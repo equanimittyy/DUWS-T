@@ -8,20 +8,21 @@
 //   Lead: the front hull IS the A3 group leader, driven by native waypoints (a MOVE completes, a CYCLE
 //   laps). Read live, so a mid-run destination swap (drive in, then home) needs no restart.
 //
-//   Followers: each REPLAYS the lead's crumb line with setDriveOnPath -- it drives the exact proven-drivable
-//   ground the lead covered, never a native route the engine recomputes. doMove (a native route) is what makes
-//   a hull stall on open ground -- "stuck on nothing" -- so it is used only in recovery, not for normal
-//   following. The replay path ends at the STATION, a point a gap (CV_GAP_WANT) behind the hull ahead, so the
-//   path and forceSpeed agree; ending it at the lead made the path brake into it while forceSpeed held the gap,
-//   and the two fought. forceSpeed holds the actual gap by matching the hull ahead's speed.
+//   Followers: each drives INDEPENDENTLY toward the DESTINATION via doMove -- native pathing used in its
+//   reliable mode (a fixed, far target computed once), NOT the near-moving-target re-issue that stalls a hull
+//   on open ground ("stuck on nothing") and never closes. Spacing is held with limitSpeed, not forceSpeed:
+//   limitSpeed is a SOFT cap the AI drives up to under its own throttle and steering, so a follower moves
+//   naturally and just brakes to hold the gap; forceSpeed is a ceiling that overrides steering and cannot make
+//   a stalled hull go -- it twitched hulls without ever closing a gap. The cap is wide open when the along-track
+//   gap is large (close it), matches the hull ahead when tucked into station (never overtake), and drops to a
+//   hard forceSpeed 0 the instant a rear-end is imminent (limitSpeed 0 is ambiguous).
 //
 //   Pace: the lead eases toward a halt as the widest inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the
 //   column always waits for its tail. This alone replaces the old explicit regroup.
 //
 //   Recovery ladder for a hull the avoidance wedged (climbs only while it is meant to move but is not):
-//     1. off-road detour     -- drop the replay path AND the road-lock for a few ticks and doMove (a fresh
-//                               native route): the one place doMove earns its keep, getting AROUND a real
-//                               block the replay cannot; then the replay resumes (lead or follower)
+//     1. off-road detour     -- drop the road-lock for a few ticks and re-issue the destination doMove, so
+//                               native pathing may route AROUND a real block off-road (lead or follower)
 //     2. per-hull reposition -- snap that one hull to its road station, un-flipped, when NO BLUFOR is
 //                               within CV_TP_CLEAR to witness it
 //     3. whole-column snap   -- the entire column deadlocked, again only out of sight
@@ -52,17 +53,17 @@ params ["_group"];
 // is km/h instead, set CV_KMH2FS to 1.0 so km/h values pass straight through.
 #define CV_KMH2FS      (1.0 / 3.6)
 #define KMH(x)         ((x) * CV_KMH2FS)
+#define CV_NOLIMIT     1e10    // limitSpeed reset ("no cap"): -1 does NOT reset (forces helis reverse); the
+                               // default is 2*maxSpeed, so a value past any vehicle's top speed removes the cap
 
 #define CV_CRUISE_KMH  40      // lead's free-running speed when the column is closed up
 #define CV_CATCHUP_KMH 60      // fastest a follower may run to close a gap
 #define CV_GAP_WANT    20      // desired along-track spacing to the hull ahead (m). Tighter than the spawn
                                // slot (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-
-                               // bumper and explode, but the column closes to this once rolling.
-#define CV_GAP_BAND    4       // deadband: within this of target, just match the hull ahead's speed -- no
-                               // spacing trim, so the column stops hunting and the accordion damps out
-#define CV_GAP_HARD    4       // closer than this: stop, a backstop against rear-ending on a transient
-#define CV_GAP_KP      1       // gentle spacing trim (km/h per metre) outside the band; matching the hull
-                               // ahead's speed, not this term, does the heavy lifting -- pure-P overshot
+                               // bumper and explode, but the column closes to this once rolling. Past this
+                               // (along-track) a follower is uncapped to close; within it, it matches the
+                               // hull ahead's speed so it holds station without overtaking.
+#define CV_GAP_HARD    4       // straight-line: closer than this, hard-stop -- backstop against rear-ending
 #define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m)
 #define CV_LAG_STOP    100     // at or past this the lead eases to a halt until the column closes up
 
@@ -70,8 +71,7 @@ private _crumbs = [];             // the lead's driven track, oldest first: a co
 private _stuck  = createHashMap;  // netId -> consecutive halted ticks (per hull, lead included)
 private _free   = createHashMap;  // netId -> ticks its road-lock stays off after a wedge, so it can detour
 private _allStuck = 0;            // consecutive ticks the whole column is deadlocked (nothing moving)
-private _issued = createHashMap;  // netId -> last replay key [startIdx, stationIdx, leadPos]; [] forces re-issue
-private _pathed = createHashMap;  // netId -> is a setDriveOnPath currently committed (clear it before a doMove)
+private _issued = createHashMap;  // netId -> last destination handed to doMove; re-issue only when it shifts
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 
 // Nearest crumb index to a position = the hull's progress along the track. -1 while the track is empty.
@@ -133,6 +133,7 @@ while {
             _x allowCrewInImmobile true;
             _x setDriveOnPath [];
             _x forceSpeed -1;
+            _x limitSpeed CV_NOLIMIT;
         };
     } forEach _hulls;
 
@@ -222,82 +223,55 @@ while {
                     private _gap = if (_myProg < 0) then { CV_GAP_WANT } else { ((_aheadProg - _myProg) * CV_STEP) max 0 };
                     if (_gap > _maxGap) then { _maxGap = _gap };
 
-                    // Drive by REPLAYING the lead's proven-drivable crumb line with setDriveOnPath, not doMove:
-                    // a native route the engine recomputes each tick stalls the hull on open ground ("stuck on
-                    // nothing"), and when a player is close the out-of-sight recovery cannot free it. The replay
-                    // path ends at the STATION -- a point CV_GAP_WANT behind the hull ahead -- so the path and the
-                    // speed controller agree, instead of the path braking into the lead while forceSpeed holds the
-                    // gap. While an off-road unstick window is open (_free), leave the path alone: the recovery
-                    // doMove detour owns the hull until the window closes, then the replay resumes. The road-lock
-                    // rides the same gate -- on-road for the haul, off in the final hop or during a detour window.
+                    // Navigate INDEPENDENTLY to the destination: doMove to a fixed, far target is native
+                    // pathing's reliable mode, unlike doMove at a moving bumper re-issued every few metres,
+                    // which churns the planner and stalls the hull on open ground. Issue once; re-issue only
+                    // when the destination itself moves (the mid-run drive-in -> home swap) or a recovery
+                    // cleared it. Road-lock as the lead: on for the haul, off in the final hop or while an
+                    // off-road unstick window (_free) holds so a wedged hull may detour around a block.
                     private _ff = _free getOrDefault [_meId, 0];
-                    if (_ff > 0) then {
-                        _free set [_meId, _ff - 1];
-                    } else {
-                        _me forceFollowRoad (!_leadNear);
-                        private _st = [_aheadPos, _aheadProg] call _stationBehind;
-                        // Before the first crumbs, off the trail, or a trail too short for a full gap: aim straight
-                        // at the lead. The destination lies beyond it, so aiming past the lead would drive the hull
-                        // through the column.
-                        if (count _crumbs < 2 || {_myProg < 0} || {_st isEqualTo []}) then {
-                            if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
-                            _me doMove (getPosATL _lead);
-                            _issued set [_meId, []];
-                        } else {
-                            _st params ["_stPos", "_stIdx"];
-                            // Slice forward from the crumb just AHEAD of this hull (never one behind -- a passed
-                            // point makes setDriveOnPath brake and reverse to reach it) to the station crumb, then
-                            // the exact station point.
-                            private _startIdx = _myProg + 1;
-                            private _slice = if (_startIdx <= _stIdx) then { _crumbs select [_startIdx, _stIdx - _startIdx + 1] } else { [] };
-                            // Re-issue when the slice or station shifted, or the lead advanced >= CV_STEP. Keying on
-                            // indices alone goes stale on a FULL trail: count pins at CV_TRAIL (push + deleteAt 0
-                            // each tick) while the crumb contents shift down an index, so a hull whose indices hold
-                            // steady would keep driving a path of OLD positions, reach its stale end, and stop.
-                            private _iss = _issued getOrDefault [_meId, []];
-                            if (
-                                _iss isEqualTo []
-                                || {(_iss select 0) != _startIdx}
-                                || {(_iss select 1) != _stIdx}
-                                || {(_lead distance2D (_iss select 2)) >= CV_STEP}
-                            ) then {
-                                _me setDriveOnPath (_slice + [_stPos]);
-                                _issued set [_meId, [_startIdx, _stIdx, getPosATL _lead]];
-                                _pathed set [_meId, true];
-                            };
-                        };
+                    if (_ff > 0) then { _free set [_meId, _ff - 1] } else { _me forceFollowRoad (!_leadNear) };
+
+                    private _iss = _issued getOrDefault [_meId, []];
+                    if (_iss isEqualTo [] || {(_iss distance2D _wpPos) >= CV_STEP}) then {
+                        _me doMove _wpPos;
+                        _issued set [_meId, _wpPos];
                     };
 
-                    // Hold station by MATCHING the hull ahead's speed with a gentle spacing trim outside a
-                    // deadband -- velocity-matching, not position-only control, so the coarse tick does not set
-                    // the column oscillating. Inside the band: match. Too close: stop on a minimum gap.
-                    private _aheadSpd = speed _ahead;   // km/h; forceSpeed converts via KMH()
-                    private _err = _gap - CV_GAP_WANT;
-                    private _fs = switch (true) do {
-                        case (_gap < CV_GAP_HARD):      { 0 };
-                        case (abs _err <= CV_GAP_BAND): { _aheadSpd };
-                        default                         { _aheadSpd + _err * CV_GAP_KP };
+                    // Spacing by limitSpeed (a SOFT cap the AI drives up to on its own), NOT forceSpeed (a ceiling
+                    // that overrides steering and cannot make a stalled hull move). Cap wide open when the
+                    // along-track gap is real, so the follower closes it under its own steering; match the hull
+                    // ahead once tucked into station, so it holds without overtaking; hard forceSpeed 0 the instant
+                    // a rear-end is imminent (limitSpeed 0 is ambiguous). limitSpeed is km/h -- no KMH() convert.
+                    // Rear-end guard is straight-line (real collision distance); catch-up is along-track gap (a
+                    // bend puts the hull ahead nearer as-the-crow-flies than along the road, which would false-brake).
+                    private _aheadSpd = speed _ahead;   // km/h
+                    private _want = switch (true) do {
+                        case ((_me distance2D _ahead) < CV_GAP_HARD): { 0 };
+                        case (_gap > CV_GAP_WANT):                    { CV_CATCHUP_KMH };
+                        default                                       { _aheadSpd min CV_CRUISE_KMH };
                     };
-                    _fs = _fs max 0 min CV_CATCHUP_KMH;
-                    // Never outrun the hull ahead when tucked inside the gap, but only while it is rolling: a
-                    // spurious speed~0 (turn, arrival micro-stop) must not pin the follower dead.
-                    if ((_me distance2D _ahead) < CV_GAP_WANT && {_aheadSpd > CV_STUCK_KMH}) then { _fs = _fs min _aheadSpd };
-                    _me forceSpeed KMH(_fs);
+                    if (_want <= 0) then {
+                        _me forceSpeed 0;
+                    } else {
+                        _me forceSpeed -1;
+                        _me limitSpeed _want;
+                    };
 
                     // Per-hull recovery, since obstacle avoidance cannot be trusted to free a wedge. The counter
-                    // climbs only while the hull is meant to move (_fs above the halt threshold) but is not, so a
-                    // legitimate halt (the column stopped) never counts. After a short confirm: off-road permission
-                    // plus a fresh doMove (detour). If it stays wedged and no BLUFOR is close enough to witness it,
+                    // climbs only while the hull is meant to move (_want above the halt threshold) but is not, so a
+                    // legitimate halt (tucked behind a stopped hull -> _want low) never counts. After a short
+                    // confirm: drop the road-lock and re-issue the destination doMove so native pathing may route
+                    // off-road around the block. If it stays wedged and no BLUFOR is close enough to witness it,
                     // snap that one hull onto its station slot, un-flipped and facing up-column.
-                    if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
+                    if (speed _me < CV_STUCK_KMH && {_want > CV_STUCK_KMH}) then {
                         private _n = (_stuck getOrDefault [_meId, 0]) + 1;
                         _stuck set [_meId, _n];
                         if (_n == CV_UNSTICK_AT) then {
                             _free set [_meId, CV_FREE_HOLD];
                             _me forceFollowRoad false;
-                            if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
-                            _me doMove _aheadPos;   // fresh native route around the block; _free gates the replay off meanwhile
-                            _issued set [_meId, []];
+                            _me doMove _wpPos;
+                            _issued set [_meId, _wpPos];
                             if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["unstick %1: off-road detour (stuck %2)", netId _me, _n]] call fnc_log };
                         };
                         if (
@@ -314,7 +288,6 @@ while {
                             _me setPosATL _slot;
                             _me setVelocity [0, 0, 0];
                             _me setDriveOnPath [];
-                            _pathed set [_meId, false];
                             _stuck set [_meId, 0];
                             _free set [_meId, 0];
                             _issued set [_meId, []];
@@ -394,6 +367,7 @@ while {
                         _x setVelocity [0, 0, 0];
                         _x setDriveOnPath [];
                         _x forceSpeed -1;
+                        _x limitSpeed CV_NOLIMIT;
                         _x forceFollowRoad false;
                     } forEach ([_lead] + _ordered);
 
@@ -401,7 +375,7 @@ while {
                     // head of the snapped column, so cv_lead stands. Native nav takes it from the next tick.
                     _crumbs = [];
                     _allStuck = 0;
-                    { private _id = netId _x; _issued set [_id, []]; _pathed set [_id, false]; _stuck set [_id, 0]; _free set [_id, 0] } forEach _live;
+                    { private _id = netId _x; _issued set [_id, []]; _stuck set [_id, 0]; _free set [_id, 0] } forEach _live;
                     _lead doMove _wpPos;
                 };
             };
@@ -411,5 +385,6 @@ while {
 };
 
 // Teardown, or hand-off to combat on release: drop every path order and speed cap on every hull this loop
-// ever configured, so native AI drives them.
-{ _x setDriveOnPath []; _x forceSpeed -1; _x forceFollowRoad false } forEach (values _seen);
+// ever configured, so native AI drives them. limitSpeed reset must be a large value, not -1 (which never
+// resets and forces a helicopter into reverse); CV_NOLIMIT is past any ground vehicle's top speed.
+{ _x setDriveOnPath []; _x forceSpeed -1; _x limitSpeed CV_NOLIMIT; _x forceFollowRoad false } forEach (values _seen);
