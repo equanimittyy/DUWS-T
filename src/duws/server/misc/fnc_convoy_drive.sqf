@@ -19,10 +19,11 @@
 //   inside the band hold the hull ahead's pace, outside it run above/below in proportion to the error, so a
 //   follower eases into and out of station instead of surging flat-out and then hard-stopping (an accordion).
 //
-//   Pace: the whole column cruises at the slowest hull's top speed (a truck sets the pace; a fast escort does
-//   not run off), taken a little below top to leave the catch-up headroom. The lead eases toward a halt as the
-//   widest inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the column always waits for its tail. This alone
-//   replaces the old explicit regroup.
+//   Pace: the whole column cruises at the slowest hull's top speed (a slow tracked hull sets the pace; a fast
+//   escort does not run off), below top for catch-up headroom and capped at a sane road pace (config maxSpeed
+//   is the flat-out downhill figure, far too fast for a column). The lead eases toward a halt as the widest
+//   inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the column always waits for its tail. This alone replaces
+//   the old explicit regroup.
 //
 //   Recovery ladder for a hull the avoidance wedged (climbs only while it is meant to move but is not):
 //     1. off-road detour     -- drop the replay path AND the road-lock for a few ticks and doMove the
@@ -60,11 +61,17 @@ params ["_group"];
 #define CV_NOLIMIT     1e10    // limitSpeed reset ("no cap"): -1 does NOT reset (forces helis reverse); the
                                // default is 2*maxSpeed, so a value past any vehicle's top speed removes the cap
 
-#define CV_CRUISE_FRAC 0.85    // convoy cruise = this fraction of the slowest hull's config top speed. Below top
-                               // on purpose: the difference is the headroom a lagging follower spends to close a
-                               // gap (catch-up runs up to the full slowest-top) without the whole column slowing.
-                               // Zero headroom (cruise == top) leaves small lags uncloseable and the column
-                               // string-unstable.
+#define CV_CRUISE_FRAC 0.85    // convoy cruise = this fraction of the slowest hull's config top speed, then
+                               // capped at CV_CRUISE_MAX. Below top on purpose: the difference is the headroom a
+                               // lagging follower spends to close a gap. Zero headroom (cruise == top) leaves
+                               // small lags uncloseable and the column string-unstable.
+#define CV_CRUISE_MAX  45      // hard ceiling on convoy cruise (km/h). Config maxSpeed is the flat-out downhill
+                               // figure (wheeled hulls ~90-110), far above a sane road-convoy pace, so an
+                               // all-wheeled column paced to it would zoom and drag the followers along. A
+                               // genuinely slow tracked hull (top below this) still sets its own slower pace.
+#define CV_CATCHUP_GAIN 20     // catch-up ceiling = cruise + this (km/h), never past the hull's own top: a
+                               // lagging follower runs a little above cruise to close, not flat out -- full-top
+                               // catch-up overshoots station into the same stop-start it is meant to damp.
 #define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot
                                // (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-bumper and
                                // explode, but the column closes to this once rolling.
@@ -162,14 +169,16 @@ while {
         if (_wpPos isNotEqualTo [0, 0, 0]) then {
             private _live = _hulls select { alive _x && {canMove _x} && {alive (driver _x)} };
 
-            // Convoy cruise = the slowest live hull's config top speed (a truck sets the pace, a fast escort
-            // does not run off), taken below top by CV_CRUISE_FRAC to leave catch-up headroom; catch-up itself
-            // may run to the full slowest-top. Recomputed live so a hull joining/leaving reshapes the pace.
+            // Convoy cruise = the slowest live hull's config top speed (a slow tracked hull sets the pace, a
+            // fast escort does not run off), taken below top by CV_CRUISE_FRAC for catch-up headroom and capped
+            // at CV_CRUISE_MAX so an all-wheeled column does not zoom at the absurd config-max figure. Catch-up
+            // is cruise + a small gain, never past the hull's own top. Recomputed live so a hull joining/leaving
+            // reshapes the pace.
             private _topMin = 1e9;
             { _topMin = _topMin min (_topspd getOrDefault [netId _x, 60]) } forEach _live;
             if (_topMin >= 1e9) then { _topMin = 60 };
-            private _cruise  = _topMin * CV_CRUISE_FRAC;
-            private _catchup = _topMin;
+            private _cruise  = (_topMin * CV_CRUISE_FRAC) min CV_CRUISE_MAX;
+            private _catchup = (_cruise + CV_CATCHUP_GAIN) min _topMin;
 
             // Progress of every live hull along the trail (nearest crumb index): follower spacing, and
             // picking a replacement front if the current one dies. Capture the hull before the call --
