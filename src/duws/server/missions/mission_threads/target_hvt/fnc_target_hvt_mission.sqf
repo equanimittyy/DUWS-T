@@ -189,7 +189,7 @@ private _convoyStarts = [];   // one per convoy, for exactly three start markers
 private _hvt = objNull;       // the target; split into his own CARELESS group on first contact
 private _car = objNull;       // his unarmed car -- watched by the monitor to trigger that split
 private _hvtColGrp = grpNull; // his column's group until the split
-private _carGrp = grpNull;    // the car's own group once split out -- held here so teardown ends its watchdog
+private _carGrp = grpNull;    // the car's own CARELESS group once it breaks away to run for the zone
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
@@ -427,11 +427,16 @@ waitUntil {
         private _wp = _carGrp addWaypoint [_destPos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointCompletionRadius 40;
-        // The peeled car gets its own driver on its new group: it commits to the zone alone now, so a jam
-        // on the final stretch would hand the player a win the mission does not intend. A lone hull has no
-        // follower to trace it -- the driver just navigates and nudges it, which is what the car needs. The
-        // column's driver drops the car the moment its driver left that group, so the two never both drive it.
-        [_carGrp] spawn fnc_convoy_drive;
+        // Release the car to native AI: as a run-away it must flee CARELESS at full speed on its own
+        // waypoint, so the convoy driver is dropped here -- a lone hull has no follower, so the driver would
+        // forceSpeed it down to convoy cruise and the player could walk it down. Clear the path order, forced
+        // speed and road-lock the column's driver left on the car: that driver resets a hull only at its own
+        // teardown, not when a hull leaves its group mid-run, so without this the car keeps driving the old
+        // replay path at the old forced speed instead of racing its waypoint. The column driver already
+        // dropped the car the instant its driver joined _carGrp, so nothing re-imposes convoy control.
+        _car setDriveOnPath [];
+        _car forceSpeed -1;
+        _car forceFollowRoad false;
         // He has committed to his own run and is no longer just one hull in a column, so Allseer calls
         // him out by name and drops a dedicated HVT marker on the car -- moved with the columns on each
         // update. This is the reveal the hunt built to: the player now knows which hull carries him.
@@ -451,9 +456,9 @@ waitUntil {
 
 ["DEBUG", "MISSION", format ["hvt debug: outcome=%1 hvtAlive=%2 carAlive=%3 carDmg=%4", _outcome, alive _hvt, alive _car, damage _car]] call fnc_log;
 
-// End every convoy watchdog: the column groups and, if it split out, the HVT car's own group.
+// End every convoy watchdog. Only the column groups run one; the peeled car was released to native AI at
+// breakaway (no driver on _carGrp), so it needs no stop.
 { _x setVariable ["DUWS_convoy_stop", true] } forEach _groups;
-if (!isNull _carGrp) then { _carGrp setVariable ["DUWS_convoy_stop", true] };
 
 [_marker] call fnc_missionMarkerClear;
 { deleteMarker _x } forEach _startMarkers;
