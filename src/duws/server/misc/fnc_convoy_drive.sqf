@@ -21,11 +21,13 @@
 //   paces the column at the slowest hull's top speed (capped to a sane road pace) and eases toward a halt as
 //   the widest gap opens, so the column always waits for its tail.
 //
-//   Recovery for a hull the engine still wedges (a dynamic obstacle, a bad segment):
-//     - out of the player's sight  -> teleport-snap it onto its route station, oriented, collision-checked
-//     - in the player's sight      -> whole-column REGROUP: the lead halts and every follower drives
-//                                     independently to its ordered slot behind the lead, then the column
-//                                     resumes -- view-safe (they regroup, never blink)
+//   Recovery for a hull the engine still wedges (a dynamic obstacle, a bad segment), in two tiers:
+//     - TIER 1 REGROUP: the column halts and every hull independently re-routes back to formation -- the
+//                       lead holds, each follower drives to its ordered slot behind it, then the column
+//                       resumes. View-safe (they regroup, never blink) and tried first, in or out of sight.
+//     - TIER 2 TELEPORT: only if the regroup cannot free the column (it stays frozen) AND no BLUFOR is near
+//                       to witness it -- realign the WHOLE convoy onto the breadcrumb, in trail order, and
+//                       teleport it there. The out-of-sight guard keeps a teleport out of the player's view.
 //
 // Leadership is pinned to the frontmost hull (highest route progress) and re-picked only when the front dies
 // (Arma migrates leadership to an arbitrary survivor -- maybe a rear hull, which would trace the column
@@ -266,7 +268,7 @@ while {
                 private _leadProg = _prog getOrDefault [_leadId, -1];
 
                 if (_regroup) then {
-                    // IN-SIGHT REGROUP: the lead HALTS and holds while every follower drives independently to
+                    // TIER 1 REGROUP: the lead HALTS and holds while every follower drives independently to
                     // its ordered slot behind the lead along the route -- slot N = how many followers are
                     // further along than me, so the column keeps its order. Slots come off the route (they
                     // follow road curve); a route too short behind the lead falls back to the lead's heading
@@ -319,7 +321,6 @@ while {
                     {
                         private _me    = _x;
                         private _meId  = netId _me;
-                        private _mePos = getPosATL _me;
                         private _myProg = _prog getOrDefault [_meId, -1];
 
                         // The hull directly ahead: least route progress strictly greater than mine, else the lead.
@@ -331,7 +332,6 @@ while {
                                 if (_p > _myProg && {_p < _aheadProg}) then { _aheadProg = _p; _ahead = _x };
                             };
                         } forEach _liveFollowers;
-                        private _aheadPos = getPosATL _ahead;
 
                         // Along-route gap (real arc length via _cum), not straight-line: on a bend the hull
                         // ahead is nearer as-the-crow-flies than along the road, which would false-brake.
@@ -357,27 +357,17 @@ while {
                         if (_d < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };  // never outrun the hull ahead
                         _me forceSpeed KMH(_fs);
 
-                        // Recovery: a hull meant to move (_fs above the halt threshold) but halted for
-                        // CV_RECOVER_AT ticks is wedged. Out of the player's sight, teleport-snap it to its
-                        // route station behind the hull ahead. In sight, trigger a whole-column regroup instead
-                        // (view-safe). The counter clears on real movement, so a legitimate halt never counts.
+                        // TIER 1 recovery: a hull meant to move (_fs above the halt threshold) but halted for
+                        // CV_RECOVER_AT ticks is wedged. Trigger a whole-column regroup -- the column waits while
+                        // every hull independently re-routes back to formation, then resumes (regroup block above).
+                        // The counter clears on real movement, so a legitimate halt never counts. The out-of-sight
+                        // whole-convoy teleport (Tier 2, below) is the fallback if the regroup cannot free it.
                         if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
                             private _n = (_stuck getOrDefault [_meId, 0]) + 1;
                             _stuck set [_meId, _n];
-                            if (_n >= CV_RECOVER_AT) then {
-                                private _witnessed = (allUnits findIf { side _x == west && {alive _x} && {_x distance2D _mePos < CV_TP_CLEAR} }) >= 0;
-                                if (_witnessed) then {
-                                    _regroup = true;
-                                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["regroup triggered by %1 (stuck %2, witnessed)", _meId, _n]] call fnc_log };
-                                } else {
-                                    private _station = [_aheadProg, CV_GAP_WANT] call _stationBack;
-                                    if (_station isEqualTo []) then { _station = _aheadPos getPos [CV_GAP_WANT, (getDir _ahead) + 180] };
-                                    [_me, _station, _station getDir _aheadPos] call _snapHull;
-                                    _pathed set [_meId, false];
-                                    _issued set [_meId, -999];
-                                    _stuck  set [_meId, 0];
-                                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["snap %1 to station (was stuck %2)", _meId, _n]] call fnc_log };
-                                };
+                            if (_n >= CV_RECOVER_AT && {!_regroup}) then {
+                                _regroup = true;
+                                if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["regroup triggered by %1 (stuck %2)", _meId, _n]] call fnc_log };
                             };
                         } else {
                             _stuck set [_meId, 0];
@@ -394,9 +384,11 @@ while {
                     private _factor = ((CV_LAG_STOP - _maxGap) / (CV_LAG_STOP - CV_LAG_OK)) max 0 min 1;
                     if (_liveFollowers isEqualTo []) then { _lead forceSpeed -1 } else { _lead forceSpeed KMH(_cruise * _factor) };
 
-                    // Lead recovery: a lead meant to move (not deliberately halted for the tail, not arriving)
-                    // but wedged. Out of sight, snap it forward onto a clean route point past the block; in
-                    // sight, a short native doMove to a point ahead nudges it past -- view-safe, best effort.
+                    // Lead TIER 1 recovery: a lead meant to move (not deliberately halted for the tail, not
+                    // arriving) but wedged. Independent re-route -- a short native doMove to a route point ahead
+                    // nudges it past a dynamic block (native pathing from a free spot frees a wedge); view-safe,
+                    // it just drives, and it re-acquires the breadcrumb next tick (issued -> -999). A lead the
+                    // re-route cannot free is caught by the out-of-sight whole-convoy teleport (Tier 2, below).
                     private _leadMoving = _factor > 0 && {(_lead distance2D _target) > CV_ARRIVE};
                     if (_leadMoving && {speed _lead < CV_STUCK_KMH}) then {
                         private _n = (_stuck getOrDefault [_leadId, 0]) + 1;
@@ -404,18 +396,11 @@ while {
                         if (_n >= CV_RECOVER_AT) then {
                             private _aheadIdx = ((_leadProg max 0) + 3) min (count _route - 1);
                             private _pt = _route select _aheadIdx;
-                            private _witnessed = (allUnits findIf { side _x == west && {alive _x} && {_x distance2D (getPosATL _lead) < CV_TP_CLEAR} }) >= 0;
-                            if (_witnessed) then {
-                                if (_pathed getOrDefault [_leadId, false]) then { _lead setDriveOnPath []; _pathed set [_leadId, false] };
-                                _lead doMove _pt;
-                            } else {
-                                private _face = if (_aheadIdx >= 1) then { (_route select (_aheadIdx - 1)) getDir _pt } else { getDir _lead };
-                                [_lead, _pt, _face] call _snapHull;
-                                _pathed set [_leadId, false];
-                                _issued set [_leadId, -999];
-                            };
+                            if (_pathed getOrDefault [_leadId, false]) then { _lead setDriveOnPath []; _pathed set [_leadId, false] };
+                            _lead doMove _pt;
+                            _issued set [_leadId, -999];
                             _stuck set [_leadId, 0];
-                            if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["lead recover %1 (witnessed=%2)", _leadId, _witnessed]] call fnc_log };
+                            if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["lead re-route %1", _leadId]] call fnc_log };
                         };
                     } else {
                         _stuck set [_leadId, 0];
@@ -434,34 +419,37 @@ while {
                         if (_legIdx < (count (waypoints _group)) && {(waypointType [_group, _legIdx]) == "CYCLE"}) then { _legIdx = 0 };
                         _route = [];
                     };
+                };
 
-                    // LAST RESORT: the whole column has sat deadlocked (nothing moving, lead included) for
-                    // CV_TELEPORT_AT ticks and no BLUFOR is within CV_TP_CLEAR to witness it -- snap every hull
-                    // onto the route ahead of the lead, in trail order, and resume. (A witnessed deadlock is
-                    // handled by the regroup the follower recovery triggers instead.)
-                    if ((_lead distance2D _target) > CV_ARRIVE && {(_live findIf { speed _x >= CV_STUCK_KMH }) < 0}) then {
-                        _allStuck = _allStuck + 1;
-                    } else {
-                        _allStuck = 0;
-                    };
-                    if (
-                        _allStuck >= CV_TELEPORT_AT
-                        && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D (getPosATL _lead) < CV_TP_CLEAR} }) < 0}
-                    ) then {
-                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["WHOLE-COLUMN SNAP grp=%1 (deadlocked %2 ticks)", _group, _allStuck]] call fnc_log };
-                        private _anchorIdx = ((_leadProg max 0) + 2) min (count _route - 1);
-                        private _anchor = _route select _anchorIdx;
-                        private _face = if (_anchorIdx >= 1) then { (_route select (_anchorIdx - 1)) getDir _anchor } else { getDir _lead };
-                        private _ordered = [_liveFollowers, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
-                        {
-                            private _slot = [_anchorIdx, _forEachIndex * CV_GAP_WANT] call _stationBack;
-                            if (_slot isEqualTo []) then { _slot = _anchor getPos [_forEachIndex * CV_GAP_WANT, _face + 180] };
-                            [_x, _slot, _face] call _snapHull;
-                            _issued set [netId _x, -999];
-                            _stuck  set [netId _x, 0];
-                        } forEach ([_lead] + _ordered);
-                        _allStuck = 0;
-                    };
+                // TIER 2 (fallback): the column has sat frozen -- nothing moving, lead included -- for
+                // CV_TELEPORT_AT ticks (a Tier 1 re-route / regroup that could not free it), and no BLUFOR is
+                // within CV_TP_CLEAR to see it. Realign the WHOLE convoy onto the breadcrumb in trail order and
+                // teleport it there, then resume. This runs in the regroup state too, so a regroup that stalls
+                // out of sight escalates here. Withheld while witnessed: never blink in the player's view -- Tier
+                // 1 keeps trying until the column frees or leaves sight.
+                if ((_lead distance2D _target) > CV_ARRIVE && {(_live findIf { speed _x >= CV_STUCK_KMH }) < 0}) then {
+                    _allStuck = _allStuck + 1;
+                } else {
+                    _allStuck = 0;
+                };
+                if (
+                    _allStuck >= CV_TELEPORT_AT
+                    && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D (getPosATL _lead) < CV_TP_CLEAR} }) < 0}
+                ) then {
+                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["WHOLE-COLUMN SNAP grp=%1 (frozen %2 ticks)", _group, _allStuck]] call fnc_log };
+                    private _anchorIdx = ((_leadProg max 0) + 2) min (count _route - 1);
+                    private _anchor = _route select _anchorIdx;
+                    private _face = if (_anchorIdx >= 1) then { (_route select (_anchorIdx - 1)) getDir _anchor } else { getDir _lead };
+                    private _ordered = [_liveFollowers, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
+                    {
+                        private _slot = [_anchorIdx, _forEachIndex * CV_GAP_WANT] call _stationBack;
+                        if (_slot isEqualTo []) then { _slot = _anchor getPos [_forEachIndex * CV_GAP_WANT, _face + 180] };
+                        [_x, _slot, _face] call _snapHull;
+                        _issued set [netId _x, -999];
+                        _stuck  set [netId _x, 0];
+                    } forEach ([_lead] + _ordered);
+                    _allStuck = 0;
+                    _regroup = false;
                 };
             };
         };
