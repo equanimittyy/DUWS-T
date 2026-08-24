@@ -1479,21 +1479,42 @@ path itself drives and `forceSpeed` sets how fast along it -- a true setpoint th
 holds one. `limitSpeed` is the soft cap for the native case (the AI drives up to it on its own), and it
 is km/h where `forceSpeed` is m/s.**
 
-The wedge is assuming `forceSpeed` behaves the same both ways. A convoy that drove followers with
-`doMove` to the destination and capped them with `forceSpeed` for spacing scattered -- each hull
-pathfound its own route, and the cap could not pull a hesitating hull forward, so the lead's pace
-governor eased to a halt waiting for a column that never formed. Switching the followers to
-`setDriveOnPath` -- replay the lead's crumb line -- made `forceSpeed` a working setpoint and the column
-held. The reset is a second trap: `limitSpeed -1` does **not** remove the limit (a negative value flies
-a helicopter in reverse); the default cap is `2 * maxSpeed`, so "no limit" means a value past any
-vehicle's top speed. A hull capped with `limitSpeed` (or one that inherited a cap from another system)
-and never reset crawls for the rest of the mission.
+The wedge is assuming `forceSpeed` behaves the same both ways. A convoy that drove hulls with `doMove`
+and capped them with `forceSpeed` for spacing scattered -- each hull pathfound its own route, and the
+cap could not pull a hesitating hull forward, so the lead's pace governor eased to a halt waiting for a
+column that never formed. Putting every hull on a committed path with `setDriveOnPath` makes
+`forceSpeed` a working setpoint and the column holds. The reset is a second trap: `limitSpeed -1` does
+**not** remove the limit (a negative value flies a helicopter in reverse); the default cap is
+`2 * maxSpeed`, so "no limit" means a value past any vehicle's top speed. A hull capped with
+`limitSpeed` (or one that inherited a cap from another system) and never reset crawls for the rest of
+the mission.
 
-**How to apply:** for a tight convoy, replay the lead's proven line with `setDriveOnPath` and hold the
-gap with `forceSpeed` (m/s, so `KMH()` convert): catch up on a real gap, match the hull ahead in
-station, `forceSpeed 0` at rear-end range. End the replay path at the lead's *live* position, never a
-fixed station behind the hull ahead -- a fixed end is one the follower reaches and idles at, the
-stop-start that reads as loose following. Where native pathing must stay (no proven path to commit to),
-spacing is `limitSpeed`, not `forceSpeed`. Reset any cap with a large sentinel, never `-1`:
-`fnc_convoy_drive.sqf` defines `CV_NOLIMIT` (`1e10`) and clears the limit at hull setup, the
-whole-column snap, and teardown, so `forceSpeed` alone governs and a released hull runs uncapped.
+**How to apply:** for a tight convoy, put every hull -- lead included -- on a committed path with
+`setDriveOnPath` (`fnc_convoy_drive` gives them a self-generated road route from `fnc_convoy_path`, so
+nothing is left to native route calculation), and hold the gap with `forceSpeed` (m/s, so `KMH()`
+convert): catch up on a real gap, match the hull ahead in station, `forceSpeed 0` at rear-end range.
+Where native pathing must stay (no path to commit to), spacing is `limitSpeed`, not `forceSpeed`. Reset
+any cap with a large sentinel, never `-1`: `fnc_convoy_drive.sqf` defines `CV_NOLIMIT` (`1e10`) and
+clears the limit at hull setup, the whole-column snap, and teardown, so `forceSpeed` alone governs and a
+released hull runs uncapped.
+
+## `waypointPosition [group, 0]` reads `[0,0,0]`: index 0 is an implicit placeholder
+
+Every group carries an implicit waypoint at index 0, created with the group. Its
+`waypointPosition` reads `[0,0,0]`, not the group's location, and user waypoints added with
+`addWaypoint` land at index 1 and up. Code that drives the group off the native waypoint AI never
+trips on this -- the engine advances `currentWaypoint` past index 0 on its own, so reading
+`waypointPosition [_grp, currentWaypoint _grp]` yields a real point from the first tick.
+
+The wedge is a driver that indexes waypoints ITSELF (because it no longer native-drives the leader, so
+`currentWaypoint` never advances): starting its own index at 0 reads `[0,0,0]` forever. A convoy driver
+that idled on a `[0,0,0]` target -- correctly refusing to drive to the map origin -- then sat still for
+the whole mission, never reaching the real destination at index 1, because idling did not advance its
+index past the placeholder.
+
+**How to apply:** when self-managing a group's waypoint index, step past any waypoint whose
+`waypointPosition` is `[0,0,0]` before using it, not just on index 0 -- a wrapped CYCLE index or a
+completed final leg can also land on an empty slot. `fnc_convoy_drive.sqf` advances its `_legIdx` with
+`while { ... waypointPosition [_group, _legIdx] isEqualTo [0,0,0] } do { _legIdx = _legIdx + 1 }` before
+reading the target, and only truly idles when the index runs past the whole list (waiting on a waypoint
+the mission appends later).

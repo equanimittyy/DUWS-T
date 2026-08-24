@@ -86,6 +86,7 @@ private _pathed = createHashMap;  // netId -> is a setDriveOnPath currently comm
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 private _topspd = createHashMap;  // netId -> config top speed (km/h), cached once: the convoy paces to the min
 private _regroup = false;         // column-wide: while true the lead holds and all followers reform on slots
+private _dumped = false;          // one-time level-4 dump of the waypoint list, so a stuck start is diagnosable
 
 // Nearest route index to a position = the hull's progress along the route. -1 while the route is empty.
 private _progressOf = {
@@ -188,7 +189,15 @@ while {
         // position; thereafter each leg starts at the anchor the previous one reached (set on advance).
         if (_legStart isEqualTo []) then { _legStart = getPosATL (vehicle (leader _group)) };
         private _wpCount = count (waypoints _group);
+        // Skip a placeholder waypoint: Arma gives every group an implicit waypoint 0 at its start whose
+        // waypointPosition reads [0,0,0], and a wrapped/advanced index can land on an empty slot. Step past
+        // any [0,0,0] to the next real waypoint, so the column never sits waiting on the map origin.
+        while { _legIdx < _wpCount && {(waypointPosition [_group, _legIdx]) isEqualTo [0, 0, 0]} } do { _legIdx = _legIdx + 1 };
         private _target = if (_legIdx < _wpCount) then { waypointPosition [_group, _legIdx] } else { [0, 0, 0] };
+        if (duws_log_level >= 4 && {!_dumped}) then {
+            _dumped = true;
+            ["DEBUG", "CONVOY", format ["waypoints grp=%1 wpCount=%2 legIdx=%3 target=%4", _group, _wpCount, _legIdx, _target]] call fnc_log;
+        };
 
         // No live waypoint (index past the list, waiting on an appended one; or a group with none yet):
         // hold in place this tick rather than drive to the map origin.
