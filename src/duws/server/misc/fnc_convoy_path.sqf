@@ -6,15 +6,16 @@
 // calculation is what wedges the convoy lead on open ground and at junctions. setDriveOnPath along a
 // precomputed line does not -- it just drives the points.
 //
-//   On the road network: a walk of connected road segments greedily toward the destination -- depth-first
-//   with backtracking and a visited set, so it always terminates and escapes a dead-end/cul-de-sac. It
-//   finds A road path (not the strictly shortest); greedy ordering keeps it near-direct. SQF has no heap, so
-//   this is DFS, not A* -- DFS needs no priority queue.
+//   On the road network: A* over connected road segments -- the SHORTEST road path (edge = real segment
+//   length, heuristic = straight-line to the dest, which never overestimates, so A* is optimal). Shortest
+//   matters here beyond speed: a wandering path doubles back near itself, and a follower's nearest-point
+//   progress measure then snaps to the wrong arm and the spacing control thrashes. A greedy walk that
+//   returned the first path found produced 30 km routes to a 4 km destination; A* does not.
 //
-//   Off the network: the two short stubs from start/dest to their nearest road, or a whole leg with no road
-//   at either end, are a straight run resampled every CP_OFF_STEP and deviated sideways around water and
-//   large statics. Coarse on purpose -- "skirt the sea inlet / the rock", not a terrain-cost search; the
-//   driver's recovery ladder covers any residual wedge.
+//   Roads first, off-road minimal: both ends snap to the NEAREST road (a generous radius), the A* runs
+//   on-road, and only the short stubs from the true start/dest to their nearest road are off-road. A leg is
+//   driven off-road in full only when an end has no road anywhere near it. An off-road run is a straight
+//   line resampled every CP_OFF_STEP and deviated sideways around water, rocks, trees and buildings.
 //
 // The result always starts exactly at _startPos and ends exactly at _destPos, so the lead reaches the real
 // waypoint and its leg completes. Consecutive near-duplicate points are dropped so setDriveOnPath is not fed
@@ -23,34 +24,30 @@
 // [_startPos, _destPos] -> [[x,y,z], ...]   // >= 2 points, start first, dest last
 params ["_startPos", "_destPos"];
 
-#define CP_ROAD_SNAP  80       // search this far (m) for a road to get on/off the network at each end, and
-                               // the radius at which the road walk counts itself as having reached the dest
-#define CP_MAX_STEPS  40000    // runaway backstop ONLY (a bug guard), NOT a route-length limit: the visited
-                               // set already terminates the search when the reachable network is exhausted, so
-                               // a road-connected dest is always found however far. Set past Altis's whole
-                               // segment count, so a real route never hits it and never falls back early.
+#define CP_ROAD_FIND  3000     // snap each end to its nearest road within this (m). Generous so we prefer the
+                               // network and drive off-road only the unavoidable stub; only a truly roadless
+                               // end (a remote island) falls through to a full off-road leg.
+#define CP_MAX_STEPS  40000    // runaway backstop ONLY (a bug guard), NOT a route-length limit: the closed
+                               // set already terminates A* when the reachable network is exhausted. Set past
+                               // Altis's whole segment count, so a real route never hits it.
 #define CP_YIELD      250      // yield to the scheduler every this many expansions, so even a whole-network
                                // search spreads across frames instead of hitching one. The caller (the convoy
                                // driver) holds the column meanwhile, so a long compute reads as a brief halt.
-#define CP_SLACK      400      // corridor width (m): the pruned first pass discards a neighbour that sits more
-                               // than this much FARTHER from the dest than the road it came from, so the walk
-                               // stays in a roughly-toward-dest lane and cannot wander down a long wrong-way
-                               // branch. Wide enough for a road's own curve; a genuine detour that must first
-                               // lead away (around a bay) breaks the lane and is caught by the full retry.
 #define CP_OFF_STEP   25       // off-road: resample the straight run every this many metres
-#define CP_OFF_PROBE  35       // off-road: lateral offset tried to skirt water / a static
+#define CP_OFF_PROBE  35       // off-road: lateral offset tried to skirt an obstacle
 #define CP_OFF_WIDEN  4        // off-road: widening lateral probes each side before giving up on a point
 #define CP_DEDUP      3        // drop a point within this (m) of the previous one
 
-// A point is blocked for a ground vehicle if the sea or a large static sits on it. Water is the real
-// convoy-killer; rocks/walls/buildings are a light guard for the off-road stubs (short, rarely near one).
+// A point is blocked for a ground vehicle if the sea or a large natural/built obstacle sits on it. These are
+// what strand a hull off-road; the deviation below routes around them.
 private _fnc_blocked = {
     params ["_p"];
-    surfaceIsWater _p || { !((nearestTerrainObjects [_p, ["ROCK", "WALL", "BUILDING", "HOUSE"], 8]) isEqualTo []) }
+    surfaceIsWater _p
+    || { !((nearestTerrainObjects [_p, ["ROCK", "TREE", "SMALL TREE", "WALL", "BUILDING", "HOUSE"], 8]) isEqualTo []) }
 };
 
 // A straight run _a -> _b resampled every CP_OFF_STEP, each sample nudged laterally to the nearest clear
-// offset when it lands on water or a static. Returns the INTERMEDIATE points only (excludes _a and _b).
+// offset when it lands on an obstacle. Returns the INTERMEDIATE points only (excludes _a and _b).
 private _fnc_offroad = {
     params ["_a", "_b"];
     private _pts = [];
@@ -81,75 +78,79 @@ private _fnc_offroad = {
     _pts
 };
 
-// Snap both ends onto the network. nearRoads returns nearest-first, so `select 0` is the closest segment.
-private _startRoads = _startPos nearRoads CP_ROAD_SNAP;
-private _destRoads  = _destPos  nearRoads CP_ROAD_SNAP;
+// Snap each end onto the network at its NEAREST road. Widen the query only as needed -- a point on/near a
+// road resolves at 60 m (cheap); a remote one escalates, and only a truly roadless end returns null. nearRoads
+// is nearest-first, so `select 0` is the closest, and a 3 km list is never built for a point already on a road.
+private _fnc_nearestRoad = {
+    params ["_pos"];
+    private _r = objNull;
+    { if (isNull _r) then { private _rs = _pos nearRoads _x; if !(_rs isEqualTo []) then { _r = _rs select 0 } } } forEach [60, 250, 1000, CP_ROAD_FIND];
+    _r
+};
+private _startRoad = [_startPos] call _fnc_nearestRoad;
+private _destRoad  = [_destPos]  call _fnc_nearestRoad;
 
-// Road-graph walk, only when BOTH ends reach the network. A key is the segment centre rounded to the metre
-// -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road object is not.
-//
-// Two passes for speed without losing correctness: a PRUNED corridor walk first (drops neighbours that lead
-// more than CP_SLACK farther from the dest, so it cannot wander), and only if that finds no path -- the dest
-// sits behind a detour the corridor cut, e.g. around a bay -- a second FULL walk with no pruning. Common,
-// roughly-direct routes pay only the cheap corridor pass; the rare detour pays a bounded corridor pass plus
-// the full search.
+// A* over the road graph, only when BOTH ends reach the network. A key is the segment centre rounded to the
+// metre -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road object is not.
 private _chain = [];
-if !(_startRoads isEqualTo [] || {_destRoads isEqualTo []}) then {
+if !(isNull _startRoad || {isNull _destRoad}) then {
     private _keyOf = { params ["_r"]; private _p = getPosATL _r; format ["%1_%2", round (_p select 0), round (_p select 1)] };
-    private _start = _startRoads select 0;
+    private _destKey = [_destRoad] call _keyOf;
 
-    // Greedy depth-first walk from _start toward _destPos. _prune true keeps it inside the corridor. Returns
-    // the start..goal position chain, or [] if the goal is unreachable within this pass's rules.
-    private _fnc_walk = {
-        params ["_prune"];
-        private _visited = createHashMap;
-        private _parent  = createHashMap;   // roadKey -> the road it was reached from (rebuilds the path)
-        private _stack   = [_start];
-        _visited set [[_start] call _keyOf, true];
-        private _goal  = objNull;
-        private _steps = 0;
+    private _g      = createHashMap;   // roadKey -> best known cost from the start road
+    private _parent = createHashMap;   // roadKey -> the road it was reached from (rebuilds the path)
+    private _closed = createHashMap;   // roadKey -> finalised (its shortest cost is settled)
+    private _open   = [_startRoad];     // frontier; min-f is picked by a lazy scan (no heap in SQF)
+    _g set [[_startRoad] call _keyOf, 0];
+    private _goal  = objNull;
+    private _steps = 0;
 
-        while { count _stack > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
-            _steps = _steps + 1;
-            if (_steps mod CP_YIELD == 0 && {canSuspend}) then { sleep 0 };   // spread a long search across frames
-            private _cur = _stack deleteAt (count _stack - 1);   // LIFO -> depth-first
-            private _cd  = (getPosATL _cur) distance2D _destPos;
-            if (_cd < CP_ROAD_SNAP) exitWith { _goal = _cur };
-            // Unvisited neighbours; when pruning, also drop any that step more than CP_SLACK farther from the
-            // dest than _cur (the corridor). Sort FARTHEST-from-dest first so the nearest lands on TOP of the
-            // stack and is expanded next -- greedy toward the destination, the rest left below to backtrack into.
-            private _nbrs = (roadsConnectedTo _cur) select {
-                !(_visited getOrDefault [[_x] call _keyOf, false])
-                && { !_prune || {(getPosATL _x) distance2D _destPos <= _cd + CP_SLACK} }
+    while { count _open > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
+        _steps = _steps + 1;
+        if (_steps mod CP_YIELD == 0 && {canSuspend}) then { sleep 0 };   // spread a long search across frames
+
+        // Pick the open node with least f = g + heuristic (straight-line to the dest). Lazy scan: cheaper than
+        // a hand-rolled heap at this frontier size, and it re-reads g so an improved cost is honoured.
+        private _bestI = 0;
+        private _bestF = 1e12;
+        {
+            private _f = (_g getOrDefault [[_x] call _keyOf, 1e12]) + ((getPosATL _x) distance2D _destPos);
+            if (_f < _bestF) then { _bestF = _f; _bestI = _forEachIndex };
+        } forEach _open;
+        private _cur    = _open deleteAt _bestI;
+        private _curKey = [_cur] call _keyOf;
+        if (_curKey == _destKey) exitWith { _goal = _cur };
+        _closed set [_curKey, true];
+
+        private _curG   = _g getOrDefault [_curKey, 1e12];
+        private _curPos = getPosATL _cur;
+        {
+            private _nk = [_x] call _keyOf;
+            if !(_closed getOrDefault [_nk, false]) then {
+                private _tg = _curG + (_curPos distance2D (getPosATL _x));
+                if (_tg < (_g getOrDefault [_nk, 1e12])) then {
+                    _g      set [_nk, _tg];
+                    _parent set [_nk, _cur];
+                    if !(_x in _open) then { _open pushBack _x };
+                };
             };
-            _nbrs = [_nbrs, [], { (getPosATL _x) distance2D _destPos }, "DESCEND"] call BIS_fnc_sortBy;
-            {
-                _visited set [[_x] call _keyOf, true];
-                _parent  set [[_x] call _keyOf, _cur];
-                _stack pushBack _x;
-            } forEach _nbrs;
-        };
-
-        private _res = [];
-        if (!isNull _goal) then {
-            private _r = _goal;
-            private _guard = 0;
-            while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
-                _res pushBack (getPosATL _r);   // built goal -> start; reversed below (pushBack is O(1), a
-                _r = _parent getOrDefault [[_r] call _keyOf, objNull];   // prepend would be O(n^2) on a long path)
-                _guard = _guard + 1;
-            };
-            reverse _res;   // -> start .. goal order
-        };
-        _res
+        } forEach (roadsConnectedTo _cur);
     };
 
-    _chain = [true] call _fnc_walk;                                     // pruned corridor: fast common case
-    if (_chain isEqualTo []) then { _chain = [false] call _fnc_walk };  // no corridor path -> full search
+    if (!isNull _goal) then {
+        private _r = _goal;
+        private _guard = 0;
+        while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
+            _chain pushBack (getPosATL _r);   // built goal -> start; reversed below (pushBack is O(1), a
+            _r = _parent getOrDefault [[_r] call _keyOf, objNull];   // prepend would be O(n^2) on a long path)
+            _guard = _guard + 1;
+        };
+        reverse _chain;   // -> start .. goal order
+    };
 };
 
-// Stitch: start stub, the road chain, end stub. No chain (off-network or the walk hit its cap) -> one
-// deviated off-road run the whole way.
+// Stitch: start stub, the road chain, end stub. No chain (a roadless end, or disconnected road components)
+// -> one deviated off-road run the whole way.
 private _route = [_startPos];
 if (_chain isEqualTo []) then {
     _route append ([_startPos, _destPos] call _fnc_offroad);

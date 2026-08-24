@@ -298,8 +298,13 @@ while {
                         private _me = _x; private _meId = netId _me;
                         private _mp = _prog getOrDefault [_meId, -1];
                         private _startIdx = (_mp + 1) max 0;
-                        private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
-                        if ((_issued getOrDefault [_meId, -999]) != _startIdx) then {
+                        private _last = _issued getOrDefault [_meId, -999];
+                        // Issue the remaining route once and let the hull drive it; the route is fixed, so
+                        // forward progress needs no re-issue -- re-issuing every point churns setDriveOnPath and
+                        // stutters the hull. Re-issue only when forced (leg change / recovery, marked -999) or
+                        // when the hull has REGRESSED behind its issued start (it strayed off, needs a fresh path).
+                        if (_last == -999 || {_startIdx < _last}) then {
+                            private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
                             _me setDriveOnPath _slice;
                             _issued set [_meId, _startIdx];
                             _pathed set [_meId, true];
