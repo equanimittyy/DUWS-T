@@ -149,6 +149,20 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
     };
 };
 
+// DEBUG (silent unless duws_log_level is 4): the route breakdown, so an RPT tells apart the two ways a convoy
+// ends up crossing open field -- a full off-road fallback (chainPts=0: A* found no path, whole leg beelines) vs
+// a road route with off-road only on the stubs (start/dest -> nearest road). startRoad/destRoad=false means an
+// end is roadless; chainPts=0 with both true means the ends sit on disconnected road components. Compare the
+// stub lengths and the straight-line distance to see how much of the leg is off the network and why.
+if (duws_log_level >= 4) then {
+    private _straight = _startPos distance2D _destPos;
+    private _sStub = if (_chain isEqualTo []) then { _straight } else { _startPos distance2D (_chain select 0) };
+    private _eStub = if (_chain isEqualTo []) then { 0 } else { (_chain select (count _chain - 1)) distance2D _destPos };
+    ["DEBUG", "CONVOY", format ["path start=[%1,%2] dest=[%3,%4] straight=%5 chainPts=%6 startRoad=%7 destRoad=%8 startStub=%9 endStub=%10",
+        round (_startPos select 0), round (_startPos select 1), round (_destPos select 0), round (_destPos select 1),
+        round _straight, count _chain, !isNull _startRoad, !isNull _destRoad, round _sStub, round _eStub]] call fnc_log;
+};
+
 // Stitch: start stub, the road chain, end stub. No chain (a roadless end, or disconnected road components)
 // -> one deviated off-road run the whole way.
 private _route = [_startPos];
