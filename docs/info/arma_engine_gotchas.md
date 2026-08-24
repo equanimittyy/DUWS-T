@@ -1497,6 +1497,18 @@ column that never formed. Putting every hull on a committed path with `setDriveO
 `limitSpeed` (or one that inherited a cap from another system) and never reset crawls for the rest of
 the mission.
 
+A third trap hides in that setpoint: `forceSpeed 0` does not just halt a `setDriveOnPath` hull, it drops
+it off the committed path back onto native idle. A later positive `forceSpeed` then behaves as the native
+*ceiling* (above), which "cannot make a hesitating driver go", so the hull sits commanded-but-stationary
+until its path is re-committed. This bites a convoy whenever the column bunches and the spacing controller
+clamps a follower to `forceSpeed 0` (rear-end / no-overtake): the hull ahead pulls away, the gap reopens,
+`forceSpeed` goes high -- and the follower never moves, because it is now a native-idle hull with a
+ceiling, not a pathed hull with a setpoint. It stays dead until the recovery snap. The fix is to re-issue
+`setDriveOnPath` to a wedged hull (commanded to move, `speed ~ 0` for a few ticks) rather than trust
+`forceSpeed` alone to restart it; a hull driven natively across a gap escapes the trap for free because it
+is re-issued its crumb path every few metres of lead travel, and the road hulls need the same soft re-issue
+before escalating to a teleport.
+
 **How to apply:** for a tight convoy, put every hull -- lead included -- on a committed path with
 `setDriveOnPath` (`fnc_convoy_drive` gives them a self-generated road route from `fnc_convoy_path`, so
 nothing is left to native route calculation), and hold the gap with `forceSpeed` (m/s, so `KMH()`

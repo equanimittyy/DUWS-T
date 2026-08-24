@@ -42,6 +42,12 @@ params ["_group"];
 #define CV_STUCK_MAX   30      // ticks a hull may stay wedged (meant to move, not moving; ~15 s) before the
                                // whole-column teleport-snap fires. Long enough that the pace governor's own
                                // catch-up (the column slows for a lagging hull) gets its chance first.
+#define CV_REISSUE     6       // wedged ticks (~3 s) before a road hull's setDriveOnPath is re-committed, and the
+                               // cadence of re-tries after. A soft recovery well below CV_STUCK_MAX: a forceSpeed 0
+                               // (the rear-end / no-overtake clamp when the column bunches) drops a hull off its
+                               // committed path onto native idle, where a later positive forceSpeed is only a
+                               // ceiling and cannot restart it. Re-committing the path restores the setpoint. Gated
+                               // on the wedge (not every tick) so a rolling hull is never re-issued -- that churns.
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
 // Gap mode (a leg the road search could not connect -- see the off-road branch): the lead pathfinds NATIVELY
 // across the gap and the followers replay its driven track. A crumb is the lead's position, laid once it has
@@ -431,9 +437,16 @@ while {
                         } else {
                             // Road leg: issue the remaining fixed route once; forward progress needs no re-issue
                             // (that churns setDriveOnPath and stutters). Re-issue only when forced (leg change /
-                            // recovery, -999) or when the hull REGRESSED behind its issued start.
+                            // recovery, -999), when the hull REGRESSED behind its issued start, or when it is
+                            // WEDGED -- commanded to move but halted. A forceSpeed 0 (the rear-end / no-overtake
+                            // clamp when the column bunches) drops the hull off its committed path onto native idle,
+                            // where the later positive forceSpeed is a ceiling that cannot restart it (see CV_REISSUE);
+                            // re-committing the path is the soft recovery the crumb branch already gets for free by
+                            // re-issuing every CV_STEP. Cadence-gated so a rolling hull is never re-issued.
                             private _last = _issued getOrDefault [_meId, -999];
-                            if (_last == -999 || {_startIdx < _last}) then {
+                            private _stuckTicks = _stuck getOrDefault [_meId, 0];
+                            private _wedged = speed _me < CV_STUCK_KMH && {_stuckTicks >= CV_REISSUE} && {(_stuckTicks mod CV_REISSUE) == 0};
+                            if (_last == -999 || {_startIdx < _last} || _wedged) then {
                                 private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
                                 // setDriveOnPath alone -- no doStop first. The path order overrides the group's
                                 // formation on its own, so the hull needs no stop to break formation; and a preceding
