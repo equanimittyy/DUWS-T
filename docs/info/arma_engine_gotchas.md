@@ -965,6 +965,14 @@ the stop was set. `doMove` to the first waypoint's position is the release —
 `_unit doMove (waypointPosition _first)` — both a move order and the leg the group was about to walk
 anyway, so it costs nothing on paths that were never stopped.
 
+`setDriveOnPath` is **not** a release: it commits the driver to a polyline but a preceding `doStop`
+still holds the hull halted on the spot. In `fnc_convoy_drive` a `doStop` right before each
+`setDriveOnPath` (added on the mistaken belief that formation-following overrides the path order — it
+does not, see [§setDriveOnPath commits a driver to the path](#setdriveonpath-commits-a-driver-to-the-path-and-ignores-waypoints-formation-and-combat))
+froze one hull per column dead, recovered only by the periodic teleport-snap. If `setDriveOnPath` will
+drive the hull, issue it alone — the path order already overrides formation, so the stop buys nothing
+and never clears.
+
 ## `cmd [...] remoteExec ["call", 0]` broadcasts the return value, not the command
 
 **A unary command binds tighter than binary `remoteExec`, so `titleText [...] remoteExec

@@ -416,30 +416,29 @@ while {
                             private _iss = _gapIssued getOrDefault [_meId, []];
                             if (count _crumbs < 2 || {_mp < 0}) then {
                                 if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
-                                doStop (driver _me);
                                 _me doMove _leadPos;
                                 _gapIssued set [_meId, []];
                             } else {
                                 if (_iss isEqualTo [] || {(_iss select 0) != _startIdx} || {(_leadPos distance2D (_iss select 1)) >= CV_STEP}) then {
                                     private _slice = if (_startIdx <= (count _crumbs - 1)) then { _crumbs select [_startIdx] } else { [] };
-                                    doStop (driver _me);
+                                    // setDriveOnPath alone (see the road branch): a doStop it cannot clear would
+                                    // freeze the follower on the crumb trail.
                                     _me setDriveOnPath (_slice + [_leadPos]);
                                     _pathed set [_meId, true];
                                     _gapIssued set [_meId, [_startIdx, _leadPos]];
                                 };
                             };
                         } else {
-                            // Road leg (unchanged): issue the remaining fixed route once; forward progress needs
-                            // no re-issue (that churns setDriveOnPath and stutters). Re-issue only when forced
-                            // (leg change / recovery, -999) or when the hull REGRESSED behind its issued start.
+                            // Road leg: issue the remaining fixed route once; forward progress needs no re-issue
+                            // (that churns setDriveOnPath and stutters). Re-issue only when forced (leg change /
+                            // recovery, -999) or when the hull REGRESSED behind its issued start.
                             private _last = _issued getOrDefault [_meId, -999];
                             if (_last == -999 || {_startIdx < _last}) then {
                                 private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
-                                // setDriveOnPath is ignored while the driver has a formLeader, so a follower kept
-                                // reverting to formation-following and drifting off its slice (the stutter that
-                                // wedged mid-column hulls). doStop clears that right before each (re-)issue; it
-                                // does not stall driving (setDriveOnPath is the move order, speed forced per tick).
-                                if (_me != _lead) then { doStop (driver _me) };
+                                // setDriveOnPath alone -- no doStop first. The path order overrides the group's
+                                // formation on its own, so the hull needs no stop to break formation; and a preceding
+                                // doStop is NOT cleared by setDriveOnPath, so it froze one hull per column, halted on
+                                // the spot until the recovery snap re-ran the same stop.
                                 _me setDriveOnPath _slice;
                                 _pathed set [_meId, true];
                                 _issued set [_meId, _startIdx];
