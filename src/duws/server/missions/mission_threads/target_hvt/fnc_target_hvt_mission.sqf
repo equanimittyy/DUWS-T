@@ -235,10 +235,18 @@ for "_i" from 0 to 2 do {
         _driver moveInDriver _car;
         _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
         _hvt moveInCargo _car;
-        // Lock the car so neither HVT nor driver disembarks: an AI in a vehicle bails when its group
-        // goes COMBAT or the car halts, and a commander on foot breaks the hunt -- the player must stop
-        // the car, not chase a runner. Lock does not impede the AI driving its waypoints.
+        // Keep the HVT in the car -- a commander on foot breaks the hunt, so the player must stop the car,
+        // not chase a runner. No single call holds an AI in, so three layers: lock (blocks the player and
+        // boarding, NOT an AI getting out), setUnloadInCombat false (stops the cargo bailing when the column
+        // goes COMBAT), and a GetOut handler that reseats him if the engine ejects him anyway -- a halted or
+        // disabled car bails its crew past the first two. Reseat only into a live car (a destroyed one lets
+        // the eject stand); moveInCargo re-enters past the lock. Lock does not impede the AI driving.
         _car lock true;
+        _car setUnloadInCombat [false, false];
+        _hvt addEventHandler ["GetOutMan", {
+            params ["_unit", "", "_veh"];
+            if (alive _unit && {alive _veh}) then { _unit moveInCargo _veh };
+        }];
         _hvt addHeadgear "H_Beret_blk";
         _hvt addMagazineGlobal "FileTopSecret";
         _hvtColGrp setBehaviour "AWARE";

@@ -973,6 +973,24 @@ froze one hull per column dead, recovered only by the periodic teleport-snap. If
 drive the hull, issue it alone — the path order already overrides formation, so the stop buys nothing
 and never clears.
 
+## `lock true` stops a player boarding, not an AI disembarking
+
+**`vehicle lock true` blocks the player from getting in or out and blocks AI from getting *in*, but it
+does not keep an AI crew *inside*: a unit already aboard still bails when its group goes COMBAT, or when
+the vehicle halts, stalls, or is disabled. Locking a car to pin an AI passenger looks right and holds
+right up until the first firefight or the first wedge, then the passenger is on foot.**
+
+The HVT convoy needs its commander to stay in his car so the player must stop the car, not chase a man on
+foot. `lock true` alone did not hold him. Three layers together do: `lock true` (the player and boarding),
+`setUnloadInCombat [false, false]` on the vehicle (the cargo bailing when the group goes COMBAT), and a
+`GetOutMan` event handler on the unit that reseats him — `if (alive _unit && alive _veh) then { _unit
+moveInCargo _veh }` — for the halted/disabled case the first two miss. `moveInCargo` re-enters past the
+lock; gating on `alive _veh` lets a destroyed car eject its crew normally instead of reseating into a wreck.
+
+**How to apply:** to keep an AI in a vehicle for gameplay, do not rely on `lock`. Stop the combat bail with
+`setUnloadInCombat [false, false]` and enforce the rest with a `GetOutMan` reseat handler; `lock` only adds
+the player and the no-boarding half. Reseat only while the vehicle is alive.
+
 ## `cmd [...] remoteExec ["call", 0]` broadcasts the return value, not the command
 
 **A unary command binds tighter than binary `remoteExec`, so `titleText [...] remoteExec
