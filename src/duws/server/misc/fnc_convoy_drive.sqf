@@ -204,6 +204,10 @@ while {
                     round ((_target   select 0) / 5), round ((_target   select 1) / 5)];
                 private _cached = _cache getOrDefault [_key, []];
                 if (_cached isEqualTo []) then {
+                    // Hold the column while a fresh route computes. fnc_convoy_path yields across frames on a
+                    // long search, so this forceSpeed 0 keeps the hulls put meanwhile; on a fast (single-frame)
+                    // compute it is overwritten by the real speed later this tick, so the column never stops.
+                    { _x forceSpeed 0 } forEach _live;
                     _cached = [_legStart, _target] call fnc_convoy_path;
                     _cache set [_key, _cached];
                 };

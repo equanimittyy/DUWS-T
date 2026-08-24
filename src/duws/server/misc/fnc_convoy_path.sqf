@@ -25,8 +25,18 @@ params ["_startPos", "_destPos"];
 
 #define CP_ROAD_SNAP  80       // search this far (m) for a road to get on/off the network at each end, and
                                // the radius at which the road walk counts itself as having reached the dest
-#define CP_MAX_STEPS  2000     // hard cap on segments expanded before falling back -- a terminating backstop,
-                               // set far above any real route (~40 km of segments), not a tuning knob
+#define CP_MAX_STEPS  40000    // runaway backstop ONLY (a bug guard), NOT a route-length limit: the visited
+                               // set already terminates the search when the reachable network is exhausted, so
+                               // a road-connected dest is always found however far. Set past Altis's whole
+                               // segment count, so a real route never hits it and never falls back early.
+#define CP_YIELD      250      // yield to the scheduler every this many expansions, so even a whole-network
+                               // search spreads across frames instead of hitching one. The caller (the convoy
+                               // driver) holds the column meanwhile, so a long compute reads as a brief halt.
+#define CP_SLACK      400      // corridor width (m): the pruned first pass discards a neighbour that sits more
+                               // than this much FARTHER from the dest than the road it came from, so the walk
+                               // stays in a roughly-toward-dest lane and cannot wander down a long wrong-way
+                               // branch. Wide enough for a road's own curve; a genuine detour that must first
+                               // lead away (around a bay) breaks the lane and is caught by the full retry.
 #define CP_OFF_STEP   25       // off-road: resample the straight run every this many metres
 #define CP_OFF_PROBE  35       // off-road: lateral offset tried to skirt water / a static
 #define CP_OFF_WIDEN  4        // off-road: widening lateral probes each side before giving up on a point
@@ -49,6 +59,7 @@ private _fnc_offroad = {
     private _steps = ceil (_dist / CP_OFF_STEP);
     private _dir = _a getDir _b;
     for "_i" from 1 to (_steps - 1) do {
+        if (_i mod 40 == 0 && {canSuspend}) then { sleep 0 };   // a long off-road fallback also yields
         private _t = _i / _steps;
         private _p = [
             (_a select 0) + ((_b select 0) - (_a select 0)) * _t,
@@ -76,41 +87,65 @@ private _destRoads  = _destPos  nearRoads CP_ROAD_SNAP;
 
 // Road-graph walk, only when BOTH ends reach the network. A key is the segment centre rounded to the metre
 // -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road object is not.
+//
+// Two passes for speed without losing correctness: a PRUNED corridor walk first (drops neighbours that lead
+// more than CP_SLACK farther from the dest, so it cannot wander), and only if that finds no path -- the dest
+// sits behind a detour the corridor cut, e.g. around a bay -- a second FULL walk with no pruning. Common,
+// roughly-direct routes pay only the cheap corridor pass; the rare detour pays a bounded corridor pass plus
+// the full search.
 private _chain = [];
 if !(_startRoads isEqualTo [] || {_destRoads isEqualTo []}) then {
     private _keyOf = { params ["_r"]; private _p = getPosATL _r; format ["%1_%2", round (_p select 0), round (_p select 1)] };
-    private _visited = createHashMap;
-    private _parent  = createHashMap;   // roadKey -> the road it was reached from (rebuilds the path)
-    private _start   = _startRoads select 0;
-    private _stack   = [_start];
-    _visited set [[_start] call _keyOf, true];
-    private _goal    = objNull;
-    private _steps   = 0;
+    private _start = _startRoads select 0;
 
-    while { count _stack > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
-        _steps = _steps + 1;
-        private _cur = _stack deleteAt (count _stack - 1);   // LIFO -> depth-first
-        if ((getPosATL _cur) distance2D _destPos < CP_ROAD_SNAP) exitWith { _goal = _cur };
-        // Unvisited neighbours, sorted FARTHEST-from-dest first so the nearest lands on TOP of the stack and
-        // is expanded next -- greedy toward the destination, with the rest left below to backtrack into.
-        private _nbrs = (roadsConnectedTo _cur) select { !(_visited getOrDefault [[_x] call _keyOf, false]) };
-        _nbrs = [_nbrs, [], { (getPosATL _x) distance2D _destPos }, "DESCEND"] call BIS_fnc_sortBy;
-        {
-            _visited set [[_x] call _keyOf, true];
-            _parent  set [[_x] call _keyOf, _cur];
-            _stack pushBack _x;
-        } forEach _nbrs;
-    };
+    // Greedy depth-first walk from _start toward _destPos. _prune true keeps it inside the corridor. Returns
+    // the start..goal position chain, or [] if the goal is unreachable within this pass's rules.
+    private _fnc_walk = {
+        params ["_prune"];
+        private _visited = createHashMap;
+        private _parent  = createHashMap;   // roadKey -> the road it was reached from (rebuilds the path)
+        private _stack   = [_start];
+        _visited set [[_start] call _keyOf, true];
+        private _goal  = objNull;
+        private _steps = 0;
 
-    if (!isNull _goal) then {
-        private _r = _goal;
-        private _guard = 0;
-        while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
-            _chain = [getPosATL _r] + _chain;   // prepend: rebuild start -> goal order
-            _r = _parent getOrDefault [[_r] call _keyOf, objNull];
-            _guard = _guard + 1;
+        while { count _stack > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
+            _steps = _steps + 1;
+            if (_steps mod CP_YIELD == 0 && {canSuspend}) then { sleep 0 };   // spread a long search across frames
+            private _cur = _stack deleteAt (count _stack - 1);   // LIFO -> depth-first
+            private _cd  = (getPosATL _cur) distance2D _destPos;
+            if (_cd < CP_ROAD_SNAP) exitWith { _goal = _cur };
+            // Unvisited neighbours; when pruning, also drop any that step more than CP_SLACK farther from the
+            // dest than _cur (the corridor). Sort FARTHEST-from-dest first so the nearest lands on TOP of the
+            // stack and is expanded next -- greedy toward the destination, the rest left below to backtrack into.
+            private _nbrs = (roadsConnectedTo _cur) select {
+                !(_visited getOrDefault [[_x] call _keyOf, false])
+                && { !_prune || {(getPosATL _x) distance2D _destPos <= _cd + CP_SLACK} }
+            };
+            _nbrs = [_nbrs, [], { (getPosATL _x) distance2D _destPos }, "DESCEND"] call BIS_fnc_sortBy;
+            {
+                _visited set [[_x] call _keyOf, true];
+                _parent  set [[_x] call _keyOf, _cur];
+                _stack pushBack _x;
+            } forEach _nbrs;
         };
+
+        private _res = [];
+        if (!isNull _goal) then {
+            private _r = _goal;
+            private _guard = 0;
+            while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
+                _res pushBack (getPosATL _r);   // built goal -> start; reversed below (pushBack is O(1), a
+                _r = _parent getOrDefault [[_r] call _keyOf, objNull];   // prepend would be O(n^2) on a long path)
+                _guard = _guard + 1;
+            };
+            reverse _res;   // -> start .. goal order
+        };
+        _res
     };
+
+    _chain = [true] call _fnc_walk;                                     // pruned corridor: fast common case
+    if (_chain isEqualTo []) then { _chain = [false] call _fnc_walk };  // no corridor path -> full search
 };
 
 // Stitch: start stub, the road chain, end stub. No chain (off-network or the walk hit its cap) -> one
