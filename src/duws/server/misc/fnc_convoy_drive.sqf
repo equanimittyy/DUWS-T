@@ -152,7 +152,9 @@ private _fnc_straightAnchor = {
     for "_i" from _lo to _hi do {
         // Stop scanning once the anchor would sit more than CV_SNAP_AHEAD past where the lead is, so the snap
         // stays near the column instead of teleporting it forward to a distant straight; keep the best so far.
-        if (_i > _lo && {((_cum select _i) - (_cum select _lo)) > CV_SNAP_AHEAD}) exitWith {};
+        // Measured from the lead's own index (_from - 2, since _from starts the search 2 points ahead), not the
+        // search start, so the cap is a true distance-ahead-of-lead regardless of route point spacing.
+        if (_i > _lo && {((_cum select _i) - (_cum select ((_from - 2) max 0))) > CV_SNAP_AHEAD}) exitWith {};
         // walk back from _i until _backLen of route is covered, then sum absolute heading change through _i+1
         private _acc = 0; private _k = _i;
         while { _k > 1 && {_acc < _backLen} } do {
