@@ -107,7 +107,11 @@ private _startRoad = [_startPos] call _fnc_nearestRoad;
 private _destRoad  = [_destPos]  call _fnc_nearestRoad;
 
 // A* over the road graph, only when BOTH ends reach the network. A key is the segment centre rounded to the
-// metre -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road object is not.
+// metre as a [x, y] pair -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road
+// object is not. A pair, NOT a `format` string: this key is built for every open node on every pop, and the
+// string version's per-call text conversion and allocation dominated the search (a multi-second freeze on a
+// long leg). NOT a single packed number (x * 1e5 + y) either -- a 32-bit float cannot hold two ~30 km coords
+// without rounding distinct segments onto the same key.
 private _chain = [];
 // When A* fails to connect the ends (disconnected road components), _bestNode is the start-component road it
 // got CLOSEST to the dest -- the point the convoy should leave the network to bridge the gap off-road. Its
@@ -115,7 +119,7 @@ private _chain = [];
 private _bestNode = objNull;
 private _bridgeChain = [];
 if !(isNull _startRoad || {isNull _destRoad}) then {
-    private _keyOf = { params ["_r"]; private _p = getPosATL _r; format ["%1_%2", round (_p select 0), round (_p select 1)] };
+    private _keyOf = { params ["_r"]; private _p = getPosATL _r; [round (_p select 0), round (_p select 1)] };
     private _destKey = [_destRoad] call _keyOf;
 
     private _g      = createHashMap;   // roadKey -> best known cost from the start road
@@ -144,7 +148,7 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
         } forEach _open;
         private _cur    = _open deleteAt _bestI;
         private _curKey = [_cur] call _keyOf;
-        if (_curKey == _destKey) exitWith { _goal = _cur };
+        if (_curKey isEqualTo _destKey) exitWith { _goal = _cur };   // isEqualTo: keys are [x,y] arrays, not ==-able
         _closed set [_curKey, true];
 
         private _curG   = _g getOrDefault [_curKey, 1e12];
