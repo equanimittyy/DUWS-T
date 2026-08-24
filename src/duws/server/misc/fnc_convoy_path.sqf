@@ -17,11 +17,13 @@
 //   driven off-road in full only when an end has no road anywhere near it. An off-road run is a straight
 //   line resampled every CP_OFF_STEP and deviated sideways around water, rocks, trees and buildings.
 //
-// The result always starts exactly at _startPos and ends exactly at _destPos, so the lead reaches the real
-// waypoint and its leg completes. Consecutive near-duplicate points are dropped so setDriveOnPath is not fed
-// a zero-length segment.
+// The result is a list of SEGMENTS, each a point run tagged "road" or "gap". A connected leg is one "road"
+// segment; a leg the search cannot bridge (disconnected road components) is road-to-the-exit, a "gap" the
+// driver crosses with native pathing, then road-out -- off-road complementing the road route, not replacing
+// the whole leg. Segments join end-to-start; the first starts at _startPos and the last ends at _destPos, so
+// the lead reaches the real waypoint and its leg completes. Near-duplicate points are dropped within a segment.
 //
-// [_startPos, _destPos] -> [[x,y,z], ...]   // >= 2 points, start first, dest last
+// [_startPos, _destPos] -> [[[x,y,z], ...], "road"|"gap"], ...]   // >= 1 segment, each >= 2 points
 params ["_startPos", "_destPos"];
 
 #define CP_ROAD_FIND  3000     // snap each end to its nearest road within this (m). Generous so we prefer the
@@ -107,6 +109,11 @@ private _destRoad  = [_destPos]  call _fnc_nearestRoad;
 // A* over the road graph, only when BOTH ends reach the network. A key is the segment centre rounded to the
 // metre -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road object is not.
 private _chain = [];
+// When A* fails to connect the ends (disconnected road components), _bestNode is the start-component road it
+// got CLOSEST to the dest -- the point the convoy should leave the network to bridge the gap off-road. Its
+// path back to the start road is _bridgeChain, rebuilt below. Both stay empty on a connected or roadless leg.
+private _bestNode = objNull;
+private _bridgeChain = [];
 if !(isNull _startRoad || {isNull _destRoad}) then {
     private _keyOf = { params ["_r"]; private _p = getPosATL _r; format ["%1_%2", round (_p select 0), round (_p select 1)] };
     private _destKey = [_destRoad] call _keyOf;
@@ -147,7 +154,7 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
         // than pop the whole network. Top-level exitWith, matching the goal break above -- _goal stays null,
         // so the leg falls through to off-road exactly as an exhausted search does.
         private _h = _curPos distance2D _destPos;
-        if (_h < _bestH) then { _bestH = _h; _stall = 0 } else { _stall = _stall + 1 };
+        if (_h < _bestH) then { _bestH = _h; _bestNode = _cur; _stall = 0 } else { _stall = _stall + 1 };
         if (_stall >= CP_STALL) exitWith {
             if (duws_log_level >= 4) then {
                 ["DEBUG", "CONVOY", format ["A* bail: closest %1 m after %2 pops, %3 with no gain -- dest unreachable, leg goes off-road",
@@ -186,38 +193,81 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
             _guard = _guard + 1;
         };
         reverse _chain;   // -> start .. goal order
+    } else {
+        // No through-path: rebuild the road run from the start road to _bestNode (the closest the search came
+        // to the dest). That is the leg's road portion on the start side; the gap off it bridges to the dest
+        // road. Same reverse-walk as the goal chain.
+        if (!isNull _bestNode) then {
+            private _r = _bestNode;
+            private _guard = 0;
+            while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
+                _bridgeChain pushBack (getPosATL _r);
+                _r = _parent getOrDefault [[_r] call _keyOf, objNull];
+                _guard = _guard + 1;
+            };
+            reverse _bridgeChain;
+        };
     };
 };
 
-// DEBUG (silent unless duws_log_level is 4): the route breakdown, so an RPT tells apart the two ways a convoy
-// ends up crossing open field -- a full off-road fallback (chainPts=0: A* found no path, whole leg beelines) vs
-// a road route with off-road only on the stubs (start/dest -> nearest road). startRoad/destRoad=false means an
-// end is roadless; chainPts=0 with both true means the ends sit on disconnected road components. Compare the
-// stub lengths and the straight-line distance to see how much of the leg is off the network and why.
+// DEBUG (silent unless duws_log_level is 4): the route breakdown. chainPts>0 = a connected road route (one
+// road segment). chainPts=0 with both roads true = disconnected components: a start-side road run to the exit
+// (bridgePts long), a native gap across to the dest road, then the dest stub. A roadless end = one full gap.
 if (duws_log_level >= 4) then {
     private _straight = _startPos distance2D _destPos;
-    private _sStub = if (_chain isEqualTo []) then { _straight } else { _startPos distance2D (_chain select 0) };
-    private _eStub = if (_chain isEqualTo []) then { 0 } else { (_chain select (count _chain - 1)) distance2D _destPos };
-    ["DEBUG", "CONVOY", format ["path start=[%1,%2] dest=[%3,%4] straight=%5 chainPts=%6 startRoad=%7 destRoad=%8 startStub=%9 endStub=%10",
+    ["DEBUG", "CONVOY", format ["path start=[%1,%2] dest=[%3,%4] straight=%5 chainPts=%6 bridgePts=%7 startRoad=%8 destRoad=%9",
         round (_startPos select 0), round (_startPos select 1), round (_destPos select 0), round (_destPos select 1),
-        round _straight, count _chain, !isNull _startRoad, !isNull _destRoad, round _sStub, round _eStub]] call fnc_log;
+        round _straight, count _chain, count _bridgeChain, !isNull _startRoad, !isNull _destRoad]] call fnc_log;
 };
 
-// Stitch: start stub, the road chain, end stub. No chain (a roadless end, or disconnected road components)
-// -> one deviated off-road run the whole way.
-private _route = [_startPos];
-if (_chain isEqualTo []) then {
-    _route append ([_startPos, _destPos] call _fnc_offroad);
+// Clean a point run: drop consecutive near-duplicates (no zero-length setDriveOnPath hop) and guarantee it
+// ends exactly at _end so a segment reaches its handoff point / the leg reaches its waypoint.
+private _fnc_clean = {
+    params ["_pts", "_end"];
+    private _c = [];
+    { if (_c isEqualTo [] || {(_x distance2D (_c select (count _c - 1))) > CP_DEDUP}) then { _c pushBack _x } } forEach _pts;
+    if (_c isEqualTo [] || {(_c select (count _c - 1)) distance2D _end > 0.1}) then { _c pushBack _end };
+    _c
+};
+
+// Build the segmented route: a list of [points, mode] where mode is "road" (driven on the fixed polyline with
+// setDriveOnPath) or "gap" (the lead pathfinds it natively while the followers replay its track). Off-road
+// COMPLEMENTS the road search rather than replacing the leg: only the span the roads cannot bridge is a gap,
+// and the roads on either side of it stay road segments.
+private _segs = [];
+if (_chain isNotEqualTo []) then {
+    // Connected: one road segment -- start stub, the road chain, end stub.
+    private _r = [_startPos];
+    _r append ([_startPos, _chain select 0] call _fnc_offroad);
+    _r append _chain;
+    _r append ([_chain select (count _chain - 1), _destPos] call _fnc_offroad);
+    _segs = [[[_r, _destPos] call _fnc_clean, "road"]];
 } else {
-    _route append ([_startPos, _chain select 0] call _fnc_offroad);
-    _route append _chain;
-    _route append ([_chain select (count _chain - 1), _destPos] call _fnc_offroad);
+    if (!isNull _startRoad && {!isNull _destRoad} && {_bridgeChain isNotEqualTo []}) then {
+        // Disconnected, both ends on roads: road to the exit, a native gap across to the dest road, road out.
+        private _exitPos     = _bridgeChain select (count _bridgeChain - 1);
+        private _destRoadPos = getPosATL _destRoad;
+        private _r1 = [_startPos];
+        _r1 append ([_startPos, _bridgeChain select 0] call _fnc_offroad);
+        _r1 append _bridgeChain;                       // ends at the exit road (closest reached to the dest)
+        private _r3 = [_destRoadPos];
+        _r3 append ([_destRoadPos, _destPos] call _fnc_offroad);
+        _segs = [
+            [[_r1, _exitPos] call _fnc_clean, "road"],
+            [[_exitPos, _destRoadPos], "gap"],         // native bridge: leave the network here, rejoin there
+            [[_r3, _destPos] call _fnc_clean, "road"]
+        ];
+    } else {
+        // A roadless end (or no exit found): the whole leg is one native gap.
+        _segs = [[[_startPos, _destPos], "gap"]];
+    };
 };
-_route pushBack _destPos;
 
-// Drop consecutive near-duplicates so setDriveOnPath never gets a zero-length hop; keep the exact dest last.
-private _clean = [];
-{ if (_clean isEqualTo [] || {(_x distance2D (_clean select (count _clean - 1))) > CP_DEDUP}) then { _clean pushBack _x } } forEach _route;
-if ((_clean select (count _clean - 1)) distance2D _destPos > 0.1) then { _clean pushBack _destPos };
-if (count _clean < 2) then { _clean = [_startPos, _destPos] };
-_clean
+// Drop any segment that collapsed to under two real points (e.g. start ~ exit), so the driver never gets a
+// sub-2-point leg; if that empties the route, fall back to one native gap.
+_segs = _segs select {
+    private _p = _x select 0;
+    count _p >= 2 && {((_p select 0) distance2D (_p select (count _p - 1))) > CP_DEDUP}
+};
+if (_segs isEqualTo []) then { _segs = [[[_startPos, _destPos], "gap"]] };
+_segs

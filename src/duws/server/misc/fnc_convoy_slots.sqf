@@ -16,6 +16,20 @@
 // [_route, _count, _spacing] -> [[_pos, _dir], ...]   // _count entries, lead first
 params ["_route", "_count", ["_spacing", 22]];
 
+// fnc_convoy_path now returns a SEGMENTED route ([points, "road"|"gap"] entries); seating only needs the
+// geometry, so flatten it to one point run. A segment entry is [array, string] (its mode is a string), a raw
+// point is [x,y,z] (all numbers) -- so a string second element marks the segmented form. Segments join
+// end-to-start, so drop the duplicated boundary point as they concatenate.
+if (count _route > 0 && {(_route select 0) isEqualType []} && {count (_route select 0) >= 2} && {((_route select 0) select 1) isEqualType ""}) then {
+    private _flat = [];
+    {
+        {
+            if (_flat isEqualTo [] || {(_x distance2D (_flat select (count _flat - 1))) > 0.1}) then { _flat pushBack _x };
+        } forEach (_x select 0);
+    } forEach _route;
+    _route = _flat;
+};
+
 private _n = count _route;
 private _slots = [];
 

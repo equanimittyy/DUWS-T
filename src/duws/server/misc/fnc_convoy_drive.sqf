@@ -113,30 +113,35 @@ private _dumped = false;          // one-time level-4 dump of the waypoint list,
 private _route0 = _group getVariable ["DUWS_convoy_route0", []];
 private _needInitOrder = (_route0 isEqualTo []);
 
-// Gap-mode state (see CV_STEP): a leg whose route the road search could not connect drives the lead natively
-// and rebuilds _route from its crumb trail each tick, so every follower/spacing/recovery helper below runs
-// unchanged over the crumbs. _legOffroad is set when a leg's route is built and gates every gap branch, so a
-// road leg never touches any of this. _pathed tracks whether a hull currently holds a setDriveOnPath, so it is
-// cleared before the lead is handed to doMove. _gapIssued is the gap analogue of _issued (a fixed route
-// re-issues on index change; a growing crumb trail re-issues as the lead advances).
+// A leg's route is a list of SEGMENTS from fnc_convoy_path, each [points, "road"|"gap"]. The driver walks them
+// in order: _segs holds the leg's segments, _segIdx the current one, _segTarget its end (the lead's goal until
+// it hands off to the next segment). A "road" segment is driven on its fixed polyline with setDriveOnPath; a
+// "gap" segment (the span the road search could not bridge) is driven with the lead pathfinding natively while
+// the followers replay its crumb trail. So off-road complements the road route rather than replacing the leg,
+// and every follower/spacing/recovery helper runs unchanged over whichever _route the current segment sets.
+// _legOffroad = the current segment is a gap, and gates every gap branch; a road segment never touches the
+// crumb machinery. _pathed tracks whether a hull holds a setDriveOnPath (cleared before a doMove); _gapIssued
+// is the gap analogue of _issued (a fixed route re-issues on index change, a growing crumb trail as the lead
+// advances). _legTargetCached is the waypoint the segments were built for, to spot a drifted waypoint.
+private _segs       = [];
+private _segIdx     = 0;
+private _segTarget  = [];
+private _legTargetCached = [];
 private _legOffroad = false;
 private _crumbs   = [];
 private _pathed   = createHashMap;   // netId -> a setDriveOnPath is committed (clear before a doMove)
 private _gapIssued = createHashMap;  // netId -> last gap issue [startIdx, leadPos]
 
-// True when a route is a blind off-road run, not a road line: the road search found no through-path and
-// fnc_convoy_path returned a deviated straight line. Sampled by road membership -- a road route's interior
-// points sit on roads, a beeline's do not. Drives the gap-mode decision for both the seeded first leg and
-// every recomputed leg.
-private _fnc_detectOffroad = {
-    params ["_r"];
-    if (count _r < 3) exitWith { false };
-    private _on = 0; private _n = 0;
-    {
-        _n = _n + 1;
-        if (isOnRoad (_r select (round (_x * (count _r - 1))))) then { _on = _on + 1 };
-    } forEach [0.15, 0.3, 0.45, 0.6, 0.75, 0.9];
-    _n > 0 && {(_on / _n) < 0.3}
+// Load segment _i of _segs -> [points, isGap, endPoint, cumulativeArcLengths]. The caller assigns these to
+// _route / _legOffroad / _segTarget / _cum; _segTarget is captured here because a gap segment overwrites
+// _route with its crumb trail, so its end cannot be re-read off _route later.
+private _fnc_segAt = {
+    params ["_theSegs", "_i"];
+    private _seg  = _theSegs select _i;
+    private _pts  = _seg select 0;
+    private _cm   = [0];
+    for "_k" from 1 to (count _pts - 1) do { _cm pushBack ((_cm select (_k - 1)) + ((_pts select (_k - 1)) distance2D (_pts select _k))) };
+    [_pts, (_seg select 1) == "gap", _pts select (count _pts - 1), _cm]
 };
 
 // Nearest route index to a position = the hull's progress along the route. -1 while the route is empty.
@@ -234,17 +239,20 @@ private _snapHull = {
     _veh setDriveOnPath [];
 };
 
-// Seed the first leg from a caller-supplied route (see DUWS_convoy_route0 above): the hulls already sit on it,
-// so drive it as-is instead of recomputing from the leader's position and re-ordering the column.
+// Seed the first leg from a caller-supplied segmented route (see DUWS_convoy_route0 above): the hulls already
+// sit on it, so drive it as-is instead of recomputing from the leader's position and re-ordering the column.
 if (_route0 isNotEqualTo []) then {
-    _route = _route0;
-    _legStart = _route0 select 0;
-    _cum = [0];
-    for "_i" from 1 to (count _route - 1) do { _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i))) };
-    // A seeded first leg can itself be a roadless gap (the deny/target column pre-seated on an off-road
-    // drive-in): flag it so the gap branch drives it, the crumb trail replacing the seated beeline.
-    _legOffroad = [_route0] call _fnc_detectOffroad;
-    if (_legOffroad) then { _crumbs = [] };
+    _segs = _route0;
+    _segIdx = 0;
+    _legStart = ((_segs select 0) select 0) select 0;   // first point of the first segment = the spawn point
+    private _lastSegPts = (_segs select (count _segs - 1)) select 0;
+    _legTargetCached = _lastSegPts select (count _lastSegPts - 1);   // last point = the leg's waypoint
+    private _seg = [_segs, 0] call _fnc_segAt;
+    _route      = _seg select 0;
+    _legOffroad = _seg select 1;
+    _segTarget  = _seg select 2;
+    _cum        = _seg select 3;
+    _crumbs = [];
 };
 
 // DEBUG (silent unless duws_log_level is raised to 4): a per-tick column line and a line per recovery event,
@@ -296,52 +304,41 @@ while {
         // waypointPosition reads [0,0,0], and a wrapped/advanced index can land on an empty slot. Step past
         // any [0,0,0] to the next real waypoint, so the column never sits waiting on the map origin.
         while { _legIdx < _wpCount && {(waypointPosition [_group, _legIdx]) isEqualTo [0, 0, 0]} } do { _legIdx = _legIdx + 1 };
-        private _target = if (_legIdx < _wpCount) then { waypointPosition [_group, _legIdx] } else { [0, 0, 0] };
+        private _wpTarget = if (_legIdx < _wpCount) then { waypointPosition [_group, _legIdx] } else { [0, 0, 0] };
         if (duws_log_level >= 4 && {!_dumped}) then {
             _dumped = true;
-            ["DEBUG", "CONVOY", format ["waypoints grp=%1 wpCount=%2 legIdx=%3 target=%4", _group, _wpCount, _legIdx, _target]] call fnc_log;
+            ["DEBUG", "CONVOY", format ["waypoints grp=%1 wpCount=%2 legIdx=%3 target=%4", _group, _wpCount, _legIdx, _wpTarget]] call fnc_log;
         };
 
         // No live waypoint (index past the list, waiting on an appended one; or a group with none yet):
         // hold in place this tick rather than drive to the map origin.
-        if (_target isEqualTo [0, 0, 0]) then {
+        if (_wpTarget isEqualTo [0, 0, 0]) then {
             { _x forceSpeed 0 } forEach _live;
         } else {
-            // Recompute only when the leg changed (route emptied on advance) or the waypoint drifted. A gap
-            // leg's _route is the crumb trail, which ends at the lead, not the target -- its drift is expected
-            // and must NOT force a recompute (that would re-run the road search every tick), so guard both on
-            // !_legOffroad. Cache by the rounded [legStart, target] (5 m buckets) so a CYCLE patrol reuses legs.
-            if (!_legOffroad && {_route isNotEqualTo []} && {(_route select (count _route - 1)) distance2D _target > CV_REROUTE}) then { _route = [] };
-            if (_route isEqualTo [] && {!_legOffroad}) then {
+            // (Re)build the leg's segmented route when the leg changed (segments emptied on advance) or the
+            // waypoint drifted from what the segments were built for. Cache by the rounded [legStart, waypoint]
+            // (5 m buckets) so a CYCLE patrol reuses each lap's legs. A rebuild starts at segment 0.
+            if (_segs isNotEqualTo [] && {_wpTarget distance2D _legTargetCached > CV_REROUTE}) then { _segs = [] };
+            if (_segs isEqualTo []) then {
                 private _key = format ["%1_%2_%3_%4",
                     round ((_legStart select 0) / 5), round ((_legStart select 1) / 5),
-                    round ((_target   select 0) / 5), round ((_target   select 1) / 5)];
-                private _cached = _cache getOrDefault [_key, []];
-                if (_cached isEqualTo []) then {
+                    round ((_wpTarget select 0) / 5), round ((_wpTarget select 1) / 5)];
+                _segs = _cache getOrDefault [_key, []];
+                if (_segs isEqualTo []) then {
                     // Hold the column while a fresh route computes. fnc_convoy_path yields across frames on a
                     // long search, so this forceSpeed 0 keeps the hulls put meanwhile; on a fast (single-frame)
                     // compute it is overwritten by the real speed later this tick, so the column never stops.
                     { _x forceSpeed 0 } forEach _live;
-                    _cached = [_legStart, _target] call fnc_convoy_path;
-                    _cache set [_key, _cached];
+                    _segs = [_legStart, _wpTarget] call fnc_convoy_path;
+                    _cache set [_key, _segs];
                 };
-                _legOffroad = [_cached] call _fnc_detectOffroad;
-                if (_legOffroad) then {
-                    // No road path: discard the blind beeline. The gap pre-step below rebuilds _route from the
-                    // lead's crumb trail each tick, and the lead drives the gap natively (see CV_STEP).
-                    _crumbs = [];
-                    _cum = [0];
-                    { _gapIssued set [netId _x, []] } forEach _live;
-                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap leg grp=%1 leg=%2 -- no road path, native lead + crumb replay", _group, _legIdx]] call fnc_log };
-                } else {
-                    _route = _cached;
-                    _cum = [0];
-                    for "_i" from 1 to (count _route - 1) do {
-                        _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i)));
-                    };
-                    { _issued set [netId _x, -999] } forEach _live;   // force a fresh path issue onto the new route
-                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 pts=%3 len=%4", _group, _legIdx, count _route, round (_cum select (count _cum - 1))]] call fnc_log };
-                };
+                _legTargetCached = _wpTarget;
+                _segIdx = 0;
+                private _seg = [_segs, _segIdx] call _fnc_segAt;
+                _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3;
+                _crumbs = [];
+                { _issued set [netId _x, -999]; _gapIssued set [netId _x, []] } forEach _live;   // fresh issue onto the new segment
+                if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 segs=%3 seg0=%4 pts=%5", _group, _legIdx, count _segs, ["road", "gap"] select _legOffroad, count _route]] call fnc_log };
             };
 
             // Convoy cruise = the slowest live hull's config top speed (a slow tracked hull sets the pace, a
@@ -403,9 +400,10 @@ while {
                     private _me = _x; private _meId = netId _me;
                     if (_legOffroad && {_me == _lead}) then {
                         // Native lead across the gap. Clear any committed path first (a setDriveOnPath and a
-                        // doMove fight), then aim at the target; re-issued each tick is cheap for doMove.
+                        // doMove fight), then aim at the segment end (the road it rejoins); re-issued each tick
+                        // is cheap for doMove, and keeps it aimed as the segment/leg updates.
                         if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
-                        _me doMove _target;
+                        _me doMove _segTarget;
                     } else {
                         private _mp = _prog getOrDefault [_meId, -1];
                         private _startIdx = (_mp + 1) max 0;
@@ -514,7 +512,7 @@ while {
                 // Lead wedge counter: same as the followers', but a lead deliberately eased to a halt for the
                 // tail (factor 0) or already arriving is NOT counted -- only a lead that should be rolling but
                 // is not. Feeds the same whole-column teleport-snap below.
-                private _leadMoving = _factor > 0 && {(_lead distance2D _target) > CV_ARRIVE};
+                private _leadMoving = _factor > 0 && {(_lead distance2D _segTarget) > CV_ARRIVE};
                 if (_leadMoving && {speed _lead < CV_STUCK_KMH}) then {
                     _stuck set [_leadId, (_stuck getOrDefault [_leadId, 0]) + 1];
                 } else {
@@ -526,15 +524,27 @@ while {
                         _group, _leadId, round (speed _lead), round _cruise, (round (_factor * 100)) / 100, round _maxGap, _dbg]] call fnc_log;
                 };
 
-                // Leg done: the lead reached the waypoint. Advance to the next; wrap to 0 on a CYCLE; the
-                // next leg routes from the anchor just reached. Emptying _route forces its recompute above.
-                if ((_lead distance2D _target) < CV_ARRIVE) then {
-                    _legStart = _target;
-                    _legIdx = _legIdx + 1;
-                    if (_legIdx < (count (waypoints _group)) && {(waypointType [_group, _legIdx]) == "CYCLE"}) then { _legIdx = 0 };
-                    _route = [];
-                    _legOffroad = false;   // the next leg re-detects road vs gap when its route is built
-                    _crumbs = [];
+                // Segment / leg advance: the lead reached the current segment's end. More segments left in this
+                // leg -> load the next one; this is where a road<->gap handoff happens (gap crossed, resume road,
+                // or road driven up to the gap edge). No segments left -> the leg is done: advance the waypoint
+                // (wrap on a CYCLE), route the next leg from the anchor just reached, and empty _segs so the
+                // block above rebuilds it.
+                if ((_lead distance2D _segTarget) < CV_ARRIVE) then {
+                    if (_segIdx < (count _segs - 1)) then {
+                        _segIdx = _segIdx + 1;
+                        private _seg = [_segs, _segIdx] call _fnc_segAt;
+                        _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3;
+                        _crumbs = [];
+                        { _issued set [netId _x, -999]; _gapIssued set [netId _x, []] } forEach _live;
+                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["segment grp=%1 leg=%2 seg=%3/%4 mode=%5", _group, _legIdx, _segIdx, count _segs, ["road", "gap"] select _legOffroad]] call fnc_log };
+                    } else {
+                        _legStart = _wpTarget;
+                        _legIdx = _legIdx + 1;
+                        if (_legIdx < (count (waypoints _group)) && {(waypointType [_group, _legIdx]) == "CYCLE"}) then { _legIdx = 0 };
+                        _segs = [];
+                        _legOffroad = false;
+                        _crumbs = [];
+                    };
                 };
 
                 // RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the
