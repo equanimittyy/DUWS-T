@@ -15,17 +15,15 @@ if (isNull (missionNamespace getVariable ["DUWS_informant_unit", objNull])) exit
 // spend it.
 _civilian setVariable ["DUWS_informant_asked", true, true];
 
-// The informant never fingers himself. Asked about the informant, he answers like a local who has
-// nothing -- the ask is spent above and greys out, so he reads no different from the third who
-// refuse. Guarded before the roll: he never reaches the reveal or the bribe that would sell his
-// own position.
+// The informant never fingers himself. Asked, he answers like a local with nothing -- the ask is
+// spent above and greys out, so he reads no different from the third who refuse. Guarded before the
+// roll: he never reaches the reveal or bribe that would sell his own position.
 if (_civilian isEqualTo (missionNamespace getVariable ["DUWS_informant_unit", objNull])) exitWith {
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_MISS"] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
-// Flat 80 reveal / 20 refuse, not the civ menu's rep curve: a hunt sits in one town and its locals
-// answer the same regardless of standing -- a town hostile enough to shift the odds never offers the
-// ask in the first place.
+// Flat 80 reveal / 20 refuse, not the civ menu's rep curve: a hunt sits in one town, its locals
+// answer the same regardless of standing, and a town hostile enough to shift odds never offers it.
 private _roll = random 1;
 
 if (_roll < 0.80) exitWith {

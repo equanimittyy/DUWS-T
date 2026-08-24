@@ -2,9 +2,9 @@
 // crowd local, so the scroll action exists on all machines. Server-added actions show only to the
 // host, hence the broadcast.
 //
-// The action shows only while a hunt is live and this civilian has not been asked. DUWS_informant_active
-// is the broadcast flag (the informant object itself is server-only); DUWS_informant_asked is set with a
-// broadcast so a spent civilian greys out for everyone.
+// Shows only while a hunt is live and this civilian is unasked. DUWS_informant_active is the broadcast
+// flag (the informant object is server-only); DUWS_informant_asked is set with a broadcast so a spent
+// civilian greys out for everyone.
 params ["_civ"];
 if (isNull _civ) exitWith {};
 

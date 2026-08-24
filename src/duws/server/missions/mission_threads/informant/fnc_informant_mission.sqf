@@ -1,15 +1,13 @@
 // Locality: server -- callers remoteExec to target 2.
 //
-// Informant hunt. An OPFOR informant hides disguised among a town's civilians; the player locates and
-// kills him before he leaves by car for a distant zone. The site-finder (fnc_informant_site)
-// guarantees _MissionPos is a populated Tomata town, so this thread never has to test for one.
+// Informant hunt. An OPFOR informant hides disguised among a town's civilians; the player finds and
+// kills him before he leaves by car for a distant zone. Site-finder (fnc_informant_site) guarantees
+// _MissionPos is a populated Tomata town, so this thread never tests for one.
 //
-// Two shapes, chosen by the town's reputation band:
-//   friendly/neutral -- the crowd is thickened and every civilian can be asked about the informant
-//                       (fnc_informant_ask_addAction, added in the ask-action layer); the player narrows
-//                       him down by talking, and has time.
-//   enemy            -- no asking; the informant leaves much sooner, so the player camps the
-//                       described vehicle and intercepts.
+// Two shapes by the town's reputation band:
+//   friendly/neutral -- crowd thickened, every civilian askable about the informant
+//                       (fnc_informant_ask_addAction); player narrows him by talking, and has time.
+//   enemy            -- no asking; he leaves much sooner, so player camps the described car.
 // Both leave early the moment a firefight starts near the informant.
 params ["_MissionPos", "_mission_name"];
 
@@ -40,17 +38,16 @@ if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// Leave built on the shared mission-timing shape (10-minute steps of in-game time, the same shape and
-// clock the deadline uses): enemy towns give one step, friendly two. TUNABLE steps.
+// Leave clock on the shared mission-timing shape (10-min in-game steps, the same clock the deadline
+// uses): enemy towns give one step, friendly two. TUNABLE steps.
 private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
 private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 
-// Escape destination: the nearest OPFOR-held zone at least 1 km off. The informant runs to enemy
-// ground, never to a BLUFOR zone or the player's own, so there is no fallback -- the finder guaranteed
-// one existed at offer time, and if the last was captured between the offer and now the mission cannot
-// run and aborts. zone_namePOS_pairs carries the name; WARCOM_zones_controled_by_OPFOR carries which
-// zones are enemy-held, matched by position. TUNABLE distance.
+// Escape destination: nearest OPFOR-held zone at least 1 km off. He runs to enemy ground, never a
+// BLUFOR/own zone, so no fallback -- finder guaranteed one at offer time; if the last was captured
+// since, the mission aborts. zone_namePOS_pairs carries the name, WARCOM_zones_controled_by_OPFOR
+// which zones are enemy-held, matched by position. TUNABLE distance.
 private _MINDIST = 1000;
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _zx  = [];
@@ -69,38 +66,33 @@ if (_zx isEqualTo []) exitWith {
 
 private _townName = text (_locs select _townIndex);
 
-// The compass direction he heads when he leaves, for the civilian "saw him leave" line: the 16-point
-// bearing from the town to his destination.
+// 16-point bearing town -> destination, for the civilian "saw him leave" line.
 private _compass16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
 private _leaveDir = _compass16 select (floor (((([_townPos, _zx] call BIS_fnc_dirTo) + 11.25) mod 360) / 22.5));
 
-// The getaway car, and three decoys that scatter when he drives so the described vehicle never points
-// at one car. One decoy is guaranteed his class, the other two random, so the description narrows the
-// field to at least two identical cars without ever pinning the informant.
+// Getaway car plus three decoys that scatter when he drives, so the described vehicle never points at
+// one car. One decoy is his class, two random: the description narrows to >=2 identical cars, never one.
 private _vehPool = missionNamespace getVariable ["civ_veh_array", []];
 if (_vehPool isEqualTo []) then { _vehPool = ["C_Offroad_01_F", "C_Hatchback_01_F", "C_SUV_01_F"] };
 private _informantClass = selectRandom _vehPool;
 private _decoyClasses = [_informantClass, selectRandom _vehPool, selectRandom _vehPool] call BIS_fnc_arrayShuffle;
 private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "displayName");
 
-// Objective marker + task on the town. Marked before the crowd is built, since the ellipse is all the
-// player has to go on while the spawn runs.
+// Objective marker + task, before the crowd is built: the ellipse is all the player has while it spawns.
 private _radius = _townRadius max 200;
-// Everything the hunt spawns -- cars, decoys, the informant and the thickened crowd -- clusters
-// within this, so the player works one tight knot near the centre instead of a town-wide sweep and
-// the informant stays among the crowd he hides in. The task ellipse still marks the whole town.
+// Everything the hunt spawns clusters within this, so the player works one tight knot at the centre,
+// not a town-wide sweep, and the informant stays in his crowd. The task ellipse still marks the town.
 private _spawnRadius = (_townRadius * 0.5) max 100; // TUNABLE.
 private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
-// Position-based, matching every other mission thread: unique per town and stable, where a
-// round-time id collides when two missions are created in the same second.
+// Position-based id (like every mission thread): unique per town and stable, where a round-time id
+// collides when two missions are created in the same second.
 private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
-// Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
-// civilian cars carry. findEmptyPosition tests THIS car's own footprint against the buildings, walls
-// and cars around the point and returns a spot it genuinely fits: a road point on its own -- and
-// binary createVehicle's weak relocate -- still drops a car into a house wall in a built-up town,
-// where it detonates on spawn. Nothing within reach fits -> open ground off the road, never the point.
+// Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition
+// tests THIS car's footprint against nearby buildings/walls/cars and returns a spot it fits: a bare
+// road point plus createVehicle's weak relocate still drops a car into a house wall in a built-up
+// town, where it detonates on spawn. Nothing fits -> open ground off the road, never the raw point.
 private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
     private _fit = _pos findEmptyPosition [0, 25, _class];
@@ -116,26 +108,24 @@ private _fnc_spawnCar = {
 };
 
 private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _spawnRadius, false, true];
-// A road point is usable only if it is clear of the walls, rocks and trees that line an Altis town
-// road and of any car already placed: the spawn settles onto the nearest open ground, so starting
-// from an open point keeps the car on the road rather than shoved off it, and the car check keeps
-// the four cars off one another's segment.
+// A road point is usable only if clear of the walls/rocks/trees lining an Altis town road and of any
+// car already placed: the spawn settles onto nearest open ground, so an open start keeps the car on
+// the road not shoved off, and the car check keeps the four cars off one another's segment.
 private _fnc_carClear = {
     params ["_p"];
     (nearestTerrainObjects [_p, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []
     && { (nearestObjects [_p, ["Car"], 7]) isEqualTo [] }
 };
 private _fnc_carPos = {
-    // A clear road point when the town has one, otherwise a safe patch of ground -- a car in a field
-    // is still a car to drive off in.
+    // Clear road point if the town has one, else safe ground -- a car in a field still drives off.
     private _clear = _roads select { [getPosATL _x] call _fnc_carClear };
     if (_clear isEqualTo []) exitWith {
         private _p = [_townPos, 0, _spawnRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
         [if (_p isEqualTo [0,0,0]) then { _townPos } else { _p }, random 360]
     };
     private _road = selectRandom _clear;
-    // Heading ALONG the road, from the bearing to a connected segment: a road piece's own getDir is
-    // frequently 0, which parks the car broadside across the carriageway and blocks it.
+    // Heading ALONG the road, via bearing to a connected segment: a road piece's own getDir is often
+    // 0, which parks the car broadside across the carriageway and blocks it.
     private _cons = roadsConnectedTo _road;
     private _dir = if (_cons isEqualTo []) then { getDir _road } else { _road getDir (_cons select 0) };
     [getPosATL _road, _dir]
@@ -166,10 +156,9 @@ private _decoys = [];
     };
 } forEach _decoyClasses;
 
-// The informant: a genuine civilian-side unit. On CIVILIAN, third-party AI mods (which manage units
-// by side) leave him alone, so his scripted stroll never breaks into a tactical reaction when BLUFOR
-// closes in and outs him. Captive and unarmed while he blends; only if his car is gone and he is
-// under fire -- already blown -- does he flip to EAST and fight out (footFlee, below).
+// The informant: a genuine CIVILIAN-side unit, so third-party AI mods (which manage units by side)
+// leave his scripted stroll alone rather than driving a tactical reaction when BLUFOR closes in and
+// outs him. Captive/unarmed while blended; only car-gone AND under fire flips him to EAST (footFlee).
 private _civBodies = missionNamespace getVariable ["civ_array", []];
 private _informantSpawn = [_townPos, 0, _spawnRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
 if (_informantSpawn isEqualTo [0,0,0]) then { _informantSpawn = _townPos };
@@ -181,15 +170,14 @@ _informant setBehaviour "SAFE";
 _informant setUnitPos "UP";
 _allUnits pushBack _informant;
 
-// Killed here so the near-town reputation cost is charged off his death position: a clean kill out on
-// the road is free, one in the crowd is not. Nearest town within its edge + 300 m pays -1. TUNABLE.
+// Killed handler here so the rep cost is charged off his death position: a clean kill on the road is
+// free, one in the crowd is not. Nearest town within edge + 300 m pays -1. TUNABLE.
 _informant addEventHandler ["Killed", {
     params ["_unit", "_killer", "_instigator"];
     _unit setVariable ["DUWS_informant_dead", true];
-    // Putting him on CIVILIAN re-armed the engine's civ-kill rating penalty, which the old EAST unit
-    // never took. The -1 town rep below is the whole intended social cost; a global rating tank that
-    // can eventually turn the player's own AI hostile is not. Cancel it -- but only for a civilian
-    // death: if he flipped to EAST (car gone, fighting) that kill was neutral and needs no restore.
+    // CIVILIAN re-armed the engine's civ-kill rating penalty the old EAST unit never took. The -1 town
+    // rep below is the whole intended cost; a global rating tank that can turn the player's own AI
+    // hostile is not. Cancel it, but only on a civilian death: an EAST flip (car gone) was neutral.
     if (side _unit == CIVILIAN) then {
         private _who = _instigator; if (isNull _who) then { _who = _killer };
         if (!isNull _who) then { _who addRating 500 }; // TUNABLE
@@ -216,17 +204,15 @@ missionNamespace setVariable ["DUWS_informant_leaveDir", _leaveDir];
 DUWS_informant_active = true;
 publicVariable "DUWS_informant_active";
 
-// He blends in full: a player who walks up can call him over and open the same interaction menu
-// every town local carries, so the one silent civilian with no menu is not the tell. Broadcast the
-// way fnc_civ_spawnUnit does it, keyed on the unit so a JIP client still gets it -- he is spawned
-// raw, so this is the only path by which he receives the actions.
+// He blends fully: a player can call him over and open the same interaction menu every local carries,
+// so a lone menu-less civilian is not the tell. Keyed on the unit (like fnc_civ_spawnUnit) so a JIP
+// client gets it; he is spawned raw, so this is his only path to the actions.
 [_informant] remoteExec ["fnc_civ_clientActions", 0, _informant];
 
-// While he waits he strolls the spawned cluster rather than standing a fixed pin in the crowd: a fresh
-// safe point within the spawn radius, re-tasked on arrival or after a cap so a blocked path never
-// freezes him. Kept to the cluster so he never wanders out of the crowd that hides him. LIMITED so he
-// reads as a local out for a walk. Ends the instant the exfil watcher takes over
-// (DUWS_informant_leaving), so this doMove never fights the getaway's waypoints. TUNABLE cap.
+// While waiting he strolls the cluster, not a fixed pin: a fresh safe point in the spawn radius,
+// re-tasked on arrival or after a cap so a blocked path never freezes him. Kept to the cluster so he
+// stays in his crowd; LIMITED so he reads as a local. Ends when the exfil watcher takes over
+// (DUWS_informant_leaving), so this doMove never fights the getaway waypoints. TUNABLE cap.
 [_informant, _townPos, _spawnRadius] spawn {
     params ["_inf", "_tp", "_tr"];
     (group _inf) setSpeedMode "LIMITED";
@@ -243,17 +229,15 @@ publicVariable "DUWS_informant_active";
     };
 };
 
-// Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
-// added civilian is a real town local (same index, so harming one costs the town), gets the ask
-// action if that layer is loaded, and wanders on the town's own movement pass rather than standing
-// frozen. Spawned three to a group beside each other: a civilian gets its own group, and 24 solo
-// groups eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. Eight
-// trios in the half-radius cluster is roughly twice the town's own density, not four times. TUNABLE.
+// Thicken the crowd only on a friendly/neutral town the player can walk. Each added civilian is a
+// real local (same index, so harming one costs the town), gets the ask action if that layer loaded,
+// and wanders on the town's own movement pass. Three to a group: solo groups would have 24 eat the
+// engine's ~144-per-side cap the town crowd and decoy drivers also draw on. Eight trios in the
+// half-radius cluster is ~twice the town's density, not four times. TUNABLE.
 private _crowd = [];
 if (!_enemyTown) then {
-    // Re-open every local already in town: a hunt reuses bodies that survived an earlier one on the
-    // same town, where DUWS_informant_asked would otherwise still read spent from last time. Fresh
-    // and streamed-in bodies default to unspent, so only the ones already here need clearing.
+    // Re-open every local already in town: a body that survived an earlier hunt still reads
+    // DUWS_informant_asked spent. Fresh/streamed-in bodies default unspent, so only these need it.
     { _x setVariable ["DUWS_informant_asked", false, true] } forEach
         (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _townIndex });
 
@@ -268,8 +252,8 @@ if (!_enemyTown) then {
             if (!isNull _c) then {
                 _crowd pushBack _c;
                 _allUnits pushBack _c;
-                // Later members of the trio join the first's group; the emptied group deletes itself
-                // (fnc_civ_spawnUnit makes them deleteWhenEmpty).
+                // Trio's later members join the first's group; the emptied group self-deletes
+                // (fnc_civ_spawnUnit sets deleteWhenEmpty).
                 if (isNull _grp) then { _grp = group _c } else { [_c] joinSilent _grp };
             };
         };
@@ -279,12 +263,11 @@ if (!_enemyTown) then {
     private _townBuildings = (missionNamespace getVariable [format ["civ_buildings_%1", _townIndex], []]) select { !isNull _x };
     [_crowdGroups, _townBuildings] spawn fnc_civ_wp_Tomata;
 
-    // The ask action reaches every town local for the hunt's duration -- the thickening crowd above,
-    // the baseline locals, and any that stream in as the player nears the town or after it sleeps and
-    // refills. A poll rather than a one-off sweep because the crowd is not all present when the hunt
-    // starts: the offer is usually taken from the map, far from the town. The askable flag makes each
-    // body a one-time add; the loop ends with the hunt, and the action hides itself once
-    // DUWS_informant_active goes false. JIP-keyed on the civilian so a mid-hunt joiner still gets it.
+    // The ask action reaches every town local for the hunt -- thickened crowd, baseline locals, and
+    // any streaming in later. A poll, not a one-off sweep: the crowd is not all present at start (the
+    // offer is usually taken far off on the map). The askable flag makes each a one-time add; the loop
+    // ends with the hunt, and the action self-hides once DUWS_informant_active is false. JIP-keyed on
+    // the civilian so a mid-hunt joiner still gets it.
     [_townIndex] spawn {
         params ["_ti"];
         while { missionNamespace getVariable ["DUWS_informant_active", false] } do {
@@ -298,19 +281,17 @@ if (!_enemyTown) then {
         };
     };
 
-    // The informant carries the same ask action as every other local -- the one man who could not
-    // be asked about the informant would be the tell. He is spawned raw and sits outside the poll's
-    // civ_locIndex set, so add it to him directly, unspent. fnc_informant_ask_request refuses the
-    // moment the asked local is the informant, so asking him never gives his own position away.
+    // The informant carries the same ask action as every local -- the one man who couldn't be asked
+    // would be the tell. Spawned raw, outside the poll's civ_locIndex set, so add it directly, unspent.
+    // fnc_informant_ask_request refuses when the asked local IS the informant, so he never outs himself.
     _informant setVariable ["DUWS_informant_asked", false, true];
     [_informant] remoteExec ["fnc_informant_ask_addAction", 0, _informant];
 };
 missionNamespace setVariable ["DUWS_informant_crowd", _crowd];
 
-// Foot flight when there is no car to take. Two independent axes: _armed decides whether he breaks
-// cover -- only with his car gone does he drop the disguise, pull a pistol and fight out; a shot
-// alone never unmasks him. _run decides pace -- FULL when hurrying (under fire, or car gone),
-// LIMITED when he walks out still blended. Faction-agnostic sidearm.
+// Foot flight when there is no car. Two independent axes: _armed decides breaking cover -- only a gone
+// car drops the disguise, pulls a pistol, fights out (a shot alone never unmasks him); _run decides
+// pace -- FULL hurrying (under fire or car gone), LIMITED walking out blended. Faction-agnostic sidearm.
 if (isNil "DUWS_fnc_informant_footFlee") then {
     DUWS_fnc_informant_footFlee = {
         params ["_inf", "_dest", ["_run", true], ["_armed", false]];
@@ -319,10 +300,9 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         while { (count (waypoints _grp)) > 0 } do { deleteWaypoint [_grp, 0] };
         if (_armed) then {
             _inf setCaptive false;
-            // Car gone and under fire -- already blown, so AI-mod combat behaviour no longer gives him
-            // away. Onto EAST so the pistol fight actually engages WEST (a CIVILIAN unit set COMBAT
-            // still won't shoot the player). Rebind _grp: the waypoint and behaviour orders below must
-            // task his new group, not the emptied civilian one.
+            // Car gone and under fire -- already blown, so AI-mod combat no longer gives him away. Onto
+            // EAST so the pistol fight actually engages WEST (a CIVILIAN unit set COMBAT still won't
+            // shoot). Rebind _grp: the orders below must task his new group, not the emptied civ one.
             [_inf] joinSilent (createGroup [EAST, true]);
             _grp = group _inf;
             _inf addMagazine "16Rnd_9x21_Mag";
@@ -334,9 +314,8 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         };
         private _speed = ["LIMITED", "FULL"] select _run;
         _grp setSpeedMode _speed;
-        // Upright, never prone: he bolts like a panicking civilian (fnc_civ_panic keeps them on their
-        // feet), where the EAST combat group above otherwise lets the danger AI drop him prone to fight
-        // from cover -- a disguised man running for it does not go to ground.
+        // Upright, never prone: he bolts like a panicking civ (fnc_civ_panic keeps them on their feet),
+        // where the EAST combat group would otherwise let danger AI drop him prone to fight from cover.
         _inf setUnitPos "UP";
         private _wp = _grp addWaypoint [_dest, 0];
         _wp setWaypointType "MOVE";
@@ -351,10 +330,9 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
 [_informant, _informantCar, _decoys, _zx, _leaveAt, _townPos, _townRadius] spawn {
     params ["_inf", "_car", "_decoys", "_zx", "_leaveAt", "_townPos", "_townRadius"];
 
-    // Why he leaves sets the tempo. A firefight -- the crowd scattering, read off the same alarm the
-    // civilians raise (fnc_civ_panic's DUWS_civ_panicked, propagated across the town within its 150 m
-    // radius) -- makes him bolt; a reached deadline is a calm scheduled exit he walks. The finder
-    // guarantees a populated town, so there are always locals around him to read.
+    // Why he leaves sets the tempo. A firefight (crowd scattering, read off the civilians' own alarm
+    // fnc_civ_panic's DUWS_civ_panicked, propagated town-wide within its 150 m radius) makes him bolt;
+    // a reached deadline is a calm exit he walks. The finder guarantees locals around him to read.
     private _loud = false;
     waitUntil {
         sleep 2;
@@ -366,20 +344,18 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     };
     if (!alive _inf) exitWith {};
 
-    // Stops the wander loop before the leave orders go in: his getaway waypoints must not race the
-    // stroll's doMove for the same group.
+    // Stop the wander loop before leave orders: getaway waypoints must not race the stroll's doMove.
     _inf setVariable ["DUWS_informant_leaving", true];
 
-    // Drop any waypoints an interaction left on him. Talking to him runs fnc_civ_resume, which hands
-    // his group a stroll CYCLE; a CYCLE sitting ahead of the getaway MOVE below would loop the car
-    // through town instead of driving it out. Back-to-front -- deleteWaypoint shifts later indices.
+    // Drop waypoints an interaction left on him: talking runs fnc_civ_resume, which adds a stroll
+    // CYCLE, and a CYCLE ahead of the getaway MOVE would loop the car through town instead of out.
+    // Back-to-front -- deleteWaypoint shifts later indices.
     private _leftover = waypoints (group _inf);
     reverse _leftover;
     { deleteWaypoint _x } forEach _leftover;
 
-    // FULL when he bolts, LIMITED (a walk on foot, a calm roll in the car) when he leaves on schedule.
-    // The one pace drives his approach to the car, the getaway, and the decoys alike, so a calm exit
-    // and a panicked one each leave four cars moving the same and speed cannot pick him out. TUNABLE.
+    // FULL when he bolts, LIMITED (walk, or calm roll) on schedule. One pace drives his approach, the
+    // getaway and the decoys alike, so all four cars move the same and speed cannot pick him out. TUNABLE.
     private _speed = ["LIMITED", "FULL"] select _loud;
     (group _inf) setBehaviour "CARELESS";
     (group _inf) setSpeedMode _speed;
@@ -387,10 +363,9 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     private _boarded = false;
     if (alive _car) then {
         _inf assignAsDriver _car;
-        // Run him to the car under his own doMove: at FULL a firefight makes him sprint to it the way
-        // the panicking crowd runs (fnc_civ_panic drives its flight the same, CARELESS + FULL), where
-        // orderGetIn alone walks a lone unit to the door whatever his speed mode. Board once he is on
-        // it. Pace tracks _speed, so a calm scheduled exit still walks over.
+        // Run him to the car under his own doMove: at FULL a firefight makes him sprint like the
+        // panicking crowd (fnc_civ_panic flees the same, CARELESS + FULL), where orderGetIn alone
+        // walks a lone unit to the door whatever his speed mode. Board once on it; pace tracks _speed.
         private _giveUp = diag_tickTime + 60;
         waitUntil {
             sleep 1;
@@ -469,8 +444,8 @@ if (_outcome isEqualTo "WIN") then {
     [_townPos, _radius, ""] call fnc_mission_end;
 };
 
-// Same cleanup for everything the mission put down -- informant, all four cars, decoy drivers and the
-// added crowd -- once the players have had a moment with the result.
+// Cleanup everything the mission put down (informant, four cars, decoy drivers, added crowd), once
+// the players have had a moment with the result.
 [_allCars, _allUnits] spawn {
     params ["_cars", "_units"];
     sleep 10;

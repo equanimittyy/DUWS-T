@@ -1,6 +1,5 @@
-// Locality: server. The informant ping: a hint to the asking player giving the informant's bearing
-// and distance from where they stand, so walking and asking around triangulates him. Reached from the
-// reaction roll (fnc_informant_ask_request).
+// Locality: server. The informant ping: a hint giving his bearing and distance from the asking
+// player, so walking and asking around triangulates him. Reached from fnc_informant_ask_request.
 if (!isServer) exitWith {};
 params ["_civilian", "_caller"];
 if (isNull _caller) exitWith {};
@@ -16,9 +15,8 @@ if (isNull _inf || !alive _inf || {(_inf distance2D _townPos) > _townRadius}) ex
     [localize "STR_DUWS_T_civ", format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_GONE", _leaveDir]] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
-// Still in town: a live bearing from the asking player either way. Beyond 50 m it carries the
-// distance too, to the nearest 50; inside 50 m the distance collapses to "nearby", where rounding
-// would read "0 m".
+// Still in town: a live bearing from the asking player. Beyond 50 m it carries distance too, to the
+// nearest 50; inside 50 m distance collapses to "nearby", where rounding would read "0 m".
 private _dir = _caller getDir _inf;
 private _pts = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 private _compass = _pts select (floor (((_dir + 22.5) mod 360) / 45));
@@ -29,7 +27,6 @@ private _reveal = if (_raw < 50) then {
     format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_REVEAL", round (_raw / 50) * 50, _compass]
 };
 
-// The local's voice on the subtitle, the bearing on the hint box: the line sells the tip, the hint
-// carries the fix.
+// The local's voice on the subtitle, the bearing on the hint box: line sells the tip, hint the fix.
 [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_HIT"] remoteExec ["fnc_duws_dialogue", _caller];
 [_reveal] remoteExec ["hint", _caller];

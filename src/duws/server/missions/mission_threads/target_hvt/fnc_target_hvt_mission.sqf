@@ -1,14 +1,12 @@
 // Locality: server -- callers remoteExec to target 2.
 //
-// Convoy hunt. A high-value target flees to an OPFOR-held zone in one of three armed road convoys,
-// each on its own approach. Exactly one convoy carries the HVT in a single unarmed car -- the odd hull
-// among the armed escorts, its type named to the player -- so the mission is to spot the right column
-// and stop it before it arrives. Win: the HVT dies. Fail: his car reaches the zone, or the deadline
-// passes.
+// Convoy hunt. An HVT flees to an OPFOR-held zone in one of three armed road convoys, each on its own
+// approach; exactly one carries him in a single unarmed car -- the odd hull among armed escorts, its type
+// named to the player -- so the hunt is to spot the right column and stop it before it arrives. Win: the
+// HVT dies. Fail: his car reaches the zone, or the deadline passes.
 //
-// Off the fnc_mission_run spine on purpose: the win is a race, not a one-shot predicate polled at a
-// fixed spot (see fnc_mission_run's header), so this owns its own site pick, spawn and monitor the
-// way the informant hunt and the IDAP escort do.
+// Off the fnc_mission_run spine on purpose: the win is a race, not a one-shot predicate polled at a fixed
+// spot (see that header), so this owns its site pick, spawn and monitor like the informant hunt and IDAP run.
 params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -16,13 +14,12 @@ private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-// Destination: the OPFOR-held haven the convoys flee to, chosen from the spawn (_MissionPos) through the
-// shared picker fnc_hvt_dest_pick -- nearest held zone 3-10 km out with a corridor crossing no water and
-// clear of BLUFOR ground. The spawn itself is the offer point the site-finder ejected 3-10 km out from a
-// zone (fnc_target_hvt_site), so the map icon the player clicked is where the columns start and the haven
-// is a real zone the far side of the run. The site-finder already proved a haven reachable from here, so
-// this normally succeeds; only an AO that flipped between offer and accept (the haven captured, or friendly
-// ground advanced across the corridor) can still leave none -> abort, releasing gate and slot.
+// Destination: the OPFOR-held haven the convoys flee to, from the spawn via fnc_hvt_dest_pick (nearest held
+// zone 3-10 km out, corridor crossing no water, clear of BLUFOR ground). The spawn is the offer point the
+// site-finder ejected 3-10 km from a zone (fnc_target_hvt_site), so the map icon is the column start and the
+// haven a real zone the far side. The site-finder proved one reachable, so this normally succeeds; only an
+// AO that flipped between offer and accept (haven captured, or friendly ground advanced across the corridor)
+// leaves none -> abort, releasing gate and slot.
 private _dest = [_MissionPos] call fnc_hvt_dest_pick;
 if (_dest isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 3 km+ out with a clean corridor"] call fnc_mission_abort;
@@ -30,16 +27,13 @@ if (_dest isEqualTo []) exitWith {
 private _destPos = _dest select 0;
 private _destName = _dest select 1;
 
-// The convoys start spread across the mission area, each on its own road, then run to the zone via a
-// divergent mid-route point so the approaches split and the player cannot cover them all. TUNABLE:
-// spawnR is the radius the three start roads are drawn from, startSep the minimum gap between two starts
-// so each column gets an independent road, viaSpread the lateral offset of the mid-route point (bigger =
-// wider fork), viaCone the widest a via road's run may sit off the destination bearing before it is
-// skipped, startCone the same limit for a START road to count as route-aligned (columns prefer these so
-// they spawn pointing down-route, not perpendicular to it). The departure hold (holdNear/holdFar seconds
-// interpolated over holdNearDist/holdFarDist of run length) is the fallback the columns keep before they
-// roll when no player reaches the start cluster; a BLUFOR arrival within the search radius ends it early,
-// and Allseer calls the move either way. arrive is the zone-edge fail band.
+// The convoys start spread across the area, each on its own road, then run to the zone via a divergent
+// mid-route point so the approaches split and the player cannot cover them all. TUNABLE: spawnR the radius
+// the three start roads are drawn from; startSep the minimum gap between starts so each gets its own road;
+// viaSpread the lateral offset of the mid-route point (bigger = wider fork); viaCone the widest a via road's
+// run may sit off the destination bearing before it is skipped; startCone the same limit for a START road to
+// count as route-aligned (preferred, so a column spawns down-route not perpendicular); arrive the zone-edge
+// fail band.
 private _spawnR    = 700;
 private _viaSpread = 1200;
 private _viaCone   = 45;
@@ -48,17 +42,16 @@ private _startSep  = 250;
 private _arrive    = 80;
 
 // Departure hold: fallback seconds the columns wait before rolling when no player reaches the start
-// cluster, scaled inversely with the run length. A short run gives the player little road to intercept
-// on, so the columns wait the long _holdNear window; a long run waits only the short _holdFar, the drive
-// itself being the intercept window. Same distance-scaled shape as the deny-armour repair race.
+// cluster, scaled inversely with run length -- a short run has little road to intercept on so waits the long
+// _holdNear, a long run waits only _holdFar (the drive is the window). Same shape as deny-armour's repair race.
 private _holdNear     = 75;
 private _holdFar      = 25;
 private _holdNearDist = 3000;
 private _holdFarDist  = 10000;
 
-// Escort classes roll per vehicle across armed car, IFV and armour, gated by OPFOR's earned Army
-// Power through DUWS_fnc_tokenClass -- a low-AP campaign fields cars, a high one can field tanks. The
-// armed car is the floor when the side has earned nothing yet, so a convoy is never unescorted.
+// Escort class rolls per vehicle across armed car, IFV and armour, gated by OPFOR's earned Army Power via
+// DUWS_fnc_tokenClass (low-AP fields cars, high can field tanks). Armed-car floor when the side has earned
+// nothing, so a convoy is never unescorted.
 private _escTokens = ["car", "ifv", "tank"] select { ([_x, "OPF"] call DUWS_fnc_tokenClass) != "" };
 private _rollEsc = {
     if (_escTokens isEqualTo []) exitWith { opfor_ARMED_CAR1_X };
@@ -66,12 +59,11 @@ private _rollEsc = {
     if (_c == "") then { opfor_ARMED_CAR1_X } else { _c }
 };
 
-// The HVT rides an unarmed car of OPFOR's own faction -- no turret weapon, a handful of seats -- so it
-// reads as one of theirs, not a civilian giveaway, yet is the odd unarmed hull among armed escorts and
-// the thing the player is told to look for. The faction vocab names no such role, so its CfgVehicles is
-// scanned once for a Car-kind class the armed test (the reserve trucks' own) clears; cached per faction,
-// since the scan is broad and the faction is fixed for the session. A faction with no unarmed car falls
-// back to an armed car, and the transport truck only if it names neither.
+// The HVT rides an unarmed car of OPFOR's own faction (no turret, a few seats) so it reads as one of theirs,
+// not a civilian giveaway, yet is the odd unarmed hull among armed escorts the player is told to find. The
+// faction vocab names no such role, so CfgVehicles is scanned once for a Car-kind class the armed test
+// clears; cached per faction (the scan is broad, the faction fixed for the session). No unarmed car -> an
+// armed car, and the transport truck only if it names neither.
 private _fac = getText (configFile >> "CfgVehicles" >> opfor_SOLDIER_X >> "faction");
 private _cacheKey = format ["DUWS_hvtCarPool_%1", _fac];
 private _carPool = missionNamespace getVariable [_cacheKey, []];
@@ -101,11 +93,10 @@ if (_carPool isEqualTo []) then {
 private _hvtCarClass = selectRandom _carPool;
 private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "displayName");
 
-// One line of vehicles as a road column, seated ON the precomputed drive route: fnc_convoy_slots spaces one
-// road-facing slot per vehicle along the route, so the hulls sit in a real column on the path they will drive
-// instead of a scatter. The route is stashed on the group (DUWS_convoy_route0) so the driver reuses it for the
-// first leg. Crews merged into a single group so they move together. Returns [group, [vehicles]]. Loot on the
-// crew so a searched body reads as this faction like any patrol.
+// One line of vehicles seated ON the precomputed drive route: fnc_convoy_slots spaces one road-facing slot
+// per vehicle along it, so the hulls form a real column on the path they will drive, not a scatter. Route
+// stashed on the group (DUWS_convoy_route0) for the driver's first leg; crews merged into one group so they
+// move together. Returns [group, [vehicles]]. Loot on the crew so a searched body reads as this faction.
 private _spawnLine = {
     params ["_classes", "_route", "_behaviour", "_speed"];
     private _slots = [_route, count _classes, 22] call fnc_convoy_slots;
@@ -129,36 +120,34 @@ private _spawnLine = {
     [_grp, _vehs]
 };
 
-// Bearing from the mission area to the destination: the columns run toward it, each forking to a via
-// point offset to one side. The 3-10 km run and the water/BLUFOR-clear corridor are already guaranteed by
-// the destination pick above, so the spawn sits at the offered mission point and the columns just aim in.
+// Bearing from the mission area to the destination: the columns run toward it, each forking to a via point
+// offset to one side. The 3-10 km run and clean corridor are guaranteed by the destination pick, so the
+// spawn sits at the offered point and the columns just aim in.
 private _dirZone = [_MissionPos, _destPos] call BIS_fnc_dirTo;
 private _legHalf = (_MissionPos distance2D _destPos) * 0.5;
 
-// A road segment's run as a compass bearing, from the direction to a road it connects to; an unconnected
-// stub falls back to its object heading. Used to keep a via snap on a road that runs along the route
-// rather than one crossing it.
+// A road segment's run as a compass bearing, from its direction to a connected road; an unconnected stub
+// falls back to its object heading. Keeps a via snap on a road running along the route, not crossing it.
 private _roadBearing = {
     params ["_road"];
     private _conn = roadsConnectedTo _road;
     if (_conn isEqualTo []) exitWith { direction _road };
     _road getDir (_conn select 0)
 };
-// Acute angle (0-90) between two bearings taken as undirected lines: a road and its reverse read the same,
-// so via alignment is line-to-line, not heading-to-heading. The +540 keeps the mod dividend positive --
-// SQF mod takes the dividend's sign, so a bare (a-b+180) would mis-wrap for a<b.
+// Acute angle (0-90) between two bearings as undirected lines: a road and its reverse read the same, so via
+// alignment is line-to-line. The +540 keeps the mod dividend positive -- SQF mod takes the dividend's sign,
+// so a bare (a-b+180) would mis-wrap for a<b.
 private _axisOffset = {
     params ["_a", "_b"];
     private _d = abs ((((_a - _b) + 540) mod 360) - 180);
     _d min (180 - _d)
 };
 
-// Three independent start roads, each stored as [pos, heading toward the zone]. Prefer roads whose run is
-// aligned with the route (within _startCone of the destination bearing) so a column spawns already pointing
-// down-range and does not snap perpendicular onto a crossing road as it rolls. Pass 1 takes aligned roads;
-// pass 2 tops up from any nearby road (laid straight at the zone); pass 3 falls back to fanned safe-pos
-// points where the corner is road-thin. Each new start must sit _startSep from the others so columns do not
-// share a road.
+// Three independent start roads, each [pos, heading toward the zone]. Prefer roads aligned with the route
+// (within _startCone of the destination bearing) so a column spawns pointing down-range, not perpendicular
+// onto a crossing road. Pass 1 takes aligned roads; pass 2 tops up from any nearby road (laid straight at
+// the zone); pass 3 falls back to fanned safe-pos points where the corner is road-thin. Each new start sits
+// _startSep from the others so columns do not share a road.
 private _startRoads = [];
 private _near = _MissionPos nearRoads _spawnR;
 {
@@ -196,10 +185,10 @@ private _carGrp = grpNull;    // the car's own CARELESS group once it breaks awa
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
     (_startRoads select _i) params ["_start"];
-    // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its own
-    // way in; the centre column (lat 0) runs the direct line. Snap to the nearest road whose run lies
-    // within _viaCone of the destination bearing, so the via never points the column back the wrong way
-    // at the fork; none aligned falls back to the nearest road, then the raw point.
+    // Via: a road point offset to one side of the midpoint so the pathfinder routes this column its own way
+    // in (centre column, lat 0, runs the direct line). Snap to the nearest road within _viaCone of the
+    // destination bearing so the via never points back the wrong way at the fork; none aligned -> nearest
+    // road, then raw point.
     private _vCand = (_MissionPos getPos [_legHalf, _dirZone]) getPos [abs _lat * _viaSpread, _dirZone + (90 * _lat)];
     private _vRoads = _vCand nearRoads 900;
     private _viaRoad = objNull;
@@ -209,16 +198,16 @@ for "_i" from 0 to 2 do {
     if (isNull _viaRoad && {!(_vRoads isEqualTo [])}) then { _viaRoad = _vRoads select 0 };
     private _via = if (!isNull _viaRoad) then { getPosATL _viaRoad } else { _vCand };
     // Route the first leg (start -> this column's via) and seat the column ON it below, so the hulls are born
-    // on the drive path in trail order and roll straight off it instead of snapping perpendicular; the driver
-    // reuses this route for its first leg (DUWS_convoy_route0), the via being that leg's waypoint.
+    // on the drive path in trail order and roll straight off it; the driver reuses this route for leg one
+    // (DUWS_convoy_route0), the via being that leg's waypoint.
     private _route0 = [_start, _via] call fnc_convoy_path;
     _convoyStarts pushBack _start;
 
     if (_i == _hvtIdx) then {
-        // HVT column: escorts front and back with the unarmed car between them, laid on one road so it
-        // sits mid-column. One group so escorts and car drive together; the monitor peels the car into
-        // its own CARELESS group on first contact so it commits to the run rather than halting to fight
-        // -- the player has to stop the car, not just spook the column.
+        // HVT column: escorts front and back, the unarmed car between them on one road so it sits mid-column.
+        // One group so escorts and car drive together; the monitor peels the car into its own CARELESS group
+        // on first contact so it commits to the run rather than halting to fight -- the player must stop the
+        // car, not just spook the column.
         private _slots = [_route0, 3, 22] call fnc_convoy_slots;
         _hvtColGrp = createGroup EAST;
         {
@@ -235,12 +224,12 @@ for "_i" from 0 to 2 do {
         _driver moveInDriver _car;
         _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
         _hvt moveInCargo _car;
-        // Keep the HVT in the car -- a commander on foot breaks the hunt, so the player must stop the car,
-        // not chase a runner. No single call holds an AI in, so three layers: lock (blocks the player and
-        // boarding, NOT an AI getting out), setUnloadInCombat false (stops the cargo bailing when the column
-        // goes COMBAT), and a GetOut handler that reseats him if the engine ejects him anyway -- a halted or
-        // disabled car bails its crew past the first two. Reseat only into a live car (a destroyed one lets
-        // the eject stand); moveInCargo re-enters past the lock. Lock does not impede the AI driving.
+        // Keep the HVT in the car -- a commander on foot breaks the hunt; the player must stop the car, not
+        // chase a runner. No single call holds an AI in, so three layers: lock (blocks the player and
+        // boarding, NOT an AI getting out), setUnloadInCombat false (no cargo bail when the column goes
+        // COMBAT), and a GetOut handler that reseats him if the engine ejects him anyway (a halted/disabled
+        // car bails past the first two). Reseat only into a live car (a destroyed one lets the eject stand);
+        // moveInCargo re-enters past the lock, which does not impede the AI driving.
         _car lock true;
         _car setUnloadInCombat [false, false];
         _hvt addEventHandler ["GetOutMan", {
@@ -274,15 +263,14 @@ if (isNull _hvt) exitWith {
 
 { [_x] call fnc_mission_claim } forEach _groups;
 
-// Standing DEBUG trace (silent unless duws_log_level is raised to 4) for the ambiguous "killed the HVT,
-// nothing happened" report: the offer fields three columns and only one carries him. His column index and
-// car id at spawn, the peel event, and the outcome at teardown tell hitting a decoy column apart from the
-// officer surviving his car's destruction -- from an RPT alone, without needing a live repro.
+// Standing DEBUG trace (silent unless duws_log_level is 4) for the "killed the HVT, nothing happened"
+// ambiguity -- three columns, one carries him. Column index and car id at spawn, the peel, and the outcome
+// at teardown tell hitting a decoy apart from the officer surviving his car's destruction, from an RPT alone.
 ["DEBUG", "MISSION", format ["hvt debug: hvtIdx=%1 car=%2 carClass=%3 hvt=%4 starts=%5", _hvtIdx, netId _car, _hvtCarClass, netId _hvt, _convoyStarts]] call fnc_log;
 
-// Search ellipse on the convoy start cluster -- where the player is sent -- with a fix on each
-// convoy's start inside it. The starts are one-shot: nothing tracks the convoys live, or there would
-// be no hunt. The destination the convoys run for is marked separately just below.
+// Search ellipse on the convoy start cluster (where the player is sent), with a fix on each start inside it.
+// The starts are one-shot: nothing tracks the convoys live, or there would be no hunt. The destination is
+// marked separately below.
 private _radius = 1500;
 private _marker = [_MissionPos, _radius] call fnc_missionMarkerData;
 private _startMarkers = [];
@@ -302,9 +290,8 @@ private _startMarkers = [];
     _startMarkers pushBack _mn;
 } forEach _convoyStarts;
 
-// The safe-haven zone the convoys run for, marked so the player reads the direction of the race and
-// can move to cut a column off short of it. Its rounded position names the marker, cleared with the
-// rest at mission end.
+// The safe-haven zone the convoys run for, marked so the player reads the direction of the race and can cut
+// a column off short of it. Rounded-position marker name, cleared with the rest at mission end.
 private _destMarker = format ["hvtconvoydest_%1_%2", round (_destPos select 0), round (_destPos select 1)];
 deleteMarker _destMarker;
 createMarker [_destMarker, _destPos];
@@ -319,11 +306,10 @@ private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
-// Departure gate: the columns hold at their start until a player reaches the convoy area (BLUFOR within
-// the search radius of the start cluster) or the hold timer runs out, whichever comes first. The BLUFOR
-// trigger starts the race the moment the player arrives; the timer is the fallback so the columns never
-// sit forever when no one comes. Then every column is ordered to the zone via its own mid-route point at
-// once, so the three take separate roads in.
+// Departure gate: the columns hold at their start until a player reaches the convoy area (BLUFOR within the
+// search radius) or the hold timer expires, whichever first -- the trigger starts the race on arrival, the
+// timer is the fallback so they never sit forever. Then all columns are ordered to the zone via their own
+// mid-route points at once, so the three take separate roads in.
 private _holdMax = linearConversion [_holdNearDist, _holdFarDist, _MissionPos distance2D _destPos, _holdNear, _holdFar, true];
 private _holdUntil = time + _holdMax;
 waitUntil {
@@ -339,11 +325,10 @@ waitUntil {
     _wpEnd setWaypointType "MOVE";
     _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
-// Self-routing convoy driver per column, once they are rolling: it computes the road route and every hull
-// drives it holding spacing, so no follower wedges cutting its own corner into the zone. The driver orders
-// each column onto its crumb in trail order at spawn (the hulls are laid in a rough line, not already
-// trailing). Spawned only now, after the grace hold, so it does not drive the columns sitting still at their
-// starts. Ended at teardown via DUWS_convoy_stop.
+// Self-routing convoy driver per column, once rolling: it computes the road route and every hull drives it
+// holding spacing, so no follower wedges cutting its corner into the zone. Orders each column onto its crumb
+// in trail order at spawn (the hulls are laid in a rough line, not already trailing). Spawned only now, after
+// the grace hold, so it does not drive the columns sitting still. Ended at teardown via DUWS_convoy_stop.
 { [_x] spawn fnc_convoy_drive } forEach _groups;
 // Allseer calls the move the instant the columns are ordered out, so the player reads the race as
 // starting rather than watching for it.
@@ -351,20 +336,18 @@ waitUntil {
 
 private _outcome = "";
 private _split = false;
-// Midpoint intel: a rolled 30-60 s hold after the columns move, then Allseer names their mid-route
-// points and drops an arrow on each pointing at the destination, so the player reads where the routes
-// bend and can move to cut one short. Run inside the monitor, not a side thread, so a kill or arrival
-// before the reveal ends the mission with nothing left to clear -- _viaMarkers stays empty and teardown
-// deletes nothing.
+// Midpoint intel: a rolled 30-60 s hold after the columns move, then Allseer names their mid-route points
+// and drops an arrow on each pointing at the destination, so the player reads where the routes bend and can
+// cut one short. Run in the monitor, not a side thread, so a kill or arrival before the reveal leaves
+// _viaMarkers empty and teardown deletes nothing.
 private _viaMarkers = [];
 private _revealAt = time + (30 + round random 30);
 private _revealed = false;
-// Allseer's running track: at a rolled cadence (first call ~2-3 min after the push, clear of the
-// move-out and midpoint lines) it moves a live convoy symbol onto each column and calls a generic
-// line. The symbols persist at their last-reported spot and jump on each update -- a periodic fix,
-// not a continuous blip, so the intercept stays the player's. One marker per column, index-aligned
-// with _groups; "" until first placed, reset to "" if the column is wiped. The peeled HVT car gets
-// its own dedicated marker the moment it breaks off (below), moved on the same cadence.
+// Allseer's running track: at a rolled cadence (first call ~2-3 min after the push, clear of the move-out
+// and midpoint lines) it moves a convoy symbol onto each column and calls a generic line. The symbols
+// persist at their last-reported spot and jump on each update -- a periodic fix, not a continuous blip, so
+// the intercept stays the player's. One marker per column, index-aligned with _groups, "" until placed and
+// reset to "" if wiped; the peeled HVT car gets its own marker at breakaway (below), on the same cadence.
 private _nextReportAt  = time + (120 + round random 60);
 private _trackMarkers  = ["", "", ""];
 private _hvtMarker     = "";
@@ -386,11 +369,10 @@ waitUntil {
         } forEach _vias;
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtmidpoint"] remoteExec ["fnc_duws_dialogue", 0];
     };
-    // Running track: at the rolled cadence, move a convoy symbol onto each live column and, once he
-    // has peeled, the HVT marker onto his car, then call a generic Allseer line. The symbol tracks the
-    // column's lead (cv_lead); a jammed hull's cv_lead may be a corpse (leadership migrates on death
-    // before the drive loop re-pins it), so fall back to the first live drivable hull. A wholly
-    // destroyed column drops its marker. Marker commands are global from the server, so all clients see.
+    // At the cadence, move a symbol onto each live column and, once he has peeled, the HVT marker onto his
+    // car, then call a generic line. The symbol tracks the column's lead (cv_lead); a jammed hull's cv_lead
+    // may be a corpse (leadership migrates on death before the drive loop re-pins it), so fall back to the
+    // first live drivable hull. A destroyed column drops its marker. Marker commands are global from server.
     if (time > _nextReportAt) then {
         {
             private _grp = _x;
@@ -420,11 +402,11 @@ waitUntil {
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvttrack"] remoteExec ["fnc_duws_dialogue", 0];
         _nextReportAt = time + (120 + round random 60);
     };
-    // First contact: peel the car out of the column into its own CARELESS group so it runs for the
-    // zone instead of halting to fight alongside the escorts. Gated on a real BLUFOR threat within 300 m
-    // of the car, so a convoy fender-bender -- which raises damage and can chain into a collision
-    // explosion -- does not spuriously launch it. Then triggered by the column going COMBAT or the car
-    // taking a hit. Its crew keep their claim stamp, so teardown still collects them.
+    // First contact: peel the car into its own CARELESS group so it runs for the zone instead of halting to
+    // fight with the escorts. Gated on a real BLUFOR threat within 300 m of the car, so a convoy fender-bender
+    // (which raises damage and can chain into a collision explosion) does not spuriously launch it; then
+    // triggered by the column going COMBAT or the car taking a hit. Crew keep their claim stamp, so
+    // teardown collects them.
     if (!_split && alive _car
         && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _car < 300} }) >= 0}
         && {
@@ -444,16 +426,16 @@ waitUntil {
         // Release the car to native AI: as a run-away it must flee CARELESS at full speed on its own
         // waypoint, so the convoy driver is dropped here -- a lone hull has no follower, so the driver would
         // forceSpeed it down to convoy cruise and the player could walk it down. Clear the path order, forced
-        // speed and road-lock the column's driver left on the car: that driver resets a hull only at its own
-        // teardown, not when a hull leaves its group mid-run, so without this the car keeps driving the old
-        // replay path at the old forced speed instead of racing its waypoint. The column driver already
-        // dropped the car the instant its driver joined _carGrp, so nothing re-imposes convoy control.
+        // speed and road-lock the column driver left on the car: that driver resets a hull only at its own
+        // teardown, not when one leaves the group mid-run, so without this the car keeps the old replay path
+        // and forced speed instead of racing its waypoint. The column driver dropped the car when its driver
+        // joined _carGrp, so nothing re-imposes convoy control.
         _car setDriveOnPath [];
         _car forceSpeed -1;
         _car forceFollowRoad false;
-        // He has committed to his own run and is no longer just one hull in a column, so Allseer calls
-        // him out by name and drops a dedicated HVT marker on the car -- moved with the columns on each
-        // update. This is the reveal the hunt built to: the player now knows which hull carries him.
+        // He has committed to his own run, so Allseer calls him out by name and drops a dedicated HVT marker
+        // on the car (moved on each update). This is the reveal the hunt built to: the player now knows
+        // which hull is his.
         _hvtMarker = format ["hvtconvoyhvt_%1", _taskId];
         deleteMarker _hvtMarker;   // a reused mission name can collide with a prior run's leftover
         createMarker [_hvtMarker, getPosATL _car];
