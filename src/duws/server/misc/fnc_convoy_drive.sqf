@@ -43,6 +43,14 @@ params ["_group"];
                                // whole-column teleport-snap fires. Long enough that the pace governor's own
                                // catch-up (the column slows for a lagging hull) gets its chance first.
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
+// Gap mode (a leg the road search could not connect -- see the off-road branch): the lead pathfinds NATIVELY
+// across the gap and the followers replay its driven track. A crumb is the lead's position, laid once it has
+// advanced CV_STEP from the last, and only the last CV_TRAIL are kept. Native routing is trusted here -- and
+// only here -- because the alternative on a roadless gap is a blind straight line through whatever water or
+// terrain lies between the ends; native pathing routes around it and rejoins the road on its own.
+#define CV_STEP        8       // lead must advance this far (m) before a new crumb is laid
+#define CV_TRAIL       40      // crumbs kept (~320 m of track): longer than any column, short enough that a
+                               // CYCLE patrol's looping track never snaps a follower onto a previous lap
 #define CV_SNAP_SCAN   40      // teleport-snap: route points ahead of the lead scanned for a straight anchor
 #define CV_SNAP_STRAIGHT 45    // teleport-snap: max total heading change (deg) over the column span for an anchor
                                // to count as straight enough -- loose on purpose, just keeps the realign off a
@@ -104,6 +112,32 @@ private _dumped = false;          // one-time level-4 dump of the waypoint list,
 // A caller that does not gets the one-time snap instead, so ordering is guaranteed either way.
 private _route0 = _group getVariable ["DUWS_convoy_route0", []];
 private _needInitOrder = (_route0 isEqualTo []);
+
+// Gap-mode state (see CV_STEP): a leg whose route the road search could not connect drives the lead natively
+// and rebuilds _route from its crumb trail each tick, so every follower/spacing/recovery helper below runs
+// unchanged over the crumbs. _legOffroad is set when a leg's route is built and gates every gap branch, so a
+// road leg never touches any of this. _pathed tracks whether a hull currently holds a setDriveOnPath, so it is
+// cleared before the lead is handed to doMove. _gapIssued is the gap analogue of _issued (a fixed route
+// re-issues on index change; a growing crumb trail re-issues as the lead advances).
+private _legOffroad = false;
+private _crumbs   = [];
+private _pathed   = createHashMap;   // netId -> a setDriveOnPath is committed (clear before a doMove)
+private _gapIssued = createHashMap;  // netId -> last gap issue [startIdx, leadPos]
+
+// True when a route is a blind off-road run, not a road line: the road search found no through-path and
+// fnc_convoy_path returned a deviated straight line. Sampled by road membership -- a road route's interior
+// points sit on roads, a beeline's do not. Drives the gap-mode decision for both the seeded first leg and
+// every recomputed leg.
+private _fnc_detectOffroad = {
+    params ["_r"];
+    if (count _r < 3) exitWith { false };
+    private _on = 0; private _n = 0;
+    {
+        _n = _n + 1;
+        if (isOnRoad (_r select (round (_x * (count _r - 1))))) then { _on = _on + 1 };
+    } forEach [0.15, 0.3, 0.45, 0.6, 0.75, 0.9];
+    _n > 0 && {(_on / _n) < 0.3}
+};
 
 // Nearest route index to a position = the hull's progress along the route. -1 while the route is empty.
 private _progressOf = {
@@ -207,6 +241,10 @@ if (_route0 isNotEqualTo []) then {
     _legStart = _route0 select 0;
     _cum = [0];
     for "_i" from 1 to (count _route - 1) do { _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i))) };
+    // A seeded first leg can itself be a roadless gap (the deny/target column pre-seated on an off-road
+    // drive-in): flag it so the gap branch drives it, the crumb trail replacing the seated beeline.
+    _legOffroad = [_route0] call _fnc_detectOffroad;
+    if (_legOffroad) then { _crumbs = [] };
 };
 
 // DEBUG (silent unless duws_log_level is raised to 4): a per-tick column line and a line per recovery event,
@@ -269,10 +307,12 @@ while {
         if (_target isEqualTo [0, 0, 0]) then {
             { _x forceSpeed 0 } forEach _live;
         } else {
-            // Recompute the route only when the leg changed (route emptied on advance) or the waypoint drifted.
-            // Cache by the rounded [legStart, target] (5 m buckets) so a CYCLE patrol reuses each lap's legs.
-            if (_route isNotEqualTo [] && {(_route select (count _route - 1)) distance2D _target > CV_REROUTE}) then { _route = [] };
-            if (_route isEqualTo []) then {
+            // Recompute only when the leg changed (route emptied on advance) or the waypoint drifted. A gap
+            // leg's _route is the crumb trail, which ends at the lead, not the target -- its drift is expected
+            // and must NOT force a recompute (that would re-run the road search every tick), so guard both on
+            // !_legOffroad. Cache by the rounded [legStart, target] (5 m buckets) so a CYCLE patrol reuses legs.
+            if (!_legOffroad && {_route isNotEqualTo []} && {(_route select (count _route - 1)) distance2D _target > CV_REROUTE}) then { _route = [] };
+            if (_route isEqualTo [] && {!_legOffroad}) then {
                 private _key = format ["%1_%2_%3_%4",
                     round ((_legStart select 0) / 5), round ((_legStart select 1) / 5),
                     round ((_target   select 0) / 5), round ((_target   select 1) / 5)];
@@ -285,13 +325,23 @@ while {
                     _cached = [_legStart, _target] call fnc_convoy_path;
                     _cache set [_key, _cached];
                 };
-                _route = _cached;
-                _cum = [0];
-                for "_i" from 1 to (count _route - 1) do {
-                    _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i)));
+                _legOffroad = [_cached] call _fnc_detectOffroad;
+                if (_legOffroad) then {
+                    // No road path: discard the blind beeline. The gap pre-step below rebuilds _route from the
+                    // lead's crumb trail each tick, and the lead drives the gap natively (see CV_STEP).
+                    _crumbs = [];
+                    _cum = [0];
+                    { _gapIssued set [netId _x, []] } forEach _live;
+                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap leg grp=%1 leg=%2 -- no road path, native lead + crumb replay", _group, _legIdx]] call fnc_log };
+                } else {
+                    _route = _cached;
+                    _cum = [0];
+                    for "_i" from 1 to (count _route - 1) do {
+                        _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i)));
+                    };
+                    { _issued set [netId _x, -999] } forEach _live;   // force a fresh path issue onto the new route
+                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 pts=%3 len=%4", _group, _legIdx, count _route, round (_cum select (count _cum - 1))]] call fnc_log };
                 };
-                { _issued set [netId _x, -999] } forEach _live;   // force a fresh path issue onto the new route
-                if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 pts=%3 len=%4", _group, _legIdx, count _route, round (_cum select (count _cum - 1))]] call fnc_log };
             };
 
             // Convoy cruise = the slowest live hull's config top speed (a slow tracked hull sets the pace, a
@@ -303,6 +353,24 @@ while {
             if (_topMin >= 1e9) then { _topMin = 60 };
             private _cruise  = (_topMin * CV_CRUISE_FRAC) min CV_CRUISE_MAX;
             private _catchup = (_cruise + CV_CATCHUP_GAIN) min _topMin;
+
+            // Gap leg: rebuild _route from the lead's crumb trail BEFORE progress/spacing, so every helper below
+            // (progress, gap, recovery) runs over the crumbs exactly as it does over a road route. The lead used
+            // here is last tick's (the re-pick below refines it once crumbs exist); at gap entry that is the road
+            // leg's frontmost hull, which is right. Lay a crumb once it has advanced CV_STEP, cap the trail, and
+            // rebuild the arc-length table _cum. On the first gap tick the trail is one point; followers hold or
+            // aim straight at the lead until it lengthens (see the issue branch), which is the intended stagger.
+            if (_legOffroad && {count _live > 0}) then {
+                private _gl = _group getVariable ["cv_lead", objNull];
+                if (isNull _gl || {!(_gl in _live)}) then { _gl = _live select 0 };
+                if (_crumbs isEqualTo [] || {((getPosATL _gl) distance2D (_crumbs select (count _crumbs - 1))) >= CV_STEP}) then {
+                    _crumbs pushBack (getPosATL _gl);
+                    if (count _crumbs > CV_TRAIL) then { _crumbs deleteAt 0 };
+                };
+                _route = _crumbs;
+                _cum = [0];
+                for "_i" from 1 to (count _route - 1) do { _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i))) };
+            };
 
             // Progress of every live hull along the route. Capture the hull before the call -- _progressOf runs
             // its own forEach, so relying on _x surviving across it is the nested-forEach clobber trap.
@@ -327,30 +395,58 @@ while {
                 private _liveFollowers = _live select { _x != _lead };
                 private _leadProg = _prog getOrDefault [_leadId, -1];
 
-                // Issue the route to EVERY hull (lead drives the whole remaining route; each follower from
-                // its own index). Slice starts one point ahead of the hull, forward-only, so setDriveOnPath
-                // never reverses it. Re-issue only when its start index changes (the route itself is fixed).
+                // Issue drive orders. Road leg: put every hull -- lead included -- on its slice of the fixed
+                // route with setDriveOnPath. Gap leg: the lead pathfinds NATIVELY to the target (doMove) so it
+                // rounds the water/terrain the road search could not, and the followers replay its crumb trail
+                // ending at its live position -- tracing the exact ground it proved drivable, in column.
                 {
                     private _me = _x; private _meId = netId _me;
-                    private _mp = _prog getOrDefault [_meId, -1];
-                    private _startIdx = (_mp + 1) max 0;
-                    private _last = _issued getOrDefault [_meId, -999];
-                    // Issue the remaining route once and let the hull drive it; the route is fixed, so
-                    // forward progress needs no re-issue -- re-issuing every point churns setDriveOnPath and
-                    // stutters the hull. Re-issue only when forced (leg change / recovery, marked -999) or
-                    // when the hull has REGRESSED behind its issued start (it strayed off, needs a fresh path).
-                    if (_last == -999 || {_startIdx < _last}) then {
-                        private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
-                        // setDriveOnPath is ignored while the driver has a formLeader, so a follower (every hull
-                        // but the pinned lead) kept reverting to formation-following and drifting off its slice
-                        // -- the stutter that wedged mid-column hulls (the HVT car worst, boxed mid-column).
-                        // doStop clears the formation order right before each (re-)issue. It does not stall our
-                        // driving: setDriveOnPath just below is the move order and speed is forced every tick.
-                        // Its "breaks AI waypoints" caveat does not bite -- the driver reads waypoints only as
-                        // leg targets, never to drive.
-                        if (_me != _lead) then { doStop (driver _me) };
-                        _me setDriveOnPath _slice;
-                        _issued set [_meId, _startIdx];
+                    if (_legOffroad && {_me == _lead}) then {
+                        // Native lead across the gap. Clear any committed path first (a setDriveOnPath and a
+                        // doMove fight), then aim at the target; re-issued each tick is cheap for doMove.
+                        if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
+                        _me doMove _target;
+                    } else {
+                        private _mp = _prog getOrDefault [_meId, -1];
+                        private _startIdx = (_mp + 1) max 0;
+                        if (_legOffroad) then {
+                            // Follower on the crumb trail: drive the crumbs from just ahead of it through to the
+                            // lead's LIVE position, so it chases the moving lead, not a stale trail end. Re-issue
+                            // only when the slice shifts or the lead advanced CV_STEP (the trail grew) -- not every
+                            // tick (that churns setDriveOnPath). Too few crumbs yet (gap entry): aim at the lead.
+                            private _leadPos = getPosATL _lead;
+                            private _iss = _gapIssued getOrDefault [_meId, []];
+                            if (count _crumbs < 2 || {_mp < 0}) then {
+                                if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
+                                doStop (driver _me);
+                                _me doMove _leadPos;
+                                _gapIssued set [_meId, []];
+                            } else {
+                                if (_iss isEqualTo [] || {(_iss select 0) != _startIdx} || {(_leadPos distance2D (_iss select 1)) >= CV_STEP}) then {
+                                    private _slice = if (_startIdx <= (count _crumbs - 1)) then { _crumbs select [_startIdx] } else { [] };
+                                    doStop (driver _me);
+                                    _me setDriveOnPath (_slice + [_leadPos]);
+                                    _pathed set [_meId, true];
+                                    _gapIssued set [_meId, [_startIdx, _leadPos]];
+                                };
+                            };
+                        } else {
+                            // Road leg (unchanged): issue the remaining fixed route once; forward progress needs
+                            // no re-issue (that churns setDriveOnPath and stutters). Re-issue only when forced
+                            // (leg change / recovery, -999) or when the hull REGRESSED behind its issued start.
+                            private _last = _issued getOrDefault [_meId, -999];
+                            if (_last == -999 || {_startIdx < _last}) then {
+                                private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
+                                // setDriveOnPath is ignored while the driver has a formLeader, so a follower kept
+                                // reverting to formation-following and drifting off its slice (the stutter that
+                                // wedged mid-column hulls). doStop clears that right before each (re-)issue; it
+                                // does not stall driving (setDriveOnPath is the move order, speed forced per tick).
+                                if (_me != _lead) then { doStop (driver _me) };
+                                _me setDriveOnPath _slice;
+                                _pathed set [_meId, true];
+                                _issued set [_meId, _startIdx];
+                            };
+                        };
                     };
                 } forEach _live;
 
@@ -437,6 +533,8 @@ while {
                     _legIdx = _legIdx + 1;
                     if (_legIdx < (count (waypoints _group)) && {(waypointType [_group, _legIdx]) == "CYCLE"}) then { _legIdx = 0 };
                     _route = [];
+                    _legOffroad = false;   // the next leg re-detects road vs gap when its route is built
+                    _crumbs = [];
                 };
 
                 // RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the
@@ -462,6 +560,8 @@ while {
                         if (_slot isEqualTo []) then { _slot = _anchor getPos [_forEachIndex * CV_GAP_WANT, _face + 180] };
                         [_x, _slot, _face] call _snapHull;
                         _issued set [netId _x, -999];
+                        _gapIssued set [netId _x, []];   // _snapHull cleared the path; force a fresh issue in either mode
+                        _pathed set [netId _x, false];
                         _stuck  set [netId _x, 0];
                     } forEach ([_lead] + _ordered);
                 };

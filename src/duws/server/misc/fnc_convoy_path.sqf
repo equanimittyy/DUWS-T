@@ -27,9 +27,19 @@ params ["_startPos", "_destPos"];
 #define CP_ROAD_FIND  3000     // snap each end to its nearest road within this (m). Generous so we prefer the
                                // network and drive off-road only the unavoidable stub; only a truly roadless
                                // end (a remote island) falls through to a full off-road leg.
-#define CP_MAX_STEPS  40000    // runaway backstop ONLY (a bug guard), NOT a route-length limit: the closed
-                               // set already terminates A* when the reachable network is exhausted. Set past
-                               // Altis's whole segment count, so a real route never hits it.
+#define CP_MAX_STEPS  40000    // runaway backstop ONLY (a bug guard), NOT a route-length limit: set past
+                               // Altis's whole segment count. CP_STALL below is the ordinary terminator for an
+                               // unreachable dest; this only catches a search that somehow neither reaches the
+                               // goal nor plateaus.
+#define CP_STALL      2500     // A* fast-bail: give up after this many pops with no closer approach to the dest.
+                               // An unreachable dest (components no CP_BRIDGE hop could join) otherwise pops the
+                               // ENTIRE reachable network before the open set empties -- tens of thousands of
+                               // nodes with an O(open) min-scan each, a multi-second freeze that hangs the convoy
+                               // spawn gated behind this route. A reachable dest keeps pulling its closest
+                               // approach in as A* homes toward it, so only a genuinely stuck search plateaus and
+                               // trips this; the leg then falls through to off-road exactly as an exhausted
+                               // search would. Far above the fruitless streak a legitimate detour (around a bay)
+                               // ever runs, so a reachable route is never cut short.
 #define CP_YIELD      250      // yield to the scheduler every this many expansions, so even a whole-network
                                // search spreads across frames instead of hitching one. The caller (the convoy
                                // driver) holds the column meanwhile, so a long compute reads as a brief halt.
@@ -108,6 +118,10 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
     _g set [[_startRoad] call _keyOf, 0];
     private _goal  = objNull;
     private _steps = 0;
+    // Closest any popped node has come to the dest, and how many pops since it last improved. A reachable
+    // dest keeps pulling _bestH down; an unreachable one plateaus and bails at CP_STALL (see the define).
+    private _bestH = 1e12;
+    private _stall = 0;
 
     while { count _open > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
         _steps = _steps + 1;
@@ -128,6 +142,18 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
 
         private _curG   = _g getOrDefault [_curKey, 1e12];
         private _curPos = getPosATL _cur;
+        // Fast-bail on a stuck search: a reachable dest keeps improving _bestH as A* homes in; an unreachable
+        // one plateaus, so a long run of pops with no closer approach means no path exists and we stop rather
+        // than pop the whole network. Top-level exitWith, matching the goal break above -- _goal stays null,
+        // so the leg falls through to off-road exactly as an exhausted search does.
+        private _h = _curPos distance2D _destPos;
+        if (_h < _bestH) then { _bestH = _h; _stall = 0 } else { _stall = _stall + 1 };
+        if (_stall >= CP_STALL) exitWith {
+            if (duws_log_level >= 4) then {
+                ["DEBUG", "CONVOY", format ["A* bail: closest %1 m after %2 pops, %3 with no gain -- dest unreachable, leg goes off-road",
+                    round _bestH, _steps, _stall]] call fnc_log;
+            };
+        };
         // Neighbours = the graph-connected roads, plus -- only at a sparsely connected node (a dead-end, or a
         // junction where roadsConnectedTo dropped a link) -- any road within CP_BRIDGE metres. This hops the
         // small gaps that otherwise fragment the network and fail the search. Gated on < 2 connections so the
