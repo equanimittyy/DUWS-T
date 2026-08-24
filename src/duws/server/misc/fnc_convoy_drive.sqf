@@ -75,8 +75,13 @@ params ["_group"];
                                // overshoot while closing; when the lead accelerates it feeds the tail forward
                                // with it, instead of reacting a tick late once the gap has already opened.
 #define CV_GAP_HARD    4       // straight-line: closer than this, hard-stop -- backstop against rear-ending
-#define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases
-#define CV_LAG_STOP    100     // at or past this the lead eases to a halt until the column closes up
+#define CV_LAG_OK      28      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases. Kept
+                               // close to CV_GAP_WANT (only ~8 m of slack): a wider tolerance let the lead hold
+                               // full cruise while a follower fell to ~2x target spacing, so the lead outran a
+                               // lagging tail before reacting -- the followers' catch-up headroom is finite.
+#define CV_LAG_STOP    70      // at or past this the lead eases to a halt until the column closes up. The
+                               // CV_LAG_OK..this ramp is deliberately narrow (~40 m) so the lead sheds speed
+                               // steeply once the column stretches, rather than drifting on at near-cruise.
 #define CV_REROUTE     30      // leg waypoint drifted this far from the route's end -> recompute the route
 
 private _route  = [];             // the current leg's drivable polyline (from fnc_convoy_path), start..dest
