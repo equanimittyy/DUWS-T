@@ -44,8 +44,13 @@ params ["_group"];
                                // catch-up (the column slows for a lagging hull) gets its chance first.
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
 #define CV_SNAP_SCAN   40      // teleport-snap: route points ahead of the lead scanned for a straight anchor
-#define CV_SNAP_STRAIGHT 25    // teleport-snap: max total heading change (deg) over the column span for an anchor
-                               // to count as straight enough -- loose, just keeps the realign off a harsh bend
+#define CV_SNAP_STRAIGHT 45    // teleport-snap: max total heading change (deg) over the column span for an anchor
+                               // to count as straight enough -- loose on purpose, just keeps the realign off a
+                               // hard bend. Too tight sent the scan hunting far ahead for a near-perfect stretch,
+                               // teleporting the column well forward of where it actually was.
+#define CV_SNAP_AHEAD  60      // teleport-snap: cap (m) on how far ahead of the lead the anchor may sit, so the
+                               // snap realigns the column near where it is instead of flinging it forward to a
+                               // distant straight. In metres (not point count): route point spacing varies.
 
 // forceSpeed takes m/s. If an in-game check (a truck given `forceSpeed 8` rolls at ~29 km/h) proves it
 // is km/h instead, set CV_KMH2FS to 1.0 so km/h values pass straight through.
@@ -145,6 +150,9 @@ private _fnc_straightAnchor = {
     private _bestI = _lo;
     private _bestTurn = 1e9;
     for "_i" from _lo to _hi do {
+        // Stop scanning once the anchor would sit more than CV_SNAP_AHEAD past where the lead is, so the snap
+        // stays near the column instead of teleporting it forward to a distant straight; keep the best so far.
+        if (_i > _lo && {((_cum select _i) - (_cum select _lo)) > CV_SNAP_AHEAD}) exitWith {};
         // walk back from _i until _backLen of route is covered, then sum absolute heading change through _i+1
         private _acc = 0; private _k = _i;
         while { _k > 1 && {_acc < _backLen} } do {
