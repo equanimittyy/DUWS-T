@@ -341,6 +341,14 @@ while {
                     // when the hull has REGRESSED behind its issued start (it strayed off, needs a fresh path).
                     if (_last == -999 || {_startIdx < _last}) then {
                         private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
+                        // setDriveOnPath is ignored while the driver has a formLeader, so a follower (every hull
+                        // but the pinned lead) kept reverting to formation-following and drifting off its slice
+                        // -- the stutter that wedged mid-column hulls (the HVT car worst, boxed mid-column).
+                        // doStop clears the formation order right before each (re-)issue. It does not stall our
+                        // driving: setDriveOnPath just below is the move order and speed is forced every tick.
+                        // Its "breaks AI waypoints" caveat does not bite -- the driver reads waypoints only as
+                        // leg targets, never to drive.
+                        if (_me != _lead) then { doStop (driver _me) };
                         _me setDriveOnPath _slice;
                         _issued set [_meId, _startIdx];
                     };
