@@ -35,11 +35,13 @@
 // the same way at teardown -- both hand every hull back to native AI.
 params ["_group"];
 
-#define CV_TICK        1.5
+#define CV_TICK        0.5     // control period. Kept short: forceSpeed is held open-loop between ticks, so a
+                               // long period is dead time in the spacing loop -- at ~1.5 s the tail oscillated
+                               // (dead time approached the target gap). 0.5 s keeps the loop responsive.
 #define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_RECOVER_AT  8       // ticks a hull sits wedged (~12 s) before recovery (snap out of sight / regroup in)
+#define CV_RECOVER_AT  24      // ticks a hull sits wedged (~12 s) before recovery (snap out of sight / regroup in)
 #define CV_FORMED      15      // a follower within this (m) of its slot counts as formed up during a regroup
-#define CV_TELEPORT_AT 20      // ticks (~30 s) the WHOLE column stays deadlocked before the out-of-sight snap
+#define CV_TELEPORT_AT 60      // ticks (~30 s) the WHOLE column stays deadlocked before the out-of-sight snap
 #define CV_TP_CLEAR    300     // no BLUFOR within this (m) or an out-of-sight snap is withheld (regroup instead)
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
 
@@ -64,11 +66,12 @@ params ["_group"];
 #define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot
                                // (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-bumper and
                                // explode, but the column closes to this once rolling.
-#define CV_GAP_DEAD    5       // band half-width around CV_GAP_WANT: inside it a follower just matches the hull
-                               // ahead (holds station); outside it the proportional term speeds up / slows down
-#define CV_GAP_KP      1.5     // proportional gain, km/h per metre of spacing error, applied outside the band:
-                               // farther than target -> run above the hull ahead to close, closer -> below it to
-                               // reopen. A gentle ramp, NOT a cliff (flat-out catch-up then a hard-stop).
+#define CV_GAP_KP      1.5     // spacing gain: km/h added to the cruise setpoint per metre the along-route gap
+                               // exceeds CV_GAP_WANT (negative when closer than target). A gentle ramp around
+                               // cruise, clamped to [0, catch-up].
+#define CV_GAP_KD      0.7     // damping gain: km/h per km/h of closing speed (aheadSpd - mySpd). Brakes an
+                               // overshoot while closing; when the lead accelerates it feeds the tail forward
+                               // with it, instead of reacting a tick late once the gap has already opened.
 #define CV_GAP_HARD    4       // straight-line: closer than this, hard-stop -- backstop against rear-ending
 #define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases
 #define CV_LAG_STOP    100     // at or past this the lead eases to a halt until the column closes up
@@ -336,22 +339,22 @@ while {
                             else { ((_cum select _aheadProg) - (_cum select _myProg)) max 0 };
                         if (_gap > _maxGap) then { _maxGap = _gap };
 
-                        // Hold the gap with forceSpeed (a real SETPOINT on a setDriveOnPath hull). Proportional
-                        // band around CV_GAP_WANT on the straight-line distance: inside +/-CV_GAP_DEAD match the
-                        // hull ahead's pace; outside, run above/below in proportion to the error. Far behind
-                        // along-route -> flat catch-up (bend-safe). Rear-end hard-stop and a no-overtake clamp
-                        // (the along-route gap cannot tell "just behind" from "just past" the hull ahead on the
-                        // coarse tick, so a fast closer can slip by). forceSpeed is m/s -> KMH().
+                        // Hold the gap with forceSpeed (a real SETPOINT on a setDriveOnPath hull). Cruise-anchored
+                        // car-following: the setpoint is the shared convoy cruise (a GLOBAL reference every hull
+                        // targets -- unlike matching the neighbour's own speed, which amplifies the lead's wobble
+                        // rearward and leaves the tail oscillating), trimmed by the along-route spacing error and
+                        // damped by the relative velocity. The damping term brakes an overshoot while closing and,
+                        // when the lead accelerates, feeds the tail forward with it rather than a tick late once
+                        // the gap has already opened. Rear-end hard-stop and a no-overtake clamp use straight-line
+                        // distance (the along-route gap cannot tell "just behind" from "just past" the hull ahead
+                        // on the tick, so a fast closer could slip by). forceSpeed is m/s -> KMH().
                         private _d        = _me distance2D _ahead;
-                        private _aheadSpd = speed _ahead;   // km/h
-                        private _err      = _d - CV_GAP_WANT;
-                        private _fs = switch (true) do {
-                            case (_d < CV_GAP_HARD):        { 0 };
-                            case (_gap > CV_LAG_OK):        { _catchup };
-                            case (abs _err <= CV_GAP_DEAD): { _aheadSpd min _cruise };
-                            default                         { (_aheadSpd + CV_GAP_KP * _err) max 0 min _catchup };
-                        };
-                        if (_d < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };   // never outrun the hull ahead
+                        private _aheadSpd = speed _ahead;         // km/h
+                        private _mySpd    = speed _me;            // km/h
+                        private _errGap   = _gap - CV_GAP_WANT;   // along-route; positive = too far back
+                        private _fs = (_cruise + CV_GAP_KP * _errGap + CV_GAP_KD * (_aheadSpd - _mySpd)) max 0 min _catchup;
+                        if (_d < CV_GAP_HARD) then { _fs = 0 };                          // rear-end hard-stop
+                        if (_d < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };  // never outrun the hull ahead
                         _me forceSpeed KMH(_fs);
 
                         // Recovery: a hull meant to move (_fs above the halt threshold) but halted for
