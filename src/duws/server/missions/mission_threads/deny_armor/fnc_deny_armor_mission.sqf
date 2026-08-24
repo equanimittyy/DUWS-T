@@ -206,10 +206,11 @@ private _wp = _convoyGrp addWaypoint [_vehpos, 0];
 _wp setWaypointType "MOVE";
 _wp setWaypointCompletionRadius 40;
 
-// Path-replay driver: the lead truck navigates to the tank and the rest of the column traces its track,
-// so Arma's bad off-road routing cannot wedge a follower cutting its own corner. It reads the group's
-// hulls and current waypoint live, so when the repaired tank joins the group and the column is re-tasked
-// home, the same driver picks the tank up and drives it in column. Ended in _finish.
+// Self-routing driver: it computes the road route to the tank and every hull drives it holding spacing, so
+// Arma's bad off-road routing cannot wedge a follower cutting its own corner. It reads the group's hulls and
+// current waypoint live, so when the repaired tank joins the group and the column is re-tasked home, the same
+// driver picks the tank up and drives it in column. The driver orders the column onto its crumb in trail
+// order at spawn (the hulls are laid in a rough line, not already trailing). Ended in _finish.
 [_convoyGrp] spawn fnc_convoy_drive;
 
 private _place = [_randomPos] call fnc_place_name;

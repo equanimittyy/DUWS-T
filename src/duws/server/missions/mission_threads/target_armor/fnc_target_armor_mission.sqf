@@ -114,10 +114,10 @@ private _build = {
     // whichever ring leg a straight-line tie fell to -- which could collapse the loop onto the last leg.
     [_grp, "hqpatrol", _randomPos, _radius, _pts] call fnc_apply_posture;
 
-    // Path-replay driver: the lead laps the ring on its own waypoints and the other two trace its track, so
-    // they hold the road as a column instead of each pathing apart. It reads the group's hulls live. Ends
+    // Self-routing driver: it computes the road route for each leg and every hull drives it holding spacing,
+    // so they hold the road as a column instead of each pathing apart. It reads the group's hulls live. Ends
     // itself once no vehicle can move (patrol wiped), so no teardown hook is owed here; the break flip below
-    // releases it to fight.
+    // releases it to fight. The driver orders the column onto its crumb in trail order at spawn.
     [_grp] spawn fnc_convoy_drive;
 
     // Speed-limited until broken: the first man down or hull hit lifts the limit and turns the patrol loose,

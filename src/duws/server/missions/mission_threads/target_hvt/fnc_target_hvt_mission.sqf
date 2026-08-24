@@ -327,9 +327,11 @@ waitUntil {
     _wpEnd setWaypointType "MOVE";
     _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
-// Path-replay driver per column, once they are rolling: the lead navigates and the rest trace its track,
-// so no follower wedges cutting its own corner into the zone. Spawned only now, after the grace hold, so
-// it does not drive the columns sitting still at their starts. Ended at teardown via DUWS_convoy_stop.
+// Self-routing convoy driver per column, once they are rolling: it computes the road route and every hull
+// drives it holding spacing, so no follower wedges cutting its own corner into the zone. The driver orders
+// each column onto its crumb in trail order at spawn (the hulls are laid in a rough line, not already
+// trailing). Spawned only now, after the grace hold, so it does not drive the columns sitting still at their
+// starts. Ended at teardown via DUWS_convoy_stop.
 { [_x] spawn fnc_convoy_drive } forEach _groups;
 // Allseer calls the move the instant the columns are ordered out, so the player reads the race as
 // starting rather than watching for it.
