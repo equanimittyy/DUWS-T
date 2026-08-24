@@ -33,6 +33,10 @@ params ["_startPos", "_destPos"];
 #define CP_YIELD      250      // yield to the scheduler every this many expansions, so even a whole-network
                                // search spreads across frames instead of hitching one. The caller (the convoy
                                // driver) holds the column meanwhile, so a long compute reads as a brief halt.
+#define CP_BRIDGE     15       // A* graph repair: at a sparsely connected node, pull in roads within this many
+                               // metres as extra neighbours, to hop the small gaps (dropped junction links, an
+                               // isolated stub end) that otherwise split the network into disconnected components
+                               // and fail the search -- which then sends the whole leg off-road across open field
 #define CP_OFF_STEP   25       // off-road: resample the straight run every this many metres
 #define CP_OFF_PROBE  35       // off-road: lateral offset tried to skirt an obstacle
 #define CP_OFF_WIDEN  4        // off-road: widening lateral probes each side before giving up on a point
@@ -124,6 +128,16 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
 
         private _curG   = _g getOrDefault [_curKey, 1e12];
         private _curPos = getPosATL _cur;
+        // Neighbours = the graph-connected roads, plus -- only at a sparsely connected node (a dead-end, or a
+        // junction where roadsConnectedTo dropped a link) -- any road within CP_BRIDGE metres. This hops the
+        // small gaps that otherwise fragment the network and fail the search. Gated on < 2 connections so the
+        // nearRoads cost is paid only at the rare fragmentation points, not every node. The bridged edge's cost
+        // is its real gap length, so A* stays optimal; a genuine gap wider than CP_BRIDGE still finds no bridge
+        // and the leg correctly falls through to off-road.
+        private _neighbours = roadsConnectedTo _cur;
+        if (count _neighbours < 2) then {
+            { if (_x != _cur && {!(_x in _neighbours)}) then { _neighbours pushBack _x } } forEach (_curPos nearRoads CP_BRIDGE);
+        };
         {
             private _nk = [_x] call _keyOf;
             if !(_closed getOrDefault [_nk, false]) then {
@@ -134,7 +148,7 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
                     if !(_x in _open) then { _open pushBack _x };
                 };
             };
-        } forEach (roadsConnectedTo _cur);
+        } forEach _neighbours;
     };
 
     if (!isNull _goal) then {
