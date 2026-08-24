@@ -141,11 +141,13 @@ private _crewUnits = units _crewGrp;
 private _teamGrp = ["team", _convoyStart, DA_RADIUS, "none", _convoyStart] call fnc_spawn_team;
 private _teamUnits = if (isNull _teamGrp) then { [] } else { units _teamGrp };
 
-// Lay the column on the road from the convoy start toward the tank, so the trucks and escort sit spaced
-// and road-facing instead of shoulder to shoulder. Six slots: up to five trucks (a tiny-cargo faction
-// truck needs several for the riders) plus the tail escort; slots the column does not use are ignored.
-private _travelDir = _convoyStart getDir _targetpos;
-private _laid = [_convoyStart, _travelDir, 6, 22] call fnc_convoy_layout;
+// Route the run (convoy start -> the tank) and seat the column ON it, so the trucks and escort are born on
+// the drive path, spaced and road-facing, instead of shoulder to shoulder off it. Six slots: up to five
+// trucks (a tiny-cargo faction truck needs several for the riders) plus the tail escort at slot 5; slots the
+// column does not use are ignored. The same route is handed to the driver (DUWS_convoy_route0) below so it
+// reuses it for the drive-in leg without recomputing or teleport-reordering the column.
+private _route0 = [_convoyStart, _vehpos] call fnc_convoy_path;
+private _laid = [_route0, 6, 22] call fnc_convoy_slots;
 
 // Unarmed transport for the crew and the team, laid lead-first. One truck if they fit; a second (or third)
 // only when the riders overflow its cargo, so a small-cargo faction truck still carries everyone rather
@@ -209,8 +211,9 @@ _wp setWaypointCompletionRadius 40;
 // Self-routing driver: it computes the road route to the tank and every hull drives it holding spacing, so
 // Arma's bad off-road routing cannot wedge a follower cutting its own corner. It reads the group's hulls and
 // current waypoint live, so when the repaired tank joins the group and the column is re-tasked home, the same
-// driver picks the tank up and drives it in column. The driver orders the column onto its crumb in trail
-// order at spawn (the hulls are laid in a rough line, not already trailing). Ended in _finish.
+// driver picks the tank up and drives it in column. It reuses the drive-in route the column was seated on
+// (DUWS_convoy_route0). Ended in _finish.
+_convoyGrp setVariable ["DUWS_convoy_route0", _route0];
 [_convoyGrp] spawn fnc_convoy_drive;
 
 private _place = [_randomPos] call fnc_place_name;

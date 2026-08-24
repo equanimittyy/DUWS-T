@@ -65,9 +65,9 @@ params ["_group"];
 #define CV_CATCHUP_GAIN 20     // catch-up ceiling = cruise + this (km/h), never past the hull's own top: a
                                // lagging follower runs a little above cruise to close, not flat out -- full-top
                                // catch-up overshoots station into the same stop-start it is meant to damp.
-#define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot
-                               // (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-bumper and
-                               // explode, but the column closes to this once rolling.
+#define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot (~22 m, see
+                               // fnc_convoy_slots): long escorts must not spawn bumper-to-bumper and explode,
+                               // but the column closes to this once rolling.
 #define CV_GAP_KP      1.5     // spacing gain: km/h added to the cruise setpoint per metre the along-route gap
                                // exceeds CV_GAP_WANT (negative when closer than target). A gentle ramp around
                                // cruise, clamped to [0, catch-up].
@@ -89,9 +89,11 @@ private _issued = createHashMap;  // netId -> last slice start index handed to s
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 private _topspd = createHashMap;  // netId -> config top speed (km/h), cached once: the convoy paces to the min
 private _dumped = false;          // one-time level-4 dump of the waypoint list, so a stuck start is diagnosable
-private _needInitOrder = true;    // one-time: snap the column into crumb order once the first route exists.
-                                  // Every caller spawns its hulls in a rough line, not already trailing on the
-                                  // route, so ordering them onto the crumb at spawn is unconditional.
+// A caller that pre-seats its column ON the route hands that route in DUWS_convoy_route0: the driver reuses it
+// for the first leg (no recompute) and skips the spawn-ordering snap (the column already sits on it, in order).
+// A caller that does not gets the one-time snap instead, so ordering is guaranteed either way.
+private _route0 = _group getVariable ["DUWS_convoy_route0", []];
+private _needInitOrder = (_route0 isEqualTo []);
 
 // Nearest route index to a position = the hull's progress along the route. -1 while the route is empty.
 private _progressOf = {
@@ -181,6 +183,15 @@ private _snapHull = {
     _veh setPosATL _p;
     _veh setVelocity [0, 0, 0];
     _veh setDriveOnPath [];
+};
+
+// Seed the first leg from a caller-supplied route (see DUWS_convoy_route0 above): the hulls already sit on it,
+// so drive it as-is instead of recomputing from the leader's position and re-ordering the column.
+if (_route0 isNotEqualTo []) then {
+    _route = _route0;
+    _legStart = _route0 select 0;
+    _cum = [0];
+    for "_i" from 1 to (count _route - 1) do { _cum pushBack ((_cum select (_i - 1)) + ((_route select (_i - 1)) distance2D (_route select _i))) };
 };
 
 // DEBUG (silent unless duws_log_level is raised to 4): a per-tick column line and a line per recovery event,

@@ -56,12 +56,13 @@ private _build = {
         });
     };
     private _start = _pts select 0;
-    private _heading = [_start, _pts select 1] call BIS_fnc_dirTo;
 
-    // Lay the three as a spaced column ON the road toward the first patrol point, so trailing hulls sit
-    // on the carriageway facing the road's tangent -- not a straight offset back from the start that
-    // ignores the road's curve and faces a map bearing, which left hulls crossways and shoved apart.
-    private _slots = [_start, _heading, 3, 20] call fnc_convoy_layout;
+    // Route the first leg (start -> the first patrol point it drives to, _pts#1) and seat the three ON that
+    // route in trail order, so they are born on the drive path facing down it -- not on a straight offset back
+    // from the start that ignores the road's curve. The same route is handed to the driver below so it reuses
+    // it for leg one without recomputing or teleport-reordering the column.
+    private _route0 = [_start, _pts select 1] call fnc_convoy_path;
+    private _slots = [_route0, 3, 20] call fnc_convoy_slots;
 
     // Crews merged into one group so the three road-march as a column instead of pathing apart.
     private _grp = createGroup EAST;
@@ -110,14 +111,17 @@ private _build = {
 
     // Lap the road-snapped ring via the shared fixed-circuit posture, not a hand-rolled CYCLE. hqpatrol alone
     // takes caller anchors (closepatrol/widepatrol roll their own un-snapped points), so the column keeps to
-    // the road network; it anchors CYCLE on the first point, so nearest-prior is that point rather than
-    // whichever ring leg a straight-line tie fell to -- which could collapse the loop onto the last leg.
-    [_grp, "hqpatrol", _randomPos, _radius, _pts] call fnc_apply_posture;
+    // the road network. Rotate the ring so the spawn point (_pts#0) is LAST, not first: the column spawns on
+    // it, so a leading waypoint there is a zero-length first leg and, with the column pre-seated forward on the
+    // route, would drive it backward. The loop still visits every point and CYCLEs on _pts#1.
+    private _ring = (_pts select [1, (count _pts) - 1]) + [_pts select 0];
+    [_grp, "hqpatrol", _randomPos, _radius, _ring] call fnc_apply_posture;
 
     // Self-routing driver: it computes the road route for each leg and every hull drives it holding spacing,
     // so they hold the road as a column instead of each pathing apart. It reads the group's hulls live. Ends
     // itself once no vehicle can move (patrol wiped), so no teardown hook is owed here; the break flip below
-    // releases it to fight. The driver orders the column onto its crumb in trail order at spawn.
+    // releases it to fight. It reuses the leg-one route the column was seated on (DUWS_convoy_route0).
+    _grp setVariable ["DUWS_convoy_route0", _route0];
     [_grp] spawn fnc_convoy_drive;
 
     // Speed-limited until broken: the first man down or hull hit lifts the limit and turns the patrol loose,

@@ -101,13 +101,14 @@ if (_carPool isEqualTo []) then {
 private _hvtCarClass = selectRandom _carPool;
 private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "displayName");
 
-// One line of vehicles as a road column: fnc_convoy_layout walks the road from the start and hands back
-// a spaced, road-facing slot per vehicle, so the hulls sit in a real column on the tarmac instead of a
-// scatter. Crews merged into a single group so they move together. Returns [group, [vehicles]]. Loot on
-// the crew so a searched body reads as this faction like any patrol.
+// One line of vehicles as a road column, seated ON the precomputed drive route: fnc_convoy_slots spaces one
+// road-facing slot per vehicle along the route, so the hulls sit in a real column on the path they will drive
+// instead of a scatter. The route is stashed on the group (DUWS_convoy_route0) so the driver reuses it for the
+// first leg. Crews merged into a single group so they move together. Returns [group, [vehicles]]. Loot on the
+// crew so a searched body reads as this faction like any patrol.
 private _spawnLine = {
-    params ["_classes", "_start", "_travelDir", "_behaviour", "_speed"];
-    private _slots = [_start, _travelDir, count _classes, 22] call fnc_convoy_layout;
+    params ["_classes", "_route", "_behaviour", "_speed"];
+    private _slots = [_route, count _classes, 22] call fnc_convoy_slots;
     private _grp = createGroup EAST;
     private _vehs = [];
     {
@@ -123,6 +124,7 @@ private _spawnLine = {
     _grp setSpeedMode _speed;
     _grp setFormation "COLUMN";
     _grp deleteGroupWhenEmpty true;
+    _grp setVariable ["DUWS_convoy_route0", _route];
     { [_x] call fnc_addRandomLoot } forEach units _grp;
     [_grp, _vehs]
 };
@@ -193,7 +195,7 @@ private _carGrp = grpNull;    // the car's own CARELESS group once it breaks awa
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
-    (_startRoads select _i) params ["_start", "_roadHd"];
+    (_startRoads select _i) params ["_start"];
     // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its own
     // way in; the centre column (lat 0) runs the direct line. Snap to the nearest road whose run lies
     // within _viaCone of the destination bearing, so the via never points the column back the wrong way
@@ -206,9 +208,10 @@ for "_i" from 0 to 2 do {
     } forEach _vRoads;
     if (isNull _viaRoad && {!(_vRoads isEqualTo [])}) then { _viaRoad = _vRoads select 0 };
     private _via = if (!isNull _viaRoad) then { getPosATL _viaRoad } else { _vCand };
-    // Lay the column along its start road, already pointing down-route toward the zone, so it rolls straight
-    // off the road instead of snapping perpendicular; the via is its first waypoint, not its spawn heading.
-    private _heading = _roadHd;
+    // Route the first leg (start -> this column's via) and seat the column ON it below, so the hulls are born
+    // on the drive path in trail order and roll straight off it instead of snapping perpendicular; the driver
+    // reuses this route for its first leg (DUWS_convoy_route0), the via being that leg's waypoint.
+    private _route0 = [_start, _via] call fnc_convoy_path;
     _convoyStarts pushBack _start;
 
     if (_i == _hvtIdx) then {
@@ -216,7 +219,7 @@ for "_i" from 0 to 2 do {
         // sits mid-column. One group so escorts and car drive together; the monitor peels the car into
         // its own CARELESS group on first contact so it commits to the run rather than halting to fight
         // -- the player has to stop the car, not just spook the column.
-        private _slots = [_start, _heading, 3, 22] call fnc_convoy_layout;
+        private _slots = [_route0, 3, 22] call fnc_convoy_slots;
         _hvtColGrp = createGroup EAST;
         {
             (_slots select _x) params ["_sp", "_sd"];
@@ -243,11 +246,12 @@ for "_i" from 0 to 2 do {
         _hvtColGrp setSpeedMode "LIMITED";
         _hvtColGrp setFormation "COLUMN";
         _hvtColGrp deleteGroupWhenEmpty true;
+        _hvtColGrp setVariable ["DUWS_convoy_route0", _route0];
         { [_x] call fnc_addRandomLoot } forEach units _hvtColGrp;
         _groups pushBack _hvtColGrp;
         _vias pushBack _via;
     } else {
-        ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
+        ([[call _rollEsc, call _rollEsc, call _rollEsc], _route0, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
         _groups pushBack _grp;
         _vias pushBack _via;
     };
