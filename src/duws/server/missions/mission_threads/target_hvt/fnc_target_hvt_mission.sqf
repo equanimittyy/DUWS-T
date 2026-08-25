@@ -171,7 +171,11 @@ private _near = _MissionPos nearRoads _spawnR;
 } forEach _near;
 while { count _startRoads < 3 } do {
     private _lat = count _startRoads;
-    _startRoads pushBack [([_MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)], 0, 250, 8, 0, 0.6, 0] call BIS_fnc_findSafePos), _dirZone];
+    // A road-thin, cluttered corner: findSafePos can find nothing and return the map origin, which would
+    // seat a whole column out at sea. The shared safe-pos helper falls back to the raw offered point
+    // (already _spawnR out on the run bearing, inside the area) so the start stays where the column belongs.
+    private _cand = _MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)];
+    _startRoads pushBack [[_cand, 250, 8] call fnc_convoy_safepos, _dirZone];
 };
 
 private _hvtIdx = floor random 3;

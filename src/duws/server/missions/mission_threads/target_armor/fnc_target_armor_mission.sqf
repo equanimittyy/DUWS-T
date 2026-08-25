@@ -39,18 +39,25 @@ private _build = {
     for "_i" from 0 to (_steps - 1) do {
         private _ang = _i * (360 / _steps) + random 40;
         private _cand = _randomPos getPos [_radius * (0.4 + random 0.3), _ang];
-        // Keep every anchor out of the sea: the spawn point (first) and the points it laps
-        // alike, so a water anchor drowns the patrol or drives it in. Drop roads whose segment
-        // sits over water (coastal snaps, bridges); road-less fallback is findSafePos waterMode
-        // 0, then the raw point.
+        // Keep every anchor out of the sea: the spawn point (first) and the points it laps alike, so a water
+        // anchor drowns the patrol or drives it in. Drop roads whose segment sits over water (coastal snaps,
+        // bridges); road-less fallback is the shared safe-pos helper (clear land near the point, else the
+        // raw point -- never the map origin).
         private _roads = (_cand nearRoads 400) select { !surfaceIsWater (getPosATL _x) };
         _pts pushBack (if (_roads isEqualTo []) then {
-            private _land = [_cand, 0, 200, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-            if (_land isEqualTo [] || {surfaceIsWater _land}) then { _cand } else { _land }
+            [_cand, 200, 5] call fnc_convoy_safepos
         } else {
             getPosATL (selectRandom _roads)
         });
     };
+    // Guard a spawn/patrol point that lands far outside the marked ring. A road or findSafePos snap must
+    // never seat the column kilometres away -- dropped on top of BLUFOR HQ, its garrison wipes the patrol
+    // the instant it spawns and the mission auto-completes with the player nowhere near. A point past the
+    // ring radius is a bad snap, not a real anchor, so it falls back to the marked centre (the AO the player
+    // is sent to). The legitimate points sit at 0.4-0.7 * _radius, well inside this bound.
+    {
+        if ((_x distance2D _randomPos) > _radius) then { _pts set [_forEachIndex, _randomPos] };
+    } forEach _pts;
     private _start = _pts select 0;
 
     // Route the first leg (start -> _pts#1, the first point it drives to) and seat the three ON it in trail
