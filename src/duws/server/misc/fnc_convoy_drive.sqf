@@ -19,7 +19,8 @@
 //
 //   Route: fnc_convoy_path walks the road graph from the lead's leg start to the leg's waypoint, returning a
 //   drivable line (roads where they exist, a water/obstacle-deviated run off-network). It is recomputed only
-//   when the leg changes, and cached so a CYCLE patrol reuses each lap's legs.
+//   when the leg changes, and cached so a CYCLE patrol reuses each lap's legs. Off-road gaps in that line are
+//   crossed once natively then cached too, so a lap replays a proven trail rather than re-rolling native routing.
 //
 //   Legs are self-managed: we do NOT rely on native waypoint completion (we no longer native-drive the lead,
 //   so it may not fire). We route to the current leg's waypoint, advance the leg index when the lead reaches
@@ -80,9 +81,11 @@ params ["_group"];
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
 // Gap mode (a leg the road search could not connect -- see the off-road branch): the lead pathfinds NATIVELY
 // across the gap and the followers replay its driven track. A crumb is the lead's position, laid once it has
-// advanced CV_STEP from the last, and only the last CV_TRAIL are kept. Native routing is trusted here -- and
-// only here -- because the alternative on a roadless gap is a blind straight line through whatever water or
-// terrain lies between the ends; native pathing routes around it and rejoins the road on its own.
+// advanced CV_STEP from the last, and only the last CV_TRAIL are kept as the follow-window. Native routing is
+// trusted here -- and only here -- because the alternative on a roadless gap is a blind straight line through
+// whatever water or terrain lies between the ends; native pathing routes around it and rejoins the road on its
+// own. The FIRST successful crossing is cached in full (see _gapCache) and replayed on every later lap, so a
+// CYCLE patrol proves each gap once instead of re-rolling native routing -- the least reliable step -- each lap.
 #define CV_STEP        8       // lead must advance this far (m) before a new crumb is laid
 #define CV_TRAIL       40      // crumbs kept (~320 m of track): longer than any column, short enough that a
                                // CYCLE patrol's looping track never snaps a follower onto a previous lap
@@ -171,17 +174,42 @@ private _legOffroad = false;
 private _crumbs   = [];
 private _pathed   = createHashMap;   // netId -> a setDriveOnPath is committed (clear before a doMove)
 private _gapIssued = createHashMap;  // netId -> last gap issue [startIdx, leadPos]
+// Gap-trail cache: the first successful crossing of a gap is remembered and replayed on every later lap,
+// so a CYCLE patrol proves each gap once instead of re-running native pathfinding every time round. The gap
+// is exactly where native routing is least reliable, so a proven line is worth most there. _gapTrail
+// accumulates the WHOLE crossing (not the CV_TRAIL follow-window), committed to _gapCache only once the
+// column clears the gap onto the next segment -- a line that dead-ended is never cached. _gapReplay = the
+// current gap is being driven from a cached trail (lead and followers ride the fixed line with setDriveOnPath
+// like a road segment, no native re-cross); _gapSetupKey guards the once-per-gap cache lookup and is the key
+// for the commit/invalidate. A replayed trail that trips the Tier 4 teleport is dropped, so a gap newly
+// blocked by a wreck self-heals: the next lap re-proves it natively.
+private _gapCache  = createHashMap;  // gapKey -> full proven crossing trail (ends at the road-entry point)
+private _gapTrail  = [];             // accumulating full crossing while native-crossing (uncapped, unlike _crumbs)
+private _gapReplay = false;          // current gap driven from a cached trail (no native re-cross)
+private _gapStart  = [];             // current segment's fixed first point; with _segTarget it keys the gap cache
+private _gapSetupKey = "";           // key of the gap whose cache lookup has run this crossing ("" = not yet)
 
-// Load segment _i of _segs -> [points, isGap, endPoint, cumulativeArcLengths]. The caller assigns these to
-// _route / _legOffroad / _segTarget / _cum; _segTarget is captured here because a gap segment overwrites
-// _route with its crumb trail, so its end cannot be re-read off _route later.
+// Load segment _i of _segs -> [points, isGap, endPoint, cumulativeArcLengths, startPoint]. The caller assigns
+// these to _route / _legOffroad / _segTarget / _cum / _gapStart; _segTarget and _gapStart are captured here
+// because a gap segment overwrites _route with its crumb trail, so its ends cannot be re-read off _route later.
+// startPoint keys the gap-trail cache (with endPoint) and must be the segment's fixed first point, not a crumb.
 private _fnc_segAt = {
     params ["_theSegs", "_i"];
     private _seg  = _theSegs select _i;
     private _pts  = _seg select 0;
     private _cm   = [0];
     for "_k" from 1 to (count _pts - 1) do { _cm pushBack ((_cm select (_k - 1)) + ((_pts select (_k - 1)) distance2D (_pts select _k))) };
-    [_pts, (_seg select 1) == "gap", _pts select (count _pts - 1), _cm]
+    [_pts, (_seg select 1) == "gap", _pts select (count _pts - 1), _cm, _pts select 0]
+};
+
+// Gap-trail cache key: the gap's fixed endpoints (road exit -> road entry) bucketed to 5 m, matching the road
+// route cache's scheme. Both come from fnc_convoy_path and are deterministic, so a CYCLE lap re-crossing the
+// same gap resolves to the same key and reuses the proven trail.
+private _fnc_gapKey = {
+    params ["_a", "_b"];
+    format ["%1_%2_%3_%4",
+        round ((_a select 0) / 5), round ((_a select 1) / 5),
+        round ((_b select 0) / 5), round ((_b select 1) / 5)]
 };
 
 // Nearest route index to a position = the hull's progress along the route. -1 while the route is empty.
@@ -292,7 +320,9 @@ if (_route0 isNotEqualTo []) then {
     _legOffroad = _seg select 1;
     _segTarget  = _seg select 2;
     _cum        = _seg select 3;
+    _gapStart   = _seg select 4;
     _crumbs = [];
+    _gapSetupKey = ""; _gapTrail = []; _gapReplay = false;
 };
 
 // DEBUG (silent unless duws_log_level is raised to 4): a per-tick column line and a line per recovery event,
@@ -378,8 +408,9 @@ while {
                 _legTargetCached = _wpTarget;
                 _segIdx = 0;
                 private _seg = [_segs, _segIdx] call _fnc_segAt;
-                _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3;
+                _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3; _gapStart = _seg select 4;
                 _crumbs = [];
+                _gapSetupKey = ""; _gapTrail = [];
                 { _issued set [netId _x, -999]; _gapIssued set [netId _x, []] } forEach _live;   // fresh issue onto the new segment
                 if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 segs=%3 seg0=%4 pts=%5", _group, _legIdx, count _segs, ["road", "gap"] select _legOffroad, count _route]] call fnc_log };
             };
@@ -401,11 +432,29 @@ while {
             // rebuild the arc-length table _cum. On the first gap tick the trail is one point; followers hold or
             // aim straight at the lead until it lengthens (see the issue branch), which is the intended stagger.
             if (_legOffroad && {count _live > 0}) then {
-                private _gl = _group getVariable ["cv_lead", objNull];
-                if (isNull _gl || {!(_gl in _live)}) then { _gl = _live select 0 };
-                if (_crumbs isEqualTo [] || {((getPosATL _gl) distance2D (_crumbs select (count _crumbs - 1))) >= CV_STEP}) then {
-                    _crumbs pushBack (getPosATL _gl);
-                    if (count _crumbs > CV_TRAIL) then { _crumbs deleteAt 0 };
+                // Once per gap entry: resolve the cache. A hit replays the proven trail (the whole column rides
+                // the fixed line with setDriveOnPath like a road segment -- see the dispatch below -- so no native
+                // re-cross); a miss crosses natively and accumulates a fresh trail to cache on success.
+                private _key = [_gapStart, _segTarget] call _fnc_gapKey;
+                if (_key != _gapSetupKey) then {
+                    _gapSetupKey = _key;
+                    private _cached = _gapCache getOrDefault [_key, []];
+                    _gapReplay = _cached isNotEqualTo [];
+                    _gapTrail = [];
+                    _crumbs = if (_gapReplay) then { +_cached } else { [] };
+                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap %1 grp=%2 (%3, pts=%4)", _key, _group, ["native cross", "replay cached"] select _gapReplay, count _crumbs]] call fnc_log };
+                };
+                if (!_gapReplay) then {
+                    // Native crossing: the lead lays the trail. Feed the CV_TRAIL follow-window (_crumbs, for the
+                    // followers) AND the uncapped _gapTrail that is cached once the gap is cleared.
+                    private _gl = _group getVariable ["cv_lead", objNull];
+                    if (isNull _gl || {!(_gl in _live)}) then { _gl = _live select 0 };
+                    private _glp = getPosATL _gl;
+                    if (_crumbs isEqualTo [] || {(_glp distance2D (_crumbs select (count _crumbs - 1))) >= CV_STEP}) then {
+                        _crumbs pushBack _glp;
+                        _gapTrail pushBack _glp;
+                        if (count _crumbs > CV_TRAIL) then { _crumbs deleteAt 0 };
+                    };
                 };
                 _route = _crumbs;
                 _cum = [0];
@@ -500,21 +549,25 @@ while {
                     };
                 } else {
                     // Issue drive orders. Road leg: put every hull -- lead included -- on its slice of the fixed
-                    // route with setDriveOnPath. Gap leg: the lead pathfinds NATIVELY to the target (doMove) so it
-                    // rounds the water/terrain the road search could not, and the followers replay its crumb trail
-                    // ending at its live position -- tracing the exact ground it proved drivable, in column.
+                    // route with setDriveOnPath. Gap leg, first crossing: the lead pathfinds NATIVELY to the target
+                    // (doMove) so it rounds the water/terrain the road search could not, and the followers replay its
+                    // crumb trail ending at its live position -- tracing the exact ground it proved drivable, in
+                    // column. Gap leg, replay (_gapReplay): _route is the cached proven trail, so every hull -- lead
+                    // included -- drives it with setDriveOnPath exactly like a road leg, no native re-cross.
                     {
                         private _me = _x; private _meId = netId _me;
-                        if (_legOffroad && {_me == _lead}) then {
-                            // Native lead across the gap. Clear any committed path first (a setDriveOnPath and a
-                            // doMove fight), then aim at the segment end (the road it rejoins); re-issued each tick
-                            // is cheap for doMove, and keeps it aimed as the segment/leg updates.
+                        if (_legOffroad && {!_gapReplay} && {_me == _lead}) then {
+                            // Native lead across the gap (first crossing, no cached trail). Clear any committed path
+                            // first (a setDriveOnPath and a doMove fight), then aim at the segment end (the road it
+                            // rejoins); re-issued each tick is cheap for doMove, and keeps it aimed as the leg updates.
+                            // A replayed gap skips this: _route is the cached trail, so the lead falls to the road
+                            // branch and drives the fixed line like any hull.
                             if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
                             _me doMove _segTarget;
                         } else {
                             private _mp = _prog getOrDefault [_meId, -1];
                             private _startIdx = (_mp + 1) max 0;
-                            if (_legOffroad) then {
+                            if (_legOffroad && !_gapReplay) then {
                                 // Follower on the crumb trail: drive the crumbs from just ahead of it through to the
                                 // lead's LIVE position, so it chases the moving lead, not a stale trail end. Re-issue
                                 // only when the slice shifts or the lead advanced CV_STEP (the trail grew) -- not every
@@ -667,11 +720,20 @@ while {
                 // block above rebuilds it. Skipped during a regroup: the column is halted and re-forming, so the
                 // lead must not advance the leg out from under it (that would swap _route mid-reform).
                 if (!_regroup && {(_lead distance2D _segTarget) < CV_ARRIVE}) then {
+                    // The lead cleared the segment. If it was a gap crossed NATIVELY (not a replay), that trail is
+                    // now proven: cache it (ending at the rejoin point) so later laps replay it instead of re-running
+                    // native pathfinding. Only on a clean arrival -- a regroup skips this block, so a line the column
+                    // could not hold is never cached. _gapSetupKey/_segTarget still name the completing gap here.
+                    if (_legOffroad && {!_gapReplay} && {count _gapTrail >= 2}) then {
+                        _gapCache set [_gapSetupKey, _gapTrail + [_segTarget]];
+                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap cached %1 grp=%2 (pts=%3)", _gapSetupKey, _group, count _gapTrail + 1]] call fnc_log };
+                    };
                     if (_segIdx < (count _segs - 1)) then {
                         _segIdx = _segIdx + 1;
                         private _seg = [_segs, _segIdx] call _fnc_segAt;
-                        _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3;
+                        _route = _seg select 0; _legOffroad = _seg select 1; _segTarget = _seg select 2; _cum = _seg select 3; _gapStart = _seg select 4;
                         _crumbs = [];
+                        _gapSetupKey = ""; _gapTrail = [];
                         { _issued set [netId _x, -999]; _gapIssued set [netId _x, []] } forEach _live;
                         if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["segment grp=%1 leg=%2 seg=%3/%4 mode=%5", _group, _legIdx, _segIdx, count _segs, ["road", "gap"] select _legOffroad]] call fnc_log };
                     } else {
@@ -681,6 +743,7 @@ while {
                         _segs = [];
                         _legOffroad = false;
                         _crumbs = [];
+                        _gapSetupKey = ""; _gapTrail = [];
                     };
                 };
 
@@ -716,6 +779,14 @@ while {
                         _pathed set [netId _x, false];
                         _stuck  set [netId _x, 0];
                     } forEach _ordered;
+                    // A replayed gap trail that reached the teleport is no longer drivable (a wreck now blocks the
+                    // proven line): drop it so the next lap re-proves the gap natively rather than replaying a dead
+                    // trail every lap. Log before clearing _gapSetupKey so the key is still valid.
+                    if (_legOffroad && _gapReplay) then {
+                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap cache dropped %1 grp=%2 (teleport)", _gapSetupKey, _group]] call fnc_log };
+                        _gapCache deleteAt _gapSetupKey;
+                        _gapReplay = false; _gapSetupKey = ""; _crumbs = []; _gapTrail = [];
+                    };
                     // The teleport seated everyone; drop any regroup in flight and reset the frozen counter.
                     _regroup = false; _regroupLead = objNull; _allStuck = 0;
                 };
