@@ -180,9 +180,10 @@ private _gapIssued = createHashMap;  // netId -> last gap issue [startIdx, leadP
 // accumulates the WHOLE crossing (not the CV_TRAIL follow-window), committed to _gapCache only once the
 // column clears the gap onto the next segment -- a line that dead-ended is never cached. _gapReplay = the
 // current gap is being driven from a cached trail (lead and followers ride the fixed line with setDriveOnPath
-// like a road segment, no native re-cross); _gapSetupKey guards the once-per-gap cache lookup and is the key
-// for the commit/invalidate. A replayed trail that trips the Tier 4 teleport is dropped, so a gap newly
-// blocked by a wreck self-heals: the next lap re-proves it natively.
+// like a road segment, no native re-cross); _gapSetupKey guards the once-per-gap cache lookup and keys the
+// commit. Cached crossings are permanent, exactly like the road-route cache: a setDriveOnPath hull keeps the
+// engine's local avoidance, so it rounds a wreck newly on the line as it would on a road route, and Tier 4
+// blinks the column past any residual block -- so a proven crossing is never discarded and re-proved.
 private _gapCache  = createHashMap;  // gapKey -> full proven crossing trail (ends at the road-entry point)
 private _gapTrail  = [];             // accumulating full crossing while native-crossing (uncapped, unlike _crumbs)
 private _gapReplay = false;          // current gap driven from a cached trail (no native re-cross)
@@ -779,14 +780,10 @@ while {
                         _pathed set [netId _x, false];
                         _stuck  set [netId _x, 0];
                     } forEach _ordered;
-                    // A replayed gap trail that reached the teleport is no longer drivable (a wreck now blocks the
-                    // proven line): drop it so the next lap re-proves the gap natively rather than replaying a dead
-                    // trail every lap. Log before clearing _gapSetupKey so the key is still valid.
-                    if (_legOffroad && _gapReplay) then {
-                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap cache dropped %1 grp=%2 (teleport)", _gapSetupKey, _group]] call fnc_log };
-                        _gapCache deleteAt _gapSetupKey;
-                        _gapReplay = false; _gapSetupKey = ""; _crumbs = []; _gapTrail = [];
-                    };
+                    // A cached gap trail is NOT dropped here, mirroring the road-route cache: a hull driving it with
+                    // setDriveOnPath keeps the engine's local avoidance, so it rounds a wreck newly on the line the
+                    // same way it does on a road route, and the teleport itself already blinks the column past any
+                    // residual block. Discarding a proven crossing would force a needless native re-prove every lap.
                     // The teleport seated everyone; drop any regroup in flight and reset the frozen counter.
                     _regroup = false; _regroupLead = objNull; _allStuck = 0;
                 };
