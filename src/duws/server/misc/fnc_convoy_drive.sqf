@@ -62,7 +62,7 @@ params ["_group"];
                                // long period is dead time in the spacing loop -- at ~1.5 s the tail oscillated
                                // (dead time approached the target gap). 0.5 s keeps the loop responsive.
 #define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_STUCK_MAX   60      // ticks (~30 s) the WHOLE column may stay frozen (nothing moving, lead not just
+#define CV_STUCK_MAX   30      // ticks (~15 s) the WHOLE column may stay frozen (nothing moving, lead not just
                                // arriving) before the teleport-snap fires. The soft recovery ladder below (path
                                // re-issue, then a native-path regroup) gets its chance across this window first;
                                // a regroup that cannot free the column escalates here.
@@ -148,6 +148,7 @@ private _pos    = createHashMap;  // netId -> FIXED convoy position (0 = front);
 private _nextPos = 0;             // next fixed position to hand out: spawn batch front-to-back, then the rear for a joiner
 private _regroup     = false;     // Tier 3 state: while true the column halts and every hull re-forms behind the front hull
 private _regroupLead = objNull;   // the hull the regroup forms up behind (frozen frontmost by progress); re-picked only if it dies
+private _regroupTicks = 0;        // ticks the current regroup has run; gates the doMove re-issue to CV_REISSUE cadence
 private _allStuck    = 0;         // consecutive ticks the WHOLE column is frozen -- drives the Tier 4 teleport
 private _dumped = false;          // one-time level-4 dump of the waypoint list, so a stuck start is diagnosable
 // A caller that pre-seats its column ON the route hands that route in DUWS_convoy_route0: the driver reuses it
@@ -517,6 +518,11 @@ while {
                         if (_pathed getOrDefault [netId _regroupLead, false]) then { _regroupLead setDriveOnPath []; _pathed set [netId _regroupLead, false] };
                         private _reformFollowers = _live select { _x != _regroupLead };
                         private _allFormed = true;
+                        // Re-issue the doMove on Tier 2's CV_REISSUE cadence (~3 s), not every tick: a native doMove
+                        // re-pathed every 0.5 s never settles (each call restarts the search), and it would thrash the
+                        // same hull faster than the road re-issue this escalated from. forceSpeed still governs the
+                        // approach every tick; the move order persists between re-issues.
+                        private _reissueNow = (_regroupTicks mod CV_REISSUE) == 0;
                         {
                             private _me = _x; private _meId = netId _me;
                             private _myProg = _prog getOrDefault [_meId, -1];
@@ -531,14 +537,17 @@ while {
                             // when the route runs out). Clear any path first so the doMove is not fought.
                             private _slot = [_aheadProg max 0, CV_GAP_WANT] call _stationBack;
                             if (_slot isEqualTo []) then { _slot = (getPosATL _ahead) getPos [CV_GAP_WANT, (getDir _ahead) + 180] };
-                            if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
-                            _me doMove _slot;
+                            if (_reissueNow) then {
+                                if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
+                                _me doMove _slot;
+                            };
                             private _off = _me distance2D _slot;
                             _me forceSpeed KMH((_off * 0.6) max 6 min _catchup);
                             // Formed = along-route gap to the hull ahead within one slot + CV_FORMED (closed up).
                             private _gap = if (_myProg < 0 || {_aheadProg < 0}) then { 0 } else { ((_cum select _aheadProg) - (_cum select _myProg)) max 0 };
                             if (_gap > CV_GAP_WANT + CV_FORMED) then { _allFormed = false };
                         } forEach _reformFollowers;
+                        _regroupTicks = _regroupTicks + 1;
                         if (_allFormed) then {
                             // Success: commit the order they formed up in (front = 0), reset issue flags, resume.
                             private _ordered = [_live, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
@@ -675,7 +684,7 @@ while {
                             private _n = (_stuck getOrDefault [_meId, 0]) + 1;
                             _stuck set [_meId, _n];
                             if (_n >= CV_REGROUP_AT && {!_regroup}) then {
-                                _regroup = true;
+                                _regroup = true; _regroupTicks = 0;
                                 if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["regroup triggered by %1 (stuck %2)", _meId, _n]] call fnc_log };
                             };
                         } else {
