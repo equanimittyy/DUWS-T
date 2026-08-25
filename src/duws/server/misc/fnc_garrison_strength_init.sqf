@@ -55,10 +55,10 @@ DUWS_fnc_garrisonSurviving = {
 // the surplus is the pool -- so a site's losses come out of its reserve depth before they thin the
 // garrison. The caller raises the garrison and tops it up from the pool; here is only the accounting.
 //
-// _stand is the standing template, a subset of x1 (default x1). A zone passes a garrison-density-thinned
-// list so fewer patrols stand at once and the trimmed ones fall to the pool; full potential stays mult
-// copies of x1 either way -- density defers force, it does not remove it. A town passes none and gets
-// the whole x1 as before.
+// _stand is the standing template, a subset of x1 (default x1). Both zones and towns pass a
+// garrison-density-thinned list so fewer patrols stand at once and the trimmed ones fall to the pool;
+// full potential stays mult copies of x1 either way -- density defers force, it does not remove it. The
+// default is retained only as the safe fallback for a caller that passes none.
 DUWS_fnc_garrisonDerive = {
 	params ["_key", "_x1", "_mult", ["_stand", []]];
 	if (_stand isEqualTo []) then { _stand = _x1 };

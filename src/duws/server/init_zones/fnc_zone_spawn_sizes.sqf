@@ -252,11 +252,11 @@ DUWS_fnc_zoneSpawnOne = {
     _grp
 };
 
-// The standing garrison a zone fields at once, thinned to garrison_density of its mobile tokens. Only
-// patrol-posture tokens (widepatrol/closepatrol) are held back; dug-in garrison-posture tokens always
-// stand, so a lower density thins the screen without abandoning the strongpoint. The trimmed patrols
-// fall to the reserve pool and lower the group ceiling, so even a x1 zone reinforces back up to this
-// reduced count as its patrols are killed. Thinned evenly across the patrols rather than off the tail,
+// The standing garrison a zone or town fields at once, thinned to garrison_density of its mobile tokens.
+// Only patrol-posture tokens (widepatrol/closepatrol) are held back; dug-in garrison-posture tokens
+// always stand, so a lower density thins the screen without abandoning the strongpoint. The trimmed
+// patrols fall to the reserve pool and lower the group ceiling, so even a x1 site reinforces back up to
+// this reduced count as its patrols are killed. Thinned evenly across the patrols rather than off the tail,
 // so the standing force keeps the composition's mix instead of shedding every vehicle first. Density 1
 // (the default) returns x1 unchanged and the whole feature stays inert.
 DUWS_fnc_zoneDensityStand = {

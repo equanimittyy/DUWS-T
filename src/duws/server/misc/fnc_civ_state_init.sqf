@@ -197,7 +197,8 @@ fnc_town_garrison_reinforce = {
 		if (_tier > 0) then {
 			private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
 			private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-			[_key, _x1, _mult] call DUWS_fnc_garrisonDerive;
+			private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
+			[_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
 		};
 	};
 	private _new = [_key] call DUWS_fnc_garrisonStrength;
