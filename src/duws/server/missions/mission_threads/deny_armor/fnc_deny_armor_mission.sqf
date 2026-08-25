@@ -113,7 +113,13 @@ while { _convoyStart isEqualTo [] } do {
     private _roads = _entry nearRoads _roadR;
     if !(_roads isEqualTo []) then {
         private _cand = getPosATL (_roads select 0);
-        if (_spin > 60 || {!([_cand, _targetpos] call fnc_route_has_water)}) then { _convoyStart = _cand };
+        // Never seat the column inside BLUFOR's area of influence (HQ, a FOB, a held zone, a banded
+        // town): a convoy forming up in the player's own bubble is cut down by the garrison the instant
+        // it spawns and the mission auto-wins with the player nowhere near. Hard constraint, ANDed so the
+        // spin cap that waives the dry-route preference below never waives this. The tank/objective is
+        // already sited clear of the bubble; this keeps the offset spawn clear too.
+        if (!([_cand] call fnc_aoi_blufor_covers)
+            && {_spin > 60 || {!([_cand, _targetpos] call fnc_route_has_water)}}) then { _convoyStart = _cand };
     };
     if (_spin % 6 == 0) then { _roadR = _roadR + 200 };
 };
