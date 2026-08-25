@@ -67,6 +67,7 @@ private _build = {
         // Slot 0 is the column front (convoy_layout lays lead-first, the driver picks the frontmost as
         // lead), so it takes the distinct lead class; the other two share _vehClass.
         private _class = [_vehClass, _leadClass] select (_i == 0);
+        _sp = [_sp, _class] call fnc_convoy_fit;
         private _r = [_sp, _sd, _class, EAST] call BIS_fnc_spawnVehicle;
         (_r select 0) setDir _sd;
         (_r select 2) deleteGroupWhenEmpty true;

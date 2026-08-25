@@ -145,6 +145,7 @@ private _laid = [_route0, 6, 22] call fnc_convoy_slots;
 // stranding the overflow to walk in from 1 km. Crew load first, so the mission-critical three ride.
 private _riders = _crewUnits + _teamUnits;
 (_laid select 0) params ["_t0p", "_t0d"];
+_t0p = [_t0p, opfor_TRANS_TRUCK_X] call fnc_convoy_fit;
 private _truckSpawn = [_t0p, _t0d, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
 private _truck = _truckSpawn select 0;                 // lead truck, watched for the disembark trigger
 _truck setDir _t0d;
@@ -154,6 +155,7 @@ private _truckGrps = [_truckSpawn select 2];
     private _cur = _trucks select (count _trucks - 1);
     if (_cur emptyPositions "cargo" == 0) then {
         (_laid select (count _trucks min 4)) params ["_tp", "_td"];   // next free slot; cap at 4 so the escort keeps the tail
+        _tp = [_tp, opfor_TRANS_TRUCK_X] call fnc_convoy_fit;
         private _extra = [_tp, _td, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
         _cur = _extra select 0;
         _cur setDir _td;
@@ -169,6 +171,7 @@ private _truckGrps = [_truckSpawn select 2];
 private _escortPool = ["car", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
 private _escortClass = if (_escortPool isEqualTo []) then { opfor_ARMED_CAR1_X } else { [selectRandom _escortPool] call DUWS_fnc_tokenClass };
 (_laid select 5) params ["_ep", "_ed"];
+_ep = [_ep, _escortClass] call fnc_convoy_fit;
 private _escortSpawn = [_ep, _ed, _escortClass, EAST] call BIS_fnc_spawnVehicle;
 (_escortSpawn select 0) setDir _ed;
 private _escortGrp = _escortSpawn select 2;

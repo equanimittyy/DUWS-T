@@ -104,6 +104,7 @@ private _spawnLine = {
     private _vehs = [];
     {
         (_slots select _forEachIndex) params ["_sp", "_sd"];
+        _sp = [_sp, _x] call fnc_convoy_fit;
         private _r = [_sp, _sd, _x, EAST] call BIS_fnc_spawnVehicle;
         (_r select 0) setDir _sd;
         (_r select 2) deleteGroupWhenEmpty true;
@@ -212,12 +213,15 @@ for "_i" from 0 to 2 do {
         _hvtColGrp = createGroup EAST;
         {
             (_slots select _x) params ["_sp", "_sd"];
-            private _r = [_sp, _sd, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
+            private _ec = call _rollEsc;
+            _sp = [_sp, _ec] call fnc_convoy_fit;
+            private _r = [_sp, _sd, _ec, EAST] call BIS_fnc_spawnVehicle;
             (_r select 0) setDir _sd;
             (_r select 2) deleteGroupWhenEmpty true;
             (_r select 1) joinSilent _hvtColGrp;
         } forEach [0, 2];
         (_slots select 1) params ["_cp", "_cd"];
+        _cp = [_cp, _hvtCarClass] call fnc_convoy_fit;
         _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
         _car setDir _cd;
         private _driver = _hvtColGrp createUnit [opfor_SOLDIER_X, _cp, [], 0, "NONE"];

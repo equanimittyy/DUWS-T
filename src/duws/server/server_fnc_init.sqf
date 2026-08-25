@@ -115,6 +115,7 @@ fnc_mission_run = compile preprocessFileLineNumbers "duws\server\missions\fnc_mi
 fnc_convoy_path = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_path.sqf";
 fnc_convoy_slots = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_slots.sqf";
 fnc_convoy_drive = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_drive.sqf";
+fnc_convoy_fit = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_fit.sqf";
 
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
