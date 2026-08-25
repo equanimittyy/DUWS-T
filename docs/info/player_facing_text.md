@@ -106,17 +106,28 @@ of them.**
 
 | Surface | Command | Use it for | Length |
 |---|---|---|---|
-| Hint box | `hint` | the ordinary case: anything answering one player, at the moment they did something | wraps, no limit |
+| Hint box | `hint` | a gameplay directive or a refusal answering one player — an instruction to act on, a price, a gate — anything with no speaker | wraps, no limit |
 | Notification card | `BIS_fnc_showNotification` | the important case: a change of state the whole team is told about | 60 characters, clipped |
 
-The hint box is the default. It answers the player who acted — a refusal, a price, a result they
-asked for — and it wraps, so the wording is free. A notification card is for news: something the
-campaign did that every player has to know, whether or not they were the one who triggered it.
-Reach for it when the audience is the team; if the audience is one player, it is a hint.
+**Prefer the radio over the hint box.** A line a callsign would plausibly speak — a fire mission
+called, a transport inbound or on station, an aircraft shot down, a drop delivered, a fire mission
+complete — is voiced on the net through `fnc_duws_dialogue` (SUB-NET for a support callsign, NET for
+Overlord), not printed as a hint. The hint box is not the default surface for status: it is reserved
+for **gameplay directives** — the things the player reads in order to act, such as designating with
+the laser, clicking the map to set a route, picking a valid lift target, keeping clear of enemy
+ground, or the access key for a called-in element — together with the refusals, prices and gate
+messages the request menu answers with, which have no speaker and no place on the radio. Decide by
+whether the message is something to act on (hint) or something that happened and someone could say
+(radio).
 
-**Never fire both for one event.** The same sentence in two boxes reads as two things happening, and
-it forces the wording down to the card's 60 characters for no gain — the hint had no limit and did
-not need it. A message that deserves the card gets the card alone.
+A notification card is for news: something the campaign did that every player has to know, whether or
+not they were the one who triggered it. Reach for it when the audience is the team; if the audience is
+one player, it is a hint or a radio line by the rule above.
+
+**Never fire the same event on two surfaces.** One sentence in two boxes reads as two things
+happening, and a hint doubling a voiced radio line, or a card doubling a hint, buys nothing — the
+card clips at 60 characters where the hint had no limit, and the radio already said it. An event
+picks one surface.
 
 **One exception stands, and it is the economy.** `CPaddedattrition`
 (`server/server_init.sqf`) pays kill income to each player individually and tells each of them
@@ -313,8 +324,11 @@ broadcast again, or N clients each send to N. Like every client-called support, 
 JIP client can be handed a line before its own init has run.
 
 **A result with a persona to voice it goes to dialogue, not a hint.** The informant win is Overlord's
-line; the fail, which has no one to say it, is a plain hint. Pick by whether someone is there to
-speak — but do not double a voiced line with a hint that repeats it.
+line; the fail, which has no one to say it, is a plain hint. The support callouts are the same call —
+inbound, on station, shot down, drop delivered, fire mission complete each have a callsign to speak
+them, so they belong on the net, not in the hint box, which is left for the directive the player acts
+on. Pick by whether someone is there to speak — but do not double a voiced line with a hint that
+repeats it.
 
 ## Side-mission briefings carry their own reward block
 
