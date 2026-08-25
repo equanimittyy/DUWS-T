@@ -46,10 +46,22 @@ kept out of the headless VM on purpose (`localize`/chat/UI), so a missing table 
 
 ## Supply drop (Courier 1-1)
 
+Supply drop is the closest thing here to a clean reference flow, and the shape the others should copy:
+a request on the net, a callsign that works the tasking on SUB-NET, and delivery marked on the player's
+own surface. Two gaps keep it from being the model outright:
+
+1. **Request has no answer.** Alpha 1-1 calls the drop up to Overlord, and the next voice on the net is
+   already Courier 1-1 — Overlord never acknowledges. A request on NET should draw an Overlord reply on
+   NET before the tasking callsign speaks (the `supplydropack` bullet below).
+2. **Delivery double-fires.** The crate landing throws both a hint box and an A3 card (green smoke). It
+   should be the hint box alone: the A3 card is reserved for important team news, not a routine crate
+   marker every player already sees smoke for. Same call for the paradrop / vehicle-drop delivery cards.
+
+- request beat — Alpha 1-1 calls the drop to Overlord; Overlord does not answer today. Add **Overlord** / NET ack before Courier keys up — new `supplydropack` (the reference gap: a net request with no acknowledgement)
 - `y91vei53` / `17hh9rx4` — drop hint "Supply Drop Inbound. ETA: 1 min." → **Courier 1-1** / SUB-NET: "This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds." — existing `supplydropcallend` (note: hint said one minute, radio says forty seconds — pick one)
 - `zhiugl0g` — drop hint "Supply Drop On Station." → **Courier 1-1** / SUB-NET: "This is Courier 1-1, on station over your position. Crate coming down." — new `supplydroponstation`
 - `supplydropfail` — drop hint "The transport was shot down. Supply drop failed." → **Overlord** / NET: "Be advised, Alpha 1-1, Courier 1-1 is down. Your supply drop is off." — new `supplydropdown`
-- `wdttb5b8` — drop hint "A supply crate has been dropped near your location." → **Courier 1-1** / SUB-NET: "Crate's on the ground at your position. Courier 1-1 out." — new `supplydropdelivered` (A3 green-smoke card also fires — decision)
+- `wdttb5b8` — delivery beat: keep the hint box, drop the A3 green-smoke card (card reserved for important news). Optionally add a **Courier 1-1** / SUB-NET sign-off: "Crate's on the ground at your position. Courier 1-1 out." — new `supplydropdelivered`
 
 ## Paradrop (Chalk 2-1)
 
@@ -93,7 +105,7 @@ Borderline: `liftwp_incomplete` "Route incomplete, tasking aborted" — kept as 
 
 1. Arty air timing — accept the `artyair_inbound` / `0jegiaf4` rewrites that add the countdown, or let air lose the numbers.
 2. Vehicle-drop transport callsign — mint one (parallel to Courier / Chalk / Chariot) for `vehdroponstation`, `vehdropdelivered`, or route them through Overlord.
-3. Delivered lines vs the A3 card — supply and veh drop each already fire a green-smoke card; add the Courier / transport radio line as well, replace the card with it, or keep the card alone.
+3. Delivered lines vs the A3 card — **decided:** the A3 card is reserved for important team news, so drop the green-smoke card on routine supply / paradrop / veh-drop delivery and keep the hint box. Still open only: whether to also add the Courier / transport SUB-NET sign-off, or leave the delivery on the hint box alone.
 4. Paradrop "under command" — the start radio + card already say it; drop the hint with no new line, or move a confirmation to the end beat.
 5. UAV `6u8qilfh` — voice it (Allseer) or keep the hint.
 6. Supply ETA wording — hint said one minute, radio says forty seconds; unify.
