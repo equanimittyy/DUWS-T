@@ -246,7 +246,9 @@ for "_i" from 0 to 2 do {
         }];
         _hvt addHeadgear "H_Beret_blk";
         _hvt addMagazineGlobal "FileTopSecret";
-        _hvtColGrp setBehaviour "AWARE";
+        // SAFE so the column cruises relaxed; the engine promotes it to COMBAT natively on contact, which is
+        // what the monitor's peel reads (behaviour == COMBAT) to break the car away and send it running.
+        _hvtColGrp setBehaviour "SAFE";
         _hvtColGrp setCombatMode "YELLOW";
         _hvtColGrp setSpeedMode "LIMITED";
         _hvtColGrp setFormation "COLUMN";
@@ -256,7 +258,7 @@ for "_i" from 0 to 2 do {
         _groups pushBack _hvtColGrp;
         _vias pushBack _via;
     } else {
-        ([[call _rollEsc, call _rollEsc, call _rollEsc], _route0, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
+        ([[call _rollEsc, call _rollEsc, call _rollEsc], _route0, "SAFE", "LIMITED"] call _spawnLine) params ["_grp"];
         _groups pushBack _grp;
         _vias pushBack _via;
     };
@@ -441,6 +443,9 @@ waitUntil {
         _car setDriveOnPath [];
         _car forceSpeed -1;
         _car forceFollowRoad false;
+        // The column driver disabled the car driver's FSM to hold setDriveOnPath, and only re-enables at its
+        // own teardown -- give it back here or the car cannot path its escape waypoint until then.
+        (driver _car) enableAI "FSM";
         // He has committed to his own run, so Allseer calls him out by name and drops a dedicated HVT marker
         // on the car (moved on each update). This is the reveal the hunt built to: the player now knows
         // which hull is his.

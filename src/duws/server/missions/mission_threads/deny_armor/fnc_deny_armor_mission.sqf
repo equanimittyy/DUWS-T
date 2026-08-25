@@ -186,17 +186,33 @@ private _convoyGrp = _truckGrps select 0;
 
 // The convoy's vehicles and their crews, snapshotted for the reliability layer and the under-attack test
 // below. _trucks is final here (a second truck, raised on cargo overflow, was pushed during loading above).
-// The crews MUST be captured now, before the driver spawns: fnc_convoy_drive splits each follower hull into
-// its own group for the drive, so `units _convoyGrp` after that holds only the lead -- these unit objects
-// stay valid wherever they are regrouped, so a driver shot out of any hull is still seen dead.
+// Snapshot the crews now, before the repaired tank's crew is folded into the group on the way home, so this
+// stays the convoy that set out. These unit objects hold wherever they are later regrouped, so a driver shot
+// out of any hull is still seen dead.
 private _convoyVeh = _trucks + [_escortSpawn select 0];
 private _convoyCrew = units _convoyGrp;
 
+// Contact flag for the under-attack test below. The convoy cruises SAFE and its gunners fight, so the engine
+// promotes it to COMBAT on contact (the test below reads that too); the HandleDamage handler backs it up as
+// the earliest, surest "taking fire" signal -- it fires on the physics of a round landing, even from a shooter
+// the crew never spotted, and the instigator tells enemy fire from a hull's own terrain scrape (a null
+// instigator). Returns the incoming damage unchanged so it never alters durability.
+{
+    _x setVariable ["DA_underFire", false];
+    _x addEventHandler ["HandleDamage", {
+        params ["_unit", "", "_damage", "", "", "", "_instigator"];
+        if (!isNull _instigator && {side _instigator == west}) then { _unit setVariable ["DA_underFire", true] };
+        _damage
+    }];
+} forEach _convoyVeh;
+
 { [_x] call fnc_mission_claim } forEach [_crewGrp, _teamGrp, _convoyGrp];
 
-// Drive to the tank at a pace the player can race: LIMITED, AWARE so they still fight if jumped, COLUMN to hold
-// order. Loose completionRadius so the lead halts near the tank rather than shouldering it.
-_convoyGrp setBehaviour "AWARE";
+// Drive to the tank at a pace the player can race: LIMITED, COLUMN to hold order. SAFE so the column cruises
+// relaxed rather than fighting spotted enemies preemptively; the engine promotes it out of SAFE to COMBAT the
+// moment it detects real contact, which the under-attack test reads to release the driver and pour the team
+// out. Loose completionRadius so the lead halts near the tank rather than shouldering it.
+_convoyGrp setBehaviour "SAFE";
 _convoyGrp setCombatMode "YELLOW";
 _convoyGrp setSpeedMode "LIMITED";
 _convoyGrp setFormation "COLUMN";
@@ -250,14 +266,16 @@ private _finish = {
 // crew drives the repaired tank home, or on the deadline. Between: the crew dismount once a transport
 // reaches the tank (or is destroyed) and work the hull; the security team stays mounted unless hit; the
 // clock advances only while a crewman is at the tank and no player has taken it.
-// Under attack = the column has gone COMBAT (spotted or engaged), a convoy vehicle is damaged or
-// destroyed, or any man is down. The COMBAT clause is load-bearing: fnc_convoy_drive suppresses the
-// engine's bail-on-contact (setUnloadInCombat [false,false]) to hold the riders through the run, so
-// without it the team sits tight until a truck crosses the damage bar -- and a truck shrugs off small
-// arms. So the team rides an untouched run out with the tank, and pours out the moment contact lands.
+// Under attack = the column has spotted the enemy and gone COMBAT, OR a convoy vehicle has taken enemy fire
+// (the HandleDamage flag above) or is destroyed, or any man is down. The convoy drives SAFE with only the
+// drivers' FSM off, so it perceives and its gunners fight -- the engine promotes it out of SAFE to COMBAT on
+// contact, which the behaviour test catches; the fire flag backs it up, flagging the first round the instant a
+// shooter the crew never spotted lands one, so a truck shrugging off small arms cannot ride the ambush out.
+// Tripping this releases the convoy driver (below), whose exit re-enables the drivers' FSM so the escort
+// manoeuvres and fights natively rather than staying force-marched on its path.
 private _underAttack = {
     (!isNull _convoyGrp && {behaviour (leader _convoyGrp) == "COMBAT"})
-    || {(_convoyVeh findIf { !alive _x || {damage _x > 0.1} }) >= 0}
+    || {(_convoyVeh findIf { !alive _x || {_x getVariable ["DA_underFire", false]} }) >= 0}
     || {(_convoyCrew findIf { !alive _x }) >= 0}
     || {((_crewUnits + _teamUnits) findIf { !alive _x }) >= 0}
 };
@@ -356,7 +374,7 @@ while { true } do {
                     // LIMITED, an ambushed one races on FULL. Same casualty/damage test (_underAttack)
                     // that pours the security team out.
                     private _homeSpeed = ["LIMITED", "FULL"] select (call _underAttack);
-                    _convoyGrp setBehaviour "AWARE";
+                    _convoyGrp setBehaviour "SAFE";
                     _convoyGrp setCombatMode "YELLOW";
                     _convoyGrp setSpeedMode _homeSpeed;
                     _convoyGrp setFormation "COLUMN";
