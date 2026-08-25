@@ -49,6 +49,22 @@ private _hdg = if (_spanIdx >= 1 && {(_route select 0) distance2D (_route select
     if (_n >= 2) then { (_route select 0) getDir (_route select 1) } else { 0 }
 };
 
+// DEBUG (silent unless duws_log_level is 4): the min pairwise separation of the returned slots and which
+// branch produced them, so a report of hulls spawning stacked can be told apart from a downstream pile (a
+// regroup, a junction) -- a minSep well below _spacing means the seating itself overlapped.
+private _fnc_dbgSlots = {
+    params ["_slots", "_branch"];
+    if (duws_log_level >= 4) then {
+        private _minD = 1e9;
+        for "_i" from 0 to (count _slots - 2) do {
+            for "_j" from (_i + 1) to (count _slots - 1) do {
+                _minD = _minD min ((_slots select _i select 0) distance2D (_slots select _j select 0));
+            };
+        };
+        ["DEBUG", "CONVOY", format ["slots %1: n=%2 minSep=%3 want=%4 hdg=%5", _branch, count _slots, round _minD, _spacing, round _hdg]] call fnc_log;
+    };
+};
+
 // A node is unfit to seat a hull if it sits in water or hard against a building/rock/wall. A road node is clear,
 // so this only rejects the off-road stretches (a roadless start, or a gap the search bridged off-road).
 private _fnc_unfit = {
@@ -74,6 +90,7 @@ if (count _picked == _count && {(_picked findIf { [_x] call _fnc_unfit }) < 0}) 
     reverse _picked;   // start-outward -> lead first
     private _slots = [];
     { _slots pushBack [_x, _hdg] } forEach _picked;
+    [_slots, "nodes"] call _fnc_dbgSlots;
     _slots
 };
 
@@ -82,4 +99,5 @@ if (count _picked == _count && {(_picked findIf { [_x] call _fnc_unfit }) < 0}) 
 // travel), so the caller always gets _count slots and no hull is seated in water or a building.
 private _slots = [];
 for "_k" from 0 to (_count - 1) do { _slots pushBack [(_route select 0) getPos [_k * _spacing, _hdg + 180], _hdg] };
+[_slots, "fallback"] call _fnc_dbgSlots;
 _slots
