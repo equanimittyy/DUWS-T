@@ -123,6 +123,8 @@ private _stuck  = createHashMap;  // netId -> consecutive wedged ticks (per hull
 private _issued = createHashMap;  // netId -> last slice start index handed to setDriveOnPath (-999 = force)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 private _topspd = createHashMap;  // netId -> config top speed (km/h), cached once: the convoy paces to the min
+private _pos    = createHashMap;  // netId -> FIXED convoy position (0 = front); ordering never re-derives from live progress
+private _nextPos = 0;             // next fixed position to hand out: spawn batch front-to-back, then the rear for a joiner
 private _dumped = false;          // one-time level-4 dump of the waypoint list, so a stuck start is diagnosable
 // A caller that pre-seats its column ON the route hands that route in DUWS_convoy_route0: the driver reuses it
 // for the first leg (no recompute) and skips the spawn-ordering snap (the column already sits on it, in order).
@@ -394,17 +396,26 @@ while {
             private _prog = createHashMap;
             { private _v = _x; _prog set [netId _v, [getPosATL _v] call _progressOf] } forEach _live;
 
-            // Lead = the frontmost hull (highest route progress). Pin it rather than track a separate lead; the
-            // A3 leader is arbitrary, and after a death Arma may migrate it to a REAR hull. Re-pick only when
-            // the current lead stops being a live driving hull. Between deaths nothing re-picks: no churn.
-            private _lead = _group getVariable ["cv_lead", objNull];
-            if (isNull _lead || {!(_lead in _live)}) then {
-                private _front = objNull; private _bestP = -2;
-                { private _p = _prog getOrDefault [netId _x, -1]; if (_p > _bestP) then { _bestP = _p; _front = _x } } forEach _live;
-                if (isNull _front) then { _front = _live select 0 };
-                _lead = _front;
-                _group setVariable ["cv_lead", _lead];
+            // Fixed convoy position per hull (0 = front), assigned once and never re-derived from live progress:
+            // the column's order stays put, so a hull that stalls or briefly reverses keeps ITS slot instead of
+            // being reordered, and the teleport realign (below) seats everyone in this order rather than in the
+            // scrambled progress order a stall produces. The spawn batch all appears the first tick, ordered by
+            // how the caller seated it on the route (front hull highest progress); a later joiner (the repaired
+            // deny tank) appears alone and takes the next rear slot.
+            private _unassigned = _live select { isNil { _pos get (netId _x) } };
+            if (_unassigned isNotEqualTo []) then {
+                { _pos set [netId _x, _nextPos]; _nextPos = _nextPos + 1 } forEach
+                    ([_unassigned, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy);
             };
+
+            // Lead = the live hull with the lowest fixed position (the frontmost SEATED hull), not the frontmost
+            // by live progress: a stalled or briefly-reversing lead must not hand its slot to a hull behind it,
+            // which would then drive a backward route slice. Only the front hull's death moves the lead to the
+            // next position. cv_lead is read by callers (HVT's tracking marker).
+            private _lead = objNull; private _bestPos = 1e9;
+            { private _p = _pos getOrDefault [netId _x, 1e9]; if (_p < _bestPos) then { _bestPos = _p; _lead = _x } } forEach _live;
+            if (isNull _lead) then { _lead = _live select 0 };
+            _group setVariable ["cv_lead", _lead];
             if (!isNull _lead && {leader _group != driver _lead}) then { _group selectLeader (driver _lead) };
 
             if (!isNull _lead && {alive _lead}) then {
@@ -481,15 +492,19 @@ while {
                     private _meId  = netId _me;
                     private _myProg = _prog getOrDefault [_meId, -1];
 
-                    // The hull directly ahead: least route progress strictly greater than mine, else the lead.
+                    // The hull directly ahead = the next LOWER fixed position that is live (the one it trails in
+                    // the seated column), else the lead. Fixed order, so spacing holds the column shape even when
+                    // a stall scrambles live progress; its progress then feeds the along-route gap below.
+                    private _myPos = _pos getOrDefault [_meId, 1e9];
                     private _ahead = _lead;
-                    private _aheadProg = _leadProg;
+                    private _aheadPos = -1;
                     {
                         if (_x != _me) then {
-                            private _p = _prog getOrDefault [netId _x, -1];
-                            if (_p > _myProg && {_p < _aheadProg}) then { _aheadProg = _p; _ahead = _x };
+                            private _p = _pos getOrDefault [netId _x, -1];
+                            if (_p < _myPos && {_p > _aheadPos}) then { _aheadPos = _p; _ahead = _x };
                         };
                     } forEach _liveFollowers;
+                    private _aheadProg = _prog getOrDefault [netId _ahead, -1];
 
                     // Along-route gap (real arc length via _cum), not straight-line: on a bend the hull
                     // ahead is nearer as-the-crow-flies than along the road, which would false-brake.
@@ -573,22 +588,22 @@ while {
                     };
                 };
 
-                // RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the
-                // breadcrumb in trail order and teleport it there. Fires when a member is wedged longer than
+                // RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the route in
+                // FIXED-position order and teleport it there. Fires when a member is wedged longer than
                 // CV_STUCK_MAX ticks (it will not free itself), and once at spawn (callers spawn their hulls in
                 // a rough line, not already trailing on the route). Whole-column only, unconditional (a mangled
                 // column is worse than a blink); the anchor is a loosely straight stretch (_fnc_straightAnchor)
-                // so the column is not realigned across a bend. Hulls are placed in current route-progress
-                // order, so the frontmost leads and the rest trail as they sit -- at spawn that is the laid-out
-                // order (e.g. HVT's car keeps its middle slot).
+                // so the column is not realigned across a bend. Hulls are seated by their FIXED position (front
+                // first), NOT by live progress: a stall that scrambled progress must not reorder the column here,
+                // or a rear hull lands in front facing the wrong way (this is what jumped the HVT car's slot).
                 private _maxStuck = 0;
                 { _maxStuck = _maxStuck max (_stuck getOrDefault [netId _x, 0]) } forEach _live;
                 if (_maxStuck >= CV_STUCK_MAX || _needInitOrder) then {
-                    private _colLen = ((count _liveFollowers) + 1) * CV_GAP_WANT;
+                    private _colLen = (count _live) * CV_GAP_WANT;
                     private _anchorIdx = [(_leadProg max 0) + 2, _colLen] call _fnc_straightAnchor;
                     private _anchor = _route select _anchorIdx;
                     private _face = if (_anchorIdx >= 1) then { (_route select (_anchorIdx - 1)) getDir _anchor } else { getDir _lead };
-                    private _ordered = [_liveFollowers, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
+                    private _ordered = [_live, [], { _pos getOrDefault [netId _x, 1e9] }, "ASCEND"] call BIS_fnc_sortBy;
                     if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["WHOLE-COLUMN SNAP grp=%1 (%2, anchor=%3)", _group, (if (_needInitOrder) then { "spawn order" } else { format ["stuck %1 ticks", _maxStuck] }), _anchorIdx]] call fnc_log };
                     _needInitOrder = false;
                     {
@@ -599,7 +614,7 @@ while {
                         _gapIssued set [netId _x, []];   // _snapHull cleared the path; force a fresh issue in either mode
                         _pathed set [netId _x, false];
                         _stuck  set [netId _x, 0];
-                    } forEach ([_lead] + _ordered);
+                    } forEach _ordered;
                 };
             };
         };
