@@ -544,6 +544,13 @@ while {
                             private _ordered = [_live, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
                             { _pos set [netId _x, _forEachIndex] } forEach _ordered;
                             { _issued set [netId _x, -999]; _gapIssued set [netId _x, []]; _pathed set [netId _x, false]; _stuck set [netId _x, 0] } forEach _live;
+                            // The renumber may have moved the front hull; adopt it as the lead now, not a tick late.
+                            // Everything below this point in the tick (leg advance, teleport trigger) reads _lead, and
+                            // cv_lead / leader _group feed the HVT marker and the next leg's start bootstrap.
+                            _lead = _ordered select 0;
+                            _leadProg = _prog getOrDefault [netId _lead, -1];
+                            _group setVariable ["cv_lead", _lead];
+                            if (leader _group != driver _lead) then { _group selectLeader (driver _lead) };
                             _regroup = false; _regroupLead = objNull;
                             if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["regroup complete grp=%1 neworder=%2", _group, _ordered]] call fnc_log };
                         };
