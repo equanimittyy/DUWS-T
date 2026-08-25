@@ -22,7 +22,13 @@ sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-_markername = format["%1%2vc",round(_centerPos select 0),round(_centerPos select 1)];
+// Unique per scan so two scans on the same point never share a marker namespace
+// (which would stomp each other's circle and dots, and delete them early). Server-
+// only fn; this read+increment has no suspension point, so scheduled calls cannot
+// interleave and hand out a duplicate sequence.
+if (isNil "DUWS_uav_scan_seq") then { DUWS_uav_scan_seq = 0 };
+DUWS_uav_scan_seq = DUWS_uav_scan_seq + 1;
+_markername = format["%1%2vc%3",round(_centerPos select 0),round(_centerPos select 1),DUWS_uav_scan_seq];
 _markerstr = createMarker [str(_markername), _centerPos];
 _markerstr setMarkerShape "ELLIPSE";
 str(_markername) setMarkerBrush "SolidBorder";
