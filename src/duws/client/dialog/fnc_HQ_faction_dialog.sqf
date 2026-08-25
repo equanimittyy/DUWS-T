@@ -114,7 +114,7 @@ _dropdownOPF ctrlAddEventHandler ["LBSelChanged",
 // them because picking a mode refills the OPFOR list, so that control has to exist already.
 // Each entry is [token, label key, description key]; the fill order is the order the handler
 // indexes back into. What each mode still has to take over from the settings it replaces is in
-// docs/game_modes_plan.md.
+// docs/plans/game_modes_plan.md.
 duws_gamemodes = [
 	["duws", "STR_DUWS_T_gamemode_duws", "STR_DUWS_T_gamemode_duws_desc"],
 	["guerilla", "STR_DUWS_T_gamemode_guerilla", "STR_DUWS_T_gamemode_guerilla_desc"],

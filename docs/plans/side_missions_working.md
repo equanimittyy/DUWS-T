@@ -4,10 +4,10 @@ Working SSOT for the side-mission rework: the catalogue of what each mission is 
 actually plays, the reward pricing, and the open design ideas. Mission data itself lives in
 `src/duws/shared/includes/mission_types.hpp` (one row per type, index-aligned with the launcher
 block); this doc is the reasoning behind those numbers, not a second copy of them. The *how-to-add*
-lives in [`docs/info/side_mission_authoring.md`](info/side_mission_authoring.md).
+lives in [`docs/info/side_mission_authoring.md`](../info/side_mission_authoring.md).
 
 The reward *pipeline* (how a base CP/AP payout is multiplied and credited) is not restated here --
-see [`docs/info/economy.md`](info/economy.md#faucets) and
+see [`docs/info/economy.md`](../info/economy.md#faucets) and
 [`docs/economy_second_pass.md`](economy_second_pass.md). In short: a thread's base CP/AP
 (`mission_types.hpp`) is scaled by `cp_reward_multiplier` (campaign 1-5), a ×1.5 civs-off CP lift,
 and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited in
@@ -17,7 +17,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 19 types (indices 0-18). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
-[`side_mission_authoring.md`](info/side_mission_authoring.md#the-design-bar)).
+[`side_mission_authoring.md`](../info/side_mission_authoring.md#the-design-bar)).
 
 **Hand-made / reworked (a distinct verb, bespoke scripting):**
 

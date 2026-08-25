@@ -277,13 +277,13 @@ broadcasts *"The game has been saved"* to every player unconditionally
 everyone; if they do, it is correct as written. Do not gate it on `isMultiplayer` before
 knowing which — the gate would suppress a true message in the case where saving works.
 
-This matters beyond the save button: [`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md)
+This matters beyond the save button: [`docs/plans/campaign_persistence_plan.md`](docs/plans/campaign_persistence_plan.md)
 opens by asserting the current save cannot work, and that assertion rests on the same
 unverified premise.
 
 ## Does a dedicated server read its profile namespace back?
 
-Unverified here, and [`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md)
+Unverified here, and [`docs/plans/campaign_persistence_plan.md`](docs/plans/campaign_persistence_plan.md)
 rests on the answer being yes. If it is no, the store changes and much of that plan changes with
 it, so this runs before any of it is built.
 
@@ -325,7 +325,7 @@ persistence on a dedicated server a manual act rather than an automatic one.
 ## Can a dedicated server boot a campaign with nobody connected?
 
 `-autoInit` starts the mission at server boot with no player, and the unattended restart in
-[`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md#nobody-at-the-screen)
+[`docs/plans/campaign_persistence_plan.md`](docs/plans/campaign_persistence_plan.md#nobody-at-the-screen)
 assumes that path already works. Two boot steps run against an empty server and neither has been
 watched doing it. Both are minutes to check, and either one alone makes an unattended restart
 useless.
@@ -517,7 +517,7 @@ other way, so late-game CP outruns anything to spend it on. This is the central 
 if a demanding economy is the goal, the levers are per-zone/garrison upkeep, diminishing per-zone passive
 scale, or a CP cap. Paying it in AP instead was considered and rejected — a holdings-scaled AP faucet
 feeds the escalation ladder, and the enemy starts holding the map
-([`docs/economy_second_pass.md`](docs/economy_second_pass.md)).
+([`docs/plans/economy_second_pass.md`](docs/plans/economy_second_pass.md)).
 
 **Enemy-loot → intel-analysis is an unbounded, cooldown-free faucet.** `fnc_addRandomLoot.sqf` puts
 `Files` (2 CP) / `Wallet_ID` (1.5 CP) on ~80% of spawned enemies, and terminal analysis
@@ -538,7 +538,7 @@ director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
 (`fnc_WARCOM_blu_assault.sqf:19-33`) and mission-guard armour above 100 (`fnc_missionPatrols.sqf:30`)
 — and the only subtractions are losing a zone and the AP→CP converter. The enemy half of that ladder
 is a single rung now; the rest went with the WARCOM OPFOR spawners. Turning it into a currency both sides spend, without breaking the ladder, is
-[`docs/economy_second_pass.md`](docs/economy_second_pass.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
+[`docs/plans/economy_second_pass.md`](docs/plans/economy_second_pass.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
 30 min with every town banded, against 25 for capturing a 500 m zone and 50 for a 1000 m one — worth is
 `round(radius/10)` (`fnc_locatorzones_random.sqf:56`), halved by `zone_ap_swing`. So at its ceiling
 civilian income substitutes for a capture rather than supplementing one; how far below that ceiling a real

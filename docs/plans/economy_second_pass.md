@@ -3,7 +3,7 @@
 The first pass shipped the territory-type economy: towns pay their holder (BLUFOR CP, OPFOR AP),
 zones trickle Army Power to both sides, a zone's first capture pays a one-time liberation bonus,
 advanced supports carry a dual CP+AP price, and vehicles are priced CP-only on a metadata scale.
-The shipped machinery is documented in [`info/economy.md`](info/economy.md) — which still describes
+The shipped machinery is documented in [`info/economy.md`](../info/economy.md) — which still describes
 the pre-reroute model in several places and wants a correcting pass of its own.
 
 This document is the economy's design of record and the backlog the first pass deliberately left.
@@ -122,7 +122,7 @@ at its own application site, never at the writer.
 
 Reputation is the deliberate exception and is not a pool in this sense: it is the only figure
 taking fractional deltas, and `fnc_town_rep_adjust` owns its rounding for the reason recorded in
-[`info/economy.md`](info/economy.md#authority-one-server-side-writer-per-pool).
+[`info/economy.md`](../info/economy.md#authority-one-server-side-writer-per-pool).
 
 ## Command Points
 
@@ -207,7 +207,7 @@ collapses.
 
 The budget is `support_max_slots` (8) consumable supports per player, and which rows draw on it is
 now the catalogue's `PERM`/`CONS` column rather than a per-case habit — see
-[`info/economy.md`](info/economy.md#supports-permanent-and-consumable). Mobile HQ's half-in state,
+[`info/economy.md`](../info/economy.md#supports-permanent-and-consumable). Mobile HQ's half-in state,
 where it tested the cap without ever consuming one, was resolved by making it permanent.
 
 **Advanced supports draw on the same slots.** A second currency that bought its own would raise the
@@ -218,7 +218,7 @@ moment AP could bypass it.
 
 Eight permanent slots against seventeen competing rows means a player commits at hour one to a
 shape they cannot evaluate until hour six. The refund is the escape hatch, and its CP half is
-built: [`info/economy.md`](info/economy.md#supports-permanent-and-consumable) has the mechanism,
+built: [`info/economy.md`](../info/economy.md#supports-permanent-and-consumable) has the mechanism,
 including why it pays back the recorded charge rather than the price and why a support that is away
 on a mission cannot be sold.
 
@@ -375,7 +375,7 @@ per-mission balance lever.
 **First capture pays a one-time bonus.** The first time BLUFOR ever takes a zone it pays a one-off
 CP + AP liberation bonus — the marquee reward for opening the map, and where BLUFOR's capture AP now
 comes from. It is tracked in the campaign save as a per-zone first-captured flag
-([`campaign_save_format.md`](campaign_save_format.md)), so a reload, or a zone lost and retaken,
+([`campaign_save_format.md`](../info/campaign_save_format.md)), so a reload, or a zone lost and retaken,
 never pays it twice. That is what makes the anti-farm invariant structural rather than arithmetic:
 BLUFOR earns a zone's AP exactly once, so lose-then-retake yields no fresh AP however often it
 flips. It maps onto the two capture paths already in the tree — `fnc_captured.sqf` is the first-ever
@@ -394,7 +394,7 @@ event-driven faucet never had.
 **The two faucets sit on different clocks.** The trickle rides the economy tick's `sleep 1800`,
 which `setTimeMultiplier` does not scale; side-mission cooldowns are stamped against `dateToNumber
 date`, which it does
-([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 At the host's higher multipliers a mission type recharges many times faster while the trickle pays
 at an unchanged real rate, so missions come to dominate and the 75/25 ordering inverts. The tick
 stays on `sleep 1800`: every share here holds at `time_Multiplier = 1`, and the high-multiplier
@@ -562,7 +562,7 @@ explicit.
 one purchase: the first can succeed and the second fail, leaving the player charged for nothing,
 and in co-op another player's spend can land between them. That is the same race the single-pool
 handshake was written to close
-([`info/economy.md`](info/economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
+([`info/economy.md`](../info/economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
 reopened one level up.
 
 `fnc_pool_try_spend` gains a dual case that tests both pools and debits both as adjacent
@@ -672,7 +672,7 @@ still per-client, and that is now correct rather than a gap — it counts one pl
 
 One thing the flags rest on is still unverified: defaulting behind `isNil` preserves a broadcast
 value only if `publicVariable` values are delivered to joining clients at all, which is an open
-engine question in [`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md). If they are not, the defaults preserve
+engine question in [`KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md). If they are not, the defaults preserve
 nothing and the team can still be charged twice for the same permanent unlock. The server mirror
 does not close that on its own: it records what the team owns, but nothing yet reads it back to a
 joining client.

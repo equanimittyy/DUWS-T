@@ -99,7 +99,7 @@ The `<name>.<world>.pbo` filename is load-bearing — Arma reads the terrain out
 
 **Choose the profile directory deliberately.** It is where the server writes its own
 `.vars.Arma3Profile`, which is where campaign saves will live once
-[`../campaign_persistence_plan.md`](../campaign_persistence_plan.md) lands: the directory you back up
+[`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md) lands: the directory you back up
 and copy a save out of. **Then keep `-profiles=` and `-name=` identical on every restart.** The
 profile namespace is read back for the profile that wrote it, so a server whose profile identity
 moves between starts files each session's save under a different one and finds nothing on the next
@@ -136,7 +136,7 @@ running server, and it is why anything a host might want to tune belongs there r
 **`persistent = 1` changes what the mission has to cope with.** Without it the mission ends the
 moment the last player disconnects and everything in memory goes with it; with it the mission keeps
 running with nobody connected. Both cases are covered in
-[`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#when-the-save-is-written-and-what-happens-with-nobody-on).
+[`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#when-the-save-is-written-and-what-happens-with-nobody-on).
 
 ```text
 arma3server_x64.exe -server -config=server.cfg -profiles=serverprofile -name=server -port=2302 -autoInit

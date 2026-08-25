@@ -15,7 +15,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The two inner `if (isServer)` blocks cover only the kill-income and flare handlers | `server/server_init.sqf:472`, inner guards `:195,281` |
 | No ownership transfer exists anywhere. `setGroupOwner` and `setOwner` appear nowhere in `server/`, `client/` or `shared/` | — |
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
-| Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
+| Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md) |
 | `setSkill` needs locality, so HC-owned units would silently never receive skill settings | `server/misc/fnc_AI_Master_Control.sqf:5,22,26` |
 
 The abbreviation is also overloaded, which matters because the file a newcomer will open first
@@ -90,7 +90,7 @@ is server-owned that resolves to the server and behaves exactly as it does today
 is safe before an HC ever connects.
 
 Note that `remoteExec` to your own machine runs a frame later
-([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md)), so any test-then-act sequence
+([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md)), so any test-then-act sequence
 around a waypoint call must not assume the waypoint exists on the next line.
 
 Anything that steers a group by re-issuing `doSuppressiveFire`, `doWatch` or `doMove` every poll,

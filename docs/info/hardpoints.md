@@ -221,5 +221,5 @@ and the enemy's pool would never reach whatever escalation a future commander lo
 it. The director's tick, its three build actions and their AP costs are documented at
 [`opfor_area_of_influence.md#band-siting`](opfor_area_of_influence.md#band-siting); the belief store
 and archetype weighting that would make its band placement target where the player operates, rather
-than sample uniformly, is [`../opcom_plan.md`](../opcom_plan.md)'s to
+than sample uniformly, is [`../opcom_plan.md`](../plans/opcom_plan.md)'s to
 add.

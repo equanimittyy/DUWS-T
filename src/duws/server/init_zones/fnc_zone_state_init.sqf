@@ -121,7 +121,7 @@ fnc_zone_tier_roll = {
 // tier garrison and holds the surplus (mult-1) copies as a pool that refills the garrison to its x1
 // group count as casualties are taken. These are the accounting the capture test, the attrition record
 // and the refill pass all read; the pass, the placement and the hunt orders are fnc_zone_reserve's.
-// The model is docs/info/zone_reserve_reinforcement_plan.md.
+// The model is docs/info/garrison_and_reserves.md.
 
 // The pool is per-awake-session state: seeded by fnc_zone_spawn, spent by the refill pass, cleared on
 // stow and reseeded on the next raise. An ordered token list, popped head-first; empty at multiplier 1

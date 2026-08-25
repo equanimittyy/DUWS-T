@@ -13,7 +13,7 @@
 // records which tokens are destroyed, and everything a site fields derives from full minus lost. A
 // token is lost when its group is wiped -- destroy one tank, lose one tank -- so a mauled zone comes
 // back specifically the units it lost, not thinner everywhere. The model is
-// docs/info/garrison_strength_ledger_plan.md. spawnDiff/tokenListMen resolve at call time, living in
+// docs/info/garrison_and_reserves.md. spawnDiff/tokenListMen resolve at call time, living in
 // fnc_zone_spawn_sizes and fnc_spawn_vocab; every function here runs at gameplay, long after both load.
 
 // The full fighting potential, stamped once at raise (and re-stamped on a town tier buy, which grows

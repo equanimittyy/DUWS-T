@@ -8,7 +8,7 @@ moment. Town reputation is a third pool, per town rather than campaign-wide, and
 town's passive income to a side: CP to a BLUFOR town, AP to an OPFOR one. Vehicle prices come from
 `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over the shipped `blufor_RQST_*` tables —
 see [`faction_system.md`](faction_system.md). The full reroute and the work still open on it are
-[`../economy_second_pass.md`](../economy_second_pass.md).
+[`../economy_second_pass.md`](../plans/economy_second_pass.md).
 
 ## Authority: one server-side writer per pool
 
@@ -251,7 +251,7 @@ only server-side caps read it.
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in
 [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance); the reroute that put AP on the menus
-and the work still open on it are [`../economy_second_pass.md`](../economy_second_pass.md).
+and the work still open on it are [`../economy_second_pass.md`](../plans/economy_second_pass.md).
 
 ## Who may spend
 

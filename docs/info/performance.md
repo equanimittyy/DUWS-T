@@ -101,7 +101,7 @@ builder a second time produces a different zone. Recording the placed result sid
 entirely, and it is why a composition needs no streaming code of its own beyond filing its objects
 through `fnc_duws_keep`. Because the record is built when a composition is stowed rather than when it
 is placed, damage, looted crates and player-moved props are captured as they actually are, and nothing
-outlives the session — [`campaign_persistence_plan.md`](../campaign_persistence_plan.md) gains no save
+outlives the session — [`campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md) gains no save
 input.
 
 Order matters at the despawn end: the garrison pass runs first, then static weapons are crewed out,

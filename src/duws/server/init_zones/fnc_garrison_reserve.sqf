@@ -8,7 +8,7 @@
 // ceiling; the strength ledger is fnc_garrison_strength_init's. Here: the refill pass topping a fought-over
 // site to its x1 group count from the pool, the far-side placement keeping a wave off the player's approach,
 // the two triggers that fire it, and the break test for beaten. Model:
-// docs/info/garrison_strength_ledger_plan.md.
+// docs/info/garrison_and_reserves.md.
 
 // Whether a garrison is beaten: live men plus reserve-owed men, worn to a tenth of full fighting potential
 // -- the campaign's one capture line, learned once, counting owed reserves so a site cannot fall on an empty

@@ -158,13 +158,13 @@ if (_prefab) then {
 // No fortification ring. Three or four towers were scattered on a random bearing and distance, sited
 // and facing by luck -- but the emplacements that make a zone worth taking need to be sited
 // deliberately, against terrain, the roads and the approach the player will actually use. That is the
-// hardpoint system's job, and the plan for it is docs/hardpoint_system_plan.md; the prefab composition
+// hardpoint system's job, and the plan for it is docs/info/hardpoints.md; the prefab composition
 // above still stands, so a zone keeps its built centre.
 
 // No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired
 // anywhere in the zone spawned up to four infantry waves at a distant OPFOR zone and walked them in
 // -- reinforcement the player could neither see coming nor interdict. Tasking OPFOR reserves is the
-// commander's job, and the plan for it is docs/opfor_commander_plan.md.
+// commander's job, and the plan for it is docs/plans/opcom_plan.md.
 
 _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];

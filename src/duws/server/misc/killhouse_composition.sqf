@@ -5,7 +5,7 @@
 // resolves a zbase= attribute by regex against the file that holds the fence, so a split would
 // leave it unmatched and the importer would silently anchor both compositions at zero instead of
 // 1000 m -- a round trip that looks like it worked and puts the killhouse on the terrain.
-// Round-tripping through Eden: docs/info/hq_layout_editing.md.
+// Round-tripping through Eden: docs/info/composition_tooling.md.
 private _centerSpawnZ = 1000;
 
 

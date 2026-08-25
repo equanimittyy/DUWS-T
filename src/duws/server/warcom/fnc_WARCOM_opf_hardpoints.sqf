@@ -11,7 +11,7 @@
 //   3. thicken the band with a standalone emplacement in the OPFOR-positive countryside.
 //
 // Uniform placement for now: where the enemy fortifies with intent -- pushing toward where it believes
-// the player operates -- waits on the belief store and the archetype weights (opfor_commander_loop_plan.md),
+// the player operates -- waits on the belief store and the archetype weights (docs/plans/opcom_plan.md),
 // which this cannot precede. The field is enough to place; the personality is the refinement that lands
 // with belief. Started once by WARCOM init, on its own clock.
 if (!isServer) exitWith {};

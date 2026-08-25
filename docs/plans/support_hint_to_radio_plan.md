@@ -3,7 +3,7 @@
 ## Goal
 
 Apply the surface rule in
-[`info/player_facing_text.md`](info/player_facing_text.md#which-surface-a-message-goes-to-and-never-both):
+[`info/player_facing_text.md`](../info/player_facing_text.md#which-surface-a-message-goes-to-and-never-both):
 **a line a callsign could speak goes to the radio net; the hint box is kept for gameplay directives.**
 Every hint dropped below is replaced by a dialogue line that carries the same information — where an
 existing radio line already says it, that line is reused (and rewritten if it was missing something

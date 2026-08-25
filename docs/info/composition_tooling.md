@@ -240,6 +240,58 @@ another file can read. The suggestion is a global.
 role reads those off positions the export never emitted, so those columns are added by hand
 afterwards and survive later round trips by the match-by-order rule above.
 
+## Editing the HQ layout
+
+The player's Main Base (`src/duws/server/init_hq/fnc_BluHQinit.sqf`, compiled at
+`server_fnc_init.sqf:35`, spawned at `server_init.sqf:194`) anchors on `PosOfBLUHQ`, the spot chosen at
+placement (`fnc_HQ_random_place.sqf:38` or `fnc_HQ_manual_place.sqf:42`). It is the static-composition
+workflow's one outlier: two fenced compositions share this file, both keyed to a runtime position
+instead of `[0,0]`. Small nudges — shifting a tent, rotating a wall — are safe to hand-edit as row
+numbers directly, per the hand-fold rules above; a real re-layout goes through the Eden round-trip like
+any other composition.
+
+**Two fences, not one.** `_allObjectsData` (`:38-176`, name `"HQ Main Base"`) holds every static prop —
+walls, towers, tents, crates — and its own placement loop (`:243-281`) ground-snaps each one via
+`setPosATL [X, Y, 0]` (`:251`), the way `snap` mode always does. `_weaponData` (`:198-203`, name
+`"HQ Turrets"`) holds just the two static guns; it plays no part in that loop and is resolved separately
+(`:298-305`) for `fnc_placeHQUnits.sqf` to place. Both carry `anchor=hqInComp` and both round-trip
+through the workflow above — pick either composition by name.
+
+**Why `anchor=hqInComp`.** The array stores original composition coordinates, not offsets from `[0,0]`,
+because every row is placed at runtime against the HQ building's own row (`Land_Cargo_HQ_V1_F`, `:41`):
+
+```text
+object world pos = PosOfBLUHQ + (row X/Y - _hqInCompX/Y)
+```
+
+`_hqInCompX/_hqInCompY` (`:14-15`) must equal that row's X/Y — drift them apart and the whole base
+mis-anchors. `_compCenterX/_compCenterY` (`:16-17`) look load-bearing but cancel out of the same math;
+they only need to stay in lockstep with `_hqInCompX/Y`, not carry independent meaning.
+
+**Z is real for one fence and not the other.** `_allObjectsData` discards it like any `snap`
+composition — every prop lands on the terrain regardless of the row. `_weaponData` writes a literal `0`
+in every row because it too is never read: a gun's height instead comes from its trailing
+`anchorClass`/`hOffset` columns, resolved against `nearestObject` of that class at placement
+(`fnc_placeHQUnits.sqf:60-86`). Move the gun's row and only its X/Y/heading change; move its anchor
+structure (the sandbag, the HQ building) and the height follows.
+
+**`_allObjectsData` still carries an `isWeapon` column and a matching skip in its loop (`:245`), but no
+row sets it true.** Weapons used to live here as flagged rows; they moved into `_weaponData` because the
+export has no room for a role and an anchor on a row already spoken for by `isWeapon`. The skip is dead
+code kept for the reconciliation logic above, not a live path.
+
+**What neither fence governs.** The garrison — tower guards, the door pairs, the sentry, the patrol, the
+officer — is placed by `fnc_placeHQUnits.sqf`, called once at build (`:340`) and again on redeploy
+(`fnc_redeployHQUnits.sqf:47`), from `modelToWorld` offsets measured against a spawned structure, not
+array rows. Move a guard by moving its anchor structure in a fence (dependents follow) or by editing the
+offset in `fnc_placeHQUnits.sqf` directly. Both fences feed the redeploy path automatically —
+`fnc_BluHQinit.sqf` resolves them into `HQ_redeploy_*` mission-namespace variables at build time, and the
+rebuild reads those rather than a second copy of the layout.
+
+Player-deployed FOBs use the same two-fence split (`fnc_fortifyFOB.sqf`, `"FOB Perimeter"` and
+`"FOB Turrets"`), offset from the FOB's own centre rather than anchored to a building row — no
+`anchor=hqInComp` needed there.
+
 ## Unit compositions: edited in place
 
 Two ideas, and keeping them apart is what makes the menus make sense:

@@ -326,7 +326,7 @@ WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";
 // faucets, never by spending), so the tier derived from it is a one-way ratchet a spent-down wallet
 // cannot lower. Seeded to match a starting-AP preset in fnc_WARCOM_init; these are the pre-preset
 // defaults. Not yet carried by the campaign save -- a reload re-derives the tier from a wallet since
-// spent down, which the persistence pass closes (docs/campaign_persistence_plan.md).
+// spent down, which the persistence pass closes (docs/plans/campaign_persistence_plan.md).
 WARCOM_blufor_ap_earned = 0;publicVariable "WARCOM_blufor_ap_earned";
 WARCOM_opfor_ap_earned = 0;publicVariable "WARCOM_opfor_ap_earned";
 WARCOM_blufor_tier = 0;publicVariable "WARCOM_blufor_tier";
@@ -495,7 +495,7 @@ DUWS_streamArrivalMargin = 400;
 // most its x1 tier composition on the ground, and the surplus (mult-1) copies wait as a pool that
 // refills the garrison to that x1 group count as casualties are taken. Server-side only, so not
 // broadcast (the DUWS_streamArrivalMargin pattern). Read by fnc_zone_reserve and fnc_zone_spawn_sizes;
-// the model is docs/info/zone_reserve_reinforcement_plan.md.
+// the model is docs/info/garrison_and_reserves.md.
 //
 // The global OPFOR-side group throttle. When the live east group count reaches this, zone garrison
 // spawns and refills pause and their tokens stay pooled. Below the engine's 144-groups-per-side hard

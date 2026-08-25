@@ -97,8 +97,8 @@ in one function each so the `profileNamespace` fallback is a one-line change. Se
 of positions silently misreads every older save. Only a dedicated server can add a real file store
 invisibly (a `-serverMod` extension needs nothing player-side); singleplayer and hosted sessions
 cannot, since the host is the server.
-Reasoning: [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#where-the-save-lives).
-Container shape: [`../campaign_save_format.md`](../campaign_save_format.md).
+Reasoning: [`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#where-the-save-lives).
+Container shape: [`../campaign_save_format.md`](campaign_save_format.md).
 
 ## A variable first assigned inside `while do` does not survive the loop
 

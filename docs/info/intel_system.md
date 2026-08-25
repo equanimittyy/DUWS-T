@@ -80,7 +80,7 @@ nothing left rather than silently awarding nothing.
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
 | An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
-| An unrevealed enemy patrol | — | waiting on [`../opcom_plan.md`](../opcom_plan.md) |
+| An unrevealed enemy patrol | — | waiting on [`../opcom_plan.md`](../plans/opcom_plan.md) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
@@ -243,4 +243,4 @@ stashed at add time.
 A hardcore campaign's entire progress is which zones and towns it has revealed, and none of it survives a
 restore today. The shape it needs — revealed state as an outcome applied after build-out, the same as zone
 ownership — is specified in
-[`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#the-snapshot), which is unbuilt.
+[`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#the-snapshot), which is unbuilt.

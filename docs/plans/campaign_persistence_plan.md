@@ -34,14 +34,14 @@ Antistasi ships the choice between it and `profileNamespace` as a control on its
 defaulted off on Linux with the reason printed on the control. So the namespace and its flush are
 each reached through one function and named nowhere else; the fallback is then a one-line change.
 That indirection, and the rest of the container the snapshot travels in, are
-[`campaign_save_format.md`](campaign_save_format.md). `profileNamespace` stays the fallback rather
+[`campaign_save_format.md`](../info/campaign_save_format.md). `profileNamespace` stays the fallback rather
 than the default because it is shared by every mission on the box, so a player clearing one
 mission's state risks another's.
 
 `saveGame` is not a candidate at all. It saves a whole session rather than a data snapshot, so it
 cannot be replayed through the builders, which is what the restore below depends on. That holds
 whether or not it works in multiplayer, which is
-[still unestablished](../KNOWN_ISSUES.md#does-a-multiplayer-save-happen-at-all).
+[still unestablished](../../KNOWN_ISSUES.md#does-a-multiplayer-save-happen-at-all).
 
 ### Transferring a save between machines
 
@@ -243,7 +243,7 @@ that stays as the backstop, and nothing new should need it.
 |---|---|
 | The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/misc/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
-| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
+| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md) |
 | Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
 
@@ -269,7 +269,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | Zone names are drawn at random from a pool that records what it has spent | `server/init_zones/fnc_zone_state_init.sqf`, `fnc_createzone.sqf` | Replaying the builder renames every zone on the map. The names *and* the used list have to be restored, and the builder must not re-draw |
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/misc/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
-| Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](info/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
+| Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](../info/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
 (`:5`) and hands it to `fnc_FOBactions.sqf:3`, which reads it and never uses it. Restore needs no
@@ -284,7 +284,7 @@ doing.
    profile-namespace variables to disk correctly and failed to read them back on the next start.
    What de-risks that is not that it is reported fixed but that the store is Antistasi's
    `missionProfileNamespace`, which Antistasi runs in production on dedicated servers today
-   ([`campaign_save_format.md`](campaign_save_format.md)) — a mechanism with that much live mileage
+   ([`campaign_save_format.md`](../info/campaign_save_format.md)) — a mechanism with that much live mileage
    is not the open unknown the plan rests on. The remaining failure mode is ours, not the engine's:
    the namespace is read back for the profile that wrote it, so **run the check with a fixed
    `-profiles` and `-name`.** A server whose profile identity moves between starts saves each session
@@ -299,7 +299,7 @@ doing.
 3. **Read the support mirror back on restore.** The write half exists:
    `DUWS_support_permanent` holds the team's permanent unlocks in purchase order, and each client
    keeps the individual flags as its fast path
-   ([`info/economy.md`](info/economy.md#supports-permanent-and-consumable)). What is missing is the
+   ([`info/economy.md`](../info/economy.md#supports-permanent-and-consumable)). What is missing is the
    read — a restore has to replay the array into the flags, and a joining client should be told the
    set rather than inferring it from six broadcast booleans. Consumable unlocks are deliberately out
    of scope: they are per-player and are lost on death already, so a restart costs no more than a
@@ -316,7 +316,7 @@ guard pins the map, so the lookup returns what it stored.
 ## The snapshot
 
 One hashmap, keyed by name, serialised as a single JSON string; the container and its type rules
-are [`campaign_save_format.md`](campaign_save_format.md). Named keys rather than array positions
+are [`campaign_save_format.md`](../info/campaign_save_format.md). Named keys rather than array positions
 so that adding a field to a later version does not shift what an older save's readers see. Only
 serialisable types go in: numbers, strings, booleans, arrays and hashmaps of those. No objects, no
 groups, no triggers, no Locations, no netIds — netIds are strings but resolve to nothing after a
@@ -454,7 +454,7 @@ multiplier and the loss condition together.
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array`, the `zone_hp_left_<n>` counters |
 
 Hardpoints are an input for the same reason zones are:
-[`info/hardpoints.md`](info/hardpoints.md#siting) sites them in a generation phase after zone
+[`info/hardpoints.md`](../info/hardpoints.md#siting) sites them in a generation phase after zone
 build-out, so the siting pass has to accept a restored `DUWS_hardpoints` registry instead of rolling
 fresh positions, or a restore moves every hardpoint and orphans its cleared state. Zone-ring and
 standalone hardpoints run in that one phase and share the one registry, so a single guard covers
@@ -463,7 +463,7 @@ so they stay out of the save.
 
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
 moment a town crosses `-10` into the OPFOR band, independently of the commander
-([`info/zones_and_civilians.md`](info/zones_and_civilians.md#garrison-tiers-0-to-iv)), so a restore
+([`info/zones_and_civilians.md`](../info/zones_and_civilians.md#garrison-tiers-0-to-iv)), so a restore
 that dropped it would repair every turned town back to ungarrisoned.
 
 **The commander's own state is deferred with the commander.** The archetype, its standing orders
@@ -487,7 +487,7 @@ loadout on the player object, which dies with the session, so the mirror keys on
 of per-player hashmaps, and the three guards a UID-keyed player save needs — a per-player
 "restored yet" flag, stripping a loadout saved while dead, and deleting the unit whose gear has
 just been banked — are in
-[`campaign_save_format.md`](campaign_save_format.md#per-player-data).
+[`campaign_save_format.md`](../info/campaign_save_format.md#per-player-data).
 
 **Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
 towns the player has found, and a replay re-hides both: `fnc_createzone.sqf:16` sets every zone's
@@ -501,7 +501,7 @@ zone the player walked into, bought from a local, or found on a dead officer all
 identically, because by then they are one flag. `hardcore_visibleZone_found` is derived from reveal
 plus OPFOR ownership and is recomputed rather than stored. Whether a hardpoint has been revealed is
 separate state on the same footing, because intel can uncover one without its parent zone. Details
-in [`info/intel_system.md`](info/intel_system.md#persistence).
+in [`info/intel_system.md`](../info/intel_system.md#persistence).
 
 **Reveal is team state today and stays that way.** `zone_namePOS_pairs` and `civ_visible` are
 shared arrays and the markers they drive are global, so there is no per-player reveal to persist.
@@ -686,7 +686,7 @@ now comes from a player, the gate is three steps rather than one:
 
 The client must **wait** for the summary rather than sample it. A joining client is sent every
 `publicVariable`'d global and then runs its own init over the top
-([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them)),
+([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them)),
 so a screen that reads the variable once at boot can read back the default it just wrote itself.
 
 **The fork lives inside the existing game-master block** (`client/client_init.sqf:95-113`), with that
@@ -744,7 +744,7 @@ is a support nobody can ever call again.
 
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
 map and dropped when it returns
-([§Map object count](info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
+([§Map object count](../info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
 so they never outlive the session and a restore rebuilds every composition deployed.
 
 This is the decision that keeps the plan finite. The server runs 25 `while {true}` loops across 19
@@ -779,7 +779,7 @@ refund attached to the one restore that consumes it.
 
 | File | Change |
 |---|---|
-| `server/misc/fnc_campaign_store.sqf` | New. The container: namespace resolution and flush, the accessor pair, the index, commit and scan. Shape and responsibilities in [`campaign_save_format.md`](campaign_save_format.md). |
+| `server/misc/fnc_campaign_store.sqf` | New. The container: namespace resolution and flush, the accessor pair, the index, commit and scan. Shape and responsibilities in [`campaign_save_format.md`](../info/campaign_save_format.md). |
 | `server/misc/fnc_campaign_save.sqf` | New. Fills the snapshot hashmap from mission state and commits it. |
 | `server/misc/fnc_campaign_restore.sqf` | New. Validates a payload, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
 | `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
@@ -819,7 +819,7 @@ refund attached to the one restore that consumes it.
 - [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts; a campaign that was won or lost is listed as ended and is not what the timeout picks up.
 - [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
 - [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
-- [ ] On a dedicated server ([`info/testing.md`](info/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
+- [ ] On a dedicated server ([`info/testing.md`](../info/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 
 ## Decided trade-offs
 
@@ -854,7 +854,7 @@ to them is an offline-progression mechanic built deliberately, not this gate lef
 migrations in production on dedicated servers, and the parts of it this plan declines — the dual
 namespace keying, the per-variable namespace writes, the legacy name fallbacks — are back-compat
 for saves already in the wild rather than design. What is adopted and what is dropped:
-[`campaign_save_format.md`](campaign_save_format.md).
+[`campaign_save_format.md`](../info/campaign_save_format.md).
 
 **Vehicles persist by data, so they come back as new objects.** Anything attached to the old
 object is lost. The alternative is persisting object identity, which vanilla cannot do.
