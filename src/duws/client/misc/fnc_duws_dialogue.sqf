@@ -11,7 +11,7 @@
 // once and read as garbled cross-talk. One constant to tune if the net's cadence reads wrong.
 #define SUBNET_GAP 2
 
-params [["_speaker", ""], ["_text", ""], ["_channel", ""]];
+params [["_speaker", ""], ["_text", ""], ["_channel", ""], ["_caller", ""]];
 
 if (!hasInterface) exitWith {};
 
@@ -70,10 +70,18 @@ _text = [_text] call fnc_cs;
 // the sentence rather than as a transmission header. _text went through fnc_cs on its own line
 // above precisely so the two can be treated differently here.
 if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
-    // Guarded for the same reason the speaker table above is built lazily: the resolver arrives
-    // by publicVariable, and a JIP client can be handed a line before it lands. An unnamed
-    // callsign beats an undefined-variable error taking the whole line with it.
-    private _who = if (isNil "fnc_duws_senior_name") then {"None"} else {call fnc_duws_senior_name};
+    // _caller names the player who requested this line, resolved at the call site (the support
+    // fn) and passed in verbatim so every machine prints the same name. It cannot be resolved
+    // here: this body runs on every client, where `player` is the local player, not the
+    // requester. Lines with no requester -- mission chatter, the intro -- pass nothing and fall
+    // back to the team senior, itself resolved identically on every client.
+    //
+    // The senior fallback is guarded for the same reason the speaker table above is built lazily:
+    // the resolver arrives by publicVariable, and a JIP client can be handed a line before it
+    // lands. An unnamed callsign beats an undefined-variable error taking the whole line with it.
+    private _who = if (_caller isEqualTo "") then {
+        if (isNil "fnc_duws_senior_name") then {"None"} else {call fnc_duws_senior_name}
+    } else { _caller };
     _speaker = format ["%1 (%2)", _speaker, _who];
 };
 

@@ -28,7 +28,7 @@ _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_courier";
 _message = ([localize "STR_DUWS_T_supplydropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_supplydropcallend";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 switch (VERSION_X) do {
 	case "MODERN": {

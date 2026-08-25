@@ -17,7 +17,8 @@ if (commandpointsblu1 < _cost) exitWith {
 [-_cost, "uav_scan"] call fnc_cp_adjust;
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+// name resolved here on the server from the caller unit, not `player`: this fn is server-side.
+[_speaker, _message, "", (if (isNull _caller) then {""} else {name _caller})] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";

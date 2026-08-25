@@ -64,7 +64,7 @@ private _consumeClass = switch (_supportype) do {
 };
 if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consume };
 
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 _ord = "";
 if (_supportype == 1) then {_ord = localize "STR_DUWS_T_jg5oh7nw"};	//arty

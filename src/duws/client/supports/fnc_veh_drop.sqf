@@ -65,7 +65,7 @@ _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_vehdropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_vehdropcallend";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 // SEND A PLANE -- offset the spawn 1200 m off a random bearing so it flies in rather than appearing overhead.
 private _vec = [random [-1,0,1], random [-1,0,1], 0];

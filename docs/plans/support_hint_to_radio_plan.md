@@ -9,11 +9,17 @@ Every hint dropped below is replaced by a dialogue line that carries the same in
 existing radio line already says it, that line is reused (and rewritten if it was missing something
 the hint had); where none does, a new line is added. No dropped hint loses its content.
 
-Channels follow `fnc_duws_dialogue_channel`: **Overlord speaks on NET**; every support callsign
-(Courier, Chalk, Chariot, Mule, the arty callsigns) speaks on **SUB-NET**, the radio log. Callsign
-substitution is automatic inside `fnc_duws_dialogue`, so any `Alpha 1-1` below resolves to the host
-callsign — do not wrap it. Line numbers drift as files are edited (arty especially); the stringtable
-**key** is the stable anchor.
+Channels follow `fnc_duws_dialogue_channel`: **Overlord and Alpha 1-1 (the player callsign) speak on
+NET**; every support callsign (Courier, Chalk, Chariot, Mule, the arty callsigns) speaks on
+**SUB-NET**, the radio log. Alpha 1-1 never speaks on SUB-NET. Every support flow opens with an
+Alpha 1-1 request on NET — already its speaker in each support fn — and the tasking callsign answers
+on SUB-NET. Callsign substitution is automatic
+inside `fnc_duws_dialogue`, so any `Alpha 1-1` below resolves to the host callsign — do not wrap it.
+The team callsign also renders with the requesting player's name — `Alpha 1-1 ({player who called})` —
+which is strictly the caller: captured at each support call site and passed to `fnc_duws_dialogue` as
+its 4th arg (`_caller`). Alpha 1-1 lines with no caller (mission chatter, the intro) pass nothing and
+fall back to the team senior. Line numbers drift as files are edited (arty especially); the
+stringtable **key** is the stable anchor.
 
 Each line is one change, editable in place. Disposition tags: `new` = add key + dialogue call;
 `rewrite` = edit an existing radio line to catch up; `existing` = radio already says it, hint was a
@@ -30,6 +36,16 @@ Alpha 1-1. Register all five in `DUWS_subnetSpeakers` before the Arty rewrites b
 route to the wrong surface whatever text they carry. The lint does not catch this — the router is
 kept out of the headless VM on purpose (`localize`/chat/UI), so a missing table entry is silent.
 
+The same trap runs the other way for Alpha 1-1 on NET. Every support already opens with an Alpha 1-1
+request voiced by the `STR_DUWS_T_actionteam` speaker — `fnc_request_fob` (FOB), `fnc_ammobox`
+(supply), `fnc_arty`, `fnc_veh_drop`, `fnc_helolift`, `fnc_helotaxi`, `fnc_uav_scanner`. But
+`DUWS_netSpeakers` lists only Overlord (`STR_DUWS_T_OVERLORD`), so every one of those request lines
+falls through to VOICE, not NET. Adding `STR_DUWS_T_actionteam` to `DUWS_netSpeakers` routes all of
+them onto NET in one change — no per-line retag. The `Alpha 1-1 ({player who called})` suffix is the
+caller, passed as the 4th arg (`_caller`) to `fnc_duws_dialogue` at each support call site (client fns
+pass `name player`; the server-side UAV passes `name _caller`); non-support Alpha 1-1 lines fall back
+to the team senior.
+
 ## Arty
 
 - `fqeghaut` (ground) — drop hint "Grid received. Rounds on the way, 60 seconds." → **firing callsign** / SUB-NET: "Grid received. Rounds on the way, sixty seconds." — existing `77l9izur`, unchanged
@@ -41,7 +57,7 @@ kept out of the headless VM on purpose (`localize`/chat/UI), so a missing table 
 
 ## FOB
 
-- `cp9cw550` (hint copy) — drop hint "Requesting a FOB on my position…" → **Alpha 1-1** / SUB-NET: (text unchanged) — existing radio `cp9cw550`, same beat
+- `cp9cw550` (hint copy) — drop hint "Requesting a FOB on my position…" → **Alpha 1-1 ({player who called})** / NET: (text unchanged) — existing radio `cp9cw550`, same beat
 - `8zn96920` (hint copy) — drop hint "Request denied. Enemies are too close to this position." → **Overlord** / NET: "Request denied. Enemies are too close to this position." — existing radio `8zn96920`, unchanged
 
 ## Supply drop (Courier 1-1)
@@ -59,7 +75,7 @@ own surface. Two gaps keep it from being the model outright:
 
 - request beat — Alpha 1-1 calls the drop to Overlord; Overlord does not answer today. Add **Overlord** / NET ack before Courier keys up — new `supplydropack` (the reference gap: a net request with no acknowledgement)
 - `y91vei53` / `17hh9rx4` — drop hint "Supply Drop Inbound. ETA: 1 min." → **Courier 1-1** / SUB-NET: "This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds." — existing `supplydropcallend` (note: hint said one minute, radio says forty seconds — pick one)
-- `zhiugl0g` — drop hint "Supply Drop On Station." → **Courier 1-1** / SUB-NET: "This is Courier 1-1, on station over your position. Crate coming down." — new `supplydroponstation`
+- `zhiugl0g` — drop hint "Supply Drop On Station." → **Courier 1-1** / SUB-NET: "This is Courier 1-1, on station over your position. Crate away." — new `supplydroponstation`
 - `supplydropfail` — drop hint "The transport was shot down. Supply drop failed." → **Overlord** / NET: "Be advised, Alpha 1-1, Courier 1-1 is down. Your supply drop is off." — new `supplydropdown`
 - `wdttb5b8` — delivery beat: keep the hint box, drop the A3 green-smoke card (card reserved for important news). Optionally add a **Courier 1-1** / SUB-NET sign-off: "Crate's on the ground at your position. Courier 1-1 out." — new `supplydropdelivered`
 
@@ -109,12 +125,13 @@ Borderline: `liftwp_incomplete` "Route incomplete, tasking aborted" — kept as 
 4. Paradrop "under command" — the start radio + card already say it; drop the hint with no new line, or move a confirmation to the end beat.
 5. UAV `6u8qilfh` — voice it (Allseer) or keep the hint.
 6. Supply ETA wording — hint said one minute, radio says forty seconds; unify.
-7. Alpha 1-1's channel — the guide names Overlord and Alpha 1-1 as the NET voices, but `actionteam` currently defaults to VOICE and the FOB `cp9cw550` line above is tagged SUB-NET. Decide whether the team callsign joins `DUWS_netSpeakers` (NET, with squelch) and retag its lines to match, or stays on SUB-NET with only Overlord on NET.
+7. Alpha 1-1's channel — **decided:** Alpha 1-1 is a NET voice and never speaks on SUB-NET. Add `STR_DUWS_T_actionteam` to `DUWS_netSpeakers` (NET, with squelch); this alone moves every support's opening Alpha 1-1 request onto NET, since each already uses that speaker (the FOB `cp9cw550` line is tagged NET above as the worked example). The speaker renders `Alpha 1-1 ({player who called})` — strictly the caller, captured at each support call site and passed to `fnc_duws_dialogue` (`_caller` arg); the team senior is the fallback for Alpha 1-1 lines with no caller.
 
 ## Task list
 
 - [ ] Settle the seven open decisions.
 - [ ] Register the arty tier callsigns (`redleg`, `sledge`, `slingshot_2`, `reaper`, `reaper_2`) in `DUWS_subnetSpeakers` (channel routing prerequisite).
+- [ ] Register `STR_DUWS_T_actionteam` (Alpha 1-1) in `DUWS_netSpeakers` (NET, with squelch) so every support's opening Alpha 1-1 request routes to NET, not VOICE.
 - [ ] Add the `new` / `rewrite` stringtable keys (English real; DE/ES/ZH English placeholders per the localisation-lag convention).
 - [ ] Replace each dropped hint with its `fnc_duws_dialogue` call at the same beat.
 - [ ] Playtest each support once: no beat goes silent, nothing double-fires.

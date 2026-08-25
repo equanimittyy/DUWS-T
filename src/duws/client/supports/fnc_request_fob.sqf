@@ -32,7 +32,7 @@ if (count Array_of_FOBS >= _maxFOB) then {
 if (_tooMany) exitWith {};
 
 Hint localize "STR_DUWS_T_cp9cw550";
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_cp9cw550"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_cp9cw550", "", name player] remoteExec ["fnc_duws_dialogue", 0];
 _triggerSize = _size / 4;
 _trg=createTrigger["EmptyDetector",_position];
 _trg setTriggerArea[_triggerSize,_triggerSize,0,false];
