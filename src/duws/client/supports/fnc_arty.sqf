@@ -263,7 +263,7 @@ if (_ammotype == "Laser") then {
 		};
 	};
 	// Break the loiter and send the jet out either way; cleanup deletes it after the tail sleeps.
-	{ _group deleteWaypoint _x } forEach (reverse (waypoints _group));
+	{ deleteWaypoint _x } forEach (reverse (waypoints _group));
 	private _rtb = _group addWaypoint [_spawnPos, 0];
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
