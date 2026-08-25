@@ -56,12 +56,17 @@ fnc_getEditorCategory = compileFinal {
 
 fnc_factionGetFilteredByEditorSubcat = {
 	params ["_factionData", "_factionFilter"];
-	_factionDataFiltered = _factionData select {_factionFilter in toLowerANSI getText ( configfile >> "CfgVehicles" >> _x >> "editorSubcategory" ) && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
-	
+	// scope == 2 only, NOT scopeCurator == 2: createVehicle/createUnit refuse anything below public
+	// scope, and some mods (e.g. CUP's *_OCimport_* base classes) are curator-placeable yet scope 1 --
+	// admitting those put unspawnable classes in the faction pool, so a convoy/garrison draw came up a
+	// hull short when the pick landed on one. scope 2 is the hard spawn requirement, so this loses no
+	// class the mission could ever raise.
+	_factionDataFiltered = _factionData select {_factionFilter in toLowerANSI getText ( configfile >> "CfgVehicles" >> _x >> "editorSubcategory" ) && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}};
+
 	// fallback for non-standard editor categories: less accurate, but better than empty
 	if (_factionDataFiltered isEqualTo []) then {
-		// only editor/Zeus-available objects (scope/scopeCurator == 2)
-		_factionDataFiltered = _factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }};
+		// only spawnable objects (scope == 2); see the note above on why scopeCurator is not accepted here
+		_factionDataFiltered = _factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2};
 		_factionDataFiltered =  switch true do {
 			case ("person" in _factionFilter) :	 	{_factionDataFiltered select {_x iskindOf "CAManBase"}};
 			case ("turrets" in _factionFilter) :	{_factionDataFiltered select {_x iskindOf "StaticWeapon"}};
@@ -111,7 +116,7 @@ fnc_filterByClassName = compileFinal {
 
 fnc_factionGetFilteredByType = compileFinal {
 	params ["_factionData", "_factionFilter"];
-	_factionData select {_x isKindOf _factionFilter && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
+	_factionData select {_x isKindOf _factionFilter && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}};
 };
 
 fnc_filterBySeats = compileFinal {
@@ -119,7 +124,7 @@ fnc_filterBySeats = compileFinal {
 	_factionData select {
 		_crewCount = [_x, false] call BIS_fnc_crewCount; // crew seats only, no cargo; but FFV seats count as crew (bench Little Bird returns 6)
 		_cargoCount =  ([_x, true] call BIS_fnc_crewCount) - _crewCount;
-		(getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }) && 
+		(getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2) && 
 		{_crewCount >= _minCrew} && 
 		{_cargoCount >= _minCargo}
 	}; 
@@ -128,7 +133,7 @@ fnc_filterBySeats = compileFinal {
 // _transportType is a config key: transportAmmo / transportRepair / transportFuel / transportSoldier
 fnc_filterByUtility = compileFinal {
 	params ["_factionData", "_transportType"];
-	_factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> _transportType) > 0 && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
+	_factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> _transportType) > 0 && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}};
 
 };
 
@@ -137,7 +142,7 @@ fnc_filterByPylons = compileFinal {
 	_factionData select {
 		_pylonIsClass = isClass (configFile >> "CfgVehicles" >> _x >> "Components" >> "TransportPylonsComponent");
 		(_hasPylon && _pylonIsClass || {!_hasPylon && !_pylonIsClass}) && 
-		{getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}
+		{getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}
 	};
 };
 
@@ -146,7 +151,7 @@ fnc_filterByWeapons = compileFinal {
 	_factionData select {
 		_weapons = flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _x >> "Turrets") apply {getArray (_x >> 'weapons')});
 		(_hasWeapons && count _weapons isNotEqualTo 0 || {!_hasWeapons && count _weapons isEqualTo 0}) && 
-		{getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}
+		{getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}
 	};
 };
 
