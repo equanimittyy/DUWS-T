@@ -4,13 +4,12 @@
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
 // place to see what reaches clients.
 
-// Server-authoritative command-point mutation. Every CP change routes here via
-// remoteExec [..., 2] with a signed delta; nothing else may assign
-// commandpointsblu1 or publicVariable it. The engine runs each delta as one
-// uninterruptible statement on the single server copy, so concurrent changes
-// from different machines serialize instead of clobbering each other with stale
-// absolute values (a client's read-modify-write of its local copy otherwise
-// duplicated or lost CP for the whole session in co-op).
+// Server-authoritative command-point mutation. Every CP change routes here via remoteExec [..., 2]
+// with a signed delta; nothing else may assign commandpointsblu1 or publicVariable it. The engine
+// runs each delta as one uninterruptible statement on the single server copy, so concurrent changes
+// from different machines serialize instead of clobbering each other with stale absolute values (a
+// client's read-modify-write of its local copy otherwise duplicated or lost CP for the whole
+// session in co-op).
 fnc_cp_adjust = {
 	if (!isServer) exitWith {};
 	// _reason is a short label naming what caused the change. It exists only for the log:
@@ -49,17 +48,16 @@ DUWS_fnc_ap_tier = {
 	1 + ({ _earned >= _x } count DUWS_ap_tier_rungs)
 };
 
-// Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
-// callers remoteExec a signed delta, nothing else assigns the pools. An unrecognised
-// side drops the delta and logs rather than crediting the wrong pool; no HUD counter
-// to refresh. Floored at 0 like CP: losing a zone subtracts the zone's full worth, so
-// an unclamped pool could sit deeply negative.
+// Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust: callers
+// remoteExec a signed delta, nothing else assigns the pools. An unrecognised side drops the delta
+// and logs rather than crediting the wrong pool; no HUD counter to refresh. Floored at 0 like CP:
+// losing a zone subtracts the zone's full worth, so an unclamped pool could sit deeply negative.
 //
-// Integer invariant, the CP writer's verbatim: every ladder gate reads "> N", so a pool
-// resting at 39.97 fails a > 40 gate while a rounded readout prints 40 and the player has
-// no way to tell why. Round the total rather than the delta -- that also normalises a pool
-// already holding a fraction. Sub-point payouts must accumulate whole points at the caller;
-// rounding here would swallow them, so a fractional delta is logged.
+// Integer invariant, the CP writer's verbatim: every ladder gate reads "> N", so a pool resting at
+// 39.97 fails a > 40 gate while a rounded readout prints 40 and the player has no way to tell why.
+// Round the total rather than the delta -- that also normalises a pool already holding a fraction.
+// Sub-point payouts must accumulate whole points at the caller; rounding here would swallow them,
+// so a fractional delta is logged.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	// _earned is the part of a positive delta that also credits the one-way earned counter and so can
@@ -292,15 +290,14 @@ fnc_money_drop = {
 	} forEach _pairs;
 };
 
-// Server-authoritative purchase. The writers above own the arithmetic but not the
-// decision: a client testing its own copy of a pool is a network round trip out of date,
-// so two clients each seeing 10 CP both pass a 10 CP gate and the floor absorbs the
-// second debit, making it free. Here the test and the debit are adjacent statements
-// against the one server copy, so no other machine's request lands between them.
-// remoteExec returns nothing, so the verdict goes back as a named reply the caller waits
-// on -- fnc_pool_spend is the other half of the handshake.
-// The debit is `call`, not remoteExec to self: that would queue a scheduled job for a
-// later frame and reopen the gap this function exists to close.
+// Server-authoritative purchase. The writers above own the arithmetic but not the decision: a client
+// testing its own copy of a pool is a network round trip out of date, so two clients each seeing 10
+// CP both pass a 10 CP gate and the floor absorbs the second debit, making it free. Here the test and
+// the debit are adjacent statements against the one server copy, so no other machine's request lands
+// between them. remoteExec returns nothing, so the verdict goes back as a named reply the caller
+// waits on -- fnc_pool_spend is the other half of the handshake. The debit is `call`, not remoteExec
+// to self: that would queue a scheduled job for a later frame and reopen the gap this function exists
+// to close.
 fnc_pool_try_spend = {
 	if (!isServer) exitWith {};
 	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
@@ -343,14 +340,13 @@ fnc_pool_try_spend = {
 	[_replyVar, _ok, _charged] remoteExec ["fnc_pool_reply", _requester];
 };
 
-// Client half of the purchase handshake: blocks until the server rules on the request,
-// so callers must already be scheduled -- every purchase entry point is spawned. Refuses
-// on timeout rather than falling through: silence must not let a purchase happen.
-// A zero cost short-circuits, because several comm-menu supports are charged at unlock
-// time and pass 0 here.
-// duws_last_charge carries what was actually debited, for the one caller that has to record it
-// (client/supports/fnc_supports_init.sqf). Returned on the side rather than in place of the
-// verdict so the forty existing call sites, which read this as a guard clause, stay as they are.
+// Client half of the purchase handshake: blocks until the server rules on the request, so callers
+// must already be scheduled -- every purchase entry point is spawned. Refuses on timeout rather than
+// falling through: silence must not let a purchase happen. A zero cost short-circuits, because
+// several comm-menu supports are charged at unlock time and pass 0 here. duws_last_charge carries
+// what was actually debited, for the one caller that has to record it
+// (client/supports/fnc_supports_init.sqf). Returned on the side rather than in place of the verdict
+// so the forty existing call sites, which read this as a guard clause, stay as they are.
 fnc_pool_spend = {
 	params [["_pool", "CP"], ["_cost", 0]];
 	duws_last_charge = 0;

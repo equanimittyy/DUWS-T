@@ -208,18 +208,17 @@ publicVariable "killhouse_srv_player_died";
 // Picks up to _want rows for the next wave and removes them from _pool. Returns the rows.
 //
 // A row is wanted between killhouse_min_spawn_dist and killhouse_max_spawn_dist of the nearest
-// player in the course: closer than the minimum usually lands behind the player and reads as a
-// glitch rather than a drill, further than the maximum turns the drill into a hunt for it.
-// Rejected rows stay in the pool, because the band moves with the player and a row out of reach
-// this wave is often the obvious one two waves later. That is the whole reason the pool is
-// consumed rather than walked by a cursor: most rows fail the band at any given moment, so a
-// cursor would step past nearly the entire composition on the first wave and leave a run of
-// three with nothing to place.
+// player: closer than the minimum lands behind the player and reads as a glitch, further than the
+// maximum turns the drill into a hunt. Rejected rows stay in the pool -- the band moves with the
+// player, so a row out of reach this wave is often the obvious one two waves later -- which is
+// why the pool is consumed rather than walked by a cursor: most rows fail the band at any given
+// moment, and a cursor would step past nearly the entire composition on the first wave and leave
+// a run of three with nothing to place.
 //
-// The minimum is hard, the maximum only a preference: when the band around a stationary player
-// has been picked clean the wave falls back to the nearest rows outside it. Honouring the
-// maximum instead would leave the run hanging on a wave that can never come, since nothing
-// short of the player moving would ever refill the band.
+// The minimum is hard, the maximum only a preference: once the band around a stationary player
+// has been picked clean, the wave falls back to the nearest rows outside it. Honouring the
+// maximum instead would leave the run hanging on a wave that can never come, since nothing short
+// of the player moving would ever refill the band.
 //
 // An empty return therefore means the pool itself is exhausted, which is the caller's signal to
 // finish on what is already down.

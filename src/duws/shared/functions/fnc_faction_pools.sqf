@@ -9,14 +9,13 @@
 // the global itself so the two hundred-odd sites that read opfor_SOLDIER_X directly keep working.
 // Variety then comes from picking out of the pool at the moment something spawns.
 //
-// What this replaces: a permanent thread per role -- 38 on the OPFOR side and 34 on the BLUFOR --
-// each waking every 300 s to re-pick and publicVariable its answer for the rest of the campaign.
-// That was wrong in three ways beyond its cost. The global holds one value at a time, so every zone
-// raised inside the same five-minute window fielded the *identical* APC and two zones raised six
-// minutes apart differed -- variety across time, where what a player sees is one moment. It made a
-// faction's identity drift, which is the one thing auto-detection exists to establish. And it paid
-// for both with seventy permanent scripts and seventy network writes every five minutes, for values
-// only ever read at the instant something spawns.
+// What this replaces: a permanent thread per role (38 OPFOR, 34 BLUFOR) waking every 300 s to re-pick
+// and publicVariable its answer for the rest of the campaign -- wrong three ways beyond the cost. The
+// global holds one value at a time, so zones raised in the same five-minute window fielded the
+// *identical* APC while zones six minutes apart differed: variety across time, not the per-moment
+// variety a player actually sees. It let a faction's identity drift, the one thing auto-detection
+// exists to establish. And it cost seventy permanent scripts and seventy network writes every five
+// minutes, for values only ever read at the instant something spawns.
 
 // The front half of the same job lives here too: fnc_faction_resolve turns a detection bucket into
 // the key's value, fnc_faction_pools_publish turns that value into a pool plus a representative.
@@ -148,9 +147,9 @@ fnc_faction_pools_publish = {
 // every reader: two zones raised in the same second field different vehicles -- the variety a player
 // actually sees -- while infantry and every other single role hand back their representative.
 //
-// Falls back to the global for a role with no pool, which is every role a hand-written faction file
-// defines as a plain string, and "" for one the faction never defined at all. fnc_factionRoles drops
-// the empty answer; inventing a class here would hide a missing role behind a unit that spawns.
+// Falls back to the global for a role with no pool (every hand-written faction file's plain-string
+// roles), and "" for one the faction never defined at all -- fnc_factionRoles drops the empty answer,
+// same reasoning as fnc_faction_resolve above.
 fnc_faction_pick = {
     params ["_name"];
     private _pool = missionNamespace getVariable [format ["DUWS_factionPool_%1", _name], []];
@@ -158,10 +157,9 @@ fnc_faction_pick = {
     private _v = missionNamespace getVariable [_name, ""];
     if !(_v isEqualType []) exitWith { _v };
     if (_v isEqualTo []) exitWith { "" };
-    // No pool var yet an array global: a non-poolable role -- a static -- whose global a Back-and-
-    // re-pick left un-collapsed. Variety is the pool var's job alone, and the gate in
-    // fnc_faction_pools_publish clears that var for a static on purpose, so here the representative
-    // (the first entry) is the answer, never a random draw. Randomising would field the very
-    // uncreatable variant the gate exists to keep out of an emplacement.
+    // No pool var yet an array global: a non-poolable role (a static) whose global a Back-and-re-pick
+    // left un-collapsed. Variety is the pool var's job alone; the gate in fnc_faction_pools_publish
+    // clears it for a static on purpose (see fnc_faction_poolable_keys above), so the representative
+    // (first entry) is the answer here too, never a random draw.
     _v select 0
 };

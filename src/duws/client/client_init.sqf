@@ -22,12 +22,12 @@ waitUntil {sleep 0.1;!isNull player};
 // with the registry the server publishes, so starting it any earlier races that. A line
 // posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
 //
-// Guarded against re-entry: a JIP client re-runs INIT.sqf and so client_init, and a second
-// drain would race the first popping the same queue into the one subtitle slot, playing queued
-// lines out of order. Guarded on the loop's own handle, not a bool: uiNamespace outlives a
-// mission restart but the spawned loop does not, so a bool would strand the guard set with no
-// loop running and silence every subtitle from the second mission of a session on. scriptDone
-// reads true once the loop is gone (restart) and false while it runs (JIP re-init this mission).
+// Guarded against re-entry: a JIP client re-runs INIT.sqf and so client_init, and a second drain
+// would race the first popping the same queue into the one subtitle slot, playing queued lines
+// out of order. Guarded on the loop's own handle, not a bool: uiNamespace outlives a mission
+// restart but the spawned loop does not, so a bool would strand the guard set with no loop
+// running and silence every subtitle from the second mission of a session on. scriptDone reads
+// true once the loop is gone (restart) and false while it runs (JIP re-init this mission).
 private _drain = uiNamespace getVariable ["DUWS_dialogueDrainHandle", scriptNull];
 if (isNull _drain || {scriptDone _drain}) then {
 	// A restart leaves last mission's queued lines in uiNamespace -- it outlives the mission and the
@@ -195,11 +195,11 @@ player addEventHandler ["killed", {
     };
     if (!_inKillhouse) then {
         [-DUWSMP_CP_death_cost, "death_penalty"] remoteExec ["fnc_cp_adjust", 2];
-        // Told to the player who paid it. The deduction itself only ever reached the RPT and
-        // control 1000, which is the counter inside the request dialog and so invisible unless
-        // that dialog happens to be open -- CP left the shared pool with nothing on screen.
-        // Skipped at zero, which the campaign menu can still select.
-        // Spawned because an event-handler body is unscheduled and the notification queue is not.
+        // Told to the player who paid it: the deduction itself only ever reached the RPT and
+        // control 1000 (the request dialog's counter, invisible unless that dialog is open),
+        // leaving CP gone from the pool with nothing on screen. Skipped at zero, which the
+        // campaign menu can still select. Spawned because an event-handler body is unscheduled
+        // and the notification queue is not.
         if (DUWSMP_CP_death_cost > 0) then {
             [DUWSMP_CP_death_cost] spawn {
                 params ["_cost"];
@@ -490,11 +490,10 @@ if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 };
 
 sleep 20;
-// Scroll-menu action opens the disguise panel (fnc_disguise_menu). A hold-action was
-// rejected: its "Hold Space" prompt sits centre-screen the whole time the show-condition
-// holds (alive, on foot -> effectively always) and blocks the view. showWindow=false
-// keeps this off-centre -- it appears only in the scroll menu. The CIV_PRESENCE gate
-// lives inside the panel.
+// Scroll-menu action opens the disguise panel (fnc_disguise_menu). A hold-action was rejected:
+// its "Hold Space" prompt sits centre-screen the whole time the show-condition holds (alive,
+// on foot -> effectively always) and blocks the view. showWindow=false keeps this off-centre
+// -- it appears only in the scroll menu. The CIV_PRESENCE gate lives inside the panel.
 if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     player addAction [
         ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),

@@ -4,9 +4,9 @@
 
 // The officer is invulnerable (allowDamage false) until OPFOR come within this of him -- wider than
 // the 200 m the contact alert calls the base, so a marksman on a ridge stays a loss worth keeping,
-// and drawn on no map. Enemy presence in the ring, not the source of a shot, is what makes him
-// mortal; while mortal, a HandleDamage veto still drops identifiable friendly fire so it cannot end
-// the campaign.
+// and drawn on no map. Enemy presence in the ring, not the source of a shot, is what makes him mortal;
+// while mortal, a HandleDamage veto still drops identifiable friendly fire so it cannot end the
+// campaign.
 #define OFFICER_GUARD_RADIUS 500
 
 if (isNil "PosOfBLUHQ") exitWith {};
@@ -175,9 +175,9 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// The base's guns, in the same frame as the walls around them but on their own fence, not merged
-// into the composition above, because the two halves have different lifetimes: props are built once,
-// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf replays these rows alone through
+// The base's guns, in the same frame as the walls around them but on their own fence, not merged into
+// the composition above, because the two halves have different lifetimes: props are built once, guns
+// are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf replays these rows alone through
 // fnc_placeHQUnits). The Eden export emits nothing past the heading column, so a permanent/rebuilt
 // flag on one merged array would survive only by being hand-carried back across 135 prop rows every
 // round trip. Do not merge them: the zone prefabs' single-fence-plus-isWeapon shape works there only
@@ -234,10 +234,10 @@ private _invulnerableTypes = [
     "Land_Pallet_F"
 ];
 
-// Cleared before the props go down rather than at placement time: this is the first point the
-// final HQ position is known, and it is the one path both random and manual placement pass
-// through. 50 m is the composition's own reach -- its farthest wall stands 47 m from the HQ
-// building every offset above is measured against.
+// Cleared before the props go down rather than at placement time: this is the first point the final
+// HQ position is known, and the one path both random and manual placement pass through. 50 m is the
+// composition's own reach -- its farthest wall stands 47 m from the HQ building every offset above is
+// measured against.
 [PosOfBLUHQ, 50] call fnc_clear_foliage;
 
 {
@@ -252,9 +252,9 @@ private _invulnerableTypes = [
     _obj setDir _dir;
     
     // Global, not the local form: enableSimulation only affects the machine it runs on, so a
-    // server-side call leaves every client still simulating props the server has frozen. They
-    // then settle, drift and fall differently on each machine, which is how the base ends up
-    // looking different to a joining player than it does to the host.
+    // server-side call leaves every client still simulating props the server has frozen. They then
+    // settle, drift and fall differently on each machine, which is how the base ends up looking
+    // different to a joining player than it does to the host.
     if (_class in _lightTypes || _class == "B_supplyCrate_F") then {
         _obj enableSimulationGlobal true;
     } else {
@@ -362,16 +362,16 @@ _officer setVariable ["NOAI", 1, false];
 _officer setVariable ["Vcm_Disable", true];
 _officer setVariable ["lambs_danger_disableAI", true];
 removeBackpackGlobal _officer;
-// An "Acts_" ambient animation holds through death: the corpse keeps the standing pose and
-// never ragdolls, so hits read as having no effect and the officer looks invulnerable. The
-// tower guards escape this because BIS_fnc_ambientAnimCombat breaks its own animation; a raw
-// switchMove has nothing that does. Clearing the move lets the death animation play.
+// An "Acts_" ambient animation holds through death: the corpse keeps the standing pose and never
+// ragdolls, so hits read as having no effect and the officer looks invulnerable. The tower guards
+// escape this because BIS_fnc_ambientAnimCombat breaks its own animation; a raw switchMove has
+// nothing that does. Clearing the move lets the death animation play.
 _officer addEventHandler ["Killed", {
     params ["_unit"];
     [_unit, ""] remoteExec ["switchMove", 0];
-    // The queued pose goes with it. Left in the queue, a player joining after the officer dies
-    // is handed the standing animation for a corpse -- the state clearing the move exists to
-    // prevent, arriving by the other route.
+    // The queued pose goes with it. Left in the queue, a player joining after the officer dies is
+    // handed the standing animation for a corpse -- the state clearing the move exists to prevent,
+    // arriving by the other route.
     remoteExec ["", format ["hq_pose_%1", netId _unit]];
 }];
 // Loss condition: friendly fire must never end the campaign. The proximity gate below (allowDamage)
@@ -386,10 +386,10 @@ _officer addEventHandler ["HandleDamage", {
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 [_officer] spawn {
-    // Polled, not hung off the Killed handler above: that runs wherever the officer is local and
+    // Polled, not hung off the Killed handler above: that runs wherever the officer is local, and
     // campaign_lost_ending is deliberately not broadcast, so a client-side firing would leave the
     // server without the ending it names. The same poll gates his mortality via allowDamage -- the
-    // reliable primitive, stopping bullets, blasts and setDamage alike while the ring is clear,
+    // reliable primitive that stops bullets, blasts and setDamage alike while the ring is clear,
     // which a per-hit HandleDamage veto could not. Killable only while OPFOR hold the ring.
     while { alive hq_blu1 } do {
         hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS] call fnc_opfor_count_at) > 0);

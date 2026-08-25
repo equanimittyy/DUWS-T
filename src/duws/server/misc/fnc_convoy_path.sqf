@@ -153,10 +153,9 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
 
         private _curG   = _g getOrDefault [_curKey, 1e12];
         private _curPos = getPosATL _cur;
-        // Fast-bail on a stuck search: a reachable dest keeps improving _bestH as A* homes in; an unreachable
-        // one plateaus, so a long run of pops with no closer approach means no path exists and we stop rather
-        // than pop the whole network. Top-level exitWith, matching the goal break above -- _goal stays null,
-        // so the leg falls through to off-road exactly as an exhausted search does.
+        // Fast-bail (see _bestH/_stall above and the CP_STALL define): top-level exitWith, matching the goal
+        // break above, so _goal stays null and the leg falls through to off-road exactly as an exhausted
+        // search does.
         private _h = _curPos distance2D _destPos;
         if (_h < _bestH) then { _bestH = _h; _bestNode = _cur; _stall = 0 } else { _stall = _stall + 1 };
         if (_stall >= CP_STALL) exitWith {
@@ -165,12 +164,10 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
                     round _bestH, _steps, _stall]] call fnc_log;
             };
         };
-        // Neighbours = the graph-connected roads, plus -- only at a sparsely connected node (a dead-end, or a
-        // junction where roadsConnectedTo dropped a link) -- any road within CP_BRIDGE metres. This hops the
-        // small gaps that otherwise fragment the network and fail the search. Gated on < 2 connections so the
-        // nearRoads cost is paid only at the rare fragmentation points, not every node. The bridged edge's cost
-        // is its real gap length, so A* stays optimal; a genuine gap wider than CP_BRIDGE still finds no bridge
-        // and the leg correctly falls through to off-road.
+        // Neighbours = the graph-connected roads, plus (only at a sparsely connected node, gated on < 2
+        // connections so the nearRoads cost is paid only at rare fragmentation points) any road within
+        // CP_BRIDGE metres -- see the define for what that hops. The bridged edge costs its real gap length,
+        // so A* stays optimal; a gap wider than CP_BRIDGE still finds no bridge and falls through to off-road.
         private _neighbours = roadsConnectedTo _cur;
         if (count _neighbours < 2) then {
             { if (_x != _cur && {!(_x in _neighbours)}) then { _neighbours pushBack _x } } forEach (_curPos nearRoads CP_BRIDGE);
@@ -234,10 +231,8 @@ private _fnc_clean = {
     _c
 };
 
-// Build the segmented route: a list of [points, mode] where mode is "road" (driven on the fixed polyline with
-// setDriveOnPath) or "gap" (the lead pathfinds it natively while the followers replay its track). Off-road
-// COMPLEMENTS the road search rather than replacing the leg: only the span the roads cannot bridge is a gap,
-// and the roads on either side of it stay road segments.
+// Build the segmented route: [points, mode] pairs, mode "road" (setDriveOnPath along the fixed polyline)
+// or "gap" (the lead pathfinds it natively while the followers replay its track).
 private _segs = [];
 if (_chain isNotEqualTo []) then {
     // Connected: one road segment -- start stub, the road chain, end stub.

@@ -16,18 +16,18 @@
 
 if (!isServer) exitWith {};
 
-// Nothing inside this of a player is deleted, however old it is. A wreck or a body blinking
-// out on screen reads as a bug, and the point of a lifetime is that it expires out of sight.
-// Expired but watched stays and is retried, so it goes once they leave rather than never.
+// Nothing inside this of a player is deleted, however old it is. A wreck or a body blinking out on
+// screen reads as a bug, and the point of a lifetime is that it expires out of sight. Expired but
+// watched stays and is retried, so it goes once they leave rather than never.
 #define KEEP_RADIUS 300
 
-// Bases are cleanup exclusion zones: an intact vehicle parked within DUWS_base_keep_radius of the
-// HQ, a FOB or the MHQ is never collected. This is the supported way to keep a vehicle, which is
-// why no vehicle carries the persistence flag any more -- drive it home instead of tagging it in
-// script. Deliberately narrower than "nothing inside is collected": wrecks, bodies and dropped kit
-// still go, or a base that gets attacked would silt up with exactly what the sweep exists to remove.
-// The radius is a global rather than a #define here because fnc_baseRangeMarker.sqf draws it on the
-// map, and the ring and the sweep must not be able to name different distances.
+// Bases are cleanup exclusion zones: an intact vehicle parked within DUWS_base_keep_radius of the HQ,
+// a FOB or the MHQ is never collected. This is the supported way to keep a vehicle, which is why no
+// vehicle carries the persistence flag any more -- drive it home instead of tagging it in script.
+// Deliberately narrower than "nothing inside is collected": wrecks, bodies and dropped kit still go,
+// or a base that gets attacked would silt up with exactly what the sweep exists to remove. The radius
+// is a global rather than a #define here because fnc_baseRangeMarker.sqf draws it on the map, and the
+// ring and the sweep must not be able to name different distances.
 
 // Passes between census log lines. The census is the one part of this that cannot be checked
 // offline -- allMissionObjects is documented around mission- and script-created objects, and a
@@ -40,11 +40,11 @@ private _lifetime = [_this, 0, 0, [0]] call BIS_fnc_param;
 // them for good. A stray 0 from an old param or save is floored to the shortest real option.
 _lifetime = _lifetime max 300;
 
-// Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a
-// drop added later is swept without anyone having to remember to register it.
-// Bodybags are listed by every name they go by rather than one base class, and the ACE one is
-// listed unconditionally: a class no loaded mod defines simply censuses to nothing, so naming it
-// costs a query when ACE is absent and catches the bags when it is not.
+// Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a drop
+// added later is swept without anyone having to remember to register it. Bodybags are listed by every
+// name they go by rather than one base class, and the ACE one is listed unconditionally: a class no
+// loaded mod defines simply censuses to nothing, so naming it costs a query when ACE is absent and
+// catches the bags when it is not.
 private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSimulated",
     "SmokeShell", "ReammoBox_F", "ParachuteBase",
     "Land_BodyBag_01_base_F", "Land_BodyBag_01_F", "Land_BodyBag_01_black_F",
@@ -95,11 +95,11 @@ while {true} do {
         private _type = _x;
         _candidates append (allMissionObjects _type);
     } forEach _litterClasses;
-    // Deduped in one engine call rather than by a unique insert per element: pushBackUnique
-    // rescans the list it is building on every insert, so the cost was quadratic in the litter
-    // lying on the map, and a few hundred holders and bodies after a firefight is tens of
-    // thousands of comparisons a pass. The census has to come after it -- the bodybag classes are
-    // listed beside their own base class, so a raw append reports those objects more than once.
+    // Deduped in one engine call rather than by a unique insert per element: pushBackUnique rescans
+    // the list it is building on every insert, so the cost was quadratic in the litter lying on the
+    // map -- a few hundred holders and bodies after a firefight is tens of thousands of comparisons a
+    // pass. The census has to come after it -- the bodybag classes are listed beside their own base
+    // class, so a raw append reports those objects more than once.
     _candidates = _candidates arrayIntersect _candidates;
     private _census = count _candidates;
 
@@ -109,9 +109,9 @@ while {true} do {
     // A vehicle counts as in use -- and so is spared -- when a living player, or a player's AI
     // squadmate, is aboard, or when living AI crew still has a mobile hull under them. A crewed hull
     // that cannot move is wreckage its crew never bailed from, not a vehicle in service, so it ages
-    // out on the clock like an empty one: this is what finally collects an immobilised-but-manned
+    // out on the clock like an empty one -- this is what finally collects an immobilised-but-manned
     // vehicle the old unmanned-only test never touched. A static is never mobile, so it is spared on
-    // any living crew instead -- collecting a manned emplacement would strip a held zone.
+    // any living crew instead: collecting a manned emplacement would strip a held zone.
     private _inUse = {
         params ["_v"];
         if ((crew _v) findIf {alive _x && {isPlayer _x || {(units group _x) findIf {isPlayer _x} >= 0}}} >= 0) exitWith { true };
@@ -121,8 +121,8 @@ while {true} do {
     // Idling and immobilised vehicles: not-in-use is the whole test now. They are still held by
     // DUWS_base_keep_radius and by the persistent flag, the same two things that hold everything
     // else. Statics stay excluded: a turret is unmanned by design, and collecting those would take a
-    // zone's emplacements the moment its captor steps away.
-    // Returning to service clears the clock, unless the vehicle was retired deliberately.
+    // zone's emplacements the moment its captor steps away. Returning to service clears the clock,
+    // unless the vehicle was retired deliberately.
     {
         if (!(_x isKindOf "StaticWeapon") && {!(_x call _inUse)}) then {
             _candidates pushBack _x;
@@ -148,12 +148,12 @@ while {true} do {
     DUWS_disposables = [];
     _disposed = _disposed select {!isNull _x};
 
-    // Read before the walk and cleared here rather than by the setter: the pass it woke is the
-    // only place that knows it was served, and leaving it set would wake every pass from now on.
-    // A forced pass treats every deadline as elapsed, which is the whole point of it -- waiting
-    // out the lifetime is what the tester is trying to skip. KEEP_RADIUS and persistent still
-    // hold: the first is what stops litter blinking out in front of someone, and the second is
-    // what tells a supply drop from the HQ crate of the same class.
+    // Read before the walk and cleared here rather than by the setter: the pass it woke is the only
+    // place that knows it was served, and leaving it set would wake every pass from now on. A forced
+    // pass treats every deadline as elapsed, which is the whole point of it -- waiting out the
+    // lifetime is what the tester is trying to skip. KEEP_RADIUS and persistent still hold: the first
+    // stops litter blinking out in front of someone, the second tells a supply drop from the HQ crate
+    // of the same class.
     private _force = DUWS_cleanup_force;
     DUWS_cleanup_force = false;
     private _tracked = 0;

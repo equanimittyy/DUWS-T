@@ -284,19 +284,17 @@ fnc_modern_FieldHospital = compile preprocessFileLineNumbers "duws\server\init_z
 // above so the zone set can reference them; the hardpoint resolver is read later by the placer.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_sets.sqf";
 
-// The engine keeps exactly one onMapSingleClick handler per machine and offers no way to read
-// back what is installed, so two features that each install one silently disarm each other and
-// the loser waits on a click that never arrives. Everything mid-mission that wants a map click
-// goes through these three instead of touching the command.
-//
-// Held in uiNamespace rather than missionNamespace because a claim must not be serialized into
-// a savegame: restored from one, the slot would come back owned by a mode that no longer
-// exists and every map click for the rest of the session would be dead.
-//
-// Mission generation (HQ placement, manual zone placement) still calls the command directly.
-// Those run to completion before the player has a comm menu or a board to click, so they
-// cannot collide with anything, and routing them through a function the server publishes would
-// make map placement depend on the broadcast having landed.
+// The engine keeps exactly one onMapSingleClick handler per machine and offers no way to read back
+// what is installed, so two features that each install one silently disarm each other and the
+// loser waits on a click that never arrives. Everything mid-mission that wants a map click goes
+// through these three instead of touching the command.
+// Held in uiNamespace rather than missionNamespace because a claim must not be serialized into a
+// savegame: restored from one, the slot would come back owned by a mode that no longer exists and
+// every map click for the rest of the session would be dead.
+// Mission generation (HQ placement, manual zone placement) still calls the command directly. Those
+// run to completion before the player has a comm menu or a board to click, so they cannot collide
+// with anything, and routing them through a function the server publishes would make map placement
+// depend on the broadcast having landed.
 
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_mapclick_init.sqf";
 publicVariable "fnc_mapclick_background";

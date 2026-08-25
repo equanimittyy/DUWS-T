@@ -2,20 +2,18 @@
 // state, none of which a client may do. Executed at load (`[] call compile ...`) to define the globals
 // below; the loop and the killed handler are launched later, at WARCOM init.
 //
-// The reinforcement half of the garrison reserve model, shared by zones and towns alike -- a town is a
-// garrison site like a zone, and the only difference is which composition table it draws from. The
-// accounting (the pool, the owed-men count, the live group count, the global throttle) is
-// fnc_zone_state_init's; the raise seeds the pool and sets the ceiling; the strength ledger is
-// fnc_garrison_strength_init's. What is here is the delivery: the refill pass that tops a fought-over
-// site back up to its x1 group count out of the pool, the far-side placement that keeps a wave off the
-// player's approach, the two triggers that fire it, and the break test that says when a garrison is
-// beaten. The model is docs/info/garrison_strength_ledger_plan.md.
+// The reinforcement half of the garrison reserve model, shared by zones and towns (a town is a garrison site
+// like a zone, differing only in which composition table it draws from). Accounting -- pool, owed-men count,
+// live group count, global throttle -- is fnc_zone_state_init's; the raise seeds the pool and sets the
+// ceiling; the strength ledger is fnc_garrison_strength_init's. Here: the refill pass topping a fought-over
+// site to its x1 group count from the pool, the far-side placement keeping a wave off the player's approach,
+// the two triggers that fire it, and the break test for beaten. Model:
+// docs/info/garrison_strength_ledger_plan.md.
 
-// Whether a garrison is beaten: its live men plus the men its reserve pool still owes, worn to a tenth
-// of its full fighting potential. One tenth is the campaign's single capture line -- a player learns it
-// once -- and it counts the owed reserves so a site cannot fall on an empty perimeter while waves are
-// still owed. The denominator is the ledger's full potential; a site with no full stamped is not beaten.
-// Read by the zone capture trigger and, for a town, by the tick that clears it.
+// Whether a garrison is beaten: live men plus reserve-owed men, worn to a tenth of full fighting potential
+// -- the campaign's one capture line, learned once, counting owed reserves so a site cannot fall on an empty
+// perimeter while waves are still owed. Denominator is the ledger's full potential; no full stamped means
+// not beaten. Read by the zone capture trigger and, for a town, the tick that clears it.
 DUWS_fnc_garrisonBeaten = {
     params ["_key"];
     private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;

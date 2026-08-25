@@ -225,12 +225,11 @@ DUWS_fnc_vehicleRow = {
 // raises it whatever it is called; anything else resolves to a classname and is placed as a vehicle.
 // A team or a vehicle added to a table spawns without a case being written for it.
 //
-// A token whose class resolves to "" is refused rather than spawned. The composition was filtered
-// before it got here, so this is a caller that skipped the filter, and spawning "" is a nil vehicle.
-// _postureOverride and _spawnPos are the reserve path's alone. A reserve rides the "hunt" orders
-// whatever posture its pool token carried, and it spawns on a point the pass chose on the zone's far
-// side rather than in the token's own radius band -- so the two override the posture the token names
-// and the position the spawner would pick. Empty defaults leave the ordinary garrison path untouched.
+// A token whose class resolves to "" is refused rather than spawned: the composition should already be
+// filtered, so this is a caller that skipped it, and spawning "" is a nil vehicle. _postureOverride and
+// _spawnPos belong to the reserve path alone -- a reserve rides the "hunt" orders regardless of its
+// pool token's own posture, and spawns where the pass chose on the zone's far side rather than in the
+// token's own radius band. Empty defaults leave the ordinary garrison path untouched.
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []]];
     private _posture = [_token] call DUWS_fnc_tokenPosture;

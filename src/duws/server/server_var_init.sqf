@@ -14,10 +14,9 @@ switch (VERSION_X) do {
 	
 };
 
-// The faction dropdown's own answer -- a faction-file token, or "CUSTOM"/"AUTODETECT". Kept apart
-// from *_Faction_X because faction init overwrites that one with the faction class the random
-// vehicle patrols read, and resolution now runs again every time the setup screens are stepped
-// back through. These default to the rows the two combos open on.
+// The faction dropdown's answer -- a faction-file token, or "CUSTOM"/"AUTODETECT". Kept apart from
+// *_Faction_X, which faction init overwrites with the class random vehicle patrols read; resolution
+// reruns every time setup steps back through. Defaults match the rows the two combos open on.
 BLUFOR_FactionFile_X = "BLU_F_ARID";publicVariable "BLUFOR_FactionFile_X";
 OPFOR_FactionFile_X = "OPF_F_ARID";publicVariable "OPFOR_FactionFile_X";
 
@@ -72,14 +71,13 @@ DUWS_trackAmmo = (["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue) == 1;publicV
 // boot, since Limited removes the unlimited friendly floor. Tunable; a playtest value.
 DUWS_limitedSeed = 100;
 
-// The faction confirmation screen's handshake. Request and ready are counters, not flags: stepping
-// back from the environment screen re-enters faction selection and the screen asks again, and a
-// flag cleared by the server can race a fresh request raised by the client. The screen waits for
-// ready to reach the number it asked with, so it can never read the previous pick's rows.
+// The faction confirmation screen's handshake. Request and ready are counters, not flags: stepping back
+// from the environment screen re-enters faction selection and asks again, and a flag cleared by the
+// server can race a fresh request from the client. The screen waits for ready to reach the number it
+// asked with, so it never reads the previous pick's rows.
 //
-// duws_faction_locked is the whole table the player confirmed -- [[side, [[key, value], ...]], ...]
-// -- carried whole rather than as a diff, so the server has one code path to apply rather than a
-// reconciliation to work out.
+// duws_faction_locked is the whole confirmed table -- [[side, [[key, value], ...]], ...] -- carried
+// whole rather than as a diff, so the server has one code path to apply, not a reconciliation to work out.
 duws_faction_preview_request = 0;publicVariable "duws_faction_preview_request";
 duws_faction_preview_ready = 0;publicVariable "duws_faction_preview_ready";
 duws_faction_locked = [];publicVariable "duws_faction_locked";
@@ -105,14 +103,13 @@ kill_cp_award = 1;
 // a circuit that a two-man probe could walk through. Server-only, both spawns run there.
 base_patrol_squad = 8;
 
-// When a FOB or HQ garrison stops being simulated. Nothing culled it before, so every base's
-// soldiers ran their pathing and targeting for the rest of the campaign whether or not anyone was
-// within a kilometre. Server-only.
+// When a FOB or HQ garrison stops being simulated. Nothing culled it before, so every base's soldiers
+// ran pathing and targeting for the rest of the campaign regardless of distance. Server-only.
 //
-// Short on the way down and nothing at all on the way up: a base is frozen rather than rebuilt, so
-// the only cost of freezing early is a garrison a returning player watches start moving, and that
-// costs a frame. The zone streamer's two minutes buy a zone something this does not -- there, the
-// clock stops a garrison being torn down and rebuilt around somebody crossing the radius.
+// Short on the way down, nothing on the way up: a base is frozen rather than rebuilt, so the only cost
+// of freezing early is a returning player watching the garrison start moving -- a frame's cost. The
+// zone streamer's two minutes buy a zone something this does not: there, the clock stops a garrison
+// being torn down and rebuilt around someone crossing the radius.
 base_garrison_sleep_range = 500;
 
 // Streaming presence per site profile: [buffer, grace, latch, aiAware, minAI].
@@ -132,11 +129,10 @@ DUWS_streamProfiles = createHashMapFromArray [
     ["base",       [  0,  10, false, false, 2]]
 ];
 
-// The consumable-support slate. support_max_slots is how many one-use items a player may carry at
-// once; support_death_refund is the share of what they paid -- both currencies -- that comes back
-// when they die holding unused ones. Half: forgiving, but still short of a full manual refund, so
-// walking an unused item back to a base returns more than dying with it does. Both are read on
-// clients, so both are broadcast.
+// The consumable-support slate. support_max_slots caps one-use items a player may carry at once;
+// support_death_refund is the share of what they paid (both currencies) refunded on death holding
+// unused ones. Half: forgiving, but short of a full refund, so walking an item back beats dying with
+// it. Both are read on clients, so both are broadcast.
 support_max_slots = 8;      publicVariable "support_max_slots";
 support_death_refund = 0.5; publicVariable "support_death_refund";
 
@@ -155,19 +151,18 @@ HC_air_station_seconds = 1800; publicVariable "HC_air_station_seconds";
 // as a scatter of named globals a restore would have to know one at a time.
 DUWS_support_permanent = []; publicVariable "DUWS_support_permanent";
 
-// Zone payouts. Capture is an event reward; holding is an Army Power trickle paid on the
-// economy tick (zone_ap_trickle, below).
+// Zone payouts. Capture is an event reward; holding is an AP trickle on the economy tick
+// (zone_ap_trickle, below).
 //
-// A first BLUFOR capture pays a flat liberation bonus -- CP and AP both, authored rather than
-// a share of worth so a small zone is worth taking too -- and pays it once ever per zone
-// (DUWS_zone_first_captured), so a zone lost and retaken is not a farm. A recapture pays
-// BLUFOR nothing: the zone's reward was earned at liberation. There is no CP bounty and no
-// bounty decay -- both retired with the town->CP reroute, which is where passive CP now lives.
+// First BLUFOR capture pays a flat liberation bonus (CP and AP both, not a worth-share so a small
+// zone is worth taking too) once ever per zone (DUWS_zone_first_captured), so a lost-and-retaken
+// zone is not a farm. Recapture pays BLUFOR nothing -- the reward was earned at liberation. No CP
+// bounty and no bounty decay: both retired with the town->CP reroute, where passive CP now lives.
 //
-// The AP swings are shares of the zone's worth so a contested zone swings the same momentum
-// however often it flips. OPFOR is paid a consolation every time BLUFOR takes a zone
-// (anti-steamroll: a fast advance funds the counter-attack) and the full swing when it retakes
-// one; BLUFOR sheds the swing when it loses one. Server-only: the capture handlers run server-side.
+// AP swings are shares of the zone's worth, so a contested zone swings the same momentum however
+// often it flips. OPFOR is paid a consolation every BLUFOR capture (anti-steamroll: a fast advance
+// funds the counter-attack) and the full swing on retaking one; BLUFOR sheds it on losing one.
+// Server-only: the capture handlers run server-side.
 zone_first_capture_cp = 25;  // flat CP the first time BLUFOR ever takes a zone
 zone_first_capture_ap = 50;  // flat AP alongside it; credits the tier, the main lever balancing OPFOR's hour-zero zones
 zone_ap_swing = 0.15;        // OPFOR's AP gain on retaking a zone, and BLUFOR's loss on losing one
@@ -196,13 +191,12 @@ DUWS_disposables = [];
 DUWS_compositions = createHashMap;
 
 // composition key -> the records needed to rebuild it, written through fnc_duws_stow. Holds a key
-// exactly while that composition's streamable members are off the map, so presence here answers
-// "is this stowed" without touching an object. Not exclusive with DUWS_compositions: pinned
-// members stay behind when the rest of their composition leaves, so a hardpoint whose gun never
-// stows appears in both.
-// Records are built when a composition is stowed rather than when it is built, so damage, looted
-// crates and moved props are captured as they actually are. Transient by design -- nothing here
-// outlives the session, and a campaign restore replays the builders instead.
+// exactly while that composition's streamable members are off the map, so presence here answers "is
+// this stowed" without touching an object. Not exclusive with DUWS_compositions: pinned members stay
+// behind when the rest of their composition leaves, so a hardpoint whose gun never stows appears in
+// both. Records are built when stowed, not when built, so damage, looted crates and moved props are
+// captured as they actually are. Transient by design -- nothing here outlives the session; a campaign
+// restore replays the builders instead.
 DUWS_stowed = createHashMap;
 
 // Keys retired through fnc_duws_release. A gate driving stow and deploy reads this to know its
@@ -257,28 +251,23 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
 // [successChance, [[payoutKind, weight], ...], nothingKey] per search source.
 //
-// combat is unflagged and rolls at the search, not at spawn: any enemy corpse is searchable, its
-// success rolled when the player searches it, and the per-player clock (DUWS_searchCooldown) is
-// what bounds intel volume. Its chance is high because that clock already caps volume -- a rarer
-// roll would only tax a five-minute wait with an empty result. objective and civ_frisk are flagged
-// at spawn and carry chance 1, so they never miss and are single-use; they read this table for
-// their kinds, not for a gate.
+// combat is unflagged and rolls at the search, not spawn: any enemy corpse is searchable, and the
+// per-player clock (DUWS_searchCooldown) -- not this chance -- bounds intel volume, so its chance is
+// high; a rarer roll would only tax a five-minute wait with an empty result. objective and civ_frisk
+// are flagged at spawn with chance 1 (never miss, single-use); they read this table only for kinds.
 //
-// Weights, not a cumulative if-ladder. Every band in a ladder depends on the one above it, so
-// adding a kind means re-deriving each constant below it; adding a row here is adding a row.
+// Weights, not a cumulative if-ladder: a ladder's bands each depend on the one above, so adding a
+// kind means re-deriving every constant below it, where a weight table just adds a row.
 //
-// Kinds are drawn without replacement. A kind whose payout reports nothing left to give drops out
-// and the remainder are re-drawn, so an exhausted intel pool cannot turn a search into silence --
-// the failure the mission already paid for once, when a dry pool returned quietly.
+// Kinds draw without replacement; one whose payout reports nothing left drops out and the remainder
+// re-draw, so an exhausted pool cannot turn a search into silence -- the failure already paid for
+// once, when a dry pool returned quietly.
 //
-// civ_frisk is flagged on every civilian and carries its own `nothing` weight, which keeps the
-// shipped 37.5 / 12.5 / 50 split exactly: the arrest is the price, and it is paid before this.
-// What it no longer carries is a line of its own. The empty-handed result was written per source,
-// on the reasoning that a body holding nothing and a detainee carrying nothing are different
-// sentences -- but every one of these is the same act reported by the same searcher, and the one
-// odd wording read as a different system rather than as a different subject.
-//
-// [successChance, [[payoutKind, weight], ...], nothingKey]
+// civ_frisk is flagged on every civilian with its own `nothing` weight, keeping the shipped
+// 37.5 / 12.5 / 50 split exact (the arrest is the price, paid before this). It no longer carries a
+// separate empty-handed line of its own: that read a body holding nothing and a detainee carrying
+// nothing as different sentences, but both are the same act by the same searcher, and the odd
+// wording read as a different system rather than a different subject.
 DUWS_searchSources = createHashMapFromArray [
     ["combat",    [0.80, [["intel", 2], ["money", 11], ["document", 7]],           "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
@@ -358,11 +347,10 @@ weather_type = "none";publicVariable "weather_type";
 // Zeus visibility
 ZeusStatus = 2;publicVariable "ZeusStatus";
 
-// Civilian faction. Defaulted here like every other environment setting: six subsystems
-// read it with no isNil guard, so leaving it unset makes each of them error separately and
-// civilians never generate, with nothing in the log naming the cause.
-// "med" is the only pool that is entirely base-game Altis classes, so it is the one default
-// that cannot pull in a mod dependency on the map this mission ships for.
+// Civilian faction. Defaulted here like every other environment setting: six subsystems read it with
+// no isNil guard, so leaving it unset makes each error separately and civilians never generate, with
+// nothing in the log naming the cause. "med" is the only pool entirely base-game Altis classes, so it
+// is the one default that cannot pull in a mod dependency on the map this mission ships for.
 CIV_PRESENCE = "med";publicVariable "CIV_PRESENCE";
 
 zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";
@@ -385,12 +373,12 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
 //   spawnRadius  distance BLUFOR wake the emplacement at (a fight holds it past this; see the tick)
 //   grace        seconds empty before it stows
-//   neverStream  the composition is built once and kept resident, never stowed. Mortar and artillery
-//                hold so OPCOM can task them with no player near; a minefield holds so its mines are
-//                never stowed off the map, leaving its own hazard list as the real count of what is
-//                armed. Only the composition is pinned: the loose garrison still streams, so a battery's
-//                defenders stow when its ring is empty and raise on approach rather than patrolling for
-//                the whole campaign. The pinned gun crew is the exception -- a frozen crew cannot fire
+//   neverStream  built once and kept resident, never stowed. Mortar and artillery hold so OPCOM can
+//                task them with no player near; a minefield holds so its mines are never stowed off
+//                the map, leaving its own hazard list as the real count of what is armed. Only the
+//                composition is pinned -- the loose garrison still streams, so a battery's defenders
+//                stow when its ring is empty rather than patrolling the whole campaign. The gun crew is
+//                the exception and stays live: a frozen crew cannot fire
 //   airRing      a second, larger radius answered only by aircraft; 0 = none. AA reaches out to
 //                catch a jet overhead its ground ring would never notice, without waking on
 //                every distant foot patrol.
@@ -427,13 +415,12 @@ DUWS_zoneAirCommitSpeed = 250;   // km/h; a player heli inbound or UAV on-statio
 DUWS_radioMastClass = "Land_TTowerBig_2_F";
 
 // How common each hardpoint type is before terrain -- the base weight the siting loop multiplies the
-// terrain score by for its weighted roll, and each map's keys ARE its roll set: a type absent from a
-// map is never rolled for that pass. Two mixes. A zone's fortification ring is the ground-assault set
-// (MG the backbone, GMG the rare supporting weapon). The standalone AoI net that denies the countryside
-// also fields AA -- weighted under MG so it does not out-place the guns on the flat ground it favours --
-// and leans harder on roadblocks. OPs, minefields and the fire-support types are in neither: they are
-// OPCOM's to place, never rolled at init. fnc_hardpoint_lay picks the map by whether the row files under
-// a zone (a zoneKey) or stands alone ("").
+// terrain score by; each map's keys ARE its roll set, so a type absent from a map is never rolled for
+// that pass. Two mixes: a zone's fortification ring is the ground-assault set (MG the backbone, GMG the
+// rare supporting weapon); the standalone AoI net also fields AA (weighted under MG so it does not
+// out-place the guns on the flat ground AA favours) and leans harder on roadblocks. OPs, minefields and
+// the fire-support types are in neither -- OPCOM's to place, never rolled at init. fnc_hardpoint_lay
+// picks the map by whether the row files under a zone (a zoneKey) or stands alone ("").
 DUWS_hardpointWeightZone = createHashMapFromArray [
     ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 1]
 ];
@@ -464,22 +451,22 @@ DUWS_hardpointBounty = createHashMapFromArray [
 ];
 
 // The loose garrison each hardpoint type fields: one DUWS_teamRosters token, or an array of them for a
-// type that fields several groups, each resolved per side when crewed -- read by fnc_hardpoint_register
-// and the raise worker so every placer fields it the same, the way DUWS_hardpointStreaming drives
-// streaming. "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
-// AT and AA field the weapons team, not the rifle team: its defenders carry the launchers that match the
-// emplaced gun's role, so an AT nest brings its own standoff AT and an AA nest its own MANPADS instead of a
-// generic section. The trade is anti-infantry punch -- wp_team has no AR, GL or marksman -- so those two
-// hold harder against armour and air but lighter against a dismounted assault.
-// A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
-// gun -- a rifle team plus two weapons teams to contest the air and armour a player brings against it,
-// part of it screening wide (widepatrol) to meet the approach while the rest hold the mast close. The
-// gun crew is separate and always placed.
-// Artillery and mortars are batteries OPCOM fires from, so their loose garrison scales to what a player
-// brings when they come to destroy the guns: artillery, with the longer reach and the greater loss, holds
-// two weapons teams and a rifle team; a mortar holds one weapons team and a light patrol. Their gun crews
-// are separate and stay resident even while the loose garrison streams, so OPCOM keeps firing between raids.
-// On each, one element screens wide (widepatrol) to catch the assault on the rim while the rest hold close.
+// type fielding several groups, resolved per side when crewed -- read by fnc_hardpoint_register and the
+// raise worker so every placer fields it the same way, as DUWS_hardpointStreaming drives streaming.
+// "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
+// AT and AA field the weapons team, not the rifle team: defenders carry launchers matching the emplaced
+// gun's role (AT nest -> standoff AT, AA nest -> MANPADS) instead of a generic section. Trade-off:
+// wp_team has no AR, GL or marksman, so those two hold harder against armour and air but lighter
+// against a dismounted assault.
+// A radio tower is a strategic objective with 5 km reach, so it fields a heavier patrol -- a rifle team
+// plus two weapons teams to contest the air and armour brought against it, part screening wide
+// (widepatrol) to meet the approach while the rest hold the mast close. Its gun crew is separate and
+// always placed.
+// Artillery and mortars are batteries OPCOM fires from, so their loose garrison scales to the threat:
+// artillery (longer reach, greater loss) holds two weapons teams and a rifle team; a mortar holds one
+// weapons team and a light patrol. Gun crews are separate and stay resident while the loose garrison
+// streams, so OPCOM keeps firing between raids. On each, one element screens wide (widepatrol) to catch
+// the assault on the rim while the rest hold close.
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
     ["OP", "team"], ["AA", "wp_team"], ["MORTAR", ["wp_team", "widepatrol:patrol"]], ["ARTY", ["wp_team", "wp_team", "widepatrol:team"]],
@@ -487,13 +474,12 @@ DUWS_hardpointGarrison = createHashMapFromArray [
 ];
 
 // Per-posture spawn band and circuit radius, each a fraction of the spawn radius the caller passes.
-// [minFrac, maxFrac, patrolFrac]: a group spawns between minFrac and maxFrac of that radius from the
-// centre and walks its circuit at patrolFrac of it. Read by fnc_spawn_team and fnc_spawn_vehicle for
-// where the group is placed and by fnc_apply_posture for how far its waypoints reach -- from one table
-// so the placement and the circuit cannot disagree: a wide patrol both spawns and lives on the outer
-// ring, a close one hugs the objective. A posture absent here (hqpatrol, none) keeps the old uniform
-// band, since those place their own men; garrison spawns inner and then claims structures within its
-// own fixed reach, so its patrolFrac only applies on the patrol fallback when it finds nothing to hold.
+// [minFrac, maxFrac, patrolFrac]: a group spawns between minFrac and maxFrac of that radius from centre
+// and circuits at patrolFrac. Read by fnc_spawn_team/fnc_spawn_vehicle for placement and by
+// fnc_apply_posture for waypoint reach -- one table so the two cannot disagree: a wide patrol spawns and
+// lives on the outer ring, a close one hugs the objective. A posture absent here (hqpatrol, none) keeps
+// the old uniform band since those place their own men; garrison spawns inner and claims structures
+// within its own fixed reach, so patrolFrac applies only on the fallback patrol when nothing is found.
 DUWS_postureBands = createHashMapFromArray [
     ["closepatrol", [0.1, 0.5, 0.4]],
     ["widepatrol",  [0.5, 1.0, 0.9]],

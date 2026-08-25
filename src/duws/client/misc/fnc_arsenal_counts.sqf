@@ -1,24 +1,23 @@
 // Locality: client -- paints the open arsenal, so it runs on whoever opened it. Compiled once by
 // client/client_init.sqf, then called every tick of the arsenal enforcer loop in initPlayerLocal.sqf.
 //
-// The stock virtual arsenal has no quantity concept: BIS_fnc_addVirtualWeaponCargo marks a class
-// present, unlimited, full stop. The real per-class stock lives in DUWS_capturedPool; this overlays it
-// onto the list rows the same way Antistasi's arsenal does -- a cosmetic count / infinity prefix
-// repainted on every list redraw, backed by the authoritative pool. The arsenal underneath stays a
-// dumb present/absent set.
+// The stock virtual arsenal has no quantity concept: BIS_fnc_addVirtualWeaponCargo just marks a class
+// present, unlimited. The real per-class stock lives in DUWS_capturedPool; this overlays it onto the
+// list rows the way Antistasi's arsenal does -- a cosmetic count/infinity prefix repainted on every
+// redraw, backed by the authoritative pool, while the arsenal underneath stays a dumb present/absent
+// set.
 //
-// The number shown is the live broadcast pool minus this session's local takes. The pool value
-// refreshes under an open arsenal on any server rebroadcast (the enforcer's restock tick diffs it and
-// forces a re-stamp), and DUWS_arsenalTaken subtracts the player's own uncommitted draws. The
-// authoritative settle still lands on close (fnc_captured_pool_settle), where overdraw is stripped.
+// The number shown is the live broadcast pool minus this session's local takes: it refreshes under an
+// open arsenal on any server rebroadcast (the enforcer's restock tick diffs it and forces a re-stamp),
+// and DUWS_arsenalTaken subtracts the player's own uncommitted draws. The authoritative settle still
+// lands on close (fnc_captured_pool_settle), where overdraw is stripped.
 //
 // The IDC macros (IDC_RSCDISPLAYARSENAL_LIST base + IDC_RSCDISPLAYARSENAL_TAB_* offsets) come from
 // BIS's own header, so the control ids track the engine version instead of being hardcoded numbers.
 #include "\A3\Ui_f\hpp\defineResinclDesign.inc"
 
 // Available count for a class as the shelf actually enforces it: -1 means unlimited (rendered as the
-// infinity glyph).
-// Order matters -- each earlier rule is a hard override of the ones below it.
+// infinity glyph). Order matters -- each earlier rule is a hard override of the ones below it.
 DUWS_fnc_arsenal_countFor = {
     params ["_cls"];
     // Full mode leaves the whole arsenal unlimited; the enforcer marks it non-restricted.
@@ -33,15 +32,14 @@ DUWS_fnc_arsenal_countFor = {
     if ((isClass (configFile >> "CfgMagazines" >> _cls)) && {!(missionNamespace getVariable ["DUWS_trackAmmo", false])}) exitWith { -1 };
     // Hybrid keeps standard-issue gear unlimited; Limited tracks it too, so only Hybrid short-circuits.
     if ((_cls in (missionNamespace getVariable ["DUWS_friendlyArsenal", []])) && {!(missionNamespace getVariable ["DUWS_arsenalLimited", false])}) exitWith { -1 };
-    // Count-tracked: the pool is [[class, n], ...] with zero-count classes dropped, so absence is zero.
-    // The pool only settles on arsenal close, so takes/returns this session are reflected live by
-    // subtracting the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (a class held now
-    // but not at open was withdrawn -> one fewer available). Display only: the pool is untouched, and
-    // close still settles the authoritative count.
-    // The compatible-magazines list hands back lowercased classnames (BIS folds case building it from
-    // the weapon's config mag list), while the pool and DUWS_arsenalTaken key on the config's own case.
-    // isEqualTo and the HashMap key are both case-sensitive, so a lowercased class read [0]. Canonicalise
-    // to the declared case first; configName resolves it (a tracked class is always in one of these).
+    // Count-tracked: pool is [[class, n], ...], zero-count classes dropped so absence reads zero. It
+    // only settles on arsenal close; this session's takes/returns are reflected live by subtracting
+    // the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (held now but not at open =
+    // withdrawn, one fewer available) -- display only, the pool itself stays untouched until close.
+    // The compatible-magazines list hands back lowercased classnames (BIS folds case from the weapon's
+    // config mag list), while the pool and DUWS_arsenalTaken key on the config's own case. isEqualTo
+    // and the HashMap key are both case-sensitive, so a lowercased class read [0]. Canonicalise to the
+    // declared case first; configName resolves it (a tracked class is always in one of these).
     private _canon = configName (configFile >> "CfgMagazines" >> _cls);
     if (_canon == "") then { _canon = configName (configFile >> "CfgWeapons" >> _cls) };
     if (_canon == "") then { _canon = configName (configFile >> "CfgVehicles" >> _cls) };
@@ -54,9 +52,9 @@ DUWS_fnc_arsenal_countFor = {
     (_n - _off) max 0
 };
 
-// Repaint every populated, visible item list under the arsenal display. Only shown lists are walked:
-// the arsenal shows just the active tab's list (plus the attachment/cargo lists when a weapon is
-// selected), so this bounds the work regardless of how large the config is in Full mode.
+// Repaints every populated, visible item list under the arsenal display: only shown lists are walked
+// (the arsenal shows just the active tab's list, plus attachment/cargo lists when a weapon is
+// selected), bounding the work regardless of how large the config is in Full mode.
 DUWS_fnc_arsenal_paintCounts = {
     params [["_display", displayNull]];
     if (isNull _display) exitWith {};
@@ -65,9 +63,9 @@ DUWS_fnc_arsenal_paintCounts = {
     // and stamping thousands of rows only fights BIS's own repopulation of that list. Paint nothing.
     if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith {};
 
-    // Every browsable category list, left panel then right. Each control id is the shared list base
+    // Every browsable category list, left panel then right; each control id is the shared list base
     // plus the category's tab offset. Both magazine lists are walked: the compact "compatible mags"
-    // list (CARGOMAG, the default view) is a separate control from "all mags" (CARGOMAGALL), so
+    // list (CARGOMAG, the default view) is a separate control from "all mags" (CARGOMAGALL) --
     // stamping only the latter left the default mag tab uncounted.
     private _tabs = [
         IDC_RSCDISPLAYARSENAL_TAB_PRIMARYWEAPON, IDC_RSCDISPLAYARSENAL_TAB_SECONDARYWEAPON,
@@ -96,10 +94,10 @@ DUWS_fnc_arsenal_paintCounts = {
     {
         private _ctrl = _display displayCtrl (IDC_RSCDISPLAYARSENAL_LIST + _x);
         if (isNull _ctrl || {!(ctrlShown _ctrl)}) then { continue };
-        // Walk only the two list shapes the arsenal actually uses: a cargo list is a CT_LISTNBOX (102,
-        // multi-column, class in column 0), every other tab a CT_LISTBOX (5). Skip any other type -- a
+        // Walk only the two list shapes the arsenal actually uses: a cargo list is CT_LISTNBOX (102,
+        // multi-column, class in column 0), every other tab CT_LISTBOX (5). Skip any other type -- a
         // not-yet-shaped control mid-rebuild, or a non-list control in the id space -- so lnb*/lb* is
-        // never called on a control that cannot take it, the shape that errored on rapid tab clicks.
+        // never called on a control that can't take it, the shape that errored on rapid tab clicks.
         private _t = ctrlType _ctrl;
         if (_t != 5 && {_t != 102}) then { continue };
         private _isN = _t == 102;

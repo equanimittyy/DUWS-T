@@ -1,21 +1,18 @@
 // Locality: server -- callers remoteExec to target 2.
 //
 // Recon-observe. The player infils to a designated overwatch position, raises binoculars, and holds
-// eyes-on an unrevealed OPFOR position -- a zone or a standalone hardpoint -- long enough to scout it;
-// success lifts that position's fog of war on the strategic map. The site-finder (fnc_recon_observe_site)
-// returns the TARGET position (a re-derivation the thread makes exact through the shared picker), and this
-// thread computes the overwatch itself -- terrain and object line-of-sight, on the friendly-facing side,
-// favouring height over the target.
+// eyes-on an unrevealed OPFOR position (a zone or standalone hardpoint) long enough to scout it;
+// success lifts that position's fog of war on the strategic map. The site-finder
+// (fnc_recon_observe_site) returns the TARGET position via the shared picker; this thread computes the
+// overwatch itself -- terrain and object line-of-sight, on the friendly-facing side, favouring height
+// over the target.
 //
-// Both a zone and a hardpoint are observed where they really stand -- the mission builds no stand-in for
-// either, so the double where a stand-in overlapped the real garrison a player then walked into is gone.
-// A hardpoint's stream ring already covers the 600-800 m overwatch band, so approaching the outlook wakes
-// the REAL emplacement through its own site poller. A zone's ring is tighter and its garrison would be
-// asleep out here; rather than build a copy, the mission widens the zone's stream radius for its own
-// lifetime (restored on end), which brings the overwatch inside the ring and lets the shared poller wake
-// the REAL zone as the player nears the outlook and stow it again when they leave. Only the site record's
-// radius moves -- the capture triggers bake their own geometry at build -- so the zone still captures over
-// its true size, and the one prefab the player ever sees is the zone's own.
+// Both a zone and a hardpoint are observed where they really stand: the mission builds no stand-in for
+// either, so the old bug where a stand-in overlapped the real garrison and a player walked into it is
+// gone. A hardpoint's stream ring already covers the 600-800 m overwatch band, so approaching the
+// outlook wakes the real emplacement through its own site poller. A zone's ring is tighter and its
+// garrison would be asleep out here, so the mission widens the zone's stream radius for its own
+// lifetime instead of building a copy.
 params ["_MissionPos", "_mission_name"];
 
 // TUNABLE, all here. Standoff band (kept with the finder); observe area; LOS range slack; hold seconds;
@@ -33,10 +30,10 @@ params ["_MissionPos", "_mission_name"];
 #define BONUS_MAX       2
 
 // Target: the finder returned the target position as _MissionPos, so re-deriving the nearest unrevealed
-// OPFOR position to it lands on that same target -- an exact re-derivation through the shared picker, not
-// the ambiguous "nearest to an overwatch". The kind (a zone or a standalone hardpoint) rides the pick. If
-// it was captured, cleared or revealed since the offer the next nearest resolves; none left aborts. A zone
-// pos is kept, not a copy -- fnc_zone_reveal matches its target by str(pos); an HP reveals by its key.
+// OPFOR position to it lands on the same target -- exact, via the shared picker, not the ambiguous
+// "nearest to an overwatch". The kind (zone or hardpoint) rides the pick; if captured, cleared or
+// revealed since the offer the next nearest resolves, none left aborts. A zone pos is kept, not copied --
+// fnc_zone_reveal matches its target by str(pos); an HP reveals by its key.
 private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _pick = [_MissionPos] call fnc_recon_observe_pick;
@@ -98,9 +95,8 @@ if (_overwatch isEqualTo []) exitWith {
     [17, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
 
-// The anchor the 3D marker and the hold LOS ride: the real target, which the overwatch was verified to
-// have clear line-of-sight to. Both kinds are observed at the true position now that a zone's real
-// garrison streams in there rather than an offset stand-in.
+// The anchor the 3D marker and hold LOS ride: the real target, which the overwatch was verified to have
+// clear line-of-sight to.
 private _anchor = _target;
 
 // A zone target's site key and its true stream radius, saved so the mission can hand the radius back on

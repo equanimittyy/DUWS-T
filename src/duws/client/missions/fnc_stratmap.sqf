@@ -13,9 +13,8 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_missioncooldown"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_missioncooldown2";
-// Answers the player who opened the menu, so it stays on their machine: this function is spawned
-// by the request-menu action and already runs there. It was addressed to player1, which in co-op
-// showed one player the refusal for another player's click.
+// Stays on the opener's machine: spawned by the request-menu action, which already runs there.
+// Previously addressed to player1, which in co-op showed one player the refusal for another's click.
 hint localize "STR_DUWS_T_b68ftbvf";
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
@@ -24,19 +23,19 @@ sleep 4;
 
 if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};
 
-// Gate the whole list, not each type: with one gate for every mission, browsing offers none of which
-// can be started is just noise. Same three-in-game-hour wait fnc_mission_begin enforces server-side,
-// checked here so the player is told before the map opens. Placed ahead of the cached-offer reuse
-// below so a cached open obeys the gate too.
+// Gates the whole list, not each type -- one gate per mission would leave the player browsing
+// offers none of which can start. Same three-in-game-hour wait fnc_mission_begin enforces
+// server-side, checked here (ahead of the cached-offer reuse below, so a cached open obeys it too)
+// so the player is told before the map opens.
 private _gateLeft = [] call fnc_mission_gate_left;
 if (_gateLeft > 0) exitWith {
 	hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", [] call fnc_mission_gate_time];
 };
 
-// Reuse a still-current offer set instead of re-rolling it. Regenerating on every open handed a
-// player who backed out to reconsider seven brand-new missions; the set now persists until one is
-// picked (fnc_mission_launch clears it) or the debug re-roll fires. Reached only past the
-// Mission_available and game_master gates above, so a cached open still obeys the start gate.
+// Reuse a still-current offer set instead of re-rolling it: regenerating on every open handed a
+// backed-out player seven brand-new missions to reconsider. Persists until one is picked
+// (fnc_mission_launch clears it) or the debug re-roll fires; reached only past the Mission_available
+// and game_master gates above, so a cached open still obeys the start gate.
 private _cachedOffers = missionNamespace getVariable ["DUWS_missionOffers", []];
 if !(_cachedOffers isEqualTo []) exitWith {
 	array_of_missions = _cachedOffers select 0;
@@ -65,32 +64,32 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   private _missionDefs = [
   #include "..\..\shared\includes\mission_types.hpp"
   ];
-  // Positions and names the launcher blocks read back, one slot per type. A global because the
+  // Positions and names the launcher blocks read back, one slot per type. A global because those
   // blocks run later, from the map, and capture nothing.
   DUWS_missionSlots = [];
   { DUWS_missionSlots pushBack [] } forEach _missionDefs;
 
-  // Weighted draw bag: [index, weight, hardEligible] per type. Types are drawn WITHOUT replacement, so
-  // the offer set holds distinct types and a type that fails to site is dropped and another drawn for
-  // the slot -- never leaving the slot empty the way the old fixed shuffle did on a no-fit. weight (rule
-  // field 4) biases the draw; hardEligible (rule field 3) is whether the type may take a deep hard slot.
+  // Weighted draw bag: [index, weight, hardEligible] per type, drawn WITHOUT replacement so the offer
+  // set holds distinct types; a type that fails to site is dropped and another drawn for the slot,
+  // never leaving it empty the way the old fixed shuffle did on a no-fit. weight is rule field 4
+  // (draw bias); hardEligible is rule field 3 (whether the type may take a deep hard slot).
   private _bag = [];
   { private _r = _x select 13; _bag pushBack [_forEachIndex, _r select 4, _r select 3] } forEach _missionDefs;
 
   private _missionDraw = 7 min (count _bag);
 
   // Two offers push deep into enemy ground (hard, a difficulty-scaled bonus); the rest seat on the
-  // frontline (easy, base pay). Hard slots draw only from hardEligible types placed deep; once they are
-  // filled -- or the hardEligible pool empties -- the draw opens to the whole bag as easy. A short or
-  // all-easy pool degrades to fewer hard rather than stalling.
+  // frontline (easy, base pay). Hard slots draw only from hardEligible types placed deep; once
+  // filled -- or the hardEligible pool empties -- the draw opens to the whole bag as easy, so a
+  // short or all-easy pool degrades to fewer hard rather than stalling.
   private _hardWant = 2 min _missionDraw;
   private _filled = 0;
   private _hardFilled = 0;
   private _hardOffers = [];   // [name, depth-from-friendly] per hard offer -> multiplier after the loop
 
   // Anchors for the hard-offer depth calc below: friendly-held ground is HQ, FOBs, and captured zones.
-  // The placement weighting lives in server/missions/fnc_mission_findSite, called per offer below, so
-  // the debug force tool sites through the same logic instead of a copy.
+  // Placement weighting lives in server/missions/fnc_mission_findSite, called per offer below, so the
+  // debug force tool sites through the same logic instead of a copy.
   private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
   private _friendlyAnchors = +_bluHeld;
   if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
@@ -102,9 +101,8 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 
 	progressLoadingScreen (_filled / _missionDraw);
 
-	// Fill the hard slots first, from hardEligible types only; when the hardEligible pool empties before
-	// they are filled, _hardWant collapses to _hardFilled so the remaining slots stop asking for hard and
-	// draw easy from the whole bag.
+	// Fill the hard slots first, from hardEligible types only. If that pool empties before they're
+	// filled, _hardWant collapses to _hardFilled, so the remaining slots draw easy from the whole bag.
 	private _wantHard = _hardFilled < _hardWant;
 	private _pool = if (_wantHard) then { _bag select { _x select 2 } } else { _bag };
 	if (_pool isEqualTo []) then { _wantHard = false; _hardWant = _hardFilled; _pool = _bag };
@@ -135,9 +133,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		DUWS_missionSlots set [_idx, [_foundSafepos, _name, _destZone]];
 
 		// The stats block mirrors the journal's (fnc_missionTaskCreate) but prints a time band, not a
-		// deadline clock: pre-pick, the deadline has not been rolled. Name, type and note come from the
-		// same single source, mission_types.hpp, so editing a row moves the map figure and the paid
-		// figure together. REP prints only where the type grants it.
+		// deadline clock: pre-pick, the deadline has not been rolled. Name, type and note all come
+		// from mission_types.hpp, so editing a row moves the map and paid figures together. REP
+		// prints only where the type grants it.
 		private _descFull = localize _desc;
 		if (_note != "") then { _descFull = _descFull + "<br />" + format [localize "STR_DUWS_T_mission_note_line", localize _note] };
 		_descFull = _descFull + "<br />" + localize "STR_DUWS_T_mission_divider";
@@ -183,10 +181,10 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // Offers found -> arm the map open; an empty set (nothing sited anywhere) still trips the failsafe.
   failsafe_not_found = (array_of_missions isEqualTo []);
 
-  // Hard offers pay a difficulty-scaled bonus: their multiplier spans 1.5x (shallowest of the hard
-  // set) to 2x (deepest), linear in depth from friendly-held ground. Easy offers get no entry and pay
-  // flat. fnc_mission_reward reads DUWS_rewardBoost back on the server as [name, multiplier] pairs.
-  // Overwritten each request -- safe because a request is gated shut while a mission is live
+  // Hard offers pay a difficulty-scaled bonus: multiplier spans 1.5x (shallowest of the hard set) to
+  // 2x (deepest), linear in depth from friendly-held ground. Easy offers get no entry and pay flat.
+  // fnc_mission_reward reads DUWS_rewardBoost back on the server as [name, multiplier] pairs,
+  // overwritten each request -- safe because a request is gated shut while a mission is live
   // (Mission_available).
   private _hardDepths = _hardOffers apply {_x select 1};
   private _dmin = if (_hardDepths isEqualTo []) then {0} else {selectMin _hardDepths};
@@ -213,9 +211,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   } forEach DUWS_rewardBoost;
 
   // Civs-off CP lift: with no town-rep economy (civilians off, or the RAVAGE/WBK modes) mission CP is
-  // paid x1.5 to substitute the absent town-CP faucet (server/missions/fnc_mission_reward.sqf). The gate
-  // there is civ_town_rep being empty, which is server-only; CIV_PRESENCE is the broadcast setting that
-  // decides it, so the client reproduces the same condition to surface the lift on every offer.
+  // paid x1.5 to substitute the absent town-CP faucet (server/missions/fnc_mission_reward.sqf). That
+  // gate is civ_town_rep being empty (server-only); CIV_PRESENCE is the broadcast setting deciding it,
+  // so the client reproduces the same condition here to surface the lift on every offer.
   if ((isNil "CIV_PRESENCE") || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) then {
       private _civTag = format ["<br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_civsoff_tag"];
       { _x set [3, (_x select 3) + _civTag] } forEach array_of_missions;

@@ -22,17 +22,15 @@ sleep 1;
 sleep 1;
 ["INFO", "WARCOM", format ["Opfor Warcom serv_zones_array: %1", serv_zones_array]] call fnc_log;
 
-// Civilian towns are chosen from the zones, so generation is a step of zone placement rather
-// than a separate race against it. This is the one point both the random and the manual
-// locator funnel through on the server, so the kick-off lives here instead of in each path.
-// Spawned: WARCOM below must not wait for build-out. Counted against serv_zones_array, not
-// zones_number -- the origin keep-out in fnc_locatorzones_random can drop a zone slot, and a
-// zones_number target would then never be reached.
+// Civilian towns come from the zones, so generation is a step of zone placement, not a race against
+// it. Kicked off here because this is the one point both the random and manual locator funnel through
+// on the server. Spawned (WARCOM below must not wait for build-out), and counted against
+// serv_zones_array, not zones_number -- the origin keep-out in fnc_locatorzones_random can drop a zone
+// slot, so a zones_number target would then never be reached.
 [] spawn {
-    // Build-out threads keep running after the locator publishes positions and clears its
-    // counter, so the map would otherwise sit blank until the civilian pass starts. Ticks on
-    // its own rather than inside the wait below, whose condition is polled far too often to
-    // hang a remoteExec off. Self-terminating on the same condition that wait gates on.
+    // Build-out threads keep running after the locator clears its counter, so the map would sit blank
+    // until the civilian pass starts unless ticked here on its own -- not inside the wait below, whose
+    // condition polls far too often to hang a remoteExec off. Self-terminates on that same condition.
     [] spawn {
         while {zones_buildout_done < count serv_zones_array} do {
             [format ["Building zones...<br/>%1 of %2 complete",
@@ -49,19 +47,19 @@ sleep 1;
     // would, and a stale "3 of 4 complete" would sit there until the map closed.
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-    // Hard Point Generation -- a phase of its own between zones and civilians, so its emplacements read
-    // a fully-built map and the player watches it happen on the same banner the other phases use. Reads
-    // zone_meta_array ([num, pos, size, ...]), which every zone publishes before it bumps
-    // zones_buildout_done, so the array is complete by the wait above. Called, not spawned:
-    // fnc_hardpoint_site_zone sleeps in its crew-drop, and running the zones in sequence is what keeps
-    // the banner honest and finishes the pass before civilians start. Idempotent per zone -- the stored
-    // cap guards a rebuild -- and the key is fnc_zone_key of the centre, the key the siting loop files under.
+    // Hard Point Generation is its own phase between zones and civilians, so emplacements read a
+    // fully-built map on the same banner the other phases use. Reads zone_meta_array ([num, pos, size,
+    // ...]), complete by the wait above since every zone publishes it before bumping
+    // zones_buildout_done. Called, not spawned: fnc_hardpoint_site_zone sleeps in its crew-drop, and
+    // running zones in sequence keeps the banner honest and finishes before civilians start. Idempotent
+    // per zone (the stored cap guards a rebuild), keyed by fnc_zone_key of the centre -- the same key
+    // the siting loop files under.
     //
-    // Roll the whole emplacement plan -- every zone's ring, the roadblock net and the two flank lines --
-    // before laying any of it, so the banner counts hardpoints toward a real total, not zones. Radio and AA
-    // are deterministic (radio rolled here so the seed call and the plan total share it; AA counts
-    // serv_zones_array), so the plan hands back the rolled arrays and those two are derived here. The plan
-    // returns the roadblock net pre-expanded to a [zonePos, endpointPos] target per block.
+    // The whole emplacement plan -- every zone's ring, the roadblock net, the two flank lines -- is
+    // rolled before laying any of it, so the banner counts hardpoints toward a real total, not zones.
+    // Radio and AA are deterministic (radio rolled here so the seed call and plan total share it; AA
+    // counts serv_zones_array), so the plan derives both and hands them back with the rolled arrays.
+    // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
     private _radioN = 1 + floor random 2;
     ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_hpTotal"];
     private _aaN = count serv_zones_array;
@@ -138,20 +136,19 @@ sleep 1;
         [] spawn DUWS_fnc_garrisonReserveLoop;
     };
 
-    // Last step of generation, and called rather than spawned so it is: its census is a
-    // multi-second frame stall, and the only way that is not felt as a hitch is for the player
-    // to still be watching the generation banner when it happens. Spawned off WARCOM_init_done
-    // it landed on the frame the banner cleared instead.
+    // Last step of generation, called (not spawned) so it stays one: its census is a multi-second frame
+    // stall, felt as a hitch unless the player is still watching the generation banner when it happens --
+    // which spawning off WARCOM_init_done missed, landing right on the frame the banner cleared.
     // Outside the civilians-off gate above: the escalation counter never depends on the
     // civilian system. Only the town reputation charge inside it does, and with civilians off
     // that degrades to charging nothing.
     [] call fnc_escalation;
 
-    // Every completion announcement lives here rather than at the end of the zone locators:
-    // there they fired while civilian towns were still being placed, telling the player the
-    // campaign was ready before it was. Wrapped in BIS_fnc_Spawn so profileName, the map
-    // description and the settings all read on each client -- the random locator ran the
-    // typeText server-side, which showed nobody anything on a dedicated host.
+    // Every completion announcement lives here rather than at the end of the zone locators: there they
+    // fired while civilian towns were still being placed, telling the player the campaign was ready
+    // before it was. Wrapped in BIS_fnc_Spawn so profileName, the map description and settings all read
+    // on each client -- the random locator ran typeText server-side, showing nobody anything on a
+    // dedicated host.
     [{player globalChat format[localize "STR_DUWS_T_d5e848d8",
         getText(configFile >> "cfgWorlds" >> worldName >> "description"), profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [{player globalChat localize "STR_DUWS_T_518bqchj"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

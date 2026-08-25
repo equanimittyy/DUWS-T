@@ -1,15 +1,14 @@
 // Locality: server -- called (not spawned) from fnc_rescue_squad_mission once the cordon is broken.
 //
-// Evac + completion. The cordon is dead and the squad is up; fly it out and close the mission. Squad
-// and helicopter are both set captive for the pickup: the fight is already won, and a scripted bird
-// taking stray fire from a passing patrol on the way out is not a failure the player earned. The bird
-// lands at an LZ off the building and the squad boards on foot; a straggler stuck on geometry is moved
-// into cargo on a timeout so one man cannot hang the extraction. A bird lost while the squad is still on
-// foot -- on approach or on the deck -- costs the lift, not the mission: the survivors walk off the AO and
-// the reward still pays. Once they are sealed aboard they are committed to it, so a crash from there
-// (before the reward) is a loss; a wiped squad is a KIA fail either way. The player and allies are kept off
-// the bird -- any that board while it is down are turned out before it lifts, then cargo is locked for the
-// flight -- so the teardown only ever deletes the flight crew and the squad.
+// Evac + completion: cordon dead, squad up -- fly it out and close the mission. Squad and helicopter
+// are both set captive for the pickup: the fight is already won, so stray fire from a passing patrol on
+// the way out is not an earned failure. The bird lands at an LZ off the building; the squad boards on
+// foot, and a straggler stuck on geometry is moved into cargo on a timeout so one man cannot hang the
+// extraction. A bird lost while the squad is still on foot -- on approach or on the deck -- costs the
+// lift, not the mission: survivors walk off the AO and the reward still pays. Once sealed aboard they are
+// committed: a crash before the reward is a loss, and a wiped squad is a KIA fail either way. The player
+// and allies are kept off the bird -- any that board while it is down are turned out before it lifts,
+// then cargo is locked for the flight -- so teardown only ever deletes the flight crew and the squad.
 params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name", "_cpreward", "_apreward"];
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};

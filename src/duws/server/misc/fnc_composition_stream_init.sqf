@@ -1,14 +1,14 @@
 // Composition membership and the stow/deploy streaming gate.
 //
-// Executed by the registry rather than stored as one function: this file defines several.
-// Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
-// place to see what reaches clients.
+// Executed by the registry rather than stored as one function: this file defines several. Broadcasts
+// stay in server_fnc_init.sqf beside the load, so the manifest remains the one place to see what
+// reaches clients.
 
-// Hand an object to the map cleanup, to be deleted _ttd seconds from now once no player is
-// near it. Opt-in by whoever created the object, because class cannot tell these apart: a
-// supply drop and the HQ arsenal crate are both B_supplyCrate_F, and three side missions use
-// crate classes for their objectives. Only the code that made the thing knows it is litter.
-// Callable from anywhere -- a client call forwards itself to the server, which owns the sweep.
+// Hand an object to the map cleanup, to be deleted _ttd seconds from now once no player is near it.
+// Opt-in by whoever created the object, because class cannot tell these apart: a supply drop and the
+// HQ arsenal crate are both B_supplyCrate_F, and three side missions use crate classes for their
+// objectives -- only the code that made the thing knows it is litter. Callable from anywhere: a
+// client call forwards itself to the server, which owns the sweep.
 fnc_duws_disposeAfter = {
     params ["_obj", ["_ttd", 1800]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_disposeAfter", 2] };
@@ -20,21 +20,20 @@ fnc_duws_disposeAfter = {
 };
 
 // Mark an object as part of a standing composition -- the BLUFOR HQ, a FOB, a zone prefab, a
-// hardpoint. Tagged persistent so no cleanup sweep touches it, and filed under _key so the
-// whole composition can be released together.
-// Membership is tracked rather than inferred, because inference cannot work: when a hardpoint
-// is wrecked its sandbags and camo net are undamaged props, and no test applied to those
-// objects -- dead, immobile, litter class -- would ever collect them. Only the key knows they
-// belonged to something that is now gone.
-// One object, one key. Nothing enforces it, but release drops the persistent flag
-// unconditionally, so filing something under two keys means retiring either of them strips the
-// protection while the other still lists it as a member.
-// _pinned marks a member whose effect depends on its existing rather than on being looked at --
-// an artillery piece, a mortar, an AA gun. Streaming those removes a capability instead of
-// deferring a cost: an aircraft crosses the gate's radius in a few seconds, so a stowed AA gun
-// would never engage anything. Declared by the caller rather than tested by class at stow time,
-// because only the code that placed the object knows why it is there, and a class test would have
-// to be kept in step with every faction mod's turret names. Local: only the server stows.
+// hardpoint. Tagged persistent so no cleanup sweep touches it, and filed under _key so the whole
+// composition can be released together. Membership is tracked rather than inferred, because
+// inference cannot work: when a hardpoint is wrecked its sandbags and camo net are undamaged props,
+// and no test on those objects -- dead, immobile, litter class -- would ever collect them. Only the
+// key knows they belonged to something that is now gone.
+// One object, one key. Nothing enforces it, but release drops the persistent flag unconditionally,
+// so filing something under two keys means retiring either of them strips the protection while the
+// other still lists it as a member.
+// _pinned marks a member whose effect depends on its existing rather than on being looked at -- an
+// artillery piece, a mortar, an AA gun. Streaming those removes a capability instead of deferring a
+// cost: an aircraft crosses the gate's radius in a few seconds, so a stowed AA gun would never engage
+// anything. Declared by the caller rather than tested by class at stow time, because only the code
+// that placed the object knows why it is there, and a class test would have to track every faction
+// mod's turret names. Local: only the server stows.
 fnc_duws_keep = {
     params ["_obj", ["_key", "world"], ["_pinned", false]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
@@ -60,8 +59,8 @@ fnc_duws_keep = {
 };
 
 // The composition is gone: drop the protection from every part and hand the lot to the sweep.
-// Deletion still respects the keep-radius, so a hardpoint wrecked under the player's nose
-// clears once they leave rather than in front of them.
+// Deletion still respects the keep-radius, so a hardpoint wrecked under the player's nose clears
+// once they leave rather than in front of them.
 fnc_duws_release = {
     params ["_key", ["_ttd", 300]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_release", 2] };
@@ -84,15 +83,15 @@ fnc_duws_release = {
 
 // Take a composition off the map, holding the data needed to put it back. Distinct from
 // fnc_duws_release: release retires a composition for good and drops its key, where stow keeps the
-// key so the same one can return.
-// Deletion is immediate rather than handed to the sweep, because removing the entity is the whole
-// point -- a stowed member has to leave allMissionObjects, the curator's editable set and the
-// spatial index at once, and the sweep's keep-radius would hold it instead.
+// key so the same one can return. Deletion is immediate rather than handed to the sweep, because
+// removing the entity is the whole point -- a stowed member has to leave allMissionObjects, the
+// curator's editable set and the spatial index at once, and the sweep's keep-radius would hold it
+// instead.
 // Refuses while a streamable member is crewed. The zone stow leaves gunners sitting in static
 // weapons alive (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a
-// manned gun and strand the AI where its turret was. Retrying on the next cycle is the safe
-// failure. Pinned members are excluded from that test on purpose: they keep their crew by design,
-// so counting them would block their composition from ever stowing.
+// manned gun and strand the AI where its turret was. Retrying on the next cycle is the safe failure.
+// Pinned members are excluded from that test on purpose: they keep their crew by design, so counting
+// them would block their composition from ever stowing.
 fnc_duws_stow = {
     params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_stow", 2] };
@@ -101,10 +100,10 @@ fnc_duws_stow = {
     private _pinned = _members select {_x getVariable ["DUWS_noStow", false]};
     private _streamable = _members - _pinned;
     // Logged where the reason is known: the streaming caller only sees a bare false, and a
-    // composition that refuses stays on the map for a whole spawn/despawn cycle with nothing to
-    // say why. Unreachable through the zone path -- DUWS_fnc_zoneStow crews out its statics first and
-    // nothing else in a composition takes crew -- so a line here means something unmodelled put a
-    // man in one, which is worth a WARN rather than a routine note.
+    // composition that refuses stays on the map for a whole spawn/despawn cycle with nothing to say
+    // why. Unreachable through the zone path -- DUWS_fnc_zoneStow crews out its statics first and
+    // nothing else in a composition takes crew -- so a line here means something unmodelled put a man
+    // in one, which is worth a WARN rather than a routine note.
     private _crewed = _streamable findIf {({alive _x} count crew _x) > 0};
     if (_crewed >= 0) exitWith {
         ["WARN", "STREAM", format ["stow %1 refused: %2 still crewed",
@@ -145,9 +144,9 @@ fnc_duws_stow = {
     true
 };
 
-// Rebuild a stowed composition. Members come back as new objects, so nothing holding a reference
-// to the old ones survives a stow -- the key is the only identity a composition has across one,
-// which is why membership is re-filed through fnc_duws_keep rather than restored.
+// Rebuild a stowed composition. Members come back as new objects, so nothing holding a reference to
+// the old ones survives a stow -- the key is the only identity a composition has across one, which is
+// why membership is re-filed through fnc_duws_keep rather than restored.
 fnc_duws_deploy = {
     params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_deploy", 2] };
@@ -155,8 +154,8 @@ fnc_duws_deploy = {
         _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo", ["_dmg", 0]];
         private _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
         // Before it is placed, not after: this loop is scheduled code, so the engine can suspend it
-        // between any two statements, and a prop that is still simulated over a frame boundary
-        // settles or slides off the position just written to it.
+        // between any two statements, and a prop still simulated over a frame boundary settles or
+        // slides off the position just written to it.
         _obj enableSimulationGlobal _sim;
         // Placed again after creation: createVehicle reads its position as AGL, and the record
         // holds world coordinates. Without this a prop on a slope returns metres into the hill.
@@ -184,8 +183,8 @@ fnc_duws_deploy = {
         // Replayed after filing: a wrecked building must return wrecked, not repaired. [dmg, false]
         // suppresses the cook-off and secondary effects a live hit triggers. If setDamage makes the
         // engine swap the building for its ruin, the BuildingChanged handler finds the key just filed
-        // and re-files the ruin; if it does not, the flag set here marks the wreck so a second stow
-        // keeps it rather than dropping it as an ordinary dead member.
+        // and re-files the ruin; if not, the flag set here marks the wreck so a second stow keeps it
+        // rather than dropping it as an ordinary dead member.
         if (_dmg > 0) then {
             _obj setDamage [_dmg, false];
             if (_dmg >= 1) then { _obj setVariable ["DUWS_ruin", true] };
@@ -194,20 +193,20 @@ fnc_duws_deploy = {
     DUWS_stowed deleteAt _key;
 };
 
-// Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed,
-// so a tester does not wait 30 min to see collection happen. The sweep's interval wait breaks on
-// this flag, so it lands within half a second. Bounded by what it cannot skip -- KEEP_RADIUS and
-// the persistent flag -- so the worst a client reaching it can do is bin distant litter early.
-// Not published, because nothing calls it locally: the menu remoteExecs it to the server, the
-// only machine holding the deadlines.
+// Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed, so
+// a tester does not wait 30 min to see collection happen. The sweep's interval wait breaks on this
+// flag, so it lands within half a second. Bounded by what it cannot skip -- KEEP_RADIUS and the
+// persistent flag -- so the worst a client reaching it can do is bin distant litter early. Not
+// published, because nothing calls it locally: the menu remoteExecs it to the server, the only
+// machine holding the deadlines.
 fnc_duws_forceCleanup = {
     DUWS_cleanup_force = true;
     ["INFO", "CLEANUP", "Forced sweep requested from the debug menu."] call fnc_log;
 };
 
-// Debug-menu entry point for composition streaming: stow the nearest zone, or deploy it if it is
-// already stowed. Takes the caller's position because the server has no player of its own to
-// measure from. Not published, for the same reason fnc_duws_forceCleanup is not.
+// Debug-menu entry point for composition streaming: stow the nearest zone, or deploy it if already
+// stowed. Takes the caller's position because the server has no player of its own to measure from.
+// Not published, for the same reason fnc_duws_forceCleanup is not.
 fnc_duws_toggleNearestZone = {
     params ["_pos"];
     if (count zone_meta_array == 0) exitWith {};

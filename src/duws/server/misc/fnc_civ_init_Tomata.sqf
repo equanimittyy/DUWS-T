@@ -71,10 +71,9 @@ while { count _queue > 0 } do {
         _kept pushBack _loc;
         _radii pushBack _radius;
         _pops pushBack _buildingCount;
-        // Trimmed to the town's own area. Selection surveys a fixed 350 m disc so its ranking is
-        // comparable across towns, but a small town's disc reaches well past where its civilians
-        // belong. The reverse case -- a radius above 350 -- only arises above 35 buildings, and a
-        // town that dense packs the crowd's cluster far inside 350 m anyway.
+        // Trimmed to the town's own area: selection's fixed 350 m disc (comparable ranking across towns)
+        // reaches well past a small town's real edge. The reverse -- a radius above 350 -- needs 35+
+        // buildings, and a town that dense already packs its cluster far inside 350 m anyway.
         _bldgs pushBack (_usable select { _x distance2D _pos <= _radius });
         // Hardcore hides towns the same way it hides zones, minus the ones the HQ anchor claimed:
         // a player who cannot see a single settlement has nowhere to start looking. A town that
@@ -216,10 +215,9 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // Seed the placement keep-out list from the starting reputations: towns overlapping an enemy zone
     // begin at -20, so they are enemy ground before the first band crossing would ever fire the rebuild.
     [] call fnc_enemy_towns_refresh;
-    // Tier I is the floor for a town that starts in the OPFOR band -- the ones seeded at -20 for
-    // overlapping an enemy zone are enemy ground before anyone has played a minute, and reading
-    // them as ungarrisoned until the first garrison cycle would let the commander appraise them
-    // as neutral. Everything else starts at 0, which is what the BLUFOR and neutral bands stay at.
+    // Tier I is the floor for a town starting in the OPFOR band: the -20 towns above are enemy ground
+    // before anyone has played a minute, and reading them as ungarrisoned until the first garrison cycle
+    // would let the commander appraise them as neutral. Everything else starts at 0 (BLUFOR/neutral).
     missionNamespace setVariable ["DUWS_townGarrisonTier", _townRep apply {[0, 1] select (_x <= -10)}];
     // No strength array: the shared attrition store answers full for ground nobody has fought over,
     // so a town needs no entry until something writes one.
@@ -228,9 +226,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
 
     // One garrison thread for all towns, like fnc_civ_handler below. Started after the arrays above
-    // exist, since its first pass reads every town's reputation and tier.
-    // Called rather than spawned: it files hooks and returns, and they have to exist before the
-    // poller starts.
+    // exist, since its first pass reads every town's reputation and tier. Called rather than spawned:
+    // it files hooks and returns, and they have to exist before the poller starts.
     [] call fnc_civ_garrison;
 };
 

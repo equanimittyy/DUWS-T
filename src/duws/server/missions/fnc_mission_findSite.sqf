@@ -1,24 +1,24 @@
-// Locality: server + all clients (publicVariable'd). Unscheduled-safe -- a pure call with no
-// suspension -- so the strategic-map picker can call it inside its search thread and the server-side
-// debug force tool can call it directly.
+// Locality: server + all clients (publicVariable'd). Unscheduled-safe (pure call, no suspension), so
+// the strategic-map picker can call it inside its search thread and the debug force tool can call it
+// directly.
 
-// The single source for where a side mission is sited. The strategic-map picker
+// Single source for where a side mission is sited. The strategic-map picker
 // (client/missions/fnc_stratmap.sqf) offers several of these per request; the debug force tool
 // (server/misc/fnc_debug_force_mission.sqf) sites one. Both route here, so a forced mission lands
-// exactly where a picked one could and the weighting lives in one place rather than drifting between
+// exactly where a picked one could, and the weighting lives in one place instead of drifting between
 // a real copy and a debug copy.
 //
-// Placement runs in two phases. Phase 2 SURVEYS the map: it walks the candidate features -- OPFOR zones,
-// or towns for a town-survey type -- and keeps the ones that pass cheap validity (inside HQ reach, and
-// for a convoy that a far-enough destination zone with a BLUFOR-clear corridor exists), each scored by
-// the placement dial. Phase 3 picks one feature from that shortlist weighted by the dial (frontline for
-// easy, deep for hard) and only then REALISES an exact position -- BIS_fnc_findSafePos, the fnc_pos_claimed
-// standoff, the origin/HQ gates, the per-type finder -- retrying the next feature on a reject. findSafePos,
-// the costly step, runs only on the few features actually picked, never on the whole survey.
+// Two placement phases. Phase 2 SURVEYS: walks the candidate features (OPFOR zones, or towns for a
+// town-survey type), keeps the ones that pass cheap validity (inside HQ reach; for a convoy, a far-enough
+// destination zone with a BLUFOR-clear corridor exists), each scored by the placement dial. Phase 3 picks
+// one feature from that shortlist weighted by the dial (frontline for easy, deep for hard) and only then
+// REALISES an exact position (BIS_fnc_findSafePos, the fnc_pos_claimed standoff, origin/HQ gates, the
+// per-type finder), retrying the next feature on a reject. findSafePos, the costly step, runs only on the
+// few features actually picked, never on the whole survey.
 //
-// Returns [_pos, _dest], or [] when the shortlist is empty or no feature realised within the cap: the
-// picker draws a different type, the debug tool logs and aborts. _dest is the vetted OPFOR destination
-// zone when the rule asks for one, else []; a convoy thread runs to it instead of recomputing its own.
+// Returns [_pos, _dest], or [] when the shortlist is empty or no feature realised within the cap (picker
+// draws a different type; debug tool logs and aborts). _dest is the vetted OPFOR destination zone when the
+// rule asks for one, else []; a convoy thread runs to it instead of recomputing its own.
 //
 //   _threadName  the mission thread's global name; its finder is fnc_<name>_site, else the accept-all generic
 //   _hard        the placement dial: true favours deep enemy ground, false the frontline seam
@@ -26,8 +26,8 @@
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _allowUrban  the "More Urban" global override: true forces the town survey for every type
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor, hardEligible, weight, surveyKind]. This reads the destination fields
-//                (1-3) and surveyKind (6); the draw (fnc_stratmap) reads hardEligible/weight.
+//                routeAvoidBlufor, hardEligible, weight, surveyKind]. Reads the destination fields (1-3)
+//                and surveyKind (6); the draw (fnc_stratmap) reads hardEligible/weight.
 //
 // Contract: [_threadName, _hard, _origin, _avoid, _allowUrban, _spawnRule] -> [_pos, _dest] | [].
 params [
@@ -41,8 +41,8 @@ params [
 _spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"]];
 
 // The type's site-finder: fnc_<name>_site if the mission defines one, else the accept-all generic.
-// Stripping "_mission" (8 chars) off the thread name is the same rule the picker used inline; keeping
-// it here alone means the picker and the debug tool cannot drift on it.
+// Stripping "_mission" (8 chars) off the thread name matches the rule the picker used inline; keeping
+// it here alone keeps the picker and the debug tool from drifting on it.
 private _finder = missionNamespace getVariable [
     (_threadName select [0, (count _threadName) - 8]) + "_site", fnc_site_generic];
 
@@ -194,8 +194,7 @@ private _features = if (_useTown) then {
 private _shortlistCap = 16;   // shortlist handed to phase 3; a wider survey is thinned to an even spread
 private _realizeCap   = 8;    // features to findSafePos + finder before giving up on this type
 
-// PHASE 2 -- survey: collect every valid feature (cheap check, no findSafePos), each carrying its centre
-// and placement-dial score.
+// PHASE 2 -- survey: collect every valid feature (cheap check, no findSafePos).
 private _valid = [];
 {
     private _fData = _x;
@@ -266,12 +265,10 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
     // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
     if ([_cand, 400] call fnc_pos_claimed) then { continue };
 
-    // Not stacked on a co-offered mission.
     private _clear = true;
     { if (_cand distance _x < 250) exitWith { _clear = false } } forEach _avoid;
     if (!_clear) then { continue };
 
-    // Clear of the requester, inside the campaign's HQ radius.
     if (!(_cand distance _origin > 1500 && {_cand distance PosOfBLUHQ < (zones_max_dist_from_hq*1.5)})) then { continue };
 
     // The type's finder gets the last word: reject -> drop this feature and draw the next; accept -> its

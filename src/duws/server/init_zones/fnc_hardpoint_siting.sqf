@@ -1,12 +1,10 @@
 // Locality: server -- every consumer (the siting loop, the minefield generator) runs where zones are
 // built and the faction globals are authoritative. These are definitions only; the placer that calls
 // them is greenfield.
-//
 // Siting is split so the arithmetic can be tested. fnc_hardpoint_survey reads the terrain -- the only
 // part that needs the engine, kept thin -- and returns a facts row; fnc_hardpoint_score is pure and
 // turns that row plus a type into a placement multiplier. sqf-vm carries no terrain, so the survey
 // cannot be unit-tested and the scoring weights can.
-//
 // Facts row, the contract between the two:
 //   0 onWater      bool   any type on water is unplaceable
 //   1 relElev      m      candidate height minus the mean of a ring around it; >0 locally raised
@@ -131,7 +129,6 @@ fnc_hardpoint_survey = {
 };
 
 // [_facts, _type] call fnc_hardpoint_score -> multiplier on the type's base weight; 0 is unplaceable.
-//
 // The number is the terrain factor the weighted roll multiplies base weights by. Returning 0 drops a
 // type from the roll at a site that cannot hold it: water for every type, plus the per-type vetoes
 // below -- artillery needs level ground, a roadblock needs a road, a minefield needs open clear
@@ -226,7 +223,6 @@ fnc_hardpoint_score = {
 };
 
 // [_type, _aspectDir, _aspectMag, _radialDir, _roadDir] call fnc_hardpoint_facing -> heading in degrees.
-//
 // The heading a sited emplacement faces. A roadblock sits square across the carriageway -- its gate spans
 // the road -- and of the road's two headings takes the one nearer _radialDir, so its guns point up the
 // approach rather than back down the road behind it. _radialDir is outward from the zone for the ring, and
@@ -249,7 +245,6 @@ fnc_hardpoint_facing = {
 };
 
 // [_cols, _rows, _spacing] call fnc_hardpoint_minefield_lattice -> [[x,y], ...] centred on the origin.
-//
 // One field in the composition frame (+Y is the field's facing). _cols is the frontage across the
 // approach, _rows the depth toward it; the commander widens or deepens a field by asking for more of
 // either, and strings fields by laying several origins along a line. Alternate rows are offset half a

@@ -155,12 +155,11 @@ if (_prefab) then {
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 };
 
-// No fortification ring. Three or four towers were scattered on a random bearing at a random
-// distance, which sited them by luck and left them facing by luck too -- and the emplacements that
-// make a zone worth taking are exactly the thing that should be sited deliberately, against terrain,
-// against the roads and against the approach the player will actually use. That is the hardpoint
-// system's job and the plan for it is docs/hardpoint_system_plan.md; the prefab composition above
-// still stands, so a zone keeps its built centre.
+// No fortification ring. Three or four towers were scattered on a random bearing and distance, sited
+// and facing by luck -- but the emplacements that make a zone worth taking need to be sited
+// deliberately, against terrain, the roads and the approach the player will actually use. That is the
+// hardpoint system's job, and the plan for it is docs/hardpoint_system_plan.md; the prefab composition
+// above still stands, so a zone keeps its built centre.
 
 // No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired
 // anywhere in the zone spawned up to four infantry waves at a distant OPFOR zone and walked them in
@@ -190,14 +189,13 @@ _trgEnemy setVariable ["DUWS_zonePos", _zonePos];
 _trgEnemy setVariable ["DUWS_zoneName", _name];
 // Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet.
 //
-// The distance test below is an identity lookup -- "which zone is this" -- not a proximity check.
-// Whether enemies are here is already answered by the trigger area above; this only asks whether
-// the entry in the ownership list is *this* zone. It cannot use `==` or `in`, because the entry on
-// the other side has been through text: the capture trigger formats its position into a statement
-// string (`%5` below), so what fnc_zone_control_set files was parsed back out of characters and
-// need not equal the array this zone was built from. The metre is float slop, not a game distance
-// -- it could be 0.5 or 5 and mean the same thing, and it must not be folded in with the real
-// radii the streaming checks use.
+// The distance test below is an identity lookup -- "which zone is this" -- not a proximity check. Whether
+// enemies are here is already answered by the trigger area above; this only asks whether the entry in the
+// ownership list is *this* zone. It cannot use `==` or `in`, because the entry on the other side has been
+// through text: the capture trigger formats its position into a statement string (`%5` below), so what
+// fnc_zone_control_set files was parsed back out of characters and need not equal the array this zone was
+// built from. The metre is float slop, not a game distance -- it could be 0.5 or 5 and mean the same thing,
+// and it must not be folded in with the real radii the streaming checks use.
 _trgEnemy setTriggerStatements [
     "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
         (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",

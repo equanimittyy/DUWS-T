@@ -11,10 +11,8 @@
 [] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
 ["INFO", "BOOT", "server_fnc_init done"] call fnc_log;
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
-// Init the URBAN LOCATION FINDER
 [] spawn fnc_moreUrban_locations;
 
-// Create centers
 createCenter sideLogic;
 createcenter sideLogic;
 createCenter west;
@@ -22,7 +20,6 @@ createCenter east;
 createCenter resistance;
 createCenter civilian;
 
-// Set relationships
 west setFriend [east, 0];
 west setFriend [resistance, 0];
 east setFriend [west, 0];
@@ -32,19 +29,17 @@ resistance setFriend [east, 0];
 civilian setFriend [west, 1];
 civilian setFriend [east, 1];
 
-// CHECK FACTION FILES
 [] call fnc_factions_check;
 
 sleep 1;
 
-// Send "complete" to client
 serverinit_complete = true;
 publicVariable "serverinit_complete";
 
-// Game Master slot watchdog. Only player1 drives setup (faction pick + HQ placement), so if that
-// slot holds no human the setup gates below never clear and the campaign hangs with nothing on
-// screen to say why. Warn every machine to restart with the slot filled. Spawned, not inline: the
-// main thread is about to block on those very gates, so an inline check would never run. MP only --
+// Game Master watchdog: only player1 drives setup (faction pick + HQ placement); if that slot
+// holds no human, the gates below never clear and the campaign hangs with nothing on screen to
+// say why -- warn every machine to restart with the slot filled. Spawned, not inline: the main
+// thread is about to block on those very gates, so an inline check would never run. MP only --
 // SP forces the local player into game_master, so the slot is never empty there.
 if (isMultiplayer) then {
 	[] spawn {
@@ -60,14 +55,13 @@ if (isMultiplayer) then {
 	};
 };
 
-// Faction resolution answers the confirmation screen, which shows the player the classname each
-// side will field for every role and is the last point they can change one -- so it cannot wait
-// for the commit. Served in a loop rather than once: stepping back from the environment screen
-// re-enters faction selection, and the screen asks again with the new pick. Both faction inits and
-// all three AutoDetect wrappers are written to survive being called again.
+// Faction resolution answers the confirmation screen (classname per role per side) and is the
+// last point the player can change one, so it cannot wait for the commit. Served in a loop, not
+// once: stepping back from the environment screen re-enters faction selection and asks again with
+// the new pick -- both faction inits and all three AutoDetect wrappers survive being re-called.
 // The condition below reads globals only: fnc_waitLogged calls the block in its own scope, so a
-// private captured here would be undefined by the time it is evaluated. duws_faction_preview_ready
-// doubles as the served marker, which is what the screen waits on anyway.
+// private captured here would be undefined by the time it runs. duws_faction_preview_ready doubles
+// as the served marker, which is what the screen waits on anyway.
 while {!createzone_server} do {
 	while {!(["BOOT", "duws_faction_preview_request (confirmation screen opened)",
 		{duws_faction_preview_request > duws_faction_preview_ready || createzone_server}, 600] call fnc_waitLogged)} do {};
@@ -103,26 +97,26 @@ while {!createzone_server} do {
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Rifleman: %1", opfor_SOLDIER_X]] call fnc_log;
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Spec Ops: %1", opfor_SPECOPS_X]] call fnc_log;
 
-	// Both sides are resolved and nothing has been shown yet, which is the only point a borrowed
-	// class can still reach the confirmation screen. Filling after the screen painted would leave
-	// the player looking at a blank row the mission then quietly fills behind them.
+	// Both sides are resolved and nothing has been shown yet -- the only point a borrowed class can
+	// still reach the confirmation screen. Filling after the screen painted would leave the player
+	// looking at a blank row the mission then quietly fills behind them.
 	{ [_x] call fnc_faction_backfill; } forEach ["blufor", "opfor"];
 
 	// After the same-side borrow, drop the schema's vanilla stand-in into any key a hand-written or
-	// pasted faction still left empty (or pointing at a class this install lacks). AutoDetect resolved
-	// its own; this is what keeps a preset that omits a role from reaching a spawner as MISSING.
+	// pasted faction still left empty (or pointing at a class this install lacks). AutoDetect resolves
+	// its own; this keeps a preset that omits a role from reaching a spawner as MISSING.
 	{ [_x] call fnc_faction_vanilla_fill; } forEach ["blufor", "opfor"];
 
 	// Expand each role's representative into its faction's pool here, not only at the commit, so the
 	// confirmation screen can show the pool a spawn will draw from -- for a hand-written faction as
 	// much as an auto-detected one, since a static file assigns one class per role and only this pass
-	// widens it. Idempotent, and run again over the player's edits at the commit (fnc_faction_augment).
+	// widens it. Idempotent, and re-run over the player's edits at the commit (fnc_faction_augment).
 	[] call fnc_faction_augment;
 
 	// Publish every role global the screen will show. AutoDetect broadcasts its own and a CUSTOM
-	// paste ships its assignment list, but a static faction file only assigns server-side and the
-	// OPFOR file is never run on a client at all -- so without this the screen would paint whatever
-	// that machine happened to hold rather than what the server just resolved.
+	// paste ships its assignment list, but a static faction file only assigns server-side, and the
+	// OPFOR file never runs on a client at all -- so without this the screen would paint whatever
+	// that machine happened to hold, not what the server just resolved.
 	{
 		private _side = _x;
 		{ missionNamespace setVariable [_x select 0, missionNamespace getVariable [_x select 0, ""], true]; }
@@ -161,8 +155,8 @@ while {!createzone_server} do {
 };
 
 // HQ build stays behind the commit so Back navigation still finds nothing built to unwind.
-// Everything below consumes only PosOfBLUHQ (set at placement) until this gate; verified no
-// HQ-object read sits before it.
+// Everything below consumes only PosOfBLUHQ (set at placement) until this gate -- no HQ-object
+// read sits before it.
 while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
 
 // HQ placement runs after the confirmation screen now, so this cannot gate the resolution loop
@@ -175,14 +169,14 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 
 // Pools live and are read only on the server, so the confirmation screen (a client) never saw them
 // and locked one class per un-edited role; a hand-written faction defines one class to begin with.
-// Expand each role's final representative back into its faction's bucket, here after the edits land,
-// so both kinds of faction get the per-spawn variety and no edit is overridden. See fnc_faction_augment.
+// Expand each role's final representative back into its faction's bucket here, after the edits
+// land, so both kinds of faction get per-spawn variety and no edit is overridden. See fnc_faction_augment.
 [] call fnc_faction_augment;
 
 // fnc_static_resolve stands a faction's own MG nest in for any static role it never fields, so a
-// side with no static MG at all leaves each composition's vanilla placeholder standing instead --
-// the one case where a zone garrisons itself with the wrong side's gun. Checked here rather than at
-// each placement: this is the first point the keys are final, and it is one line per campaign.
+// side with no static MG leaves each composition's vanilla placeholder standing instead -- the one
+// case where a zone garrisons itself with the wrong side's gun. Checked here, not at each
+// placement: this is the first point the keys are final, and it is one line per campaign.
 {
 	if (([format ["%1_TURRET_HMG", _x]] call fnc_faction_pick) isEqualTo "") then {
 		["WARN", "FACTION", format ["%1 fields no static MG -- statics with no role of their own stand as the composition's own class", _x]] call fnc_log;
@@ -199,7 +193,6 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 ["INFO", "BOOT", format ["bluHQ Position: %1", str PosOfBLUHQ]] call fnc_log;
 [] spawn fnc_bluHQinit;
 
-// Initialize the Dynamic Groups framework
 ["Initialize"] call BIS_fnc_dynamicGroups; 
 
 enableSaving [false, false];
@@ -220,14 +213,12 @@ while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) 
 [] spawn fnc_zone_spawn_sizes;
 
 
-// WEATHER INIT
 if (dynamic_weather_enable) then {
 	[] spawn fnc_weather;
 };
 
-// One lifetime for every category the sweep collects; the sweep is always on (a 0 from an old
-// save is floored, not off). The default lives in the parameter, not here, so the two cannot
-// drift apart.
+// One lifetime for every category the sweep collects; the sweep is always on (a 0 from an old save
+// is floored, not off). The default lives in the parameter, not here, so the two cannot drift apart.
 [["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
 // Cleanup unused players slots.
@@ -241,14 +232,11 @@ for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {
 };
 
 waituntil {sleep 1;WARCOM_init_done;};
-// prepopulate the Mission Locator
 [] spawn fnc_missionLocator;
 
-// SET OPFOR AI AIM to 0.2
-// SET OPFOR/BLUFOR VEHICLES/UNITS REARM/REFUEL EVERY 10min
+// OPFOR AI aim set to 0.2; OPFOR/BLUFOR vehicles and units rearm/refuel every 10 min.
 [] spawn fnc_AI_Master_Control;
 
-// Init the Zeus objects
 if (ZeusStatus != 0) then {
 	[] spawn fnc_zeus_objects_init;
 };
@@ -269,10 +257,10 @@ if (isServer) then {
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
-        // Killhouse bodies never pay. The drill spawns hostile OPFOR on demand and already
-        // awards a fixed sum per completed run, so counting them here would turn an
-        // unlimited training course into an unlimited CP source. Plain (non-public)
-        // setVariable is enough: the tag is written and read on the server.
+        // Killhouse bodies never pay: the drill spawns hostile OPFOR on demand and already awards
+        // a fixed sum per completed run, so counting kills here would turn an unlimited training
+        // course into an unlimited CP source. Plain (non-public) setVariable is enough: the tag
+        // is written and read on the server.
         if (_killed getVariable ["killhouse_enemy", false]) exitWith {};
 
         private _shooter = objNull;
@@ -291,10 +279,10 @@ if (isServer) then {
         };
         if (isNull _shooter) exitWith {};
 
-        // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty
-        // vehicles too, and paying for civilian kills rewards exactly what the town
-        // reputation charge penalises. 0.6 is the engine's hostile/friendly cutoff, and the mission
-        // sets every playable side pair to 0, so INDEPENDENT zombies still count.
+        // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty vehicles too,
+        // and paying for civilian kills rewards exactly what the town reputation charge penalises.
+        // 0.6 is the engine's hostile/friendly cutoff; the mission sets every playable side pair to
+        // 0, so INDEPENDENT zombies still count.
         if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
 
         // Every kill attributed to this player counts the same; the tally converts to CP
@@ -319,12 +307,12 @@ if (isServer) then {
         playerKillCount deleteAt _uid;
     }];
 
-    // Kill income is paid in one periodic sweep rather than per kill: a tally the player
-    // watches build reads as campaign economy, where a payout per body reads as a score
-    // feed. Each player is told only about their own award, so the credit stays personal.
-    // Defined here beside the handlers that fill the tally, but driven by the campaign
-    // economy tick in server/misc/fnc_zonesundercontrol.sqf -- a second timer of the same
-    // nominal period still accrues its own scheduler slop and walks out of phase.
+    // Kill income is paid in one periodic sweep rather than per kill: a tally the player watches
+    // build reads as campaign economy, where a payout per body reads as a score feed. Each player
+    // is told only about their own award, so the credit stays personal. Defined here beside the
+    // handlers that fill the tally, but driven by the campaign economy tick in
+    // server/misc/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period still
+    // accrues its own scheduler slop and walks out of phase.
     fnc_kill_income_sweep = {
         {
             private _uid = getPlayerUID _x;
@@ -332,17 +320,15 @@ if (isServer) then {
             private _batches = floor (_kills / kill_cp_kills);
             if (_batches > 0) then {
                 private _award = _batches * kill_cp_award;
-                // Server-side caller: call runs inline, where remoteExec [...,2] would
-                // land a frame later.
+                // Server-side caller: call runs inline, where remoteExec [...,2] would land a frame later.
                 [_award, "kill_income"] call fnc_cp_adjust;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
-                // A card, not a hint, and deliberately the exception to the surface rule in
-                // docs/info/player_facing_text.md: that rule sends a one-player message to the hint
-                // box, and this is addressed at one player. CP arriving speaks the card vocabulary
-                // its siblings cpaddedmission and apaddedmission already own -- moving it would make
-                // kill income the only income that looks like a refusal. It is also the payoff for
-                // half an hour of fighting, and it fires on the economy tick, so it is neither
-                // frequent enough to be noise nor small enough to bury in the corner.
+                // A card, not a hint -- deliberately the exception to the one-player-to-hint rule in
+                // docs/info/player_facing_text.md: CP arriving speaks the card vocabulary its
+                // siblings cpaddedmission and apaddedmission already own, so moving it would make
+                // kill income the only income that reads as a refusal. It is also the payoff for
+                // half an hour of fighting, and it fires on the economy tick -- frequent enough to
+                // matter, infrequent enough not to bury in the corner.
                 ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
             };
         } forEach allPlayers;

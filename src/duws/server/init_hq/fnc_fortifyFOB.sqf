@@ -25,18 +25,17 @@ playSound "loadgun";
 // ring to the cleanup at once -- the turrets and the sandbags around them alike.
 _fobKey = format ["FOB_%1", netId _fob];
 
-// Two fences rather than one, because the halves have different lifetimes: the perimeter is placed
-// on the first fortify and left standing, while a refortify -- misc/fnc_redeployFOBUnits.sqf calling
-// back in with _refortify true -- replaces every turret. A single array would have to carry a
-// permanent/rebuilt flag, and the Eden export does not emit anything past the heading column, so the
-// flag would survive only by being hand-carried back across 43 rows on every round trip. Lose it and
-// a refortify either duplicates the walls or stops replacing the guns.
-// The split makes the lifetime the fence rather than a column. Do not merge them into one
-// composition; the zone prefabs' single-fence-plus-isWeapon shape works there only because a prefab
-// is built once and never rebuilt.
+// Two fences, not one: the halves have different lifetimes. The perimeter is placed on first fortify
+// and left standing; a refortify (misc/fnc_redeployFOBUnits.sqf calling back with _refortify true)
+// replaces every turret. A single array would need a permanent/rebuilt flag per row, but the Eden
+// export emits nothing past the heading column, so the flag would survive only by being hand-carried
+// across 43 rows every round trip -- lose it and a refortify either duplicates the walls or stops
+// replacing the guns. The split makes lifetime the fence's property, not a column. Do not merge into
+// one composition: the zone prefabs' single-fence-plus-isWeapon shape works there only because a
+// prefab is built once and never rebuilt.
 //
-// Rows are [class, X, Y, Z, heading], offsets from the FOB centre, which is what lets the layout
-// round-trip through the 3D editor (docs/info/composition_tooling.md).
+// Rows are [class, X, Y, Z, heading], offsets from the FOB centre -- what lets the layout round-trip
+// through the 3D editor (docs/info/composition_tooling.md).
 // --DUWS-COMPOSITION BEGIN name="FOB Perimeter" schema=A--
 private _perimeterData = [
 	["Land_HBarrier_1_F",         -10.0,   4.5, 0,  0.0],
@@ -84,17 +83,17 @@ private _perimeterData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// Column 5 is the faction role holding the classname and column 0 is what that role resolves to on
-// the stock faction. fnc_static_resolve prefers the role, so a mod's own GMG stands here rather than
-// a vanilla one; the class is what the Eden import draws, so the ring is rearranged against the
+// Column 5 is the faction role holding the classname; column 0 is what that role resolves to on the
+// stock faction. fnc_static_resolve prefers the role, so a mod's own GMG stands here rather than a
+// vanilla one, and the class is what the Eden import draws -- so the ring rearranges against the
 // right silhouettes instead of against nothing. A row whose role the faction never fields falls to
-// that faction's MG nest and then to its own class, which is what keeps this working mod-free.
-// A gun added here in Eden carries no role column and is resolved by its class instead, so the ring
-// follows the faction without anyone remembering to hand-add a sixth column after a round trip.
+// that faction's MG nest, then to its own class, which is what keeps this mod-free. A gun added in
+// Eden carries no role column and resolves by class instead, so the ring follows the faction without
+// anyone hand-adding a sixth column after a round trip.
 //
-// The headings used to be computed radially from the centre. They are rows now because the export
-// emits a heading per object: computed, a turret turned in the 3D editor would come back facing
-// wherever the formula put it, and the round trip would silently drop half the edit.
+// Headings used to be computed radially from the centre; they're rows now because the export emits a
+// heading per object -- computed, a turret turned in the 3D editor would come back facing wherever
+// the formula put it, silently dropping half the edit on round-trip.
 // --DUWS-COMPOSITION BEGIN name="FOB Turrets" schema=A--
 private _turretData = [
 	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5],
@@ -104,11 +103,11 @@ private _turretData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// One perimeter row, one object. The turrets go through fnc_static_place instead: a wall is the same
-// wall whoever built it, while a gun is whatever the faction fields, and the perimeter stays
-// simulated and invulnerable where the ring is frozen until it is crewed.
-// Position is written twice around the rotation for the reason the composition deploy states:
-// setDir displaces the object, so the heading has to be applied between two writes.
+// One perimeter row, one object -- the turrets go through fnc_static_place instead: a wall is the
+// same wall whoever built it, while a gun is whatever the faction fields; the perimeter stays
+// simulated and invulnerable while the ring is frozen until it's crewed. Position is written twice
+// around the rotation because setDir displaces the object, so the heading must land between two
+// writes.
 private _fnc_place = {
 	params ["_row", "_key"];
 	_row params ["_class", "_ox", "_oy", "_oz", "_dir"];
@@ -127,21 +126,21 @@ private _turrets = [];
 switch (VERSION_X) do {
 	case "MODERN": {
 		{
-			// Invulnerable from the moment it stands up rather than from when its gunner arrives,
-			// which is why the caller applies this and the placer does not: the ring is what the
-			// player paid for, and the perimeter and roof AA below want their own answers.
+			// Invulnerable from the moment it stands up, not from when its gunner arrives -- which is
+			// why the caller applies this and the placer does not: the ring is what the player paid
+			// for, and the perimeter and roof AA below want their own answers.
 			private _turret = [_x, _centerPos, "blufor", _fobKey, "pos"] call fnc_static_place;
 			_turret allowDamage false;
 			_turret setDamage 0;
 			_turrets pushBack _turret;
 		} forEach _turretData;
 
-		// The one turret that is not a row: it stands on the FOB building's own roof, and
-		// buildingPos is the only thing that knows where that is. A flat offset would put it at
-		// ground level the first time the building were replaced with anything else.
-		// Filed under the FOB key like the rest, so a teardown hands the whole ring over at once.
-		// Its class still goes through the resolver, so the roof gun is drawn from the same pool and
-		// gets the same type test as the ring; only its placement is its own.
+		// The one turret that is not a row: it stands on the FOB building's own roof, and buildingPos
+		// is the only thing that knows where that is -- a flat offset would put it at ground level the
+		// first time the building were replaced with anything else. Filed under the FOB key like the
+		// rest, so a teardown hands the whole ring over at once. Its class still goes through the
+		// resolver, so the roof gun is drawn from the same pool and gets the same type test as the
+		// ring; only its placement is its own.
 		private _roofPos = _fob buildingPos 5;
 		private _aaClass = "B_static_AA_F";
 		private _aa = createVehicle [
@@ -195,12 +194,12 @@ sleep 50;
 _fob setVariable ["FOB_turrets", _turrets];
 
 // Filed under the site as its emplacement occupant, so the freeze reaches the ring and not only the
-// guards standing beside it. A turret is a vehicle with a full FSM, so five of them per FOB at up to
-// floor(zones x 0.7) FOBs is the larger half of what a base costs while nobody is there.
+// guards beside it. A turret is a vehicle with a full FSM, so five per FOB at up to
+// floor(zones x 0.7) FOBs is the larger half of what an idle base costs.
 //
-// The FOB building and its props are deliberately not registered. Freezing a static building buys
-// almost nothing, and it is the object carrying the base's action menu and its respawn point --
-// a saving worth nothing is not worth putting those behind enableSimulationGlobal.
+// The FOB building and its props are deliberately not registered: freezing a static building buys
+// almost nothing, and it's the object carrying the base's action menu and respawn point -- a saving
+// worth nothing isn't worth putting those behind enableSimulationGlobal.
 private _emplacements = [_fobKey, "emplacement"] call fnc_site_roster;
 [_fobKey, "emplacement"] call fnc_site_roster_clear;
 {

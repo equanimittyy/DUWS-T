@@ -238,14 +238,13 @@ DUWS_fnc_zoneManStatics = {
     [_grp, _pos] call bis_fnc_taskDefend;
 };
 
-// The emplacement kind: a static weapon and the man on it, which do not stream the same way. The gun
-// is campaign property that belongs to whoever holds the ground, so it stows; the man is a defender,
-// so he goes. That split is the reason the model divides by what is streamed rather than by side --
-// one object and one man, on the same objective, with opposite answers.
+// The emplacement kind: a static weapon and the man on it, which do not stream the same way. The gun is
+// campaign property that belongs to whoever holds the ground, so it stows; the man is a defender, so he
+// goes. That split is the reason the model divides by what is streamed rather than by side -- one object and
+// one man, on the same objective, with opposite answers.
 //
-// Crewing out has to happen here rather than in the garrison sweep: that sweep's man clause tests
-// vehicle _x == _x, so a gunner sitting in a static keeps his seat, and stow refuses while any member
-// is crewed.
+// Crewing out has to happen here rather than in the garrison sweep: that sweep's man clause tests vehicle _x
+// == _x, so a gunner sitting in a static keeps his seat, and stow refuses while any member is crewed.
 DUWS_zoneEmplacementHooks = createHashMapFromArray [
     ["wake", { params ["_key", "_o"]; [([_key] call fnc_site_at) get "pos", _key] call DUWS_fnc_zoneManStatics }],
     ["sleep", { params ["_key", "_o"];
@@ -284,16 +283,15 @@ DUWS_fnc_zoneStow = {
     [_key] call DUWS_fnc_garrisonReserveClear;
 };
 
-// Survivors of a zone that has fallen: ordered off the objective here, collected by the tick once
-// nobody can see them go. The order is what makes the collection quiet rather than what performs it
-// -- a group that cannot path is still collected on distance, so nothing is left standing whether or
-// not the walk works.
+// Survivors of a zone that has fallen: ordered off the objective here, collected by the tick once nobody can
+// see them go. The order is what makes the collection quiet rather than what performs it -- a group that
+// cannot path is still collected on distance, so nothing is left standing whether or not the walk works.
 //
-// Roster-scoped, so only this zone's own garrison goes: a neighbouring town's or a side mission's
-// guards are not this zone's to take. Returns the men, for the collection to work through.
+// Roster-scoped, so only this zone's own garrison goes: a neighbouring town's or a side mission's guards are
+// not this zone's to take. Returns the men, for the collection to work through.
 //
-// Locality: addWaypoint and setBehaviour are ignored unless the group is local to the machine
-// issuing them (docs/info/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
+// Locality: addWaypoint and setBehaviour are ignored unless the group is local to the machine issuing them
+// (docs/info/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
 DUWS_fnc_zoneSendOff = {
     params ["_key", "_pos"];
     private _men = ([_key] call fnc_zone_roster) select { alive _x };

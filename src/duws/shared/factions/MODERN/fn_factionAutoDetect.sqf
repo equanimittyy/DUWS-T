@@ -254,9 +254,8 @@ fnc_unitParseRoles = compileFinal {
 		"pilot" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"pilot" in toLowerANSI _type}
 	};
 
-	// Segment match on "crew" as well as "crewman": mods split roughly evenly between
-	// rhs_vdv_crew and ..._crewman, and a crewman left in a combat bucket garrisons a zone in
-	// a tanker suit.
+	// Segment match on "crew" as well as "crewman": mods split roughly evenly between rhs_vdv_crew
+	// and ..._crewman, and a crewman left in a combat bucket garrisons a zone in a tanker suit.
 	fnc_IsCrewman = compileFinal {
 		params ["_type"];
 		"crewman" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName)
@@ -345,9 +344,9 @@ fnc_unitParseRoles = compileFinal {
 			getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _secondaryMag >> "ammo") >> "cost")
 		};	// LAT < 400, HAT > 400
 		_hasUAVterminal = "uav" in toLowerANSI (_assignedItems # 1);
-		// param, not # 0: an unarmed unit has an empty weapon array, and indexing that handed
-		// the role predicates below nothing at all -- one config lookup per weaponless unit,
-		// erroring on every pass of the faction scan.
+		// param, not # 0: an unarmed unit's empty weapon array made indexing it hand the role
+		// predicates below nothing at all -- one config lookup per weaponless unit, erroring on
+		// every pass of the faction scan.
 		_primaryType = _primaryWeapon param [0, ""];
 		_secondaryType = _secondaryWeapon param [0, ""];
 		
@@ -372,11 +371,10 @@ fnc_unitParseRoles = compileFinal {
 		};	// suppressed weapon -> classified as spec ops
 		
 		switch true do {
-			// Pilots and crew first: they carry the same launchers and medikits as line infantry,
-			// so lower down a crewman with an RPG became an AT rifleman and a garrison came out
-			// dressed for a cockpit. The old fix stripped them back out by classname, but that
-			// keyword list included "officer" and so emptied the officer role for factions that
-			// spell their officers "officer".
+			// Pilots and crew first: they carry the same launchers and medikits as line infantry, so
+			// lower down a crewman with an RPG became an AT rifleman and a garrison came out dressed
+			// for a cockpit. The old fix stripped them back out by classname, but that keyword list
+			// included "officer" and so emptied the officer role for factions that spell theirs "officer".
 			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
 			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
 			case ( [_x] call fnc_IsDiver ) : { _diver pushBackUnique _x };
@@ -679,9 +677,8 @@ fnc_factionSelector = compileFinal {
 			if (_sel < 0) exitWith {};   // the filter emptied the list -- nothing to confirm
 			missionNamespace setVariable ["selectedFaction", lbData [1500, _sel], true];
 
-			// Selection only: the per-side fnc_factionGen is run later, at the
-			// deferred commit, so the picker can show during setup without building
-			// faction data before the player has locked settings in.
+			// Selection only: the per-side fnc_factionGen runs later, at the deferred commit, so the
+			// picker can show during setup without building faction data before settings are locked.
 			selectionDone = true;
 			publicVariable "selectedFaction";
 			publicVariable "selectionDone";

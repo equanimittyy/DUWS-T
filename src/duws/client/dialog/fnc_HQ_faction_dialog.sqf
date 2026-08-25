@@ -5,18 +5,16 @@
 waituntil {!(IsNull (findDisplay 46))};
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 
-// One green box with everything tucked inside it, which is the shape every other setup screen
-// carries (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and
-// each answer in a labelled frame of its own. This screen used to be a full-bleed band split by two
-// white rules, which read as controls dropped on the map rather than as the first screen of the
-// setup sequence.
+// One green box with everything tucked inside it -- the shape every other setup screen carries
+// (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and each
+// answer in its own labelled frame. This screen used to be a full-bleed band split by two white
+// rules, reading as controls dropped on the map rather than the setup sequence's first screen.
 //
-// One box, painted by three surfaces. The BUILD FACTIONS button is a dialog of its own
-// (shared/includes/faction_screen.hpp) because a control this display creates cannot be styled like
-// a menu button, and this display draws over that dialog -- so the panel is cut into the two pieces
-// below, above and beneath the strip the dialog paints, and the three greens meet edge to edge
-// rather than overlapping. The frame spans all of it and draws over the joins, being transparent
-// inside.
+// One box, painted by three surfaces. The BUILD FACTIONS button is its own dialog
+// (shared/includes/faction_screen.hpp): a control this display creates can't be styled like a menu
+// button, and this display draws over that dialog -- so the panel is cut into the two pieces below,
+// above and beneath the strip the dialog paints, and the three greens meet edge to edge rather
+// than overlapping. The frame spans all of it and draws over the joins, staying transparent inside.
 //
 // The strip sits high, between the welcome line and the first dropdown, because that is what stops
 // an open list being clicked straight through into the button; the reasoning is in that hpp.
@@ -79,11 +77,10 @@ _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
 _dropdownOPF ctrlSetPosition [0.52, 0.540, 0.3675, 0.04];
 _dropdownOPF ctrlCommit 0;
 
-// Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place.
-// The apocalypse mode fields zombies, and zombies exist only as detected factions -- a static
-// faction file or a pasted one would put an army in the campaign that is supposed to have none --
-// so its OPFOR list is the two AutoDetect rows, both of which the picker and the roll narrow to
-// zombies.
+// Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place. The
+// apocalypse mode fields zombies, and zombies exist only as detected factions -- a static faction
+// file or a pasted one would put an army in the campaign that is supposed to have none -- so its
+// OPFOR list is the two AutoDetect rows, both of which the picker and the roll narrow to zombies.
 duws_fill_opfor_combo = {
 	params ["_ctrl"];
 	lbClear _ctrl;

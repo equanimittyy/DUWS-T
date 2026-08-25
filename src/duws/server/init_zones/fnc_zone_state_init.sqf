@@ -1,5 +1,4 @@
 // Zone control ownership and the WARCOM primary-zone pointer.
-//
 // Executed by the registry rather than stored as one function: this file defines several.
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
 // place to see what reaches clients.
@@ -15,14 +14,11 @@ fnc_zone_key = {
 // One zone identity, handed out once and never reused. Zones were numbered, which meant every line
 // of dialogue naming one read as a spreadsheet row and two adjacent zones sounded like the same
 // place; a spoken callsign is what the player ends up using for the ground itself.
-//
 // English words with no stringtable key, like the squad callsigns: these are proper nouns a player
 // says out loud, and a translated phonetic alphabet is a different alphabet, not a translation.
-//
 // The common English spellings rather than the official ICAO ones -- "Alpha", not "Alfa" -- so a
 // zone reads the way the team callsign already does ("Alpha 1-1"). "Xray" stays unhyphenated
 // because the pair separator below is a hyphen and "X-ray-Bravo" reads as three words.
-//
 // Past the twenty-six the pool pairs two distinct words. Selection is by draw-and-retry rather than
 // by building the 650 pairs, because a campaign runs to tens of zones and would throw the list away.
 fnc_zone_name = {
@@ -41,10 +37,9 @@ fnc_zone_name = {
 			private _try = format ["%1-%2", _first, selectRandom (_words - [_first])];
 			if !(_try in _used) exitWith { _name = _try };
 		};
-		// Fifty draws without a new pair means the pair pool is effectively spent. Uniqueness is
-		// what the rest of the mission keys on -- two zones answering to one name would make the
-		// map readout and the capture report ambiguous -- so the count is appended rather than
-		// risking a collision.
+		// Fifty draws without a new pair means the pair pool is effectively spent. Uniqueness is what
+		// the rest of the mission keys on -- two zones answering to one name would make the map
+		// readout and the capture report ambiguous -- so the count is appended rather than risking a collision.
 		if (_name == "") then { _name = format ["%1-%2", selectRandom _words, count _used] };
 	};
 
@@ -95,10 +90,8 @@ fnc_zone_strength = {
 // fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says
 // how much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a
 // full bar -- small, but not yet fought over.
-//
 // Tier selects a list rather than scaling one, so it reaches only the units a zone spawns alongside
 // itself. The fortification garrison and the composition's gun crews scale by attrition alone.
-//
 // Defaults to IV so a zone that never rolled one -- a save written before tiers existed, or any path
 // that reaches the spawn without passing through the roll -- fields what it always did rather than
 // silently coming back at half strength.
@@ -111,7 +104,6 @@ fnc_zone_tier = {
 // exists so a zone can be rebuilt through it -- and a rebuild that re-rolled would change what the
 // ground is worth behind the player's back, and disagree with the garrison peak already measured
 // against the old tier.
-//
 // Skewed to the top: most zones are the full-strength objective the campaign has always fielded, and
 // the lower tiers are the occasional soft one worth taking early. selectRandomWeighted rather than a
 // hand-rolled cumulative sum, as fnc_createzone's prefab pick already uses.

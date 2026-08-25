@@ -4,10 +4,9 @@
 //
 // Two mechanisms over one catalogue. A PERM row is bought once for the whole team, recorded on
 // the server so a campaign save can restore it, occupies no slot and never refunds: it is
-// infrastructure, and dismantling infrastructure for cash is a different mechanic with its own
-// rules. A CONS row belongs to the buyer alone, takes one of support_max_slots, and refunds every
-// point it charged -- the slate is meant to be re-cut as the campaign teaches the player what
-// they actually needed.
+// infrastructure, and dismantling it for cash is a different mechanic. A CONS row belongs to the
+// buyer alone, takes one of support_max_slots, and refunds every point it charged -- the slate is
+// meant to be re-cut as the campaign teaches the player what they actually needed.
 #include "..\..\shared\includes\action_style.hpp"
 
 // The catalogue: one ordered list, permanent rows first. This raw form is read by the manual
@@ -20,8 +19,8 @@
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
 // The 8th column is the Army Power half of a support's dual price -- carried by the indirect-fire and
 // air-strike rows and, among the permanent unlocks, by HALO and the upper two radio towers. Absent
-// (read as 0 via `param [7, 0]`) on every other row, which pays CP only. AP is what actually decides
-// an advanced purchase under an abundant CP pool; the CP half is carried for one price across the catalogue.
+// (read as 0 via `param [7, 0]`) on every other row, which pays CP only. AP decides an advanced
+// purchase under an abundant CP pool; the CP half is carried for one price across the catalogue.
 //
 // A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>.
 fnc_support_catalogue = {

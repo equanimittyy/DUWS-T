@@ -398,21 +398,20 @@ fnc_roadblock_gate_arm = {
     missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], _trg];
 };
 
-// Files the hardpoint as a streamed site over the composition the caller just built, and either crews it
-// now or stows it uncrewed. The streaming spec is the type's, not the caller's: spawnRadius, grace,
-// neverStream and airRing come from DUWS_hardpointStreaming and the loose garrison from
-// DUWS_hardpointGarrison, so the dev tool, the zone loop and OPCOM all site a given type the same way and
-// one pair of tables tunes them. hpSide and the garrison token are the serialisable spec a later raise
-// rebuilds from.
+// Files the hardpoint as a streamed site over the composition the caller just built, and either crews it now
+// or stows it uncrewed. The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream
+// and airRing come from DUWS_hardpointStreaming and the loose garrison from DUWS_hardpointGarrison, so the
+// dev tool, the zone loop and OPCOM all site a given type the same way and one pair of tables tunes them.
+// hpSide and the garrison token are the serialisable spec a later raise rebuilds from.
 //
 // A standalone hardpoint streams on BLUFOR presence over its own ring -- a player, friendly AI, or an
 // aircraft in its air ring, the same arrival test a zone answers to; a zone one -- a _zoneKey names its
-// parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls together
-// rather than each emplacement waking on its own radius. The caller builds but never mans it: an
-// emplacement BLUFOR are already near (or a resident type) is crewed here and stands deployed, and every
-// other is stowed uncrewed at once and re-crewed by the raise worker on approach -- the zone lifecycle,
-// where a garrison rises on stream-in, not at build. So campaign start never pays the drop-and-settle for
-// the emplacements nobody is near, and an occupant is never left asleep over a standing composition.
+// parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls together rather
+// than each emplacement waking on its own radius. The caller builds but never mans it: an emplacement BLUFOR
+// are already near (or a resident type) is crewed here and stands deployed, and every other is stowed
+// uncrewed at once and re-crewed by the raise worker on approach -- the zone lifecycle, where a garrison
+// rises on stream-in, not at build. So campaign start never pays the drop-and-settle for the emplacements
+// nobody is near, and an occupant is never left asleep over a standing composition.
 //
 // neverStream (mortar, artillery, minefield) keeps its composition resident so OPCOM can task it with no
 // player near: the pieces and their gun crew are pinned against every stow and release, so only a clear
@@ -422,8 +421,8 @@ fnc_roadblock_gate_arm = {
 // short-circuits for it, but its clearance check runs and, below the short-circuit, a loose-garrison-only
 // stow/raise arm cycles the defenders. A minefield has no loose garrison, so only its mines remain.
 //
-// _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
-// and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
+// _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone) and
+// rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
 fnc_hardpoint_register = {
     params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])

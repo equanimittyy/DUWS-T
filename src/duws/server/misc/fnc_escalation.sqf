@@ -20,11 +20,10 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 // portable off Altis. Inert on Altis, where the fraction already yields thirty.
 #define ESCALATION_MIN_TIER 15
 
-// The census is one engine call that cannot yield -- measured at 5.03 s for Altis's 17472
-// houses -- so it is a frame stall, not 5 s of shared scheduler time, and no amount of
-// rearranging inside this function changes that. What it gets instead is a banner and a place
-// in the generation sequence, so the stall lands inside a wait the player is already watching
-// rather than on the frame they take control.
+// The census is one engine call that cannot yield -- 5.03 s for Altis's 17472 houses -- so it is
+// a frame stall, not 5 s of shared scheduler time, and no rearranging here changes that. Instead
+// it gets a banner and a slot in the generation sequence, landing the stall inside a wait the
+// player is already watching, not the frame they take control.
 //
 // The banner has to be up before the stall starts. fnc_map_prompt is remoteExec'd and a
 // remoteExec to your own machine still runs a frame later, so a blocking call on the next line
