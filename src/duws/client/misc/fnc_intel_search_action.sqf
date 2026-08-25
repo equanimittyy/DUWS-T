@@ -25,6 +25,10 @@ if (!hasInterface) exitWith {};
 // fails the flagged branch and drops to the combat branch, so it becomes an ordinary corpse rather
 // than going dead under the cursor. Cooldown read via getVariable with a default: the broadcast
 // DUWS_searchCooldown may not have landed when this first evaluates.
+//
+// Enemy is read from the class config side (0 = east), not `side cursorObject`: the engine reports
+// every corpse as civilian, so a live `side` test matches no body at all. The config lookup is
+// death-stable and survives the AGC corpse-swap the flag-free combat branch exists to sidestep.
 private _cond =
     "!isNull cursorObject"
   + " && {cursorObject distance _target < 3}"
@@ -37,7 +41,7 @@ private _cond =
   + "     || {"
   + "       cursorObject isKindOf 'CAManBase'"
   + "       && {!alive cursorObject}"
-  + "       && {side cursorObject == east}"
+  + "       && {getNumber (configFile >> 'CfgVehicles' >> typeOf cursorObject >> 'side') == 0}"
   + "       && {time - (_target getVariable ['DUWS_lastSearch', -1e10]) > (missionNamespace getVariable ['DUWS_searchCooldown', 300])}"
   + "     }"
   + "   }";

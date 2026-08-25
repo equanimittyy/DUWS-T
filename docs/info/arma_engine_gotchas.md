@@ -713,6 +713,23 @@ for a server-owned unit, so no per-client broadcast, JIP key, or death handler i
 `switchMove` into an `acts_` crouch idle can freeze mid-transition into a visibly wrong half-crouch --
 seen in Zeus on a captive squad while the player was still far off. Reset with `setUnitPos "AUTO"`.
 
+## `side` of a dead unit is civilian, so an enemy-corpse test must not read `side`
+
+**Once a unit dies the engine reports it on side `civilian`, whatever it fought as. So `side _corpse
+== east` is false on every OPFOR body, and any prompt, loot, or cleanup gated on it silently never
+fires -- the units all spawned and died correctly, so nothing in the logs points at the side test.**
+
+The same code reads correctly a frame earlier: a `Killed` handler that runs `side _unit` at the
+instant of death can still catch the fighting side, which is why a check that works inside the
+handler breaks when the same test is moved onto a settled corpse (a search action, a body sweep).
+Caching the side at spawn in a variable works but re-exposes the state to a body-swapping garbage
+collector (the AGC mod), which rebuilds a distant corpse and drops its variables.
+
+**How to apply:** identify an enemy corpse by the class config side, not the live side:
+`getNumber (configFile >> "CfgVehicles" >> typeOf _corpse >> "side") == 0` (0 = east, 1 = west,
+2 = independent, 3 = civilian). It is a pure config read, so it is death-stable and survives the
+corpse swap. `client/misc/fnc_intel_search_action.sqf` gates the enemy-corpse search this way.
+
 ## `enableSimulation` is local, so a server-side freeze leaves clients simulating
 
 **`enableSimulation` only affects the machine it runs on; `enableSimulationGlobal` (server-only)
