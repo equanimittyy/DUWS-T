@@ -130,11 +130,17 @@ DUWS_fnc_reserveRoadSnap = {
 // bearing, so the tail runs away from the objective and the players, never toward them -- then snapped to
 // a road near there. A multi-vehicle wave lines up nose-to-tail on drivable ground with room between, and
 // successive vehicles can take different roads rather than stacking on one point. A slot that lands within
-// a gap of one already placed this wave, or on water, is rejected and the ray steps another gap out to
+// a gap of any vehicle already on the ground, or on water, is rejected and the ray steps another gap out to
 // retry: good spacing outranks being exactly on a road (two vehicles on one point brew up on spawn), and
 // neither outranks staying out of the sea. Bounded retries, then the lead point -- land by construction.
 DUWS_fnc_reserveConvoySlot = {
-    params ["_lead", "_dir", "_i", "_slots"];
+    params ["_lead", "_dir", "_i"];
+    // A slot is taken if any vehicle already stands within a gap of it: this wave's own trucks (each
+    // spawned the frame its slot was picked, so it is on the ground before the next slot is drawn), a
+    // concurrent wave's, or ambient civ traffic. Read straight off the world with nearestObjects -- the
+    // same clear-ground test civilian cars settle on -- rather than a private list that only ever saw
+    // this one wave.
+    private _fnc_clear = { (nearestObjects [_this, ["LandVehicle"], DUWS_reserveConvoyGap]) isEqualTo [] };
     private _out = [];
     private _step = _i;
     private _tries = 0;
@@ -145,10 +151,10 @@ DUWS_fnc_reserveConvoySlot = {
         // A slot over water is no slot: the outbound bearing can run a coastal wave off the shoreline
         // step by step, and a vehicle stood up on the sea surface sinks. Reject it like a collision and
         // step further out to look for land past it.
-        if (!surfaceIsWater _snap && {(_slots findIf { (_snap distance2D _x) < DUWS_reserveConvoyGap }) < 0}) then {
+        if (!surfaceIsWater _snap && {_snap call _fnc_clear}) then {
             _out = _snap;
         } else {
-            if (!surfaceIsWater _raw && {(_slots findIf { (_raw distance2D _x) < DUWS_reserveConvoyGap }) < 0}) then {
+            if (!surfaceIsWater _raw && {_raw call _fnc_clear}) then {
                 _out = _raw;
             } else {
                 _step = _step + 1;
@@ -173,7 +179,7 @@ DUWS_fnc_reserveWaveSlot = {
         _wave set [0, _lead];
         _wave set [1, _center getDir _lead];
     };
-    private _pos = [_wave select 0, _wave select 1, count _slots, _slots] call DUWS_fnc_reserveConvoySlot;
+    private _pos = [_wave select 0, _wave select 1, count _slots] call DUWS_fnc_reserveConvoySlot;
     _slots pushBack _pos;
     _pos
 };
