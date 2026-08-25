@@ -5723,6 +5723,27 @@
                 <Original>Slingshot 1-1</Original>
                 <English>Slingshot 1-1</English>
             </Key>
+            <Key ID="STR_DUWS_T_slingshot_2">
+                <German>Schleuder 2-1</German>
+                <Spanish>Honda 2-1</Spanish>
+                <Chinesesimp>弹弓 2-1</Chinesesimp>
+                <Original>Slingshot 2-1</Original>
+                <English>Slingshot 2-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reaper">
+                <German>Reaper 1-1</German>
+                <Spanish>Reaper 1-1</Spanish>
+                <Chinesesimp>Reaper 1-1</Chinesesimp>
+                <Original>Reaper 1-1</Original>
+                <English>Reaper 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reaper_2">
+                <German>Reaper 2-1</German>
+                <Spanish>Reaper 2-1</Spanish>
+                <Chinesesimp>Reaper 2-1</Chinesesimp>
+                <Original>Reaper 2-1</Original>
+                <English>Reaper 2-1</English>
+            </Key>
             <Key ID="STR_DUWS_T_4sqljq58">
                 <German>Klicke auf die Karte um Koordinaten zu übermitteln oder warte 60 Sekunden um den Schlag abzubrechen</German>
                 <Spanish>Haga clic en el mapa para dar las coordenadas o espere 60 segundos para cancelar el ataque</Spanish>

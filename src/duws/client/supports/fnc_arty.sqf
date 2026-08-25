@@ -17,6 +17,13 @@ _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_artycall";
+// Each air-strike tier answers on its own callsign; ground arty/mortar keep the default.
+_callsign = switch (_supportype) do {
+	case 3: { localize "STR_DUWS_T_slingshot_2" };	// JDAM
+	case 5: { localize "STR_DUWS_T_reaper" };		// cluster
+	case 6: { localize "STR_DUWS_T_reaper_2" };		// napalm
+	default { localize "STR_DUWS_T_slingshot" };
+};
 
 // Swap the fallback shell for the faction's own round where a piece is named. Unset key -> "" -> keep
 // the passed vanilla shell, so an undeclared faction fires exactly as before.
@@ -67,9 +74,9 @@ if (_supportype == 7) then {_ord = localize "STR_DUWS_T_mortar_smoke_ord"};	//mo
 
 hint localize "STR_DUWS_T_fqeghaut";
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
+	[_callsign, localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
-	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
+	[_callsign, localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 _drawRadius = "";
@@ -128,9 +135,9 @@ if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || 
 
 hint localize "STR_DUWS_T_moassj3z";
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
-} else {	
-	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_hf9bhgvb"] remoteExec ["fnc_duws_dialogue", 0];
+	[_callsign, localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
+} else {
+	[_callsign, localize "STR_DUWS_T_hf9bhgvb"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 _veh_alive = true;
