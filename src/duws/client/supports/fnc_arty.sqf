@@ -17,12 +17,15 @@ _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_artycall";
-// Each air-strike tier answers on its own callsign; ground arty/mortar keep the default.
+// Each support type answers on its own callsign; mortar HE and smoke both crew Sledge 1-1, cluster/napalm shares Reaper.
 _callsign = switch (_supportype) do {
+	case 1: { localize "STR_DUWS_T_redleg" };		// tube arty
+	case 2: { localize "STR_DUWS_T_sledge" };		// mortar HE
 	case 3: { localize "STR_DUWS_T_slingshot_2" };	// JDAM
 	case 5: { localize "STR_DUWS_T_reaper" };		// cluster
 	case 6: { localize "STR_DUWS_T_reaper_2" };		// napalm
-	default { localize "STR_DUWS_T_slingshot" };
+	case 7: { localize "STR_DUWS_T_sledge" };		// mortar smoke (same crew as HE)
+	default { localize "STR_DUWS_T_slingshot" };	// laser bomb
 };
 
 // Swap the fallback shell for the faction's own round where a piece is named. Unset key -> "" -> keep

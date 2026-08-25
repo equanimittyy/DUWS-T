@@ -5723,6 +5723,27 @@
                 <Original>Slingshot 1-1</Original>
                 <English>Slingshot 1-1</English>
             </Key>
+            <Key ID="STR_DUWS_T_laser_inbound">
+                <German>Slingshot inbound. Loitering over your position, stand by.</German>
+                <Spanish>Slingshot inbound. Loitering over your position, stand by.</Spanish>
+                <Chinesesimp>Slingshot inbound. Loitering over your position, stand by.</Chinesesimp>
+                <Original>Slingshot inbound. Loitering over your position, stand by.</Original>
+                <English>Slingshot inbound. Loitering over your position, stand by.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_loiter">
+                <German>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</German>
+                <Spanish>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Spanish>
+                <Chinesesimp>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Chinesesimp>
+                <Original>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Original>
+                <English>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_jet_down">
+                <German>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</German>
+                <Spanish>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Spanish>
+                <Chinesesimp>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Chinesesimp>
+                <Original>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Original>
+                <English>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</English>
+            </Key>
             <Key ID="STR_DUWS_T_slingshot_2">
                 <German>Schleuder 2-1</German>
                 <Spanish>Honda 2-1</Spanish>
@@ -5743,6 +5764,20 @@
                 <Chinesesimp>Reaper 2-1</Chinesesimp>
                 <Original>Reaper 2-1</Original>
                 <English>Reaper 2-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_redleg">
+                <German>Redleg 1-1</German>
+                <Spanish>Redleg 1-1</Spanish>
+                <Chinesesimp>Redleg 1-1</Chinesesimp>
+                <Original>Redleg 1-1</Original>
+                <English>Redleg 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sledge">
+                <German>Sledge 1-1</German>
+                <Spanish>Sledge 1-1</Spanish>
+                <Chinesesimp>Sledge 1-1</Chinesesimp>
+                <Original>Sledge 1-1</Original>
+                <English>Sledge 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_4sqljq58">
                 <German>Klicke auf die Karte um Koordinaten zu übermitteln oder warte 60 Sekunden um den Schlag abzubrechen</German>
