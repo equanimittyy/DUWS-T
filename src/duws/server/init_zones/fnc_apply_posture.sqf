@@ -42,6 +42,26 @@ private _isAir = (vehicle _leader) isKindOf "Air";
 // sheds and doorways, where a squad has nowhere to fire from and reads as men standing in a hut.
 #define GARRISON_POSITIONS 5
 
+// Foot patrols spawn stacked: every foot builder hands a whole roster to one BIS_fnc_spawnGroup
+// point with no relative positions, so the engine drops the section in a tight default formation.
+// The section then paths its first patrol leg off one square and the men jam on each other -- so ring
+// them out around the spawn before the circuit orders go down. The two roaming foot postures only:
+// hqpatrol walks fixed anchors it must not be nudged off, garrison places men in buildings, hunt
+// charges, and a mounted group keeps its hull spacing. Leader stays put as the anchor; findSafePos
+// (objDist 3) drops each man on clear land clear of the others, water and wild snaps rejected.
+if (!_mounted && {_posture in ["closepatrol", "widepatrol"]}) then {
+    private _origin = getPos _leader;
+    private _reach = 6 max (2.5 * count units _group);
+    {
+        if (_x != _leader) then {
+            private _spot = [_origin, 3, _reach, 3, 0, 0.6, 0] call BIS_fnc_findSafePos;
+            if (_spot isNotEqualTo [] && {!surfaceIsWater _spot} && {_spot distance2D _origin <= _reach * 2}) then {
+                _x setPos _spot;
+            };
+        };
+    } forEach units _group;
+};
+
 switch (_posture) do {
     case "closepatrol": {
         // Engages what it walks into without abandoning the circuit. Set once here, not per
