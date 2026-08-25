@@ -181,9 +181,13 @@ private _convoyGrp = _truckGrps select 0;
     if (_x != _convoyGrp) then { (units _x) joinSilent _convoyGrp; deleteGroup _x };
 } forEach (_truckGrps + [_escortGrp]);
 
-// The convoy's vehicles, snapshotted for the reliability layer and the under-attack test below.
-// _trucks is final here (a second truck, raised on cargo overflow, was pushed during loading above).
+// The convoy's vehicles and their crews, snapshotted for the reliability layer and the under-attack test
+// below. _trucks is final here (a second truck, raised on cargo overflow, was pushed during loading above).
+// The crews MUST be captured now, before the driver spawns: fnc_convoy_drive splits each follower hull into
+// its own group for the drive, so `units _convoyGrp` after that holds only the lead -- these unit objects
+// stay valid wherever they are regrouped, so a driver shot out of any hull is still seen dead.
 private _convoyVeh = _trucks + [_escortSpawn select 0];
+private _convoyCrew = units _convoyGrp;
 
 { [_x] call fnc_mission_claim } forEach [_crewGrp, _teamGrp, _convoyGrp];
 
@@ -243,7 +247,6 @@ private _finish = {
 // crew drives the repaired tank home, or on the deadline. Between: the crew dismount once a transport
 // reaches the tank (or is destroyed) and work the hull; the security team stays mounted unless hit; the
 // clock advances only while a crewman is at the tank and no player has taken it.
-private _convoyCrew = units _convoyGrp;
 // Under attack = the column has gone COMBAT (spotted or engaged), a convoy vehicle is damaged or
 // destroyed, or any man is down. The COMBAT clause is load-bearing: fnc_convoy_drive suppresses the
 // engine's bail-on-contact (setUnloadInCombat [false,false]) to hold the riders through the run, so
