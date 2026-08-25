@@ -50,7 +50,6 @@ _group deleteGroupWhenEmpty true;
 _pilot = units _group select 0;
 _vehicle = vehicle _pilot;
 _vehicle setVehicleAmmo 0;
-_vehicle allowdamage false;
 _vehicle engineOn true;
 
 
@@ -58,11 +57,14 @@ onStation = false;
 _wp1 = _group addWaypoint [_centerPos, -1];
 _wp1 setWaypointType "MOVE";
 _wp1 setWaypointBehaviour "CARELESS";
-_wp1 setWaypointTimeout [40, 60, 80];
-_wp1 setWaypointStatements ["true", "onStation = true"]; 
-_wp2 = _group addWaypoint [[0,0], 100];
-_wp2 setWaypointType "MOVE";
+// Fire onStation promptly on arrival so the scan starts right away, not after a
+// 40-80 s loiter timeout; the drone then circles the target while it reports.
+_wp1 setWaypointTimeout [1, 2, 3];
+_wp1 setWaypointStatements ["true", "onStation = true"];
+_wp2 = _group addWaypoint [_centerPos, 0];
+_wp2 setWaypointType "LOITER";
 _wp2 setWaypointBehaviour "CARELESS";
+_wp2 setWaypointLoiterRadius 400;
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -71,7 +73,16 @@ switch (VERSION_X) do {
 };
 
 waitUntil {sleep 0.5;onStation||!alive _vehicle};
-if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_l01sbx6n"};
+// The UAV is now killable, so death before it reaches station is a real path:
+// tell the caller and tidy the search-area marker and dead group.
+if (!alive _vehicle) exitWith {
+	if (!isNull _caller) then {
+		["info", [localize "STR_DUWS_T_l01sbx6n"]] remoteExec ["bis_fnc_showNotification", _caller];
+	};
+	{ deleteVehicle _x } forEach units _group;
+	deleteVehicle _vehicle;
+	deleteMarker str(_markername);
+};
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -86,79 +97,68 @@ sleep 5;
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_2ncoq1yy"] remoteExec ["fnc_duws_dialogue", 0];
 
 
-_trg=createTrigger["EmptyDetector",_centerPos];
-_trg setTriggerArea[_checkedRadius,_checkedRadius,0,false];
-_trg setTriggerActivation["EAST","PRESENT",false];
-_trg setTriggerStatements["this","", ""];
-_trg setTriggerTimeout [0, 0, 0, true ];  
+// Live recon feed. Two EmptyDetector triggers keep a continuously-updated PRESENT
+// list of each side in the scan area, so the position markers can be refreshed on a
+// fixed cadence and follow units as they move, rather than freezing at one arrival
+// snapshot. The feed runs until the drone is destroyed or its on-station time ends;
+// markers are pulled the moment it stops, so a dead/departed UAV shows nothing.
+_scanInterval = 5;
+_scanDuration = 180;
+
+_trg = createTrigger ["EmptyDetector", _centerPos];
+_trg setTriggerArea [_checkedRadius, _checkedRadius, 0, false];
+_trg setTriggerActivation ["EAST", "PRESENT", false];
+_trg setTriggerStatements ["this", "", ""];
+_trg setTriggerTimeout [0, 0, 0, true];
+
+_trgwest = createTrigger ["EmptyDetector", _centerPos];
+_trgwest setTriggerArea [_checkedRadius, _checkedRadius, 0, false];
+_trgwest setTriggerActivation ["WEST", "PRESENT", false];
+_trgwest setTriggerStatements ["this", "", ""];
+_trgwest setTriggerTimeout [0, 0, 0, true];
+
+// Let the engine evaluate the fresh triggers once so the first pass has a real
+// PRESENT list; without this the arrival tick reads empty.
 sleep 1;
-_tlist = list _trg; 
 
-{  
-	_markername2 = format["%1%2uav",round(getpos _x select 0),round(getpos _x select 1)];
-	_markerstr2 = createMarker [str(_markername2), getpos _x];
-	_markerstr2 setMarkerShape "ELLIPSE";
-	str(_markername2) setMarkerBrush "SolidBorder";
-	str(_markername2) setMarkerColor "ColorRed";
-	str(_markername2) setMarkerSize [3, 3];
-	str(_markername2) setMarkerAlpha 1;
+_reconMarkers = [];
+_elapsed = 0;
+while {alive _vehicle && _elapsed < _scanDuration} do {
+	{ deleteMarker _x } forEach _reconMarkers;
+	_reconMarkers = [];
+	_idx = 0;
 
-	[_markername2] spawn {
-		_markername2 = _this select 0;
-		for [{_i=0}, {_i<=200}, {_i = _i+1}] do
-		{
-			sleep 0.5;
-			str(_markername2) setMarkerColor "ColorPink";
-			sleep 0.5;
-			str(_markername2) setMarkerColor "ColorRed";
-		};    
-		deleteMarker str(_markername2); 
-	};  
- 
-} forEach _tlist;
+	{
+		_mk = createMarker [format ["%1_e_%2", _markername, _idx], getPos _x];
+		_mk setMarkerShape "ELLIPSE";
+		_mk setMarkerBrush "SolidBorder";
+		_mk setMarkerColor "ColorRed";
+		_mk setMarkerSize [3, 3];
+		_reconMarkers pushBack _mk;
+		_idx = _idx + 1;
+	} forEach list _trg;
 
-_trgwest=createTrigger["EmptyDetector",_centerPos];
-_trgwest setTriggerArea[_checkedRadius,_checkedRadius,0,false];
-_trgwest setTriggerActivation["WEST","PRESENT",false];
-_trgwest setTriggerStatements["this","", ""];
-_trgwest setTriggerTimeout [0, 0, 0, true ];  
-sleep 1;
-_tlistwest = list _trgwest; 
+	{
+		_mk = createMarker [format ["%1_w_%2", _markername, _idx], getPos _x];
+		_mk setMarkerShape "ELLIPSE";
+		_mk setMarkerBrush "SolidBorder";
+		_mk setMarkerColor "ColorBlue";
+		_mk setMarkerSize [3, 3];
+		_reconMarkers pushBack _mk;
+		_idx = _idx + 1;
+	} forEach list _trgwest;
 
-{ 
-	_markername2 = format["%1%2uavw",round(getpos _x select 0),round(getpos _x select 1)];
-	_markerstr2 = createMarker [str(_markername2), getpos _x];
-	_markerstr2 setMarkerShape "ELLIPSE";
-	str(_markername2) setMarkerBrush "SolidBorder";
-	str(_markername2) setMarkerColor "ColorBlue";
-	str(_markername2) setMarkerSize [3, 3];
-	str(_markername2) setMarkerAlpha 1;
+	sleep _scanInterval;
+	_elapsed = _elapsed + _scanInterval;
+};
 
-	[_markername2] spawn {
-		_markername2 = _this select 0;
-		for [{_i=0}, {_i<=200}, {_i = _i+1}] do {
-			sleep 0.5;
-			str(_markername2) setMarkerColor "ColorBlue";
-			sleep 0.5;
-			str(_markername2) setMarkerColor "ColorBLUFOR";
-		};    
-		deleteMarker str(_markername2); 
-	};  
- 
-} forEach _tlistwest;
-
-sleep 20; 
+// Feed ended (drone destroyed or station time up): clear the live markers, stand the
+// drone down, then remove the search circle and triggers.
+{ deleteMarker _x } forEach _reconMarkers;
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 20;
 
-{
-	deleteVehicle _x;
-} foreach units _group;
-
+{ deleteVehicle _x } forEach units _group;
 deleteVehicle _vehicle;
-
-sleep 200;
 deleteMarker str(_markername);
-deletevehicle _trg;
-deletevehicle _trgwest;
-
+deleteVehicle _trg;
+deleteVehicle _trgwest;
