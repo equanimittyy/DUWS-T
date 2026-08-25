@@ -433,7 +433,9 @@ while {
             // joiner (the repaired tank the caller folds in). Move ONLY the crew that is in the control group --
             // cargo riders belong to other groups (deny-armour's crew and rifle team ride the trucks) and must
             // stay put, or their win-census / team logic breaks. Once split, a follower's crew is out of the
-            // control group, so it is never re-split.
+            // control group, so it is never re-split. A hull split THIS tick is collected in _freshSplit so
+            // the issue block below can defer its first drive order one tick (see there).
+            private _freshSplit = [];
             {
                 private _h = _x;
                 private _crewIn = (crew _h) select { group _x == _group };
@@ -446,6 +448,7 @@ while {
                     _g setSpeedMode "FULL";       // forceSpeed governs pace; keep the group's own cap permissive
                     _g deleteGroupWhenEmpty true; // a follower killed/peeled empties its group -> it falls away
                     _followers set [netId _h, _g];
+                    _freshSplit pushBack (netId _h);
                 };
             } forEach _live;
 
@@ -491,6 +494,13 @@ while {
                     // ending at its live position -- tracing the exact ground it proved drivable, in column.
                     {
                         private _me = _x; private _meId = netId _me;
+                        // Freshly split into its own group this tick: defer the first drive order one tick. A
+                        // setDriveOnPath issued the same frame the driver changed group is dropped as the new
+                        // group's FSM initialises, so the hull sits idle on a path it never received; forceSpeed
+                        // on an un-pathed hull is only a ceiling and cannot restart it, and the column then waits
+                        // on the Tier 2 teleport ~30 s in. Deferring one tick lets the order land once the group
+                        // has settled. The lead is never split, so it always issues at once.
+                        if !(_meId in _freshSplit) then {
                         if (_legOffroad && {_me == _lead}) then {
                             // Native lead across the gap. Clear any committed path first (a setDriveOnPath and a
                             // doMove fight), then aim at the segment end (the road it rejoins); re-issued each tick
@@ -539,6 +549,7 @@ while {
                                     _issued set [_meId, _startIdx];
                                 };
                             };
+                        };
                         };
                     } forEach _live;
 
