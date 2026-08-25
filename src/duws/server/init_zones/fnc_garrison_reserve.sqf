@@ -360,8 +360,8 @@ DUWS_fnc_garrisonReserveDispatch = {
             };
         } forEach _grps;
         // The driver's work is done: point the empty truck off the far side, away from the players, then
-        // hand it to the map cleanup sweep with a delete order rather than scrapping it here. Flagged on the
-        // hull, it and its driver are reaped together once they are KEEP_RADIUS clear of every player -- the
+        // hand it to the map cleanup sweep with a delete order rather than scrapping it here. Flagged for the
+        // sweep, it and its crew are reaped together once they are KEEP_RADIUS clear of every player -- the
         // same rule the sweep bins a cleared garrison by, so a delivery truck never blinks out under a
         // player's eyes and needs no despawn timer of its own. binMe overrides the in-use spare a live
         // AI-crewed mobile truck would otherwise get; the small binAt grace lets it pull away first.
@@ -372,8 +372,16 @@ DUWS_fnc_garrisonReserveDispatch = {
             private _ewp = _drv addWaypoint [_escapePos, 0];
             _ewp setWaypointType "MOVE";
         };
+        // Flag the hull and its crew alike, on one clock. The sweep clears a manned truck's crew with the
+        // hull, but a driver or gunner who has left it -- brewed up and bailed, or dismounted when the truck
+        // was immobilised -- is no longer crew, and a hull-only flag would leave him standing as an orphan
+        // OPFOR man nothing reaps. Flagged himself, he is binned whether he is still aboard or on foot.
         _truck setVariable ["DUWS_binMe", true];
         _truck setVariable ["DUWS_binAt", time + 30];
+        {
+            _x setVariable ["DUWS_binMe", true];
+            _x setVariable ["DUWS_binAt", time + 30];
+        } forEach units _drv;
     };
 };
 
