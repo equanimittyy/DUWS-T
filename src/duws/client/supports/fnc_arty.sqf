@@ -75,7 +75,11 @@ if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
 if (_supportype == 7) then {_ord = localize "STR_DUWS_T_mortar_smoke_ord"};	//mortar smoke
 
-hint localize "STR_DUWS_T_fqeghaut";
+// Laser drives the whole strike off the on-station hint alone, so the caller gets no inbound hint
+// here -- only the radio call. Every other type keeps the grid-received hint.
+if (_ammotype != "Laser") then {
+	hint localize "STR_DUWS_T_fqeghaut";
+};
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 	[_callsign, localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
@@ -115,49 +119,108 @@ _dist = 3000;
 _spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
 onStation = false;
 
-if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+if (_ammotype == "Laser") then {
+	// Loiter wide and very high, centred on the caller. The jet is cosmetic -- ammo is stripped and
+	// the bomb is scripted onto the player's laser below -- so altitude and radius are purely visual.
 	_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+800];
 	_grouptype = [blufor_MISC_AIR_X];
 	_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 	_group deleteGroupWhenEmpty true;
 	_pilot = units _group select 0;
 	_pilot allowfleeing 0;
-	_pilot disableAI "Target"; 
+	_pilot disableAI "Target";
 	_vehicle = vehicle _pilot;
 	_vehicle engineOn true;
-	_vehicle flyInHeight 150;
+	_vehicle flyInHeight 1000;
 	_vehicle setVehicleAmmo 0;
-	_wp1 = _group addWaypoint [_position, -1];
+	// MOVE onto the caller first to flag on-station -- a LOITER waypoint never "completes", so its
+	// statement would never run -- then circle it at a wide radius until the strike or the timeout.
+	_wp1 = _group addWaypoint [_position, 200];
 	_wp1 setWaypointType "MOVE";
 	_wp1 setWaypointBehaviour "CARELESS";
-	_wp1 setWaypointStatements ["true", "onStation = true"]; 
-	_wp2 = _group addWaypoint [[0,0], 100];
-	_wp2 setWaypointType "MOVE";
+	_wp1 setWaypointStatements ["true", "onStation = true"];
+	_wp2 = _group addWaypoint [_position, 0];
+	_wp2 setWaypointType "LOITER";
+	_wp2 setWaypointLoiterType "CIRCLE_L";
+	_wp2 setWaypointLoiterRadius 1500;
 	_wp2 setWaypointBehaviour "CARELESS";
-};
-
-hint localize "STR_DUWS_T_moassj3z";
-if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	[_callsign, localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
-	[_callsign, localize "STR_DUWS_T_hf9bhgvb"] remoteExec ["fnc_duws_dialogue", 0];
+	if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+800];
+		_grouptype = [blufor_MISC_AIR_X];
+		_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
+		_group deleteGroupWhenEmpty true;
+		_pilot = units _group select 0;
+		_pilot allowfleeing 0;
+		_pilot disableAI "Target";
+		_vehicle = vehicle _pilot;
+		_vehicle engineOn true;
+		_vehicle flyInHeight 150;
+		_vehicle setVehicleAmmo 0;
+		_wp1 = _group addWaypoint [_position, -1];
+		_wp1 setWaypointType "MOVE";
+		_wp1 setWaypointBehaviour "CARELESS";
+		_wp1 setWaypointStatements ["true", "onStation = true"];
+		_wp2 = _group addWaypoint [[0,0], 100];
+		_wp2 setWaypointType "MOVE";
+		_wp2 setWaypointBehaviour "CARELESS";
+	};
 };
 
 _veh_alive = true;
+_laserImpact = [];
+_laserLocked = false;
 if (_ammotype == "Laser") then {
-	sleep 15;
-	hint localize "STR_DUWS_T_wlasdnk6";
-	waitUntil {sleep 0.1;onStation||!alive _vehicle};
-	sleep 2;
+	// On-station over the caller, then hold for the player to designate. Slingshot needs a steady
+	// spot: the laser must stay on target 5 s unbroken before it locks, and any drop restarts the
+	// count. Impact tracks the live spot so the bomb lands where the laser is at lock, not entry.
+	waitUntil {sleep 0.25; onStation || !alive _vehicle};
+	if (alive _vehicle) then {
+		hint localize "STR_DUWS_T_laser_loiter";
+		private _deadline = time + 300;
+		private _lockStart = -1;
+		private _lastPrompt = -1000;
+		private _lastFailHint = -1000;
+		waitUntil {
+			sleep 0.25;
+			private _t = if (isNull getConnectedUAV player) then { LaserTarget player } else { LaserTarget getConnectedUAV player };
+			if (isNull _t) then {
+				// Dropped the spot before the lock: re-show the instruction so the caller re-lases,
+				// still inside the window. Debounced so a jittery hold does not strobe the hint box.
+				if (_lockStart >= 0 && (time - _lastFailHint > 5)) then {
+					_lastFailHint = time;
+					hint localize "STR_DUWS_T_laser_loiter";
+				};
+				_lockStart = -1;
+				_laserImpact = [];
+			} else {
+				private _fresh = _lockStart < 0;
+				if (_fresh) then { _lockStart = time };
+				// Slingshot calls the hold when the player picks up the spot. Debounced: it re-keys on a
+				// genuine re-acquire but stays quiet through sub-second flicker, so a shaky lase does not
+				// spam the net.
+				if (_fresh && (time - _lastPrompt > 8)) then {
+					_lastPrompt = time;
+					[_callsign, localize "STR_DUWS_T_laser_hold"] remoteExec ["fnc_duws_dialogue", 0];
+				};
+				_laserImpact = getPos _t;
+				if (time - _lockStart >= 5) then { _laserLocked = true };
+			};
+			_laserLocked || (time > _deadline) || (!alive _vehicle)
+		};
+	};
 	if (!alive _vehicle) then {_veh_alive = false};
 } else {
-	if (_ammotype == "Cluster" || _ammotype == "Bo_Mk82" || _ammotype == "Napalm") then {
+	hint localize "STR_DUWS_T_moassj3z";
+	if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+		[_callsign, localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
 		waitUntil {sleep 0.1;onStation||!alive _vehicle};
 		sleep 2;
 		if (!alive _vehicle) then {_veh_alive = false};
 	} else {
+		[_callsign, localize "STR_DUWS_T_hf9bhgvb"] remoteExec ["fnc_duws_dialogue", 0];
 		sleep 30;
-	};	
+	};
 };
 
 if (!_veh_alive) exitWith {
@@ -169,29 +232,41 @@ if (!_veh_alive) exitWith {
 	deletemarker str(_markername2);
 	{ deleteVehicle _x } forEach units _group;
 	deleteVehicle _vehicle;
-	hint localize "STR_DUWS_T_9wu0cgea";
-};
-
-// WAIT UNTIL THE LAST SECOND TO CHECK FOR LASER
-_target = "";
-if (isNull getConnectedUAV player) then {
-	_target = LaserTarget player;
-} else {
-	_target = LaserTarget getConnectedUAV player;
+	// Laser leans on the radio for this; other air types keep the HUD note.
+	if (_ammotype != "Laser") then { hint localize "STR_DUWS_T_9wu0cgea"; };
+	[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_jet_down", _callsign]] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 if (_ammotype == "Laser") then {
-		if (isNull _target) then { hint localize "STR_DUWS_T_l6wdrhei"; sleep 10 };
-		private _impact = getPos _target;
-		_bomb = "Bo_Mk82" createVehicle _impact;
-		// One unsorted query at the outer radius, split by distance. nearestObjects with an empty
-		// class filter returns every object in range and sorts the lot by distance, and the inner
-		// ring is a subset of the outer one, so asking twice paid for the same objects twice.
-		// Outermost first, because the rings overlap: damaging the inner ring first left
-		// everything inside 10 m on 0.5, healing what the strike had just destroyed.
-		private _hit = _impact nearObjects 20;
-		{_x setDamage .5} forEach _hit;
-		{_x setDamage 1} forEach (_hit select {_x distance _impact < 10});
+	if (!_laserLocked) then {
+		// Window closed without a steady lock: no ordnance, the jet just goes home.
+		[_callsign, localize "STR_DUWS_T_laser_abort"] remoteExec ["fnc_duws_dialogue", 0];
+	} else {
+		[_callsign, localize "STR_DUWS_T_laser_locked"] remoteExec ["fnc_duws_dialogue", 0];
+		// The round leaves the jet and runs in on the spot, so it reads as an air-delivered strike --
+		// but the kill is scripted onto the laser point and detonated on arrival, so a stripped-ammo
+		// prop still lands exactly where the player lased, regardless of the jet's line or ballistics.
+		private _drop = _vehicle modelToWorld [0,0,-3];
+		_bomb = "Bo_Mk82" createVehicle _drop;
+		_bomb setVelocity ((vectorNormalized (_laserImpact vectorDiff _drop)) vectorMultiply 300);
+		[_bomb, _laserImpact] spawn {
+			params ["_round", "_imp"];
+			// Pull the in-flight round as it reaches the spot (or if it strikes short) and detonate on
+			// the laser point. Outermost ring first: overlapping rings would otherwise heal the inner
+			// kills back to 0.5.
+			waitUntil { sleep 0.05; isNull _round || !alive _round || (_round distance _imp < 30) || ((getPosATL _round) select 2) < 2 };
+			deleteVehicle _round;
+			"Bo_Mk82" createVehicle _imp;
+			private _hit = _imp nearObjects 20;
+			{_x setDamage .5} forEach _hit;
+			{_x setDamage 1} forEach (_hit select {_x distance _imp < 10});
+		};
+	};
+	// Break the loiter and send the jet out either way; cleanup deletes it after the tail sleeps.
+	{ _group deleteWaypoint _x } forEach (reverse (waypoints _group));
+	private _rtb = _group addWaypoint [_spawnPos, 0];
+	_rtb setWaypointType "MOVE";
+	_rtb setWaypointBehaviour "CARELESS";
 } else {
 	while {_salvos > 0} do {
 		_rps = _rpsinit;
@@ -249,9 +324,8 @@ if (_ammotype == "Laser") then {
 // spend a further 90 s deleting markers and the jet, and the battery is free long before that.
 [_supportype] remoteExec ["fnc_support_release", 2];
 
-if (_ammotype == "Laser" && isNull _target) then {
-	hint localize "STR_DUWS_T_b95i2b8d";
-} else {
+// Laser reports its outcome over the radio (captured / abort), so it shows no completion hint.
+if (_ammotype != "Laser") then {
 	sleep 2;
 	hint localize "STR_DUWS_T_t6y8r92y";
 };

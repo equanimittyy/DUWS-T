@@ -47,6 +47,18 @@ if !([_supportype] call fnc_support_claim) exitWith {
 	call _fnc_restoreCommMenu;
 };
 
+// Laser no longer needs a map designation: the jet loiters over the caller and drops on the
+// player's own laser. Skip the click flow and commit at the caller's position. fnc_arty owns the
+// slot release; here we only mirror the click path's in-range reset and the cooldown before the
+// menu entry comes back.
+if (_supportype == 4) exitWith {
+	[getPos player, _salvos, _radius, _interval, _rps, _supportype, _cost, _ammotype] spawn fnc_arty;
+	waitUntil {sleep 0.5; !isNil "arty_Blufor_close"};
+	arty_Blufor_close = nil;
+	sleep 300;
+	call _fnc_restoreCommMenu;
+};
+
 _pos = [];
 // The handler releases before closing the map: the banner the release clears is a control on
 // the map display and cannot be reached once it is gone.

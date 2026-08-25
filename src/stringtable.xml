@@ -5242,33 +5242,12 @@
                 <Original>Rounds ready. Splash in 30 seconds.</Original>
                 <English>Rounds ready. Splash in 30 seconds.</English>
             </Key>
-            <Key ID="STR_DUWS_T_wlasdnk6">
-                <German>Erfasse Laserziel</German>
-                <Spanish>Adquiriendo objetivo láser</Spanish>
-                <Chinesesimp>获取激光目标</Chinesesimp>
-                <Original>Acquiring Laser Target.</Original>
-                <English>Acquiring Laser Target.</English>
-            </Key>
             <Key ID="STR_DUWS_T_9wu0cgea">
                 <German>Flugzeug wurde abgeschossen. Luftschlag fehlgeschlagen.</German>
                 <Spanish>Avión de ataque derribado. Ataque áereo fallido.</Spanish>
                 <Chinesesimp>攻击机被击落。空袭失败。</Chinesesimp>
                 <Original>Attack Plane was shot down. Airstrike failed.</Original>
                 <English>Attack Plane was shot down. Airstrike failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_l6wdrhei">
-                <German>Laserziel NICHT erfasst</German>
-                <Spanish>Objetivo láser no adquirido</Spanish>
-                <Chinesesimp>没有获取激光目标</Chinesesimp>
-                <Original>Laser target not acquired.</Original>
-                <English>Laser target not acquired.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b95i2b8d">
-                <German>Zielerfassung fehlgeschlagen</German>
-                <Spanish>Apuntado FALLADO</Spanish>
-                <Chinesesimp>瞄准失败</Chinesesimp>
-                <Original>Targeting failed.</Original>
-                <English>Targeting failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_t6y8r92y">
                 <German>Anforderung abgeschlossen</German>
@@ -5723,26 +5702,40 @@
                 <Original>Slingshot 1-1</Original>
                 <English>Slingshot 1-1</English>
             </Key>
-            <Key ID="STR_DUWS_T_laser_inbound">
-                <German>Slingshot inbound. Loitering over your position, stand by.</German>
-                <Spanish>Slingshot inbound. Loitering over your position, stand by.</Spanish>
-                <Chinesesimp>Slingshot inbound. Loitering over your position, stand by.</Chinesesimp>
-                <Original>Slingshot inbound. Loitering over your position, stand by.</Original>
-                <English>Slingshot inbound. Loitering over your position, stand by.</English>
-            </Key>
             <Key ID="STR_DUWS_T_laser_loiter">
-                <German>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</German>
-                <Spanish>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Spanish>
-                <Chinesesimp>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Chinesesimp>
-                <Original>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</Original>
-                <English>Slingshot on station. Hold your laser steady on the target for 5 seconds to lock it in. Window is 5 minutes.</English>
+                <German>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</German>
+                <Spanish>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Spanish>
+                <Chinesesimp>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Chinesesimp>
+                <Original>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Original>
+                <English>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_hold">
+                <German>Copy your laser. Hold for 5 seconds, Alpha 1-1.</German>
+                <Spanish>Copy your laser. Hold for 5 seconds, Alpha 1-1.</Spanish>
+                <Chinesesimp>Copy your laser. Hold for 5 seconds, Alpha 1-1.</Chinesesimp>
+                <Original>Copy your laser. Hold for 5 seconds, Alpha 1-1.</Original>
+                <English>Copy your laser. Hold for 5 seconds, Alpha 1-1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_locked">
+                <German>Captured. Weapon away.</German>
+                <Spanish>Captured. Weapon away.</Spanish>
+                <Chinesesimp>Captured. Weapon away.</Chinesesimp>
+                <Original>Captured. Weapon away.</Original>
+                <English>Captured. Weapon away.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_abort">
+                <German>No capture, Alpha 1-1. Aborting.</German>
+                <Spanish>No capture, Alpha 1-1. Aborting.</Spanish>
+                <Chinesesimp>No capture, Alpha 1-1. Aborting.</Chinesesimp>
+                <Original>No capture, Alpha 1-1. Aborting.</Original>
+                <English>No capture, Alpha 1-1. Aborting.</English>
             </Key>
             <Key ID="STR_DUWS_T_jet_down">
-                <German>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</German>
-                <Spanish>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Spanish>
-                <Chinesesimp>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Chinesesimp>
-                <Original>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</Original>
-                <English>Be advised Alpha 1-1, %1 was shot down. Your strike is aborted.</English>
+                <German>Be advised Alpha 1-1, %1 was shot down. Your strike is off.</German>
+                <Spanish>Be advised Alpha 1-1, %1 was shot down. Your strike is off.</Spanish>
+                <Chinesesimp>Be advised Alpha 1-1, %1 was shot down. Your strike is off.</Chinesesimp>
+                <Original>Be advised Alpha 1-1, %1 was shot down. Your strike is off.</Original>
+                <English>Be advised Alpha 1-1, %1 was shot down. Your strike is off.</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot_2">
                 <German>Schleuder 2-1</German>
