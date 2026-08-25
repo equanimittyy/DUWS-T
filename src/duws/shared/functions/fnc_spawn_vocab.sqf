@@ -29,7 +29,7 @@
 //
 // One string, not a nested pair, because these tables are edited through the composition TUI, whose
 // row editor splits input on commas and would cut a nested list in half
-// (docs/info/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing plain strings.
+// (docs/info/architecture/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing plain strings.
 //
 // A bare name defaults to closepatrol, so a caller that names no posture still gets what it always got.
 DUWS_fnc_tokenName = {

@@ -31,7 +31,7 @@ str(_ellipse) setMarkerAlpha 0.3;
 
 // Logged because a marker that does not appear leaves nothing else behind: setMarkerColor and
 // setMarkerAlpha on a name matching no marker throw nothing and log nothing
-// (docs/info/arma_engine_gotchas.md), so this line is the only proof the marker was drawn at all.
+// (docs/info/architecture/arma_engine_gotchas.md), so this line is the only proof the marker was drawn at all.
 ["INFO", "MISSION", format ["marked %1 at %2, radius %3", _ellipse, _randomPos, _radius]] call fnc_log;
 
 // And read back on every machine that has a map, because the line above only proves the call was

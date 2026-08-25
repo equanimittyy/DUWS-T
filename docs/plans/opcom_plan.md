@@ -5,9 +5,9 @@ player: it garrisons towns, tasks squads, builds hardpoints, and lets low-reputa
 back. This document owns how it decides — what it wakes on, what it is allowed to know, how it ranks
 one target against another — what it builds, what it spends on, its archetype, and the town events
 it triggers. Its wallet and the faucets that fill it are the economy's ([`economy_second_pass.md`](economy_second_pass.md#army-power)); the
-shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](../info/hardpoints.md); the
+shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](../info/gameplay/hardpoints.md); the
 standalone-siting economics already in play are
-[`info/opfor_area_of_influence.md`](../info/opfor_area_of_influence.md#band-siting).
+[`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting).
 
 ## The three layers
 
@@ -40,9 +40,9 @@ So the commander reads a belief store, and only the sensors below read truth.
 
 Parallel arrays, server-local, indexed together, every entry a number or an array of numbers. The
 same shape and the same reason as the hardpoint registry
-([`info/hardpoints.md`](../info/hardpoints.md#why-hardpoints-are-not-zones)): the mission namespace is the save
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#why-hardpoints-are-not-zones)): the mission namespace is the save
 file, so state that might outlive a session has to be serialisable
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
 Not broadcast — no client reads it, and a belief the player could inspect is a belief the player
 can route around.
 
@@ -77,7 +77,7 @@ Each writer is something the player can find and kill.
 **`knowsAbout` with a side on the left is the whole sighting sweep.** It is a side-wide query, so
 "has any OPFOR unit seen this player" is one call per player — no `nearEntities`, no scan over
 `allUnits`, and nothing that grows with the campaign. That is the rule in
-[`info/performance.md`](../info/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)
+[`info/performance.md`](../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)
 satisfied by construction rather than by care.
 
 The threshold is `1.5` because that is the figure the artillery observation gate already uses.
@@ -170,7 +170,7 @@ intents exist — a withdrawing group is one whose intent has been released.
 
 Numbers and strings only, for the same serialisation reason as the belief store, and `time` rather
 than `diag_tickTime` so an expiry survives a savegame
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 ## Why not GOAP
 
@@ -187,7 +187,7 @@ chain is the product. Three reasons the commander has no chain to find:
   execution, at which point the planner has stopped deciding the thing that matters.
 - **Replanning is the cost, and it lands in the worst place.** GOAP replans whenever the world
   state moves. Scheduled scripts share about 3 ms per frame between them
-  ([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
+  ([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
   so a node-expansion loop settles at roughly one expansion per frame. It can be escaped by
   batching, but the batching would be funding a search with nothing to search.
 
@@ -200,7 +200,7 @@ machine rather than searching.
 
 An **influence map** — a coarse grid holding decayed per-side influence — is the standard upgrade
 to the *reach* and *threat* terms. The front line it would produce as a by-product is now produced by
-the area-of-influence coverage field ([`opfor_area_of_influence.md`](../info/opfor_area_of_influence.md)),
+the area-of-influence coverage field ([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)),
 which sites standalone hardpoints in the OPFOR band and replaced the hand-drawn corridor an earlier
 design once used. The *grid* itself is still
 deferred: it buys a cheap "how contested is this whole region" read for scoring that a point-sampled
@@ -210,7 +210,7 @@ field does not, so it stays an upgrade path rather than part of the first build.
 
 **One thread with a phase counter, not one per sink.** The shipped hardpoint monitor already made
 this call — one shared loop over the whole registry, not one thread each
-([`info/hardpoints.md`](../info/hardpoints.md#streaming-and-garrison)); it binds harder here, because
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)); it binds harder here, because
 `src/duws` carries 25 `while {true}` loops across 19 files today.
 
 | Property | Value | Why |
@@ -329,7 +329,7 @@ archetype decides *where* the money goes, not whether there is anywhere for it t
 Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
 toward: every zone tier fields fortified groups with a squad leader each, occupied buildings, and
 whatever guard towers stand nearby. **Zones carry a tier of their own, rolled at
-generation** — see [`info/zones_and_civilians.md`](../info/zones_and_civilians.md#zone-tiers). A tier
+generation** — see [`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers). A tier
 names the whole composition and nothing scales it afterwards. Towns and zones draw from one token
 vocabulary but keep separate composition sets, so tuning what a town fields cannot silently retune
 what a zone does.
@@ -337,7 +337,7 @@ what a zone does.
 **Both sinks reach both kinds of ground.** The commander upgrades and reinforces zones exactly as it
 does towns; the town is simply where the hooks were written first. A retaken zone is floored to `0.3`
 precisely so there is something to buy back — the floor is the bill, not a permanent brand
-([`info/zones_and_civilians.md`](../info/zones_and_civilians.md#zone-tiers)).
+([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)).
 
 Extending it needs no new machinery: a zone's tier is already stored per zone, the composition table
 is already indexed by it, and `fnc_zone_strength_set` already names the zone's key to the same store
@@ -358,7 +358,7 @@ a beaten zone garrison means the zone changed hands, and ground the player owns 
 
 The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
 tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in
-[`info/zones_and_civilians.md`](../info/zones_and_civilians.md#garrison-tiers-0-to-iv).
+[`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv).
 
 - **Reputation decides *whether* a town garrisons; AP decides *how hard*.** Crossing `-10` writes
   tier I and nothing deeper writes more.
@@ -366,7 +366,7 @@ tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Fu
   0, and there is no refund: with one, a player clearing towns would hand the enemy its AP back and
   the enemy would never climb. The director must spend again to restore it — and cannot, for the
   three hours the town spends regrouping
-  ([`info/zones_and_civilians.md`](../info/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
+  ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
 - **A cleared town is permanently cheaper to hold and permanently weaker.** Its garrison is pinned
   to the `0.3` floor for the rest of the campaign, so AP spent on a town the player keeps clearing
   buys progressively less. Whether that makes such towns a trap for the director to avoid, or a sink
@@ -394,7 +394,7 @@ upgrading something that has. It is the player's answer to the enemy taking town
 **Taking ground hands the player nothing.** A captured zone or town carries no tier and no strength —
 there is no inherited garrison and no destroyed state to inherit. What OPFOR left behind is OPFOR's:
 their attrition figure is floored at `0.3` and re-read only when they retake the ground
-([`info/zones_and_civilians.md`](../info/zones_and_civilians.md#blufor-inherits-nothing)).
+([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#blufor-inherits-nothing)).
 
 **So the ladder runs the other way on this side.** Buying tier I creates a garrison at **zero
 strength**, and each reinforcement adds **30 %** — four to reach full from nothing, three from the
@@ -420,9 +420,9 @@ indirect-fire assets behave once the commander is spending on them.
 **This is the intended ladder, not the shipped director.** What shipped is deliberately simpler: a
 uniform per-type garrison and three flat-priced build actions — raise a radio tower, top a zone back
 toward its stored ring cap, fortify the band — priced `OPCOM_AP_TOWER`/`OPCOM_AP_TOPUP`/`OPCOM_AP_BAND`
-([`info/opfor_area_of_influence.md`](../info/opfor_area_of_influence.md#band-siting)), and nothing scales
+([`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting)), and nothing scales
 garrison size to `WARCOM_opfor_ap` today
-([`info/hardpoints.md`](../info/hardpoints.md#streaming-and-garrison)). The ladder below is the
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). The ladder below is the
 escalation this loop is meant to layer onto that director.
 
 ### The director and the escalation ladder
@@ -470,10 +470,10 @@ table beside the zone one, for three reasons: the vehicle rows already name fact
 than classnames, so a hardpoint late in a campaign is defended by whatever the enemy fields
 everywhere else; the row's `setting` column already answers `HeavyArmor`; and a fenced table is
 editable through the composition TUI, where a list hardcoded in a placer is not
-([`info/composition_tooling.md`](../info/composition_tooling.md)).
+([`info/composition_tooling.md`](../info/architecture/composition_tooling.md)).
 
 **Composition is read when the garrison spawns, not when the hardpoint is built.** With garrisons
-distance-gated ([`info/hardpoints.md`](../info/hardpoints.md#streaming-and-garrison)), a hardpoint the
+distance-gated ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)), a hardpoint the
 player walks past in hour one and returns to in hour five is defended at hour five's strength. That
 is what makes the ladder felt: the map does not get more hardpoints so much as harder ones, and it
 costs nothing to implement, because the spawn already happens on approach.
@@ -496,7 +496,7 @@ avoid, because the difference is invisible in play and only shows up as a zone t
 | Build tick | one candidate every 20-30 min | Slow enough that the map changes between visits rather than while the player is looking at it |
 | Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying |
 | Build costs | 8-25 AP by type | Cheapest for an OP or MG nest, dearest for the battery — the same order the clear payouts run in |
-| Live cap | none | live AI is bounded by player proximity, not a count ([`info/hardpoints.md`](../info/hardpoints.md#streaming-and-garrison)) |
+| Live cap | none | live AI is bounded by player proximity, not a count ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)) |
 | Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:19`, `fnc_captured.sqf:38-41`) |
 
 ## Indirect-fire hardpoints
@@ -505,7 +505,7 @@ The types that justify the hardpoint tier: persistent enemy assets that act on t
 destroying one changes the player's situation rather than incrementing a counter. Two tiers, sharing
 one fire-mission implementation. None of the fire missions below ships today — the mortar and
 artillery cores exist as clearable emplacements
-([`info/hardpoints.md`](../info/hardpoints.md#hardpoint-types)) but do not run missions; this is the
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#hardpoint-types)) but do not run missions; this is the
 behaviour the commander loop is meant to give them.
 
 **A zone's own mortar is a different thing and stays as it is.** Several zone prefabs site a tube
@@ -517,7 +517,7 @@ a sited, crewed, map-marked gun that keeps firing while nobody is there.
 Real crewed guns, not a virtual effect. `doArtilleryFire` must be issued from the machine where the
 gun is local, and both are server-spawned, so the server issues it — the same locality rule that
 silently broke `fnc_helolift`
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#waypoint-and-flight-commands-are-ignored-unless-the-group-is-local-to-that-machine)).
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#waypoint-and-flight-commands-are-ignored-unless-the-group-is-local-to-that-machine)).
 
 | | Mortar pit | Artillery battery |
 |---|---|---|
@@ -535,7 +535,7 @@ nothing fires at what the enemy has not seen.
 **The battery is a vehicle, so it needs pinning.** `disableAI "PATH"` on the crew plus
 `allowFleeing 0`, or it relocates and the marker lies. Killing the crew leaves an intact gun the
 player can take, and the unmanned clause already counts that as cleared
-([`info/hardpoints.md`](../info/hardpoints.md#clearance)) — capturing one is a legitimate prize for a
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#clearance)) — capturing one is a legitimate prize for a
 hard fight, and the recycle station will pay for it (`fnc_activateBaseRecycleStation.sqf`, a
 documented ownership-free faucet in [`../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance)).
 
@@ -645,7 +645,7 @@ what has to be verified.
 both flavours: a zone that rolls a mortar pit consumes one of the two, and the director cannot build
 a battery while one already stands. Clearing one frees its slot, so destroying the battery buys quiet
 until the enemy fields another rather than ending indirect fire for the campaign. No such cap is
-enforced today ([`info/hardpoints.md`](../info/hardpoints.md#hardpoint-types)); it lands with the fire
+enforced today ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#hardpoint-types)); it lands with the fire
 missions above.
 
 Three reasons the number is this small:
@@ -659,7 +659,7 @@ Three reasons the number is this small:
 
 **If AA is ever made resident, it needs its own cap for the same reason.** The shipped AA streams
 like any other type, waking early on a 5,000 m air ring rather than staying resident
-([`info/hardpoints.md`](../info/hardpoints.md#streaming-and-garrison)). Were it pinned resident to
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Were it pinned resident to
 guarantee it engages what crosses its ring in seconds, it would be a fourth permanent-crew type and
 would reintroduce exactly the unbounded live-AI growth this cap exists to prevent.
 
@@ -741,7 +741,7 @@ Decided:
 - Events are attributed to the town, so clearing that town's garrison damps its events by lifting
   its reputation a step. It no longer stops them outright: a clear is worth `+5` rather than a
   discharge, so a town driven to `-20` is still deep in the band after one
-  ([`info/zones_and_civilians.md`](../info/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
+  ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
 
 ### Preserved: hostile civilian conversion
 
@@ -807,7 +807,7 @@ and the intent records already follow ([§Shape](#shape), [§Commitment: intents
 because the mission namespace is the save file. Time-based fields store on `time` and are written as
 remaining durations, never absolute stamps: `diag_tickTime` restarts with the process, so an absolute
 stamp sits in the future in the next session
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 **Whether the belief store persists is open.** It is shaped to serialise, so carrying it costs
 nothing to build — but a campaign resumed with the enemy still knowing where it last saw the player
@@ -900,7 +900,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
   (`civ_maxSpawnPerVisit`) or against the WARCOM wave budget.
 - **Whether the player can learn the commander's archetype, and how.** One the player can never
   perceive is variance rather than a mechanic; the intel system is the obvious route
-  ([`info/intel_system.md`](../info/intel_system.md)), and observed behaviour is the free one.
+  ([`info/intel_system.md`](../info/gameplay/intel_system.md)), and observed behaviour is the free one.
 - **What the commander does with a surplus.** All three sinks are throttled and one saturates
   outright, so a commander that out-earns them banks the difference and the map stops changing.
   Anything that absorbs it has to be something the player still notices — reinforcing a garrison

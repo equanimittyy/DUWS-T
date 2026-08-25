@@ -298,7 +298,7 @@ Two ideas, and keeping them apart is what makes the menus make sense:
 
 - A **composition** is a list of tokens, sometimes with a price. A zone tier, a town tier, a
   purchasable squad. Contract for what the tier tables mean:
-  [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers). A garrison composition writes each
+  [`zones_and_civilians.md`](../gameplay/zones_and_civilians.md#zone-tiers). A garrison composition writes each
   entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
   than a pair because the row editor below splits on commas and would cut a nested list in half.
 - A **token** is what one name stands for, and the Tokens menu holds every table of them: a team of

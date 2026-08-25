@@ -5,7 +5,7 @@
 // it resolves its class against that display's config rather than the mission's, so it comes up as
 // the engine's RscButton: no green hover, no focus colour, different shadow, border, press offsets
 // and click sounds, and only some of that has a runtime setter
-// (docs/info/arma_engine_gotchas.md). Declared here, this is an ordinary menu button.
+// (docs/info/architecture/arma_engine_gotchas.md). Declared here, this is an ordinary menu button.
 //
 // It sits above every combo on the screen, which is what keeps it clickable rather than clicked
 // through. A dropdown belongs to the other display and draws over this dialog without taking its

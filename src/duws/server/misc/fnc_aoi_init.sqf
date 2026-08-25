@@ -8,7 +8,7 @@
 // Reach from the outer edge, not the centre, is the whole mechanic: a naturally large zone claims
 // proportionally more ground than a small one, and the band it owns outside its own footprint is
 // where standalone hardpoints are sited. The field is derived from live campaign state each time it
-// is asked, so there is no second store to keep in step. See docs/info/opfor_area_of_influence.md.
+// is asked, so there is no second store to keep in step. See docs/info/gameplay/opfor_area_of_influence.md.
 if (!isServer) exitWith {};
 
 // [_pos, _side] call DUWS_fnc_aoi_covers -> bool. Is _pos within reach of any _side ("opfor"/"blufor")

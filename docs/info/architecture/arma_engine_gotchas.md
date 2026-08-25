@@ -3,7 +3,7 @@
 Engine behaviours that aren't visible in the SQF itself and cost real debugging time.
 Each entry states the rule, why the engine forces it, and how to apply it. Add an entry
 when an Arma-specific trap — not a plain SQF bug — burns a debugging session. For where
-the mission's subsystems live see [`architecture.md`](architecture.md).
+the mission's subsystems live see [`architecture.md`](../architecture.md).
 
 ## `remoteExec` to your own machine still runs a frame later
 
@@ -97,7 +97,7 @@ in one function each so the `profileNamespace` fallback is a one-line change. Se
 of positions silently misreads every older save. Only a dedicated server can add a real file store
 invisibly (a `-serverMod` extension needs nothing player-side); singleplayer and hosted sessions
 cannot, since the host is the server.
-Reasoning: [`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#where-the-save-lives).
+Reasoning: [`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#where-the-save-lives).
 Container shape: [`../campaign_save_format.md`](campaign_save_format.md).
 
 ## A variable first assigned inside `while do` does not survive the loop
@@ -161,7 +161,7 @@ loop instead, so a loop meant to retry silently runs once and quits.
 **How to apply:** to skip-and-retry an iteration use `continue` (or fall off the loop body's end);
 reserve `exitWith` for stopping the loop. The zone locator hit this: an origin keep-out used
 `exitWith` to "re-roll" a position but dropped the zone entirely — see
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
+[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
 
 ## `ctrlCreate` on a config display ignores the mission's base classes entirely
 
@@ -518,7 +518,7 @@ yields only at suspension points), so the loss is the stale *base* a second mach
 first's broadcast landed, and a save persists the corrupted value. Single-player has one machine,
 so it only surfaces in co-op. A delta writer fixes the arithmetic but not the authorisation: the
 *caller* still decides whether to spend, reading a snapshot the server has moved past — both must
-be server-side. See [`economy.md`](economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
+be server-side. See [`economy.md`](../gameplay/economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 **How to apply:** never `publicVariable` a shared resource from a non-authoritative machine. Route
 every change through one server-side function taking a signed *delta*
@@ -548,7 +548,7 @@ installs the default. Assigning unconditionally is correct *only* for globals ne
 the decision to `publicVariable` a global and to initialise it live in two files kept in step by
 hand. Here they are not: `client/includes/supports_init.hpp` guards three flags and assigns three
 unconditionally while `client/dialog/fnc_request_support.sqf` broadcasts all six
-([`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#open-defects)).
+([`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#open-defects)).
 
 ## Weather set on the server synchronises itself, so mirroring it into a global is dead state
 
@@ -817,7 +817,7 @@ register, because nothing it hides is a building.
 The split is a trade: a hide is permanent and unrestorable, so a cleared town keeps invisible houses
 for the campaign — worth paying where a composition must fit, not to stop a tree clipping a tent.
 `BuildingChanged` is a local event, so whether a dedicated server sees it for damage a client caused
-is unconfirmed ([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
+is unconfirmed ([KNOWN_ISSUES.md](../../../KNOWN_ISSUES.md)).
 
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 
@@ -1143,7 +1143,7 @@ still clipped in play — 60 sits under the narrowest clip seen rather than besi
 `format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
 needing more room is not a notification: a briefing belongs in the task description (which scrolls),
 an explanation in a `hint` (which wraps) — one or the other, never both,
-[`player_facing_text.md`](player_facing_text.md#which-surface-a-message-goes-to-and-never-both).
+[`player_facing_text.md`](../gameplay/player_facing_text.md#which-surface-a-message-goes-to-and-never-both).
 
 ## SQF identifiers are case-insensitive, so `_Varname` and `_VarName` are one variable
 

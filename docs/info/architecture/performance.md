@@ -6,14 +6,14 @@ never shrinks*, which does not. This doc covers both, and the design decisions t
 Everything here was read out of the source rather than profiled in-engine, so treat sizes as
 reasoning about how often code runs and what it touches.
 
-Two of the three growth terms this tree carried are bounded now, and the shape of the bound is worth
+Two of the three growth terms this tree carried are gone now, and the shape of the fix is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
-with no single call to point at. BLUFOR task forces stop at one standing by
-(`warcom/fnc_WARCOM_blu_assault.sqf`), so an ignored one no longer accumulates as permanently
-simulated AI beside the base. The task-force waypoint slot is written rather than appended to
-(`warcom/fnc_WARCOM_gps_marker.sqf`), where only index 0 was ever read. The third, the enemy gear
-scan, still runs for the whole session, and why a convergence ceiling is not the fix for it is in
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#the-enemy-gear-scan-runs-for-the-whole-session).
+with no single call to point at. BLUFOR task forces — the player-directed assault force and the
+waypoint slot it wrote — were removed entirely, so neither the permanently simulated AI an ignored
+one left standing beside the base, nor that waypoint list only index 0 was ever read from,
+accumulates any longer. The third, the enemy gear scan, still runs for the whole session, and why a
+convergence ceiling is not the fix for it is in
+[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#the-enemy-gear-scan-runs-for-the-whole-session).
 
 ## The pattern that costs the most: timed scans anchored on `allUnits`
 
@@ -84,7 +84,7 @@ where the players are rather than how many zones were generated.
 The arithmetic is what forces it. A zone prefab places 37-72 objects
 (`server/init_zones/prefabs/modern/*.sqf`) plus five crates, a light, 3-4 fortification buildings and a
 flagpole (`fnc_createzone.sqf:151-206`) — call it 65. Zones alone are bounded, since `zones_number`
-tops out at 40, so roughly 2,600. The hardpoint tier ([`hardpoints.md`](hardpoints.md)) breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus director-built normals
+tops out at 40, so roughly 2,600. The hardpoint tier ([`hardpoints.md`](../gameplay/hardpoints.md)) breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus director-built normals
 with no ceiling, reaches five figures on a large campaign.
 
 **Deleted rather than hidden.** A hidden object is still a network entity, still returned by
@@ -101,7 +101,7 @@ builder a second time produces a different zone. Recording the placed result sid
 entirely, and it is why a composition needs no streaming code of its own beyond filing its objects
 through `fnc_duws_keep`. Because the record is built when a composition is stowed rather than when it
 is placed, damage, looted crates and player-moved props are captured as they actually are, and nothing
-outlives the session — [`campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md) gains no save
+outlives the session — [`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md) gains no save
 input.
 
 Order matters at the despawn end: the garrison pass runs first, then static weapons are crewed out,

@@ -9,7 +9,7 @@
 // Snapshot, not a live counter: the setup values (starting CP, AP tiers, ...) are read once
 // at mission start, before the player spends anything, so they show the chosen setting.
 //
-// Diary rendering (docs/info/arma_engine_gotchas.md, same as fnc_duws_help): records show
+// Diary rendering (docs/info/architecture/arma_engine_gotchas.md, same as fnc_duws_help): records show
 // newest-first, so the list is reversed before creation; colour comes from <font color=...>,
 // the diary ignores <t>; <font size> is absolute px.
 

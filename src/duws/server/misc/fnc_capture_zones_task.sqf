@@ -27,7 +27,7 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // Created server-side, not remoteExec'd: broadcasting BIS_fnc_taskCreate serialises the owner and
 // destination as live references, which BIS's map draw then re-resolves by netId every frame the map is
 // open -- flooding the rpt with "objectFromNetId: type OBJECT, expected STRING, in player1" for the task's
-// whole life and jamming the strategic map (docs/info/arma_engine_gotchas.md). A native server-side create
+// whole life and jamming the strategic map (docs/info/architecture/arma_engine_gotchas.md). A native server-side create
 // syncs the objective to the owner side's clients, joiners included, and keeps each reference as its own
 // netId string. No single map pin (capture-all-zones has no one point), so the destination is [] rather
 // than an objNull the draw would try to resolve.
@@ -75,7 +75,7 @@ private _title = [localize "STR_DUWS_T_CAMPAIGN_LOST_TITLE", localize "STR_DUWS_
 // as a stringtable key rather than as resolved text so the setter does not have to be a machine
 // with a stringtable -- and so this stays the one place the campaign's endings are worded.
 // The map name is passed to every ending, not just the one that reads it: a body without a %1
-// discards the surplus argument (docs/info/arma_engine_gotchas.md), so this stays one call. It is the
+// discards the surplus argument (docs/info/architecture/arma_engine_gotchas.md), so this stays one call. It is the
 // map's config description rather than worldName -- the latter is the internal class ("Altis" but
 // "Enoch" for Livonia), which is not what the player calls the place.
 private _body = format [[localize (missionNamespace getVariable

@@ -11,7 +11,7 @@
 // control created on an RscDisplayEmpty resolves its class against that display's config rather
 // than the mission's, so it comes up as the engine's RscButton -- no green hover, no focus colour,
 // different shadow, border, press offsets and click sounds, and only some of that has a runtime
-// setter (docs/info/arma_engine_gotchas.md). Declared here, these are ordinary menu buttons.
+// setter (docs/info/architecture/arma_engine_gotchas.md). Declared here, these are ordinary menu buttons.
 class startup_hq_placement_dialog
 {
 	idd = -1;

@@ -35,7 +35,7 @@ _fobKey = format ["FOB_%1", netId _fob];
 // prefab is built once and never rebuilt.
 //
 // Rows are [class, X, Y, Z, heading], offsets from the FOB centre -- what lets the layout round-trip
-// through the 3D editor (docs/info/composition_tooling.md).
+// through the 3D editor (docs/info/architecture/composition_tooling.md).
 // --DUWS-COMPOSITION BEGIN name="FOB Perimeter" schema=A--
 private _perimeterData = [
 	["Land_HBarrier_1_F",         -10.0,   4.5, 0,  0.0],

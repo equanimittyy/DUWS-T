@@ -10,29 +10,8 @@ dependency runs one way.
   persistent civilian population. Purely civilian — not an objective.
 
 Both are server-only and run near campaign start; civilians are registered once zone build-out has
-finished. For the boot order see [`architecture.md`](architecture.md#boot-flow); siting defects are
-catalogued in [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
-
-## Provenance: what 5U5 changed vs inherited
-
-The fork chain is Kibot's DUWS -> Tomata's DUWS_X -> 5U5's DUWS_T. 5U5's additions carry Chinese
-comments; DUWS-era code is English. Comment language is a proxy, not proof, but here it lines up with
-explicit author annotations (`// LESS URBAN 保持不变` = "keep unchanged", `修复` = "fix",
-`改进版` = "improved version"):
-
-**Enemy zone placement is largely inherited.** 5U5 did *not* rewrite the core siting. The "More
-Urban" survey (`fnc_moreUrban_locations.sqf`) is untouched Tomata code. In the siting loop 5U5
-replaced only the `moreUrban == 1` branch (building-cluster centroid) and added the origin guard; the
-less-urban branch, the outer loop, the distance/spacing gates and the failsafes are inherited. Manual
-placement is untouched. `fnc_createzone.sqf` keeps its inherited core (markers, prefab, triggers,
-spawn loop) with 5U5 features *bolted on*: obstacle clearing, heli reinforcement and the offset flag.
-
-**The civilian population system is 5U5's own work**, layered on Tomata's civilian-presence concept
-and rewritten again since: the map-wide building-cluster scan and the synthetic "Dynamic Town N"
-locations it invented are gone, replaced by the selection pass in `fnc_civ_selectTowns.sqf`.
-
-So the honest summary for a reviewer: the classic DUWS objective placement was tweaked and decorated,
-not overhauled; the substantial new system is civilian population.
+finished. For the boot order see [`architecture.md`](../architecture.md#boot-flow); siting defects are
+catalogued in [`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
 
 ## Enemy zone siting ("More Urban")
 
@@ -775,7 +754,7 @@ and their expense.
 
 That garrison is planned to start at **tier I with zero strength** and climb by **30 % per
 reinforcement**, so four reinforcements bring it to full
-([`../opcom_plan.md`](../plans/opcom_plan.md#town-garrisons-i-through-iv)). It shares nothing with what
+([`../opcom_plan.md`](../../plans/opcom_plan.md#town-garrisons-i-through-iv)). It shares nothing with what
 OPFOR left behind: the enemy's attrition figure is theirs, is floored at `0.3`, and is re-read only
 when they take the ground back.
 
@@ -800,7 +779,7 @@ Three cases, and the distinction that separates them is whether the player asked
   respawn, so there is no arrival to hide.
 
 **A BLUFOR-held town will be the first BLUFOR force in the second case.** The tier ladder is planned
-for both sides ([`../opcom_plan.md`](../plans/opcom_plan.md#town-garrisons-i-through-iv)), and a town
+for both sides ([`../opcom_plan.md`](../../plans/opcom_plan.md#town-garrisons-i-through-iv)), and a town
 the player holds will stream on the same rules a town the enemy holds does — so it will need the same
 latch, and whoever builds it should reuse the machinery rather than re-derive it.
 
@@ -1173,7 +1152,7 @@ reputation term in the amount would count it twice.
 | Arrest | — |
 
 **These are placeholders chosen to make the framework testable, not balanced figures**
-([`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance)). They are anchored on the black
+([`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#economy-balance)). They are anchored on the black
 market, which is the price scale the player already reads — goggles at 1, pistol and optic at 5 — so
 intel sits between the two. An unrecognised row returns a negative price, and callers treat that as a
 reject: rows only ever come off the wire, so that is the fail-closed edge for a client sending one the

@@ -8,7 +8,7 @@ moment. Town reputation is a third pool, per town rather than campaign-wide, and
 town's passive income to a side: CP to a BLUFOR town, AP to an OPFOR one. Vehicle prices come from
 `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over the shipped `blufor_RQST_*` tables —
 see [`faction_system.md`](faction_system.md). The full reroute and the work still open on it are
-[`../economy_second_pass.md`](../plans/economy_second_pass.md).
+[`../economy_second_pass.md`](../../plans/economy_second_pass.md).
 
 ## Authority: one server-side writer per pool
 
@@ -18,7 +18,7 @@ function, `fnc_cp_adjust` (`src/duws/server/misc/fnc_economy_init.sqf`), invoked
 `publicVariable`s the pool. This is a hard concurrency requirement, not a style choice: mutating a
 networked global as `x = x - c; publicVariable "x"` from a client drops concurrent co-op changes and
 can duplicate CP — see the gotchas entry *"A shared global mutated as `x = x - c; publicVariable`
-loses concurrent writes"* in [`arma_engine_gotchas.md`](arma_engine_gotchas.md).
+loses concurrent writes"* in [`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md).
 
 The result is floored at 0: the purchase gates all ask *"can I afford this"*, so a negative pool
 behaves like an empty one and the floor only keeps the HUD honest. The writer also **rounds the
@@ -170,7 +170,7 @@ to replay a campaign's worth of supports for free.
 **A support that is not in hand cannot be refunded.** The thirteen comm-menu classes with
 `removeAfterExpressionCall = 1` are absent from the player's menu for as long as their mission is
 running, and `fnc_supports_init` tracks presence for its own reasons
-([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
 so that one test covers a fire mission in flight, a taxi in transit and a High Command aircraft in
 the air without a guard per support.
 
@@ -250,8 +250,8 @@ only server-side caps read it.
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance); the reroute that put AP on the menus
-and the work still open on it are [`../economy_second_pass.md`](../plans/economy_second_pass.md).
+[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#economy-balance); the reroute that put AP on the menus
+and the work still open on it are [`../economy_second_pass.md`](../../plans/economy_second_pass.md).
 
 ## Who may spend
 

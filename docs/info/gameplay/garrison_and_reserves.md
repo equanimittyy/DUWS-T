@@ -78,7 +78,7 @@ handler also fires the event-refill trigger (below).
 **x1** tier composition; the surplus `(mult - 1)` copies wait as a pool that refills the garrison
 as casualties are taken. This exists because a composition token is a group, and the engine
 silently drops any `createGroup`/`BIS_fnc_spawnGroup` call once a side passes **144 groups**
-(`docs/info/arma_engine_gotchas.md`) — scaling the live composition wholesale at x3 could ask for
+(`docs/info/architecture/arma_engine_gotchas.md`) — scaling the live composition wholesale at x3 could ask for
 triple a tier's groups on one site alone, and two hot sites at once would blow the wall.
 
 Per-site, the live *composition* group count is capped at the standing template's count, stored

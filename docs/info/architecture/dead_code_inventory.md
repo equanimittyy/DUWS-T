@@ -5,9 +5,9 @@ Anything not listed here has either been removed or is live.
 
 Two passes have looked. The first read `.sqf` only and deleted what it found; the second widened to
 the config includes, `description.ext` and `stringtable.xml`, and also caught residue inside `.sqf`
-that the first could not see as text. The residue is listed below rather than silently re-swept,
-because a reader who finds an unused variable naturally asks whether the earlier pass considered and
-kept it. It did not: it could not see it.
+that the first could not see as text. That residue is not enumerated here; git history and a re-run
+of the wider scan can surface it, because a reader who finds an unused variable naturally asks
+whether the earlier pass considered and kept it. It did not: it could not see it.
 
 ## What a scan of this kind can conclude
 
@@ -64,48 +64,6 @@ Eleven `#define`s in `shared/includes/defines.hpp` are never expanded: `CT_LISTN
 standard control-type and style constants every Arma dialog file copies in, and the next dialog
 added is as likely to want one as not. Deleting them buys nothing and makes the file diverge from
 the shape anyone writing a new dialog will expect.
-
-## Residue a `.sqf`-only text pass could not reach
-
-### Four globals written and never read
-
-| Global | Written at |
-|---|---|
-| `hq_manually_placed` | `server/server_var_init.sqf:212`, `client/dialog/fnc_HQ_manual_place.sqf:7`, both `publicVariable`d |
-| `zones_manually_placed` | `server/server_var_init.sqf:323`, `publicVariable`d |
-| `WARCOM_blu_attack_delay` | `server/warcom/fnc_WARCOM_init.sqf:20` |
-| `DUWS_number_at` | `client/includes/squad_number_init.hpp:4` |
-
-`WARCOM_blu_attack_delay` is the one worth reading before deleting: its only consumer is a
-commented-out `sleep` at `server/warcom/fnc_WARCOM_blu_assault.sqf:138`, so removing the global
-also discards the last record of what that delay was for.
-
-### Unused locals
-
-| File | Local |
-|---|---|
-| `client/misc/fnc_player_markers.sqf:140,155,161,165` | `_injured`, assigned four times, read never |
-| `client/misc/fnc_bottom_right_message.sqf:73` | `_showDate` |
-| `shared/factions/MODERN/fn_factionAutoDetect.sqf:134` | `_passengers` |
-| `shared/factions/MODERN/fn_factionAutoDetect.sqf:586` | `_turretCannon` |
-| `server/missions/mission_threads/rescue_squad/fnc_rescue_squad_mission.sqf:26` | `_targetpos` |
-| `client/warcom/fnc_WARCOM_mapclick_assault.sqf:6`, `client/supports/fnc_mapclickuav.sqf:6`, `client/supports/fnc_mapclickarty.sqf:50` | `_pos` |
-
-Two need a word. The `_targetPos` read at `fnc_rescue_squad_mission.sqf:79` and `:86` comes from the
-`params` of `fnc_rescue_squad_uncaptive` at `:60`, a scope of its own, so the outer write at `:26` is
-not what feeds it. The three `_pos` declarations are the engine-handler case in the table above.
-
-### Unreferenced stringtable keys
-
-103 of the 1295 keys in `src/stringtable.xml` are named nowhere in the mission: 43 with descriptive
-names, 60 with generated ones. They cluster by feature in a way that reads as reworked rather than
-abandoned text — `STR_DUWS_T_LOOT1`, `LOOT_MONEY2` and `LOOT_NOTHING` are dead while `LOOT2` and
-`LOOT4` are live, and twelve `*DISGUISE*` keys are dead against roughly seventy that are not.
-
-Two are parked rather than dead: `STR_DUWS_T_RAVAGE_HELP_SUB` and `STR_DUWS_T_WBK_HELP_SUB` belong
-to the modes held back until base DUWS is whole, and deleting them would have to be undone. Weigh
-the rest against the translation debt: an unused key still costs every language that has to carry
-it, and re-adding one later is cheaper than translating one that was never needed.
 
 ## The domination briefing bypasses its own translated string
 

@@ -3,7 +3,7 @@
 The first pass shipped the territory-type economy: towns pay their holder (BLUFOR CP, OPFOR AP),
 zones trickle Army Power to both sides, a zone's first capture pays a one-time liberation bonus,
 advanced supports carry a dual CP+AP price, and vehicles are priced CP-only on a metadata scale.
-The shipped machinery is documented in [`info/economy.md`](../info/economy.md) — which still describes
+The shipped machinery is documented in [`info/economy.md`](../info/gameplay/economy.md) — which still describes
 the pre-reroute model in several places and wants a correcting pass of its own.
 
 This document is the economy's design of record and the backlog the first pass deliberately left.
@@ -122,7 +122,7 @@ at its own application site, never at the writer.
 
 Reputation is the deliberate exception and is not a pool in this sense: it is the only figure
 taking fractional deltas, and `fnc_town_rep_adjust` owns its rounding for the reason recorded in
-[`info/economy.md`](../info/economy.md#authority-one-server-side-writer-per-pool).
+[`info/economy.md`](../info/gameplay/economy.md#authority-one-server-side-writer-per-pool).
 
 ## Command Points
 
@@ -207,7 +207,7 @@ collapses.
 
 The budget is `support_max_slots` (8) consumable supports per player, and which rows draw on it is
 now the catalogue's `PERM`/`CONS` column rather than a per-case habit — see
-[`info/economy.md`](../info/economy.md#supports-permanent-and-consumable). Mobile HQ's half-in state,
+[`info/economy.md`](../info/gameplay/economy.md#supports-permanent-and-consumable). Mobile HQ's half-in state,
 where it tested the cap without ever consuming one, was resolved by making it permanent.
 
 **Advanced supports draw on the same slots.** A second currency that bought its own would raise the
@@ -218,7 +218,7 @@ moment AP could bypass it.
 
 Eight permanent slots against seventeen competing rows means a player commits at hour one to a
 shape they cannot evaluate until hour six. The refund is the escape hatch, and its CP half is
-built: [`info/economy.md`](../info/economy.md#supports-permanent-and-consumable) has the mechanism,
+built: [`info/economy.md`](../info/gameplay/economy.md#supports-permanent-and-consumable) has the mechanism,
 including why it pays back the recorded charge rather than the price and why a support that is away
 on a mission cannot be sold.
 
@@ -258,8 +258,8 @@ independently on both sides — raise a support's price without pushing the ladd
 without making supports free, and set the enemy's escalation pace without reference to how much it
 happens to be buying.
 
-The read surface is small: `server/warcom/fnc_WARCOM_blu_assault.sqf:11-25` and
-`fnc_WARCOM_blu_patrol.sqf:11-20,92,96,100` on the player's side, and the OPFOR sites in
+The read surface is small: `server/warcom/fnc_WARCOM_blu_patrol.sqf:13-17,86,90,94` on the
+player's side, and the OPFOR sites in
 [§The enemy ceiling](#the-enemy-ceiling-is-100-and-one-gate-stands-behind-it).
 
 **A shared pool would make the enemy's two jobs fight each other.** The commander's sinks can
@@ -293,16 +293,16 @@ integer by construction.
 
 The wave-composition threads already ratchet: each is a `spawn`ed thread walking forward through
 `waitUntil` gates, so once it passes a threshold it never re-tests it. A pool drained back below
-100 leaves the thread where it got to.
+60 leaves the thread where it got to.
 
 The eight sites that read the pool live, once per spawn, would silently downgrade the moment
 anything spends:
 
 | Site | Gate | What is lost |
 |---|---|---|
-| `fnc_WARCOM_blu_patrol.sqf:92,96,100` | > 99 / > 149 / > 199 | The three vehicle steps, BLUFOR side |
-| `fnc_missionPatrols.sqf:20` | > 100 | Mission guard armour drops to a car |
-| `fnc_missionPatrolswithintel.sqf:14` | > 100 | Same |
+| `fnc_WARCOM_blu_patrol.sqf:86,90,94` | > 60 / > 200 / > 200 | The three vehicle steps, BLUFOR side |
+| `fnc_missionPatrols.sqf:33-38` | tank rung 350 (`DUWS_fnc_tokenClass`) | Mission guard fields a car only, no armour |
+| `fnc_missionPatrolswithintel.sqf:23-28` | tank rung 350 (`DUWS_fnc_tokenClass`) | Same |
 
 These read the tier, not the pool. A player who watches their own patrols lose armour because
 they bought a support is being shown an unlock that un-unlocked, which contradicts the one rule
@@ -317,7 +317,7 @@ ratchet.
 
 Each side's opening pool once picked a raw AP figure; it now picks a **starting tier** (1–5) — the
 campaign begins with that side's ladder already at the chosen tier. Five tiers: **tier 1 is infantry
-at 0 AP** (always available), and the four rungs `DUWS_ap_tier_rungs = 100, 300, 550, 900` gate the
+at 0 AP** (always available), and the four rungs `DUWS_ap_tier_rungs = 60, 150, 350, 600` gate the
 vehicle classes above it. Presets are labelled by tier because the number is no longer a spendable
 bank (below).
 
@@ -326,10 +326,10 @@ bank (below).
 | Tier | Class | Rung | OPFOR unlock at ~94 AP/hr |
 |---|---|---|---|
 | 1 | Infantry | 0 | from the start |
-| 2 | Motorised | 100 | ~1 h |
-| 3 | Mechanised + transport heli | 300 | ~3 h |
-| 4 | Armour + attack heli | 550 | ~6 h |
-| 5 | Jets | 900 | ~10 h |
+| 2 | Motorised | 60 | ~0.6 h |
+| 3 | Mechanised + transport heli | 150 | ~1.6 h |
+| 4 | Armour + attack heli | 350 | ~3.7 h |
+| 5 | Jets | 600 | ~6.4 h |
 
 BLUFOR climbs the same rungs on its own income — captures, missions and its zone trickle once it holds
 ground — so its times differ, and the capture bounty is what keeps it in the race.
@@ -341,8 +341,10 @@ first shot, several times the whole AP catalogue. The tier is capability reached
 from zero. Tier 1 is the from-scratch option: infantry, both counters empty.
 
 Retune `DUWS_ap_tier_rungs` and the presets follow, since their seeds are those rung values. The
-BLUFOR patrol/assault gates and the OPFOR vehicle `_ap` values hold the same rung numbers as literals
-today and must be kept in step with the array until they are centralised on it.
+OPFOR vehicle `_ap` values hold the same rung numbers as literals today and must be kept in step
+with the array until they are centralised on it. BLUFOR's patrol gates mostly follow suit, but its
+tier-3 WAVE gate is a literal 200, not the 150 rung — a second place that would drift from the array
+if it moves.
 
 ### Where BLUFOR army power comes from
 
@@ -375,7 +377,7 @@ per-mission balance lever.
 **First capture pays a one-time bonus.** The first time BLUFOR ever takes a zone it pays a one-off
 CP + AP liberation bonus — the marquee reward for opening the map, and where BLUFOR's capture AP now
 comes from. It is tracked in the campaign save as a per-zone first-captured flag
-([`campaign_save_format.md`](../info/campaign_save_format.md)), so a reload, or a zone lost and retaken,
+([`campaign_save_format.md`](../info/architecture/campaign_save_format.md)), so a reload, or a zone lost and retaken,
 never pays it twice. That is what makes the anti-farm invariant structural rather than arithmetic:
 BLUFOR earns a zone's AP exactly once, so lose-then-retake yields no fresh AP however often it
 flips. It maps onto the two capture paths already in the tree — `fnc_captured.sqf` is the first-ever
@@ -394,7 +396,7 @@ event-driven faucet never had.
 **The two faucets sit on different clocks.** The trickle rides the economy tick's `sleep 1800`,
 which `setTimeMultiplier` does not scale; side-mission cooldowns are stamped against `dateToNumber
 date`, which it does
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 At the host's higher multipliers a mission type recharges many times faster while the trickle pays
 at an unchanged real rate, so missions come to dominate and the 75/25 ordering inverts. The tick
 stays on `sleep 1800`: every share here holds at `time_Multiplier = 1`, and the high-multiplier
@@ -442,23 +444,29 @@ penalised for holding. The retake swing and the consolation stay wallet-only —
 still never raise the enemy's permanent ceiling. `zones_number` running 1 to 40 is handled separately,
 by the throttle on every passive faucet.
 
-Both sides gate capability on raw `earned` against the same thresholds (BLUFOR's wave/vehicle steps,
-OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`): five tiers, tier 1 infantry at 0 and the rungs
-100 / 300 / 550 / 900 gating motorised, mechanised, armour and jets. Both sides use the whole ladder;
-the tier integer is the readout summary of that climb.
+Both sides gate capability on raw `earned` against the same thresholds for most of the ladder
+(BLUFOR's wave/vehicle steps, OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`): five tiers, tier 1
+infantry at 0 and the rungs 60 / 150 / 350 / 600 gating motorised, mechanised, armour and jets. The
+one exception is BLUFOR's tier-3 WAVE gate, a literal 200 rather than the 150 rung. Both sides use
+the whole ladder; the tier integer is the readout summary of that climb.
 
-### The enemy ceiling is 100, and one gate stands behind it
+### What enemy AP gates now: the shared vehicle rungs
 
-The WARCOM patrol, assault and air spawners are gone, and they held every OPFOR rung above the
-first. What is left reading the enemy pool is a single gate:
+The old WARCOM patrol, assault and air spawners that held OPFOR's rungs are gone. Enemy Army Power
+no longer meets a distinct ceiling; it gates OPFOR vehicles through the same token table the zone
+garrisons use (`DUWS_fnc_tokenClass`, `fnc_zone_spawn_sizes.sqf:91`), on the shared rungs above.
 
-| Gate | Site | Buys |
+The one live spender outside a zone garrison is the mission guard. It raises two tokens rather than
+substituting one for the other (`fnc_missionPatrols.sqf:31-39`, `fnc_missionPatrolswithintel.sqf:23-29`):
+
+| Token | Rung | Result |
 |---|---|---|
-| 100 | `fnc_missionPatrols.sqf:20`, `fnc_missionPatrolswithintel.sqf:14` | Mission-guard armour instead of a car |
+| `car` | 60 | the light vehicle, standing from tier 2 up |
+| `tank` | 350 | armour added on top once the enemy reaches tier 4 |
 
-So enemy AP is currently a number that fills and buys almost nothing, and the ladder is the OPFOR
-commander's to rebuild rather than something to balance against as it stands. Any figure below on
-what enemy income *should* pace is written against that commander existing.
+The lighter token stands whether or not the heavier is gated in, so the ladder adds armour to the
+guard instead of exchanging a car for it. Beyond this, enemy AP is the OPFOR commander's to spend;
+any figure below on what enemy income *should* pace is written against that commander existing.
 
 **Town income alone will reach any ceiling put back.** Every town whose radius overlaps an enemy
 zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:199-201`), the deepest band, so the enemy
@@ -562,7 +570,7 @@ explicit.
 one purchase: the first can succeed and the second fail, leaving the player charged for nothing,
 and in co-op another player's spend can land between them. That is the same race the single-pool
 handshake was written to close
-([`info/economy.md`](../info/economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
+([`info/economy.md`](../info/gameplay/economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
 reopened one level up.
 
 `fnc_pool_try_spend` gains a dual case that tests both pools and debits both as adjacent
@@ -703,9 +711,9 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth; wallet only |
 | `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth; wallet only |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
-| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 100/300/550/900 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (BLUFOR gates + OPFOR `_ap` hold the same values as literals) |
-| OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 100 (T2) / APC·IFV·AA·trans-heli 300 (T3) / tank·attack-heli 550 (T4) / plane 900 (T5) | OPFOR's capability ladder; utility trucks ungated |
-| BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf`, `fnc_WARCOM_blu_assault.sqf` | motor·car 100 (T2) / mech·armored·air 300 (T3) / armour 550 (T4); infantry free (T1) | BLUFOR's capability ladder, on the shared rungs |
+| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 60/150/350/600 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (OPFOR `_ap` and BLUFOR's vehicle gates hold the same values as literals; BLUFOR's tier-3 WAVE gate is a literal 200, not the 150 rung) |
+| OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 60 (T2) / APC·IFV·AA·trans-heli 150 (T3) / tank·attack-heli 350 (T4) / plane 600 (T5) | OPFOR's capability ladder; utility trucks ungated |
+| BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf` | car 60 (T2) / apc·ifv·transheli 150 (T3) / tank·attackheli 350 (T4); infantry free (T1) | BLUFOR's capability ladder; the T3 WAVE gate (armored/air in `fnc_WARCOM_blu_patrol.sqf`) is a literal 200, not the 150 vehicle rung |
 | corpse money drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
@@ -738,7 +746,7 @@ once those land.
   touch it, since it rewards an action rather than a holding.
 - **OPFOR AP accumulation.** Until the commander lands, OPFOR's wallet has only the hardpoint director
   as a sink, so it climbs with little to spend it on. Its
-  earned counter meanwhile crosses the tank rung (100) off town+zone income, so side-mission and zone
+  earned counter meanwhile crosses the tank rung (350) off town+zone income, so side-mission and zone
   armour appear once OPFOR has held enough ground; that gate reads the earned counter (the token
   `_ap`), not the wallet. Expected, and the wallet drains when the commander's sinks land; not a leak.
 - **CP abundance versus vehicle price.** Light vehicles now cost ~1–5 CP against a CP economy the
@@ -755,10 +763,10 @@ is where a second array goes.
 
 ## Open questions
 
-- **How long a passive campaign should take to reach maximum enemy capability.** The ceiling is
-  100 ([above](#the-enemy-ceiling-is-100-and-one-gate-stands-behind-it)), the ratchet is one-way, and a director that
-  never spends climbs at its whole income. Picking that duration *is* picking the flat income, so
-  the constant cannot be set before it.
+- **How long a passive campaign should take to reach maximum enemy capability.** Enemy capability
+  now tops out at the shared vehicle rungs ([above](#what-enemy-ap-gates-now-the-shared-vehicle-rungs)), the
+  ratchet is one-way, and a director that never spends climbs at its whole income. Picking that
+  duration *is* picking the flat income, so the constant cannot be set before it.
 - **The flat income figure**, which falls out of the answer above once OPFOR town income is
   measured on a real map rather than estimated.
 - **The throttle constants `k` and `REF_ZONES`.** `k = 0.5` and `REF_ZONES = 6` are starting

@@ -5,7 +5,7 @@
 // that don't warrant their own page fold into the owning page as inline
 // sub-headers.
 //
-// Engine notes (docs/info/arma_engine_gotchas.md):
+// Engine notes (docs/info/architecture/arma_engine_gotchas.md):
 //  - The diary displays records newest-first, so the list is built top-down then
 //    reversed before creation (the first row ends up on top).
 //  - Record bodies are structured text, but colour comes from <font>, NOT <t>:

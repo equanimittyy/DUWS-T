@@ -1,5 +1,5 @@
 // Locality: server -- addWaypoint, setBehaviour and setPos are ignored unless the group is local to
-// the machine issuing them (docs/info/arma_engine_gotchas.md); every caller spawns server-side.
+// the machine issuing them (docs/info/architecture/arma_engine_gotchas.md); every caller spawns server-side.
 //
 // A group's standing orders, held apart from what it is made of: a composition names a posture and a
 // team independently, so one roster works under any posture and the orders are a property of the

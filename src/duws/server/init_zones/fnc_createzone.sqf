@@ -158,7 +158,7 @@ if (_prefab) then {
 // No fortification ring. Three or four towers were scattered on a random bearing and distance, sited
 // and facing by luck -- but the emplacements that make a zone worth taking need to be sited
 // deliberately, against terrain, the roads and the approach the player will actually use. That is the
-// hardpoint system's job, and the plan for it is docs/info/hardpoints.md; the prefab composition
+// hardpoint system's job, and the plan for it is docs/info/gameplay/hardpoints.md; the prefab composition
 // above still stands, so a zone keeps its built centre.
 
 // No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired

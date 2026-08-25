@@ -112,9 +112,9 @@ does not imply server-only.
 
 | Subsystem | Role |
 |---|---|
-| `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Siting (the "More Urban" town detection) and the civilian town system are in [`zones_and_civilians.md`](zones_and_civilians.md) |
-| `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. The Main Base layout, the tool that edits it and the spawn tables are in [`composition_tooling.md`](composition_tooling.md) (HQ specifics: [§Editing the HQ layout](composition_tooling.md#editing-the-hq-layout)) |
-| `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type. How to add a type, and the design bar it must clear, in [`side_mission_authoring.md`](side_mission_authoring.md) |
+| `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Siting (the "More Urban" town detection) and the civilian town system are in [`zones_and_civilians.md`](gameplay/zones_and_civilians.md) |
+| `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. The Main Base layout, the tool that edits it and the spawn tables are in [`composition_tooling.md`](architecture/composition_tooling.md) (HQ specifics: [§Editing the HQ layout](architecture/composition_tooling.md#editing-the-hq-layout)) |
+| `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type. How to add a type, and the design bar it must clear, in [`side_mission_authoring.md`](gameplay/side_mission_authoring.md) |
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
 | `warcom/` | War Command — the dynamic AI director for both sides (assault and patrol task forces reacting to the front line) |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
@@ -128,14 +128,14 @@ does not imply server-only.
 
 | System | Where | Note |
 |---|---|---|
-| Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions, plus per-town reputation. Writers, faucets and sinks in [`economy.md`](economy.md) |
+| Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions, plus per-town reputation. Writers, faucets and sinks in [`economy.md`](gameplay/economy.md) |
 | Persistence | `server/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
-| Faction detection | `server/misc/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
+| Faction detection | `server/misc/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](gameplay/faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
-| Scroll-menu actions | `addAction` / `BIS_fnc_holdActionAdd` call sites across `client/`, `server/` and `shared/` | Every entry DUWS adds, grouped by owning system, in [`player_facing_text.md`](player_facing_text.md) |
+| Scroll-menu actions | `addAction` / `BIS_fnc_holdActionAdd` call sites across `client/`, `server/` and `shared/` | Every entry DUWS adds, grouped by owning system, in [`player_facing_text.md`](gameplay/player_facing_text.md) |
 | Player-facing text | `stringtable.xml`, `fnc_cs` | English `<Original>`/`<English>` is the source of truth; the localised tags lag it deliberately, and any key naming the player callsign must go through `fnc_cs`. Same doc as above |
-| Performance | `modules/taw_vd`, `server/misc/fnc_site_stream_init.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | View-distance control, one poller streaming every site's AI and props, and aggressive cleanup keep a whole-map persistent war affordable. `modules/zbe_cache` ships **disabled**; why re-enabling it is not a one-line change is in [`performance.md`](performance.md) |
-| Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`client/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `server/init_zones/`, `server/missions/`, `server/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`server/init_zones/fnc_zone_reveal.sqf`); `hardcore_visibleZone_found` then releases WARCOM waves and task-force squads. See [`intel_system.md`](intel_system.md) |
+| Performance | `modules/taw_vd`, `server/misc/fnc_site_stream_init.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | View-distance control, one poller streaming every site's AI and props, and aggressive cleanup keep a whole-map persistent war affordable. `modules/zbe_cache` ships **disabled**; why re-enabling it is not a one-line change is in [`performance.md`](architecture/performance.md) |
+| Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`client/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `server/init_zones/`, `server/missions/`, `server/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`server/init_zones/fnc_zone_reveal.sqf`). See [`intel_system.md`](gameplay/intel_system.md) |
 
 ## Vendored frameworks — `modules/`
 

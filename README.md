@@ -71,13 +71,13 @@ from the `.<world>.` part, so the `_<hash>` in the name is free to vary per buil
 
 Hosting this way runs the server and a client in one process, which hides every
 locality fault. Persistence, JIP and remote execution need a real dedicated server to
-prove anything: [`docs/info/testing.md`](docs/info/testing.md#running-a-dedicated-server)
+prove anything: [`docs/info/architecture/testing.md`](docs/info/architecture/testing.md#running-a-dedicated-server)
 sets one up from the executable already in your Arma install.
 
 ## Tests
 
 Static checks (SQF syntax + path resolution) and pure-function unit tests live in
-[`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/info/testing.md`](docs/info/testing.md).
+[`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/info/architecture/testing.md`](docs/info/architecture/testing.md).
 
 Neither layer can see a running mission. What still needs an in-game pass, what is known
 broken, and what the previous developer worked around rather than fixed are listed in
@@ -89,4 +89,4 @@ Working rules for contributors and agents (voice, comments, docs) live in
 [`docs/claude/`](docs/claude/) and load each session via [`CLAUDE.md`](CLAUDE.md).
 
 Arma engine traps that aren't visible in the SQF (e.g. what may be stored in the mission
-namespace) are collected in [`docs/info/arma_engine_gotchas.md`](docs/info/arma_engine_gotchas.md).
+namespace) are collected in [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md).

@@ -291,7 +291,7 @@ DUWS_fnc_zoneStow = {
 // not this zone's to take. Returns the men, for the collection to work through.
 //
 // Locality: addWaypoint and setBehaviour are ignored unless the group is local to the machine issuing them
-// (docs/info/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
+// (docs/info/architecture/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
 DUWS_fnc_zoneSendOff = {
     params ["_key", "_pos"];
     private _men = ([_key] call fnc_zone_roster) select { alive _x };

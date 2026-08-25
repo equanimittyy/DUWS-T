@@ -3,7 +3,8 @@
 Everything the player reads lives in `src/stringtable.xml`, grouped into `<Container>` blocks by
 subsystem. Keys are `STR_DUWS_T_*` (a handful of newer ones use a bare `STR_DUWS_*` prefix);
 lookups are case-insensitive, so a `localize` that differs in case from the `Key ID` still
-resolves. The second half of this doc inventories the scroll-menu entries that carry much of it.
+resolves. The second half of this doc covers the mechanisms and call-site conventions that produce scroll-menu
+entries, which carry much of it.
 
 ## English is the source of truth
 
@@ -137,14 +138,14 @@ different. It also fires on the economy tick rather than on an action, so it is 
 enough to read as noise nor small enough to want burying. The call site carries the same note.
 
 The card's ceiling is a hard one and it clips mid-sentence with no error, which is a trap of its own
-([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-60-characters)).
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-60-characters)).
 That budget is a reason to keep a card's text to a headline rather than a reason to split a long one
 across both surfaces.
 
 ## The notification card catalogue
 
 Cards are styled by their `CfgNotifications` class in
-[`shared/includes/notifications.hpp`](../../src/duws/shared/includes/notifications.hpp), named as the
+[`shared/includes/notifications.hpp`](../../../src/duws/shared/includes/notifications.hpp), named as the
 first element of the `BIS_fnc_showNotification` argument. The class decides colour, icon and
 duration; the call site supplies only the text. Every class runs `duration = 4`.
 
@@ -383,7 +384,7 @@ liveness — which is what makes bulk pruning safe to reason about.
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
 Black Market, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick Kits and the debug
 menu each occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu
-entries and are excluded from the inventory below.
+entries.
 
 The request menu's COMMAND AND CONTROL column is the same idea one level up: everything a player has
 to ask command for is a button in the dialog Requests already opens, so the HQ structure carries one
@@ -437,157 +438,6 @@ different word — `Rest / Heal`, `Mission Control`.
 died with it: a button is already legible as a button, and the five row hues only ever re-encoded a
 scroll priority that a fixed column has no use for. The command column still orders itself the way
 the scroll list does — management first, the spend last.
-
-## Inventory
-
-Every scroll entry DUWS itself creates; vendored modules are listed separately at the end. Priority
-and colour follow the bucket, so neither is repeated per row.
-
-### Primary menu
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| Requests | `STR_DUWS_T_vw32hahc` | HQ building, FOB |
-
-Squad Manager (`STR_DUWS_T_l0xark5g`) and FOB Manager (`STR_DUWS_T_iggpsdqo`) are the first two
-buttons of the command column inside it. They print as written rather than uppercased: capitals were
-a property of the scroll bucket, and a button carries no bucket.
-
-### Secondary menu
-
-| Entry | Key | Attached by | Rows |
-| --- | --- | --- | --- |
-| Black Market | `STR_DUWS_T_BLACKMARKET_TITLE` | HQ building | 3 |
-| Killhouse Controls | `STR_DUWS_T_KILLHOUSE_CONTROLS` | Multi-screen computer | 4 |
-| Vehicle Recycling | `STR_DUWS_T_VEHICLE_RECYCLING` | Depot | 2 |
-| Vehicle Customization | `STR_DUWS_T_VEHICLE_CUSTOMIZATION` | Depot | 4 |
-
-View Map is no longer here. It is a button in the request menu's missions row, beside the mission
-timers and the pools it is read against, because choosing where to go and choosing what to buy for
-it are one decision. Travel between bases belongs to the FOB Manager; the board's own base fast
-travel is gone, having only ever moved the player within 200 m of an HQ they were standing at, and
-the board now carries the killhouse teleports alone.
-
-Mission Control is gone as a menu: its three entries spend CP, which is command's business, so each
-became a button of its own in the command column. The black market stayed on the scroll wheel,
-because it spends the coins a player takes off civilians instead — nobody has to ask for that. Both
-hung off the HQ structure rather than a terminal of their own, so the one that stayed is added by
-`fnc_addHQBuildingActions` alongside Requests, in the single broadcast that object gets.
-
-### Equip
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| Arsenal | `STR_DUWS_T_160jkc3a` | HQ, FOB, MHQ ammobox, airdropped ammobox, multi-screen computer |
-| Quick Kits | `STR_DUWS_T_QUICK_KITS` | Supply crate, multi-screen computer |
-| Seize Enemy Materiel | `STR_DUWS_T_CACHE_SEIZE` | Cache boxes, supply truck |
-| Disguise | `STR_DUWS_T_DISGUISE_MENU_ACTION` | `player` (hold, 1 s) |
-
-### Move
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| HALO Solo / Group / Group (AI Only) | `STR_DUWS_T_foldimok`, `…_u6btu73i`, `…_halo_ai_only` | HQ, FOB, squad-leader units |
-| Killhouse A / B | `STR_DUWS_KILLHOUSE_TELEPORT_A` / `_B` | HQ map board |
-| Set Waypoints | `STR_DUWS_T_helotaxi_action_wp`, `…_boattaxi_action_dest`, `…_helolift_action_wp` | Taxi helo, taxi boat, `player` during a lift |
-| Set LZ | `STR_DUWS_T_helotaxi_action_lz` | Taxi helicopter |
-| Set Destination | `STR_DUWS_T_boattaxi_action_loc` | Taxi boat |
-| Open Chute | `STR_DUWS_T_bd22lcos` | `player` at HALO exit |
-
-Three separate keys share the label `Set Waypoints` deliberately: helo taxi, boat taxi and the lift
-request are independently translatable but present the same choice.
-
-### Aid
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| AI Heal / Rearm | `STR_DUWS_T_xfgokhbc` | Medical tent, FOB, MHQ ammobox, airdropped ammobox |
-| Rest / Heal | `STR_DUWS_T_9eiwr3bt` | Medical tent, FOB — `game_master` only |
-
-Rest / Heal is two entries again, one per base kind, but both now take the server-checked path.
-They had shared one 600 s cooldown through `GM_Heal_LastUsedTime` while testing it in different
-places — the HQ copy deferred to `fnc_restHealServer`, where one machine decides, while the FOB copy
-checked and stamped in its own client callback and then `publicVariable`d the result, so two players
-triggering it inside one propagation window both passed.
-
-Which base is rested is the object the entry sits on: `fnc_rest_heal` treats only what stands within
-100 m of it, so a rest called at a FOB cannot patch up a fight at the HQ. That is also why it is on
-the medical tent rather than on the HQ structure — the tent is where the wounded are.
-
-### Civilian interaction
-
-| Entry | Key | Shown when |
-| --- | --- | --- |
-| Halt | `STR_DUWS_T_CIV_STOP` | Within 6 m, inside a ±15° facing cone, not panicking |
-| Interact | `STR_DUWS_T_CIV_MENU_ACTION` | Alive, called over, within 3 m, not surrendered, not arrested, not spent |
-| Release | `STR_DUWS_T_RELEASE` | Within 3 m, surrendered, still civilian-side |
-| Evacuate | `STR_DUWS_T_RECRUIT_ACTION` | Always, but only on RAVAGE/WBK civilians |
-
-Interact opens `civ_dialog` rather than `fnc_open_action_menu`, because its rows need per-row greying
-against coin count, town state and range. Searching a surrendered civilian carries no entry of its
-own — it goes through the shared hold action below — and was never a row inside Interact either: the
-menu hides on `isSurrendered`, so offering it there would mean closing, waiting out the surrender
-animation and reopening. Reach and reputation are in
-[`zones_and_civilians.md`](zones_and_civilians.md#range-two-distances-on-purpose).
-
-**Evacuate never shares a civilian with the other four.** `fnc_civ_spawnUnit` branches on
-`CIV_PRESENCE`: the vanilla path attaches Halt and Interact through `fnc_civ_clientActions`, and the
-RAVAGE/WBK path attaches this instead — as do the WBK survivor spawns. A survivor you can recruit is
-not a local you can question, so no civilian ever carries both sets.
-
-### Util
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| Earplugs | `STR_DUWS_T_2rc0nvug` | `player` |
-| Debug | `STR_DUWS_T_DEBUG_ACTION` | `player` — needs the `DUWS_Debug` parameter and `game_master` |
-
-| Reset Squad Leader | `STR_DUWS_T_4jabuvz6` | HQ medical tent — `Squad_Leaders` only |
-
-The first two hang off the player, so they follow whoever opened them anywhere on the map. Reset
-Squad Leader and Mission Timers (`STR_DUWS_T_SHOW_MISSION_COOLDOWNS`) mean nothing away from a base,
-so neither follows the player: the reset is on the tent and the timers are a button in the MISSIONS
-box, Game Master only.
-
-### Commit
-
-| Entry | Key | Attached by |
-| --- | --- | --- |
-| Deploy / Undeploy Mobile HQ | `STR_DUWS_T_rqzxlvf4`, `…_fjpyu3zb` | `MHQ1` — `Squad_Leaders` only |
-| Release Mobile HQ | `STR_DUWS_T_MHQ_RELEASE` | `MHQ1` while undeployed — `Squad_Leaders` only |
-| Sabotage | `STR_DUWS_T_p3200mf5` | Laptop |
-
-Release sits beside Deploy rather than beside Undeploy, so it is reachable exactly while the vehicle
-is packed up and never while it is a working base. Undeploying is how the MHQ moves and is the common
-action; releasing ends the designation and frees the one-at-a-time slot, which is rare and worth the
-second click. Both are open to any squad leader, whether or not they carry the designation radio.
-Designate Mobile HQ itself is never consumed — a lead holding that slot keeps the entry, so every one
-of its refusals leaves them something to act on.
-
-Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the last of the three administration
-buttons at both the HQ and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom
-of the scroll list.
-The two differ only in what the server is asked to rebuild — `fnc_redeployHQUnits` against
-`fnc_redeployFOBUnits`, the latter carrying the FOB the menu was opened on.
-
-### Plain entries
-
-Two groups take no macro. The rescue-pilot set is the only feature whose entries are a bucket to
-themselves; the searches identify by their hold icon, so colour on the title would duplicate a signal
-the player already has.
-
-| Entry | Key | Icon |
-| --- | --- | --- |
-| Carry Pilot / Drop Pilot / Load Into Vehicle / Unload Pilot | `STR_DUWS_T_carry_pilot` and siblings | — |
-| Search | `STR_DUWS_T_INTEL_SEARCH_ACTION` | `holdAction_search_ca.paa` |
-| Search Container | `STR_DUWS_T_SEARCH_CONTAINER` | `holdAction_search_ca.paa` |
-
-Searching is one entry for the whole mission, on the player rather than on the thing searched
-(`client/misc/fnc_intel_search_action.sqf`). Bodies, mission objectives and arrested civilians all
-reach it through `cursorObject`, gated on a search flag the server sets; the reasoning is in
-[`intel_system.md`](intel_system.md#one-action-on-the-player-not-one-per-searchable-thing). Search
-Container is the exception: intel gathering attaches its own hold action per container, because it
-hands physical intel items to the searcher rather than paying through the shared claim.
 
 ## Call-site conventions
 

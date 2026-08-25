@@ -15,7 +15,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The two inner `if (isServer)` blocks cover only the kill-income and flare handlers | `server/server_init.sqf:472`, inner guards `:195,281` |
 | No ownership transfer exists anywhere. `setGroupOwner` and `setOwner` appear nowhere in `server/`, `client/` or `shared/` | — |
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
-| Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md) |
+| Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
 | `setSkill` needs locality, so HC-owned units would silently never receive skill settings | `server/misc/fnc_AI_Master_Control.sqf:5,22,26` |
 
 The abbreviation is also overloaded, which matters because the file a newcomer will open first
@@ -67,7 +67,6 @@ Mobile WARCOM groups only:
 
 | Spawner | `path:line` |
 |---|---|
-| BLUFOR assault | `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113` |
 | BLUFOR patrol | `server/warcom/fnc_WARCOM_blu_patrol.sqf` |
 | Vehicle crews for the above | `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` |
 
@@ -81,16 +80,15 @@ Zone garrisons — `server/init_zones/fnc_spawn_team.sqf` and the garrison place
 ### Routing waypoint calls
 
 Waypoint logic is already factored into its own files, which is the seam that makes this
-tractable: `fnc_WARCOM_wp_blu_patrol.sqf:7,17,25`,
-`fnc_WARCOM_wp_blu_assault.sqf:29`, plus `fnc_WARCOM_blu_assault.sqf:89,95` and the
-`bis_fnc_taskPatrol` call at `server/init_zones/fnc_spawn_team.sqf:64`.
+tractable: `fnc_WARCOM_wp_blu_patrol.sqf:7,17,25` and the `bis_fnc_taskPatrol` call at
+`server/init_zones/fnc_spawn_team.sqf:64`.
 
 Each call becomes `remoteExec [..., groupOwner _grp]` rather than a direct call. Where the group
 is server-owned that resolves to the server and behaves exactly as it does today, so the change
 is safe before an HC ever connects.
 
 Note that `remoteExec` to your own machine runs a frame later
-([`info/arma_engine_gotchas.md`](../info/arma_engine_gotchas.md)), so any test-then-act sequence
+([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md)), so any test-then-act sequence
 around a waypoint call must not assume the waypoint exists on the next line.
 
 Anything that steers a group by re-issuing `doSuppressiveFire`, `doWatch` or `doMove` every poll,
@@ -117,7 +115,7 @@ machine sets skill on the units it owns.
 | `server/misc/fnc_hc_init.sqf` | New. `fnc_hc_handoff` and the `DUWST_hc_owner` registration handler — the manifest holds no bodies. |
 | `server/server_fnc_init.sqf` | Registry lines. |
 | `server/server_var_init.sqf` | Declare `DUWST_hc_owner` defaulting to `2`. |
-| `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113`, `fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
+| `server/warcom/fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
 | `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |

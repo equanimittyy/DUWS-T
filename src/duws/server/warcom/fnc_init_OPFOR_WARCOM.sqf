@@ -125,7 +125,7 @@ sleep 1;
     // campaign with no civilians unable to spawn a zone garrison at all.
     //
     // A boolean rather than the script handle: a SCRIPT stored in the mission namespace has no
-    // serialized form and would break the save (docs/info/arma_engine_gotchas.md). Nothing needs to
+    // serialized form and would break the save (docs/info/architecture/arma_engine_gotchas.md). Nothing needs to
     // terminate this thread, so the handle is worth nothing anyway.
     if !(missionNamespace getVariable ["DUWS_sitePollerUp", false]) then {
         missionNamespace setVariable ["DUWS_sitePollerUp", true];
@@ -156,7 +156,7 @@ sleep 1;
     // from this list over its life -- staminaEnabled, then VCOM_AI_enable when the VCOM option went --
     // each assigned by nothing, so the whole format threw and no player saw the summary. Order matters
     // as much as count: a surplus argument pushes every row from its point onward onto the wrong label,
-    // and format discards the overflow silently (docs/info/arma_engine_gotchas.md). Stamina has no row
+    // and format discards the overflow silently (docs/info/architecture/arma_engine_gotchas.md). Stamina has no row
     // now because it has no setting -- client/client_init.sqf forces it on for everyone.
     [{hint format[localize "STR_DUWS_T_7mog9k78",
         zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,

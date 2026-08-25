@@ -7,7 +7,7 @@
 // Each array holds a single sandbag and nothing else: the composition TUI raises its origin and
 // facing markers from a fence that already exists, so a layout has to be fenced in source before it
 // can be authored in Eden. The sandbag is an ordinary row and goes when the real layout is pasted
-// back. Round trip: docs/info/composition_tooling.md.
+// back. Round trip: docs/info/architecture/composition_tooling.md.
 //
 // A global's suffix is the type token carried in hardpoint_type_array, so the placer resolves a
 // composition by name rather than through a switch that has to be taught every new type.

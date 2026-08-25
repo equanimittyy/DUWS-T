@@ -7,7 +7,7 @@ private _cooldownVar = "DUWS_hirePMC_lastUse";
 private _lastUse = _caller getVariable [_cooldownVar, -900];
 private _cooldownRemaining = 900 - (diag_tickTime - _lastUse);
 // Hints, where the squad arriving below is a card: a refusal answers the one player who
-// clicked and the hire is news for the team (docs/info/player_facing_text.md).
+// clicked and the hire is news for the team (docs/info/gameplay/player_facing_text.md).
 if (_cooldownRemaining > 0) exitWith {
     private _minutes = floor (_cooldownRemaining / 60);
     private _seconds = floor (_cooldownRemaining % 60);

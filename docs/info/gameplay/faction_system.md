@@ -2,7 +2,7 @@
 
 How DUWS_T decides which units and vehicles each side fields. All faction code lives under
 `src/duws/shared/factions/` (data) and the `server/` / `client/` trees (logic); paths below are relative
-to `src/`. For the wider mission structure see [`architecture.md`](architecture.md).
+to `src/`. For the wider mission structure see [`architecture.md`](../architecture.md).
 
 ## The core abstraction: a faction variable schema
 
@@ -237,7 +237,7 @@ PrOpfor/LOP, Unsung, IFA3, and a Ravage-zombie set (which falls back to vanilla 
 
 - `VERSION_X` (value `"MODERN"`) is both the era switch used across the dialogs/squad logic and the
   `factions/` subfolder segment in the load path; its value is game state and the folder is named to match
-  it (see [`architecture.md`](architecture.md)).
+  it (see [`architecture.md`](../architecture.md)).
 - Faction variables are plain globals populated server-side and `publicVariable`d; a consumer that runs
   before faction init sees nil.
 - The static library and the registry in `fnc_factions_check_modern.sqf` must stay in lockstep — a template

@@ -80,7 +80,7 @@ nothing left rather than silently awarding nothing.
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
 | An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
-| An unrevealed enemy patrol | — | waiting on [`../opcom_plan.md`](../plans/opcom_plan.md) |
+| An unrevealed enemy patrol | — | waiting on [`../opcom_plan.md`](../../plans/opcom_plan.md) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
@@ -110,12 +110,6 @@ the four hold-action sites have a player to ask; the two rescue missions pay out
 has none, so they pass the mission site, the ground the rescue was fought over. A faucet that passes nothing
 falls back to the HQ. With neither, the bucket sits out the draw rather than picking at random — one feature
 quietly running on two different rules is worse than it paying a zone instead.
-
-`hardcore_visibleZone_found` gates every task-force launch (`fnc_request_squad`,
-`fnc_WARCOM_blu_assault`). It is derived from reveal state plus OPFOR ownership and recomputed whole by
-`fnc_hardcore_visible_recalc`, never nudged: capture moves it one way and reveal the other, and a delta from
-either side drifts as soon as they interleave. Towns are deliberately outside it — it asks whether the
-player can see an enemy zone to send a task force at, and a town is not capturable.
 
 ## Three sources, three prices
 
@@ -243,4 +237,4 @@ stashed at add time.
 A hardcore campaign's entire progress is which zones and towns it has revealed, and none of it survives a
 restore today. The shape it needs — revealed state as an outcome applied after build-out, the same as zone
 ownership — is specified in
-[`../campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#the-snapshot), which is unbuilt.
+[`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#the-snapshot), which is unbuilt.

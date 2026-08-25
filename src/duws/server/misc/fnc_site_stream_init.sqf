@@ -9,7 +9,7 @@ if (!isServer) exitWith {};
 
 // Plain values only. The mission namespace is written into save games and everything in it must have
 // a serialized form, so the hooks -- which are CODE -- live in a store of their own and are rebuilt
-// at boot rather than restored (docs/info/arma_engine_gotchas.md).
+// at boot rather than restored (docs/info/architecture/arma_engine_gotchas.md).
 if (isNil "DUWS_sites") then { DUWS_sites = createHashMap };
 if (isNil "DUWS_occupants") then { DUWS_occupants = createHashMap };
 if (isNil "DUWS_siteHooks") then { DUWS_siteHooks = createHashMap };

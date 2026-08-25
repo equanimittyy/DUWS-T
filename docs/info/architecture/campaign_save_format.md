@@ -2,7 +2,7 @@
 
 The store mechanism and payload shape, adopted from Antistasi Community
 (`A3A/addons/core/functions/Save/`, 20 files). *What* DUWS_T puts in a save is
-[`campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md#the-snapshot); this is the container
+[`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#the-snapshot); this is the container
 it goes in.
 
 It is reused rather than designed because it has survived several format migrations in production
@@ -18,7 +18,7 @@ of their code must ship the copyright and permission notice alongside it. There 
 so DUWS_T's own licence stays unconstrained.
 
 Techniques borrowed without their code -- the arsenal count overlay in
-[`fnc_arsenal_counts.sqf`](../../src/duws/client/misc/fnc_arsenal_counts.sqf) -- copy nothing
+[`fnc_arsenal_counts.sqf`](../../../src/duws/client/misc/fnc_arsenal_counts.sqf) -- copy nothing
 copyrightable and need only the courtesy credit already carried in its comment. This save container
 is the one place DUWS_T adopts a substantial portion: when the `Save/` functions land under `src/`,
 carry the Antistasi MIT notice with them -- a `THIRD_PARTY_NOTICES` file at the repo root, or a

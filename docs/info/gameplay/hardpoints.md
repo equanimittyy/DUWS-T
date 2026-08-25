@@ -59,7 +59,7 @@ garrison, streaming, clearance — but reachable today only through the debug sp
 (`client/dialog/fnc_debug_hardpoint_menu.sqf`). No campaign-wide count is enforced on any type.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
-composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](composition_tooling.md#static-compositions-the-eden-round-trip)).
+composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).
 Offsets sit in a frame whose +Y is the hardpoint's facing, so a heading rotates cover and core
 together rather than turning the core inside a fixed ring of props.
 
@@ -221,5 +221,5 @@ and the enemy's pool would never reach whatever escalation a future commander lo
 it. The director's tick, its three build actions and their AP costs are documented at
 [`opfor_area_of_influence.md#band-siting`](opfor_area_of_influence.md#band-siting); the belief store
 and archetype weighting that would make its band placement target where the player operates, rather
-than sample uniformly, is [`../opcom_plan.md`](../plans/opcom_plan.md)'s to
+than sample uniformly, is [`../opcom_plan.md`](../../plans/opcom_plan.md)'s to
 add.

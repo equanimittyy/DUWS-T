@@ -40,7 +40,7 @@ if (_dl > time) then {
 // the create serialises the owner and destination over the wire as live references, and BIS's
 // per-frame map draw then resolves those by netId every frame the map is open -- flooding the rpt
 // with "objectFromNetId/groupFromNetId: type OBJECT/TASK, expected STRING" for the task's whole life
-// and jamming the strategic map's tooltip and click (docs/info/arma_engine_gotchas.md). A native
+// and jamming the strategic map's tooltip and click (docs/info/architecture/arma_engine_gotchas.md). A native
 // server-side create keeps the references as their own netId strings, so the destination pin draws
 // clean while still reaching every client on the owner side.
 //

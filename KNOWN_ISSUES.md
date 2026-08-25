@@ -160,7 +160,7 @@ failure here is more likely to be something missing than something wrong.
 - [ ] On a dedicated server with two clients, have one player search a body and send the other over
       the same one. No prompt for the second, one payout in total. The same test on an objective and
       on a civilian, which are the two that paid once *per player* before
-      ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress))
+      ([`docs/info/architecture/testing.md`](docs/info/architecture/testing.md#testing-join-in-progress))
 - [ ] Die a few times and walk back over your own bodies. No search action on any of them — the
       strip in `onPlayerKilled.sqf` is what keeps this one action per player
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each
@@ -215,7 +215,7 @@ The `remoteExec` JIP queue was keyed throughout; the five bare `true` flags left
 compiled-code payloads in [Open defects](#open-defects). None of it has been exercised. A second
 player joining a LAN host is a real JIP client and covers the first group below; testing alone, or
 covering the dedicated-server path a host masks, needs the setup in
-[`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress).
+[`docs/info/architecture/testing.md`](docs/info/architecture/testing.md#testing-join-in-progress).
 
 Every check is: build the state, then have a joiner arrive — a second player connecting, or
 yourself rejoining a dedicated server. "Rejoin" below means either.
@@ -239,7 +239,7 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 **Unverified engine behaviour.**
 
 - [ ] Settle whether `remoteExec ["", _id]` removes a queue entry when issued from a client. Both removals in the tree hand the call to the server rather than rely on it
-- [ ] Buy the Mobile HQ, then rejoin. It must still read as claimed. A joiner offered it a second time means `publicVariable` values are **not** delivered to joining clients, in which case the `isNil` defaults in `client/includes/supports_init.hpp` have nothing to preserve and the team can still be charged twice — the fix would then have to be a server-side record of what the team owns rather than a client-side default. Recycle and repair are the same test the other way round: both must still read as unlocked. This also settles the claim the gotchas entry rests on ([gotchas](docs/info/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them))
+- [ ] Buy the Mobile HQ, then rejoin. It must still read as claimed. A joiner offered it a second time means `publicVariable` values are **not** delivered to joining clients, in which case the `isNil` defaults in `client/includes/supports_init.hpp` have nothing to preserve and the team can still be charged twice — the fix would then have to be a server-side record of what the team owns rather than a client-side default. Recycle and repair are the same test the other way round: both must still read as unlocked. This also settles the claim the gotchas entry rests on ([gotchas](docs/info/architecture/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them))
 
 ## Does a multiplayer save happen at all?
 
@@ -307,7 +307,7 @@ from RAM and passes whether or not the file is ever loaded. Only a full process 
 exercises the load path.
 
 Setup, including the `#login` the debug console needs on a dedicated server, is in
-[`docs/info/testing.md`](docs/info/testing.md#running-a-dedicated-server).
+[`docs/info/architecture/testing.md`](docs/info/architecture/testing.md#running-a-dedicated-server).
 
 - [ ] With the debug console targeting **Server**, run
       `missionProfileNamespace setVariable ["DUWST_probe", [1,"alive",true]]; saveMissionProfileNamespace;`
@@ -431,7 +431,7 @@ run and 5909 of 6064 in another.
 
 A flat rate that tracks frame rate rather than workload was the scheduler rationing the pass,
 so the sweeps are batched unscheduled
-([§scheduled scripts](docs/info/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
+([§scheduled scripts](docs/info/architecture/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
 which measured 2589 candidates in 10 s — ~259/second against the ~50 before it.
 
 That is as far as batching goes: the same run reports 10 s wall against 10.2 s sweeping, so
@@ -440,7 +440,7 @@ of it waiting for frames. Cost is `candidates x 4 ms`, and the only remaining le
 sweeping fewer candidates. The `ZONES` line keeps reporting both figures because a future
 boot script that starves the pass again would show up as the two diverging.
 
-Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
+Reading those logs: [`docs/info/architecture/testing.md`](docs/info/architecture/testing.md#runtime-logging-reading-the-rpt).
 
 ## The enemy gear scan runs for the whole session
 
@@ -464,7 +464,7 @@ which is why `fnc_unitParseRoles` classifies them ahead of every combat role —
 infantry fighting satisfies any counter before the campaign has shown its armour, and the tables never
 learn a crew uniform. And the removal has to name the handler by an id indexing an event that two
 faction-detection handlers also hook
-([gotchas](docs/info/arma_engine_gotchas.md#a-mission-event-handler-id-is-a-per-event-index-not-a-unique-handle)),
+([gotchas](docs/info/architecture/arma_engine_gotchas.md#a-mission-event-handler-id-is-a-per-event-index-not-a-unique-handle)),
 where a wrong id disables part of faction detection silently.
 
 Hooking the OPFOR spawners directly, instead of a mission-wide handler, is the direction that
@@ -473,7 +473,7 @@ removes the per-man script without either problem.
 ## Zone and civilian siting defects
 
 Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in
-[`docs/info/zones_and_civilians.md`](docs/info/zones_and_civilians.md#enemy-zone-siting-more-urban).
+[`docs/info/gameplay/zones_and_civilians.md`](docs/info/gameplay/zones_and_civilians.md#enemy-zone-siting-more-urban).
 
 **Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:172-177`. When a
 candidate lands within 500 m of `[0,0,0]`, the guard runs `exitWith`. In SQF `exitWith` exits the nearest
@@ -481,7 +481,7 @@ enclosing **loop** (`if/then` is transparent to it), so it terminates `while {!_
 still false and the `for` loop advances — the zone slot is silently lost, yielding **fewer than
 `zones_number` zones**. The comment ("let the outer loop keep searching") describes what a plain
 `if/then` would do. Fix: re-roll inside the loop instead of exiting it. Engine background:
-[gotchas](docs/info/arma_engine_gotchas.md).
+[gotchas](docs/info/architecture/arma_engine_gotchas.md).
 
 **The `moreUrban` branch can emit `[0,0,0]`.** `:92-126`. It sets `_Posfound = true` unconditionally with
 no validity retry; its no-buildings fallback takes `getPos (nearestBuilding …)` (`:100-102`), which is
@@ -508,7 +508,7 @@ single 5 m `relPos` road nudge is never re-validated. Placement-quality only.
 
 Open observations from an economy review. Each is a design or correctness property, not a crash; none is
 currently scheduled. The writers, faucets and sinks these read against are in
-[`docs/info/economy.md`](docs/info/economy.md).
+[`docs/info/gameplay/economy.md`](docs/info/gameplay/economy.md).
 
 **Territory income snowballs with no upkeep.** Passive hold pays `zones_held × 6` every 30 min
 (`fnc_zonesundercontrol.sqf:55`) on top of lump capture rewards, and holding a zone costs nothing

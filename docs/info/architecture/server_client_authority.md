@@ -4,7 +4,7 @@ Shared campaign state — the CP, AP and reputation pools, the zone and FOB list
 globals that every machine keeps its own copy of. Correctness depends on exactly one machine writing
 each of them. This doc covers the model, how locality is recorded in the source, and what
 dedicated-server support additionally demands. The three pools and their writers are in
-[`economy.md`](economy.md); for where subsystems live see [`architecture.md`](architecture.md).
+[`economy.md`](../gameplay/economy.md); for where subsystems live see [`architecture.md`](../architecture.md).
 
 ## The invariant
 
@@ -30,7 +30,7 @@ separate problems and the second needs its own mechanism, because a client's aff
 snapshot the server has already moved past. `fnc_pool_spend` / `fnc_pool_try_spend` are that
 mechanism — the buyer asks and blocks, the server tests and debits in one breath and replies. The
 contract, the surviving advisory pre-filters and the scheduled-caller requirement are in
-[`economy.md`](economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
+[`economy.md`](../gameplay/economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 Where a function is *intended* to be server-only and its locality is not provable from the code, assert
 it: `server/init_zones/fnc_captured.sqf` and its two peers open with `if (!isServer) exitWith {}`
@@ -106,7 +106,7 @@ test proves nothing. The old `fnc_found_intel` was reached both ways: most calle
 `addAction`, so it ran on the player who used it, but two side missions `spawn`ed it straight from a
 server thread and their reward silently evaporated. The fix is not to weaken the guard but to split the
 function — the decision server-side, the presentation `remoteExec`'d at whoever should see it. See
-[`intel_system.md`](intel_system.md#one-writer-per-reveal-flag-one-function-for-payout).
+[`intel_system.md`](../gameplay/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout).
 
 The corollary is that a bare `player` read in server-side code is a latent dedicated-server bug, and a
 silent one — `objNull` yields no error, just wrong behaviour.

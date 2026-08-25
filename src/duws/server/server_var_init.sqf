@@ -495,7 +495,7 @@ DUWS_streamArrivalMargin = 400;
 // most its x1 tier composition on the ground, and the surplus (mult-1) copies wait as a pool that
 // refills the garrison to that x1 group count as casualties are taken. Server-side only, so not
 // broadcast (the DUWS_streamArrivalMargin pattern). Read by fnc_zone_reserve and fnc_zone_spawn_sizes;
-// the model is docs/info/garrison_and_reserves.md.
+// the model is docs/info/gameplay/garrison_and_reserves.md.
 //
 // The global OPFOR-side group throttle. When the live east group count reaches this, zone garrison
 // spawns and refills pause and their tokens stay pooled. Below the engine's 144-groups-per-side hard
@@ -568,7 +568,7 @@ DUWS_hardpoints = [];publicVariable "DUWS_hardpoints";
 // source owns a band outside its own footprint. Read only by fnc_aoi_init's coverage tests, all
 // server-side, so not broadcast (the pattern DUWS_streamArrivalMargin already sets). The values are
 // large against Altis by intent: OPFOR influence blankets most of the map at start and the player
-// opens with 2 km around the HQ. Tuning lives here; see docs/info/opfor_area_of_influence.md.
+// opens with 2 km around the HQ. Tuning lives here; see docs/info/gameplay/opfor_area_of_influence.md.
 AOI_TOWER_REACH = 5000;   // OPFOR radio tower, the longest reach on the map
 AOI_ZONE_REACH  = 2000;   // added to a zone's own radius
 AOI_HQ_REACH    = 2000;   // player HQ
