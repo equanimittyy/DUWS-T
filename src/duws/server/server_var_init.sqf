@@ -418,9 +418,11 @@ DUWS_radioMastClass = "Land_TTowerBig_2_F";
 // terrain score by; each map's keys ARE its roll set, so a type absent from a map is never rolled for
 // that pass. Two mixes: a zone's fortification ring is the ground-assault set (MG the backbone, GMG the
 // rare supporting weapon); the standalone AoI net also fields AA (weighted under MG so it does not
-// out-place the guns on the flat ground AA favours) and leans harder on roadblocks. OPs, minefields and
-// the fire-support types are in neither -- OPCOM's to place, never rolled at init. fnc_hardpoint_lay
-// picks the map by whether the row files under a zone (a zoneKey) or stands alone ("").
+// out-place the guns on the flat ground AA favours) and leans harder on roadblocks. Minefields and the
+// fire-support types are in neither -- OPCOM's to place, never rolled at init. OPs are absent from the maps
+// too, but a dedicated band pass rolls them at init (an inline OP-only mix, one per zone at HP_OBS_P
+// probability). fnc_hardpoint_lay picks the map by whether the row files under a zone (a zoneKey) or stands
+// alone ("").
 DUWS_hardpointWeightZone = createHashMapFromArray [
     ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 1]
 ];

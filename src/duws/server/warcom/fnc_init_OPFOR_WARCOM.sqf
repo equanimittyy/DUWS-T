@@ -61,7 +61,7 @@ sleep 1;
     // counts serv_zones_array), so the plan derives both and hands them back with the rolled arrays.
     // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
     private _radioN = 1 + floor random 2;
-    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_hpTotal"];
+    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
     private _aaN = count serv_zones_array;
     private _hpDone = 0;
     // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
@@ -112,6 +112,11 @@ sleep 1;
     // reuses the band sampler with an AA-only mix.
     [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
     _hpDone = _hpDone + _aaN;
+    // Observation posts scattered through the same band -- eyes on the countryside between the zones, manned by
+    // a loose team but carrying no gun. A per-zone coin flip rolled in fnc_hardpoint_plan_counts, sited and
+    // faced off the band sampler exactly like the AA net, with an OP-only mix.
+    [_obsN, "hpobs", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["OP", 1]]] call fnc_hardpoint_lay;
+    _hpDone = _hpDone + _obsN;
     [_roadTargets, _tick] call fnc_hardpoint_site_roadblocks;
     _hpDone = _hpDone + count _roadTargets;
 

@@ -259,8 +259,9 @@ fnc_hardpoint_spawn_sited = {
 // -- pick the best-scoring spot, then roll a type there -- which let high ground (that MG and AT score huge on)
 // win nearly every site and starved the flat-ground type (AA) and the road-gated one (roadblock). A type that
 // finds no ground in its draw budget is dropped and logged, never swapped for another -- swapping is the
-// terrain skew this order removes. OPs, minefields and the fire-support types are in no map, OPCOM's to place,
-// never rolled here. _radialDir is the outward "toward the approach" bearing fnc_hardpoint_facing hands the
+// terrain skew this order removes. Minefields and the fire-support types are in no map, OPCOM's to place,
+// never rolled here (OPs join the scenario passes below via an inline OP-only mix). _radialDir is the outward
+// "toward the approach" bearing fnc_hardpoint_facing hands the
 // flat types, while the overwatch nests face their own fall line. _regZoneKey files each row under a parent
 // zone ("" = standalone). Every emplacement carries the type's own garrison, fielded by fnc_hardpoint_register
 // when it crews (or by the raise that later crews it), on top of any gun's crew.
@@ -540,14 +541,15 @@ fnc_hardpoint_seed_radio = {
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
 
-// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadTargets, _total]
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadTargets, _obs, _total]
 //
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints up
 // front instead of counting zones. The passes: per-zone ring (round(random cap) under the same radius cap
 // fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers); the roadblock net (two passes,
-// below); the two flank lines; radio (rolled by the caller and passed in, since the seed call must be handed
-// the same value); and the AA net (one per zone, derived by the caller). Radio and AA are only summed into the
-// total. Here, not in WARCOM init, so the count formulas are not duplicated away from HP_CAP_STEP.
+// below); the two flank lines; a per-zone observation-post coin flip (HP_OBS_P, spread through the band like the
+// AA net); radio (rolled by the caller and passed in, since the seed call must be handed the same value); and
+// the AA net (one per zone, derived by the caller). Radio and AA are only summed into the total. Here, not in
+// WARCOM init, so the count formulas are not duplicated away from HP_CAP_STEP.
 //
 // Flank throttle: gun nests offset from the zones matter most on a small map, where a zone stands alone and its
 // flanks are open. As zones multiply they screen each other, so the same per-zone flank density just carpets
@@ -569,6 +571,7 @@ fnc_hardpoint_seed_radio = {
 #define HP_FLANK_SLOPE 0.5
 #define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
 #define HP_ROAD_NBR_P 0.4   // per-zone chance of an off-axis inter-zone roadblock
+#define HP_OBS_P 0.5        // per-zone chance of a standalone observation post out in the band
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
     private _zc = count serv_zones_array;
@@ -576,13 +579,18 @@ fnc_hardpoint_plan_counts = {
     private _roadTargets = [];
     // Radio + AA (_zc) are the deterministic passes; sum them straight in. Rings roll per zone below.
     private _total = _radioN + _zc;
+    // Observation posts are a per-zone coin flip out in the band, not a ring gun: one standalone OP with
+    // probability HP_OBS_P per zone, summed here so the banner totals them and laid in its own band pass.
+    private _obs = 0;
     {
         _x params ["", "_zpos", "_hpSize"];
         private _cap = [[_zpos] call fnc_zone_key, _hpSize] call fnc_hardpoint_zone_cap;
         private _n = round (random _cap);
         _zoneCounts pushBack _n;
         _total = _total + _n;
+        if (random 1 < HP_OBS_P) then { _obs = _obs + 1 };
     } forEach zone_meta_array;
+    _total = _total + _obs;
 
     // Roadblock net, two passes (see header). Endpoints resolved here: HQ for pass A, a random non-closest
     // zone for pass B.
@@ -618,7 +626,7 @@ fnc_hardpoint_plan_counts = {
     private _backline = _lo + floor random (_fz - _lo + 1);
     private _frontline = _lo + floor random (_fz - _lo + 1);
     _total = _total + _backline + _frontline;
-    [_zoneCounts, _backline, _frontline, _roadTargets, _total]
+    [_zoneCounts, _backline, _frontline, _roadTargets, _obs, _total]
 };
 
 // [_zoneKey, _radius] call fnc_hardpoint_debug -> the dev readout for a zone's ring: its cap split into
