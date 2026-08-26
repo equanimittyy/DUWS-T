@@ -16,7 +16,7 @@ _ammotype = _this select 7;
 _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
 _speaker = localize "STR_DUWS_T_actionteam";
-_message = localize "STR_DUWS_T_artycall";
+_message = format [localize "STR_DUWS_T_artycall", mapGridPosition _position];
 // Each support type answers on its own callsign; mortar HE and smoke both crew Sledge 1-1, cluster/napalm shares Reaper.
 _callsign = switch (_supportype) do {
 	case 1: { localize "STR_DUWS_T_redleg" };		// tube arty
@@ -246,18 +246,24 @@ if (_ammotype == "Laser") then {
 		// prop still lands exactly where the player lased, regardless of the jet's line or ballistics.
 		private _drop = _vehicle modelToWorld [0,0,-3];
 		_bomb = "Bo_Mk82" createVehicle _drop;
-		_bomb setVelocity ((vectorNormalized (_laserImpact vectorDiff _drop)) vectorMultiply 300);
-		[_bomb, _laserImpact] spawn {
-			params ["_round", "_imp"];
-			// Pull the in-flight round as it reaches the spot (or if it strikes short) and detonate on
-			// the laser point. Outermost ring first: overlapping rings would otherwise heal the inner
-			// kills back to 0.5.
-			waitUntil { sleep 0.05; isNull _round || !alive _round || (_round distance _imp < 30) || ((getPosATL _round) select 2) < 2 };
+		[_bomb, _laserImpact, _callsign] spawn {
+			params ["_round", "_imp", "_cs"];
+			// Steer the prop round onto _imp -- the point where the scripted round detonates, fixed when
+			// the laser locked -- so the visible bomb lands where the real ordnance goes off rather than
+			// falling short and leaving the blast to pop somewhere else. Outermost ring first below so
+			// overlapping rings do not heal the inner kills back to 0.5.
+			waitUntil {
+				sleep 0.05;
+				_round setVelocity ((vectorNormalized (_imp vectorDiff (position _round))) vectorMultiply 300);
+				isNull _round || !alive _round || (_round distance _imp < 12) || ((getPosATL _round) select 2) < 2
+			};
 			deleteVehicle _round;
 			"Bo_Mk82" createVehicle _imp;
+			[_cs, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
 			private _hit = _imp nearObjects 20;
 			{_x setDamage .5} forEach _hit;
 			{_x setDamage 1} forEach (_hit select {_x distance _imp < 10});
+			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		};
 	};
 	// Break the loiter and send the jet out either way; cleanup deletes it after the tail sleeps.
@@ -266,6 +272,8 @@ if (_ammotype == "Laser") then {
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
 } else {
+	// Splash call as the first rounds arrive.
+	[_callsign, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
 	// Smoke screen: rounds walk a line perpendicular to the caller's bearing to the target, so the
 	// wall sits across the enemy's line of sight instead of blobbing on the point. Axis is fixed here
 	// at commit time from the local player (the caller); +90 turns the sightline into the screen line.
