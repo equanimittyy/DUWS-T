@@ -11,13 +11,13 @@
 // Contract: [_candidatePos] -> [] reject, or [_hpPos] accept.
 params ["_pos"];
 
-// TUNABLE. How far the target mast may sit from where the picker wanted the offer before it drags the
-// mission across the map. Kept in step with the thread, which re-derives the same nearest mast.
-#define ACCEPT_RADIUS 2500
-
-// Nearest live OPFOR standalone RADIO mast within reach. Row: [key, pos, type, side, zoneKey, revealed, dir].
+// Nearest live OPFOR standalone RADIO mast anywhere on the map -- no distance cap. Masts are few (seeded on
+// hilltops, off the OPFOR zones this picker's survey draws its candidates from), so gating the offer on one
+// happening to sit near the survey candidate starved the mission to near-never. Snap the offer to the
+// nearest mast instead; the offer position becomes that mast, and the thread's own re-scan runs from there.
+// Row: [key, pos, type, side, zoneKey, revealed, dir].
 private _best = [];
-private _bestD = ACCEPT_RADIUS;
+private _bestD = 1e10;
 {
     _x params ["", "_hp", "_type", "_side", "_zoneKey"];
     if (_type isEqualTo "RADIO" && {_side isEqualTo "opfor"} && {_zoneKey isEqualTo ""}) then {

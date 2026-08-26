@@ -19,14 +19,13 @@
 // Contract: [_candidatePos] -> [] reject, or [_hpPos] accept.
 params ["_pos"];
 
-// TUNABLE. How far the target may sit from where the picker wanted the offer before it drags the mission
-// across the map. Kept in step with the thread, which re-derives the same nearest hardpoint.
-#define ACCEPT_RADIUS 2500
-
-// Nearest live, revealed OPFOR standalone hardpoint of a destructible type within reach. Row:
-// [key, pos, type, side, zoneKey, revealed, dir].
+// Nearest live, revealed OPFOR standalone hardpoint of a destructible type anywhere on the map -- no
+// distance cap. Standalone hardpoints are sparse and sit off the OPFOR zones this picker's survey draws its
+// candidates from, so gating the offer on one happening to sit near the survey candidate starved the
+// mission. Snap the offer to the nearest one instead; the offer position becomes that hardpoint, and the
+// thread's own re-scan runs from there. Row: [key, pos, type, side, zoneKey, revealed, dir].
 private _best = [];
-private _bestD = ACCEPT_RADIUS;
+private _bestD = 1e10;
 {
     _x params ["", "_hp", "_type", "_side", "_zoneKey", "_revealed"];
     if (
