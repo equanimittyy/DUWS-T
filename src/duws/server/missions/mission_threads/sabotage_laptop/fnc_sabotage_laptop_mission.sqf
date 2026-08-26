@@ -16,9 +16,12 @@ switch (VERSION_X) do {
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_laptopletsdothis";
 
-private _site = [_MissionPos, _radius, 8] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// The offer's site-finder already vetted a usable building near _MissionPos; pick the best multi-storey one
+// and the interior slot the laptop sits on. [] only if the buildings vanished in the gap -- abort and release.
+private _pick = [_MissionPos, _radius] call fnc_laptop_building_pick;
+if (_pick isEqualTo []) exitWith { [8, "STR_DUWS_T_crtzxs0j", "no_building"] call fnc_mission_abort };
+_pick params ["_Building", "_targetpos"];
+private _randomPos = getPosATL _Building;
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
@@ -33,27 +36,27 @@ private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 
 _laptop = "";
 switch (VERSION_X) do {
     case "MODERN": {
-        _table = createVehicle ["Land_WoodenTable_large_F", _tableLoc, [], 0, "CAN_COLLIDE"];
+        // Objective sits inside the building on the chosen floor: a small desk on the interior slot, the
+        // laptop on the desk. The old open-air table + camonet + pallet camp does not fit indoors, so it goes.
+        // setPosATL, not the plain spawn position, so both land on the floor's exact height rather than snap
+        // to the terrain under the building.
+        _table = createVehicle ["Land_TableDesk_F", _tableLoc, [], 0, "CAN_COLLIDE"];
+        _table setPosATL _tableLoc;
         _table setDir 0;
         [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
         sleep 1;
-        _pallet = createVehicle ["VirtualReammoBox_camonet_F", [(_tableLoc select 0)+3, (_tableLoc select 1)+3], [], 0, "CAN_COLLIDE"];
-        [_pallet, "mission_sabotage_laptop"] call fnc_duws_keep;
-        sleep 1;
         _laptop = createVehicle ["Land_Laptop_unfolded_F", _tableLoc, [], 0, "CAN_COLLIDE"];
-        _laptop setpos [(_tableLoc select 0),(_tableLoc select 1),1.0];
+        _laptop setPosATL [(_tableLoc select 0), (_tableLoc select 1), (_tableLoc select 2) + 0.46];
         _laptop setDir 270;
         [_laptop, "mission_sabotage_laptop"] call fnc_duws_keep;
-        sleep 1;
-        _camonet = createVehicle ["CamoNet_INDP_open_F", _tableLoc, [], 0, "CAN_COLLIDE"];
-        _camonet setDir 0;
-        [_camonet, "mission_sabotage_laptop"] call fnc_duws_keep;
     };
 };
 
-[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
+// Garrison the objective building and its immediate neighbours so the laptop is defended from inside; the
+// patrol ring stays on the wider mission radius. Both centre on the building, not the interior slot.
+[[_randomPos, 50, 2, 4] call fnc_garrisonBuildings] call fnc_mission_claim;
 sleep 1;
-[_targetpos, _radius] spawn fnc_missionPatrolswithintel;
+[_randomPos, _radius] spawn fnc_missionPatrolswithintel;
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
