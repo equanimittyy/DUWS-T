@@ -95,7 +95,7 @@ fnc_ap_adjust = {
 					["INFO", "ECON", format ["BLU tier -> %1 (earned %2)", _t, WARCOM_blufor_ap_earned]] call fnc_log;
 					// Earned AP is a ratchet, so a change is always a rise: announce the new tier to the
 					// whole team. Skip a dedicated server, which has no screen or audio device.
-					["tier_up", [_t]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
+					["tier_up", [[_t] call DUWS_fnc_tierName]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 					"boots" remoteExec ["playSound", [0,-2] select isDedicated];
 				};
 			};

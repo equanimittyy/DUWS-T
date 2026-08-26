@@ -3333,12 +3333,12 @@
                 <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_TIER_UP_TITLE">
-                <Original>Force Tier Up</Original>
-                <English>Force Tier Up</English>
+                <Original>Army Power Tier</Original>
+                <English>Army Power Tier</English>
             </Key>
             <Key ID="STR_DUWS_T_TIER_UP_MSG">
-                <Original>BLUFOR reached Tier %1</Original>
-                <English>BLUFOR reached Tier %1</English>
+                <Original>BLUFOR has unlocked %1</Original>
+                <English>BLUFOR has unlocked %1</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
                 <Original>--- TEAM SUPPORTS (one-time purchase) ---</Original>
