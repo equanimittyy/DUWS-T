@@ -68,7 +68,7 @@ _teardown = {
 // Damage aborts: the aircraft is genuinely lost, so Overlord reports it out of action.
 _abort = {
     call _teardown;
-    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 
@@ -77,7 +77,7 @@ _helo_minFuel = 0.4;
 _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel _helo < %2) or (vehicle _pilot == _pilot)", _helo_maxDamage, _helo_minFuel];
 
 _speaker = localize "STR_DUWS_T_actionteam";
-_message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
+_message = localize "STR_DUWS_T_heloliftcall";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_helolift1"] remoteExec ["fnc_duws_dialogue", 0];
 

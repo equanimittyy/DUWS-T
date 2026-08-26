@@ -10,7 +10,7 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
 
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_chalk";
-_message = ([localize "STR_DUWS_T_paradropcall"] call fnc_cs);
+_message = localize "STR_DUWS_T_paradropcall";
 _message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropack"] remoteExec ["fnc_duws_dialogue", 0];

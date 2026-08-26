@@ -9,7 +9,7 @@ if !(["hcCAS", "hc_CAS", "STR_DUWS_T_hcair_busy_jet", "STR_DUWS_T_hcair_cooldown
 // refused (in service or on cooldown) is handed back to the player unspent.
 ["hc_CAS"] call fnc_support_consume;
 
-[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hccasrequest"] call fnc_cs), "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hccasrequest", "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 private _hq = getmarkerpos str blu_hq_markername;
 
@@ -61,7 +61,7 @@ _wpIn setWaypointType "LOITER";
 _wpIn setWaypointLoiterRadius 800;
 _wpIn setWaypointSpeed "NORMAL";
 
-[localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_hccasack"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hccasack"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Bounded so a jet that cannot reach HQ still funnels to the tail instead of holding the slot forever.
 private _inbound = time + 300;
@@ -77,7 +77,7 @@ if (alive _vehicle && HC_CAS_active && {_vehicle distance _hq < 1200}) then {
 	DUWS_number_CAS = DUWS_number_CAS + 1;
 	_group setGroupId [format[localize "STR_DUWS_T_hc_cas_squad",DUWS_number_CAS]];
 
-	[localize "STR_DUWS_T_koipilot", [localize "STR_DUWS_T_koiin"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+	[localize "STR_DUWS_T_koipilot", localize "STR_DUWS_T_koiin"] remoteExec ["fnc_duws_dialogue", 0];
 	hint localize "STR_DUWS_T_gu6cbc5f";
 
 	// On-station leash: the jet holds for a fixed window, then breaks off and ferries back off the map.
@@ -86,7 +86,7 @@ if (alive _vehicle && HC_CAS_active && {_vehicle distance _hq < 1200}) then {
 	private _leash = time + (missionNamespace getVariable ["HC_air_station_seconds", 300]);
 	waitUntil { sleep 5; time > _leash || !alive _vehicle };
 	if (alive _vehicle && HC_CAS_active) then {
-		[localize "STR_DUWS_T_koipilot", [localize "STR_DUWS_T_hc_cas_rtb"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+		[localize "STR_DUWS_T_koipilot", localize "STR_DUWS_T_hc_cas_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		// Cleared before egress: it is leaving under orders, so a shoot-down now is not a "casdown".
 		HC_CAS_active = false;
 		{ _x setCaptive true } forEach units _group;

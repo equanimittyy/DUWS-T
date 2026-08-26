@@ -9,7 +9,7 @@ if !(["hcAttChop", "hc_ATTchop", "STR_DUWS_T_hcair_busy_gunship", "STR_DUWS_T_hc
 // refused (in service or on cooldown) is handed back to the player unspent.
 ["hc_ATTchop"] call fnc_support_consume;
 
-[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hcattrequest"] call fnc_cs), "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hcattrequest", "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 private _hq = getmarkerpos str blu_hq_markername;
 
@@ -63,7 +63,7 @@ private _wpIn = _group addWaypoint [_hq, 0];
 _wpIn setWaypointType "MOVE";
 _wpIn setWaypointSpeed "NORMAL";
 
-[localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_hcattack"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hcattack"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Bounded so a gunship that cannot reach HQ still funnels to the tail instead of holding the slot forever.
 private _inbound = time + 300;
@@ -78,7 +78,7 @@ if (alive _vehicle && HC_ATTchop_active && {_vehicle distance _hq < 600}) then {
 	DUWS_number_attackchopa = DUWS_number_attackchopa + 1;
 	_group setGroupId [format[localize "STR_DUWS_T_hc_gunship_squad",DUWS_number_attackchopa]];
 
-	[localize "STR_DUWS_T_longbowpilot", [localize "STR_DUWS_T_longbowin"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+	[localize "STR_DUWS_T_longbowpilot", localize "STR_DUWS_T_longbowin"] remoteExec ["fnc_duws_dialogue", 0];
 	hint localize "STR_DUWS_T_rjuehu36";
 
 	// On-station leash: the gunship holds for a fixed window, then breaks off and ferries back off the
@@ -87,7 +87,7 @@ if (alive _vehicle && HC_ATTchop_active && {_vehicle distance _hq < 600}) then {
 	private _leash = time + (missionNamespace getVariable ["HC_air_station_seconds", 300]);
 	waitUntil { sleep 5; time > _leash || !alive _vehicle };
 	if (alive _vehicle && HC_ATTchop_active) then {
-		[localize "STR_DUWS_T_longbowpilot", [localize "STR_DUWS_T_hc_attchop_rtb"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+		[localize "STR_DUWS_T_longbowpilot", localize "STR_DUWS_T_hc_attchop_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		// Cleared before egress: it is leaving under orders, so a shoot-down now is not a "casdown".
 		HC_ATTchop_active = false;
 		{ _x setCaptive true } forEach units _group;

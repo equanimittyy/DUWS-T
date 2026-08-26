@@ -19,7 +19,7 @@ str(_markername) setMarkerSize [2.5, 2.5];
 
 sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
+_message = localize "STR_DUWS_T_fobcall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 // A FOB is a building and a ring of fortifications appearing out of nothing, and anyone stood on

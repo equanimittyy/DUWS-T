@@ -24,7 +24,7 @@ _grouptype = "";
 // state kept on the vehicle rather than a global onStation
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_courier";
-_message = ([localize "STR_DUWS_T_supplydropcall"] call fnc_cs);
+_message = localize "STR_DUWS_T_supplydropcall";
 _message1 = localize "STR_DUWS_T_supplydropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supplydropack"] remoteExec ["fnc_duws_dialogue", 0];

@@ -63,7 +63,7 @@ ctrlSetText [1000, format ["%1", commandpointsblu1]];
 
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_courier2";
-_message = ([localize "STR_DUWS_T_vehdropcall"] call fnc_cs);
+_message = localize "STR_DUWS_T_vehdropcall";
 _message1 = localize "STR_DUWS_T_vehdropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vehdropack"] remoteExec ["fnc_duws_dialogue", 0];
