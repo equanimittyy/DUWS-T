@@ -262,6 +262,8 @@ if (_ammotype == "Laser") then {
 			private _hit = _imp nearObjects 20;
 			{_x setDamage .5} forEach _hit;
 			{_x setDamage 1} forEach (_hit select {_x distance _imp < 10});
+			// Hold before the sign-off so the splash reads first, matching the air-delivered close.
+			sleep 6;
 			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		};
 	};
@@ -350,9 +352,13 @@ if (_ammotype == "Laser") then {
 
 // Laser reports its outcome over the radio (captured / abort); other types close on the firing callsign.
 if (_ammotype != "Laser") then {
-	sleep 2;
 	// Air-delivered types (JDAM/cluster/napalm) drop ordnance, not rounds; tube and mortar keep "rounds".
-	private _closeLine = if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {"STR_DUWS_T_artyair_complete"} else {"STR_DUWS_T_artycomplete"};
+	private _airDelivered = _ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm";
+	// A single air-delivered round makes the fire loop near-instant, so the splash lands only a beat
+	// before this: hold longer so the impact call is read before the sign-off. A tube/mortar salvo
+	// walks over several seconds and already spaces the two.
+	sleep (if (_airDelivered) then {6} else {2});
+	private _closeLine = if (_airDelivered) then {"STR_DUWS_T_artyair_complete"} else {"STR_DUWS_T_artycomplete"};
 	[_callsign, localize _closeLine] remoteExec ["fnc_duws_dialogue", 0];
 };
 
