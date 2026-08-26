@@ -5227,6 +5227,10 @@
                 <Original>Copy your fire mission, Alpha 1-1. %1 has the target.</Original>
                 <English>Copy your fire mission, Alpha 1-1. %1 has the target.</English>
             </Key>
+            <Key ID="STR_DUWS_T_artyack_laser">
+                <Original>Copy your fire mission, Alpha 1-1. %1 is inbound to your position.</Original>
+                <English>Copy your fire mission, Alpha 1-1. %1 is inbound to your position.</English>
+            </Key>
             <Key ID="STR_DUWS_T_fobcall">
                 <German>"Overlord 1-1" an Action Squad – wir haben gerade eine Voroperationsbasis im AO eingerichtet. Geht dort vorbei und macht eine Pause, solange ihr bereitsteht.</German>
                 <Spanish>"Overlord 1-1" a Action Squad – acabamos de establecer una base operativa avanzada en el AO. Pásate por allí y reposa mientras estás en espera.</Spanish>
@@ -5749,8 +5753,12 @@
                 <German>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</German>
                 <Spanish>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Spanish>
                 <Chinesesimp>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Chinesesimp>
-                <Original>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Original>
-                <English>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</English>
+                <Original>Designate a target with your laser and hold it for 5 seconds.</Original>
+                <English>Designate a target with your laser and hold it for 5 seconds.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_onstation">
+                <Original>On station, holding five minutes for your designation.</Original>
+                <English>On station, holding five minutes for your designation.</English>
             </Key>
             <Key ID="STR_DUWS_T_laser_hold">
                 <German>Copy your laser. Hold for 5 seconds, Alpha 1-1.</German>

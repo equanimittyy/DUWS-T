@@ -65,7 +65,10 @@ private _consumeClass = switch (_supportype) do {
 if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consume };
 
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_artyack", _callsign]] remoteExec ["fnc_duws_dialogue", 0];
+// Laser has no plotted grid -- the jet loiters and the caller designates later -- so Overlord names
+// the bird inbound rather than claiming a target the plotted-grid types already have.
+private _ackLine = if (_ammotype == "Laser") then {"STR_DUWS_T_artyack_laser"} else {"STR_DUWS_T_artyack"};
+[localize "STR_DUWS_T_OVERLORD", format [localize _ackLine, _callsign]] remoteExec ["fnc_duws_dialogue", 0];
 
 _ord = "";
 if (_supportype == 1) then {_ord = localize "STR_DUWS_T_jg5oh7nw"};	//arty
@@ -176,6 +179,7 @@ if (_ammotype == "Laser") then {
 	// count. Impact tracks the live spot so the bomb lands where the laser is at lock, not entry.
 	waitUntil {sleep 0.25; onStation || !alive _vehicle};
 	if (alive _vehicle) then {
+		[_callsign, localize "STR_DUWS_T_laser_onstation"] remoteExec ["fnc_duws_dialogue", 0];
 		hint localize "STR_DUWS_T_laser_loiter";
 		private _deadline = time + 300;
 		private _lockStart = -1;
