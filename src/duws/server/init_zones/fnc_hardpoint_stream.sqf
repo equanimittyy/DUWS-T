@@ -269,14 +269,17 @@ DUWS_fnc_hardpointClear = {
 // compromised player. reveal is a knowledge write, hence server-only. Its left operand must be a unit or a
 // group, never a side, so an OPFOR-wide fix means revealing each caught BLUFOR to every live EAST group in
 // turn -- allGroups holds only spawned groups, so this reaches the OPFOR actually in play, not the
-// virtualised garrisons still behind the site poller. The card is remoteExec'd to each player object, so only
-// the compromised player sees it, on their own machine, in SP and MP alike. Unconditional: the observe loop
+// virtualised garrisons still behind the site poller. Convoy groups (DUWS_convoy_handled, set by
+// fnc_convoy_drive) are skipped: they cruise SAFE on a scripted route, and feeding them this reveal would
+// promote the column out of SAFE and false-trip a mission's under-attack test with no real contact. The card
+// is remoteExec'd to each player object, so only the compromised player sees it, on their own machine, in SP
+// and MP alike. Unconditional: the observe loop
 // gates it behind its per-wake roll and the dev map-click tool fires it at 100%, so this holds only the sweep.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
     private _blu = allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} };
     if (_blu isEqualTo []) exitWith {};
-    private _opforGroups = allGroups select { side _x == EAST };
+    private _opforGroups = allGroups select { side _x == EAST && {!(_x getVariable ["DUWS_convoy_handled", false])} };
     {
         private _u = _x;
         { _x reveal [_u, 4] } forEach _opforGroups;

@@ -58,6 +58,12 @@
 // the same way at teardown -- both hand every hull back to native AI.
 params ["_group"];
 
+// Cross-system contract: flags this group as under scripted convoy control for the whole drive. The OPFOR OP
+// recon burst (DUWS_fnc_hardpointOPBurst) reveals BLUFOR to every EAST group map-wide; without this skip it
+// injects that knowledge into a convoy anywhere on the map, promoting the column out of SAFE and false-tripping
+// a mission's behaviour-based under-attack test. Cleared at teardown, so a released group is fair game again.
+_group setVariable ["DUWS_convoy_handled", true];
+
 #define CV_TICK        0.5     // control period. Kept short: forceSpeed is held open-loop between ticks, so a
                                // long period is dead time in the spacing loop -- at ~1.5 s the tail oscillated
                                // (dead time approached the target gap). 0.5 s keeps the loop responsive.
@@ -813,3 +819,4 @@ while {
 // Behaviour is the caller's throughout (never forced), so nothing is restored here. The peeling HVT car takes
 // the same release mid-run (see fnc_convoy_release_hull), so both paths undo convoy control identically.
 { [_x] call fnc_convoy_release_hull } forEach (values _seen);
+if (!isNull _group) then { _group setVariable ["DUWS_convoy_handled", nil] };
