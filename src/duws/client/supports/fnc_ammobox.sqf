@@ -59,7 +59,6 @@ sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 30;
-[_speaker1, localize "STR_DUWS_T_supplydroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 waitUntil {sleep 0.1; (_vehicle getVariable ["DUWS_onStation", false]) || !alive _vehicle};
 
 if (!alive _vehicle) exitWith {[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supplydropdown"] remoteExec ["fnc_duws_dialogue", 0]};
@@ -80,8 +79,8 @@ clearItemCargoGlobal _ammobox;
 clearBackpackCargoGlobal _ammobox;
 _ammobox attachTo [_parachute,[0,0,0]];
 
+[_speaker1, localize "STR_DUWS_T_supplydroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 hint localize "STR_DUWS_T_wdttb5b8";
-[_speaker1, localize "STR_DUWS_T_supplydropdelivered"] remoteExec ["fnc_duws_dialogue", 0];
 
 waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 

@@ -5239,8 +5239,12 @@
                 <German>Hier ist "Overlord 1-1" – Anfrage empfangen. ETA für den Abwurf: 40 Sekunden.</German>
                 <Spanish>Este es "Overlord 1-1" – solicitud recibida. ETA del lanzamiento: 40 segundos.</Spanish>
                 <Chinesesimp>请求收到了。投送预计到达时间40秒。</Chinesesimp>
-                <Original>Request received. Drop ETA forty seconds.</Original>
-                <English>Request received. Drop ETA forty seconds.</English>
+                <Original>This is Courier 2-1, deploying a vehicle to your position. ETA forty seconds.</Original>
+                <English>This is Courier 2-1, deploying a vehicle to your position. ETA forty seconds.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_vehdropack">
+                <Original>Copy your request, Alpha 1-1. Courier 2-1 is inbound with your vehicle drop.</Original>
+                <English>Copy your request, Alpha 1-1. Courier 2-1 is inbound with your vehicle drop.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropcallend">
                 <German>Hier ist Fallschirmjäger-Einsatz – ich habe den LZ im Blick, achte auf die Verbindung.</German>
@@ -5276,10 +5280,6 @@
                 <Original>Be advised, Alpha 1-1, Courier 1-1 was shot down with the supply drop.</Original>
                 <English>Be advised, Alpha 1-1, Courier 1-1 was shot down with the supply drop.</English>
             </Key>
-            <Key ID="STR_DUWS_T_supplydropdelivered">
-                <Original>Crate's on the ground at your position. Courier 1-1 out.</Original>
-                <English>Crate's on the ground at your position. Courier 1-1 out.</English>
-            </Key>
             <Key ID="STR_DUWS_T_paradropinbound">
                 <Original>This is Chalk 2-1, inbound to your grid. ETA one minute.</Original>
                 <English>This is Chalk 2-1, inbound to your grid. ETA one minute.</English>
@@ -5307,10 +5307,6 @@
             <Key ID="STR_DUWS_T_vehdropdown">
                 <Original>Be advised, Alpha 1-1, the transport is down. Your vehicle drop is off.</Original>
                 <English>Be advised, Alpha 1-1, the transport is down. Your vehicle drop is off.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_vehdropdelivered">
-                <Original>Vehicle's on the ground at your position. Courier 2-1 out.</Original>
-                <English>Vehicle's on the ground at your position. Courier 2-1 out.</English>
             </Key>
             <Key ID="STR_DUWS_T_heloliftnoreach">
                 <Original>Be advised, Alpha 1-1, heavy transport can't reach your position. Tasking aborted.</Original>

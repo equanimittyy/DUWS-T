@@ -62,10 +62,11 @@ ctrlSetText [1000, format ["%1", commandpointsblu1]];
 ["veh_drop"] call fnc_support_consume;
 
 _speaker = localize "STR_DUWS_T_actionteam";
-_speaker1 = localize "STR_DUWS_T_OVERLORD";
+_speaker1 = localize "STR_DUWS_T_courier2";
 _message = ([localize "STR_DUWS_T_vehdropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_vehdropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vehdropack"] remoteExec ["fnc_duws_dialogue", 0];
 
 // SEND A PLANE -- offset the spawn 1200 m off a random bearing so it flies in rather than appearing overhead.
 private _vec = [random [-1,0,1], random [-1,0,1], 0];
@@ -89,13 +90,12 @@ private _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 
-sleep 18;
+sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[localize "STR_DUWS_T_courier2", localize "STR_DUWS_T_vehdroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 waitUntil { sleep 0.5; (missionNamespace getVariable "VEHDROP_onStation") || !alive _vehicle };
 
 if (!alive _vehicle) exitWith {
-    [_speaker1, localize "STR_DUWS_T_vehdropdown"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vehdropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["VEHDROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -106,8 +106,8 @@ _parachute setPos [_location select 0, _location select 1, (_location select 2) 
 private _cargo = CreateVehicle [_class, [_location select 0, _location select 1, (_location select 2) + 50], [], 0, "CAN_COLLIDE"];
 _cargo attachTo [_parachute, [0,0,0]];
 
+[localize "STR_DUWS_T_courier2", localize "STR_DUWS_T_vehdroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 hint localize "STR_DUWS_T_iv3s5xlc";
-[localize "STR_DUWS_T_courier2", localize "STR_DUWS_T_vehdropdelivered"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 30;
 deleteVehicle _parachute;
 sleep 7;
