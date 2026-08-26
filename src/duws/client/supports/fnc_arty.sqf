@@ -273,10 +273,20 @@ if (_ammotype == "Laser") then {
 	};
 	// Break the loiter and send the jet home, then delete it only once it has cleared the area, so it
 	// flies off rather than vanishing over the caller. Detached so the slot frees below without waiting.
-	{ deleteWaypoint _x } forEach (reverse (waypoints _group));
+	// Two traps. reverse sorts in place and returns Nothing, so inlining it as forEach (reverse (waypoints
+	// _group)) iterates over Nothing and deletes no waypoint -- bind the list, reverse it, then delete
+	// (highest index first). And the loiter sits at index 2 (the MOVE at index 1 flags on-station), so
+	// deleting it does not move the group's current-waypoint pointer off that index onto the new egress
+	// MOVE; setCurrentWaypoint forces it, or the jet keeps orbiting even with the loiter gone. The
+	// single-waypoint hcCAS/hcATTchop RTBs skip this only because their loiter IS index 1, the index the
+	// replacement MOVE re-takes.
+	private _wps = waypoints _group;
+	reverse _wps;
+	{ deleteWaypoint _x } forEach _wps;
 	private _rtb = _group addWaypoint [_spawnPos, 0];
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
+	_group setCurrentWaypoint _rtb;
 	[_group, _vehicle, _position] spawn {
 		params ["_g", "_v", "_pos"];
 		// Grace cap so a damaged jet that cannot make distance still cleans up.
