@@ -54,6 +54,29 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
     ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
 
+    // Fire one observation-post recon burst at a clicked spot, at 100% -- the same 1km reveal an OP rolls
+    // for, on demand, to test the compromise card and the OPFOR reveal without waiting on the post's odds.
+    // Click-to-place idiom, same as the hardpoint placer; the pos is captured client-side, the burst run on
+    // the server (DUWS_fnc_hardpointOPBurst), which owns the side-level reveal.
+    ["Recon burst: click a spot", {
+        [] spawn {
+            DUWS_dbgReconClicked = false;
+            openMap [true, false];
+            waitUntil { !isNull (findDisplay 12) };
+            // Banner, not hint: the engine draws the hint box beneath the open map, so it is invisible while
+            // the map is up. The confirmation arrives as a hint once the map is closed, below.
+            ["<t size='2' color='#00ffff'>Click the map to fire an OP recon burst there. </t><br/>Dev tool: reveals every BLUFOR within 1 km to OPFOR and cards each player, at 100%. Close the map to cancel."] call fnc_map_prompt;
+            onMapSingleClick "DUWS_dbgReconPos = _pos; DUWS_dbgReconClicked = true; onMapSingleClick ''; true";
+            waitUntil { DUWS_dbgReconClicked || !visibleMap };
+            onMapSingleClick "";
+            [""] call fnc_map_prompt;
+            if (!DUWS_dbgReconClicked) exitWith {};
+            openMap [false, false];
+            [[DUWS_dbgReconPos select 0, DUWS_dbgReconPos select 1, 0]] remoteExec ["DUWS_fnc_hardpointOPBurst", 2];
+            hint "OP recon burst fired at the marked spot.\n\nDev tool: every BLUFOR within 1 km is revealed to OPFOR\nand each player carded, at 100% (no per-wake roll).";
+        };
+    }, [], [1,0.667,0,1]],
+
     // Click-to-inspect on the open map, same idiom as the hardpoint placer: read one site's garrison
     // ledger -- max, available and dead tokens with the strength maths -- from the server, which owns it.
     ["Garrison ledger: click a site", {

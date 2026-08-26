@@ -264,30 +264,35 @@ DUWS_fnc_hardpointClear = {
     };
 };
 
+// [_pos] call DUWS_fnc_hardpointOPBurst -- one recon fix from a post at _pos: pin OPFOR's knowledge of
+// every live BLUFOR within OP_OBSERVE_RADIUS to a full identification (reveal 4) and red-card each
+// compromised player. reveal is a side-level knowledge write -- hence server-only, and to EAST as a whole
+// rather than to any one group, so every OPFOR element gets the position. The card is remoteExec'd to each
+// player object, so only the compromised player sees it, on their own machine, in SP and MP alike.
+// Unconditional: the observe loop gates it behind its per-wake roll, and the dev map-click tool fires it at
+// 100% -- so this holds only the sweep both share.
+DUWS_fnc_hardpointOPBurst = {
+    params ["_pos"];
+    {
+        EAST reveal [_x, 4];
+        if (isPlayer _x) then {
+            ["critical", [localize "STR_DUWS_T_OP_COMPROMISED_TITLE", localize "STR_DUWS_T_OP_COMPROMISED_MSG"]]
+                remoteExec ["BIS_fnc_showNotification", _x, false];
+        };
+    } forEach (allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} });
+};
+
 // [_key, _pos] spawn DUWS_fnc_hardpointOPObserve -- the recon screen a standalone enemy observation post
-// runs while it stands. Each period, at OP_OBSERVE_CHANCE odds, it pins OPFOR's knowledge of every live
-// BLUFOR within OP_OBSERVE_RADIUS to a full identification (reveal 4) and red-cards each compromised player,
+// runs while it stands. Each period, at OP_OBSERVE_CHANCE odds, it fires a burst (DUWS_fnc_hardpointOPBurst),
 // so a post left alive keeps feeding its sector to the enemy and pressures the player to kill it or route
 // around its ring -- but the per-wake roll means it can miss, so the ring is a risk, not a certain reveal.
-// reveal is a
-// side-level knowledge write -- hence server-only, and to EAST as a whole rather than to any one group, so
-// every OPFOR element gets the position. Runs off the poller on its own clock, so its beat is independent of
-// the streaming tick and it reports whether the post is deployed or stowed. Terminates when the post's row
-// leaves DUWS_hardpoints (cleared, dev-cleared or retired); the up-to-one-period lag before it notices is
-// harmless -- the post is already gone. Card is remoteExec'd to each player object, so only the compromised
-// player sees it, on their own machine, in SP and MP alike.
+// Runs off the poller on its own clock, so its beat is independent of the streaming tick and it reports
+// whether the post is deployed or stowed. Terminates when the post's row leaves DUWS_hardpoints (cleared,
+// dev-cleared or retired); the up-to-one-period lag before it notices is harmless -- the post is already gone.
 DUWS_fnc_hardpointOPObserve = {
     params ["_key", "_pos"];
     while { (DUWS_hardpoints findIf { (_x select 0) isEqualTo _key }) > -1 } do {
-        if (random 1 < OP_OBSERVE_CHANCE) then {
-            {
-                EAST reveal [_x, 4];
-                if (isPlayer _x) then {
-                    ["critical", [localize "STR_DUWS_T_OP_COMPROMISED_TITLE", localize "STR_DUWS_T_OP_COMPROMISED_MSG"]]
-                        remoteExec ["BIS_fnc_showNotification", _x, false];
-                };
-            } forEach (allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} });
-        };
+        if (random 1 < OP_OBSERVE_CHANCE) then { [_pos] call DUWS_fnc_hardpointOPBurst };
         sleep OP_OBSERVE_PERIOD;
     };
 };
