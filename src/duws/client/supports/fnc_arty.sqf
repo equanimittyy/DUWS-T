@@ -266,6 +266,14 @@ if (_ammotype == "Laser") then {
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
 } else {
+	// Smoke screen: rounds walk a line perpendicular to the caller's bearing to the target, so the
+	// wall sits across the enemy's line of sight instead of blobbing on the point. Axis is fixed here
+	// at commit time from the local player (the caller); +90 turns the sightline into the screen line.
+	private _smokeAxis = [0,0,0];
+	if (_supportype == 7) then {
+		private _brg = (player getDir _position) + 90;
+		_smokeAxis = [sin _brg, cos _brg, 0];
+	};
 	while {_salvos > 0} do {
 		_rps = _rpsinit;
 		while {_rps > 0} do {
@@ -280,8 +288,10 @@ if (_ammotype == "Laser") then {
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};
-				case 7: {  // Mortar smoke -- same delivery, a smoke round instead of HE
-					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800];
+				case 7: {  // Mortar smoke -- walk the screen line, jittered enough to read as a wall, not a ruler
+					private _along = (random (2 * _radius)) - _radius;
+					private _p = _position vectorAdd (_smokeAxis vectorMultiply _along);
+					_bomb = _ammotype createVehicle [(_p select 0)+(random 14)-(random 14), (_p select 1)+(random 14)-(random 14), 800];
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};
