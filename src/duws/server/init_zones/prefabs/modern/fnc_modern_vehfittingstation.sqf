@@ -11,12 +11,6 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// Objects that must keep simulation: interactable or destructible.
-private _keepSimulation = [
-    "Land_RepairDepot_01_green_F",
-    "FlexibleTank_01_forest_F"
-];
-
 // Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Vehicle Refit Station" schema=A--
 private _allObjectsData = [
@@ -79,9 +73,9 @@ private _tiltTypes = [
     "Land_Razorwire_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen (bar the keep-simulated set), hardened. Weapon rows
-// are skipped here and stood up by the fnc_static_place pass below.
-[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all", _keepSimulation]] call fnc_composition_place;
+// Cover props via the shared placer -- tilted, then frozen and hardened (cargo towers/houses excepted:
+// left simulated and destructible). Weapon rows are stood up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all"]] call fnc_composition_place;
 
 sleep 2;
 

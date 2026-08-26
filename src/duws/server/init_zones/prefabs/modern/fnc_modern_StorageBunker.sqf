@@ -11,9 +11,6 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// Objects that must keep simulation: none for this composition.
-private _keepSimulation = [];
-
 // Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Storage Bunker" schema=A--
 private _allObjectsData = [
@@ -63,9 +60,9 @@ private _tiltTypes = [
     "Land_BagFence_Long_F", "Land_BagFence_Short_F", "Land_BagFence_Round_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen, all hardened. Weapon rows are skipped here and
-// stood up by the fnc_static_place pass below.
-[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all", _keepSimulation]] call fnc_composition_place;
+// Cover props via the shared placer -- tilted, then frozen and hardened (cargo towers/houses excepted:
+// left simulated and destructible). Weapon rows are stood up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all"]] call fnc_composition_place;
 
 sleep 2;
 

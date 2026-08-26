@@ -80,9 +80,9 @@ private _tiltTypes = [
     "Land_Razorwire_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen, hardened. Land_Cargo_Patrol_V1_F stays simulated
-// (and destructible, per the placer's carve-out). Weapon rows are stood up by the fnc_static_place pass below.
-[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all", ["Land_Cargo_Patrol_V1_F"]]] call fnc_composition_place;
+// Cover props via the shared placer -- tilted, then frozen and hardened (cargo towers/houses excepted:
+// left simulated and destructible). Weapon rows are stood up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all"]] call fnc_composition_place;
 
 sleep 2;
 

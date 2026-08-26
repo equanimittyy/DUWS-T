@@ -82,8 +82,8 @@ private _tiltTypes = [
     "Land_SandbagBarricade_01_hole_F","Land_Razorwire_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen, hardened. Weapon rows are skipped here and stood
-// up by the fnc_static_place pass below.
+// Cover props via the shared placer -- tilted, then frozen and hardened (cargo towers/houses excepted:
+// left simulated and destructible). Weapon rows are stood up by the fnc_static_place pass below.
 [_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all"]] call fnc_composition_place;
 
 sleep 2;

@@ -23,12 +23,11 @@
 //                 leaves everything upright, which is what the hardpoints want.
 //     _invuln     "all" to harden every prop, a class list to harden only that fragile subset, or [] for
 //                 none. The frozen-cover convention is "all"; some prefabs harden only their breakables.
-//     _keepSim    classes left simulated instead of frozen -- a prop that must keep moving (a medevac heli,
-//                 a working depot). Default [] freezes every prop, which is the usual case.
 //
-// Hardening never touches a class in DUWS_compDestructible (cargo towers and houses): those read as
-// objectives or enterable structures a player expects to bring down, so they stay destructible even under
-// an "all" pass. The radio mast is exempted separately, by its own hardpoint after placement.
+// Hardening and simulation are one switch, not two: enableSimulation false suppresses damage, so a frozen
+// prop is unkillable whatever allowDamage says. A class in DUWS_compDestructible (cargo towers and houses)
+// is therefore left BOTH destructible and simulated so the player can bring it down; every other prop is
+// frozen and hardened together. The radio mast is exempted separately, by its own hardpoint after placement.
 DUWS_compDestructible = [
     "Land_Cargo_Tower_V1_F",
     "Land_Cargo_Patrol_V1_F",
@@ -39,7 +38,7 @@ DUWS_compDestructible = [
 
 fnc_composition_place = {
     params ["_rows", "_origin", "_key", ["_opts", []]];
-    _opts params [["_heading", 0], ["_tiltTypes", []], ["_invuln", []], ["_keepSim", []]];
+    _opts params [["_heading", 0], ["_tiltTypes", []], ["_invuln", []]];
     private _ox0 = _origin select 0;
     private _oy0 = _origin select 1;
     // "all" short-circuits the membership test below, so _invuln never reaches `_class in <string>`, which
@@ -62,8 +61,12 @@ fnc_composition_place = {
         _obj setPosATL _wp;
         if (_class in _tiltTypes) then { _obj setVectorUp (surfaceNormal [_wp select 0, _wp select 1]) };
         _obj setDir (_rowDir + _heading);
-        if !(_class in _keepSim) then { _obj enableSimulationGlobal false };
-        if (!(_class in DUWS_compDestructible) && {_invulnAll || {_class in _invuln}}) then { _obj allowDamage false };
+        // One switch: a frozen prop takes no damage, so freeze exactly what is hardened and leave a
+        // destructible prop simulated (createVehicle's default) so it can be brought down.
+        if (!(_class in DUWS_compDestructible) && {_invulnAll || {_class in _invuln}}) then {
+            _obj enableSimulationGlobal false;
+            _obj allowDamage false;
+        };
 
         _props pushBack _obj;
     } forEach _rows;
