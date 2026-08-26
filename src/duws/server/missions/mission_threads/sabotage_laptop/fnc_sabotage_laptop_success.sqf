@@ -21,7 +21,7 @@ if (count getObjectTextures _object > 0) then {
 // string, so nothing deletes it implicitly, and the laptop outlives the hack.
 remoteExec ["", format ["sabotage_action_%1", netId _object]];
 
-[{hint localize "STR_DUWS_T_v5ylof1e"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+[localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_laptopdone"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
 
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];

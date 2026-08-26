@@ -3971,8 +3971,8 @@
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
                 <Spanish>Los exploradores informan de que el enemigo ha desplegado un dispositivo de guerra electrónica de estilo portátil aquí, que puede contener información sobre las posiciones de despliegue enemigo. Localiza el dispositivo, descarga toda la información útil y destrúyelo si no hay ninguna. (Very low CP, high AP)</Spanish>
                 <Chinesesimp>侦察兵报告了敌人在这里部署了笔记本样式的电子战设备，里面可能有关于敌军部署位置的信息。找到设备，下载一切有用信息，没有的话就把它毁掉。(极低CP，高AP)</Chinesesimp>
-                <Original>Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.</Original>
-                <English>Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.</English>
+                <Original>Scouts report an enemy field laptop in the marked area, electronic warfare gear that may hold their deployment positions. It is hidden in one of the flagged buildings. Find the laptop and sabotage it.</Original>
+                <English>Scouts report an enemy field laptop in the marked area, electronic warfare gear that may hold their deployment positions. It is hidden in one of the flagged buildings. Find the laptop and sabotage it.</English>
             </Key>
             <Key ID="STR_DUWS_T_geryeddp">
                 <German>Der kleine feindliche Waffenschatz befindet sich hier. Sprenge ihn! (Slightly high CP, low AP)</German>
@@ -4129,12 +4129,13 @@
                 <Original>Sabotage</Original>
                 <English>Sabotage</English>
             </Key>
-            <Key ID="STR_DUWS_T_v5ylof1e">
-                <German>Sabotage erfolgreich</German>
-                <Spanish>Sabotaje exitoso</Spanish>
-                <Chinesesimp>破坏成功</Chinesesimp>
-                <Original>Sabotage successful.</Original>
-                <English>Sabotage successful.</English>
+            <Key ID="STR_DUWS_T_laptopdone">
+                <Original>Alpha 1-1, good work sabotaging the enemy laptop. Out.</Original>
+                <English>Alpha 1-1, good work sabotaging the enemy laptop. Out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laptopfail">
+                <Original>Alpha 1-1, we're out of time. The enemy has relocated the asset.</Original>
+                <English>Alpha 1-1, we're out of time. The enemy has relocated the asset.</English>
             </Key>
             <Key ID="STR_DUWS_T_mfxb090t">
                 <German>==DEIN BAU-FAHRZEUG IST NOCH INTAKT==\n\nEs ist nur 1 Bau-Fahrzeug gleichzeitig in der Mission erlaubt! Bitte wähle eine andere Mission.</German>
@@ -4427,8 +4428,8 @@
                 <German>Dies ist "Overlord 1-1". Wir haben die Position der feindlichen elektronischen Kampfgeräte ermittelt. Ihre Einheit soll sich zum Standort begeben und alle verfügbaren Informationen beschaffen. Falls keine gefunden werden, lade das kürzlich an Ihre Terminals übermittelte Hacking-Programm hoch. Nach Abschluss der Mission können Sie sich sofort abziehen.</German>
                 <Spanish>Este es "Imperador 1-1". Hemos localizado la posición del equipo de guerra electrónica enemigo. Tu unidad debe acudir al lugar y recuperar toda la inteligencia disponible. Si no se encuentra ninguna, sube el programa de hacking enviado recientemente a tus terminales. Puedes retirarte en cualquier momento tras completar la misión.</Spanish>
                 <Chinesesimp>我们发现了敌人电子战设备的位置。现在需要你的单位去设备处寻找一切可用情报，如果没有就上传刚刚发到终端上的骇客程序。任务完成后随时可以撤离。</Chinesesimp>
-                <Original>We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent you. Extract as soon as it's done.</Original>
-                <English>We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent you. Extract as soon as it's done.</English>
+                <Original>Alpha 1-1, Allseer has located an enemy's field laptop in one of the marked buildings on your map. Find it, sabotage it, and extract.</Original>
+                <English>Alpha 1-1, Allseer has located an enemy's field laptop in one of the marked buildings on your map. Find it, sabotage it, and extract.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Ein verbündetes Hubschrauber stürzte vor zehn Minuten an der markierten Position ab. Glücklicherweise steht der Pilot noch mit dem Kommando in Verbindung. Ihre Einheit soll als Soforteinsatztruppe vorgehen und den Piloten evakuieren.</German>

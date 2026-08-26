@@ -129,7 +129,6 @@ sleep 5; // let the patrols finish spawning
     waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
     if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
         { deleteMarker _x } forEach _crosses;
-        // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
-        [_taskId, _marker, "mission_sabotage_laptop", _tpos, _radius, false] call fnc_mission_deadline_fail;
+        [_taskId, _marker, "mission_sabotage_laptop", _tpos, _radius, false, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_laptopfail"]] call fnc_mission_deadline_fail;
     };
 };

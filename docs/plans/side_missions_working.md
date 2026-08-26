@@ -32,11 +32,12 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 | 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
 | 17 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
+| 8 | Destroy Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
 gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
 too until reworked, not a reviewed baseline: Steal Supply Truck (1), Rescue
-Pilot (4), Steal Builder Vehicle (6), Destroy Laptop (8), Destroy Ammo Cache (9), Destroy Radar (10),
+Pilot (4), Steal Builder Vehicle (6), Destroy Ammo Cache (9), Destroy Radar (10),
 Clear Area (11), Protect Informant (14), Recover Humanitarian Supply Truck (15).
 Ideas per row in the [tracker](#per-mission-rework-tracker).
 
@@ -228,6 +229,25 @@ the mission watches liveness, not any one object. Pays 10/10 on top of the hardp
 bounty (type-scaled: [5,0] for most, [10,5]/[10,0] for artillery/mortar), all credited by the streamer.
 Spawns nothing. Off the spine.
 
+### Destroy Laptop
+
+`mission_threads/sabotage_laptop/`. A which-building hunt, not a walk to one marker. An enemy field
+laptop hides in **one** of 3-5 enterable buildings the mission marks with orange crosses; the player is
+not told which, so the objective is to clear and search them. `fnc_sabotage_laptop_site` gates the
+offer on a cluster of at least three enterable buildings within 350 m -- a hamlet or town block, not a
+lone farmhouse -- so a countryside cluster is valid but open ground is not (map survey, no town-tether;
+the finder inlines `fnc_usableBuildings`' terrain test so it can run client-side in the picker). Every
+candidate building holds a garrisoned `team`, and the cluster is ringed by a mixed patrol (a car, an
+IFV where the faction fields one, foot teams). The laptop sits on a spawned desk on a random interior
+slot of its building; a `Sabotage` action on it wins, and in hardcore it also carries a body-style
+search. Win: the laptop sabotaged. Fail: the deadline. Off the spine (the win comes through the
+laptop's own action, watched on a deadline watcher, not a one-shot predicate).
+
+The gameplay verb is reworked and shipped; the reward is **not** repriced. 10/35 predates the rework,
+when the mission was a single hold-action (effort 1) and the AP read as overpaid. The rework raised the
+required fight to a multi-building garrison clear, so the old "trim the AP" rationale is dead -- the
+number now wants a fresh read at the new effort, not the old cut.
+
 ## Mission catalogue (current)
 
 CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
@@ -247,13 +267,13 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
 | 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
 | 17 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
+| 8 | Destroy Laptop | sabotage | cmd | 10/35/0 | 3 | done (verb reworked; reward not repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 30/20/0 | 3 | stale |
 | 10 | Destroy Radar | sabotage | cmd | 25/25/0 | 3 | stale |
 | 11 | Clear Area | assault | cmd | 15/20/0 | 3 | stale |
-| 8 | Destroy Laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
 | 14 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
 | 15 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
 
@@ -264,14 +284,13 @@ to command/intel/tactical value, AP to materiel destroyed or manpower recovered.
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower) are now priced to effort; the
 vehicle patrol adds a tier bonus at spawn (see its design note). **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 9 stale rows, not only
-the three below; these three are just the worst effort/pay mismatches:
+still-stale mission carries its old numbers and is open pricing work** -- all 8 stale rows, not only
+the two below; these two are just the worst effort/pay mismatches:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
 | Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
 | Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
-| Destroy Laptop | 1 | 10/35 | AP overpaid for one hold-action |
 
 ## Per-mission rework tracker
 
@@ -289,9 +308,9 @@ change cell is the current idea, not a locked spec.
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
 | Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
 | Destroy Hardpoint | target an existing revealed OPFOR emplacement (any type but radio/minefield); win when the hardpoint falls | done |
+| Destroy Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings (reward not yet repriced) | done |
 | Steal Builder Vehicle | match effort/pay of its twin | stale |
 | Clear Area | reprice to the full-clear effort | stale |
-| Destroy Laptop | keep light; trim the overpaid AP | stale |
 | Steal Supply Truck | distinct verb TBD + reprice | stale |
 | Rescue Pilot | distinct verb TBD + reprice | stale |
 | Destroy Ammo Cache | distinct verb TBD + reprice | stale |
@@ -301,7 +320,7 @@ change cell is the current idea, not a locked spec.
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 9 need both a verb and a reprice; see the tracker).
+- The distinct verb for each still-stale row (all 8 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
