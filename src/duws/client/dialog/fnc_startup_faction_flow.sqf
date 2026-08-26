@@ -18,6 +18,7 @@ chosen_hq_placement = false;
 player_is_choosing_hqpos = false;
 random_placement = false;
 duws_custom_faction_back = false;   // set by the paste screen's Back button
+duws_debug_quickstart = false;      // set by the faction screen's dev-only one-click button
 
 // Cleared network-wide, unlike the flags above: the AutoDetect wrappers wait on these, and on a
 // re-entry the server would otherwise resolve against the previous round's pick before the picker
@@ -26,6 +27,10 @@ missionNamespace setVariable ["selectedFaction_BLU", nil, true];
 missionNamespace setVariable ["selectedFaction_OPF", nil, true];
 
 [] call fnc_HQ_faction_dialog;
+
+// Debug one-click start (the faction screen's dev-only button): skip the confirmation, HQ
+// placement and parameter screens and commit with every screen's own defaults.
+if (duws_debug_quickstart) exitWith { [] spawn fnc_debug_quickstart; };
 
 // Per-side faction prompts (custom paste window and/or AutoDetect picker), shown
 // BLUFOR then OPFOR and only for the side that needs one. Runs during setup so the

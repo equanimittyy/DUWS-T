@@ -22,6 +22,9 @@ class startup_faction_next_dialog
 {
 	idd = -1;
 	movingenable = false;
+	// Stashed so fnc_HQ_faction_dialog.sqf can hide the debug button below unless the DUWS_Debug
+	// mission param is on -- config cannot read a mission param, so the gate has to be in SQF.
+	onLoad = "uiNamespace setVariable ['duws_faction_next_display', _this select 0];";
 
 	class controls
 	{
@@ -46,6 +49,23 @@ class startup_faction_next_dialog
 			colorBackground[] = {1, 0, 0, 0.5};
 			tooltip = "$STR_DUWS_T_callsign_next_tt";
 			action = "duws_faction_screen_next = true;";
+		};
+		// Dev-only shortcut past the whole setup flow. Hidden unless the DUWS_Debug param is on
+		// (ctrlShow from fnc_HQ_faction_dialog.sqf). Sits in the panel's left gap, clear of the
+		// BUILD FACTIONS button, and shares the same tear-down as that button -- the flow reads
+		// duws_debug_quickstart and diverts (client/dialog/fnc_startup_faction_flow.sqf).
+		class faction_debug_button: RscButton
+		{
+			idc = 1601;
+			text = "$STR_DUWS_T_faction_debug_quickstart";
+			x = 3.75 * GUI_GRID_W + GUI_GRID_X;
+			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+			w = 6.5 * GUI_GRID_W;
+			h = 2 * GUI_GRID_H;
+			sizeEx = 0.04;
+			colorBackground[] = {0.2, 0.3, 0.6, 0.8};
+			tooltip = "$STR_DUWS_T_faction_debug_quickstart_tt";
+			action = "duws_debug_quickstart = true; duws_faction_screen_next = true;";
 		};
 	};
 };

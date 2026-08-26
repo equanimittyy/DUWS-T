@@ -214,6 +214,12 @@ _dropdownMode lbSetCurSel (0 max _modeSel);
 createDialog "startup_faction_next_dialog";
 waitUntil {dialog};
 
+// The one-click debug start (idc 1601) is shown only with the DUWS_Debug mission param on. No
+// game_master check: only that client ever reaches this screen (client_init gates setup on it).
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) != 1) then {
+	((uiNamespace getVariable ["duws_faction_next_display", displayNull]) displayCtrl 1601) ctrlShow false;
+};
+
 waitUntil {duws_faction_screen_next};
 
 _display closeDisplay 1;

@@ -319,6 +319,14 @@
                 <Original>BUILD FACTIONS</Original>
                 <English>BUILD FACTIONS</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_debug_quickstart">
+                <Original>DEBUG START</Original>
+                <English>DEBUG START</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_debug_quickstart_tt">
+                <Original>Debug only. Skip setup: random HQ, default factions and settings, start the campaign now.</Original>
+                <English>Debug only. Skip setup: random HQ, default factions and settings, start the campaign now.</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_edit_working">
                 <Original>Working...</Original>
                 <English>Working...</English>

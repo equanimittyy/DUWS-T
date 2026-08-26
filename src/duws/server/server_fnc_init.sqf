@@ -479,6 +479,7 @@ fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 fnc_no_gm_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_no_gm_prompt.sqf";publicVariable "fnc_no_gm_prompt";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
 fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
+fnc_debug_quickstart = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_quickstart.sqf";publicVariable "fnc_debug_quickstart";
 fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_menu.sqf";publicVariable "fnc_debug_econ_menu";
 fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
 // Not broadcast: the window remoteExecs it to the server by name, and it re-checks game_master
