@@ -2,7 +2,7 @@
 // server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf remoteExecs
 // here to target 2. The split exists because an addAction is dispatched to whoever used it and
 // has no server-side form; only the action's own removal has to stay there.
-params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2", "_radius"];
+params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2", "_radius", ["_crossMarkers", []]];
 
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
@@ -27,6 +27,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
 [_markername2] call fnc_missionMarkerClear;
+{ deleteMarker _x } forEach _crossMarkers;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
