@@ -79,6 +79,7 @@ _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel 
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_helolift1"] remoteExec ["fnc_duws_dialogue", 0];
 
 _hookMarkerName = format ["hook_%1", floor random 10000];
 createMarker [_hookMarkerName, getPos _target];
@@ -93,10 +94,6 @@ missionNamespace setVariable [_moveCompletedVar, false]; // init, client-local
 [player, "setInitial", [_targetVehicle]] remoteExec ["fnc_helolift_waypoints", 2];
 
 sleep 8;
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = format[localize "STR_DUWS_T_helolift1"];
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
 _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift2"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

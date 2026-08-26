@@ -83,12 +83,9 @@ switch (VERSION_X) do {
 
 waitUntil {sleep 0.5;onStation||!alive _vehicle};
 // The UAV is now killable, so death before it reaches station is a real path:
-// tell the caller and tidy the search-area marker and dead group.
+// report the loss and tidy the search-area marker and dead group.
 if (!alive _vehicle) exitWith {
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
-	if (!isNull _caller) then {
-		["info", [localize "STR_DUWS_T_l01sbx6n"]] remoteExec ["bis_fnc_showNotification", _caller];
-	};
 	{ deleteVehicle _x } forEach units _group;
 	deleteVehicle _vehicle;
 	deleteMarker str(_markername);
