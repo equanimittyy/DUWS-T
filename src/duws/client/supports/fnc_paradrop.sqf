@@ -14,6 +14,7 @@ _message = ([localize "STR_DUWS_T_paradropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropack"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
 [_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
 // SEND A PLANE

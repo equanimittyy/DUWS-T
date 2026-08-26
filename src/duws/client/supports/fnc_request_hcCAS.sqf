@@ -34,6 +34,7 @@ switch (VERSION_X) do {
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_hccasack"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
 _speaker = localize "STR_DUWS_T_koipilot";
 _message = ([localize "STR_DUWS_T_koiin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
