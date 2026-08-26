@@ -3836,8 +3836,8 @@
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
                 <Spanish>Una torre de señales aliada en esta zona ha sido tomada por fuerzas enemigas. Las tropas enemigas están acantonadas cerca y descifrando información crítica. Destruye la torre con explosivos antes de que terminen el descifrado! (¡Quedan solo 15 minutos para que la información crítica se filtre!) (Slightly low CP, avg AP)</Spanish>
                 <Chinesesimp>友军部队在该地的一座信号塔被占领了，敌军正在旁边驻扎并破译关键信息。在敌军完成破译前去把塔炸掉！(距离关键信息泄露仅剩15分钟)(稍低CP，平均AP)</Chinesesimp>
-                <Original>An OPFOR radio mast at the marked position is pushing enemy comms across the sector. Bring explosives and drop it. The mast is the only thing on the site worth wrecking.</Original>
-                <English>An OPFOR radio mast at the marked position is pushing enemy comms across the sector. Bring explosives and drop it. The mast is the only thing on the site worth wrecking.</English>
+                <Original>An OPFOR radio tower at the marked position is spreading enemy influence across the sector. Bring demolitions and drop the tower.</Original>
+                <English>An OPFOR radio tower at the marked position is spreading enemy influence across the sector. Bring demolitions and drop the tower.</English>
             </Key>
             <Key ID="STR_DUWS_T_towerdecrypt">
                 <German>Unsere kritischen Informationen werden gerade entschlüsselt! Du und deine Truppe müsst euch beeilen!</German>
@@ -4398,8 +4398,8 @@
                 <English>To Alpha 1-1, that OPFOR radio mast is boosting enemy comms across the sector. Get in and drop it.</English>
             </Key>
             <Key ID="STR_DUWS_T_DESTROY_HARDPOINT_DESC">
-                <Original>Intel has an OPFOR emplacement at the marked position. Move in and wreck it -- gun, garrison and all.</Original>
-                <English>Intel has an OPFOR emplacement at the marked position. Move in and wreck it -- gun, garrison and all.</English>
+                <Original>Intel has fixed an OPFOR emplacement at the marked position. Destroy it.</Original>
+                <English>Intel has fixed an OPFOR emplacement at the marked position. Destroy it.</English>
             </Key>
             <Key ID="STR_DUWS_T_hardpointoverlord">
                 <Original>To Alpha 1-1, we've fixed an enemy strongpoint at the marked grid. Get in and take it apart.</Original>
