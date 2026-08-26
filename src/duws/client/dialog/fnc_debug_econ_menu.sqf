@@ -61,8 +61,11 @@ private _apply = {
         closeDialog 0;
         switch (_i) do {
             case 0: { [_delta, "debug menu"] remoteExec ["fnc_cp_adjust", 2]; };
-            case 1: { ["BLU", _delta, "debug menu"] remoteExec ["fnc_ap_adjust", 2]; };
-            case 2: { ["OPF", _delta, "debug menu"] remoteExec ["fnc_ap_adjust", 2]; };
+            // Pass the delta as _earned too so debug AP advances the tier like real income; clamped
+            // at 0 because the earned counter is a one-way ratchet and a negative test delta must not
+            // credit it.
+            case 1: { ["BLU", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
+            case 2: { ["OPF", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
         };
         // Reports the delta sent, not the resulting total: the server owns both pools and
         // broadcasts them back, so the local copies are still the pre-change values here.
