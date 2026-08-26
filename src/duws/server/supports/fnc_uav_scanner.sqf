@@ -73,6 +73,7 @@ _wp2 setWaypointType "LOITER";
 _wp2 setWaypointBehaviour "CARELESS";
 _wp2 setWaypointLoiterRadius 400;
 
+sleep 8;
 switch (VERSION_X) do {
 	case "MODERN": {
 		[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_45np59yv"] remoteExec ["fnc_duws_dialogue", 0];
@@ -83,6 +84,7 @@ waitUntil {sleep 0.5;onStation||!alive _vehicle};
 // The UAV is now killable, so death before it reaches station is a real path:
 // tell the caller and tidy the search-area marker and dead group.
 if (!alive _vehicle) exitWith {
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
 	if (!isNull _caller) then {
 		["info", [localize "STR_DUWS_T_l01sbx6n"]] remoteExec ["bis_fnc_showNotification", _caller];
 	};
@@ -162,7 +164,11 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 // Feed ended (drone destroyed or station time up): clear the live markers, stand the
 // drone down, then remove the search circle and triggers.
 { deleteMarker _x } forEach _reconMarkers;
-[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
+if (alive _vehicle) then {
+	[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
+} else {
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
+};
 
 { deleteVehicle _x } forEach units _group;
 deleteVehicle _vehicle;

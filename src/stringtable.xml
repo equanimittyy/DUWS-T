@@ -5680,8 +5680,12 @@
                 <German>Leitstelle hier, verstanden. Aufklärungs-UAV ist im Anflug, bitte warten.</German>
                 <Spanish>Leitstelle hier, verstanden. Aufklärungs-UAV ist im Anflug, bitte warten.</Spanish>
                 <Chinesesimp>收到。一架无人侦察机正在入场，请稍等。</Chinesesimp>
-                <Original>Received. Recon UAV inbound, stand by.</Original>
-                <English>Received. Recon UAV inbound, stand by.</English>
+                <Original>Copy your request, Alpha 1-1. Allseer has a recon UAV inbound.</Original>
+                <English>Copy your request, Alpha 1-1. Allseer has a recon UAV inbound.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_uavscandown">
+                <Original>Be advised, Alpha 1-1, the recon UAV has been shot down. No further intel will be available.</Original>
+                <English>Be advised, Alpha 1-1, the recon UAV has been shot down. No further intel will be available.</English>
             </Key>
             <Key ID="STR_DUWS_T_hccasrequest">
                 <Original>Requesting close air support. Sending our position now.</Original>
