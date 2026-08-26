@@ -324,7 +324,7 @@ if (isServer) then {
                 [_award, "kill_income"] call fnc_cp_adjust;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
                 // A card, not a hint -- deliberately the exception to the one-player-to-hint rule in
-                // docs/info/gameplay/player_facing_text.md: CP arriving speaks the card vocabulary its
+                // docs/info/gameplay/player_text_style_guide.md: CP arriving speaks the card vocabulary its
                 // siblings cpaddedmission and apaddedmission already own, so moving it would make
                 // kill income the only income that reads as a refusal. It is also the payoff for
                 // half an hour of fighting, and it fires on the economy tick -- frequent enough to

@@ -3,7 +3,7 @@
 How to add a side-mission type, and the bar a new one has to clear. The rework SSOT — per-mission
 catalogue, effort ratings, reward pricing — is [`side_missions_working.md`](../../plans/side_missions_working.md);
 this doc is the *how*, not the *what*. Player-facing wording rules are in
-[`player_facing_text.md`](player_facing_text.md).
+[`player_text_style_guide.md`](player_text_style_guide.md).
 
 ## The design bar
 
@@ -115,7 +115,7 @@ by the thread aborting with a stable snake_case `_reason` slug — see the abort
 ## Player-facing text and reward
 
 Briefing lines, callsigns, hint-vs-card split, and punctuation follow
-[`player_facing_text.md`](player_facing_text.md); keep strings in `stringtable.xml` (English leads,
+[`player_text_style_guide.md`](player_text_style_guide.md); keep strings in `stringtable.xml` (English leads,
 other locales lag on purpose). Set the base CP/AP to track the *required effort*, not the archetype —
 the pricing rationale and the current effort ratings are in
 [`side_missions_working.md`](../../plans/side_missions_working.md#pricing-rework-command-missions).

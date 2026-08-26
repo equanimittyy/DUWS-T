@@ -243,7 +243,7 @@ DUWS_rsq_holdBroken = false;
 // Un-captive on the first of: player within UNCAPTIVE_RANGE, or the cordon wiped (so a player who
 // clears it from range still gets the squad out). Not on the deadline -- a timed-out squad is lost,
 // not freed. The greeting is order-independent on purpose: it must read whether the cordon is still
-// up or already gone (see fnc_duws_dialogue notes / player_facing_text.md).
+// up or already gone (see fnc_duws_dialogue notes / player_text_style_guide.md).
 //
 // Un-captive turns them active and killable but leaves them garrisoned -- PATH stays off, so they defend
 // the building from cover instead of charging a still-intact cordon. They break out and path freely only

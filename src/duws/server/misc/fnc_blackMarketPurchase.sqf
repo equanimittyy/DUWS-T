@@ -8,7 +8,7 @@ if (isNull _caller) exitWith {};
 private _moneyCount = [_caller] call fnc_money_count;
 
 // A hint, where the purchase below is a card: the refusal answers the one player who clicked and
-// the sale is news for the team (docs/info/gameplay/player_facing_text.md).
+// the sale is news for the team (docs/info/gameplay/player_text_style_guide.md).
 if !([_caller, _amount] call fnc_money_spend) exitWith {
     private _msg = format [localize "STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY", _amount, _moneyCount];
     [_msg] remoteExec ["hint", _caller];

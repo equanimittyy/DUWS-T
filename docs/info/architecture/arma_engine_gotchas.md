@@ -1143,7 +1143,7 @@ still clipped in play — 60 sits under the narrowest clip seen rather than besi
 `format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
 needing more room is not a notification: a briefing belongs in the task description (which scrolls),
 an explanation in a `hint` (which wraps) — one or the other, never both,
-[`player_facing_text.md`](../gameplay/player_facing_text.md#which-surface-a-message-goes-to-and-never-both).
+[`player_text_style_guide.md`](../gameplay/player_text_style_guide.md#notification-card-dialogue-and-the-hint-box).
 
 ## SQF identifiers are case-insensitive, so `_Varname` and `_VarName` are one variable
 
