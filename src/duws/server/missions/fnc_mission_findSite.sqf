@@ -183,30 +183,40 @@ private _fnZoneWeight = {
 private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = ((_surveyKind isEqualTo "town") || _allowUrban) && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
+private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
 
-// The features phase 2 surveys: town centres, a whole-map sample, or OPFOR zones as [centre, bandMin,
-// bandMax] the realise step feeds straight to findSafePos. Map and zone features share that triple shape,
-// so phase 3's realise reads both without a branch.
+// The features phase 2 surveys: town centres, the live target hardpoints, a whole-map sample, or OPFOR zones
+// as [centre, bandMin, bandMax] the realise step feeds straight to findSafePos. Hardpoint, map and zone
+// features share that triple shape, so phase 3's realise reads them without a branch.
 private _features = if (_useTown) then {
     +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
-    if (_useMap) then {
-        // Whole-map source for a type that need not tether to a zone: sample the HQ-reach disc directly, so
-        // the offer can land anywhere and the hard/easy weight (not a zone anchor) decides where it clusters.
-        // r = R*sqrt(random) spreads points by area rather than radius; phase-2 farthest-point sampling then
-        // thins the 64 to an even map-wide 16. A tiny realise band keeps the settled pos near its sample.
-        private _R = zones_max_dist_from_hq * 1.5;
-        private _pts = [];
-        for "_i" from 1 to 64 do {
-            _pts pushBack [PosOfBLUHQ getPos [_R * sqrt (random 1), random 360], 0, 300];
-        };
-        _pts
+    if (_useHardpoint) then {
+        // Enumerate: one candidate per live target hardpoint, listed by the type's own finder in ["ALL"] mode
+        // (so the RADIO-vs-other filter stays in the finder, not duplicated here -- a "hardpoint" type must
+        // define a finder that answers ["ALL"]). A sparse, discrete set: listing it directly gives every
+        // target an even shot, where a random-dot survey would snap many dots onto whichever target sits
+        // nearest a zone cluster and never surface the rest. Tiny realise band -- the vet snaps back exactly.
+        (["ALL"] call _finder) apply { [_x, 0, 50] }
     } else {
-        private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
-        // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
-        if (_fs isEqualTo []) then { _fs = [[PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5)]] };
-        _fs
+        if (_useMap) then {
+            // Whole-map source for a type that need not tether to a zone: sample the HQ-reach disc directly, so
+            // the offer can land anywhere and the hard/easy weight (not a zone anchor) decides where it clusters.
+            // r = R*sqrt(random) spreads points by area rather than radius; phase-2 farthest-point sampling then
+            // thins the 64 to an even map-wide 16. A tiny realise band keeps the settled pos near its sample.
+            private _R = zones_max_dist_from_hq * 1.5;
+            private _pts = [];
+            for "_i" from 1 to 64 do {
+                _pts pushBack [PosOfBLUHQ getPos [_R * sqrt (random 1), random 360], 0, 300];
+            };
+            _pts
+        } else {
+            private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
+            // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
+            if (_fs isEqualTo []) then { _fs = [[PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5)]] };
+            _fs
+        };
     };
 };
 
@@ -234,8 +244,8 @@ private _valid = [];
     };
     if (_ok) then {
         // _fnUrbanWeight scores an arbitrary position (frontline bell for easy, _fnHardScore for hard), so it
-        // serves both the town and the map survey; _fnZoneWeight is zone-list-specific and stays for zones.
-        private _score = if (_useTown || _useMap) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
+        // serves the town, map and hardpoint surveys; _fnZoneWeight is zone-list-specific and stays for zones.
+        private _score = if (_useTown || _useMap || _useHardpoint) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
         _valid pushBack [_fData, _fCenter, _score];
     };
 } forEach _features;

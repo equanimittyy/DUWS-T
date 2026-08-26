@@ -1,43 +1,39 @@
-// Site-finder for the destroy-hardpoint mission. Accepts a picker candidate only where a live,
-// intel-revealed OPFOR standalone hardpoint of a destructible type sits within reach, and returns that
-// hardpoint's position. The mission points at an existing emplacement rather than a spawned stand-in, so
-// with none in range the offer is dropped.
+// Site-finder for the destroy-hardpoint mission. Dual-mode, matching surveyKind "hardpoint" (fnc_mission_findSite):
+//   ["ALL"]         -> enumerate every live, revealed OPFOR standalone hardpoint of a destructible type.
+//   [_candidatePos] -> vet: nearest such hardpoint to the candidate, or [] if none left.
+// The survey lists these emplacements directly (one candidate each), so sparse, scattered hardpoints each get
+// offered -- no random-dot survey to snap many dots onto whichever sits nearest a zone cluster. The vet
+// re-resolves a picked candidate to a still-live emplacement and hands back its position. None live -> [].
 //
-// Intel IS a prerequisite here, unlike the tower picker: only a revealed row (index 5) qualifies, so the
-// mission never sends the player after an emplacement they have not found. Under non-hardcore fog every
-// hardpoint spawns revealed, so the flag only bites in hardcore mode.
+// Intel IS a prerequisite, unlike the tower picker: only a revealed row (index 5) qualifies, so the mission
+// never sends the player after an emplacement they have not found. Under non-hardcore fog every hardpoint
+// spawns revealed, so the flag only bites in hardcore mode.
 //
-// Excludes RADIO (its own Destroy Signal Tower mission) and MINEFIELD (no emplacement to wreck -- it is a
-// hazard cleared, not a garrison beaten). Standalone only (zoneKey ""): a zone-child hardpoint reveals
-// with its zone and sits inside its footprint, so it is taken by capturing the zone, not as a discrete
-// objective, and pays no destruction bounty.
+// Excludes RADIO (its own Destroy Signal Tower mission) and MINEFIELD (a hazard cleared, not a garrison
+// beaten). Standalone only (zoneKey ""): a zone-child hardpoint reveals with its zone and sits inside its
+// footprint, so it is taken by capturing the zone, not as a discrete objective, and pays no bounty.
 //
-// Runs client-side inside the picker (client/missions/fnc_stratmap.sqf), so it reads only the broadcast
-// DUWS_hardpoints. Presence in that array == the emplacement is alive: the streamer deletes the row the
-// instant it clears, so no separate liveness query is needed.
+// Client-side in the picker (client/missions/fnc_stratmap.sqf), reads only broadcast DUWS_hardpoints;
+// presence == alive (streamer deletes the row the instant it clears). Row: [key, pos, type, side, zoneKey,
+// revealed, dir].
 //
-// Contract: [_candidatePos] -> [] reject, or [_hpPos] accept.
-params ["_pos"];
+// Contract: ["ALL"] -> [pos, ...] ; [_candidatePos] -> [] reject, or [_hpPos] accept.
+params ["_arg"];
 
-// Nearest live, revealed OPFOR standalone hardpoint of a destructible type anywhere on the map -- no
-// distance cap. Standalone hardpoints are sparse and sit off the OPFOR zones this picker's survey draws its
-// candidates from, so gating the offer on one happening to sit near the survey candidate starved the
-// mission. Snap the offer to the nearest one instead; the offer position becomes that hardpoint, and the
-// thread's own re-scan runs from there. Row: [key, pos, type, side, zoneKey, revealed, dir].
+private _hps = (missionNamespace getVariable ["DUWS_hardpoints", []]) select {
+    !((_x select 2) in ["RADIO", "MINEFIELD"])
+    && {(_x select 3) isEqualTo "opfor"}
+    && {(_x select 4) isEqualTo ""}
+    && {_x select 5}
+};
+if (_arg isEqualTo "ALL") exitWith { _hps apply { _x select 1 } };
+
 private _best = [];
 private _bestD = 1e10;
 {
-    _x params ["", "_hp", "_type", "_side", "_zoneKey", "_revealed"];
-    if (
-        !(_type in ["RADIO", "MINEFIELD"])
-        && {_side isEqualTo "opfor"}
-        && {_zoneKey isEqualTo ""}
-        && {_revealed}
-    ) then {
-        private _d = _hp distance2D _pos;
-        if (_d < _bestD) then { _bestD = _d; _best = _hp };
-    };
-} forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
+    private _d = (_x select 1) distance2D _arg;
+    if (_d < _bestD) then { _bestD = _d; _best = _x select 1 };
+} forEach _hps;
 
 if (_best isEqualTo []) exitWith { [] };
 [_best]

@@ -61,14 +61,19 @@
 // bonus. weight is the relative odds of being drawn; 1 is neutral, lower makes a type rarer. Types are
 // drawn without replacement into the offer set, so weight biases order and presence, not duplication.
 //
-// surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the
-// countryside off OPFOR zones, "town" scans populated towns, "map" samples the whole HQ-reach area. Set
-// "town" for a type that belongs in a built-up area (informant, CQB, the civilian pair); "map" for a type
-// that need not sit near a zone -- the hard/easy dial, not a zone anchor, pulls it toward meaningful ground
-// (hard scores 0 with no enemy near, so it still clusters on enemy density; easy favours the frontline).
-// The deny-armor convoy uses "map" too: its spawn is free but needDest still ties the haven it drives to a
-// zone. The HVT convoy stays "zone" -- its finder anchors the eject on a discovered held zone, not a dot. The
-// front-vs-deep bias is separate -- it is the offer's hard/easy dial, not the survey source.
+// surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the countryside
+// off OPFOR zones, "town" scans populated towns, "map" samples the whole HQ-reach area, "hardpoint"
+// enumerates the live target hardpoints directly. Set "town" for a type that belongs in a built-up area
+// (informant, CQB, the civilian pair). Set "map" for a type not tied to a zone, placed straight on the
+// sampled dot: the hard/easy dial (not a zone anchor) pulls it toward meaningful ground (hard scores 0 with
+// no enemy near, so it still clusters on enemy density; easy favours the frontline). Set "hardpoint" for a
+// type that destroys an existing emplacement (tower, hardpoint): the survey lists those emplacements one per
+// candidate via the type's finder in ["ALL"] mode -- so a "hardpoint" type MUST define a finder that answers
+// ["ALL"] -- giving a sparse, scattered target set even coverage where a random-dot survey would collapse
+// onto whichever target sits nearest a zone cluster. The deny-armor convoy uses "map" too: its spawn is free
+// but needDest still ties the haven it drives to a zone. The HVT convoy stays "zone" -- its finder anchors
+// the eject on a discovered held zone, not a dot. The front-vs-deep bias is separate -- it is the offer's
+// hard/easy dial, not the survey source.
 //
 // The launcher is a literal block per row rather than something built from the thread column:
 // BIS_fnc_strategicMapOpen runs it with no arguments and an SQF block captures no locals, so the
@@ -80,7 +85,7 @@
 ["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue Assault Team",              { [0]  call fnc_mission_launch }, 25, 15, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "map"]],
 ["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Supply Truck",       { [1]  call fnc_mission_launch }, 35, 25, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "map"]],
 ["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate High-Value Target",          { [2]  call fnc_mission_launch }, 40, 35, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "zone"]],
-["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Signal Tower",            { [3]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
+["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Signal Tower",            { [3]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "hardpoint"]],
 ["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue Pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "map"]],
 ["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt Sniper Team",             { [5]  call fnc_mission_launch }, 20, 15, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "map"]],
 ["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Builder Vehicle",{ [6]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "map"]],
@@ -94,4 +99,4 @@
 ["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect Informant",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend", "", [false, 0, false, true, 1, "town"]],
 ["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Recover Humanitarian Supply Truck",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort", "", [false, 0, false, true, 1, "town"]],
 ["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Informant Manhunt", { [16] call fnc_mission_launch }, 10, 25, 0, [3,3], "command", "elimination", "STR_DUWS_T_INTEL_INFORMANT_NOTE", [false, 0, false, true, 1, "town"]],
-["fnc_destroy_hardpoint_mission", "STR_DUWS_T_c17", "STR_DUWS_T_DESTROY_HARDPOINT_DESC", "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Hardpoint",            { [17] call fnc_mission_launch }, 10, 10, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]]
+["fnc_destroy_hardpoint_mission", "STR_DUWS_T_c17", "STR_DUWS_T_DESTROY_HARDPOINT_DESC", "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Hardpoint",            { [17] call fnc_mission_launch }, 10, 10, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "hardpoint"]]
