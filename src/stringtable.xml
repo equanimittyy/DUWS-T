@@ -3768,6 +3768,10 @@
                 <Original>Informant Manhunt</Original>
                 <English>Informant Manhunt</English>
             </Key>
+            <Key ID="STR_DUWS_T_c17">
+                <Original>Destroy Hardpoint</Original>
+                <English>Destroy Hardpoint</English>
+            </Key>
             <Key ID="STR_DUWS_T_c13">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
@@ -4392,6 +4396,18 @@
                 <Chinesesimp>驻守信号塔的"眼镜蛇1-3"刚刚已经确认全体阵亡，但我们不能让敌人在信号塔截获我们的信号。你的单位需要以一切手段使信号塔无效化。</Chinesesimp>
                 <Original>To Alpha 1-1, that OPFOR radio mast is boosting enemy comms across the sector. Get in and drop it.</Original>
                 <English>To Alpha 1-1, that OPFOR radio mast is boosting enemy comms across the sector. Get in and drop it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DESTROY_HARDPOINT_DESC">
+                <Original>Intel has an OPFOR emplacement at the marked position. Move in and wreck it -- gun, garrison and all.</Original>
+                <English>Intel has an OPFOR emplacement at the marked position. Move in and wreck it -- gun, garrison and all.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hardpointoverlord">
+                <Original>To Alpha 1-1, we've fixed an enemy strongpoint at the marked grid. Get in and take it apart.</Original>
+                <English>To Alpha 1-1, we've fixed an enemy strongpoint at the marked grid. Get in and take it apart.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hardpointfail">
+                <Original>To Alpha 1-1, that emplacement's still holding and we've lost the window. Pull out of the AO.</Original>
+                <English>To Alpha 1-1, that emplacement's still holding and we've lost the window. Pull out of the AO.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Gerade eben haben wir ein verborgenes feindliches Flakradar lokalisiert. Mehrere unserer Luftverbände wurden ihm zum Opfer gefallen. Also, zur Rache ziehen!</German>

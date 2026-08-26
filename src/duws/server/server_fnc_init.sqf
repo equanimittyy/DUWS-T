@@ -134,6 +134,11 @@ fnc_destroy_tower_mission = compile preprocessFileLineNumbers "duws\server\missi
 // on a live RADIO hardpoint being in reach. Undefined on a non-host client, findSite falls back to the
 // accept-all generic and the RADIO gate is silently lost.
 fnc_destroy_tower_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_tower\fnc_destroy_tower_site.sqf";publicVariable "fnc_destroy_tower_site";
+fnc_destroy_hardpoint_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_hardpoint\fnc_destroy_hardpoint_mission.sqf";
+// Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap), which gates the offer
+// on a live, revealed, destructible OPFOR hardpoint being in reach. Undefined on a non-host client,
+// findSite falls back to the accept-all generic and the hardpoint gate is silently lost.
+fnc_destroy_hardpoint_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_hardpoint\fnc_destroy_hardpoint_site.sqf";publicVariable "fnc_destroy_hardpoint_site";
 fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_mission.sqf";
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_clearthearea_cqb_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\clearthearea_cqb\fnc_clearthearea_cqb_mission.sqf";

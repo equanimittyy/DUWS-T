@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-17 types (indices 0-16). The rework's shape is settled: each mission should pose a **distinct
+18 types (indices 0-17). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -30,6 +30,8 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 13 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
 | 12 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
+| 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
+| 17 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
 gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
@@ -75,9 +77,9 @@ debug-force path, where no destination is handed.
 
 ## Hand-made mission designs
 
-The three convoy/patrol reworks, plus the two manhunt/recon builds. Read the closest one before
-writing a new hand-made mission; each changes the *verb*, and the change lives in the scripts around
-the objective, not in a bigger garrison.
+The convoy/patrol reworks, the manhunt/recon builds, and the two hardpoint-destruction missions. Read
+the closest one before writing a new hand-made mission; each changes the *verb*, and the change lives in
+the scripts around the objective, not in a bigger garrison.
 
 ### Eliminate High-Value Target
 
@@ -211,6 +213,21 @@ hardpoint's own [10 CP, 10 AP] destruction bounty and its AoI-coverage drop, all
 Spawns nothing -- the mast's own inline crew is the whole opposition. Off the spine (the win watches
 broadcast state, not a one-shot predicate).
 
+### Destroy Hardpoint
+
+`mission_threads/destroy_hardpoint/`. The Destroy Signal Tower shape generalized to the rest of the
+emplacements: the mission points at an existing standalone OPFOR hardpoint of any destructible type
+*except* RADIO (its own tower mission) and MINEFIELD (a hazard, not an emplacement) -- so MG, AT, AA,
+GMG, roadblock, OP, mortar and artillery are all fair game. Intel *is* required, unlike the tower:
+`fnc_destroy_hardpoint_site` accepts only a **revealed** row (index 5), so the player is never sent
+after an emplacement they have not found; under non-hardcore fog every hardpoint spawns revealed, so
+the flag only bites in hardcore mode. Standalone only (`zoneKey ""`): a zone-child emplacement is taken
+by capturing its zone and pays no bounty. Wins when the target's `DUWS_hardpoints` row leaves the array
+-- the streamer's own per-type clearance test (garrison beaten, guns wrecked) decides "destroyed", so
+the mission watches liveness, not any one object. Pays 10/10 on top of the hardpoint's own destruction
+bounty (type-scaled: [5,0] for most, [10,5]/[10,0] for artillery/mortar), all credited by the streamer.
+Spawns nothing. Off the spine.
+
 ## Mission catalogue (current)
 
 CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
@@ -229,6 +246,7 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
 | 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
+| 17 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
 | 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
@@ -270,6 +288,7 @@ change cell is the current idea, not a locked spec.
 | Recon Enemy Position | standoff binocular hold that reveals a zone | done |
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
 | Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
+| Destroy Hardpoint | target an existing revealed OPFOR emplacement (any type but radio/minefield); win when the hardpoint falls | done |
 | Steal Builder Vehicle | match effort/pay of its twin | stale |
 | Clear Area | reprice to the full-clear effort | stale |
 | Destroy Laptop | keep light; trim the overpaid AP | stale |
