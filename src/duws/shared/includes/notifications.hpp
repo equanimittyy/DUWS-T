@@ -115,6 +115,21 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // BLUFOR's force reached a new capability tier (WARCOM_blufor_tier, fnc_economy_init). Team news
+    // like a zone capture, so a card, not a hint. Blue = something gained. The rank chevron is the
+    // grayscale (_gs) glyph, tinted by the class colour; %1 is the new tier, filled from the call site.
+    class tier_up
+    {
+        title = "$STR_DUWS_T_TIER_UP_TITLE";
+        iconPicture = "\A3\Ui_f\data\GUI\Cfg\Ranks\sergeant_gs.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_TIER_UP_MSG";
+        color[] = {0.2,0.5,1,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class info
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
