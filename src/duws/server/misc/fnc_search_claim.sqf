@@ -45,8 +45,11 @@ private _nothingLine = localize (_config param [2, "STR_DUWS_T_INTEL_FOUND_n"]);
 // miss, so this only ever thins the combat source.
 if (random 1 >= (_config select 0)) exitWith { [_nothingLine] remoteExec ["hint", _caller] };
 
-// ATL throughout: fnc_search_dropItems places with setPosATL, and a body on a roof drops its
-// items through it if the two disagree.
+// Two positions from one search. The intel reveal keys off _origin, the body -- a revealed marker
+// should point at where the enemy fell. The physical drops (money, documents) go to the searcher's
+// feet instead: a corpse often ragdolls half into a wall or onto a roof, and loot written to the
+// body drops through the surface or lands somewhere the player cannot reach. getPosATL throughout --
+// fnc_search_dropItems places with setPosATL, and a base position that disagrees drops through it.
 private _origin = getPosATL _target;
 private _remaining = +(_config select 1);
 private _paid = false;
@@ -89,7 +92,7 @@ private _documentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITEM
 // single search. The hint names which one, so the player knows its worth before the terminal.
 private _payDocument = {
     private _class = _documents selectRandomWeighted _documentWeights;
-    [[_class], _origin] call fnc_search_dropItems;
+    [[_class], getPosATL _caller] call fnc_search_dropItems;
     private _label = localize (_documentLabels select (_documents find _class));
     [format [localize "STR_DUWS_T_LOOT2", _label]] call _fnc_hint;
 };
@@ -117,7 +120,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
             private _count = 1 + floor random 3;
             private _items = [];
             for "_i" from 1 to _count do { _items pushBack "Item_Money_roll" };
-            [_items, _origin] call fnc_search_dropItems;
+            [_items, getPosATL _caller] call fnc_search_dropItems;
             [format [localize "STR_DUWS_T_LOOT4", _count]] call _fnc_hint;
             _paid = true;
         };
