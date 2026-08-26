@@ -266,20 +266,25 @@ DUWS_fnc_hardpointClear = {
 
 // [_pos] call DUWS_fnc_hardpointOPBurst -- one recon fix from a post at _pos: pin OPFOR's knowledge of
 // every live BLUFOR within OP_OBSERVE_RADIUS to a full identification (reveal 4) and red-card each
-// compromised player. reveal is a side-level knowledge write -- hence server-only, and to EAST as a whole
-// rather than to any one group, so every OPFOR element gets the position. The card is remoteExec'd to each
-// player object, so only the compromised player sees it, on their own machine, in SP and MP alike.
-// Unconditional: the observe loop gates it behind its per-wake roll, and the dev map-click tool fires it at
-// 100% -- so this holds only the sweep both share.
+// compromised player. reveal is a knowledge write, hence server-only. Its left operand must be a unit or a
+// group, never a side, so an OPFOR-wide fix means revealing each caught BLUFOR to every live EAST group in
+// turn -- allGroups holds only spawned groups, so this reaches the OPFOR actually in play, not the
+// virtualised garrisons still behind the site poller. The card is remoteExec'd to each player object, so only
+// the compromised player sees it, on their own machine, in SP and MP alike. Unconditional: the observe loop
+// gates it behind its per-wake roll and the dev map-click tool fires it at 100%, so this holds only the sweep.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
+    private _blu = allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} };
+    if (_blu isEqualTo []) exitWith {};
+    private _opforGroups = allGroups select { side _x == EAST };
     {
-        EAST reveal [_x, 4];
-        if (isPlayer _x) then {
+        private _u = _x;
+        { _x reveal [_u, 4] } forEach _opforGroups;
+        if (isPlayer _u) then {
             ["critical", [localize "STR_DUWS_T_OP_COMPROMISED_TITLE", localize "STR_DUWS_T_OP_COMPROMISED_MSG"]]
-                remoteExec ["BIS_fnc_showNotification", _x, false];
+                remoteExec ["BIS_fnc_showNotification", _u, false];
         };
-    } forEach (allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} });
+    } forEach _blu;
 };
 
 // [_key, _pos] spawn DUWS_fnc_hardpointOPObserve -- the recon screen a standalone enemy observation post
