@@ -447,7 +447,7 @@ DUWS_hardpointName = createHashMapFromArray [
 // whose 5 km reach makes it the greatest single loss to OPFOR. Where a type pays AP it is earned (raises
 // the BLUFOR tier), the mission-reward contract, not a spend.
 DUWS_hardpointBounty = createHashMapFromArray [
-    ["RADIO", [20, 10]], ["ARTY", [15, 5]], ["MORTAR", [10, 0]]
+    ["RADIO", [10, 10]], ["ARTY", [10, 5]], ["MORTAR", [10, 0]]
 ];
 
 // The loose garrison each hardpoint type fields: one DUWS_teamRosters token, or an array of them for a
