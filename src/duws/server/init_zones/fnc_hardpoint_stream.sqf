@@ -19,6 +19,16 @@ if (!isServer) exitWith {};
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
+// An observation post's recon ring, how often it wakes to report, and the odds it actually gets a fix
+// off on any given wake. The ring is wider than any garrison stream radius (DUWS_hardpointStreaming) on
+// purpose: the post screens its whole sector whether or not its lookouts have streamed in, so a player
+// cannot sit just outside the garrison's ring unseen. Reporting on a beat, not continuously, gives the
+// player time to break out of the ring; the per-wake chance makes the fix unreliable, so being in the ring
+// is a mounting risk rather than a certainty and a player can slip a sector unseen.
+#define OP_OBSERVE_RADIUS 1000
+#define OP_OBSERVE_PERIOD 60
+#define OP_OBSERVE_CHANCE 0.2
+
 // The OPFOR radio-tower amplifier is the live count of uncleared "RADIO" rows, capped. Recomputed
 // from the registry whenever a tower is registered or cleared -- never incremented in place -- so it
 // cannot drift out of step with what actually stands, and clearing a mast drops the enemy's global
@@ -254,6 +264,34 @@ DUWS_fnc_hardpointClear = {
     };
 };
 
+// [_key, _pos] spawn DUWS_fnc_hardpointOPObserve -- the recon screen a standalone enemy observation post
+// runs while it stands. Each period, at OP_OBSERVE_CHANCE odds, it pins OPFOR's knowledge of every live
+// BLUFOR within OP_OBSERVE_RADIUS to a full identification (reveal 4) and red-cards each compromised player,
+// so a post left alive keeps feeding its sector to the enemy and pressures the player to kill it or route
+// around its ring -- but the per-wake roll means it can miss, so the ring is a risk, not a certain reveal.
+// reveal is a
+// side-level knowledge write -- hence server-only, and to EAST as a whole rather than to any one group, so
+// every OPFOR element gets the position. Runs off the poller on its own clock, so its beat is independent of
+// the streaming tick and it reports whether the post is deployed or stowed. Terminates when the post's row
+// leaves DUWS_hardpoints (cleared, dev-cleared or retired); the up-to-one-period lag before it notices is
+// harmless -- the post is already gone. Card is remoteExec'd to each player object, so only the compromised
+// player sees it, on their own machine, in SP and MP alike.
+DUWS_fnc_hardpointOPObserve = {
+    params ["_key", "_pos"];
+    while { (DUWS_hardpoints findIf { (_x select 0) isEqualTo _key }) > -1 } do {
+        if (random 1 < OP_OBSERVE_CHANCE) then {
+            {
+                EAST reveal [_x, 4];
+                if (isPlayer _x) then {
+                    ["critical", [localize "STR_DUWS_T_OP_COMPROMISED_TITLE", localize "STR_DUWS_T_OP_COMPROMISED_MSG"]]
+                        remoteExec ["BIS_fnc_showNotification", _x, false];
+                };
+            } forEach (allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} });
+        };
+        sleep OP_OBSERVE_PERIOD;
+    };
+};
+
 // One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its
 // withdraw and retake arms: a hardpoint is present or not, and standing or cleared.
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
@@ -461,6 +499,11 @@ fnc_hardpoint_register = {
     _mk setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
+
+    // An enemy observation post runs a recon screen on its own clock (DUWS_fnc_hardpointOPObserve), keyed to
+    // the registry row so it dies with the post. OPFOR posts only: a BLUFOR OP (the dev tool can place one)
+    // must not report BLUFOR to OPFOR.
+    if (_type isEqualTo "OP" && {_side isEqualTo "opfor"}) then { [_key, _pos] spawn DUWS_fnc_hardpointOPObserve; };
 
     // The boom opens for its own side and bars the enemy; armed once per key, the trigger outlives the
     // stow/deploy cycles the composition goes through.

@@ -4464,6 +4464,14 @@
                 <Original>Enemies have been spotted near %1</Original>
                 <English>Enemies have been spotted near %1</English>
             </Key>
+            <Key ID="STR_DUWS_T_OP_COMPROMISED_TITLE">
+                <Original>Position Compromised</Original>
+                <English>Position Compromised</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OP_COMPROMISED_MSG">
+                <Original>Your position was revealed to OPFOR due to an enemy recon post</Original>
+                <English>Your position was revealed to OPFOR due to an enemy recon post</English>
+            </Key>
 </Container>
         <Container name="Support &amp; Radio">
             <Key ID="STR_DUWS_T_halo_ai_only">
