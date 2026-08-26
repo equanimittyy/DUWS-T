@@ -33,12 +33,19 @@ if (isNil "DUWS_netSpeakers") then {
         "STR_DUWS_T_longbowpilot", "STR_DUWS_T_slingshot", "STR_DUWS_T_Cobra",
         "STR_DUWS_T_hound", "STR_DUWS_T_Signal", "STR_DUWS_T_Signal2",
         "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER",
+        // The per-tier fire-support callsigns minted alongside slingshot: tube arty, mortar
+        // (HE and smoke share Sledge), JDAM, cluster and napalm. Absent here they default to
+        // VOICE, so their inbound/splash calls would jump onto the subtitle the guide keeps
+        // for Overlord and the team.
+        "STR_DUWS_T_redleg", "STR_DUWS_T_sledge", "STR_DUWS_T_slingshot_2",
+        "STR_DUWS_T_reaper", "STR_DUWS_T_reaper_2",
         // The two Pilot keys are absent on purpose: the intro and downed pilots are in the
         // room, not on the net.
         "STR_DUWS_T_chariot", "STR_DUWS_T_crane", "STR_DUWS_T_swordfish",
         // One callsign per air drop rather than one shared across all four: each body already
         // introduces its own, so a shared slot contradicted the line it was attached to.
-        "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
+        // courier2 is the vehicle drop's Courier 2-1, sister to the supply drop's Courier 1-1.
+        "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier2", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
     ] apply { localize _x };
 
     // The SUB-NET speakers who are OPFOR, so the log tints them red instead of the BLUFOR blue

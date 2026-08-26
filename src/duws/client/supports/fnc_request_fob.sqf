@@ -31,7 +31,6 @@ if (count Array_of_FOBS >= _maxFOB) then {
 
 if (_tooMany) exitWith {};
 
-Hint localize "STR_DUWS_T_cp9cw550";
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_cp9cw550", "", name player] remoteExec ["fnc_duws_dialogue", 0];
 _triggerSize = _size / 4;
 _trg=createTrigger["EmptyDetector",_position];
@@ -44,7 +43,6 @@ _amountOPFOR = count list _trg;
 deleteVehicle _trg;
 
 if (_amountOPFOR > 0) exitWith {
-	Hint localize "STR_DUWS_T_8zn96920";
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_8zn96920"] remoteExec ["fnc_duws_dialogue", 0];
 	sleep 15;
 	["fob_support"] call fnc_support_comm_add;

@@ -13,8 +13,6 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
-hint localize "STR_DUWS_T_y91vei53";
-
 _group = "";
 _vehicle = "";
 
@@ -29,6 +27,7 @@ _speaker1 = localize "STR_DUWS_T_courier";
 _message = ([localize "STR_DUWS_T_supplydropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_supplydropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supplydropack"] remoteExec ["fnc_duws_dialogue", 0];
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -59,12 +58,11 @@ _wp2 setWaypointBehaviour "CARELESS";
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
-hint localize "STR_DUWS_T_17hh9rx4";
 sleep 30;
-hint localize "STR_DUWS_T_zhiugl0g";
+[_speaker1, localize "STR_DUWS_T_supplydroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 waitUntil {sleep 0.1; (_vehicle getVariable ["DUWS_onStation", false]) || !alive _vehicle};
 
-if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_supplydropfail"};
+if (!alive _vehicle) exitWith {[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supplydropdown"] remoteExec ["fnc_duws_dialogue", 0]};
 
 _parachute = "Steerable_Parachute_F" CreateVehicle _location;
 _parachute setPos [_location select 0, _location select 1, (_location select 2)+100];
@@ -83,6 +81,7 @@ clearBackpackCargoGlobal _ammobox;
 _ammobox attachTo [_parachute,[0,0,0]];
 
 hint localize "STR_DUWS_T_wdttb5b8";
+[_speaker1, localize "STR_DUWS_T_supplydropdelivered"] remoteExec ["fnc_duws_dialogue", 0];
 
 waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 
@@ -101,7 +100,6 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 };
 
 "SmokeShellGreen" CreateVehicle (getpos _ammobox);
-["info",[localize "STR_DUWS_T_lyxq9zpm",localize "STR_DUWS_T_5p6d9535"]] call bis_fnc_showNotification;
 // Two broadcasts, two JIP ids: the Arsenal/rearm pair keys on the box (so its queue entry dies with
 // the crate), and Quick Kits takes a distinct string id -- a second broadcast against the same id
 // would evict the first and leave late joiners with only one of the two.

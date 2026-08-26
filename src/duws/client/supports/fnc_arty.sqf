@@ -75,15 +75,14 @@ if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
 if (_supportype == 7) then {_ord = localize "STR_DUWS_T_mortar_smoke_ord"};	//mortar smoke
 
-// Laser drives the whole strike off the on-station hint alone, so the caller gets no inbound hint
-// here -- only the radio call. Every other type keeps the grid-received hint.
-if (_ammotype != "Laser") then {
-	hint localize "STR_DUWS_T_fqeghaut";
-};
-if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+if (_ammotype == "Laser") then {
 	[_callsign, localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
-	[_callsign, localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
+	if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+		[_callsign, localize "STR_DUWS_T_artyair_inbound"] remoteExec ["fnc_duws_dialogue", 0];
+	} else {
+		[_callsign, localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
+	};
 };
 
 _drawRadius = "";
@@ -211,7 +210,6 @@ if (_ammotype == "Laser") then {
 	};
 	if (!alive _vehicle) then {_veh_alive = false};
 } else {
-	hint localize "STR_DUWS_T_moassj3z";
 	if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 		[_callsign, localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
 		waitUntil {sleep 0.1;onStation||!alive _vehicle};
@@ -232,8 +230,6 @@ if (!_veh_alive) exitWith {
 	deletemarker str(_markername2);
 	{ deleteVehicle _x } forEach units _group;
 	deleteVehicle _vehicle;
-	// Laser leans on the radio for this; other air types keep the HUD note.
-	if (_ammotype != "Laser") then { hint localize "STR_DUWS_T_9wu0cgea"; };
 	[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_jet_down", _callsign]] remoteExec ["fnc_duws_dialogue", 0];
 };
 
@@ -324,10 +320,10 @@ if (_ammotype == "Laser") then {
 // spend a further 90 s deleting markers and the jet, and the battery is free long before that.
 [_supportype] remoteExec ["fnc_support_release", 2];
 
-// Laser reports its outcome over the radio (captured / abort), so it shows no completion hint.
+// Laser reports its outcome over the radio (captured / abort); other types close on the firing callsign.
 if (_ammotype != "Laser") then {
 	sleep 2;
-	hint localize "STR_DUWS_T_t6y8r92y";
+	[_callsign, localize "STR_DUWS_T_artycomplete"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 sleep 30;

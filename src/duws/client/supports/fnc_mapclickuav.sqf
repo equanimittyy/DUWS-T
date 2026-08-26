@@ -15,13 +15,13 @@ if (commandpointsblu1 < _cost) exitWith {
 };
 
 // _cost rides the binary form so the handler can read the price out of _this. It releases
-// before closing the map, because the banner the release clears lives on the map display, and
-// hints only after, because the hint box renders behind it.
+// before closing the map, because the banner the release clears lives on the map display; the
+// tasking call to Allseer goes out last, once the map is down.
 if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	clicked=true;
 	['UAV'] call fnc_mapclick_release;
 	openMap false;
-	hint localize 'STR_DUWS_T_6u8qilfh'", _cost] call fnc_mapclick_claim)) exitWith {
+	[localize 'STR_DUWS_T_allseer', localize 'STR_DUWS_T_uav_coords'] remoteExec ['fnc_duws_dialogue', 0]", _cost] call fnc_mapclick_claim)) exitWith {
 	// The comm-menu entry is consumed on selection, so a refusal has to hand it back.
 	["uav_recon"] call fnc_support_comm_add;
 };

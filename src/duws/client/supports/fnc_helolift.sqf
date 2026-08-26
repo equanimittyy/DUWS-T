@@ -48,7 +48,7 @@ waitUntil {
 _helo = missionNamespace getVariable [_varPrefix + "_helo", objNull];
 _heloGroup = missionNamespace getVariable [_varPrefix + "_heloGroup", grpNull];
 if (isNull _helo) exitWith {
-    hint localize "STR_DUWS_T_helolift_noheli";
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftnoreach"] remoteExec ["fnc_duws_dialogue", 0];
 };
 _pilot = currentPilot _helo;
 
@@ -59,12 +59,16 @@ _originalMass = getMass _targetVehicle;
 // server owns the aircraft, so the rope/mass/landing cleanup is its call -- this half only
 // clears the player's own map markers. One-time use: the support was spent at commit and is
 // not handed back on a failed lift.
-_abort = {
+_teardown = {
     private _markers = player getVariable ["LiftWaypointMarkers", []];
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
+};
+// Damage aborts: the aircraft is genuinely lost, so Overlord reports it out of action.
+_abort = {
+    call _teardown;
+    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 
@@ -215,7 +219,10 @@ player removeAction _liftActionID;
 if (call _check_damage) exitWith { call _abort };
 
 private _waypoints = player getVariable ["LiftWaypoints", []];
-if (count _waypoints < 3) exitWith { hint localize "STR_DUWS_T_liftwp_incomplete"; call _abort };
+if (count _waypoints < 3) exitWith {
+    call _teardown;
+    [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_liftnoroute"] remoteExec ["fnc_duws_dialogue", 0];
+};
 
 // update the final waypoint marker, client-side visual feedback
 private _heloPos = getPos _helo;

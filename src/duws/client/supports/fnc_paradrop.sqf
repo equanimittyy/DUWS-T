@@ -8,12 +8,12 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
-hint localize "STR_DUWS_T_r8ubc9jy";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_chalk";
 _message = localize "STR_DUWS_T_paradropcall";
 _message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
 // SEND A PLANE
 _group = "";
@@ -57,13 +57,12 @@ _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 
-hint localize "STR_DUWS_T_5iciamva";
 sleep 40;
-hint localize "STR_DUWS_T_o4p4grm4";
+[_speaker1, localize "STR_DUWS_T_paradroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 
 // first check: plane destroyed while waiting?
 if (!alive _vehicle) exitWith {
-    hint localize "STR_DUWS_T_2bwz0z4w";
+    [_speaker, localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -73,7 +72,7 @@ waitUntil {sleep 0.5; missionNamespace getVariable "PARADROP_onStation" || !aliv
 
 // second check: plane destroyed before arrival?
 if (!alive _vehicle) exitWith {
-    hint localize "STR_DUWS_T_2bwz0z4w";
+    [_speaker, localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -163,14 +162,11 @@ _parachute12 setPos [(_lz select 0)+(random _radius)-(random _radius), (_lz sele
 _soldier12 moveindriver _parachute12;
 if (player_fatigue == 0) then {_soldier12 enablefatigue false;};
 
-hint localize "STR_DUWS_T_zm99dbgu";
+[_speaker1, localize "STR_DUWS_T_paradropdeployed"] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5;
 
 {[_x] joinSilent player} forEach units _group2;
-hint localize "STR_DUWS_T_0xtit0ht";
-
-["info",[localize "STR_DUWS_T_4i4h6z3t",localize "STR_DUWS_T_0xtit0ht"]] call bis_fnc_showNotification;
 
 //DELETE THE PLANE
 sleep 60;

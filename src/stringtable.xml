@@ -5109,54 +5109,12 @@
                 <Original>SELECT DROP ZONE</Original>
                 <English>SELECT DROP ZONE</English>
             </Key>
-            <Key ID="STR_DUWS_T_y91vei53">
-                <German>Nachschub Abwurf unterwegs. ETA: 1 min</German>
-                <Spanish>Entrega de suministros en camino. TEA: 1 min</Spanish>
-                <Chinesesimp>补给下降。预计到达时间：1分钟</Chinesesimp>
-                <Original>Supply Drop Inbound. ETA: 1 min.</Original>
-                <English>Supply Drop Inbound. ETA: 1 min.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_17hh9rx4">
-                <German>Nachschub Abwurf unterwegs</German>
-                <Spanish>Entrega de suministros en camino</Spanish>
-                <Chinesesimp>补给正在投送</Chinesesimp>
-                <Original>Supply Drop Inbound.</Original>
-                <English>Supply Drop Inbound.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zhiugl0g">
-                <German>Nachschub Abwurf bereit</German>
-                <Spanish>Entrega de suministros en estación</Spanish>
-                <Chinesesimp>补给就位</Chinesesimp>
-                <Original>Supply Drop On Station.</Original>
-                <English>Supply Drop On Station.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supplydropfail">
-                <German>Nachschub Abwurf wurde abgeschossen. Abwurf fehlgeschlagen.</German>
-                <Spanish>Los suministros ha sido derribados. Entrega de suministros fallida.</Spanish>
-                <Chinesesimp>空投补给被击落了，空投补给失败。</Chinesesimp>
-                <Original>The transport was shot down. Supply drop failed.</Original>
-                <English>The transport was shot down. Supply drop failed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_wdttb5b8">
                 <German>Eine Nachschub-Kiste wurde in der Nähe deiner Position abgeworfen</German>
                 <Spanish>Cajas de suministros ha caído cerca de su posición.</Spanish>
                 <Chinesesimp>一个补给箱被扔到了你的位置附近。</Chinesesimp>
                 <Original>A supply crate has been dropped near your location.</Original>
                 <English>A supply crate has been dropped near your location.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_lyxq9zpm">
-                <German>Nachschub-Abwurf</German>
-                <Spanish>Entrega de suministros</Spanish>
-                <Chinesesimp>空投补给</Chinesesimp>
-                <Original>Supply Drop</Original>
-                <English>Supply Drop</English>
-            </Key>
-            <Key ID="STR_DUWS_T_5p6d9535">
-                <German>Der Nachschub wurde mit grünem Rauch markiert. Prüfe deine Karte.</German>
-                <Spanish>Las cajas de suministros ha sido marcadas con humo verde. Revise su mapa.</Spanish>
-                <Chinesesimp>补给被标上了绿色烟雾。查看地图。</Chinesesimp>
-                <Original>The Supply Drop has been marked with green smoke. Check your map.</Original>
-                <English>The Supply Drop has been marked with green smoke. Check your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_jg5oh7nw">
                 <German>Artillerie</German>
@@ -5200,13 +5158,6 @@
                 <Original>Napalm</Original>
                 <English>Napalm</English>
             </Key>
-            <Key ID="STR_DUWS_T_fqeghaut">
-                <German>Koordinaten erhalten. Aufschlag in 60 Sekunden.</German>
-                <Spanish>Coordenadas recividas. Impacto en 60 segundos.</Spanish>
-                <Chinesesimp>收到坐标。60秒后着弹</Chinesesimp>
-                <Original>Grid received. Rounds on the way, 60 seconds.</Original>
-                <English>Grid received. Rounds on the way, 60 seconds.</English>
-            </Key>
             <Key ID="STR_DUWS_T_stmeajce">
                 <German>Wir sind im Anflug aufs Ziel.</German>
                 <Spanish>Estamos de camino al objetivo.</Spanish>
@@ -5221,19 +5172,12 @@
                 <Original>Grid received. Rounds on the way, 60 seconds.</Original>
                 <English>Grid received. Rounds on the way, 60 seconds.</English>
             </Key>
-            <Key ID="STR_DUWS_T_moassj3z">
-                <German>Anforderung erhalten. Aufschlag in 30 Sekunden.</German>
-                <Spanish>Munición lista. Impacto en 30 segundos.</Spanish>
-                <Chinesesimp>准备好了。30秒后着弹。</Chinesesimp>
-                <Original>Rounds ready. Splash in 30 seconds.</Original>
-                <English>Rounds ready. Splash in 30 seconds.</English>
-            </Key>
             <Key ID="STR_DUWS_T_0jegiaf4">
                 <German>Wir sind im finalen Anflug. Ziel in Sicht.</German>
                 <Spanish>Estamos en la aproximación final. Objetivo en la mira.</Spanish>
                 <Chinesesimp>我们马上到了，已看到目标。</Chinesesimp>
-                <Original>On final approach, target in sight.</Original>
-                <English>On final approach, target in sight.</English>
+                <Original>Target in sight. Splash in thirty seconds.</Original>
+                <English>Target in sight. Splash in thirty seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_hf9bhgvb">
                 <German>Anforderung erhalten. Aufschlag in 30 Sekunden.</German>
@@ -5241,20 +5185,6 @@
                 <Chinesesimp>准备好了。30秒后着弹。</Chinesesimp>
                 <Original>Rounds ready. Splash in 30 seconds.</Original>
                 <English>Rounds ready. Splash in 30 seconds.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_9wu0cgea">
-                <German>Flugzeug wurde abgeschossen. Luftschlag fehlgeschlagen.</German>
-                <Spanish>Avión de ataque derribado. Ataque áereo fallido.</Spanish>
-                <Chinesesimp>攻击机被击落。空袭失败。</Chinesesimp>
-                <Original>Attack Plane was shot down. Airstrike failed.</Original>
-                <English>Attack Plane was shot down. Airstrike failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_t6y8r92y">
-                <German>Anforderung abgeschlossen</German>
-                <Spanish>Rondas completas</Spanish>
-                <Chinesesimp>指令完成</Chinesesimp>
-                <Original>Fire mission complete.</Original>
-                <English>Fire mission complete.</English>
             </Key>
             <Key ID="STR_DUWS_T_26nbk6p8">
                 <German>Die FOB wurde errichtet.</German>
@@ -5325,6 +5255,74 @@
                 <Chinesesimp>这里是"速递1-3"，正在朝你的位置空投补给包，预计到达时间：40秒。</Chinesesimp>
                 <Original>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</Original>
                 <English>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_artyair_inbound">
+                <Original>Inbound to target. Rounds in sixty seconds.</Original>
+                <English>Inbound to target. Rounds in sixty seconds.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_artycomplete">
+                <Original>Rounds complete. Fire mission out.</Original>
+                <English>Rounds complete. Fire mission out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_supplydropack">
+                <Original>Copy your request, Alpha 1-1. Courier 1-1 is inbound with your supply drop.</Original>
+                <English>Copy your request, Alpha 1-1. Courier 1-1 is inbound with your supply drop.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_supplydroponstation">
+                <Original>This is Courier 1-1, on station over your position. Crate away.</Original>
+                <English>This is Courier 1-1, on station over your position. Crate away.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_supplydropdown">
+                <Original>Be advised, Alpha 1-1, Courier 1-1 was shot down with the supply drop.</Original>
+                <English>Be advised, Alpha 1-1, Courier 1-1 was shot down with the supply drop.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_supplydropdelivered">
+                <Original>Crate's on the ground at your position. Courier 1-1 out.</Original>
+                <English>Crate's on the ground at your position. Courier 1-1 out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_paradropinbound">
+                <Original>This is Chalk 2-1, inbound to your grid. ETA one minute.</Original>
+                <English>This is Chalk 2-1, inbound to your grid. ETA one minute.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_paradroponstation">
+                <Original>This is Chalk 2-1, on station.</Original>
+                <English>This is Chalk 2-1, on station.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_paradropdeployed">
+                <Original>Chutes away.</Original>
+                <English>Chutes away.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_paradropdown">
+                <Original>Be advised, Chalk 2-1 is down. No paratroopers inbound. You're on your own, Alpha 1-1.</Original>
+                <English>Be advised, Chalk 2-1 is down. No paratroopers inbound. You're on your own, Alpha 1-1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_courier2">
+                <Original>Courier 2-1</Original>
+                <English>Courier 2-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_vehdroponstation">
+                <Original>Transport on station over your position, cargo away.</Original>
+                <English>Transport on station over your position, cargo away.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_vehdropdown">
+                <Original>Be advised, Alpha 1-1, the transport is down. Your vehicle drop is off.</Original>
+                <English>Be advised, Alpha 1-1, the transport is down. Your vehicle drop is off.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_vehdropdelivered">
+                <Original>Vehicle's on the ground at your position. Courier 2-1 out.</Original>
+                <English>Vehicle's on the ground at your position. Courier 2-1 out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_heloliftnoreach">
+                <Original>Be advised, Alpha 1-1, heavy transport can't reach your position. Tasking aborted.</Original>
+                <English>Be advised, Alpha 1-1, heavy transport can't reach your position. Tasking aborted.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftnoroute">
+                <Original>No route received. Tasking cancelled.</Original>
+                <English>No route received. Tasking cancelled.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_uav_coords">
+                <Original>Coordinates received, tasking the UAV overhead.</Original>
+                <English>Coordinates received, tasking the UAV overhead.</English>
             </Key>
             <Key ID="STR_DUWS_T_i_got_u">
                 <German>Ich trage dich, entspann dich.</German>
@@ -5442,10 +5440,6 @@
                 <Original>To Overlord, we're at the LZ.</Original>
                 <English>To Overlord, we're at the LZ.</English>
             </Key>
-            <Key ID="STR_DUWS_T_liftwp_incomplete">
-                <Original>Route incomplete, tasking aborted.</Original>
-                <English>Route incomplete, tasking aborted.</English>
-            </Key>
                    <Key ID="STR_DUWS_T_helolift_notarget">
                        <Original>You must pick a target vehicle. Heavy transport available again in ten seconds.</Original>
                        <English>You must pick a target vehicle. Heavy transport available again in ten seconds.</English>
@@ -5453,10 +5447,6 @@
                    <Key ID="STR_DUWS_T_helolift_badtarget">
                        <Original>Target must be a car, tank, helicopter or fixed-wing aircraft. Heavy transport available again in ten seconds.</Original>
                        <English>Target must be a car, tank, helicopter or fixed-wing aircraft. Heavy transport available again in ten seconds.</English>
-                   </Key>
-                   <Key ID="STR_DUWS_T_helolift_noheli">
-                       <Original>Heavy transport could not reach your position.</Original>
-                       <English>Heavy transport could not reach your position.</English>
                    </Key>
                    <Key ID="STR_DUWS_T_liftwp_brief">
                 <Original>Mark three points on the map: two route legs, then the drop point.</Original>
@@ -5589,13 +5579,6 @@
                 <Chinesesimp>航点2已设定，现在设定最终的降落区域。</Chinesesimp>
                 <Original>Waypoint 2 set. Set final landing zone.</Original>
                 <English>Waypoint 2 set. Set final landing zone.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_helotaxichopperinbound">
-                <German>Transportflugzeug ist im Anflug.</German>
-                <Spanish>Aeronave de transporte en ruta.</Spanish>
-                <Chinesesimp>运输机正在入场</Chinesesimp>
-                <Original>Transport aircraft is inbound.</Original>
-                <English>Transport aircraft is inbound.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxirtb">
                 <German>Kehre zurück.</German>
@@ -5800,61 +5783,12 @@
                 <Original>Click on your map to scan a location using the UAV.</Original>
                 <English>Click on your map to scan a location using the UAV.</English>
             </Key>
-            <Key ID="STR_DUWS_T_6u8qilfh">
-                <Spanish>Coordenadas recividas</Spanish>
-                <German>Koordinaten erhalten</German>
-                <Chinesesimp>指令收到</Chinesesimp>
-                <Original>Coordinates received.</Original>
-                <English>Coordinates received.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_r8ubc9jy">
-                <Spanish>Paracaídistas en camino TEL: 1 minuto</Spanish>
-                <German>Fallschirmäger unterwegs. ETA: 1 Minute</German>
-                <Chinesesimp>空投进场预计时间：1分钟</Chinesesimp>
-                <Original>Paradrop Inbound. ETA: 1 minute.</Original>
-                <English>Paradrop Inbound. ETA: 1 minute.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_5iciamva">
-                <Spanish>Paracaídistas en camino</Spanish>
-                <German>Fallschirmäger im Anflug</German>
-                <Chinesesimp>空投进场</Chinesesimp>
-                <Original>Paradrop Inbound.</Original>
-                <English>Paradrop Inbound.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_o4p4grm4">
-                <Spanish>Paracaídistas en estación</Spanish>
-                <German>Fallschirmäger vor Ort angekommen</German>
-                <Chinesesimp>空投到达</Chinesesimp>
-                <Original>Paradrop On Station.</Original>
-                <English>Paradrop On Station.</English>
-            </Key>
             <Key ID="STR_DUWS_T_2bwz0z4w">
                 <Spanish>Paracaídistas derribados. Salto fallido.</Spanish>
                 <German>Fallschirmäger wurden abgeschossen.  Abwurf fehlgeschlagen.</German>
                 <Chinesesimp>空投被击落了，空投失败。</Chinesesimp>
                 <Original>The transport was shot down. Paradrop failed.</Original>
                 <English>The transport was shot down. Paradrop failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zm99dbgu">
-                <Spanish>Paracaídistas desplegados</Spanish>
-                <German>Fallschirmjäger abgesprungen</German>
-                <Chinesesimp>部署空降兵</Chinesesimp>
-                <Original>Paratroopers deployed.</Original>
-                <English>Paratroopers deployed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_0xtit0ht">
-                <Spanish>Los paracaídistas han sido agregados a su mando</Spanish>
-                <German>Die Fallschirmjäger wurden deinem Kommando unterstellt</German>
-                <Chinesesimp>空降兵已添加到你的指挥下</Chinesesimp>
-                <Original>The paratroopers are now under your command.</Original>
-                <English>The paratroopers are now under your command.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_4i4h6z3t">
-                <Spanish>Paracaídistas</Spanish>
-                <German>Fallschirmjäger</German>
-                <Chinesesimp>空投</Chinesesimp>
-                <Original>Paradrop</Original>
-                <English>Paradrop</English>
             </Key>
             <Key ID="STR_DUWS_T_cp9cw550">
                 <Spanish>Solicito un Puesto de avanzada en mi posición...</Spanish>
@@ -5912,13 +5846,6 @@
                 <Original>The UAV is returning to base.</Original>
                 <English>The UAV is returning to base.</English>
             </Key>
-            <Key ID="STR_DUWS_T_6cwj6h8z">
-                <Spanish>Entrega de vehículo de emergencia en camino</Spanish>
-                <German>Notfall Fahrzeugabwurf unterwegs</German>
-                <Chinesesimp>紧急载具空投进场</Chinesesimp>
-                <Original>Vehicle Drop Inbound.</Original>
-                <English>Vehicle Drop Inbound.</English>
-            </Key>
             <Key ID="STR_DUWS_T_vehicleready">
                 <Spanish>Despacho, el vehículo solicitado ya ha sido desplegado. Revisa tu terminal GPS.</Spanish>
                 <German>Dispo, das angeforderte Fahrzeug ist eingetroffen. Überprüfe dein GPS-Terminal.</German>
@@ -5940,40 +5867,12 @@
                 <Original>Alpha 1-1. New combat elements inbound.</Original>
                 <English>Alpha 1-1. New combat elements inbound.</English>
             </Key>
-            <Key ID="STR_DUWS_T_9tpm5uf6">
-                <Spanish>Entrega de vehículo de emergencia en estación</Spanish>
-                <German>Notfall Fahrzeugabwurf im Einsatgebiet</German>
-                <Chinesesimp>载具空投就位</Chinesesimp>
-                <Original>Vehicle Drop On Station.</Original>
-                <English>Vehicle Drop On Station.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_7h0bmzi7">
-                <Spanish>Aeronave de suministros derribada. Entrega de suministros fallida</Spanish>
-                <German>Fahrzeugabwurf wurde abgeschossenb. Abwurf gescheitert.</German>
-                <Chinesesimp>空投补给被击落，空投补给失败。</Chinesesimp>
-                <Original>The transport was shot down. Vehicle drop failed.</Original>
-                <English>The transport was shot down. Vehicle drop failed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_iv3s5xlc">
                 <Spanish>Un vehículo de emergencia ha sido soltado cerca de su locación</Spanish>
                 <German>Ein Notfall Fahrzeug wurde in der Nähe deiner Position abgeworfen</German>
                 <Chinesesimp>一辆紧急载具已经降落在你的位置附近</Chinesesimp>
                 <Original>A vehicle has been dropped near your location.</Original>
                 <English>A vehicle has been dropped near your location.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_2oefoo3j">
-                <Spanish>Vehículo entregado</Spanish>
-                <German>Fahrzeug abgeliefert</German>
-                <Chinesesimp>载具已运送</Chinesesimp>
-                <Original>Vehicle delivered</Original>
-                <English>Vehicle delivered</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pvue8vst">
-                <Spanish>El vehículo ha sido marcado con humo verde</Spanish>
-                <German>Das Fahrzeug wurde mit grünem Rauch markiert</German>
-                <Chinesesimp>载具被标上了绿色烟雾</Chinesesimp>
-                <Original>The vehicle has been marked with green smoke.</Original>
-                <English>The vehicle has been marked with green smoke.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_BUSY">
                 <Original>That battery is already firing for another element. Stand by.</Original>

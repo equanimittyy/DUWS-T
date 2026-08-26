@@ -89,14 +89,13 @@ private _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 
-hint localize "STR_DUWS_T_6cwj6h8z";
 sleep 18;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-hint localize "STR_DUWS_T_9tpm5uf6";
+[localize "STR_DUWS_T_courier2", localize "STR_DUWS_T_vehdroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 waitUntil { sleep 0.5; (missionNamespace getVariable "VEHDROP_onStation") || !alive _vehicle };
 
 if (!alive _vehicle) exitWith {
-    hint localize "STR_DUWS_T_7h0bmzi7";
+    [_speaker1, localize "STR_DUWS_T_vehdropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["VEHDROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -108,11 +107,11 @@ private _cargo = CreateVehicle [_class, [_location select 0, _location select 1,
 _cargo attachTo [_parachute, [0,0,0]];
 
 hint localize "STR_DUWS_T_iv3s5xlc";
+[localize "STR_DUWS_T_courier2", localize "STR_DUWS_T_vehdropdelivered"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 30;
 deleteVehicle _parachute;
 sleep 7;
 "SmokeShellGreen" CreateVehicle (getpos _cargo);
-["info", [localize "STR_DUWS_T_2oefoo3j", localize "STR_DUWS_T_pvue8vst"]] call bis_fnc_showNotification;
 _cargo setVehicleArmor 1;
 
 sleep 60;

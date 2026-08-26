@@ -70,8 +70,6 @@ _wp setWaypointType "MOVE";
 
 
 
-hint localize "STR_DUWS_T_helotaxichopperinbound";
-
 // check damage and exit function
 _check_damage = compile "((vehicle _pilot == _pilot) or (damage _helo > _helo_maxDamage) or (fuel _helo < _helo_minFuel))";
 _abort = {
