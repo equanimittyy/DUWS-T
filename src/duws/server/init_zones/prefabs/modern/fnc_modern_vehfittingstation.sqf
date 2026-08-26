@@ -79,31 +79,9 @@ private _tiltTypes = [
     "Land_Razorwire_F"
 ];
 
-{
-    _x params ["_class", "_offsetX", "_offsetY", "_offsetZ", "_dir", "_isWeapon"];
-    if (_isWeapon) then { continue; };
-
-    private _newX = _centerSpawnX + _offsetX;
-    private _newY = _centerSpawnY + _offsetY;
-
-    private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-    [_obj, _zoneKey] call fnc_duws_keep;
-    _obj setPosATL [_newX, _newY, 0];
-
-    if (_class in _tiltTypes) then {
-        _obj setVectorUp (surfaceNormal [_newX, _newY]);
-    };
-    _obj setDir _dir;
-
-    if !(_class in _keepSimulation) then {
-        _obj enableSimulationGlobal false;
-    };
-
-    // Fragile props kept indestructible.
-    if (_class in ["Land_WaterTank_F","Land_PaperBox_closed_F","Land_PaperBox_open_empty_F","Land_GarbageBags_F"]) then {
-        _obj allowDamage false;
-    };
-} forEach _allObjectsData;
+// Cover props via the shared placer -- tilted, frozen (bar the keep-simulated set), fragile props
+// hardened. Weapon rows are skipped here and stood up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, ["Land_WaterTank_F","Land_PaperBox_closed_F","Land_PaperBox_open_empty_F","Land_GarbageBags_F"], _keepSimulation]] call fnc_composition_place;
 
 sleep 2;
 
