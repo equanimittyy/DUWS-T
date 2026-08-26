@@ -3,10 +3,14 @@
 // the server thread (fnc_target_hvt_mission, to choose the haven the convoys run for) -- one source, so
 // offer and launch never disagree on whether or where a destination exists.
 //
-// Picks the OPFOR-held haven the columns flee to: nearest held zone 3-10 km out whose straight-line corridor
-// crosses no water and skims no BLUFOR ground. Every clean zone past 10 km -> keep the 3 km floor, drop the
-// ceiling, take the nearest clean one anyway. No clean zone (captured haven, water-locked or friendly-ringed
-// spawn) -> [], and the caller drops the offer or aborts.
+// Picks the OPFOR-held haven the columns flee to: nearest revealed held zone 3-10 km out whose straight-line
+// corridor crosses no water and skims no BLUFOR ground. Every clean zone past 10 km -> keep the 3 km floor,
+// drop the ceiling, take the nearest clean one anyway. No clean zone (captured haven, water-locked or
+// friendly-ringed spawn, or none revealed yet) -> [], and the caller drops the offer or aborts.
+//
+// Intel is a prerequisite: only a revealed zone (index 2) qualifies, so the mission never sends the player
+// after a haven they have not found. Under non-hardcore fog every zone spawns revealed, so the flag only
+// bites in hardcore mode.
 //
 // Reads only broadcast state, valid in the client picker: WARCOM_zones_controled_by_*, zone_namePOS_pairs,
 // PosOfBLUHQ, Array_of_FOBpos and fnc_route_has_water are all publicVariable'd.
@@ -46,11 +50,11 @@ private _corridorClear = {
     _ok
 };
 
-// Held OPFOR zones at least the minimum out with a clean corridor, tagged by distance.
+// Revealed held OPFOR zones at least the minimum out with a clean corridor, tagged by distance.
 private _cands = [];
 {
-    _x params ["_zn", "_zp"];
-    if ((_enemyZones findIf { _x distance2D _zp < 50 }) >= 0) then {
+    _x params ["_zn", "_zp", "_revealed"];
+    if (_revealed && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}) then {
         private _dz = _zp distance2D _spawnPos;
         if (_dz >= _spawnMin && {[_zp] call _corridorClear}) then { _cands pushBack [_dz, _zp, _zn] };
     };
