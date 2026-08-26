@@ -809,14 +809,7 @@ while {
     sleep CV_TICK;
 };
 
-// Teardown, or hand-off to combat on release: drop every path order and speed cap on every hull this loop ever
-// configured, and re-enable each driver's FSM, so native AI drives them again. Behaviour is the caller's the
-// whole time (never forced), so nothing is restored here. enableAI is issued across the whole crew (idempotent
-// on the gunner/commander, whose FSM was never touched), which is also null-safe when a hull's crew is gone.
-// limitSpeed reset must be a large value, not -1 (which never resets and forces a helicopter into reverse);
-// CV_NOLIMIT is past any ground vehicle's top speed. Per-hull commands run before the crew forEach so its _x
-// clobber cannot reach them.
-{
-    _x setDriveOnPath []; _x forceSpeed -1; _x limitSpeed CV_NOLIMIT; _x forceFollowRoad false;
-    { _x enableAI "FSM" } forEach (crew _x);
-} forEach (values _seen);
+// Teardown, or hand-off to combat on release: release every hull this loop ever configured back to native AI.
+// Behaviour is the caller's throughout (never forced), so nothing is restored here. The peeling HVT car takes
+// the same release mid-run (see fnc_convoy_release_hull), so both paths undo convoy control identically.
+{ [_x] call fnc_convoy_release_hull } forEach (values _seen);

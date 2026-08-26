@@ -322,29 +322,39 @@ private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (
 // mid-route points at once, so the three take separate roads in.
 private _holdMax = linearConversion [_holdNearDist, _holdFarDist, _MissionPos distance2D _destPos, _holdNear, _holdFar, true];
 private _holdUntil = time + _holdMax;
+// The outcome can resolve during the hold, before the columns ever move: the player can kill the HVT in his
+// held car (WIN), or the mission deadline can pass with the convoy still parked (TIMEOUT). Declared here (not
+// after the departure) so the gate and the monitor write the same variable, and a hold-phase result skips
+// ordering the columns out and the monitor below.
+private _outcome = "";
 waitUntil {
     sleep 1;
+    if (!alive _hvt) exitWith { _outcome = "WIN"; true };
+    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
     (time > _holdUntil) || {[_MissionPos, _radius] call fnc_duws_bluforNear}
 };
-{
-    private _via = _vias select _forEachIndex;
-    private _wpVia = _x addWaypoint [_via, 0];
-    _wpVia setWaypointType "MOVE";
-    _wpVia setWaypointCompletionRadius 60;
-    private _wpEnd = _x addWaypoint [_destPos, 0];
-    _wpEnd setWaypointType "MOVE";
-    _wpEnd setWaypointCompletionRadius 40;
-} forEach _groups;
-// Self-routing convoy driver per column, once rolling: it computes the road route and every hull drives it
-// holding spacing, so no follower wedges cutting its corner into the zone. Orders each column onto its crumb
-// in trail order at spawn (the hulls are laid in a rough line, not already trailing). Spawned only now, after
-// the grace hold, so it does not drive the columns sitting still. Ended at teardown via DUWS_convoy_stop.
-{ [_x] spawn fnc_convoy_drive } forEach _groups;
-// Allseer calls the move the instant the columns are ordered out, so the player reads the race as
-// starting rather than watching for it.
-[localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_hvtmoveout", _destName]] remoteExec ["fnc_duws_dialogue", 0];
+// Skipped when the hold already resolved the mission (HVT killed in his parked car, or the deadline passed):
+// the columns must not move, and the monitor below early-exits, so teardown runs straight away.
+if (_outcome == "") then {
+    {
+        private _via = _vias select _forEachIndex;
+        private _wpVia = _x addWaypoint [_via, 0];
+        _wpVia setWaypointType "MOVE";
+        _wpVia setWaypointCompletionRadius 60;
+        private _wpEnd = _x addWaypoint [_destPos, 0];
+        _wpEnd setWaypointType "MOVE";
+        _wpEnd setWaypointCompletionRadius 40;
+    } forEach _groups;
+    // Self-routing convoy driver per column, once rolling: it computes the road route and every hull drives it
+    // holding spacing, so no follower wedges cutting its corner into the zone. Orders each column onto its crumb
+    // in trail order at spawn (the hulls are laid in a rough line, not already trailing). Spawned only now, after
+    // the grace hold, so it does not drive the columns sitting still. Ended at teardown via DUWS_convoy_stop.
+    { [_x] spawn fnc_convoy_drive } forEach _groups;
+    // Allseer calls the move the instant the columns are ordered out, so the player reads the race as
+    // starting rather than watching for it.
+    [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_hvtmoveout", _destName]] remoteExec ["fnc_duws_dialogue", 0];
+};
 
-private _outcome = "";
 private _split = false;
 // Midpoint intel: a rolled 30-60 s hold after the columns move, then Allseer names their mid-route points
 // and drops an arrow on each pointing at the destination, so the player reads where the routes bend and can
@@ -362,6 +372,7 @@ private _nextReportAt  = time + (120 + round random 60);
 private _trackMarkers  = ["", "", ""];
 private _hvtMarker     = "";
 waitUntil {
+    if (_outcome != "") exitWith { true };   // resolved during the hold; nothing to monitor, tear down now
     sleep 2;
     if (!_revealed && {time > _revealAt}) then {
         _revealed = true;
@@ -433,19 +444,11 @@ waitUntil {
         private _wp = _carGrp addWaypoint [_destPos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointCompletionRadius 40;
-        // Release the car to native AI: as a run-away it must flee CARELESS at full speed on its own
-        // waypoint, so the convoy driver is dropped here -- a lone hull has no follower, so the driver would
-        // forceSpeed it down to convoy cruise and the player could walk it down. Clear the path order, forced
-        // speed and road-lock the column driver left on the car: that driver resets a hull only at its own
-        // teardown, not when one leaves the group mid-run, so without this the car keeps the old replay path
-        // and forced speed instead of racing its waypoint. The column driver dropped the car when its driver
-        // joined _carGrp, so nothing re-imposes convoy control.
-        _car setDriveOnPath [];
-        _car forceSpeed -1;
-        _car forceFollowRoad false;
-        // The column driver disabled the car driver's FSM to hold setDriveOnPath, and only re-enables at its
-        // own teardown -- give it back here or the car cannot path its escape waypoint until then.
-        (driver _car) enableAI "FSM";
+        // Hand the car to native AI: as a lone run-away it must flee CARELESS at full speed on its own
+        // waypoint. The column driver dropped it when its driver joined _carGrp but only reverses its per-hull
+        // control at its own teardown, so the stale path and the forced convoy cruise (which the player could
+        // otherwise walk down) must be lifted explicitly here.
+        [_car] call fnc_convoy_release_hull;
         // He has committed to his own run, so Allseer calls him out by name and drops a dedicated HVT marker
         // on the car (moved on each update). This is the reveal the hunt built to: the player now knows
         // which hull is his.
