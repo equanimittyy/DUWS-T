@@ -17,6 +17,12 @@
 // the order under them, so a bought permanent turning green loses nothing.
 params [["_keepSel", 1]];
 
+// The whole clear-and-rebuild runs unscheduled inside isNil. Both callers are scheduled (the menu
+// open is spawned, the refill follows fnc_support_buy's server round-trip), where the engine rations
+// ~3 ms per frame and can suspend the loop right after lbClear -- the listbox then renders empty for
+// a frame and the row flickers on every purchase. isNil runs uninterrupted, so clear and refill land
+// in the same frame. isNil shares this scope, so _keepSel and the row map are the ones declared here.
+isNil {
 lbClear 2103;
 
 private _defs = [] call fnc_support_defs;
@@ -79,3 +85,4 @@ private _rows = [];   // listbox index -> its def, [] for a heading
 
 uiNamespace setVariable ["DUWS_support_rows", _rows];
 lbSetCurSel [2103, _keepSel min ((count _rows) - 1)];
+};
