@@ -325,7 +325,9 @@ if (_ammotype == "Laser") then {
 // Laser reports its outcome over the radio (captured / abort); other types close on the firing callsign.
 if (_ammotype != "Laser") then {
 	sleep 2;
-	[_callsign, localize "STR_DUWS_T_artycomplete"] remoteExec ["fnc_duws_dialogue", 0];
+	// Air-delivered types (JDAM/cluster/napalm) drop ordnance, not rounds; tube and mortar keep "rounds".
+	private _closeLine = if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {"STR_DUWS_T_artyair_complete"} else {"STR_DUWS_T_artycomplete"};
+	[_callsign, localize _closeLine] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 sleep 30;

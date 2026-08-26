@@ -5277,12 +5277,16 @@
                 <English>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_artyair_inbound">
-                <Original>Inbound to target. Rounds in sixty seconds.</Original>
-                <English>Inbound to target. Rounds in sixty seconds.</English>
+                <Original>Inbound to target. Ordnance in sixty seconds.</Original>
+                <English>Inbound to target. Ordnance in sixty seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_artycomplete">
                 <Original>Rounds complete. Fire mission out.</Original>
                 <English>Rounds complete. Fire mission out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_artyair_complete">
+                <Original>Ordnance delivered. Fire mission out.</Original>
+                <English>Ordnance delivered. Fire mission out.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplydropack">
                 <Original>Copy your request, Alpha 1-1. Courier 1-1 is inbound with your supply drop.</Original>
