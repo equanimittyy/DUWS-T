@@ -15,14 +15,15 @@ if (commandpointsblu1 < _cost) exitWith {
 	};
 };
 [-_cost, "uav_scan"] call fnc_cp_adjust;
+// Opening exchange in the fire-support cadence: the caller's request and Overlord's copy key up
+// together the instant the grid is marked, then Allseer answers a beat later. name resolved from
+// the caller unit, not `player`: this fn is server-side.
 _speaker = localize "STR_DUWS_T_actionteam";
-_message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
-// name resolved here on the server from the caller unit, not `player`: this fn is server-side.
+_message = localize "STR_DUWS_T_requestuavscan";
 [_speaker, _message, "", (if (isNull _caller) then {""} else {name _caller})] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_requestuavscan1"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_requestuavscan1";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_uav_coords"] remoteExec ["fnc_duws_dialogue", 0];
 // Unique per scan so two scans on the same point never share a marker namespace
 // (which would stomp each other's circle and dots, and delete them early). Server-
 // only fn; this read+increment has no suspension point, so scheduled calls cannot
@@ -93,17 +94,10 @@ if (!alive _vehicle) exitWith {
 	deleteMarker str(_markername);
 };
 
-switch (VERSION_X) do {
-	case "MODERN": {
-		[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_7vt59ge6"] remoteExec ["fnc_duws_dialogue", 0];
-	};
-};
-
-_speaker = localize "STR_DUWS_T_OVERLORD";
+_speaker = localize "STR_DUWS_T_allseer";
 _message = localize "STR_DUWS_T_uavscancall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
-[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_2ncoq1yy"] remoteExec ["fnc_duws_dialogue", 0];
 
 
 // Live recon feed. Two EmptyDetector triggers keep a continuously-updated PRESENT

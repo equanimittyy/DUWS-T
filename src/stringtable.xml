@@ -5248,8 +5248,8 @@
                 <German>Alle AO-Einheiten, hier ist "Overlord 1-1" – UAV-Aufklärung ist an markierter Position online.</German>
                 <Spanish>Todas las unidades del AO, este es "Overlord 1-1" – reconocimiento por UAV está en línea en posición marcada.</Spanish>
                 <Chinesesimp>战区所有单位。无人机侦察在标记位置上线了。</Chinesesimp>
-                <Original>All AO units. UAV recon is online over the marked position.</Original>
-                <English>All AO units. UAV recon is online over the marked position.</English>
+                <Original>All units in the AO, UAV recon is online over the marked position.</Original>
+                <English>All units in the AO, UAV recon is online over the marked position.</English>
             </Key>
             <Key ID="STR_DUWS_T_vehdropcallend">
                 <German>Hier ist "Overlord 1-1" – Anfrage empfangen. ETA für den Abwurf: 40 Sekunden.</German>
@@ -5876,20 +5876,6 @@
                 <Chinesesimp>侦察机被击落，侦查失败。</Chinesesimp>
                 <Original>The recon aircraft was shot down. Mission failed.</Original>
                 <English>The recon aircraft was shot down. Mission failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_7vt59ge6">
-                <Spanish>En estación. Reciviendo datos del VANT...</Spanish>
-                <German>Im Einsatzgebiet. Erhalte Aufklärungsdaten von der Drohne...</German>
-                <Chinesesimp>就绪，从UAV获取数据。</Chinesesimp>
-                <Original>On Station. Collecting data from the UAV...</Original>
-                <English>On Station. Collecting data from the UAV...</English>
-            </Key>
-            <Key ID="STR_DUWS_T_2ncoq1yy">
-                <Spanish>Revise su mapa. Las últimas posiciones enemigas están en estas coordenadas.</Spanish>
-                <German>Prüfe deine Karte. Die letzten bekannten Feindpositionen befinden sich auf diesen Koordinaten.</German>
-                <Chinesesimp>查看地图。最后已知的敌人位置在这些网格位置。</Chinesesimp>
-                <Original>Check your map. The last known enemy positions are marked.</Original>
-                <English>Check your map. The last known enemy positions are marked.</English>
             </Key>
             <Key ID="STR_DUWS_T_rfcxa2ku">
                 <Spanish>El VANT está regresando a base.</Spanish>
