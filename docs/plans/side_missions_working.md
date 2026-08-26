@@ -33,7 +33,7 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
 gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
-too until reworked, not a reviewed baseline: Steal Supply Truck (1), Destroy Signal Tower (3), Rescue
+too until reworked, not a reviewed baseline: Steal Supply Truck (1), Rescue
 Pilot (4), Steal Builder Vehicle (6), Destroy Laptop (8), Destroy Ammo Cache (9), Destroy Radar (10),
 Clear Area (11), Protect Informant (14), Recover Humanitarian Supply Truck (15).
 Ideas per row in the [tracker](#per-mission-rework-tracker).
@@ -199,6 +199,18 @@ hold 12 s, approach ring 200 m, 2 teams + a car, prefab offset 25 m, gunner-clai
 bonus reveals. Targets zones only for now -- hardpoint targeting as the primary objective is a later
 add.
 
+### Destroy Signal Tower
+
+`mission_threads/destroy_tower/`. No stand-in: the mission points at an existing standalone OPFOR RADIO
+hardpoint (a `Land_TTowerBig_2_F` mast) picked from `DUWS_hardpoints` nearest the anchor, intel state
+ignored, and wins when that hardpoint falls -- its row leaving the array, watched directly, not the tower
+object dying (the mission never handles the streamer-owned mast). The streamer removes the row and pays
+the bounty when the hardpoint clears. `fnc_destroy_tower_site` gates the offer on a live mast within 2500 m, so once every
+tower is down the mission stops being offered. The player collects the 30/20 mission reward on top of the
+hardpoint's own [10 CP, 10 AP] destruction bounty and its AoI-coverage drop, all paid by the streamer.
+Spawns nothing -- the mast's own inline crew is the whole opposition. Off the spine (the win watches
+broadcast state, not a one-shot predicate).
+
 ## Mission catalogue (current)
 
 CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
@@ -215,13 +227,14 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | 16 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
 | 13 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
 | 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
-| 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done || 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
+| 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
+| 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
+| 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 30/20/0 | 3 | stale |
 | 10 | Destroy Radar | sabotage | cmd | 25/25/0 | 3 | stale |
 | 11 | Clear Area | assault | cmd | 15/20/0 | 3 | stale |
-| 3 | Destroy Signal Tower | sabotage | cmd | 20/30/0 | 2 | stale (tower pre-broken to 0.8) |
 | 8 | Destroy Laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
 | 14 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
 | 15 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
@@ -231,15 +244,15 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 Principle: base pay tracks required effort, holding the command economy near its aggregate. CP leans
 to command/intel/tactical value, AP to materiel destroyed or manpower recovered. The reworked and
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
-Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team) are now priced to effort; the
+Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower) are now priced to effort; the
 vehicle patrol adds a tier bonus at spawn (see its design note). **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 10 stale rows, not only
-the four below; these four are just the worst effort/pay mismatches:
+still-stale mission carries its old numbers and is open pricing work** -- all 9 stale rows, not only
+the three below; these three are just the worst effort/pay mismatches:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
-| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort || Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
-| Destroy Signal Tower | 2 | 20/30 | gimme -- tower pre-broken; spawn it intact or cut the AP |
+| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
+| Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
 | Destroy Laptop | 1 | 10/35 | AP overpaid for one hold-action |
 
 ## Per-mission rework tracker
@@ -256,8 +269,9 @@ change cell is the current idea, not a locked spec.
 | Informant Manhunt | disguised manhunt in a town crowd | done |
 | Recon Enemy Position | standoff binocular hold that reveals a zone | done |
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
-| Steal Builder Vehicle | match effort/pay of its twin | stale || Clear Area | reprice to the full-clear effort | stale |
-| Destroy Signal Tower | spawn the tower intact so destruction is real work | stale |
+| Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
+| Steal Builder Vehicle | match effort/pay of its twin | stale |
+| Clear Area | reprice to the full-clear effort | stale |
 | Destroy Laptop | keep light; trim the overpaid AP | stale |
 | Steal Supply Truck | distinct verb TBD + reprice | stale |
 | Rescue Pilot | distinct verb TBD + reprice | stale |
@@ -268,9 +282,8 @@ change cell is the current idea, not a locked spec.
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 10 need both a verb and a reprice; see the tracker).
+- The distinct verb for each still-stale row (all 9 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
-- Destroy Signal Tower: spawn intact, or accept it as a gimme and cut the AP.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
 - Civilian missions (protect_civ, transport_IDAP): analyse how they play, then price.

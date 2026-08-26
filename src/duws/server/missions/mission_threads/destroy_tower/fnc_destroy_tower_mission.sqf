@@ -1,115 +1,57 @@
 // Locality: server -- callers remoteExec to target 2.
+//
+// Destroy an EXISTING standalone OPFOR RADIO hardpoint (a signal mast, DUWS_radioMastClass) rather than
+// a spawned stand-in. The mast, its crew and its destruction bounty are all owned by the hardpoint
+// streamer; this thread only points the task at one and pays the mission reward on top when it falls.
+// Win is the hardpoint falling -- its DUWS_hardpoints row disappearing -- not the tower object dying:
+// the mission never handles the streamer-owned mast, and a cleared row is the broadcast signal for the
+// hardpoint being gone by any means (player, support, anything the streamer recognizes). The streamer
+// removes the row and credits the bounty in the same step, so the two payouts stack with no coupling
+// here. Off the fnc_mission_run spine -- the win watches broadcast state, not a one-shot predicate.
 params ["_MissionPos", "_mission_name"];
 if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
-
 
 _radius = 400;
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_speaker1 = localize "STR_DUWS_T_Cobra";
-_message = localize "STR_DUWS_T_towerletsdothis";
-_message1 = localize "STR_DUWS_T_towersignallost";
-_message2 = localize "STR_DUWS_T_toweroverlord";
 
-_markerText2 = localize "STR_DUWS_T_c3";
-
-private _site = [_MissionPos, _radius, 3] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
-
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the spawn-up below runs for tens of seconds.
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
-private _VARtaskgeneratedName = format ["tower%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
-
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",[0,-2] select isDedicated];
-
-_towerPos = _targetpos;
-
-
-_centerSpawnX = _towerPos select 0;
-_centerSpawnY = _towerPos select 1;
-
-// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=A--
-_staticsArray = [];
-switch (VERSION_X) do {
-    case "MODERN": {
-        _staticsArray = [
-            ["Land_CratesWooden_F", -3.56738, -6.65527, 0, 269.589],
-            ["CargoNet_01_barrels_F", 3.37939, -7.32568, 0, 0],
-            ["Land_CratesWooden_F", -5.61475, -6.56982, 0, 269.589],
-            ["CargoNet_01_barrels_F", 5.3335, -7.30029, 0, 0],
-            ["Land_HBarrier_5_F", -3.70996, 8.57227, 0, 1.64537],
-            ["Land_HBarrier_5_F", 2.06396, 8.42969, 0, 1.64537],
-            ["Land_HBarrier_5_F", 10.0508, 1.10498, 0, 271.593],
-            ["Land_HBarrier_5_F", -4.1333, -9.50635, 0, 179.745],
-            ["Land_HBarrier_5_F", 9.91553, -4.47949, 0, 271.593],
-            ["Land_HBarrier_5_F", 4.69043, -9.56396, 0, 179.745],
-            ["Land_HBarrier_5_F", -10.3931, 2.490234, 0, 271.593],
-            ["Land_HBarrier_5_F", -10.5269, -3.28467, 0, 271.593],
-            ["Land_TBox_F", -0.117676, -14.9492, 0, 182.221]
-        ];
-// --DUWS-COMPOSITION END--
-    };
-};
-
-_vehicle = objNull;
+// Nearest live OPFOR standalone RADIO mast to the anchor -- the same scan the offer's site-finder ran,
+// so the two agree on which mast. Row: [key, pos, type, side, zoneKey, revealed, dir]. None left in
+// reach (the mast fell in the gap between offer and launch) releases the slot and gate.
+private _hpKey = "";
+private _hpPos = [];
+private _bestD = 2500;
 {
-    _x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
-    _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
-    _vehicle setDir _dir;
-    _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-    [_vehicle, "mission_destroy_tower"] call fnc_duws_keep;
-} forEach _staticsArray;
-
-_vehicle_7 = objNull;
-switch (VERSION_X) do {
-    case "MODERN": {
-        _vehicle_7 = createVehicle ["Land_TTowerBig_2_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-        _vehicle_7 setDir 0;
-        _vehicle_7 setPosATL [(_centerSpawnX), (_centerSpawnY), 0];
-        _vehicle_7 setDamage 0.8;
-        _vehicle_7 setVectorUp [0,0,1];
-        [_vehicle_7, "mission_destroy_tower"] call fnc_duws_keep;
+    _x params ["_key", "_hp", "_type", "_side", "_zoneKey"];
+    if (_type isEqualTo "RADIO" && {_side isEqualTo "opfor"} && {_zoneKey isEqualTo ""}) then {
+        private _d = _hp distance2D _MissionPos;
+        if (_d < _bestD) then { _bestD = _d; _hpKey = _key; _hpPos = _hp };
     };
-};
+} forEach DUWS_hardpoints;
+if (_hpKey isEqualTo "") exitWith { [3, "STR_DUWS_T_crtzxs0j", "no_radio_hp"] call fnc_mission_abort };
 
-[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-sleep 1;
-[_targetpos, _radius] spawn fnc_missionPatrolswithintel;
+_markername2 = [_hpPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["tower%1%2", round (_hpPos select 0), round (_hpPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _hpPos, "destroy"] call fnc_missionTaskCreate;
 
+[localize "STR_DUWS_T_c3", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
-[_speaker1, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 12;
-["", _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 12;
-[_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
+// One tasking line: the mast and its crew already stand on the map, so there is no spawn-up to narrate.
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_toweroverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
-sleep 5;
-
-
+// Win when the hardpoint's row leaves DUWS_hardpoints -- watch the hardpoint's liveness, not the tower
+// object. A gone row means the hardpoint fell and its bounty is already paid. Deadline covers it left up.
 waitUntil {
     sleep 5;
-    !alive _vehicle_7 || (damage _vehicle_7) == 1 || time > _deadline
+    (DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) < 0 || time > _deadline
 };
 
-
-if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && time > _deadline) exitWith {
-    [{hint localize "STR_DUWS_T_xhtbpyl1"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = ([localize "STR_DUWS_T_towerfail"] call fnc_cs);
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [_markername2] call fnc_missionMarkerClear;
-    [_targetpos,_radius, "mission_destroy_tower"] call fnc_mission_end;
+if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && time > _deadline) exitWith {
+    [_VARtaskgeneratedName, _markername2, "", _hpPos, _radius, false, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_towerfail"]] call fnc_mission_deadline_fail;
 };
 
 [_markername2] call fnc_missionMarkerClear;
-
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_targetpos,_radius, "mission_destroy_tower"] call fnc_mission_end;
+[_hpPos, _radius, "mission_destroy_tower"] call fnc_mission_end;

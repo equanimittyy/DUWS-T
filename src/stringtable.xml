@@ -3832,8 +3832,8 @@
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
                 <Spanish>Una torre de señales aliada en esta zona ha sido tomada por fuerzas enemigas. Las tropas enemigas están acantonadas cerca y descifrando información crítica. Destruye la torre con explosivos antes de que terminen el descifrado! (¡Quedan solo 15 minutos para que la información crítica se filtre!) (Slightly low CP, avg AP)</Spanish>
                 <Chinesesimp>友军部队在该地的一座信号塔被占领了，敌军正在旁边驻扎并破译关键信息。在敌军完成破译前去把塔炸掉！(距离关键信息泄露仅剩15分钟)(稍低CP，平均AP)</Chinesesimp>
-                <Original>OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.</Original>
-                <English>OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.</English>
+                <Original>An OPFOR radio mast at the marked position is pushing enemy comms across the sector. Bring explosives and drop it. The mast is the only thing on the site worth wrecking.</Original>
+                <English>An OPFOR radio mast at the marked position is pushing enemy comms across the sector. Bring explosives and drop it. The mast is the only thing on the site worth wrecking.</English>
             </Key>
             <Key ID="STR_DUWS_T_towerdecrypt">
                 <German>Unsere kritischen Informationen werden gerade entschlüsselt! Du und deine Truppe müsst euch beeilen!</German>
@@ -3841,13 +3841,6 @@
                 <Chinesesimp>我们的关键信息正被破译！你和你的小队需要加快脚步了！</Chinesesimp>
                 <Original>They're nearly through the intel. Two minutes left.</Original>
                 <English>They're nearly through the intel. Two minutes left.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xhtbpyl1">
-                <German>==SIDE MISSION FAILED==\n\nZu spät – die kritischen Informationen wurden von den Feinden entschlüsselt......</German>
-                <Spanish>==SIDE MISSION FAILED==\n\nDemasiado tarde – la información crítica ha sido descifrada por el enemigo......</Spanish>
-                <Chinesesimp>==SIDE MISSION FAILED==\n\n太晚了，关键信息被敌人破译了......</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</English>
             </Key>
             <Key ID="STR_DUWS_T_njsu8ofz">
                 <German>Eines unserer Flugzeuge wurde in der Nähe dieses Ortes abgeschossen. Satellitenmeldungen zeigen, dass der Pilot schwere Verletzungen erlitten hat und stark blutet – beeil dich zum Absturzort und bring ihn sicher zurück zur Basis. (Nur noch 10 Minuten, bis der Pilot an Blutverlust stirbt!) (Avg CP, very high AP)</German>
@@ -4386,33 +4379,19 @@
                 <Original>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</Original>
                 <English>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</English>
             </Key>
-            <Key ID="STR_DUWS_T_towerletsdothis">
-                <German>"Kobra" an Kommando! Wir bekämpfen feindliches schweres Feuer am verbündeten Funkturm! Ich wiederhole...</German>
-                <Spanish>"Cobra" al Mando! Estamos combatiendo contra fuego pesado enemigo en la torre de señales aliada! Repito...</Spanish>
-                <Chinesesimp>总部！我们正在友军信号塔处与敌人重火力交战！重复...</Chinesesimp>
-                <Original>To Overlord, we're taking heavy fire at the signal tower. I say again, heavy fire—</Original>
-                <English>To Overlord, we're taking heavy fire at the signal tower. I say again, heavy fire—</English>
-            </Key>
             <Key ID="STR_DUWS_T_towerfail">
                 <German>"Overlord 1-1" an Action Squad, verlasse das AO! Der Feind hat unsere Kommunikation gekapert!</German>
                 <Spanish>"Overlord 1-1" al Action Squad, retirese del AO! El enemigo ha interceptado nuestras comunicaciones!</Spanish>
                 <Chinesesimp>行动组，撤出行动区域！敌人已经截获了我们的信号！</Chinesesimp>
-                <Original>To Alpha 1-1, the enemy has our traffic. Nothing more to do there — extract from the AO.</Original>
-                <English>To Alpha 1-1, the enemy has our traffic. Nothing more to do there — extract from the AO.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_towersignallost">
-                <German>Zzzzt...(Funkstörgeräusch)</German>
-                <Spanish>Zzzzt...(Estática de radio)</Spanish>
-                <Chinesesimp>滋滋滋...</Chinesesimp>
-                <Original>Zzzzt...(Radio static)</Original>
-                <English>Zzzzt...(Radio static)</English>
+                <Original>To Alpha 1-1, the mast is still standing and we've lost the window. Pull out of the AO.</Original>
+                <English>To Alpha 1-1, the mast is still standing and we've lost the window. Pull out of the AO.</English>
             </Key>
             <Key ID="STR_DUWS_T_toweroverlord">
                 <German>Dies ist „Oberherr 1-1“. „Cobra 1-3“ (Funkturm-Verteidigung) bestätigt tot. Feinde dürfen unsere Signale nicht abfangen. Funkturm mit allen Mitteln unbrauchbar machen!</German>
                 <Spanish>Este es "Imperador 1-1". "Cobra 1-3" (defensa torre de señales) caída en combate confirmada. El enemigo no interceptará nuestras señales. Neutraliza la torre por cualquier medio!</Spanish>
                 <Chinesesimp>驻守信号塔的"眼镜蛇1-3"刚刚已经确认全体阵亡，但我们不能让敌人在信号塔截获我们的信号。你的单位需要以一切手段使信号塔无效化。</Chinesesimp>
-                <Original>Cobra 1-3, the element holding the signal tower, is confirmed KIA. The enemy is reading our traffic through that tower. Bring it down.</Original>
-                <English>Cobra 1-3, the element holding the signal tower, is confirmed KIA. The enemy is reading our traffic through that tower. Bring it down.</English>
+                <Original>To Alpha 1-1, that OPFOR radio mast is boosting enemy comms across the sector. Get in and drop it.</Original>
+                <English>To Alpha 1-1, that OPFOR radio mast is boosting enemy comms across the sector. Get in and drop it.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Gerade eben haben wir ein verborgenes feindliches Flakradar lokalisiert. Mehrere unserer Luftverbände wurden ihm zum Opfer gefallen. Also, zur Rache ziehen!</German>
