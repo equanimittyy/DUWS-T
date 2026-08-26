@@ -53,10 +53,13 @@
 // demand -- rarely exist but open ground 3-10 km from a zone does.
 //
 // hardEligible and weight feed the strategic-map draw (fnc_stratmap), not siting. hardEligible true lets
-// the type fill one of the two deep, difficulty-boosted "hard" offer slots -- false for a type that
-// cannot sit behind enemy lines (informant, the civilian pair, the convoys). weight is the relative odds
-// of being drawn; 1 is neutral, lower makes a type rarer. Types are drawn without replacement into the
-// offer set, so weight biases order and presence, not duplication.
+// the type fill one of the two deep, difficulty-boosted "hard" offer slots; false bars a type from them.
+// Every type is hardEligible: the hard survey scores a town or countryside feature 0 where no enemy zone
+// or hardpoint is near (fnc_mission_findSite _fnHardScore), so a type with no enemy-dense fit just returns
+// no hard site -- that slot draws another type and the type still seats easy -- rather than placing
+// somewhere absurd. So the flag needs no bar; leave it true unless a future type must never pay the deep
+// bonus. weight is the relative odds of being drawn; 1 is neutral, lower makes a type rarer. Types are
+// drawn without replacement into the offer set, so weight biases order and presence, not duplication.
 //
 // surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the
 // countryside off OPFOR zones, "town" scans populated towns. Set "town" for a type that belongs in a
@@ -72,7 +75,7 @@
 
 ["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue Assault Team",              { [0]  call fnc_mission_launch }, 25, 15, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Supply Truck",       { [1]  call fnc_mission_launch }, 35, 25, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "zone"]],
-["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate High-Value Target",          { [2]  call fnc_mission_launch }, 40, 35, 0, [3,3], "command", "elimination", "", [false, 0, false, false, 1, "zone"]],
+["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate High-Value Target",          { [2]  call fnc_mission_launch }, 40, 35, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Signal Tower",            { [3]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue Pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt Sniper Team",             { [5]  call fnc_mission_launch }, 20, 15, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "zone"]],
@@ -82,9 +85,9 @@
 ["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Ammo Cache",            { [9]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Radar",            { [10] call fnc_mission_launch }, 25, 25, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_clearthearea_cqb_mission", "STR_DUWS_T_c11", "STR_DUWS_T_cqbdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Clear Area", { [11] call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "assault", "", [false, 0, false, true, 1, "town"]],
-["fnc_deny_armor_mission",       "STR_DUWS_T_c12", "STR_DUWS_T_destroyarmour_desc",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Deny Enemy Armor",         { [12] call fnc_mission_launch }, 15, 25, 0, [3,3], "command", "elimination", "", [true, 1500, true, false, 1, "zone"]],
+["fnc_deny_armor_mission",       "STR_DUWS_T_c12", "STR_DUWS_T_destroyarmour_desc",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Deny Enemy Armor",         { [12] call fnc_mission_launch }, 15, 25, 0, [3,3], "command", "elimination", "", [true, 1500, true, true, 1, "zone"]],
 ["fnc_recon_observe_mission",    "STR_DUWS_T_c13", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon Enemy Position",       { [13] call fnc_mission_launch }, 10, 5,  0, [3,3], "command", "recon", "", [false, 0, false, true, 1, "zone"]],
-["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect Informant",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend", "", [false, 0, false, false, 1, "town"]],
-["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Recover Humanitarian Supply Truck",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort", "", [false, 0, false, false, 1, "town"]],
-["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Informant Manhunt", { [16] call fnc_mission_launch }, 10, 25, 0, [3,3], "command", "elimination", "STR_DUWS_T_INTEL_INFORMANT_NOTE", [false, 0, false, false, 1, "town"]],
+["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect Informant",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend", "", [false, 0, false, true, 1, "town"]],
+["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Recover Humanitarian Supply Truck",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort", "", [false, 0, false, true, 1, "town"]],
+["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Informant Manhunt", { [16] call fnc_mission_launch }, 10, 25, 0, [3,3], "command", "elimination", "STR_DUWS_T_INTEL_INFORMANT_NOTE", [false, 0, false, true, 1, "town"]],
 ["fnc_destroy_hardpoint_mission", "STR_DUWS_T_c17", "STR_DUWS_T_DESTROY_HARDPOINT_DESC", "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Hardpoint",            { [17] call fnc_mission_launch }, 10, 10, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]]
