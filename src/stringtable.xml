@@ -5619,23 +5619,23 @@
                 <German>Leitstelle hier, Nahluftunterstützungseinheit „Koi“ bestätigt im Einsatz gefallen. Ersatzeinheit wird im Einsatzgebiet eingesetzt, ETA: 10 Minuten.</German>
                 <Spanish>Despacho aquí, unidad de apoyo aéreo cercano «Koi» confirmada KIA en acción. Unidad de respaldo desplegando hacia la zona de operaciones, ETA: 10 minutos.</Spanish>
                 <Chinesesimp>近空支援单位"鲤鱼"被确认在行动中阵亡。后备单位正在部署到战区，预计到达时间：10分钟后</Chinesesimp>
-                <Original>Koi 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</Original>
-                <English>Koi 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</English>
+                <Original>Koi 1-1 is down. A replacement aircraft will be available in ten minutes.</Original>
+                <English>Koi 1-1 is down. A replacement aircraft will be available in ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_casdownlb">
                 <German>Leitstelle hier, Nahluftunterstützungseinheit „Longbow“ bestätigt im Einsatz gefallen. Ersatzeinheit wird im Einsatzgebiet eingesetzt, ETA: 10 Minuten.</German>
                 <Spanish>Despacho aquí, unidad de apoyo aéreo cercano «Longbow» confirmada KIA en acción. Unidad de respaldo desplegando hacia la zona de operaciones, ETA: 10 minutos.</Spanish>
                 <Chinesesimp>近空支援单位"长弓"被确认在行动中阵亡。后备单位正在部署到战区，预计到达时间：10分钟后</Chinesesimp>
-                <Original>Longbow 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</Original>
-                <English>Longbow 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</English>
+                <Original>Longbow 1-1 is down. A replacement aircraft will be available in ten minutes.</Original>
+                <English>Longbow 1-1 is down. A replacement aircraft will be available in ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_hc_attchop_rtb">
-                <Original>To Alpha 1-1, on-station time expired, returning to base.</Original>
-                <English>To Alpha 1-1, on-station time expired, returning to base.</English>
+                <Original>To Alpha 1-1, on-station time expired, returning to base. Another gunship will be available in ten minutes.</Original>
+                <English>To Alpha 1-1, on-station time expired, returning to base. Another gunship will be available in ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_hc_cas_rtb">
-                <Original>To Alpha 1-1, on-station time expired, returning to base.</Original>
-                <English>To Alpha 1-1, on-station time expired, returning to base.</English>
+                <Original>To Alpha 1-1, on-station time expired, returning to base. Another jet will be available in ten minutes.</Original>
+                <English>To Alpha 1-1, on-station time expired, returning to base. Another jet will be available in ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_casreservekoi">
                 <German>Einsatzteam, beachten Sie, Leitstelle hier. Neue Nahluftunterstützungseinheit im Anflug. Rufzeichen: "Koi".</German>
@@ -5915,6 +5915,22 @@
             <Key ID="STR_DUWS_T_SUPPORT_BUSY">
                 <Original>That battery is already firing for another element. Stand by.</Original>
                 <English>That battery is already firing for another element. Stand by.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcair_busy_gunship">
+                <Original>The gunship is already on station. Only one at a time.</Original>
+                <English>The gunship is already on station. Only one at a time.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcair_busy_jet">
+                <Original>The jet is already on station. Only one at a time.</Original>
+                <English>The jet is already on station. Only one at a time.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcair_cooldown_gunship">
+                <Original>Gunship on cooldown: %1 min %2 sec remaining.</Original>
+                <English>Gunship on cooldown: %1 min %2 sec remaining.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcair_cooldown_jet">
+                <Original>Jet on cooldown: %1 min %2 sec remaining.</Original>
+                <English>Jet on cooldown: %1 min %2 sec remaining.</English>
             </Key>
                     <Key ID="STR_DUWS_T_liftwp_leg">
                 <Original>Route leg %1</Original>

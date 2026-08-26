@@ -21,6 +21,7 @@ fnc_duws_bluforNear = compile preprocessFileLineNumbers "duws\server\misc\fnc_du
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_support_claim_init.sqf";
 publicVariable "fnc_support_reply";
 publicVariable "fnc_support_claim";
+publicVariable "fnc_hcair_claim_request";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
 fnc_duws_dialogue_channel = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue_channel.sqf";

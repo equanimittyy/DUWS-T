@@ -144,7 +144,7 @@ MHQ_lockout_seconds = 1800; publicVariable "MHQ_lockout_seconds";
 // How long a High Command aircraft (attack heli, CAS jet) holds station before it flies home and
 // despawns. Without a leash a one-time air support that is never shot down loiters for the rest of the
 // mission, making a consumable permanent. One figure for both airframes; read on the buyer's client.
-HC_air_station_seconds = 1800; publicVariable "HC_air_station_seconds";
+HC_air_station_seconds = 300; publicVariable "HC_air_station_seconds";
 
 // Which permanent supports the team has bought, in purchase order. Their broadcast flags stay
 // every client's fast path; this holds the same set as data a campaign save can walk, instead of

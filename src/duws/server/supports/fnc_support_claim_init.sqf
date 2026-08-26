@@ -48,3 +48,58 @@ fnc_support_claim = {
 	if (!_replied) then { ["WARN", "SUPPORT", format ["fnc_support_claim: no reply for %1, refused", _type]] call fnc_log; };
 	_ok
 };
+
+// High Command aircraft lock. One airborne at a time across the whole team, then a global cooldown
+// everyone waits out. Kept apart from the fire-mission slot above because a sortie is long and its two
+// refusal states -- one already on station, or the cooldown still running -- carry different hints, and
+// the cooldown end is broadcast so any client can show the time left without another round-trip.
+fnc_hcair_claim = {
+	if (!isServer) exitWith {};
+	params [["_type", ""], ["_requester", objNull], ["_replyVar", ""]];
+	private _activeVar = format ["DUWS_hcair_active_%1", _type];
+	private _untilVar = format ["DUWS_hcair_activeUntil_%1", _type];
+	private _cdVar = format ["DUWS_hcair_cooldownEnd_%1", _type];
+	private _active = missionNamespace getVariable [_activeVar, false];
+	// Safety expiry: a caller that disconnects or errors between claim and end would otherwise hold the
+	// slot for the rest of the campaign, so an over-age active claim is treated as free.
+	private _stale = _active && {time > (missionNamespace getVariable [_untilVar, 0])};
+	private _ok = (!_active || _stale) && {time > (missionNamespace getVariable [_cdVar, 0])};
+	if (_ok) then {
+		missionNamespace setVariable [_activeVar, true];
+		missionNamespace setVariable [_untilVar, time + 1800];
+	};
+	[_replyVar, _ok] remoteExec ["fnc_support_reply", _requester];
+};
+
+// Sortie over (RTB, shot down, or no-show): free the slot and start the global cooldown. The end time
+// is broadcast (public) so the refusal hint on every client can read how long is left.
+fnc_hcair_endActive = {
+	if (!isServer) exitWith {};
+	params [["_type", ""], ["_cooldown", 600]];
+	missionNamespace setVariable [format ["DUWS_hcair_active_%1", _type], false];
+	missionNamespace setVariable [format ["DUWS_hcair_cooldownEnd_%1", _type], time + _cooldown, true];
+};
+
+// Client half of the aircraft lock, same handshake shape as fnc_support_claim. On refusal it shows the
+// reason -- cooldown with time left, or one already on station -- and hands the comm-menu entry back,
+// so a refused request costs the caller nothing.
+fnc_hcair_claim_request = {
+	params [["_type", ""], ["_commItem", ""], ["_busyKey", ""], ["_cdKey", ""]];
+	duws_hcair_seq = (missionNamespace getVariable ["duws_hcair_seq", 0]) + 1;
+	private _replyVar = format ["duws_hcair_reply_%1", duws_hcair_seq];
+	[_type, player, _replyVar] remoteExec ["fnc_hcair_claim", 2];
+	private _deadline = diag_tickTime + 5;
+	waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
+	private _ok = missionNamespace getVariable [_replyVar, false];
+	missionNamespace setVariable [_replyVar, nil];
+	if (!_ok) then {
+		private _left = (missionNamespace getVariable [format ["DUWS_hcair_cooldownEnd_%1", _type], 0]) - time;
+		if (_left > 0) then {
+			hint format [localize _cdKey, floor (_left / 60), floor (_left % 60)];
+		} else {
+			hint localize _busyKey;
+		};
+		if (_commItem isNotEqualTo "") then { [_commItem] call fnc_support_comm_add };
+	};
+	_ok
+};

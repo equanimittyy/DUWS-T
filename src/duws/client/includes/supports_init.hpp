@@ -20,9 +20,7 @@ support_laser_available = false;
 support_cluster_available = false;
 support_napalm_available = false;
 support_hcAttChop_available = false;
-AttChopInUse = false;
 support_hcCAS_available = false;
-CASInUse = false;
 support_paradrop_available = false;
 // The Mobile HQ designation radio. Consumable: the team's unlock is support_mobile_HQ_available
 // below, and this is one lead spending a slot to carry the ability.

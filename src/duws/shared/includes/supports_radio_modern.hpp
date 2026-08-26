@@ -175,7 +175,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_9bxjbidl"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['hc_ATTchop'] call fnc_support_comm_used; [0] spawn fnc_request_hcATTchop"; 
+        expression = "['hc_ATTchop', true] call fnc_support_comm_used; [0] spawn fnc_request_hcATTchop"; // deferred consume: the request script spends it only if its claim is granted, so a refused call is handed back
         icon = "\A3\ui_f\data\Map\Markers\NATO\b_air.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -186,7 +186,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_f5y7ue87"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['hc_CAS'] call fnc_support_comm_used; [0] spawn fnc_request_hcCAS"; 
+        expression = "['hc_CAS', true] call fnc_support_comm_used; [0] spawn fnc_request_hcCAS"; // deferred consume: the request script spends it only if its claim is granted, so a refused call is handed back 
         icon = "\A3\ui_f\data\Map\Markers\NATO\b_plane.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
