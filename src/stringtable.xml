@@ -5774,8 +5774,8 @@
                 <Spanish>El VANT está regresando a base.</Spanish>
                 <German>Die Drohne kehr zur Basis zurück</German>
                 <Chinesesimp>UAV正在返回基地</Chinesesimp>
-                <Original>The UAV is returning to base.</Original>
-                <English>The UAV is returning to base.</English>
+                <Original>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</Original>
+                <English>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</English>
             </Key>
             <Key ID="STR_DUWS_T_vehicleready">
                 <Spanish>Despacho, el vehículo solicitado ya ha sido desplegado. Revisa tu terminal GPS.</Spanish>

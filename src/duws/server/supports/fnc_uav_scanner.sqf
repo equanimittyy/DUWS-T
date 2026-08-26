@@ -152,17 +152,34 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 	_elapsed = _elapsed + _scanInterval;
 };
 
-// Feed ended (drone destroyed or station time up): clear the live markers, stand the
-// drone down, then remove the search circle and triggers.
+// Feed ended (drone destroyed or station time up): pull the live markers, the search
+// circle and the triggers now -- the scan is over however the drone leaves.
 { deleteMarker _x } forEach _reconMarkers;
-if (alive _vehicle) then {
-	[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
-} else {
-	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
-};
-
-{ deleteVehicle _x } forEach units _group;
-deleteVehicle _vehicle;
 deleteMarker str(_markername);
 deleteVehicle _trg;
 deleteVehicle _trgwest;
+
+// Shot down before the feed ended: Overlord reports the loss and the wreck/group go now.
+if (!alive _vehicle) exitWith {
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
+	{ deleteVehicle _x } forEach units _group;
+	deleteVehicle _vehicle;
+};
+
+// Station time up with the drone intact: Allseer signs the recon off, then the UAV breaks
+// the loiter and egresses, deleted only once it has cleared the area -- so it flies out like
+// the laser bird rather than blinking off the map overhead.
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
+{ deleteWaypoint _x } forEach (reverse (waypoints _group));
+private _egress = _centerPos getPos [3500, random 360];
+private _rtb = _group addWaypoint [_egress, 0];
+_rtb setWaypointType "MOVE";
+_rtb setWaypointBehaviour "CARELESS";
+[_group, _vehicle, _centerPos] spawn {
+	params ["_g", "_v", "_pos"];
+	// Grace cap so a blocked or damaged drone that cannot make distance still cleans up.
+	private _grace = time + 120;
+	waitUntil { sleep 3; !alive _v || _v distance _pos > 2500 || time > _grace };
+	{ deleteVehicle _x } forEach units _g;
+	deleteVehicle _v;
+};
