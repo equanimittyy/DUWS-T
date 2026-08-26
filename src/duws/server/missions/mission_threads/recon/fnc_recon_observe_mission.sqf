@@ -38,13 +38,13 @@ private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _pick = [_MissionPos] call fnc_recon_observe_pick;
 if (_pick isEqualTo []) exitWith {
-    [17, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+    [13, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
 private _kind   = _pick select 0;
 private _target = _pick select 1;
 private _hpKey  = if (_kind isEqualTo "hp") then { _pick select 2 } else { "" };
 
-if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([13, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
@@ -92,7 +92,7 @@ for "_i" from 0 to 17 do {
     };
 };
 if (_overwatch isEqualTo []) exitWith {
-    [17, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+    [13, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
 
 // The anchor the 3D marker and hold LOS ride: the real target, which the overwatch was verified to have

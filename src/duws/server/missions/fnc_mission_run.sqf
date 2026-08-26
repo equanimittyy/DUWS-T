@@ -6,8 +6,8 @@
 // vary, and both are passed in the spec -- what the mission spawns (_build) and how it is won
 // (_done). A thread becomes: build a spec, call this.
 //
-// NOT for the missions whose win is continuous or scripted (hold-for-duration, the domination
-// battle, protect-civ, the informant hunt) -- their win does not reduce to a one-shot predicate,
+// NOT for the missions whose win is continuous or scripted (protect-civ, the informant hunt) --
+// their win does not reduce to a one-shot predicate,
 // and forcing them through here would mean a hook for every step the spine is supposed to own.
 //
 // The spec is a positional array, destructured below -- the mission layer passes arrays through

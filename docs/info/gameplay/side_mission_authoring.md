@@ -49,8 +49,8 @@ The full spec field list is the header of `fnc_mission_run.sqf:16-30`; `target_s
 complete example. Do not restate the spine's steps in a thread — if you find yourself hooking every
 step, you want the other shape.
 
-**Bespoke** — for a mission whose win is continuous or scripted (hold-for-duration, domination,
-protect-civ, informant, recon, rescue-squad). The thread calls `fnc_mission_begin` itself, then owns
+**Bespoke** — for a mission whose win is continuous or scripted (protect-civ, informant, recon,
+rescue-squad). The thread calls `fnc_mission_begin` itself, then owns
 the whole flow. `fnc_mission_run.sqf:9-11` names why these stay off the spine.
 
 ## What every thread owes, either shape

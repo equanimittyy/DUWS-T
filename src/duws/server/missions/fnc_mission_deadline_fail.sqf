@@ -3,7 +3,7 @@
 // The teardown a side mission owes when its deadline runs out before the objective is met: the
 // player-facing notice, a FAILED task, the objective marker cleared and the standard end. One call
 // so a thread's timeout branch is not the same four lines re-inlined seventeen times. Threads that
-// clear extra markers or unwind an escort (domination, transport, rescue pilot) keep their own
+// clear extra markers or unwind an escort (transport, rescue pilot) keep their own
 // branch instead -- this covers only the common shape.
 //
 // _marker / _compKey / _sweepFriendly default empty so a mission that owns no marker or built

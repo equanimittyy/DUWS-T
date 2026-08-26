@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-18 types (indices 0-17). The rework's shape is settled: each mission should pose a **distinct
+17 types (indices 0-16). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -27,15 +27,15 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 5 | Hunt Sniper Team | find two hidden elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
 | 7 | Destroy Vehicle Patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
 | 16 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
-| 17 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
+| 13 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
 | 12 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
-gameplay rework** -- the earlier "bespoke, review" rows (Rescue Pilot, Hunt Armor Platoon) are stale
+gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
 too until reworked, not a reviewed baseline: Steal Supply Truck (1), Destroy Signal Tower (3), Rescue
 Pilot (4), Steal Builder Vehicle (6), Destroy Laptop (8), Destroy Ammo Cache (9), Destroy Radar (10),
-Clear Area (11), Hunt Armor Platoon (13), Protect Informant (14), Recover Humanitarian Supply Truck (15).
+Clear Area (11), Protect Informant (14), Recover Humanitarian Supply Truck (15).
 Ideas per row in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
@@ -213,11 +213,9 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | 12 | Deny Enemy Armor | elimination | cmd | 15/25/0 | 3 | done |
 | 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
 | 16 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
-| 17 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
+| 13 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
 | 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
-| 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
-| 13 | Hunt Armor Platoon | elimination | cmd | 10/30/0 | 5 | stale |
-| 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
+| 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done || 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 30/20/0 | 3 | stale |
@@ -235,14 +233,12 @@ to command/intel/tactical value, AP to materiel destroyed or manpower recovered.
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team) are now priced to effort; the
 vehicle patrol adds a tier bonus at spawn (see its design note). **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 11 stale rows, not only
-the five below; these five are just the worst effort/pay mismatches:
+still-stale mission carries its old numbers and is open pricing work** -- all 10 stale rows, not only
+the four below; these four are just the worst effort/pay mismatches:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
-| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
-| Hunt Armor Platoon | 5 | 10/30 | worst-paid vs effort (the 4-MBT fight) |
-| Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
+| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort || Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
 | Destroy Signal Tower | 2 | 20/30 | gimme -- tower pre-broken; spawn it intact or cut the AP |
 | Destroy Laptop | 1 | 10/35 | AP overpaid for one hold-action |
 
@@ -260,9 +256,7 @@ change cell is the current idea, not a locked spec.
 | Informant Manhunt | disguised manhunt in a town crowd | done |
 | Recon Enemy Position | standoff binocular hold that reveals a zone | done |
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
-| Steal Builder Vehicle | match effort/pay of its twin | stale |
-| Hunt Armor Platoon | reprice to the 4-MBT effort | stale |
-| Clear Area | reprice to the full-clear effort | stale |
+| Steal Builder Vehicle | match effort/pay of its twin | stale || Clear Area | reprice to the full-clear effort | stale |
 | Destroy Signal Tower | spawn the tower intact so destruction is real work | stale |
 | Destroy Laptop | keep light; trim the overpaid AP | stale |
 | Steal Supply Truck | distinct verb TBD + reprice | stale |
@@ -274,7 +268,7 @@ change cell is the current idea, not a locked spec.
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 11 need both a verb and a reprice; see the tracker).
+- The distinct verb for each still-stale row (all 10 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
 - Destroy Signal Tower: spawn intact, or accept it as a gimme and cut the AP.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost

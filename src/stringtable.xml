@@ -3747,13 +3747,6 @@
                 <Original>Clear Area</Original>
                 <English>Clear Area</English>
             </Key>
-            <Key ID="STR_DUWS_T_c13">
-                <German>Panzerzug jagen</German>
-                <Spanish>Cazar pelotón blindado</Spanish>
-                <Chinesesimp>猎杀装甲排</Chinesesimp>
-                <Original>Hunt Armor Platoon</Original>
-                <English>Hunt Armor Platoon</English>
-            </Key>
             <Key ID="STR_DUWS_T_c14">
                 <German>Informant schützen</German>
                 <Spanish>Proteger al informante</Spanish>
@@ -3775,7 +3768,7 @@
                 <Original>Informant Manhunt</Original>
                 <English>Informant Manhunt</English>
             </Key>
-            <Key ID="STR_DUWS_T_c17">
+            <Key ID="STR_DUWS_T_c13">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
             </Key>
@@ -3959,61 +3952,12 @@
                 <Original>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</Original>
                 <English>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</English>
             </Key>
-            <Key ID="STR_DUWS_T_domination">
-                <German>Freundliche mechanisierte Infanteriestrupp kämpft gegen feindliche schwere Panzerverbände. Eure Einheit muss sofort reagieren und alle feindlichen Panzer-Einheiten im Zielbereich um jeden Preis eliminieren. Hinweis: Bei der Auswahl des AO für diese Mission sollten vorzugsweise wasserfreie Binnenbereiche gewählt werden. (Very low CP, avg AP)</German>
-                <Spanish>Escuadrón de infantería mecanizada aliado está en combate con unidades de blindaje pesado enemigas. Tu unidad debe responder inmediatamente y eliminar todas las unidades de blindaje enemigas en el área objetivo a cualquier costo. Nota: al seleccionar el AO para esta misión, es preferible elegir zonas interiores sin agua. (Very low CP, avg AP)</Spanish>
-                <Chinesesimp>友军机械化步兵班正与敌人重型装甲单位交火，你的单位需要立即响应，不惜代价歼灭目标区域所有敌军装甲单位。(注意，此任务的行动区域在选取时最好在无水的内陆) (极低CP，平均AP)</Chinesesimp>
-                <Original>A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.</Original>
-                <English>A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.</English>
-            </Key>
             <Key ID="STR_DUWS_T_hound">
                 <German>Hund</German>
                 <Spanish>Sabueso</Spanish>
                 <Chinesesimp>猎狗</Chinesesimp>
                 <Original>Hound 2-2</Original>
                 <English>Hound 2-2</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationletsdothis">
-                <German>"Hund 2-2" an alle Einheiten im Einsatzgebiet, wir haben an der markierten Position eine komplette feindliche Panzerzug! Sofortige Verstärkung erforderlich!</German>
-                <Spanish>"Sabueso 2-2" a todas las unidades en la zona operativa, hemos encontrado una sección de blindaje enemiga completa en la posición marcada! Necesitamos refuerzos urgentes!</Spanish>
-                <Chinesesimp>战区所有单位，我们在标记位置处遭遇了敌方整整一个装甲排！急需支援部队！</Chinesesimp>
-                <Original>To all units in the AO, we're engaging a full enemy armor platoon at the marked position. Requesting immediate reinforcements.</Original>
-                <English>To all units in the AO, we're engaging a full enemy armor platoon at the marked position. Requesting immediate reinforcements.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationoverlord">
-                <German>"Overlord 1-1" an Action Squad, "Hund 2-2" braucht eure Unterstützung. Rüstet sofort eure Feuerkraft auf und brecht auf!</German>
-                <Spanish>"Overlord 1-1" al Action Squad, "Sabueso 2-2" necesita vuestro apoyo. Preparad vuestro fuego inmediatamente y salid.</Spanish>
-                <Chinesesimp>行动组，"猎狗2-2"需要你们的支援，立刻整理手上的火力，然后出发。</Chinesesimp>
-                <Original>To Alpha 1-1, Hound 2-2 needs support. Bring anything that can kill armor and move out.</Original>
-                <English>To Alpha 1-1, Hound 2-2 needs support. Bring anything that can kill armor and move out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationcopy">
-                <German>Hier ist Action Squad, verstanden. ETA: 5 Minute.</German>
-                <Spanish>Aquí Action Squad, entendido. ETA: 5 minuto.</Spanish>
-                <Chinesesimp>收到命令。预计到达时间：五分钟。</Chinesesimp>
-                <Original>Copy. ETA five minutes.</Original>
-                <English>Copy. ETA five minutes.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationhoundlost">
-                <German>"Overlord" an Action Squad, wir haben gerade den Kontakt zur "Hund" Einheit verloren. Fahrt weiter zum Ziel und stellt sicher, dass alle feindlichen Panzer-Einheiten vernichtet werden.</German>
-                <Spanish>"Overlord" al Action Squad, acabamos de perder el contacto con el elemento "Sabueso". Continúen hacia el objetivo y asegúrense de destruir todas las unidades de blindaje enemigas.</Spanish>
-                <Chinesesimp>行动组，我们刚刚失去了与"猎狗"车组的联系。继续前往目标地点，确保摧毁所有敌军装甲单位。</Chinesesimp>
-                <Original>To Alpha 1-1, we've lost contact with Hound 2-2. Continue to the objective and make sure every enemy armored vehicle is destroyed.</Original>
-                <English>To Alpha 1-1, we've lost contact with Hound 2-2. Continue to the objective and make sure every enemy armored vehicle is destroyed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationarrow">
-                <German>Feindliche Angriffsrichtung</German>
-                <Spanish>Dirección de ataque enemiga</Spanish>
-                <Chinesesimp>敌军进攻方向</Chinesesimp>
-                <Original>Enemy attack direction</Original>
-                <English>Enemy attack direction</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dominationend">
-                <German>"Overlord" an alle Einheiten im AO, Lagebericht: Feindlicher Panzerzug hat keine Kampfwirksamkeit mehr. Gute Arbeit, Action Squad.</German>
-                <Spanish>"Overlord" a todas las unidades en el AO, informe de situación: la sección de blindaje enemiga ha perdido su efectividad de combate. Muy bien hecho, Action Squad.</Spanish>
-                <Chinesesimp>战区全体单位，情况报告：敌方装甲排已失去战斗效力。干得漂亮，行动组。</Chinesesimp>
-                <Original>To all units in the AO, be advised: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</Original>
-                <English>To all units in the AO, be advised: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_czpvn5z1">
                 <German>Der Nachrichtendienst hat angegeben, dass die Feinde hier ein Ingenieurfahrzeug aufgestellt haben. Ergreife es und bring es zurück zur Basis. Es kann zu einer mobilen Fabrik umgewandelt werden. (Low CP, low AP)</German>

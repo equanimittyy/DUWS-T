@@ -64,15 +64,3 @@ Eleven `#define`s in `shared/includes/defines.hpp` are never expanded: `CT_LISTN
 standard control-type and style constants every Arma dialog file copies in, and the next dialog
 added is as likely to want one as not. Deleting them buys nothing and makes the file diverge from
 the shape anyone writing a new dialog will expect.
-
-## The domination briefing bypasses its own translated string
-
-`server/missions/mission_threads/domination/fnc_domination_mission.sqf:35` hints the hardcoded
-English literal `"Armor Hunting"` for its briefing. Every other mission thread shows a localised
-`_markerText2` through `[_markerText2,{hint _this}] remoteExec [...]`, and domination's key
-`STR_DUWS_T_c13` exists and is translated in `src/stringtable.xml`.
-
-The unused `_markerText2` local that pointed at this went with the rest of the dead code, which is
-why the defect is recorded here rather than beside the other live ones: without this note, the next
-reader sees a hint with no local behind it and nothing saying a translated key was ever intended.
-Fixing it is a one-line substitution.
