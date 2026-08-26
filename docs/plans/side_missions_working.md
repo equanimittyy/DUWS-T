@@ -210,9 +210,9 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
 |--:|---------|-----|-----|:---------:|:--:|-------|
 | 2 | Eliminate High-Value Target | elimination | cmd | 40/35/0 | 3 | done |
-| 12 | Deny Enemy Armor | elimination | cmd | 20/25/0 | 3 | done |
+| 12 | Deny Enemy Armor | elimination | cmd | 15/25/0 | 3 | done |
 | 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
-| 16 | Informant Manhunt | elimination | cmd | 10/20/0 | 3 | done |
+| 16 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
 | 17 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
 | 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
