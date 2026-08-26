@@ -25,6 +25,18 @@
 //                 none. The frozen-cover convention is "all"; some prefabs harden only their breakables.
 //     _keepSim    classes left simulated instead of frozen -- a prop that must keep moving (a medevac heli,
 //                 a working depot). Default [] freezes every prop, which is the usual case.
+//
+// Hardening never touches a class in DUWS_compDestructible (cargo towers and houses): those read as
+// objectives or enterable structures a player expects to bring down, so they stay destructible even under
+// an "all" pass. The radio mast is exempted separately, by its own hardpoint after placement.
+DUWS_compDestructible = [
+    "Land_Cargo_Tower_V1_F",
+    "Land_Cargo_Patrol_V1_F",
+    "Land_Cargo_Patrol_V3_F",
+    "Land_Cargo_House_V1_F",
+    "Land_Cargo_HQ_V1_F"
+];
+
 fnc_composition_place = {
     params ["_rows", "_origin", "_key", ["_opts", []]];
     _opts params [["_heading", 0], ["_tiltTypes", []], ["_invuln", []], ["_keepSim", []]];
@@ -51,7 +63,7 @@ fnc_composition_place = {
         if (_class in _tiltTypes) then { _obj setVectorUp (surfaceNormal [_wp select 0, _wp select 1]) };
         _obj setDir (_rowDir + _heading);
         if !(_class in _keepSim) then { _obj enableSimulationGlobal false };
-        if (_invulnAll || {_class in _invuln}) then { _obj allowDamage false };
+        if (!(_class in DUWS_compDestructible) && {_invulnAll || {_class in _invuln}}) then { _obj allowDamage false };
 
         _props pushBack _obj;
     } forEach _rows;

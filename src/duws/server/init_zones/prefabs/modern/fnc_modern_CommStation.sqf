@@ -82,9 +82,9 @@ private _tiltTypes = [
     "Land_SandbagBarricade_01_hole_F","Land_Razorwire_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen, fragile decoratives hardened. Weapon rows are
-// skipped here and stood up by the fnc_static_place pass below.
-[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, ["Land_WaterTank_F","Land_PaperBox_closed_F","Land_ToiletBox_F","Land_GarbageBarrel_01_F"]]] call fnc_composition_place;
+// Cover props via the shared placer -- tilted, frozen, hardened. Weapon rows are skipped here and stood
+// up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all"]] call fnc_composition_place;
 
 sleep 2;
 

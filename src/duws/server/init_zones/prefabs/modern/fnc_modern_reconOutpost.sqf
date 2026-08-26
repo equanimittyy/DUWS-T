@@ -120,9 +120,9 @@ private _tiltTypes = [
     "Land_BagBunker_Tower_F"
 ];
 
-// Cover props via the shared placer -- tilted, frozen (bar the keep-simulated set), fragile decoratives
-// hardened. Weapon rows are skipped here and stood up by the fnc_static_place pass below.
-[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, ["Land_CampingChair_V1_F","Land_Camping_Light_F","Land_TentDome_F","Land_WaterTank_F","Land_Pallets_stack_F","Land_PaperBox_closed_F","Land_Ammobox_rounds_F","Land_WoodenBox_F","Land_CratesShabby_F","Land_FMradio_F","Land_TinContainer_F","Land_CanisterPlastic_F","Land_Axe_F","Land_Bucket_F","Land_Matches_F","Land_ButaneCanister_F","Land_GasCanister_F","Land_Canteen_F","Land_DuctTape_F","Land_PainKillers_F","Land_Bandage_F","Land_Sacks_heap_F","Land_WoodPile_F","Land_MetalWire_F","Land_Gloves_F","Land_BakedBeans_F"], _keepSimulation]] call fnc_composition_place;
+// Cover props via the shared placer -- tilted, frozen (bar the keep-simulated set), hardened. Weapon rows
+// are skipped here and stood up by the fnc_static_place pass below.
+[_allObjectsData, [_centerSpawnX, _centerSpawnY], _zoneKey, [0, _tiltTypes, "all", _keepSimulation]] call fnc_composition_place;
 
 sleep 2;
 
