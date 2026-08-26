@@ -384,7 +384,7 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 //                every distant foot patrol.
 // Server-only: every consumer (the site poller, fnc_hardpoint_register) runs on the server.
 DUWS_hardpointStreaming = createHashMapFromArray [
-    ["OP",        [1000, 300, false, 0]],
+    ["OP",        [ 800, 300, false, 0]],
     ["MG",        [ 800, 300, false, 0]],
     ["AT",        [ 800, 300, false, 0]],
     ["ROADBLOCK", [ 800, 300, false, 0]],
@@ -456,6 +456,8 @@ DUWS_hardpointBounty = createHashMapFromArray [
 // type fielding several groups, resolved per side when crewed -- read by fnc_hardpoint_register and the
 // raise worker so every placer fields it the same way, as DUWS_hardpointStreaming drives streaming.
 // "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
+// An observation post is a lookout, not a strongpoint: a close security team holds the post while a recon
+// patrol screens wide, so it keeps eyes out past its own ground instead of hugging the bunker.
 // AT and AA field the weapons team, not the rifle team: defenders carry launchers matching the emplaced
 // gun's role (AT nest -> standoff AT, AA nest -> MANPADS) instead of a generic section. Trade-off:
 // wp_team has no AR, GL or marksman, so those two hold harder against armour and air but lighter
@@ -471,7 +473,7 @@ DUWS_hardpointBounty = createHashMapFromArray [
 // the assault on the rim while the rest hold close.
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
-    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", ["wp_team", "widepatrol:patrol"]], ["ARTY", ["wp_team", "wp_team", "widepatrol:team"]],
+    ["OP", ["closepatrol:team", "widepatrol:recon"]], ["AA", "wp_team"], ["MORTAR", ["wp_team", "widepatrol:patrol"]], ["ARTY", ["wp_team", "wp_team", "widepatrol:team"]],
     ["RADIO", ["wp_team", "widepatrol:wp_team", "widepatrol:team"]], ["MINEFIELD", ""]
 ];
 
