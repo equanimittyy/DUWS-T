@@ -8,11 +8,12 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
-_speaker = localize "STR_DUWS_T_OVERLORD";
+_speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_chalk";
-_message = localize "STR_DUWS_T_paradropcall";
+_message = ([localize "STR_DUWS_T_paradropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_paradropcallend";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+[_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropack"] remoteExec ["fnc_duws_dialogue", 0];
 [_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
 // SEND A PLANE
@@ -58,11 +59,10 @@ _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 
 sleep 40;
-[_speaker1, localize "STR_DUWS_T_paradroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 
 // first check: plane destroyed while waiting?
 if (!alive _vehicle) exitWith {
-    [_speaker, localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -72,7 +72,7 @@ waitUntil {sleep 0.5; missionNamespace getVariable "PARADROP_onStation" || !aliv
 
 // second check: plane destroyed before arrival?
 if (!alive _vehicle) exitWith {
-    [_speaker, localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
@@ -81,6 +81,7 @@ if (!alive _vehicle) exitWith {
 _group2 = creategroup WEST;
 _radius = 130;
 _group2 deleteGroupWhenEmpty true;
+[_speaker1, localize "STR_DUWS_T_paradroponstation"] remoteExec ["fnc_duws_dialogue", 0];
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
 private ["_soldier1","_soldier2","_soldier3","_soldier4","_soldier5","_soldier6","_soldier7","_soldier8","_soldier9","_soldier10","_soldier11","_soldier12"];

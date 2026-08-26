@@ -1,6 +1,7 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
 // not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:198).
 CASInUse = true;
+[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hccasrequest"] call fnc_cs), "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 _spawnPos = getmarkerpos str blu_hq_markername;
 _grouptype = [blufor_MISC_AIR_X];
@@ -30,6 +31,9 @@ switch (VERSION_X) do {
 		_vehicle flyInHeight 150;
 	};
 };
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_message = ([localize "STR_DUWS_T_hccasack"] call fnc_cs);
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _speaker = localize "STR_DUWS_T_koipilot";
 _message = ([localize "STR_DUWS_T_koiin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
@@ -38,9 +42,6 @@ player hcsetgroup [_group,""];
 DUWS_number_CAS = DUWS_number_CAS + 1;
 _group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_CAS]];
 hint localize "STR_DUWS_T_gu6cbc5f";
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 // State is reset the instant the jet is lost, not after a cooldown: the support is spent at
 // selection and never re-added, so a stale handler must not linger and reset a re-bought jet's

@@ -5207,6 +5207,10 @@
                 <Original>Requesting immediate fire support, sending grid now.</Original>
                 <English>Requesting immediate fire support, sending grid now.</English>
             </Key>
+            <Key ID="STR_DUWS_T_artyack">
+                <Original>Copy your fire mission, Alpha 1-1. %1 has the target.</Original>
+                <English>Copy your fire mission, Alpha 1-1. %1 has the target.</English>
+            </Key>
             <Key ID="STR_DUWS_T_fobcall">
                 <German>"Overlord 1-1" an Action Squad – wir haben gerade eine Voroperationsbasis im AO eingerichtet. Geht dort vorbei und macht eine Pause, solange ihr bereitsteht.</German>
                 <Spanish>"Overlord 1-1" a Action Squad – acabamos de establecer una base operativa avanzada en el AO. Pásate por allí y reposa mientras estás en espera.</Spanish>
@@ -5218,8 +5222,12 @@
                 <German>Hier ist "Overlord 1-1" – Achtung, eine Fallschirmjägertruppe steht Ihnen jetzt untergeordnet.</German>
                 <Spanish>Este es "Overlord 1-1" – atención, un escuadrón de paracaidistas pasa ahora a su mando.</Spanish>
                 <Chinesesimp>请注意，一个伞兵班组现在听你指挥了。</Chinesesimp>
-                <Original>Be advised: one paratrooper squad is now under your command.</Original>
-                <English>Be advised: one paratrooper squad is now under your command.</English>
+                <Original>To Overlord, requesting a paratrooper drop on my position, over.</Original>
+                <English>To Overlord, requesting a paratrooper drop on my position, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_paradropack">
+                <Original>Copy your request, Alpha 1-1. Chalk 2-1 is inbound with your paratroopers.</Original>
+                <English>Copy your request, Alpha 1-1. Chalk 2-1 is inbound with your paratroopers.</English>
             </Key>
             <Key ID="STR_DUWS_T_vehdropcall">
                 <German>Action Squad an "Overlord" – Anfrage zum Luftabwurf eines zivilen Notfahrzeugs an meiner Position, over.</German>
@@ -5623,12 +5631,28 @@
                 <Original>Alpha 1-1. New close air support inbound, callsign Longbow 1-1.</Original>
                 <English>Alpha 1-1. New close air support inbound, callsign Longbow 1-1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_boattaxicall0">
+                <Original>Requesting boat extraction. Sending our grid now.</Original>
+                <English>Requesting boat extraction. Sending our grid now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxicall1">
+                <Original>Received. Sending a boat to your grid. Callsign %1, over.</Original>
+                <English>Received. Sending a boat to your grid. Callsign %1, over.</English>
+            </Key>
             <Key ID="STR_DUWS_T_boattaxicall">
                 <German>Action Squad, hier ist Disposition – das Bootsteam in Ihrer Nähe kommt zur Evakuierung, achten Sie auf Freundfeindfeuer.</German>
                 <Spanish>Action Squad, este es Despacho – el equipo de embarcaciones cerca de tu posición viene a evacuarte, ten cuidado con el fuego amigo.</Spanish>
                 <Chinesesimp>行动组。你位置附近的舟艇队正在赶来接送，注意友军火力。</Chinesesimp>
-                <Original>Alpha 1-1. The boat team near you is en route for extraction. Watch your fire.</Original>
-                <English>Alpha 1-1. The boat team near you is en route for extraction. Watch your fire.</English>
+                <Original>Alpha 1-1, we're inbound to your position. Watch your fire.</Original>
+                <English>Alpha 1-1, we're inbound to your position. Watch your fire.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcattrequest">
+                <Original>Requesting attack helicopter support. Sending our position now.</Original>
+                <English>Requesting attack helicopter support. Sending our position now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hcattack">
+                <Original>Copy your request, Alpha 1-1. Longbow 1-1 is inbound and at your disposal.</Original>
+                <English>Copy your request, Alpha 1-1. Longbow 1-1 is inbound and at your disposal.</English>
             </Key>
             <Key ID="STR_DUWS_T_longbowin">
                 <German>"Longbow" an Einsatzteam, ich habe den HQ-Luftraum erreicht. Bereit zur Nahluftunterstützung jederzeit.</German>
@@ -5650,6 +5674,14 @@
                 <Chinesesimp>收到。一架无人侦察机正在入场，请稍等。</Chinesesimp>
                 <Original>Received. Recon UAV inbound, stand by.</Original>
                 <English>Received. Recon UAV inbound, stand by.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hccasrequest">
+                <Original>Requesting close air support. Sending our position now.</Original>
+                <English>Requesting close air support. Sending our position now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hccasack">
+                <Original>Copy your request, Alpha 1-1. Koi 1-1 is inbound and at your disposal.</Original>
+                <English>Copy your request, Alpha 1-1. Koi 1-1 is inbound and at your disposal.</English>
             </Key>
             <Key ID="STR_DUWS_T_koiin">
                 <German>"Koi" an Einsatzteam, ich habe den HQ-Luftraum erreicht. Bereit, alle entdeckten feindlichen Fahrzeuge zu vernichten.</German>

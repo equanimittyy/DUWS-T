@@ -1,6 +1,7 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
 // not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:187).
 AttChopInUse = true;
+[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hcattrequest"] call fnc_cs), "", name player] remoteExec ["fnc_duws_dialogue", 0];
 
 _grouptype = [];
 _spawnPos = getmarkerpos str blu_hq_markername;
@@ -30,6 +31,9 @@ switch (VERSION_X) do {
 		_group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_attackchopa]];
 	};
 };
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_message = ([localize "STR_DUWS_T_hcattack"] call fnc_cs);
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _speaker = localize "STR_DUWS_T_longbowpilot";
 _message = ([localize "STR_DUWS_T_longbowin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

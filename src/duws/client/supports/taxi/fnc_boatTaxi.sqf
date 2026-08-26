@@ -28,7 +28,15 @@ _markerstr setMarkerShape "ICON";
 str(_markerpickup) setMarkerType "hd_end";
 str(_markerpickup) setMarkerColor "ColorGreen";
 str(_markerpickup) setMarkerText "PICKUP";
+_speakeracteam = localize "STR_DUWS_T_actionteam";
+_message = ([localize "STR_DUWS_T_boattaxicall0"] call fnc_cs);
+[_speakeracteam, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
+_message = format[localize "STR_DUWS_T_boattaxicall1", localize "STR_DUWS_T_swordfish"];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+_speaker = localize "STR_DUWS_T_swordfish";
 _message = ([localize "STR_DUWS_T_boattaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
