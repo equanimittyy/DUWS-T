@@ -48,9 +48,9 @@
 // BLUFOR-held ground, keeping the convoy corridor off friendly positions. The three destination fields
 // default to [false, 0, false] -- every type but the deny-armor convoy. The HVT convoy leaves them default
 // too: instead of siting picking its destination, its own site-finder (fnc_target_hvt_site) ejects the
-// spawn 3-10 km out from a zone and its thread picks the haven from there (fnc_hvt_dest_pick). That way it
-// still offers on tight, cluster-zoned maps, where two OPFOR zones 3 km apart -- what needDestZone would
-// demand -- rarely exist but open ground 3-10 km from a zone does.
+// spawn 3-10 km out from the map-survey anchor and its thread picks the haven from there (fnc_hvt_dest_pick).
+// That way it still offers on tight, cluster-zoned maps, where two OPFOR zones 3 km apart -- what
+// needDestZone would demand -- rarely exist but open ground 3-10 km out does.
 //
 // hardEligible and weight feed the strategic-map draw (fnc_stratmap), not siting. hardEligible true lets
 // the type fill one of the two deep, difficulty-boosted "hard" offer slots; false bars a type from them.
@@ -62,8 +62,11 @@
 // drawn without replacement into the offer set, so weight biases order and presence, not duplication.
 //
 // surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the
-// countryside off OPFOR zones, "town" scans populated towns. Set "town" for a type that belongs in a
-// built-up area (informant, CQB, the civilian pair); everything else is "zone". The
+// countryside off OPFOR zones, "town" scans populated towns, "map" samples the whole HQ-reach area. Set
+// "town" for a type that belongs in a built-up area (informant, CQB, the civilian pair); "map" for a type
+// that need not sit near a zone -- the hard/easy dial, not a zone anchor, pulls it toward meaningful ground
+// (hard scores 0 with no enemy near, so it still clusters on enemy density; easy favours the frontline).
+// A convoy uses "map" too: its spawn is free but needDest still ties the haven it drives to a zone. The
 // front-vs-deep bias is separate -- it is the offer's hard/easy dial, not the survey source.
 //
 // The launcher is a literal block per row rather than something built from the thread column:
@@ -73,19 +76,19 @@
 //
 // The debug label is deliberately English-only, matching fnc_debug_mission_menu.
 
-["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue Assault Team",              { [0]  call fnc_mission_launch }, 25, 15, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "zone"]],
-["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Supply Truck",       { [1]  call fnc_mission_launch }, 35, 25, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "zone"]],
-["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate High-Value Target",          { [2]  call fnc_mission_launch }, 40, 35, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "zone"]],
+["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue Assault Team",              { [0]  call fnc_mission_launch }, 25, 15, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "map"]],
+["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Supply Truck",       { [1]  call fnc_mission_launch }, 35, 25, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "map"]],
+["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate High-Value Target",          { [2]  call fnc_mission_launch }, 40, 35, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "map"]],
 ["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Signal Tower",            { [3]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
-["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue Pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "zone"]],
-["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt Sniper Team",             { [5]  call fnc_mission_launch }, 20, 15, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "zone"]],
-["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Builder Vehicle",{ [6]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "zone"]],
-["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Vehicle Patrol",  { [7]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "elimination", "STR_DUWS_T_armornote", [false, 0, false, true, 1, "zone"]],
-["fnc_sabotage_laptop_mission",  "STR_DUWS_T_c8",  "STR_DUWS_T_j97ecrsh",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Laptop",          { [8]  call fnc_mission_launch }, 10, 35, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
-["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Ammo Cache",            { [9]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
-["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Radar",            { [10] call fnc_mission_launch }, 25, 25, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "zone"]],
+["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue Pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", "", [false, 0, false, true, 1, "map"]],
+["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt Sniper Team",             { [5]  call fnc_mission_launch }, 20, 15, 0, [3,3], "command", "elimination", "", [false, 0, false, true, 1, "map"]],
+["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Builder Vehicle",{ [6]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "requisition", "", [false, 0, false, true, 1, "map"]],
+["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Vehicle Patrol",  { [7]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "elimination", "STR_DUWS_T_armornote", [false, 0, false, true, 1, "map"]],
+["fnc_sabotage_laptop_mission",  "STR_DUWS_T_c8",  "STR_DUWS_T_j97ecrsh",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Laptop",          { [8]  call fnc_mission_launch }, 10, 35, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "map"]],
+["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Ammo Cache",            { [9]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "map"]],
+["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Radar",            { [10] call fnc_mission_launch }, 25, 25, 0, [3,3], "command", "sabotage", "", [false, 0, false, true, 1, "map"]],
 ["fnc_clearthearea_cqb_mission", "STR_DUWS_T_c11", "STR_DUWS_T_cqbdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Clear Area", { [11] call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "assault", "", [false, 0, false, true, 1, "town"]],
-["fnc_deny_armor_mission",       "STR_DUWS_T_c12", "STR_DUWS_T_destroyarmour_desc",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Deny Enemy Armor",         { [12] call fnc_mission_launch }, 15, 25, 0, [3,3], "command", "elimination", "", [true, 1500, true, true, 1, "zone"]],
+["fnc_deny_armor_mission",       "STR_DUWS_T_c12", "STR_DUWS_T_destroyarmour_desc",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Deny Enemy Armor",         { [12] call fnc_mission_launch }, 15, 25, 0, [3,3], "command", "elimination", "", [true, 1500, true, true, 1, "map"]],
 ["fnc_recon_observe_mission",    "STR_DUWS_T_c13", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon Enemy Position",       { [13] call fnc_mission_launch }, 10, 5,  0, [3,3], "command", "recon", "", [false, 0, false, true, 1, "zone"]],
 ["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect Informant",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend", "", [false, 0, false, true, 1, "town"]],
 ["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Recover Humanitarian Supply Truck",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort", "", [false, 0, false, true, 1, "town"]],

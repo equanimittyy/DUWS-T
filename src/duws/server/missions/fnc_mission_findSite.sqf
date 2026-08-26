@@ -8,8 +8,8 @@
 // exactly where a picked one could, and the weighting lives in one place instead of drifting between
 // a real copy and a debug copy.
 //
-// Two placement phases. Phase 2 SURVEYS: walks the candidate features (OPFOR zones, or towns for a
-// town-survey type), keeps the ones that pass cheap validity (inside HQ reach; for a convoy, a far-enough
+// Two placement phases. Phase 2 SURVEYS: walks the candidate features (OPFOR zones, towns for a town-survey
+// type, or a whole-map sample for a map-survey type), keeps the ones that pass cheap validity (inside HQ reach; for a convoy, a far-enough
 // destination zone with a BLUFOR-clear corridor exists), each scored by the placement dial. Phase 3 picks
 // one feature from that shortlist weighted by the dial (frontline for easy, deep for hard) and only then
 // REALISES an exact position (BIS_fnc_findSafePos, the fnc_pos_claimed standoff, origin/HQ gates, the
@@ -56,6 +56,9 @@ private _gauntCorr      = 400;  // hard: approach-corridor half-width, metres
 private _hardBand       = 800;  // hard: metres past a chosen zone edge the objective may drift -- tight, to hug the cluster
 private _peakEnemyness  = 0.5;  // seam target for the easy urban bell; hard offers ignore it
 private _routeClearReach = 1200; // convoy corridor: metres a route sample must keep from BLUFOR ground
+private _mapTheaterReach = 3000; // map survey: a sample is valid only within this of an enemy zone/hardpoint
+                                 // edge -- keeps offers in contested ground without gluing them to a zone,
+                                 // and stops the easy frontline bell peaking on empty equidistant corners
 
 private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
 private _friendlyAnchors = +_bluHeld;
@@ -175,20 +178,36 @@ private _fnZoneWeight = {
 };
 
 // Town survey samples MissionLocations; with none present (a server may not carry them) it cannot run,
-// so a town-survey type -- or the "More Urban" override -- falls back to the zone survey.
+// so a town-survey type -- or the "More Urban" override -- falls back to the zone survey. "More Urban"
+// wins over a map-survey type too, so its override still routes every type through towns.
 private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = ((_surveyKind isEqualTo "town") || _allowUrban) && {!(_mLocs isEqualTo [])};
+private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
 
-// The features phase 2 surveys: town centres, or OPFOR zones as [centre, bandMin, bandMax] the realise
-// step feeds straight to findSafePos.
+// The features phase 2 surveys: town centres, a whole-map sample, or OPFOR zones as [centre, bandMin,
+// bandMax] the realise step feeds straight to findSafePos. Map and zone features share that triple shape,
+// so phase 3's realise reads both without a branch.
 private _features = if (_useTown) then {
     +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
-    private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
-    // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
-    if (_fs isEqualTo []) then { _fs = [[PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5)]] };
-    _fs
+    if (_useMap) then {
+        // Whole-map source for a type that need not tether to a zone: sample the HQ-reach disc directly, so
+        // the offer can land anywhere and the hard/easy weight (not a zone anchor) decides where it clusters.
+        // r = R*sqrt(random) spreads points by area rather than radius; phase-2 farthest-point sampling then
+        // thins the 64 to an even map-wide 16. A tiny realise band keeps the settled pos near its sample.
+        private _R = zones_max_dist_from_hq * 1.5;
+        private _pts = [];
+        for "_i" from 1 to 64 do {
+            _pts pushBack [PosOfBLUHQ getPos [_R * sqrt (random 1), random 360], 0, 300];
+        };
+        _pts
+    } else {
+        private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
+        // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
+        if (_fs isEqualTo []) then { _fs = [[PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5)]] };
+        _fs
+    };
 };
 
 private _shortlistCap = 16;   // shortlist handed to phase 3; a wider survey is thinned to an even spread
@@ -207,8 +226,16 @@ private _valid = [];
             (_fCenter distance2D _x) >= _minCorridor && {(!_routeAvoid) || {[_fCenter, _x] call _fnRouteClear}}
         }) >= 0;
     };
+    // A map sample must sit within reach of an enemy zone or hardpoint edge. Zone/town features are already
+    // enemy-anchored, so this only gates the whole-map source: it keeps offers in contested ground and
+    // stops the easy frontline bell rewarding empty corners equidistant from both sides.
+    if (_ok && _useMap) then {
+        _ok = (_enemyPts findIf { ((_fCenter distance2D (_x select 0)) - (_x select 1)) < _mapTheaterReach }) >= 0;
+    };
     if (_ok) then {
-        private _score = if (_useTown) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
+        // _fnUrbanWeight scores an arbitrary position (frontline bell for easy, _fnHardScore for hard), so it
+        // serves both the town and the map survey; _fnZoneWeight is zone-list-specific and stays for zones.
+        private _score = if (_useTown || _useMap) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
         _valid pushBack [_fData, _fCenter, _score];
     };
 } forEach _features;
