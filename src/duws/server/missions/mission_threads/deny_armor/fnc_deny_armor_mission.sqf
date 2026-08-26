@@ -13,7 +13,7 @@
 // distinct scripted fail (the repair race) it has no hook for. Shares the spine's helpers
 // (fnc_mission_begin/site/reward/end, marker and task calls), not its loop.
 params ["_MissionPos", "_mission_name", ["_destZone", []]];
-if (!([18, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([12, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 #define DA_RADIUS      300      // objective ring drawn and searched within
 #define DA_CONVOY_DIST 1000     // fallback convoy entry distance when no OPFOR zone is known
@@ -33,7 +33,7 @@ private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-private _site = [_MissionPos, DA_RADIUS, 18] call fnc_mission_site;
+private _site = [_MissionPos, DA_RADIUS, 12] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
@@ -56,7 +56,7 @@ if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetp
 private _marker = [_randomPos, DA_RADIUS] call fnc_missionMarkerData;
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
-[localize "STR_DUWS_T_c18", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+[localize "STR_DUWS_T_c12", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // The broken-down tank: empty (createVehicle raises no crew, unlike BIS_fnc_spawnVehicle), pre-damaged
 // and low on fuel so it reads as a wreck and the repair is a real state change. Persistent so the

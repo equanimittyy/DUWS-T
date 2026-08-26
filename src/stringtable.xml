@@ -3530,62 +3530,6 @@
                 <Original>Be advised, friendly forces have lost a zone.</Original>
                 <English>Be advised, friendly forces have lost a zone.</English>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING">
-                <German>Hier spricht "Oberherr 1-1", unser taktisches Mittel hat gerade die Beweglichkeit verloren. Die nahe gelegene Aufklärungsgruppe "Kurier 2-1" ist als Soforteinsatztruppe dorthin entsandt, um es zu schützen, braucht aber weitere Unterstützung. Vergiss nicht, das Toolkit mitzubringen, um bei Beschädigung des Mittels feldreparaturen durchzuführen.</German>
-                <Spanish>Este es "Imperador 1-1", nuestro bien táctico acaba de perder la movilidad. La escuadra de reconocimiento "Envío Rápido 2-1", ubicada en sus proximidades, ha acudido como fuerza de respuesta rápida para protegerlo, pero necesita más refuerzos. No olvides traer la caja de herramientas para hacer reparaciones de campo si el bien sufre daños.</Spanish>
-                <Chinesesimp>我们的战术资产在野外某地失去了机动能力，位于资产附近的侦察班组"速递2-1"已作为快反部队前去保护，但他们还需要更多支援。别忘了带上工具箱来在资产受损时进行战地维修。</Chinesesimp>
-                <Original>Our tactical asset has lost mobility. Recon fireteam Express 2-1 has moved in as QRF to secure it, but they need support. Bring a toolkit in case the asset needs field repairs.</Original>
-                <English>Our tactical asset has lost mobility. Recon fireteam Express 2-1 has moved in as QRF to secure it, but they need support. Bring a toolkit in case the asset needs field repairs.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING1">
-                <German>"Kurier 2-1" an "Oberherr", wir sind als Soforteinsatztruppe am Standort der taktischen Mittel eingetroffen und eine Verteidigungslinie aufgebaut, wir brauchen dringende Unterstützung.</German>
-                <Spanish>"Envío Rápido 2-1" a "Imperador", hemos llegado a los bienes tácticos como fuerza de respuesta rápida y establecido una línea defensiva, necesitamos refuerzos urgentemente.</Spanish>
-                <Chinesesimp>"霸王"，我们已作为快反部队到达战术资产位置并建立防线，但仍需要额外部队支援。</Chinesesimp>
-                <Original>To Overlord, we're on the tactical asset and holding a perimeter. We need support, now.</Original>
-                <English>To Overlord, we're on the tactical asset and holding a perimeter. We need support, now.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHINGcm">
-                <German>Hey! Ihr seid endlich da! Es gibt einen Mörser in der Stellung, kann ihn einer von euch bedienen?</German>
-                <Spanish>¡Oye! ¡Por fin llegáis! Hay un mortero en la posición, ¿alguno de vosotros sabe manejarlo?</Spanish>
-                <Chinesesimp>嘿！你们终于来了！阵地里有台迫击炮，你们有人方便操作它吗？</Chinesesimp>
-                <Original>You're finally here. There's a mortar on the position. Any of you know how to work it?</Original>
-                <English>You're finally here. There's a mortar on the position. Any of you know how to work it?</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING1p1">
-                <German>Feindkontakt!</German>
-                <Spanish>¡Contacto!</Spanish>
-                <Chinesesimp>接敌！</Chinesesimp>
-                <Original>Contact!</Original>
-                <English>Contact!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING2">
-                <German>„Allseher“ an „Kurier 2-1“, Warnung: Starkere Feindinfanteriebewegungen in Ihrer Umgebung erfasst, Stärke ca. eine Kompanie. Auf Kontakt vorbereiten, aus.</German>
-                <Spanish>"Ojo Omnisciente" a "Envío Rápido 2-1", advertencia: detectados intensos movimientos de infantería enemiga alrededor de tu posición, fuerza de aproximadamente un pelotón. Prepárense para el contacto, fin.</Spanish>
-                <Chinesesimp>"速递2-1"，注意，我在你的位置周围发现大量敌人步兵活动，一个排左右，准备接战，完毕。</Chinesesimp>
-                <Original>To Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</Original>
-                <English>To Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING3">
-                <German>„Kurier 2-1“ an „Oberherr“, wir und die Verbündeten leiden schwere Verluste! Wo zur Hölle ist die Verstärkung?!</German>
-                <Spanish>"Envío Rápido 2-1" a "Imperador", nosotros y las fuerzas aliadas sufrimos bajas graves! ¿Dónde carajo está el refuerzo?!</Spanish>
-                <Chinesesimp>"霸王"，我们和友军严重减员！援军他妈的在哪？</Chinesesimp>
-                <Original>To Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?</Original>
-                <English>To Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING4">
-                <German>„Delta 3-2“ an „Kurier“, wir bewegen uns als Soforteinsatztruppe zur Unterstützung Eurer Seite, voraussichtliche Ankunftszeit: 1 Minute!</German>
-                <Spanish>"Delta 3-2" a "Envío Rápido", nos dirigimos a apoyarlos como fuerza de respuesta rápida, TEA: 1 minuto!</Spanish>
-                <Chinesesimp>"速递"，我们正作为快反部队前往支援你们，预计到达时间：1分钟</Chinesesimp>
-                <Original>To Express 2-1, moving to support you as QRF. ETA one minute.</Original>
-                <English>To Express 2-1, moving to support you as QRF. ETA one minute.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_APPROACHING5">
-                <German>„Delta 3-2“ an „Kurier 2-1“, wir sind in Ihrer Umgebung eingetroffen und bekämpfen die Feinde! Ihr könnt euch kurz durchatmen!</German>
-                <Spanish>"Delta 3-2" a "Envío Rápido 2-1", hemos llegado a vuestras proximidades y estamos combatiendo contra los enemigos! ¡Podéis respirar un momento!</Spanish>
-                <Chinesesimp>"速递2-1"，我们已经到达你们周围，正与敌军交战！你们可以歇口气了！</Chinesesimp>
-                <Original>To Express 2-1, we're on station and engaging. Ease off, we've got them.</Original>
-                <English>To Express 2-1, we're on station and engaging. Ease off, we've got them.</English>
-            </Key>
             <Key ID="STR_DUWS_T_9dt4d8rm">
                 <German>Mission erfolgreich!</German>
                 <Spanish>Ha capturado exitosamente todas las zonas y completado la misión. Esta AO está ahora bajo control de BLUFOR. Bien hecho soldado.</Spanish>
@@ -3803,13 +3747,6 @@
                 <Original>Clear Area</Original>
                 <English>Clear Area</English>
             </Key>
-            <Key ID="STR_DUWS_T_c12">
-                <German>Taktisches Asset sichern</German>
-                <Spanish>Proteger activo táctico</Spanish>
-                <Chinesesimp>守住战术资产</Chinesesimp>
-                <Original>Secure Tactical Asset</Original>
-                <English>Secure Tactical Asset</English>
-            </Key>
             <Key ID="STR_DUWS_T_c13">
                 <German>Panzerzug jagen</German>
                 <Spanish>Cazar pelotón blindado</Spanish>
@@ -4022,13 +3959,6 @@
                 <Original>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</Original>
                 <English>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</English>
             </Key>
-            <Key ID="STR_DUWS_T_holdposdesc">
-                <German>Unser hochwertiges taktisches Asset befindet sich hier. Du musst das Ziel schnell erreichen und es für eine Weile halten, bis die Verstärkung eintrifft. (Slightly high CP, high AP)</German>
-                <Spanish>Nuestro activo táctico de alto valor está aquí. Debes llegar al destino con prisa y mantener la posición durante un tiempo hasta que lleguen los refuerzos. (Slightly high CP, high AP)</Spanish>
-                <Chinesesimp>我方高价值战术资产在这里，你需要快点到达目的地并坚守一段时间，直到援军抵达。(稍高CP，高AP)</Chinesesimp>
-                <Original>A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.</Original>
-                <English>A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.</English>
-            </Key>
             <Key ID="STR_DUWS_T_domination">
                 <German>Freundliche mechanisierte Infanteriestrupp kämpft gegen feindliche schwere Panzerverbände. Eure Einheit muss sofort reagieren und alle feindlichen Panzer-Einheiten im Zielbereich um jeden Preis eliminieren. Hinweis: Bei der Auswahl des AO für diese Mission sollten vorzugsweise wasserfreie Binnenbereiche gewählt werden. (Very low CP, avg AP)</German>
                 <Spanish>Escuadrón de infantería mecanizada aliado está en combate con unidades de blindaje pesado enemigas. Tu unidad debe responder inmediatamente y eliminar todas las unidades de blindaje enemigas en el área objetivo a cualquier costo. Nota: al seleccionar el AO para esta misión, es preferible elegir zonas interiores sin agua. (Very low CP, avg AP)</Spanish>
@@ -4190,7 +4120,7 @@
                 <Original>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</Original>
                 <English>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_c18">
+            <Key ID="STR_DUWS_T_c12">
                 <Original>Deny Enemy Armor</Original>
                 <English>Deny Enemy Armor</English>
             </Key>
