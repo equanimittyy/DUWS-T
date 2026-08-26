@@ -110,6 +110,10 @@ as the same courier detachment. New key `STR_DUWS_T_courier2` ("Courier 2-1"), r
 ## Helolift
 
 - `helolift_noheli` — drop hint "Heavy transport could not reach your position." → **Overlord** / NET: "Be advised, Alpha 1-1, heavy transport can't reach your position. Tasking aborted." — new `heloliftnoreach`
+- `liftwp_incomplete` "Route incomplete, tasking aborted." — **decided: convert to radio, and fix a state-contradicting line on the way.** The `count _waypoints < 3` exit at `fnc_helolift.sqf:218` is reached only *after* the helo has flown to the hook, slung the load, lifted to 60 m, and the player pressed takeoff (`:213`) — the aircraft is airborne and healthy. But it calls the shared `_abort` (`:62`), which speaks `heloliftabort` "Mule 1-1 is out of action and aborting the tasking." — false on this path. Split `_abort` into a `_teardown` (marker cleanup + the `fnc_helolift_ropes "abort"` remoteExec that drops the load and RTBs) and the radio line. The six `_check_damage` exits (`:104, :112, :192, :199, :211, :215`) keep `_teardown` + `heloliftabort` (genuinely out of action). The `:218` path gets `_teardown` + a new honest line — **Crane** / SUB-NET: "No route received. Tasking cancelled." (new `liftnoroute`). Then the hint drops; its content lives on the correct surface.
+- callsign fix: `heloliftabort` names **"Mule 1-1"**, but the lift pilot speaks as **Crane** (`STR_DUWS_T_crane`) in every other line (`helolift2/3/5`). Reconcile to Crane while `_abort` is being touched — the orphaned "Mule 1-1" appears nowhere else.
+
+**Taxi abort audit (result: no change to helo taxi or boat taxi).** The same failure class was checked in both taxis and neither has the helolift defect. Every `_abort` in `fnc_helotaxi.sqf` and `fnc_boatTaxi.sqf` is gated on damage (`_check_damage` / `getdammage > 0.7 or !alive _pilot`), so their "out of action" lines (`helotaxidamaged`, `boattaxi_damaged`) are only ever spoken when the aircraft really is down — honest. Their route/destination feedback is already voiced and already honest, as re-prompts rather than cancellations: helo taxi's Chariot line `helotaxiwp_nolz` "No clear LZ at that grid. Send another, over.", boat taxi's Swordfish lines `boattaxiwp_bad` "We cannot reach that grid…" and `boattaxiwp_close` "That grid is too close…". Structurally, neither taxi can reach helolift's broken state: both refuse to depart until a valid destination is set (`fnc_mapclickhelo.sqf`, `fnc_mapclickboat.sqf` loop until a `BIS_fnc_findSafePos` hit), so a "No route received. Tasking cancelled." line there would be unreachable — do not add it.
 
 ## UAV recon (Allseer)
 
@@ -119,7 +123,7 @@ as the same courier detachment. New key `STR_DUWS_T_courier2` ("Courier 2-1"), r
 
 `laser_loiter`, `pilotwp`, `helotaxi2wp`, `helotaxiwp_reopen`, the `hint ""` clear · `helolift_notarget`, `helolift_badtarget`, `too_close_enemy`, `nolz`, `boattaxi_noshore`, `7yy0wapp` (750 m rule) · `rjuehu36`, `gu6cbc5f` (access key) · `vehicle_garage_no_vehicle`, `repair_select_pylon` · `veh_drop_none`, `tier_locked_hint`, `SUPPORT_BUSY`, `346eazcm` · buy menu: `inssupport`, `8c1i4vga`, `e95mc4lv`, `SUPPORT_NO_REFUND`, `dvbox9ay`, purchase `_msg`.
 
-Borderline: `liftwp_incomplete` "Route incomplete, tasking aborted" — kept as a hint because the Overlord abort radio (`heloliftabort`) says "aborting" but not the reason; fold the reason into the radio to drop it too, or leave it.
+(`liftwp_incomplete` was the borderline here; now decided — see the Helolift section: converted to radio and the shared abort line fixed.)
 
 ## Side effects (fall out of the drops, no extra work)
 
@@ -136,11 +140,12 @@ Borderline: `liftwp_incomplete` "Route incomplete, tasking aborted" — kept as 
 6. **Supply ETA wording** — unify on **forty seconds**, the value already in the radio line and the closer match to the code's timeline; drop the "one minute" hint.
 7. **Alpha 1-1's channel** — **VOICE**, never NET or SUB-NET. The team speaks co-located, so its lines get no squelch tone; VOICE is the loud subtitle with none. VOICE is the router's default for unlisted speakers, so the change is to **leave `STR_DUWS_T_actionteam` out of both speaker tables** — no registration at all. The speaker still renders `Alpha 1-1 ({player who called})` — strictly the caller, passed to `fnc_duws_dialogue` (`_caller` arg); the team senior is the fallback for Alpha 1-1 lines with no caller.
 
-Still open (not among the seven): the `liftwp_incomplete` borderline above — fold the abort reason into the `heloliftabort` radio and drop the hint, or leave it.
+8. **Helolift `liftwp_incomplete` + shared abort line** — convert the hint to a **Crane** / SUB-NET line "No route received. Tasking cancelled." (`liftnoroute`), split `_abort` so the healthy-aircraft cancel no longer speaks the "out of action" `heloliftabort`, and reconcile that line's orphaned "Mule 1-1" to Crane. Helo taxi and boat taxi audited alongside: already honest, no change. Detail in the Helolift section.
 
 ## Task list
 
 - [ ] Register the arty tier callsigns (`redleg`, `sledge`, `slingshot_2`, `reaper`, `reaper_2`) and the new `STR_DUWS_T_courier2` (Courier 2-1) in `DUWS_subnetSpeakers` (channel routing prerequisite). Leave `STR_DUWS_T_actionteam` unlisted so Alpha 1-1 defaults to VOICE.
-- [ ] Add the `new` / `rewrite` stringtable keys, incl. `STR_DUWS_T_courier2` (English real; DE/ES/ZH English placeholders per the localisation-lag convention).
+- [ ] Add the `new` / `rewrite` stringtable keys, incl. `STR_DUWS_T_courier2` and `liftnoroute` (English real; DE/ES/ZH English placeholders per the localisation-lag convention).
+- [ ] Helolift: split `_abort` into `_teardown` + line; route the `:218` WP-incomplete exit to `_teardown` + Crane `liftnoroute`; leave the six `_check_damage` exits on `heloliftabort`; fix `heloliftabort`'s "Mule 1-1" to Crane. No change to helo taxi / boat taxi (already honest).
 - [ ] Replace each dropped hint with its `fnc_duws_dialogue` call at the same beat. On delivery beats keep the hint (caller-local) and add the sign-off `remoteExec`'d to `0` (global); drop the `bis_fnc_showNotification` green card.
 - [ ] Playtest each support once: no beat goes silent, nothing double-fires, Alpha 1-1 reads on VOICE with no squelch.
