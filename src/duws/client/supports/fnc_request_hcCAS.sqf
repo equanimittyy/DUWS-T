@@ -107,5 +107,9 @@ if (alive _vehicle && HC_CAS_active && {_vehicle distance _hq < 1200}) then {
 // the caller re-buys at an HQ or FOB, and the cooldown gates the whole team until it lapses.
 HC_CAS_active = false;
 HC_CAS_currentVehicle = nil;
-if (alive _vehicle) then { [_vehicle, _group] call fnc_support_despawn };
+// Alive: normal stand-down. Dead: the jet was shot down, and an AI pilot bails out of a critically
+// damaged aircraft before it blows -- so a live pilot is left drifting under a chute in the player's
+// group. Delete the group's surviving units so no stray friendly is stranded on the map.
+if (alive _vehicle) then { [_vehicle, _group] call fnc_support_despawn }
+else { { deleteVehicle _x } forEach units _group };
 ["hcCAS", 600] remoteExec ["fnc_hcair_endActive", 2];

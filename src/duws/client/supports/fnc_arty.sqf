@@ -87,26 +87,25 @@ if (_ammotype == "Laser") then {
 	};
 };
 
-_drawRadius = "";
-if (_ammotype == "Bo_Mk82") then {
-	_drawRadius = 20;
-} else {
-	_drawRadius = _radius;
-};
-
 _markername = format["ord%1%2",_position];
-_markerstr = createMarker [str(_markername), _position];
-_markerstr setMarkerShape "ELLIPSE";
-str(_markername) setMarkerColor "ColorGrey";
-str(_markername) setMarkerSize [_drawRadius,_drawRadius]; 
-
 _markername2 = format["lbl%1%2",_position];
-_markerstr2 = createMarker [str(_markername2), _position];
-_markerstr2 setMarkerShape "ICON";
-str(_markername2) setMarkerType "hd_warning";
-str(_markername2) setMarkerColor "ColorOrange";
-str(_markername2) setMarkerSize [.8,.8]; 
-str(_markername2) setMarkerText " " + _ord;
+// No target marker for the laser strike: the jet loiters on the caller, who designates by hand, so
+// there is no pre-plotted grid to draw -- a circle over the player's own position is just noise. Names
+// stay defined so the tail's deletemarker calls are harmless no-ops.
+if (_ammotype != "Laser") then {
+	private _drawRadius = if (_ammotype == "Bo_Mk82") then {20} else {_radius};
+	_markerstr = createMarker [str(_markername), _position];
+	_markerstr setMarkerShape "ELLIPSE";
+	str(_markername) setMarkerColor "ColorGrey";
+	str(_markername) setMarkerSize [_drawRadius,_drawRadius];
+
+	_markerstr2 = createMarker [str(_markername2), _position];
+	_markerstr2 setMarkerShape "ICON";
+	str(_markername2) setMarkerType "hd_warning";
+	str(_markername2) setMarkerColor "ColorOrange";
+	str(_markername2) setMarkerSize [.8,.8];
+	str(_markername2) setMarkerText " " + _ord;
+};
 
 sleep 20;
 
@@ -266,11 +265,20 @@ if (_ammotype == "Laser") then {
 			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		};
 	};
-	// Break the loiter and send the jet out either way; cleanup deletes it after the tail sleeps.
+	// Break the loiter and send the jet home, then delete it only once it has cleared the area, so it
+	// flies off rather than vanishing over the caller. Detached so the slot frees below without waiting.
 	{ deleteWaypoint _x } forEach (reverse (waypoints _group));
 	private _rtb = _group addWaypoint [_spawnPos, 0];
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
+	[_group, _vehicle, _position] spawn {
+		params ["_g", "_v", "_pos"];
+		// Grace cap so a damaged jet that cannot make distance still cleans up.
+		private _grace = time + 120;
+		waitUntil { sleep 3; !alive _v || _v distance _pos > 2500 || time > _grace };
+		{ deleteVehicle _x } forEach units _g;
+		deleteVehicle _v;
+	};
 } else {
 	// Splash call as the first rounds arrive.
 	[_callsign, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
@@ -358,7 +366,7 @@ sleep 30;
 deletemarker str(_markername);
 deletemarker str(_markername2);
 
-if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
+if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 	sleep 60;
 	{
 		deleteVehicle _x;
