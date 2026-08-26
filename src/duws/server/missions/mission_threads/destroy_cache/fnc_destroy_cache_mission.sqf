@@ -63,15 +63,9 @@ _staticsArray = [
 ];
 // --DUWS-COMPOSITION END--
 
-_vehicle = objNull;
-{
-    _x params ["_class", "_posX", "_posY", "_posZ", "_dir", "_isWeapon"];
-    if (_isWeapon) then { continue; };
-    _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
-    _vehicle setDir _dir;
-    _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-    [_vehicle, "mission_destroy_cache"] call fnc_duws_keep;
-} forEach _staticsArray;
+// Cover props: frozen, tilted flush and hardened by the shared placer, the way zones and hardpoints
+// build theirs. Weapon rows are skipped here and stood up in the fnc_static_place pass below.
+[_staticsArray, [_centerSpawnX, _centerSpawnY], "mission_destroy_cache", [0, ["Land_HBarrier_5_F","Land_Razorwire_F"], "all"]] call fnc_composition_place;
 
 _vehicle_7 = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 [_vehicle_7, "mission_destroy_cache"] call fnc_duws_keep;

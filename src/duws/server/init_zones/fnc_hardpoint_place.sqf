@@ -39,27 +39,21 @@ fnc_hardpoint_build = {
         []
     };
 
-    private _placed = [];
-    // Props first: a weapon row's Z is an absolute height fnc_static_place writes, and the ground pass
-    // here would stamp it to terrain like a prop. Props are frozen invulnerable cover, as the prefabs
-    // place them -- except the radio mast, left live below; the gun is what the player destroys.
-    {
-        _x params ["_class", "_ox", "_oy", "_oz", "_rowDir", ["_isWeapon", false]];
-        if (_isWeapon) then { continue };
-        private _off = [_ox, _oy, _dir] call fnc_hardpoint_rotate;
-        private _wp = [_px + (_off select 0), _py + (_off select 1), 0];
-        private _obj = createVehicle [_class, _wp, [], 0, "CAN_COLLIDE"];
-        [_obj, _key] call fnc_duws_keep;
-        _obj setPosATL _wp;
-        _obj setDir (_rowDir + _dir);
-        // The radio mast alone is left simulated and damageable, so the player clears the tower by
-        // destroying it; fnc_hardpoint_stream reads the mast, not the roster. Every other prop stays
-        // frozen and invulnerable.
-        private _isMast = _type isEqualTo "RADIO" && {_class isEqualTo DUWS_radioMastClass};
-        _obj enableSimulationGlobal _isMast;
-        _obj allowDamage _isMast;
-        _placed pushBack _obj;
-    } forEach _rows;
+    // Props via the shared placer, frozen and hardened as the zone prefabs build theirs. Hardpoints stand
+    // on a heading (offsets rotated by _dir) and never tilt; weapon rows are skipped here and placed in the
+    // second pass below, where their absolute Z survives instead of being stamped to terrain like a prop.
+    private _placed = [_rows, [_px, _py], _key, [_dir, [], "all"]] call fnc_composition_place;
+    // The radio mast alone is left simulated and damageable, so the player clears the tower by destroying
+    // it; fnc_hardpoint_stream reads the mast, not the roster. The placer hardened every prop, so undo it
+    // on the mast. RADIO only -- no other type fields one, so this loop is a no-op there.
+    if (_type isEqualTo "RADIO") then {
+        {
+            if (typeOf _x isEqualTo DUWS_radioMastClass) then {
+                _x enableSimulationGlobal true;
+                _x allowDamage true;
+            };
+        } forEach _placed;
+    };
 
     // Weapons second. fnc_static_place adds the row's own offset to the origin it is handed, so the
     // rotated offset is folded into the origin and the row passed with a zeroed X/Y.

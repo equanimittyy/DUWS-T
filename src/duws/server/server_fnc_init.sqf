@@ -33,6 +33,10 @@ publicVariable "fnc_duws_release";
 publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
+// Shared prop-placement primitive for every composition (zones, hardpoints, cache/radar missions). After
+// fnc_duws_keep, which it calls; server-only, so not broadcast.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_place.sqf";
+
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
