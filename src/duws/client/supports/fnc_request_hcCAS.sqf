@@ -41,7 +41,7 @@ _message = ([localize "STR_DUWS_T_koiin"] call fnc_cs);
 
 player hcsetgroup [_group,""];
 DUWS_number_CAS = DUWS_number_CAS + 1;
-_group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_CAS]];
+_group setGroupId [format[localize "STR_DUWS_T_hc_cas_squad",DUWS_number_CAS]];
 hint localize "STR_DUWS_T_gu6cbc5f";
 
 // State is reset the instant the jet is lost, not after a cooldown: the support is spent at

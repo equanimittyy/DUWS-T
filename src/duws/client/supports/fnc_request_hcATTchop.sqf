@@ -28,7 +28,7 @@ DUWS_number_attackchopa = DUWS_number_attackchopa + 1;
 
 switch (VERSION_X) do {
 	case "MODERN": {
-		_group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_attackchopa]];
+		_group setGroupId [format[localize "STR_DUWS_T_hc_gunship_squad",DUWS_number_attackchopa]];
 	};
 };
 _speaker = localize "STR_DUWS_T_OVERLORD";

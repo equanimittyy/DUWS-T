@@ -5212,8 +5212,8 @@
                 <German>Anfrage nach sofortigem Feuerschutz – Koordinaten übermittelt.</German>
                 <Spanish>Solicito apoyo de fuego inmediato – coordenadas enviadas.</Spanish>
                 <Chinesesimp>请求即时火力支援，坐标已给出。</Chinesesimp>
-                <Original>Requesting immediate fire support, sending grid now.</Original>
-                <English>Requesting immediate fire support, sending grid now.</English>
+                <Original>Overlord, we're requesting fire support on grid %1, over.</Original>
+                <English>Overlord, we're requesting fire support on grid %1, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_artyack">
                 <Original>Copy your fire mission, Alpha 1-1. %1 has the target.</Original>
@@ -5287,6 +5287,14 @@
             <Key ID="STR_DUWS_T_artyair_complete">
                 <Original>Ordnance delivered. Fire mission out.</Original>
                 <English>Ordnance delivered. Fire mission out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_arty_splash">
+                <Original>Splash.</Original>
+                <English>Splash.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_artyair_rtb">
+                <Original>Ordnance delivered, returning to base.</Original>
+                <English>Ordnance delivered, returning to base.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplydropack">
                 <Original>Copy your request, Alpha 1-1. Courier 1-1 is inbound with your supply drop.</Original>
@@ -6289,12 +6297,13 @@
                 <Original>Exit the squad manager</Original>
                 <English>Exit the squad manager</English>
             </Key>
-            <Key ID="STR_DUWS_T_8mtxjfj3">
-                <Spanish>Escuadrón de ataque áereo %1</Spanish>
-                <German>Luftlandeeinheit %1</German>
-                <Chinesesimp>空中攻击小队 %1</Chinesesimp>
-                <Original>Air attack squad %1</Original>
-                <English>Air attack squad %1</English>
+            <Key ID="STR_DUWS_T_hc_gunship_squad">
+                <Original>Longbow %1</Original>
+                <English>Longbow %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hc_cas_squad">
+                <Original>Koi %1</Original>
+                <English>Koi %1</English>
             </Key>
             <Key ID="STR_DUWS_T_rjuehu36">
                 <Spanish>¡Vehículo áereo del AM listo! \n Accese a él con [CTRL. Izq. + Espacio]</Spanish>
