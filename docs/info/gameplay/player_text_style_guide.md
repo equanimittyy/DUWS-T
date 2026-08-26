@@ -3,7 +3,8 @@
 Everything the player reads lives in `src/stringtable.xml`, grouped into `<Container>` blocks by
 subsystem, under `STR_DUWS_T_*` keys (a handful of newer ones use a bare `STR_DUWS_*`); lookups are
 case-insensitive, so a `localize` that differs in case from the `Key ID` still resolves. This guide
-is how that text should read and which surface it belongs on.
+is how that text should read, which surface it belongs on, and how the scroll-menu entries that carry
+much of it are styled.
 
 **English is the source of truth.** Every key carries both `<Original>` and `<English>`, and Arma
 falls back to `<Original>` when the active language has no tag. Edit the two in lockstep — changing
@@ -212,6 +213,162 @@ Three things make it read right, and are the parts to get right in a new one:
   Overlord's on NET, not the callsign's — the callsign is gone. Only the failure moves to Overlord;
   arrival, work and completion stay the callsign's own.
 
+Fire support carries an extra ordering rule. The `Splash.` impact call fires as the first round
+lands, and the fire-mission-out sign-off follows it (`Rounds complete.` for tube and mortar,
+`Ordnance delivered. Fire mission out.` for the air-delivered types) — splash first, sign-off after,
+never the reverse. A tube or mortar salvo walks over several seconds, which spaces the two on its
+own; a single air-delivered round (JDAM, cluster, napalm, laser) lands all at once, so its sign-off
+is held a few seconds longer (`client/supports/fnc_arty.sqf`) or it would tread on the splash.
+
 The request passes the requester's name so every machine prints the same header: `name player` where
 the opening runs client-side (the drops, arty), `name _caller` where it runs on the server (UAV). See
 [§Military-like language](#military-like-language) for the callsign-substitution rule this rides on.
+
+## Three mechanisms produce a scroll entry
+
+| Mechanism | Produces | Used for |
+| --- | --- | --- |
+| `addAction` | An instant scroll entry | Almost everything |
+| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an icon and progress ring | Searching bodies and containers, the disguise panel |
+| `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
+
+`src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
+Black Market, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick Kits and the debug
+menu each occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu
+entries.
+
+The request menu's COMMAND AND CONTROL column is the same idea one level up: everything a player has
+to ask command for is a button in the dialog Requests already opens, so the HQ structure carries one
+scroll entry instead of the twelve it once did. The dividing line is **who needs it and how fast** —
+an arsenal, a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay
+on the scroll wheel and on the prop they belong to, because a player reaches for those without asking
+anyone. Squad and FOB management, operative recruitment, intel analysis, the redeploy and the two
+hires are buttons, built by `fnc_command_fill` in that order: what costs nothing above what does,
+and the analysis directly under the operatives whose take it converts.
+
+Rest and the squad-leader reset went the other way and are scroll entries again, on the HQ medical
+tent (`fnc_medtent_actions`) and on the FOB object. Both are things a player walks somewhere to do
+rather than things they ask command for, and resting treats who is standing at that site.
+
+## Buckets
+
+Every entry belongs to a bucket, and the bucket decides both how the title looks and where the entry
+sits in the scroll list. `src/duws/shared/includes/action_style.hpp` defines one macro per bucket;
+call sites pass a stringtable key and never write markup themselves.
+
+| Bucket | Hex | Priority | Means |
+| --- | --- | --- | --- |
+| `ACT_PRIMARY_MENU` | `#15ff00` | 100 | Command: directs your forces or your base. Uppercased by the macro |
+| `ACT_SECONDARY_MENU` | `#0d9900` | 90 | Services and situational entries — the command hue one tier down |
+| `ACT_EQUIP` | `#ff8000` | 80 | Gives or swaps gear |
+| `ACT_MOVE` | `#00b7ff` | 70 | Relocates you, or commits a vehicle to a destination |
+| `ACT_AID` | `#00b7ff` | 60 | Heals or rearms |
+| `ACT_CIVILIAN_INTERACTION` | `#00b7ff` | 50 | Acts on a civilian |
+| `ACT_UTIL` | `#00b7ff` | 20 | Local effect only: toggles, readouts, dev tools |
+| `ACT_COMMIT` | `#ff1111` | 10 | Spends CP or commits a shared asset; not freely undone |
+| *(none)* | plain | 40 | The rescue-pilot set |
+| *(none)* | plain | 30 | Hold-to-search entries, identified by icon instead |
+
+**Colour lives in the header, not in `stringtable.xml`.** A value carrying its own `<t>` markup
+freezes that markup into every translation — the variants drift apart, one entry once shipping
+coloured in German and plain in English — and a listbox row renders the tags literally rather than
+applying them. Keys stay plain text so the bucket alone decides appearance.
+
+**Four buckets deliberately share one blue.** Navigational, medical, social and informational
+entries read as one ambient family against the loud consequence colours. They stay four named macros
+so priority keys off the bucket, and splitting a blue back out later is a one-line header edit.
+
+**`ACT_COMMIT` sits lowest on purpose.** Priority orders the scroll list, and a mis-scrolled spend
+costs more than a buried entry does.
+
+**A bare `&`, `<` or `>` in a title breaks the entry.** Titles are wrapped in `<t>` markup, so an
+unescaped ampersand ends the structured-text parse and swallows the rest of the entry. Use `/` or a
+different word — `Rest / Heal`, `Mission Control`.
+
+**The buckets stop at the scroll wheel.** They once had `ACT_ROW_*` twins for the BASE listbox, which
+died with it: a button is already legible as a button, and the five row hues only ever re-encoded a
+scroll priority that a fixed column has no use for. The command column still orders itself the way
+the scroll list does — management first, the spend last.
+
+## Call-site conventions
+
+**Slot arity is uniform.** `addAction`'s array is positional — `[title, script, arguments, priority,
+showWindow, hideOnUse, shortcut, condition, radius, …]`. Every DUWS call passes eight elements, or
+nine where `radius` is used (the rescue-pilot set). The `arguments` slot is `[]` when there are none;
+a shorter array silently inherits engine defaults, which is how Open Chute went without a condition
+and the Mobile HQ entries without a priority.
+
+**One broadcast path.** Actions attached from the server go out as
+`remoteExec ["addAction", [0,-2] select isDedicated, <object>]`. The target skips a dedicated server,
+which has no interface to draw a scroll menu on. The third argument is the owning object rather than
+`true`: an auto-generated JIP id outlives the object it decorates and leaves a queue entry per object
+forever, where an object-keyed message is dropped when that object is deleted. That id *is* the
+object's netId, so two broadcasts against one object write the same queue key and the later silently
+evicts the earlier — a gap only a late joiner ever sees. Give an object all its entries in a single
+broadcast where you can: `fnc_ammobox_actions` attaches both the arsenal and the rearm entry for the
+airdropped and Mobile HQ boxes, and the Mobile HQ depends on that object-keyed lifetime because
+undeploy deletes its box. Suffix the id only where entries genuinely cannot share a call — the FOB's
+defences and guards are attached from different files at different times, and the killhouse
+terminal's gear is attached after its controls menu.
+
+**A function that is already broadcast must attach locally.** `fnc_FOBactions` and
+`fnc_ammobox_actions` run on every machine, so a plain `_obj addAction` inside them produces exactly
+one entry per machine. A `remoteExec` inside such a function instead fans out once per machine that
+runs it, so an eight-player session gets eight copies of that one entry on every screen — and a
+single-player test shows one, because there is only one machine to multiply by.
+
+**Duplicate guards must stay machine-local.** The adders are broadcast to every client and each
+client adds its own local action, so a guard written with a public `setVariable` lets the first
+client through and locks every other one out permanently.
+
+**A button needs no broadcast at all.** The command column is built per client when the menu opens,
+so an entry that became a button stopped needing a broadcast, a JIP id and a duplicate guard along
+with it — which is what let the FOB redeploy come out of `fnc_guardsFOB` entirely.
+
+## Menu rows
+
+`fnc_open_action_menu` takes an optional `[r,g,b,a]` float array per row; a row without one renders in
+the listbox default. Row labels are plain text — a listbox renders `<t>` markup literally rather than
+applying it — so a scroll-entry colour and a row colour cannot share a definition.
+
+| Menu | Row colours |
+| --- | --- |
+| Black Market | `[0,1,0,1]` on all three purchases |
+| Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[1,0.533,0,1]` exit |
+| Vehicle Recycling | None — both rows default |
+| Vehicle Customization | None — all four rows default |
+| Quick Kits | None — one row per scanned loadout, all default |
+| Debug | `[1,0.667,0,1]` on the six working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
+| Flag *(object)* as searchable, Force side mission | `[1,0.667,0,1]` on every row |
+
+The command column is not a menu in this sense: it is seven fixed buttons in the request dialog
+itself (`request_menu.hpp`, idc 1610-1616), written from the top down by `fnc_command_fill` and run
+by `fnc_command_select`. The entry's CODE rides in `uiNamespace`, because a control's action is a
+string, and entries that do not apply are hidden rather than greyed so the column never shows a gap.
+
+It differs from the reusable menu on closing. Only an entry that opens a dialog of its own brings the
+request menu down — Squad Manager, FOB Manager and Special Operatives — because those would stack on
+top of it. The rest spend, hint and leave the menu standing, so buying two things in a row does not
+mean walking back to the prop between them. Entries that cost are drawn in the same orange the
+supports catalogue paints an unbought permanent with: the label carries the figure, but nothing else
+carried the fact that clicking spends it.
+
+Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
+server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are
+deliberately unlocalised English — a dev surface no player reads.
+
+Both menus in the last row open from a Debug row rather than from a scroll entry, and are the one
+place a menu opens another menu. The economy tool sitting between them in Debug is a hand-built
+dialog rather than one of these lists, because it pairs an edit box with the buttons that spend it.
+
+## Vendored module entries
+
+Not DUWS-authored, but they share the same scroll menu, the same priority space, and the same `<t>`
+markup. DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's release entry
+ties `ACT_COMMIT` at 10 and everything else sits under it.
+
+| Module | Entries | Source and formatting |
+| --- | --- | --- |
+| AIS | First Aid/Revive, Stabilize, Drag, Carry, Release, Unload Injured, Load Injured | `src/modules/AIS/System/fn_postinit.sqf`, added through `AIS_Core_fnc_addAction` at a fixed priority of 1.5. Titles are hardcoded English and restyled through `setUserActionText` with `#E9FDF7` text plus a per-action `<img>` icon — the only entries in the scroll menu that carry an inline image |
+| R3F Logistics | Object move/rotate/align entries and the config-tool dump actions | `src/modules/R3F_LOG/objet_deplacable/deplacer.sqf:166-171`, priority 10 on release and 6 on the rest, coloured `#ee0000` and `#00eeff` |
+| TAW View Distance | View-distance menu | `src/modules/taw_vd/fn_openMenu.sqf`, reached through the CfgFunctions include in `src/description.ext` |
