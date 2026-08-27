@@ -276,9 +276,8 @@ if (_ammotype == "Laser") then {
 			if (!isNull _round) then { deleteVehicle _round };
 			"Bo_Mk82" createVehicle _imp;
 			[_cs, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
-			private _hit = _imp nearObjects 20;
-			{_x setDamage .5} forEach _hit;
-			{_x setDamage 1} forEach (_hit select {_x distance _imp < 10});
+			// Server owns the AI, so the kill is applied there, not on this client (see fnc_air_strike_kill).
+			[_imp] remoteExec ["fnc_air_strike_kill", 2];
 			// Hold before the sign-off so the splash reads first, matching the air-delivered close.
 			sleep 6;
 			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
@@ -342,12 +341,8 @@ if (_ammotype == "Laser") then {
 				};
 				case 3: {  // JDAM
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
-					// One query and the outermost-first ordering, as the laser strike above.
-					// This branch fires once per round with no yield, so the doubled query was
-					// paid for every shell in the salvo.
-					private _hit = _position nearObjects 20;
-					{_x setDamage .5} forEach _hit;
-					{_x setDamage 1} forEach (_hit select {_x distance _position < 10});
+					// Server owns the AI, so the kill is applied there, not on this client (see fnc_air_strike_kill).
+					[_position] remoteExec ["fnc_air_strike_kill", 2];
 				};
 				case 5: {  // Cluster
 					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
