@@ -152,6 +152,7 @@ private _forcesBody = ("FORCES, ECONOMY &amp; WORLD" call _hdr)
     ["BLUFOR AI Skill", "blufor_ai_skill" call _skill],
     ["OPFOR AI Skill", "opfor_ai_skill" call _skill],
     ["Enemy Unit Multiplier", format ["%1x", "enemyunitMultiplier" call _S]],
+    ["Garrison Density", if (isNil "garrison_density") then {"-"} else {format ["%1%", round (garrison_density * 100)]}],
     ["OPFOR Heavy Armour", ["HeavyArmor", "Yes", "No"] call _yn],
     ["OPFOR Attack Helis", ["AttackHeli", "Yes", "No"] call _yn],
     ["War Escalation", ["escalation_enabled"] call _yn]
