@@ -23,13 +23,12 @@ private _build = {
     private _leadClass = [_leadToken] call DUWS_fnc_tokenClass;
     if (_leadClass == "") then { _leadClass = _vehClass };
 
-    // Reward scales with the tier fielded: +10 CP and +5 AP per step above a car patrol (car/IFV/armour
-    // pay 15/20, 25/25, 35/30). The briefing and strategic map print the base -- both built before this
+    // Reward scales with the tier fielded: +10 CP per step above a car patrol, AP flat (car/IFV/armour
+    // pay 15/20, 25/20, 35/20). The briefing and strategic map print the base -- both built before this
     // rolls -- so the step-up is an unadvertised completion bonus, inherent to rolling the tier at spawn,
     // not a display bug. One mission runs at a time (Mission_available gate), so the in-place bump is safe.
     private _tier = ["car", "ifv", "tank"] find _token;
     DUWS_curReward set [0, (DUWS_curReward select 0) + (10 * _tier)];
-    DUWS_curReward set [1, (DUWS_curReward select 1) + (5 * _tier)];
 
     // Patrol points around the ring, snapped to roads so the column rides the network rather than cutting
     // cross-country (Arma routes vehicles badly off-road -- see fnc_convoy_drive). Centred on the marked

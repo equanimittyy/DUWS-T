@@ -117,11 +117,13 @@ player's ride home. Off the spine for the scripted repair-race fail.
 one class**, the class rolled once and gated by OPFOR's earned AP tier (car floor, tank top), patrols
 a road loop as one column. Win: every crewman across the three dead. The column holds LIMITED speed
 until first hit or a man down, then drops the limit and fights -- "speed-limited until broken", so the
-opening is an ambush window. On the `fnc_mission_run` spine (one-shot win predicate). **Reward scales
-with the tier fielded**: +10 CP / +5 AP per step above a car patrol, so car / IFV / armour pay
-15/20, 25/25, 35/30. The briefing and map print the base (built before the tier rolls), so a heavier
-patrol pays the step-up as an unadvertised completion bonus -- inherent to rolling the tier at spawn,
-safe because one mission runs at a time.
+opening is an ambush window. On the `fnc_mission_run` spine (one-shot win predicate). **Offered only
+where OPFOR has earned the Motorised tier** (`fnc_target_armor_site`): a side with no vehicles has no
+patrol to break, so below tier 2 the offer is dropped rather than sited on a fallback truck column.
+**Reward scales with the tier fielded**: +10 CP per step above a car patrol, AP flat, so car / IFV /
+armour pay 15/20, 25/20, 35/20. The briefing and map print the base (built before the tier rolls), so a
+heavier patrol pays the step-up as an unadvertised completion bonus -- inherent to rolling the tier at
+spawn, safe because one mission runs at a time.
 
 ### Informant Manhunt
 
