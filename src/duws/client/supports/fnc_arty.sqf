@@ -174,6 +174,16 @@ if (_ammotype == "Laser") then {
 	if (alive _vehicle) then {
 		[_callsign, localize "STR_DUWS_T_laser_onstation"] remoteExec ["fnc_duws_dialogue", 0];
 		hint localize "STR_DUWS_T_laser_loiter";
+		// Keep the orbit over the caller: the loiter was plotted where they stood at call time, but the
+		// designation window runs up to 5 min and they move. Re-centred every 5 s until the window closes.
+		_vehicle setVariable ["DUWS_laser_recentre", true];
+		[_vehicle, _wp2] spawn {
+			params ["_veh", "_loiterWp"];
+			while { alive _veh && (_veh getVariable ["DUWS_laser_recentre", false]) } do {
+				_loiterWp setWaypointPosition [getPos player, 0];
+				sleep 5;
+			};
+		};
 		private _deadline = time + 300;
 		private _lockStart = -1;
 		private _lastPrompt = -1000;
@@ -206,6 +216,7 @@ if (_ammotype == "Laser") then {
 			};
 			_laserLocked || (time > _deadline) || (!alive _vehicle)
 		};
+		_vehicle setVariable ["DUWS_laser_recentre", false];
 	};
 	if (!alive _vehicle) then {_veh_alive = false};
 } else {
