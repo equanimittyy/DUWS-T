@@ -55,9 +55,10 @@ DUWS_curNameKey = _mnameKey;
 DUWS_curObjective = _mobj;
 DUWS_curNoteKey = _mnote;
 _mdl params ["_dlMinH", "_dlMaxH"];
-// Rolled once at the mission's start, in 10-minute steps of in-game time, so the enforced deadline
-// sits behind the band the map advertised. The table's hours become steps here; fnc_time_deadline is
-// the shared shape deadlines and timed triggers both use, and holds the deadline in in-game time.
-DUWS_curDeadlineAt = [round (_dlMinH * 6), round (_dlMaxH * 6)] call fnc_time_deadline;
+// Rolled once at the mission's start, in 5-minute steps of in-game time, so the enforced deadline
+// sits behind the band the map advertised. The table's hours become steps here (x12: twelve 5-minute
+// steps to the hour); fnc_time_deadline is the shared shape deadlines and timed triggers both use,
+// and holds the deadline in in-game time.
+DUWS_curDeadlineAt = [round (_dlMinH * 12), round (_dlMaxH * 12)] call fnc_time_deadline;
 
 true

@@ -160,7 +160,8 @@ bearings when he boards. Car destroyed before he boards, and he arms a pistol an
 leave time is rolled in 10-minute steps of in-game time via `fnc_time_deadline` and shown as a world
 clock via `fnc_time_clock`.
 
-Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy, +16 crowd, zone-reach
+Tunables (defaults, all in the thread): leave 4 steps friendly / 2 steps enemy (5-min steps, so 20 /
+10 min), +16 crowd, zone-reach
 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
 3.
 

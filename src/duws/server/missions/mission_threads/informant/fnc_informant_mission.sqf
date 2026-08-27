@@ -38,9 +38,9 @@ if (!([15, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// Leave clock on the shared mission-timing shape (10-min in-game steps, the same clock the deadline
-// uses): enemy towns give one step, friendly two. TUNABLE steps.
-private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
+// Leave clock on the shared mission-timing shape (5-min in-game steps, the same clock the deadline
+// uses): enemy towns give 10 minutes, friendly 20. TUNABLE steps.
+private _leaveSteps = if (_enemyTown) then { 2 } else { 4 };
 private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 

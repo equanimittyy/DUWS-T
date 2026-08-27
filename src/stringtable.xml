@@ -3101,12 +3101,12 @@
                 <English>&lt;br /&gt;REP: +%1</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_time_fixed">
-                <Original>&lt;br /&gt;Time: ~%1 hrs</Original>
-                <English>&lt;br /&gt;Time: ~%1 hrs</English>
+                <Original>&lt;br /&gt;Time: ~%1</Original>
+                <English>&lt;br /&gt;Time: ~%1</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_time_range">
-                <Original>&lt;br /&gt;Time: ~%1-%2 hrs</Original>
-                <English>&lt;br /&gt;Time: ~%1-%2 hrs</English>
+                <Original>&lt;br /&gt;Time: ~%1-%2</Original>
+                <English>&lt;br /&gt;Time: ~%1-%2</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_deadline_desc">
                 <Original>&lt;br /&gt;You have until %1.</Original>
