@@ -176,8 +176,10 @@ if (_ammotype == "Laser") then {
 		hint localize "STR_DUWS_T_laser_loiter";
 		// Keep the orbit over the caller: the loiter was plotted where they stood at call time, but the
 		// designation window runs up to 5 min and they move. Re-centred every 5 s until the window closes.
+		// The loiter is waypoint index 2 (implicit 0, the on-station MOVE 1, the LOITER 2); _wp2 itself is
+		// scoped to the setup block above and reads nil here, so reach it through the function-scoped _group.
 		_vehicle setVariable ["DUWS_laser_recentre", true];
-		[_vehicle, _wp2] spawn {
+		[_vehicle, [_group, 2]] spawn {
 			params ["_veh", "_loiterWp"];
 			while { alive _veh && (_veh getVariable ["DUWS_laser_recentre", false]) } do {
 				_loiterWp setWaypointPosition [getPos player, 0];
