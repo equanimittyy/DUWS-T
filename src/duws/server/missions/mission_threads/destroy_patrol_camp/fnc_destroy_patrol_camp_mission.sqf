@@ -25,7 +25,7 @@ _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _taskId = format ["patrolcamp%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
-[localize "STR_DUWS_T_c17", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+[localize "STR_DUWS_T_c18", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // Camp centres: 1-3, spread across the zone with a minimum separation so the smoke columns read as
 // distinct objectives rather than one blob. The site-finder already placed the zone anchor in treeline;
@@ -48,20 +48,46 @@ private _campTeamUnits = [];
     private _cx = _campPos select 0;
     private _cy = _campPos select 1;
 
-    // A stub composition -- a burning campfire, three tents, a camping table -- laid out to be re-authored
-    // in Eden. Rows are [class, offX, offY, offZ, dir, isWeapon], offsets from the camp centre; offZ unused
-    // (props seat on terrain). Left simulated (no hardening): the campfire's fire and smoke are a particle
-    // effect that enableSimulation false would suppress, and the smoke is the whole point of the beacon.
+    // The camp composition, authored in Eden -- tents, two tables, sandbag cover, wood piles, ammo and
+    // clutter, and a campfire. Rows are [class, offX, offY, offZ, dir, isWeapon], offsets from the camp
+    // centre; offZ unused (props seat on terrain). Left simulated (no hardening): the campfire lit below has
+    // fire and smoke as a particle effect that enableSimulation false would suppress -- and the smoke column
+    // is the whole point of the beacon.
     // --DUWS-COMPOSITION BEGIN name="Mission: Patrol Camp" schema=A--
     private _staticsArray = [
-        ["Land_Campfire_burning_F", 0,   0,    0, 0,   false],
-        ["Land_TentDome_F",        -3,   2,    0, 45,  false],
-        ["Land_TentDome_F",         3,   2,    0, -45, false],
-        ["Land_TentDome_F",         0,  -3.5,  0, 180, false],
-        ["Land_CampingTable_F",     1.5, 0.5,  0, 0,   false]
-    ];
+        ["Land_TentDome_F", -3.95898, 3.27539, -5.90000000000312E-05, 45, false],
+        ["Land_TentDome_F", 3, 2, -5.90000000000312E-05, 315,  false],
+        ["Land_TentDome_F", -0.728516, -3.83398, -5.90000000000312E-05, 180, false],
+        ["Land_CampingTable_F", 5.71484, -0.441406, -0.207753, 44.8096, false],
+        ["Land_BagBunker_Small_F", 4.51172, -10.6426, 0.346326, 345.614, false],
+        ["Land_BagFence_Long_F", 6.11133, -0.015625, -0.199993, 44.7205, false],
+        ["Land_WoodPile_F", -5.94141, -3.69336, -0.35937, 122.244, false],
+        ["Land_WoodPile_large_F", 2.04102, -11.5586, -0.250585, 163.572, false],
+        ["Land_CampingChair_V2_F", -6.32227, -1.58203, -0.112819, 91.7357, false],
+        ["Land_BagFence_Long_F", -7.23828, 1.02148, -0.199993, 277.736, false],
+        ["Land_CampingTable_F", -6.66406, 0.666016, -0.207753, 98.212, false],
+        ["Land_Garbage_square5_F", -3.29297, -5.99219, -0.5798689, 0, false],
+        ["Land_Garbage_square3_F", 6.37305, -2.90625, -0.5673886, 47.4125, false],
+        ["Land_Garbage_line_F", 3.86328, -7.67188, -0.5691529, 0, false],
+        ["Land_BarrelEmpty_F", -6.58398, 2.23828, -0.214552, 0, false],
+        ["Land_Ammobox_rounds_F", 2.86328, -9.74609, -0.513942, 313.351, false],
+        ["Land_Ammobox_rounds_F", 2.66016, -9.45117, -0.513942, 250.36, false],
+        ["Land_BagFence_Round_F", -7.42969, -1.82031, -0.199993, 74.2054, false],
+        ["Land_CratesWooden_F", 2.33398, 5.09961, 0.119695, 253.913, false],
+        ["Land_BagFence_Long_F", -4.20898, 7.19922, -0.199993, 162.012, false],
+        ["Land_BagFence_Long_F", -1.41602, 8.18359, -0.199993, 162.012, false],
+        ["Land_Campfire_F", -0.136719, -0.171875, -0.399721, 0, false]
+];
     // --DUWS-COMPOSITION END--
     private _props = [_staticsArray, [_cx, _cy], "mission_patrol_camp", [0, [], []]] call fnc_composition_place;
+
+    // Eden exports the campfire cold. Light it so it burns and smokes -- the smoke column is the beacon the
+    // player homes in on. Left simulated by the [] hardening above, so the fire effect runs.
+    private _fireIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_Campfire_F" };
+    if (_fireIdx >= 0) then {
+        private _fire = _props param [_fireIdx, objNull];
+        if (!isNull _fire) then { _fire inflame true; };
+    };
 
     // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items. Seated like the laptop
     // objective (sabotage_laptop) -- freeze the table into a static, level surface and rest each item
