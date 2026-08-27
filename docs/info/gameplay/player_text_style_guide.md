@@ -45,9 +45,12 @@ re-addressing every line reads as stilted.
   the place in code: `fnc_mission_run` finds the nearest named settlement (`nearestLocations`, a 5 km
   ring, a grid reference as fallback) and folds it into `%1`, so *marked near %1* prints *marked near
   Agglelesh*.
-- **The register the speaker would use.** The command net (Overlord, Allseer) is clipped and
-  procedural, and names the player's callsign on a result (*To Alpha 1-1, the informant has been
-  disposed of. Good work.*). A civilian in the world speaks in character and imprecisely — a live
+- **The register the speaker would use.** Overlord is command: clipped and procedural, it tasks the
+  player, confirms a result and names the player's callsign (*To Alpha 1-1, the informant has been
+  disposed of. Good work.*). Allseer is the ISR feed, not a commander — it reports what
+  it sees and may recommend a course of action *to Overlord*, but it addresses command, not the
+  player, and never tasks or orders the player itself; the tasking that reaches the player is
+  Overlord's. A civilian in the world speaks in character and imprecisely — a live
   bearing and range while the informant is in town (*about %1 m %2 of you*), only a bystander's guess
   once he has driven off (*Him? I think I just saw him leave town heading %1*). The system knows
   where he is; a local only saw which way he went.
@@ -95,7 +98,10 @@ explicit speaker lists in `fnc_duws_dialogue`.
 
 **The speaker decides, and a voice is a real element in the fiction.** Overlord and Allseer on the
 net, a support callsign the player called, an intro or downed pilot, a civilian in the world — each
-is demonstrably on the net or in the room when its line plays. A one-off callsign wired to nothing
+is demonstrably on the net or in the room when its line plays. Overlord and Allseer are not
+interchangeable: Overlord is the command voice that tasks the player and calls results, while Allseer
+is the ISR feed — it reports contacts and can recommend action *to Overlord*, but it talks to
+command, not the player, and never tasks or orders the player directly. A one-off callsign wired to nothing
 the player can see or call is not a voice; a brief and its result come from an established element,
 not a name minted for the occasion. The player's own callsign is on no list — VOICE by default —
 because you do not hear your own key-up.
