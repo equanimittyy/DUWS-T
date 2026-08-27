@@ -60,5 +60,6 @@ if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && time > _
 
 [_markername2] call fnc_missionMarkerClear;
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hardpointclose"] remoteExec ["fnc_duws_dialogue", 0];
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [_hpPos, _radius, "mission_destroy_hardpoint"] call fnc_mission_end;
