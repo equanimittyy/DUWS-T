@@ -50,9 +50,8 @@ private _campTeamUnits = [];
 
     // The camp composition, authored in Eden -- tents, two tables, sandbag cover, wood piles, ammo and
     // clutter, and a campfire. Rows are [class, offX, offY, offZ, dir, isWeapon], offsets from the camp
-    // centre; offZ unused (props seat on terrain). Left simulated (no hardening): the campfire lit below has
-    // fire and smoke as a particle effect that enableSimulation false would suppress -- and the smoke column
-    // is the whole point of the beacon.
+    // centre; offZ unused (props seat on terrain). Left simulated (no hardening): the smoke-column particle
+    // stood on the campfire below is the beacon, and a particle source needs simulation to emit.
     // --DUWS-COMPOSITION BEGIN name="Mission: Patrol Camp" schema=A--
     private _staticsArray = [
         ["Land_TentDome_F", -3.95898, 3.27539, -5.90000000000312E-05, 45, false],
@@ -81,12 +80,17 @@ private _campTeamUnits = [];
     // --DUWS-COMPOSITION END--
     private _props = [_staticsArray, [_cx, _cy], "mission_patrol_camp", [0, [], []]] call fnc_composition_place;
 
-    // Eden exports the campfire cold. Light it so it burns and smokes -- the smoke column is the beacon the
-    // player homes in on. Left simulated by the [] hardening above, so the fire effect runs.
+    // Stand a smoke column on the campfire as the beacon. inflame would light only campfire-class props and
+    // gives a weak, low wisp; a base-game smoke-particle source is far taller, reads from across the zone,
+    // and renders on every client. Attached to the fire so it rides it, kept for cleanup with the camp.
     private _fireIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_Campfire_F" };
     if (_fireIdx >= 0) then {
         private _fire = _props param [_fireIdx, objNull];
-        if (!isNull _fire) then { _fire inflame true; };
+        if (!isNull _fire) then {
+            private _smoke = createVehicle ["test_EmptyObjectForSmoke", getPosATL _fire, [], 0, "CAN_COLLIDE"];
+            _smoke attachTo [_fire, [0, 0, 0.3]];
+            [_smoke, "mission_patrol_camp"] call fnc_duws_keep;
+        };
     };
 
     // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items. Seated like the laptop
@@ -115,6 +119,9 @@ private _campTeamUnits = [];
                 // Global, not local: the item must fall the last finger onto the table and be lootable on
                 // every client, so the settle cannot be a server-only simulation the clients never see.
                 _item enableSimulationGlobal true;
+                // fnc_duws_keep stamps `persistent`, which fnc_repetitive_cleanup never reaps -- so an
+                // unlooted item is safe from the GC for the whole mission (a WeaponHolderSimulated on a table
+                // far from any player is otherwise litter). fnc_mission_end releases the key to delete it.
                 [_item, "mission_patrol_camp"] call fnc_duws_keep;
             };
         };
