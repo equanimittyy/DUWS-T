@@ -250,12 +250,13 @@ if (_ammotype == "Laser") then {
 			params ["_round", "_lockPos", "_cs"];
 			private _dt = 0.05;
 			private _g = 9.8;             // gravity, always pulling the round down and short of an un-steered aim
-			private _maxDV = 60 * _dt;    // steering authority: the most the fins can bend the velocity per tick
+			private _maxDV = 140 * _dt;   // steering authority: the most the fins can bend the velocity per tick
 			private _lastPos = getPos _round;
 			private _flightEnd = time + 25; // safety cap so a round that never resolves cannot hang the thread
 			// Released running in on the locked point at a bomb's run-in speed; guidance and gravity take it
-			// from here.
-			private _vel = (vectorNormalized (_lockPos vectorDiff _lastPos)) vectorMultiply 200;
+			// from here. Speed kept moderate on purpose: turn radius grows with the square of speed, so a
+			// slower run-in lets the capped steering below actually walk a late correction onto the mark.
+			private _vel = (vectorNormalized (_lockPos vectorDiff _lastPos)) vectorMultiply 150;
 			waitUntil {
 				sleep _dt;
 				if (!isNull _round) then { _lastPos = getPos _round };
