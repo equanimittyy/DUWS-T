@@ -32,7 +32,7 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 | 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
 | 17 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
-| 8 | Destroy Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
+| 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
 gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
@@ -229,7 +229,7 @@ the mission watches liveness, not any one object. Pays 10/10 on top of the hardp
 bounty (type-scaled: [5,0] for most, [10,5]/[10,0] for artillery/mortar), all credited by the streamer.
 Spawns nothing. Off the spine.
 
-### Destroy Laptop
+### Sabotage Laptop
 
 `mission_threads/sabotage_laptop/`. A which-building hunt, not a walk to one marker. An enemy field
 laptop hides in **one** of 3-5 enterable buildings the mission marks with orange crosses; the player is
@@ -267,7 +267,7 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
 | 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
 | 17 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
-| 8 | Destroy Laptop | sabotage | cmd | 10/35/0 | 3 | done (verb reworked; reward not repriced) |
+| 8 | Sabotage Laptop | sabotage | cmd | 10/35/0 | 3 | done (verb reworked; reward not repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
@@ -308,7 +308,7 @@ change cell is the current idea, not a locked spec.
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
 | Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
 | Destroy Hardpoint | target an existing revealed OPFOR emplacement (any type but radio/minefield); win when the hardpoint falls | done |
-| Destroy Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings (reward not yet repriced) | done |
+| Sabotage Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings (reward not yet repriced) | done |
 | Steal Builder Vehicle | match effort/pay of its twin | stale |
 | Clear Area | reprice to the full-clear effort | stale |
 | Steal Supply Truck | distinct verb TBD + reprice | stale |

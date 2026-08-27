@@ -3723,8 +3723,8 @@
                 <German>Laptop zerstören</German>
                 <Spanish>Destruir el portátil</Spanish>
                 <Chinesesimp>破坏笔记本</Chinesesimp>
-                <Original>Destroy Laptop</Original>
-                <English>Destroy Laptop</English>
+                <Original>Sabotage Laptop</Original>
+                <English>Sabotage Laptop</English>
             </Key>
             <Key ID="STR_DUWS_T_c9">
                 <German>Arsenal zerstören</German>
@@ -4142,8 +4142,8 @@
                 <English>Rigged Decoy</English>
             </Key>
             <Key ID="STR_DUWS_T_RIGGED_DECOY_MSG">
-                <Original>This decoy was rigged with a bomb, get out of the building!</Original>
-                <English>This decoy was rigged with a bomb, get out of the building!</English>
+                <Original>This decoy was rigged with a bomb, clear the area!</Original>
+                <English>This decoy was rigged with a bomb, clear the area!</English>
             </Key>
             <Key ID="STR_DUWS_T_laptopdecoy">
                 <Original>This laptop is a decoy. Keep searching.</Original>
