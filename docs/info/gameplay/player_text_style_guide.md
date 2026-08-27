@@ -57,6 +57,10 @@ re-addressing every line reads as stilted.
 
 - **Theatrics.** No exclamation marks, no words shouted mid-sentence (`Targeting FAILED`).
 - **Shooter idiom for a kill** — never *take him down*, *tango down*, or *he's down*.
+- **A bare appended callsign as self-identification** — `Alpha 1-1, Overlord. ...`. The speaker
+  label already carries who is talking, so a callsign tacked on with only a comma reads as a label,
+  not speech. Self-identification is either worded (`Alpha 1-1, this is Overlord`, or `Overlord to
+  Alpha 1-1`) or dropped, and a result addresses the hearer instead (`To Alpha 1-1, ...`).
 - **Narrating the software** — a line reports state, it does not say what the code is doing.
 - **Em-dashes in player prose.** A parenthetical goes in commas, not dashes: *at %2, or sooner if
   shots are fired, in a %3*, not *leave at %1 — or sooner if shots are fired — in a %2*. A
