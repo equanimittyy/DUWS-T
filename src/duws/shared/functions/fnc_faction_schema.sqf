@@ -133,6 +133,9 @@ if (_side == "opfor") exitWith {[
     ["blufor_BOAT_ARMED_X",        "SPECIAL",     "vehicle",    true,    "B_Boat_Armed_01_minigun_F"],
     // Crews the boat above, which is why it sits with the vehicles rather than the infantry.
     ["blufor_BOAT_CREW_X",         "SPECIAL",     "man",        true,    "C_Man_UtilityWorker_01_F"],
+    // The unarmed player taxi boat. Seats its own pilot when spawned, so unlike the armed boat above
+    // it needs no crew key.
+    ["blufor_BOAT_TRANS_X",        "SPECIAL",     "vehicle",    true,    "B_Boat_Transport_01_F"],
     // Wants a gun on it: fnc_helotaxi flies into contested ground, where the plain transport the
     // shared TRANS_HELI key holds is what the random patrols want.
     ["blufor_HELI_TRANS_ARM_X",    "SPECIAL",     "vehicle",    true,    "B_Heli_Transport_01_F"]
