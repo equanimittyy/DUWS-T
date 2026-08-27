@@ -5172,13 +5172,6 @@
                 <Original>Copy your request, Alpha 1-1. Courier 2-1 is inbound with your vehicle drop.</Original>
                 <English>Copy your request, Alpha 1-1. Courier 2-1 is inbound with your vehicle drop.</English>
             </Key>
-            <Key ID="STR_DUWS_T_paradropcallend">
-                <German>Hier ist Fallschirmjäger-Einsatz – ich habe den LZ im Blick, achte auf die Verbindung.</German>
-                <Spanish>Este es Despliegue de Paracaidistas – tengo el LZ a la vista, prepárate para el acoplamiento.</Spanish>
-                <Chinesesimp>这里是伞兵投送，我能看见目标地点了，注意对接。</Chinesesimp>
-                <Original>This is Chalk 2-1, I have the LZ in sight. Stand by for linkup.</Original>
-                <English>This is Chalk 2-1, I have the LZ in sight. Stand by for linkup.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplydropcallend">
                 <German>Hier ist "Courier 1-1" – Lieferkiste per Luftabwurf zu Ihrer Position unterwegs, ETA: 40 Sekunden.</German>
                 <Spanish>Este es "Courier 1-1" – lanzando caja de suministros por aire a su posición, ETA: 40 segundos.</Spanish>
@@ -5223,8 +5216,8 @@
                 <English>This is Chalk 2-1, inbound to your grid. ETA one minute.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradroponstation">
-                <Original>This is Chalk 2-1, on station.</Original>
-                <English>This is Chalk 2-1, on station.</English>
+                <Original>On station, drop zone in sight. Green light.</Original>
+                <English>On station, drop zone in sight. Green light.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropdeployed">
                 <Original>Chutes away.</Original>

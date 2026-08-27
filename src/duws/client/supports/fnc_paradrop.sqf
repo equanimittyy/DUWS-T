@@ -11,7 +11,6 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_chalk";
 _message = localize "STR_DUWS_T_paradropcall";
-_message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropack"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
@@ -83,7 +82,6 @@ _group2 = creategroup WEST;
 _radius = 130;
 _group2 deleteGroupWhenEmpty true;
 [_speaker1, localize "STR_DUWS_T_paradroponstation"] remoteExec ["fnc_duws_dialogue", 0];
-[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
 private _soldiers = [];
 switch (VERSION_X) do {
@@ -111,6 +109,7 @@ _lz = _location;
 	if (player_fatigue == 0) then { _x enablefatigue false };
 } forEach _soldiers;
 
+sleep 1; // beat after the green light before the chutes-away call
 [_speaker1, localize "STR_DUWS_T_paradropdeployed"] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5;
