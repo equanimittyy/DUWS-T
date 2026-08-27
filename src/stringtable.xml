@@ -5665,9 +5665,9 @@
                 <Original>Captured, weapon away. Keep it lit.</Original>
                 <English>Captured, weapon away. Keep it lit.</English>
             </Key>
-            <Key ID="STR_DUWS_T_laser_lost">
-                <Original>Spot lost. Ordnance ballistic.</Original>
-                <English>Spot lost. Ordnance ballistic.</English>
+            <Key ID="STR_DUWS_T_laser_dropped">
+                <Original>Lost your spot. Re-designate.</Original>
+                <English>Lost your spot. Re-designate.</English>
             </Key>
             <Key ID="STR_DUWS_T_laser_abort">
                 <German>No capture, Alpha 1-1. Aborting.</German>
