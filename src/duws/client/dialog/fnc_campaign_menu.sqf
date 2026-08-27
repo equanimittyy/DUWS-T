@@ -14,131 +14,143 @@
       lbSetText [_idc, _i, (lbText [_idc, _i]) + " " + (localize "STR_DUWS_T_default_suffix")];
   };
 
-  index_max_radius_2000 = lbAdd [2100, "2000m"];
-  index_max_radius_1750 = lbAdd [2100, "1750m"];
-  index_max_radius_1500 = lbAdd [2100, "1500m"];
-  index_max_radius_1250 = lbAdd [2100, "1250m"];
-  index_max_radius_1000 = lbAdd [2100, "1000m"];
-  index_max_radius_750 = lbAdd [2100, "750m"];
-  index_max_radius_500 = lbAdd [2100, localize "STR_DUWS_T_zoneradiusmax500"];
-  [2100, index_max_radius_500] call _setDefault;
+  // Each row carries its own value as lbData, so the readback (fnc_process_campaign_menu) reads the
+  // value straight off the selected row -- the label is free to be formatted or localised without a
+  // parallel index-to-value switch. Compound settings pack a comma list (skill "min,max", the AT combo
+  // "heli,armour"). Returns the row index for the rows a default or preset needs to preselect.
+  private _addOpt = {
+      params ["_idc", "_label", "_data"];
+      private _row = lbAdd [_idc, _label];
+      lbSetData [_idc, _row, _data];
+      _row
+  };
 
-  index_min_radius_1750 = lbAdd [2101, "1750m"];
-  index_min_radius_1500 = lbAdd [2101, "1500m"];
-  index_min_radius_1250 = lbAdd [2101, "1250m"];
-  index_min_radius_1000 = lbAdd [2101, "1000m"];
-  index_min_radius_750 = lbAdd [2101, "750m"];
-  index_min_radius_500 = lbAdd [2101, "500m"];
-  index_min_radius_350 = lbAdd [2101, localize "STR_DUWS_T_zoneradiusmin350"];
-  [2101, index_min_radius_350] call _setDefault;
+  [2100, "2000m", "2000"] call _addOpt;
+  [2100, "1750m", "1750"] call _addOpt;
+  [2100, "1500m", "1500"] call _addOpt;
+  [2100, "1250m", "1250"] call _addOpt;
+  private _hcMaxRadius = [2100, "1000m", "1000"] call _addOpt;
+  [2100, "750m", "750"] call _addOpt;
+  private _defMaxRadius = [2100, localize "STR_DUWS_T_zoneradiusmax500", "500"] call _addOpt;
+  [2100, _defMaxRadius] call _setDefault;
 
-index_amount_zones_40 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q4"];
-index_amount_zones_30 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q3"];
-index_amount_zones_20 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q2"];
-index_amount_zones_15 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q"];
-index_amount_zones_10 = lbAdd [2102, localize "STR_DUWS_T_8gqzfdui"];
-index_amount_zones_9 = lbAdd [2102, "9"];
-index_amount_zones_8 = lbAdd [2102, "8"];
-index_amount_zones_7 = lbAdd [2102, "7"];
-index_amount_zones_6 = lbAdd [2102, "6"];
-index_amount_zones_5 = lbAdd [2102, "5"];
-index_amount_zones_4 = lbAdd [2102, localize "STR_DUWS_T_zonecount4"];
-index_amount_zones_3 = lbAdd [2102, "3"];
-index_amount_zones_2 = lbAdd [2102, "2"];
-index_amount_zones_1 = lbAdd [2102, "1"];
-[2102, index_amount_zones_4] call _setDefault;
+  [2101, "1750m", "1750"] call _addOpt;
+  [2101, "1500m", "1500"] call _addOpt;
+  [2101, "1250m", "1250"] call _addOpt;
+  [2101, "1000m", "1000"] call _addOpt;
+  [2101, "750m", "750"] call _addOpt;
+  [2101, "500m", "500"] call _addOpt;
+  private _defMinRadius = [2101, localize "STR_DUWS_T_zoneradiusmin350", "350"] call _addOpt;
+  [2101, _defMinRadius] call _setDefault;
 
-index_max_dist_hq_30 = lbAdd [2103, localize "STR_DUWS_T_blqblz86"];
-index_max_dist_hq_40 = lbAdd [2103, "4 km"];
-index_max_dist_hq_50 = lbAdd [2103, "5 km"];
-index_max_dist_hq_100 = lbAdd [2103, "10 km"];
-index_max_dist_hq_150 = lbAdd [2103, localize "STR_DUWS_T_hqdistmax15km"];
-index_max_dist_hq_200 = lbAdd [2103, "20 km"];
-[2103, index_max_dist_hq_150] call _setDefault;
+  [2102, localize "STR_DUWS_T_jooz8g8q4", "40"] call _addOpt;
+  [2102, localize "STR_DUWS_T_jooz8g8q3", "30"] call _addOpt;
+  [2102, localize "STR_DUWS_T_jooz8g8q2", "20"] call _addOpt;
+  [2102, localize "STR_DUWS_T_jooz8g8q", "15"] call _addOpt;
+  [2102, localize "STR_DUWS_T_8gqzfdui", "10"] call _addOpt;
+  [2102, "9", "9"] call _addOpt;
+  [2102, "8", "8"] call _addOpt;
+  [2102, "7", "7"] call _addOpt;
+  private _hcZones = [2102, "6", "6"] call _addOpt;
+  [2102, "5", "5"] call _addOpt;
+  private _defZones = [2102, localize "STR_DUWS_T_zonecount4", "4"] call _addOpt;
+  [2102, "3", "3"] call _addOpt;
+  [2102, "2", "2"] call _addOpt;
+  [2102, "1", "1"] call _addOpt;
+  [2102, _defZones] call _setDefault;
 
-index_amount_cp_0 = lbAdd [2104, "0"];
-index_amount_cp_10 = lbAdd [2104, "10"];
-index_amount_cp_20 = lbAdd [2104, "20"];
-index_amount_cp_30 = lbAdd [2104, "30"];
-index_amount_cp_60 = lbAdd [2104, "60"];
-index_amount_cp_100 = lbAdd [2104, "100"];
-index_amount_cp_150 = lbAdd [2104, "150"];
-index_amount_cp_300 = lbAdd [2104, "300"];
-index_amount_cp_350 = lbAdd [2104, "350"];
-index_amount_cp_600 = lbAdd [2104, "600"];
-[2104, index_amount_cp_30] call _setDefault;
+  [2103, localize "STR_DUWS_T_blqblz86", "3000"] call _addOpt;
+  [2103, "4 km", "4000"] call _addOpt;
+  [2103, "5 km", "5000"] call _addOpt;
+  [2103, "10 km", "10000"] call _addOpt;
+  private _defDistHq = [2103, localize "STR_DUWS_T_hqdistmax15km", "15000"] call _addOpt;
+  [2103, "20 km", "20000"] call _addOpt;
+  [2103, _defDistHq] call _setDefault;
 
-// Reward Multiplier (scales both CP and AP mission payouts)
-index_cp_reward_multiplier_1 = lbAdd [2106, "1x"];
-index_cp_reward_multiplier_2 = lbAdd [2106, "2x"];
-index_cp_reward_multiplier_3 = lbAdd [2106, "3x"];
-index_cp_reward_multiplier_4 = lbAdd [2106, "4x"];
-index_cp_reward_multiplier_5 = lbAdd [2106, "5x"];
-[2106, index_cp_reward_multiplier_1] call _setDefault;
+  [2104, "0", "0"] call _addOpt;
+  [2104, "10", "10"] call _addOpt;
+  [2104, "20", "20"] call _addOpt;
+  private _defCp = [2104, "30", "30"] call _addOpt;
+  [2104, "60", "60"] call _addOpt;
+  [2104, "100", "100"] call _addOpt;
+  [2104, "150", "150"] call _addOpt;
+  [2104, "300", "300"] call _addOpt;
+  [2104, "350", "350"] call _addOpt;
+  [2104, "600", "600"] call _addOpt;
+  [2104, _defCp] call _setDefault;
 
-index_cp_death_penalty_0 = lbAdd [2107, "0"];
-index_cp_death_penalty_1 = lbAdd [2107, "1"];
-index_cp_death_penalty_2 = lbAdd [2107, "2"];
-index_cp_death_penalty_3 = lbAdd [2107, "3"];
-index_cp_death_penalty_4 = lbAdd [2107, "4"];
-index_cp_death_penalty_5 = lbAdd [2107, "5"];
-index_cp_death_penalty_8 = lbAdd [2107, "8"];
-index_cp_death_penalty_10 = lbAdd [2107, "10"];
-[2107, index_cp_death_penalty_2] call _setDefault;
+  // Reward Multiplier (scales both CP and AP mission payouts)
+  private _defReward = [2106, "1x", "1"] call _addOpt;
+  [2106, "2x", "2"] call _addOpt;
+  [2106, "3x", "3"] call _addOpt;
+  [2106, "4x", "4"] call _addOpt;
+  [2106, "5x", "5"] call _addOpt;
+  [2106, _defReward] call _setDefault;
 
-// BLUFOR starting tier (1-5) -- the campaign begins with BLUFOR's capability ladder already at this
-// tier (fnc_WARCOM_init seeds earned + tier, and opens the wallet at the same value). Tier 1 is
-// infantry from scratch; tier 5 opens with jets. The label shows the earned-AP floor of the tier (the
-// rung it seeds) and the capability it reaches named in brackets; the infantry floor shows the raw AP
-// alone, since starting with nothing unlocked needs no name. The number is both the earned floor and
-// the starting wallet.
-index_blufor_ap_t1 = lbAdd [2108, "0"];
-index_blufor_ap_t2 = lbAdd [2108, format ["60 (%1)", localize "STR_DUWS_T_tiername2"]];
-index_blufor_ap_t3 = lbAdd [2108, format ["150 (%1)", localize "STR_DUWS_T_tiername3"]];
-index_blufor_ap_t4 = lbAdd [2108, format ["350 (%1)", localize "STR_DUWS_T_tiername4"]];
-index_blufor_ap_t5 = lbAdd [2108, format ["600 (%1)", localize "STR_DUWS_T_tiername5"]];
-[2108, index_blufor_ap_t1] call _setDefault;
+  [2107, "0", "0"] call _addOpt;
+  [2107, "1", "1"] call _addOpt;
+  private _defDeath = [2107, "2", "2"] call _addOpt;
+  [2107, "3", "3"] call _addOpt;
+  [2107, "4", "4"] call _addOpt;
+  [2107, "5", "5"] call _addOpt;
+  [2107, "8", "8"] call _addOpt;
+  [2107, "10", "10"] call _addOpt;
+  [2107, _defDeath] call _setDefault;
 
-// OPFOR starting tier -- same ladder.
-index_opfor_ap_t1 = lbAdd [2109, "0"];
-index_opfor_ap_t2 = lbAdd [2109, format ["60 (%1)", localize "STR_DUWS_T_tiername2"]];
-index_opfor_ap_t3 = lbAdd [2109, format ["150 (%1)", localize "STR_DUWS_T_tiername3"]];
-index_opfor_ap_t4 = lbAdd [2109, format ["350 (%1)", localize "STR_DUWS_T_tiername4"]];
-index_opfor_ap_t5 = lbAdd [2109, format ["600 (%1)", localize "STR_DUWS_T_tiername5"]];
-[2109, index_opfor_ap_t2] call _setDefault;
+  // BLUFOR starting tier (1-5) -- the campaign begins with BLUFOR's capability ladder already at this
+  // tier (fnc_WARCOM_init seeds earned + tier, and opens the wallet at the same value). Tier 1 is
+  // infantry from scratch; tier 5 opens with jets. The label shows the earned-AP floor of the tier (the
+  // rung it seeds) and the capability it reaches named in brackets; the infantry floor shows the raw AP
+  // alone, since starting with nothing unlocked needs no name. The data is both the earned floor and
+  // the starting wallet.
+  private _defBluAp = [2108, "0", "0"] call _addOpt;
+  [2108, format ["60 (%1)", localize "STR_DUWS_T_tiername2"], "60"] call _addOpt;
+  [2108, format ["150 (%1)", localize "STR_DUWS_T_tiername3"], "150"] call _addOpt;
+  [2108, format ["350 (%1)", localize "STR_DUWS_T_tiername4"], "350"] call _addOpt;
+  [2108, format ["600 (%1)", localize "STR_DUWS_T_tiername5"], "600"] call _addOpt;
+  [2108, _defBluAp] call _setDefault;
 
-index_blu_skill_elite = lbAdd [2110, localize "STR_DUWS_T_7ovwb13n"];
-index_blu_skill_commando = lbAdd [2110, localize "STR_DUWS_T_i9ql9ndj"];
-index_blu_skill_veteran = lbAdd [2110, localize "STR_DUWS_T_7szkelef"];
-index_blu_skill_trained = lbAdd [2110, localize "STR_DUWS_T_njgzfxj4"];
-index_blu_skill_rookie = lbAdd [2110, localize "STR_DUWS_T_hjz2qz8j"];
-[2110, index_blu_skill_veteran] call _setDefault;
+  // OPFOR starting tier -- same ladder.
+  [2109, "0", "0"] call _addOpt;
+  private _defOpAp = [2109, format ["60 (%1)", localize "STR_DUWS_T_tiername2"], "60"] call _addOpt;
+  [2109, format ["150 (%1)", localize "STR_DUWS_T_tiername3"], "150"] call _addOpt;
+  [2109, format ["350 (%1)", localize "STR_DUWS_T_tiername4"], "350"] call _addOpt;
+  [2109, format ["600 (%1)", localize "STR_DUWS_T_tiername5"], "600"] call _addOpt;
+  [2109, _defOpAp] call _setDefault;
 
-index_op_skill_elite = lbAdd [2111, localize "STR_DUWS_T_7ovwb13n"];
-index_op_skill_commando = lbAdd [2111, localize "STR_DUWS_T_i9ql9ndj"];
-index_op_skill_veteran = lbAdd [2111, localize "STR_DUWS_T_7szkelef"];
-index_op_skill_trained = lbAdd [2111, localize "STR_DUWS_T_njgzfxj4"];
-index_op_skill_rookie = lbAdd [2111, localize "STR_DUWS_T_hjz2qz8j"];
-[2111, index_op_skill_trained] call _setDefault;
+  [2110, localize "STR_DUWS_T_7ovwb13n", "0.85,1.0"] call _addOpt;
+  [2110, localize "STR_DUWS_T_i9ql9ndj", "0.75,0.85"] call _addOpt;
+  private _defBluSkill = [2110, localize "STR_DUWS_T_7szkelef", "0.55,0.75"] call _addOpt;
+  [2110, localize "STR_DUWS_T_njgzfxj4", "0.35,0.55"] call _addOpt;
+  [2110, localize "STR_DUWS_T_hjz2qz8j", "0.25,0.35"] call _addOpt;
+  [2110, _defBluSkill] call _setDefault;
 
-index_opfor_AT_yes_yes = lbAdd [2112, localize "STR_DUWS_T_dge86ern"];
-index_opfor_AT_yes_no = lbAdd [2112, localize "STR_DUWS_T_z4j9n0qo"];
-index_opfor_AT_no_yes = lbAdd [2112, localize "STR_DUWS_T_reguyhhi"];
-index_opfor_AT_no_no = lbAdd [2112, localize "STR_DUWS_T_ps661jx6"];
-[2112, index_opfor_AT_yes_yes] call _setDefault;
+  [2111, localize "STR_DUWS_T_7ovwb13n", "0.85,1.0"] call _addOpt;
+  [2111, localize "STR_DUWS_T_i9ql9ndj", "0.75,0.85"] call _addOpt;
+  [2111, localize "STR_DUWS_T_7szkelef", "0.55,0.75"] call _addOpt;
+  private _defOpSkill = [2111, localize "STR_DUWS_T_njgzfxj4", "0.35,0.55"] call _addOpt;
+  [2111, localize "STR_DUWS_T_hjz2qz8j", "0.25,0.35"] call _addOpt;
+  [2111, _defOpSkill] call _setDefault;
+
+  // AT combo packs both toggles as "attackHeli,heavyArmour".
+  private _defAt = [2112, localize "STR_DUWS_T_dge86ern", "1,1"] call _addOpt;
+  [2112, localize "STR_DUWS_T_z4j9n0qo", "1,0"] call _addOpt;
+  [2112, localize "STR_DUWS_T_reguyhhi", "0,1"] call _addOpt;
+  [2112, localize "STR_DUWS_T_ps661jx6", "0,0"] call _addOpt;
+  [2112, _defAt] call _setDefault;
 
 
-index_enemyunit_multiplier_1 = lbAdd [2113, "1x"];
-index_enemyunit_multiplier_2 = lbAdd [2113, "2x"];
-index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];
-[2113, index_enemyunit_multiplier_1] call _setDefault;
+  private _defEnemyMult = [2113, "1x", "1"] call _addOpt;
+  [2113, "2x", "2"] call _addOpt;
+  [2113, "3x", "3"] call _addOpt;
+  [2113, _defEnemyMult] call _setDefault;
 
-// GARRISON DENSITY -- the share of a zone's mobile garrison that stands up at once; the rest wait as
-// reserve. Value labels carry the percentage; the readback maps them to a fraction.
-index_garrison_density_50 = lbAdd [2114, "50%"];
-index_garrison_density_80 = lbAdd [2114, "80%"];
-index_garrison_density_100 = lbAdd [2114, "100%"];
-[2114, index_garrison_density_100] call _setDefault;
+  // GARRISON DENSITY -- the share of a zone's mobile garrison that stands up at once; the rest wait as
+  // reserve. Value labels carry the percentage; the data carries the fraction.
+  [2114, "50%", "0.5"] call _addOpt;
+  [2114, "80%", "0.8"] call _addOpt;
+  private _defGarrison = [2114, "100%", "1"] call _addOpt;
+  [2114, _defGarrison] call _setDefault;
 
 // Restore selections when the player returns to this screen via the Back button. With no snapshot
 // to restore, a preset that owes this screen values applies them here, where its combos exist.
@@ -150,8 +162,8 @@ if (!isNil "duws_campaign_sel") then {
     { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_campaign_sel;
 } else {
     if (duws_preset_base == "hardcore") then {
-        lbSetCurSel [2100, index_max_radius_1000];
-        lbSetCurSel [2102, index_amount_zones_6];
+        lbSetCurSel [2100, _hcMaxRadius];
+        lbSetCurSel [2102, _hcZones];
     };
 };
 
@@ -167,4 +179,3 @@ private _display = uiNamespace getVariable ["duws_startup_display", displayNull]
 } forEach [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110,2111,2112,2113,2114];
 
 duws_preset_applying = false;
-
