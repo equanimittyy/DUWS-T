@@ -4143,8 +4143,8 @@
                 <German>==DEIN BAU-FAHRZEUG IST NOCH INTAKT==\n\nEs ist nur 1 Bau-Fahrzeug gleichzeitig in der Mission erlaubt! Bitte wähle eine andere Mission.</German>
                 <Spanish>==SU VEHÍCULO CONSTRUCTOR SIGUE INTACTO==\n\n ¡Solo se permite un vehículo constructor a la vez en el mapa! Por favor escoja otra misión.</Spanish>
                 <Chinesesimp>==你的建筑汽车还完好无损==\n\n地图上只允许同时有一辆建筑载具！请选择另一个任务。</Chinesesimp>
-                <Original>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</Original>
-                <English>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</English>
+                <Original>You can only have one builder vehicle at a time. Mission aborted.</Original>
+                <English>You can only have one builder vehicle at a time. Mission aborted.</English>
             </Key>
             <Key ID="STR_DUWS_T_jsg7ys0w">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
@@ -4194,20 +4194,20 @@
                 <English>This is Allseer. Be advised, enemy engineering vehicle parked at the marked grid. No sign they're moving it yet.</English>
             </Key>
             <Key ID="STR_DUWS_T_buildertask">
-                <Original>To Alpha 1-1, priority tasking: recover the enemy engineering vehicle and RTB. The shop can convert it into a mobile factory for us.</Original>
-                <English>To Alpha 1-1, priority tasking: recover the enemy engineering vehicle and RTB. The shop can convert it into a mobile factory for us.</English>
+                <Original>To Alpha 1-1, secure that engineering vehicle and bring it back to the motor pool for repurposing.</Original>
+                <English>To Alpha 1-1, secure that engineering vehicle and bring it back to the motor pool for repurposing.</English>
             </Key>
             <Key ID="STR_DUWS_T_builderwin">
-                <Original>To Alpha 1-1, vehicle's back inside the wire, good work. The engineers are converting it into a mobile factory now.</Original>
-                <English>To Alpha 1-1, vehicle's back inside the wire, good work. The engineers are converting it into a mobile factory now.</English>
+                <Original>Well done Alpha 1-1, vehicle recovered. You are free to reuse it as a mobile factory.</Original>
+                <English>Well done Alpha 1-1, vehicle recovered. You are free to reuse it as a mobile factory.</English>
             </Key>
             <Key ID="STR_DUWS_T_builderfail">
-                <Original>To Alpha 1-1, that vehicle's a total loss, tasking scrubbed. Disengage and RTB.</Original>
-                <English>To Alpha 1-1, that vehicle's a total loss, tasking scrubbed. Disengage and RTB.</English>
+                <Original>To Alpha 1-1, the vehicle's a total loss, abort tasking.</Original>
+                <English>To Alpha 1-1, the vehicle's a total loss, abort tasking.</English>
             </Key>
             <Key ID="STR_DUWS_T_builderdeadline">
-                <Original>To Alpha 1-1, time's up. The enemy's recovered the vehicle. Tasking scrubbed, RTB.</Original>
-                <English>To Alpha 1-1, time's up. The enemy's recovered the vehicle. Tasking scrubbed, RTB.</English>
+                <Original>To Alpha 1-1, the enemy's recovered the vehicle, abort tasking.</Original>
+                <English>To Alpha 1-1, the enemy's recovered the vehicle, abort tasking.</English>
             </Key>
             <Key ID="STR_DUWS_T_cacheletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Aufklärer haben gerade das feindliche Arsenal lokalisiert. Ihr wisst, was zu tun ist.</German>

@@ -1,11 +1,13 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
 
-// Ahead of fnc_mission_begin: a builder still standing means the last one was never
-// collected, and refusing after the launcher would stamp a full hour of cooldown for a
-// mission that never started.
+// Ahead of fnc_mission_begin, so the aborted mission claims no reward, deadline or token. begin also
+// stamps the rest timer; since it never runs here, stamp it by hand so aborting still spends this
+// cycle and the next mission offer waits out the rest instead of the abort being free to spam.
 if (!isNil "BLD1" && {alive BLD1}) exitWith {
     [{hint localize "STR_DUWS_T_mfxb090t"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+    DUWS_lastMissionStartDate = dateToNumber date;
+    publicVariable "DUWS_lastMissionStartDate";
     ["INFO", "MISSION", "steal_builder refused: previous builder still alive"] call fnc_log;
 };
 
@@ -109,7 +111,7 @@ if (alive BLD1 && (BLD1 distance PosOfBLUHQ) >= 100 && time > _deadline) exitWit
 _init_code = {
     waitUntil {!isNil "BLD1"};
     [BLD1, -1, west, "LIGHT"] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
-    [BLD1, "mil_triangle", "ColorBlue", "2", "2", "BLD-1"] call kndr_assignMarker;
+    [BLD1, "mil_triangle", "ColorBlue", "2", "2", "BLD-V"] call kndr_assignMarker;
 };
 [[[], _init_code], "BIS_fnc_spawn", true, true] spawn BIS_fnc_MP;
 
