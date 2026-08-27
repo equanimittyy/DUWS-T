@@ -361,21 +361,14 @@ titleCut ["", "BLACK FADED", 999];
 uiSleep 0.3;
 forceMap false;
 openMap [false, false];
-// Zombie mode: force client-side fog.
-if (CIV_PRESENCE == "RAVAGE") then {
+// Survival modes (RAVAGE/WBK) force client-side fog, identically.
+if (CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     waitUntil {!isNull player};
     // fog: intensity 0.5, decay 0.1, base height 10
     0 setFog [0.5, 0.1, 10];
     0 setOvercast 0.8;
     forceWeatherChange;
-    ["INFO", "BOOT", "RAVAGE mode: Client-side fog forced."] call fnc_log;
-};if (CIV_PRESENCE == "WBK") then {
-    waitUntil {!isNull player};
-    // fog: intensity 0.5, decay 0.1, base height 10
-    0 setFog [0.5, 0.1, 10];
-    0 setOvercast 0.8;
-    forceWeatherChange;
-    ["INFO", "BOOT", "WBK mode: Client-side fog forced."] call fnc_log;
+    ["INFO", "BOOT", format ["%1 mode: Client-side fog forced.", CIV_PRESENCE]] call fnc_log;
 };
 // Bounded: an unbounded wait here stalls the client ahead of every later boot milestone, and the
 // flag is broadcast rather than derived, so a joiner that misses it would never proceed. The
