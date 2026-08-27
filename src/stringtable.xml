@@ -3740,39 +3740,32 @@
                 <Original>Destroy Radar</Original>
                 <English>Destroy Radar</English>
             </Key>
-            <Key ID="STR_DUWS_T_c11">
-                <German>Bereich räumen</German>
-                <Spanish>Limpiar zona</Spanish>
-                <Chinesesimp>清理目标房屋</Chinesesimp>
-                <Original>Clear Area</Original>
-                <English>Clear Area</English>
-            </Key>
-            <Key ID="STR_DUWS_T_c14">
+            <Key ID="STR_DUWS_T_c13">
                 <German>Informant schützen</German>
                 <Spanish>Proteger al informante</Spanish>
                 <Chinesesimp>保护线人</Chinesesimp>
                 <Original>Protect Informant</Original>
                 <English>Protect Informant</English>
             </Key>
-            <Key ID="STR_DUWS_T_c15">
+            <Key ID="STR_DUWS_T_c14">
                 <German>Humanitäres Versorgungslkw bergen</German>
                 <Spanish>Recuperar camión de suministros humanitarios</Spanish>
                 <Chinesesimp>夺回人道主义物资卡车</Chinesesimp>
                 <Original>Recover Humanitarian Supply Truck</Original>
                 <English>Recover Humanitarian Supply Truck</English>
             </Key>
-            <Key ID="STR_DUWS_T_c16">
+            <Key ID="STR_DUWS_T_c15">
                 <German>Sturmkommandozentrale</German>
                 <Spanish>Puesto de Mando de Asalto</Spanish>
                 <Chinesesimp>突击指挥部</Chinesesimp>
                 <Original>Informant Manhunt</Original>
                 <English>Informant Manhunt</English>
             </Key>
-            <Key ID="STR_DUWS_T_c17">
+            <Key ID="STR_DUWS_T_c16">
                 <Original>Destroy Hardpoint</Original>
                 <English>Destroy Hardpoint</English>
             </Key>
-            <Key ID="STR_DUWS_T_c13">
+            <Key ID="STR_DUWS_T_c12">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
             </Key>
@@ -3942,13 +3935,6 @@
                 <Original>Allseer has tracked an enemy sniper element working this area. Kill them all.</Original>
                 <English>Allseer has tracked an enemy sniper element working this area. Kill them all.</English>
             </Key>
-            <Key ID="STR_DUWS_T_cqbdesc">
-                <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
-                <Spanish>Hay un equipo de infiltración enemigo atrapado aquí! ¡Elimínalos! (Low CP, Low AP)</Spanish>
-                <Chinesesimp>敌人的渗透小队被困在这里了！去干掉他们！(低CP，低AP)</Chinesesimp>
-                <Original>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</Original>
-                <English>An enemy infiltration team has gone to ground in the buildings here. Clear them out.</English>
-            </Key>
             <Key ID="STR_DUWS_T_hound">
                 <German>Hund</German>
                 <Spanish>Sabueso</Spanish>
@@ -4061,7 +4047,7 @@
                 <Original>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</Original>
                 <English>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_c12">
+            <Key ID="STR_DUWS_T_c11">
                 <Original>Deny Enemy Armor</Original>
                 <English>Deny Enemy Armor</English>
             </Key>
@@ -4220,27 +4206,6 @@
                 <Original>Unloading the truck and disarming the charge...</Original>
                 <English>Unloading the truck and disarming the charge...</English>
             </Key>
-            <Key ID="STR_DUWS_T_cqbletsdothis">
-                <German>Dies ist „Oberherr 1-1“. Ein feindliches Infiltrationskommando wurde in den Gebäuden am Zielort gesichtet. Die genaue Position des Kommandos wurde auf Ihren Positionsterminals aktualisiert. Beseitigen Sie sie.</German>
-                <Spanish>Este es "Imperador 1-1". Un equipo de infiltración enemigo ha sido detectado dentro de los edificios en el lugar objetivo. La posición exacta del equipo ha sido actualizada en sus terminales de posición. Acaben con ellos.</Spanish>
-                <Chinesesimp>这里是"霸王1-1"，一支敌人渗透小队被发现位于目标地点的建筑物内，小队的精确位置已经在你的位置终端上更新，去干掉他们。</Chinesesimp>
-                <Original>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your map. Take them out.</Original>
-                <English>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your map. Take them out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cqbroger">
-                <German>Action Squad, verstanden. Bewege dich zum Ziel.</German>
-                <Spanish>Action Squad, entendido. Dirigiéndome al objetivo.</Spanish>
-                <Chinesesimp>行动组收到，正在前往目标地点。</Chinesesimp>
-                <Original>Copy. Moving to the objective.</Original>
-                <English>Copy. Moving to the objective.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cqboverlordcopy">
-                <German>"Overlord 1-1", verstanden, gute Arbeit. Nun extrahieren aus dem AO.</German>
-                <Spanish>"Overlord 1-1", entendido, buen trabajo. Ahora extraer del AO.</Spanish>
-                <Chinesesimp>"霸王1-1"收到，干得漂亮。现在从行动区域撤离吧。</Chinesesimp>
-                <Original>Overlord copies. Good work — extract from the AO.</Original>
-                <English>Overlord copies. Good work — extract from the AO.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplytruckletsdothis">
                 <German>Signal 2-2 an alle Einheiten, gute Nachricht: Wir haben gerade den feindlichen Versorgungslaster entdeckt, Koordinaten wurden ins Informationssystem hochgeladen.</German>
                 <Spanish>Signal 2-2 a todas las unidades, buenas noticias: Acabamos de localizar el camión de suministros enemigo, coordenadas subidas al sistema de información.</Spanish>
@@ -4320,13 +4285,6 @@
             <Key ID="STR_DUWS_T_sniperfail">
                 <Original>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</Original>
                 <English>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cqbend">
-                <German>Action Squad an "Overlord", das feindliche Infiltrationskommando wurde vollständig eliminiert.</German>
-                <Spanish>Action Squad a "Overlord", el equipo de infiltración enemigo fue eliminado por completo.</Spanish>
-                <Chinesesimp>"霸王"，敌人的渗透小队已全部歼灭。</Chinesesimp>
-                <Original>To Overlord, enemy infiltration team neutralized.</Original>
-                <English>To Overlord, enemy infiltration team neutralized.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot">
                 <German>Flieger</German>
@@ -4450,13 +4408,6 @@
                 <Chinesesimp>十分钟前，友军直升机在标记位置坠毁。好在飞行员仍和指挥部保持联系。你的单位现在需要作为快反部队，将飞行员救出来。</Chinesesimp>
                 <Original>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</Original>
                 <English>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cqblookslike">
-                <German>Sieht so aus, als wäre dies der letzte von ihnen...</German>
-                <Spanish>Parece que este es el último de ellos...</Spanish>
-                <Chinesesimp>看起来这是他们的最后一个了...</Chinesesimp>
-                <Original>Looks like that's the last of them...</Original>
-                <English>Looks like that's the last of them...</English>
             </Key>
                     <Key ID="STR_DUWS_T_mission_selector_title">
                 <Original>Mission Selector</Original>

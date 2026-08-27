@@ -43,7 +43,6 @@ The direct spawn sites that remain, and why each stays direct — most are not a
 |---|---|---|
 | `protect_civ:243` | 8-man OPFOR wave | convertible — one-off composition, no row; also the site that passes no skill |
 | `deny_armor:133` | tank repair crew `[CREW, CREW, ENG]` | convertible — one-off composition |
-| `clearthearea_cqb:90` | `_bldgUnits`, built by a loop | dynamic list — no fixed roster to name |
 | `destroy_cache:152/154`, `destroy_radar:100/102` | 1-man bunker gunner | frozen static gunner: wants no posture and no loot; belongs in a shared bunker-gun helper, not the team API |
 | `protect_civ:70`, `rescue_pilot:442`, `rescue_squad:72` | WEST group | side param could route these, but they are a civilian VIP and follow-player rescue squads — they want no posture and no loot |
 | `transport_idap:121` | CIVILIAN group | not OPFOR |
@@ -70,7 +69,7 @@ CIVILIAN is deliberately *not* a value: only the two armies have a role vocabula
 `BIS_fnc_spawnGroup`.
 
 Not chosen: the raw-list escape hatch (let the API take a class array, not just a token). Dynamic and
-one-off class lists — `clearthearea_cqb:90` and the `protect_civ:243` / `deny_armor:133` one-offs — still
+one-off class lists — the `protect_civ:243` / `deny_armor:133` one-offs — still
 cannot name a roster row, so they stay direct until a row is added for the recurring ones. The side
 parameter does not address them.
 

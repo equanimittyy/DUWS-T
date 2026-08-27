@@ -1,6 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([15, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 
 _radius = 600;
@@ -14,9 +14,9 @@ _message = localize "STR_DUWS_T_idapletsdothis";
 _message1 = ([localize "STR_DUWS_T_idapcopy"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_idapacteamgo"] call fnc_cs);
 _message3 = localize "STR_DUWS_T_idapend";
-_markerText2 = localize "STR_DUWS_T_c15";
+_markerText2 = localize "STR_DUWS_T_c14";
 
-private _site = [_MissionPos, _radius, 15] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 14] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 

@@ -1,6 +1,6 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 params ["_MissionPos", "_mission_name"];
-if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([13, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _searchRadius   = 250;
 _spawnDist      = 230;
@@ -23,7 +23,7 @@ _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
 _message3       = ([localize "STR_DUWS_T_pcfail"] call fnc_cs);
 
 
-private _site = [_MissionPos, _searchRadius, 14] call fnc_mission_site;
+private _site = [_MissionPos, _searchRadius, 13] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
@@ -33,7 +33,7 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 // believed no mission was live. exitWith leaves the thread from here because if/then is transparent
 // to it and nothing between this line and the thread body is a loop.
 if (isNull _Building) exitWith {
-    [14, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
+    [13, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
 _buildingPositions = [_Building] call BIS_fnc_buildingPositions;
@@ -51,7 +51,7 @@ if (count _buildingPositions < 4) then {
         };
     } forEach _nearbyBuildings;
     if (!_found) exitWith {
-        [14, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
+        [13, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
     };
 };
 
@@ -94,7 +94,7 @@ _civilianMarker setMarkerSize [1, 1];
 
 // TODO: revisit the channel -- every mission thread announces through a hint box, so moving off
 // it is one pass across all of them rather than a change here.
-[localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+[localize "STR_DUWS_T_c13", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 [_civilian] spawn {
     params ["_unit"];

@@ -174,7 +174,7 @@ as prose; the two surfaces that exist to be glanced at are kept bare.
 
 A sentence break *inside* a string is untouched — a card reads `Last Mobile HQ destroyed. Name
 another in %1 min`, keeping the break and dropping the tail. A label takes no period on any surface,
-because it is not a sentence: a side-mission name (`Clear Area`), a menu heading (`Mission
+because it is not a sentence: a side-mission name (`Destroy Radar`), a menu heading (`Mission
 Selector`), a card's title field, and a line ending on a substituted value (`Squad renamed to:` plus
 the name).
 

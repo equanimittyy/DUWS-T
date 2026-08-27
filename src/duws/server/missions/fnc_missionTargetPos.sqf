@@ -1,4 +1,4 @@
-// Locality: server -- inherited from server/missions/mission_threads/clearthearea_cqb/fnc_clearthearea_cqb_mission.sqf.
+// Locality: server -- the mission-site target-position search, called by fnc_mission_site.
 
 params ["_missionpos", "_radius", "_Posfound", "_targetpos", "_failSafe"];
 

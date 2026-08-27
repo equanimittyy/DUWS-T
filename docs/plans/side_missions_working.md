@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-18 types (indices 0-17). The rework's shape is settled: each mission should pose a **distinct
+17 types (indices 0-16). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -26,20 +26,24 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 2 | Eliminate High-Value Target | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
 | 5 | Hunt Sniper Team | find two hidden elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
 | 7 | Destroy Vehicle Patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
-| 16 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
-| 13 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
-| 12 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
+| 15 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
+| 12 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
+| 11 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
 | 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 | 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
-| 17 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
+| 16 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
 | 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
 
-**Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
-gameplay rework** -- the earlier "bespoke, review" row (Rescue Pilot) is stale
-too until reworked, not a reviewed baseline: Steal Supply Truck (1), Rescue
-Pilot (4), Steal Builder Vehicle (6), Destroy Ammo Cache (9), Destroy Radar (10),
-Clear Area (11), Protect Informant (14), Recover Humanitarian Supply Truck (15).
-Ideas per row in the [tracker](#per-mission-rework-tracker).
+**Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
+Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
+removed; they field the tier-gated vehicle ring (`fnc_missionPatrolswithintel`). They stay the
+reach-the-site-and-destroy shape rather than posing a distinct problem, a deliberate exception to the
+design bar, not pending work.
+
+**Still stale -- each needs *both* a reprice and a distinct-verb gameplay rework** -- the earlier
+"bespoke, review" row (Rescue Pilot) is stale too until reworked, not a reviewed baseline: Steal
+Supply Truck (1), Rescue Pilot (4), Steal Builder Vehicle (6), Protect Informant (13), Recover
+Humanitarian Supply Truck (14). Ideas per row in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
 
@@ -253,44 +257,45 @@ number now wants a fresh read at the new effort, not the old cut.
 CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
 1-5 read of the *required* fight. Shared force for the generic threads: garrison ~24
 (`fnc_garrisonBuildings`) and/or a patrol ring (`fnc_missionPatrols` 16 inf,
-`fnc_missionPatrolswithintel` 12 inf); every patrol-ring mission also gains 1 MBT + 2 armed cars once
-OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while their pay is fixed.
+`fnc_missionPatrolswithintel` 12 inf). The intel ring adds up to three vehicle patrols on tier-gated
+slots -- car (AP 60), then car/ifv (150), then ifv/tank (350) -- thickening from one car to three
+vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring still fields the older
+1 MBT + 2 armed car set.
 
 | # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
 |--:|---------|-----|-----|:---------:|:--:|-------|
 | 2 | Eliminate High-Value Target | elimination | cmd | 40/35/0 | 3 | done |
-| 12 | Deny Enemy Armor | elimination | cmd | 15/25/0 | 3 | done |
+| 11 | Deny Enemy Armor | elimination | cmd | 15/25/0 | 3 | done |
 | 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
-| 16 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
-| 13 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
+| 15 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
+| 12 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
 | 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
 | 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
-| 17 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
-| 8 | Sabotage Laptop | sabotage | cmd | 10/35/0 | 3 | done (verb reworked; reward not repriced) |
+| 16 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
+| 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
+| 9 | Destroy Ammo Cache | sabotage | cmd | 35/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
+| 10 | Destroy Radar | sabotage | cmd | 20/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
-| 9 | Destroy Ammo Cache | sabotage | cmd | 30/20/0 | 3 | stale |
-| 10 | Destroy Radar | sabotage | cmd | 25/25/0 | 3 | stale |
-| 11 | Clear Area | assault | cmd | 15/20/0 | 3 | stale |
-| 14 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
-| 15 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
+| 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
+| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
 
 ## Pricing rework (command missions)
 
 Principle: base pay tracks required effort, holding the command economy near its aggregate. CP leans
 to command/intel/tactical value, AP to materiel destroyed or manpower recovered. The reworked and
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
-Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower) are now priced to effort; the
-vehicle patrol adds a tier bonus at spawn (see its design note). **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 8 stale rows, not only
-the two below; these two are just the worst effort/pay mismatches:
+Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower, Sabotage
+Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
+note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **Every
+still-stale mission carries its old numbers and is open pricing work** -- all 5 stale rows, not only
+the one below; it is just the worst effort/pay mismatch:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
 | Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
-| Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
 
 ## Per-mission rework tracker
 
@@ -308,19 +313,18 @@ change cell is the current idea, not a locked spec.
 | Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
 | Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
 | Destroy Hardpoint | target an existing revealed OPFOR emplacement (any type but radio/minefield); win when the hardpoint falls | done |
-| Sabotage Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings (reward not yet repriced) | done |
+| Sabotage Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings | done |
+| Destroy Ammo Cache | kept as fixed-site destroy; repriced, one-shot arsenal reward removed | done |
+| Destroy Radar | kept as fixed-site destroy; repriced | done |
 | Steal Builder Vehicle | match effort/pay of its twin | stale |
-| Clear Area | reprice to the full-clear effort | stale |
 | Steal Supply Truck | distinct verb TBD + reprice | stale |
 | Rescue Pilot | distinct verb TBD + reprice | stale |
-| Destroy Ammo Cache | distinct verb TBD + reprice | stale |
-| Destroy Radar | distinct verb TBD + reprice | stale |
 | Protect Informant | analyse + price (civilian) | stale |
 | Recover Humanitarian Supply Truck | analyse + price (civilian) | stale |
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 8 need both a verb and a reprice; see the tracker).
+- The distinct verb for each still-stale row (all 5 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.

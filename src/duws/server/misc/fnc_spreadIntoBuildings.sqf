@@ -1,8 +1,8 @@
 // Locality: server -- setPosATL and the hold loops it starts need the units local.
 //
 // Spreads an already-spawned group across a list of buildings, _unitsPerBuilding to each, and
-// starts every placed unit holding its post. Returns the per-building unit lists, which
-// clearthearea_cqb's house-cleared announcements are built on; the other callers discard it.
+// starts every placed unit holding its post. Returns the per-building unit lists; every current
+// caller places for effect and discards the return.
 //
 // The group and the building list stay the caller's to build: the three callers pick their
 // classes and their buildings on different rules. What they share is the index arithmetic

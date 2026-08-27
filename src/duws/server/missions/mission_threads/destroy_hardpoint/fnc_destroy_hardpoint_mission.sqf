@@ -11,7 +11,7 @@
 // bounty in the same step, so the two payouts stack with no coupling here. Off the fnc_mission_run spine --
 // the win watches broadcast state, not a one-shot predicate.
 params ["_MissionPos", "_mission_name"];
-if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 400;
 _cpreward = DUWS_curReward select 0;
@@ -36,13 +36,13 @@ private _bestD = 2500;
         if (_d < _bestD) then { _bestD = _d; _hpKey = _key; _hpPos = _hp };
     };
 } forEach DUWS_hardpoints;
-if (_hpKey isEqualTo "") exitWith { [17, "STR_DUWS_T_crtzxs0j", "no_hardpoint"] call fnc_mission_abort };
+if (_hpKey isEqualTo "") exitWith { [16, "STR_DUWS_T_crtzxs0j", "no_hardpoint"] call fnc_mission_abort };
 
 _markername2 = [_hpPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["hp%1%2", round (_hpPos select 0), round (_hpPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_DESTROY_HARDPOINT_DESC", _mission_name, _hpPos, "destroy"] call fnc_missionTaskCreate;
 
-[localize "STR_DUWS_T_c17", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+[localize "STR_DUWS_T_c16", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // One tasking line: the emplacement and its crew already stand on the map, so there is no spawn-up to narrate.
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hardpointoverlord"] remoteExec ["fnc_duws_dialogue", 0];

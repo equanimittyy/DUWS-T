@@ -13,8 +13,6 @@
 // which is what a composition can name and vary; this raises its own men by a rule and cannot be
 // asked for anything else. The zone parameters that used to sit here (nearest-first, men stood UP,
 // five positions rather than two, an attrition fraction) went with that caller.
-// clearthearea_cqb stays out, because its house-cleared announcements need the per-building unit
-// lists this does not return.
 params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4]];
 
 // Two positions, so a hut with a doorway counts: a side mission wants its objective ringed rather
