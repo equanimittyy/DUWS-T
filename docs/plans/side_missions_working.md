@@ -41,10 +41,14 @@ removed; they field the tier-gated vehicle ring (`fnc_missionPatrolswithintel`).
 reach-the-site-and-destroy shape rather than posing a distinct problem, a deliberate exception to the
 design bar, not pending work.
 
+**Complete, kept as a steal-and-deliver pair (repriced):** Steal Supply Truck (1) and Steal Builder
+Vehicle (6). Same verb -- steal a guarded vehicle and drive it back to home HQ -- differing only in the
+prize (supply truck vs builder vehicle). Repriced to 20/20 and 20/30; no longer the half-pay twin.
+
 **Still stale -- each needs *both* a reprice and a distinct-verb gameplay rework** -- the earlier
-"bespoke, review" row (Rescue Pilot) is stale too until reworked, not a reviewed baseline: Steal
-Supply Truck (1), Rescue Pilot (4), Steal Builder Vehicle (6), Protect Informant (13), Recover
-Humanitarian Supply Truck (14). Ideas per row in the [tracker](#per-mission-rework-tracker).
+"bespoke, review" row (Rescue Pilot) is stale too until reworked, not a reviewed baseline: Rescue
+Pilot (4), Protect Informant (13), Recover Humanitarian Supply Truck (14). Ideas per row in the
+[tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
 
@@ -280,8 +284,8 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 35/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
 | 10 | Destroy Radar | sabotage | cmd | 20/25/0 | 3 | done (fixed-site, repriced) |
-| 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
-| 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
+| 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
+| 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
 | 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
 | 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
@@ -294,12 +298,8 @@ repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicl
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower, Sabotage
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
 note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 5 stale rows, not only
-the one below; it is just the worst effort/pay mismatch:
-
-| Mission | Eff | CP/AP now | Note |
-|---------|:-:|:-:|------|
-| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
+still-stale mission carries its old numbers and is open pricing work** -- all 3 stale rows (Rescue
+Pilot, Protect Informant, Recover Humanitarian Supply Truck).
 
 ## Per-mission rework tracker
 
@@ -320,15 +320,15 @@ change cell is the current idea, not a locked spec.
 | Sabotage Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings | done |
 | Destroy Ammo Cache | kept as fixed-site destroy; repriced, one-shot arsenal reward removed | done |
 | Destroy Radar | kept as fixed-site destroy; repriced | done |
-| Steal Builder Vehicle | match effort/pay of its twin | stale |
-| Steal Supply Truck | distinct verb TBD + reprice | stale |
+| Steal Builder Vehicle | steal a guarded vehicle and drive it back to home HQ; repriced 20/30 | done |
+| Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
 | Rescue Pilot | distinct verb TBD + reprice | stale |
 | Protect Informant | analyse + price (civilian) | stale |
 | Recover Humanitarian Supply Truck | analyse + price (civilian) | stale |
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 5 need both a verb and a reprice; see the tracker).
+- The distinct verb for each still-stale row (all 3 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
