@@ -8,13 +8,12 @@ _radius = 600;
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
-_speaker = localize "STR_DUWS_T_Signal2";
+_speaker = localize "STR_DUWS_T_ALLSEER";
 _message = localize "STR_DUWS_T_supplytruckletsdothis";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
 _message1 = ([localize "STR_DUWS_T_supplytruckoverlord"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_supplytruckfail"] call fnc_cs);
-
-_markerText2 = localize "STR_DUWS_T_c1";
+_message3 = ([localize "STR_DUWS_T_supplytruckwin"] call fnc_cs);
 
 private _site = [_MissionPos, _radius, 1] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
@@ -25,8 +24,6 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_p7qawzl4", _mission_name, _randomPos, "getin"] call fnc_missionTaskCreate;
-
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 _vehPos = _targetpos;
 
@@ -40,13 +37,6 @@ clearMagazineCargoGlobal _truck1;
 clearWeaponCargoGlobal _truck1;
 clearItemCargoGlobal _truck1;
 clearBackpackCargoGlobal _truck1;
-
-private _truckGetInEH = _truck1 addEventHandler ["GetIn", {
-    params ["_vehicle", "_role", "_unit", "_turret"];
-    if (isPlayer _unit) then {
-        [{hint localize "STR_DUWS_T_fxkczy00"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
-    };
-}];
 
 _box1 = "";
 _box2 = "";
@@ -103,7 +93,7 @@ if ((["ifv"] call DUWS_fnc_tokenClass) != "") then {
 };
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
+sleep 3;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5; // let the patrols finish spawning
@@ -119,24 +109,20 @@ waitUntil {
 [_markername2] call fnc_missionMarkerClear;
 
 if (!alive _truck1 || time > _deadline) exitWith {
-    _truck1 removeEventHandler ["GetIn", _truckGetInEH];
     _truck1 setDamage 1;
-    [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos, _radius, "mission_steal_supply"] call fnc_mission_end;
 };
 
-_truck1 removeEventHandler ["GetIn", _truckGetInEH];
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
-[{hint localize "STR_DUWS_T_po7fmmoa"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 sleep 2;
 deleteVehicle _box2;
 sleep 2;
 deleteVehicle _box1;
-[{hint localize "STR_DUWS_T_3jmpthvi"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
-["opfor", [3, 2, 2, 2, 2]] call fnc_arsenal_reward;
+[_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
+["opfor", [3, 2, 2, 2, 2], [localize "STR_DUWS_T_SUPPLY_ARSENAL_TITLE", localize "STR_DUWS_T_arsenalfound2"]] call fnc_arsenal_reward;
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [_targetpos, _radius, "mission_steal_supply"] call fnc_mission_end;
