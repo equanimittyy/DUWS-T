@@ -1,5 +1,4 @@
 // Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
-#include "..\..\..\..\shared\includes\action_style.hpp"
 
 params ["_MissionPos", "_mission_name"];
 if (!([1, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
@@ -42,29 +41,7 @@ clearWeaponCargoGlobal _truck1;
 clearItemCargoGlobal _truck1;
 clearBackpackCargoGlobal _truck1;
 
-[_truck1, {
-    private _actionID = _this addAction [
-        ACT_EQUIP("STR_DUWS_T_CACHE_SEIZE"),
-        {
-            params ["_target", "_caller", "_actionId"];
-            if (!(_target getVariable ["arsenalUsed", false])) then {
-                _target setVariable ["arsenalUsed", true, true];
-                _target removeAction _actionId;
-                [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["arsenal", [localize "STR_DUWS_T_CACHE_SEIZED_TITLE", localize "STR_DUWS_T_CACHE_SEIZED_DESC"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-                [] remoteExec ["fnc_captured_pool_cache_deposit", 2];
-            };
-        },
-        [],
-        80,
-        true,
-        true,
-        "",
-        "!(_target getVariable ['arsenalUsed', false])"
-    ];
-    _this setVariable ["arsenalActionID", _actionID];
-}] remoteExec ["call", 0, true];
-_truck1 setVariable ["arsenalUsed", false, true];
+[_truck1] call fnc_attach_seize_arsenal;
 
 private _truckGetInEH = _truck1 addEventHandler ["GetIn", {
     params ["_vehicle", "_role", "_unit", "_turret"];
