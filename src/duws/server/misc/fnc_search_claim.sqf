@@ -70,23 +70,12 @@ private _fnc_notify = {
     ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
-// What the document kind drops on the ground, analysed later at the terminal for CP. Only classes
-// with an `Item_` ground variant go here: createVehicle needs one, and an item that lacks one
-// vanishes when a player drops it. Wallet_traitor lacks that variant, so it stays out and no
-// longer spawns at all.
-//
-// Weighted, not uniform: cheap 1-CP items dominate and the guaranteed-reveal FilesSecret is rare,
-// so a search reveals the map on the order of once or twice per ten document draws rather than
-// every third. Weights are parallel to _documents.
-private _documents = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
-    "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
-private _documentWeights = [30, 30, 20, 10, 6, 4];
-// Parallel to _documents: the label a hint names the find by. Kept here rather than read from each
-// item's config displayName -- these are base-game Item_ ground holders with generic or empty
-// names, so the readable label is the mission's to own.
-private _documentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITEM_wallet",
-    "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
-    "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
+// What the document kind drops on the ground, analysed later at the terminal for CP. The item pool,
+// its weights and its labels are shared (DUWS_intelDocuments in server_var_init) so a patrol camp's
+// table draws the same classes rather than a second copy that drifts.
+private _documents = DUWS_intelDocuments;
+private _documentWeights = DUWS_intelDocumentWeights;
+private _documentLabels = DUWS_intelDocumentLabels;
 
 // One item, not a handful: three documents off one body is three searches' worth of CP for a
 // single search. The hint names which one, so the player knows its worth before the terminal.

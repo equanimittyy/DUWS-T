@@ -274,6 +274,19 @@ DUWS_searchSources = createHashMapFromArray [
     ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
 
+// The physical intel items a "document" search find drops, and a patrol camp's table may hold. Only
+// base-game Item_ ground holders (each has an Item_ ground variant, so createVehicle works and a dropped
+// copy survives rather than vanishing) belong here. Weighted, parallel arrays: cheap 1-CP items dominate
+// and the guaranteed-reveal FilesSecret is rare. Labels are the readable name a hint uses -- these holders
+// carry generic or empty displayNames, so the label is the mission's to own. Shared so the search payout
+// and the camp draw from one list rather than two that drift apart.
+DUWS_intelDocuments = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
+    "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
+DUWS_intelDocumentWeights = [30, 30, 20, 10, 6, 4];
+DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITEM_wallet",
+    "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
+    "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
+
 // Seconds a player must wait between combat-corpse searches. The combat source no longer flags
 // bodies at spawn: any enemy corpse is searchable and the success roll is spent at the search, so
 // this clock -- not troop density -- is what bounds intel volume. Deliberately long to keep that

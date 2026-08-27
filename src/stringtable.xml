@@ -3769,6 +3769,10 @@
                 <Original>Eliminate Recon Patrol</Original>
                 <English>Eliminate Recon Patrol</English>
             </Key>
+            <Key ID="STR_DUWS_T_c18">
+                <Original>Destroy Patrol Camp</Original>
+                <English>Destroy Patrol Camp</English>
+            </Key>
             <Key ID="STR_DUWS_T_c12">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
@@ -4293,6 +4297,18 @@
             <Key ID="STR_DUWS_T_RECON_PATROL_DESC">
                 <Original>Allseer has tracked an enemy recon patrol working this area. Kill them all.</Original>
                 <English>Allseer has tracked an enemy recon patrol working this area. Kill them all.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DESTROY_PATROL_CAMP_DESC">
+                <Original>Enemy recon patrols have made camp in the treeline. Follow the campfire smoke and destroy every camp team.</Original>
+                <English>Enemy recon patrols have made camp in the treeline. Follow the campfire smoke and destroy every camp team.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_PATROLCAMP_BRIEF">
+                <Original>Alpha 1-1, Overlord. Enemy recon patrols are camped in the treeline, watching our movements. Look for the campfire smoke and wipe out the camp teams.</Original>
+                <English>Alpha 1-1, Overlord. Enemy recon patrols are camped in the treeline, watching our movements. Look for the campfire smoke and wipe out the camp teams.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_PATROLCAMP_COPY">
+                <Original>Overlord, Alpha 1-1. Moving to smoke them out.</Original>
+                <English>Overlord, Alpha 1-1. Moving to smoke them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_reconpatrolletsdothis">
                 <Original>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</Original>
