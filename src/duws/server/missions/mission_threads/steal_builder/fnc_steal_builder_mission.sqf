@@ -66,11 +66,19 @@ _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)], []
 [_obj4, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 
-_group = ["team", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
-[_group] call fnc_mission_claim;
-[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-sleep 1;
-[_targetpos, _radius] spawn fnc_missionPatrolswithintel;
+// Guard force: idle team on the prize, a close and two wide foot patrols, plus vehicle patrols that
+// scale with the enemy's earned AP -- DUWS_fnc_tokenClass returns "" for a token gated out at the
+// current tier, so a car joins from motorised (60 AP) and a second car-or-ifv from mechanised (150 AP).
+private _claim = { [_this] call fnc_mission_claim };
+(["team", _targetpos, _radius, "none", _targetpos] call fnc_spawn_team) call _claim;   // idle, on the objective
+(["team", _targetpos, _radius, "closepatrol"] call fnc_spawn_team) call _claim;
+for "_i" from 1 to 2 do { (["patrol", _targetpos, _radius, "widepatrol"] call fnc_spawn_team) call _claim; };
+private _car = ["car"] call DUWS_fnc_tokenClass;
+if (_car != "") then { ([_car, _targetpos, _radius, "widepatrol"] call fnc_spawn_vehicle) call _claim; };
+if ((["ifv"] call DUWS_fnc_tokenClass) != "") then {
+    private _cls = [selectRandom ["car", "ifv"]] call DUWS_fnc_tokenClass;
+    if (_cls != "") then { ([_cls, _targetpos, _radius, "widepatrol"] call fnc_spawn_vehicle) call _claim; };
+};
 
 
 
