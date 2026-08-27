@@ -5644,8 +5644,8 @@
                 <German>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</German>
                 <Spanish>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Spanish>
                 <Chinesesimp>Slingshot on station and loitering for 5 minutes. Designate a target with your laser and hold it for 5 seconds.</Chinesesimp>
-                <Original>Designate a target with your laser and hold it for 5 seconds.</Original>
-                <English>Designate a target with your laser and hold it for 5 seconds.</English>
+                <Original>Designate with your laser and hold for 5 seconds to lock, then keep it on the target until impact.</Original>
+                <English>Designate with your laser and hold for 5 seconds to lock, then keep it on the target until impact.</English>
             </Key>
             <Key ID="STR_DUWS_T_laser_onstation">
                 <Original>On station, holding five minutes for your designation.</Original>
@@ -5662,8 +5662,12 @@
                 <German>Captured. Weapon away.</German>
                 <Spanish>Captured. Weapon away.</Spanish>
                 <Chinesesimp>Captured. Weapon away.</Chinesesimp>
-                <Original>Captured. Weapon away.</Original>
-                <English>Captured. Weapon away.</English>
+                <Original>Captured, weapon away. Keep it lit.</Original>
+                <English>Captured, weapon away. Keep it lit.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laser_lost">
+                <Original>Spot lost. Ordnance ballistic.</Original>
+                <English>Spot lost. Ordnance ballistic.</English>
             </Key>
             <Key ID="STR_DUWS_T_laser_abort">
                 <German>No capture, Alpha 1-1. Aborting.</German>

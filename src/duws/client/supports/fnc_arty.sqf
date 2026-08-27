@@ -237,22 +237,44 @@ if (_ammotype == "Laser") then {
 		[_callsign, localize "STR_DUWS_T_laser_abort"] remoteExec ["fnc_duws_dialogue", 0];
 	} else {
 		[_callsign, localize "STR_DUWS_T_laser_locked"] remoteExec ["fnc_duws_dialogue", 0];
-		// The round leaves the jet and runs in on the spot, so it reads as an air-delivered strike --
-		// but the kill is scripted onto the laser point and detonated on arrival, so a stripped-ammo
-		// prop still lands exactly where the player lased, regardless of the jet's line or ballistics.
+		// Semi-active laser homing: the round chases the LIVE laser spot the whole way in, so the caller
+		// has to keep the target lit through terminal flight. Drop the spot and the seeker goes blind --
+		// the round loses guidance and wanders onto a random point in the vicinity, a clean miss. The kill
+		// is scripted onto wherever it ends up, so a stripped-ammo prop still detonates there.
 		private _drop = _vehicle modelToWorld [0,0,-3];
 		_bomb = "Bo_Mk82" createVehicle _drop;
 		[_bomb, _laserImpact, _callsign] spawn {
-			params ["_round", "_imp", "_cs"];
-			// Steer the prop round onto _imp -- the point where the scripted round detonates, fixed when
-			// the laser locked -- so the visible bomb lands where the real ordnance goes off rather than
-			// falling short and leaving the blast to pop somewhere else. Outermost ring first below so
-			// overlapping rings do not heal the inner kills back to 0.5.
+			params ["_round", "_lockPos", "_cs"];
+			private _aim = _lockPos;   // last good spot: seeded with the lock point, then tracks the live laser
+			private _stray = [];       // set once, when the spot is lost, then fixed
+			private _lostSince = -1;   // when the spot first went null in this stretch, for the grace below
 			waitUntil {
 				sleep 0.05;
-				_round setVelocity ((vectorNormalized (_imp vectorDiff (position _round))) vectorMultiply 300);
-				isNull _round || !alive _round || (_round distance _imp < 12) || ((getPosATL _round) select 2) < 2
+				if (_stray isEqualTo []) then {
+					private _t = if (isNull getConnectedUAV player) then { LaserTarget player } else { LaserTarget getConnectedUAV player };
+					if (isNull _t) then {
+						if (_lostSince < 0) then { _lostSince = time };
+						// Brief obscuration is tolerated; only a real release -- the spot gone about half a
+						// second -- blinds the seeker. It then homes a stray point near the last good aim,
+						// fixed once so re-lasing cannot re-home a round already gone ballistic.
+						if (time - _lostSince >= 0.5) then {
+							_stray = [(_aim select 0) + 50 - random 100, (_aim select 1) + 50 - random 100, 0];
+							[_cs, localize "STR_DUWS_T_laser_lost"] remoteExec ["fnc_duws_dialogue", 0];
+						};
+					} else {
+						_lostSince = -1;
+						_aim = getPos _t;
+					};
+				};
+				private _tgt = if (_stray isEqualTo []) then { _aim } else { _stray };
+				private _vel = (vectorNormalized (_tgt vectorDiff (position _round))) vectorMultiply 300;
+				// A blinded round tumbles rather than tracking clean: jitter its run-in so it visibly
+				// wanders down onto the stray point instead of arrowing to it.
+				if (_stray isNotEqualTo []) then { _vel = _vel vectorAdd [50 - random 100, 50 - random 100, 0] };
+				_round setVelocity _vel;
+				isNull _round || !alive _round || (_round distance _tgt < 12) || ((getPosATL _round) select 2) < 2
 			};
+			private _imp = if (_stray isEqualTo []) then { _aim } else { _stray };
 			deleteVehicle _round;
 			"Bo_Mk82" createVehicle _imp;
 			[_cs, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
