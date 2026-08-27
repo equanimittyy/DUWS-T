@@ -261,6 +261,38 @@ when the mission was a single hold-action (effort 1) and the AP read as overpaid
 required fight to a multi-building garrison clear, so the old "trim the AP" rationale is dead -- the
 number now wants a fresh read at the new effort, not the old cut.
 
+## Planned reworks (decided, not built)
+
+The three still-stale missions. Verbs, win/fail and reward mechanics are decided; nothing here is coded
+yet. CP/AP and the deadline band are open (not set below). Build order: Rescue Pilot, Protect Informant,
+Recover Aid Truck.
+
+### Rescue Pilot (4)
+
+Keep the current shape -- fight in to the crash site, extract the downed pilot (carry/load actions
+already in the thread), likely a pursuit on the way out. The one change: **win when the pilot is alive
+within 100 m of BLUFOR HQ** (the thread already ends on `_pilot distance PosOfBLUHQ`, today at 50 m --
+widen to 100). Fail: pilot killed, or deadline. No new twist; this is the escort-home shape kept, only
+the delivery radius moves.
+
+### Protect Informant (13)
+
+Defend the informant in place. **Site anywhere with an enterable building near, in or out of a town
+zone** (today town-only): map survey plus a building-proximity finder. The **hold timer starts on first
+player arrival** at the informant, not at spawn -- players get time to set up before it runs; hold length
+**10 min** (up from the current 360 s). **No player leash** during the hold. Win: informant alive when
+the hold elapses. Fail: informant killed. The deadline stays as a backstop for an offer never engaged.
+Reward: **+3 REP to the nearest discovered town** via `fnc_town_rep_adjust` (was a flat +5); no
+discovered town in range means no REP. The hpp REP column moves **5 -> 3**.
+
+### Recover Humanitarian Supply Truck (14)
+
+The IDAP crew wait in a neutral or BLUFOR town; the aid truck is hijacked (OPFOR-held) elsewhere. Seize
+it and **deliver it within 50 m of the crew**. Fail: truck destroyed, or deadline. **Offer gated on a
+neutral/BLUFOR town existing** -- a new `fnc_transport_IDAP_site` rejects when none, so the offer drops
+rather than siting with nowhere to deliver. Reward: **+3 REP to that town** (was +5). The hpp REP column
+moves **5 -> 3**.
+
 ## Mission catalogue (current)
 
 CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
@@ -289,9 +321,9 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
-| 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
-| 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
-| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
+| 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
+| 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale (spec ready, not built) |
+| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale (spec ready, not built) |
 
 ## Pricing rework (command missions)
 
@@ -325,14 +357,13 @@ change cell is the current idea, not a locked spec.
 | Destroy Radar | kept as fixed-site destroy; repriced | done |
 | Steal Builder Vehicle | steal a guarded vehicle and drive it back to home HQ; repriced 20/30 | done |
 | Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
-| Rescue Pilot | distinct verb TBD + reprice | stale |
-| Protect Informant | analyse + price (civilian) | stale |
-| Recover Humanitarian Supply Truck | analyse + price (civilian) | stale |
+| Rescue Pilot | fight in to the downed pilot, then extract him to within 100 m of HQ (verb decided, not built) | stale |
+| Protect Informant | defend the informant through a timed hold that starts on player arrival (verb decided, not built) | stale |
+| Recover Humanitarian Supply Truck | retake the OPFOR-held aid truck and deliver it to the IDAP crew's town (verb decided, not built) | stale |
 
 ## Open decisions
 
-- The distinct verb for each still-stale row (all 3 need both a verb and a reprice; see the tracker).
-- Final command prices for the still-stale rows (the pricing table above).
+- Build the three planned reworks above (verbs decided; none coded yet).
+- CP/AP and deadline band for all three (unset; the reworks pricing pass follows the build).
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
-- Civilian missions (protect_civ, transport_IDAP): analyse how they play, then price.
