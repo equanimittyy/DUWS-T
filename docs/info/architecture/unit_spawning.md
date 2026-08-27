@@ -55,7 +55,7 @@ Line numbers are anchors into `server/missions/mission_threads/<name>/`; they dr
 Already migrated (reference examples): `target_armor`, `target_sniper`, `rescue_squad` and
 `sabotage_laptop` call `fnc_spawn_team`/`fnc_spawn_vehicle`. `rescue_squad:118` shows the
 exact-placement pattern — a token with `"none"` posture and a supplied position. The `steal_builder`,
-`steal_supply` and `transport_idap` vehicle guards share that pattern through the `guard` roster row.
+`steal_supply` and `transport_idap` vehicle guards share that pattern through the existing `team` row.
 
 ## Decision: side parameter
 
@@ -76,10 +76,11 @@ parameter does not address them.
 
 ## Call-site conversions still owed
 
-The primitive is done; routing sites through it is separate, per-site work. The recurring `[SL, LAT,
-SOLDIER]` vehicle guard is now the `guard` roster row, and `steal_builder`, `steal_supply` and
-`transport_idap` raise it through `fnc_spawn_team` with `"none"` posture at the vehicle point — a
-behaviour-preserving swap, since all three already looted their guards.
+The primitive is done; routing sites through it is separate, per-site work. `steal_builder`,
+`steal_supply` and `transport_idap` now raise their vehicle guard through `fnc_spawn_team` with `"none"`
+posture at the vehicle point, reusing the existing `team` row rather than earning a new one. That trades
+the old hand-written three-man `[SL, LAT, SOLDIER]` guard for the six-man `team`, a deliberate difficulty
+bump; loot is unchanged in kind, since all three already looted their guards.
 
 The side parameter *enables* the WEST conversions but does not settle them: a converted site gains
 `fnc_apply_posture` and `fnc_addRandomLoot` whether it wants them or not. `rescue_squad:72` and

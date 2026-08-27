@@ -66,7 +66,7 @@ _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)], []
 [_obj4, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 
-_group = ["guard", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
+_group = ["team", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
 [_group] call fnc_mission_claim;
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 sleep 1;

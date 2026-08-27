@@ -66,7 +66,7 @@ _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)-10],
 sleep 1;
 
 // Vehicle guards
-_group = ["guard", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
+_group = ["team", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
 [_group] call fnc_mission_claim;
 
 // CREATE PATROLS
