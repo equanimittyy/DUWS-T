@@ -97,7 +97,10 @@ clearBackpackCargoGlobal _vehicle_8;
 private _guns = [];
 {
     if !(_x select 5) then { continue; };
-    private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_cache", "pos"] call fnc_static_place;
+    // "world", not "pos": pos seats the gun with setPos (AGL, which counts a building roof), so a site
+    // overlapping a building lands the emplacement on the roof. world uses terrain height, the way the
+    // hardpoints place theirs, so the gun grounds where the composition sits.
+    private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_cache", "world"] call fnc_static_place;
     _gun allowDamage false;
     _gun setDamage 0;
     _guns pushBack _gun;

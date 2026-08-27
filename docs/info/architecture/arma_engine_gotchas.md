@@ -1589,3 +1589,19 @@ then `setPosATL`'d it to that same point produced a dud every time.
 ceiling on an upper floor, so the small-offset-plus-downward-velocity form is safer indoors. Create it on
 the server: the blast is then authoritative and its damage replicates to every client, unlike a
 client-side `setDamage`.
+
+## `setPos` Z counts building roofs; `setPosATL` / `setPosWorld` do not
+
+`setPos [x, y, z]` measures z above the highest surface at that point -- and a building roof is a
+surface. Place a prop or an emplacement with `setPos` on a point that overlaps a building footprint and
+it lands z metres above the roof, not the ground. `setPosATL` measures above the terrain, ignoring
+objects, and `setPosWorld` (paired with `getTerrainHeightASL`) is absolute terrain height, so both seat
+the object on the ground whatever stands there. A side mission that placed its guns with the `setPos`
+path stood them on the rooftops of any building its site happened to overlap, while its props -- placed
+with `setPosATL` -- sat correctly on the ground a few metres away, so the composition looked split.
+
+**How to apply:** for anything meant to sit on the ground, place it with `setPosATL [x, y, 0]` or with a
+terrain-height `setPosWorld`, never bare `setPos`. `fnc_static_place`'s `"world"` mode is the grounded
+path (terrain height + the row's own Z) and `"pos"` is the `setPos` one; the zone prefabs and hardpoints
+use `"world"`, so any new composition-style placement should too. `setPos` is only right when the point
+is known clear of buildings and a terrain-relative height is genuinely wanted.
