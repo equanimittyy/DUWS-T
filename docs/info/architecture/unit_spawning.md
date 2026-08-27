@@ -58,21 +58,33 @@ Already migrated (reference examples): `target_armor`, `target_sniper`, `rescue_
 `sabotage_laptop` call `fnc_spawn_team`/`fnc_spawn_vehicle`. `rescue_squad:118` shows the
 exact-placement pattern — a token with `"none"` posture and a supplied position.
 
-## Open decision
+## Decision: side parameter
 
-Making the token API the default OPFOR spawner needs one choice, not yet made, about how the
-non-roster compositions above reach it:
+`fnc_spawn_team` and `fnc_spawn_vehicle` take a trailing `_side` (`"opfor"`/`"blufor"`, default
+`"opfor"`). One string drives the engine side, the skill globals and the roster prefix; the shared
+roster already held bare role names and asked for a side (`DUWS_fnc_teamRoster`), so the primitives were
+the only OPFOR-hardcoded layer. Defaulting to `"opfor"` keeps every existing caller spawning as before —
+the argument is appended past `_spawnPos`, and no caller passed one there.
 
-- **Roster rows only** — add a `DUWS_teamRosters` row per recurring composition, convert the sites that
-  map to a row, leave one-off and dynamic lists direct. Keeps the table clean; leaves the dynamic-list
-  and one-off sites unconverted.
-- **Raw-list escape hatch** — let `fnc_spawn_team` accept a raw class array as well as a token, so every
-  OPFOR site routes through the one chokepoint and inherits side/skill/loot/posture. Converts the
-  dynamic and one-off sites too; recurring compositions still earn proper rows.
-- **Side parameter** — add a `_side` argument so WEST/CIVILIAN groups also route through it. Widest
-  reach, but contradicts the file being the OPFOR spawner and carries the most risk.
+CIVILIAN is deliberately *not* a value: only the two armies have a role vocabulary and skill globals
+(`format ["%1_%2", _side, role]` has no `civilian_` pool). A civilian group stays a direct
+`BIS_fnc_spawnGroup`.
 
-The WEST/CIVILIAN and deliberate-exception sites are correct as direct spawns regardless of the choice.
-Any conversion also changes behaviour where it adds loot to a group that had none — searchable bodies
-feed faction detection — so each converted thread needs an in-game check of head-count, position, AI
-behaviour and body-search identity.
+Not chosen: the raw-list escape hatch (let the API take a class array, not just a token). Dynamic and
+one-off class lists — `clearthearea_cqb:90`, the `[SL, LAT, SOLDIER]` guard trio — still cannot name a
+roster row, so they stay direct until a row is added for the recurring ones. The side parameter does not
+address them.
+
+## Call-site conversions still owed
+
+The primitive is done; routing sites through it is separate, per-site work. The side parameter *enables*
+the WEST conversions but does not settle them: a converted site gains `fnc_apply_posture` and
+`fnc_addRandomLoot` whether it wants them or not. `rescue_squad:72` and `rescue_pilot:442` raise a WEST
+group that should follow the player, not garrison under a posture, and wants no loot — those stay direct
+by choice, not by limitation. Any conversion that adds loot to a group that had none changes body-search
+identity (searchable bodies feed faction detection), so each converted thread needs an in-game check of
+head-count, position, AI behaviour and body-search identity.
+
+The deliberate-exception sites (`target_sniper:87`, the `deny_armor` convoy hulls) remain correct as
+direct spawns: the convoy hulls need bespoke column seating that the posture band would fight, and route
+through raw `BIS_fnc_spawnVehicle` — the side parameter never reaches them.

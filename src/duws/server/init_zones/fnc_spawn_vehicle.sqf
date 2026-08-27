@@ -15,8 +15,14 @@
 // _spawnPos is the reserve path's, as in fnc_spawn_team: a reinforcement vehicle is placed on the
 // point the pass chose. It reaches ground vehicles only -- air still enters from off the map, since a
 // reserve gunship makes no sense parked on the far ridge at zero altitude.
-params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []]];
+params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"]];
 if (_class == "") exitWith { grpNull };
+
+// _side ("opfor"/"blufor") sets the engine side and the crew skill, and defaults to opfor so the
+// existing callers spawn as before. Which vehicle a token fields for a side is resolved upstream by
+// DUWS_fnc_tokenClass, so the class reaching this file is already the right side's -- _side here only
+// mans and colours the hull.
+private _army = [EAST, WEST] select (_side isEqualTo "blufor");
 
 // Air enters from off the map at altitude and everything else from a safe spot on the ground. Keyed
 // on the class rather than on the token that asked for it: the engine's own answer cannot disagree
@@ -43,7 +49,7 @@ private _vehpos = if (_isAir) then {
     }
 };
 
-private _created = [_vehpos, 0, _class, EAST] call BIS_fnc_spawnVehicle;
+private _created = [_vehpos, 0, _class, _army] call BIS_fnc_spawnVehicle;
 private _veh = _created select 0;
 private _vehGroup = _created select 2;
 _vehGroup deleteGroupWhenEmpty true;
@@ -57,14 +63,16 @@ if (_isAir) then {
 
 {
     [_x] call fnc_addRandomLoot;
-    // Crew in a mod's own flight suit read as that mod's faction on a body search. Skipped for the
-    // BLUFOR faction files that dress their own pilots, which would otherwise be overwritten.
-    if (_isAir && {!(("OPTRE" in BLUFOR_FactionFile_X)
+    // Crew in a mod's own flight suit read as that mod's faction on a body search. OPFOR only: the
+    // coveralls are an independent-side pilot suit, wrong on a BLUFOR crew, and body-search identity
+    // only matters for the enemy the player searches. Skipped for the BLUFOR faction files that dress
+    // their own pilots, which would otherwise be overwritten.
+    if (_side isEqualTo "opfor" && {_isAir} && {!(("OPTRE" in BLUFOR_FactionFile_X)
         || {"HL2ECR" in BLUFOR_FactionFile_X}
         || {"TIOW" in BLUFOR_FactionFile_X})}) then {
         _x forceAddUniform "U_I_pilotCoveralls";
     };
-    _x setSkill opfor_ai_skill_random;
+    _x setSkill (missionNamespace getVariable [format ["%1_ai_skill_random", _side], opfor_ai_skill_random]);
 } forEach units _vehGroup;
 
 _vehGroup
