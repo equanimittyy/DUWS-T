@@ -290,8 +290,6 @@ if (_ammotype == "Laser") then {
 			if (!isNull _round) then { deleteVehicle _round };
 			"Bo_Mk82" createVehicle _imp;
 			[_cs, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
-			// Server owns the AI, so the kill is applied there, not on this client (see fnc_air_strike_kill).
-			[_imp] remoteExec ["fnc_air_strike_kill", 2];
 			// Hold before the sign-off so the splash reads first, matching the air-delivered close.
 			sleep 6;
 			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
@@ -355,8 +353,6 @@ if (_ammotype == "Laser") then {
 				};
 				case 3: {  // JDAM
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
-					// Server owns the AI, so the kill is applied there, not on this client (see fnc_air_strike_kill).
-					[_position] remoteExec ["fnc_air_strike_kill", 2];
 				};
 				case 5: {  // Cluster
 					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
