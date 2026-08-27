@@ -102,6 +102,10 @@ _guns params ["_vehicle_9", "_vehicle_10"];
 
 private _groupBunker1 = [_vehicle_9, _vehicle_10, _guns] call fnc_place_bunker_guns;
 _groupBunker1 addVehicle _vehicle_7;
+// Claimed so the cleanup sweep bins the gunners on both the success and the timeout exit, once the
+// player is clear -- the same teardown the garrison and patrols get. The radar hull and the guns are
+// composition, released by fnc_mission_end's compKey; this covers only the men.
+[_groupBunker1] call fnc_mission_claim;
 
 sleep 1;
 

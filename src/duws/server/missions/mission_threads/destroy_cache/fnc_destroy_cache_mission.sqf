@@ -4,8 +4,6 @@ params ["_MissionPos", "_mission_name"];
 if (!([9, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 
-private _missionUnits = [];
-
 _radius = 400;
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
@@ -108,8 +106,9 @@ private _guns = [];
 _guns params ["_vehicle_9", "_vehicle_10"];
 
 private _groupBunker1 = [_vehicle_9, _vehicle_10, _guns] call fnc_place_bunker_guns;
-// Tracked for manual teardown: these men are not composition, so the sweep will not take them.
-_missionUnits append (units _groupBunker1);
+// Claimed, not hand-deleted: ownership hands the gunners to the cleanup sweep, which bins them on both
+// the success and the timeout exit once the player is clear -- the same teardown the garrison gets.
+[_groupBunker1] call fnc_mission_claim;
 
 [[_cachePos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 
@@ -137,11 +136,6 @@ if (time > _deadline && !((!alive _vehicle_7 || damage _vehicle_7 == 1) && (!ali
     // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, _markername2, "mission_destroy_cache", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
-
-// Units only, and deleted rather than handed to the sweep: they are not composition, and
-// the sweep spares anything with living crew -- a man's crew is himself. The mission's
-// props leave through fnc_duws_release, which its own cleanup call triggers.
-{ deleteVehicle _x } forEach _missionUnits;
 
 "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
