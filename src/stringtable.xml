@@ -4328,13 +4328,6 @@
                 <Original>To Overlord, enemy infiltration team neutralized.</Original>
                 <English>To Overlord, enemy infiltration team neutralized.</English>
             </Key>
-            <Key ID="STR_DUWS_T_playerdown">
-                <German>Mann zu Boden!</German>
-                <Spanish>Hombre caído!</Spanish>
-                <Chinesesimp>队员倒地！</Chinesesimp>
-                <Original>Man down!</Original>
-                <English>Man down!</English>
-            </Key>
             <Key ID="STR_DUWS_T_pilot">
                 <German>Flieger</German>
                 <Spanish>Piloto</Spanish>

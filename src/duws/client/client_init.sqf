@@ -193,7 +193,6 @@ player addEventHandler ["killed", {
     // Reported unfiltered: a challenge run fails on a death inside the course, and the server
     // owns that test against its own area radius rather than the wider one used just above.
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_playerdown"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 
 // Stamina/fatigue from the lobby param (default off). Drives the player here and the AI units
