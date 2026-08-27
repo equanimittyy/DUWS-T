@@ -49,7 +49,7 @@ private _crossMarkers = [];
     private _cpos = getPosATL _x;
     private _mk = format ["laptopcross_%1_%2", round (_cpos select 0), round (_cpos select 1)];
     createMarker [_mk, _cpos];
-    _mk setMarkerType "mil_objective";
+    _mk setMarkerType "hd_objective_noShadow";
     _mk setMarkerColor "ColorOrange";
     _mk setMarkerText "";
     _crossMarkers pushBack _mk;
