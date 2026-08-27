@@ -1573,3 +1573,19 @@ completed final leg can also land on an empty slot. `fnc_convoy_drive.sqf` advan
 `while { ... waypointPosition [_group, _legIdx] isEqualTo [0,0,0] } do { _legIdx = _legIdx + 1 }` before
 reading the target, and only truly idles when the index runs past the whole list (waiting on a waypoint
 the mission appends later).
+
+## A shell spawned at rest is inert: it needs impact velocity to detonate
+
+`createVehicle` on an ammo/shell class (`Sh_82mm_AMOS` and the like) makes the projectile object but
+does not fire it. Spawned with zero velocity, resting on a surface, its impact fuze never runs, so it
+sits there live but inert -- no explosion. Re-placing it with `setPosATL`/`setPos` after creation makes
+this worse, not better: the reposition zeroes the velocity again, so even a shell that would have fallen
+and hit is pinned stationary. A scripted booby-trap that created the shell on the exact prop position and
+then `setPosATL`'d it to that same point produced a dud every time.
+
+**How to apply:** give the shell an impact instead of a resting place. Spawn it slightly above the target
+(`+0.5` m) and drive it down with `setVelocity [0,0,-30]` so it strikes at once and detonates; do not
+`setPosATL` it afterward. A plain fall from a couple of metres also works but risks spawning inside a
+ceiling on an upper floor, so the small-offset-plus-downward-velocity form is safer indoors. Create it on
+the server: the blast is then authoritative and its damage replicates to every client, unlike a
+client-side `setDamage`.

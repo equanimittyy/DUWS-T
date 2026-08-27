@@ -3971,8 +3971,8 @@
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
                 <Spanish>Los exploradores informan de que el enemigo ha desplegado un dispositivo de guerra electrónica de estilo portátil aquí, que puede contener información sobre las posiciones de despliegue enemigo. Localiza el dispositivo, descarga toda la información útil y destrúyelo si no hay ninguna. (Very low CP, high AP)</Spanish>
                 <Chinesesimp>侦察兵报告了敌人在这里部署了笔记本样式的电子战设备，里面可能有关于敌军部署位置的信息。找到设备，下载一切有用信息，没有的话就把它毁掉。(极低CP，高AP)</Chinesesimp>
-                <Original>Scouts report an enemy field laptop in the marked area, electronic warfare gear that may hold their deployment positions. It is hidden in one of the flagged buildings. Find the laptop and sabotage it.</Original>
-                <English>Scouts report an enemy field laptop in the marked area, electronic warfare gear that may hold their deployment positions. It is hidden in one of the flagged buildings. Find the laptop and sabotage it.</English>
+                <Original>Scouts report an enemy field laptop in the marked area, hidden in one of the flagged buildings. It's electronic warfare gear that may hold their deployment positions. Find the laptop and sabotage it.</Original>
+                <English>Scouts report an enemy field laptop in the marked area, hidden in one of the flagged buildings. It's electronic warfare gear that may hold their deployment positions. Find the laptop and sabotage it.</English>
             </Key>
             <Key ID="STR_DUWS_T_geryeddp">
                 <German>Der kleine feindliche Waffenschatz befindet sich hier. Sprenge ihn! (Slightly high CP, low AP)</German>

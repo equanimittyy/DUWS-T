@@ -26,6 +26,10 @@ if (!_rigged) exitWith {
 [getPosATL _decoy] spawn {
     params ["_p"];
     sleep 6;
-    private _bomb = createVehicle ["Sh_82mm_AMOS", _p, [], 0, "CAN_COLLIDE"];
-    _bomb setPosATL _p;
+    // Driven down, not pinned in place: a shell created at rest never runs its impact fuze and sits
+    // inert (the old setPosATL nailed it to the ground stationary). Spawned just above the spot with a
+    // downward velocity, it impacts at once and detonates. Server-created, so the blast is authoritative
+    // and replicates to every client.
+    private _bomb = createVehicle ["Sh_82mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+    _bomb setVelocity [0, 0, -30];
 };

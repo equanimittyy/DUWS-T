@@ -42,35 +42,38 @@ _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
 
-// One orange cross per candidate building, no text: the player sees every possible site but not which holds
-// the laptop until it is cleared. Names tracked so the win and timeout paths can delete them all.
+// One orange objective marker per candidate building, no text: the player sees every possible site but not
+// which holds the laptop until it is cleared. Names tracked so the win and timeout paths can delete them all.
 private _crossMarkers = [];
 {
     private _cpos = getPosATL _x;
     private _mk = format ["laptopcross_%1_%2", round (_cpos select 0), round (_cpos select 1)];
     createMarker [_mk, _cpos];
-    _mk setMarkerType "mil_destroy";
+    _mk setMarkerType "mil_objective";
     _mk setMarkerColor "ColorOrange";
     _mk setMarkerText "";
     _crossMarkers pushBack _mk;
 } forEach _bldgs;
 
-// A desk-and-laptop in every candidate building, on a random interior slot (any floor). One is the real
-// objective, the rest decoys; a third of the decoys are rigged. _laptops holds [object, isReal, rigged] so
-// the action loop below can wire each to the right handler. setPosATL, not the plain spawn position, so both
-// props land on the slot's exact height rather than snap to the terrain under the building.
+// A camping table and laptop in every candidate building, on a random interior slot (any floor). One is the
+// real objective, the rest decoys; a third of the decoys are rigged. _laptops holds [object, isReal, rigged]
+// so the action loop below can wire each to the right handler. setPosATL, not the plain spawn position, so
+// both props land on the slot's exact height rather than snap to the terrain under the building.
 private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
         {
             private _slot = selectRandom ([_x] call BIS_fnc_buildingPositions);
             private _isReal = _x isEqualTo _laptopBldg;
-            private _table = createVehicle ["Land_TableDesk_F", _slot, [], 0, "CAN_COLLIDE"];
+            private _table = createVehicle ["Land_CampingTable_F", _slot, [], 0, "CAN_COLLIDE"];
             _table setPosATL _slot;
             _table setDir 0;
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
+            // Laptop on the table's own surface: read the table top from its bounding box rather than
+            // hard-code an offset, so a change of table model cannot leave the prop floating or sunk.
+            private _tableTop = (boundingBoxReal _table select 1) select 2;
             private _lap = createVehicle ["Land_Laptop_unfolded_F", _slot, [], 0, "CAN_COLLIDE"];
-            _lap setPosATL [_slot select 0, _slot select 1, (_slot select 2) + 0.46];
+            _lap setPosATL [_slot select 0, _slot select 1, (_slot select 2) + _tableTop];
             _lap setDir 270;
             [_lap, "mission_sabotage_laptop"] call fnc_duws_keep;
             // Rigged roll is fixed here, not at the action, so a decoy's fate is the same for whoever
