@@ -14,11 +14,15 @@ if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
+_speaker = localize "STR_DUWS_T_ALLSEER";
+_message = localize "STR_DUWS_T_builderspot";
+_speaker1 = localize "STR_DUWS_T_OVERLORD";
+_message1 = ([localize "STR_DUWS_T_buildertask"] call fnc_cs);
+_message2 = ([localize "STR_DUWS_T_builderfail"] call fnc_cs);
+_message3 = ([localize "STR_DUWS_T_builderwin"] call fnc_cs);
 
 
 _radius = 600;
-
-_markerText2 = localize "STR_DUWS_T_c6";
 
 private _site = [_MissionPos, _radius, 6] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
@@ -29,8 +33,6 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_czpvn5z1", _mission_name, _randomPos, "getin"] call fnc_missionTaskCreate;
-
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 _vehpos = _targetpos;
 
@@ -80,7 +82,9 @@ if ((["ifv"] call DUWS_fnc_tokenClass) != "") then {
     if (_cls != "") then { ([_cls, _targetpos, _radius, "widepatrol"] call fnc_spawn_vehicle) call _claim; };
 };
 
-
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 3;
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5; // let the patrols finish spawning
 
@@ -90,19 +94,17 @@ waitUntil {sleep 2; (!alive BLD1 || (BLD1 distance PosOfBLUHQ)<100 || time > _de
 [_markername2] call fnc_missionMarkerClear;
 
 if (!alive BLD1) exitWith {
-    [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_steal_builder"] call fnc_mission_end;
 };
 
 if (alive BLD1 && (BLD1 distance PosOfBLUHQ) >= 100 && time > _deadline) exitWith {
-    // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
-    [_VARtaskgeneratedName, "", "mission_steal_builder", _targetpos, _radius] call fnc_mission_deadline_fail;
+    [_VARtaskgeneratedName, "", "mission_steal_builder", _targetpos, _radius, false, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderdeadline"]] call fnc_mission_deadline_fail;
 };
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-[[{hint localize "STR_DUWS_T_125f39s4"}],"BIS_fnc_Spawn",true] call BIS_fnc_MP;
-sleep 2;
+[_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
 
 _init_code = {
     waitUntil {!isNil "BLD1"};
@@ -110,9 +112,6 @@ _init_code = {
     [BLD1, "mil_triangle", "ColorBlue", "2", "2", "BLD-1"] call kndr_assignMarker;
 };
 [[[], _init_code], "BIS_fnc_spawn", true, true] spawn BIS_fnc_MP;
-
-sleep 5;
-[{hint localize "STR_DUWS_T_rw65exr8"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 

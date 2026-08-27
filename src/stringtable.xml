@@ -4146,27 +4146,6 @@
                 <Original>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</Original>
                 <English>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</English>
             </Key>
-            <Key ID="STR_DUWS_T_obc4591x">
-                <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDas Bau-Fahrzeug wurde zerstört</German>
-                <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n El vehículo constructor ha sido destruído</Spanish>
-                <Chinesesimp>==支线任务失败==\n\n建筑载具被毁</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_125f39s4">
-                <German>==SEKUNDÄRE MISSION ABGESCHLOSSEN==\n\nDas Bau-Fahrzeug wurde sicher zur Basis zurückgebracht!</German>
-                <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡El vehículo constructor ha sido retornado a la base!</Spanish>
-                <Chinesesimp>==支线任务成功==\n\n建筑载具已安全返回基地!</Chinesesimp>
-                <Original>==SIDE MISSION COMPLETED==\n\nThe builder vehicle is back at base.</Original>
-                <English>==SIDE MISSION COMPLETED==\n\nThe builder vehicle is back at base.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rw65exr8">
-                <German>Anpassung des Fahrzeugs abgeschlossen!\nDu kannst das Fahrzeug jetzt zum Bauen von Befestigungen nutzen!</German>
-                <Spanish>¡Modificaciónes al vehículo completadas!\n ¡Ahora puede usar el vehículo como una fábrica de estructuras!</Spanish>
-                <Chinesesimp>载具改装完成！\n你可以把载具变成建造工厂！</Chinesesimp>
-                <Original>Conversion complete.\nThe vehicle now operates as a mobile factory.</Original>
-                <English>Conversion complete.\nThe vehicle now operates as a mobile factory.</English>
-            </Key>
             <Key ID="STR_DUWS_T_jsg7ys0w">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡El camión ha sido destruído!</Spanish>
@@ -4185,8 +4164,8 @@
                 <German>Signal 2-2 an alle Einheiten, gute Nachricht: Wir haben gerade den feindlichen Versorgungslaster entdeckt, Koordinaten wurden ins Informationssystem hochgeladen.</German>
                 <Spanish>Signal 2-2 a todas las unidades, buenas noticias: Acabamos de localizar el camión de suministros enemigo, coordenadas subidas al sistema de información.</Spanish>
                 <Chinesesimp>所有单位，好消息：我们刚刚发现了敌人的补给卡车，坐标上传到信息系统了。</Chinesesimp>
-                <Original>This is Allseer. Be advised, eyes on an enemy supply truck at the marked grid. Recommend you move on it before they displace it.</Original>
-                <English>This is Allseer. Be advised, eyes on an enemy supply truck at the marked grid. Recommend you move on it before they displace it.</English>
+                <Original>Allseer to Overlord. Eyes on an enemy supply truck at the marked grid, looks ready to displace. Recommend you task a team to seize it.</Original>
+                <English>Allseer to Overlord. Eyes on an enemy supply truck at the marked grid, looks ready to displace. Recommend you task a team to seize it.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplytruckoverlord">
                 <German>"Overlord 1-1" an "Signal 2-2", die Action Squad ist zum Zielbereich unterwegs. Ihr dürft abziehen.</German>
@@ -4209,6 +4188,26 @@
             <Key ID="STR_DUWS_T_SUPPLY_ARSENAL_TITLE">
                 <Original>Captured Supplies</Original>
                 <English>Captured Supplies</English>
+            </Key>
+            <Key ID="STR_DUWS_T_builderspot">
+                <Original>This is Allseer. Be advised, enemy engineering vehicle parked at the marked grid. No sign they're moving it yet.</Original>
+                <English>This is Allseer. Be advised, enemy engineering vehicle parked at the marked grid. No sign they're moving it yet.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_buildertask">
+                <Original>To Alpha 1-1, priority tasking: recover the enemy engineering vehicle and RTB. The shop can convert it into a mobile factory for us.</Original>
+                <English>To Alpha 1-1, priority tasking: recover the enemy engineering vehicle and RTB. The shop can convert it into a mobile factory for us.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_builderwin">
+                <Original>To Alpha 1-1, vehicle's back inside the wire, good work. The engineers are converting it into a mobile factory now.</Original>
+                <English>To Alpha 1-1, vehicle's back inside the wire, good work. The engineers are converting it into a mobile factory now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_builderfail">
+                <Original>To Alpha 1-1, that vehicle's a total loss, tasking scrubbed. Disengage and RTB.</Original>
+                <English>To Alpha 1-1, that vehicle's a total loss, tasking scrubbed. Disengage and RTB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_builderdeadline">
+                <Original>To Alpha 1-1, time's up. The enemy's recovered the vehicle. Tasking scrubbed, RTB.</Original>
+                <English>To Alpha 1-1, time's up. The enemy's recovered the vehicle. Tasking scrubbed, RTB.</English>
             </Key>
             <Key ID="STR_DUWS_T_cacheletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Aufklärer haben gerade das feindliche Arsenal lokalisiert. Ihr wisst, was zu tun ist.</German>
