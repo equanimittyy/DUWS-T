@@ -30,7 +30,7 @@ class CfgSounds
     };
     class DUWS_Radio_Start {
         name = "DUWS_Radio_Start";
-        sound[] = {"duws\shared\sounds_npics\support\radioinnout.ogg", 1.36, 1};
+        sound[] = {"duws\shared\sounds_npics\support\radioinnout.ogg", 1.088, 1};
         titles[] = {};
     };
 };
