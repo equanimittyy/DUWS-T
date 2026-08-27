@@ -104,34 +104,9 @@ private _guns = [];
 } forEach _staticsArray;
 _guns params ["_vehicle_9", "_vehicle_10"];
 
-_groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-_groupBunker1 deleteGroupWhenEmpty true;
-_groupBunker2 = [getpos _vehicle_10, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-_groupBunker2 deleteGroupWhenEmpty true;
-[[_groupBunker1, _groupBunker2]] call fnc_mission_claim;
-_guard1 = units _groupBunker1 select 0;
-_guard2 = units _groupBunker2 select 0;
-_guard1 moveinGunner _vehicle_9;
-_guard2 moveinGunner _vehicle_10;
-// The thaw for fnc_static_place's placement freeze.
-{ _x enableSimulationGlobal true } forEach _guns;
-
-[_guard2] joinSilent _groupBunker1;
-_missionUnits pushBack _guard1;
-_missionUnits pushBack _guard2;
-{
-    _missionUnits pushBack _x;
-} forEach (units _groupBunker1);
-{
-    _missionUnits pushBack _x;
-} forEach (units _groupBunker2);
-
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _groupBunker1;
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _groupBunker2;
+private _groupBunker1 = [_vehicle_9, _vehicle_10, _guns] call fnc_place_bunker_guns;
+// Tracked for manual teardown: these men are not composition, so the sweep will not take them.
+_missionUnits append (units _groupBunker1);
 
 [[_cachePos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 
