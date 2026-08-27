@@ -1,5 +1,4 @@
-// Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
-#include "..\..\..\..\shared\includes\action_style.hpp"
+// Locality: server; the hold-action code blocks below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 params ["_MissionPos", "_mission_name"];
 if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
@@ -17,8 +16,10 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_laptopletsdothis";
 
 // The offer's site-finder vetted a cluster of enterable buildings near _MissionPos. Pick 3-5 of them: every
-// one gets a garrison and an orange cross on the map, but the laptop hides in only one, so the player has to
-// clear them to find it. The finder guaranteed a cluster; abort defensively only if it evaporated.
+// one gets a garrison, an orange cross on the map, and a laptop on a desk -- but only one laptop is the real
+// objective. The rest are decoys, a third of them rigged to blow, so the player has to clear each building
+// and sabotage its laptop to find out which is which. The finder guaranteed a cluster; abort defensively
+// only if it evaporated.
 private _usable = [_MissionPos, 2, _radius] call fnc_usableBuildings;
 if (_usable isEqualTo []) exitWith { [8, "STR_DUWS_T_crtzxs0j", "no_building"] call fnc_mission_abort };
 private _bldgCount = (3 + floor random 3) min (count _usable);   // 3-5, capped at what exists
@@ -26,15 +27,14 @@ private _bldgs = [];
 private _pool = +_usable;
 for "_i" from 1 to _bldgCount do { _bldgs pushBack (_pool deleteAt (floor random (count _pool))) };
 
-// Laptop hides in one random building of the cluster, on a random interior slot (any floor). The task and
-// ellipse centre on _MissionPos, not this building, so the marker never gives the hiding place away.
+// The real laptop hides in one random building of the cluster. The task and ellipse centre on _MissionPos,
+// not this building, so the marker never gives the hiding place away. _targetpos is set to the real laptop's
+// exact slot in the spawn loop below.
 private _laptopBldg = selectRandom _bldgs;
-private _targetpos = selectRandom ([_laptopBldg] call BIS_fnc_buildingPositions);
 private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
-
-_tableLoc = _targetpos;
 
 // Marked before anything is built. The ellipse and the task are the only things telling the
 // player where the objective is, and the spawn-up below runs for tens of seconds.
@@ -55,22 +55,30 @@ private _crossMarkers = [];
     _crossMarkers pushBack _mk;
 } forEach _bldgs;
 
-_laptop = "";
+// A desk-and-laptop in every candidate building, on a random interior slot (any floor). One is the real
+// objective, the rest decoys; a third of the decoys are rigged. _laptops holds [object, isReal, rigged] so
+// the action loop below can wire each to the right handler. setPosATL, not the plain spawn position, so both
+// props land on the slot's exact height rather than snap to the terrain under the building.
+private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
-        // Objective sits inside the laptop building on its random interior slot: a small desk there, the
-        // laptop on the desk. The old open-air table + camonet + pallet camp does not fit indoors, so it goes.
-        // setPosATL, not the plain spawn position, so both land on the slot's exact height rather than snap
-        // to the terrain under the building.
-        _table = createVehicle ["Land_TableDesk_F", _tableLoc, [], 0, "CAN_COLLIDE"];
-        _table setPosATL _tableLoc;
-        _table setDir 0;
-        [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
-        sleep 1;
-        _laptop = createVehicle ["Land_Laptop_unfolded_F", _tableLoc, [], 0, "CAN_COLLIDE"];
-        _laptop setPosATL [(_tableLoc select 0), (_tableLoc select 1), (_tableLoc select 2) + 0.46];
-        _laptop setDir 270;
-        [_laptop, "mission_sabotage_laptop"] call fnc_duws_keep;
+        {
+            private _slot = selectRandom ([_x] call BIS_fnc_buildingPositions);
+            private _isReal = _x isEqualTo _laptopBldg;
+            private _table = createVehicle ["Land_TableDesk_F", _slot, [], 0, "CAN_COLLIDE"];
+            _table setPosATL _slot;
+            _table setDir 0;
+            [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
+            private _lap = createVehicle ["Land_Laptop_unfolded_F", _slot, [], 0, "CAN_COLLIDE"];
+            _lap setPosATL [_slot select 0, _slot select 1, (_slot select 2) + 0.46];
+            _lap setDir 270;
+            [_lap, "mission_sabotage_laptop"] call fnc_duws_keep;
+            // Rigged roll is fixed here, not at the action, so a decoy's fate is the same for whoever
+            // reaches it. Only decoys are ever rigged.
+            private _rigged = !_isReal && {random 1 < 0.33};
+            _laptops pushBack [_lap, _isReal, _rigged];
+            if (_isReal) then { _targetpos = _slot };
+        } forEach _bldgs;
     };
 };
 
@@ -97,28 +105,54 @@ sleep 1;
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
-// ADD SABOTAGE ACTION TO LAPTOP
-// Suffixed JIP id, not the laptop itself: the hardcore intel rotary below hangs off the same
-// object, and an object-keyed id is that object's netId, so the two entries evicted each other
-// and a joining client got the search but never the sabotage. The success path removes this id.
-// The local half of a split: an addAction runs on whoever activated it, and its index exists
-// only on that machine, so removal has to happen here. Everything else the hack changes is
-// shared state and is decided on the server.
-[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), {
-    params ["_target", "_caller", "_actionId", "_arguments"];
-    // Dropped locally first. The server's broadcast removal is a round-trip away, and this
-    // action admits only the activating player, so they are the only one who could pay
-    // themselves twice inside that window.
-    _target removeAction _actionId;
-    ([_target] + _arguments) remoteExec ["fnc_sabotage_laptop_success", 2];
-}, [_MissionPos,_targetpos,_mission_name,_markername2,_radius,_crossMarkers], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
-
-// Searchable through the player's own action, the same way a body is. The laptop carries two
-// actions -- this and the sabotage -- so giving it one of its own was also what made the
-// index-0 removeAction in fnc_sabotage_laptop_success unsafe.
-if (hardcore_mode_enable) then {
-    [[_laptop], "objective"] call fnc_search_flag_group;
+// SABOTAGE ACTION ON EVERY LAPTOP
+// A hold-to-complete "Sabotage" on each laptop, real or decoy, timed to the body-search hold (6 s). The
+// entry always shows, but the hold only makes progress once the building is clear -- no living OPFOR
+// within 50 m of the laptop -- and a hold attempted with enemies still up is interrupted at once and
+// answered with a hint, so the refusal is instant, not a wasted six seconds. Completing sets
+// DUWS_laptop_done on the laptop, which the show-condition reads, so the entry drops on every machine
+// without a per-client removal. The real laptop's completion wins the mission; a decoy's reveals it and,
+// if rigged, arms the bomb.
+//
+// Object-keyed JIP id (netId): a late joiner re-runs the add, but the show-condition keeps it hidden on
+// an already-sabotaged laptop, and the success/decoy paths clear the queued add anyway. The 50 m check
+// is an engine spatial query (nearEntities), valid on the activating client.
+private _condShow = "(_this == player) && !(_target getVariable ['DUWS_laptop_done', false])";
+private _condProg = _condShow + " && (({side _x == east && alive _x} count (_target nearEntities [['CAManBase'], 50])) == 0)";
+private _interrupted = {
+    params ["_target"];
+    // Fires on any interrupt, a voluntary release included, so re-check: only nag about OPFOR when they
+    // are the reason the hold could not finish.
+    if ({side _x == east && alive _x} count (_target nearEntities [["CAManBase"], 50]) > 0) then { hint localize "STR_DUWS_T_laptopnotclear" };
 };
+{
+    _x params ["_lap", "_isReal", "_rigged"];
+    private _completed = if (_isReal) then {
+        {
+            params ["_target", "_caller", "_actionId", "_arguments"];
+            _target setVariable ["DUWS_laptop_done", true, true];
+            ([_target] + _arguments) remoteExec ["fnc_sabotage_laptop_success", 2];
+        }
+    } else {
+        {
+            params ["_target", "_caller", "_actionId", "_arguments"];
+            _target setVariable ["DUWS_laptop_done", true, true];
+            ([_target, _caller] + _arguments) remoteExec ["fnc_sabotage_laptop_decoy", 2];
+        }
+    };
+    private _args = if (_isReal) then {
+        [_MissionPos, _targetpos, _mission_name, _markername2, _radius, _crossMarkers]
+    } else {
+        [_rigged]
+    };
+    [
+        _lap, localize "STR_DUWS_T_p3200mf5",
+        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
+        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
+        _condShow, _condProg, {}, {}, _completed, _interrupted, _args, 6, 30, false, false
+    ] remoteExec ["BIS_fnc_holdActionAdd", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _lap]];
+} forEach _laptops;
+
 sleep 5; // let the patrols finish spawning
 
 // Success comes through the laptop's addAction, not a wait here, so the deadline runs on a watcher:

@@ -152,6 +152,7 @@ fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missio
 fnc_deny_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deny_armor\fnc_deny_armor_mission.sqf";
 fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_mission.sqf";
 fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
+fnc_sabotage_laptop_decoy = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_decoy.sqf";
 fnc_sabotage_laptop_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_site.sqf";publicVariable "fnc_sabotage_laptop_site";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";

@@ -4137,6 +4137,26 @@
                 <Original>Alpha 1-1, we're out of time. The enemy has relocated the asset.</Original>
                 <English>Alpha 1-1, we're out of time. The enemy has relocated the asset.</English>
             </Key>
+            <Key ID="STR_DUWS_T_RIGGED_DECOY_TITLE">
+                <Original>Rigged Decoy</Original>
+                <English>Rigged Decoy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RIGGED_DECOY_MSG">
+                <Original>This decoy was rigged with a bomb, get out of the building!</Original>
+                <English>This decoy was rigged with a bomb, get out of the building!</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laptopdecoy">
+                <Original>This laptop is a decoy. Keep searching.</Original>
+                <English>This laptop is a decoy. Keep searching.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laptopnothing">
+                <Original>We've got nothing here.</Original>
+                <English>We've got nothing here.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_laptopnotclear">
+                <Original>Clear the area of OPFOR first.</Original>
+                <English>Clear the area of OPFOR first.</English>
+            </Key>
             <Key ID="STR_DUWS_T_mfxb090t">
                 <German>==DEIN BAU-FAHRZEUG IST NOCH INTAKT==\n\nEs ist nur 1 Bau-Fahrzeug gleichzeitig in der Mission erlaubt! Bitte wähle eine andere Mission.</German>
                 <Spanish>==SU VEHÍCULO CONSTRUCTOR SIGUE INTACTO==\n\n ¡Solo se permite un vehículo constructor a la vez en el mapa! Por favor escoja otra misión.</Spanish>

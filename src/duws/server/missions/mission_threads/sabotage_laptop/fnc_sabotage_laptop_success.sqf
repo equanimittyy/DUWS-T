@@ -1,8 +1,14 @@
-// Locality: server -- the addAction body in
+// Locality: server -- the laptop's hold-action completion in
 // server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf remoteExecs
-// here to target 2. The split exists because an addAction is dispatched to whoever used it and
-// has no server-side form; only the action's own removal has to stay there.
+// here to target 2. The split exists because a hold action completes on whoever held it and has no
+// server-side form; the shared state -- reward, task, teardown -- is decided here.
 params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2", "_radius", ["_crossMarkers", []]];
+
+// Idempotent: two players can finish the hold on the same laptop a frame apart, and each one's
+// completion calls in here. First pays, the rest no-op. Server-local flag is enough, since the server
+// runs these calls in order.
+if (_object getVariable ["DUWS_laptop_paid", false]) exitWith {};
+_object setVariable ["DUWS_laptop_paid", true];
 
 _cpreward = DUWS_curReward select 0;
 _apreward = DUWS_curReward select 1;
@@ -14,11 +20,10 @@ if (count getObjectTextures _object > 0) then {
   _object setObjectTextureGlobal [0, "#(rgb,8,8,3)color(0,0,1,1)"];
 };
 
-// The action body already dropped the activating player's copy; this clears everyone else's.
-[_object,0] remoteExec ["removeAction",[0,-2] select isDedicated];
-
-// Dropping the queued copy is what stops a joiner re-hacking a finished mission. The id is a
-// string, so nothing deletes it implicitly, and the laptop outlives the hack.
+// The hold action hides itself the instant DUWS_laptop_done is set on the laptop (in the hold's own
+// completion, before this runs), so no per-client removal is needed. Dropping the queued JIP add still
+// matters: it stops a late joiner from re-adding the entry. The id is a string, so nothing deletes it
+// implicitly, and the laptop outlives the hack.
 remoteExec ["", format ["sabotage_action_%1", netId _object]];
 
 [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_laptopdone"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];

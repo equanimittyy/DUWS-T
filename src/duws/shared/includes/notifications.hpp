@@ -185,6 +185,22 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // A rigged decoy laptop's fuse warning. The one card in the mission set that carries an
+    // exclamation, because it is an act-now alarm and not a report. Bomb glyph (the IED hint icon,
+    // the same one the laptop mission wears on the map), red like the loss family, and held well past
+    // the 6 s fuse so it cannot clear before the blast.
+    class rigged_decoy
+    {
+        title = "$STR_DUWS_T_RIGGED_DECOY_TITLE";
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_RIGGED_DECOY_MSG";
+        color[] = {1,0.2,0.2,1};
+        duration = 8;
+        priority = 10;
+        difficulty[] = {};
+    };
+
     class sitrepinfo
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
