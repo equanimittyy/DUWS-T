@@ -71,6 +71,7 @@ fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
 fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_base_weapons.sqf";
+fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_reward.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
@@ -113,7 +114,6 @@ fnc_time_clock = compile preprocessFileLineNumbers "duws\server\missions\fnc_tim
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_run = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_run.sqf";
-fnc_attach_seize_arsenal = compile preprocessFileLineNumbers "duws\server\missions\fnc_attach_seize_arsenal.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
 
 // Shared convoy driving: a self-generated road-graph route builder, a slot layout that seats the column ON
@@ -606,8 +606,6 @@ fnc_operator_open = compile preprocessFileLineNumbers "duws\client\operative\fnc
 fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_recruit.sqf";publicVariable "fnc_operator_recruit";
 fnc_apocalypse_buildings = compile preprocessFileLineNumbers "duws\server\supports\fnc_apocalypse_buildings.sqf";
 publicVariable "fnc_apocalypse_buildings";
-fnc_removeArsenalAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_removeArsenalAction.sqf";
-publicVariable "fnc_removeArsenalAction";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_wbk_server_init.sqf";
 publicVariable "fnc_wbk_survivorKilled_server";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_pylon_init.sqf";

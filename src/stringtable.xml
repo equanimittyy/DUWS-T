@@ -2191,20 +2191,8 @@
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>Seize the enemy gear here before you leave</Original>
-                <English>Seize the enemy gear here before you leave</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CACHE_SEIZE">
-                <Original>Seize enemy materiel</Original>
-                <English>Seize enemy materiel</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CACHE_SEIZED_TITLE">
-                <Original>Enemy materiel seized</Original>
-                <English>Enemy materiel seized</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CACHE_SEIZED_DESC">
-                <Original>Captured weapons and gear added to the arsenal</Original>
-                <English>Captured weapons and gear added to the arsenal</English>
+                <Original>Captured weapons and gear added to your arsenal</Original>
+                <English>Captured weapons and gear added to your arsenal</English>
             </Key>
         </Container>
         <Container name="Disguise Menu">

@@ -500,7 +500,7 @@ fnc_captured_pool_settle = {
 };
 
 // Deposit explicit [class, count] pairs (server). Friendly classes are skipped: pooling one is
-// harmless (friendly is unlimited regardless) but pointless. Used by the loot caches.
+// harmless (friendly is unlimited regardless) but pointless.
 fnc_captured_pool_deposit_counts = {
 	if (!isServer) exitWith {};
 	params [["_pairs", []]];
@@ -513,45 +513,4 @@ fnc_captured_pool_deposit_counts = {
 	} forEach _pairs;
 	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool deposit_counts: %1", _pairs]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
-};
-
-// Loot-cache reward (server). Spreads the pool wide and shallow: a fixed few kinds of OPFOR gear,
-// each at a small random count, so clearing a cache broadens the shelf rather than stockpiling one
-// item. Weapons come from the built OPFOR ammobox list; wearables and attachments are read from the
-// OPFOR role units' config loadouts, since the ammobox item list holds neither worn nor mounted gear.
-fnc_captured_pool_cache_deposit = {
-	if (!isServer) exitWith {};
-	private _pick = {
-		params ["_src", "_n"];
-		private _bag = +_src;
-		private _out = [];
-		for "_i" from 1 to (_n min (count _bag)) do { _out pushBack (_bag deleteAt (floor random (count _bag))); };
-		_out
-	};
-	private _wear = [];
-	private _attach = [];
-	{
-		private _uc = _x;
-		if (_uc isEqualType "" && {_uc != ""} && {isClass (configFile >> "CfgVehicles" >> _uc)}) then {
-			private _l = getUnitLoadout _uc;
-			{
-				private _c = _l param [_x, []];
-				if (_c isEqualType [] && {(_c param [0, ""]) != ""}) then { _wear pushBackUnique (_c select 0); };
-			} forEach [3, 4, 5];   // uniform/vest/backpack
-			private _hg = _l param [6, ""];
-			if (_hg != "") then { _wear pushBackUnique _hg; };
-			{
-				private _w = _l param [_x, []];
-				if (_w isEqualType []) then {
-					{ private _a = _w param [_x, ""]; if (_a != "") then { _attach pushBackUnique _a; }; } forEach [1, 2, 3, 6];
-				};
-			} forEach [0, 1, 2];   // primary/secondary/handgun attachment slots
-		};
-	} forEach [opfor_SOLDIER_X, opfor_SPECOPS_X, opfor_SPECOPS_MEDIC_X, opfor_LAT_SOLDIER_X];
-	private _pairs = [];
-	// rand(3-10) inclusive per line.
-	{ _pairs pushBack [_x, 3 + floor random 8]; } forEach (
-		([opfor_ammobox_weapons, 3] call _pick) + ([_wear, 2] call _pick) + ([_attach, 2] call _pick)
-	);
-	[_pairs] call fnc_captured_pool_deposit_counts;
 };

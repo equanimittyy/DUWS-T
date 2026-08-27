@@ -41,8 +41,6 @@ clearWeaponCargoGlobal _truck1;
 clearItemCargoGlobal _truck1;
 clearBackpackCargoGlobal _truck1;
 
-[_truck1] call fnc_attach_seize_arsenal;
-
 private _truckGetInEH = _truck1 addEventHandler ["GetIn", {
     params ["_vehicle", "_role", "_unit", "_turret"];
     if (isPlayer _unit) then {
@@ -100,8 +98,6 @@ sleep 1;
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 sleep 5; // let the patrols finish spawning
 
@@ -134,6 +130,6 @@ sleep 2;
 deleteVehicle _box1;
 [{hint localize "STR_DUWS_T_3jmpthvi"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
-
+["opfor", [3, 2, 2, 2, 2]] call fnc_arsenal_reward;
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [_targetpos, _radius, "mission_steal_supply"] call fnc_mission_end;

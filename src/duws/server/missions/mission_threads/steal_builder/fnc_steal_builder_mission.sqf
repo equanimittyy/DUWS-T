@@ -16,7 +16,7 @@ _apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
 
 
-_radius = 500;
+_radius = 600;
 
 _markerText2 = localize "STR_DUWS_T_c6";
 
@@ -77,17 +77,17 @@ sleep 1;
 sleep 5; // let the patrols finish spawning
 
 
-waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50 || time > _deadline)};
+waitUntil {sleep 2; (!alive BLD1 || (BLD1 distance PosOfBLUHQ)<100 || time > _deadline)};
 
 [_markername2] call fnc_missionMarkerClear;
 
-if (getdammage BLD1>0.95) exitWith {
+if (!alive BLD1) exitWith {
     [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_steal_builder"] call fnc_mission_end;
 };
 
-if (getdammage BLD1 <= 0.95 && (BLD1 distance PosOfBLUHQ) >= 50 && time > _deadline) exitWith {
+if (alive BLD1 && (BLD1 distance PosOfBLUHQ) >= 100 && time > _deadline) exitWith {
     // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, "", "mission_steal_builder", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
