@@ -17,16 +17,20 @@ _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = format [localize "STR_DUWS_T_artycall", mapGridPosition _position];
-// Each support type answers on its own callsign; mortar HE and smoke both crew Sledge 1-1, cluster/napalm shares Reaper.
-_callsign = switch (_supportype) do {
-	case 1: { localize "STR_DUWS_T_redleg" };		// tube arty
-	case 2: { localize "STR_DUWS_T_sledge" };		// mortar HE
-	case 3: { localize "STR_DUWS_T_slingshot_2" };	// JDAM
-	case 5: { localize "STR_DUWS_T_reaper" };		// cluster
-	case 6: { localize "STR_DUWS_T_reaper_2" };		// napalm
-	case 7: { localize "STR_DUWS_T_sledge" };		// mortar smoke (same crew as HE)
-	default { localize "STR_DUWS_T_slingshot" };	// laser bomb
-};
+// Per-support-type metadata, indexed by _supportype (1-7): [callsign, consume-item class, ordnance
+// label]. Mortar HE and smoke both crew Sledge 1-1; cluster/napalm share Reaper; laser answers Slingshot.
+private _artyDesc = [
+	[],                                                                        // 0 unused
+	["STR_DUWS_T_redleg",      "artillery",    "STR_DUWS_T_jg5oh7nw"],         // 1 tube arty
+	["STR_DUWS_T_sledge",      "mortar",       "STR_DUWS_T_9sgayeiq"],         // 2 mortar HE
+	["STR_DUWS_T_slingshot_2", "jdam",         "STR_DUWS_T_sa5k8p4r"],         // 3 JDAM
+	["STR_DUWS_T_slingshot",   "laser",        "STR_DUWS_T_4o24llvl"],         // 4 laser bomb
+	["STR_DUWS_T_reaper",      "cluster",      "STR_DUWS_T_a31378y0"],         // 5 cluster
+	["STR_DUWS_T_reaper_2",    "napalm",       "STR_DUWS_T_7sgon7jn"],         // 6 napalm
+	["STR_DUWS_T_sledge",      "mortar_smoke", "STR_DUWS_T_mortar_smoke_ord"]  // 7 mortar smoke
+];
+private _desc = _artyDesc select _supportype;
+_callsign = localize (_desc select 0);
 
 // Swap the fallback shell for the faction's own round where a piece is named. Unset key -> "" -> keep
 // the passed vanilla shell, so an undeclared faction fires exactly as before.
@@ -57,11 +61,7 @@ if (isNil "arty_Blufor_close") exitWith {arty_Blufor_close = false};
 // item is spent at this point rather than at selection. A map-click the player backs out of in the
 // 45 s window never reaches here, leaving the flag set for fnc_mapclickarty to hand the item back.
 // Paid at purchase, so no per-fire charge.
-private _consumeClass = switch (_supportype) do {
-	case 1: {"artillery"}; case 2: {"mortar"}; case 3: {"jdam"};
-	case 4: {"laser"}; case 5: {"cluster"}; case 6: {"napalm"};
-		case 7: {"mortar_smoke"}; default {""};
-};
+private _consumeClass = _desc select 1;
 if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consume };
 
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
@@ -70,14 +70,7 @@ if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consu
 private _ackLine = if (_ammotype == "Laser") then {"STR_DUWS_T_artyack_laser"} else {"STR_DUWS_T_artyack"};
 [localize "STR_DUWS_T_OVERLORD", format [localize _ackLine, _callsign]] remoteExec ["fnc_duws_dialogue", 0];
 
-_ord = "";
-if (_supportype == 1) then {_ord = localize "STR_DUWS_T_jg5oh7nw"};	//arty
-if (_supportype == 2) then {_ord = localize "STR_DUWS_T_9sgayeiq"};		//mortar
-if (_supportype == 3) then {_ord = localize "STR_DUWS_T_sa5k8p4r"};			//jdam
-if (_supportype == 4) then {_ord = localize "STR_DUWS_T_4o24llvl"};		//laser
-if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
-if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
-if (_supportype == 7) then {_ord = localize "STR_DUWS_T_mortar_smoke_ord"};	//mortar smoke
+_ord = localize (_desc select 2);
 
 sleep 8;
 if (_ammotype == "Laser") then {
