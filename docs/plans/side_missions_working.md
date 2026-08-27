@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-17 types (indices 0-16). The rework's shape is settled: each mission should pose a **distinct
+19 types (indices 0-18). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -34,6 +34,7 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 16 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
 | 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
 | 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a persistent AP minefield walls the ring edge opposite the patrol | `target_recon/` |
+| 18 | Destroy Patrol Camp | find 1-3 recon camps hidden in treeline by their campfire smoke, wipe out every camp team | `destroy_patrol_camp/` |
 
 **Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
 Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
@@ -272,18 +273,20 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 
 | # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
 |--:|---------|-----|-----|:---------:|:--:|-------|
-| 2 | Eliminate High-Value Target | elimination | cmd | 40/35/0 | 3 | done |
-| 11 | Deny Enemy Armor | elimination | cmd | 15/25/0 | 3 | done |
+| 2 | Eliminate High-Value Target | elimination | cmd | 40/30/0 | 3 | done |
+| 11 | Deny Enemy Armor | elimination | cmd | 20/20/0 | 3 | done |
 | 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
 | 15 | Informant Manhunt | elimination | cmd | 10/25/0 | 3 | done |
 | 12 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
-| 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
+| 5 | Hunt Sniper Team | elimination | cmd | 15/15/0 | 3 | done |
 | 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
 | 3 | Destroy Signal Tower | sabotage | cmd | 30/20/0 | 2 | done |
 | 16 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
-| 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
-| 9 | Destroy Ammo Cache | sabotage | cmd | 35/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
-| 10 | Destroy Radar | sabotage | cmd | 20/25/0 | 3 | done (fixed-site, repriced) |
+| 17 | Eliminate Recon Patrol | elimination | cmd | 10/10/0 | 3 | done |
+| 18 | Destroy Patrol Camp | elimination | cmd | 20/15/0 | 3 | done |
+| 8 | Sabotage Laptop | sabotage | cmd | 30/15/0 | 3 | done |
+| 9 | Destroy Ammo Cache | sabotage | cmd | 25/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
+| 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
