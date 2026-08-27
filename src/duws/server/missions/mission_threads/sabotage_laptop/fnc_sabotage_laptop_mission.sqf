@@ -55,27 +55,49 @@ private _crossMarkers = [];
     _crossMarkers pushBack _mk;
 } forEach _bldgs;
 
-// A camping table and laptop in every candidate building, on a random interior slot (any floor). One is the
-// real objective, the rest decoys; a third of the decoys are rigged. _laptops holds [object, isReal, rigged]
-// so the action loop below can wire each to the right handler. setPosATL, not the plain spawn position, so
-// both props land on the slot's exact height rather than snap to the terrain under the building.
+// A camping table and laptop in every candidate building, on an interior floor slot biased toward the
+// building's middle. One is the real objective, the rest decoys; a third of the decoys are rigged.
+// _laptops holds [object, isReal, rigged] so the action loop below can wire each to the right handler.
+// setPosATL, not the plain spawn position, so both props land on the slot's exact height rather than
+// snap to the terrain under the building.
 private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
         {
-            private _slot = selectRandom ([_x] call BIS_fnc_buildingPositions);
-            private _isReal = _x isEqualTo _laptopBldg;
+            private _bldg = _x;
+            // Nearest-to-centroid slot, not a raw random one: a perimeter buildingPos sits against a
+            // wall, leaving the table clipping into it or wedged where the player cannot reach the laptop.
+            // The slots closest to the mean of all slots are the building's interior.
+            private _positions = [_bldg] call BIS_fnc_buildingPositions;
+            private _slot = _positions param [0, [0,0,0]];
+            if (count _positions > 1) then {
+                private _sx = 0; private _sy = 0;
+                { _sx = _sx + (_x select 0); _sy = _sy + (_x select 1) } forEach _positions;
+                private _cen = [_sx / count _positions, _sy / count _positions, 0];
+                private _scored = _positions apply { [_cen distance2D _x, _x] };
+                _scored sort true;
+                _slot = (selectRandom (_scored select [0, 1 max floor (count _scored / 2)])) select 1;
+            };
+            private _isReal = _bldg isEqualTo _laptopBldg;
             private _table = createVehicle ["Land_CampingTable_F", _slot, [], 0, "CAN_COLLIDE"];
             _table setPosATL _slot;
             _table setDir 0;
-            [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
             // Laptop on the table's own surface: read the table top from its bounding box rather than
             // hard-code an offset, so a change of table model cannot leave the prop floating or sunk.
             private _tableTop = (boundingBoxReal _table select 1) select 2;
             private _lap = createVehicle ["Land_Laptop_unfolded_F", _slot, [], 0, "CAN_COLLIDE"];
             _lap setPosATL [_slot select 0, _slot select 1, (_slot select 2) + _tableTop];
             _lap setDir 270;
+            // Freeze both once placed. Left simulated, physx settles the table and slides the laptop off
+            // its top; and invulnerable so stray patrol fire cannot destroy the real objective (mission
+            // unwinnable) or a decoy prop. A rigged decoy still detonates -- its bomb is a separate shell
+            // spawned by the decoy handler, not damage to the laptop.
+            { _x enableSimulationGlobal false; _x allowDamage false } forEach [_table, _lap];
+            [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
             [_lap, "mission_sabotage_laptop"] call fnc_duws_keep;
+            // Paired so a rigged decoy's blast can clear both props (invulnerable, so the shell alone
+            // leaves them standing). Read server-side by fnc_sabotage_laptop_decoy.
+            _lap setVariable ["DUWS_laptop_table", _table];
             // Rigged roll is fixed here, not at the action, so a decoy's fate is the same for whoever
             // reaches it. Only decoys are ever rigged.
             private _rigged = !_isReal && {random 1 < 0.33};
@@ -86,12 +108,22 @@ switch (VERSION_X) do {
 };
 
 // Each candidate building holds a garrisoned team, raised and claimed up front so the objective is defended
-// before the player can reach it. The cluster is then ringed by a mixed patrol -- a car and, where the
-// faction fields one, an IFV, plus foot teams. DUWS_fnc_zoneSpawnOne skips a vehicle the faction cannot
-// field, so the IFV is "if available" for free.
+// before the player can reach it. The team is spawned posture "none" at the building and spread into that
+// exact building by hand, not left to the garrison posture: garrison hunts the nearest structure with >=5
+// slots within 300 m, so a candidate with fewer slots gets no defenders and a neighbour can be claimed in
+// its place -- the laptop and its guards must not drift apart. DUWS_garrisonedBy is stamped so an
+// overlapping zone garrison cannot double-occupy the same house; it frees itself once the group is gone.
 private _garrison = [];
-{ _garrison pushBack (["garrison:team", getPosATL _x, 30] call DUWS_fnc_zoneSpawnOne) } forEach _bldgs;
-(_garrison select { !isNull _x }) call fnc_mission_claim;
+{
+    private _bldg = _x;
+    private _grp = ["garrison:team", getPosATL _bldg, 30, "none", getPosATL _bldg] call DUWS_fnc_zoneSpawnOne;
+    if (!isNull _grp) then {
+        _bldg setVariable ["DUWS_garrisonedBy", _grp];
+        [_grp, [_bldg], count units _grp, "AUTO"] call fnc_spreadIntoBuildings;
+        _garrison pushBack _grp;
+    };
+} forEach _bldgs;
+_garrison call fnc_mission_claim;
 sleep 1;
 
 // Patrols raise on a stagger (raiseGarrison sleeps between groups), so build them off the main thread and

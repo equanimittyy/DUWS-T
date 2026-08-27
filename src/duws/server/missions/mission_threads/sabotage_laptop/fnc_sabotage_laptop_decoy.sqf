@@ -23,8 +23,8 @@ if (!_rigged) exitWith {
 // blast, and goes only to the player who triggered it. Position captured before the fuse in case the
 // object is torn down in the gap -- the bomb still goes off where the laptop was.
 ["rigged_decoy"] remoteExec ["BIS_fnc_showNotification", _caller];
-[getPosATL _decoy] spawn {
-    params ["_p"];
+[getPosATL _decoy, _decoy, _decoy getVariable ["DUWS_laptop_table", objNull]] spawn {
+    params ["_p", "_lap", "_table"];
     sleep 6;
     // Driven down, not pinned in place: a shell created at rest never runs its impact fuze and sits
     // inert (the old setPosATL nailed it to the ground stationary). Spawned just above the spot with a
@@ -32,4 +32,8 @@ if (!_rigged) exitWith {
     // and replicates to every client.
     private _bomb = createVehicle ["Sh_82mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
     _bomb setVelocity [0, 0, -30];
+    // Clear the laptop and its table with the blast: both are invulnerable props, so the shell would
+    // otherwise leave them standing on the crater. Deleted here on the server, where both are local.
+    deleteVehicle _lap;
+    deleteVehicle _table;
 };
