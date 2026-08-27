@@ -2891,22 +2891,34 @@
                 <German>Hier ist BLUFOR-Kommando. Wir haben Ihre Anfrage erhalten. Einheiten sind zum markierten Ort unterwegs ———— "Overlord 1-1" an Einsatzteam, habt ihr die Übertragung alle verstanden?</German>
                 <Spanish>Aquí mando BLUFOR. Hemos recibido su solicitud. Unidades en camino a la ubicación marcada ———— "Overlord 1-1" llamando al Equipo de Acción, ¿escuchasteis esa transmisión?</Spanish>
                 <Chinesesimp>我们收到了你的请求。正在派出部队前往标记位置————"霸王1-1"呼叫行动组，刚刚的通话你们都听到了吧。</Chinesesimp>
-                <Original>IDAP, we copy. Units are moving to the marked location. Alpha 1-1, you copy all that?</Original>
-                <English>IDAP, we copy. Units are moving to the marked location. Alpha 1-1, you copy all that?</English>
+                <Original>IDAP, this is Overlord. Solid copy. Alpha 1-1, move to the marked position and recover the truck.</Original>
+                <English>IDAP, this is Overlord. Solid copy. Alpha 1-1, move to the marked position and recover the truck.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapacteamgo">
                 <German>Einsatzteam verstanden, wir beginnen die Operation sobald der Plan festgelegt ist, Ende.</German>
                 <Spanish>Equipo de Acción recibe, comenzaremos la operación una vez planificado, fuera.</Spanish>
                 <Chinesesimp>行动组收到，我们规划完方案后就开始行动，完毕。</Chinesesimp>
-                <Original>Copy. We'll move once we've got a plan. Out.</Original>
-                <English>Copy. We'll move once we've got a plan. Out.</English>
+                <Original>Roger, Overlord. Moving to recover. Out.</Original>
+                <English>Roger, Overlord. Moving to recover. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapend">
                 <German>Vielen Dank! Zivilisten im Kriegsgebiet schätzen, was Sie getan haben!</German>
                 <Spanish>Muchas gracias! Civiles en la zona de guerra agradecen lo que han hecho!</Spanish>
                 <Chinesesimp>太感谢了！战区平民感激你们的所作所为！</Chinesesimp>
-                <Original>Thank you. The people out here won't forget what you've done.</Original>
-                <English>Thank you. The people out here won't forget what you've done.</English>
+                <Original>Thank you. The people of %1 won't forget what you've done.</Original>
+                <English>Thank you. The people of %1 won't forget what you've done.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_idap_town_generic">
+                <Original>this town</Original>
+                <English>this town</English>
+            </Key>
+            <Key ID="STR_DUWS_T_idapoverlordclose">
+                <Original>To Alpha 1-1, the aid's back with IDAP, good work. Tasking complete. Overlord out.</Original>
+                <English>To Alpha 1-1, the aid's back with IDAP, good work. Tasking complete. Overlord out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_idaptruckdown">
+                <Original>To Alpha 1-1, the aid truck's a write-off, tasking scrubbed. Disengage and RTB.</Original>
+                <English>To Alpha 1-1, the aid truck's a write-off, tasking scrubbed. Disengage and RTB.</English>
             </Key>
             <Key ID="STR_DUWS_T_pcroger">
                 <German>Hier ist Einsatztrupp, verstanden. Unterwegs zum Zielort.</German>
@@ -4145,13 +4157,6 @@
                 <Chinesesimp>==你的建筑汽车还完好无损==\n\n地图上只允许同时有一辆建筑载具！请选择另一个任务。</Chinesesimp>
                 <Original>You can only have one builder vehicle at a time. Mission aborted.</Original>
                 <English>You can only have one builder vehicle at a time. Mission aborted.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jsg7ys0w">
-                <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
-                <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡El camión ha sido destruído!</Spanish>
-                <Chinesesimp>==支线任务失败==\n\n卡车严重损毁！</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe truck was destroyed.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe truck was destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_abc1abc2">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nHochwertiges Gelegenheitsfenster abgelaufen!</German>
@@ -5814,8 +5819,8 @@
                 <German>IDAP Mitarbeiter</German>
                 <Spanish>Personal de IDAP</Spanish>
                 <Chinesesimp>IDAP工作人员</Chinesesimp>
-                <Original>IDAP staff</Original>
-                <English>IDAP staff</English>
+                <Original>IDAP</Original>
+                <English>IDAP</English>
             </Key>
             <Key ID="STR_DUWS_T_OVERLORD">
                 <German>Overlord 1-1</German>

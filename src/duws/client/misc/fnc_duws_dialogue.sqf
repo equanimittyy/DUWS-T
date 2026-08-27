@@ -45,7 +45,10 @@ if (isNil "DUWS_netSpeakers") then {
         // One callsign per air drop rather than one shared across all four: each body already
         // introduces its own, so a shared slot contradicted the line it was attached to.
         // courier2 is the vehicle drop's Courier 2-1, sister to the supply drop's Courier 1-1.
-        "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier2", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
+        "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier2", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger",
+        // The IDAP crew's aid-recovery mission: their distress call and thanks arrive over the radio, not
+        // in the room, so the log carries them; BLUFOR-blue by default (not an OPFOR speaker).
+        "STR_DUWS_T_IDAP"
     ] apply { localize _x };
 
     // The SUB-NET speakers who are OPFOR, so the log tints them red instead of the BLUFOR blue

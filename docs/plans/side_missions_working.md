@@ -35,6 +35,7 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
 | 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a persistent AP minefield walls the ring edge opposite the patrol | `target_recon/` |
 | 18 | Destroy Patrol Camp | find 1-3 recon camps hidden in treeline by their campfire smoke, wipe out every camp team | `destroy_patrol_camp/` |
+| 14 | Recover Humanitarian Supply Truck | seize an OPFOR-guarded aid truck and drive it to the IDAP crew waiting in a neutral/BLUFOR town | `transport_idap/` |
 
 **Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
 Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
@@ -48,7 +49,7 @@ prize (supply truck vs builder vehicle). Repriced to 20/20 and 20/30; no longer 
 
 **Still stale -- each needs *both* a reprice and a distinct-verb gameplay rework** -- the earlier
 "bespoke, review" row (Rescue Pilot) is stale too until reworked, not a reviewed baseline: Rescue
-Pilot (4), Protect Informant (13), Recover Humanitarian Supply Truck (14). Ideas per row in the
+Pilot (4) and Protect Informant (13). Ideas per row in the
 [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
@@ -261,11 +262,42 @@ when the mission was a single hold-action (effort 1) and the AP read as overpaid
 required fight to a multi-building garrison clear, so the old "trim the AP" rationale is dead -- the
 number now wants a fresh read at the new effort, not the old cut.
 
+### Recover Humanitarian Supply Truck
+
+`mission_threads/transport_idap/fnc_transport_IDAP_mission.sqf`. An escort in reverse: OPFOR has hijacked
+an IDAP aid truck and parked it under guard, and the player fights in, seizes it and drives it back to the
+IDAP crew. The truck and its guard force are the stolen-supply shape (`fnc_steal_supply_mission`) -- an
+idle team on the prize, close and wide foot patrols, and the tier-gated `DUWS_fnc_tokenClass` car/IFV
+patrols -- so the recovery leg reads like a theft the player is undoing. Win: the truck delivered within
+50 m of the crew. Fail: the truck destroyed (`> 0.95` damage), or the deadline. Off the
+`fnc_mission_run` spine -- the win is a delivered-vehicle predicate the thread polls itself, like the
+stolen-supply thread.
+
+**Siting.** `surveyKind "map"`, so the truck spawns on contested ground rather than in a town, and
+`fnc_transport_IDAP_site` gates the offer on a neutral/BLUFOR town sitting within 3 km of the sited truck
+-- the crew's haven and delivery point. With no such town (civilians off leaves `duws_town_circles`
+empty; every town in reach is in the OPFOR band) the offer is dropped. The finder reads only broadcast
+state (`duws_town_circles`, `DUWS_enemy_town_pos`). The thread re-derives the nearest non-enemy town from
+the same state and aborts (`no_delivery_town`) if the war state flipped the last one hostile in the gap.
+
+**The crew and hand-over.** Five IDAP aid workers stand idle at a safe spot in the delivery town under a
+looping green smoke plume and a green "IDAP" map marker. Delivery lifts the town's reputation by +3
+(`fnc_town_rep_adjust`, keyed by the town's own index, not `fnc_civ_townAt` on the truck's contested-
+ground spawn); losing the truck sours it by -3. `fnc_town_rep_adjust` self-guards an out-of-range index,
+so RAVAGE/WBK (towns but no reputation array) take the call harmlessly. The hpp REP column reads 3 to
+match the win.
+
+**Dialogue.** IDAP opens with a distress call (VOICE), Overlord copies and tasks the player (NET), the
+player's team acknowledges (VOICE); IDAP thanks the player on delivery (VOICE). A destroyed truck is
+Overlord's loss to report on NET (`STR_DUWS_T_idaptruckdown`), a deadline the shared
+`fnc_mission_timeout_notice` (Overlord, NET). CP/AP and the deadline band are unchanged pending the
+reworks pricing pass.
+
 ## Planned reworks (decided, not built)
 
-The three still-stale missions. Verbs, win/fail and reward mechanics are decided; nothing here is coded
-yet. CP/AP and the deadline band are open (not set below). Build order: Rescue Pilot, Protect Informant,
-Recover Aid Truck.
+The two still-stale missions. Verbs, win/fail and reward mechanics are decided; nothing here is coded
+yet. CP/AP and the deadline band are open (not set below). Build order: Rescue Pilot, Protect Informant.
+Recover Aid Truck (14) is built -- its writeup moved to [Hand-made mission designs](#recover-humanitarian-supply-truck).
 
 ### Rescue Pilot (4)
 
@@ -284,14 +316,6 @@ player arrival** at the informant, not at spawn -- players get time to set up be
 the hold elapses. Fail: informant killed. The deadline stays as a backstop for an offer never engaged.
 Reward: **+3 REP to the nearest discovered town** via `fnc_town_rep_adjust` (was a flat +5); no
 discovered town in range means no REP. The hpp REP column moves **5 -> 3**.
-
-### Recover Humanitarian Supply Truck (14)
-
-The IDAP crew wait in a neutral or BLUFOR town; the aid truck is hijacked (OPFOR-held) elsewhere. Seize
-it and **deliver it within 50 m of the crew**. Fail: truck destroyed, or deadline. **Offer gated on a
-neutral/BLUFOR town existing** -- a new `fnc_transport_IDAP_site` rejects when none, so the offer drops
-rather than siting with nowhere to deliver. Reward: **+3 REP to that town** (was +5). The hpp REP column
-moves **5 -> 3**.
 
 ## Mission catalogue (current)
 
@@ -323,7 +347,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
 | 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale (spec ready, not built) |
-| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale (spec ready, not built) |
+| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done (gameplay + REP built; CP/AP + deadline pending) |
 
 ## Pricing rework (command missions)
 
@@ -333,8 +357,9 @@ repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicl
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower, Sabotage
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
 note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **Every
-still-stale mission carries its old numbers and is open pricing work** -- all 3 stale rows (Rescue
-Pilot, Protect Informant, Recover Humanitarian Supply Truck).
+still-stale mission carries its old numbers and is open pricing work** -- the 2 stale rows (Rescue
+Pilot, Protect Informant). Recover Humanitarian Supply Truck is built but its CP/AP and deadline are
+unchanged, still open pricing work.
 
 ## Per-mission rework tracker
 
@@ -359,11 +384,11 @@ change cell is the current idea, not a locked spec.
 | Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
 | Rescue Pilot | fight in to the downed pilot, then extract him to within 100 m of HQ (verb decided, not built) | stale |
 | Protect Informant | defend the informant through a timed hold that starts on player arrival (verb decided, not built) | stale |
-| Recover Humanitarian Supply Truck | retake the OPFOR-held aid truck and deliver it to the IDAP crew's town (verb decided, not built) | stale |
+| Recover Humanitarian Supply Truck | retake the OPFOR-guarded aid truck and deliver it to the IDAP crew's neutral/BLUFOR town | done |
 
 ## Open decisions
 
-- Build the three planned reworks above (verbs decided; none coded yet).
-- CP/AP and deadline band for all three (unset; the reworks pricing pass follows the build).
+- Build the two remaining planned reworks above (Rescue Pilot, Protect Informant; verbs decided, none coded yet).
+- CP/AP and deadline band for the two stale rows and the newly-built Recover Aid Truck (unset; the reworks pricing pass follows the build).
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.

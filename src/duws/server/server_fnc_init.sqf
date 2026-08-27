@@ -130,6 +130,8 @@ fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missio
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
 fnc_steal_supply_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_supply\fnc_steal_supply_mission.sqf";
 fnc_transport_IDAP_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\transport_idap\fnc_transport_IDAP_mission.sqf";
+// Gates the offer on a neutral/BLUFOR town existing for the crew to wait in; runs client-side in the picker.
+fnc_transport_IDAP_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\transport_idap\fnc_transport_IDAP_site.sqf";publicVariable "fnc_transport_IDAP_site";
 fnc_target_hvt_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_target_hvt_mission.sqf";
 // The HVT convoy's destination picker and site-finder. Broadcast: the site-finder runs client-side in the
 // offer picker (fnc_stratmap), and it calls the destination picker, which calls fnc_route_has_water.
