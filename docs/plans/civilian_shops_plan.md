@@ -95,31 +95,33 @@ rebuild. Reveal a town's markers only once the player has discovered it, keyed o
 flag the zone markers use (`setMarkerAlpha`), so the map is not pre-populated with every shop on the
 island.
 
-**Icons.** Vanilla `CfgMarkers` has no trash, fish, farm, mail, or car glyph, so the mapping is
-nearest-fit built-ins — a box van for the garbage round, cultivated land for the farm, a quay for
-fishing. Every marker also carries the vendor's name as text (`setMarkerText`), so a nearest-fit
-glyph is never ambiguous — the label reads "Fishmonger" even when the icon is only an approximate
-match. No vendor falls back to the bare `c_unknown` question mark. The classes below are the vanilla
-set; the ones already used in this mission (`c_van_01_box_f`, `c_supplycrate_f`, `loc_Hospital`,
-`loc_tourism`, `loc_Bunker`, the `hd_*` and `b_/o_/n_` icons) are known-good, the rest —
-`loc_VegetationVineyard`, `loc_Quay`, `loc_Fuelstation`, `loc_Transmitter`, `loc_BusStop`,
-`loc_Stack`, `loc_Power`, `hd_service` — are standard but need their exact casing confirmed against
-`CfgMarkers` (dump it with `configClasses (configFile >> "CfgMarkers")`).
+**Icons.** Drawn from the stock `CfgMarkers` task-glyph set (the `simpletasks` icons), which carries a
+car, boat, truck, rifle, box, wrench, and container — a closer fit than the location pins, so the
+mapping is deliberate rather than a nearest guess. Those classes were added by the Apex platform
+update, but their textures live in the base `\a3\ui_f\` PBO and platform-update configs ship to every
+owner, so they render on a mod-free client; the wiki's "Apex" tag marks the update that introduced the
+class, not a runtime gate. Two picks are classic base markers — `c_car` (taxi) and `loc_Fountain`
+(fishmonger, a water stand-in). Every marker also carries the vendor's name as text (`setMarkerText`),
+so an approximate glyph is never ambiguous — the label reads "Fishmonger" even where the icon is only
+water. No *listed* vendor falls back to the bare `c_unknown` question mark; a vendor type with no row
+in the table below defaults to `c_unknown`. The **No.** column is the contact-sheet number in the
+marker reference ([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
 
-| Vendor | Icon | Reads as |
-|---|---|---|
-| Car Dealer | `loc_Fuelstation` | fuel pump / garage |
-| Boat dealer | `loc_Quay` | harbour |
-| Arms Dealer | `c_supplycrate_f` | goods crate |
-| Contractor | `n_inf` | independent riflemen (guerilla/PMC) |
-| Garbage depot | `c_van_01_box_f` | box van / collection truck |
-| Post office | `loc_Transmitter` | communications |
-| Taxi rank | `loc_BusStop` | transport pickup |
-| Haulage depot | `loc_Stack` | industrial / warehouse |
-| Mechanic | `hd_service` | wrench |
-| Utility works | `loc_Power` | power line |
-| Farmer | `loc_VegetationVineyard` | cultivated land |
-| Fishmonger | `loc_Quay` | harbour |
+| Vendor | Icon | No. | Reads as |
+|---|---|---|---|
+| Car Dealer | `loc_car` | 157 | car |
+| Boat dealer | `loc_boat` | 152 | boat |
+| Arms Dealer | `loc_Rifle` | 218 | rifle |
+| Contractor | `loc_Attack` | 151 | crossed swords |
+| Garbage depot | `loc_help` | 174 | help / assist |
+| Post office | `loc_Box` | 153 | package |
+| Taxi rank | `c_car` | 22 | car |
+| Haulage depot | `loc_Truck` | 231 | truck |
+| Mechanic | `loc_repair` | 217 | wrench |
+| Utility works | `loc_use` | 232 | cog / service |
+| Farmer | `loc_container` | 161 | crate |
+| Fishmonger | `loc_Fountain` | 169 | water |
+| *(unlisted type)* | `c_unknown` | 25 | question mark |
 
 None of these is load-bearing — swap any icon freely, the label is what identifies the vendor. If the
 icon shortage grates, the alternative is a few custom `.paa` glyphs declared in `description.ext`
