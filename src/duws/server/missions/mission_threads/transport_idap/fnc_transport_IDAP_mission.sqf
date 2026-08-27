@@ -66,17 +66,13 @@ _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)-10],
 sleep 1;
 
 // Vehicle guards
-_group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
+_group = ["guard", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
 [_group] call fnc_mission_claim;
 
 // CREATE PATROLS
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _group;
 private _targetDeliveryPos = [];
 private _deliveryMarkerName = format ["delivery_%1", floor random 10000];
 private _minDist = 1000;

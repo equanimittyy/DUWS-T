@@ -49,6 +49,7 @@ DUWS_fnc_tokenPosture = {
 // --DUWS-UNITCOMP BEGIN name="Teams" kind=team row="team, roles, leader" fields="team, roles, leader" prefix=blufor_,opfor_--
 DUWS_teamRosters = [
     ["patrol", ["SOLDIER_X", "AR_SOLDIER_X"], ""],
+    ["guard", ["LAT_SOLDIER_X", "SOLDIER_X"], "SL_SOLDIER_X"],
     ["team", ["AR_SOLDIER_X", "GL_SOLDIER_X", "MARK_SOLDIER_X", "LAT_SOLDIER_X", "MEDIC_X"], "TL_SOLDIER_X"],
     ["sniper_element", ["SNIPER_SOLDIER_X", "SNIPER_SOLDIER_X"], ""],
     ["wp_team", ["SOLDIER_X", "AA_SOLDIER_X", "AT_SOLDIER_X", "AT_SOLDIER_X", "MEDIC_X"], "TL_SOLDIER_X"],

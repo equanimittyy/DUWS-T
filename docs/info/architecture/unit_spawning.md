@@ -37,17 +37,15 @@ What the token path centralises, and the direct path scatters or drops:
 
 ## The gap: direct-spawn call sites in mission threads
 
-Sixteen direct spawn sites remain across eleven threads. Most are *not* a simple migration — the two
-constraints above disqualify over half:
+The direct spawn sites that remain, and why each stays direct — most are not a simple migration:
 
 | Sites | What they raise | Why still direct |
 |---|---|---|
-| `steal_builder:69`, `steal_supply:116`, `transport_idap:69` | identical `[SL, LAT, SOLDIER]` guard | convertible — no roster row names this composition yet |
 | `protect_civ:243` | 8-man OPFOR wave | convertible — one-off composition, no row; also the site that passes no skill |
 | `deny_armor:133` | tank repair crew `[CREW, CREW, ENG]` | convertible — one-off composition |
 | `clearthearea_cqb:90` | `_bldgUnits`, built by a loop | dynamic list — no fixed roster to name |
 | `destroy_cache:152/154`, `destroy_radar:100/102` | 1-man bunker gunner | frozen static gunner: wants no posture and no loot; belongs in a shared bunker-gun helper, not the team API |
-| `protect_civ:70`, `rescue_pilot:442`, `rescue_squad:72` | WEST group | not OPFOR — the API cannot take it |
+| `protect_civ:70`, `rescue_pilot:442`, `rescue_squad:72` | WEST group | side param could route these, but they are a civilian VIP and follow-player rescue squads — they want no posture and no loot |
 | `transport_idap:121` | CIVILIAN group | not OPFOR |
 | `target_sniper:87` | OPFOR perch pair | deliberate exception, documented at the call site |
 | `deny_armor:155/165/181` | convoy vehicles | scripted self-routing convoy; posture bands would fight the convoy logic |
@@ -56,7 +54,8 @@ Line numbers are anchors into `server/missions/mission_threads/<name>/`; they dr
 
 Already migrated (reference examples): `target_armor`, `target_sniper`, `rescue_squad` and
 `sabotage_laptop` call `fnc_spawn_team`/`fnc_spawn_vehicle`. `rescue_squad:118` shows the
-exact-placement pattern — a token with `"none"` posture and a supplied position.
+exact-placement pattern — a token with `"none"` posture and a supplied position. The `steal_builder`,
+`steal_supply` and `transport_idap` vehicle guards share that pattern through the `guard` roster row.
 
 ## Decision: side parameter
 
@@ -71,19 +70,23 @@ CIVILIAN is deliberately *not* a value: only the two armies have a role vocabula
 `BIS_fnc_spawnGroup`.
 
 Not chosen: the raw-list escape hatch (let the API take a class array, not just a token). Dynamic and
-one-off class lists — `clearthearea_cqb:90`, the `[SL, LAT, SOLDIER]` guard trio — still cannot name a
-roster row, so they stay direct until a row is added for the recurring ones. The side parameter does not
-address them.
+one-off class lists — `clearthearea_cqb:90` and the `protect_civ:243` / `deny_armor:133` one-offs — still
+cannot name a roster row, so they stay direct until a row is added for the recurring ones. The side
+parameter does not address them.
 
 ## Call-site conversions still owed
 
-The primitive is done; routing sites through it is separate, per-site work. The side parameter *enables*
-the WEST conversions but does not settle them: a converted site gains `fnc_apply_posture` and
-`fnc_addRandomLoot` whether it wants them or not. `rescue_squad:72` and `rescue_pilot:442` raise a WEST
-group that should follow the player, not garrison under a posture, and wants no loot — those stay direct
-by choice, not by limitation. Any conversion that adds loot to a group that had none changes body-search
-identity (searchable bodies feed faction detection), so each converted thread needs an in-game check of
-head-count, position, AI behaviour and body-search identity.
+The primitive is done; routing sites through it is separate, per-site work. The recurring `[SL, LAT,
+SOLDIER]` vehicle guard is now the `guard` roster row, and `steal_builder`, `steal_supply` and
+`transport_idap` raise it through `fnc_spawn_team` with `"none"` posture at the vehicle point — a
+behaviour-preserving swap, since all three already looted their guards.
+
+The side parameter *enables* the WEST conversions but does not settle them: a converted site gains
+`fnc_apply_posture` and `fnc_addRandomLoot` whether it wants them or not. `rescue_squad:72` and
+`rescue_pilot:442` raise a WEST group that should follow the player, not garrison under a posture, and
+wants no loot — those stay direct by choice, not by limitation. Any conversion that adds loot to a group
+that had none changes body-search identity (searchable bodies feed faction detection), so each converted
+thread needs an in-game check of head-count, position, AI behaviour and body-search identity.
 
 The deliberate-exception sites (`target_sniper:87`, the `deny_armor` convoy hulls) remain correct as
 direct spawns: the convoy hulls need bespoke column seating that the posture band would fight, and route

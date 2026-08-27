@@ -90,14 +90,10 @@ _obj4 = createVehicle [_static2, [(_vehPos select 0)-10, (_vehPos select 1)-10],
 [_obj4, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 
-_group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
+_group = ["guard", _vehPos, _radius, "none", _vehPos] call fnc_spawn_team;
 [_group] call fnc_mission_claim;
 
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _group;
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
