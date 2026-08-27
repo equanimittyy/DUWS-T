@@ -56,27 +56,7 @@ player addRating 10000000;
 		sleep 10;
 	};
 };
-fnc_remoteBoard = {
-    params ["_heliNetId", "_seatType", "_player"];
-    if (_player != player) exitWith {};
-    private _heli = objectFromNetId _heliNetId;
-    if (isNull _heli) exitWith { ["ERROR", "INTRO", "Remote board: helicopter not found."] call fnc_log; };
-    switch (_seatType) do {
-        case "cargo": {
-            player assignAsCargo _heli;
-            player moveInCargo _heli;
-        };
-        case "gunner": {
-            player assignAsGunner _heli;
-            player moveInGunner _heli;
-        };
-        case "commander": {
-            player assignAsCommander _heli;
-            player moveInCommander _heli;
-        };
-    };
-    ["INFO", "INTRO", format ["Client %1 boarded helicopter as %2", name player, _seatType]] call fnc_log;
-};
+fnc_remoteBoard = compile preprocessFileLineNumbers "duws\client\misc\fnc_remoteBoard.sqf";
 publicVariable "fnc_remoteBoard";
 // Set GameMaster
 if (!isMultiplayer) then {
@@ -378,37 +358,7 @@ if (CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 if (isNil "apocalypse_mode") then { apocalypse_mode = false };
 
 // filter-apply function, kept callable so respawn can reapply it
-DUWS_fnc_applyApocalypseFilter = {
-    // clear any prior effect first, keyed by a unique ID
-    private _idCC = 15001;
-    private _idGrain = 15002;
-    private _idBlur = 15003;
-    
-    ppEffectDestroy _idCC;
-    ppEffectDestroy _idGrain;
-    ppEffectDestroy _idBlur;
-    
-    // colour correction: strong end-of-world tint
-    private _cc = ppEffectCreate ["ColorCorrections", _idCC];
-    _cc ppEffectEnable true;
-    _cc ppEffectAdjust [
-        0.7,        // brightness down
-        1.2,        // high contrast
-        0.0,        // offset
-        [0,0,0,0],  // start blend
-        [1.0,0.5,0.2,0.9], // strong orange-red tint (A=0.9 = high intensity)
-        [0.9,0.9,0.9,0.0]  // heavily desaturated (near monochrome, slight tint kept)
-    ];
-    _cc ppEffectCommit 0;
-
-    // slight edge blur to fake a vignette; dynamic blur instead of chromatic aberration
-    private _blur = ppEffectCreate ["DynamicBlur", _idBlur];
-    _blur ppEffectEnable true;
-    _blur ppEffectAdjust [0.02];
-    _blur ppEffectCommit 0;
-
-    ["INFO", "SUPPORT", "Aggressive filters applied."] call fnc_log;
-};
+DUWS_fnc_applyApocalypseFilter = compile preprocessFileLineNumbers "duws\client\misc\fnc_applyApocalypseFilter.sqf";
 
 if (apocalypse_mode) then {
     call DUWS_fnc_applyApocalypseFilter;
@@ -501,9 +451,5 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
 // disguise feature: set captive state locally
-fnc_disguise_setCaptiveLocal = {
-    params ["_state"];
-    player setCaptive _state;
-    ["INFO", "GEAR", format ["Client setCaptive %1 for %2", _state, name player]] call fnc_log;
-};
+fnc_disguise_setCaptiveLocal = compile preprocessFileLineNumbers "duws\client\misc\fnc_disguise_setCaptiveLocal.sqf";
 publicVariable "fnc_disguise_setCaptiveLocal";
