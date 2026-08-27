@@ -18,12 +18,22 @@ sleep 1;
 sleep 1;
 [[(_missionPos select 0), (_missionPos select 1)+35], _radius] spawn _fnc_claimTeam;
 sleep 1;
-// See fnc_missionPatrols for why the Army Power rung is two tokens rather than a substitution.
+// Three vehicle slots, each gated on its top rung: slot 1 opens at the car tier, slot 2 only once
+// the side has reached the ifv tier, slot 3 only at the tank tier -- so the ring thickens with Army
+// Power rather than fielding all three from the start. Once a slot opens it rolls across its pool;
+// AP is monotonic, so the lower token is already earned, and the middle slot mixes light and medium
+// instead of always the heavier class.
+private _vehSlots = [
+    [["car"],         "car",  [(_missionPos select 0)+30, (_missionPos select 1)+10]],
+    [["car", "ifv"],  "ifv",  [(_missionPos select 0)+35, (_missionPos select 1)]],
+    [["ifv", "tank"], "tank", [(_missionPos select 0)+28, (_missionPos select 1)+12]]
+];
 {
-    private _class = [_x] call DUWS_fnc_tokenClass;
+    _x params ["_pool", "_gate", "_pos"];
+    if (([_gate] call DUWS_fnc_tokenClass) == "") then { continue };
+    private _class = [selectRandom _pool] call DUWS_fnc_tokenClass;
     if (_class != "") then {
-        [_class, [(_missionPos select 0)+30, (_missionPos select 1)+10], _radius] spawn _fnc_claimVeh;
+        [_class, _pos, _radius] spawn _fnc_claimVeh;
         sleep 1;
     };
-} forEach ["tank", "car"];
-[["car"] call DUWS_fnc_tokenClass, [(_missionPos select 0)+28, (_missionPos select 1)+12], _radius] spawn _fnc_claimVeh;
+} forEach _vehSlots;
