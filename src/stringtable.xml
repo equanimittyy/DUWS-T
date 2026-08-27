@@ -3765,6 +3765,10 @@
                 <Original>Destroy Hardpoint</Original>
                 <English>Destroy Hardpoint</English>
             </Key>
+            <Key ID="STR_DUWS_T_c17">
+                <Original>Eliminate Recon Patrol</Original>
+                <English>Eliminate Recon Patrol</English>
+            </Key>
             <Key ID="STR_DUWS_T_c12">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
@@ -4285,6 +4289,22 @@
             <Key ID="STR_DUWS_T_sniperfail">
                 <Original>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</Original>
                 <English>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_PATROL_DESC">
+                <Original>Allseer has tracked an enemy recon patrol working this area. Kill them all.</Original>
+                <English>Allseer has tracked an enemy recon patrol working this area. Kill them all.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reconpatrolletsdothis">
+                <Original>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</Original>
+                <English>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reconpatrolend">
+                <Original>To Alpha 1-1, Allseer confirms the enemy recon patrol has been eliminated. Good work.</Original>
+                <English>To Alpha 1-1, Allseer confirms the enemy recon patrol has been eliminated. Good work.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reconpatrolfail">
+                <Original>Alpha 1-1, we're out of time. Allseer's lost the recon patrol. Mission failed.</Original>
+                <English>Alpha 1-1, we're out of time. Allseer's lost the recon patrol. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot">
                 <German>Flieger</German>

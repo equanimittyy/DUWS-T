@@ -33,6 +33,7 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
 | 16 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
 | 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
+| 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a persistent AP minefield walls the ring edge opposite the patrol | `target_recon/` |
 
 **Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
 Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
