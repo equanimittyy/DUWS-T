@@ -75,8 +75,6 @@ clearWeaponCargoGlobal _vehicle_7;
 clearItemCargoGlobal _vehicle_7;
 clearBackpackCargoGlobal _vehicle_7;
 
-[_vehicle_7] call fnc_attach_seize_arsenal;
-
 _vehicle_8 = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 [_vehicle_8, "mission_destroy_cache"] call fnc_duws_keep;
 _vehicle_8 setDir 0;
@@ -87,8 +85,6 @@ clearMagazineCargoGlobal _vehicle_8;
 clearWeaponCargoGlobal _vehicle_8;
 clearItemCargoGlobal _vehicle_8;
 clearBackpackCargoGlobal _vehicle_8;
-
-[_vehicle_8] call fnc_attach_seize_arsenal;
 
 // The guns off the same fence, in a second pass because they are placed by the resolver and
 // frozen until crewed, where the props above snap to the terrain and stay simulated.
@@ -121,7 +117,6 @@ sleep 6;
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 
 sleep 5;
