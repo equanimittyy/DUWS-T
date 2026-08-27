@@ -58,11 +58,16 @@ private _crossMarkers = [];
 // A camping table and laptop in every candidate building, on an interior floor slot biased toward the
 // building's middle. One is the real objective, the rest decoys; a third of the decoys are rigged.
 // _laptops holds [object, isReal, rigged] so the action loop below can wire each to the right handler.
-// setPosATL, not the plain spawn position, so both props land on the slot's exact height rather than
-// snap to the terrain under the building.
+//
+// Two passes with a physics settle between them. A buildingPos slot is authored above the floor, so a
+// table seated there by hand floats; instead each table is dropped simulated and left to fall onto the
+// real floor collision, then frozen. The laptop is seated only afterward -- base-flush on its table's
+// settled top -- and never simulated itself, because physx slides a loose laptop off the small top.
 private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
+        // Pass 1: drop a table into each candidate, upright, left simulated to fall the slot-to-floor gap.
+        private _pending = [];
         {
             private _bldg = _x;
             // Nearest-to-centroid slot, not a raw random one: a perimeter buildingPos sits against a
@@ -78,21 +83,50 @@ switch (VERSION_X) do {
                 _scored sort true;
                 _slot = (selectRandom (_scored select [0, 1 max floor (count _scored / 2)])) select 1;
             };
-            private _isReal = _bldg isEqualTo _laptopBldg;
             private _table = createVehicle ["Land_CampingTable_F", _slot, [], 0, "CAN_COLLIDE"];
-            _table setPosATL _slot;
+            _table setVectorUp [0, 0, 1];
             _table setDir 0;
-            // Laptop on the table's own surface: read the table top from its bounding box rather than
-            // hard-code an offset, so a change of table model cannot leave the prop floating or sunk.
-            private _tableTop = (boundingBoxReal _table select 1) select 2;
-            private _lap = createVehicle ["Land_Laptop_unfolded_F", _slot, [], 0, "CAN_COLLIDE"];
-            _lap setPosATL [_slot select 0, _slot select 1, (_slot select 2) + _tableTop];
-            _lap setDir 270;
-            // Freeze both once placed. Left simulated, physx settles the table and slides the laptop off
-            // its top; and invulnerable so stray patrol fire cannot destroy the real objective (mission
-            // unwinnable) or a decoy prop. A rigged decoy still detonates -- its bomb is a separate shell
-            // spawned by the decoy handler, not damage to the laptop.
-            { _x enableSimulationGlobal false; _x allowDamage false } forEach [_table, _lap];
+            _table setPosATL _slot;
+            _pending pushBack [_table, _bldg isEqualTo _laptopBldg];
+        } forEach _bldgs;
+
+        // One wait covers every table in the air at once, so the cost is flat in the building count
+        // rather than a sleep per table.
+        sleep 1.5;
+
+        // Pass 2: freeze each settled table, then drop a laptop onto its now-static, level top. The table
+        // is frozen first so the laptop lands on a surface that no longer moves -- a laptop left on a
+        // still-settling table slid straight off, the failure the old blanket freeze papered over. A
+        // frozen prop still collides, so it makes a solid landing surface. The laptop starts a finger
+        // above the top (base offset backed out so it clears the surface, not clips it), upright, and
+        // turned 90 degrees off the table's own heading; it falls the last gap to rest flat.
+        {
+            _x params ["_table", "_isReal"];
+            // Freeze == harden: enableSimulation false also suppresses damage, so stray patrol fire cannot
+            // destroy the real objective (mission unwinnable) or a decoy prop. A rigged decoy still
+            // detonates -- its bomb is a separate shell in the decoy handler, not damage to the laptop.
+            _table setVectorUp [0, 0, 1];
+            _table enableSimulationGlobal false;
+            _table allowDamage false;
+            private _tPos = getPosATL _table;
+            private _topZ = (_tPos select 2) + (boundingBoxReal _table select 1 select 2);
+
+            private _lap = createVehicle ["Land_Laptop_unfolded_F", _tPos, [], 0, "CAN_COLLIDE"];
+            private _lBase = (boundingBoxReal _lap select 0) select 2;
+            _lap setVectorUp [0, 0, 1];
+            _lap setDir ((getDir _table) + 90);
+            _lap setPosATL [_tPos select 0, _tPos select 1, _topZ + 0.05 - _lBase];
+            _x set [2, _lap];
+        } forEach _pending;
+
+        // Laptops settle onto their (now frozen) tables in one shared wait, as the tables did onto the floor.
+        sleep 1;
+
+        // Pass 3: freeze each rested laptop and wire it to its handler.
+        {
+            _x params ["_table", "_isReal", "_lap"];
+            _lap enableSimulationGlobal false;
+            _lap allowDamage false;
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
             [_lap, "mission_sabotage_laptop"] call fnc_duws_keep;
             // Paired so a rigged decoy's blast can clear both props (invulnerable, so the shell alone
@@ -102,8 +136,8 @@ switch (VERSION_X) do {
             // reaches it. Only decoys are ever rigged.
             private _rigged = !_isReal && {random 1 < 0.33};
             _laptops pushBack [_lap, _isReal, _rigged];
-            if (_isReal) then { _targetpos = _slot };
-        } forEach _bldgs;
+            if (_isReal) then { _targetpos = getPosATL _lap };
+        } forEach _pending;
     };
 };
 

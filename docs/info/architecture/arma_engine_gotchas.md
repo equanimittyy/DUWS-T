@@ -1232,6 +1232,24 @@ preserves the row's real elevation, so a ground gun stays grounded and a roof gu
 per class; `fnc_static_place` there applies the shift only when the class actually changed, so an
 unmodded faction is untouched.
 
+## `buildingPos` slots sit above the floor, so a prop seated at that Z by hand floats
+
+**`BIS_fnc_buildingPositions` / `buildingPos` return a building's authored unit-placement points, not
+its floor collision surface. Their Z sits a variable gap above the walkable floor, so an object placed
+straight onto that Z -- even base-corrected off its own bounding box -- hangs in the air.**
+
+The gap is per building and per slot, not a fixed offset, so it cannot be subtracted out the way a
+class's base offset can. Seating a camping table on a laptop-hunt slot by hand left it floating a
+hand's width off the floor with the laptop stacked above it.
+
+**How to apply:** drop the prop simulated and let physx fall it the small gap onto the real floor, then
+freeze (`enableSimulationGlobal false`). Batch it -- place every prop, one `sleep`, then freeze the lot
+-- so the wait is flat in the object count, not one `sleep` per prop. A prop that must carry another (a
+laptop on a table) is dropped only *after* the carrier is frozen: a prop left to settle on a
+still-simulated carrier slides off as the carrier shifts under it, but a frozen prop still collides, so
+the carried one falls onto a static, level top and comes to rest on it.
+`src/duws/server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf`.
+
 ## An empty group is never freed, and each side caps at 144 groups
 
 **`createGroup` claims a group slot that lives until it is explicitly freed. Nothing reclaims an
