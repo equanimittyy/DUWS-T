@@ -80,6 +80,10 @@ private _pilot = units _group select 0;
 private _vehicle = vehicle _pilot;
 _vehicle setVehicleAmmo 0;
 _vehicle allowdamage false;
+// Cosmetic transport: crew hold fire and don't acquire, so it flies the drop run instead of engaging.
+_pilot disableAI "Target";
+_pilot disableAI "AUTOTARGET";
+_group setCombatMode "BLUE";
 _vehicle engineOn true;
 
 private _wp1 = _group addWaypoint [_location, -1];

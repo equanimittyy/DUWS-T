@@ -58,6 +58,10 @@ _group deleteGroupWhenEmpty true;
 _pilot = units _group select 0;
 _vehicle = vehicle _pilot;
 _vehicle setVehicleAmmo 0;
+// Cosmetic drone: hold fire and don't acquire, so it just flies the scan orbit.
+_pilot disableAI "Target";
+_pilot disableAI "AUTOTARGET";
+_group setCombatMode "BLUE";
 _vehicle engineOn true;
 
 

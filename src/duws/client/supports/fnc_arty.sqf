@@ -125,6 +125,9 @@ if (_ammotype == "Laser") then {
 	_pilot = units _group select 0;
 	_pilot allowfleeing 0;
 	_pilot disableAI "Target";
+	// Cosmetic bird: hold fire and don't acquire, so it flies its scripted run instead of breaking off to engage.
+	_pilot disableAI "AUTOTARGET";
+	_group setCombatMode "BLUE";
 	_vehicle = vehicle _pilot;
 	_vehicle engineOn true;
 	_vehicle flyInHeight 1000;
@@ -149,6 +152,9 @@ if (_ammotype == "Laser") then {
 		_pilot = units _group select 0;
 		_pilot allowfleeing 0;
 		_pilot disableAI "Target";
+		// Cosmetic bird: hold fire and don't acquire, so it flies its scripted run instead of breaking off to engage.
+		_pilot disableAI "AUTOTARGET";
+		_group setCombatMode "BLUE";
 		_vehicle = vehicle _pilot;
 		_vehicle engineOn true;
 		_vehicle flyInHeight 150;

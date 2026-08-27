@@ -56,6 +56,9 @@ _heloGroup deleteGroupWhenEmpty true;
 _pilot = currentPilot _helo;
 _pilot allowfleeing 0;
 _pilot disableAI "Target";
+// Cosmetic taxi: hold fire and don't acquire, so the crew flies the ferry instead of engaging.
+_pilot disableAI "AUTOTARGET";
+_heloGroup setCombatMode "BLUE";
 
 // Disable VCOM on CREW
 {

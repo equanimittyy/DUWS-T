@@ -23,6 +23,9 @@ private _pilot = currentPilot _helo;
 _pilot setCaptive false;
 _pilot allowFleeing 0;
 _pilot disableAI "TARGET";
+// Cosmetic lift: hold fire and don't acquire, so the crew flies the sling run instead of engaging.
+_pilot disableAI "AUTOTARGET";
+_heloGroup setCombatMode "BLUE";
 _pilot allowDamage true;
 { _x setVariable ["Vcm_Disable", true, true]; } forEach units _heloGroup;
 
