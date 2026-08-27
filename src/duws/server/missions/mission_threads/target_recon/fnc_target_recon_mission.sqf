@@ -41,6 +41,21 @@ private _build = {
     private _grp = ["recon", _spawnPos, 300, "closepatrol", _spawnPos] call fnc_spawn_team;
     [_grp] call fnc_mission_claim;
 
+    // Elite and sneaking. Sub-skills forced to 1 so the team is as accurate and quick to spot as the
+    // engine allows, whatever opfor_ai_skill is. Started in STEALTH -- and the closepatrol waypoints
+    // apply_posture laid are SAFE, so override those too, or the first leg walks the team back out of
+    // stealth. The engine still promotes it to COMBAT itself the moment it detects the player.
+    {
+        _x setSkill ["aimingAccuracy", 1];
+        _x setSkill ["aimingShake", 1];
+        _x setSkill ["aimingSpeed", 1];
+        _x setSkill ["spotDistance", 1];
+        _x setSkill ["spotTime", 1];
+        _x setSkill ["general", 1];
+    } forEach units _grp;
+    _grp setBehaviour "STEALTH";
+    { _x setWaypointBehaviour "STEALTH" } forEach (waypoints _grp);
+
     // Anti-personnel minefield opposite the patrol, a third of the time: a wall across the approach at
     // the far ring edge, depth toward the centre so its length lies perpendicular to that radial. Sited
     // opposite the team so no mine spawns on top of it. Skipped where another minefield already sits
