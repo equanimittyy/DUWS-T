@@ -399,8 +399,6 @@ call _fncScript;
 [_fncScript] remoteExec ["call", 0, true];
 
 _radius = 300;
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_pilot_downed";
@@ -412,11 +410,10 @@ private _site = [_MissionPos, _radius, 4] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the spawn-up below runs for tens of seconds.
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+// Marker + task before the spawn-up (tens of seconds); the brief below stays manual (fixed speaker,
+// pre-localised, no callsign substitution).
 private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, _randomPos, "help"] call fnc_missionTaskCreate;
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, "help"] call fnc_mission_present;
 
 _vehPos = _targetpos;
 
@@ -484,20 +481,16 @@ waitUntil {
 if (!pilot_west_close && time > _deadline) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [_markername2] call fnc_missionMarkerClear;
     _pilot setDamage 1;
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
 
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [_markername2] call fnc_missionMarkerClear;
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
 
 sleep 5;
@@ -513,31 +506,23 @@ waitUntil {sleep 1; (_pilot distance PosOfBLUHQ)<50 OR !(alive _pilot) OR time >
 if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 50 && time > _deadline) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [_markername2] call fnc_missionMarkerClear;
-    call fnc_mission_timeout_notice;
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, true] call fnc_mission_finish;
 };
 
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [_markername2] call fnc_missionMarkerClear;
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
-
-[_markername2] call fnc_missionMarkerClear;
 
 if (!isNull attachedTo _pilot) then {
     detach _pilot;
     CLEANUP_PILOT(_pilot);
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-sleep 1;
-
+// Win outro plays inline (pilot handed over, then deleted, then Overlord's sign-off); the task ticks
+// complete at the end through finish, which also pays the reward and releases the slot.
 [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
 deleteVehicle _pilot;
 missionNamespace setVariable ["currentMissionPilot", nil];
@@ -546,8 +531,7 @@ sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+[_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 
 // Guaranteed, and called rather than spawned into a client function: completing the mission is
 // the gate, and the shape this replaces rolled a chance from a server thread through a function
