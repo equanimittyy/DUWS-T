@@ -6,12 +6,6 @@ if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 _radius = 350;
 
-_markerText2 = "";
-switch (VERSION_X) do {
-    case "MODERN": {
-        _markerText2 = localize "STR_DUWS_T_c8";
-    };
-};
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_laptopletsdothis";
 
@@ -33,8 +27,6 @@ for "_i" from 1 to _bldgCount do { _bldgs pushBack (_pool deleteAt (floor random
 private _laptopBldg = selectRandom _bldgs;
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
-
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 // Marked before anything is built. The ellipse and the task are the only things telling the
 // player where the objective is, and the spawn-up below runs for tens of seconds.

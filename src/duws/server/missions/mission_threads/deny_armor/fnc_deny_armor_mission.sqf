@@ -56,7 +56,6 @@ if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetp
 private _marker = [_randomPos, DA_RADIUS] call fnc_missionMarkerData;
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
-[localize "STR_DUWS_T_c11", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // The broken-down tank: empty (createVehicle raises no crew, unlike BIS_fnc_spawnVehicle), pre-damaged
 // and low on fuel so it reads as a wreck and the repair is a real state change. Persistent so the

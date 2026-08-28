@@ -35,8 +35,6 @@ _markername2 = [_hpPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["tower%1%2", round (_hpPos select 0), round (_hpPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _hpPos, "destroy"] call fnc_missionTaskCreate;
 
-[localize "STR_DUWS_T_c3", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
-
 // One tasking line: the mast and its crew already stand on the map, so there is no spawn-up to narrate.
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_toweroverlord"] remoteExec ["fnc_duws_dialogue", 0];
 

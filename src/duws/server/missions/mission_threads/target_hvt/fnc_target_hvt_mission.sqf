@@ -312,7 +312,6 @@ _destMarker setMarkerText "Destination";
 
 private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
-[localize "STR_DUWS_T_c2", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 

@@ -92,10 +92,6 @@ _civilianMarker setMarkerColor "ColorBlue";
 _civilianMarker setMarkerText "Informant";
 _civilianMarker setMarkerSize [1, 1];
 
-// TODO: revisit the channel -- every mission thread announces through a hint box, so moving off
-// it is one pass across all of them rather than a change here.
-[localize "STR_DUWS_T_c13", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
-
 [_civilian] spawn {
     params ["_unit"];
     sleep 1;

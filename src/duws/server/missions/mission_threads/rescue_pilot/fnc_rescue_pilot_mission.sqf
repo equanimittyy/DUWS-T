@@ -408,8 +408,6 @@ _message = localize "STR_DUWS_T_pilotletsdothis";
 _message1 = localize "STR_DUWS_T_pilotfound";
 _message2 = localize "STR_DUWS_T_pilotend";
 
-_markerText2 = localize "STR_DUWS_T_c4";
-
 private _site = [_MissionPos, _radius, 4] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
@@ -419,8 +417,6 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, _randomPos, "help"] call fnc_missionTaskCreate;
-
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 _vehPos = _targetpos;
 

@@ -65,7 +65,6 @@ private _place = [_BuildingPos] call fnc_place_name;
 private _marker = [_BuildingPos, _radius] call fnc_missionMarkerData;
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, _BuildingPos, "help"] call fnc_missionTaskCreate;
-[localize "STR_DUWS_T_c0", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // Holed up in the building and captive: passive and unkillable until relieved, so the cordon cannot
 // wipe them before the player arrives. Maxed skill: once they come out they fight their own corner.
