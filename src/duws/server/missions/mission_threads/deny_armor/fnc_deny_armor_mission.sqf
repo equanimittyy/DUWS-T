@@ -57,6 +57,11 @@ private _marker = [_randomPos, DA_RADIUS] call fnc_missionMarkerData;
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
+// Overlord's brief opens the mission, before the convoy spawn below: the spawn costs seconds and must
+// not delay the opening line. The eyes-on and approach arrow follow once the column is sited (further down).
+private _place = [_randomPos] call fnc_place_name;
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
+
 // The broken-down tank: empty (createVehicle raises no crew, unlike BIS_fnc_spawnVehicle), pre-damaged
 // and low on fuel so it reads as a wreck and the repair is a real state change. Persistent so the
 // abandoned-vehicle sweep (fnc_repetitive_cleanup) cannot reap the empty hull before the convoy or
@@ -232,11 +237,9 @@ _wp setWaypointCompletionRadius 40;
 _convoyGrp setVariable ["DUWS_convoy_route0", _route0];
 [_convoyGrp] spawn fnc_convoy_drive;
 
-private _place = [_randomPos] call fnc_place_name;
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
-
-// Hold the convoy intel a beat: Overlord's brief lands first, then 10s on the approach arrow drops and
-// Allseer calls the eyes-on -- neither handed the instant the mission opens.
+// The convoy intel holds a beat behind the open: Overlord's brief already played at mission start
+// (above); 10s on, the approach arrow drops and Allseer calls the eyes-on -- the convoy intel is never
+// handed the instant the mission opens.
 sleep 10;
 // Orange arrow at the entry point, pointing the way it drives. Approach direction only (the ellipse
 // marks the tank), so it stays static and clears once the convoy is in and engaged.

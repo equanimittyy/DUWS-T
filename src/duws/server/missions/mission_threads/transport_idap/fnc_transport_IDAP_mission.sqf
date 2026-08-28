@@ -62,6 +62,14 @@ _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, _randomPos, "truck"] call fnc_missionTaskCreate;
 
+// Brief opens the mission, before the truck/guard spawn-up below (tens of seconds): the spawn must not
+// delay the opening line. Speakers and messages are fixed strings, independent of the spawned convoy.
+[_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
+sleep 5;
+[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
+
 _vehPos = _targetpos;
 
 // The objective itself: kept for the mission's duration so the abandoned-vehicle sweep cannot collect it.
@@ -177,12 +185,6 @@ _cleanupDelivery = {
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
     deleteMarker _deliveryMarkerName;
 };
-
-[_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 5;
-[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5; // let the patrols finish spawning
 

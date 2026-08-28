@@ -21,7 +21,8 @@
 //   _idPrefix str   task-id stem; the rounded mission position is appended so it is unique
 //   _build    code  [_targetpos,_randomPos,_radius,_Building] -> handles. Spawns and claims the
 //                   objective (garrison, target group, vehicle, ...) and returns whatever _done
-//                   needs to test. Runs after the marker/task so the player already sees the area.
+//                   needs to test. Runs after the marker/task and the intro brief, so the player
+//                   already sees the area and has heard the opening line before the spawn begins.
 //                   Return the sentinel string "ABORT" to fail the mission at build time -- for a
 //                   mission that could not stand its objective up (no target group raised), where
 //                   letting an empty handle set reach _done would pass the win on the first poll.
@@ -30,7 +31,8 @@
 //                   mission with an early-lose (_lost), make _done require the objective still intact
 //                   so win and loss stay mutually exclusive.
 //   _brief    array optional [[speakerKey,msgKey,delayAfter], ...] -- intro dialogue, played in
-//                   order. Each line is callsign-substituted (fnc_cs), so a brief may name Alpha 1-1.
+//                   order, before _build so the guard-force spawn never delays the opening line.
+//                   Each line is callsign-substituted (fnc_cs), so a brief may name Alpha 1-1.
 //   _endLine  array optional [speakerKey,msgKey] -- success line, callsign-substituted via fnc_cs
 //   _failLine array optional [speakerKey,msgKey] -- timeout fail line, replaces the generic notice
 //   _compKey  str   optional composition key handed to fnc_mission_end / _deadline_fail for teardown
@@ -63,24 +65,29 @@ private _taskId = format ["%1%2%3", _idPrefix, round (_MissionPos select 0), rou
 [_taskId, localize _descKey, _mission_name, _randomPos, _taskType] call fnc_missionTaskCreate;
 [localize _nameKey, {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
+// Nearest named settlement to the marker, for the "marked near <place>" briefs.
+private _place = [_randomPos] call fnc_place_name;
+
+// Brief before the build, not after: the build's spawns cost seconds of engine time, and playing the
+// intro after them left the player watching a silent marker until the guard force finished spawning.
+// The brief reads only _place (from _randomPos), never the build's handles, so it is free to run first.
+{
+    _x params ["_spk", "_msg", ["_delay", 0]];
+    [localize _spk, [format [localize _msg, _place]] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+    if (_delay > 0) then { sleep _delay };
+} forEach _brief;
+
 private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
 // Build-time abort: the objective could not be stood up, so fail cleanly rather than let an empty
-// handle set win the mission on the first poll. Same teardown as a timeout, minus the spoken line.
+// handle set win the mission on the first poll. Same teardown as a timeout, minus the spoken line. The
+// brief has already played by here; a build that aborts is a rare broken-faction edge (no target group
+// raised), accepted so the common path speaks immediately rather than after the spawn.
 if (_handles isEqualTo "ABORT") exitWith {
     [_marker] call fnc_missionMarkerClear;
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos, _radius, _compKey, _sweep] call fnc_mission_end;
 };
 if (isNil "_handles") then { _handles = [] };
-
-// Nearest named settlement to the marker, for the "marked near <place>" briefs.
-private _place = [_randomPos] call fnc_place_name;
-
-{
-    _x params ["_spk", "_msg", ["_delay", 0]];
-    [localize _spk, [format [localize _msg, _place]] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    if (_delay > 0) then { sleep _delay };
-} forEach _brief;
 
 sleep 5; // let the patrols the build spawned finish arriving before the win poll starts
 

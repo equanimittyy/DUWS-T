@@ -34,6 +34,11 @@ _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
 
+// Brief opens the mission, before the building/laptop spawn-up below (tens of seconds): the spawn must
+// not delay the opening line. Speaker and message are fixed strings, independent of the spawned sites.
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+
 // One orange objective marker per candidate building, no text: the player sees every possible site but not
 // which holds the laptop until it is cleared. Names tracked so the win and timeout paths can delete them all.
 private _crossMarkers = [];
@@ -162,9 +167,6 @@ sleep 1;
     ];
     (([_patrolTokens, _c, _r] call DUWS_fnc_raiseGarrison) select { !isNull _x }) call fnc_mission_claim;
 };
-
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
 
 // SABOTAGE ACTION ON EVERY LAPTOP
 // A hold-to-complete "Sabotage" on each laptop, real or decoy, timed to the body-search hold (6 s). The

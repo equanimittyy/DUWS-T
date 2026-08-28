@@ -89,6 +89,10 @@ private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
 private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
+// Brief opens the mission, before the crowd/car spawn below: those spawns cost seconds and must not
+// delay the opening line. All four fields are resolved above, none depends on the spawned units.
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+
 // Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition
 // tests THIS car's footprint against nearby buildings/walls/cars and returns a spot it fits: a bare
 // road point plus createVehicle's weak relocate still drops a car into a house wall in a built-up
@@ -322,8 +326,6 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         _wp setWaypointSpeed _speed;
     };
 };
-
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
 // Exfil watcher: hold until the leave clock elapses or a firefight starts, then get him out. Kept off
 // the main thread so the win/fail monitor below runs against it in parallel.

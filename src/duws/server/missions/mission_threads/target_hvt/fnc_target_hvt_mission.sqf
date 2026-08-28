@@ -93,6 +93,13 @@ if (_carPool isEqualTo []) then {
 private _hvtCarClass = selectRandom _carPool;
 private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "displayName");
 
+// Task and opening brief before the convoy spawn below: the three columns cost seconds of engine time to
+// stand up, and issuing the task/line after them left the player with a silent map until they finished.
+// Both read only _destName/_vehName, already resolved above -- neither needs the spawned convoys.
+private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+
 // One line of vehicles seated ON the precomputed drive route: fnc_convoy_slots spaces one road-facing slot
 // per vehicle along it, so the hulls form a real column on the path they will drive, not a scatter. Route
 // stashed on the group (DUWS_convoy_route0) for the driver's first leg; crews merged into one group so they
@@ -309,11 +316,6 @@ _destMarker setMarkerShape "ICON";
 _destMarker setMarkerType "mil_end";
 _destMarker setMarkerColor "ColorEAST";
 _destMarker setMarkerText "Destination";
-
-private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
-
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
 // Departure gate: the columns hold at their start until a player reaches the convoy area (BLUFOR within the
 // search radius) or the hold timer expires, whichever first -- the trigger starts the race on arrival, the

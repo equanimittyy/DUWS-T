@@ -66,6 +66,12 @@ private _marker = [_BuildingPos, _radius] call fnc_missionMarkerData;
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, _BuildingPos, "help"] call fnc_missionTaskCreate;
 
+// Brief opens the mission, before the squad/cordon spawn below: those spawns cost seconds and must not
+// delay the opening line. Signal calls it in, Overlord confirms 8s on; neither reads the spawned units.
+[localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
+
 // Holed up in the building and captive: passive and unkillable until relieved, so the cordon cannot
 // wipe them before the player arrives. Maxed skill: once they come out they fight their own corner.
 private _squadGroup = [_BuildingPos, WEST, _squadClasses, [], [], 1] call BIS_fnc_spawnGroup;
@@ -147,10 +153,6 @@ if (!isNull _car) then {
 // back, so a cordon man stands, drops or takes cover as the fight tells him to instead of holding a frozen
 // crouch. Harmless on the car crew that rode into _cordonUnits -- setUnitPos AUTO is a no-op while mounted.
 _cordonUnits spawn { sleep 4; { _x setUnitPos "AUTO" } forEach _this; };
-
-[localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Relief flag: raised the moment the squad comes out, guarding the un-captive against a double fire and
 // read by both the suppression thread (which stops hosing the building once its occupants are up) and the
