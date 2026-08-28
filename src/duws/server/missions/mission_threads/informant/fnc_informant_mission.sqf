@@ -35,8 +35,6 @@ private _rep       = [_townIndex] call fnc_civ_repAt;
 private _enemyTown = (_rep <= -10) || {([_townIndex] call fnc_town_garrison_tierAt) > 0};
 
 if (!([15, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
-private _cpreward = DUWS_curReward select 0;
-private _apreward = DUWS_curReward select 1;
 
 // Leave clock on the shared mission-timing shape (5-min in-game steps, the same clock the deadline
 // uses): enemy towns give 10 minutes, friendly 20. TUNABLE steps.
@@ -83,11 +81,11 @@ private _radius = _townRadius max 200;
 // Everything the hunt spawns clusters within this, so the player works one tight knot at the centre,
 // not a town-wide sweep, and the informant stays in his crowd. The task ellipse still marks the town.
 private _spawnRadius = (_townRadius * 0.5) max 100; // TUNABLE.
-private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
 // Position-based id (like every mission thread): unique per town and stable, where a round-time id
-// collides when two missions are created in the same second.
+// collides when two missions are created in the same second. Marker + task via fnc_mission_present;
+// the brief below stays manual (four-arg format, no callsign substitution).
 private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
-[_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
+private _markername2 = [_townPos, _radius, _taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, "search"] call fnc_mission_present;
 
 // Brief opens the mission, before the crowd/car spawn below: those spawns cost seconds and must not
 // delay the opening line. All four fields are resolved above, none depends on the spawned units.
@@ -429,23 +427,19 @@ waitUntil {
     false
 };
 
-[_markername2] call fnc_missionMarkerClear;
 missionNamespace setVariable ["DUWS_informant_unit", objNull];
 missionNamespace setVariable ["DUWS_informant_crowd", []];
 DUWS_informant_active = false;
 publicVariable "DUWS_informant_active";
 
 if (_outcome isEqualTo "WIN") then {
-    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
-    [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    [_townPos, _radius, ""] call fnc_mission_end;
-    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+    [_mission_name, _taskID, "SUCCEEDED", _townPos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_INTEL_INFORMANT_KILLED"], true, "", false, false] call fnc_mission_finish;
 } else {
-    [_taskID, "FAILED"] call fnc_missionTaskEnd;
-    // Both fails read the same way: on a timeout we simply assume he made it to the zone.
+    // Both fails read the same way: on a timeout we simply assume he made it to the zone. His own
+    // "escaped" hint stands in for the generic timeout notice (notify false).
     private _failText = format [localize "STR_DUWS_T_INTEL_INFORMANT_ESCAPED", _zoneName];
     [_failText, {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
-    [_townPos, _radius, ""] call fnc_mission_end;
+    [_mission_name, _taskID, "FAILED", _townPos, _radius, [_markername2], [], false, "", false, false] call fnc_mission_finish;
 };
 
 // Cleanup everything the mission put down (informant, four cars, decoy drivers, added crowd), once
