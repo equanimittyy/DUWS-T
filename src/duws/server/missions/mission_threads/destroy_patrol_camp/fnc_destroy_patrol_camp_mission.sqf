@@ -11,16 +11,24 @@ private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
 
     // Camp centres: 1-3, spread across the zone with a minimum separation so the smoke columns read as
-    // distinct objectives rather than one blob. The site-finder already placed the zone anchor in treeline;
-    // per-camp treeline biasing is left to a later pass -- for now they seat on any clear land in the ring.
+    // distinct objectives rather than one blob. Each is heavily biased into forest: a candidate seats only
+    // where enough trees stand around it, so camps sit deep in woods rather than open ground. findSafePos
+    // still holds the centre 8 m clear of objects, so the camp gets a small clearing ringed by the trees.
+    // The tree demand relaxes partway through the tries -- deep forest first, mere treeline as a fallback --
+    // so a thinly wooded zone still seats every camp instead of collapsing them onto the anchor.
     private _campCount = 1 + floor random 3;
     private _campCentres = [];
+    private _campTreeRadius = 60;
+    private _campTreeDense  = 20;   // trees within radius to read as deep forest
+    private _campTreeMin    = 8;    // relaxed floor once the deep-forest tries run out
     private _tries = 0;
-    while { count _campCentres < _campCount && _tries < 60 } do {
+    while { count _campCentres < _campCount && _tries < 80 } do {
         _tries = _tries + 1;
         private _p = [_randomPos, 120, _radius - 120, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
         if (_p isEqualTo [] || {surfaceIsWater _p}) then { continue };
         if (_campCentres findIf { (_x distance2D _p) < 250 } >= 0) then { continue };
+        private _trees = count nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], _campTreeRadius, false, true];
+        if (_trees < (if (_tries < 55) then { _campTreeDense } else { _campTreeMin })) then { continue };
         _campCentres pushBack _p;
     };
     if (_campCentres isEqualTo []) then { _campCentres = [_targetpos]; };
@@ -102,17 +110,37 @@ private _build = {
             _table allowDamage false;
             _table enableSimulationGlobal false;
 
-            // Roll the loot, then hand the chosen classes to the placer as model-space slots across the table
-            // top (boundingBoxReal max-corner Z), a hair above it. The layout lives here; placement -- seat,
-            // align, kill velocity, keep under the key -- lives in fnc_place_settled. The table needs no keep;
-            // fnc_composition_place already filed it. Kept objects are `persistent`, so fnc_repetitive_cleanup
-            // never reaps an unlooted item before fnc_mission_end releases the key.
-            private _topZ = (boundingBoxReal _table select 1) select 2;
+            // Roll the loot, then hand the chosen classes to the placer as model-space slots on the table top
+            // (boundingBoxReal max-corner Z), a hair above it. Each item scatters to a random spot and heading
+            // rather than a fixed row, inset from the edges by _edgeMargin so nothing overhangs, and kept
+            // _itemSep off the others so two documents do not land on the same spot and z-fight. The layout
+            // lives here; placement -- seat, align, kill velocity, keep under the key -- lives in
+            // fnc_place_settled. The table needs no keep; fnc_composition_place already filed it. Kept objects
+            // are `persistent`, so fnc_repetitive_cleanup never reaps an unlooted item before fnc_mission_end
+            // releases the key.
+            private _bb   = boundingBoxReal _table;
+            private _bMin = _bb select 0;
+            private _bMax = _bb select 1;
+            private _topZ = _bMax select 2;
+            private _edgeMargin = 0.12;   // inset from every edge so no item overhangs the table
+            private _itemSep    = 0.18;   // min gap between two items so they do not stack and z-fight
+            private _minX = (_bMin select 0) + _edgeMargin;
+            private _maxX = (_bMax select 0) - _edgeMargin;
+            private _minY = (_bMin select 1) + _edgeMargin;
+            private _maxY = (_bMax select 1) - _edgeMargin;
             private _rows = [];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
                     private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
-                    _rows pushBack [_cls, -0.2 + (0.2 * _i), 0, _topZ + _hover, 0];
+                    private _ox = 0;
+                    private _oy = 0;
+                    // Draw a spot clear of the ones already taken; keep the last draw if none comes up clear.
+                    for "_try" from 0 to 7 do {
+                        _ox = _minX + random (_maxX - _minX);
+                        _oy = _minY + random (_maxY - _minY);
+                        if (_rows findIf { [(_x select 1) - _ox, (_x select 2) - _oy] distance [0, 0] < _itemSep } < 0) exitWith {};
+                    };
+                    _rows pushBack [_cls, _ox, _oy, _topZ + _hover, random 360];
                 };
             };
             [_rows, _table, "mission_patrol_camp"] call fnc_place_settled;
