@@ -257,10 +257,11 @@ DUWS_fnc_hardpointClear = {
     private _name = DUWS_hardpointName getOrDefault [_o get "hpType", _o get "hpType"];
     private _place = [([_key] call fnc_site_at) get "pos"] call DUWS_fnc_hardpointNearestPlace;
     private _tgt = [0, -2] select isDedicated;
+    // CP and AP each get their own card: a single combined card buried the AP gain in a badge that
+    // only ever showed the CP figure, so the AP the player earned went unread.
+    ["HPdestroyed", [_cp, _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
     if (_ap > 0) then {
-        ["HPdestroyedAP", [_cp, _name, _place, _ap]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
-    } else {
-        ["HPdestroyed", [_cp, _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
+        ["HPdestroyedAP", [_ap, _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
     };
 };
 

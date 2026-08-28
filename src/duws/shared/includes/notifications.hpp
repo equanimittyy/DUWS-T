@@ -73,13 +73,15 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    // The variant for a strongpoint that also pays Army Power (the radio tower): iconText the CP
-    // bounty (%1), description the type (%2), the place (%3) and the AP (%4).
+    // The Army Power half of an AP-paying strongpoint's bounty (the radio tower, the batteries),
+    // posted as its own card beside the CP one so each currency reads on its own line rather than
+    // sharing a badge: iconText the AP gained (%1), description the type (%2) and the place (%3),
+    // reusing the CP card's body key. Raised only when the type pays AP.
     class HPdestroyedAP
     {
         title = "$STR_DUWS_T_HP_destroyed_ap_title";
         iconText = "+%1";
-        description = "$STR_DUWS_T_HP_destroyed_ap";
+        description = "$STR_DUWS_T_HP_destroyed";
         color[] = {0.5,1,1,1};
         priority = 0;
         difficulty[] = {};

@@ -3297,12 +3297,8 @@
                 <English>OPFOR %2 near %3 destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_HP_destroyed_ap_title">
-                <Original>CP + AP Bonus: Hardpoint destroyed</Original>
-                <English>CP + AP Bonus: Hardpoint destroyed</English>
-            </Key>
-            <Key ID="STR_DUWS_T_HP_destroyed_ap">
-                <Original>OPFOR %2 near %3 destroyed. +%4 AP.</Original>
-                <English>OPFOR %2 near %3 destroyed. +%4 AP.</English>
+                <Original>AP Bonus: Hardpoint destroyed</Original>
+                <English>AP Bonus: Hardpoint destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_elszwwpc">
                 <German>CP Bonus: Sekundäre Mission erfolgreich</German>
