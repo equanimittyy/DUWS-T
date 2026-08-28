@@ -61,6 +61,8 @@ private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), rou
 // not delay the opening line. The eyes-on and approach arrow follow once the column is sited (further down).
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_destroyarmour_copy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // The broken-down tank: empty (createVehicle raises no crew, unlike BIS_fnc_spawnVehicle), pre-damaged
 // and low on fuel so it reads as a wreck and the repair is a real state change. Persistent so the

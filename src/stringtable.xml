@@ -3004,6 +3004,10 @@
                 <Original>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</Original>
                 <English>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</English>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_COPY">
+                <Original>Copy. Moving to intercept before he displaces.</Original>
+                <English>Copy. Moving to intercept before he displaces.</English>
+            </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_BRIEF">
                 <Original>All units, an enemy informant is operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and will displace early if a firefight breaks out.</Original>
                 <English>All units, an enemy informant is operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and will displace early if a firefight breaks out.</English>
@@ -3031,6 +3035,10 @@
             <Key ID="STR_DUWS_T_RECON_OBSERVE_TASK">
                 <Original>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</Original>
                 <English>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_OBSERVE_COPY">
+                <Original>Copy Overlord. Moving to the overwatch.</Original>
+                <English>Copy Overlord. Moving to the overwatch.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BRIEF">
                 <Original>Alpha 1-1, we have an unscouted enemy position near %1. Move to the marked overwatch and observe it through binoculars until Allseer confirms the intel.</Original>
@@ -4047,6 +4055,10 @@
                 <Original>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.</Original>
                 <English>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.</English>
             </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_copy">
+                <Original>Roger Overlord. Moving to hit it before they recover it.</Original>
+                <English>Roger Overlord. Moving to hit it before they recover it.</English>
+            </Key>
             <Key ID="STR_DUWS_T_destroyarmour_start">
                 <Original>Alpha 1-1, our close air support disabled an enemy tank near %1 and its crew is moving up to recover it. Destroy the tank or eliminate the crew before it's recovered.</Original>
                 <English>Alpha 1-1, our close air support disabled an enemy tank near %1 and its crew is moving up to recover it. Destroy the tank or eliminate the crew before it's recovered.</English>
@@ -4148,6 +4160,10 @@
                 <Original>Allseer to Overlord. Eyes on an enemy supply truck at the marked grid, looks ready to displace. Recommend you task a team to seize it.</Original>
                 <English>Allseer to Overlord. Eyes on an enemy supply truck at the marked grid, looks ready to displace. Recommend you task a team to seize it.</English>
             </Key>
+            <Key ID="STR_DUWS_T_supplytruckcopy">
+                <Original>Roger Overlord. Moving to seize it now.</Original>
+                <English>Roger Overlord. Moving to seize it now.</English>
+            </Key>
             <Key ID="STR_DUWS_T_supplytruckoverlord">
                 <German>"Overlord 1-1" an "Signal 2-2", die Action Squad ist zum Zielbereich unterwegs. Ihr dürft abziehen.</German>
                 <Spanish>"Overlord 1-1" a "Signal 2-2", el Action Squad se dirige al área objetivo. Tienen permiso para retirarse.</Spanish>
@@ -4173,6 +4189,10 @@
             <Key ID="STR_DUWS_T_builderspot">
                 <Original>This is Allseer. Be advised, enemy engineering vehicle parked at the marked grid. No sign they're moving it yet.</Original>
                 <English>This is Allseer. Be advised, enemy engineering vehicle parked at the marked grid. No sign they're moving it yet.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_buildercopy">
+                <Original>Copy. Moving to secure it now.</Original>
+                <English>Copy. Moving to secure it now.</English>
             </Key>
             <Key ID="STR_DUWS_T_buildertask">
                 <Original>To Alpha 1-1, secure that engineering vehicle and bring it back to the motor pool for repurposing.</Original>
@@ -4204,6 +4224,10 @@
                 <Original>To Alpha 1-1, Allseer confirms the ammunition cache is destroyed. Good work. Overlord out.</Original>
                 <English>To Alpha 1-1, Allseer confirms the ammunition cache is destroyed. Good work. Overlord out.</English>
             </Key>
+            <Key ID="STR_DUWS_T_hvtcopy">
+                <Original>Roger. Moving to locate his vehicle.</Original>
+                <English>Roger. Moving to locate his vehicle.</English>
+            </Key>
             <Key ID="STR_DUWS_T_hvtletsdothis">
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
@@ -4227,9 +4251,17 @@
                 <Original>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked on your map.</Original>
                 <English>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked on your map.</English>
             </Key>
+            <Key ID="STR_DUWS_T_armorcopy">
+                <Original>Copy Overlord. Moving to engage.</Original>
+                <English>Copy Overlord. Moving to engage.</English>
+            </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <Original>Alpha 1-1, an enemy vehicle patrol is operating near %1. Hunt the column down and destroy every vehicle.</Original>
                 <English>Alpha 1-1, an enemy vehicle patrol is operating near %1. Hunt the column down and destroy every vehicle.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_snipercopy">
+                <Original>Roger. Moving to clear the element.</Original>
+                <English>Roger. Moving to clear the element.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperletsdothis">
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
@@ -4264,6 +4296,10 @@
             <Key ID="STR_DUWS_T_patrolcampend">
                 <Original>All enemy camps have been cleared. Good work Alpha 1-1, RTB.</Original>
                 <English>All enemy camps have been cleared. Good work Alpha 1-1, RTB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_reconpatrolcopy">
+                <Original>Copy Overlord. Moving to engage.</Original>
+                <English>Copy Overlord. Moving to engage.</English>
             </Key>
             <Key ID="STR_DUWS_T_reconpatrolletsdothis">
                 <Original>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</Original>
@@ -4308,6 +4344,10 @@
                 <Original>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building near %1. We need extraction.</Original>
                 <English>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building near %1. We need extraction.</English>
             </Key>
+            <Key ID="STR_DUWS_T_squadcopy">
+                <Original>We copy, Overlord. Moving to Signal 3-1 now.</Original>
+                <English>We copy, Overlord. Moving to Signal 3-1 now.</English>
+            </Key>
             <Key ID="STR_DUWS_T_squadoverlord">
                 <German>"Overlord 1-1" an "Signal 3-1"! Eine Soforteinsatztruppe ist auf dem Weg zu Ihrer Position. Halten Sie durch!</German>
                 <Spanish>"Imperador 1-1" a "Signal 3-1"! Una fuerza de reacción rápida está de camino a tu posición. Resiste!</Spanish>
@@ -4346,6 +4386,10 @@
                 <Original>To Alpha 1-1, the radio tower is down and enemy comms with it. Good work. Overlord out.</Original>
                 <English>To Alpha 1-1, the radio tower is down and enemy comms with it. Good work. Overlord out.</English>
             </Key>
+            <Key ID="STR_DUWS_T_towercopy">
+                <Original>Alpha 1-1 copies, Overlord.</Original>
+                <English>Alpha 1-1 copies, Overlord.</English>
+            </Key>
             <Key ID="STR_DUWS_T_toweroverlord">
                 <German>Dies ist „Oberherr 1-1“. „Cobra 1-3“ (Funkturm-Verteidigung) bestätigt tot. Feinde dürfen unsere Signale nicht abfangen. Funkturm mit allen Mitteln unbrauchbar machen!</German>
                 <Spanish>Este es "Imperador 1-1". "Cobra 1-3" (defensa torre de señales) caída en combate confirmada. El enemigo no interceptará nuestras señales. Neutraliza la torre por cualquier medio!</Spanish>
@@ -4356,6 +4400,10 @@
             <Key ID="STR_DUWS_T_DESTROY_HARDPOINT_DESC">
                 <Original>Intel has fixed an OPFOR emplacement at the marked position. Destroy it.</Original>
                 <English>Intel has fixed an OPFOR emplacement at the marked position. Destroy it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hardpointcopy">
+                <Original>Copy Overlord. Moving on the strongpoint now.</Original>
+                <English>Copy Overlord. Moving on the strongpoint now.</English>
             </Key>
             <Key ID="STR_DUWS_T_hardpointoverlord">
                 <Original>To Alpha 1-1, there's an enemy strongpoint holding at the marked grid. Move in and destroy it.</Original>
@@ -4379,12 +4427,20 @@
                 <Original>Copy. Moving out.</Original>
                 <English>Copy. Moving out.</English>
             </Key>
+            <Key ID="STR_DUWS_T_laptopcopy">
+                <Original>Copy, Overlord.</Original>
+                <English>Copy, Overlord.</English>
+            </Key>
             <Key ID="STR_DUWS_T_laptopletsdothis">
                 <German>Dies ist "Overlord 1-1". Wir haben die Position der feindlichen elektronischen Kampfgeräte ermittelt. Ihre Einheit soll sich zum Standort begeben und alle verfügbaren Informationen beschaffen. Falls keine gefunden werden, lade das kürzlich an Ihre Terminals übermittelte Hacking-Programm hoch. Nach Abschluss der Mission können Sie sich sofort abziehen.</German>
                 <Spanish>Este es "Imperador 1-1". Hemos localizado la posición del equipo de guerra electrónica enemigo. Tu unidad debe acudir al lugar y recuperar toda la inteligencia disponible. Si no se encuentra ninguna, sube el programa de hacking enviado recientemente a tus terminales. Puedes retirarte en cualquier momento tras completar la misión.</Spanish>
                 <Chinesesimp>我们发现了敌人电子战设备的位置。现在需要你的单位去设备处寻找一切可用情报，如果没有就上传刚刚发到终端上的骇客程序。任务完成后随时可以撤离。</Chinesesimp>
                 <Original>Alpha 1-1, Allseer has located an enemy's field laptop in one of the marked buildings on your map. Find it, sabotage it, and extract.</Original>
                 <English>Alpha 1-1, Allseer has located an enemy's field laptop in one of the marked buildings on your map. Find it, sabotage it, and extract.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pilotcopy">
+                <Original>Roger. En route to the crash site now.</Original>
+                <English>Roger. En route to the crash site now.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Ein verbündetes Hubschrauber stürzte vor zehn Minuten an der markierten Position ab. Glücklicherweise steht der Pilot noch mit dem Kommando in Verbindung. Ihre Einheit soll als Soforteinsatztruppe vorgehen und den Piloten evakuieren.</German>

@@ -44,6 +44,8 @@ private _VARtaskgeneratedName = format ["hp%1%2", round (_hpPos select 0), round
 
 // One tasking line: the emplacement and its crew already stand on the map, so there is no spawn-up to narrate.
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hardpointoverlord"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hardpointcopy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Win when the hardpoint's row leaves DUWS_hardpoints -- watch the hardpoint's liveness, not any one
 // object. A gone row means it fell and its bounty is already paid. Deadline covers it left standing.

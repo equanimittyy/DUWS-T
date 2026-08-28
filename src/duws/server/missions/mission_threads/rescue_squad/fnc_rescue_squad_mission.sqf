@@ -71,6 +71,8 @@ private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_Mi
 [localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_squadcopy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Holed up in the building and captive: passive and unkillable until relieved, so the cordon cannot
 // wipe them before the player arrives. Maxed skill: once they come out they fight their own corner.

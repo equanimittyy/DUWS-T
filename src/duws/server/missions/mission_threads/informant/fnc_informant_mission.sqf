@@ -92,6 +92,8 @@ private _taskID = format ["informant%1%2", round (_townPos select 0), round (_to
 // Brief opens the mission, before the crowd/car spawn below: those spawns cost seconds and must not
 // delay the opening line. All four fields are resolved above, none depends on the spawned units.
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_INFORMANT_COPY"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition
 // tests THIS car's footprint against nearby buildings/walls/cars and returns a spot it fits: a bare

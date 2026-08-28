@@ -37,6 +37,8 @@ private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 
 // Brief opens the mission, before the building/laptop spawn-up below (tens of seconds): the spawn must
 // not delay the opening line. Speaker and message are fixed strings, independent of the spawned sites.
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_laptopcopy"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
 // One orange objective marker per candidate building, no text: the player sees every possible site but not

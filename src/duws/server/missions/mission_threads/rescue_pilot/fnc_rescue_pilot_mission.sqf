@@ -459,6 +459,8 @@ publicVariable "currentMissionPilot";
 [_pilot] call DUWS_fnc_addCarryAction;
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_pilotcopy"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
 pilot_west_close = false;

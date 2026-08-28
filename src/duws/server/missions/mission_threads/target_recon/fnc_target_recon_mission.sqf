@@ -81,7 +81,7 @@ private _spec = [
     _build,
     // Win when the recon team is dead: findIf returns -1 once no unit of it is left alive.
     { (_this findIf { alive _x }) < 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolletsdothis", 8]],
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_reconpatrolcopy", 0]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolend"],
     []
 ];

@@ -127,6 +127,8 @@ publicVariable "DUWS_recon_active";
 private _place = [_target] call fnc_place_name;
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_RECON_OBSERVE_BRIEF", _place]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECON_OBSERVE_COPY"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Wake the REAL zone by widening its stream radius, so the shared poller raises it as the player nears the
 // outlook instead of the mission standing up a copy. The ring the poller wakes on is the site radius plus

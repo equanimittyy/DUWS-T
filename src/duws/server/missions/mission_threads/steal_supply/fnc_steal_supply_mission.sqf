@@ -64,7 +64,7 @@ private _spec = [
     1, 600, "getin", "STR_DUWS_T_p7qawzl4", "rescue",
     _build,
     { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 },
-    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 0]],
+    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_supplytruckcopy", 0]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckwin"],
     [],
     "mission_steal_supply",

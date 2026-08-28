@@ -157,7 +157,7 @@ private _spec = [
     7, 1500, "kill", "STR_DUWS_T_y7z1cx6j", "vehpatrol",
     _build,
     { (_this findIf { alive _x }) < 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8]],
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_armorcopy", 0]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorend"],
     [],
     "mission_target_armor"

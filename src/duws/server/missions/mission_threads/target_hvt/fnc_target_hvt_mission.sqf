@@ -99,6 +99,8 @@ private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "disp
 private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hvtcopy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // One line of vehicles seated ON the precomputed drive route: fnc_convoy_slots spaces one road-facing slot
 // per vehicle along it, so the hulls form a real column on the path they will drive, not a scatter. Route
