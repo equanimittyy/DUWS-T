@@ -10,9 +10,6 @@ params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2",
 if (_object getVariable ["DUWS_laptop_paid", false]) exitWith {};
 _object setVariable ["DUWS_laptop_paid", true];
 
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
-
 // setObjectTexture is local, so the dead screen only ever showed for the player who did the
 // hacking; everyone else kept looking at a live laptop on a finished mission. The global form
 // runs on the server, which owns the object. The loop this replaces only ever set index 0.
@@ -26,21 +23,12 @@ if (count getObjectTextures _object > 0) then {
 // implicitly, and the laptop outlives the hack.
 remoteExec ["", format ["sabotage_action_%1", netId _object]];
 
-[localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_laptopdone"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_markername2] call fnc_missionMarkerClear;
+// Cross markers are raw createMarker names, cleared by hand; the ellipse, the win line, the task state,
+// the reward and slot release go through finish. Disposal of the laptop, table, pallet and camo net
+// rides on the composition key (fnc_duws_keep at spawn -> fnc_duws_disposeAfter on release in
+// fnc_mission_end), so the props leave on the keep-radius clock rather than vanishing in a player's face.
 { deleteMarker _x } forEach _crossMarkers;
-
-[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-
-
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-// Disposal of the laptop, table, pallet and camo net rides on this composition key: they are
-// filed under it by fnc_duws_keep at spawn, and release hands each one to fnc_duws_disposeAfter.
-// The hand-rolled sweep this replaces ran a second timer in the hacker's scheduler, so it was
-// lost on disconnect, and it deleted by class and radius without the keep-radius the disposal
-// path respects -- which meant the props could vanish in front of a player still standing there.
-[_targetPos,_radius, "mission_sabotage_laptop"] call fnc_mission_end;
+[_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetPos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_laptopdone"], true, "mission_sabotage_laptop", false, false] call fnc_mission_finish;

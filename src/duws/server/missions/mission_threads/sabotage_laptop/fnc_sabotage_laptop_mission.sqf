@@ -28,11 +28,10 @@ private _laptopBldg = selectRandom _bldgs;
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
 
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the spawn-up below runs for tens of seconds.
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+// Marker + task before the spawn-up (tens of seconds); the brief below stays manual (fixed speaker,
+// pre-localised, no callsign substitution).
 private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, "download"] call fnc_mission_present;
 
 // Brief opens the mission, before the building/laptop spawn-up below (tens of seconds): the spawn must
 // not delay the opening line. Speaker and message are fixed strings, independent of the spawned sites.
@@ -222,12 +221,14 @@ sleep 5; // let the patrols finish spawning
 
 // Success comes through the laptop's addAction, not a wait here, so the deadline runs on a watcher:
 // fail the mission if the clock runs out while it is still live (slot shut, token unadvanced).
-[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers] spawn {
-    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses"];
+[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name] spawn {
+    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name"];
     private _token = DUWS_mission_token;
     waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
     if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
+        // Cross markers are raw createMarker names, cleared by hand; the ellipse and the timeout notice
+        // route through finish (line [], FAILED, notify true).
         { deleteMarker _x } forEach _crosses;
-        [_taskId, _marker, "mission_sabotage_laptop", _tpos, _radius, false] call fnc_mission_deadline_fail;
+        [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], [], false, "mission_sabotage_laptop", false, true] call fnc_mission_finish;
     };
 };
