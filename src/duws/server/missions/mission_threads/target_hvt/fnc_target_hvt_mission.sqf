@@ -10,8 +10,6 @@
 params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-private _cpreward = DUWS_curReward select 0;
-private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
 // Destination: the OPFOR-held haven the convoys flee to, from the spawn via fnc_hvt_dest_pick (nearest held
@@ -483,17 +481,11 @@ if (_hvtMarker != "") then { deleteMarker _hvtMarker };
 deleteMarker _destMarker;
 
 if (_outcome == "WIN") then {
-    [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_hvtend"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
-    sleep 1;
-    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+    [_mission_name, _taskId, "SUCCEEDED", _destPos, _radius, [], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hvtend"], true] call fnc_mission_finish;
 } else {
+    // ESCAPED speaks its own hint (the haven the HVT reached); TIMEOUT falls back to finish's generic notice.
     if (_outcome == "ESCAPED") then {
         [[_destName], { params ["_z"]; hint format [localize "STR_DUWS_T_HVT_CONVOY_ESCAPED", _z] }] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
-    } else {
-        call fnc_mission_timeout_notice;
     };
-    [_taskId, "FAILED"] call fnc_missionTaskEnd;
+    [_mission_name, _taskId, "FAILED", _destPos, _radius, [], [], false, "", false, (_outcome != "ESCAPED")] call fnc_mission_finish;
 };
-
-[_destPos, _radius] call fnc_mission_end;
