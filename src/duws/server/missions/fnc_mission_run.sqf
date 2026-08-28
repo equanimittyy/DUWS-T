@@ -34,7 +34,7 @@
 //                   Each line is callsign-substituted (fnc_cs), so a brief may name Alpha 1-1.
 //   _endLine  array optional [speakerKey,msgKey] -- success line, callsign-substituted via fnc_cs
 //   _failLine array optional [speakerKey,msgKey] -- timeout fail line, replaces the generic notice
-//   _compKey  str   optional composition key handed to fnc_mission_end / _deadline_fail for teardown
+//   _compKey  str   optional composition key handed to fnc_mission_finish for teardown
 //   _sweep    bool  optional, forwarded to teardown
 //   _onWin    code  optional handles -> void. Post-success side effects that are not standard
 //                   teardown (a cook-off, a client-side conversion), run after the task is set
@@ -57,72 +57,41 @@ private _site = [_MissionPos, _radius, _index] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// Marked before anything is built: the ellipse and the task are the only things telling the player
-// where the objective is, and the build below can run for tens of seconds.
-private _marker = [_randomPos, _radius] call fnc_missionMarkerData;
+// Marker, task and brief before the build, which can run for tens of seconds: the marker and task are
+// the only things telling the player where to go, and the brief must open before the guard-force spawn
+// delays it. fnc_mission_present owns that ordering; the task id stays here, stamped from the rounded
+// mission position so it is unique per instance.
 private _taskId = format ["%1%2%3", _idPrefix, round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, localize _descKey, _mission_name, _randomPos, _taskType] call fnc_missionTaskCreate;
-
-// Nearest named settlement to the marker, for the "marked near <place>" briefs.
-private _place = [_randomPos] call fnc_place_name;
-
-// Brief before the build, not after: the build's spawns cost seconds of engine time, and playing the
-// intro after them left the player watching a silent marker until the guard force finished spawning.
-// The brief reads only _place (from _randomPos), never the build's handles, so it is free to run first.
-{
-    _x params ["_spk", "_msg", ["_delay", 0]];
-    [localize _spk, [format [localize _msg, _place]] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    if (_delay > 0) then { sleep _delay };
-} forEach _brief;
+private _marker = [_randomPos, _radius, _taskId, localize _descKey, _mission_name, _taskType, _brief] call fnc_mission_present;
 
 private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
-// Build-time abort: the objective could not be stood up, so fail cleanly rather than let an empty
-// handle set win the mission on the first poll. Same teardown as a timeout, minus the spoken line. The
-// brief has already played by here; a build that aborts is a rare broken-faction edge (no target group
-// raised), accepted so the common path speaks immediately rather than after the spawn.
+// Build-time abort: the objective could not be stood up (a rare broken-faction edge, no target group
+// raised), so fail rather than let an empty handle set win on the first poll. The brief has already
+// played, so the abort speaks nothing (_notify false) -- same teardown as a timeout, minus the line.
 if (_handles isEqualTo "ABORT") exitWith {
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos, _radius, _compKey, _sweep] call fnc_mission_end;
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, _compKey, _sweep, false] call fnc_mission_finish;
 };
 if (isNil "_handles") then { _handles = [] };
 
 sleep 5; // let the patrols the build spawned finish arriving before the win poll starts
 
 private _deadline = DUWS_curDeadlineAt;
-
 waitUntil {
     sleep 2;
     (_handles call _done) || (_lost findIf { _handles call (_x select 0) } >= 0) || time > _deadline
 };
 
-// Early-lose before the win: speak the tripped path's line, fail the task, tear down. Win is checked
-// first (a mission with a _lost makes _done require the prize intact, so the two are exclusive), and
-// the loss is ranked ahead of the timeout so a prize destroyed as the clock runs out reads as
-// destroyed, not merely out of time. exitWith is kept at the script's own scope -- nested inside a
-// then/if it would exit only that block, not the thread.
+// Loss ranked ahead of the timeout so a prize destroyed as the clock runs out reads as destroyed, not
+// merely out of time; a mission with a _lost makes _done require the prize intact, so win and loss are
+// mutually exclusive. exitWith stays at the thread's scope -- nested in a then block it would exit only
+// that block, not the thread.
 private _lostIdx = _lost findIf { _handles call (_x select 0) };
 if (!(_handles call _done) && _lostIdx >= 0) exitWith {
-    (_lost select _lostIdx select 1) params ["_spk", "_msg"];
-    [localize _spk, [localize _msg] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, "FAILED"] call fnc_missionTaskEnd;
-    [_targetpos, _radius, _compKey, _sweep] call fnc_mission_end;
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], (_lost select _lostIdx) select 1, false, _compKey, _sweep, false] call fnc_mission_finish;
 };
 
 if (!(_handles call _done) && time > _deadline) exitWith {
-    [_taskId, _marker, _compKey, _targetpos, _radius, _sweep, _failLine] call fnc_mission_deadline_fail;
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], _failLine, false, _compKey, _sweep, true] call fnc_mission_finish;
 };
 
-if (!(_endLine isEqualTo [])) then {
-    _endLine params ["_spk", "_msg"];
-    [localize _spk, [localize _msg] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-};
-[_marker] call fnc_missionMarkerClear;
-[_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
-_handles call _onWin;
-
-sleep 1;
-
-[DUWS_curReward select 0, DUWS_curReward select 1, _mission_name] spawn fnc_mission_reward;
-[_targetpos, _radius, _compKey, _sweep] call fnc_mission_end;
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], _endLine, true, _compKey, _sweep, false, _onWin, _handles] call fnc_mission_finish;
