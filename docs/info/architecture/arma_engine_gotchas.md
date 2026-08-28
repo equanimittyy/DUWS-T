@@ -72,12 +72,15 @@ append-only](#the-jip-queue-is-append-only-unless-the-message-carries-an-id-you-
 must exist on each machine — compile it in `client_init.sqf`, which the server runs too, not in a
 server-only file.
 
-**How to apply:** hang the local source in the parent's `effects` array
-(`_p setVariable ["effects", (_p getVariable ["effects", []]) + [_src]]`). The engine deletes every
-object in a parent's `effects` array when that parent is deleted, so a per-client source reaps itself
-on its own machine when the shared parent is binned — the same free teardown a config emitter object
-gets, and the only one available here: `fnc_duws_keep` tracks global composition members and would
-never see a machine-local source. The patrol-camp beacon (`fnc_camp_smoke.sqf`) is built this way.
+**How to apply:** delete the source explicitly on each machine when its parent goes; there is no free
+teardown. Deleting an object only *detaches* its `attachTo` children, it does not delete them, so a
+source left to the engine keeps smoking from wherever the binned parent last stood. The `effects`-array
+convention (`_p setVariable ["effects", …]`) does not rescue it: no reaper deletes a machine-local
+source when its shared parent is removed over the network. `fnc_duws_keep` is no help either — it tracks
+global composition members and never sees a machine-local source. Instead have each machine watch its own
+parent reference and delete its own source once the parent is null (`waitUntil { isNull _parent };
+deleteVehicle _src`): `isNull` flips true wherever the parent is binned, host or client, so every machine
+reaps its own source exactly once. The patrol-camp beacon (`fnc_camp_smoke.sqf`) is built this way.
 
 ## Non-serializable handles must not live in the mission namespace
 

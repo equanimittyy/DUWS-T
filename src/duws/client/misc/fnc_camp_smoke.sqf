@@ -7,10 +7,12 @@
 // because its emitters live in config and each client runs them off the shared object; the trade for the
 // column we want is that each machine builds its own.
 //
-// Cleanup rides the fire: the source is hung in the fire object's `effects` array, and the engine deletes
-// every object in a parent's effects array when that parent is deleted. The campfire is a kept composition
-// member, so when the camp is retired and the fire binned on every machine, the column goes with it on every
-// machine -- no separate teardown, and none possible through fnc_duws_keep, which tracks global members only.
+// Cleanup rides the fire, but explicitly. The source is attachTo'd to the global fire, and deleting an object
+// only detaches its attached children -- it does not delete them -- so a source left to the engine keeps
+// smoking from wherever the binned fire last stood. Storing it in the fire's `effects` array does not save
+// this either: no reaper deletes a machine-local source when its shared parent is removed over the network.
+// So each machine watches its own fire reference and deletes its own source once the fire is gone. isNull
+// flips true wherever the fire is binned, host or client, so every machine reaps its own column, once.
 params ["_fire"];
 // A JIP joiner whose message arrives after the camp was retired has no fire to stand smoke on.
 if (isNull _fire) exitWith {};
@@ -18,4 +20,9 @@ if (isNull _fire) exitWith {};
 private _smoke = "#particlesource" createVehicleLocal getPosATL _fire;
 _smoke setParticleClass "MediumDestructionSmoke";
 _smoke attachTo [_fire, [0, 0, 0.3]];
-_fire setVariable ["effects", (_fire getVariable ["effects", []]) + [_smoke]];
+
+[_fire, _smoke] spawn {
+    params ["_fire", "_smoke"];
+    waitUntil { sleep 2; isNull _fire };
+    deleteVehicle _smoke;
+};
