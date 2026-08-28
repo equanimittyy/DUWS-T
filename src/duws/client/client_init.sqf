@@ -13,6 +13,9 @@ publicVariable "fnc_hirePartisans_clientMap";
 // Defines DUWS_fnc_arsenal_countFor / _paintCounts (arsenal item-count overlay); the enforcer loop
 // in initPlayerLocal.sqf calls the painter each tick while the arsenal is open.
 [] call compile preprocessFileLineNumbers "duws\client\misc\fnc_arsenal_counts.sqf";
+// Per-client beacon builder for the patrol-camp mission; the server remoteExecs it to stand a wood-smoke
+// column on each camp's fire (a #particlesource must be built locally on every machine, see the file).
+DUWS_fnc_campSmoke = compile preprocessFileLineNumbers "duws\client\misc\fnc_camp_smoke.sqf";
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // BLACK SCREEN
 titleCut ["", "BLACK FADED", 999];

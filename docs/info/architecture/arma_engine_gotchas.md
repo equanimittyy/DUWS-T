@@ -55,6 +55,30 @@ quiet where a collision is neither. Eviction is right only when the later entry 
 supersede the earlier (a corpse entry replacing a spent live-body search). A transient message (a
 one-off OSD or hint) should not be queued at all.
 
+## A scripted `#particlesource` renders only where it was set, unlike a config smoke object
+
+**A particle source built by script — `"#particlesource" createVehicle` then `setParticleClass` /
+`setParticleParams` — is a local visual: the emitter exists only on the machine that ran those
+commands. Spawn one server-side and the smoke shows on the host alone; remote and JIP clients see
+nothing. A config-backed emitter object (`test_EmptyObjectForSmoke`, `test_EmptyObjectForFireBig`) is
+the opposite — one global `createVehicle` renders on every client, because its emitter lives in config
+and each machine runs it off the shared object.**
+
+The trade is look for locality: the config helpers are a fixed few (a big black/oily column, a big
+fire), so a different column — taller, greyer, medium — means a scripted source, which then has to be
+built on every machine. `remoteExec` the builder to all present clients and key its JIP entry to the
+parent object so a late joiner rebuilds it while the parent stands (see [§The JIP queue is
+append-only](#the-jip-queue-is-append-only-unless-the-message-carries-an-id-you-choose)). The builder
+must exist on each machine — compile it in `client_init.sqf`, which the server runs too, not in a
+server-only file.
+
+**How to apply:** hang the local source in the parent's `effects` array
+(`_p setVariable ["effects", (_p getVariable ["effects", []]) + [_src]]`). The engine deletes every
+object in a parent's `effects` array when that parent is deleted, so a per-client source reaps itself
+on its own machine when the shared parent is binned — the same free teardown a config emitter object
+gets, and the only one available here: `fnc_duws_keep` tracks global composition members and would
+never see a machine-local source. The patrol-camp beacon (`fnc_camp_smoke.sqf`) is built this way.
+
 ## Non-serializable handles must not live in the mission namespace
 
 **Never store a `DISPLAY`, `CONTROL`, `SCRIPT`, `LOCATION`, or other handle type in a

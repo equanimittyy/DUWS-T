@@ -63,16 +63,17 @@ private _build = {
         // --DUWS-COMPOSITION END--
         private _props = [_staticsArray, [_cx, _cy], "mission_patrol_camp", [0, [], []]] call fnc_composition_place;
 
-        // Stand a smoke column on the campfire as the beacon. inflame would light only campfire-class props and
-        // gives a weak, low wisp; a base-game smoke-particle source is far taller, reads from across the zone,
-        // and renders on every client. Attached to the fire so it rides it, kept for cleanup with the camp.
+        // Stand a medium wood-smoke column on the campfire as the beacon. inflame would light only
+        // campfire-class props and gives a weak, low wisp; this reads from across the zone. Built per client
+        // (DUWS_fnc_campSmoke) rather than as one global object: the taller look needs a #particlesource,
+        // which carries no config and so must have its emitter set locally on each machine. Sent to every
+        // present client, and JIP-tied to the fire object so a late joiner gets the column while the camp
+        // stands but not after it is retired (the fire is then gone). The source self-cleans with the fire.
         private _fireIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_Campfire_F" };
         if (_fireIdx >= 0) then {
             private _fire = _props param [_fireIdx, objNull];
             if (!isNull _fire) then {
-                private _smoke = createVehicle ["test_EmptyObjectForSmoke", getPosATL _fire, [], 0, "CAN_COLLIDE"];
-                _smoke attachTo [_fire, [0, 0, 0.3]];
-                [_smoke, "mission_patrol_camp"] call fnc_duws_keep;
+                [_fire] remoteExec ["DUWS_fnc_campSmoke", [0, -2] select isDedicated, _fire];
             };
         };
 
