@@ -83,6 +83,6 @@ private _spec = [
     { (_this findIf { alive _x }) < 0 },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolletsdothis", 8]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolend"],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolfail"]
+    []
 ];
 [_MissionPos, _mission_name, _spec] call fnc_mission_run;

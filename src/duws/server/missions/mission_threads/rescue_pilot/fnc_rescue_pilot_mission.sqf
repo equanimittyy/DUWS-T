@@ -512,7 +512,6 @@ if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 50 && time > _deadline) exit
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     [_markername2] call fnc_missionMarkerClear;
-    // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
     call fnc_mission_timeout_notice;
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;

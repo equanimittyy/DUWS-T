@@ -212,6 +212,6 @@ if (_outcome isEqualTo "WIN") then {
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
     [_taskID, "FAILED"] call fnc_missionTaskEnd;
-    [localize "STR_DUWS_T_RECON_OBSERVE_FAILED", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+    call fnc_mission_timeout_notice;
     [_overwatch, _radius, ""] call fnc_mission_end;
 };

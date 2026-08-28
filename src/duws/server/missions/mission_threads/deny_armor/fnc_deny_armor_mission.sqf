@@ -310,7 +310,7 @@ while { true } do {
 
     if (time > _deadline) exitWith {
         ["FAILED"] call _finish;
-        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail_time"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+        call fnc_mission_timeout_notice;
     };
 
     // Terminal fail: the repaired tank reaches its home zone with a live enemy crew aboard. Kept a

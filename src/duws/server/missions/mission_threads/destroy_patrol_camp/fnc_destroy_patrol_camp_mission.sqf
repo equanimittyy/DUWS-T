@@ -145,7 +145,7 @@ private _spec = [
     _build,
     { ({alive _x} count _this) == 0 },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]],
-    [],
+    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_patrolcampend"],
     [],
     "mission_patrol_camp"
 ];

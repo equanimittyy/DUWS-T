@@ -61,7 +61,7 @@ private _spec = [
     { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 },
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_builderspot", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_buildertask", 0]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderdeadline"],
+    [],
     "mission_steal_builder",
     false,
     _onWin,

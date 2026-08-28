@@ -489,7 +489,7 @@ if (_outcome == "WIN") then {
     if (_outcome == "ESCAPED") then {
         [[_destName], { params ["_z"]; hint format [localize "STR_DUWS_T_HVT_CONVOY_ESCAPED", _z] }] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     } else {
-        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_HVT_CONVOY_TIMEOUT"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+        call fnc_mission_timeout_notice;
     };
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
 };

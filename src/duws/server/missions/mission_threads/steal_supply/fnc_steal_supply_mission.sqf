@@ -66,7 +66,7 @@ private _spec = [
     { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 },
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 0]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckwin"],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckfail"],
+    [],
     "mission_steal_supply",
     false,
     _onWin,

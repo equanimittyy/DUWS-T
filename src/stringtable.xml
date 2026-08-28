@@ -3024,10 +3024,6 @@
                 <Original>The high-value target reached %1. Mission failed.</Original>
                 <English>The high-value target reached %1. Mission failed.</English>
             </Key>
-            <Key ID="STR_DUWS_T_HVT_CONVOY_TIMEOUT">
-                <Original>Alpha 1-1, we're out of time. The high-value target got away. Mission failed.</Original>
-                <English>Alpha 1-1, we're out of time. The high-value target got away. Mission failed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DESC">
                 <Original>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</Original>
                 <English>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</English>
@@ -3047,10 +3043,6 @@
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BONUS">
                 <Original>We've got intel on more enemy positions in the area. They're now marked on your map too.</Original>
                 <English>We've got intel on more enemy positions in the area. They're now marked on your map too.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_RECON_OBSERVE_FAILED">
-                <Original>The recon timed out. Mission failed.</Original>
-                <English>The recon timed out. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_RAISE">
                 <Original>Raise binoculars</Original>
@@ -4043,10 +4035,6 @@
                 <Original>To Alpha 1-1, that patrol's wiped out. Every vehicle confirmed destroyed. Good work.</Original>
                 <English>To Alpha 1-1, that patrol's wiped out. Every vehicle confirmed destroyed. Good work.</English>
             </Key>
-            <Key ID="STR_DUWS_T_armorfail">
-                <Original>Alpha 1-1, we're out of time. We've missed our window of opportunity. Mission failed.</Original>
-                <English>Alpha 1-1, we're out of time. We've missed our window of opportunity. Mission failed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_armornote">
                 <Original>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</Original>
                 <English>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</English>
@@ -4087,10 +4075,6 @@
                 <Original>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</Original>
                 <English>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</English>
             </Key>
-            <Key ID="STR_DUWS_T_destroyarmour_fail_time">
-                <Original>Alpha 1-1, we're out of time and the enemy have recovered their armor.</Original>
-                <English>Alpha 1-1, we're out of time and the enemy have recovered their armor.</English>
-            </Key>
             <Key ID="STR_DUWS_T_radarend">
                 <German>"Overlord 1-1" an Action Squad, Radar zerstört – bestätigt. Gute Arbeit.</German>
                 <Spanish>"Overlord 1-1" a Action Squad, radar destruido, confirmado. Muy bien hecho.</Spanish>
@@ -4122,10 +4106,6 @@
             <Key ID="STR_DUWS_T_laptopdone">
                 <Original>Alpha 1-1, good work sabotaging the enemy laptop. Out.</Original>
                 <English>Alpha 1-1, good work sabotaging the enemy laptop. Out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_laptopfail">
-                <Original>Alpha 1-1, we're out of time. The enemy has relocated the asset.</Original>
-                <English>Alpha 1-1, we're out of time. The enemy has relocated the asset.</English>
             </Key>
             <Key ID="STR_DUWS_T_RIGGED_DECOY_TITLE">
                 <Original>Rigged Decoy</Original>
@@ -4206,10 +4186,6 @@
                 <Original>To Alpha 1-1, the vehicle's a total loss, abort tasking.</Original>
                 <English>To Alpha 1-1, the vehicle's a total loss, abort tasking.</English>
             </Key>
-            <Key ID="STR_DUWS_T_builderdeadline">
-                <Original>To Alpha 1-1, the enemy's recovered the vehicle, abort tasking.</Original>
-                <English>To Alpha 1-1, the enemy's recovered the vehicle, abort tasking.</English>
-            </Key>
             <Key ID="STR_DUWS_T_cacheletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Aufklärer haben gerade das feindliche Arsenal lokalisiert. Ihr wisst, was zu tun ist.</German>
                 <Spanish>Este es "Imperador 1-1". Los exploradores han localizado recientemente el arsenal enemigo. Saben lo que tienen que hacer.</Spanish>
@@ -4223,6 +4199,10 @@
                 <Chinesesimp>行动组收到，准备前往目标地点。</Chinesesimp>
                 <Original>Copy. Moving to the objective.</Original>
                 <English>Copy. Moving to the objective.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_cacheend">
+                <Original>To Alpha 1-1, Allseer confirms the ammunition cache is destroyed. Good work. Overlord out.</Original>
+                <English>To Alpha 1-1, Allseer confirms the ammunition cache is destroyed. Good work. Overlord out.</English>
             </Key>
             <Key ID="STR_DUWS_T_hvtletsdothis">
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
@@ -4265,10 +4245,6 @@
                 <Original>To Alpha 1-1, Allseer confirms the enemy sniper element has been eliminated. Good work.</Original>
                 <English>To Alpha 1-1, Allseer confirms the enemy sniper element has been eliminated. Good work.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sniperfail">
-                <Original>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</Original>
-                <English>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_RECON_PATROL_DESC">
                 <Original>Allseer has tracked an enemy recon patrol working this area. Kill them all.</Original>
                 <English>Allseer has tracked an enemy recon patrol working this area. Kill them all.</English>
@@ -4285,6 +4261,10 @@
                 <Original>Copy that Overlord, moving to clear them out.</Original>
                 <English>Copy that Overlord, moving to clear them out.</English>
             </Key>
+            <Key ID="STR_DUWS_T_patrolcampend">
+                <Original>All enemy camps have been cleared. Good work Alpha 1-1, RTB.</Original>
+                <English>All enemy camps have been cleared. Good work Alpha 1-1, RTB.</English>
+            </Key>
             <Key ID="STR_DUWS_T_reconpatrolletsdothis">
                 <Original>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</Original>
                 <English>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</English>
@@ -4292,10 +4272,6 @@
             <Key ID="STR_DUWS_T_reconpatrolend">
                 <Original>To Alpha 1-1, Allseer confirms the enemy recon patrol has been eliminated. Good work.</Original>
                 <English>To Alpha 1-1, Allseer confirms the enemy recon patrol has been eliminated. Good work.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_reconpatrolfail">
-                <Original>Alpha 1-1, we're out of time. Allseer's lost the recon patrol. Mission failed.</Original>
-                <English>Alpha 1-1, we're out of time. Allseer's lost the recon patrol. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot">
                 <German>Flieger</German>
@@ -4366,13 +4342,6 @@
                 <Original>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</Original>
                 <English>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</English>
             </Key>
-            <Key ID="STR_DUWS_T_towerfail">
-                <German>"Overlord 1-1" an Action Squad, verlasse das AO! Der Feind hat unsere Kommunikation gekapert!</German>
-                <Spanish>"Overlord 1-1" al Action Squad, retirese del AO! El enemigo ha interceptado nuestras comunicaciones!</Spanish>
-                <Chinesesimp>行动组，撤出行动区域！敌人已经截获了我们的信号！</Chinesesimp>
-                <Original>To Alpha 1-1, the radio tower is still standing and we're out of time. Disengage and RTB.</Original>
-                <English>To Alpha 1-1, the radio tower is still standing and we're out of time. Disengage and RTB.</English>
-            </Key>
             <Key ID="STR_DUWS_T_towerclose">
                 <Original>To Alpha 1-1, the radio tower is down and enemy comms with it. Good work. Overlord out.</Original>
                 <English>To Alpha 1-1, the radio tower is down and enemy comms with it. Good work. Overlord out.</English>
@@ -4391,10 +4360,6 @@
             <Key ID="STR_DUWS_T_hardpointoverlord">
                 <Original>To Alpha 1-1, there's an enemy strongpoint holding at the marked grid. Move in and destroy it.</Original>
                 <English>To Alpha 1-1, there's an enemy strongpoint holding at the marked grid. Move in and destroy it.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_hardpointfail">
-                <Original>To Alpha 1-1, that strongpoint's still holding and we're out of time. Disengage and RTB.</Original>
-                <English>To Alpha 1-1, that strongpoint's still holding and we're out of time. Disengage and RTB.</English>
             </Key>
             <Key ID="STR_DUWS_T_hardpointclose">
                 <Original>To Alpha 1-1, the strongpoint's been destroyed. Good work. Overlord out.</Original>

@@ -53,7 +53,7 @@ waitUntil {
 };
 
 if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && time > _deadline) exitWith {
-    [_VARtaskgeneratedName, _markername2, "", _hpPos, _radius, false, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hardpointfail"]] call fnc_mission_deadline_fail;
+    [_VARtaskgeneratedName, _markername2, "", _hpPos, _radius, false] call fnc_mission_deadline_fail;
 };
 
 [_markername2] call fnc_missionMarkerClear;
