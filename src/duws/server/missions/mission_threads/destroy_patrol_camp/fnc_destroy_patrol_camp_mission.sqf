@@ -77,38 +77,36 @@ private _build = {
             };
         };
 
-        // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items. Seated like the laptop
-        // objective (sabotage_laptop) -- freeze the table into a static, level surface and rest each item
-        // base-flush on its measured top -- with one difference the loot requires: the item is left GLOBALLY
-        // simulated, not frozen. A frozen ground holder cannot be looted; simulated (the state fnc_search_dropItems
-        // leaves its drops in) it stays lootable and CP-bearing, and the frozen table under it is a solid surface
-        // it settles onto rather than sliding off. Only the table is frozen; the campfire stays simulated so it
-        // keeps burning. Items drawn from the shared document pool.
+        // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items, drawn from the shared
+        // document pool. Spawned in the world and left to physics rather than seated on a measured surface --
+        // each item is dropped a metre over the table and settles onto the top on its own. Everything stays
+        // simulated (createVehicle's default): fnc_intelAnalysis takes these from the player's inventory, so a
+        // frozen holder would lose its pickup, and the table has to stay a live body under them. Damage is
+        // switched off once settled so stray patrol fire near the camp cannot destroy the loot or the table.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
-            // Settle onto terrain before freezing, as the laptop's tables settle onto the floor.
+            // Let the table settle on the terrain before dropping loot onto it.
             sleep 1;
-            _table setVectorUp [0, 0, 1];
-            _table enableSimulationGlobal false;
-            _table allowDamage false;
             private _tPos = getPosATL _table;
-            private _topZ = (_tPos select 2) + (boundingBoxReal _table select 1 select 2);
+            private _items = [];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
                     private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
-                    private _item = createVehicle [_cls, _tPos, [], 0, "CAN_COLLIDE"];
-                    private _base = (boundingBoxReal _item select 0) select 2;
-                    _item setPosATL [(_tPos select 0) + (0.25 * (_i - 1)), _tPos select 1, _topZ + 0.05 - _base];
-                    // Global, not local: the item must fall the last finger onto the table and be lootable on
-                    // every client, so the settle cannot be a server-only simulation the clients never see.
-                    _item enableSimulationGlobal true;
-                    // fnc_duws_keep stamps `persistent`, which fnc_repetitive_cleanup never reaps -- so an
-                    // unlooted item is safe from the GC for the whole mission (a WeaponHolderSimulated on a table
-                    // far from any player is otherwise litter). fnc_mission_end releases the key to delete it.
-                    [_item, "mission_patrol_camp"] call fnc_duws_keep;
+                    _items pushBack (createVehicle [_cls,
+                        [(_tPos select 0) + (0.2 * (_i - 1)), _tPos select 1, (_tPos select 2) + 1], [], 0, "CAN_COLLIDE"]);
                 };
             };
+            // Let the items rest, then lock down: damage off, simulation left on. fnc_duws_keep stamps
+            // `persistent`, which fnc_repetitive_cleanup never reaps, so an unlooted item survives the GC until
+            // fnc_mission_end releases the key. The table needs no keep here -- fnc_composition_place already
+            // filed it under this key when it placed it.
+            sleep 1;
+            _table allowDamage false;
+            {
+                _x allowDamage false;
+                [_x, "mission_patrol_camp"] call fnc_duws_keep;
+            } forEach _items;
         };
 
         // The camp's guard team: close patrol centred on this camp. This is the objective -- all camp teams
