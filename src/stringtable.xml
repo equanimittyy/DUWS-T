@@ -3117,8 +3117,8 @@
                 <English>&lt;br /&gt;You have until %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_deadline_fail">
-                <Original>Alpha 1-1, we're out of time. Mission is a failure.</Original>
-                <English>Alpha 1-1, we're out of time. Mission is a failure.</English>
+                <Original>Alpha 1-1, we're out of time. Mission failed.</Original>
+                <English>Alpha 1-1, we're out of time. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_ACTION">
                 <Original>Analyse Intel</Original>
