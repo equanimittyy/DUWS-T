@@ -151,12 +151,11 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     // case: an offer never engaged fails and frees the slot rather than waiting on the trigger forever.
     waitUntil { sleep 1; (missionNamespace getVariable [format ["%1_started", _taskID], false]) || time > _deadline };
     if (time > _deadline && !(missionNamespace getVariable [format ["%1_started", _taskID], false])) exitWith {
-        [_taskID, "FAILED"] call fnc_missionTaskEnd;
+        // The informant marker is a raw createMarker (unwrapped name), so it is cleared by hand; only
+        // the missionMarkerData ellipse routes through finish.
         if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
-        if (!isNil "_areaMarker" && {_areaMarker != ""}) then { [_areaMarker] call fnc_missionMarkerClear; };
         // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
-        call fnc_mission_timeout_notice;
-        [_targetPos, _radius, "", true] call fnc_mission_end;
+        ["Protect Civilian", _taskID, "FAILED", _targetPos, _radius, [_areaMarker], [], false, "", true, true] call fnc_mission_finish;
     };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _taskID], time];
 
@@ -173,8 +172,8 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     Mission_Active = false;
     publicVariable "Mission_Active";
 
+    private _status = "FAILED";
     if (!alive _civ) then {
-        [_taskID, "FAILED"] call fnc_missionTaskEnd;
         // Reputation is a civilian-system currency: skip its change when off. Charged against
         // the town the escorted civilian belonged to, falling back to the global outside one.
         if (CIV_PRESENCE != "NONE") then {
@@ -183,27 +182,21 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         ["alert", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
     } else {
+            _status = "SUCCEEDED";
             _speakeracteam  = localize "STR_DUWS_T_actionteam";
             _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
             sleep 8;
-            [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
-
             [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {
                 [_civ getVariable ["civ_locIndex", -1], _rep, "protect_civ_success"] call fnc_town_rep_adjust;
             };
     };
 
-
-    if (!isNil "_civMarker" && {_civMarker != ""}) then {
-        deleteMarker _civMarker;
-    };
-    if (!isNil "_areaMarker" && {_areaMarker != ""}) then {
-        [_areaMarker] call fnc_missionMarkerClear;
-    };
-
-    [_targetPos, _radius, "", true] call fnc_mission_end;
+    // Informant marker cleared by hand (raw createMarker name); the ellipse and the rest of teardown
+    // go through finish. Reward is already paid inline above on the success branch, so pay is false.
+    if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
+    ["Protect Civilian", _taskID, _status, _targetPos, _radius, [_areaMarker], [], false, "", true, false] call fnc_mission_finish;
 };
 
 [_targetpos, _spawnDist, _civilian, _VARtaskgeneratedName] spawn {

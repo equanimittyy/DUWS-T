@@ -23,8 +23,6 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 private _compKey = "mission_rescue_squad";
 private _radius = 300;
-private _cpreward = DUWS_curReward select 0;
-private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
 // The elite BLUFOR squad, raised first so the building check can be sized to it: from the "recon"
@@ -60,11 +58,10 @@ private _BuildingPos = getPos _Building;
 // sit up to SEARCH_R off the offer point -- so it names the squad's ground, not the offer's.
 private _place = [_BuildingPos] call fnc_place_name;
 
-// Marked on the building itself, not the offer point: the building can sit up to SEARCH_R away, and
-// the ellipse and the task are the only things pointing the player at the objective.
-private _marker = [_BuildingPos, _radius] call fnc_missionMarkerData;
+// Marked on the building itself, not the offer point (it can sit up to SEARCH_R away). Marker + task
+// via fnc_mission_present; the brief below stays manual (fixed speakers, no callsign substitution).
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, _BuildingPos, "help"] call fnc_missionTaskCreate;
+private _marker = [_BuildingPos, _radius, _taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, "help"] call fnc_mission_present;
 
 // Brief opens the mission, before the squad/cordon spawn below: those spawns cost seconds and must not
 // delay the opening line. Signal calls it in, Overlord confirms 8s on; neither reads the spawned units.
@@ -298,11 +295,8 @@ waitUntil {
 
 if (((_cordonUnits findIf {alive _x}) >= 0) || {(_squadUnits findIf {alive _x}) < 0}) exitWith {
     DUWS_rsq_relieved = true;
-    [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_squadfail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, "FAILED"] call fnc_missionTaskEnd;
-    [_BuildingPos, _radius, _compKey] call fnc_mission_end;
+    [_mission_name, _taskId, "FAILED", _BuildingPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_squadfail"], false, _compKey, false, false] call fnc_mission_finish;
 };
 
 DUWS_rsq_relieved = true;
-[_squadUnits, _Building, _marker, _taskId, _BuildingPos, _radius, _compKey, _mission_name, _cpreward, _apreward] call fnc_rescue_squad_success;
+[_squadUnits, _Building, _marker, _taskId, _BuildingPos, _radius, _compKey, _mission_name] call fnc_rescue_squad_success;

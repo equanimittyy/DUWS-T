@@ -9,7 +9,7 @@
 // committed: a crash before the reward is a loss, and a wiped squad is a KIA fail either way. The player
 // and allies are kept off the bird -- any that board while it is down are turned out before it lifts,
 // then cargo is locked for the flight -- so teardown only ever deletes the flight crew and the squad.
-params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name", "_cpreward", "_apreward"];
+params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name"];
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};
 
@@ -78,9 +78,6 @@ _wpIn setWaypointSpeed "FULL";
 // so abort the bird and fail rather than flying an empty LZ run to a false success. The main thread's
 // squad-death fail only reaches up to the cordon breaking -- this carries it through the extraction.
 private _fail = {
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, "FAILED"] call fnc_missionTaskEnd;
-    [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_squadfail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     // No one left to lift. Send the empty bird off and delete it once it is clear of the AO, rather than
     // vanishing it in front of the player. Its LZ run is dropped for a departure leg; a detached watcher
     // deletes it when far (or on a timeout) so this fail path finishes and tears down now. mission_end
@@ -100,7 +97,8 @@ private _fail = {
         };
     };
     if (!isNil "_helipad") then { deleteVehicle _helipad };
-    [_tpos, _radius, _compKey] call fnc_mission_end;
+    // Fail teardown through the shared chokepoint; the empty-bird departure above is bespoke evac cleanup.
+    [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_squadfail"], false, _compKey, false, false] call fnc_mission_finish;
 };
 
 // The evac bird is down, but the fight was already won and the squad is up, so losing the lift is not a
@@ -131,8 +129,6 @@ private _exfilFoot = {
     _wpFoot setWaypointType "MOVE";
     _wpFoot setWaypointSpeed "FULL";
     if (!isNil "_helipad") then { deleteVehicle _helipad };
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
     [] spawn {
         [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacfoot"] remoteExec ["fnc_duws_dialogue", 0];
         sleep 5;
@@ -148,8 +144,7 @@ private _exfilFoot = {
         { deleteVehicle _x } forEach _crew;
         if (!isNull _h) then { deleteVehicle _h };
     };
-    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-    [_tpos, _radius, _compKey] call fnc_mission_end;
+    [_mission_name, _taskId, "SUCCEEDED", _tpos, _radius, [_marker], [], true, _compKey, false, false] call fnc_mission_finish;
 };
 
 private _tApproach = time + 150;
@@ -186,9 +181,6 @@ sleep 10;
 // paid -- is a loss, not an on-foot recovery. Fail rather than pay a squad that went down with the bird.
 if (!alive _heli) exitWith { call _fail };
 
-[_marker] call fnc_missionMarkerClear;
-[_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
-
 // Radio exchange, spawned so the beat between the two lines does not hold up the payout below.
 [] spawn {
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacout"] remoteExec ["fnc_duws_dialogue", 0];
@@ -210,5 +202,4 @@ deleteVehicle _helipad;
     if (!isNull _h) then { deleteVehicle _h };
 };
 
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_tpos, _radius, _compKey] call fnc_mission_end;
+[_mission_name, _taskId, "SUCCEEDED", _tpos, _radius, [_marker], [], true, _compKey, false, false] call fnc_mission_finish;
