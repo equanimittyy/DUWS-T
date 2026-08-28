@@ -11,8 +11,6 @@ if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 
 _radius = 600;
 _deliverDist = 50;
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
 // Town goodwill: handing the aid back lifts the delivery town, losing the truck sours it the same amount.
 // The mission's REP column mirrors the win figure for the briefing line.
 _repWin = 3;
@@ -56,11 +54,10 @@ private _site = [_MissionPos, _radius, 14] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the spawn-up below runs for tens of seconds.
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+// Marker + task before the spawn-up (tens of seconds); the brief below uses pre-localised strings with
+// fixed speakers, so it stays manual rather than riding fnc_mission_present's callsign substitution.
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, _randomPos, "truck"] call fnc_missionTaskCreate;
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, "truck"] call fnc_mission_present;
 
 // Brief opens the mission, before the truck/guard spawn-up below (tens of seconds): the spawn must not
 // delay the opening line. Speakers and messages are fixed strings, independent of the spawned convoy.
@@ -194,23 +191,18 @@ waitUntil {
     (getDammage _truck1 > 0.95) || (_truck1 distance _targetDeliveryPos < _deliverDist) || (time > _deadline)
 };
 
-[_markername2] call fnc_missionMarkerClear;
-
 if (getDammage _truck1 > 0.95) exitWith {
     call _cleanupDelivery;
     _truck1 setDamage 1;
     [_speaker, _messageLost] remoteExec ["fnc_duws_dialogue", 0];
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_townIdx, _repFail, "idap_failed"] call fnc_town_rep_adjust;
-    [_targetpos, _radius, "mission_transport_idap"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, false] call fnc_mission_finish;
 };
 
 if (time > _deadline) exitWith {
     call _cleanupDelivery;
-    call fnc_mission_timeout_notice;
-    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_townIdx, _repFail, "idap_deadline"] call fnc_town_rep_adjust;
-    [_targetpos, _radius, "mission_transport_idap"] call fnc_mission_end;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, true] call fnc_mission_finish;
 };
 
 deleteMarker _deliveryMarkerName;
@@ -220,7 +212,7 @@ deleteMarker _deliveryMarkerName;
 sleep 6;
 [_speaker, _messageClose] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
-[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
+// The handover theatre keeps its own order; the task ticks complete at the end, through finish.
 [_townIdx, _repWin, "idap_success"] call fnc_town_rep_adjust;
 sleep 2;
 deleteVehicle _box2;
@@ -230,5 +222,4 @@ sleep 8;
 deleteVehicle _truck1;
 call _cleanupDelivery;
 
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_targetpos, _radius, "mission_transport_idap", true] call fnc_mission_end;
+[_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_transport_idap", true, false] call fnc_mission_finish;

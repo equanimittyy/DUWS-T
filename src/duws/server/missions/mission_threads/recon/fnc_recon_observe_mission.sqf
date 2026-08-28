@@ -45,8 +45,6 @@ private _target = _pick select 1;
 private _hpKey  = if (_kind isEqualTo "hp") then { _pick select 2 } else { "" };
 
 if (!([12, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
-private _cpreward = DUWS_curReward select 0;
-private _apreward = DUWS_curReward select 1;
 
 // The overwatch. Sample bearings across the friendly-facing arc at 600-800 m and keep the highest one
 // with clear line-of-sight to the target -- terrain (terrainIntersectASL) and structures
@@ -107,10 +105,11 @@ private _zoneOrigRadius = 0;
 
 // Objective marker + task on the OVERWATCH, since that is where the player is sent. The task type only
 // picks the map icon; "scout" falls back to default on any faction pack that lacks it.
+// Marker + task on the OVERWATCH (where the player is sent); the brief below names the target instead,
+// so it stays manual rather than riding fnc_mission_present's place substitution.
 private _radius = OBS_AREA;
-private _markername = [_overwatch, _radius] call fnc_missionMarkerData;
 private _taskID = format ["recon_%1", round time];
-[_taskID, localize "STR_DUWS_T_RECON_OBSERVE_TASK", _mission_name, _overwatch, "scout"] call fnc_missionTaskCreate;
+private _markername = [_overwatch, _radius, _taskID, localize "STR_DUWS_T_RECON_OBSERVE_TASK", _mission_name, "scout"] call fnc_mission_present;
 
 // Mission-owned observe state. DUWS_recon_active is the broadcast switch every client half gates on and
 // the monitor clears at the end; DUWS_recon_done is the win flag the client success report raises.
@@ -167,10 +166,8 @@ DUWS_recon_active = false;
 publicVariable "DUWS_recon_active";
 remoteExec ["", "DUWS_recon_layer_jip"];
 if (_zoneSiteKey isNotEqualTo "") then { ([_zoneSiteKey] call fnc_site_at) set ["radius", _zoneOrigRadius] };
-[_markername] call fnc_missionMarkerClear;
 
 if (_outcome isEqualTo "WIN") then {
-    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
     // The payoff: the scouted position comes up on the strategic map. Quiet reveal -- the line here is the
     // mission's own, not the reveal's AO-wide broadcast. An HP reveals by its key, a zone by pos.
     if (_kind isEqualTo "hp") then { ["ONE", _hpKey, 0, true] call fnc_hardpoint_reveal }
@@ -210,10 +207,7 @@ if (_outcome isEqualTo "WIN") then {
     if (_n > 0) then {
         [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_BONUS"] remoteExec ["fnc_duws_dialogue", 0];
     };
-    [_overwatch, _radius, ""] call fnc_mission_end;
-    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+    [_mission_name, _taskID, "SUCCEEDED", _overwatch, _radius, [_markername], [], true] call fnc_mission_finish;
 } else {
-    [_taskID, "FAILED"] call fnc_missionTaskEnd;
-    call fnc_mission_timeout_notice;
-    [_overwatch, _radius, ""] call fnc_mission_end;
+    [_mission_name, _taskID, "FAILED", _overwatch, _radius, [_markername]] call fnc_mission_finish;
 };
