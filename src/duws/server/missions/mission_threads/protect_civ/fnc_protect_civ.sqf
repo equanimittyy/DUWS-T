@@ -55,16 +55,12 @@ if (count _buildingPositions < 4) then {
     };
 };
 
-// The operation-area ellipse every other thread draws. Sited on _targetpos rather than _randomPos
-// because that is what the start trigger and the end sweep below both use, so all three describe
-// one area. Drawn only once the 4-position rebuild above has settled which building it is.
-_markername2 = [_targetpos, _searchRadius] call fnc_missionMarkerData;
-
-// Task alongside the ellipse, before the civilian exists: sited on _targetpos for the same reason
-// the ellipse is, so the marker, the trigger, the sweep and the task all describe one area. The
-// informant is placed inside that building a few lines down, within metres of this point.
+// Marker + task via fnc_mission_present, sited on _targetpos rather than _randomPos because that is
+// what the start trigger and the end sweep below both use, so all three describe one area. Drawn only
+// once the 4-position rebuild above has settled which building it is; the brief below stays manual
+// (multi-speaker sequence, callsign substitution already applied per line above).
 private _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, _targetpos, "defend"] call fnc_missionTaskCreate;
+_markername2 = [_targetpos, _searchRadius, _VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, "defend"] call fnc_mission_present;
 
 _civilianClass = "C_Man_Fisherman_01_F";
 _civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;

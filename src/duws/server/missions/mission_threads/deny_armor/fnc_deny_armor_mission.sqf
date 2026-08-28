@@ -51,11 +51,11 @@ if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then {
 };
 if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetpos };
 
-// Marked before anything is built: the ellipse and task are all that point the player at the objective
-// while the convoy is still forming up off-screen.
-private _marker = [_randomPos, DA_RADIUS] call fnc_missionMarkerData;
+// Marker + task before the spawn-up: the ellipse and task are all that point the player at the objective
+// while the convoy is still forming up off-screen. The brief below stays manual (Overlord line with a
+// place-name format, no callsign substitution).
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
+private _marker = [_randomPos, DA_RADIUS, _taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, "destroy"] call fnc_mission_present;
 
 // Overlord's brief opens the mission, before the convoy spawn below: the spawn costs seconds and must
 // not delay the opening line. The eyes-on and approach arrow follow once the column is sited (further down).
