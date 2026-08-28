@@ -1,7 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-// Eliminate a roving vehicle patrol: three vehicles of one class, scaled to OPFOR's earned AP tier,
-// lapping a road loop inside the search ring as one column. Win: every crewman across the three dead.
-// The column holds LIMITED until first hit or man down, then drops it and fights.
 params ["_MissionPos", "_mission_name"];
 
 private _build = {
@@ -15,33 +12,27 @@ private _build = {
     if (_vehClass == "") then { _vehClass = opfor_ARMED_CAR1_X; _token = "car" };
     if (_vehClass == "") then { _vehClass = opfor_TRANS_TRUCK_X };
 
-    // Lead drawn apart from the pair so the column has a distinct hull, not three identical shapes: a
-    // different earned tier if one exists, else a fresh draw of the same tier (distinct only where it has
-    // variants). Reward keys to _token (the pair's tier), so a heavier/lighter lead is flavour, not payout.
+    // Lead drawn apart from the pair for a distinct hull; reward keys to _token (the pair's tier), so a
+    // heavier or lighter lead is flavour, not payout.
     private _leadPool = _tierPool - [_token];
     private _leadToken = if (_leadPool isEqualTo []) then { _token } else { selectRandom _leadPool };
     private _leadClass = [_leadToken] call DUWS_fnc_tokenClass;
     if (_leadClass == "") then { _leadClass = _vehClass };
 
-    // Reward scales with the tier fielded: +10 CP per step above a car patrol, AP flat (car/IFV/armour
-    // pay 15/20, 25/20, 35/20). The briefing and strategic map print the base -- both built before this
-    // rolls -- so the step-up is an unadvertised completion bonus, inherent to rolling the tier at spawn,
-    // not a display bug. One mission runs at a time (Mission_available gate), so the in-place bump is safe.
+    // +10 CP per tier above a car patrol (AP flat). An unadvertised completion bonus: the briefing and map
+    // print the base, built before this rolls. Safe to bump in place -- only one mission runs at a time.
     private _tier = ["car", "ifv", "tank"] find _token;
     DUWS_curReward set [0, (DUWS_curReward select 0) + (10 * _tier)];
 
-    // Patrol points around the ring, snapped to roads so the column rides the network rather than cutting
-    // cross-country (Arma routes vehicles badly off-road -- see fnc_convoy_drive). Centred on the marked
-    // position so the patrol stays inside the drawn ellipse.
+    // Patrol points around the ring, snapped to roads -- Arma routes vehicles badly off-road (see
+    // fnc_convoy_drive). Centred on the marked position so the patrol stays inside the ellipse.
     private _pts = [];
     private _steps = 5;
     for "_i" from 0 to (_steps - 1) do {
         private _ang = _i * (360 / _steps) + random 40;
         private _cand = _randomPos getPos [_radius * (0.4 + random 0.3), _ang];
-        // Keep every anchor out of the sea: the spawn point (first) and the points it laps alike, so a water
-        // anchor drowns the patrol or drives it in. Drop roads whose segment sits over water (coastal snaps,
-        // bridges); road-less fallback is the shared safe-pos helper (clear land near the point, else the
-        // raw point -- never the map origin).
+        // Keep every anchor out of the sea -- a water anchor drowns the patrol: drop road segments over
+        // water (coastal snaps, bridges); road-less fallback is fnc_convoy_safepos.
         private _roads = (_cand nearRoads 400) select { !surfaceIsWater (getPosATL _x) };
         _pts pushBack (if (_roads isEqualTo []) then {
             [_cand, 200, 5] call fnc_convoy_safepos
@@ -49,19 +40,16 @@ private _build = {
             getPosATL (selectRandom _roads)
         });
     };
-    // Guard a spawn/patrol point that lands far outside the marked ring. A road or findSafePos snap must
-    // never seat the column kilometres away -- dropped on top of BLUFOR HQ, its garrison wipes the patrol
-    // the instant it spawns and the mission auto-completes with the player nowhere near. A point past the
-    // ring radius is a bad snap, not a real anchor, so it falls back to the marked centre (the AO the player
-    // is sent to). The legitimate points sit at 0.4-0.7 * _radius, well inside this bound.
+    // Clamp a snap that lands past _radius back to centre: a bad road/findSafePos snap could seat the
+    // column on BLUFOR HQ, whose garrison wipes it on spawn and auto-completes the mission. Real points
+    // sit at 0.4-0.7 * _radius, well inside this bound.
     {
         if ((_x distance2D _randomPos) > _radius) then { _pts set [_forEachIndex, _randomPos] };
     } forEach _pts;
     private _start = _pts select 0;
 
-    // Route the first leg (start -> _pts#1, the first point it drives to) and seat the three ON it in trail
-    // order, so they are born on the drive path facing down it, not on a straight offset that ignores the
-    // road's curve. The same route is handed to the driver below so it reuses it without teleport-reordering.
+    // Route the first leg and seat the three ON it in trail order, so they are born facing down the drive
+    // path, not a straight offset that ignores the road's curve. The driver below reuses this same route.
     private _route0 = [_start, _pts select 1] call fnc_convoy_path;
     private _slots = [_route0, 3, 20] call fnc_convoy_slots;
 
@@ -97,11 +85,8 @@ private _build = {
         [units _grp, "objective"] call fnc_search_flag_group;
     };
 
-    // Two ambient foot patrols working the zone alongside the vehicle column: extra opposition the player
-    // meets while hunting, deliberately NOT in the win census (that stays the vehicle crews below). Each
-    // owns half the zone -- centres offset to opposite sides of the marked point on a random axis, at half
-    // the ring so each stays in its half -- so both roam wide (widepatrol) yet keep a zone-width apart
-    // rather than converging on one walk. Claimed so teardown collects them with the rest on mission end.
+    // Two ambient foot patrols, deliberately NOT in the win census (that stays the vehicle crews). Centres
+    // offset to opposite half-ring axes so the two roam wide yet keep apart rather than converging.
     private _teamAxis = random 360;
     {
         private _teamCentre = _randomPos getPos [_radius * 0.5, _teamAxis + _x];
@@ -109,24 +94,21 @@ private _build = {
         if (!isNull _team) then { [_team] call fnc_mission_claim };
     } forEach [0, 180];
 
-    // Lap the road-snapped ring via the shared fixed-circuit posture, not a hand-rolled CYCLE: only
-    // hqpatrol takes caller anchors (closepatrol/widepatrol roll un-snapped points), so the column keeps to
-    // the network. Rotate the spawn point (_pts#0) LAST: a leading waypoint there is a zero-length first leg
-    // that, with the column pre-seated forward, drives it backward. Still visits every point, CYCLEs on _pts#1.
+    // hqpatrol is the only posture that takes caller anchors, so the column keeps to the snapped roads.
+    // Spawn point (_pts#0) rotated LAST: a leading waypoint there is a zero-length first leg that drives
+    // the pre-seated column backward. Still visits every point, CYCLEs on _pts#1.
     private _ring = (_pts select [1, (count _pts) - 1]) + [_pts select 0];
     [_grp, "hqpatrol", _randomPos, _radius, _ring] call fnc_apply_posture;
 
-    // Self-routing driver: computes each leg's road route and every hull drives it holding spacing, so they
-    // hold the road as a column. Reads the group's hulls live; ends itself once no vehicle can move (patrol
-    // wiped), so no teardown hook here -- the break flip below releases it to fight. Reuses the seated
-    // leg-one route (DUWS_convoy_route0).
+    // Self-routing driver: each hull drives the leg's road route holding spacing, so they keep column on
+    // the road. Ends itself once no vehicle can move (patrol wiped) -- no teardown hook needed; the break
+    // flip below releases it to fight. Reuses the seated leg-one route (DUWS_convoy_route0).
     _grp setVariable ["DUWS_convoy_route0", _route0];
     [_grp] spawn fnc_convoy_drive;
 
-    // Speed-limited until broken: the first man down or hull hit lifts the limit and turns the patrol loose,
-    // dropping its waypoints so the AI manoeuvres rather than lapping the ring. Past 0.3, not a scrape: a
-    // hull that clips terrain self-damages and must not read as contact. Guards the flip so a patrol cleaned
-    // before it is ever engaged cannot make the thread outlive the group.
+    // Speed-limited until broken: first man down or hull hit past 0.3 damage lifts the limit and drops the
+    // waypoints so the AI manoeuvres. The 0.3 floor ignores terrain scrapes; the guard below stops a patrol
+    // cleaned before contact outliving its group.
     [_grp, _vehs] spawn {
         params ["_grp", "_vehs"];
         private _crew = units _grp;
@@ -153,7 +135,6 @@ private _build = {
     units _grp
 };
 
-// Win when every crewman across the three vehicles is dead.
 private _done = { (_this findIf { alive _x }) < 0 };
 
 if (!([7, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};

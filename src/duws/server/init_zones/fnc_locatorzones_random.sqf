@@ -150,7 +150,6 @@ for "_i" from 1 to zones_number do {
 			};
      
 if (_found_distance) then {
-    // Origin guard: refuse to spawn a zone within 500m of [0,0,0].
     if (_zonePos distance2D [0,0,0] < 500) exitWith {
         ["WARN", "ZONES", format ["Zone %1 position %2 is within 500m of origin, retrying...", _i, _zonePos]] call fnc_log;
         // _found stays false, so the outer loop keeps searching for a new position.

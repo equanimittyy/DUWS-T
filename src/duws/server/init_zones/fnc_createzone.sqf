@@ -1,8 +1,4 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
-// fnc_createZone.sqf
-//  _generatezonescript = ["",_points_zone,_zone_radius,_MissionPos,_fortified,true,_i] spawn fnc_createzone
-//  Name of the place,pts,radius,position,fortified,prefab,zone#
-//
 
 _name = _this select 0;
 _points = _this select 1;
@@ -24,7 +20,7 @@ publicVariable "amount_zones_created";
 zones_created = true;
 publicVariable "zones_created";
 
-// Add the zone to the array of zones (need for manual placement of zones and WARCOM)
+// Both arrays are read downstream by the manual zone placer and by WARCOM, so every zone must be pushed onto them here.
 if (isNil ("Array_of_OPFOR_zones")) then {Array_of_OPFOR_zones = [];};
 Array_of_OPFOR_zones = Array_of_OPFOR_zones + [_zonePos];
 zone_namePOS_pairs = zone_namePOS_pairs + [[_name,_zonePos,_visible]];
@@ -35,8 +31,6 @@ publicVariable "zone_namePOS_pairs";
 // deliberately: it is drawn, so a rebuild has to be handed the original back rather than re-roll it.
 zone_meta_array = zone_meta_array + [[_zone_num,_zonePos,_size,_points,_fortified,_prefab]];
 publicVariable "zone_meta_array";
-
-// Add zone to the spawn/despawn array [number, blufor_close, noDespawn]
 
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
@@ -134,10 +128,9 @@ if (_prefab) then {
 	{ _weighted append [_x, _x select 3] } forEach _array_of_prefabs;
 	_prefab_array = selectRandomWeighted _weighted;
 
-	// The composition's kind, not the zone's name -- it used to overwrite the name, which is why a
-	// capture reported "Comm Station" while the map called the same ground Zone 4. It stays a map
-	// label, on the marker and in the readout; radio traffic uses the callsign alone, because that is
-	// what a player repeats back and "Comm Station" names a building rather than a place.
+	// The composition's kind, not the zone's name: it stays a map label, on the marker and in the
+	// readout, while radio traffic uses the callsign alone -- a player repeats that back, and
+	// "Comm Station" names a building, not a place.
 	_prefabName = _prefab_array select 0;
 	_fortified = _prefab_array select 1;
 	_path = _prefab_array select 2;

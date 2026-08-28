@@ -1,6 +1,5 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here.
-// fnc_opfor_cap.sqf
-_place   =   _this select 0; 
+_place   =   _this select 0;
 _points =   _this select 1;
 _markername = _this select 2;
 _markername2 = _this select 3;
@@ -43,16 +42,13 @@ missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _retakenKey], tr
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];
 
 
-// MODIFY ARMY POWER - the same swing a capture pays, in the other direction. No consolation
-// share for BLUFOR here: losing ground is meant to cost, where OPFOR losing one is what
-// mobilises it.
+// The same AP swing a capture pays, reversed: no consolation share for BLUFOR, since losing ground is
+// meant to cost while OPFOR losing a zone is what mobilises it.
 _apswing = round(_points * zone_ap_swing);
 ["OPF", _apswing, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
 ["BLU", -_apswing, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
 
-// MODIFY MARKER ICON
 str(_markername) setMarkerColor "ColorRed";
-// MODIFY MARKER ELLIPSE
 str(_markername2) setMarkerColor "ColorRed";
 
 if (VERSION_X == "MODERN" || simple_zones_enable) then {

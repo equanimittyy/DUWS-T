@@ -1,19 +1,8 @@
 // Locality: server -- callers remoteExec to target 2.
-// Kill the recon patrol. A single OPFOR special-forces recon team on a close patrol of a treeline is
-// the whole objective -- no garrison, no support -- so the win is unambiguous. Borrows the sniper
-// hunt's shape (an all-dead predicate) but sites its target in cover instead of on an
-// overwatch, and seeds the ground rather than the perch.
-//
-// A third of the time an OPFOR anti-personnel minefield is laid on the ring edge opposite the patrol
-// (so its mines never spawn on the team) as a wall across the approach -- its length runs perpendicular
-// to the line to the centre. It is skipped where another minefield already sits within 1 km, where a
-// road runs within 100 m, or on water; and it is left unmanaged, so it outlives the mission as a
-// lasting hazard rather than being torn down with the objective.
 params ["_MissionPos", "_mission_name"];
 
-// Minefield knobs. Length is the belt's frontage across the approach; a longer belt is more columns,
-// derived from the length so the metres stay real whatever the spacing. Depth is fixed shallow: a belt
-// across an approach is wide and a few rows deep, not a square, and it keeps the mine count sane.
+// Minefield knobs. Depth is fixed shallow: a belt across an approach is wide and a few rows deep, not a
+// square, which also keeps the mine count sane.
 #define RECON_MINE_CHANCE  0.33
 #define RECON_MINE_LENGTH  50     // metres of frontage, laid perpendicular to the line to the zone centre
 #define RECON_MINE_SPACING 2.5    // metres between mines; an AP field sows this tight
@@ -22,9 +11,8 @@ params ["_MissionPos", "_mission_name"];
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
 
-    // Site the patrol in the deepest cover the ring offers: sample bearings across the ring and keep
-    // the spot with the most trees and bushes around it, so the team opens in a treeline rather than
-    // on open ground. Terrain-object count, engine-cheap; the centre is the fallback for a bare ring.
+    // Site the patrol in the deepest cover: sample bearings across the ring, keep the most-treed spot
+    // (terrain-object count, engine-cheap); centre is the fallback for a bare ring.
     private _treeKinds = ["TREE", "SMALL TREE", "BUSH"];
     private _spawnPos = _targetpos;
     private _bestTrees = -1;
@@ -35,16 +23,14 @@ private _build = {
         if (_n > _bestTrees) then { _bestTrees = _n; _spawnPos = _cand };
     };
 
-    // One special-forces recon team, close-patrolling its own patch of the treeline. Centre and leash
-    // are the spawn, not the whole objective ring, so the team holds the wood it hides in instead of
-    // wandering the marker; the 300 m passed here is the posture radius, not the mission radius.
+    // Centre and leash are the spawn, not the objective ring, so the team holds the wood it hides in;
+    // the 300 m here is the posture radius, not the mission radius.
     private _grp = ["recon", _spawnPos, 300, "closepatrol", _spawnPos] call fnc_spawn_team;
     [_grp] call fnc_mission_claim;
 
-    // Elite and sneaking. Sub-skills forced to 1 so the team is as accurate and quick to spot as the
-    // engine allows, whatever opfor_ai_skill is. Started in STEALTH -- and the closepatrol waypoints
-    // apply_posture laid are SAFE, so override those too, or the first leg walks the team back out of
-    // stealth. The engine still promotes it to COMBAT itself the moment it detects the player.
+    // Sub-skills forced to 1 so the team spots and shoots at the engine's ceiling, whatever opfor_ai_skill
+    // is. The closepatrol waypoints apply_posture laid are SAFE, so override those to STEALTH too, or the
+    // first leg walks the team back out of it. The engine still promotes to COMBAT on detecting the player.
     {
         _x setSkill ["aimingAccuracy", 1];
         _x setSkill ["aimingShake", 1];
@@ -56,11 +42,9 @@ private _build = {
     _grp setBehaviour "STEALTH";
     { _x setWaypointBehaviour "STEALTH" } forEach (waypoints _grp);
 
-    // Anti-personnel minefield opposite the patrol, a third of the time: a wall across the approach at
-    // the far ring edge, depth toward the centre so its length lies perpendicular to that radial. Sited
-    // opposite the team so no mine spawns on top of it. Skipped where another minefield already sits
-    // within 1 km, where a road runs within 100 m (an AP field is not a roadblock), or on water. No
-    // key -> unmanaged, so it persists past the mission rather than being swept with the objective.
+    // AP minefield opposite the patrol (so no mine spawns on the team), a third of the time: a wall at
+    // the far ring edge. Skipped near another minefield (<1 km), a road (<100 m), or water. No key, so
+    // it is unmanaged and persists past the mission rather than swept with the objective.
     if (random 1 < RECON_MINE_CHANCE) then {
         private _fieldPos = _targetpos getPos [_radius * 0.85, (_targetpos getDir _spawnPos) + 180];
         private _clash = DUWS_hardpoints findIf {
@@ -76,7 +60,6 @@ private _build = {
     units _grp
 };
 
-// Win when the recon team is dead: findIf returns -1 once no unit of it is left alive.
 private _done = { (_this findIf { alive _x }) < 0 };
 
 if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};

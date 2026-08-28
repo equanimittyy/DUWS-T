@@ -1,22 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-// Kill every sniper. 1-3 two-man teams are the ONLY things spawned: no garrison, no patrols, no
-// support teams -- the teams on their perches are the whole objective, so the win is unambiguous and
-// the field is empty but for them.
-//
-// Each team is sited independently across the full objective ring by the hardpoint terrain-ray
-// technique (fnc_hardpoint_siting): sample ground anywhere in the ring and score each on how high it
-// stands over its surroundings (an eight-point elevation ring) and how far it looks down open terrain
-// (rays marched out on eight bearings until the ground masks them) -- best score wins, and teams are
-// held at least SNIPER_MIN_SEP apart so the pairs do not stack. The pair is laid prone facing the most
-// open bearing -- an overwatch, not a garrison. Prone eye height is modelled in the ray (z + 0.5) so
-// the perch is chosen for the stance they actually hold.
-//
-// Elite by override, not by campaign difficulty: their sub-skills are forced to 1 so they are as
-// accurate and quick to spot as the engine allows, whatever opfor_ai_skill is. A reveal loop pins
-// every team's knowledge of every in-AO player at max, so inside the ring they never lose the
-// player's position. Each team holds prone and still (PATH disabled) until a player closes within
-// 500 m or one of its pair is hit, then that team is released to move and fight -- a static overwatch
-// that will not sit and be flanked.
 params ["_MissionPos", "_mission_name"];
 
 #define SNIPER_FLUSH_DIST 500   // a player this close, or a hit, releases a team to move
@@ -31,13 +13,11 @@ private _build = {
     private _placedPerches = [];   // perch of each team already sited, to space the next one off them
 
     for "_t" from 1 to _teamCount do {
-        // Best prone overlook anywhere in the ring: score every land sample on how high it stands over
-        // its 60 m surroundings and how far it sees down eight bearings, and keep the best. Terrain-only
-        // rays, generation-time; getPos on a position array is the same relative-point form the recon
-        // site-finder uses. Two bests are tracked: the best that also clears SNIPER_MIN_SEP from every
-        // team already placed (preferred, so the teams spread), and the best regardless (used only when
-        // the ring is too tight to honour the separation). Elevation is scored, not gated, so a flat AO
-        // no longer collapses every team onto _targetpos.
+        // Best prone overlook in the ring: score each land sample on height over its 60 m surroundings and
+        // how far it sees down eight bearings (terrain-only rays, generation-time). Track two bests -- the
+        // best clearing SNIPER_MIN_SEP from placed teams (preferred, so they spread), and the best
+        // regardless (used only when the ring is too tight). Elevation is scored, not gated, so a flat AO
+        // does not collapse every team onto _targetpos.
         private _ring = [0, 45, 90, 135, 180, 225, 270, 315];
         private _perchAny = _targetpos;  private _dirAny = 0;  private _scoreAny = -1000000;
         private _perchSep = _targetpos;  private _dirSep = 0;  private _scoreSep = -1000000;
@@ -64,10 +44,9 @@ private _build = {
                     _openSum = _openSum + _clear;
                     if (_clear > _candBestRay) then { _candBestRay = _clear; _candBestDir = _dir };
                 } forEach _ring;
-                // Elevation leads, openness is a bounded tie-breaker. Rays cap at 700 m/bearing, so a
-                // flat open plain reads as "sees far" as a hill and, weighted raw, out-scored it -- that
-                // put teams down low. Normalise openness to a 0..5 m-equivalent so height (metres)
-                // decides the perch and openness only spreads teams / breaks near-ties.
+                // Elevation leads; openness is a bounded tie-breaker. Rays cap at 700 m, so a flat plain
+                // reads as open as a hill and raw-weighted out-scored it, putting teams low. Normalise
+                // openness to 0..5 m-equivalent so height decides the perch, openness only breaks ties.
                 private _score = _relElev + 5 * (_openSum / 5600);
                 if (_score > _scoreAny) then { _scoreAny = _score; _perchAny = _cand; _dirAny = _candBestDir };
                 if ((_placedPerches findIf { _cand distance2D _x < SNIPER_MIN_SEP }) < 0) then {
@@ -80,9 +59,8 @@ private _build = {
         if (_scoreSep > -1000000) then { _perch = _perchSep; _perchDir = _dirSep };
         _placedPerches pushBack _perch;
 
-        // Roster from the "sniper_element" token, not a class literal, so the composition tool owns the
-        // pair and faction pools resolve it. Spawned here rather than via fnc_spawn_team: the perch
-        // siting above replaces the token's own findSafePos/posture.
+        // Roster from the "sniper_element" token so faction pools resolve the pair. Spawned here, not via
+        // fnc_spawn_team, since the perch siting above replaces the token's own findSafePos/posture.
         private _men = ["sniper_element", "opfor"] call DUWS_fnc_teamRoster;
         private _group = [_perch, east, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _group deleteGroupWhenEmpty true;
@@ -149,11 +127,9 @@ private _build = {
         _allSnipers append [_target1, _target2];
     };
 
-    // Auto-aware, but only inside the AO: pin every team's knowledge of each live player within the
-    // objective ring at 4 (fully identified, exact position). knowsAbout decays, so it is re-applied
-    // until the last sniper is dead -- inside the ring the teams never lose the player's position,
-    // whatever the terrain or line of sight; a player who breaks contact past _radius falls off normal
-    // spotting. One loop covers every team.
+    // Auto-aware, but only inside the AO: pin each team's knowledge of every in-ring player at 4 (exact
+    // position). knowsAbout decays, so re-applied until the last sniper dies -- inside the ring they never
+    // lose the player; past _radius the player falls off normal spotting.
     [_allGroups, _allSnipers, _targetpos, _radius] spawn {
         params ["_grps", "_snipers", "_aoCentre", "_aoRadius"];
         while { (_snipers findIf { alive _x }) >= 0 } do {
@@ -166,7 +142,6 @@ private _build = {
     _allSnipers
 };
 
-// Win when every sniper is dead: findIf returns -1 once none of the teams is left alive.
 private _done = { (_this findIf { alive _x }) < 0 };
 
 if (!([5, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};

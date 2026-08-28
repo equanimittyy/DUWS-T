@@ -6,14 +6,10 @@ private _build = {
     private _cx = _targetpos select 0;
     private _cy = _targetpos select 1;
 
-    // Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, the zone
-    // prefabs' convention: the props and the guns stand up in the same breath and are torn down under
-    // the same key, so a second fence would only mean two entries in the composition tool for one site.
-    // The flag is hand-carried back after a round trip -- the Eden export emits five columns and stops.
-    //
-    // A gun's class is a placeholder: fnc_static_place stands whatever OPFOR fields for the role, this
-    // being their cache. A BLUFOR key here would have the player's own faction defending the enemy's
-    // supplies. The row's own class only decides what the Eden import draws.
+    // Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, per the zone-prefab
+    // convention (props and guns share one key). A gun's class is a placeholder -- fnc_static_place stands
+    // whatever OPFOR fields for the role (this is their cache; a BLUFOR key would defend it with the
+    // player's own faction). The row's own class only decides what the Eden import draws.
     // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=A--
     private _staticsArray = [
         ["CamoNet_INDP_open_F", 0.942383, -0.640625, 1.16854, 342.004, false],
@@ -65,9 +61,8 @@ private _build = {
     private _guns = [];
     {
         if !(_x select 5) then { continue; };
-        // "world", not "pos": pos seats the gun with setPos (AGL, which counts a building roof), so a site
-        // overlapping a building lands the emplacement on the roof. world uses terrain height, the way the
-        // hardpoints place theirs, so the gun grounds where the composition sits.
+        // "world", not "pos": pos uses setPos (AGL, which counts a building roof), so a site over a building
+        // lands the gun on the roof; world grounds it at terrain height like the hardpoints.
         private _gun = [_x, [_cx, _cy], "opfor", "mission_destroy_cache", "world"] call fnc_static_place;
         _gun allowDamage false;
         _gun setDamage 0;

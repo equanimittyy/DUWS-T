@@ -5,14 +5,11 @@
 [{hint localize "STR_DUWS_T_5ve9v8c0"}] remoteExec ["BIS_fnc_Spawn", player1,false];
 [[localize "STR_DUWS_T_shuo4nyn"]] remoteExec ["BIS_fnc_typeText", [0,-2] select isDedicated,false];
 
-// ON WATER ? >> FLAT ? >> DISTANCE BETWEEN ZONES ? >> OK !
-
 titleCut ["", "BLACK IN", 10];
 man_fortified = true; publicVariable "man_fortified";
 openMap [true, true];
 mapAnimAdd [3, 1, PosOfBLUHQ];
 mapAnimCommit;
-//sleep 3;
 _zones_array = [[-9999,-9999,-9999]];
 
 for [{_i=1}, {_i<=zones_number}, {_i=_i+1}] do  // BEGIN "FOR" LOOP --
@@ -58,9 +55,7 @@ for [{_i=1}, {_i<=zones_number}, {_i=_i+1}] do  // BEGIN "FOR" LOOP --
 					clicked = false;
 					[format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, localize "STR_DUWS_T_blz9jyju"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 				} else {
-					// DON'T SPAWN ON ROADS
 if (isNull _nearRoad) then {
-    // Origin guard: reject a zone within 500 m of [0,0,0]
     if (_posDeMeilleurTruc distance2D [0,0,0] < 500) then {
         clicked = false;
         [format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, localize "STR_DUWS_T_zone_too_close_origin"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
@@ -104,18 +99,15 @@ if (isNull _nearRoad) then {
     };
 };
 
-//openMap [false, false];
-
 [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 // No completion announcement here: every one of them fires from fnc_init_OPFOR_WARCOM once
 // civilians are registered too. Announcing at this point told the player the campaign was
 // ready while towns were still being placed.
 
-// For some reasons I had to add a zone [0,0,0] in _zones_array, now I must remove it:
+// Drop the [-9999,-9999,-9999] seed pushed at init so only real zones remain.
 _zones_array = [_zones_array, 0] call BIS_fnc_removeIndex;
 
-//player globalchat format["%1",_zones_array];
 serv_zones_array = [] + _zones_array;
 publicVariable "serv_zones_array";
 

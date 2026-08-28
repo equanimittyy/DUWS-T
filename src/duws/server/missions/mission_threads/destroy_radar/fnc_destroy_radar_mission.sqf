@@ -6,13 +6,10 @@ private _build = {
     private _cx = _targetpos select 0;
     private _cy = _targetpos select 1;
 
-    // Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, the zone
-    // prefabs' convention: the props and the guns stand up in the same breath and are torn down under
-    // the same key, so a second fence would only mean two entries in the composition tool for one site.
-    // The flag is hand-carried back after a round trip -- the Eden export emits five columns and stops.
-    //
-    // A gun's class is a placeholder: fnc_static_place stands whatever OPFOR fields for the role, this
-    // being their radar, and the row's own class only decides what the Eden import draws.
+    // Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, per the zone-prefab
+    // convention (props and guns share one key). A gun's class is a placeholder -- fnc_static_place stands
+    // whatever OPFOR fields for the role (this is their radar); the row's own class only decides what the
+    // Eden import draws.
     // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar" schema=A--
     private _staticsArray = [
         ["Land_HBarrier_5_F", -12.7821, 1.67578, 0.74121, 357.084, false],
@@ -61,9 +58,8 @@ private _build = {
     private _guns = [];
     {
         if !(_x select 5) then { continue; };
-        // "world", not "pos": pos seats the gun with setPos (AGL, which counts a building roof), so a site
-        // overlapping a building lands the emplacement on the roof. world uses terrain height, the way the
-        // hardpoints place theirs, so the gun grounds where the composition sits.
+        // "world", not "pos": pos uses setPos (AGL, which counts a building roof), so a site over a building
+        // lands the gun on the roof; world grounds it at terrain height like the hardpoints.
         private _gun = [_x, [_cx, _cy], "opfor", "mission_destroy_radar", "world"] call fnc_static_place;
         // Invulnerable by design: the objective is the radar, and a launcher the player can shoot off
         // from a ridge is one the mission never asks them to close with.
@@ -88,7 +84,6 @@ private _build = {
     _radar
 };
 
-// Win when the radar is destroyed.
 private _done = { !alive _this || (damage _this) == 1 };
 
 if (!([10, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
