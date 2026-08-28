@@ -80,14 +80,14 @@ private _build = {
         // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items, drawn from the shared
         // document pool. The table is the only body left to physics -- it settles on the terrain, is forced
         // upright if it settled badly tilted, then frozen as a fixed anchor. Each item is then seated at a
-        // measured slot on the table top and frozen hovering, so the loot lands in the same readable row every
+        // measured slot on the table top and attached to it, so the loot lands in the same readable row every
         // time rather than scattering off a one-metre drop. Damage is off on all of it so stray patrol fire
         // near the camp cannot destroy the loot or the table.
         //
-        // The item freeze rides on unsimulated ground-holders staying loot-able: fnc_intelAnalysis pulls these
-        // from the player's inventory, so if a build ever delists a frozen holder from the pickup panel the
-        // payout goes dead-silent. Recovery is to leave the items simulated (drop _hover near 0 so they seat
-        // with no drop) rather than freeze them.
+        // Items are pinned with attachTo, not physics: a created ground-holder (Item_*) settles to the floor
+        // and a one-metre drop scatters, but an attached child holds its slot on the frozen table. Left
+        // un-frozen so it stays loot-able -- fnc_intelAnalysis pulls these from the player's inventory. If a
+        // build ever blocks taking an attached item, detach each after the attach and freeze it in place.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
@@ -99,7 +99,7 @@ private _build = {
             // Toppled or steep past ~18 degrees: physics gave up on this spot. Reset to the row's authored
             // transform on the terrain -- reorient AND re-pin, since a flip usually slides it off the slot too.
             // A flat table with a floating edge on a slope beats one on its back; mild tilt is left conformed.
-            if (((_table vectorUp) select 2) < 0.95) then {
+            if (((vectorUp _table) select 2) < 0.95) then {
                 private _tRow = _staticsArray select _tableIdx;
                 _table setVectorUp [0, 0, 1];
                 _table setPosATL [_cx + (_tRow select 1), _cy + (_tRow select 2), 0];
@@ -108,21 +108,19 @@ private _build = {
             _table allowDamage false;
             _table enableSimulationGlobal false;
 
-            // Fixed local slots on the table top (boundingBoxReal max-corner Z), filled left-to-right by
-            // whatever rolled. fnc_duws_keep stamps `persistent`, which fnc_repetitive_cleanup never reaps, so
-            // an unlooted item survives the GC until fnc_mission_end releases the key. The table needs no keep
-            // -- fnc_composition_place already filed it under this key when it placed it.
+            // Fixed model-space slots on the table top (boundingBoxReal max-corner Z), filled left-to-right by
+            // whatever rolled. The offset is the attachTo local offset, so it is measured in the table's own
+            // frame and follows the table's heading. fnc_duws_keep stamps `persistent`, which
+            // fnc_repetitive_cleanup never reaps, so an unlooted item survives the GC until fnc_mission_end
+            // releases the key. The table needs no keep -- fnc_composition_place already filed it.
             private _topZ = (boundingBoxReal _table select 1) select 2;
             private _slots = [[-0.2, 0, _topZ + _hover], [0, 0, _topZ + _hover], [0.2, 0, _topZ + _hover]];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
                     private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
-                    private _p = _table modelToWorld (_slots select _i);
-                    private _obj = createVehicle [_cls, _p, [], 0, "CAN_COLLIDE"];
-                    _obj setPosATL _p;
-                    _obj setVectorUp [0, 0, 1];
+                    private _obj = createVehicle [_cls, [_cx, _cy, 0], [], 0, "CAN_COLLIDE"];
+                    _obj attachTo [_table, _slots select _i];
                     _obj allowDamage false;
-                    _obj enableSimulationGlobal false;
                     [_obj, "mission_patrol_camp"] call fnc_duws_keep;
                 };
             };
