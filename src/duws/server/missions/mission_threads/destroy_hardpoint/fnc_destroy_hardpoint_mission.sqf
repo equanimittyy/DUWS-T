@@ -8,8 +8,8 @@
 // Win is the hardpoint falling -- its DUWS_hardpoints row disappearing -- not any one object dying: the
 // streamer runs the per-type clearance test (garrison beaten, guns wrecked) and a cleared row is the
 // broadcast signal that the emplacement is gone by any means. The streamer removes the row and credits the
-// bounty in the same step, so the two payouts stack with no coupling here. Off the fnc_mission_run spine --
-// the win watches broadcast state, not a one-shot predicate.
+// bounty in the same step, so the two payouts stack with no coupling here. The win watches broadcast
+// state (the DUWS_hardpoints row leaving), not a spawned object.
 params ["_MissionPos", "_mission_name"];
 if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 

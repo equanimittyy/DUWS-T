@@ -5,8 +5,8 @@
 // named to the player -- so the hunt is to spot the right column and stop it before it arrives. Win: the
 // HVT dies. Fail: his car reaches the zone, or the deadline passes.
 //
-// Off the fnc_mission_run spine on purpose: the win is a race, not a one-shot predicate polled at a fixed
-// spot (see that header), so this owns its site pick, spawn and monitor like the informant hunt and IDAP run.
+// The win is a race, not a one-shot predicate polled at a fixed spot, so this owns its site pick, spawn
+// and monitor like the informant hunt and IDAP run. Ends through fnc_mission_finish like every mission.
 params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 

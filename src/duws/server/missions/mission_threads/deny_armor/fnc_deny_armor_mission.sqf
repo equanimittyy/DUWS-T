@@ -9,9 +9,9 @@
 // cleanup-protected only while the mission runs and never claimed on a win, so a player who clears the
 // crew can drive it home (a claim is a deletion order, and this one may be his).
 //
-// Off the fnc_mission_run spine: that spine wins-or-times-out on a one-shot predicate; this has a
-// distinct scripted fail (the repair race) it has no hook for. Shares the spine's helpers
-// (fnc_mission_begin/site/reward/end, marker and task calls), not its loop.
+// Not a one-shot predicate poll: this has a distinct scripted fail (the repair race), so it owns its
+// own win/fail loop. Uses the shared library (fnc_mission_begin/site/present/claim) and ends through
+// fnc_mission_finish like every mission.
 params ["_MissionPos", "_mission_name", ["_destZone", []]];
 if (!([11, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 

@@ -177,13 +177,36 @@ private _build = {
     _campTeamUnits
 };
 
-private _spec = [
-    18, 1000, "destroy", "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", "patrolcamp",
-    _build,
-    { ({alive _x} count _this) == 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_patrolcampend"],
-    [],
-    "mission_patrol_camp"
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when every camp team is dead; the roaming patrols are ambience, not part of the census.
+private _done = { ({alive _x} count _this) == 0 };
+
+if (!([18, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 1000;
+private _site = [_MissionPos, _radius, 18] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["patrolcamp%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", _mission_name, "destroy",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+// Build-time abort: no camp team stood up (a broken-faction edge), so fail rather than let an empty
+// census win on the first poll. The brief has already played, so the abort speaks nothing.
+if (_handles isEqualTo "ABORT") exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_patrol_camp", false, false] call fnc_mission_finish;
+};
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the camp teams finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_patrol_camp"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_patrolcampend"], true, "mission_patrol_camp"] call fnc_mission_finish;

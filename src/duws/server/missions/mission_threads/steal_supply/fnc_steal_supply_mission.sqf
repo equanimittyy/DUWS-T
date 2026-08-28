@@ -60,16 +60,39 @@ private _onWin = {
     ["opfor", [3, 2, 2, 2, 2], [localize "STR_DUWS_T_SUPPLY_ARSENAL_TITLE", localize "STR_DUWS_T_arsenalfound2"]] call fnc_arsenal_reward;
 };
 
-private _spec = [
-    1, 600, "getin", "STR_DUWS_T_p7qawzl4", "rescue",
-    _build,
-    { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 },
-    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_supplytruckcopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckwin"],
-    [],
-    "mission_steal_supply",
-    false,
-    _onWin,
-    [[{ !alive (_this select 0) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckfail"]]]
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win: the recovered truck reaches BLUFOR HQ intact. Early-lose: the truck is destroyed (the _done
+// test requires it alive, so win and loss stay mutually exclusive).
+private _done = { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 };
+private _lost = [[{ !alive (_this select 0) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckfail"]]];
+
+if (!([1, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 600;
+private _site = [_MissionPos, _radius, 1] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_p7qawzl4", _mission_name, "getin",
+    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_supplytruckcopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the guard force finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || (_lost findIf { _handles call (_x select 0) } >= 0) || time > _deadline };
+
+// Loss ranked ahead of the timeout so a truck destroyed as the clock runs out reads as destroyed.
+private _lostIdx = _lost findIf { _handles call (_x select 0) };
+if (!(_handles call _done) && _lostIdx >= 0) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], (_lost select _lostIdx) select 1, false, "mission_steal_supply", false, false] call fnc_mission_finish;
+};
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_steal_supply"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckwin"], true, "mission_steal_supply", false, false, _onWin, _handles] call fnc_mission_finish;

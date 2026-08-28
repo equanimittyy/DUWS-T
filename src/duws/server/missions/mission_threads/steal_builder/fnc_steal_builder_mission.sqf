@@ -1,8 +1,8 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
 
-// Refuse a second builder while one still lives -- ahead of fnc_mission_run (which calls fnc_mission_begin),
-// so the refused mission claims no reward, deadline or token. begin also stamps the rest timer; since it
+// Refuse a second builder while one still lives -- ahead of the fnc_mission_begin call below, so the
+// refused mission claims no reward, deadline or token. begin also stamps the rest timer; since it
 // never runs here, stamp it by hand so aborting still spends this cycle and the next mission offer waits out
 // the rest instead of the abort being free to spam.
 if (!isNil "BLD1" && {alive BLD1}) exitWith {
@@ -55,16 +55,39 @@ private _onWin = {
     [[[], _init_code], "BIS_fnc_spawn", true, true] spawn BIS_fnc_MP;
 };
 
-private _spec = [
-    6, 600, "getin", "STR_DUWS_T_czpvn5z1", "rescue",
-    _build,
-    { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 },
-    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_builderspot", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_buildertask", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_buildercopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"],
-    [],
-    "mission_steal_builder",
-    false,
-    _onWin,
-    [[{ !alive (_this) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderfail"]]]
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win: the recovered builder vehicle reaches BLUFOR HQ intact. Early-lose: it is destroyed (the _done
+// test requires it alive, so win and loss stay mutually exclusive).
+private _done = { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 };
+private _lost = [[{ !alive (_this) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderfail"]]];
+
+if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 600;
+private _site = [_MissionPos, _radius, 6] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_czpvn5z1", _mission_name, "getin",
+    [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_builderspot", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_buildertask", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_buildercopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the guard force finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || (_lost findIf { _handles call (_x select 0) } >= 0) || time > _deadline };
+
+// Loss ranked ahead of the timeout so a builder destroyed as the clock runs out reads as destroyed.
+private _lostIdx = _lost findIf { _handles call (_x select 0) };
+if (!(_handles call _done) && _lostIdx >= 0) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], (_lost select _lostIdx) select 1, false, "mission_steal_builder", false, false] call fnc_mission_finish;
+};
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_steal_builder"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"], true, "mission_steal_builder", false, false, _onWin, _handles] call fnc_mission_finish;

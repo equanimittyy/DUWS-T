@@ -1,7 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 // Eliminate a roving vehicle patrol: three vehicles of one class, scaled to OPFOR's earned AP tier,
 // lapping a road loop inside the search ring as one column. Win: every crewman across the three dead.
-// The column holds LIMITED until first hit or man down, then drops it and fights. Spine: fnc_mission_run.
+// The column holds LIMITED until first hit or man down, then drops it and fights.
 params ["_MissionPos", "_mission_name"];
 
 private _build = {
@@ -153,13 +153,31 @@ private _build = {
     units _grp
 };
 
-private _spec = [
-    7, 1500, "kill", "STR_DUWS_T_y7z1cx6j", "vehpatrol",
-    _build,
-    { (_this findIf { alive _x }) < 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_armorcopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorend"],
-    [],
-    "mission_target_armor"
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when every crewman across the three vehicles is dead.
+private _done = { (_this findIf { alive _x }) < 0 };
+
+if (!([7, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 1500;
+private _site = [_MissionPos, _radius, 7] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["vehpatrol%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_y7z1cx6j", _mission_name, "kill",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_armorcopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the column finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_target_armor"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorend"], true, "mission_target_armor"] call fnc_mission_finish;

@@ -88,13 +88,31 @@ private _build = {
     _radar
 };
 
-private _spec = [
-    10, 400, "destroy", "STR_DUWS_T_n4uc7t2x", "cache",
-    _build,
-    { !alive _this || (damage _this) == 1 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_radarletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_radarcopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_radarend"],
-    [],
-    "mission_destroy_radar"
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when the radar is destroyed.
+private _done = { !alive _this || (damage _this) == 1 };
+
+if (!([10, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 400;
+private _site = [_MissionPos, _radius, 10] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["cache%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_n4uc7t2x", _mission_name, "destroy",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_radarletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_radarcopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the guard force finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_destroy_radar"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_radarend"], true, "mission_destroy_radar"] call fnc_mission_finish;

@@ -7,7 +7,7 @@
 // the mission never handles the streamer-owned mast, and a cleared row is the broadcast signal for the
 // hardpoint being gone by any means (player, support, anything the streamer recognizes). The streamer
 // removes the row and credits the bounty in the same step, so the two payouts stack with no coupling
-// here. Off the fnc_mission_run spine -- the win watches broadcast state, not a one-shot predicate.
+// here. The win watches broadcast state (the DUWS_hardpoints row leaving), not the tower object.
 params ["_MissionPos", "_mission_name"];
 if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 

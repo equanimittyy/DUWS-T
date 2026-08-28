@@ -111,15 +111,31 @@ private _onWin = {
     "grenade" createVehicle [_px, _py];
 };
 
-private _spec = [
-    9, 400, "destroy", "STR_DUWS_T_geryeddp", "cache",
-    _build,
-    { ((!alive (_this select 0)) || (damage (_this select 0)) == 1) && ((!alive (_this select 1)) || (damage (_this select 1)) == 1) },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_cachecopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheend"],
-    [],
-    "mission_destroy_cache",
-    false,
-    _onWin
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when both ammo boxes are destroyed.
+private _done = { ((!alive (_this select 0)) || (damage (_this select 0)) == 1) && ((!alive (_this select 1)) || (damage (_this select 1)) == 1) };
+
+if (!([9, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 400;
+private _site = [_MissionPos, _radius, 9] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["cache%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_geryeddp", _mission_name, "destroy",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_cachecopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the guard force finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_destroy_cache"] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheend"], true, "mission_destroy_cache", false, false, _onWin, _handles] call fnc_mission_finish;

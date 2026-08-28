@@ -1,7 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 // Kill every sniper. 1-3 two-man teams are the ONLY things spawned: no garrison, no patrols, no
 // support teams -- the teams on their perches are the whole objective, so the win is unambiguous and
-// the field is empty but for them. Shared spine: fnc_mission_run.
+// the field is empty but for them.
 //
 // Each team is sited independently across the full objective ring by the hardpoint terrain-ray
 // technique (fnc_hardpoint_siting): sample ground anywhere in the ring and score each on how high it
@@ -166,12 +166,31 @@ private _build = {
     _allSnipers
 };
 
-private _spec = [
-    5, 1000, "kill", "STR_DUWS_T_16dh939j", "sniperhunt",
-    _build,
-    { (_this findIf { alive _x }) < 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_snipercopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperend"],
-    []
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when every sniper is dead: findIf returns -1 once none of the teams is left alive.
+private _done = { (_this findIf { alive _x }) < 0 };
+
+if (!([5, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 1000;
+private _site = [_MissionPos, _radius, 5] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["sniperhunt%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_16dh939j", _mission_name, "kill",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_snipercopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the teams finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker]] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperend"], true] call fnc_mission_finish;

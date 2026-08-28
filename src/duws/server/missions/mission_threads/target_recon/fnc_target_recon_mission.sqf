@@ -1,7 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 // Kill the recon patrol. A single OPFOR special-forces recon team on a close patrol of a treeline is
 // the whole objective -- no garrison, no support -- so the win is unambiguous. Borrows the sniper
-// hunt's shape (fnc_mission_run, all-dead predicate) but sites its target in cover instead of on an
+// hunt's shape (an all-dead predicate) but sites its target in cover instead of on an
 // overwatch, and seeds the ground rather than the perch.
 //
 // A third of the time an OPFOR anti-personnel minefield is laid on the ring edge opposite the patrol
@@ -76,13 +76,31 @@ private _build = {
     units _grp
 };
 
-private _spec = [
-    17, 600, "kill", "STR_DUWS_T_RECON_PATROL_DESC", "reconpatrol",
-    _build,
-    // Win when the recon team is dead: findIf returns -1 once no unit of it is left alive.
-    { (_this findIf { alive _x }) < 0 },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_reconpatrolcopy", 0]],
-    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolend"],
-    []
-];
-[_MissionPos, _mission_name, _spec] call fnc_mission_run;
+// Win when the recon team is dead: findIf returns -1 once no unit of it is left alive.
+private _done = { (_this findIf { alive _x }) < 0 };
+
+if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+private _radius = 600;
+private _site = [_MissionPos, _radius, 17] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
+
+private _taskId = format ["reconpatrol%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_RECON_PATROL_DESC", _mission_name, "kill",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_reconpatrolcopy", 0]]
+] call fnc_mission_present;
+
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
+sleep 5; // let the team finish arriving before the win poll starts
+
+private _deadline = DUWS_curDeadlineAt;
+waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+
+if (!(_handles call _done) && time > _deadline) exitWith {
+    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker]] call fnc_mission_finish;
+};
+
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_reconpatrolend"], true] call fnc_mission_finish;
