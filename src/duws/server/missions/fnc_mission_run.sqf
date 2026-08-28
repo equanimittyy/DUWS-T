@@ -17,7 +17,6 @@
 //   _radius   num   objective ring the site is found within and the marker drawn at
 //   _taskType str   CfgTaskTypes class -- picks the task icon only
 //   _descKey  str   stringtable key for the task description
-//   _nameKey  str   stringtable key for the mission name, hinted alongside the intro card
 //   _idPrefix str   task-id stem; the rounded mission position is appended so it is unique
 //   _build    code  [_targetpos,_randomPos,_radius,_Building] -> handles. Spawns and claims the
 //                   objective (garrison, target group, vehicle, ...) and returns whatever _done
@@ -47,7 +46,7 @@
 //                   differently (steal-builder does). Default none.
 params ["_MissionPos", "_mission_name", "_spec"];
 _spec params [
-    "_index", "_radius", "_taskType", "_descKey", "_nameKey", "_idPrefix", "_build", "_done",
+    "_index", "_radius", "_taskType", "_descKey", "_idPrefix", "_build", "_done",
     ["_brief", []], ["_endLine", []], ["_failLine", []], ["_compKey", ""], ["_sweep", false],
     ["_onWin", {}], ["_lost", []]
 ];
@@ -63,7 +62,6 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 private _marker = [_randomPos, _radius] call fnc_missionMarkerData;
 private _taskId = format ["%1%2%3", _idPrefix, round (_MissionPos select 0), round (_MissionPos select 1)];
 [_taskId, localize _descKey, _mission_name, _randomPos, _taskType] call fnc_missionTaskCreate;
-[localize _nameKey, {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // Nearest named settlement to the marker, for the "marked near <place>" briefs.
 private _place = [_randomPos] call fnc_place_name;

@@ -61,7 +61,7 @@ private _onWin = {
 };
 
 private _spec = [
-    1, 600, "getin", "STR_DUWS_T_p7qawzl4", "STR_DUWS_T_c1", "rescue",
+    1, 600, "getin", "STR_DUWS_T_p7qawzl4", "rescue",
     _build,
     { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 },
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 0]],

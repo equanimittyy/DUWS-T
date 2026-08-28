@@ -141,7 +141,7 @@ private _build = {
 };
 
 private _spec = [
-    18, 1000, "destroy", "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", "STR_DUWS_T_c18", "patrolcamp",
+    18, 1000, "destroy", "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", "patrolcamp",
     _build,
     { ({alive _x} count _this) == 0 },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]],

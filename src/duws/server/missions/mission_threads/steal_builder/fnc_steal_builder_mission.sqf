@@ -56,7 +56,7 @@ private _onWin = {
 };
 
 private _spec = [
-    6, 600, "getin", "STR_DUWS_T_czpvn5z1", "STR_DUWS_T_c6", "rescue",
+    6, 600, "getin", "STR_DUWS_T_czpvn5z1", "rescue",
     _build,
     { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 },
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_builderspot", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_buildertask", 0]],

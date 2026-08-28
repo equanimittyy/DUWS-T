@@ -167,7 +167,7 @@ private _build = {
 };
 
 private _spec = [
-    5, 1000, "kill", "STR_DUWS_T_16dh939j", "STR_DUWS_T_c5", "sniperhunt",
+    5, 1000, "kill", "STR_DUWS_T_16dh939j", "sniperhunt",
     _build,
     { (_this findIf { alive _x }) < 0 },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperletsdothis", 8]],

@@ -77,7 +77,7 @@ private _build = {
 };
 
 private _spec = [
-    17, 600, "kill", "STR_DUWS_T_RECON_PATROL_DESC", "STR_DUWS_T_c17", "reconpatrol",
+    17, 600, "kill", "STR_DUWS_T_RECON_PATROL_DESC", "reconpatrol",
     _build,
     // Win when the recon team is dead: findIf returns -1 once no unit of it is left alive.
     { (_this findIf { alive _x }) < 0 },

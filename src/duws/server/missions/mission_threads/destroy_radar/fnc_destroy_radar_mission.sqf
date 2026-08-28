@@ -89,7 +89,7 @@ private _build = {
 };
 
 private _spec = [
-    10, 400, "destroy", "STR_DUWS_T_n4uc7t2x", "STR_DUWS_T_c10", "cache",
+    10, 400, "destroy", "STR_DUWS_T_n4uc7t2x", "cache",
     _build,
     { !alive _this || (damage _this) == 1 },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_radarletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_radarcopy", 0]],

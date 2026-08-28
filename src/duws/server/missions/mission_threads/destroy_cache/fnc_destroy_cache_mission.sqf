@@ -112,7 +112,7 @@ private _onWin = {
 };
 
 private _spec = [
-    9, 400, "destroy", "STR_DUWS_T_geryeddp", "STR_DUWS_T_c9", "cache",
+    9, 400, "destroy", "STR_DUWS_T_geryeddp", "cache",
     _build,
     { ((!alive (_this select 0)) || (damage (_this select 0)) == 1) && ((!alive (_this select 1)) || (damage (_this select 1)) == 1) },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_cachecopy", 0]],
