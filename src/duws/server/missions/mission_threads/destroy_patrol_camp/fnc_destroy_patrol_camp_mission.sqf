@@ -78,35 +78,54 @@ private _build = {
         };
 
         // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items, drawn from the shared
-        // document pool. Spawned in the world and left to physics rather than seated on a measured surface --
-        // each item is dropped a metre over the table and settles onto the top on its own. Everything stays
-        // simulated (createVehicle's default): fnc_intelAnalysis takes these from the player's inventory, so a
-        // frozen holder would lose its pickup, and the table has to stay a live body under them. Damage is
-        // switched off once settled so stray patrol fire near the camp cannot destroy the loot or the table.
+        // document pool. The table is the only body left to physics -- it settles on the terrain, is forced
+        // upright if it settled badly tilted, then frozen as a fixed anchor. Each item is then seated at a
+        // measured slot on the table top and frozen hovering, so the loot lands in the same readable row every
+        // time rather than scattering off a one-metre drop. Damage is off on all of it so stray patrol fire
+        // near the camp cannot destroy the loot or the table.
+        //
+        // The item freeze rides on unsimulated ground-holders staying loot-able: fnc_intelAnalysis pulls these
+        // from the player's inventory, so if a build ever delists a frozen holder from the pickup panel the
+        // payout goes dead-silent. Recovery is to leave the items simulated (drop _hover near 0 so they seat
+        // with no drop) rather than freeze them.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
-            // Let the table settle on the terrain before dropping loot onto it.
-            sleep 1;
-            private _tPos = getPosATL _table;
-            private _items = [];
+            private _hover = 0.05;   // gap above the table top; raise if an item clips the mesh
+
+            // Settle on the terrain, then lock as the slot anchor. enableSimulationGlobal (not local): a
+            // client left simulating renders it toppling off the anchor.
+            sleep 2;
+            // Toppled or steep past ~18 degrees: physics gave up on this spot. Reset to the row's authored
+            // transform on the terrain -- reorient AND re-pin, since a flip usually slides it off the slot too.
+            // A flat table with a floating edge on a slope beats one on its back; mild tilt is left conformed.
+            if (((_table vectorUp) select 2) < 0.95) then {
+                private _tRow = _staticsArray select _tableIdx;
+                _table setVectorUp [0, 0, 1];
+                _table setPosATL [_cx + (_tRow select 1), _cy + (_tRow select 2), 0];
+                _table setDir (_tRow select 4);
+            };
+            _table allowDamage false;
+            _table enableSimulationGlobal false;
+
+            // Fixed local slots on the table top (boundingBoxReal max-corner Z), filled left-to-right by
+            // whatever rolled. fnc_duws_keep stamps `persistent`, which fnc_repetitive_cleanup never reaps, so
+            // an unlooted item survives the GC until fnc_mission_end releases the key. The table needs no keep
+            // -- fnc_composition_place already filed it under this key when it placed it.
+            private _topZ = (boundingBoxReal _table select 1) select 2;
+            private _slots = [[-0.2, 0, _topZ + _hover], [0, 0, _topZ + _hover], [0.2, 0, _topZ + _hover]];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
                     private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
-                    _items pushBack (createVehicle [_cls,
-                        [(_tPos select 0) + (0.2 * (_i - 1)), _tPos select 1, (_tPos select 2) + 1], [], 0, "CAN_COLLIDE"]);
+                    private _p = _table modelToWorld (_slots select _i);
+                    private _obj = createVehicle [_cls, _p, [], 0, "CAN_COLLIDE"];
+                    _obj setPosATL _p;
+                    _obj setVectorUp [0, 0, 1];
+                    _obj allowDamage false;
+                    _obj enableSimulationGlobal false;
+                    [_obj, "mission_patrol_camp"] call fnc_duws_keep;
                 };
             };
-            // Let the items rest, then lock down: damage off, simulation left on. fnc_duws_keep stamps
-            // `persistent`, which fnc_repetitive_cleanup never reaps, so an unlooted item survives the GC until
-            // fnc_mission_end releases the key. The table needs no keep here -- fnc_composition_place already
-            // filed it under this key when it placed it.
-            sleep 1;
-            _table allowDamage false;
-            {
-                _x allowDamage false;
-                [_x, "mission_patrol_camp"] call fnc_duws_keep;
-            } forEach _items;
         };
 
         // The camp's guard team: close patrol centred on this camp. This is the objective -- all camp teams
