@@ -499,9 +499,16 @@ fnc_site_poller = {
 
         // Logged rather than assumed. This is the figure that decides whether the shape still holds:
         // a pass approaching a frame means per-site work has crept back inline.
+        private _passMs = round ((diag_tickTime - _t0) * 1000);
+        // Scheduled scripts share ~3 ms a frame; a pass well past that means per-site work crept back
+        // inline against the gate-then-dispatch rule. WARN not DEBUG so it shows at the default level.
+        if (_passMs > 15) then {
+            ["WARN", "STREAM", format ["site pass %1 ms over ceiling (%2 sites) -- work may have crept inline",
+                _passMs, count DUWS_sites]] call fnc_log;
+        };
         if (duws_log_level >= 4) then {
             ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms",
-                count DUWS_sites, round ((diag_tickTime - _t0) * 1000)]] call fnc_log;
+                count DUWS_sites, _passMs]] call fnc_log;
         };
     };
 };

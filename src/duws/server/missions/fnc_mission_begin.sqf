@@ -24,6 +24,13 @@ if (_remaining > 0) exitWith {
 		_missionType, _remaining]] call fnc_log;
 	false
 };
+// Reward/name/deadline globals below aren't bound to the mission -- each start overwrites them, safe
+// only while Mission_available gates a second start out. If one's already live, its reward gets clobbered.
+if !(missionNamespace getVariable ["Mission_available", true]) then {
+	["ERROR", "MISSION", format
+		["Mission type=%1 starting while another is still live -- reward globals will be clobbered",
+		_missionType]] call fnc_log;
+};
 // Stamp the gate at the start of every mission: the next one waits three in-game hours from here,
 // measured on the campaign clock so a rest skips it. Broadcast so the readout and map agree.
 DUWS_lastMissionStartDate = dateToNumber date;
