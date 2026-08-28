@@ -45,6 +45,17 @@ re-addressing every line reads as stilted.
   *cleared*. A swappable *target confirmed destroyed, good work* reads as a stamped template because
   it is one. The test: read the brief, the copy and the close back as one radio exchange; if the close
   would sit unchanged under a different mission's brief, it is too generic to earn its place.
+- **A specific line for a win and for a distinctive loss; the shared notice for a plain timeout.** A win
+  earns its own close (above). A *distinctive* loss — one with its own event, the prize destroyed, the
+  hostage killed, the target driven off — earns a line that names that event. A plain deadline expiry
+  does not: it routes to the one shared notice (`fnc_mission_timeout_notice`, `STR_DUWS_T_mission_deadline_fail`),
+  never a per-mission timeout string. Two reasons. One, maintainability: one line across every default
+  mission, not a near-duplicate *we're out of time* per thread. Two, a timeout line must not assert world
+  state. The clock running out does not mean the objective is gone, untouched, recovered or relocated —
+  the player may still destroy or finish it after the deadline — so a bespoke *the cache remains intact*
+  can be flatly false by the time it is read. The shared notice states only what the deadline proves: the
+  time ran out. Reserve `_failLine` (and a custom fail branch's spoken line) for the distinctive loss; let
+  the timeout fall through to the notice.
 - **The concrete nouns the player plans against** — the place, the clock, the vehicle — named, not
   gestured at. The informant brief is the worked example: *an enemy informant is operating out of
   %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and
