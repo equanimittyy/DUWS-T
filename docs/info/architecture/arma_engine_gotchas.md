@@ -1647,3 +1647,17 @@ terrain-height `setPosWorld`, never bare `setPos`. `fnc_static_place`'s `"world"
 path (terrain height + the row's own Z) and `"pos"` is the `setPos` one; the zone prefabs and hardpoints
 use `"world"`, so any new composition-style placement should too. `setPos` is only right when the point
 is known clear of buildings and a terrain-relative height is genuinely wanted.
+
+## `getVariable` with a default returns `nil` on a null object, not the default
+
+`_obj getVariable ["name", _default]` returns `_default` only when `_obj` is a live object missing that
+variable. On a **null** object it returns `nil` regardless of the default supplied. A `select`/`findIf`
+filter that walks `allUnits + vehicles` -- either can hand back a null reference -- and compares the
+result (`_x getVariable ["k", -1] == _token`) then evaluates `nil == _token`, which throws a generic
+error. The throw aborts the whole `select`, so a filter that looks total silently returns nothing: a
+mission teardown that flagged its units this way flagged none, and nothing was ever cleaned up. The log
+line that would have reported the count sits past the throw, so its absence is the tell.
+
+**How to apply:** guard the element before the `getVariable`, short-circuited so it never runs on a null:
+`(allUnits + vehicles) select {!isNull _x && {_x getVariable ["k", -1] == _token}}`. The same shape
+protects any `findIf`/`count`/`select` over a live-entity census that reads a variable and compares it.

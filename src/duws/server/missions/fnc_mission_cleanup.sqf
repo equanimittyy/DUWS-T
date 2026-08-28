@@ -33,7 +33,10 @@ if (_compKey != "") then { [_compKey] call fnc_duws_release };
 // and the props they stood among expire together. Dead owned men are already collected by the
 // sweep's allDeadMen census -- keep-radius protected, so corpse intel stays reachable.
 if (_token >= 0) then {
-    private _owned = (allUnits + vehicles) select {_x getVariable ["DUWS_missionOwner", -1] == _token};
+    // isNull guard first, short-circuited: allUnits + vehicles can hand back a null reference, and
+    // getVariable on a null object returns nil, not the -1 default -- nil == _token then throws a
+    // generic error that aborts the whole select, so nothing gets flagged and the mission never cleans up.
+    private _owned = (allUnits + vehicles) select {!isNull _x && {_x getVariable ["DUWS_missionOwner", -1] == _token}};
     {
         _x setVariable ["DUWS_binMe", true];
         _x setVariable ["DUWS_binAt", time + 300];
