@@ -267,9 +267,10 @@ private _finish = {
     _tank setVariable ["persistent", false];
     _convoyGrp setVariable ["DUWS_convoy_stop", true];
     deleteMarker _arrow;
-    [_marker] call fnc_missionMarkerClear;
-    [_taskId, _status] call fnc_missionTaskEnd;
-    [_targetpos, DA_RADIUS, _compKey] call fnc_mission_end;
+    // Mechanical teardown through the shared chokepoint: marker clear, task state, slot release. The
+    // branches keep their own outcome line, reward and timeout notice, so finish speaks and pays nothing
+    // here (line [], pay false, notify false).
+    [_mission_name, _taskId, _status, _targetpos, DA_RADIUS, [_marker], [], false, _compKey, false, false] call fnc_mission_finish;
 };
 
 // The repair race. WIN when the tank is denied (crew all dead, or tank destroyed); FAIL when a live
