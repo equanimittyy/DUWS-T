@@ -114,6 +114,7 @@ fnc_time_clock = compile preprocessFileLineNumbers "duws\server\missions\fnc_tim
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_run = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_run.sqf";
+fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
 
 // Shared convoy driving: a self-generated road-graph route builder, a slot layout that seats the column ON
