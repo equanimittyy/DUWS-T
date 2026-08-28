@@ -12,8 +12,6 @@ params ["_MissionPos", "_mission_name"];
 if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 400;
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
 _deadline = DUWS_curDeadlineAt;
 
 // Nearest live OPFOR standalone RADIO mast to the anchor -- the same scan the offer's site-finder ran,
@@ -31,14 +29,12 @@ private _bestD = 2500;
 } forEach DUWS_hardpoints;
 if (_hpKey isEqualTo "") exitWith { [3, "STR_DUWS_T_crtzxs0j", "no_radio_hp"] call fnc_mission_abort };
 
-_markername2 = [_hpPos, _radius] call fnc_missionMarkerData;
-private _VARtaskgeneratedName = format ["tower%1%2", round (_hpPos select 0), round (_hpPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _hpPos, "destroy"] call fnc_missionTaskCreate;
-
-// One tasking line: the mast and its crew already stand on the map, so there is no spawn-up to narrate.
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_toweroverlord"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_towercopy"] remoteExec ["fnc_duws_dialogue", 0];
+// One tasking line either side of the marker/task: the mast and its crew already stand on the map, so
+// there is no spawn-up to narrate.
+private _taskId = format ["tower%1%2", round (_hpPos select 0), round (_hpPos select 1)];
+private _marker = [_hpPos, _radius, _taskId, localize "STR_DUWS_T_dgpqenyw", _mission_name, "destroy",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_toweroverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_towercopy"]]
+] call fnc_mission_present;
 
 // Win when the hardpoint's row leaves DUWS_hardpoints -- watch the hardpoint's liveness, not the tower
 // object. A gone row means the hardpoint fell and its bounty is already paid. Deadline covers it left up.
@@ -48,11 +44,7 @@ waitUntil {
 };
 
 if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && time > _deadline) exitWith {
-    [_VARtaskgeneratedName, _markername2, "", _hpPos, _radius, false] call fnc_mission_deadline_fail;
+    [_mission_name, _taskId, "FAILED", _hpPos, _radius, [_marker]] call fnc_mission_finish;
 };
 
-[_markername2] call fnc_missionMarkerClear;
-[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_towerclose"] remoteExec ["fnc_duws_dialogue", 0];
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_hpPos, _radius, "mission_destroy_tower"] call fnc_mission_end;
+[_mission_name, _taskId, "SUCCEEDED", _hpPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_towerclose"], true, "mission_destroy_tower"] call fnc_mission_finish;
