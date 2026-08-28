@@ -37,6 +37,10 @@ publicVariable "fnc_duws_deploy";
 // fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_place.sqf";
 
+// Settled-object counterpart to fnc_composition_place: seats simulated pieces (loot, live props) at rest
+// instead of freezing them. After fnc_duws_keep, which it calls; server-only, so not broadcast.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_place_settled.sqf";
+
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is

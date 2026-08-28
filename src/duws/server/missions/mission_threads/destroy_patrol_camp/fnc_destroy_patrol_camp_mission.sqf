@@ -78,20 +78,14 @@ private _build = {
         };
 
         // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items, drawn from the shared
-        // document pool. The table is the only body left to physics -- it settles on the terrain, is forced
-        // upright if it settled badly tilted, then frozen as a fixed anchor. Each item is then seated at a
-        // measured slot on the table top and attached to it, so the loot lands in the same readable row every
-        // time rather than scattering off a one-metre drop. Damage is off on all of it so stray patrol fire
-        // near the camp cannot destroy the loot or the table.
-        //
-        // Items are pinned with attachTo, not physics: a created ground-holder (Item_*) settles to the floor
-        // and a one-metre drop scatters, but an attached child holds its slot on the frozen table. Left
-        // un-frozen so it stays loot-able -- fnc_intelAnalysis pulls these from the player's inventory. If a
-        // build ever blocks taking an attached item, detach each after the attach and freeze it in place.
+        // document pool. The table settles on the terrain, is forced upright if it toppled, then frozen as a
+        // fixed anchor; the rolled items are seated on its top by fnc_place_settled, which keeps each simulated
+        // (so fnc_intelAnalysis can still take it from inventory) yet velocity-pinned so it does not scatter.
+        // Damage is off on all of it so stray patrol fire cannot destroy the loot or the table.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
-            private _hover = 0.05;   // gap above the table top; raise if an item clips the mesh
+            private _hover = 0.02;   // seat just above the top so it does not clip; small so there is no drop
 
             // Settle on the terrain, then lock as the slot anchor. enableSimulationGlobal (not local): a
             // client left simulating renders it toppling off the anchor.
@@ -108,22 +102,20 @@ private _build = {
             _table allowDamage false;
             _table enableSimulationGlobal false;
 
-            // Fixed model-space slots on the table top (boundingBoxReal max-corner Z), filled left-to-right by
-            // whatever rolled. The offset is the attachTo local offset, so it is measured in the table's own
-            // frame and follows the table's heading. fnc_duws_keep stamps `persistent`, which
-            // fnc_repetitive_cleanup never reaps, so an unlooted item survives the GC until fnc_mission_end
-            // releases the key. The table needs no keep -- fnc_composition_place already filed it.
+            // Roll the loot, then hand the chosen classes to the placer as model-space slots across the table
+            // top (boundingBoxReal max-corner Z), a hair above it. The layout lives here; placement -- seat,
+            // align, kill velocity, keep under the key -- lives in fnc_place_settled. The table needs no keep;
+            // fnc_composition_place already filed it. Kept objects are `persistent`, so fnc_repetitive_cleanup
+            // never reaps an unlooted item before fnc_mission_end releases the key.
             private _topZ = (boundingBoxReal _table select 1) select 2;
-            private _slots = [[-0.2, 0, _topZ + _hover], [0, 0, _topZ + _hover], [0.2, 0, _topZ + _hover]];
+            private _rows = [];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
                     private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
-                    private _obj = createVehicle [_cls, [_cx, _cy, 0], [], 0, "CAN_COLLIDE"];
-                    _obj attachTo [_table, _slots select _i];
-                    _obj allowDamage false;
-                    [_obj, "mission_patrol_camp"] call fnc_duws_keep;
+                    _rows pushBack [_cls, -0.2 + (0.2 * _i), 0, _topZ + _hover, 0];
                 };
             };
+            [_rows, _table, "mission_patrol_camp"] call fnc_place_settled;
         };
 
         // The camp's guard team: close patrol centred on this camp. This is the objective -- all camp teams
