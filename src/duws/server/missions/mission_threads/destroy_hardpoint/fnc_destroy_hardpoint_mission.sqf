@@ -1,15 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Destroy an EXISTING standalone OPFOR hardpoint -- any destructible type except RADIO (its own Destroy
-// Signal Tower mission) and MINEFIELD (a hazard, not an emplacement) -- rather than a spawned stand-in.
-// The emplacement, its crew and its destruction bounty are all owned by the hardpoint streamer; this
-// thread only points the task at one and pays the mission reward on top when it falls.
-//
-// Win is the hardpoint falling -- its DUWS_hardpoints row disappearing -- not any one object dying: the
-// streamer runs the per-type clearance test (garrison beaten, guns wrecked) and a cleared row is the
-// broadcast signal that the emplacement is gone by any means. The streamer removes the row and credits the
-// bounty in the same step, so the two payouts stack with no coupling here. The win watches broadcast
-// state (the DUWS_hardpoints row leaving), not a spawned object.
+// Points the task at an EXISTING OPFOR hardpoint -- any destructible type except RADIO (its own mission)
+// and MINEFIELD -- owned by the hardpoint streamer; this thread only tasks it and pays the mission reward
+// on top. The streamer owns the emplacement, its crew and its own bounty, so the two payouts stack here.
 params ["_MissionPos", "_mission_name"];
 if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 

@@ -27,11 +27,9 @@ private _site = [_MissionPos, _searchRadius, 13] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// A guard, not an else branch. The else this replaces announced the failure and handed the mission
-// slot back, then fell through and built the civilian, the markers and the triggers on a null
-// building anyway -- a mission the player was told had been cancelled, running while the campaign
-// believed no mission was live. exitWith leaves the thread from here because if/then is transparent
-// to it and nothing between this line and the thread body is a loop.
+// Abort here rather than fall through: a null building would otherwise build the civilian, markers and
+// triggers on nothing. exitWith leaves the thread because if/then is transparent to it and nothing above
+// the body is a loop.
 if (isNull _Building) exitWith {
     [13, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
@@ -91,10 +89,8 @@ _civilianMarker setMarkerSize [1, 1];
 [_civilian] spawn {
     params ["_unit"];
     sleep 1;
-    // Broadcast: playMoveNow is local, so run from the server the informant only panicked on a
-    // hosting player's screen and stood there calmly for every client. fnc_civ_arrest already
-    // reaches for the same command this way. Unkeyed on purpose -- it reissues every 5 s, so a
-    // joiner picks the animation up on the next pass without a queue entry per repeat.
+    // playMoveNow is local, so broadcast it or the informant animates only on the host's screen.
+    // Unkeyed on purpose -- it reissues every 5 s, so a joiner picks it up on the next pass.
     while {alive _unit} do {
         [_unit, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
         sleep 5;
@@ -102,10 +98,8 @@ _civilianMarker setMarkerSize [1, 1];
 };
 
 _civGroup deleteGroupWhenEmpty true;
-// The informant is the one WEST unit this thread raises; it used to be swept only by the mission's
-// radius pass. With that gone it needs an explicit owner so the teardown flags it like everything
-// else. Claim sets ownership only -- DUWS_binMe is stamped later at cleanup -- so this cannot delete
-// him mid-escort.
+// The one WEST unit here needs an explicit owner so teardown flags it. Claim sets ownership only --
+// DUWS_binMe is stamped later at cleanup -- so this cannot delete him mid-escort.
 [_civGroup] call fnc_mission_claim;
 
 [_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
@@ -200,7 +194,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskName], false] };
 
-    // defined inside the thread so it is in scope here
     private _spawnOpforWave = {
         params ["_center", "_dist", "_targetObject"];
         private _spawnPos = [];

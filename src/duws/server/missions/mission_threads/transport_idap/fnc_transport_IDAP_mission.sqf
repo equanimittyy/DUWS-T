@@ -1,10 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Recover an aid truck OPFOR has hijacked and hand it back to the IDAP crew. The truck sits parked under
-// an OPFOR guard, the same shape as the stolen supply truck (fnc_steal_supply_mission is the reference for
-// the spawn and guard force); the crew wait in the nearest neutral/BLUFOR town, and the win is delivering
-// the truck to within reach of them. The offer is gated on such a town existing (fnc_transport_IDAP_site);
-// the thread re-derives the same town here and aborts if the war state left none between offer and start.
 params ["_MissionPos", "_mission_name"];
 if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -25,10 +19,9 @@ _message2 = localize "STR_DUWS_T_idapacteamgo";
 _messageClose = localize "STR_DUWS_T_idapoverlordclose";
 _messageLost = localize "STR_DUWS_T_idaptruckdown";
 
-// The crew's haven: nearest neutral/BLUFOR town to the truck, matching what the site-finder vetted. A town
-// in the OPFOR band (its centre in the broadcast enemy list) is no hand-over point. duws_town_circles is
-// index-aligned with civ_locations, so its index is the town index fnc_town_rep_adjust takes. If the last
-// non-enemy town flipped hostile in the gap, there is nowhere to deliver: release the gate and abort.
+// The crew's haven: nearest neutral/BLUFOR town, matching what the site-finder vetted (a town in the OPFOR
+// band is no hand-over point). duws_town_circles is index-aligned with civ_locations, so its index is what
+// fnc_town_rep_adjust takes. If the last non-enemy town flipped in the gap, abort.
 private _enemyTowns = missionNamespace getVariable ["DUWS_enemy_town_pos", []];
 private _circles = missionNamespace getVariable ["duws_town_circles", []];
 private _townIdx = -1;
@@ -59,8 +52,7 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 _markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, "truck"] call fnc_mission_present;
 
-// Brief opens the mission, before the truck/guard spawn-up below (tens of seconds): the spawn must not
-// delay the opening line. Speakers and messages are fixed strings, independent of the spawned convoy.
+// Brief opens before the spawn-up so the spawn does not delay the opening line; speakers are fixed strings.
 [_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
@@ -104,10 +96,9 @@ _obj4 = createVehicle [_static2, [(_vehPos select 0)-10, (_vehPos select 1)-10],
 [_obj4, "mission_transport_idap"] call fnc_duws_keep;
 sleep 1;
 
-// Guard force, the stolen-supply shape: idle team on the prize, a close and two wide foot patrols, plus
-// vehicle patrols that scale with the enemy's earned AP -- DUWS_fnc_tokenClass returns "" for a token
-// gated out at the current tier, so a car joins from motorised (60 AP) and a second car-or-ifv from
-// mechanised (150 AP).
+// Guard force, the stolen-supply shape: idle team, close + two wide foot patrols, plus vehicle patrols
+// that scale with earned AP -- tokenClass returns "" for a gated token, so a car joins at 60 AP and a
+// second car-or-ifv at 150 AP.
 private _claim = { [_this] call fnc_mission_claim };
 (["team", _targetpos, _radius, "none", _targetpos] call fnc_spawn_team) call _claim;   // idle, on the objective
 (["team", _targetpos, _radius, "closepatrol"] call fnc_spawn_team) call _claim;

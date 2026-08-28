@@ -4,9 +4,8 @@ params ["_MissionPos", "_mission_name"];
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
 
-    // The objective itself: kept for the mission's duration so the abandoned-vehicle clause cannot
-    // collect it. A player who disables it and takes half an hour would otherwise find the thing they
-    // were sent for gone, with no way left to finish.
+    // Kept for the mission's duration so the abandoned-vehicle sweep cannot collect the prize while a
+    // player takes their time.
     private _truck1 = opfor_TRANS_TRUCK_X createVehicle _targetpos;
     [_truck1, "mission_steal_supply"] call fnc_duws_keep;
     clearMagazineCargoGlobal _truck1;

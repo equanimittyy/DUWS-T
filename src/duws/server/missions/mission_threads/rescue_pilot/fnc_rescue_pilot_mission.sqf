@@ -220,12 +220,10 @@ private _fncScript = {
                         [_caller, _pilot] call DUWS_fnc_autoDropPilot;
                         hint localize "STR_DUWS_T_auto_drop_hint";
                     };
-                    // Sampled here for the load action's condition below. An action condition is
-                    // evaluated every frame while its action is in range, so holding the query
-                    // there ran a spatial search at frame rate for the whole carry -- which is
-                    // exactly when the player is under fire. This thread already lives for the
-                    // length of the carry and answers the same question twice a second.
-                    // Local, like the condition that reads it: both run on the carrier's machine.
+                    // Sampled here, not in the load action's condition: an action condition runs every
+                    // frame in range, so a spatial search there would run at frame rate through the whole
+                    // carry. This thread already lives that long and answers twice a second. Local, like
+                    // the condition that reads it.
                     _caller setVariable ["DUWS_carryVehicleNear",
                         count (_caller nearEntities [["Car","Tank","Helicopter","Ship"], 5]) > 0];
                     sleep 0.5;
@@ -533,9 +531,7 @@ _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 
-// Guaranteed, and called rather than spawned into a client function: completing the mission is
-// the gate, and the shape this replaces rolled a chance from a server thread through a function
-// that began `if (!hasInterface) exitWith {}`, so on a dedicated server the reward evaporated.
-// The mission site stands in for the earner's position: a server thread has no one player to ask,
-// and this is the ground the rescue was fought over.
+// Guaranteed and called, not spawned into a client function: intel_payout began `if (!hasInterface)
+// exitWith {}`, so spawning it from this server thread evaporated the reward on a dedicated server. The
+// mission site stands in for the earner's position -- a server thread has no one player to ask.
 if (hardcore_mode_enable) then {[_targetpos] call fnc_intel_payout};

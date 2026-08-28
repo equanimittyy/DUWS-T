@@ -1,21 +1,14 @@
 // Locality: server; the composition, spawns and monitor all run on the server. Callers remoteExec to 2.
-//
-// A cluster of 1-3 enemy recon camps spread across a 1 km zone, each hidden in treeline and betrayed by
-// its campfire smoke. Each camp holds a close-patrol team (the objective) and seeds a roaming patrol that
-// circuits between all the camps. Win when every camp team is dead; the roaming patrols are ambience, not
-// part of the win. Each camp's table may hold 0-3 lootable intel items.
 
 params ["_MissionPos", "_mission_name"];
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
 
-    // Camp centres: 1-3, spread across the zone with a minimum separation so the smoke columns read as
-    // distinct objectives rather than one blob. Each is heavily biased into forest: a candidate seats only
-    // where enough trees stand around it, so camps sit deep in woods rather than open ground. findSafePos
-    // still holds the centre 8 m clear of objects, so the camp gets a small clearing ringed by the trees.
-    // The tree demand relaxes partway through the tries -- deep forest first, mere treeline as a fallback --
-    // so a thinly wooded zone still seats every camp instead of collapsing them onto the anchor.
+    // Camp centres: 1-3, min-separated so the smoke columns read as distinct objectives. Each is biased
+    // into forest -- a candidate seats only where enough trees stand around it (findSafePos still holds the
+    // centre 8 m clear, so the camp gets a clearing ringed by trees). The tree demand relaxes late in the
+    // search so a thinly wooded zone still seats every camp rather than collapsing them onto the anchor.
     private _campCount = 1 + floor random 3;
     private _campCentres = [];
     private _campTreeRadius = 60;
@@ -39,10 +32,9 @@ private _build = {
         private _cx = _campPos select 0;
         private _cy = _campPos select 1;
 
-        // The camp composition, authored in Eden -- tents, two tables, sandbag cover, wood piles, ammo and
-        // clutter, and a campfire. Rows are [class, offX, offY, offZ, dir, isWeapon], offsets from the camp
-        // centre; offZ unused (props seat on terrain). Left simulated (no hardening): the smoke-column particle
-        // stood on the campfire below is the beacon, and a particle source needs simulation to emit.
+        // Camp composition (Eden-authored). Rows are [class, offX, offY, offZ, dir, isWeapon] from the camp
+        // centre; offZ unused (props seat on terrain). Left simulated, not hardened: the smoke-column
+        // particle on the campfire is the beacon, and a particle source needs simulation to emit.
         // --DUWS-COMPOSITION BEGIN name="Mission: Patrol Camp" schema=A--
         private _staticsArray = [
             ["Land_TentDome_F", -3.95898, 3.27539, -5.90000000000312E-05, 45, false],
@@ -71,12 +63,9 @@ private _build = {
         // --DUWS-COMPOSITION END--
         private _props = [_staticsArray, [_cx, _cy], "mission_patrol_camp", [0, [], []]] call fnc_composition_place;
 
-        // Stand a medium wood-smoke column on the campfire as the beacon. inflame would light only
-        // campfire-class props and gives a weak, low wisp; this reads from across the zone. Built per client
-        // (DUWS_fnc_campSmoke) rather than as one global object: the taller look needs a #particlesource,
-        // which carries no config and so must have its emitter set locally on each machine. Sent to every
-        // present client, and JIP-tied to the fire object so a late joiner gets the column while the camp
-        // stands but not after it is retired (the fire is then gone). The source self-cleans with the fire.
+        // Wood-smoke column on the campfire as the beacon -- inflame gives only a weak low wisp. Built per
+        // client (DUWS_fnc_campSmoke): the #particlesource carries no config, so its emitter is set locally
+        // on each machine. JIP-tied to the fire object so a late joiner rebuilds it while the camp stands.
         private _fireIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_Campfire_F" };
         if (_fireIdx >= 0) then {
             private _fire = _props param [_fireIdx, objNull];
@@ -85,11 +74,10 @@ private _build = {
             };
         };
 
-        // Intel on the table: three independent 1-in-3 rolls, so a camp holds 0-3 items, drawn from the shared
-        // document pool. The table settles on the terrain, is forced upright if it toppled, then frozen as a
-        // fixed anchor; the rolled items are seated on its top by fnc_place_settled, which keeps each simulated
-        // (so fnc_intelAnalysis can still take it from inventory) yet velocity-pinned so it does not scatter.
-        // Damage is off on all of it so stray patrol fire cannot destroy the loot or the table.
+        // Intel on the table: three independent 1-in-3 rolls (0-3 items) from the shared pool. The table
+        // settles, is forced upright if toppled, then frozen as the anchor; fnc_place_settled seats the items
+        // on top -- each kept simulated (so fnc_intelAnalysis can take it) yet velocity-pinned. Damage off
+        // throughout so stray fire cannot destroy loot or table.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
@@ -110,14 +98,10 @@ private _build = {
             _table allowDamage false;
             _table enableSimulationGlobal false;
 
-            // Roll the loot, then hand the chosen classes to the placer as model-space slots on the table top
-            // (boundingBoxReal max-corner Z), a hair above it. Each item scatters to a random spot and heading
-            // rather than a fixed row, inset from the edges by _edgeMargin so nothing overhangs, and kept
-            // _itemSep off the others so two documents do not land on the same spot and z-fight. The layout
-            // lives here; placement -- seat, align, kill velocity, keep under the key -- lives in
-            // fnc_place_settled. The table needs no keep; fnc_composition_place already filed it. Kept objects
-            // are `persistent`, so fnc_repetitive_cleanup never reaps an unlooted item before fnc_mission_end
-            // releases the key.
+            // Each item scatters to a random spot and heading on the table top (boundingBoxReal max-corner Z),
+            // inset by _edgeMargin so nothing overhangs and kept _itemSep apart so two never z-fight. Placement
+            // (seat, align, kill velocity, keep under the key) lives in fnc_place_settled. Kept objects are
+            // `persistent`, so fnc_repetitive_cleanup never reaps an unlooted item before mission end.
             private _bb   = boundingBoxReal _table;
             private _bMin = _bb select 0;
             private _bMax = _bb select 1;
@@ -146,8 +130,7 @@ private _build = {
             [_rows, _table, "mission_patrol_camp"] call fnc_place_settled;
         };
 
-        // The camp's guard team: close patrol centred on this camp. This is the objective -- all camp teams
-        // dead wins the mission.
+        // The camp's guard team -- the objective; all camp teams dead wins.
         private _team = ["team", _campPos, 180, "closepatrol"] call fnc_spawn_team;
         if (!isNull _team) then {
             [_team] call fnc_mission_claim;

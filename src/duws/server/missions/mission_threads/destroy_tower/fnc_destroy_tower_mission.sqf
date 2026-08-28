@@ -1,13 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Destroy an EXISTING standalone OPFOR RADIO hardpoint (a signal mast, DUWS_radioMastClass) rather than
-// a spawned stand-in. The mast, its crew and its destruction bounty are all owned by the hardpoint
-// streamer; this thread only points the task at one and pays the mission reward on top when it falls.
-// Win is the hardpoint falling -- its DUWS_hardpoints row disappearing -- not the tower object dying:
-// the mission never handles the streamer-owned mast, and a cleared row is the broadcast signal for the
-// hardpoint being gone by any means (player, support, anything the streamer recognizes). The streamer
-// removes the row and credits the bounty in the same step, so the two payouts stack with no coupling
-// here. The win watches broadcast state (the DUWS_hardpoints row leaving), not the tower object.
+// Points the task at an EXISTING OPFOR RADIO hardpoint (DUWS_radioMastClass) owned by the hardpoint
+// streamer -- this thread only tasks it and pays the mission reward on top; the streamer owns the mast,
+// its crew and its own bounty, so the two payouts stack with no coupling here.
 params ["_MissionPos", "_mission_name"];
 if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -36,8 +30,8 @@ private _marker = [_hpPos, _radius, _taskId, localize "STR_DUWS_T_dgpqenyw", _mi
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_toweroverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_towercopy"]]
 ] call fnc_mission_present;
 
-// Win when the hardpoint's row leaves DUWS_hardpoints -- watch the hardpoint's liveness, not the tower
-// object. A gone row means the hardpoint fell and its bounty is already paid. Deadline covers it left up.
+// Win when the hardpoint's row leaves DUWS_hardpoints -- watch the row, not the tower object; a gone row
+// means it fell (by any means) and its bounty is already paid. Deadline covers it left standing.
 waitUntil {
     sleep 5;
     (DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) < 0 || time > _deadline

@@ -1,10 +1,9 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
 
-// Refuse a second builder while one still lives -- ahead of the fnc_mission_begin call below, so the
-// refused mission claims no reward, deadline or token. begin also stamps the rest timer; since it
-// never runs here, stamp it by hand so aborting still spends this cycle and the next mission offer waits out
-// the rest instead of the abort being free to spam.
+// Refuse a second builder while one still lives -- ahead of fnc_mission_begin, so the refused mission
+// claims no reward, deadline or token. begin never runs here, so stamp the rest timer by hand, or the
+// abort would be free to spam the next offer.
 if (!isNil "BLD1" && {alive BLD1}) exitWith {
     [{hint localize "STR_DUWS_T_mfxb090t"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
     DUWS_lastMissionStartDate = dateToNumber date;
@@ -15,10 +14,9 @@ if (!isNil "BLD1" && {alive BLD1}) exitWith {
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
 
-    // The objective itself: kept for the mission's duration so the abandoned-vehicle clause cannot
-    // collect it. A player who disables it and takes half an hour would otherwise find the thing they
-    // were sent for gone, with no way left to finish. Published as the global BLD1 -- the R3F factory
-    // init on win waits on it, and the next-offer gate above tests it.
+    // Kept for the mission's duration so the abandoned-vehicle sweep cannot collect the prize while a
+    // player takes their time. Published as the global BLD1 -- the R3F factory init on win waits on it,
+    // and the next-offer gate above tests it.
     private _bld1 = opfor_REPAIR_TRUCK_X createVehicle _targetpos;
     [_bld1, "mission_steal_builder"] call fnc_duws_keep;
     BLD1 = _bld1;
