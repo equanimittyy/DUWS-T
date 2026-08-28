@@ -36,6 +36,15 @@ re-addressing every line reads as stilted.
 - **Service kill vocabulary, not shooter-game idiom.** A result reads *eliminated*, *neutralised*,
   *confirmed KIA*, *confirmed kill*, *disposed of*. Vary the verb across the elimination missions so
   four near-identical confirmations do not read as one template.
+- **An exchange is a conversation, not a form to fill in.** Each line answers the one before it, and a
+  closing line answers the brief that opened the exchange — it names the concrete outcome *this*
+  mission produced, not a confirmation that would fit any target. `supplytruckwin` lands the specific
+  payoff (*truck's secure at base, good work. Enemy stores are being logged into your arsenal now*),
+  `towerclose` names the effect (*the radio tower is down and enemy comms with it*), and a close can
+  answer the copy's own words — a squad that radioed *moving to clear them out* is told the camp is
+  *cleared*. A swappable *target confirmed destroyed, good work* reads as a stamped template because
+  it is one. The test: read the brief, the copy and the close back as one radio exchange; if the close
+  would sit unchanged under a different mission's brief, it is too generic to earn its place.
 - **The concrete nouns the player plans against** — the place, the clock, the vehicle — named, not
   gestured at. The informant brief is the worked example: *an enemy informant is operating out of
   %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and
