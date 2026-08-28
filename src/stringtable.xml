@@ -4274,16 +4274,16 @@
                 <English>Allseer has tracked an enemy recon patrol working this area. Kill them all.</English>
             </Key>
             <Key ID="STR_DUWS_T_DESTROY_PATROL_CAMP_DESC">
-                <Original>Enemy recon patrols have made camp in the treeline. Follow the campfire smoke and destroy every camp team.</Original>
-                <English>Enemy recon patrols have made camp in the treeline. Follow the campfire smoke and destroy every camp team.</English>
+                <Original>Enemy patrols have made camp in the treeline. Destroy every camp.</Original>
+                <English>Enemy patrols have made camp in the treeline. Destroy every camp.</English>
             </Key>
             <Key ID="STR_DUWS_T_PATROLCAMP_BRIEF">
-                <Original>Alpha 1-1, Overlord. Enemy recon patrols are camped in the treeline, watching our movements. Look for the campfire smoke and wipe out the camp teams.</Original>
-                <English>Alpha 1-1, Overlord. Enemy recon patrols are camped in the treeline, watching our movements. Look for the campfire smoke and wipe out the camp teams.</English>
+                <Original>New tasking Alpha 1-1. Enemy patrols are camped in the area, watching our movements. Wipe out their camps.</Original>
+                <English>New tasking Alpha 1-1. Enemy patrols are camped in the area, watching our movements. Wipe out their camps.</English>
             </Key>
             <Key ID="STR_DUWS_T_PATROLCAMP_COPY">
-                <Original>Overlord, Alpha 1-1. Moving to smoke them out.</Original>
-                <English>Overlord, Alpha 1-1. Moving to smoke them out.</English>
+                <Original>Copy that Overlord, moving to clear them out.</Original>
+                <English>Copy that Overlord, moving to clear them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_reconpatrolletsdothis">
                 <Original>Alpha 1-1, Allseer has located an enemy recon patrol in the treeline, marked near %1. Eliminate them.</Original>
