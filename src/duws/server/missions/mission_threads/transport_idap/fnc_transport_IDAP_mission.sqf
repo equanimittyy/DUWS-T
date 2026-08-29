@@ -124,8 +124,9 @@ _unitClasses = [
     "C_IDAP_Man_Aidworker_05_F",
     "C_IDAP_Man_Aidworker_06_F"
 ];
+private _crewAnims = ["Acts_ShowingTheRightWay_loop", "Acts_JetsShooterNavigate_loop_m", "Acts_CivilIdle_2"];
 _groupUnits = [];
-for "_i" from 1 to 5 do { _groupUnits pushBack (selectRandom _unitClasses); };
+for "_i" from 1 to (count _crewAnims) do { _groupUnits pushBack (selectRandom _unitClasses); };
 _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
 
 {
@@ -135,10 +136,11 @@ _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]]
     _x disableAI "MOVE";
     _x disableAI "PATH";
     _x setBehaviour "CARELESS";
-    [_x] spawn {
-        params ["_unit"];
+    // Re-applied on a timer so a non-looping act (Acts_CivilIdle_2) replays instead of settling to a stand.
+    [_x, _crewAnims select _forEachIndex] spawn {
+        params ["_unit", "_anim"];
         while {alive _unit} do {
-            _unit switchMove "Acts_JetsShooterNavigate_loop_m";
+            _unit switchMove _anim;
             sleep 5;
         };
     };
