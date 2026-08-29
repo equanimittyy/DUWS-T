@@ -288,8 +288,10 @@ match the win.
 **Dialogue.** IDAP opens with a distress call (VOICE), Overlord copies and tasks the player (NET), the
 player's team acknowledges (VOICE); IDAP thanks the player on delivery (VOICE). A destroyed truck is
 Overlord's loss to report on NET (`STR_DUWS_T_idaptruckdown`), a deadline the shared
-`fnc_mission_timeout_notice` (Overlord, NET). CP/AP and the deadline band are unchanged pending the
-reworks pricing pass.
+`fnc_mission_timeout_notice` (Overlord, NET). The deadline band is set to 0h30-1h00, matching the
+steal-and-drive pair (Steal Supply Truck, Steal Builder Vehicle) whose shape it shares. CP/AP are held
+at 20/10: it shares the steal pair's fight but pays less CP/AP because the +3 REP carries part of its
+value.
 
 ## Planned reworks (decided, not built)
 
@@ -345,7 +347,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
 | 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale (spec ready, not built) |
-| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done (gameplay + REP built; CP/AP + deadline pending) |
+| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done |
 
 ## Pricing rework (command missions)
 
@@ -356,8 +358,8 @@ Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Si
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
 note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **Every
 still-stale mission carries its old numbers and is open pricing work** -- the 2 stale rows (Rescue
-Pilot, Protect Informant). Recover Humanitarian Supply Truck is built but its CP/AP and deadline are
-unchanged, still open pricing work.
+Pilot, Protect Informant). Recover Humanitarian Supply Truck is fully priced: 20/10, deadline matching
+the steal-and-drive pair.
 
 ## Per-mission rework tracker
 
@@ -387,6 +389,6 @@ change cell is the current idea, not a locked spec.
 ## Open decisions
 
 - Build the two remaining planned reworks above (Rescue Pilot, Protect Informant; verbs decided, none coded yet).
-- CP/AP and deadline band for the two stale rows and the newly-built Recover Aid Truck (unset; the reworks pricing pass follows the build).
+- CP/AP and deadline band for the two stale rows; the reworks pricing pass follows the build.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
