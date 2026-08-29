@@ -109,10 +109,10 @@ function — the decision server-side, the presentation `remoteExec`'d at whoeve
 [`intel_system.md`](../gameplay/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout).
 
 The corollary is that a bare `player` read in server-side code is a latent dedicated-server bug, and a
-silent one — `objNull` yields no error, just wrong behaviour.
-`server/warcom/fnc_WARCOM_blu_patrol.sqf` measured `_randomZone distance player` to keep patrol waves away
-from players; that returned a huge value against `objNull` so the keep-out always passed, and on a hosted
-server it only ever measured the host. It now tests `allPlayers`.
+silent one — `objNull` yields no error, just wrong behaviour. A now-retired WARCOM patrol thread
+measured `_randomZone distance player` to keep waves away from players; that returned a huge value
+against `objNull` so the keep-out always passed, and on a hosted server it only ever measured the
+host — the class of bug that must test `allPlayers`, never a bare `player`.
 
 Counters that name things must live server-side for the same reason. `DUWS_number_*` were initialised only
 in `client/includes/squad_number_init.hpp` via `client/client_init.sqf:53`, so each client kept its own and

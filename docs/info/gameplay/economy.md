@@ -36,11 +36,14 @@ with side `"BLU"` or `"OPF"`; its pre-play absolutes are `server_var_init.sqf:17
 `fnc_WARCOM_init.sqf:22-28` and the campaign-menu presets in `fnc_process_campaign_menu.sqf:277-348`.
 Both pools floor at 0 as CP does: losing a zone sheds the same AP swing that taking one pays, so an
 unclamped pool could sit deeply negative, and every WARCOM wave threshold reads *"above N"* anyway.
-Two deliberate differences from `fnc_cp_adjust`: an unrecognised side drops the delta and logs it
+One deliberate difference from `fnc_cp_adjust`: an unrecognised side drops the delta and logs it
 rather than crediting the wrong pool, so a bad call shows up in the RPT instead of corrupting a pool
-or throwing; and there is no display refresh, because AP has no live HUD counter and no
-`publicVariableEventHandler` — it surfaces on demand in the map readout and in the request-menu
-labels of what it now buys, not through a pushed update.
+or throwing. Display then differs by side. `WARCOM_blufor_ap` carries a live counter — a
+`publicVariableEventHandler` mirrors it to the request-menu AP box (ctrl 1002) on clients
+(`client_init.sqf:145`) while the host refreshes the same control directly (`fnc_economy_init.sqf:86`)
+— and its earned-AP total crossing a force tier fires a card and a sound (`:88-96`). `WARCOM_opfor_ap`
+has no counter; it surfaces on demand in the map readout and in the request-menu labels of what it now
+buys, not through a pushed update.
 
 **Reputation is territory, and `fnc_town_rep_adjust` is its only writer.** Same contract with one
 addition: the writer owns the rounding as well as the write. Reputation is the only pool taking

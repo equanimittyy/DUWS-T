@@ -18,7 +18,7 @@ to clear far more often than a zone changes hands. Hardpoints therefore get thei
 
 That separation runs deeper than shared globals. Zone-ring siting does not run inside
 `fnc_createZone` at all: it runs after every zone has finished building, in a dedicated generation
-phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96`, [below](#siting)), reading `zone_meta_array`
+phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:50-120`, [below](#siting)), reading `zone_meta_array`
 — data the zone already published — rather than the zone builder's own locals. And a hardpoint's
 garrison is never appended to a zone's own roster (`DUWS_zoneUnits_<key>`,
 [`zones_and_civilians.md#what-captures-a-zone`](zones_and_civilians.md#what-captures-a-zone)):
@@ -37,7 +37,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `GMG` | `opfor_TURRET_GMG` | one team | rare supporting weapon |
 | `AA` | `opfor_TURRET_AA` | one team | wakes on a 5,000 m air ring, not just its ground ring |
 | `ROADBLOCK` | gate flanked by two `opfor_TURRET_HMG` nests | one team | faces along the road, toward the approach |
-| `OP` | vanilla bunker/tower prop | one team | defined and placeable, not yet rolled by generation or the director |
+| `OP` | vanilla bunker/tower prop | security team + wide recon patrol | standalone recon screen, seeded at generation; see [below](#observation-posts) |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
 | `ARTY` | `opfor_ARTY_X` | one team | resident; cleared by destroying the piece |
 | `MINEFIELD` | mine lattice, no core weapon | none | AT or AP variant; cleared when no armed mine remains |
@@ -52,11 +52,13 @@ auto-detection. `opfor_ARTY_X` is the one core that is a vehicle rather than a s
 crewed on a separate path in `fnc_hardpoint_garrison` (`fnc_hardpoint_place.sqf:97-155`): thawed and
 crewed in place rather than dropped and settled, because it already sits on its own tracks.
 
-`MG`, `AT`, `GMG`, `AA` and `ROADBLOCK` are the only types either weight table rolls
+`MG`, `AT`, `GMG`, `AA` and `ROADBLOCK` are the types the weight tables roll
 (`DUWS_hardpointWeightZone` / `_Solo`, `server_var_init.sqf:405-410`) or the director builds
-([below](#siting)); `OP`, `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented — composition,
-garrison, streaming, clearance — but reachable today only through the debug spawner
-(`client/dialog/fnc_debug_hardpoint_menu.sqf`). No campaign-wide count is enforced on any type.
+([below](#siting)). `OP` sits in no weight table but is seeded standalone at generation, one per
+zone on a coin flip ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are
+fully implemented — composition, garrison, streaming, clearance — but reachable today only through the
+debug spawner (`client/dialog/fnc_debug_hardpoint_menu.sqf`). No campaign-wide count is enforced on
+any type.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
 composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).
@@ -69,13 +71,14 @@ Two shared primitives decide where a hardpoint goes and what it becomes, both in
 `server/init_zones/fnc_hardpoint_siting.sqf` and both pure — no engine calls — so the arithmetic is
 unit-tested independently of the terrain read that feeds it:
 
-- **`fnc_hardpoint_survey [_pos]`** (`:25-98`) reads the ground: local relief and slope off an
+- **`fnc_hardpoint_survey [_pos]`** (`:33-132`) reads the ground: local relief and slope off an
   eight-point ring, a fall-line bearing and magnitude (which way the ground drops, and how
   decisively), distance and drop to the nearest road, tree and building counts at several radii, and
   distance to the nearest already-placed hardpoint.
-- **`fnc_hardpoint_score [_facts, _type]`** (`:101-181`) turns that row into a multiplier for one
+- **`fnc_hardpoint_score [_facts, _type]`** (`:141-233`) turns that row into a multiplier for one
   type: 0 means the site cannot hold it (water, or a per-type veto — artillery needs level ground,
-  a roadblock needs a road within 8 m, a minefield's footprint must be clear of trees and buildings).
+  a roadblock needs a road within 8 m, every non-roadblock type is kept 100 m clear of any road, and
+  a minefield's footprint must be clear of trees and buildings).
   Otherwise the multiplier rewards what that type wants — high ground and a road below for MG/AT,
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.
@@ -91,7 +94,7 @@ roadblock of the flat or roaded ground they need. Rolling type first means the r
 base weights, and terrain decides only *where* a type lands, never *whether* it is the one placed.
 
 **Facing has no separate registry field.** `fnc_hardpoint_facing [_type, _aspectDir, _aspectMag,
-_radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:240-253`) picks a heading per type — a roadblock stays
+_radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:246-255`) picks a heading per type — a roadblock stays
 square across its road and takes whichever of its two headings faces the approach (`_radialDir`: outward
 for a zone ring, toward BLU HQ for the corridor pass), MG/AT/GMG face down the fall line when one is
 pronounced enough to trust, everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
@@ -129,11 +132,12 @@ towers are their own hardpoint type, scored for hilltop crests and spaced off ea
 terrain survey, per-type score, facing and spacing every band placement shares with the zone ring;
 that one owns what the band *is* and what a tower buys the enemy.
 
-All of it — the zone ring, radio-tower seeding, and the standalone band — runs in one generation
-phase between zone build-out finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:52-96`),
-under the same progress banner the other phases use. `fnc_hardpoint_plan_counts`
-(`fnc_hardpoint_place.sqf:529`) rolls every zone's ring and roadblock count and the radio count before
-any of it is laid, so the banner totals real hardpoints rather than counting zones.
+All of it — the zone ring, radio-tower seeding, and the standalone band (the two flank lines, an AA
+net, the observation-post net and the roadblock net) — runs in one generation phase between zone
+build-out finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:50-120`), under the same
+progress banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:567`)
+rolls every zone's ring, both flank-line counts, the observation-post count and the roadblock targets
+before any of it is laid, so the banner totals real hardpoints rather than counting zones.
 
 ## Streaming and garrison
 
@@ -162,6 +166,24 @@ like an ordinary composition: garrisons are raised fresh from `DUWS_fnc_teamRost
 (`fnc_hardpoint_garrison`, `fnc_hardpoint_place.sqf:97-155`), a fixed per-type token — the same team
 composition and size whether the hardpoint is razed and rebuilt in hour one or hour five. Nothing in
 the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
+
+## Observation posts
+
+An `OP` is a lookout, not a strongpoint: it fields a close security team on the post and a recon
+patrol screening wide, and while it stands it runs a recon screen against the player. Standalone OPs
+are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:566`) —
+at most one OP out in the band per zone — counted into the generation banner and laid in the band
+pass, not rolled from any weight table.
+
+`DUWS_fnc_hardpointOPObserve` (`fnc_hardpoint_stream.sqf:296`) ticks every `OP_OBSERVE_PERIOD` (60 s)
+while the post is deployed and, at `OP_OBSERVE_CHANCE` odds (0.2), fires `DUWS_fnc_hardpointOPBurst`
+(`:281`): it pins OPFOR's knowledge of every live BLUFOR within `OP_OBSERVE_RADIUS` (1,000 m) to a
+full identification — `reveal [_unit, 4]` run against every live EAST group, since `reveal` writes
+knowledge onto a group, not a side — and red-cards each compromised *player* on their own machine.
+Convoy groups (`DUWS_convoy_handled`) are skipped, or the reveal would promote a scripted column out
+of SAFE and false-trip a mission's under-attack test. The per-tick roll makes the ring a risk, not a
+certain reveal: a post left alive keeps feeding its sector to the enemy, so the player kills it or
+routes around its ring.
 
 ## Clearance
 
@@ -207,12 +229,15 @@ revealed zone and a hardpoint row carry.
 
 ## Clear economy
 
-Clearing pays the player CP; it never pays OPFOR anything back. Only a *standalone*, non-minefield
-hardpoint pays: `5 CP` via `fnc_cp_adjust` (`server/misc/fnc_economy_init.sqf:14`) plus a
-carded notification naming the type and the nearest zone or town
-(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:199-208`; `notifications.hpp`, `HPdestroyed`).
-A zone hardpoint pays nothing on clear — the zone's own capture bounty already prices its defences —
-and neither does a minefield, a hazard removed rather than a garrison beaten.
+Clearing pays the player CP, and for the heaviest emplacements AP as well; it never pays OPFOR
+anything back. Only a *standalone*, non-minefield hardpoint pays, a per-type bounty read from
+`DUWS_hardpointBounty` (`server_var_init.sqf:461-463`): `5 CP` by default, `10 CP` for a radio,
+artillery or mortar hardpoint, of which a radio also pays `10 AP` and artillery `5 AP`. CP runs
+through `fnc_cp_adjust` and any AP through `fnc_ap_adjust`, each on its own carded notification naming
+the type and nearest zone or town — a single combined card buried the AP gain in the CP badge
+(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:251-267`; `notifications.hpp`, `HPdestroyed` /
+`HPdestroyedAP`). A zone hardpoint pays nothing on clear — the zone's own capture bounty already
+prices its defences — and neither does a minefield, a hazard removed rather than a garrison beaten.
 
 The director that builds standalone hardpoints (`server/warcom/fnc_WARCOM_opf_hardpoints.sqf`,
 spawned unconditionally from `fnc_WARCOM_init.sqf:57`) spends OPFOR Army Power to raise them; nothing

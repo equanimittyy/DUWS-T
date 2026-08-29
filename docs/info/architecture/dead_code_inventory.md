@@ -27,22 +27,6 @@ files and read only through `fnc_faction_rqst_list.sqf:18`, which composes the n
 
 ## Kept deliberately
 
-### The support in-use flags are redundant, not a missing guard
-
-`CASInUse` (`client/includes/supports_init.hpp`, `client/supports/fnc_request_hcCAS.sqf`) and
-`AttChopInUse` (same pair, with `fnc_request_hcATTchop.sqf`) are written and never read. Their
-shape — set true on request, false on both completion paths — reads as a guard against requesting
-a support twice, and invites someone to "finish" it by adding the read.
-
-That guard already exists and works. `shared/includes/supports_radio_modern.hpp` declares each
-support with `removeAfterExpressionCall = 1` and an expression calling `fnc_support_comm_used`, so
-requesting one removes its comm-menu item and drops it from the held record; only the completion
-paths hand it back through `fnc_support_comm_add`. The comm menu owns this state, and the record
-doubles as the presence test.
-
-Adding a read of `CASInUse` would introduce a second, weaker source of truth for something already
-handled — so these are duplicates to delete, not a gap to fill.
-
 ### The kndr marker pack is vendored
 
 `client/misc/fnc_kndr_unit_markers.sqf` is a third-party pack that sits in the DUWS tree rather

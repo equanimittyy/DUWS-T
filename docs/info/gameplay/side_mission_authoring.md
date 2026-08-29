@@ -25,7 +25,7 @@ quick to kill you. Small mission, real problem.
 | Informant Manhunt | find one disguised target in a live crowd before he flees | social "ask a civilian" layer, decoy cars, timed drive to an enemy zone | `mission_threads/informant/` |
 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | mission-owned copy of the zone's own prefab, continuous LOS hold | `mission_threads/recon/` |
 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac | captive-until-reached squad, cordon fight, evac helicopter + on-foot exfil | `mission_threads/rescue_squad/` |
-| Generic (tower, cache, laptop, …) | reach the marker, destroy/kill the objective | none bespoke — the shared spine, reskinned | one file per folder |
+| Generic (tower, cache, laptop, …) | reach the marker, destroy/kill the objective | none bespoke — the shared helper sequence, reskinned | one file per folder |
 
 All the hand-made designs are written up in full in the plan doc's
 [§Hand-made mission designs](../../plans/side_missions_working.md#hand-made-mission-designs) (the convoy reworks,
@@ -33,35 +33,41 @@ plus [§Informant Manhunt](../../plans/side_missions_working.md#informant-manhun
 [§Recon Enemy Position](../../plans/side_missions_working.md#recon-enemy-position)); read the closest one before writing a
 new hand-made mission, as the worked example.
 
-## Two build shapes
+## The shape every thread runs
 
-**Spine-shaped** — for a mission whose win reduces to a one-shot predicate (the thing is dead, the
-object is destroyed). Build a spec and hand it to `fnc_mission_run.sqf`; the spine owns the marker,
-the task, the intro card and dialogue, the deadline poll, the payout, and teardown. Only two fields
-vary and you write both:
+There is no runner. Every thread inlines the same sequence from shared helpers and ends through one
+chokepoint. A one-shot win (the thing is dead) and a continuous one (hold eyes-on, cover the evac)
+differ only in what step 6 polls, not in the code path. `destroy_tower` is the smallest complete
+example; `rescue_squad` and `recon` run the same sequence around a scripted win.
 
-- `_build` — `[_targetpos,_randomPos,_radius,_Building] -> handles`. Spawn the objective, claim it
-  (below), return whatever `_done` needs to test. Runs after the marker so the player already sees the
-  area.
-- `_done` — `handles -> bool`. The win predicate, polled every 2 s against the deadline.
+1. **Sample the requester, open the gate.** Take `remoteExecutedOwner` in the thread's own scope
+   (a called function reads its caller's, not the thread's), then
+   `if (!([_index, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};`
+   (`fnc_mission_begin.sqf:5`).
+2. **Find ground, or abort.** `[_MissionPos, _radius, _index, _requester] call fnc_mission_site`
+   returns `[_randomPos, _Building, _targetpos]` or `[]`; a thread that builds its own site searches
+   directly instead. `fnc_mission_site` auto-aborts on `[]`, so `exitWith` there.
+3. **Announce the build.** `[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice`.
+4. **Spawn and claim.** Build the objective; `fnc_mission_claim` every group and vehicle you own.
+5. **Present.** `[_pos, _radius, _taskId, _descText, _mission_name, _taskType, _brief] call
+   fnc_mission_present` draws the search marker, issues the task and plays the opening brief, and
+   returns the marker name (`fnc_mission_present.sqf:5`).
+6. **Poll to the deadline.** `waitUntil { sleep N; <win> || time > DUWS_curDeadlineAt }`. The win
+   predicate is the only part that varies by mission.
+7. **Finish.** `[_mission_name, _taskId, "SUCCEEDED"|"FAILED", _pos, _radius, [_marker], …] call
+   fnc_mission_finish` on **both** exits — the single terminal step that speaks the outcome line,
+   clears markers, sets task state, tears down, and pays on a win. Full field list in its header
+   (`fnc_mission_finish.sqf:11-15`).
 
-The full spec field list is the header of `fnc_mission_run.sqf:16-30`; `target_sniper` is the smallest
-complete example. Do not restate the spine's steps in a thread — if you find yourself hooking every
-step, you want the other shape.
-
-**Bespoke** — for a mission whose win is continuous or scripted (protect-civ, informant, recon,
-rescue-squad). The thread calls `fnc_mission_begin` itself, then owns
-the whole flow. `fnc_mission_run.sqf:9-11` names why these stay off the spine.
-
-## What every thread owes, either shape
+## What every thread owes
 
 | Obligation | How | Why |
 |---|---|---|
-| Open with the entry gate | `[_index, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin`; exit if it returns `false` | Enforces the cooldown and sets `DUWS_curReward` / `DUWS_curDeadlineAt` from the table. `remoteExecutedOwner` must be sampled in the thread's own scope (`fnc_mission_begin.sqf:7-8`). The spine does this for you. |
-| Find ground, or abort | spine: `fnc_mission_site`; bespoke: your own search, then `[_index, _hintKey, _reason] call fnc_mission_abort` when nothing fits | A called function cannot exit its caller, so both return `[]`/`false` and the thread must exit itself. `fnc_mission_abort` also undoes the entry state. |
+| Open with the entry gate | `[_index, _MissionPos, _mission_name, _requester] call fnc_mission_begin`; exit if it returns `false` | Enforces the cooldown and sets `DUWS_curReward` / `DUWS_curDeadlineAt` from the table (`fnc_mission_begin.sqf:53,68`). Sample `remoteExecutedOwner` into `_requester` in the thread's own scope, not inside a called helper. |
+| Find ground, or abort | `fnc_mission_site`, or your own search then `[_index, _requester, _reason] call fnc_mission_abort` when nothing fits | A called function cannot exit its caller, so both return `[]`/`false` and the thread must exit itself. `fnc_mission_abort` also undoes the entry state (`fnc_mission_abort.sqf:14`). |
 | Claim what you spawn | living entities → `fnc_mission_claim`; props → `fnc_duws_keep` (a compKey) | Teardown collects by ownership, not proximity — a patrol wanders out of any radius sweep (`fnc_mission_claim.sqf`). |
-| Never claim what the player is handed | leave a rescued squad, a recruited civilian, a captured vehicle unclaimed | A claim is a deletion order (`fnc_mission_claim.sqf:14-15`). |
-| Tear down on both exits | spine does it; bespoke calls `fnc_mission_end` on success and `fnc_mission_deadline_fail` on timeout, passing the compKey | Deletes claimed tokens and keyed props; a missed teardown leaks the garrison for the rest of the session. |
+| Never claim what the player is handed | leave a rescued squad, a recruited civilian, a captured vehicle unclaimed | A claim is a deletion order (`fnc_mission_claim.sqf:12`). |
+| Tear down on both exits | `fnc_mission_finish` with `"SUCCEEDED"` or `"FAILED"` and the compKey | The one chokepoint: deletes claimed tokens and keyed props, pays on a win, frees the slot; a missed teardown leaks the garrison for the rest of the session. `fnc_mission_end` is its internal tail, called nowhere else. |
 
 ## Registration: one row plus the thread
 
@@ -124,8 +130,8 @@ the pricing rationale and the current effort ratings are in
 
 1. Name the problem the mission poses, and the verb that makes it different from the catalogue. If the
    answer is "the same verb with more enemies", it is a generic reskin, not a new type.
-2. Pick the shape: one-shot win → spine + a `_build`/`_done` spec; continuous/scripted win → bespoke
-   thread off `fnc_mission_begin`.
+2. Decide the win predicate: one-shot (the thing is dead) or continuous/scripted. Both run the same
+   begin → site → build → present → poll → finish sequence; only what step 6 polls differs.
 3. Add the `mission_types.hpp` row and register the thread global in `server_fnc_init.sqf`.
 4. Write the thread. Spawn, `fnc_mission_claim` everything you own, never claim the player's reward.
 5. If it needs particular terrain, add `fnc_<name>_site`; otherwise it inherits the generic finder.

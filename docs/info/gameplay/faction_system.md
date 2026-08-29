@@ -74,11 +74,12 @@ and, on selection, sets `BLUFOR_FactionFile_X` / `OPFOR_FactionFile_X` to the ch
 then hands off to HQ placement.
 
 **Two globals, two meanings.** `*_FactionFile_X` is the player's answer — a faction-file token, or
-`CUSTOM`/`AUTODETECT`. `*_Faction_X` is the faction *class*, written only by faction init and read by the
-random vehicle patrols (`server/warcom/fnc_WARCOM_blu_patrol.sqf`). Init used to overwrite the answer with
-the class, which was harmless only while it ran once; resolution now runs once per pass through the setup
-screens, and a second pass reading the overwritten value matched no registry row and silently kept the
-previous faction's file.
+`CUSTOM`/`AUTODETECT`. `*_Faction_X` is the faction *class*, written only by faction init; its functional
+reader was the BLUFOR vehicle patrols, retired with the WARCOM cleanup, so today it survives as the
+resolved-class record (read only in placement logging, `client/dialog/fnc_HQ_manual_place.sqf:2-3`). Init
+used to overwrite the answer with the class, which was harmless only while it ran once; resolution now runs
+once per pass through the setup screens, and a second pass reading the overwritten value matched no registry
+row and silently kept the previous faction's file.
 
 `server/init_hq/fnc_BLUFOR_faction_init.sqf` and `server/warcom/fnc_OPFOR_faction_init.sqf` resolve the
 choice to a file, build the path `duws\factions\MODERN\<file>_<side>.sqf`, then

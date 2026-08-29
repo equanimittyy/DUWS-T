@@ -99,9 +99,9 @@ the scripts around the objective, not in a bigger garrison.
 zone in one of **three** armed road convoys, each on its own approach via a divergent mid-route point
 so the player cannot cover them all. Exactly one convoy carries the HVT in a single **unarmed** car --
 the odd hull among the armed escorts, its type named to the player -- so the mission is to spot the
-right column and stop it. Win: the HVT dies. Fail: his car reaches the zone, or the deadline. Off the
-`fnc_mission_run` spine because the win is a race, not a one-shot predicate polled at a fixed spot;
-owns its own site pick, spawn and monitor, like the informant and IDAP. Uses the convoy destination
+right column and stop it. Win: the HVT dies. Fail: his car reaches the zone, or the deadline. The win is a
+race, not a one-shot predicate polled at a fixed spot; it owns its own site pick, spawn and monitor,
+like the informant and IDAP. Uses the convoy destination
 contract above.
 
 ### Deny Enemy Armor
@@ -123,7 +123,7 @@ player's ride home. Off the spine for the scripted repair-race fail.
 one class**, the class rolled once and gated by OPFOR's earned AP tier (car floor, tank top), patrols
 a road loop as one column. Win: every crewman across the three dead. The column holds LIMITED speed
 until first hit or a man down, then drops the limit and fights -- "speed-limited until broken", so the
-opening is an ambush window. On the `fnc_mission_run` spine (one-shot win predicate). **Offered only
+opening is an ambush window. A one-shot win predicate polled at the objective. **Offered only
 where OPFOR has earned the Motorised tier** (`fnc_target_armor_site`): a side with no vehicles has no
 patrol to break, so below tier 2 the offer is dropped rather than sited on a fallback truck column.
 **Reward scales with the tier fielded**: +10 CP per step above a car patrol, AP flat, so car / IFV /
@@ -195,7 +195,7 @@ prefab (real structures and crewed statics, via the zone's builder fn resolved f
 `DUWS_zoneKind_<key>`), plus two representative infantry teams (`YELLOW`, so they hold rather than
 chase an 800 m spotter) and a car, all on `closepatrol`. The prefab is built a step off the zone
 centre so its `zone_<x>_<y>` key stays distinct from the real zone's -- releasing the recon copy must
-not retire the live zone. Teardown rides `fnc_mission_end`: prefab by compKey, gunners/teams/car by
+not retire the live zone. Teardown rides `fnc_mission_finish`: prefab by compKey, gunners/teams/car by
 the claimed-token sweep plus a proximity pass for the builder-orphaned gunners.
 
 **Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, JIP-keyed to all
@@ -269,9 +269,8 @@ an IDAP aid truck and parked it under guard, and the player fights in, seizes it
 IDAP crew. The truck and its guard force are the stolen-supply shape (`fnc_steal_supply_mission`) -- an
 idle team on the prize, close and wide foot patrols, and the tier-gated `DUWS_fnc_tokenClass` car/IFV
 patrols -- so the recovery leg reads like a theft the player is undoing. Win: the truck delivered within
-50 m of the crew. Fail: the truck destroyed (`> 0.95` damage), or the deadline. Off the
-`fnc_mission_run` spine -- the win is a delivered-vehicle predicate the thread polls itself, like the
-stolen-supply thread.
+50 m of the crew. Fail: the truck destroyed (`> 0.95` damage), or the deadline. The win is a
+delivered-vehicle predicate the thread polls itself, like the stolen-supply thread.
 
 **Siting.** `surveyKind "map"`, so the truck spawns on contested ground rather than in a town, and
 `fnc_transport_IDAP_site` gates the offer on a neutral/BLUFOR town sitting within 3 km of the sited truck

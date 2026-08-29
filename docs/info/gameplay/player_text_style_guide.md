@@ -62,7 +62,7 @@ re-addressing every line reads as stilted.
   will displace early if a firefight breaks out.* — %1 the town, %2 the named escape zone, %3 the
   leave clock, %4 the vehicle class. A named place the player reads off the map beats an abstraction,
   and the fail line names where he got to. The three spec-based briefs (armour, HVT, snipers) name
-  the place in code: `fnc_mission_run` finds the nearest named settlement (`nearestLocations`, a 5 km
+  the place in code: `fnc_place_name` finds the nearest named settlement (`nearestLocations`, a 5 km
   ring, a grid reference as fallback) and folds it into `%1`, so *marked near %1* prints *marked near
   Agglelesh*.
 - **The register the speaker would use.** Overlord is command: clipped and procedural, it tasks the
