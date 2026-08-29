@@ -44,11 +44,9 @@ private _crossMarkers = [];
     _crossMarkers pushBack _mk;
 } forEach _bldgs;
 
-// A camping table and laptop in each candidate building, on an interior slot. _laptops holds
-// [object, isReal, rigged] for the action loop below. The table is dropped simulated to fall the
-// slot-to-floor gap (buildingPos slots sit above the floor) then frozen; the laptop is not dropped onto it.
-// fnc_place_settled seats the laptop at rest on the frozen top, velocity-zeroed -- a laptop created clipping
-// the table and left to settle takes an ejection impulse and ends up on the floor instead of the top.
+// Table and laptop are left simulated, not frozen, so a destroyed building drops them instead of leaving
+// them hanging where the floor was. fnc_place_settled seats the laptop clear of the table rather than
+// dropping it -- a laptop created clipping the table takes an ejection impulse and lands on the floor.
 private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
@@ -80,24 +78,19 @@ switch (VERSION_X) do {
         // rather than a sleep per table.
         sleep 1.5;
 
-        // Pass 2: freeze each settled table, then seat a laptop at rest on its now-static top -- turned 90
-        // degrees off the table heading, base flush on the surface. fnc_place_settled creates the laptop clear
-        // of the table and zeroes its velocity, so there is no drop and no settle wait.
+        // The 1 cm gap keeps the laptop off the still-live table on the settle frame; seated flush the two
+        // interpenetrate and physx kicks it away.
         {
             _x params ["_table", "_isReal"];
-            // Freeze == harden: enableSimulation false also suppresses damage, so stray patrol fire cannot
-            // destroy the real objective (mission unwinnable) or a decoy prop. A rigged decoy still
-            // detonates -- its bomb is a separate shell in the decoy handler, not damage to the laptop.
+            // allowDamage false hardens the real objective -- patrol fire that destroyed it would make the
+            // mission unwinnable. setVelocity zeroes the slot-to-floor drop residual so the live table rests.
             _table setVectorUp [0, 0, 1];
-            _table enableSimulationGlobal false;
+            _table setVelocity [0, 0, 0];
             _table allowDamage false;
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
 
             private _topZ = (boundingBoxReal _table select 1) select 2;
-            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ, 90]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
-            // Frozen once seated so a patrol brushing the table can never nudge it off; the addAction target
-            // needs no physics. Damage is already off from fnc_place_settled.
-            _lap enableSimulationGlobal false;
+            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, 90]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
 
             // Paired so a rigged decoy's blast can clear both props (invulnerable, so the shell alone
             // leaves them standing). Read server-side by fnc_sabotage_laptop_decoy.
