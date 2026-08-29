@@ -377,7 +377,10 @@ zones_max_radius = 1000;publicVariable "zones_max_radius";
 zones_min_radius = 200;publicVariable "zones_min_radius";
 
 // Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
-//   spawnRadius  distance BLUFOR wake the emplacement at (a fight holds it past this; see the tick)
+//   spawnRadius  distance BLUFOR wake the emplacement at (a fight holds it past this; see the tick).
+//                800 for direct-fire nests that must open up before the player closes; 600 for the rest --
+//                an OP screens its sector past this ring anyway (OP_OBSERVE_RADIUS), and a radio mast or a
+//                battery is destroyed up close, so none of those needs to wake at gun range
 //   grace        seconds empty before it stows
 //   neverStream  built once and kept resident, never stowed. Mortar and artillery hold so OPCOM can
 //                task them with no player near; a minefield holds so its mines are never stowed off
@@ -390,17 +393,18 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 //                every distant foot patrol.
 // Server-only: every consumer (the site poller, fnc_hardpoint_register) runs on the server.
 DUWS_hardpointStreaming = createHashMapFromArray [
-    ["OP",        [ 800, 300, false, 0]],
+    ["OP",        [ 600, 300, false, 0]],
     ["MG",        [ 800, 300, false, 0]],
     ["AT",        [ 800, 300, false, 0]],
+    ["GMG",       [ 800, 300, false, 0]],
     ["ROADBLOCK", [ 800, 300, false, 0]],
     ["MINEFIELD", [ 600, 300, true,  0]],
     ["AA",        [ 800, 300, false, 5000]],
     ["MORTAR",    [ 600, 300, true,  0]],
     ["ARTY",      [ 600, 300, true,  0]],
-    // A radio tower streams like a combat hardpoint: its coverage and its amplifier read the registry
-    // whether it is up or stowed, but its mast must be deployed for the player to reach and destroy it.
-    ["RADIO",     [ 800, 300, false, 0]]
+    // A radio tower's coverage and amplifier read the registry whether it is up or stowed, so the ring
+    // only governs when its mast and garrison stream in -- and the mast is destroyed up close, not at range.
+    ["RADIO",     [ 600, 300, false, 0]]
 ];
 
 // Zone air streaming: a player-crewed aircraft or a UAV committing to a zone wakes its garrison, where
