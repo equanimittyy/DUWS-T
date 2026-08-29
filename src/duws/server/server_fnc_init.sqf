@@ -96,6 +96,8 @@ fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_
 publicVariable "fnc_killhouse_markers";
 fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_sabotage_laptop_markers.sqf";
 publicVariable "fnc_sabotage_laptop_markers";
+fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_protect_civ_markers.sqf";
+publicVariable "fnc_protect_civ_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
@@ -164,6 +166,11 @@ fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missio
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_target_recon_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_recon\fnc_target_recon_mission.sqf";
 fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ.sqf";
+// Broadcast: the finder runs client-side in the offer picker; without it findSite falls back to the
+// accept-all generic and the building gate is lost.
+fnc_protect_civ_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_site.sqf";publicVariable "fnc_protect_civ_site";
+// Broadcast: the informant's Skip Prep Phase action remoteExecs this from clients.
+fnc_protect_civ_skip = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_skip.sqf";publicVariable "fnc_protect_civ_skip";
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap), which gates the offer

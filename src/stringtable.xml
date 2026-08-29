@@ -2543,13 +2543,6 @@
                 <Spanish>¡Bien! ¡Siempre he querido matar a esos bastardos! (recibiendo los billetes)</Spanish>
                 <Chinesesimp>行，我一直都很想杀光那帮杂碎！(接过纸币)</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_cycuqbvj">
-                <Original>Civilian Killed</Original>
-                <English>Civilian Killed</English>
-                <German>Zivilist getötet !</German>
-                <Spanish>¡Civil asesinado!</Spanish>
-                <Chinesesimp>平民被杀了！</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_HANDSUP1">
                 <Original>Hands up!</Original>
                 <English>Hands up!</English>
@@ -2889,19 +2882,68 @@
                 <German>Wir haben einen Informanten, dessen Identität aufgeflogen ist. Er versteckt sich irgendwo in einem Gebäude. Geh dorthin und beschütze ihn, bevor der Feind ihn einholt und verhaftet — ja, wir können ihn noch nicht aus dem Gebiet evakuieren, weil wir ihn brauchen, um weiterhin vor Ort Informationen für uns zu sammeln. (Slightly low CP, no AP, high Rep)</German>
                 <Spanish>Tenemos un informante cuya identidad ha sido expuesta. Se está ocultando dentro de un edificio en algún lugar. Ve allí y protégelo antes de que el enemigo lo alcance y lo arresta — sí, aún no podemos sacarlo de la zona, porque necesitamos que siga recopilando información para nosotros localmente. (Slightly low CP, no AP, high Rep)</Spanish>
                 <Chinesesimp>我们有一个线人暴露了身份，他现在躲在某地的建筑物内。在敌人追上并逮捕他之前赶到那里保护他————是的，他还不能离开当地，我们需要他继续为我们收集情报。(稍低CP，无AP，高声望)</Chinesesimp>
-                <Original>One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.</Original>
-                <English>One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.</English>
+                <Original>One of our informants has been made and is holed up in a building in this area, with a hit team closing on him. Reach him, then use the supply crate to fortify his position while it is quiet. Hold against repeated assaults until they are spent. There is no extraction, we need him in place and still gathering.</Original>
+                <English>One of our informants has been made and is holed up in a building in this area, with a hit team closing on him. Reach him, then use the supply crate to fortify his position while it is quiet. Hold against repeated assaults until they are spent. There is no extraction, we need him in place and still gathering.</English>
             </Key>
-            <Key ID="STR_DUWS_T_pcfail">
-                <German>"Overlord 1-1" an Einsatztrupp. Der Informant ist tot. Zieht euch sofort zurück. Wir können nichts mehr tun.</German>
-                <Spanish>"Overlord 1-1" a Equipo de Acción. El informante está muerto. Retrocedan de inmediato. No podemos hacer nada más.</Spanish>
-                <Chinesesimp>行动组，线人死掉了你们就撤出来吧。我们也做不了更多了。</Chinesesimp>
-                <Original>To Alpha 1-1, the informant's dead. Nothing more we can do there — extract.</Original>
-                <English>To Alpha 1-1, the informant's dead. Nothing more we can do there — extract.</English>
+            <Key ID="STR_DUWS_T_protectciv_note">
+                <Original>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.</Original>
+                <English>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.</English>
             </Key>
-            <Key ID="STR_DUWS_T_ayhemuj4">
-                <Original>The informant is dead</Original>
-                <English>The informant is dead</English>
+            <Key ID="STR_DUWS_T_pc_directive">
+                <Original>Priority directive, Alpha 1-1. An informant has been compromised and needs his position held against enemy attack. He is a high value asset, we need him alive.</Original>
+                <English>Priority directive, Alpha 1-1. An informant has been compromised and needs his position held against enemy attack. He is a high value asset, we need him alive.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_copy">
+                <Original>Copy, Overlord. Moving to the informant now.</Original>
+                <English>Copy, Overlord. Moving to the informant now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_prep_hint">
+                <Original>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 10 minutes.</Original>
+                <English>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 10 minutes.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_arrive">
+                <Original>Thank god you're here. They'll be here any minute now. We should make ready while we still can.</Original>
+                <English>Thank god you're here. They'll be here any minute now. We should make ready while we still can.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_prep_count">
+                <Original>You have %1 minute(s) before the assault.</Original>
+                <English>You have %1 minute(s) before the assault.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_assault">
+                <Original>Be advised, we have reports of multiple contacts converging on the informant's position.</Original>
+                <English>Be advised, we have reports of multiple contacts converging on the informant's position.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_hold">
+                <Original>Alpha 1-1, hold the line. Do not let them reach him.</Original>
+                <English>Alpha 1-1, hold the line. Do not let them reach him.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_hold_hint">
+                <Original>Hold your position for 20 minutes and stay within 300m of the informant.</Original>
+                <English>Hold your position for 20 minutes and stay within 300m of the informant.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_abandon">
+                <Original>No friendly forces within 300m of the informant. The mission will fail in %1s.</Original>
+                <English>No friendly forces within 300m of the informant. The mission will fail in %1s.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_win">
+                <Original>Good work Alpha 1-1. The assault is breaking off. Ensure the area is clear and RTB. Overlord out.</Original>
+                <English>Good work Alpha 1-1. The assault is breaking off. Ensure the area is clear and RTB. Overlord out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_killed">
+                <Original>Alpha 1-1, the informant is dead. Nothing more we can do. Disengage and RTB.</Original>
+                <English>Alpha 1-1, the informant is dead. Nothing more we can do. Disengage and RTB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_skip">
+                <Original>Skip Prep Phase</Original>
+                <English>Skip Prep Phase</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_icon_informant">
+                <Original>Informant</Original>
+                <English>Informant</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_icon_crate">
+                <Original>Supplies</Original>
+                <English>Supplies</English>
             </Key>
         </Container>
         <Container name="Intel &amp; Search">

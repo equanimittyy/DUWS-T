@@ -1,259 +1,337 @@
-// Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
+// Locality: server; the action and factory bodies below run on the machine that triggers them.
+// Protect Informant, defend-and-build: reach the informant, fortify from a limited crate through a
+// fixed prep window, then hold OPFOR waves long enough for him to survive. docs/plans/protect_informant_rework.md.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([13, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
-_searchRadius   = 250;
-_spawnDist      = 230;
-_timeLimit      = 360;
-_cpReward       = DUWS_curReward select 0;
-_apReward       = DUWS_curReward select 1;
-_repReward      = DUWS_curReward select 2;
-_deadline       = DUWS_curDeadlineAt;
+#define RADIUS       300    // hold ring: fail radius, spawn radius and debus radius in one number
+#define ARRIVE_DIST  30
+#define PREP_TIME    600
+#define DEFEND_TIME  1200
+#define ABANDON_TIME 20
 
-_speaker        = localize "STR_DUWS_T_OVERLORD";
-_speakerinfomat = localize "STR_DUWS_T_infomat";
-_speakeracteam  = localize "STR_DUWS_T_actionteam";
-_message        = localize "STR_DUWS_T_pcletsdothis";
-_messagewhoau   = localize "STR_DUWS_T_pcwhoau";
-_messageiminfo  = localize "STR_DUWS_T_pciminfo";
-_messageoverlord= ([localize "STR_DUWS_T_pcoverlord"] call fnc_cs);
-_messageroger   = ([localize "STR_DUWS_T_pcroger"] call fnc_cs);
-_message1       = localize "STR_DUWS_T_pcbequick";
-_message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
-_message3       = ([localize "STR_DUWS_T_pcfail"] call fnc_cs);
+private _deadline = DUWS_curDeadlineAt;
 
-
-private _site = [_MissionPos, _searchRadius, 13] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
-
-// Abort here rather than fall through: a null building would otherwise build the civilian, markers and
-// triggers on nothing. exitWith leaves the thread because if/then is transparent to it and nothing above
-// the body is a loop.
-if (isNull _Building) exitWith {
-    [13, _requester, "no_building"] call fnc_mission_abort;
+// Re-derive the building the finder snapped onto: nearest house at _MissionPos with a real interior.
+private _findBuilding = {
+    params ["_p", "_reach"];
+    private _list = [nearestTerrainObjects [_p, ["HOUSE", "BUILDING"], _reach, false], [], { _p distance2D _x }, "ASCEND"] call BIS_fnc_sortBy;
+    private _b = objNull;
+    { if (count (_x buildingPositions -1) >= 4) exitWith { _b = _x } } forEach _list;
+    _b
 };
+private _building = [_MissionPos, 30] call _findBuilding;
+if (isNull _building) exitWith { [13, _requester, "no_building"] call fnc_mission_abort };
+private _targetpos = getPosATL _building;
+private _bpos = _building buildingPositions -1;
 
-_buildingPositions = [_Building] call BIS_fnc_buildingPositions;
-if (count _buildingPositions < 4) then {
-    private _nearbyBuildings = nearestObjects [_MissionPos, ["House"], _searchRadius];
-    private _found = false;
-    {
-        private _bpos = [_x] call BIS_fnc_buildingPositions;
-        if (count _bpos >= 4) then {
-            _Building = _x;
-            _targetpos = getPosATL _Building;
-            _buildingPositions = _bpos;
-            _found = true;
-            break;
-        };
-    } forEach _nearbyBuildings;
-    if (!_found) exitWith {
-        [13, _requester, "no_building_4pos"] call fnc_mission_abort;
-    };
-};
+private _tn            = format ["protectciv_%1_%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+private _skipVar       = format ["%1_skip", _tn];
+private _prepActiveVar = format ["%1_prepActive", _tn];
+private _liveVar       = format ["%1_live", _tn];        // spawn -> teardown
+private _defendVar     = format ["%1_defend", _tn];      // defend phase only
+missionNamespace setVariable [_skipVar, false];
+missionNamespace setVariable [_liveVar, true];
+missionNamespace setVariable [_defendVar, false];
+missionNamespace setVariable [_prepActiveVar, true, true];
 
-// The task name the start trigger and end sweep below both key on, sited on _targetpos so all three
-// describe one settled area; the marker follows once the civilian stands (below).
-private _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
-_civilianClass = "C_Man_Fisherman_01_F";
-_civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;
-_civilian = leader _civGroup;
-_civilian allowDamage true;
-_civilian setCaptive false;
-_civilian setDamage 0.8;
+// --- informant: a civilian-costumed WEST unit, so OPFOR reads him as the target to kill ---
+private _civClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_4_F", "C_man_p_fugitive_F", "C_man_hunter_1_F", "C_Man_casual_1_F", "C_Man_casual_4_F"];
+private _grp = [[0, 0], WEST, [selectRandom _civClasses]] call BIS_fnc_spawnGroup;
+private _inf = leader _grp;
+_grp deleteGroupWhenEmpty true;
+if (count _bpos > 0) then { _inf setPosATL (selectRandom _bpos) } else { _inf setPosATL _targetpos };
+_inf allowDamage true;
+_inf setCaptive false;
+_inf disableAI "PATH";       // holds the building even once he goes AWARE to fire
+_inf setBehaviour "CARELESS";
+_inf setCombatMode "BLUE";
+// Belt-and-suspenders against a future AIS setting change reviving him or stripping the handler below
+// (ais_revive_integration.md); the shipped "allplayables" never enrols a spawned unit.
+_inf setVariable ["AIS_noReviveInit", true, true];
+// Chamber through the weapon: many civilian costumes have no container, so a loose magazine drops
+// nowhere (arma_engine_gotchas.md). Spares land only where the costume has pockets.
+_inf addWeapon "hgun_P07_F";
+_inf addWeaponItem ["hgun_P07_F", "16Rnd_9x21_Mag", true];
+_inf addMagazines ["16Rnd_9x21_Mag", 2];
+// Half damage, doubling effective health so no fluke ends a 30-minute mission. Scales the per-hit
+// increment (not the absolute) so damage still accumulates to death; negative index is whole-body.
+_inf addEventHandler ["HandleDamage", {
+    params ["_u", "", "_dmg", "", "", "_hi"];
+    private _old = if (_hi < 0) then { damage _u } else { _u getHitIndex _hi };
+    _old + ((_dmg - _old) * 0.5)
+}];
+[_grp] call fnc_mission_claim;
+DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
 
-if (count _buildingPositions > 0) then {
-    _randIndex = floor random count _buildingPositions;
-    _civilian setPosATL (_buildingPositions select _randIndex);
-} else {
-    _civilian setPosATL (getPosATL _Building);
-};
-
-_civilian disableAI "PATH";
-_civilian setBehaviour "CARELESS";
-_civilian setCombatMode "BLUE";
-
-_civilianMarker = format ["civ_marker_%1", round(time + random 1000)];
-createMarker [_civilianMarker, getPosATL _civilian];
-_civilianMarker setMarkerShape "ICON";
-_civilianMarker setMarkerType "o_unknown";
-_civilianMarker setMarkerColor "ColorBlue";
-_civilianMarker setMarkerText "Informant";
-_civilianMarker setMarkerSize [1, 1];
-
-[_civilian] spawn {
-    params ["_unit"];
-    sleep 1;
-    // playMoveNow is local, so broadcast it or the informant animates only on the host's screen.
-    // Unkeyed on purpose -- it reissues every 5 s, so a joiner picks it up on the next pass.
-    while {alive _unit} do {
-        [_unit, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
+// Idle only through prep: a re-issued playMoveNow cancels his aim, so it must stop before he goes AWARE.
+[_inf, _defendVar] spawn {
+    params ["_inf", "_defendVar"];
+    while { alive _inf && !(missionNamespace getVariable [_defendVar, false]) } do {
+        [_inf, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
         sleep 5;
     };
 };
 
-_civGroup deleteGroupWhenEmpty true;
-// The one WEST unit here needs an explicit owner so teardown flags it. Claim sets ownership only --
-// DUWS_binMe is stamped later at cleanup -- so this cannot delete him mid-escort.
-[_civGroup] call fnc_mission_claim;
+// --- supply crate registered as an R3F creation factory (the "builder vehicle" mechanic) ---
+private _cratePos = if (count _bpos > 1) then { _bpos select 1 } else { _targetpos };
+private _crate = createVehicle ["Box_NATO_Support_F", _cratePos, [], 0, "CAN_COLLIDE"];
+_crate setPosATL _cratePos;
+DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
+[_crate, "mission_protect_civ"] call fnc_duws_keep;
 
-// Marker + task now the civilian stands; the manual multi-speaker brief follows.
-_markername2 = [_targetpos, _searchRadius, _VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, "defend"] call fnc_mission_present;
+// R3F init is if(!isDedicated) and waits on R3F_LOG_active, so fan it to every client via BIS_fnc_MP.
+// NOT JIP-persistent: DUWS_pc_crate is overwritten by the next instance, so a stale JIP entry would
+// re-register the factory onto a later mission's crate.
+[[[], {
+    waitUntil { !isNil "DUWS_pc_crate" && { !isNull DUWS_pc_crate } };
+    [DUWS_pc_crate, 250, west, ["Fortifications", "Cargo", "Structures_Fences", "Structures_Walls", "Static"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+}], "BIS_fnc_spawn", true, false] spawn BIS_fnc_MP;
 
-[_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[_speaker, _messagewhoau] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[_speakerinfomat, _messageiminfo] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[_speaker, _messageoverlord] remoteExec ["fnc_duws_dialogue", 0];
-sleep 3;
-
-sleep 5;
-[_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[_speakerinfomat, _message1] remoteExec ["fnc_duws_dialogue", 0];
-
-_startTrigger = createTrigger ["EmptyDetector", _targetpos];
-_startTrigger setTriggerArea [_searchRadius, _searchRadius, 0, false];
-_startTrigger setTriggerActivation ["ANYPLAYER", "PRESENT", false];
-_startTrigger setTriggerStatements ["this", "", ""]; // empty statements: the wait runs in the thread below
-
-missionNamespace setVariable [format ["%1_started", _VARtaskgeneratedName], false];
-publicVariable format ["%1_started", _VARtaskgeneratedName];
-
-[_startTrigger, _VARtaskgeneratedName] spawn {
-    params ["_trg", "_taskName"];
-    waitUntil { sleep 1; triggerActivated _trg };
-    missionNamespace setVariable [format ["%1_startTime", _taskName], time];
-    missionNamespace setVariable [format ["%1_started", _taskName], true];
-    [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pcbehindme"] remoteExec ["fnc_duws_dialogue", 0];
-    deleteVehicle _trg;
-};
-
-
-[_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2, _deadline] spawn {
-    params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius", "_areaMarker", "_deadline"];
-
-    // The escort only starts once a player reaches the informant. The deadline covers the abandon
-    // case: an offer never engaged fails and frees the slot rather than waiting on the trigger forever.
-    waitUntil { sleep 1; (missionNamespace getVariable [format ["%1_started", _taskID], false]) || time > _deadline };
-    if (time > _deadline && !(missionNamespace getVariable [format ["%1_started", _taskID], false])) exitWith {
-        // The informant marker is a raw createMarker (unwrapped name), so it is cleared by hand; only
-        // the missionMarkerData ellipse routes through finish.
-        if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
-        // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
-        ["Protect Civilian", _taskID, "FAILED", _targetPos, _radius, [_areaMarker], [], false, "", true, true] call fnc_mission_finish;
-    };
-    private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _taskID], time];
-
-    Mission_Active = true;
-    publicVariable "Mission_Active";
-
-    waitUntil {
-        sleep 2;
-        if (!alive _civ) exitWith { true };
-        if (time - _missionStartTime >= _timeLimit) exitWith { true };
-        false
-    };
-
-    Mission_Active = false;
-    publicVariable "Mission_Active";
-
-    private _status = "FAILED";
-    if (!alive _civ) then {
-        // Reputation is a civilian-system currency: skip its change when off. Charged against
-        // the town the escorted civilian belonged to, falling back to the global outside one.
-        if (CIV_PRESENCE != "NONE") then {
-            [_civ getVariable ["civ_locIndex", -1], -1, "protect_civ_casualty"] call fnc_town_rep_adjust;
-        };
-        ["alert", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-        [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
-    } else {
-            _status = "SUCCEEDED";
-            _speakeracteam  = localize "STR_DUWS_T_actionteam";
-            _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
-            [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
-            sleep 8;
-            [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
-            if (CIV_PRESENCE != "NONE") then {
-                [_civ getVariable ["civ_locIndex", -1], _rep, "protect_civ_success"] call fnc_town_rep_adjust;
-            };
-    };
-
-    // Informant marker cleared by hand (raw createMarker name); the ellipse and the rest of teardown
-    // go through finish. Reward is already paid inline above on the success branch, so pay is false.
-    if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
-    ["Protect Civilian", _taskID, _status, _targetPos, _radius, [_areaMarker], [], false, "", true, false] call fnc_mission_finish;
-};
-
-[_targetpos, _spawnDist, _civilian, _VARtaskgeneratedName] spawn {
-    params ["_pos", "_dist", "_civ", "_taskName"];
-
-    waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskName], false] };
-
-    private _spawnOpforWave = {
-        params ["_center", "_dist", "_targetObject"];
-        private _spawnPos = [];
-        private _attempts = 0;
-        private _validPos = false;
-
-        while {_attempts < 15 && !_validPos} do {
-            _angle = random 360;
-            _spawnPos = _center getPos [_dist, _angle];
-            if (!surfaceIsWater _spawnPos) then { _validPos = true; };
-            _attempts = _attempts + 1;
-            sleep 0.5;
-        };
-        if (!_validPos) then {
-            _spawnPos = _center getPos [_dist, random 360];
-        };
-        _spawnPos set [2, 0];
-
-        // The nine-man squad token drawn from the faction pool, replacing a hardcoded eight-man list.
-        // Posture none with the spawn point as _spawnPos: fnc_spawn_team places the men there and adds
-        // their loot, and this thread drives the assault -- AWARE, RED, no fleeing.
-        _group = ["squad", _spawnPos, 0, "none", _spawnPos, "opfor"] call fnc_spawn_team;
+// Enrol only this crate's built objects under the mission key: R3F flags factory-made objects
+// (R3F_LOG_CF_depuis_usine, broadcast) beside the factory, so a near-crate poll separates them from a
+// builder vehicle's props, which stand far off and are never keyed here.
+[_crate, _liveVar] spawn {
+    params ["_crate", "_liveVar"];
+    private _seen = [];
+    while { (missionNamespace getVariable [_liveVar, false]) && { !isNull _crate } } do {
+        uiSleep 2;
         {
-            _x allowFleeing 0;
-            _x disableAI "AUTOCOMBAT";
-            _x setBehaviour "AWARE";
-            _x setCombatMode "RED";
-        } forEach units _group;
-
-        [_group] call fnc_mission_claim;
-
-        _wp = _group addWaypoint [getPosATL _targetObject, 0];
-        _wp setWaypointType "MOVE";
-        _wp setWaypointBehaviour "AWARE";
-        _wp setWaypointSpeed "NORMAL";
-
-        _wp2 = _group addWaypoint [getPosATL _targetObject, 10];
-        _wp2 setWaypointType "SAD";
-        _wp2 setWaypointSpeed "NORMAL";
-    };
-
-    private _waveCount = 0;
-    private _maxWaves = 4;
-    private _initialDelay = 20;
-
-    private _endTime = time + _initialDelay;
-    waitUntil { sleep 1; time >= _endTime || !Mission_Active };
-    if (!Mission_Active) exitWith {};
-    sleep 20;
-    [_pos, _dist, _civ] call _spawnOpforWave;
-    _waveCount = 1;
-
-    while {_waveCount < _maxWaves && Mission_Active} do {
-        _endTime = time + 40;
-        waitUntil { sleep 1; time >= _endTime || !Mission_Active };
-        if (!Mission_Active) exitWith {};
-
-        [_pos, _dist, _civ] call _spawnOpforWave;
-        _waveCount = _waveCount + 1;
+            if !(_x in _seen) then { _seen pushBack _x; [_x, "mission_protect_civ"] call fnc_duws_keep };
+        } forEach ((_crate nearObjects 60) select { (_x getVariable ["R3F_LOG_CF_depuis_usine", false]) && { _x != _crate } });
     };
 };
+
+// --- brief: search marker, task, Overlord directive + team copy ---
+private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _mission_name, "defend",
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_directive", 7], ["STR_DUWS_T_actionteam", "STR_DUWS_T_pc_copy", 0]]
+] call fnc_mission_present;
+
+// Skip Prep Phase action, 10 s in, reach-gated by the condition, JIP-keyed to the informant.
+[_inf, _skipVar, _prepActiveVar] spawn {
+    params ["_inf", "_skipVar", "_prepActiveVar"];
+    sleep 10;
+    private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _prepActiveVar];
+    [_inf, [localize "STR_DUWS_T_pc_skip",
+        { (_this select 3) params ["_sv"]; [_sv] remoteExec ["fnc_protect_civ_skip", 2] },
+        [_skipVar], 1.5, true, true, "", _cond]
+    ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
+};
+
+// ============================ arrival gate ============================
+// Prep starts only when a player reaches the informant; the deadline is the never-engaged backstop and
+// disarms once prep triggers.
+private _fnArrived = { (call BIS_fnc_listPlayers) findIf { _x distance _inf < ARRIVE_DIST } >= 0 };
+waitUntil {
+    sleep 1;
+    (call _fnArrived) || { missionNamespace getVariable [_skipVar, false] } || { time > _deadline }
+};
+
+if (time > _deadline && !(call _fnArrived) && !(missionNamespace getVariable [_skipVar, false])) exitWith {
+    // Never engaged -> shared timeout notice, no death asserted.
+    missionNamespace setVariable [_liveVar, false];
+    missionNamespace setVariable [_prepActiveVar, false, true];
+    DUWS_pc_informant = objNull; publicVariable "DUWS_pc_informant";
+    DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
+    [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], [], false, "mission_protect_civ", false, true] call fnc_mission_finish;
+};
+
+// ============================ prep phase ============================
+private _skipped = missionNamespace getVariable [_skipVar, false];
+[localize "STR_DUWS_T_pc_prep_hint"] remoteExec ["hint", [0, -2] select isDedicated];
+[localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pc_arrive"] remoteExec ["fnc_duws_dialogue", 0];
+
+if (!_skipped) then {
+    private _prepEnd = time + PREP_TIME;
+    while { time < _prepEnd && !(missionNamespace getVariable [_skipVar, false]) } do {
+        [format [localize "STR_DUWS_T_pc_prep_count", ceil ((_prepEnd - time) / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
+        private _next = time + 60;
+        waitUntil { sleep 1; time >= _next || time >= _prepEnd || (missionNamespace getVariable [_skipVar, false]) };
+    };
+};
+
+missionNamespace setVariable [_prepActiveVar, false, true];   // hide the skip action
+
+// ============================ defend phase ============================
+missionNamespace setVariable [_defendVar, true];
+_inf setBehaviour "AWARE";
+_inf setCombatMode "YELLOW";
+
+// Budget derived once and held: 7 plus the BLUFOR headcount, counting all on the side (not the living)
+// so casualties never thin the waves.
+private _budget = 7 + ({ side group _x == west } count (call BIS_fnc_listPlayers));
+private _vehSubCap = 2 + floor random 3;   // rand(2,4) live combat vehicles, rolled once
+
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_pc_assault"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 2;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_pc_hold"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_pc_hold_hint"] remoteExec ["hint", [0, -2] select isDedicated];
+
+// Lean truck dispatch: the garrison reserve's debus geometry without its held-state/pool machinery
+// (the informant site is held until the mission ends by definition). Drive to a debus short of the
+// ring, eject the squads to hunt, send the empty taxi off to the sweep.
+private _leanDispatch = {
+    params ["_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
+    private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
+    private _debusPos = [_debusRaw, 0, 80, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+    if (_debusPos isEqualTo []) then { _debusPos = _debusRaw };
+    _drv setBehaviour "CARELESS";
+    _drv setSpeedMode "FULL";
+    (_drv addWaypoint [_debusPos, 0]) setWaypointType "MOVE";
+    private _rideStart = diag_tickTime;
+    waitUntil {
+        uiSleep 1;
+        !alive _truck || { !alive (driver _truck) } || { !canMove _truck }
+        || { damage _truck > 0.8 } || { (_truck distance2D _debusPos) < 40 }
+        || { diag_tickTime - _rideStart > 180 }
+    };
+    for "_i" from ((count (waypoints _drv)) - 1) to 0 step -1 do { deleteWaypoint [_drv, _i] };
+    {
+        private _g = _x;
+        { if (alive _x) then { unassignVehicle _x; moveOut _x } } forEach units _g;
+        if (({ alive _x } count units _g) > 0) then { [_g, "hunt", _center, _radius] call fnc_apply_posture };
+    } forEach _grps;
+    if (alive _truck && { alive (driver _truck) }) then {
+        (_drv addWaypoint [_center getPos [_radius + 400, _center getDir _spawnPos], 0]) setWaypointType "MOVE";
+    };
+    _truck setVariable ["DUWS_binMe", true];
+    _truck setVariable ["DUWS_binAt", time + 30];
+    { _x setVariable ["DUWS_binMe", true]; _x setVariable ["DUWS_binAt", time + 30] } forEach units _drv;
+};
+
+private _claim = { [_this] call fnc_mission_claim };
+
+// Deliver infantry tokens by truck (walk them in if the side fields none); returns the squad groups.
+private _deliverSquads = {
+    params ["_center", "_radius", "_spawnPos", "_tokens", "_claim"];
+    private _out = [];
+    private _made = [_spawnPos, _center] call DUWS_fnc_garrisonReserveTruckSpawn;
+    if (_made isEqualTo []) exitWith {
+        { private _g = [_x, _center, _radius, "hunt", _spawnPos, "opfor"] call fnc_spawn_team;
+          if (!isNull _g) then { [_g] call _claim; _out pushBack _g } } forEach _tokens;
+        _out
+    };
+    _made params ["_truck", "_drv", "_cap"];
+    private _aboard = [];
+    private _used = 0;
+    {
+        private _men = [_x] call DUWS_fnc_tokenMenCount;
+        if (_used + _men <= _cap) then {
+            private _g = [_x, _center, _radius, "none", _spawnPos, "opfor"] call fnc_spawn_team;
+            if (!isNull _g) then {
+                { _x moveInCargo _truck } forEach units _g;
+                [_g] call _claim;
+                _aboard pushBack _g; _out pushBack _g; _used = _used + _men;
+            };
+        } else {
+            private _g = [_x, _center, _radius, "hunt", _spawnPos, "opfor"] call fnc_spawn_team;
+            if (!isNull _g) then { [_g] call _claim; _out pushBack _g };
+        };
+    } forEach _tokens;
+    if (_aboard isEqualTo []) then {
+        { deleteVehicle _x } forEach units _drv; deleteVehicle _truck;
+    } else {
+        [_drv] call _claim;
+        [_center, _radius, _spawnPos, _truck, _drv, _aboard] spawn _leanDispatch;
+    };
+    _out
+};
+
+// Shared with the win-time retreat: the wave loop mutates these in place (arrays pass by reference).
+private _waveGroups = [];
+private _vehGroups = [];
+
+// Wave controller: fill toward the budget on a deep dip (< 60 %) or the 5-minute heartbeat. Vehicles
+// drive in from the far side; infantry ride the truck to the debus.
+[_targetpos, _budget, _vehSubCap, _defendVar, _claim, _deliverSquads, _leanDispatch, _waveGroups, _vehGroups] spawn {
+    params ["_center", "_budget", "_vehSubCap", "_defendVar", "_claim", "_deliverSquads", "_leanDispatch", "_waveGroups", "_vehGroups"];
+    private _fnLive = { { ({ alive _x } count units _x) > 0 } count _this };
+    private _lastWave = -1e9;
+    while { missionNamespace getVariable [_defendVar, false] } do {
+        private _live = _waveGroups call _fnLive;
+        if (_live < 0.6 * _budget || { time - _lastWave >= 300 }) then {
+            _lastWave = time;
+            private _spawnPos = [_center, RADIUS] call DUWS_fnc_garrisonReservePos;
+            private _vehLive = _vehGroups call _fnLive;
+            private _pending = [];
+            for "_slot" from 1 to (_budget - _live) do {
+                private _fieldableVeh = ["car", "apc", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
+                if ((_vehLive < _vehSubCap) && { _fieldableVeh isNotEqualTo [] } && { random 1 < 0.4 }) then {
+                    private _cls = [selectRandom _fieldableVeh] call DUWS_fnc_tokenClass;
+                    if (_cls != "") then {
+                        private _g = [_cls, _center, RADIUS, "hunt", _spawnPos, "opfor"] call fnc_spawn_vehicle;
+                        if (!isNull _g) then { [_g] call _claim; _waveGroups pushBack _g; _vehGroups pushBack _g; _vehLive = _vehLive + 1 };
+                    };
+                } else {
+                    _pending pushBack (selectRandom ["team", "wp_team", "squad", "recon"]);
+                };
+            };
+            if (_pending isNotEqualTo []) then {
+                { _waveGroups pushBack _x } forEach ([_center, RADIUS, _spawnPos, _pending, _claim] call _deliverSquads);
+            };
+        };
+        sleep 5;
+    };
+};
+
+// Abandon: no BLUFOR in the ring for 20 continuous seconds kills the informant (same killed loss);
+// warning hint loops while breached, cancelled the instant any BLUFOR re-enters.
+[_inf, _targetpos, _defendVar] spawn {
+    params ["_inf", "_center", "_defendVar"];
+    private _breach = -1;
+    while { (missionNamespace getVariable [_defendVar, false]) && { alive _inf } } do {
+        uiSleep 2;
+        if ([_center, RADIUS, 1] call fnc_duws_bluforNear) then {
+            _breach = -1;
+        } else {
+            if (_breach < 0) then { _breach = time };
+            private _left = ABANDON_TIME - (time - _breach);
+            if (_left <= 0) exitWith { _inf setDamage 1 };
+            [format [localize "STR_DUWS_T_pc_abandon", ceil _left]] remoteExec ["hint", [0, -2] select isDedicated];
+        };
+    };
+};
+
+// ============================ outcome ============================
+private _defendEnd = time + DEFEND_TIME;
+waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } };
+
+missionNamespace setVariable [_defendVar, false];
+missionNamespace setVariable [_liveVar, false];
+if (!isNull DUWS_pc_crate) then { DUWS_pc_crate setVariable ["R3F_LOG_CF_credits", 0, true] };   // halt building
+DUWS_pc_informant = objNull; publicVariable "DUWS_pc_informant";
+DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
+
+if (!alive _inf) exitWith {
+    [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_killed"], false, "mission_protect_civ", false, false] call fnc_mission_finish;
+};
+
+// Win. Surviving combat vehicles disengage to the nearest OPFOR-held zone (infantry keep hunting);
+// REP to the nearest town, paid apart from finish's CP/AP.
+{
+    if (({ alive _x } count units _x) > 0) then {
+        private _lead = leader _x;
+        private _held = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
+        private _dest = if (_held isNotEqualTo []) then {
+            ([_held, [], { _lead distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0
+        } else {
+            _targetpos getPos [RADIUS + 800, _targetpos getDir (getPosATL _lead)]
+        };
+        for "_i" from ((count (waypoints _x)) - 1) to 0 step -1 do { deleteWaypoint [_x, _i] };
+        _x setBehaviour "CARELESS";
+        _x setSpeedMode "FULL";
+        (_x addWaypoint [_dest, 0]) setWaypointType "MOVE";
+    };
+} forEach _vehGroups;
+
+if (CIV_PRESENCE != "NONE") then {
+    private _locs = missionNamespace getVariable ["civ_locations", []];
+    private _idx = -1; private _best = 1e9;
+    { private _d = (getPos _x) distance2D _targetpos; if (_d < _best) then { _best = _d; _idx = _forEachIndex } } forEach _locs;
+    if (_idx >= 0) then { [_idx, DUWS_curReward select 2, "protect_civ_success"] call fnc_town_rep_adjust };
+};
+
+[_mission_name, _tn, "SUCCEEDED", _targetpos, RADIUS, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_win"], true, "mission_protect_civ", false, false] call fnc_mission_finish;
