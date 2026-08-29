@@ -1,6 +1,4 @@
-///////////
 ///////////   "gm_fc_ge", "GM German Bundeswehr 80s (Wood) + USA (3CB)", "GM_BW80_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"gm_ge_army_rifleman_g3a3_80_ols";					//Basic Soldier  (Patrols, Zone Guard, Team)

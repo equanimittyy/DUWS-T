@@ -1,6 +1,4 @@
-///////////
 ///////////   "LOP_IRAN", "PrOpfor IRAN Army", "LOP_IRAN"
-///////////
 
 
 opfor_SOLDIER_X = 				"LOP_IRAN_Infantry_Rifleman_2";			//Basic Soldier  (Patrols, Zone Guard, Team)

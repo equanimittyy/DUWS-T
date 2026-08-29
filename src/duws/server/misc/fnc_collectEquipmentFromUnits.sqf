@@ -1,4 +1,3 @@
-// fnc_collectEquipmentFromUnits.sqf
 if (!isServer) exitWith {};
 
 ["INFO", "GEAR", "Collecting equipment from nearby units..."] call fnc_log;

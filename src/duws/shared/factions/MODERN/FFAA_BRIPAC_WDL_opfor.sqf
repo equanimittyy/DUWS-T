@@ -1,6 +1,4 @@
-///////////
 ///////////   "ffaa_bripac", "FFAA Spanish Army BRIPAC + MOE Wood", "FFAA_BRIPAC_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"ffaa_bripac_fusilero_mochila";		//Basic Soldier  (Patrols, Zone Guard, Team)

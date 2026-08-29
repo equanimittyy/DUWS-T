@@ -1,7 +1,7 @@
 // Locality: server -- called by mission threads only, all server-side.
 //
-// The guard ring for a mission site. Its bodies are searchable as any enemy corpse now, so this no
-// longer flags them -- it only spawns the ring.
+// The guard ring for a mission site. Despite the name, its bodies are not specially flagged for intel --
+// they are searchable like any enemy corpse; this only spawns the ring.
 params ["_missionPos", "_radius"];
 
 // See fnc_missionPatrols for why the claim lives here and why each builder runs in its own thread.
@@ -18,11 +18,9 @@ sleep 1;
 sleep 1;
 [[(_missionPos select 0), (_missionPos select 1)+35], _radius] spawn _fnc_claimTeam;
 sleep 1;
-// Three vehicle slots, each gated on its top rung: slot 1 opens at the car tier, slot 2 only once
-// the side has reached the ifv tier, slot 3 only at the tank tier -- so the ring thickens with Army
-// Power rather than fielding all three from the start. Once a slot opens it rolls across its pool;
-// AP is monotonic, so the lower token is already earned, and the middle slot mixes light and medium
-// instead of always the heavier class.
+// Three vehicle slots, each gated on its top rung (car/ifv/tank tier), so the ring thickens with Army
+// Power rather than fielding all three at once. AP is monotonic, so an opened slot rolls across its pool
+// with the lower token already earned -- the middle slot mixes light and medium, not always the heavier.
 private _vehSlots = [
     [["car"],         "car",  [(_missionPos select 0)+30, (_missionPos select 1)+10]],
     [["car", "ifv"],  "ifv",  [(_missionPos select 0)+35, (_missionPos select 1)]],

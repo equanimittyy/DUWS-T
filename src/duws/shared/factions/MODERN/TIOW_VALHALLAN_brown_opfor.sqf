@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_VALHALLAN_brown", "Valhallans (brown)", "TIOW_VALHALLAN_brown"
-///////
 
 opfor_SOLDIER_X = 				"TIOW_Valhallan_Trooper_1_brown_Blu";			//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"TIOW_Valhallan_Meltagunner_1_brown_Blu";					//Anti Air   (Patrols, Zone Guard, Team)

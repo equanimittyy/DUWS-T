@@ -1,6 +1,4 @@
-///////////
 ///////////   "CUP_B_USMC", "CUP USMC SpecOps Desert", "CUP_B_USMC_D"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_B_USMC_Soldier_FROG_DES";			//Basic Soldier  (Patrols, Zone Guard, Team)

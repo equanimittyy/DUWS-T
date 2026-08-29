@@ -29,6 +29,6 @@ if (_speak && {!isNull _caller}) then {
 };
 
 // Back to whatever they were doing before being called over. The scroll entry going away is what
-// tells the player this person is finished with them -- it used to be a walk-off as well, which
-// also emptied a hostile town on sight, but it moved every local the player so much as spoke to.
+// tells the player this person is finished with them -- not a walk-off, which would move every
+// local the player so much as spoke to and empty a hostile town on sight.
 [_civilian] call fnc_civ_resume;

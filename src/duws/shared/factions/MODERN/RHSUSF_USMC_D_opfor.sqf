@@ -1,6 +1,4 @@
-///////////
 ///////////   "RHSUSF_USMC", "RHS USMC (Desert) + RECON", "RHSUSF_USMC_D"
-///////////
 
 
 opfor_SOLDIER_X = 				"rhsusf_usmc_marpat_d_rifleman";			//Basic Soldier  (Patrols, Zone Guard, Team)

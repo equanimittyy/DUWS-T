@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CUP_O_SLA", "CUP Sahrani SLA (Wood)", "CUP_O_SLA_WOOD"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CUP_O_SLA_Soldier_Backpack";	//Basic Soldier  (Patrols, Zone Guard, Team)

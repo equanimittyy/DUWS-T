@@ -4,14 +4,13 @@
 // they are bought supports a player uses on the way out, not something to ask command for.
 //
 // The handlers below do not paint the supports listbox green when the purchase lands. That row is
-// coloured from the availability flags each time the menu is built, and the indices written here
-// had drifted onto the wrong rows -- the armory handler was colouring HALO.
+// coloured from the availability flags each time the menu is built -- a hardcoded index here drifts
+// onto the wrong row as the list changes (it once had the armory handler colouring HALO).
 #include "..\..\shared\includes\action_style.hpp"
 
 _hq = _this select 0;
 
 if (isMultiplayer) then {
-    // dedup guard: exit if the actions were already added
     if (_hq getVariable ["HQ_actions_done", false]) exitWith {};
     _hq setVariable ["HQ_actions_done", true];
     if (support_armory_available) then {

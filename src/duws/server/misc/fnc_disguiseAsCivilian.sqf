@@ -1,4 +1,3 @@
-// functions\misc\fnc_disguiseAsCivilian.sqf
 if (!isServer) exitWith {};
 
 params ["_player"];

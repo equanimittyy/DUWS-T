@@ -10,17 +10,15 @@ params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2",
 if (_object getVariable ["DUWS_laptop_paid", false]) exitWith {};
 _object setVariable ["DUWS_laptop_paid", true];
 
-// setObjectTexture is local, so the dead screen only ever showed for the player who did the
-// hacking; everyone else kept looking at a live laptop on a finished mission. The global form
-// runs on the server, which owns the object. The loop this replaces only ever set index 0.
+// setObjectTexture is local, so only the player who set it would see the dead screen;
+// setObjectTextureGlobal runs on the server, which owns the object, so every client sees it finished.
 if (count getObjectTextures _object > 0) then {
   _object setObjectTextureGlobal [0, "#(rgb,8,8,3)color(0,0,1,1)"];
 };
 
-// The hold action hides itself the instant DUWS_laptop_done is set on the laptop (in the hold's own
-// completion, before this runs), so no per-client removal is needed. Dropping the queued JIP add still
-// matters: it stops a late joiner from re-adding the entry. The id is a string, so nothing deletes it
-// implicitly, and the laptop outlives the hack.
+// The hold action hides itself once DUWS_laptop_done is set (in the hold's completion, before this runs),
+// so no per-client removal is needed. Dropping the queued JIP add still matters -- it stops a late joiner
+// re-adding the entry, since the string id is never deleted implicitly and the laptop outlives the hack.
 remoteExec ["", format ["sabotage_action_%1", netId _object]];
 
 private "_VARtaskgeneratedName";

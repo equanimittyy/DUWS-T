@@ -1,61 +1,21 @@
-// Locality: server -- spawn once the group has its move waypoint(s) or a CYCLE loop. The whole convoy
-// reliability engine. One control group in; native AI drives and fights it on release or teardown.
+// Locality: server -- spawn once the group has its move waypoint(s) or a CYCLE loop. The convoy
+// reliability engine: one control group in, native AI drives and fights it on release or teardown.
 //
-// Arma's native vehicle route CALCULATION is the unreliable half of convoy driving: it wedges the lead on
-// open ground and at junctions with nothing in the way. Driving a KNOWN polyline with setDriveOnPath is the
-// reliable half. So this engine routes the road ITSELF (fnc_convoy_path) and puts EVERY hull -- lead
-// included -- on that fixed polyline with setDriveOnPath. Nothing is left to native routing.
+// Native vehicle route CALCULATION wedges the lead on open ground and at junctions, so this routes the
+// road itself (fnc_convoy_path) and puts EVERY hull on that fixed polyline via setDriveOnPath. Only each
+// hull's DRIVER gets disableAI "FSM" (the loop that would re-path it to a formation slot); gunner and
+// commander keep their AI, so the escort fights while the column keeps driving. PATH and AUTOCOMBAT stay
+// on -- setDriveOnPath needs PATH, and the HVT-peel and deny-armour ambush tests read behaviour.
 //
-// Group AI: the caller hands ONE group holding every hull, and it stays one group at the caller's behaviour
-// (SAFE). Only the DRIVER of each hull gets disableAI "FSM" -- the formation/decision loop that would re-path
-// a subordinate to its formation slot and override setDriveOnPath. With just the driver's FSM off the hull
-// holds its path, while the gunner and commander keep their AI, so the column returns fire and can promote to
-// COMBAT without breaking formation or leaving the road (this is what lets the escort fight while the convoy
-// keeps driving). PATH stays enabled: setDriveOnPath and the gap-mode lead's native doMove both need it.
-// AUTOCOMBAT is left on so the group's behaviour still reports contact -- the HVT car peel and deny-armour's
-// ambush test read it. On release or teardown the drivers' FSM is re-enabled; behaviour is the caller's
-// throughout, so nothing is restored. A hull that leaves the group mid-run (the HVT car peeling off) has its
-// driver's FSM re-enabled by its caller.
+// Legs are self-managed (native waypoint completion is not trusted, the lead not being native-driven);
+// spacing is held by a forceSpeed band with a no-overtake clamp. Recovery escalates on a per-hull wedge
+// counter: pace governor -> path re-issue -> regroup -> teleport (last resort, seats by original _pos so
+// a designed order like the HVT car's middle slot survives). Leadership is pinned to the lowest FIXED
+// column position, not live progress, so a stalled lead cannot hand off to a hull behind it.
 //
-//   Route: fnc_convoy_path walks the road graph from the lead's leg start to the leg's waypoint, returning a
-//   drivable line (roads where they exist, a water/obstacle-deviated run off-network). It is recomputed only
-//   when the leg changes, and cached so a CYCLE patrol reuses each lap's legs. Off-road gaps in that line are
-//   crossed once natively then cached too, so a lap replays a proven trail rather than re-rolling native routing.
-//
-//   Legs are self-managed: we do NOT rely on native waypoint completion (we no longer native-drive the lead,
-//   so it may not fire). We route to the current leg's waypoint, advance the leg index when the lead reaches
-//   it, wrap on a CYCLE, pick up a waypoint appended mid-run (deny-armour's drive-in-then-home), and idle
-//   when the index runs past the list (waiting for that appended waypoint).
-//
-//   Spacing: every hull drives its slice of the route from its own position to the end. forceSpeed holds the
-//   gap -- a proportional band around a target spacing (inside it match the hull ahead, outside run above or
-//   below in proportion to the error), with a straight-line rear-end stop and a no-overtake clamp. The lead
-//   paces the column at the slowest hull's top speed (capped to a sane road pace) and eases toward a halt as
-//   the widest gap opens, so the column always waits for its tail.
-//
-//   Recovery ladder, softest first, all keyed on a per-hull wedge counter (meant to move, not moving):
-//     1. Pace governor -- the lead eases toward a halt as the widest gap opens, so the column waits for its
-//        tail. Continuous, preventive; keeps most lags from ever becoming a wedge.
-//     2. Path re-issue (~CV_REISSUE ticks) -- a road hull's setDriveOnPath is re-committed, restoring the
-//        setpoint a forceSpeed 0 (rear-end clamp) dropped it off. A wedged lead nudges ITSELF one route hop
-//        with a native doMove instead of halting the column.
-//     3. Regroup (~CV_REGROUP_AT ticks) -- the column halts and every hull native-pathfinds up to close the
-//        gap on the hull ahead, re-forming behind the frozen front hull in whatever order they arrive; the
-//        order is renumbered on success. View-safe, no teleport. Native pathing is trusted here only as a
-//        recovery nudge from a free spot (it rounds a dynamic block a re-committed path cannot).
-//     4. Teleport (~CV_STUCK_MAX ticks the WHOLE column stays frozen) -- a regroup that could not free the
-//        column: realign onto the route in FIXED-position order and blink it there, on a loosely straight
-//        anchor (never across a harsh bend). Unconditional (a mangled column is worse than a blink); it seats
-//        by the ORIGINAL _pos, so a failed regroup's designed order (e.g. the HVT car's middle slot) is restored.
-//
-// Leadership is pinned to the hull with the lowest FIXED position (the seated column order, not live progress:
-// a stalled or briefly-reversing lead must not hand off to a hull behind it, which would trace the column
-// backwards) and re-picked only when the front dies. A successful regroup renumbers those positions to the
-// order the column re-formed in, so leadership follows the new front. One loop owns each group. Hulls are read
-// live: one joining mid-run (the repaired tank) is
-// picked up, one leaving (the peeled HVT car) is dropped, with no caller bookkeeping. Where the hulls must
-// break and fight (the roving patrol), the caller sets DUWS_convoy_release; DUWS_convoy_stop ends the loop
-// the same way at teardown -- both hand every hull back to native AI.
+// Hulls are read live: one joining mid-run (repaired tank) is picked up, one leaving (peeled HVT car)
+// dropped. DUWS_convoy_release (break and fight) and DUWS_convoy_stop (teardown) both hand every hull
+// back to native AI.
 params ["_group"];
 
 // Cross-system contract: flags this group as under scripted convoy control for the whole drive. The OPFOR OP

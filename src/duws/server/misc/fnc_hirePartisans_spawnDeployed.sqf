@@ -1,4 +1,3 @@
-// fnc_hirePartisans_spawnDeployed.sqf
 // Server-side: spawn the partisan squad at the chosen position and add it to high command.
 if (!isServer) exitWith {};
 

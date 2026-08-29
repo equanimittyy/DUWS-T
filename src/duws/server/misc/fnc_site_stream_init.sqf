@@ -127,21 +127,12 @@ fnc_site_hasHook = {
     _name in keys ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
 };
 
-// Every unit an occupant spawned, in one array per site and kind.
-//
-// A roster rather than a flag on each unit: the zone capture condition reads its count twice a second
-// while a player stands in the zone, and walking allUnits to find the stamped ones would put a
-// several-hundred-entry scan on exactly the frames a firefight is using. The crowd handler was doing
-// that walk -- allUnits + allDeadMen, once per emptied town -- for want of anywhere to keep the list.
-//
-// Dead men stay on it. A corpse is still the site's to collect, and the count below asks about the
-// living, so nothing has to be removed at the moment of death. What does have to leave is anything that
-// changes hands -- a recruited civilian is the player's now, and a teardown that still held it would
-// delete a man standing in their squad.
-//
-// Held outside the occupant record because a roster is object references, and the record is the half of
-// this that has to survive a save. One derivation of the name, because two readers spell it: the roster
-// itself and the retirement below, which has to unset the variable the roster created.
+// Every unit an occupant spawned, one array per site and kind.
+// A roster, not a per-unit flag: the capture condition polls this count twice a second, and walking
+// allUnits for stamped units would scan hundreds of entries on a firefight's frames. Dead men stay on it
+// (a corpse is still the site's to collect, and the count asks about the living); a unit that changes
+// hands -- a recruited civilian is the player's now -- is dropped, or teardown would delete a man in their
+// squad. Held outside the occupant record (references, not save state), the name derived once.
 fnc_site_roster_var = {
     params ["_siteKey", ["_kind", "garrison"]];
     format ["DUWS_siteUnits_%1_%2", _siteKey, _kind]
@@ -191,22 +182,13 @@ fnc_site_retire = {
     DUWS_siteHooks deleteAt _key;
 };
 
-// Takes an occupant's men off the map along with everything they leave behind.
-//
-// By roster, never by proximity: a radius sweep took a neighbouring town's garrison with it, and
-// that town then measured its survivors against its own baseline, recorded a mauling nobody
-// inflicted, and came back thinned for the rest of the campaign.
-//
-// A vehicle goes only once nothing living is aboard, so a transport the site crewed leaves with its
-// crew while one the player parked in the ring is not on this roster and stays. Groups are swept
-// because not every spawner sets deleteGroupWhenEmpty, and an empty group left behind on every
-// teardown of every site shows up only as a slow drift across a long campaign.
-//
-// A composition member is never taken this way, and the persistent flag is what says so: a zone's
-// turret gunner is on this roster and the thing he is sitting in is the zone's own emplacement, so
-// collecting "the vehicle he was in" once he is gone deletes a gun that was about to be stowed --
-// and a stow skips nulls, so the zone comes back without it, permanently, from its first teardown
-// on. The flag is set by fnc_duws_keep on everything a composition owns and by nothing else.
+// Takes an occupant's men off the map with everything they leave behind.
+// By roster, never proximity: a radius sweep once took a neighbouring town's garrison, which then read
+// its untouched survivors as a mauling nobody inflicted and came back thinned for the campaign. A vehicle
+// goes only once nothing living is aboard, so a site-crewed transport leaves with its crew while a
+// player-parked one (not on the roster) stays; empty groups are swept too (not every spawner sets
+// deleteGroupWhenEmpty). A composition member is never taken this way (the persistent flag says so) --
+// collecting a zone turret gunner's emplacement would delete a gun about to be stowed.
 fnc_site_collect = {
     params ["_siteKey", ["_kind", "garrison"]];
     private _men = ([_siteKey, _kind] call fnc_site_roster) select { !isNull _x };
@@ -244,26 +226,14 @@ fnc_site_alive = {
     { alive _x } count ([_siteKey, _kind] call fnc_site_roster)
 };
 
-// The freeze, as a disposal mode. Nothing is rebuilt and nothing is deleted: every registered occupant
-// of the site has its simulation switched off where it stands, and switched back on when anybody
-// arrives.
-//
-// This is why a base is the exception to streaming. A zone garrison belongs to OPFOR and is rebuilt from
-// a table, so deleting it loses nothing. A base's belongs to the player: rebuilding it would hand back
-// every soldier who had been killed, which is a free version of the redeploy they would otherwise pay
-// for, and its buildings carry damage a table cannot reproduce. A base is also a respawn point, so it
-// has to be able to receive somebody who arrives in an instant with no approach to notice. Freezing
-// satisfies all three, and simulation is where nearly all of an idle soldier's cost sits.
-//
-// enableSimulationGlobal, not enableSimulation: the latter is local, so a server-side freeze would leave
-// every client still simulating them.
-//
-// Only registered occupants freeze. A vehicle the player parked at base is their property and not the
-// site's, which also keeps this off anything the base-keep radius already exists to protect.
-//
-// The roster is read each pass rather than captured: a redeploy replaces a garrison wholesale, and a
-// watcher holding the old men would thaw units that no longer exist while the new ones stayed frozen.
-// Only units whose state actually differs are touched, because the command broadcasts.
+// The freeze, as a disposal mode: nothing is rebuilt or deleted, each registered occupant just has its
+// simulation switched off where it stands and back on when anybody arrives (where nearly all of an idle
+// soldier's cost sits). enableSimulationGlobal, not enableSimulation -- the latter is local, so a
+// server-side freeze would leave clients still simulating them. This is why a base is exempt from
+// streaming: rebuilding one from a table would refund every killed soldier and lose its buildings' damage,
+// and it must stay a live respawn point. Only registered occupants freeze (a player-parked vehicle is not
+// the site's). The roster is read each pass, not captured, so a wholesale redeploy does not leave a watcher
+// thawing units that no longer exist; only units whose state differs are touched (the command broadcasts).
 fnc_site_setFrozen = {
     params ["_key", "_o", "_awake"];
     {
@@ -321,19 +291,12 @@ fnc_site_bluforOrAir = {
 
 // One thread for every site, replacing a thread per zone plus a sleeper per FOB plus two town loops.
 //
-// The saving is the shared pre-gate rather than the thread count. Each zone thread called
-// fnc_duws_bluforNear every tick unconditionally, and that runs a nearEntities over radius + buffer as
-// well as a player-list build: forty zones at six ticks a minute is 240 spatial queries a minute across
-// a map that is empty of players almost everywhere. Here the player list is built once and every site is
-// distance-tested against it, and the spatial query is only paid where somebody actually is. The crowd
-// handler already did this and stated the principle; zones never got it because each had a thread of its
-// own and nothing to share a list with.
-//
-// The risk this shape takes on is one long pass. Scheduled scripts share about 3 ms a frame between
-// them, so a pass that outgrows the budget is split across frames and the sites at the tail are serviced
-// later than those at the head. Two hundred and fifty distance tests sit well inside it; what would not
-// is per-site work done inline. Hence the rule this poller is written to: **gate, then dispatch -- never
-// do real work here.** Every hook below either answers a question or spawns a worker.
+// The saving is the shared pre-gate, not the thread count: instead of every zone thread running
+// fnc_duws_bluforNear (a nearEntities + player-list build) each tick -- 240 spatial queries a minute over
+// a mostly empty map -- the player list is built once and every site distance-tested against it, the
+// spatial query paid only where somebody is. The risk is one long pass (scheduled scripts share ~3 ms a
+// frame), so the rule this poller is written to: gate, then dispatch -- never do real work inline. Every
+// hook below either answers a question or spawns a worker.
 fnc_site_poller = {
     if (!isServer) exitWith {};
     while {true} do {

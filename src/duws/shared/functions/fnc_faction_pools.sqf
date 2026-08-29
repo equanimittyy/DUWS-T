@@ -9,13 +9,13 @@
 // the global itself so the two hundred-odd sites that read opfor_SOLDIER_X directly keep working.
 // Variety then comes from picking out of the pool at the moment something spawns.
 //
-// What this replaces: a permanent thread per role (38 OPFOR, 34 BLUFOR) waking every 300 s to re-pick
-// and publicVariable its answer for the rest of the campaign -- wrong three ways beyond the cost. The
-// global holds one value at a time, so zones raised in the same five-minute window fielded the
-// *identical* APC while zones six minutes apart differed: variety across time, not the per-moment
-// variety a player actually sees. It let a faction's identity drift, the one thing auto-detection
-// exists to establish. And it cost seventy permanent scripts and seventy network writes every five
-// minutes, for values only ever read at the instant something spawns.
+// Why not a permanent thread per role (38 OPFOR, 34 BLUFOR) waking every 300 s to re-pick and
+// publicVariable its answer: wrong three ways beyond the cost. The global holds one value at a time,
+// so zones raised in the same five-minute window would field the *identical* APC while zones six
+// minutes apart differed -- variety across time, not the per-moment variety a player actually sees.
+// It would let a faction's identity drift, the one thing auto-detection exists to establish. And it
+// would cost seventy permanent scripts and seventy network writes every five minutes, for values
+// only ever read at the instant something spawns.
 
 // The front half of the same job lives here too: fnc_faction_resolve turns a detection bucket into
 // the key's value, fnc_faction_pools_publish turns that value into a pool plus a representative.

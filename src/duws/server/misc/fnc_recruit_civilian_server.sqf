@@ -32,7 +32,6 @@ _civilian setVariable ["recruit_processed_server", true];
 private _oldGroup = group _civilian;
 private _locIndex = _civilian getVariable ["civ_locIndex", -1];
 
-// 95% success chance.
 if (random 1 < 0.95) then {
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["fnc_duws_dialogue", _caller];
     sleep 3;

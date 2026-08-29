@@ -10,7 +10,7 @@ _salvos = _this select 1;
 _radius = _this select 2;
 _interval = _this select 3;
 _rps = _this select 4;
-_supportype = _this select 5; // 1 = arty, 2 = mortar, 3 = jdam, 4 = laser bomb, 5 = cluster
+_supportype = _this select 5;
 _cost = _this select 6;
 _ammotype = _this select 7;
 _rpsinit = _rps;
@@ -48,8 +48,6 @@ switch (_supportype) do {
 		if (_r != "") then { _ammotype = _r };
 	};
 };
-
-// make sure blufor has someone in range
 
 {
 	if (_x distance _position < 1000 || _supportype == 4) exitWith {arty_Blufor_close = true};
@@ -341,12 +339,12 @@ if (_ammotype == "Laser") then {
 		while {_rps > 0} do {
 			switch (_supportype) do {
 				case 1: {  // Arty
-					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800]; //spawn shells
+					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800];
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};
 				case 2: {  // Mortar
-					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800]; //spawn shells
+					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800];
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};
@@ -358,15 +356,15 @@ if (_ammotype == "Laser") then {
 					sleep ((random 20)/10);
 				};
 				case 3: {  // JDAM
-					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
+					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
 				};
 				case 5: {  // Cluster
-					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
-					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
+					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
+					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
 					sleep ((random 10)/50);
 				};
 				case 6: {  // Napalm
-					_bomb= "Bo_Mk82" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
+					_bomb= "Bo_Mk82" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
 					// A carpet of fire across the radius. Count kept low on purpose: the fire object is a
 					// heavy particle-and-light emitter, and this multiplies by rounds-per-salvo, so every
 					// extra one here lands eight on the ground at once.

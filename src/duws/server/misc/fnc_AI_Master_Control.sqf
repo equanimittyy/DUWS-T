@@ -1,6 +1,4 @@
 
-// SET OPFOR AI AIM to 0.2
-// REARM/REFUEL OPFOR VEHICLES & UNITS EVERY 10min
 if (!isServer) exitWith {};
 
 // How far from a player an enemy has to be for a resupply to mean anything. Generous on purpose --
@@ -25,9 +23,9 @@ if (!isServer) exitWith {};
 		sleep 10;
 
 		// Anchored on players off the spatial index rather than swept map-wide. Rearming an enemy
-		// nobody can reach demonstrates nothing, and the sweep this replaces called setVehicleAmmo
-		// and setFuel for every OPFOR unit and vehicle in the campaign every ten minutes -- a cost
-		// that grew with the campaign to keep ammo in guns no player was near.
+		// nobody can reach demonstrates nothing, and a full-map setVehicleAmmo/setFuel over every
+		// OPFOR unit and vehicle every ten minutes is a cost that grows with the campaign to keep
+		// ammo in guns no player is near.
 		private _near = [];
 		{
 			_near append (_x nearEntities [["CAManBase", "LandVehicle", "Air", "Ship"], RESUPPLY_RADIUS]);

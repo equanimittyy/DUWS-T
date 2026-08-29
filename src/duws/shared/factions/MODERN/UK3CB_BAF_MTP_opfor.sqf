@@ -1,6 +1,4 @@
-///////////
 ///////////   "UK3CB_BAF", "3CB British AF (MTP)", "UK3CB_BAF_MTP"
-///////////
 
 
 opfor_SOLDIER_X = 				"UK3CB_BAF_Pointman_MTP";		//Basic Soldier  (Patrols, Zone Guard, Team)

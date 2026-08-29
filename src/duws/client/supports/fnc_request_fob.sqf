@@ -21,7 +21,7 @@ if (commandpointsblu1 < _cost) exitWith {
 };
 
 _tooMany = false;
-private _maxFOB = floor(amount_zones_created * 0.7); // 70%, rounded down
+private _maxFOB = floor(amount_zones_created * 0.7);
 if (count Array_of_FOBS >= _maxFOB) then {
     ["info",[localize "STR_DUWS_T_m7h89a4s",format[localize "STR_DUWS_T_6vjxo4eb",_maxFOB]]] call bis_fnc_showNotification;
     sleep 15;
@@ -48,7 +48,6 @@ if (_amountOPFOR > 0) exitWith {
 	["fob_support"] call fnc_support_comm_add;
 };
 
-// try to find a pos, if no pos is found exit the script
 _direction = direction player;
 _newpos = [_position, 20, _direction] call BIS_fnc_relPos;
 _foundPickupPos = _newpos;

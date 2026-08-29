@@ -1,19 +1,12 @@
 // Locality: server -- mission threads call it, all server-side.
 //
-// The presentation step every side mission owes before it spawns anything: draw the search marker,
-// issue the task, then play the opening brief. Kept in this order and ahead of the objective spawn
-// because the marker and task are the only things telling the player where to go, and a spawn can run
-// for tens of seconds -- the brief reads only the nearest place name, never the objective, so it is
-// free to run first and the player hears the opening line while the guard force is still standing up.
+// Draw the search marker, issue the task, then play the opening brief -- in that order, ahead of the
+// objective spawn (which can run tens of seconds), because the marker and task are all that tell the
+// player where to go. The brief reads only the nearest place name, never the objective, so it runs first.
 //
-// _pos       the marker/task position (the search-ring centre); the nearest settlement to it names
-//            the "near %1" brief.
-// _taskId    caller-built task id (unique per instance -- callers append a rounded position).
-// _descText  the task description, already localised by the caller.
-// _brief     optional [[speakerKey, msgKey, delayAfter], ...]; each line is callsign-substituted
-//            (fnc_cs) and its message formatted with the place name, played in order.
-//
-// Returns the marker name, which the caller hands to fnc_mission_finish to clear at teardown.
+// _taskId is unique per instance (callers append a rounded position); _descText arrives already localised;
+// _brief is [[speakerKey, msgKey, delayAfter], ...], each callsign-substituted (fnc_cs) and formatted with
+// the place name. Returns the marker name, which the caller hands to fnc_mission_finish at teardown.
 params ["_pos", "_radius", "_taskId", "_descText", "_mission_name", "_taskType", ["_brief", []]];
 
 private _marker = [_pos, _radius] call fnc_missionMarkerData;

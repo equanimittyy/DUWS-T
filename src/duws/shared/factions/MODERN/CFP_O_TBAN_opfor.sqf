@@ -1,6 +1,4 @@
-///////////
 ///////////   "CFP_O_TBAN", "CFP Taliban (Modern)", "CFP_O_TBAN"
-///////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_TBAN_Rifleman_AK_47_01";					//Basic Soldier  (Patrols, Zone Guard, Team)

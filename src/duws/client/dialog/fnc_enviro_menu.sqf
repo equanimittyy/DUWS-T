@@ -21,7 +21,6 @@ private _setDefault = {
     lbSetText [_idc, _i, (lbText [_idc, _i]) + " " + (localize "STR_DUWS_T_default_suffix")];
 };
 
-// WEATHER TYPE
 index_weather_type_tropical = lbAdd [2100, localize "STR_DUWS_T_ex41rpdu"];
 index_weather_type_arid = lbAdd [2100, localize "STR_DUWS_T_jf8jtvt7"];
 index_weather_type_temperate = lbAdd [2100, localize "STR_DUWS_T_kpi5qxd0"];
@@ -31,48 +30,40 @@ index_weather_type_varied = lbAdd [2100, localize "STR_DUWS_T_pa387ndd"];
 index_weather_type_disable = lbAdd [2100, localize "STR_DUWS_T_6dgte6s0"];
 [2100, index_weather_type_disable] call _setDefault;
 
-// TIME OF DAY
 time_of_day_dawn = lbAdd [2101, localize "STR_DUWS_T_4hmx1wzd"];
 time_of_day_noon = lbAdd [2101, localize "STR_DUWS_T_95vrzwsq"];
 time_of_day_evening = lbAdd [2101, localize "STR_DUWS_T_pshlpqdy"];
 time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
 [2101, time_of_day_dawn] call _setDefault;
 
-// CIVILIAN DENSITY
-// option values: 5, 10, 15, 20 (default 15)
 private _civDensityValues = [5, 10, 15, 20];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
     if (_x == 15) then { [2102, _index] call _setDefault; };
 } forEach _civDensityValues;
 
-// FOB FAST TRAVEL
 index_fast_travel_true = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg2"];
 index_fast_travel_false = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg1"];
 [2103, index_fast_travel_true] call _setDefault;
 
-// ZEUS PARAMS
 index_zeus_params_full = lbAdd [2104, localize "STR_DUWS_T_m4bqnyut"];
 index_zeus_params_blufor = lbAdd [2104, localize "STR_DUWS_T_nque25op"];
 index_zeus_params_none = lbAdd [2104, localize "STR_DUWS_T_3i1vcc0n"];
 [2104, index_zeus_params_blufor] call _setDefault;
 
-// War escalation (replaces the old scorched-earth mode).
+// War escalation.
 lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
 [2106, index_escalation_true] call _setDefault;
 
-// ENABLE SIMPLE ZONES
 index_simpzones_false = lbAdd [2108, localize "STR_DUWS_T_x4zs3lsg0"];
 index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
 [2108, index_simpzones_false] call _setDefault;
 
-// MORE URBAN
 index_more_urban_yes = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg2"];
 index_more_urban_no = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg1"];
 [2105, index_more_urban_yes] call _setDefault;
 
-// ENABLE CIVILIANS
 // Each row carries its CIV_PRESENCE value as item data rather than recording its index in a
 // global: the game mode decides which rows exist, so an index means nothing outside the list it
 // was added to. fnc_process_enviro_menu.sqf reads the value straight back off the row.
@@ -102,9 +93,9 @@ if (duws_gamemode == "apocalypse") then {
     [2109, _iRavage] call _setDefault;
 } else {
     // Every set is offered only when the body models it draws from are loaded, so the list shows
-    // exactly what this install can spawn. One presence check per set replaces the old civ_mod
-    // switch, which both left CUP/CFP/propfor sets ungated at the tail and could never reach the
-    // Unsung/IFA3 cases (civ_mod detection only ever sets vanilla/cup/propfor/cfp). Probes are lead
+    // exactly what this install can spawn. A presence check per set, not a civ_mod switch: civ_mod
+    // detection only ever sets vanilla/cup/propfor/cfp, so it left CUP/CFP/propfor sets ungated at
+    // the tail and could never reach the Unsung/IFA3 cases. Probes are lead
     // models from CIV_FACTIONS.sqf; a mixed CUP+CFP set probes a CFP class so CUP alone won't pass.
     // NONE and med carry none: Off is always offered and med is vanilla base classes, the default.
     private _civSets = [
@@ -141,7 +132,6 @@ if (duws_gamemode == "apocalypse") then {
     [2109, _iMed] call _setDefault;
 };
 
-// ENABLE HARDCORE MODE
 index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];
 index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
 [2110, index_hardcore_false] call _setDefault;
@@ -154,7 +144,6 @@ if (!isNil "duws_enviro_sel") then {
     { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_enviro_sel;
 };
 
-// PRESET
 // Filled last so the row reflects whatever the restore above ended on: a player who came back
 // from the campaign screen having changed something there is already on Custom.
 duws_preset_classic = lbAdd [2200, localize "STR_DUWS_T_preset_classic"];

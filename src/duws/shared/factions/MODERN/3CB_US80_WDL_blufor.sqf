@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "UK3CB_CW_US_B_LATE", "3CB US Army 80s (Wood)", "3CB_US80_WDL"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"UK3CB_CW_US_B_LATE_RIF_1";				//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"UK3CB_CW_US_B_LATE_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"UK3CB_CW_US_B_LATE_LAV25";				//random patrol
 blufor_MBT_TANK1_X =			"UK3CB_CW_US_B_LATE_M1A1";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"UK3CB_CW_US_B_LATE_Stinger_AA_pod";
 blufor_TURRET_AT =				"UK3CB_CW_US_B_LATE_TOW_TriPod";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"UK3CB_CW_US_B_LATE_M2_TriPod";
 blufor_TURRET_GMG =				"UK3CB_CW_US_B_LATE_MK19_TriPod";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"UK3CB_CW_US_B_LATE_SF_RIF_2";			//operator
 blufor_SPECOPS_GL_X =			"UK3CB_CW_US_B_LATE_SF_GL";				//operator
@@ -61,14 +47,10 @@ blufor_SPECOPS_ENG_X = 			"UK3CB_CW_US_B_LATE_SF_ENG";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -76,12 +58,10 @@ blufor_SPECOPS_ENG_X = 			"UK3CB_CW_US_B_LATE_SF_ENG";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -100,12 +80,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["UK3CB_CW_US_B_LATE_M1025_Unarmed","M1025 (Unarmed) (5CP)",5],

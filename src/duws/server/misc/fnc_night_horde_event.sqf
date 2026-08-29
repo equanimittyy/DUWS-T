@@ -8,7 +8,6 @@ private _zombieClasses = [
     "zombie_runner"
 ];
 
-// Ravage-loaded check, gauged by whether zombie_runner exists.
 if (!isClass (configFile >> "CfgVehicles" >> "zombie_runner")) then {
     _zombieClasses = [
         "C_Man_casual_1_F"

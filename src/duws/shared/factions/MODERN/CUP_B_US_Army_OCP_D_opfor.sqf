@@ -1,6 +1,4 @@
-///////////
 ///////////   "CUP_B_US_Army", "CUP US Army (OCP Desert)","cup_b_usarmy_ocp_desert"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_B_US_Soldier_ACOG_OCP";					//Basic Soldier  (Patrols, Zone Guard, Team)

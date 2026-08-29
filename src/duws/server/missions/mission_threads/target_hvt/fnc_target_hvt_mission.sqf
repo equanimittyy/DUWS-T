@@ -1,23 +1,12 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Convoy hunt. An HVT flees to an OPFOR-held zone in one of three armed road convoys, each on its own
-// approach; exactly one carries him in a single unarmed car -- the odd hull among armed escorts, its type
-// named to the player -- so the hunt is to spot the right column and stop it before it arrives. Win: the
-// HVT dies. Fail: his car reaches the zone, or the deadline passes.
-//
-// The win is a race, not a one-shot predicate polled at a fixed spot, so this owns its site pick, spawn
-// and monitor like the informant hunt and IDAP run. Ends through fnc_mission_finish like every mission.
 params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 private _deadline = DUWS_curDeadlineAt;
 
-// Destination: the OPFOR-held haven the convoys flee to, from the spawn via fnc_hvt_dest_pick (nearest held
-// zone 3-10 km out, corridor crossing no water, clear of BLUFOR ground). The spawn is the offer point the
-// site-finder ejected 3-10 km from a zone (fnc_target_hvt_site), so the map icon is the column start and the
-// haven a real zone the far side. The site-finder proved one reachable, so this normally succeeds; only an
-// AO that flipped between offer and accept (haven captured, or friendly ground advanced across the corridor)
-// leaves none -> abort, releasing gate and slot.
+// Destination: the OPFOR-held haven the convoys flee to (fnc_hvt_dest_pick -- nearest held zone 3-10 km out,
+// corridor clear of water and BLUFOR ground). The site-finder proved one reachable at offer time; only an AO
+// that flipped since (haven captured, or friendly ground crossed the corridor) leaves none -> abort.
 private _dest = [_MissionPos] call fnc_hvt_dest_pick;
 if (_dest isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 3 km+ out with a clean corridor"] call fnc_mission_abort;
@@ -25,13 +14,10 @@ if (_dest isEqualTo []) exitWith {
 private _destPos = _dest select 0;
 private _destName = _dest select 1;
 
-// The convoys start spread across the area, each on its own road, then run to the zone via a divergent
-// mid-route point so the approaches split and the player cannot cover them all. TUNABLE: spawnR the radius
-// the three start roads are drawn from; startSep the minimum gap between starts so each gets its own road;
-// viaSpread the lateral offset of the mid-route point (bigger = wider fork); viaCone the widest a via road's
-// run may sit off the destination bearing before it is skipped; startCone the same limit for a START road to
-// count as route-aligned (preferred, so a column spawns down-route not perpendicular); arrive the zone-edge
-// fail band.
+// The convoys start spread, each on its own road, then fork to the zone via a divergent mid-route point so
+// the player cannot cover all three. Tunables: spawnR (start-road draw radius), startSep (min gap between
+// starts), viaSpread (mid-point lateral offset), viaCone/startCone (max road misalignment off the dest
+// bearing for a via/start road), arrive (zone-edge fail band).
 private _spawnR    = 700;
 private _viaSpread = 1200;
 private _viaCone   = 45;
@@ -57,11 +43,9 @@ private _rollEsc = {
     if (_c == "") then { opfor_ARMED_CAR1_X } else { _c }
 };
 
-// The HVT rides an unarmed car of OPFOR's own faction (no turret, a few seats) so it reads as one of theirs,
-// not a civilian giveaway, yet is the odd unarmed hull among armed escorts the player is told to find. The
-// faction vocab names no such role, so CfgVehicles is scanned once for a Car-kind class the armed test
-// clears; cached per faction (the scan is broad, the faction fixed for the session). No unarmed car -> an
-// armed car, and the transport truck only if it names neither.
+// The HVT rides an unarmed car of OPFOR's own faction, the odd unarmed hull among armed escorts the player
+// is told to find. The faction vocab names no such role, so CfgVehicles is scanned once for a Car-kind class
+// the armed test clears, cached per faction. No unarmed car -> an armed car, then the transport truck.
 private _fac = getText (configFile >> "CfgVehicles" >> opfor_SOLDIER_X >> "faction");
 private _cacheKey = format ["DUWS_hvtCarPool_%1", _fac];
 private _carPool = missionNamespace getVariable [_cacheKey, []];
@@ -151,11 +135,9 @@ private _axisOffset = {
     _d min (180 - _d)
 };
 
-// Three independent start roads, each [pos, heading toward the zone]. Prefer roads aligned with the route
-// (within _startCone of the destination bearing) so a column spawns pointing down-range, not perpendicular
-// onto a crossing road. Pass 1 takes aligned roads; pass 2 tops up from any nearby road (laid straight at
-// the zone); pass 3 falls back to fanned safe-pos points where the corner is road-thin. Each new start sits
-// _startSep from the others so columns do not share a road.
+// Three independent start roads, each [pos, heading toward the zone], _startSep apart so columns do not
+// share a road. Pass 1 prefers route-aligned roads (within _startCone) so a column spawns down-range; pass
+// 2 tops up from any nearby road; pass 3 falls back to fanned safe-pos points where the corner is road-thin.
 private _startRoads = [];
 private _near = _MissionPos nearRoads _spawnR;
 {
@@ -239,12 +221,10 @@ for "_i" from 0 to 2 do {
         _driver moveInDriver _car;
         _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
         _hvt moveInCargo _car;
-        // Keep the HVT in the car -- a commander on foot breaks the hunt; the player must stop the car, not
-        // chase a runner. No single call holds an AI in, so three layers: lock (blocks the player and
-        // boarding, NOT an AI getting out), setUnloadInCombat false (no cargo bail when the column goes
-        // COMBAT), and a GetOut handler that reseats him if the engine ejects him anyway (a halted/disabled
-        // car bails past the first two). Reseat only into a live car (a destroyed one lets the eject stand);
-        // moveInCargo re-enters past the lock, which does not impede the AI driving.
+        // Keep the HVT in the car -- a commander on foot breaks the hunt. No single call holds an AI in, so
+        // three layers: lock (blocks the player, not an AI exit), setUnloadInCombat false (no bail on COMBAT),
+        // and a GetOut handler that reseats him into a live car if the engine ejects him anyway (a destroyed
+        // car lets the eject stand). moveInCargo re-enters past the lock without impeding the driver.
         _car lock true;
         _car setUnloadInCombat [false, false];
         _hvt addEventHandler ["GetOutMan", {
@@ -364,11 +344,9 @@ private _split = false;
 private _viaMarkers = [];
 private _revealAt = time + (30 + round random 30);
 private _revealed = false;
-// Allseer's running track: at a rolled cadence (first call ~2-3 min after the push, clear of the move-out
-// and midpoint lines) it moves a convoy symbol onto each column and calls a generic line. The symbols
-// persist at their last-reported spot and jump on each update -- a periodic fix, not a continuous blip, so
-// the intercept stays the player's. One marker per column, index-aligned with _groups, "" until placed and
-// reset to "" if wiped; the peeled HVT car gets its own marker at breakaway (below), on the same cadence.
+// Allseer's running track: at a rolled cadence it jumps a convoy symbol onto each column and calls a generic
+// line -- a periodic fix, not a continuous blip, so the intercept stays the player's. One marker per column,
+// index-aligned with _groups, "" until placed and reset if wiped; the peeled HVT car gets its own (below).
 private _nextReportAt  = time + (120 + round random 60);
 private _trackMarkers  = ["", "", ""];
 private _hvtMarker     = "";
@@ -425,10 +403,8 @@ waitUntil {
         _nextReportAt = time + (120 + round random 60);
     };
     // First contact: peel the car into its own CARELESS group so it runs for the zone instead of halting to
-    // fight with the escorts. Gated on a real BLUFOR threat within 300 m of the car, so a convoy fender-bender
-    // (which raises damage and can chain into a collision explosion) does not spuriously launch it; then
-    // triggered by the column going COMBAT or the car taking a hit. Crew keep their claim stamp, so
-    // teardown collects them.
+    // fight. Gated on a real BLUFOR threat within 300 m (so a convoy fender-bender does not launch it), then
+    // triggered by the column going COMBAT or the car taking a hit. Crew keep their claim stamp for teardown.
     if (!_split && alive _car
         && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _car < 300} }) >= 0}
         && {

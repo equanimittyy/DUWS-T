@@ -1,22 +1,12 @@
 // Locality: server -- creates civilian vehicles for a town. Called from fnc_civ_handler's fill
 // thread, which is server-only.
-/*
-    Puts civilian cars on a town's roads: a few driving town-to-town, the rest parked. Params:
-    [_locIndex, _centerPos, _radius]. Returns nothing.
-
-    Parked cars ride the town's "crowd" roster, so the site poller's empty hook collects them with
-    the pedestrians when the town sleeps. A parked car a player gets into leaves that roster and
-    costs the town a point of reputation: off the roster the sleep sweep cannot delete a car the
-    player drove off, and once abandoned the map cleanup sweep reaps it like any other empty
-    vehicle. Driving cars must not ride the roster: they leave for another town, and
-    deleting them on their origin town's sleep pops them in front of whoever they drove up to.
-    Instead they carry DUWS_binMe -- the map cleanup sweep reaps them only when no player is within
-    its keep radius, so one you are following stays and the rest are collected once out of sight.
-
-    Models come from civ_veh_array, auto-detected off the civilian faction the same way combat
-    vehicles are (fnc_civ_setup_array). Drivers are full civilians via fnc_civ_spawnUnit, so
-    running one down costs reputation exactly as shooting one on foot does; parked cars are empty.
-*/
+// Puts civilian cars on a town's roads: a few driving town-to-town, the rest parked.
+// Parked cars ride the town's crowd roster, so the site poller's sleep sweep collects them; a player
+// getting into one takes it off the roster (costing a reputation point) and the map cleanup reaps it once
+// abandoned. Driving cars must NOT ride the roster -- deleting them on their origin town's sleep would pop
+// them in front of whoever they drove up to; they carry DUWS_binMe instead, reaped by map cleanup only
+// when no player is within its keep radius. Models from civ_veh_array; drivers are full civilians
+// (fnc_civ_spawnUnit), so running one down costs reputation as shooting one on foot does.
 if (!isServer) exitWith {};
 params ["_locIndex", "_centerPos", "_radius"];
 

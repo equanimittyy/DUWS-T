@@ -1,6 +1,4 @@
-///////////
 ///////////   "NATO_WINTER", "NATO (Winter)", "NATO_WINTER"
-///////////
 
 
 opfor_SOLDIER_X = 				"NATO_WINTER_SOLDIER";					//Basic Soldier  (Patrols, Zone Guard, Team)

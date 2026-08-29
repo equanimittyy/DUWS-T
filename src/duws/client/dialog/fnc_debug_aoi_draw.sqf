@@ -18,7 +18,7 @@ private _names = [];
     // not paint on these local markers. Colour is the inline #(r,g,b,a) form, not a CfgMarkerColors
     // name (the map has no cyan); the marker alpha below -- not the string's 4th channel -- is kept
     // low so a double overlap barely darkens, holding the union close to flat. Pastel rose OPFOR,
-    // pastel sky BLUFOR, lightened from the old saturated pink/cyan to sit easier on the eyes.
+    // pastel sky BLUFOR, kept light so overlaps sit easier on the eyes.
     private _blu = _side isEqualTo "blufor";
     _nm setMarkerBrushLocal "Solid";
     _nm setMarkerColorLocal (["#(1,0.62,0.72,1)", "#(0.6,0.82,1,1)"] select _blu);

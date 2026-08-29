@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "BWA3", "BWA3 German Bundeswehr + KSK (Desert)", "BWA3_DES"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"BWA3_Rifleman_G27_Tropen";			//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"BWA3_RiflemanAT_RGW90_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"BWA3_Puma_Tropen";						//random patrol
 blufor_MBT_TANK1_X =			"BWA3_Leopard2_Tropen";					//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"B_static_AA_F";
 blufor_TURRET_AT =				"B_static_AT_F";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"B_G_HMG_02_high_F";
 blufor_TURRET_GMG =				"B_GMG_01_high_F";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"BWA3_recon_Tropen";					//operator
 blufor_SPECOPS_GL_X =			"BWA3_Grenadier_G27_Tropen";			//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"BWA3_recon_Pioneer_Tropen";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"BWA3_recon_Pioneer_Tropen";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -100,12 +80,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["B_Quadbike_01_F","ATV (1CP)",1],

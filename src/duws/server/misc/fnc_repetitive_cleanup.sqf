@@ -1,18 +1,9 @@
 // Locality: server -- inherited from server/server_init.sqf.
-/*
-    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing empty (or immobilised
-    with its crew still aboard), dropped weapons, spent smoke, supply crates and parachutes. One
-    lifetime covers all of it, set by the
-    DUWS_CleanupLifetime parameter. The sweep is always on: teardowns hand it their live leftovers
-    (a finished side mission's survivors, a cleared hardpoint's garrison), so it can never be off.
-
-    Anything carrying the persistent flag is never touched, whatever its age. fnc_duws_keep sets that
-    flag and files the object under a composition (the HQ, a FOB, a zone prefab, a side-mission
-    objective); fnc_duws_release drops it and hands the parts back here.
-
-    Planted explosives are deliberately absent: folding them into the shared lifetime would delete
-    charges a player placed and meant to return to, a gameplay change rather than a cleanup one.
-*/
+// Deletes what play leaves behind -- bodies, wrecks, empty or immobilised vehicles, dropped weapons, spent
+// smoke, crates, parachutes -- on one lifetime (DUWS_CleanupLifetime). Always on: teardowns hand it their
+// live leftovers, so it can never be off. Anything flagged persistent (fnc_duws_keep, dropped by
+// fnc_duws_release) is never touched. Planted explosives are excluded on purpose -- player-placed and
+// meant to be returned to, not litter.
 
 if (!isServer) exitWith {};
 
@@ -109,9 +100,9 @@ while {true} do {
     // A vehicle counts as in use -- and so is spared -- when a living player, or a player's AI
     // squadmate, is aboard, or when living AI crew still has a mobile hull under them. A crewed hull
     // that cannot move is wreckage its crew never bailed from, not a vehicle in service, so it ages
-    // out on the clock like an empty one -- this is what finally collects an immobilised-but-manned
-    // vehicle the old unmanned-only test never touched. A static is never mobile, so it is spared on
-    // any living crew instead: collecting a manned emplacement would strip a held zone.
+    // out on the clock like an empty one, which is what collects an immobilised-but-manned vehicle.
+    // A static is never mobile, so it is spared on any living crew instead: collecting a manned
+    // emplacement would strip a held zone.
     private _inUse = {
         params ["_v"];
         if ((crew _v) findIf {alive _x && {isPlayer _x || {(units group _x) findIf {isPlayer _x} >= 0}}} >= 0) exitWith { true };

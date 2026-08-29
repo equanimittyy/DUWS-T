@@ -6,8 +6,6 @@ _skill = blufor_ai_skill_random;
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],150,200,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
 
-///  14 UNITS MAX
-
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
 _unitType = (["UNIT"] call fnc_faction_rqst_list) param [_index - 2, []];

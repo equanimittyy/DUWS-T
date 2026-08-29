@@ -19,21 +19,13 @@ fnc_duws_disposeAfter = {
     DUWS_disposables pushBack [_obj, _ttd];
 };
 
-// Mark an object as part of a standing composition -- the BLUFOR HQ, a FOB, a zone prefab, a
-// hardpoint. Tagged persistent so no cleanup sweep touches it, and filed under _key so the whole
-// composition can be released together. Membership is tracked rather than inferred, because
-// inference cannot work: when a hardpoint is wrecked its sandbags and camo net are undamaged props,
-// and no test on those objects -- dead, immobile, litter class -- would ever collect them. Only the
-// key knows they belonged to something that is now gone.
-// One object, one key. Nothing enforces it, but release drops the persistent flag unconditionally,
-// so filing something under two keys means retiring either of them strips the protection while the
-// other still lists it as a member.
-// _pinned marks a member whose effect depends on its existing rather than on being looked at -- an
-// artillery piece, a mortar, an AA gun. Streaming those removes a capability instead of deferring a
-// cost: an aircraft crosses the gate's radius in a few seconds, so a stowed AA gun would never engage
-// anything. Declared by the caller rather than tested by class at stow time, because only the code
-// that placed the object knows why it is there, and a class test would have to track every faction
-// mod's turret names. Local: only the server stows.
+// Mark an object as part of a standing composition (HQ, FOB, zone prefab, hardpoint): tagged persistent so
+// no sweep touches it, filed under _key so the whole composition releases together. Membership is tracked,
+// not inferred -- a wrecked hardpoint's sandbags are undamaged props no class/damage test would collect.
+// One object, one key: release drops persistent unconditionally, so double-filing lets one key's release
+// strip protection the other still lists. _pinned marks a member whose effect needs it to exist, not be
+// looked at (artillery, mortar, AA) -- streaming those removes a capability (an aircraft crosses the gate
+// in seconds, so a stowed AA gun never engages); declared by the caller, since only the placer knows why.
 fnc_duws_keep = {
     params ["_obj", ["_key", "world"], ["_pinned", false]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
@@ -81,17 +73,11 @@ fnc_duws_release = {
     DUWS_retired pushBackUnique _key;
 };
 
-// Take a composition off the map, holding the data needed to put it back. Distinct from
-// fnc_duws_release: release retires a composition for good and drops its key, where stow keeps the
-// key so the same one can return. Deletion is immediate rather than handed to the sweep, because
-// removing the entity is the whole point -- a stowed member has to leave allMissionObjects, the
-// curator's editable set and the spatial index at once, and the sweep's keep-radius would hold it
-// instead.
-// Refuses while a streamable member is crewed. The zone stow leaves gunners sitting in static
-// weapons alive (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a
-// manned gun and strand the AI where its turret was. Retrying on the next cycle is the safe failure.
-// Pinned members are excluded from that test on purpose: they keep their crew by design, so counting
-// them would block their composition from ever stowing.
+// Take a composition off the map, holding the data to put it back -- unlike fnc_duws_release, which retires
+// the key for good. Deletion is immediate, not handed to the sweep, because a stowed member must leave
+// allMissionObjects, the curator set and the spatial index at once (the sweep's keep-radius would hold it).
+// Refuses while a non-pinned member is crewed -- stowing would delete a manned gun and strand its AI;
+// pinned members keep their crew by design, so they skip that test.
 fnc_duws_stow = {
     params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_stow", 2] };

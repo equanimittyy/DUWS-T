@@ -1,16 +1,14 @@
 // Locality: client -- invoked from a dialog action (shared/includes/fobmanager.hpp:59).
 
-//// CREATE THE ARRAY OF FOBS w/ POSITION
-_array_of_fobs_list = [];  // init the array of fobs
+_array_of_fobs_list = [];
 
-// DISPLAY LIST BEGIN
 _index = -1;
 _listREMOV = [];
 {
-    _array_of_fobs_list = _array_of_fobs_list + [[getpos _x]]; // add the FOB (pos) into a nested array
+    _array_of_fobs_list = _array_of_fobs_list + [[getpos _x]];
 
     _index = _index + 1;
-    _array_of_fobs_list_selected = _array_of_fobs_list select _index; // select the current array inside _array_of_fobs_list
+    _array_of_fobs_list_selected = _array_of_fobs_list select _index;
 
     _actual_fobname = Array_of_FOBname select _index;
     _array_of_fobs_list_selected = _array_of_fobs_list_selected + [_actual_fobname];

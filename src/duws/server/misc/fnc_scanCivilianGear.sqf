@@ -1,4 +1,3 @@
-// functions\misc\fnc_scanCivilianGear.sqf
 if (!isServer) exitWith {};
 
 ["INFO", "CIV", "Starting civilian gear scan..."] call fnc_log;

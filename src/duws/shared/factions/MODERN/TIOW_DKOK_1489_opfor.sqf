@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_DKOK_1489", "Death Korps of Krieg 1489th", "TIOW_DKOK_1489"
-///////
 
 opfor_SOLDIER_X = 				"DKoK_GM_1489th";			//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"DKoK_GM_1489th_Plasma";					//Anti Air   (Patrols, Zone Guard, Team)

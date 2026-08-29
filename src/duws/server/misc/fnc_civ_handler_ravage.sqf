@@ -127,8 +127,8 @@ if (_mode == "spawn") then {
     if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1: pop %2, live target %3", _locIndex, _targetPop, _spawnCount]] call fnc_log; };
 
     // Surveyed once at campaign generation and kept for the rest of the mission: the terrain sweep
-    // behind it is the heaviest engine call in the civilian system, and every town entry used to
-    // repeat it. Destroyed buildings go null, so the list is filtered rather than trusted.
+    // behind it is the heaviest engine call in the civilian system, too costly to repeat per town
+    // entry. Destroyed buildings go null, so the list is filtered rather than trusted.
     private _usableBuildings = (missionNamespace getVariable [format ["civ_buildings_%1", _locIndex], []]) select { !isNull _x };
     if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Usable buildings count: %1", count _usableBuildings]] call fnc_log; };
 

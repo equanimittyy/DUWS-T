@@ -7,8 +7,7 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 
 // One green box with everything tucked inside it -- the shape every other setup screen carries
 // (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and each
-// answer in its own labelled frame. This screen used to be a full-bleed band split by two white
-// rules, reading as controls dropped on the map rather than the setup sequence's first screen.
+// answer in its own labelled frame.
 //
 // One box, painted by three surfaces. The BUILD FACTIONS button is its own dialog
 // (shared/includes/faction_screen.hpp): a control this display creates can't be styled like a menu

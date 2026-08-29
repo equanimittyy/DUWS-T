@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_MORDIAN_blue", "Mordian Iron Guard (blue)", "TIOW_MORDIAN_blue"
-///////
 
 opfor_SOLDIER_X = 				"TIOW_Mordian_Trooper_1_Blu";			//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"TIOW_Mordian_Meltagunner_1_Blu";					//Anti Air   (Patrols, Zone Guard, Team)

@@ -1,6 +1,4 @@
-///////////
 ///////////    "MIN_RF", "Russia 2035 (Wood)", "MIN_RF_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"MIN_RF_SOLDIER";					//Basic Soldier  (Patrols, Zone Guard, Team)

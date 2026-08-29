@@ -1,4 +1,3 @@
-// fnc_blackMarketPurchase.sqf
 if (!isServer) exitWith {};
 
 params ["_caller", "_amount", "_type"];

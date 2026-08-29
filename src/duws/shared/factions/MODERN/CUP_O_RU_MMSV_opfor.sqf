@@ -1,6 +1,4 @@
-///////
 ///////   "CUP_O_RU", "CUP Russian MSV(emr)+Spetsnaz", "CUP_O_RU_MMSV"
-///////
 
 opfor_SOLDIER_X = 				"CUP_O_RU_Soldier_M_EMR";					//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"CUP_O_RU_Soldier_AA_M_EMR";				//Anti Air   (Patrols, Zone Guard, Team)

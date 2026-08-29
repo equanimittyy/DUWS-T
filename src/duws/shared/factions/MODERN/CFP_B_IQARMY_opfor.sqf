@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CFP_B_IQARMY", "CFP Iraqi Army (modern) + USA SpecOps", "CFP_B_IQARMY"
-//////////////
 
 
 opfor_SOLDIER_X = 				"cfp_b_iqarmy_rifleman";			//Basic Soldier  (Patrols, Zone Guard, Team)

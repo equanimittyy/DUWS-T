@@ -1,8 +1,5 @@
 // Locality: server -- inherited from server/misc/fnc_create_ammo_lists.sqf.
 
-// LIST OF ALL ITEMS TO SUPPLEMENT RESTRICTED ARSENAL
-// SOME FACTIONS DON'T HAVE GOOD BASIC GEAR
-
 // Curated ACE tools/flares/tables only. Medical items are detected dynamically in
 // fnc_create_ammo_lists off ACE's own ACE_isMedicalItem flag, so that set tracks the installed ACE
 // version and catches ACE-patched faction mods instead of rotting as a hardcoded list here.

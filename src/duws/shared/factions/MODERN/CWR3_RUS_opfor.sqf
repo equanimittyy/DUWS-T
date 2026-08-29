@@ -1,6 +1,4 @@
-///////////
 ///////////  "CWR3_O", "CWR3 Soviet Armed Forces (1985)", "CWR3_RUS"
-///////////
 
 
 opfor_SOLDIER_X = 				"cwr3_o_soldier";					//Basic Soldier  (Patrols, Zone Guard, Team)

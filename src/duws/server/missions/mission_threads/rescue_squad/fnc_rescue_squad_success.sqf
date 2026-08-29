@@ -1,22 +1,11 @@
 // Locality: server -- called (not spawned) from fnc_rescue_squad_mission once the cordon is broken.
-//
-// Evac + completion: cordon dead, squad up -- fly it out and close the mission. Squad and helicopter
-// are both set captive for the pickup: the fight is already won, so stray fire from a passing patrol on
-// the way out is not an earned failure. The bird lands at an LZ off the building; the squad boards on
-// foot, and a straggler stuck on geometry is moved into cargo on a timeout so one man cannot hang the
-// extraction. A bird lost while the squad is still on foot -- on approach or on the deck -- costs the
-// lift, not the mission: survivors walk off the AO and the reward still pays. Once sealed aboard they are
-// committed: a crash before the reward is a loss, and a wiped squad is a KIA fail either way. The player
-// and allies are kept off the bird -- any that board while it is down are turned out before it lifts,
-// then cargo is locked for the flight -- so teardown only ever deletes the flight crew and the squad.
 params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name"];
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};
 
-// Squad up and safe for the pickup: unpin them (PATH/MOVE on) so they can walk to the bird, stand them
-// up, and set captive so the extraction is not lost to a stray round now the fight is won. Unpinned here
-// as well as at break-out: on a cordon-wiped win the main thread can flip DUWS_rsq_relieved before the
-// un-captive thread runs, so without this the squad stays pinned in the building and never boards.
+// Unpin (PATH/MOVE on) so they can walk to the bird, stand them up, and set captive so the extraction is
+// not lost to a stray round now the fight is won. Unpinned here as well as at break-out: on a cordon-wiped
+// win the main thread can flip DUWS_rsq_relieved before the un-captive thread runs, else they never board.
 {
     _x enableAI "PATH";
     _x enableAI "MOVE";
@@ -33,11 +22,9 @@ if (_lz isEqualTo [] || {(_lz select 0) == 0}) then { _lz = _bpos getPos [60, ra
 
 private _bearing = random 360;
 private _vehpos = _bpos getPos [2500, _bearing];
-// Spawn and fly the bird on the helo-taxi's shape (client/supports/taxi/fnc_helotaxi.sqf), the one
-// transport pattern that lands reliably here. BIS_fnc_spawnVehicle gives a crewed, flight-ready bird in
-// one call (no pilotless window); setPos z is above ground level, so 200 clears whatever terrain the far
-// spawn sits on; flyInHeight sets the cruise. The invisible helipad and the pinned pilot below are what
-// turn an inconsistent approach into a clean put-down.
+// Spawn and fly the bird on the helo-taxi's shape (fnc_helotaxi.sqf), the one transport pattern that lands
+// reliably here. BIS_fnc_spawnVehicle gives a crewed, flight-ready bird in one call; setPos z 200 clears
+// whatever terrain the far spawn sits on. The invisible helipad and pinned pilot below make the put-down.
 private _veh = [_vehpos, 0, blufor_TRANS_HELI_X, WEST] call BIS_fnc_spawnVehicle;
 private _heli = _veh select 0;
 private _heliGrp = _veh select 2;
@@ -101,10 +88,9 @@ private _fail = {
     [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_squadfail"], false, _compKey, false, false] call fnc_mission_finish;
 };
 
-// The evac bird is down, but the fight was already won and the squad is up, so losing the lift is not a
-// failure the player earned: the survivors walk off the AO on foot and the mission still succeeds. Only a
-// squad with no one left to walk -- wiped before this, or lost in a crash with them aboard -- falls through
-// to the KIA fail. Radio tone is borrowed from the helo-taxi's own bird-down call.
+// Bird down but the fight was won and the squad is up, so losing the lift is not an earned failure: the
+// survivors walk off on foot and the mission still succeeds. Only a squad with no one left to walk falls
+// through to the KIA fail.
 private _exfilFoot = {
     // Let a crash blast finish resolving before calling this a save. If the bird went down on top of the
     // squad their deaths can land a beat after the wreck is flagged dead, so a bare survivor check would

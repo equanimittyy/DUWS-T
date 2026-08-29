@@ -1,17 +1,10 @@
 // Locality: server -- driven by the town monitor thread in fnc_civ_handler_ravage, the only
 // caller left since the plain civilian path moved onto the enemy-zone streaming model.
-/*
-    One pass of a town's civilian stream: drop the people the players have walked away from, and
-    refill the crowd around where the players actually are. Params: [_locIndex].
-
-    Delete-and-create rather than moving the bodies. A civilian carries interaction state --
-    searched, bribed, refused, arrested, plus its action IDs -- and relocating one means clearing
-    every one of those by hand, a list that rots silently as interactions are added. A fresh unit
-    also gets a fresh face, so a player crossing a city does not keep meeting the same six people.
-    The cost is affordable because the rate is low: a pass every 90 s creates at worst what a
-    single town fill already creates in a few seconds when the player first walks in, and in
-    practice replaces only the handful that fell behind since the last pass.
-*/
+// One pass of a town's civilian stream: drop the people players walked away from, refill around where they
+// are now. Delete-and-create, not relocate -- a civilian carries interaction state (searched, bribed,
+// arrested, its action IDs) that a move would have to clear by hand, a list that rots as interactions are
+// added, and a fresh unit gets a fresh face. Affordable because the rate is low (a pass every 90 s), and
+// in practice it replaces only the handful that fell behind.
 if (!isServer) exitWith {};
 params ["_locIndex"];
 
@@ -49,13 +42,11 @@ if (_inTown isEqualTo []) exitWith {};
 private _density = missionNamespace getVariable ["civ_density", 15];
 private _target = [_density, _locIndex] call fnc_civ_liveTarget;
 
-// The crowd goes into the buildings nearest a player rather than across the whole disc. A town's
-// radius grows with its building count, so a fixed budget spread over the disc made the big towns
-// the empty ones -- the same civilians over three times the ground. Clustering on a fixed number
-// of buildings instead means the dense town packs them into a street corner and the sparse one
-// strings them across a valley, which is the difference the density setting is meant to express.
-// Ranked by index rather than by the building itself: sort compares element by element, and two
-// buildings at an identical distance would leave it comparing objects.
+// The crowd goes into the buildings nearest a player, not across the whole disc: a town's radius grows
+// with its building count, so a fixed budget over the disc made big towns the empty ones. Clustering on a
+// fixed building count instead packs a dense town into a street corner and strings a sparse one across a
+// valley -- the difference the density setting expresses. Ranked by index, not the building itself, since
+// sort compares element by element and two equidistant buildings would leave it comparing objects.
 private _buildings = (missionNamespace getVariable [format ["civ_buildings_%1", _locIndex], []]) select { !isNull _x };
 private _anchor = getPos (_inTown select 0);
 private _ranked = [];

@@ -9,11 +9,9 @@ _radius = 350;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_laptopletsdothis";
 
-// The offer's site-finder vetted a cluster of enterable buildings near _MissionPos. Pick 3-5 of them: every
-// one gets a garrison, an orange cross on the map, and a laptop on a desk -- but only one laptop is the real
-// objective. The rest are decoys, a third of them rigged to blow, so the player has to clear each building
-// and sabotage its laptop to find out which is which. The finder guaranteed a cluster; abort defensively
-// only if it evaporated.
+// Pick 3-5 of the vetted building cluster: each gets a garrison, an orange cross and a laptop, but only one
+// laptop is real. The rest are decoys, a third rigged to blow, so the player must clear and sabotage each
+// to find out which. Abort only if the cluster evaporated since the offer.
 private _usable = [_MissionPos, 2, _radius] call fnc_usableBuildings;
 if (_usable isEqualTo []) exitWith { [8, "STR_DUWS_T_crtzxs0j", "no_building"] call fnc_mission_abort };
 private _bldgCount = (3 + floor random 3) min (count _usable);   // 3-5, capped at what exists
@@ -53,14 +51,11 @@ private _crossMarkers = [];
     _crossMarkers pushBack _mk;
 } forEach _bldgs;
 
-// A camping table and laptop in every candidate building, on an interior floor slot biased toward the
-// building's middle. One is the real objective, the rest decoys; a third of the decoys are rigged.
-// _laptops holds [object, isReal, rigged] so the action loop below can wire each to the right handler.
-//
-// Two passes with a physics settle between them. A buildingPos slot is authored above the floor, so a
-// table seated there by hand floats; instead each table is dropped simulated and left to fall onto the
-// real floor collision, then frozen. The laptop is seated only afterward -- base-flush on its table's
-// settled top -- and never simulated itself, because physx slides a loose laptop off the small top.
+// A camping table and laptop in each candidate building, on an interior slot. _laptops holds
+// [object, isReal, rigged] for the action loop below. Two passes with a physics settle between: a
+// buildingPos slot is authored above the floor, so a hand-seated table floats -- instead each table is
+// dropped simulated to fall onto the floor, then frozen. The laptop is seated afterward and never
+// simulated, because physx slides a loose laptop off the small top.
 private _laptops = [];
 switch (VERSION_X) do {
     case "MODERN": {
@@ -92,12 +87,10 @@ switch (VERSION_X) do {
         // rather than a sleep per table.
         sleep 1.5;
 
-        // Pass 2: freeze each settled table, then drop a laptop onto its now-static, level top. The table
-        // is frozen first so the laptop lands on a surface that no longer moves -- a laptop left on a
-        // still-settling table slid straight off, the failure the old blanket freeze papered over. A
-        // frozen prop still collides, so it makes a solid landing surface. The laptop starts a finger
-        // above the top (base offset backed out so it clears the surface, not clips it), upright, and
-        // turned 90 degrees off the table's own heading; it falls the last gap to rest flat.
+        // Pass 2: freeze each settled table, then drop a laptop onto its now-static top. Frozen first so the
+        // laptop lands on a surface that no longer moves (a laptop on a still-settling table slid off); a
+        // frozen prop still collides. The laptop starts a finger above the top (base offset backed out),
+        // upright, turned 90 degrees off the table heading, and falls the last gap to rest flat.
         {
             _x params ["_table", "_isReal"];
             // Freeze == harden: enableSimulation false also suppresses damage, so stray patrol fire cannot
@@ -120,7 +113,6 @@ switch (VERSION_X) do {
         // Laptops settle onto their (now frozen) tables in one shared wait, as the tables did onto the floor.
         sleep 1;
 
-        // Pass 3: freeze each rested laptop and wire it to its handler.
         {
             _x params ["_table", "_isReal", "_lap"];
             _lap enableSimulationGlobal false;
@@ -139,12 +131,10 @@ switch (VERSION_X) do {
     };
 };
 
-// Each candidate building holds a garrisoned team, raised and claimed up front so the objective is defended
-// before the player can reach it. The team is spawned posture "none" at the building and spread into that
-// exact building by hand, not left to the garrison posture: garrison hunts the nearest structure with >=5
-// slots within 300 m, so a candidate with fewer slots gets no defenders and a neighbour can be claimed in
-// its place -- the laptop and its guards must not drift apart. DUWS_garrisonedBy is stamped so an
-// overlapping zone garrison cannot double-occupy the same house; it frees itself once the group is gone.
+// Each candidate building holds a garrisoned team, spread into that exact building by hand rather than the
+// garrison posture -- which hunts the nearest structure with >=5 slots and could put defenders in a
+// neighbour, drifting the guards off the laptop. DUWS_garrisonedBy is stamped so an overlapping zone
+// garrison cannot double-occupy the house; it frees itself once the group is gone.
 private _garrison = [];
 {
     private _bldg = _x;
@@ -169,14 +159,10 @@ sleep 1;
     (([_patrolTokens, _c, _r] call DUWS_fnc_raiseGarrison) select { !isNull _x }) call fnc_mission_claim;
 };
 
-// SABOTAGE ACTION ON EVERY LAPTOP
-// A hold-to-complete "Sabotage" on each laptop, real or decoy, timed to the body-search hold (6 s). The
-// entry always shows, but the hold only makes progress once the building is clear -- no living OPFOR
-// within 50 m of the laptop -- and a hold attempted with enemies still up is interrupted at once and
-// answered with a hint, so the refusal is instant, not a wasted six seconds. Completing sets
-// DUWS_laptop_done on the laptop, which the show-condition reads, so the entry drops on every machine
-// without a per-client removal. The real laptop's completion wins the mission; a decoy's reveals it and,
-// if rigged, arms the bomb.
+// A hold-to-complete "Sabotage" on each laptop (6 s, the body-search hold). The entry always shows but
+// only progresses once no living OPFOR is within 50 m; a hold attempted with enemies up is interrupted
+// at once with a hint. Completing sets DUWS_laptop_done, which the show-condition reads, so the entry
+// drops on every machine. The real laptop wins; a decoy reveals itself and, if rigged, arms the bomb.
 //
 // Object-keyed JIP id (netId): a late joiner re-runs the add, but the show-condition keeps it hidden on
 // an already-sabotaged laptop, and the success/decoy paths clear the queued add anyway. The 50 m check

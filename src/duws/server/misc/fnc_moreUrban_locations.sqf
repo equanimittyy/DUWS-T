@@ -15,7 +15,6 @@ _temp_allLocationsPos = [];
 _allLocationTypes = [];
 "_allLocationTypes pushBack configName _x" configClasses (configFile >> "CfgLocationTypes");
 
-// Create a MASTER temp list of "all" location positions on the map using TYPES
 {
 	_temp_allLocations = _temp_allLocations + [_x];
 } forEach nearestLocations [_mapcenter, _allLocationTypes, _mapradius];
@@ -30,8 +29,6 @@ publicVariable "MASTER_allLocationsPos";
 {
 	_temp_allTowns = _temp_allTowns + [_x];
 } forEach nearestLocations [_mapcenter, ["NameCityCapital","NameVillage","NameCity","Name"], _mapradius];
-
-//[{player globalChat "ALL MAP LOCATIONS FOUND."}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 // These two come from the client's setup screens. Until both land the whole campaign is
 // blocked behind this function, so a silent stall here reads as "zones never generated".
@@ -70,7 +67,6 @@ private _tStage = diag_tickTime;
     count _temp_allLocations, count _allLocations, count _temp_allTowns, count _allTowns,
     round (diag_tickTime - _tStage)]] call fnc_log;
 _tStage = diag_tickTime;
-// ZONE DISTANCE FILTER APPLIED.
 [{player globalChat localize "STR_DUWS_T_8q8zqlf0"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 if (count(AO_direction) > 0) then {
@@ -84,7 +80,6 @@ if (count(AO_direction) > 0) then {
 		_inArc = [ PosOfBLUHQ, _direction, 135, position _x ] call BIS_fnc_inAngleSector;
 		if (_inArc) then {_allLocations pushBack _x};
 	} forEach _temp_allLocations;
-	// if not enough locations in the arc, use 360
 	if (count _allLocations < 10) then {
 		_allLocations = _temp_allLocations;
 	};
@@ -97,7 +92,6 @@ if (count(AO_direction) > 0) then {
 		if (_inArc) then {_allTowns pushBack _x};
 	} forEach _temp_allTowns;
 
-	// AO DIRECTION FILTER APPLIED
 	[{player globalChat localize "STR_DUWS_T_33eyysx9"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 };
@@ -163,7 +157,6 @@ while {_next < _total} do {
 [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 if (moreUrban == 1) then {
-	// URBAN FILTER APPLIED
 	[{player globalChat localize "STR_DUWS_T_rb6rlg1b"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 

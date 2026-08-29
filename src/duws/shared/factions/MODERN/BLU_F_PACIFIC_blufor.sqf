@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "BLU_F_T", "NATO  (Pacific)", "BLU_F_PACIFIC"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"B_T_Soldier_F";				//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"B_T_Soldier_LAT_F";			//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"B_T_APC_Tracked_01_AA_F";			//random patrol
 blufor_MBT_TANK1_X =			"B_T_MBT_01_TUSK_F";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"B_static_AA_F";
 blufor_TURRET_AT =				"B_static_AT_F";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"B_G_HMG_02_high_F";
 blufor_TURRET_GMG =				"B_GMG_01_high_F";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"B_T_Recon_F";					//operator
 blufor_SPECOPS_GL_X =			"B_T_Recon_JTAC_F";				//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"B_T_Recon_Exp_F";				//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"B_T_Recon_Exp_F";				//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -101,12 +81,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////   
 
 blufor_RQST_VEHICLES = [
 	["B_Quadbike_01_F","ATV (1CP)",1],

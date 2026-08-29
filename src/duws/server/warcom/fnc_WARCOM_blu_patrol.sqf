@@ -44,12 +44,10 @@ blufor_patrol_count = 0;
 
 	while {true} do {
 
-		// make sure blufor is controlling at least 1 zones and blufor_patrol_count <= total zones
 		if (count WARCOM_zones_controled_by_BLUFOR > 0 && blufor_patrol_count <= ((count WARCOM_zones_controled_by_BLUFOR)-1)) then {
 			sleep 2;
 			["INFO", "WARCOM", format ["WARCOM blufor patrol active: %1", str WARCOM_blu_patrol_type]] call fnc_log;
 
-			// find a zone where to spawn BLU wave *** BEGIN
 			_found = false;
 			_randomZone = [];
 			_failSafe = 0;
@@ -63,9 +61,6 @@ blufor_patrol_count = 0;
 				_failSafe = _failSafe + 1;
 				if (_failsafe > 10) then {sleep 300; _failsafe = 0;}
 			};
-			// find a zone *** end
-
-			// Find a safe position
 			_spawnLoc = [[(_randomZone select 0), (_randomZone select 1)],300,500,10,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
 			_group = "";
 

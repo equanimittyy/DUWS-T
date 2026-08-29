@@ -1,11 +1,5 @@
 // Locality: server -- all 20 callers are mission threads running server-side, and it
 // credits the shared CP and AP pools, so it must stay that way.
-//event handler for mission complete
-// PARAMS:
-// 1: command points reward
-// 2: army power reward (+BLUFOR only)
-// 3: mission name (used in notifications)
-// [25, 20, _mission_name] spawn fnc_mission_reward;
 
 _cpreward = _this select 0;
 _apreward = _this select 1;

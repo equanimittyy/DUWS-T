@@ -1,24 +1,8 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Recon-observe. The player infils to a designated overwatch position, raises binoculars, and holds
-// eyes-on an unrevealed OPFOR position (a zone or standalone hardpoint) long enough to scout it;
-// success lifts that position's fog of war on the strategic map. The site-finder
-// (fnc_recon_observe_site) returns the TARGET position via the shared picker; this thread computes the
-// overwatch itself -- terrain and object line-of-sight, on the friendly-facing side, favouring height
-// over the target.
-//
-// Both a zone and a hardpoint are observed where they really stand: the mission builds no stand-in for
-// either, so the old bug where a stand-in overlapped the real garrison and a player walked into it is
-// gone. A hardpoint's stream ring already covers the 600-800 m overwatch band, so approaching the
-// outlook wakes the real emplacement through its own site poller. A zone's ring is tighter and its
-// garrison would be asleep out here, so the mission widens the zone's stream radius for its own
-// lifetime instead of building a copy.
 params ["_MissionPos", "_mission_name"];
 
-// TUNABLE, all here. Standoff band (kept with the finder); observe area; LOS range slack; hold seconds;
-// the lead the real zone is woken within of the overwatch, so its garrison is up before the hold begins;
-// the clearance the overwatch keeps from other enemy zones and hardpoints; and the most bonus positions a
-// scout also reveals.
+// Tunables: standoff band, observe area, LOS range, hold seconds, zone-wake lead, clearance from other
+// enemy sites, and max bonus reveals.
 #define OBS_MIN_DIST    600
 #define OBS_MAX_DIST    800
 #define OBS_AREA        75
@@ -29,11 +13,10 @@ params ["_MissionPos", "_mission_name"];
 #define HP_CLEAR        300
 #define BONUS_MAX       2
 
-// Target: the finder returned the target position as _MissionPos, so re-deriving the nearest unrevealed
-// OPFOR position to it lands on the same target -- exact, via the shared picker, not the ambiguous
-// "nearest to an overwatch". The kind (zone or hardpoint) rides the pick; if captured, cleared or
-// revealed since the offer the next nearest resolves, none left aborts. A zone pos is kept, not copied --
-// fnc_zone_reveal matches its target by str(pos); an HP reveals by its key.
+// Target: the finder returned it as _MissionPos, so re-deriving the nearest unrevealed OPFOR position
+// lands on the same one via the shared picker. Kind (zone/hardpoint) rides the pick; if it was captured
+// or revealed since the offer the next nearest resolves, none left aborts. A zone pos is kept, not copied
+// -- fnc_zone_reveal matches by str(pos), an HP by its key.
 private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _pick = [_MissionPos] call fnc_recon_observe_pick;
@@ -103,10 +86,9 @@ private _anchor = _target;
 private _zoneSiteKey   = "";
 private _zoneOrigRadius = 0;
 
-// Objective marker + task on the OVERWATCH, since that is where the player is sent. The task type only
-// picks the map icon; "scout" falls back to default on any faction pack that lacks it.
 // Marker + task on the OVERWATCH (where the player is sent); the brief below names the target instead,
-// so it stays manual rather than riding fnc_mission_present's place substitution.
+// so it stays manual rather than riding fnc_mission_present's place substitution. "scout" task type just
+// picks the map icon and falls back to default on a pack that lacks it.
 private _radius = OBS_AREA;
 private _taskID = format ["recon_%1", round time];
 private _markername = [_overwatch, _radius, _taskID, localize "STR_DUWS_T_RECON_OBSERVE_TASK", _mission_name, "scout"] call fnc_mission_present;
@@ -129,13 +111,10 @@ private _place = [_target] call fnc_place_name;
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECON_OBSERVE_COPY"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Wake the REAL zone by widening its stream radius, so the shared poller raises it as the player nears the
-// outlook instead of the mission standing up a copy. The ring the poller wakes on is the site radius plus
-// the garrison's buffer; pushed to reach the overwatch plus SPAWN_R of lead, the poller raises the zone
-// before the player is set and holds it up while they stay (lastSeen stays fresh inside the ring), then
-// stows it on the normal grace once they leave. max() never shrinks a zone whose ring already reaches, and
-// the raise worker re-confirms against this same radius, so wake and confirm cannot disagree. The site
-// record's radius alone moves; the capture triggers keep their own geometry, so the zone captures over its
+// Wake the REAL zone by widening its stream radius, so the poller raises it as the player nears the outlook
+// rather than building a copy. Pushed to reach the overwatch plus SPAWN_R of lead; max() never shrinks a
+// ring that already reaches, and the raise worker re-confirms against this same radius. Only the site
+// record's radius moves -- the capture triggers keep their geometry, so the zone still captures over its
 // true size. Handed back on end below.
 if (_kind isEqualTo "zone") then {
     _zoneSiteKey = [_target] call fnc_zone_key;
@@ -157,11 +136,9 @@ waitUntil {
     false
 };
 
-// Stand the client layer down before scoring: the observe layer gates on this flag, and a cleared JIP key
-// stops it reaching a later joiner. The real zone is not torn down here -- it is campaign state the zone
-// poller owns; only its widened stream radius is handed back, so from now it streams on its true ring,
-// stowing when the player leaves and waking again if they close to assault. A hardpoint target left the
-// key "" and never moved.
+// Stand the client layer down before scoring (the layer gates on this flag; a cleared JIP key stops a
+// later joiner getting it). The real zone is campaign state, not torn down -- only its widened radius is
+// handed back, so it streams on its true ring again. A hardpoint target left the key "" and never moved.
 DUWS_recon_active = false;
 publicVariable "DUWS_recon_active";
 remoteExec ["", "DUWS_recon_layer_jip"];

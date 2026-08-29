@@ -1,9 +1,9 @@
 // Locality: any -- a pure table, reads no engine or mission state.
 //
 // The one place the DUWS role schema is written down: every key a side must fill, in fill order,
-// with the section, class kind, required flag and vanilla default no earlier list carried. Three
-// consumers used to hold their own copy (fnc_custom_faction_parse's required keys, the two AutoDetect
-// pool-publish lists); a fourth for the confirmation screen would only have let the copies disagree.
+// with the section, class kind, required flag and vanilla default no earlier list carried. Single-
+// sourced so its consumers (fnc_custom_faction_parse's required keys, the two AutoDetect pool-publish
+// lists, the confirmation screen) cannot disagree with each other.
 //
 // Returns [key, group, kind, required, vanillaDefault]:
 //   key      - full global name, e.g. "blufor_AR_SOLDIER_X"

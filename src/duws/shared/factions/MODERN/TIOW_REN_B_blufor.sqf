@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "TIOW_REN_B", "Chaos Renegades (brown)", "TIOW_REN_B"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"TIOW_B_Ren_B_Rifleman";			//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"TIOW_B_Ren_B_AT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"_RenegadeChimAuto_brown";		//random patrol
 blufor_MBT_TANK1_X =			"TIOW_Renegade_LR_Battlecannon_brown_Blu";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"TIOW_IG_MissileLauncher_AA_Renbrown_Blu";
 blufor_TURRET_AT =				"TIOW_IG_MissileLauncher_AT_Renbrown_Blu";
@@ -44,9 +33,6 @@ blufor_TURRET_GMG =				"TIOW_IG_HeavyBolter_Renbrown_Blu";
 
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"TIOW_Cultist6";					//operator
 blufor_SPECOPS_GL_X =			"TIOW_Cultist2";				//operator
@@ -64,14 +50,10 @@ blufor_SPECOPS_ENG_X = 			"TIOW_Cultist4";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -79,12 +61,10 @@ blufor_SPECOPS_ENG_X = 			"TIOW_Cultist4";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -102,12 +82,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["TIOW_Centaur_01_Renegade_B_Blu","Centaur (1CP)",1],

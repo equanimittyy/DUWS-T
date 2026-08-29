@@ -1,19 +1,15 @@
 // Locality: server -- called by mission threads only, all server-side.
 //
-// _patrols scales the infantry ring only. A lighter variant of this function was kept as a
-// separate copy and drifted from it; an argument cannot drift. No caller asks for a light ring
-// today, so the default is the ring every mission thread has always spawned.
+// _patrols scales the infantry ring only, an argument rather than a forked copy that could drift. No
+// caller asks for a light ring today, so the default is the full ring.
 params ["_missionPos", "_radius", ["_patrols", 5]];
 
-// Three distinct offsets: the ring was written as five spawns of which the last three shared a
-// position, so anything past the third repeats it.
+// Three distinct offsets; anything past the third repeats the last position.
 private _offsets = [[30, 20], [30, 0], [35, 0]];
 
-// Claimed for the mission that ordered the ring, so its teardown collects it wherever it patrolled
-// to. The claim lives here, not in the builders, which are shared with zone and town garrisons.
-//
-// Each builder is `call`ed from inside its own thread -- the only way to read back the group it
-// returns.
+// Claimed here, not in the builders (shared with zone/town garrisons), so teardown collects the ring
+// wherever it patrolled. Each builder is `call`ed from inside its own thread -- the only way to read
+// back the group it returns.
 private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_spawn_vehicle] call fnc_mission_claim };

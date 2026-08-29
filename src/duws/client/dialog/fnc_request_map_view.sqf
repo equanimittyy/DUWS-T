@@ -1,9 +1,9 @@
 // Locality: client -- a dialog button action, so it runs on whoever pressed it.
 //
-// View Map from inside the request menu, which the HQ board used to own alone. The dialog cannot
-// stay up over it: a dialog draws on top of the map display, so the readout would be answered onto
-// a screen nobody can see. So it comes down, and goes back up when the map closes -- the player
-// closing the map is coming back to the menu, not leaving it.
+// View Map from inside the request menu, not only the HQ board. The dialog cannot stay up over it:
+// a dialog draws on top of the map display, so the readout would be answered onto a screen nobody
+// can see. So it comes down, and goes back up when the map closes -- the player closing the map is
+// coming back to the menu, not leaving it.
 //
 // Spawned, never called: it waits on the map twice.
 if (!hasInterface) exitWith {};

@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "OPTRE_UNSC", "UNSCDF (Woodland)", "OPTRE_UNSC_WDL"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"OPTRE_UNSC_Army_Soldier_Rifleman_BR_WDL";				//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_Rifleman_AT_WDL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"OPTRE_M413_MGS_UNSC";				//random patrol
 blufor_MBT_TANK1_X =			"OPTRE_M808B_UNSC";			//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"OPTRE_Static_AA";
 blufor_TURRET_AT =				"OPTRE_Static_ATGM";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"OPTRE_Static_M41";
 blufor_TURRET_GMG =				"OPTRE_Static_Gauss";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"OPTRE_UNSC_ODST_Soldier_Rifleman_AR";				//operator
 blufor_SPECOPS_GL_X =			"OPTRE_UNSC_ODST_Soldier_DemolitionsExpert";	//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X =			"OPTRE_UNSC_ODST_Soldier_DemolitionsExpert"; 	//operato
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X =			"OPTRE_UNSC_ODST_Soldier_DemolitionsExpert"; 	//operato
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -101,12 +81,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["OPTRE_M12_FAV","Warthog (Unarmed) (2CP)",2],

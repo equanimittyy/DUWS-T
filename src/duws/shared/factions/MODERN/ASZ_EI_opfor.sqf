@@ -1,6 +1,4 @@
-///////////
 ///////////   "ASZ_EI", "PEDAGNE Italian Army + SOF (Vegecam + Vegetata)", "ASZ_EI"
-///////////
 
 
 opfor_SOLDIER_X = 				"ASZ_EI_rifleman_06A";				//Basic Soldier  (Patrols, Zone Guard, Team)

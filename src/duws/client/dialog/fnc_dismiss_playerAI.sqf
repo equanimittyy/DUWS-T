@@ -1,7 +1,5 @@
 // Locality: client -- invoked from a dialog action (shared/includes/squadmng.hpp:49).
 
-// dismiss players AI
-
 _arrayOfYellowUnits = [];
 
 {

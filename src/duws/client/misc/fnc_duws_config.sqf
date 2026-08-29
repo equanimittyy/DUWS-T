@@ -1,5 +1,4 @@
 // Locality: client -- inherited from client/client_init.sqf.
-// fnc_duws_config.sqf
 // Builds the "DUWS Config" subject in the map's Notes (diary), separate from the
 // DUWS-T Manual: one read-only page group listing the live campaign config -- the lobby
 // parameters and the setup-screen choices as they were actually committed for this run.

@@ -1,20 +1,12 @@
-// Garrison attrition, shared by every kind of ground that holds one.
+// Garrison attrition, shared by every kind of ground that holds one (zone or town): both wear down the
+// same way, so this is one store keyed by a caller-owned string (`zone_<x>_<y>` / `town_<n>`). Defines
+// several functions, so it is executed by the registry and must load ahead of its two consumers,
+// fnc_zone_state_init and fnc_civ_state_init.
 //
-// Executed by the registry rather than stored as one function: this file defines several. Loaded
-// ahead of both fnc_zone_state_init and fnc_civ_state_init, which are its two consumers.
-//
-// A zone and a town differ in what they *are* -- one has an owner, the other an opinion -- but not in
-// how a garrison wears down: both raise a composition, get ground down by the same player, and come
-// back at what was left, not what they started with. So this is one store keyed by a string:
-// `zone_<x>_<y>` for a zone, `town_<n>` for a town. Callers own the key format; nothing here inspects it.
-//
-// Attrition is a **ledger of lost whole tokens**, not a scalar men-thin. A garrison's full fighting
-// potential is a multiset of composition tokens (mult copies of its filtered tier list); the ledger
-// records which tokens are destroyed, and everything a site fields derives from full minus lost. A
-// token is lost when its group is wiped -- destroy one tank, lose one tank -- so a mauled zone comes
-// back specifically the units it lost, not thinner everywhere. The model is
-// docs/info/gameplay/garrison_and_reserves.md. spawnDiff/tokenListMen resolve at call time, living in
-// fnc_zone_spawn_sizes and fnc_spawn_vocab; every function here runs at gameplay, long after both load.
+// Attrition is a ledger of lost whole tokens, not a men-thin scalar: a garrison's potential is a multiset
+// of composition tokens, and everything it fields is full minus lost -- so a mauled site comes back
+// missing specifically what it lost (destroy one tank, lose one tank). Model:
+// docs/info/gameplay/garrison_and_reserves.md.
 
 // The full fighting potential, stamped once at raise (and re-stamped on a town tier buy, which grows
 // it). Stored as the token list and its men count both: the list drives surviving/seed/loss, the men
@@ -103,7 +95,7 @@ DUWS_fnc_garrisonStrength = {
 // under it. The reserve/garrison split at raise fills the garrison before the pool, so dropping to a
 // low fraction empties the pool first and leaves a thin single garrison -- which is what a recaptured
 // zone or a cleared town should redeploy as. Vehicles owe no men, so a low seed sheds them freely,
-// matching the old 0.3 scratch force that fielded no armour.
+// leaving a thin infantry force with no armour.
 DUWS_fnc_garrisonSeed = {
 	params ["_key", "_frac"];
 	private _target = _frac * ([_key] call DUWS_fnc_garrisonFullMen);

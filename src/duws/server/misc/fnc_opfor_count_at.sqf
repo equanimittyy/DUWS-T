@@ -1,6 +1,4 @@
 // Locality: server -- OPFOR physically standing on a piece of ground, whoever spawned them.
-// usage: [_pos, _radius] call fnc_opfor_count_at
-//
 // Deliberately owner-blind, unlike fnc_zone_garrison_count: this answers "is this ground held",
 // which anyone standing on it denies whether they are the local garrison, a side mission's guards,
 // or a patrol passing through.

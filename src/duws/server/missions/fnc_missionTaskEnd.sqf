@@ -1,6 +1,5 @@
 // Locality: server -- called by mission threads only, all server-side.
 
-// Retires a side-mission task: final state to every client, then removal once it has been read.
 params ["_taskId", ["_state", "SUCCEEDED"]];
 if (!isServer) exitWith {};
 

@@ -1,8 +1,8 @@
 // Locality: all machines; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 0).
-// The command entries a FOB used to carry -- squad and FOB managers, the redeploy -- are buttons
-// inside Requests now, built by the same function the HQ uses. What is left here is what a player
-// reaches for without asking command first, plus the rest: a FOB has no medical tent to put it on,
-// and it is the same act of standing at a base and stopping for the night.
+// The command entries -- squad and FOB managers, the redeploy -- live inside Requests, built by the
+// same function the HQ uses. What is left here is what a player reaches for without asking command
+// first: a FOB has no medical tent to put it on, and it is the same act of standing at a base and
+// stopping for the night.
 #include "..\includes\action_style.hpp"
 
 _fob = _this select 0;

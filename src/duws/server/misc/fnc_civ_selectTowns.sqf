@@ -69,8 +69,6 @@ private _total = count _inReach;
 private _lastPing = 0;
 {
     _x params ["_loc", "_pos"];
-    // The list is carried out with the count, not recomputed later: this sweep is the heaviest
-    // engine work in the whole civilian pass, and the spawn handler needs exactly what it found.
     private _usable = [_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings;
     private _buildings = count _usable;
     // Below the floor there is nothing for a civilian to walk into, and the caller's population

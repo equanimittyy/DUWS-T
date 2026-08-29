@@ -235,8 +235,8 @@ fnc_unitParseRoles = compileFinal {
 	};
 	
 	// These test the classname as well as the display name, and read it from their own _type
-	// rather than the caller's _x: `call` shares the caller's scope, so the old reads only
-	// worked from inside fnc_unitParseRoles' apply and errored anywhere else.
+	// rather than the caller's _x: `call` shares the caller's scope, so reading _x only works from
+	// inside fnc_unitParseRoles' apply and errors anywhere else.
 	fnc_IsOfficer = compileFinal {
 		params ["_type"];
 		"officer" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"officer" in toLowerANSI _type}

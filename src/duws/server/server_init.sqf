@@ -84,8 +84,8 @@ while {!createzone_server} do {
 	["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
 	["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", (["VEHICLE"] call fnc_faction_rqst_list) param [0, "none"]]] call fnc_log;
 
-	// OPFOR. Unguarded: the "opfor already resolved" check that used to wrap this pinned the first
-	// resolution, which is wrong once stepping back can re-pick the faction.
+	// OPFOR. Unguarded: an "opfor already resolved" guard would pin the first resolution, which is
+	// wrong once stepping back can re-pick the faction.
 	["INFO", "BOOT", format ["OPFOR Faction init on server: %1", OPFOR_FactionFile_X]] call fnc_log;
 
 	if (OPFOR_FactionFile_X == "CUSTOM") then {
@@ -247,7 +247,6 @@ setDate [2035, 8, 3, time_of_day, 0];
 if (CIV_PRESENCE == "RAVAGE") then {
     [] spawn fnc_night_horde_event;
 };
-// NO VCOM WAYPOINTS
 VCM_ADVANCEDMOVEMENT = false;
 publicVariable "VCM_ADVANCEDMOVEMENT";
 if (isServer) then {

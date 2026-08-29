@@ -1,6 +1,4 @@
-///////////
 ///////////   "SFP", "SFP Swedish Forces + SOG (Wood)", "SFP_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"sfp_m90w_rifleman_ak5";				//Basic Soldier  (Patrols, Zone Guard, Team)

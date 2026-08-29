@@ -1,6 +1,4 @@
-///////////
 ///////////   "CUP_B_GER", "German Bundeswehr + KSK (Wood)", "CUP_B_GER_BW_Fleck"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_B_GER_BW_Fleck_Soldier";				//Basic Soldier  (Patrols, Zone Guard, Team)

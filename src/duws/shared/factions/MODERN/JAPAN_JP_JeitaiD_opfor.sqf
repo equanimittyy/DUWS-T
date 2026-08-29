@@ -1,6 +1,4 @@
-///////////
 ///////////   "JAPAN_JP", "JP Japan JGSDF (Jeitai-D)", "JAPAN_JP_JeitaiD"
-///////////
 
 
 opfor_SOLDIER_X = 				"Japan_JP_Jeitai_Desert_2012_Soldier_Base";		//Basic Soldier  (Patrols, Zone Guard, Team)

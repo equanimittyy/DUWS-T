@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "gm_fc_gc", "GM East German NVA 80s (Winter) + USSR (3CB)", "GM_NVA_WIN"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"gm_gc_army_rifleman_mpiak74n_80_win";			//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"gm_gc_army_antitank_mpiak74n_rpg7_80_win";		//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"gm_gc_army_btr60pb";							//random patrol
 blufor_MBT_TANK1_X =			"gm_gc_army_t55am2b";							//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"rhs_Igla_AA_pod_msv";
 blufor_TURRET_AT =				"rhs_Kornet_9M133_2_msv";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"gm_gc_army_dshkm_aatripod";
 blufor_TURRET_GMG =				"RHS_AGS30_TriPod_MSV";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"gm_gc_army_sf_rifleman_mpikms72_80_win";				//operator
 blufor_SPECOPS_GL_X =			"gm_gc_army_sf_rifleman_mpikms72_80_win";				//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"gm_gc_army_sf_engineer_mpikms72_80_win";				//operato
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"gm_gc_army_sf_engineer_mpikms72_80_win";				//operato
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -100,12 +80,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["gm_gc_army_p601","P601 (2CP)",2],

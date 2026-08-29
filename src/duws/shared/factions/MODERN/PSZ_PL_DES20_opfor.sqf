@@ -1,6 +1,4 @@
-///////////
 ///////////   "PSZ_PL", "PSZ Polish Army (DES20)", "PSZ_PL_DES20"
-///////////
 
 
 opfor_SOLDIER_X = 				"PSZ_PL_DES20_Soldier_Rifleman";		//Basic Soldier  (Patrols, Zone Guard, Team)

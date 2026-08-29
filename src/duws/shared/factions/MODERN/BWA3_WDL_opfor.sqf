@@ -1,6 +1,4 @@
-///////////
 ///////////   "BWA3", "BWA3 German Bundeswehr + KSK (Wood)", "BWA3_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"BWA3_Rifleman_G27_Fleck";					//Basic Soldier  (Patrols, Zone Guard, Team)

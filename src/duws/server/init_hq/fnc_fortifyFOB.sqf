@@ -25,14 +25,11 @@ playSound "loadgun";
 // ring to the cleanup at once -- the turrets and the sandbags around them alike.
 _fobKey = format ["FOB_%1", netId _fob];
 
-// Two fences, not one: the halves have different lifetimes. The perimeter is placed on first fortify
-// and left standing; a refortify (misc/fnc_redeployFOBUnits.sqf calling back with _refortify true)
-// replaces every turret. A single array would need a permanent/rebuilt flag per row, but the Eden
-// export emits nothing past the heading column, so the flag would survive only by being hand-carried
-// across 43 rows every round trip -- lose it and a refortify either duplicates the walls or stops
-// replacing the guns. The split makes lifetime the fence's property, not a column. Do not merge into
-// one composition: the zone prefabs' single-fence-plus-isWeapon shape works there only because a
-// prefab is built once and never rebuilt.
+// Two fences, not one: the halves have different lifetimes. The perimeter is placed on first fortify and
+// left standing; a refortify replaces every turret. A merged array would need a permanent/rebuilt flag per
+// row, but the Eden export emits nothing past the heading column, so the flag would survive only by being
+// hand-carried across 43 rows every round trip -- lose it and a refortify duplicates the walls or stops
+// replacing the guns. (The zone prefabs' single-fence shape works only because a prefab is never rebuilt.)
 //
 // Rows are [class, X, Y, Z, heading], offsets from the FOB centre -- what lets the layout round-trip
 // through the 3D editor (docs/info/architecture/composition_tooling.md).
@@ -83,17 +80,15 @@ private _perimeterData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// Column 5 is the faction role holding the classname; column 0 is what that role resolves to on the
-// stock faction. fnc_static_resolve prefers the role, so a mod's own GMG stands here rather than a
-// vanilla one, and the class is what the Eden import draws -- so the ring rearranges against the
-// right silhouettes instead of against nothing. A row whose role the faction never fields falls to
-// that faction's MG nest, then to its own class, which is what keeps this mod-free. A gun added in
-// Eden carries no role column and resolves by class instead, so the ring follows the faction without
-// anyone hand-adding a sixth column after a round trip.
+// Column 5 is the faction role holding the classname; column 0 is what it resolves to on the stock faction.
+// fnc_static_resolve prefers the role (so a mod's own GMG stands here, not a vanilla one) and the class is
+// what the Eden import draws, so the ring rearranges against the right silhouettes. A role the faction
+// never fields falls to its MG nest, then to its own class, keeping this mod-free. A gun added in Eden
+// carries no role column and resolves by class instead.
 //
-// Headings used to be computed radially from the centre; they're rows now because the export emits a
-// heading per object -- computed, a turret turned in the 3D editor would come back facing wherever
-// the formula put it, silently dropping half the edit on round-trip.
+// Headings are rows, not computed radially from the centre: the export emits a heading per object,
+// and a computed heading would bring a turret turned in the 3D editor back facing wherever the
+// formula put it, silently dropping half the edit on round-trip.
 // --DUWS-COMPOSITION BEGIN name="FOB Turrets" schema=A--
 private _turretData = [
 	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5],
@@ -135,12 +130,10 @@ switch (VERSION_X) do {
 			_turrets pushBack _turret;
 		} forEach _turretData;
 
-		// The one turret that is not a row: it stands on the FOB building's own roof, and buildingPos
-		// is the only thing that knows where that is -- a flat offset would put it at ground level the
-		// first time the building were replaced with anything else. Filed under the FOB key like the
-		// rest, so a teardown hands the whole ring over at once. Its class still goes through the
-		// resolver, so the roof gun is drawn from the same pool and gets the same type test as the
-		// ring; only its placement is its own.
+		// The one turret that is not a row: it stands on the FOB building's roof, and buildingPos is the only
+		// thing that knows where -- a flat offset would put it at ground level if the building were ever
+		// replaced. Filed under the FOB key like the rest; its class still goes through the resolver, so the
+		// roof gun is drawn from the same pool -- only its placement is its own.
 		private _roofPos = _fob buildingPos 5;
 		private _aaClass = "B_static_AA_F";
 		private _aa = createVehicle [

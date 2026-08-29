@@ -197,9 +197,9 @@ fnc_warcom_set_primary_zone = {
 };
 
 // Server-authoritative zone-control transition. A capture or loss moves four networked
-// globals at once -- both side lists and both counters -- and each used to be its own
-// read-modify-write plus broadcast, so the four could be left inconsistent with each
-// other as well as individually lost. Applying them together makes a transition atomic.
+// globals at once -- both side lists and both counters. Done as four separate read-modify-write-plus-
+// broadcasts, they could be left inconsistent with each other as well as individually lost; applying
+// them together makes a transition atomic.
 // Position matching is on the x/y components rather than isEqualTo: a stored zone
 // position and the trigger position that reports it can differ in z.
 // No floor on the counters on purpose -- they are accounting, and a negative would mean

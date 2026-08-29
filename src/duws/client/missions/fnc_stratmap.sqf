@@ -1,7 +1,8 @@
 // Locality: client -- invoked from a dialog action.
 
 
-///// DUWS_T  RERUN THE OPFOR FACTION FILE FOR JIP SIDE MISSION GEN
+// Reruns the OPFOR faction file for a JIP client: side-mission generation needs the faction globals it
+// sets, and a late joiner never ran the boot-time faction init that set them.
 if (hasInterface && isMultiplayer)	then {
 	[] call fnc_OPFOR_FactionFile_X;
 	sleep 1;
@@ -46,7 +47,6 @@ if !(_cachedOffers isEqualTo []) exitWith {
 	[(findDisplay 46), getpos player, array_of_missions, [], [], [], 1, _night] call BIS_fnc_strategicMapOpen;
 };
 
-// init the array of missions
 array_of_missions = [];
 
 failsafe_not_found = true;
@@ -56,7 +56,7 @@ failsafe_not_found2 = false;
 	failsafe_not_found2 = true;
 };
 
-_handle = [] spawn {  // Spawn the MAIN SEARCH
+_handle = [] spawn {
 
   _kibot_pos_array_missionPos = [[-99999,-99999,-99999]];
 
@@ -70,8 +70,8 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   { DUWS_missionSlots pushBack [] } forEach _missionDefs;
 
   // Weighted draw bag: [index, weight, hardEligible] per type, drawn WITHOUT replacement so the offer
-  // set holds distinct types; a type that fails to site is dropped and another drawn for the slot,
-  // never leaving it empty the way the old fixed shuffle did on a no-fit. weight is rule field 4
+  // set holds distinct types; a type that fails to site is dropped and another drawn for the slot, so
+  // the slot is never left empty on a no-fit. weight is rule field 4
   // (draw bias); hardEligible is rule field 3 (whether the type may take a deep hard slot).
   private _bag = [];
   { private _r = _x select 13; _bag pushBack [_forEachIndex, _r select 4, _r select 3] } forEach _missionDefs;
@@ -243,7 +243,6 @@ DUWS_missionOffers = [array_of_missions, DUWS_missionSlots, DUWS_rewardBoost];
 
 hint localize "STR_DUWS_T_mission_selector_title";
 
-// NOW OPEN THE MAP
 _isNight = false;
 if ((20 < daytime) OR (daytime < 5)) then {_isNight=true};
 

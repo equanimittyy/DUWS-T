@@ -1,9 +1,6 @@
 // Locality: server -- reads the per-town population and occupancy state the handler publishes.
-/*
-    How many civilians one town may hold at this moment: its own demand, thinned if the towns
-    currently occupied add up to more than the campaign-wide ceiling.
-    Params: [_density, _locIndex]. Returns a count.
-*/
+// How many civilians one town may hold at this moment: its own demand, thinned if the towns
+// currently occupied add up to more than the campaign-wide ceiling.
 params ["_density", "_locIndex"];
 
 private _pop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];

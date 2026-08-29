@@ -1,6 +1,4 @@
-///////////
 ///////////   "LOP_AFR_OPF", "PrOpfor African Insurgents", "LOP_AFR_OPF"
-///////////
 
 
 opfor_SOLDIER_X = 				"LOP_AFR_OPF_Infantry_Rifleman";		//Basic Soldier  (Patrols, Zone Guard, Team)

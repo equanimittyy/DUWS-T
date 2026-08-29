@@ -99,8 +99,8 @@ kill_cp_kills = 10;
 kill_cp_award = 1;
 
 // Soldiers on the perimeter patrol, at the HQ and at every FOB alike. One figure for both because a
-// FOB is a small base rather than a different kind of thing: it used to send a single soldier round
-// a circuit that a two-man probe could walk through. Server-only, both spawns run there.
+// FOB is a small base, not a different kind of thing: a single soldier round a circuit is one a
+// two-man probe could walk straight through. Server-only, both spawns run there.
 base_patrol_squad = 8;
 
 // When a FOB or HQ garrison stops being simulated. Nothing culled it before, so every base's soldiers

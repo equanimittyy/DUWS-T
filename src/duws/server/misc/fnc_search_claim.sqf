@@ -16,7 +16,7 @@ if (isNull _target || {isNull _caller}) exitWith {};
 
 // A flagged body not yet claimed pays its objective/frisk table once. Anything else -- an unflagged
 // corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the per-player
-// clock and, since combat no longer rolls at spawn, rolled here (below). The clock is enforced here
+// clock and, since combat is not rolled at spawn, rolled here (below). The clock is enforced here
 // rather than only in the action's condition, because the claim is the authoritative point and a
 // condition a client evaluates is a condition a client can be made to skip.
 private _source = _target getVariable ["DUWS_search_src", ""];

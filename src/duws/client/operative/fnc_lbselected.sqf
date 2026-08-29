@@ -2,9 +2,9 @@
 // spells it fnc_LBselected.
 _selected_index = lbCurSel 1500;
 
-_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
+_selected_soldier = duws_operator_list select _selected_index;
 
-// extract the skill value and do x100
+// Skill values are stored 0-1; scale by 100 for the percent display.
 _selected_soldier_aim = (_selected_soldier select 0)*100;
 _selected_soldier_reflexes = (_selected_soldier select 1)*100;
 _selected_soldier_spotting = (_selected_soldier select 2)*100;

@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CFP_B_CDF", "CUP-CFP Chernarus Defense Force (Winter)", "CFP_B_CDF_SNW"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CUP_B_CDF_Soldier_SNW";				//Basic Soldier  (Patrols, Zone Guard, Team)

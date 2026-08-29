@@ -1,7 +1,6 @@
 // Locality: client -- spawned from client/client_init.sqf.
-// Announces that the FOB has appeared in the requests menu. It used to hand the comm-menu item
-// over free at this point; the FOB is bought like every other support now, and the first zone
-// capture is what puts its row on that list.
+// Announces that the FOB has appeared in the requests menu. The FOB is bought like every other
+// support, and the first zone capture is what puts its row on that list.
 if (!hasInterface) exitWith {};
 waitUntil {sleep 20;zoneundercontrolblu >= 1};
 sleep 20;

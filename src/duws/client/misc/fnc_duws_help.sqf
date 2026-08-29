@@ -1,5 +1,4 @@
 // Locality: client -- inherited from client/client_init.sqf.
-// fnc_duws_help.sqf
 // Builds the single "DUWS-T Manual" subject in the map's Notes (diary) as one
 // record (page) per top-level topic, each led by its heading banner. Sub-topics
 // that don't warrant their own page fold into the owning page as inline

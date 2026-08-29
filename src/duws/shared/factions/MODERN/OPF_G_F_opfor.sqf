@@ -1,6 +1,4 @@
-///////////
 ///////////   "OPF_G_F", "FIA Guerillas", "OPF_G_F"
-///////////
 
 
 opfor_SOLDIER_X = 				"O_G_Soldier_F";				//Basic Soldier  (Patrols, Zone Guard, Team)

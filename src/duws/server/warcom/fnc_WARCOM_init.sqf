@@ -39,12 +39,10 @@ sleep 5;
 WARCOM_createdZones = [_array_of_zones_total,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
 publicVariable "WARCOM_createdZones";
 
-// Campaign-size throttle, from the ACTUAL count rather than the requested zones_number (generation
-// can fall short). At or below the reference size the factor is 1 and nothing throttles; above it
-// total passive income at full control grows as sqrt(zones), so four times the zones pay twice the
-// passive income, not four -- which is what stops a host's high zones_number from handing everyone a
-// proportionally larger war chest. k toward 1 flattens income across sizes, toward 0 restores the
-// linear payout. Both are the tuning surface.
+// Campaign-size income throttle, from the ACTUAL zone count (generation can fall short of zones_number).
+// At or below the reference size the factor is 1; above it, passive income grows as sqrt(zones), so 4x the
+// zones pay 2x -- stopping a host's high zones_number from handing everyone a proportionally larger war
+// chest. k tunes the curve (1 flattens across sizes, 0 restores linear).
 private _REF_ZONES = 6;
 private _k = 0.5;
 DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
@@ -70,12 +68,10 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Init OPCOM hardpoint director"] call fnc_log;
 [] spawn fnc_WARCOM_opf_hardpoints;
 
-// None of the old blind OPFOR timers run here any more. The roaming patrols, the attack waves and the
-// random air were three timers each dropping live groups on the map for the rest of the campaign,
-// answering to Army Power alone rather than to anything the enemy was trying to achieve -- and they
-// are what put permanently simulated AI between the zones and on the road to the BLUFOR HQ. Enemy
-// presence is now zone garrisons, side-mission guards and OPCOM's deliberate fortification above:
-// emplacements it sites and pays for, not live groups a clock drips onto the map.
+// No blind OPFOR spawn timers here: enemy presence is zone garrisons, side-mission guards and OPCOM's
+// deliberate fortification above -- emplacements it sites and pays for, not live groups an AP clock
+// drips onto the map, which would put permanently simulated AI between the zones and on the road to
+// the HQ.
 
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";

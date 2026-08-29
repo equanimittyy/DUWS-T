@@ -1,6 +1,4 @@
-///////////
 ///////////    "OPF_R_arid_F", "Aegis Russia - 2035 (Arid)", "AEG_OPF_R_ARD_F"
-///////////
 
 
 opfor_SOLDIER_X = 				"O_R_Soldier_ard_F";					//Basic Soldier  (Patrols, Zone Guard, Team)

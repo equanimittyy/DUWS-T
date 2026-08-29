@@ -18,13 +18,10 @@ if (!isServer) exitWith {};
 
 params ["_unit", "_firer", ["_spread", true]];
 
-// First, and alone on the hot path: a FiredNear handler sits on every civilian, so this is entered
-// once per round per person within earshot and everything below is wasted on someone already
-// running. An in-flight panic costs one getVariable and an exit. The consequence is deliberate --
-// the calm-down is a flat count from the first round, so a fight outlasting it lets the crowd
-// settle and be scattered again, which is the only re-check that has to happen. Doubles as the
-// recursion guard for the sweep below. Broadcast, unlike the local flag this was: the call-over
-// action's condition reads it, and that runs on every machine carrying the action.
+// First and alone on the hot path: a FiredNear handler fires once per round per civilian in earshot, so
+// most calls land on someone already panicking -- an in-flight panic costs one getVariable and an exit.
+// Doubles as the recursion guard for the sweep below. Broadcast, not local: the call-over action's
+// condition reads it on every machine carrying the action.
 if (_unit getVariable ["DUWS_civ_panicked", false]) exitWith {};
 
 if (isNull _unit || {!alive _unit}) exitWith {};
@@ -72,16 +69,11 @@ if (!isNull _cover) then {
 
 _unit doMove _dest;
 
-// One thread per panicking civilian, and the same one watches the run in: the engine raises
-// nothing when a doMove lands, so arrival has to be polled, but only inside the calm-down this
-// thread was going to sleep through anyway and only for the civilians given cover to reach. The
-// calm-down stays a flat count from the first round -- a fight outlasting it lets the crowd settle
-// and be scattered again, which is the only re-check that has to happen. Without this thread the
-// flag never cleared and a town that heard one shot stayed uncallable for the rest of its
-// occupancy.
-// Orders are re-issued from wherever the flight ended, which may be well outside the town: the
-// building list only supplies stroll targets, so a civilian who ran clear of it walks a circuit
-// where they stand.
+// One thread per panicking civilian, watching the run in: the engine raises nothing when a doMove lands,
+// so arrival is polled -- but only inside the calm-down this thread sleeps through anyway. Without it the
+// flag never cleared and a town that heard one shot stayed uncallable for its whole occupancy. Orders
+// resume from wherever the flight ended (maybe outside town): the building list only supplies stroll
+// targets, so a civilian clear of it walks a circuit where they stand.
 [_unit, _dest, _inCover] spawn {
     params ["_unit", "_dest", "_inCover"];
     private _settle = time + CALM_DELAY;

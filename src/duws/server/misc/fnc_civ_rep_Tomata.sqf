@@ -10,9 +10,9 @@ _instigator = _this select 2;
 
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
-// Presence is the whole gate now. A 30 % roll used to sit in front of it, so a player shooting
-// civilians deliberately saw nothing happen most of the time -- which reads as a broken system,
-// not as leniency. Same 200 m the building charge uses: both mean one thing by "player involved".
+// Presence is the whole gate: no random roll in front of it, since a player shooting civilians
+// deliberately and seeing nothing happen most of the time reads as a broken system, not leniency.
+// Same 200 m the building charge uses: both mean one thing by "player involved".
 if !([getPos _unit] call fnc_civ_playerNear) exitWith {};
 
 // The writer announces the change and owns the clamp, so nothing is

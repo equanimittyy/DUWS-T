@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CFP_O_IRARMY", "CFP Iranian Army", "CFP_O_IRARMY"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_IRARMY_Rifleman_01";				//Basic Soldier  (Patrols, Zone Guard, Team)

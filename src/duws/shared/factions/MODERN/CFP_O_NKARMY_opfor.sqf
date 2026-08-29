@@ -1,6 +1,4 @@
-///////////
 ///////////   "CFP_O_NKARMY", "CFP North Korean Peoples Army", "CFP_O_NKARMY"
-///////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_NKARMY_Rifleman_01";			//Basic Soldier  (Patrols, Zone Guard, Team)

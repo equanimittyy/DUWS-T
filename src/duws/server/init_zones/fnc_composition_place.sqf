@@ -4,7 +4,7 @@
 // The one place the composition-placement convention lives. Zones, hardpoints and the destroy-cache /
 // destroy-radar side missions all stand the same shape: a table of props at fixed offsets from an anchor,
 // filed under a key so the streaming layer (fnc_duws_stow / fnc_duws_deploy) and the cleanup sweep can
-// treat the lot as one unit. Each used to re-implement the loop inline and drift: the two missions left
+// treat the lot as one unit. Shared so the missions cannot drift: an inline copy of this loop left
 // their props simulated, upright and destructible where every zone prefab froze, tilted and hardened them.
 //
 // Non-weapon props only. Weapon rows (isWeapon true) carry a spawn/freeze/crew lifecycle a prop does not,

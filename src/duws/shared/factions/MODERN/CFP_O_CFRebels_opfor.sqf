@@ -1,6 +1,4 @@
-///////////
 ///////////    "CFP_O_CFRebels", "CFP African Insurgents", "CFP_O_CFRebels"
-///////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_CFRebels_Rifleman_01";			//Basic Soldier  	(Patrols, Zone Guard, Team)

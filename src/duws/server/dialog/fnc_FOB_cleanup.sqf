@@ -12,16 +12,14 @@ FOB_removed = true;
 
 ["info",[format[localize "STR_DUWS_T_mrmg6qui",_fob_name],localize "STR_DUWS_T_f28nbzbw"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 
-// Delete the FOB's enemy-proximity trigger. It is the only one a FOB carries -- the arrival
-// notification trigger that used to sit beside it is gone. Defaulted to objNull so a FOB whose
-// trigger was never filed deletes nothing instead of throwing on a nil.
+// Delete the FOB's enemy-proximity trigger, the only trigger a FOB carries. Defaulted to objNull so
+// a FOB whose trigger was never filed deletes nothing instead of throwing on a nil.
 private _trg2 = missionNamespace getVariable [
     format["trigfob2%1%2",round (_fob_pos select 0),round (_fob_pos select 1)],
     objNull
 ];
 deleteVehicle _trg2;
 
-// Remove FOB from Array_of_FOBS
 [_fob_pos] call fnc_fob_deregister;
 
 [_fob_pos, _fob_name] spawn {

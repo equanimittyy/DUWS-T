@@ -47,18 +47,12 @@ fnc_civ_repAt = {
 	}
 };
 
-// What each garrison tier puts in a town, as tokens DUWS_fnc_zoneSpawnOne already understands: a
-// posture and the team standing up under it, one entry per A3 group. Absolute, like the zone set:
-// a row is the whole garrison for that tier, so what a tier IV town fields reads off one line. A
-// tier bought while the garrison stands raises DUWS_fnc_spawnDiff of the two rows, keeping
-// reinforcement an addition rather than a second garrison.
-//
-// A town's own set, kept apart from the zone tiers and not radius-multiplied like a zone's. It now
-// carries a zone tier's infantry weight rather than the smaller garrison it once did, but drops the
-// heavy end a zone is known by: no tanks, no attack helicopters, armour capped to a lone IFV at
-// tier IV, and none of a zone's static emplacements. That is what keeps a large town a garrison
-// rather than a zone with civilians in it, and why IV digs into buildings instead of fielding the
-// armour a zone of its tier would.
+// What each garrison tier fields in a town, as tokens DUWS_fnc_zoneSpawnOne understands (posture + team,
+// one entry per group). Absolute like the zone set -- a row is the whole garrison for that tier, and a
+// tier bought while it stands raises DUWS_fnc_spawnDiff of the two rows (reinforcement, not a second
+// garrison). A town's own set, not radius-multiplied: it carries a zone tier's infantry weight but drops
+// the heavy end (no tanks/attack helis, armour capped to a lone IFV at IV), so a large town stays a
+// garrison, not a zone with civilians -- and IV digs into buildings rather than fielding zone armour.
 // --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
 	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
@@ -96,13 +90,11 @@ fnc_town_garrison_tierAt = {
 #define TOWN_HOLD_MOBILISING 1800
 #define TOWN_HOLD_REGROUPING 10800
 
-// Seconds left on a town's hold, or 0 for a town that is free to garrison.
-//
-// The stored figure is a diag_tickTime deadline, counting from process start, so it is not
-// restored by a savegame: a hold written last session reads as further out than anything this
-// session could set. Worth catching because this lives in the mission namespace, which is the
-// save file -- left alone it would pin a town for the rest of the run. Bounded by the longest
-// hold there is, so a stale value of either kind is caught.
+// Seconds left on a town's hold, or 0 for a town free to garrison.
+// The stored figure is a diag_tickTime deadline (from process start), so it is NOT restored by a savegame
+// -- a hold written last session reads as further out than this session could set, and this lives in the
+// mission namespace (the save file), so left alone it would pin a town for the run. Bounded by the longest
+// hold there is, to catch a stale value of either kind.
 fnc_town_garrison_holdAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -166,17 +158,11 @@ fnc_town_garrison_strengthAt = {
 // the BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
 #define REINFORCE_STEP 0.3
 
-// Reinforcement buys strength; a tier buys composition. **Two sinks, deliberately independent.**
-// The tier says what the town would field and the strength says how much of it stands, so the
-// commander can pay for either or both, separately. Under the ledger, buying strength un-loses
-// destroyed tokens back -- a paid replacement, the one thing that raises a garrison's strength,
-// and not a heal: it costs, and the men still have to walk in on the next refill wave.
-//
-// Refused under REGROUPING, the one thing that hold blocks which matters: with the men already
-// gone, a commander who could still spend here would erase what clearing the town bought before
-// the player had left the map. A MOBILISING hold does not refuse -- ground that has only just
-// fallen is exactly what the enemy should be free to commit to. Returns the new strength, or -1
-// when refused, so a paying caller can tell.
+// Reinforcement buys strength; a tier buys composition -- two independent sinks. Tier says what the town
+// would field, strength how much of it stands, so the commander pays either or both. Under the ledger,
+// buying strength un-loses destroyed tokens -- a paid replacement, not a heal (it costs, and the men still
+// walk in on the next refill wave). Refused under REGROUPING (the men already gone, spending would erase
+// what clearing the town bought), allowed under MOBILISING. Returns the new strength, or -1 when refused.
 fnc_town_garrison_reinforce = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
@@ -206,20 +192,12 @@ fnc_town_garrison_reinforce = {
 	_new
 };
 
-// The sole writer, and the OPFOR commander's purchase hook. Clamped rather than trusted: nothing
-// upstream validates a tier, and a table lookup on one out of range is a fatal error rather than
-// a weak garrison. A tier written here is what the town owes, not what is standing in it -- the
-// garrison thread picks the change up on its own cycle, and only when a player is there to see it
-// arrive.
-//
-// A raise is refused outright while the town is REGROUPING-held, rather than deferred: the
-// garrison thread already defers *arrival*, so without this the commander could buy a beaten town
-// up to IV during the hours it is left alone, and the player would meet a tier IV garrison where
-// they had just destroyed a tier I. Lowering is always allowed -- that is how the clear itself
-// files the town back down to I. A MOBILISING hold does not refuse: a town that has only just
-// fallen is exactly the ground the enemy should be free to commit to, and the men have not
-// arrived yet either way, so a purchase made inside that window is folded into the first spawn
-// rather than arriving as a second wave.
+// The sole writer of the owned tier, the OPFOR commander's purchase hook. Clamped, not trusted -- an
+// out-of-range tier is a fatal table lookup, not a weak garrison. A tier written here is what the town
+// owes, not what stands (the garrison thread picks it up on its cycle, only when a player is there to see
+// it). A raise is refused outright under REGROUPING (else the commander could rebuild a beaten town to IV
+// during the hours it is left alone); lowering is always allowed (the clear files it back to I), and a
+// MOBILISING hold does not refuse -- the men have not arrived, so a buy is folded into the first spawn.
 fnc_town_garrison_setTier = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_tier", 0], ["_reason", ""]];
@@ -303,9 +281,9 @@ fnc_civ_townIncome = {
 };
 
 // Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of both
-// colours -- depopulation used to paint the ellipse black and that path is gone -- so nothing
-// races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors class
-// name; alpha is set explicitly because a marker created without it sits at 1. With no
+// colours, so nothing races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a
+// CfgMarkerColors class name; alpha is set explicitly because a marker created without it sits at 1.
+// With no
 // civ_town_rep (RAVAGE, WBK) both markers keep the neutral pair creation gave them, since no
 // band will ever repaint them.
 fnc_civ_townRender = {

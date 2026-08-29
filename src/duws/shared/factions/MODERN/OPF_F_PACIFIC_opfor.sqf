@@ -1,6 +1,4 @@
-///////////
 ///////////    "OPF_F_T", "CSAT (Pacific)", "OPF_F_PACIFIC"
-///////////
 
 
 opfor_SOLDIER_X = 				"O_T_Soldier_F";				//Basic Soldier  (Patrols, Zone Guard, Team)

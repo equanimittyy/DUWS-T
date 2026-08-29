@@ -1,6 +1,4 @@
-///////////
 ///////////   "BLU_A_tna_F", "Aegis British - 2035 (Pacific)", "AEG_BLU_A_TNA_F"
-///////////
 
 
 opfor_SOLDIER_X = 				"B_A_Soldier_tna_F";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -12,7 +12,6 @@ str(_markername) setMarkerColor "ColorBlue";
 
 sleep 2;
 
-// wait for AO direction or "ESC"
 forceMap false;
 [localize "STR_DUWS_T_k9kxtm85"] call fnc_map_prompt;
 OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";

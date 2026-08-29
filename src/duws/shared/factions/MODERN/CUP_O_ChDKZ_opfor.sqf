@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CUP_O_INS", "CUP ChDKZ + Spetsnaz", "CUP_O_ChDKZ"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CUP_O_INS_Soldier";				//Basic Soldier  (Patrols, Zone Guard, Team)

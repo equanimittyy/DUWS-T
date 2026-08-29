@@ -1,6 +1,4 @@
-///////////
 ///////////    "CFP_O_HEZBOLLAH", "CFP Hezbollah + Stolen Vehicle Support", "CFP_O_HEZBOLLAH"
-///////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_HEZBOLLAH_Paramilitary_Rifleman_01";	//Basic Soldier  	(Patrols, Zone Guard, Team)

@@ -34,12 +34,10 @@ if (_target isKindOf "car" || _target isKindOf "tank") then {_goodVeh = true};
 
 if (!_goodVeh) exitWith { hint localize "STR_DUWS_T_1gk907or" };
 
-// Give MHQ a name with public variable
 _Varname = "MHQ1";
 _target SetVehicleVarName _VarName;
 _target Call Compile Format ["%1=_This ; PublicVariable ""%1""",_VarName];
 
-// Create MHQ marker
 ["select"] remoteExec ["fnc_MHQ_addActions", 2];
 
 ["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];

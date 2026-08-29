@@ -1,6 +1,4 @@
-///////////
 ///////////   "LOP_IA", "PrOpfor Iraqi Army + USA Specops", "LOP_IA"
-///////////
 
 
 opfor_SOLDIER_X = 				"LOP_IA_Infantry_Rifleman";			//Basic Soldier  (Patrols, Zone Guard, Team)

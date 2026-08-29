@@ -1,6 +1,4 @@
-///////////
 ///////////    "CUP_I_TK_GUE", "TAKI Insurgents + Militia", "CUP_I_TK_GUE_MIX"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_O_TK_INS_Soldier";					//Basic Soldier  	(Patrols, Zone Guard, Team)

@@ -23,7 +23,6 @@ while {!_found} do {
 		if (_count > 100) exitWith {}; 
 		_Building = nearestBuilding _foundSafePos;
 		_foundSafePos = [_Building, 50, 100,15,0,0.08,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
-		// DON'T SPAWN ON ROADS
 		_nearRoad = [_foundSafePos,20] call BIS_fnc_nearestRoad;
 		if (_foundSafePos select 0 != 0 &&
 			_foundSafePos select 1 != 0 &&

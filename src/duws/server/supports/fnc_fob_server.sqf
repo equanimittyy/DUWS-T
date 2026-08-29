@@ -35,7 +35,6 @@ switch (VERSION_X) do {
 };
 [_fob, format ["FOB_%1", netId _fob]] call fnc_duws_keep;
 
-// FOB ADD ACTION MENU
 // Keyed to the FOB so the entry dies with it. The defences and guards entries hang off the same
 // FOB and cannot use this form -- an object-keyed id is that object's netId, so the three would
 // evict each other; those two suffix a string instead.
@@ -54,10 +53,9 @@ if (count _fadePlayers > 0) then {
 
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_26nbk6p8"] remoteExec ["fnc_duws_dialogue", 0];
 
-// The garrison, and the one patrol that walks the perimeter with it. Three more groups used to be
-// spawned here on bis_fnc_taskPatrol circuits of their own, which scattered the FOB's infantry
-// across 170 m of open ground on separate random routes -- and none of them was rebuilt by the
-// reguard action, so a FOB that lost them never got them back.
+// The garrison, and the one patrol that walks the perimeter with it -- no extra taskPatrol groups:
+// they scattered the FOB's infantry across 170 m of open ground on separate random routes, and the
+// reguard action rebuilt none of them, so a FOB that lost them never got them back.
 
 // Registered as a frozen site rather than given a watcher thread of its own. A ten-FOB campaign
 // carried ten permanent sleepers; they are one pass of the shared poller now.

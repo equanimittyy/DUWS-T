@@ -1,4 +1,3 @@
-// fnc_hirePartisans_clientMap.sqf
 // Client-side: open the map to pick a partisan deploy spot; the map is forced to stay open.
 if (!hasInterface) exitWith {};
 

@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "NATO_WINTER", "NATO (Winter)", "NATO_WINTER"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"NATO_WINTER_SOLDIER";			//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"NATO_WINTER_SOLDIER_LAT";		//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"NATO_WINTER_AA";				//random patrol
 blufor_MBT_TANK1_X =			"NATO_WINTER_MBT_TUSK";			//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"NATO_WINTER_STATIC_AA";
 blufor_TURRET_AT =				"NATO_WINTER_STATIC_AT";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"NATO_WINTER_STATIC_HMG_HIGH";
 blufor_TURRET_GMG =				"NATO_WINTER_STATIC_GMG_HIGH";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"NATO_WINTER_RECON";					//operator
 blufor_SPECOPS_GL_X =			"NATO_WINTER_RECON_JTAC";				//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"NATO_WINTER_SOLDIER_ENGINEER";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"NATO_WINTER_SOLDIER_ENGINEER";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -101,12 +81,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////   
 
 blufor_RQST_VEHICLES = [
 	["NATO_WINTER_QUADBIKE","ATV (1CP)",1],

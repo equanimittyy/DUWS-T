@@ -1,6 +1,4 @@
-///////
 ///////   "CUP_O_RU", "CUP Russian Ratnik(Winter)+Spetsnaz", "CUP_O_RU_WINTER"
-///////
 
 opfor_SOLDIER_X = 				"CUP_O_RU_Soldier_Ratnik_Winter";					//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"CUP_O_RU_Soldier_AA_Ratnik_Winter";				//Anti Air   (Patrols, Zone Guard, Team)

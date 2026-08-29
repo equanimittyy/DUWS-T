@@ -4,11 +4,10 @@
 // The faction confirmation screen: every role key both sides will field, side by side, with the
 // classname resolution produced and a way to change or clear it before the campaign locks in.
 //
-// This is the first point in the flow where those classnames exist. Resolution is server-side and
-// used to sit behind the commit; the request below is what pulls it forward. Asking the server
-// rather than resolving here keeps one resolution: fnc_factionGen picks at random in places, so a
-// local preview and a later server build would disagree and the player would confirm a roster the
-// campaign never fields.
+// This is the first point in the flow where those classnames exist. Resolution is server-side,
+// pulled ahead of the commit by the request below. Asking the server rather than resolving here
+// keeps one resolution: fnc_factionGen picks at random in places, so a local preview and a later
+// server build would disagree and the player would confirm a roster the campaign never fields.
 //
 // The working table (duws_faction_table) is edited in place by the key editor and the clear
 // prompt, then published whole at the bottom of this file when the player confirms.

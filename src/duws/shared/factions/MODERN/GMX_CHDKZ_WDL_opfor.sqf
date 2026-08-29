@@ -1,6 +1,4 @@
-///////////
 ///////////   "gmx_fc_chdkz", "GMX ChDKZ + USSR Spetznas (3CB)", "GMX_CHDKZ_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"gmx_chdkz_army_rifleman_akm_mix";					//Basic Soldier  (Patrols, Zone Guard, Team)

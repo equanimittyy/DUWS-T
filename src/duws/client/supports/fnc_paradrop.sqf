@@ -16,11 +16,9 @@ _message = localize "STR_DUWS_T_paradropcall";
 sleep 8;
 [_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
-// SEND A PLANE
 _group = "";
 _vehicle = "";
 
-// FIND A RANDOM LOCATION
 _spawnPos = _location;
 _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 3100;
@@ -120,7 +118,6 @@ sleep 5;
 
 {[_x] joinSilent player} forEach units _group2;
 
-//DELETE THE PLANE
 sleep 60;
 {
 	deleteVehicle _x;

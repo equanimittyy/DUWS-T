@@ -26,7 +26,7 @@ private _fnc_strollPos = {
     _pos
 };
 
-// Zombies keep the building-to-building hunt this function used to give everyone: a walking pace
+// Zombies keep the building-to-building hunt; a living town strolls instead, because a walking pace
 // and a smoke break are what a living town looks like, and neither reads as undead.
 private _fnc_hunt = {
     params ["_group", "_buildings"];
@@ -62,9 +62,9 @@ private _fnc_hunt = {
         continue;
     };
 
-    // SAFE and LIMITED are the whole difference from the jog this replaces. SAFE keeps them
-    // upright instead of moving tactically, LIMITED is the walk; the pair was STEALTH and NORMAL,
-    // which is a crouching sprint and the reason the crowd looked panicked before anyone fired.
+    // SAFE and LIMITED are what keep a stroll a stroll. SAFE keeps them upright instead of moving
+    // tactically, LIMITED is the walk; STEALTH with NORMAL is a crouching sprint, which reads as a
+    // panicked crowd before anyone has fired.
     _group setBehaviour "SAFE";
     _group setSpeedMode "LIMITED";
 
@@ -77,8 +77,8 @@ private _fnc_hunt = {
         _wp setWaypointSpeed "LIMITED";
         _wp setWaypointBehaviour "SAFE";
         _wp setWaypointCombatMode "GREEN";
-        // Short and varied next to the flat minute the old waypoints held: the pause is what
-        // makes a walker read as someone going somewhere rather than a patrol on a loop.
+        // Short and varied, not a flat minute: the pause is what makes a walker read as someone
+        // going somewhere rather than a patrol on a loop.
         _wp setWaypointTimeout [10, 30, 60];
         _wp setWaypointCompletionRadius 5;
     };

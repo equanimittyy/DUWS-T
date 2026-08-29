@@ -1,10 +1,9 @@
 // Locality: server -- inherited from server/server_init.sqf.
 //
-// Five of the seven climates are one routine: set an opening overcast, force it, then loop
-// re-rolling fog and overcast on the same cadence. They were written out per climate, so the four
-// numbers that actually differ sat inside four near-identical copies of the loop. The two that are
-// not that shape stay below as code: "varied" runs no fog at all and waits out a full cycle before
-// its loop starts, and "none" pins everything to zero.
+// Five of the seven climates share one routine: set an opening overcast, force it, then loop
+// re-rolling fog and overcast on the same cadence, differing only in the four numbers pulled from
+// the table below. The other two stay as code: "varied" runs no fog at all and waits out a full
+// cycle before its loop starts, and "none" pins everything to zero.
 //
 // setOvercast and setFog self-synchronise from the server, so nothing here broadcasts: a client
 // wanting the current sky reads `overcast` / `fogParams`, which return the engine's own state.
@@ -79,7 +78,7 @@ switch (weather_type) do {
         };
     };
 
-    case "none": { //TODO Expand on this
+    case "none": {
         [] spawn {
             while {true} do {
                 private _wait = random 1800;

@@ -1,4 +1,3 @@
-// fnc_intelAnalysis.sqf
 if (!isServer) exitWith {};
 
 params ["_caller"];

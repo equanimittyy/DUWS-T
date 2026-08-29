@@ -10,8 +10,8 @@ private _fnc_offer = {
 	params ["_objs"];
 	private _new = _objs select { !(_x getVariable ["DUWS_zeusEditable", false]) };
 	if (count _new == 0) exitWith {};
-	// One call for the batch: addCuratorEditableObjects takes an array, and the per-unit form
-	// this replaces paid the call overhead once for every unit and vehicle on the map.
+	// One call for the batch: addCuratorEditableObjects takes an array, so the per-unit form would
+	// pay the call overhead once for every unit and vehicle on the map.
 	Curator addCuratorEditableObjects [_new, true];
 	{ _x setVariable ["DUWS_zeusEditable", true] } forEach _new;
 };

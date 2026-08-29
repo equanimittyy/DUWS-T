@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_CADIAN_700", "Cadian 700th", "TIOW_CADIAN_700"
-///////
 
 opfor_SOLDIER_X = 				"TIOW_Cad_GM700th";				//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"TIOW_Cad_GM_Plasma_700th";					//Anti Air   (Patrols, Zone Guard, Team)

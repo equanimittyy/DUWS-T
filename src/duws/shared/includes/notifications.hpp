@@ -264,12 +264,11 @@ class CfgNotifications
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
-    // One class per permanent unlock, inheriting everything but the icon and the sentence. The five
-    // that announced themselves used to wear three different classes between them -- two of them the
-    // shared warning triangle, over an unlock -- and each named the facility in a title the player
-    // had just read on the row they clicked. The class name is derived from the catalogue key
-    // (server/supports/fnc_support_perm_grant.sqf), so a new permanent row needs a class here under
-    // the matching name or its card draws the engine's empty default.
+    // One class per permanent unlock, inheriting everything but the icon and the sentence. Not spread
+    // across shared classes: the shared warning triangle over an unlock reads wrong, and a title
+    // naming the facility only repeats the row the player just clicked. The class name is derived from
+    // the catalogue key (server/supports/fnc_support_perm_grant.sqf), so a new permanent row needs a
+    // class here under the matching name or its card draws the engine's empty default.
     class SupportUnlock
     {
         title = "$STR_DUWS_T_SUPPORT_UNLOCK_TITLE";

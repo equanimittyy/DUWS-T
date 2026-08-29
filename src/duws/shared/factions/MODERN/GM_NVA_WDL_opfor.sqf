@@ -1,6 +1,4 @@
-///////////
 ///////////   "gm_fc_gc", "GM East German NVA (Wood) + USSR (3CB)", "GM_NVA_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"gm_gc_army_rifleman_mpiak74n_80_str";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -1,6 +1,4 @@
-///////
 ///////   "PLA", "VME PLA Chinese Army + SpecOps (Desert)", "VME_PLA_DES"
-///////
 
 opfor_SOLDIER_X = 				"PLA_Soldier_HM_F";				//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"PLA_Soldier_AA_HM_F";			//Anti Air   (Patrols, Zone Guard, Team)

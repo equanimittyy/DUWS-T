@@ -35,11 +35,9 @@ if (isNil "CIV_PRESENCE" || {CIV_PRESENCE == "NONE"}) then {
     [] remoteExec ["fnc_civ_setup_array", 2];
 };
 
-// TELL WARCOM THE ZONE VARIABLES ARE SET
 createzone_server = true;
 publicVariable "createzone_server";
 
-// Give the go! WARCOM can continue execution
 chosen_settings = true;publicVariable "chosen_settings";
 
 // Full setup snapshot, one key=value per line so two runs can be diffed directly. A single

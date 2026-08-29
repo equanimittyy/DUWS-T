@@ -1,12 +1,12 @@
 if (!isServer) exitWith {};
 /*
     The campaign economy tick: one 30-minute clock paying the zone AP trickle (both sides), town
-    income (BLUFOR CP, OPFOR AP), the OPFOR flat floor and kill income together. Each used to keep
-    its own timer of the same nominal period, which is not the same clock -- a suspended thread
-    resumes when the scheduler reaches it, so every loop accrues its own slop and they walk apart
-    over a session. Merged this way round because this loop is spawned unconditionally by WARCOM
-    init while the civilian economy only runs when CIV_PRESENCE is not "NONE" -- hosting the tick
-    there would delete zone income on a civs-off campaign. Civs off leaves the town arrays empty,
+    income (BLUFOR CP, OPFOR AP), the OPFOR flat floor and kill income together. One clock, not one
+    timer per faucet of the same nominal period: a suspended thread resumes only when the scheduler
+    reaches it, so separate loops accrue their own slop and walk apart over a session. Hosted here
+    because this loop is spawned unconditionally by WARCOM init while the civilian economy only runs
+    when CIV_PRESENCE is not "NONE" -- hosting the tick there would delete zone income on a civs-off
+    campaign. Civs off leaves the town arrays empty,
     so town income pays nobody, but the zone trickle and the OPFOR flat floor still pay: neither
     reads a town. BLUFOR's passive CP therefore goes to zero on civs-off, which the mission-CP lift
     restores (server/missions/fnc_mission_reward.sqf).
@@ -15,16 +15,16 @@ while {true} do {
     sleep 1800;
 
     // The tick's own sequence number, so anything that wants a "once per payout window" cap can
-    // key off this clock rather than start a second one that drifts out of phase with it --
-    // which is the failure this loop was merged to end. Server-local: no client reads it.
+    // key off this clock rather than start a second one that drifts out of phase with it.
+    // Server-local: no client reads it.
     econ_tick = econ_tick + 1;
 
     // Hands every player their one ask of a local back. Cleared from here rather than compared
     // against econ_tick on the client, because the menu's greying has to read it, and
     // broadcasting a boolean per player is cheaper than broadcasting the clock for clients to
-    // subtract. The body search used to ride this same tick and no longer does: what limits a
-    // search is now the flagged materiel the player fought through, not a clock. A local is a
-    // finite population the reaction curve already prices, so this one stays.
+    // subtract. A local is a finite population the reaction curve already prices, so its per-tick
+    // reset lives here; a body search is gated by the materiel the player fought through, not a
+    // clock, so it is not reset on this tick.
     { _x setVariable ["DUWS_civ_intel_asked", false, true] } forEach allPlayers;
 
     // Income is not gated on zone holdings: the enemy banking its towns while the player holds

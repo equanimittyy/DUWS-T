@@ -10,19 +10,15 @@ taxiCanTakeOff = false;
 
 _music = [] call fnc_taxi_music;
 
-_foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
+_foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-// try to find a pos, if no pos is found exit the script
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; ["boat_taxi"] call fnc_support_comm_add;};
 
 // One-time use: a shore was found and the taxi is committed, so spend it. Deferred to here so the
 // no-shore exit above leaves the item for the player to keep.
 ["boat_taxi"] call fnc_support_consume;
 
-// A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
-
-// create marker on LZ
-_markerpickup = format["lz%1%2",_foundPickupPos]; // Define marker name
+_markerpickup = format["lz%1%2",_foundPickupPos];
 _markerstr = createMarker [str(_markerpickup), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markerpickup) setMarkerType "hd_end";
@@ -39,10 +35,8 @@ _speaker = localize "STR_DUWS_T_swordfish";
 _message = localize "STR_DUWS_T_boattaxicall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-// find a pos where to create the boat
 _spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-// create the boat
 _boat = createVehicle [blufor_BOAT_TRANS_X, _spawnPos,[], 0, "FLY"];
 _boatgroup = createGroup west; 
 _pilot = _boatgroup createUnit [blufor_MARK_SOLDIER_X, [5,5,5], [], 0, "NONE"];
@@ -51,10 +45,9 @@ _boat addAction [ACT_MOVE("STR_DUWS_T_boattaxi_action_dest"), fnc_mapclickboat, 
 _pilot moveindriver _boat;
 
 
-// Single teardown for every failure below. The six copies this replaces had drifted: two
-// forgot to clear the pickup marker, so a boat lost on the run-in left it on the map for
-// the rest of the campaign. Unlock and deleteMarker are no-ops when already done, so one
-// handler is safe on every path.
+// Single teardown for every failure below, so no path forgets the pickup marker -- a boat lost on
+// the run-in must not leave it on the map for the rest of the campaign. Unlock and deleteMarker are
+// no-ops when already done, so one handler is safe on every path.
 _abort = {
     // Message is a parameter so the return leg can report a completed extraction rather
     // than apologise for one; everything else about the teardown is identical.
@@ -70,14 +63,13 @@ _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
 
 
-waitUntil {_foundpickuppos distance _boat < 350 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the lz
+waitUntil {_foundpickuppos distance _boat < 350 or (getdammage _boat > 0.7 or !alive _pilot)};
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
 _inVehCheck = true;
 while {_inVehCheck} do {
-waitUntil {sleep 0.5;taxiCanTakeOff or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the player has given a validpos
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop if choopa is down
-// check if player is inside choppa
+waitUntil {sleep 0.5;taxiCanTakeOff or (getdammage _boat > 0.7 or !alive _pilot)};
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith {};
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
 	[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
@@ -89,7 +81,6 @@ if (vehicle player != _boat) then {
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
 
-// everything is ok, player is in boat
 playMusic [_music, 0];
 _boat lock true;
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_oscarmike"] remoteExec ["fnc_duws_dialogue", 0];
@@ -101,14 +92,13 @@ str(_markerpickup) setMarkerText "DROP POINT";
 
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
-// TELEPORT BOAT NEAR DROP POINT. The fade masks the hop; the pilot's call goes through the
-// dialogue system rather than riding the fade's text slot.
+// The fade masks the teleport to the drop point; the pilot's call goes through the dialogue system rather
+// than riding the fade's text slot.
 titleCut ["", "BLACK OUT", 3];
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_enroute"] remoteExec ["fnc_duws_dialogue", 0];
 _teleportPoint = [ClickedTaxiPos, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 sleep 3.5;
 _boat setpos _teleportPoint;
-// tell the boat to go at wp
 _wp = _boatgroup addWaypoint [ClickedTaxiPos,0];
 _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
@@ -117,12 +107,11 @@ titleCut ["", "BLACK IN", 4];
 _boat lock false;
 
 
-waitUntil {sleep 0.5;ClickedTaxiPos distance _boat < 200  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near the shore
+waitUntil {sleep 0.5;ClickedTaxiPos distance _boat < 200  or (getdammage _boat > 0.7 or !alive _pilot)};
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
 
-// time to move ppl out of the boat;
-waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos<20)  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near shore
+waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos<20)  or (getdammage _boat > 0.7 or !alive _pilot)};
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_arrived"] remoteExec ["fnc_duws_dialogue", 0];
 
@@ -138,12 +127,12 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
 sleep 40;
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_rtb"] remoteExec ["fnc_duws_dialogue", 0];
-_wp = _boatgroup addWaypoint [_teleportPoint,0];   // tell the helo to leave
+_wp = _boatgroup addWaypoint [_teleportPoint,0];
 _wp setWaypointType "MOVE";
 deleteMarker str(_markerpickup);
 
 
-waitUntil {_boat distance player>100 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the ground
+waitUntil {_boat distance player>100 or (getdammage _boat > 0.7 or !alive _pilot)};
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { ["STR_DUWS_T_boattaxi_rtbdown"] call _abort };
 
 

@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_REN_GR", "Chaos Renegades (Grey)", "TIOW_REN_GR"
-///////
 
 opfor_SOLDIER_X = 				"TIOW_B_Ren_GR_Rifleman";				//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"TIOW_B_Ren_GR_Plasma";					//Anti Air   (Patrols, Zone Guard, Team)

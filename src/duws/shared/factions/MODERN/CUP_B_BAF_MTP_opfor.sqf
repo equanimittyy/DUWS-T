@@ -1,6 +1,4 @@
-///////////
 ///////////   "CUP_B_BAF", "CUP British AF (MTP)", "CUP_B_BAF_MTP"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_B_BAF_Soldier_Rifleman_MTP";			//Basic Soldier  (Patrols, Zone Guard, Team)

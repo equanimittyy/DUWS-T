@@ -16,7 +16,7 @@
 
 // Read off the editor's own display. The IDC forms resolve against whichever display the engine
 // holds current, and the confirmation screen is open underneath -- landing there they return "",
-// which this used to read as "nothing picked" and answer a CONFIRM click by closing the editor and
+// which reads as "nothing picked" and would answer a CONFIRM click by closing the editor and
 // changing nothing.
 private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
 if (isNull _display) exitWith {

@@ -1,6 +1,4 @@
-///////////
 ///////////   "OPTRE_Ins", "OPTRE Insurrectionists", "OPTRE_Ins"
-///////////
 
 
 opfor_SOLDIER_X = 				"OPTRE_Ins_URF_Rifleman_BR";				//Basic Soldier  (Patrols, Zone Guard, Team)

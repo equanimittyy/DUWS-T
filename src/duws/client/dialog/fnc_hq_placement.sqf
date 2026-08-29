@@ -2,11 +2,10 @@
 //
 // HQ placement: the two buttons, and the wait for whichever one the player picks to finish.
 //
-// This used to be the tail of fnc_HQ_faction_dialog, run while the faction screen was still on
-// screen. It sits after the confirmation screen instead so the campaign's rosters are settled
-// before the player is asked to commit to a position -- stepping back from the confirmation screen
-// re-picks factions, and a base placed ahead of that would have been placed against a roster the
-// player then changed.
+// Runs after the confirmation screen, not on the faction screen, so the campaign's rosters are
+// settled before the player is asked to commit to a position -- stepping back from the confirmation
+// screen re-picks factions, and a base placed ahead of that would have been placed against a roster
+// the player then changed.
 //
 // Cleared before the dialog opens, because a click is live the moment the buttons exist.
 random_placement = false;

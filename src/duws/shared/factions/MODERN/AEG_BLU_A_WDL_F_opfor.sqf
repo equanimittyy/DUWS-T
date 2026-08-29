@@ -1,6 +1,4 @@
-///////////
 ///////////   "BLU_A_WDL_F", "Aegis British - 2035 (Woodland)", "AEG_BLU_A_WDL_F"
-///////////
 
 
 opfor_SOLDIER_X = 				"B_A_Soldier_WDL_F";				//Basic Soldier  (Patrols, Zone Guard, Team)

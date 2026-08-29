@@ -1,13 +1,13 @@
 // Locality: client; the map-click bodies below run on the machine that triggers them, not here (invoked from a dialog action).
 // [salvos, radius, interval between salvos(in seconds), shots per salvo, support type, CP cost, ammotype] spawn fnc_mapclickarty
 // AMMO TYPES:  Arty (R_80mm_HE) / Laser (Bo_Mk82) / Mortar(grenade) / JDAM (Bo_Mk82) / Cluster(grenade)
-//  SUPPORT TYPE: 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm
+//  SUPPORT TYPE: 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm, 7 = mortar smoke
 
 _salvos = _this select 0;
 _radius = _this select 1;
 _interval = _this select 2;
 _rps = _this select 3;
-_supportype = _this select 4; // 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm
+_supportype = _this select 4;
 _cost = _this select 5; 
 _ammotype = _this select 6;
 

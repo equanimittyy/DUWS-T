@@ -54,8 +54,8 @@ fnc_factionGen = {
 // so it lives in one place. Trailing notes say what reads the key.
 //
 // Operators draw from the suppressed-weapon sets the role parser fills, then the plain role -- recomputed
-// per key here, unlike the old `_spec arrayIntersect _sl`, which summed buckets and so rated anti-air men
-// equal to light AT for an anti-tank slot.
+// per key here rather than by a single `_spec arrayIntersect _sl`, which would sum buckets and so rate
+// anti-air men equal to light AT for an anti-tank slot.
 { _x call fnc_faction_resolve } forEach [
 	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry]],      //patrol, fortify, paradrop
 	["blufor_AA_SOLDIER_X",       [_aa, _hat, _lat, _grunt, _infantry]],   //shared team rosters
@@ -185,11 +185,11 @@ requestAssets = requestAssets arrayIntersect requestAssets;	// remove potential 
 
 
 // Make vars public (dedicated server compat), named from the schema rather than matched on name
-// fragments: the fragment list this replaces asked whether "blufor_soldier" appeared in the lowercased
-// name, which silently stopped covering six keys once a role was spelled AR_SOLDIER_X rather than
-// SOLDIER_AR_X -- a key that fails to publish leaves a dedicated server's clients holding whatever they
-// had. The two request catalogues are appended because they are the one thing the schema deliberately
-// does not carry: variable-length lists no one-row-per-key table can express.
+// fragments: a fragment list asking whether "blufor_soldier" appears in the lowercased name silently
+// stops covering six keys once a role is spelled AR_SOLDIER_X rather than SOLDIER_AR_X -- a key that
+// fails to publish leaves a dedicated server's clients holding whatever they had. The two request
+// catalogues are appended because they are the one thing the schema deliberately does not carry:
+// variable-length lists no one-row-per-key table can express.
 _publish = ((["blufor"] call fnc_faction_schema) apply {_x select 0}) + ["blufor_RQST_UNITS", "blufor_RQST_VEHICLES"];
 { missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] } forEach _publish;
 
@@ -205,11 +205,9 @@ sleep 0.5;
 
 b_arraysToRandomize = (["blufor"] call fnc_faction_schema) apply {_x select 0};
 
-// Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
-// role that used to sit here got wrong.
+// Pools published, not collapsed by a timer. See fnc_faction_pools for what a thread per role gets wrong.
 [b_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
-// The five-minute squad rebuild that used to sit here went with the re-pick it was chasing: it
-// existed to fold newly drawn role classnames into the purchasable squads. server_init calls
-// fnc_BLUFOR_squad_init once, which is right for a catalogue -- a price list that reshuffles under
-// the player mid-purchase is worse than a stable one.
+// No five-minute squad rebuild folding newly drawn role classnames into the purchasable squads:
+// server_init calls fnc_BLUFOR_squad_init once, which is right for a catalogue -- a price list that
+// reshuffles under the player mid-purchase is worse than a stable one.

@@ -1,6 +1,4 @@
-///////
 ///////   "TIOW_Orks", "ORKZ!!!11", "TIOW_Orks"
-///////
 
 opfor_SOLDIER_X = 				"Naked1_Blu";				//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"TankBusta1_Blu";					//Anti Air   (Patrols, Zone Guard, Team)

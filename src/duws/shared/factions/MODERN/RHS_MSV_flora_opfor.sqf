@@ -1,6 +1,4 @@
-///////
 ///////   "RHS_msv", "RHS Russia MSV+Spetsnaz (Flora)","RHS_MSV_flora"
-///////
 
 opfor_SOLDIER_X = 				"rhs_msv_arifleman";						//Basic Soldier  (Patrols, Zone Guard, Team)
 opfor_AA_SOLDIER_X = 			"rhs_msv_aa";							//Anti Air   (Patrols, Zone Guard, Team)

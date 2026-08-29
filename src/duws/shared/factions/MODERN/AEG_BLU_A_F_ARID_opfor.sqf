@@ -1,6 +1,4 @@
-///////////
 ///////////   "BLU_A_F", "Aegis British (Arid)", "AEG_BLU_A_F_ARID"
-///////////
 
 
 opfor_SOLDIER_X = 				"B_A_Soldier_F";					//Basic Soldier  (Patrols, Zone Guard, Team)

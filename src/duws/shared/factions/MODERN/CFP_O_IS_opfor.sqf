@@ -1,6 +1,4 @@
-///////////
 ///////////    "CFP_O_IS", "CFP Middle East Insurgents", "CFP_O_IS"
-///////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_ALQAEDA_Rifleman_01";	//Basic Soldier  	(Patrols, Zone Guard, Team)

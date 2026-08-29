@@ -1,6 +1,4 @@
-///////////
 ///////////   "gm_fc_pl", "GM Poland (Winter) + USSR (3CB)", "GM_Poland_WIN"
-///////////
 
 
 opfor_SOLDIER_X = 				"gm_pl_army_rifleman_akm_80_win";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -1,6 +1,4 @@
-///////////
 ///////////////   "I_E_F", "LDF Livonian Defense Force (Woodland)", "LDF_E_F_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"I_E_soldier_F";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -1,11 +1,7 @@
 // Opens every side-mission thread: the start gate, the gate stamp, and the mission lock.
-// Returns false when the caller must abort -- the caller has to exit itself, because
-// neither exitWith nor breakOut inside a called function can terminate its caller's scope.
-// The 17 copies this replaces tried to, via `breakOut "main"` into a scope no thread
-// declares, so a mission held at the gate unwound through an undefined scope name.
-// _requester is remoteExecutedOwner read in the calling thread -- it must be sampled
-// there, in the scope remoteExec actually entered. 0 means the thread was called
-// locally, in which case a plain hint is the only machine there is to reach.
+// Returns false when the caller must abort -- exitWith/breakOut inside a called function cannot unwind
+// the caller's scope, so the caller must exit itself. _requester is remoteExecutedOwner, sampled in the
+// calling scope (0 means called locally, so a plain hint is the only machine to reach).
 params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0]];
 private _remaining = [] call fnc_mission_gate_left;
 if (_remaining > 0) exitWith {
@@ -55,9 +51,8 @@ private _missionDefs = [
 ];
 (_missionDefs select _missionType) params ["", "_mnameKey", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl", "", "_mobj", ["_mnote", ""]];
 DUWS_curReward = [_mcp, _map, _mrep];
-// Name key, objective and optional note key for the briefing stats block. Server-local like the reward
-// and deadline above, and read the same way: nothing else runs while Mission_available is false, so
-// fnc_missionTaskCreate reads them for exactly this mission before it ends.
+// Name key, objective and optional note key for the briefing stats block -- same validity window as the
+// reward and deadline above.
 DUWS_curNameKey = _mnameKey;
 DUWS_curObjective = _mobj;
 DUWS_curNoteKey = _mnote;

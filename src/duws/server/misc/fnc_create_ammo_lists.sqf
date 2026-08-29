@@ -1,5 +1,3 @@
-// CREATE LISTS OF ITEMS FOR ADDING TO AMMOBOXES, VEHICLES, RESTRICTED ARSENAL, etc...
-// SPAWN UNITS, COPY ITEMS
 if (!isServer) exitWith {};
 _excludedItems = [
     "I_UAV_01_backpack_F",
@@ -25,17 +23,6 @@ _excludedItems = [
     "O_Mortar_01_weapon_F",
     "B_Patrol_Respawn_bag_F"
 ];
-
-// weapons = all weapons
-// magazines = ammo mags, grenades, rockets, explosives
-// items = medkits, FAKs, toolkits, etc...
-// assignedItems = map, compass, radio, etc...
-// primaryWeaponItems = scopes, laser, grips, etc...
-// headgear = helmets, shemags, etc...
-// goggles = goggles, glasses, etc...
-// uniformItems = all items in uniform
-// vestItems = all items in vest
-// backpackItems = all items in backpack
 
 blufor_ammobox_weapons = [];
 blufor_ammobox_magazines = [];

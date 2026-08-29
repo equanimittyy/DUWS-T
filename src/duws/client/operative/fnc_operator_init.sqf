@@ -44,15 +44,13 @@ duws_operator_list=[
 // init functions for adding skills
 DUWS_operator_add_aim = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_aim = _selected_soldier select 0;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_aim >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_aim_new = _selected_soldier_aim + 0.01; // update the variable
-	_selected_soldier set [0,_selected_soldier_aim_new];
+	_selected_soldier_aim_new = _selected_soldier_aim + 0.01;	_selected_soldier set [0,_selected_soldier_aim_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
@@ -62,15 +60,13 @@ DUWS_operator_add_aim = {
 	
 DUWS_operator_add_reflexes = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_reflexes = _selected_soldier select 1;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_reflexes >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_reflexes_new = _selected_soldier_reflexes + 0.01; // update the variable
-	_selected_soldier set [1,_selected_soldier_reflexes_new];
+	_selected_soldier_reflexes_new = _selected_soldier_reflexes + 0.01;	_selected_soldier set [1,_selected_soldier_reflexes_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
@@ -80,15 +76,13 @@ DUWS_operator_add_reflexes = {
 	
 DUWS_operator_add_spotting = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_spotting = _selected_soldier select 2;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_spotting >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_spotting_new = _selected_soldier_spotting + 0.01; // update the variable
-	_selected_soldier set [2,_selected_soldier_spotting_new];
+	_selected_soldier_spotting_new = _selected_soldier_spotting + 0.01;	_selected_soldier set [2,_selected_soldier_spotting_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
@@ -98,15 +92,13 @@ DUWS_operator_add_spotting = {
 	
 DUWS_operator_add_courage = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_courage = _selected_soldier select 3;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_courage >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_courage_new = _selected_soldier_courage + 0.01; // update the variable
-	_selected_soldier set [3,_selected_soldier_courage_new];
+	_selected_soldier_courage_new = _selected_soldier_courage + 0.01;	_selected_soldier set [3,_selected_soldier_courage_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
@@ -116,15 +108,13 @@ DUWS_operator_add_courage = {
 	
 DUWS_operator_add_comms = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_comms = _selected_soldier select 4;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_comms >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_comms_new = _selected_soldier_comms + 0.01; // update the variable
-	_selected_soldier set [4,_selected_soldier_comms_new];
+	_selected_soldier_comms_new = _selected_soldier_comms + 0.01;	_selected_soldier set [4,_selected_soldier_comms_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
@@ -134,15 +124,13 @@ DUWS_operator_add_comms = {
 	
 DUWS_operator_add_reload = {
 	_selected_index = lbCurSel 1500;
-	_selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index
-	
+	_selected_soldier = duws_operator_list select _selected_index;	
 	_selected_soldier_reload = _selected_soldier select 5;
 	_selected_soldier_points = _selected_soldier select 13;
 	if (_selected_soldier_points <= 0) exitWith {hint localize "STR_DUWS_T_operative_no_points"};
 	if (_selected_soldier_reload >= 1) exitWith {hint localize "STR_DUWS_T_operative_stat_max"};
 	
-	_selected_soldier_reload_new = _selected_soldier_reload + 0.01; // update the variable
-	_selected_soldier set [5,_selected_soldier_reload_new];
+	_selected_soldier_reload_new = _selected_soldier_reload + 0.01;	_selected_soldier set [5,_selected_soldier_reload_new];
 	
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];

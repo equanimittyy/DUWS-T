@@ -1,6 +1,4 @@
-///////////
 ///////////   "RHS_faction_USAIRBORNE_D", "RHS USA Airborne (OCP Desert) + SOCOM", "RHS_faction_USAIRBORNE_OCP_D"
-///////////
 
 
 opfor_SOLDIER_X = 				"rhsusf_army_ocp_arb_rifleman";			//Basic Soldier  (Patrols, Zone Guard, Team)

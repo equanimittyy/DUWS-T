@@ -1,6 +1,4 @@
-///////////
 ///////////    "MIN_RF", "Russia 2035 (Desert)", "MIN_RF_DES"
-///////////
 
 
 opfor_SOLDIER_X = 				"MIN_RF_SOLDIER_DESERT";					//Basic Soldier  (Patrols, Zone Guard, Team)

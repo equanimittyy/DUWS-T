@@ -54,8 +54,8 @@ DUWS_fnc_zoneSpawnList = {
 // Drops the tokens this side cannot field right now. Three separate reasons, one answer: the token
 // leaves the composition and nothing takes its place.
 //
-// Substituting is what this replaces and it was never chosen -- it was the shape of an `if` leaking.
-// An air slot with attack helicopters switched off fell through to the general vehicle pool, so a
+// Dropped, not substituted: substituting was never a choice, only the shape of an `if` leaking --
+// an air slot with attack helicopters switched off fell through to the general vehicle pool, so a
 // player who asked for no helicopters got an extra truck per slot instead of a quieter zone.
 //
 // Runs before the strength thin: filtering first thins the force the side can actually field, where
@@ -131,7 +131,7 @@ DUWS_fnc_spawnDiff = {
 // rules about raising a garrison, not about which kind of ground is raising one.
 //
 // Staggered, not batched: each token raises a group, and firing a whole composition in one frame is
-// what the per-call sleep this replaces existed to avoid. None after the last.
+// what the per-token sleep avoids. None after the last.
 //
 // Returns groups rather than appending to a caller's roster, so a caller that keeps one appends
 // after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
@@ -162,9 +162,9 @@ DUWS_fnc_raiseGarrison = {
 // Every vehicle the OPFOR side fields, one row each, in the same shape as a team's: what it is
 // called, what it fields, and what it requires.
 //
-// A token names one vehicle and never a bucket to roll in. The pool this replaces weighted four
-// trucks alongside three APCs and a tank under the name "armored", so roughly one armour slot in six
-// stood a supply truck on an objective. Variety is not lost with it: the role below names a faction
+// A token names one vehicle and never a bucket to roll in: a pool weighting four trucks alongside
+// three APCs and a tank under the name "armored" stood a supply truck on an objective roughly one
+// armour slot in six. Variety is not lost with it: the role below names a faction
 // pool, and fnc_faction_pick draws from that pool as each vehicle is placed, so two zones raised in
 // the same second field different APCs. What goes is the randomness no table could see -- a bucket
 // the composition named but could not describe.

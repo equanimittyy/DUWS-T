@@ -26,9 +26,9 @@ private _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS
 _group deleteGroupWhenEmpty true;
 _group setFormation "STAG COLUMN";
 
-// Counters are read with a default instead of an init file: they previously existed
-// only in the client-side include, so every client minted its own "Inf 1" and the
-// server had no copy at all. An unrecognised squad type is left unnamed, as before.
+// Counters read with a default rather than from an init file: they are defined only in the
+// client-side include, so the server holds no copy -- without the default the server read would
+// fault and clients would each mint their own "Inf 1". An unrecognised squad type is left unnamed.
 private _spec = switch (_HCsquadtype) do {
 	case "Infantry": { ["DUWS_number_fireteam", "Inf", false] };
 	case "Motor":    { ["DUWS_number_motor", "Motor", true] };

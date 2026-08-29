@@ -39,7 +39,7 @@ private _damagedCount = 0;
 {
     if (!isNull _x && {!(_x in _protected)}) then {
         _x allowDamage true;
-        private _damage = 0.7 + random 0.15; // 0.7 ~ 0.85
+        private _damage = 0.7 + random 0.15;
         _x setDamage _damage;
         _damagedCount = _damagedCount + 1;
     };

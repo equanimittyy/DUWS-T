@@ -1,14 +1,10 @@
 
-// fnc_factions_check
-
-
 // make 2 local arrays [_faction_files_BLU] and [_faction_files_OPF]
 //  - fill them with meta data about the faction files
 //  - faction files for BLUFOR have a completely different unit/vehicle format
 //    than OPFOR faction files
 //  - BLUFOR array contents should be identical to the OPFOR array
 //
-// ARRAY DESCRIPTION
 // [basic rifleman classname, faction class, selection menu label, faction file]
 //
 //  - faction class defines the faction classname i.e.  BLU_F for NATO (arid)
@@ -299,7 +295,7 @@ Factions_Available_BLUFOR_X pushback ["BLU_F", "Default = NATO (Arid)","BLU_F_AR
 
 {
 	if (isClass(configFile >> "CfgVehicles" >> (_x select 0))) then {
-		Factions_Available_BLUFOR_X pushback [(_x select 1), (_x select 2), (_x select 3)];  // faction, label
+		Factions_Available_BLUFOR_X pushback [(_x select 1), (_x select 2), (_x select 3)];
 	};
 
 } foreach _faction_files_BLUFOR;
@@ -309,7 +305,7 @@ Factions_Available_OPFOR_X pushback ["OPF_F", "Default = CSAT (Arid)","OPF_F_ARI
 
 {
 	if (isClass(configFile >> "CfgVehicles" >> (_x select 0))) then {
-		Factions_Available_OPFOR_X pushback [(_x select 1), (_x select 2), (_x select 3)];  // faction, label
+		Factions_Available_OPFOR_X pushback [(_x select 1), (_x select 2), (_x select 3)];
 	};
 
 } foreach _faction_files_OPFOR;

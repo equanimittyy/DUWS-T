@@ -1,18 +1,9 @@
 // Locality: server -- registered once for all towns by server/misc/fnc_civ_init_Tomata.sqf.
-/*
-    Owns every town's OPFOR garrison: raise one when BLUFOR arrive at a town the enemy holds,
-    reinforce it as the commander buys, stream it out once the town has been empty long enough,
-    and settle up when it is cleared. No params. Returns once the hooks are in place.
-
-    The clock is fnc_site_poller's, which services every site on one thread. What stays here is the
-    part a garrison does not share with a crowd or a zone: the reputation band that makes a town
-    enemy ground at all, the commander's purchases, and the clear.
-
-    The raise is the one part that cannot run inline -- it confirms over five seconds, then waits on
-    the spawners and on the men actually appearing, up to a minute -- so it is dispatched to a
-    short-lived worker per town and adopted on a later pass. The poller holds the clock of every
-    other site and must not stall on one.
-*/
+// Owns every town's OPFOR garrison: raise one when BLUFOR arrive at an enemy-held town, reinforce as the
+// commander buys, stream it out once empty long enough, settle up when cleared. The clock is
+// fnc_site_poller's; what stays here is the part a garrison does not share with a crowd or zone -- the
+// reputation band, the commander's purchases, the clear. The raise is dispatched to a per-town worker (it
+// confirms over 5 s then waits up to a minute for men to appear), since the poller must not stall on one.
 if (!isServer) exitWith {};
 
 // RAVAGE and WBK register no town reputation, so no town ever enters the OPFOR band and this
@@ -106,28 +97,15 @@ private _fnc_raise = {
     missionNamespace setVariable [RAISE_SLOT(_i), [_grps, _tier]];
 };
 
-// One record per town, held in the shared site store: the town garrison is an occupant of the same
-// site its crowd is, so both are reached the same way and neither can go missing when the poller
-// takes them over. Keyed rather than kept as parallel arrays because eleven fields indexed the same
-// way are one transposition away from a town reinforcing against another's composition.
-//
-// awaitVacate is set whenever a hold is armed, and held until the town has been empty of BLUFOR
-// once since. The hold expiring is not enough on its own: a player who took or cleared the town and
-// stayed in it is still standing there when the clock lapses, and the arrival test would read them
-// as having just walked up. Waiting for one empty cycle is what makes leaving and coming back the
-// only way to meet the garrison, whichever hold put it off. It starts latched for the same reason
-// at the other end: a town seeded into the band at campaign start would raise its garrison on
-// sight. The first cycle clears it for any town nobody is near.
-//
-// emptySince is the diag_tickTime from which the town has been empty, or -1 while somebody is in
-// it. The garrison streams out on this, so a step outside the radius does not tear it down and walk
-// it back.
-//
-// tier is the deployed tier -- what is standing, distinct from the owned tier the reputation band and
-// the commander set. A tier buy that outruns the deployed tier re-derives the reserve pool at the new
-// row and lets the refill deliver the growth in waves. The strength, the loss ledger, the reserve pool
-// and the live flag are the shared garrison state (fnc_garrison_strength_init), keyed by the same town
-// key, not town-record fields -- so a town wears down and reinforces by exactly a zone's rules.
+// One record per town in the shared site store (the garrison is an occupant of the same site as the
+// crowd, so both are reached the same way). Keyed, not parallel arrays -- eleven same-indexed fields are
+// one transposition from a town reinforcing against another's composition.
+// awaitVacate is held until the town has been empty of BLUFOR once since a hold armed, so a player who
+// cleared it and stayed is not read as freshly arrived; it starts latched so a band-seeded town does not
+// raise on sight. emptySince is the diag_tickTime the town went empty (-1 while occupied); the garrison
+// streams out on it, so a step outside the radius does not tear it down. tier is the deployed tier,
+// distinct from the owned tier the band and commander set; the rest of the garrison state is shared
+// (fnc_garrison_strength_init), keyed the same, so a town wears down by a zone's rules.
 private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     private _key = [_i] call fnc_town_site_key;
@@ -226,9 +204,9 @@ private _fnc_tick = {
         };
     };
 
-    // Streamed out once the town has been empty for the town_gar grace. Town garrisons used to stand
-    // for the rest of the campaign wherever the player had ever been, so a long session left
-    // live men in every town on the map; this makes a town cost what a zone costs.
+    // Streamed out once the town has been empty for the town_gar grace, so a town costs what a zone
+    // costs: a garrison left standing for the rest of the campaign wherever the player had ever been
+    // would leave live men in every town on the map over a long session.
     //
     // What it took is recorded first, against the strength the town will come back at. Without
     // that, streaming would hand back every casualty: grind a garrison to one man, walk away,

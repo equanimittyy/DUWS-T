@@ -1,6 +1,4 @@
-///////////
 ///////////    "CSAT_WINTER "CSAT (Winter)", "CSAT_WINTER"
-///////////
 // Using Hex variants since I like it the most of the four options
 
 opfor_SOLDIER_X = 				"RIFLEMAN_WINTER_HEX";					//Basic Soldier  (Patrols, Zone Guard, Team)

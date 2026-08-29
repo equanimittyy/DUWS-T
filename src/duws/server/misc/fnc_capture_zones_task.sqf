@@ -6,9 +6,9 @@ if (isNil "ZombieTaskCreated") then {
     ZombieTaskCreated = false;
 };
 
-// Orders arrive with the player, not on a timer: the fixed 60s wait this replaces expired
-// part-way through zone build-out, and manual placement runs minutes past it, so the task told
-// the player to capture zones that did not exist yet.
+// Orders arrive with the player, not on a timer: a fixed 60 s wait expires part-way through zone
+// build-out, and manual placement runs minutes past it, so the task would tell the player to
+// capture zones that did not exist yet.
 while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 // Then the fast-rope. Not retried on timeout, unlike the wait above -- fnc_intro_heli has early
@@ -20,17 +20,12 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // MP session with that slot empty would never publish it.
 ["ZONES", "sitrep_granted (radio item added)", {!isNil "sitrep_granted"}, 90] call fnc_waitLogged;
 
-// The task ID is a fixed key and must never be localized: the SUCCEEDED update at the end of
-// this file looks the task up by this exact string, so a localized ID silently stops matching
-// the moment the server is not English and the campaign task never completes. The player-facing
-// name comes from the description array below, not from the ID.
-// Created server-side, not remoteExec'd: broadcasting BIS_fnc_taskCreate serialises the owner and
-// destination as live references, which BIS's map draw then re-resolves by netId every frame the map is
-// open -- flooding the rpt with "objectFromNetId: type OBJECT, expected STRING, in player1" for the task's
-// whole life and jamming the strategic map (docs/info/architecture/arma_engine_gotchas.md). A native server-side create
-// syncs the objective to the owner side's clients, joiners included, and keeps each reference as its own
-// netId string. No single map pin (capture-all-zones has no one point), so the destination is [] rather
-// than an objNull the draw would try to resolve.
+// The task ID must never be localized -- the SUCCEEDED update looks it up by this exact string, so a
+// localized ID stops matching on a non-English server and the campaign never completes. Created
+// server-side, not remoteExec'd: broadcasting BIS_fnc_taskCreate serialises owner/destination as live
+// references the map re-resolves by netId every open frame, flooding the rpt with "objectFromNetId"
+// errors (docs/info/architecture/arma_engine_gotchas.md). Destination is [] -- capture-all-zones has no
+// single pin, and an objNull the draw would try to resolve.
 [west, ["Campaign"],
     [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], [], true]
     call BIS_fnc_taskCreate;
@@ -49,15 +44,11 @@ if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
 };
 
 waitUntil {sleep 10; WARCOM_init_done};
-// The zone count has to be checked, not assumed: with none created the comparison reads 0 >= 0
-// and wins the campaign on its first evaluation. Ordering alone is not enough of a guard --
-// every zone slot can be dropped by the origin keep-out in fnc_locatorzones_random.
-// Both endings are waited on together and the branch below picks which fired. A second thread
-// watching for the loss is not an option: this wait blocks for the whole campaign, so anything
-// appended after it is unreachable until the win lands.
-// Five seconds, not thirty: both losses are published the moment they happen and this poll is
-// what turns them into an ending, so a long interval reads as the campaign not noticing. The
-// condition is two variable reads, so the rate costs nothing.
+// The zone count must be checked, not assumed: with none created, 0 >= 0 wins on the first evaluation
+// (every zone slot can be dropped by the origin keep-out in fnc_locatorzones_random). Win and loss share
+// one waitUntil, not two threads -- this blocks for the whole campaign, so anything appended after it is
+// unreachable until an ending fires. Five-second poll: the losses publish the moment they happen, so a
+// long interval reads as the campaign not noticing (two variable reads cost nothing).
 waitUntil {
     sleep 5;
     (amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created})
@@ -70,14 +61,12 @@ waitUntil {
 // headline straight into the sentence as "Mission Completed!Every zone...".
 private _won = isNil "campaign_lost";
 private _title = [localize "STR_DUWS_T_CAMPAIGN_LOST_TITLE", localize "STR_DUWS_T_fo1ihi1n"] select _won;
-// The losing body names which ending this was: there is more than one way to lose now, and the
-// ruined-island line reads as a non sequitur after the commander is shot at his own desk. Carried
-// as a stringtable key rather than as resolved text so the setter does not have to be a machine
-// with a stringtable -- and so this stays the one place the campaign's endings are worded.
-// The map name is passed to every ending, not just the one that reads it: a body without a %1
-// discards the surplus argument (docs/info/architecture/arma_engine_gotchas.md), so this stays one call. It is the
-// map's config description rather than worldName -- the latter is the internal class ("Altis" but
-// "Enoch" for Livonia), which is not what the player calls the place.
+// The losing body names which ending this was (more than one way to lose now), carried as a stringtable
+// key not resolved text -- so the setter needs no stringtable, and this stays the one place the endings
+// are worded. The map name is passed to every ending, not just the one reading it: a body without a %1
+// discards the surplus arg (docs/info/architecture/arma_engine_gotchas.md), so this stays one call. It is
+// the map's config description, not worldName (the internal class -- "Enoch" for Livonia -- not what the
+// player calls it).
 private _body = format [[localize (missionNamespace getVariable
     ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won,
     getText (configFile >> "cfgWorlds" >> worldName >> "description")];

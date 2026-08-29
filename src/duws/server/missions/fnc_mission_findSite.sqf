@@ -289,7 +289,6 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
     private _fData = if ((_weights findIf {_x > 0}) < 0) then { selectRandom _items } else { _items selectRandomWeighted _weights };
 
     private _cand = if (_useTown) then {
-        // Named location settled onto a building, as the old urban branch did.
         private _zl = [_fData, 100, 400, 10, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
         private _bld = nearestBuilding _zl;
         [(getPos _bld) select 0, (getPos _bld) select 1]

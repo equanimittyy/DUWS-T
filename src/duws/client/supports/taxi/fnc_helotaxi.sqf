@@ -44,8 +44,8 @@ _vehpos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _vehpos;
 
 _veh = [_vehpos,0,blufor_TRANS_HELI_X,WEST] call bis_fnc_spawnvehicle;
 
-_helo = _veh select 0 ;// vehicle object
-_helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height
+_helo = _veh select 0;
+_helo setPos [_vehpos select 0, _vehpos select 1, 200];
 
 _helo flyInHeight 50;
 _helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_wp"), fnc_mapclickhelo, [], 70, true, true, "", "vehicle _this == _target"];
@@ -72,7 +72,6 @@ _wp setWaypointType "MOVE";
 
 
 
-// check damage and exit function
 _check_damage = compile "((vehicle _pilot == _pilot) or (damage _helo > _helo_maxDamage) or (fuel _helo < _helo_minFuel))";
 _abort = {
 	params ["_helo","_helogroup","_helipad1","_markerpickup"];
@@ -198,7 +197,6 @@ _LzSpawnopen = [_helo] spawn {
 };
 
 
-// time to move ppl out of the helo;
 waitUntil {sleep 0.5;(getposATL _helo select 2 < 4) or (call _check_damage)};
 sleep 1;
 
@@ -229,7 +227,7 @@ _helo lock false;
 
 sleep 12;
 
-_wp = _helogroup addWaypoint [[0,0,0],0];   // tell the helo to leave
+_wp = _helogroup addWaypoint [[0,0,0],0];
 _wp setWaypointType "MOVE";
 deleteMarker str(_markerpickup);
 deleteVehicle _helipad;

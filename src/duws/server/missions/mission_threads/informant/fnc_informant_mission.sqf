@@ -1,14 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-//
-// Informant hunt. An OPFOR informant hides disguised among a town's civilians; the player finds and
-// kills him before he leaves by car for a distant zone. Site-finder (fnc_informant_site) guarantees
-// _MissionPos is a populated Tomata town, so this thread never tests for one.
-//
-// Two shapes by the town's reputation band:
-//   friendly/neutral -- crowd thickened, every civilian askable about the informant
-//                       (fnc_informant_ask_addAction); player narrows him by talking, and has time.
-//   enemy            -- no asking; he leaves much sooner, so player camps the described car.
-// Both leave early the moment a firefight starts near the informant.
 params ["_MissionPos", "_mission_name"];
 
 // Resolve the town this offer sits on. The finder returned a town centre, so the nearest registered
@@ -42,10 +32,9 @@ private _leaveSteps = if (_enemyTown) then { 2 } else { 4 };
 private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 
-// Escape destination: nearest OPFOR-held zone at least 1 km off. He runs to enemy ground, never a
-// BLUFOR/own zone, so no fallback -- finder guaranteed one at offer time; if the last was captured
-// since, the mission aborts. zone_namePOS_pairs carries the name, WARCOM_zones_controled_by_OPFOR
-// which zones are enemy-held, matched by position. TUNABLE distance.
+// Escape destination: nearest OPFOR-held zone at least 1 km off (he runs to enemy ground, never a
+// BLUFOR zone). Finder guaranteed one at offer time; if the last was captured since, abort. Name from
+// zone_namePOS_pairs, enemy-held from WARCOM_zones_controled_by_OPFOR, matched by position. TUNABLE.
 private _MINDIST = 1000;
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _zx  = [];
@@ -93,10 +82,9 @@ private _markername2 = [_townPos, _radius, _taskID, format [localize "STR_DUWS_T
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_INFORMANT_COPY"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition
-// tests THIS car's footprint against nearby buildings/walls/cars and returns a spot it fits: a bare
-// road point plus createVehicle's weak relocate still drops a car into a house wall in a built-up
-// town, where it detonates on spawn. Nothing fits -> open ground off the road, never the raw point.
+// Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition fits
+// THIS car's footprint against nearby buildings/walls/cars, or a bare road point plus createVehicle's weak
+// relocate drops it into a house wall where it detonates on spawn. Nothing fits -> open ground off the road.
 private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
     private _fit = _pos findEmptyPosition [0, 25, _class];
@@ -179,9 +167,9 @@ _allUnits pushBack _informant;
 _informant addEventHandler ["Killed", {
     params ["_unit", "_killer", "_instigator"];
     _unit setVariable ["DUWS_informant_dead", true];
-    // CIVILIAN re-armed the engine's civ-kill rating penalty the old EAST unit never took. The -1 town
-    // rep below is the whole intended cost; a global rating tank that can turn the player's own AI
-    // hostile is not. Cancel it, but only on a civilian death: an EAST flip (car gone) was neutral.
+    // CIVILIAN death triggers the engine's civ-kill rating penalty -- a global rating tank that can turn
+    // the player's own AI hostile. Cancel it (the -1 town rep below is the whole intended cost); only on a
+    // civilian death, since an EAST flip (car gone) was neutral.
     if (side _unit == CIVILIAN) then {
         private _who = _instigator; if (isNull _who) then { _who = _killer };
         if (!isNull _who) then { _who addRating 500 }; // TUNABLE
@@ -213,10 +201,9 @@ publicVariable "DUWS_informant_active";
 // client gets it; he is spawned raw, so this is his only path to the actions.
 [_informant] remoteExec ["fnc_civ_clientActions", 0, _informant];
 
-// While waiting he strolls the cluster, not a fixed pin: a fresh safe point in the spawn radius,
-// re-tasked on arrival or after a cap so a blocked path never freezes him. Kept to the cluster so he
-// stays in his crowd; LIMITED so he reads as a local. Ends when the exfil watcher takes over
-// (DUWS_informant_leaving), so this doMove never fights the getaway waypoints. TUNABLE cap.
+// While waiting he strolls the cluster (fresh safe point, re-tasked on arrival or a cap so a blocked
+// path never freezes him), LIMITED so he reads as a local. Ends when the exfil watcher takes over
+// (DUWS_informant_leaving), so this doMove never fights the getaway waypoints.
 [_informant, _townPos, _spawnRadius] spawn {
     params ["_inf", "_tp", "_tr"];
     (group _inf) setSpeedMode "LIMITED";
@@ -233,11 +220,9 @@ publicVariable "DUWS_informant_active";
     };
 };
 
-// Thicken the crowd only on a friendly/neutral town the player can walk. Each added civilian is a
-// real local (same index, so harming one costs the town), gets the ask action if that layer loaded,
-// and wanders on the town's own movement pass. Three to a group: solo groups would have 24 eat the
-// engine's ~144-per-side cap the town crowd and decoy drivers also draw on. Eight trios in the
-// half-radius cluster is ~twice the town's density, not four times. TUNABLE.
+// Thicken the crowd only on a friendly/neutral town. Each added civilian is a real local (same index,
+// so harming one costs the town). Three to a group: 24 solo groups would eat the engine's ~144-per-side
+// cap the town crowd and decoy drivers also draw on. Eight trios is ~twice the town's density. TUNABLE.
 private _crowd = [];
 if (!_enemyTown) then {
     // Re-open every local already in town: a body that survived an earlier hunt still reads
@@ -267,11 +252,9 @@ if (!_enemyTown) then {
     private _townBuildings = (missionNamespace getVariable [format ["civ_buildings_%1", _townIndex], []]) select { !isNull _x };
     [_crowdGroups, _townBuildings] spawn fnc_civ_wp_Tomata;
 
-    // The ask action reaches every town local for the hunt -- thickened crowd, baseline locals, and
-    // any streaming in later. A poll, not a one-off sweep: the crowd is not all present at start (the
-    // offer is usually taken far off on the map). The askable flag makes each a one-time add; the loop
-    // ends with the hunt, and the action self-hides once DUWS_informant_active is false. JIP-keyed on
-    // the civilian so a mid-hunt joiner still gets it.
+    // The ask action reaches every town local -- a poll, not a one-off sweep, since the crowd is not all
+    // present at start (the offer is usually taken far off). The askable flag makes each a one-time add;
+    // the loop ends with the hunt, and the action self-hides once DUWS_informant_active is false.
     [_townIndex] spawn {
         params ["_ti"];
         while { missionNamespace getVariable ["DUWS_informant_active", false] } do {

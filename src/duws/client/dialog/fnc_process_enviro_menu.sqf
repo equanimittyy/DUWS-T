@@ -51,7 +51,6 @@ switch (_index) do {
     case time_of_day_midnite:{ time_of_day = 0; };
 };
 
-// CIVILIAN DENSITY
 // How many civilians one town holds while players are in it, capped by its own building count.
 // One town gets the figure in full; past a campaign-wide soft cap of three towns' worth the rest
 // are thinned proportionally, down to a floor of three apiece (fnc_civ_liveTarget).
@@ -97,7 +96,6 @@ switch (_index) do
     case index_more_urban_no: { moreUrban = 0; };
 };
 
-// ENABLE CIVILIANS
 // A row with no value is a bug, not a mode: every row the menu adds carries one. Take civilians
 // off rather than leave the previous value standing, and log it -- silently keeping the old value
 // reads in game as "civilians on, none ever spawn".
@@ -115,7 +113,6 @@ switch (_index) do
     case index_hardcore_true: { hardcore_mode_enable = true; publicVariable "hardcore_mode_enable"; };
 };
 
-// always enable the restricted arsenal
 restricted_arsenal = true;
 
 publicVariable "weather_type";

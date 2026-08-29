@@ -3,16 +3,10 @@
 params ["_taskId", "_description", "_title", "_destination", ["_type", "unknown"]];
 if (!isServer) exitWith {};
 
-// Journal footer, built once here so all threads share it. Order: the mission body (passed in), a blank
-// line and the deadline as an in-game wall clock, the optional Note line, then a divider and the stats
-// block -- mission name, type, reward, time. Only the journal shows the clock; the map picker
-// (fnc_stratmap) builds the same stats block but prints a time band, since a deadline read while browsing
-// overstates the time left once the mission is picked. DUWS_curDeadlineAt is an absolute engine-time
-// (seconds) and daytime advances 1:1 with engine seconds, so the seconds left convert straight to a
-// clock. Guarded on a live future deadline; a stale/unset global adds nothing.
-//
-// Name, type and note are single-sourced from mission_types.hpp through fnc_mission_begin's globals: the
-// type token is title-cased into its display word, and the note renders only when the type carries one.
+// Only the journal shows a clock; the map picker (fnc_stratmap) shows a time band instead, since a
+// deadline read while browsing would overstate what is left once picked. DUWS_curDeadlineAt is absolute
+// engine-time and daytime advances 1:1 with it, so seconds-left converts straight to a clock. Name, type
+// and note are single-sourced from mission_types.hpp via fnc_mission_begin's globals.
 private _dl = missionNamespace getVariable ["DUWS_curDeadlineAt", -1];
 if (_dl > time) then {
 	// A blank line opens each section: the line strings carry one leading break, so a second one here

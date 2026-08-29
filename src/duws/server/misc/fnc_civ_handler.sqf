@@ -55,8 +55,8 @@ private _fnc_fill = {
     params ["_locIndex", "_centerPos", "_radius"];
 
     // Surveyed once at campaign generation and kept for the rest of the mission: the terrain sweep
-    // behind it is the heaviest engine call in the civilian system, and every town entry used to
-    // repeat it. Destroyed buildings go null, so the list is filtered rather than trusted.
+    // behind it is the heaviest engine call in the civilian system, too costly to repeat per town
+    // entry. Destroyed buildings go null, so the list is filtered rather than trusted.
     private _buildings = (missionNamespace getVariable [format ["civ_buildings_%1", _locIndex], []])
         select { !isNull _x };
     private _civArray = missionNamespace getVariable ["civ_array", []];
@@ -104,9 +104,9 @@ private _fnc_fill = {
 
 private _centres = _locations apply { getPos _x };
 
-// Collected by roster, which is what the town filled rather than whatever is standing in it. The
-// scan this replaces walked allUnits + allDeadMen once per emptied town looking for a tag, which is
-// a several-hundred-entry pass to find a list the fill already had.
+// Collected by roster, which is what the town filled rather than whatever is standing in it -- a
+// scan of allUnits + allDeadMen per emptied town looking for a tag would be a several-hundred-entry
+// pass to rebuild a list the fill already had.
 //
 // Corpses go with the living: they stay on the roster, and leaving them to the litter sweep does
 // nothing at all when the campaign was started with the cleanup lifetime switched off. A recruited

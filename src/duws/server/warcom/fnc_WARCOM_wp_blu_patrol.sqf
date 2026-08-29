@@ -7,7 +7,6 @@ _group setCombatMode "YELLOW";
     _wp setWaypointType "MOVE";    // MUST BE MOVE FOR FOR VEH SQUADS
 	_wp setWaypointBehaviour "AWARE";
 	_wp setWaypointFormation  "STAG COLUMN";
-	//if (vehicle _leader != _leader) then {_wp setWaypointSpeed "LIMITED"};  // prevent vehiceles from running ahead
 	_wp setWaypointCompletionRadius 200;
 	_wp setWaypointTimeout [60, 120, 240]; 
 	
@@ -17,7 +16,6 @@ _group setCombatMode "YELLOW";
     _wp1 setWaypointType "MOVE";
 	_wp1 setWaypointBehaviour "AWARE";
 	_wp1 setWaypointFormation  "STAG COLUMN";
-	//if (vehicle _leader != _leader) then {_wp setWaypointSpeed "LIMITED"};  // prevent vehiceles from running ahead
 	_wp1 setWaypointCompletionRadius 200;
 	_wp1 setWaypointTimeout [60, 120, 180]; 
 

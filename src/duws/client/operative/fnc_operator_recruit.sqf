@@ -52,7 +52,7 @@ _soldier setskill ["courage",_selected_soldier_courage];
 _soldier setskill ["reloadSpeed",_selected_soldier_reload];
 _soldier setskill ["commanding",_selected_soldier_comms];
 
-// No headgear
+// The soldier's stored hat (index 11 of duws_operator_list) is not applied; recruited operatives spawn bare-headed.
 
 {[_x] joinSilent (group player)} forEach units _group;
 

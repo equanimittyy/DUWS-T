@@ -3,11 +3,10 @@
 
 params ["_target", "_caller", "_actionId", "_arguments"];
 
-// The map-click slot is the thing actually being contended, so this takes the shared claim
-// rather than the private lock it used to keep here. That lock was per-machine despite being
-// written as a player mutex (the owner was never broadcast) and its timeout was measured with
-// diag_tickTime, which a savegame does not restore -- a campaign loaded after the stamp was
-// taken saw the lock as either permanently held or permanently free.
+// The map-click slot is the thing actually being contended, so this takes the shared claim rather
+// than a private lock: a per-machine lock written as a player mutex never broadcasts its owner, and
+// a diag_tickTime timeout is not restored across a savegame -- a campaign loaded after the stamp
+// was taken sees the lock as either permanently held or permanently free.
 private _liftClickHandler = "player setVariable ['LIFT_TMPPOS', _pos]; player setVariable ['LIFT_CLICKED', true];";
 if (!(["LIFT", _liftClickHandler] call fnc_mapclick_claim)) exitWith {};
 

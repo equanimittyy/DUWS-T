@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "CUP_B_US_Army", "CUP US Army (OCP Woodland)","CUP_B_USArmy_OCP_Woodland"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"CUP_B_US_Soldier_ACOG_OCP";					//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"CUP_B_US_Soldier_LAT_OCP";				//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"CUP_B_M2A3Bradley_USA_W";		//random patrol
 blufor_MBT_TANK1_X =			"CUP_B_M1A2_TUSK_MG_US_Army";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"CUP_B_CUP_Stinger_AA_pod_US";
 blufor_TURRET_AT =				"CUP_B_TOW2_TriPod_US";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"CUP_B_M2StaticMG_US";
 blufor_TURRET_GMG =				"CUP_B_MK19_TriPod_US";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"CUP_B_US_SpecOps";					//operator
 blufor_SPECOPS_GL_X =			"CUP_B_US_SpecOps_Assault";				//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"CUP_B_US_Soldier_Engineer_OCP";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"CUP_B_US_Soldier_Engineer_OCP";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -101,12 +81,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////   
 
 blufor_RQST_VEHICLES = [
 	["CUP_B_M1030_USA","Motorcycle (1CP)",1],

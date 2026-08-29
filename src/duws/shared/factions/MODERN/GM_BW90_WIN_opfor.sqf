@@ -1,6 +1,4 @@
-///////////
 ///////////   "gm_fc_ge", "GM German Bundeswehr 90s (Winter) + USA (3CB)", "GM_BW90_WIN"
-///////////
 
 
 opfor_SOLDIER_X = 				"gm_ge_army_rifleman_g36a1_90_win";					//Basic Soldier  (Patrols, Zone Guard, Team)

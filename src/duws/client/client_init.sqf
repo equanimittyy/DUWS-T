@@ -17,7 +17,6 @@ publicVariable "fnc_hirePartisans_clientMap";
 // column on each camp's fire (a #particlesource must be built locally on every machine, see the file).
 DUWS_fnc_campSmoke = compile preprocessFileLineNumbers "duws\client\misc\fnc_camp_smoke.sqf";
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
-// BLACK SCREEN
 titleCut ["", "BLACK FADED", 999];
 waitUntil {sleep 0.1;!isNull player};
 	while {!(["BOOT", "serverinit_complete from the server", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
@@ -61,7 +60,6 @@ player addRating 10000000;
 };
 fnc_remoteBoard = compile preprocessFileLineNumbers "duws\client\misc\fnc_remoteBoard.sqf";
 publicVariable "fnc_remoteBoard";
-// Set GameMaster
 if (!isMultiplayer) then {
 	game_master = vehiclevarname player;
 };
@@ -233,7 +231,6 @@ player setUnitTrait ["uavHacker",true];
 if ((vehiclevarname player) in Squad_Leaders) then {
 	// wait until blu captures at least one zone
 	[] spawn fnc_zones_bonus;
-	//INIT HC module
 	["INFO", "BOOT", "HC init"] call fnc_log;
 	[] spawn fnc_hc_init;
 };
@@ -326,9 +323,9 @@ player setVariable ["duws_intro_ready", true, true];
 
 // Then held until the insertion flight is up, or until the intro reports it is not coming. The
 // server spawns the helicopter, seats the player in it and only then fades in
-// (server/misc/fnc_intro_heli.sqf), so waiting for it is what puts the cut in the right order: the
-// fixed sleeps this replaces ran on past that fade and blacked out a screen the server had just
-// cleared, leaving the player in the cabin still looking at the map.
+// (server/misc/fnc_intro_heli.sqf), so waiting for it is what puts the cut in the right order: a
+// fixed sleep would run on past that fade and black out a screen the server had just cleared,
+// leaving the player in the cabin still looking at the map.
 //
 // intro_heli_done is in the condition because a failed spawn publishes an objNull helicopter, which
 // this can never see turn up; without it the map stayed pinned for the whole timeout while the

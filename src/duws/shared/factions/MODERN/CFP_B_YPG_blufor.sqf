@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "CFP_B_YPG", "CFP YPG (Kurds) + USAF Support", "CFP_B_YPG"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"cfp_b_ypg_rifleman";				//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"cfp_b_ypg_at";						//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
 blufor_MBT_TANK1_X =			"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"CFP_B_USARMY_2003_M2_Machine_Gun_DES_01";
 blufor_TURRET_AT =				"CFP_B_USARMY_2003_TOW_Tripod_DES_01";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"CFP_B_USARMY_2003_M2_Machine_Gun_DES_01";
 blufor_TURRET_GMG =				"CFP_B_USARMY_2003_M2_Machine_Gun_DES_01";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"cfp_b_ypg_rifleman";			//operator
 blufor_SPECOPS_GL_X =			"cfp_b_ypg_grenadier";			//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"cfp_b_ypg_crewman";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"cfp_b_ypg_crewman";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -98,12 +78,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////   
 
 blufor_RQST_VEHICLES = [
 	["CFP_B_YPG_Hilux_DSHKM_01","Hilux (DSHKM) (3CP)",3],

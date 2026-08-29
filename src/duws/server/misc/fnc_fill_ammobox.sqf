@@ -1,6 +1,4 @@
 
-// FILL ANY OBJECT WITH AMMO, WEAPONS, etc...
-// Get the lists from fnc_create_ammo_lists
 if (!isServer) exitWith {};
 _ammobox = _this select 0;
 _side = _this select 1;

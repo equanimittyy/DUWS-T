@@ -68,7 +68,6 @@ MHQ_tent setDir _mhqDir;
 _markerType = "b_motor_inf";
 if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
-// Remove Undeployed Marker and create a Deployed Marker 
 [MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,false];
 sleep 0.2;
 [MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_cmbq8ut7"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,false];

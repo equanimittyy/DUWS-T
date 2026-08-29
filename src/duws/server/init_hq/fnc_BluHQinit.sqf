@@ -538,5 +538,6 @@ if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", n
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
 ["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;
 // Drawn through the shared function so the HQ, every FOB and the MHQ all advertise the one radius
-// the cleanup sweep honours -- this used to say 200 m against a sweep that spared 250.
+// the cleanup sweep honours -- a separate hardcoded figure drifts from it (200 m against a sweep
+// that spares 250).
 [PosOfBLUHQ] call fnc_baseRangeMarker;

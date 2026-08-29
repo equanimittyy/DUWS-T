@@ -3,10 +3,10 @@
 //
 // Two mechanisms, permanent first: a permanent row is bought once for the whole team and stays
 // bought, a consumable row belongs to its buyer and refunds at what it charged. Rows come from the
-// catalogue (client/supports/fnc_supports_init.sqf) rather than being written out here, because
-// the row index used to be a literal agreed between this file and fnc_request_support.sqf --
-// adding a row anywhere but the end repointed every row below it at another support's price and
-// flag, and the colour pass it fed had already drifted onto the wrong rows once.
+// catalogue (client/supports/fnc_supports_init.sqf) rather than being written out here, so the row
+// index is not a literal shared with fnc_request_support.sqf: with one, adding a row anywhere but
+// the end would repoint every row below it at another support's price and flag, and misalign the
+// colour pass it feeds.
 //
 // Rebuilt wholesale rather than repainted a row at a time: a purchase moves the slot count in the
 // consumable heading as well as that row's own colour, and repainting one without the other lets

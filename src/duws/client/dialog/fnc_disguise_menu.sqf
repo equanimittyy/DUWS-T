@@ -25,10 +25,9 @@ private _statusCtrl = _display displayCtrl 8100;
 _statusCtrl ctrlSetText _status;
 _statusCtrl ctrlSetBackgroundColor _statusBg;
 
-// Civilian mode needs a living population to blend into: same gate the old civ
-// hold-action used. Grey the button and swap the card text when it can't run.
-// Cooldown is deliberately not gated here -- the Activate button always fires, and
-// the server function hints the remaining cooldown on demand. No client countdown to
+// Civilian mode needs a living population to blend into. Grey the button and swap the card text
+// when it can't run. Cooldown is deliberately not gated here -- the Activate button always fires,
+// and the server function hints the remaining cooldown on demand. No client countdown to
 // drift out of sync.
 private _civAllowed = (isNil "CIV_PRESENCE") || {!(CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"])};
 if (!_civAllowed) then {

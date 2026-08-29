@@ -178,7 +178,7 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
     while {count (waypoints _patrolGroup) > 0} do { deleteWaypoint ((waypoints _patrolGroup) select 0); };
     // The anchors are this base's own towers, stood off far enough not to path into one. The circuit
     // itself is fnc_apply_posture's, shared with the FOB pair, which walks its corners on the same
-    // orders and used to carry its own copy of this block.
+    // orders.
     [_patrolGroup, "hqpatrol", _patrolSpawnPos, 0, _towers apply { _x getPos [15, getDir _x] }]
         call fnc_apply_posture;
     [_patrolGroup] spawn {

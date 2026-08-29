@@ -125,9 +125,9 @@ DUWS_fnc_manStatics = {
     private _pending = [];
     {
         // Undamageable for the whole run of drops: a landing on hard ground or a clip into composition
-        // clutter used to wreck the gun outright, which made the recovery the thing that removed the
+        // clutter can wreck the gun outright, which would make the recovery the thing that removes the
         // emplacement. Off, the same landing only shoves it, so no gun is lost to its own placement --
-        // which is what let the wreck-and-rebuild path this loop used to carry go.
+        // no wreck-and-rebuild path needed.
         _x allowDamage false;
         _pending pushBack [_x, getPosWorld _x, _men param [_forEachIndex, objNull]];
     } forEach _guns;
@@ -450,9 +450,9 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     };
 
     // Streamed out once the ring has been empty for the grace period. The grace restarts every time
-    // BLUFOR are seen: the shape this replaces tested once at the timer mark and then pinned the
-    // zone permanently if anyone happened to be inside at that instant, so an assault lasting longer
-    // than the timer left the zone standing for the rest of the campaign.
+    // BLUFOR are seen: testing once at the timer mark would pin the zone permanently if anyone
+    // happened to be inside at that instant, so an assault lasting longer than the timer would leave
+    // the zone standing for the rest of the campaign.
     if (!_here && {(_o get "emptySince") >= 0}
         && {diag_tickTime > (_o get "emptySince") + (_o get "grace")}) exitWith {
         // What the player left is already in the ledger -- each wiped group recorded its token as it

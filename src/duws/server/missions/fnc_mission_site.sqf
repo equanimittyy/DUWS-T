@@ -11,9 +11,8 @@ _POSdata params ["_randomPos", "_Building", "_Posfound", "_targetpos"];
 if (_Posfound) exitWith { [_randomPos, _Building, _targetpos] };
 
 // _Posfound alone, not a failsafe threshold: fnc_missionTargetPos loops until it succeeds or
-// gives up at its own cap, so it never returns unfound with attempts left. The fifteen copies
-// this replaces each retested that cap themselves, at 10 in fourteen of them and 5 in the
-// fifteenth, against a callee that stops at 50 -- three numbers describing one boundary, none of
-// which could be changed without reading the other two.
+// gives up at its own cap, so it never returns unfound with attempts left. A caller re-testing that
+// cap adds a second number describing one boundary -- neither changeable without reading the other,
+// and easily set to 10 or 5 against a callee that stops at 50.
 [_missionType] call fnc_mission_abort;
 []

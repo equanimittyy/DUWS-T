@@ -12,8 +12,8 @@
 // The catalogue: one ordered list, permanent rows first. This raw form is read by the manual
 // (client/misc/fnc_duws_help.sqf), which lists every support as a reference; the menu build
 // (client/dialog/fnc_request_menu.sqf) and the buy/refund handler take the filtered view
-// (fnc_support_defs) below. Row order used to be literal indices agreed between those files, so
-// adding a row anywhere but the end silently repointed every row below it at another support's
+// (fnc_support_defs) below. Row order is not literal indices shared between those files: with them,
+// adding a row anywhere but the end would silently repoint every row below it at another support's
 // price, flag and comm item.
 //
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
@@ -77,8 +77,7 @@ fnc_support_defs = {
 	([] call fnc_support_catalogue) select {
 		private _key = _x select 0;
 		private _keep = true;
-		// A FOB is not offered until a zone has been taken, which is what the comm item it grants
-		// used to wait on.
+		// A FOB is not offered until a zone has been taken, the same gate the comm item it grants waits on.
 		if (_key == "fob" && {zoneundercontrolblu < 1}) then { _keep = false };
 		// Only once the team owns the Mobile HQ. Absent rather than greyed, like every other row.
 		if (_key == "mhq_slot" && {!(["support_mobile_HQ_available"] call fnc_support_owned)}) then {
@@ -130,8 +129,8 @@ fnc_support_owned = {
 // Comm-menu bookkeeping. Every radio support is a CfgCommunicationMenu class, and the fourteen
 // with removeAfterExpressionCall = 1 are deleted by the engine the moment they are used, then
 // re-added by their own script when the mission ends or the cooldown expires. BIS_fnc_removeCommMenuItem
-// wants the id BIS_fnc_addCommMenuItem returned, and those re-adds used to throw the new id away,
-// so nothing but the two High Command aircraft could remove an item at all. A refund has to.
+// wants the id BIS_fnc_addCommMenuItem returned, so each re-add must keep the new id -- throw it
+// away and nothing but the two High Command aircraft can remove an item at all. A refund has to.
 //
 // The record below is the presence test as well as the id store: an entry exists exactly while
 // the player is holding that item. That is what makes "refund what you are still carrying" a

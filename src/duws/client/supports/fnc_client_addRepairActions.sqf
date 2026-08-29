@@ -5,7 +5,6 @@ if (!hasInterface) exitWith {};
 params ["_depot", "_trgNetId"];
 if (isNull _depot) exitWith {};
 
-// dedup
 if (_depot getVariable ["repair_actions_done", false]) exitWith {};
 _depot setVariable ["repair_actions_done", true];
 
@@ -31,7 +30,6 @@ private _fnc_appearance = {
     private _textures = ("true" configClasses (configFile >> "CfgVehicles" >> typeOf _veh >> "TextureSources")) apply {configName _x};
     { _listbox lbAdd format ["Texture: %1", _x]; } forEach _textures;
 
-    // only user-source animations
     private _animations = ("true" configClasses (configFile >> "CfgVehicles" >> typeOf _veh >> "AnimationSources")) select {
         getText (_x >> "source") == "user"
     } apply {configName _x};
@@ -247,7 +245,6 @@ _txtHint ctrlCommit 0;
         private _selectedMag = if (_magIdx == 0) then { "" } else { _flat select (_magIdx - 1) };
         private _turret = [_veh, _pylonIndex] call _fnc_getPylonTurret;
 
-        // server call: deduct CP and set the pylon
         [netId _veh, _pylonIndex, _selectedMag, _turret, getPlayerUID player] remoteExec ["fnc_pylon_set_with_cost", 2];
 
         (_this select 0) spawn {

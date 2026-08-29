@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "TIOW_DKOK_1491", "Death Korps of Krieg 1491st", "TIOW_DKOK_1491"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"DKoK_GM_1491st";			//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"DKoK_GM_1491st_Plasma";				//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"_1491stChimAuto";		//random patrol
 blufor_MBT_TANK1_X =			"TIOW_Krieg_LR_Battlecannon_1491st_Blu";				//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"TIOW_IG_MissileLauncher_AA_1491_Blu";
 blufor_TURRET_AT =				"TIOW_IG_MissileLauncher_AT_1491_Blu";
@@ -44,9 +33,6 @@ blufor_TURRET_GMG =				"TIOW_IG_HeavyBolter_1491_Blu";
 
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"DKoK_GM_1491st";					//operator
 blufor_SPECOPS_GL_X =			"DKoK_Gren_1491st";				//operator
@@ -64,14 +50,10 @@ blufor_SPECOPS_ENG_X = 			"DKoK_Eng_1491st";			//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -79,12 +61,10 @@ blufor_SPECOPS_ENG_X = 			"DKoK_Eng_1491st";			//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -103,12 +83,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["TIOW_Centaur_01_Krieg_1491_Blu","Centaur (1CP)",1],

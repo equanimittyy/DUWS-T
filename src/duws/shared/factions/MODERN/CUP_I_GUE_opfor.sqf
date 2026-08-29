@@ -1,6 +1,4 @@
-///////////
 ///////////    "CUP_I_GUE", "CUP Chernarus NAPA + USMC Recon", "CUP_I_GUE"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_I_GUE_Soldier_AKS74";			//Basic Soldier  	(Patrols, Zone Guard, Team)

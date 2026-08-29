@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CFP_O_CHDKZ", "CFP ChDKZ + Spetsnaz (Winter)", "CFP_O_CHDKZ_SNW"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CFP_O_CHDKZ_Rifleman_AK_74_SNW_01";		//Basic Soldier  (Patrols, Zone Guard, Team)

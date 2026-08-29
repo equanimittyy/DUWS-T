@@ -4,9 +4,9 @@
 // these were two drawers whose range, colour, opacity, text size and font were copies of each
 // other -- and a copy is a thing you have to remember to edit twice.
 //
-// Not the stacked onEachFrame the HQ icon used to run on: taking that handler down needed a bare
-// `onEachFrame {}`, which clears every stacked handler in the mission rather than its own, and any
-// other system that wanted one had to work around it.
+// Not a stacked onEachFrame: taking one down needs a bare `onEachFrame {}`, which clears every
+// stacked handler in the mission rather than its own, so any other system that wants one has to
+// work around it.
 //
 // The killhouse contact markers stay out of this table (client/misc/fnc_killhouse_markers.sqf).
 // Their alpha is a per-frame function of range and their subjects are a list that changes as the

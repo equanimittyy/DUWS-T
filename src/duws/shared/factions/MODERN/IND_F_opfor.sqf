@@ -1,6 +1,4 @@
-///////////
 ///////////   "IND_F", "AAF Altis Armed Forces", "IND_F"
-///////////
 
 
 opfor_SOLDIER_X = 				"I_soldier_F";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -23,8 +23,8 @@ if !(_list isEqualTo []) then {
 } else {
     // Same stopping rule the numbered menus always used: the first unset, "empty" or zero-cost slot
     // ends the list, so a faction may leave gaps at the end but not in the middle. The walk runs to 99
-    // rather than the documented 50-slot ceiling because the old menu builder did, and an unconverted
-    // third-party faction is exactly the case this fallback exists to carry.
+    // rather than the documented 50-slot ceiling to match what faction files actually fill, and an
+    // unconverted third-party faction is exactly the case this fallback exists to carry.
     for "_i" from 1 to 99 do {
         private _var = format ["blufor_RQST_%1_%2_X", _kind, if (_i < 10) then { "0" + str _i } else { str _i }];
         if (isNil _var) exitWith {};

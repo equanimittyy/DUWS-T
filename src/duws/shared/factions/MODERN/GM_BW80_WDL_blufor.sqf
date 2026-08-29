@@ -1,14 +1,6 @@
 
-///////////////
 ///////////////   "gm_fc_ge", "GM German Bundeswehr 80s (Wood) + USA (3CB)", "GM_BW80_WDL"
-///////////////
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"gm_ge_army_rifleman_g3a3_80_ols";				//patrol, fortify, paradrop
 blufor_LAT_SOLDIER_X =			"gm_ge_army_antitank_g3a3_pzf84_80_ols";		//init_hq\fnc_HQguards, supports\fnc_paradrop
@@ -33,9 +25,6 @@ blufor_APC2_X =					"gm_ge_army_marder1a1a";						//random patrol
 blufor_MBT_TANK1_X =			"gm_ge_army_Leopard1a1";						//random patrol
 
 
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
 
 blufor_TURRET_AA = 				"UK3CB_CW_US_B_LATE_Stinger_AA_pod";
 blufor_TURRET_AT =				"UK3CB_CW_US_B_LATE_TOW_TriPod";
@@ -43,9 +32,6 @@ blufor_TURRET_HMG =				"UK3CB_CW_US_B_LATE_M2_TriPod";
 blufor_TURRET_GMG =				"UK3CB_CW_US_B_LATE_MK19_TriPod";
 
 
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
 
 blufor_SPECOPS_X =				"gm_ge_army_sf_rifleman_g3a4_80_wdl";				//operator
 blufor_SPECOPS_GL_X =			"gm_ge_army_sf_grenadier_hk69a1_80_wdl";			//operator
@@ -63,14 +49,10 @@ blufor_SPECOPS_ENG_X = 			"gm_ge_army_engineer_g3a4_80_ols";					//operator
 
 
 
-/////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
-//
 // Ordered lists, no padding and no fixed length: the menus offer every entry in the order
 // written here, so position in the list is the display order. A faction may list as many
 // or as few as it has.
-//
-/////////////////////////////////////////////////////////////////
 
 // REQUEST MENU defines labels/index for all request menu units/vehicles (not Operators)
 
@@ -78,12 +60,10 @@ blufor_SPECOPS_ENG_X = 			"gm_ge_army_engineer_g3a4_80_ols";					//operator
 // - these files contain the classnames referenced by the label/index
 
 
-///////////////////////////////
 // dialog\fnc_request_unit
 //   _index = lbCurSel 2100;
 // dialog\fnc_request_unit_fob
 //   _index = lbCurSel 2120;
-///////////////////////////////
 
 
 blufor_RQST_UNITS = [
@@ -101,12 +81,10 @@ blufor_RQST_UNITS = [
 ];
 
 
-///////////////////////////////
 // dialog\fnc_request_vehicle
 //   _index = lbCurSel 2102;
 // dialog\fnc_request_vehicle_fob
 //   _index = lbCurSel 2122;
-////////////////////////////////
 
 blufor_RQST_VEHICLES = [
 	["gm_ge_army_k125","Krad K125 (1CP)",1],

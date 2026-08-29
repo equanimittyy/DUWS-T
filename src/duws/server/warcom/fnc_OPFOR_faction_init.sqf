@@ -1,7 +1,5 @@
 // Locality: server -- inherited from server/server_init.sqf.
 
-/////////   OPFOR FACTION INIT  ///////////////////
-
 // Reads the dropdown's token, not OPFOR_Faction_X: see fnc_BLUFOR_faction_init for why the two
 // are separate now that resolution re-runs.
 {

@@ -1,19 +1,11 @@
-// Locality: server -- OPCOM's first real behaviour, and every placer and pool it touches is
-// server-authoritative. This is the commander the WARCOM init comment was waiting on: nothing spawned
-// OPFOR after generation because "an OPFOR commander decides it", and this is the smallest thing that
-// decision can be -- spending OPFOR Army Power to fortify the ground the enemy holds.
-//
-// One build per pass, in priority order, each AP-priced so it competes with the commander's other
-// sinks and gated so nothing is built the enemy cannot pay for:
-//   1. raise a radio tower toward the cap -- the strongest rep lever, and it replaces what the player
-//      has knocked down, lifting the global drift amplifier a point everywhere at once;
-//   2. top a depleted zone back toward its stored cap -- inside-zone emplacements the player cleared;
-//   3. thicken the band with a standalone emplacement in the OPFOR-positive countryside.
-//
-// Uniform placement for now: where the enemy fortifies with intent -- pushing toward where it believes
-// the player operates -- waits on the belief store and the archetype weights (docs/plans/opcom_plan.md),
-// which this cannot precede. The field is enough to place; the personality is the refinement that lands
-// with belief. Started once by WARCOM init, on its own clock.
+// Locality: server -- OPCOM's fortification director, server-authoritative. One build per pass, in
+// priority order, each AP-priced so it competes with the commander's other sinks and gated so nothing is
+// built the enemy cannot pay for:
+//   1. raise a radio tower toward the cap (the strongest rep lever, replacing what the player knocked down);
+//   2. top a depleted zone back toward its stored cap (emplacements the player cleared);
+//   3. thicken the band with a standalone emplacement in OPFOR-positive countryside.
+// Placement is uniform for now -- targeting toward believed player positions waits on the belief store
+// (docs/plans/opcom_plan.md). Started once by WARCOM init, on its own clock.
 if (!isServer) exitWith {};
 
 while {true} do {

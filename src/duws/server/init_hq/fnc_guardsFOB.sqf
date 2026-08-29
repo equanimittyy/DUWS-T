@@ -13,10 +13,8 @@ params ["_centerPos", "_fob"];
 if (_fob getVariable ["FOB_guard_busy", false]) exitWith {};
 _fob setVariable ["FOB_guard_busy", true];
 
-// Reguard replaces the previous garrison rather than adding to it. Read off the FOB rather
-// than passed in, so no copy of the scroll action holds stale groups. Server-local.
-// The FOB's own men, by roster: a reguard replaces the garrison wholesale, so what stood before it
-// goes with it and the frozen-state flag goes with them.
+// Reguard replaces the FOB's garrison wholesale, not adds to it: read off the FOB by roster, not passed
+// in, so no stale copy of the scroll action re-adds groups that already died. Server-local.
 private _fobKey = _fob getVariable ["DUWS_siteKey", ""];
 if (_fobKey != "") then {
 	{ deleteVehicle _x } forEach ([_fobKey, "infantry"] call fnc_site_roster);
@@ -58,13 +56,13 @@ switch (VERSION_X) do {
 // One group walking the hqpatrol posture, the same circuit the HQ walks round its towers. It is the
 // FOB's only moving element now.
 //
-// 20 m, not the 10 this used to walk: the fortification ring puts HESCO and turrets on the 9-10 m
-// line, so the old corners sat inside the wall and the patrol spent its circuit pathing through it.
+// 20 m, not 10: the fortification ring puts HESCO and turrets on the 9-10 m line, so a tighter
+// circuit sits inside the wall and the patrol spends it pathing through the HESCO.
 #define FOB_PATROL_RADIUS 20
 
 // The same squad the HQ walks, drawn from the same pool: a FOB is a small base, not a different
-// kind of thing, and the single soldier this used to send round was a circuit a two-man probe could
-// walk straight through. The pool is set under an HQ_ prefix because that is where it is written
+// kind of thing, and a single soldier round the circuit is one a two-man probe could walk straight
+// through. The pool is set under an HQ_ prefix because that is where it is written
 // (init_hq/fnc_BluHQinit.sqf), not because only the HQ may read it; defaulted, because a FOB built
 // before that ran should still get a patrol rather than throw.
 private _patrolTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X]];

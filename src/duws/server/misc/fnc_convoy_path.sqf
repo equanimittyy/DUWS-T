@@ -1,28 +1,14 @@
-// Locality: any (terrain queries only), but the caller (fnc_convoy_drive) is server-side. Pure geometry:
-// no spawning, no unit orders.
+// Locality: any (terrain queries only), but the caller (fnc_convoy_drive) is server-side. Pure geometry.
 //
-// Build a drivable polyline from _startPos to _destPos for the convoy driver to hand to setDriveOnPath. We
-// route it OURSELVES instead of letting Arma's native vehicle pathfinder choose the route: native route
-// calculation is what wedges the convoy lead on open ground and at junctions. setDriveOnPath along a
-// precomputed line does not -- it just drives the points.
+// Builds a drivable polyline from _startPos to _destPos for setDriveOnPath, routed ourselves since native
+// vehicle pathfinding wedges the lead at junctions and on open ground. A* over connected road segments
+// (edge = segment length, heuristic = straight-line, so optimal) after snapping both ends to their nearest
+// road; only the stubs to the road are off-road. Shortest matters beyond speed -- a doubled-back path makes
+// a follower's nearest-point progress snap to the wrong arm and thrash the spacing (a greedy walk once
+// produced 30 km routes to a 4 km dest).
 //
-//   On the road network: A* over connected road segments -- the SHORTEST road path (edge = real segment
-//   length, heuristic = straight-line to the dest, which never overestimates, so A* is optimal). Shortest
-//   matters here beyond speed: a wandering path doubles back near itself, and a follower's nearest-point
-//   progress measure then snaps to the wrong arm and the spacing control thrashes. A greedy walk that
-//   returned the first path found produced 30 km routes to a 4 km destination; A* does not.
-//
-//   Roads first, off-road minimal: both ends snap to the NEAREST road (a generous radius), the A* runs
-//   on-road, and only the short stubs from the true start/dest to their nearest road are off-road. A leg is
-//   driven off-road in full only when an end has no road anywhere near it. An off-road run is a straight
-//   line resampled every CP_OFF_STEP and deviated sideways around water, rocks, trees and buildings.
-//
-// The result is a list of SEGMENTS, each a point run tagged "road" or "gap". A connected leg is one "road"
-// segment; a leg the search cannot bridge (disconnected road components) is road-to-the-exit, a "gap" the
-// driver crosses with native pathing, then road-out -- off-road complementing the road route, not replacing
-// the whole leg. Segments join end-to-start; the first starts at _startPos and the last ends at _destPos, so
-// the lead reaches the real waypoint and its leg completes. Near-duplicate points are dropped within a segment.
-//
+// Returns SEGMENTS tagged "road" or "gap" (a gap is a disconnected stretch the driver crosses natively),
+// joined end-to-start from _startPos to _destPos.
 // [_startPos, _destPos] -> [[[x,y,z], ...], "road"|"gap"], ...]   // >= 1 segment, each >= 2 points
 params ["_startPos", "_destPos"];
 

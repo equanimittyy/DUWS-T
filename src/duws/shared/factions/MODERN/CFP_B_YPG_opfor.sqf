@@ -1,6 +1,4 @@
-///////////
 ///////////  "CFP_B_YPG", "CFP YPG (Kurds) + USAF Support", "CFP_B_YPG"
-///////////
 
 
 opfor_SOLDIER_X = 				"cfp_b_ypg_rifleman";					//Basic Soldier  (Patrols, Zone Guard, Team)

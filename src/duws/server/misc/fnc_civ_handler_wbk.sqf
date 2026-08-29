@@ -208,9 +208,9 @@ if (_mode == "spawn") then {
                 };
             };
 
-            // Replacement is gated on the unspawned pool alone. The population figure it used to
-            // consult is now the town's static size, so comparing it against the spawn ceiling
-            // gave a constant answer for the whole campaign.
+            // Replacement is gated on the unspawned pool alone, not the population figure: that is
+            // the town's static size, so comparing it against the spawn ceiling would give a
+            // constant answer for the whole campaign.
             private _remVar = format ["civ_remaining_%1", _idx];
             private _remaining = missionNamespace getVariable [_remVar, 0];
             if (_remaining > 0) then {

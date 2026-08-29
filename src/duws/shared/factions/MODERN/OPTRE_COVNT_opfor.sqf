@@ -1,6 +1,4 @@
-///////////
 ///////////   "OPTRE_FC_Covenant", "OPTRE Covenant","OPTRE_COVNT"
-///////////
 
 
 opfor_SOLDIER_X = 				"OPTRE_FC_Elite_Minor2";				//Basic Soldier  (Patrols, Zone Guard, Team)

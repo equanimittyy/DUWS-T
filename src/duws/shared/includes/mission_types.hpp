@@ -5,8 +5,8 @@
 //     #include "..\..\shared\includes\mission_types.hpp"
 //     ];
 //
-// Adding a side mission is one row here plus the thread itself. It used to be four hand-synced
-// tables that agreed only because somebody checked them.
+// Adding a side mission is one row here plus the thread itself -- one table, not four hand-synced
+// ones that agree only because somebody checked them.
 //
 // Columns: [thread, cooldown-ready name, strategic-map description, map icon, debug label, launcher,
 //           CP, AP, REP, deadline, category, objective, note, spawnRule]

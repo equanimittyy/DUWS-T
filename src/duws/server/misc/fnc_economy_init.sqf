@@ -33,14 +33,11 @@ fnc_cp_adjust = {
 	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
 };
 
-// The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a
-// one-way ratchet, because the earned counter only ever rises (fnc_ap_adjust credits it from the
-// recurring faucets and spending never touches it), so a wallet spent down cannot drop the tier.
-// Capability sites read the earned counter directly against their own thresholds; this integer is
-// the coarse summary of the same climb, for the readout and (later) the save, and the shared scale
-// both sides' capability gates sit on. Five tiers: tier 1 is infantry at 0 AP (always available), and
-// the four rungs gate the vehicle classes above it, steepening past tier 2. Against OPFOR's ~94 AP/hr
-// from six zones that paces motorised ~0.6 h, mechanised ~1.6 h, armour ~3.7 h, jets ~6.4 h.
+// The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a one-way
+// ratchet (earned only ever rises; spending never touches it), so a spent-down wallet cannot drop the tier.
+// Capability sites read the earned counter directly; this integer is the coarse summary, for the readout
+// and save. Five tiers: tier 1 is infantry free at 0 AP, the four rungs above gate vehicle classes,
+// steepening past tier 2 (against OPFOR's ~94 AP/hr from six zones: motorised ~0.6 h to jets ~6.4 h).
 DUWS_ap_tier_rungs = [60, 150, 350, 600]; publicVariable "DUWS_ap_tier_rungs";
 // Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {
@@ -166,23 +163,13 @@ fnc_town_rep_announce = {
 	_card remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 };
 
-// Per-town reputation, and the only reputation there is: server-only, signed delta, the writer
-// owns the rounding, callers never assign. Deltas are fractional (+0.5, -0.3), so two callers
-// rounding differently would compound drift into what a town will sell.
-// A town index of -1 is dropped rather than charged somewhere else. Every caller resolves its
-// index through fnc_civ_townAt, which answers -1 for open country, a civilians-off campaign and
-// RAVAGE/WBK alike -- and reputation is territory, so harm done where no town can see it costs
-// nothing. Not broadcast: no client reads civ_town_rep, and the markers below are painted with
-// global-effect commands.
-//
-// The player is told here rather than by each caller. Eight sites announced their own change in
-// six different wordings, two announced nothing, and one quoted a figure the clamp had already
-// reduced. Queued off the applied change, so a town pinned at a bound contributes nothing at all
-// instead of claiming a charge it absorbed.
-// _silent suppresses only the notification card, not the write, the marker repaint or the log. The
-// passive AoI drift charges every covered town each economy tick, so a card apiece would post a
-// dozen at once and bury the event cards this queue exists to keep legible; the town's own marker
-// colour is the drift's feedback instead. Every event caller leaves it default, so their cards stand.
+// Per-town reputation, the only reputation there is: server-only, signed delta, the writer owns the
+// rounding so callers never assign (fractional deltas would compound into drift). A town index of -1
+// (open country, civilians off, RAVAGE/WBK -- all via fnc_civ_townAt) is dropped, not charged elsewhere,
+// since reputation is territory. Not broadcast (no client reads civ_town_rep; markers repaint globally).
+// The player is told here, not per caller (callers announced in six wordings, some not at all), queued
+// off the applied change so a town pinned at a bound claims nothing. _silent suppresses only the card --
+// the passive AoI drift charges every covered town per tick, so a card apiece would bury the event cards.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""], ["_silent", false]];
@@ -232,9 +219,8 @@ fnc_escalation_cost = {
 
 // Money in hand. Money_roll is added as a magazine, but the ground pickup and the arsenal can
 // land one in either the magazine or the item slots, so both are counted: itemsWithMagazines is
-// the union and cannot report less money than the player is holding. Counting magazines alone
-// -- which two of the four purchase paths used to do -- can only ever undercount, and an
-// undercount tells a player who can afford something that they cannot.
+// the union and cannot report less money than the player is holding. Counting magazines alone can
+// only ever undercount, and an undercount tells a player who can afford something that they cannot.
 // Available on clients too: the civilian menu shows the player what they are carrying.
 fnc_money_count = {
 	params ["_unit"];
@@ -294,14 +280,11 @@ fnc_money_drop = {
 	} forEach _pairs;
 };
 
-// Server-authoritative purchase. The writers above own the arithmetic but not the decision: a client
-// testing its own copy of a pool is a network round trip out of date, so two clients each seeing 10
-// CP both pass a 10 CP gate and the floor absorbs the second debit, making it free. Here the test and
-// the debit are adjacent statements against the one server copy, so no other machine's request lands
-// between them. remoteExec returns nothing, so the verdict goes back as a named reply the caller
-// waits on -- fnc_pool_spend is the other half of the handshake. The debit is `call`, not remoteExec
-// to self: that would queue a scheduled job for a later frame and reopen the gap this function exists
-// to close.
+// Server-authoritative purchase, closing a stale-read race: a client testing its own pool copy is a
+// round-trip out of date, so two clients each seeing 10 CP both pass a 10 CP gate and the second debit
+// goes free. Here test and debit are adjacent against the one server copy, so no request lands between.
+// The verdict returns as a named reply (fnc_pool_spend is the other half). The debit is `call`, not
+// remoteExec-to-self, which would queue a later-frame job and reopen the gap.
 fnc_pool_try_spend = {
 	if (!isServer) exitWith {};
 	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
@@ -380,7 +363,6 @@ fnc_pool_reply = {
 	missionNamespace setVariable [_replyVar, [_ok, _charged]];
 };
 
-// ---------------------------------------------------------------------------
 // Captured-materiel pool. Server-authoritative like the CP/AP pools above: the read and the write
 // are adjacent statements on the one machine that owns DUWS_capturedPool, so two clients banking or
 // drawing the last of a class cannot both win. Clients never assign the pool; they remoteExec these

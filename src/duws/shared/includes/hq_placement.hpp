@@ -1,8 +1,7 @@
 // HQ placement, opened on its own over the map once the faction confirmation screen is done with
-// (client/dialog/fnc_hq_placement.sqf). It used to be the bottom strip of the faction setup screen
-// and borrowed that screen's panel, title and caption; standing alone it carries its own, in the
-// shape every other setup screen uses -- a filled panel, a titled frame just inside it, and the
-// standing advice above the answers.
+// (client/dialog/fnc_hq_placement.sqf). Standing alone, it carries its own panel, title and caption,
+// in the shape every other setup screen uses -- a filled panel, a titled frame just inside it, and
+// the standing advice above the answers.
 //
 // Sized to leave the map either side of it rather than filling the screen: the manual answer is a
 // map click, and a full-width box would hide the ground the player is about to judge.

@@ -1,7 +1,5 @@
 // Locality: all machines -- inherited from shared/functions/fnc_MHQ_addActions.sqf.
 
-// BEGIN OF SPAWN "IF MHQ DESTROYED"
-
 // Released designations end this watch as well as destroyed ones. Both tests are needed: the
 // variable is cleared on release, so reading `alive MHQ1` alone would throw, and the generation
 // catches the case where a replacement was designated inside one ten-second interval -- without it
@@ -27,9 +25,6 @@ if (MHQ_deployed) then {
 };
 
 removeAllActions MHQ1;
-
-// Remove Marker
-//[MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,true];
 
 // Stamped here and not on the release path, which this thread never reaches: handing a working
 // vehicle back is not what is being priced. Mission time, like every other cooldown here.

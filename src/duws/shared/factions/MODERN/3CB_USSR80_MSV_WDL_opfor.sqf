@@ -1,6 +1,4 @@
-///////////
 ///////////   "UK3CB_CW_SOV_O_LATE", "3CB USSR MSV 80s (Wood)", "3CB_USSR80_MSV_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"UK3CB_CW_SOV_O_LATE_RIF_1";			//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -1,6 +1,4 @@
-///////////
 ///////////   "OPTRE_UNSC", "UNSCDF (Olive)", "OPTRE_UNSC_OLI"
-///////////
 
 
 opfor_SOLDIER_X = 				"OPTRE_UNSC_Army_Soldier_Rifleman_BR_OLI";				//Basic Soldier  (Patrols, Zone Guard, Team)

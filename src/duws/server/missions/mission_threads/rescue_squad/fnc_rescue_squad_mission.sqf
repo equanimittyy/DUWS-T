@@ -1,15 +1,4 @@
 // Locality: server -- callers remoteExec to target 2; the sub-threads spawned here inherit it.
-//
-// Rescue an elite squad pinned in a building by an enemy cordon. The win is breaking the cordon, not
-// reaching the squad: the squad is held captive -- unkillable and passive -- until the player closes
-// to UNCAPTIVE_RANGE or the cordon is wiped, whichever comes first. Only then does it come out and
-// fight as its own group (it never joins the player). Once the cordon is dead an evac helicopter
-// flies the squad off the map (see fnc_rescue_squad_success), captive so nothing downs it, and the
-// player cannot board. Deadline, or the squad being wiped after it comes out, fail the mission --
-// both voiced by Overlord rather than dropped as a hint.
-//
-// The site is filtered off held zones and civilian towns: a captive squad and a building-suppressing
-// cordon read wrong inside a garrison or a town street, and the cordon fight wants open ground.
 params ["_MissionPos", "_mission_name"];
 if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -25,20 +14,17 @@ private _compKey = "mission_rescue_squad";
 private _radius = 300;
 private _deadline = DUWS_curDeadlineAt;
 
-// The elite BLUFOR squad, raised first so the building check can be sized to it: from the "recon"
-// roster (SPECOPS) through the shared token vocabulary, so it is both elite and faction-safe --
-// fnc_faction_pick / backfill covers a role a given pack never named, where a hardcoded
-// blufor_SPECOPS_* list would spawn a man short on one that omits it.
+// The elite BLUFOR squad, raised first so the building check can be sized to it. From the "recon" roster
+// through the shared token vocabulary, so it stays elite and faction-safe where a hardcoded list would
+// spawn a man short on a pack that omits the role.
 private _squadClasses = ["recon", "blufor"] call DUWS_fnc_teamRoster;
 private _squadSize = count _squadClasses;
 
-// Site: enterable buildings near the offer that can garrison the whole squad, minus any sitting in a
-// zone (its own radius plus a margin), inside a civilian town, or on the waterline. fnc_civ_townAt is -1
-// when clear -- and always -1 with civilians off, so the town half of the filter simply passes then. The
-// seating check counts BIS_fnc_buildingPositions -- the same list each man is later dropped on by index --
-// so a chosen building has a distinct indoor slot per man rather than spilling the squad into the open
-// around a stub. The water guard samples the centre and a ring at DRY_RADIUS (surfaceIsWater is point-wise,
-// so a shoreline lot with the cordon ring reaching into the sea is rejected on any wet sample).
+// Site: enterable buildings near the offer that can garrison the whole squad, minus any in a zone (radius
+// plus margin), in a civilian town (fnc_civ_townAt, always -1 with civilians off), or on the waterline.
+// The seating check counts BIS_fnc_buildingPositions -- the same list each man is dropped on by index --
+// so the squad gets a slot each. Water is sampled at the centre and a DRY_RADIUS ring (surfaceIsWater is
+// point-wise), rejecting a shoreline lot whose cordon ring reaches the sea.
 private _zoneMeta = missionNamespace getVariable ["zone_meta_array", []];
 private _candidates = ([_MissionPos, 2, SEARCH_R] call fnc_usableBuildings) select {
     private _bp = getPos _x;
@@ -78,11 +64,9 @@ _squadGroup deleteGroupWhenEmpty true;
 [_squadGroup] call fnc_mission_claim;
 private _squadUnits = units _squadGroup;
 
-// Pinned inside the building and inert while captive: each man dropped on his own building position,
-// movement off (disableAI "PATH") so he cannot wander out, and firing off (combat mode BLUE, autotarget
-// off) so the squad does not one-sidedly shoot the cordon that -- being captive -- will not shoot back.
-// A roaming garrison hold read wrong here: doMove walked them out of the building and combat pulled them
-// into a fight the cordon could not answer. setUnitPos "MIDDLE" holds the crouch with a living idle.
+// Pinned and inert while captive: each man on his own building position, PATH off so he cannot wander out,
+// firing off (combat mode BLUE, autotarget off) so the squad does not one-sidedly shoot a cordon that,
+// being captive, cannot shoot back. setUnitPos "MIDDLE" holds a crouch with a living idle.
 private _positions = [_Building] call BIS_fnc_buildingPositions;
 {
     _x setCaptive true;
@@ -94,19 +78,14 @@ private _positions = [_Building] call BIS_fnc_buildingPositions;
 } forEach _squadUnits;
 _squadGroup setCombatMode "BLUE";
 
-// The cordon: four OPFOR teams held at the cardinal points on a ring round the building -- three rifle
-// teams and one weapons team, from the shared token vocabulary. Posture "none" drops each team on its
-// cardinal ring point; a small per-man setPos then loosens the clump so the ring reads as spread positions
-// rather than four stacks. Each holds facing in on combat mode YELLOW. CORDON_RING sits past 100 m and the
-// scatter is capped under 20 m, so even a man thrown building-ward stays outside 100 m; PATH is disabled on
-// every cordon man, so the ring holds static -- no one advances inside 100 m while the hold stands. Movement
-// is handed back only when the player breaks the hold (below); until then the ring holds and suppresses the
-// building, and the player owns the ground inside it, where the squad is reached.
+// The cordon: four OPFOR teams (three rifle, one weapons) held at the cardinal ring points round the
+// building. Posture "none" drops each on its point; a per-man setPos loosens the clump. CORDON_RING is
+// past 100 m and the scatter capped under 20 m, so even a building-ward man stays outside 100 m; PATH off
+// on every cordon man holds the ring static until the player breaks the hold (below).
 //
-// Who suppresses: anyone but a grenadier or a launcher man. A GL lobs 40 mm into the building and a rocket
-// levels it -- both wreck the hostage backdrop the suppression sells -- so a unit with an underbarrel GL (a
-// primary muzzle past the bare "this") or a launcher in the secondary slot is cut, and every rifleman,
-// autorifleman and MG gunner is kept. Weapon-based, so it holds across faction packs that never named a role.
+// Who suppresses: not a grenadier or launcher man -- a 40 mm or rocket into the building wrecks the hostage
+// backdrop -- so a unit with an underbarrel GL (a muzzle past the bare "this") or a secondary launcher is
+// cut, riflemen/AR/MG kept. Weapon-based, so it holds across faction packs that never named a role.
 private _canSuppress = {
     private _w = primaryWeapon _this;
     _w != ""
@@ -137,11 +116,9 @@ private _suppressUnits = [];
     };
 } forEach _cordonTokens;
 
-// One armed car idling near the building rather than patrolling. Posture "none" parks it ~100-200 m out
-// (the band table's fallback for an unlisted posture) on SAFE with no circuit -- a static overwatch that
-// the engine wakes to fight the moment it detects the player. Its crew count toward the relief like the
-// ring teams -- breaking the cordon means the car as well -- so its units join the win set. Killing
-// the car kills them; a crew that bails is mopped up on foot like any other cordon man.
+// One armed car idling near the building (posture "none" parks it ~100-200 m out on SAFE, no circuit) --
+// a static overwatch the engine wakes on detecting the player. Its crew count toward the relief like the
+// ring teams, so their units join the win set; a bailed crew is mopped up on foot.
 private _car = [["car"] call DUWS_fnc_tokenClass, _BuildingPos, 400, "none"] call fnc_spawn_vehicle;
 if (!isNull _car) then {
     [_car] call fnc_mission_claim;
@@ -163,19 +140,14 @@ DUWS_rsq_relieved = false;
 DUWS_rsq_holdBroken = false;
 
 // The cordon hoses the building on full auto to sell the squad being pinned. Fires only while a player is
-// in the outer band (SUPPRESS_RANGE) and the squad is still holed up; stops on the first of the hold
-// breaking, the squad being relieved, SUPPRESS_MAX seconds, every shooter down, or the deadline. Not on mere
-// proximity -- a player inside a few dozen metres should not silence it. The timeout counts from the first
-// burst, so a slow approach still gets the show.
+// in SUPPRESS_RANGE and the squad is still holed up; stops on hold-break, relief, SUPPRESS_MAX seconds,
+// every shooter down, or the deadline (timed from the first burst, so a slow approach still gets the show).
 //
-// forceWeaponFire, not doSuppressiveFire: the latter fires nothing when a ring man has no sightline, and is
-// free to pick the heaviest weapon (a rifleman levels the building with his launcher). forceWeaponFire
-// discharges the named primary regardless of LOS or target, so every shooter fires and nothing explosive is
-// ever selected -- grenadiers and launcher men are already cut upstream. doWatch points each man at the
-// building first so the rounds go downrange. One forceWeaponFire is a single auto burst; each shooter is
-// re-fired on its own jittered interval -- a shared cadence would rip the whole ring in perfect unison --
-// so the bursts overlap into continuous fire. forceWeaponFire reloads from the shooter's own mags, so the
-// ring thins and goes quiet as men burn through their loadout.
+// forceWeaponFire, not doSuppressiveFire: the latter fires nothing without a sightline and may pick the
+// heaviest weapon (a rifleman levels the building with his launcher). forceWeaponFire discharges the named
+// primary regardless of LOS, so every shooter fires and nothing explosive is selected (grenadiers/launchers
+// already cut upstream); doWatch aims them first. Each shooter re-fires on its own jittered interval so the
+// bursts overlap rather than ripping in unison, and reloads from its own mags, so the ring thins and quiets.
 [_suppressUnits, _Building, _deadline] spawn {
     params ["_shooters", "_bld", "_dl"];
     // Full-auto mode name for a weapon: a mode named auto/full, else the last mode (auto is listed last by
@@ -240,15 +212,11 @@ DUWS_rsq_holdBroken = false;
     { if (alive _x) then { _x enableAI "PATH" } } forEach _cordon;
 };
 
-// Un-captive on the first of: player within UNCAPTIVE_RANGE, or the cordon wiped (so a player who
-// clears it from range still gets the squad out). Not on the deadline -- a timed-out squad is lost,
-// not freed. The greeting is order-independent on purpose: it must read whether the cordon is still
-// up or already gone (see fnc_duws_dialogue notes / player_text_style_guide.md).
-//
-// Un-captive turns them active and killable but leaves them garrisoned -- PATH stays off, so they defend
-// the building from cover instead of charging a still-intact cordon. They break out and path freely only
-// once the tide has turned enough to keep them alive: at least half the cordon down AND the armed car
-// destroyed (a car that never spawned counts as gone, so the gate falls back to the half-cordon check).
+// Un-captive on the first of: player within UNCAPTIVE_RANGE, or the cordon wiped (a player who clears it
+// from range still frees them). Not on the deadline -- a timed-out squad is lost, not freed. Un-captive
+// makes them active and killable but leaves PATH off, so they defend from cover rather than charge an
+// intact cordon; they path out only once the tide turns -- half the cordon down AND the armed car gone
+// (a car that never spawned counts as gone).
 [_squadUnits, _squadGroup, _Building, _cordonUnits, _car, _deadline] spawn {
     params ["_sq", "_grp", "_bld", "_cordon", "_carv", "_dl"];
     waitUntil {

@@ -1,6 +1,4 @@
-///////////
 ///////////   "I_C", "Syndikat Guerillas", "I_C"
-///////////
 
 
 opfor_SOLDIER_X = 				"I_C_Soldier_Para_8_F";				//Basic Soldier  (Patrols, Zone Guard, Team)

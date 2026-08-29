@@ -12,10 +12,9 @@ _helo removeAction _actionID;
 
 
 
-// TIMER & MAPCLICK
 while {_timer>0} do {
-    if (clicked) then { // player has clicked the map
-    _foundPickupPos = [ClickedTaxiPos, 0,50,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
+    if (clicked) then {
+    _foundPickupPos = [ClickedTaxiPos, 0,50,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
     if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 		if (ClickedTaxiPos distance player < 100) exitWith {
@@ -29,7 +28,7 @@ while {_timer>0} do {
 	{["BOATTAXI"] call fnc_mapclick_release;_timer = 0;taxiCanTakeOff = true;}
     
     };
-  _timer = _timer-1; // remove 1 to timer
+  _timer = _timer-1;
   sleep 0.5;
 };
 

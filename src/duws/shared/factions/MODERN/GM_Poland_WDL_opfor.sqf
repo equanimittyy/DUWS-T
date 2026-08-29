@@ -1,6 +1,4 @@
-///////////
 ///////////   "gm_fc_pl", "GM Poland (Wood) + USSR (3CB)", "GM_Poland_WDL"
-///////////
 
 
 opfor_SOLDIER_X = 				"gm_pl_army_rifleman_akm_80_moro";					//Basic Soldier  (Patrols, Zone Guard, Team)

@@ -68,7 +68,7 @@ _message1 = localize "STR_DUWS_T_vehdropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vehdropack"] remoteExec ["fnc_duws_dialogue", 0];
 
-// SEND A PLANE -- offset the spawn 1200 m off a random bearing so it flies in rather than appearing overhead.
+// Offset the spawn 1200 m off a random bearing so it flies in rather than appearing overhead.
 private _vec = [random [-1,0,1], random [-1,0,1], 0];
 private _spawnPos = ((vectorNormalized _vec) vectorMultiply 1200) vectorAdd _location;
 _spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2) + 400];

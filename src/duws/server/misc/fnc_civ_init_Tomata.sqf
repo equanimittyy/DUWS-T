@@ -296,8 +296,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 // list: registration reads all three. Called rather than spawned -- it files hooks and returns.
 if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then { [] call fnc_civ_handler };
 
-// No start-up delay: this function now runs after zone build-out rather than alongside a
-// map-wide scan, so there is nothing left for the spawns to wait out.
+// No start-up delay: this runs after zone build-out, not alongside a map-wide scan, so the
+// spawns have nothing left to wait out.
 missionNamespace setVariable ["civ_spawn_enabled_time", time, true];
 
 call _fnc_finish;

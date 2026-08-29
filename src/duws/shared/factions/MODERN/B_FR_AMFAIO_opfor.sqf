@@ -1,6 +1,4 @@
-///////////
 ///////////   "B_FR", "AMF AIO French Army (T3 camo)", "B_FR_AMFAIO"
-///////////
 
 
 opfor_SOLDIER_X = 				"B_FR_Fusilier_01";						//Basic Soldier  (Patrols, Zone Guard, Team)

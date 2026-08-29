@@ -1,28 +1,13 @@
 // Locality: server -- the flag is authored here. Clients only ever read it.
 //
-// Stage one of a search. Rolls once per unit at the moment the unit is created and marks the
-// winners with the source whose payout table they will later be drawn against. An unmarked thing
-// holds nothing, deterministically, and offers no action to say so.
+// Stage one of a search: rolls once per unit at creation and stamps winners with their payout source, so
+// intel scales with OPFOR spawned rather than how often the search key is pressed. Broadcast because the
+// search action's condition runs on the client that would draw it. Takes a group or a plain unit array
+// (the patrol spawners hold neither shape consistently). Only objective and civ_frisk sources flag here --
+// combat corpses roll flag-free at the search.
 //
-// Rolled at creation rather than at the action: how much intel exists is then a function of how
-// much OPFOR the campaign put on the ground, not of how often a key was pressed. It also means
-// only the flagged share carries any state at all, rather than every corpse the campaign
-// produces.
-//
-// Broadcast because the search action's condition is evaluated on the client that would draw it.
-// That makes the flag readable by a client with the debug console open, which is accepted here:
-// this is co-op against AI, and the alternative -- offering the action on every body and
-// answering "nothing" from the server -- puts a prompt on every body the campaign produces.
-//
-// Takes a group or a plain array of units, because the mission patrol spawners hold neither
-// shape consistently.
-//
-// Only the objective and civ_frisk sources reach here now: combat corpses are searched flag-free
-// (any enemy body, per-player clock, roll at the search). The bodies flagged here still hold their
-// state on the object -- so a body-swapping garbage collector (the AGC mod) that deletes a distant
-// corpse and rebuilds it near a player drops the flag with it. These are single, hardcore-only
-// objective bodies, so the fix is to exempt them by name: TODO exempt with `setVariable
-// ['GCblackList', true]` at the flag point once the objective corpse-search is revisited.
+// The flag lives on the object, so a body-swapping GC (the AGC mod) that rebuilds a distant corpse near a
+// player drops it. TODO: exempt these bodies with setVariable ['GCblackList', true] at the flag point.
 if (!isServer) exitWith {};
 
 params ["_units", ["_source", "combat"]];

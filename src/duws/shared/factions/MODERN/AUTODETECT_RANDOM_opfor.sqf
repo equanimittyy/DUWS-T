@@ -79,7 +79,6 @@ selectRandom factionList select 1 call fnc_factionGen;
 o_arraysToRandomize = (["opfor"] call fnc_faction_schema) apply {_x select 0};
 
 
-// Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
-// role that used to sit here got wrong.
+// Pools published, not collapsed by a timer. See fnc_faction_pools for what a thread per role gets wrong.
 [o_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;

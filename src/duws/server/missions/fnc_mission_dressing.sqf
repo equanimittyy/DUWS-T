@@ -3,8 +3,8 @@
 // than a lone spawn. The caller bakes any offset into the centre it passes, so this needs no offset
 // argument -- steal-supply clusters the clutter south of the truck, steal-builder on it.
 //
-// MODERN only: the classes are the modern faction's props. Other version sets get bare ground, as
-// the inline blocks this replaces did (they left the class strings empty and spawned nothing usable).
+// MODERN only: the classes are the modern faction's props. Other version sets get bare ground --
+// their class strings are empty and would spawn nothing usable.
 // Each piece is kept under the caller's composition key so fnc_mission_end bins it with the rest.
 params ["_centre", "_compKey"];
 if (VERSION_X != "MODERN") exitWith {};

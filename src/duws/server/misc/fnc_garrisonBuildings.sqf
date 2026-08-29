@@ -11,8 +11,7 @@
 // A side mission's guard ring, and only that. A zone and a town garrison hold buildings through the
 // "garrison" posture instead -- one squad to one structure, drawn from an ordinary team roster --
 // which is what a composition can name and vary; this raises its own men by a rule and cannot be
-// asked for anything else. The zone parameters that used to sit here (nearest-first, men stood UP,
-// five positions rather than two, an attrition fraction) went with that caller.
+// asked for anything else.
 params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4]];
 
 // Two positions, so a hut with a doorway counts: a side mission wants its objective ringed rather

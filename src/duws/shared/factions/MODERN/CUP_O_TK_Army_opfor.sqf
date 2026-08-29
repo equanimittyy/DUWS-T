@@ -1,6 +1,4 @@
-///////////
 ///////////    "CUP_O_TK", "Takistani Army + US SpecOps", "CUP_O_TK_Army"
-///////////
 
 
 opfor_SOLDIER_X = 				"CUP_O_TK_Soldier";						//Basic Soldier  	(Patrols, Zone Guard, Team)

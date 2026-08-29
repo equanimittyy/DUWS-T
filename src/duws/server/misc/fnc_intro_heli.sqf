@@ -123,8 +123,8 @@ sleep 5;
 missionNamespace setVariable ["intro_heli_fadein", true, true];
 [["", "BLACK IN", 1]] remoteExec ["titleCut", 0];
 // The insertion flight is one of only two places music plays; the other is a side mission opening.
-// A day-cycle loop used to run underneath the whole campaign, which is what made music feel like
-// weather rather than an event. Double brackets for the same reason as the titleText below.
+// Kept to events, never a loop running underneath the whole campaign, so music reads as an event
+// rather than weather. Double brackets for the same reason as the titleText below.
 [["LeadTrack01_F_EPA", 0]] remoteExec ["playMusic", 0];
 [] spawn fnc_bottom_right_message;
 sleep 0.5;
@@ -190,9 +190,9 @@ private _processedPlayers = _boardedPlayers + _unboardedPlayers;
 private _heliPos2D = getPos _heli;
 private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrainHeightASL [_heliPos2D select 0, _heliPos2D select 1]];
 
-// The whole stick ropes at once. These waits used to sit inside a forEach on the server, so a
-// player's black screen only began once the player before them was already on the ground --
-// about 13.5 s each, most of a minute of nothing for the last man of a four.
+// The whole stick ropes at once, not one player after another: serialised on the server, a
+// player's black screen would only begin once the player before them was on the ground -- about
+// 13.5 s each, most of a minute of nothing for the last man of a four.
 private _dropThreads = [];
 private _dropping = (_boardedPlayers apply {[_x, true]}) + (_unboardedPlayers apply {[_x, false]});
 {

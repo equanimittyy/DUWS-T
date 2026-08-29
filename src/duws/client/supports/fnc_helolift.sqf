@@ -121,7 +121,6 @@ private _heliPoints = [
     [0, -7, -1]         // rear-centre
 ];
 
-// vehicle centre of mass and rope attach points
 private _com = getCenterOfMass _targetVehicle;
 private _frontRadius = 2.5;
 private _rearRadius = _frontRadius;
@@ -129,7 +128,6 @@ private _heightOffset = 0.3;
 
 private _vehPoints = [];
 
-// front two points
 private _frontAngles = [45, 135];
 {
     private _angle = _x;
@@ -139,7 +137,6 @@ private _frontAngles = [45, 135];
     _vehPoints pushBack [_xPos, _yPos, _zPos];
 } forEach _frontAngles;
 
-// rear two points
 private _rearAngles = [315, 225];
 {
     private _angle = _x;
@@ -149,7 +146,6 @@ private _rearAngles = [315, 225];
     _vehPoints pushBack [_xPos, _yPos, _zPos];
 } forEach _rearAngles;
 
-// rear-centre point
 private _rearX = (_com select 0) + (_rearRadius * cos 270);
 private _rearY = (_com select 1) + (_rearRadius * sin 270);
 private _rearZ = (_com select 2) + _heightOffset;
@@ -171,7 +167,6 @@ private _crossPairs = [
 private _rearPair = [4, 4];
 private _allPairs = _mainPairs + _crossPairs + [_rearPair];
 
-// initial rope slack length
 private _dists = [];
 {
     _x params ["_heliIdx", "_vehIdx"];
@@ -221,7 +216,6 @@ if (count _waypoints < 3) exitWith {
     [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_liftnoroute"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
-// update the final waypoint marker, client-side visual feedback
 private _heloPos = getPos _helo;
 private _finalClickPos = _waypoints select 2;
 private _offsetFinalPos = _finalClickPos getPos [-70, _finalClickPos getDir _heloPos];

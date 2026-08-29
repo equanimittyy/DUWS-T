@@ -1,5 +1,4 @@
 
-// DELETE NAPALM FLAMES FOR EACH PLAYER
 if (!isServer) exitWith {};
 _position = _this select 0;
 _radius = _this select 1;

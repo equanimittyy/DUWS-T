@@ -1,6 +1,4 @@
-//////////////
 //////////////   "CUP_I_RACS", "CUP Sahrani RACS (Wood)", "CUP_I_RACS_WOOD"
-//////////////
 
 
 opfor_SOLDIER_X = 				"CUP_I_RACS_Soldier_wdl";				//Basic Soldier  (Patrols, Zone Guard, Team)
