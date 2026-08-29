@@ -142,7 +142,7 @@ does not imply server-only.
 
 | Framework | Purpose | State |
 |---|---|---|
-| `AIS` | Advanced Injury System — revive/medical, an alternative to ACE or vanilla. Who it manages (players + their AI only), the `Revive` param, and the HandleDamage/unconscious traps are in [`ais_revive_integration.md`](architecture/ais_revive_integration.md) | Active |
+| `AIS` | Advanced Injury System — revive/medical, an alternative to ACE or vanilla. Who it manages (players + their AI only), the `Revive` param, the ACE handoff, and the HandleDamage/unconscious traps are in [`revive_system.md`](architecture/revive_system.md) | Active |
 | `R3F_LOG` | R3F Logistics — vehicle/object lift, tow, load, and factory building | Active |
 | `VCOM` | VCOM AI — enemy AI behavior enhancement | Compiled but never started; nothing calls `VCM_fnc_VcomInit` |
 | `taw_vd` | TAW View Distance control | Active |
