@@ -347,8 +347,6 @@ WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 // passes placed nothing. Empty = every zone OPFOR, which is the truth at hour zero; WARCOM_init resets it.
 WARCOM_zones_controled_by_BLUFOR = [];
 
-WARCOM_blu_attack_wave_type = [];
-
 // choose between "none" - "tropical" - "arid" - "temperate" - "temperate_cold" - "mediterranean"
 weather_type = "none";publicVariable "weather_type";
 

@@ -178,6 +178,6 @@ sleep 1;
 
 ["INFO", "WARCOM", "Opfor Warcom Start WARCOM zone patrols."] call fnc_log;
 
-[serv_zones_array, PosOfBLUHQ, [0,0,0], WARCOM_blufor_ap, WARCOM_opfor_ap, 1800, blufor_ai_skill, opfor_ai_skill, 1800] spawn fnc_WARCOM_init; // 2700 is 40 mins
+[serv_zones_array, PosOfBLUHQ, WARCOM_blufor_ap, WARCOM_opfor_ap] spawn fnc_WARCOM_init;
 while {!(["WARCOM", "WARCOM_init_done", {WARCOM_init_done}, 300] call fnc_waitLogged)} do {};
 sleep 1;

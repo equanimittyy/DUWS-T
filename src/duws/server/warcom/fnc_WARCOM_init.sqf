@@ -1,15 +1,11 @@
-// [[zones],posHQblu,posHQop,blufor AP,opfor AP, blu attack delay, blu skill range, opfor skill range, opf attack delay] spawn fnc_WARCOM_init
-//               |         |     |        |          |            |
-//         array of arrays |   array      |        number         |
-//                      array           number                  number
+// [[zones], posBLUHQ, blufor AP, opfor AP] spawn fnc_WARCOM_init
 if (!isServer) exitWith {};
 [{player globalChat localize "STR_DUWS_T_jl4gqjpf"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 _array_of_zones_total =_this select 0;
 _blu_hq_pos =_this select 1;
-_blufor_ap =_this select 3;
-_opfor_ap =_this select 4;
-_blu_attack_delay =_this select 5;
+_blufor_ap =_this select 2;
+_opfor_ap =_this select 3;
 
 
 // WARCOM uses PosOfBLUHQ+16m to keep waypoints and spawn points away from HQ building
@@ -24,8 +20,6 @@ WARCOM_blufor_tier = [_blufor_ap] call DUWS_fnc_ap_tier;
 WARCOM_opfor_tier = [_opfor_ap] call DUWS_fnc_ap_tier;
 WARCOM_blufor_ap = _blufor_ap;
 WARCOM_opfor_ap = _opfor_ap;
-WARCOM_blu_attack_delay = _blu_attack_delay;
-WARCOM_marker_num = 0;
 publicVariable "WARCOM_blufor_ap";
 publicVariable "WARCOM_opfor_ap";
 publicVariable "WARCOM_blufor_ap_earned";
