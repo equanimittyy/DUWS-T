@@ -14,7 +14,11 @@ private _site = [_MissionPos] call fnc_destroy_hardpoint_site;
 if (_site isEqualTo []) exitWith { [16, _requester, "no_hardpoint"] call fnc_mission_abort };
 _site params ["_hpPos", "_hpKey"];
 
-// The emplacement already stands -- present at once, no spawn-up to narrate.
+// The emplacement already stands -- nothing to build. Hold the generating beat anyway (cosmetic 2s) so a
+// present-only mission reads survey -> generating -> complete like the spawn-up missions: UX consistency.
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+sleep 2;
+
 private _taskId = format ["hp%1%2", round (_hpPos select 0), round (_hpPos select 1)];
 private _marker = [_hpPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_HARDPOINT_DESC", _mission_name, "destroy",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hardpointoverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_hardpointcopy"]]

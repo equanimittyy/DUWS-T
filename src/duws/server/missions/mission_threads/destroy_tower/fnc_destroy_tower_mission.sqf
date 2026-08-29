@@ -14,7 +14,11 @@ private _site = [_MissionPos] call fnc_destroy_tower_site;
 if (_site isEqualTo []) exitWith { [3, _requester, "no_radio_hp"] call fnc_mission_abort };
 _site params ["_hpPos", "_hpKey"];
 
-// The mast already stands -- present at once, no spawn-up to narrate.
+// The mast already stands -- nothing to build. Hold the generating beat anyway (cosmetic 2s) so a
+// present-only mission reads survey -> generating -> complete like the spawn-up missions: UX consistency.
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+sleep 2;
+
 private _taskId = format ["tower%1%2", round (_hpPos select 0), round (_hpPos select 1)];
 private _marker = [_hpPos, _radius, _taskId, localize "STR_DUWS_T_dgpqenyw", _mission_name, "destroy",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_toweroverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_towercopy"]]
