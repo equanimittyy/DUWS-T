@@ -10,8 +10,8 @@ The review found the design healthy in the large and fragile in one specific way
 are half-adopted, and the invariants that keep the two halves safe are held by comment and discipline,
 not by code. SQF has no compiler, so a violation cannot fail a build — each is one careless edit from a
 silent, hard-to-trace break. The tractable response is containment, not a rewrite: verify the
-correctness risks, put a cheap runtime assertion behind each load-bearing invariant, then finish the
-half-migrations one subsystem at a time. A sweeping `DUWS_` rename is the single highest-risk change
+correctness risks, put a cheap runtime assertion behind the load-bearing invariants actually worth
+guarding, then finish the half-migrations one subsystem at a time. A sweeping `DUWS_` rename is the single highest-risk change
 available here — broadcasts are matched as strings with nothing to catch a miss — and is explicitly out
 of scope.
 
@@ -70,13 +70,10 @@ fix in the tree; the economy-gate fix leaves one residual, called out in its bul
   baseline needs a server-side open snapshot (an arsenal-open ping), which carries its own delayed-ping
   gap. Belongs to the economy domain — see [`economy_second_pass.md`](./economy_second_pass.md).
 
-## Phase 2 — an assertion behind each unasserted invariant
+## Phase 2 — assertions behind load-bearing invariants (closed)
 
-Each load-bearing invariant gets one cheap, loud runtime check — a `WARN`/`ERROR` `fnc_log` line on
-violation, not a behaviour change. Runtime checks are the only guardrail a compiler-less language
-offers. Two are already done and set the pattern to copy.
-
-Done (reference implementations, `feat(server): guard poller pass-time and double-mission starts`):
+Two cheap, loud runtime checks — a `WARN`/`ERROR` `fnc_log` line on violation, not a behaviour change —
+shipped with a feature commit and stand as the pattern:
 
 - **Poller "never real work inline."** A `WARN` when a site pass exceeds a 15 ms ceiling, at the
   default log level unlike the DEBUG heartbeat (`server/misc/fnc_site_stream_init.sqf`).
@@ -84,17 +81,12 @@ Done (reference implementations, `feat(server): guard poller pass-time and doubl
   globals are not bound to their mission and a second start clobbers the first's payout
   (`server/missions/fnc_mission_begin.sqf`).
 
-Still to assert:
-
-- **Lock-free reserve refill single-writer.** The refill assumes exactly one writer
-  (`server/init_zones/fnc_garrison_reserve.sqf`). Assert the writer identity, or log if a second path
-  writes the reserve within a pass.
-- **Tier-monotonic spawn rows.** No tier may field fewer of anything than the tier below it
-  (`server/init_zones/fnc_zone_spawn_sizes.sqf`). A loud log on a monotonicity violation at table build
-  time catches an edit that breaks the ladder — see the tier-monotonic invariant note.
-- **Garrison-live flag cleared on every teardown.** Every teardown path must clear the flag; a leak
-  strands a zone as permanently garrisoned. Audit the teardown paths against
-  `server/misc/fnc_garrison_strength_init.sqf` and log a flag still set after teardown.
+Three further candidates were scoped and **dropped as not worth the churn** — reserve single-writer
+(`server/init_zones/fnc_garrison_reserve.sqf`), tier-monotonic spawn rows
+(`server/init_zones/fnc_zone_spawn_sizes.sqf`), and garrison-live flag on teardown
+(`server/misc/fnc_garrison_strength_init.sqf`). Each guards an invariant that is stable and rarely
+edited, and a post-hoc log fires only after the break it cannot prevent. Add one reactively if that
+invariant actually breaks in play; do not add them on spec.
 
 ## Phase 3 — finish one migration at a time
 
@@ -129,8 +121,10 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
    namespace or registry rebuild.
 2. **Verify before fixing.** All four review risks now carry a fix on disk (the economy gates with one
    residual) and two of the invariants are asserted; the plan confirms in-game rather than re-fixing.
-3. **Runtime assertions are the guardrail.** SQF cannot fail a build, so each load-bearing invariant
-   gets a loud log on violation — cheap, and the only check the language affords.
+3. **Runtime assertions stay opportunistic.** SQF cannot fail a build, so a loud log on violation is
+   the only check the language affords — but the two that shipped with a feature commit are enough. The
+   remaining invariants are stable and rarely touched, so a post-hoc log that cannot prevent the break
+   is not worth the churn; add one reactively only if an invariant actually breaks.
 4. **One migration finished before the next.** The recurring fault is half-adoption; do not open a
    fifth half-migration to chase the first four.
 5. **The mission-spine migration stays in its own plan** and is referenced, not duplicated.
@@ -140,8 +134,8 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
 - [ ] Phase 1: play-test-confirm the four patched risks (money debit, dedicated escalation, OPFOR
       off-pattern role, economy tier + close-loadout gates); close the economy residual (settle open-loadout
       snapshot, and the 0-cost tier bypass) server-side.
-- [ ] Phase 2: assert the three still-open invariants (reserve single-writer, tier-monotonic rows,
-      garrison-live flag on teardown), copying the poller/mission-begin pattern.
+- [x] Phase 2: two assertions shipped (poller, single-mission); the remaining three (reserve
+      single-writer, tier-monotonic rows, garrison-live flag on teardown) dropped as not worth the churn.
 - [ ] Phase 3: finish the token-spawner migration; bring hardpoints onto the lost-token ledger;
       `DUWS_`-prefix on touch only.
 - [ ] Phase 4: add the missing-broadcast lint check to the harness.
