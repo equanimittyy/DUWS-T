@@ -91,3 +91,11 @@ if (!(_handles call _done) && time > _deadline) exitWith {
 };
 
 [_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"], true, "mission_steal_builder", false, false, _onWin, _handles] call fnc_mission_finish;
+
+// A captured builder is a standing player asset, so re-file it persistent -- but after finish, whose
+// release of mission_steal_builder would otherwise strip the keep along with the dressing. Killed
+// retires the key so the record does not outlive the wreck.
+if (alive BLD1) then {
+    BLD1 addEventHandler ["Killed", { ["captured_builder"] call fnc_duws_release }];
+    [BLD1, "captured_builder"] call fnc_duws_keep;
+};
