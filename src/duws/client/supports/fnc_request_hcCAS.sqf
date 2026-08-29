@@ -26,8 +26,9 @@ sleep 1;
 _pilot = units _group select 0;
 _vehicle = vehicle _pilot;
 _vehicle engineOn true;
+// Ferry in high; dropped to 150 on-station at handover, back to 1000 on egress below.
+_vehicle flyInHeight 1000;
 
-// store the current CAS jet in a global for event-handler sync
 HC_CAS_currentVehicle = _vehicle;
 HC_CAS_active = true;
 
@@ -68,7 +69,7 @@ private _inbound = time + 300;
 waitUntil { sleep 3; !alive _vehicle || {_vehicle distance _hq < 1200} || {time > _inbound} };
 
 if (alive _vehicle && HC_CAS_active && {_vehicle distance _hq < 1200}) then {
-	// On station: hand it to the player. Clear captive/CARELESS, add to High Command, name the group.
+	// On station: hand it to the player -- no longer captive, now a High Command asset.
 	{ _x setCaptive false } forEach units _group;
 	_vehicle setCaptive false;
 	_group setBehaviour "AWARE";
@@ -92,12 +93,13 @@ if (alive _vehicle && HC_CAS_active && {_vehicle distance _hq < 1200}) then {
 		{ _x setCaptive true } forEach units _group;
 		_vehicle setCaptive true;
 		_group setBehaviour "CARELESS";
+		_vehicle flyInHeight 1000;
 		while { count waypoints _group > 0 } do { deleteWaypoint [_group, 0] };
 		private _wpOut = _group addWaypoint [_offmap, 0];
 		_wpOut setWaypointType "MOVE";
 		_wpOut setWaypointSpeed "FULL";
 		// Grace cap so a damaged or blocked aircraft that never clears the map still cleans up.
-		private _grace = time + 180;
+		private _grace = time + 60;
 		waitUntil { sleep 3; !alive _vehicle || _vehicle distance _offmap < 800 || time > _grace };
 	};
 };

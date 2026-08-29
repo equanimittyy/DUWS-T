@@ -255,12 +255,10 @@ if (_ammotype == "Laser") then {
 		[_callsign, localize "STR_DUWS_T_laser_abort"] remoteExec ["fnc_duws_dialogue", 0];
 	} else {
 		[_callsign, localize "STR_DUWS_T_laser_locked"] remoteExec ["fnc_duws_dialogue", 0];
-		// Laser guidance, physically simulated: the round runs in under gravity and its own momentum, and
-		// while the caller keeps the spot lit it pulls a LIMITED steering correction toward it -- capped
-		// lateral change per tick, so momentum resists and only sustained, early designation walks it onto
-		// the mark. Drop the spot and it coasts; re-lase and it corrects again. Too short a window and it
-		// cannot pull enough and falls wide -- a miss the player sees, not one radioed in. It detonates
-		// wherever it actually lands.
+		// Laser guidance, physically simulated: the round runs in under gravity and momentum, pulling a
+		// capped steering correction toward the lit spot each tick -- so only sustained, early designation
+		// walks it onto the mark, a short or dropped lase falls wide, and it detonates where it lands. The
+		// miss is one the player sees, not one radioed in.
 		private _drop = _vehicle modelToWorld [0,0,-3];
 		_bomb = "Bo_Mk82" createVehicle _drop;
 		[_bomb, _laserImpact, _callsign] spawn {
@@ -299,8 +297,8 @@ if (_ammotype == "Laser") then {
 			[_cs, localize "STR_DUWS_T_artyair_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 		};
 	};
-	// Break the loiter and send the jet home, then delete it only once it has cleared the area, so it
-	// flies off rather than vanishing over the caller. Detached so the slot frees below without waiting.
+	// Break the loiter and send the jet home, then delete it only once it reaches the ferry-in point, so
+	// it flies off rather than vanishing over the caller. Detached so the slot frees below without waiting.
 	// Two traps. reverse sorts in place and returns Nothing, so inlining it as forEach (reverse (waypoints
 	// _group)) iterates over Nothing and deletes no waypoint -- bind the list, reverse it, then delete
 	// (highest index first). And the loiter sits at index 2 (the MOVE at index 1 flags on-station), so
@@ -315,16 +313,15 @@ if (_ammotype == "Laser") then {
 	_rtb setWaypointType "MOVE";
 	_rtb setWaypointBehaviour "CARELESS";
 	_group setCurrentWaypoint _rtb;
-	[_group, _vehicle, _position] spawn {
-		params ["_g", "_v", "_pos"];
-		// Grace cap so a damaged jet that cannot make distance still cleans up.
-		private _grace = time + 120;
-		waitUntil { sleep 3; !alive _v || _v distance _pos > 2500 || time > _grace };
+	[_group, _vehicle, _spawnPos] spawn {
+		params ["_g", "_v", "_home"];
+		// Grace cap so a damaged jet that cannot reach home still cleans up.
+		private _grace = time + 60;
+		waitUntil { sleep 3; !alive _v || _v distance _home < 800 || time > _grace };
 		{ deleteVehicle _x } forEach units _g;
 		deleteVehicle _v;
 	};
 } else {
-	// Splash call as the first rounds arrive.
 	[_callsign, localize "STR_DUWS_T_arty_splash"] remoteExec ["fnc_duws_dialogue", 0];
 	// Smoke screen: rounds walk a line perpendicular to the caller's bearing to the target, so the
 	// wall sits across the enemy's line of sight instead of blobbing on the point. Axis is fixed here
@@ -382,8 +379,8 @@ if (_ammotype == "Laser") then {
 	};
 };	
 
-// Slot handed back the moment the ordnance is off, not after the cleanup sleeps below: those
-// spend a further 90 s deleting markers and the jet, and the battery is free long before that.
+// Slot handed back the moment the ordnance is off, not after the cleanup below: that still clears the
+// markers and flies the jet home before deleting it, and the battery is free long before that.
 [_supportype] remoteExec ["fnc_support_release", 2];
 
 // Laser reports its outcome over the radio (captured / abort); other types close on the firing callsign.
@@ -409,10 +406,22 @@ deletemarker str(_markername);
 deletemarker str(_markername2);
 
 if (_ammotype == "Bo_Mk82" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	sleep 60;
-	{
-		deleteVehicle _x;
-	} foreach units _group;
-
-	deleteVehicle _vehicle;
+	// Low run-in is done above; now climb out of the deck, break for the ferry-in point, and delete on
+	// arrival -- same egress as the laser and HC sorties, in place of a blind timed despawn over the
+	// target. Detached so the tail returns without waiting on the jet to clear.
+	_vehicle flyInHeight 1000;
+	while { count waypoints _group > 0 } do { deleteWaypoint [_group, 0] };
+	private _rtb = _group addWaypoint [_spawnPos, 0];
+	_rtb setWaypointType "MOVE";
+	_rtb setWaypointSpeed "FULL";
+	_rtb setWaypointBehaviour "CARELESS";
+	_group setCurrentWaypoint _rtb;
+	[_group, _vehicle, _spawnPos] spawn {
+		params ["_g", "_v", "_home"];
+		// Grace cap so a damaged jet that cannot reach home still cleans up.
+		private _grace = time + 60;
+		waitUntil { sleep 3; !alive _v || _v distance _home < 800 || time > _grace };
+		{ deleteVehicle _x } forEach units _g;
+		deleteVehicle _v;
+	};
 };

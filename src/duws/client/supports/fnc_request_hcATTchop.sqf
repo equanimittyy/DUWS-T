@@ -31,7 +31,6 @@ _group deleteGroupWhenEmpty true;
 _leader = leader _group;
 _vehicle = vehicle _leader;
 
-// store the current attack heli in a global for event-handler sync
 HC_ATTchop_currentVehicle = _vehicle;
 HC_ATTchop_active = true;
 
@@ -70,7 +69,7 @@ private _inbound = time + 300;
 waitUntil { sleep 3; !alive _vehicle || {_vehicle distance _hq < 600} || {time > _inbound} };
 
 if (alive _vehicle && HC_ATTchop_active && {_vehicle distance _hq < 600}) then {
-	// On station: hand it to the player. Clear captive/CARELESS, add to High Command, name the group.
+	// On station: hand it to the player -- no longer captive, now a High Command asset.
 	{ _x setCaptive false } forEach units _group;
 	_vehicle setCaptive false;
 	_group setBehaviour "AWARE";
@@ -97,8 +96,9 @@ if (alive _vehicle && HC_ATTchop_active && {_vehicle distance _hq < 600}) then {
 		private _wpOut = _group addWaypoint [_offmap, 0];
 		_wpOut setWaypointType "MOVE";
 		_wpOut setWaypointSpeed "FULL";
-		// Grace cap so a damaged or blocked aircraft that never clears the map still cleans up.
-		private _grace = time + 180;
+		// Grace cap so a damaged or blocked aircraft that never clears the map still cleans up. Shorter
+		// than the ferry-in leg: at ~80 m/s over 6 km a healthy gunship despawns ~1 km short of the edge.
+		private _grace = time + 60;
 		waitUntil { sleep 3; !alive _vehicle || _vehicle distance _offmap < 800 || time > _grace };
 	};
 };
