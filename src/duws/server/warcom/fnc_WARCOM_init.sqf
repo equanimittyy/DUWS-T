@@ -8,12 +8,11 @@ _blufor_ap =_this select 2;
 _opfor_ap =_this select 3;
 
 
-// WARCOM uses PosOfBLUHQ+16m to keep waypoints and spawn points away from HQ building
+// HQ reference that WARCOM here and zone_state_init order zones against, nearest first (+16m off the building).
 WARCOM_blu_hq_pos = [_blu_hq_pos select 0, (_blu_hq_pos select 1) + 16];
-// The preset seeds both halves from the same value: the earned counter (the ladder input, and the
-// tier derived from it) and the spendable wallet. A side set to start at a tier begins with the wallet
-// to act at it -- OPCOM can fortify, BLUFOR can field -- instead of idling at capability it cannot pay
-// for until income accrues. The earned counter is the one-way ratchet; the wallet is spent from here.
+// Seed both halves from the preset: the earned counter (one-way ratchet, and what the tier derives
+// from) and the spendable wallet. Starting at a tier means the wallet to act at it now, not capability
+// it cannot pay for until income accrues.
 WARCOM_blufor_ap_earned = _blufor_ap;
 WARCOM_opfor_ap_earned = _opfor_ap;
 WARCOM_blufor_tier = [_blufor_ap] call DUWS_fnc_ap_tier;
@@ -33,10 +32,9 @@ sleep 5;
 WARCOM_createdZones = [_array_of_zones_total,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
 publicVariable "WARCOM_createdZones";
 
-// Campaign-size income throttle, from the ACTUAL zone count (generation can fall short of zones_number).
-// At or below the reference size the factor is 1; above it, passive income grows as sqrt(zones), so 4x the
-// zones pay 2x -- stopping a host's high zones_number from handing everyone a proportionally larger war
-// chest. k tunes the curve (1 flattens across sizes, 0 restores linear).
+// Campaign-size income throttle from the ACTUAL zone count (gen can fall short of zones_number): factor 1
+// at or below the reference size, above it income grows as sqrt(zones) so 4x zones pay 2x -- a high
+// zones_number can't hand everyone a bigger war chest. k tunes the curve (1 flat, 0 linear).
 private _REF_ZONES = 6;
 private _k = 0.5;
 DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
@@ -45,24 +43,18 @@ DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES))
 WARCOM_zones_controled_by_BLUFOR = [];
 publicVariable "WARCOM_zones_controled_by_BLUFOR";
 
-// make sure it's not a reference
 _WARCOM_zones_controled_by_OPFOR = WARCOM_createdZones;
 WARCOM_zones_controled_by_OPFOR = [] + _WARCOM_zones_controled_by_OPFOR;
 publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-// OPCOM's hardpoint director: the one thing that spawns OPFOR after generation, and the reader the
-// AP pool and the stored zone caps were built waiting for. It spends OPFOR Army Power to fortify the
-// ground the enemy holds -- topping up cleared zone emplacements, thickening the band, raising radio
-// towers -- replacing the blind AP-timers this init deleted with something the enemy is trying to do.
 ["INFO", "WARCOM", "Init OPCOM hardpoint director"] call fnc_log;
 [] spawn fnc_WARCOM_opf_hardpoints;
 
-// No blind OPFOR spawn timers here: enemy presence is zone garrisons, side-mission guards and OPCOM's
-// deliberate fortification above -- emplacements it sites and pays for, not live groups an AP clock
-// drips onto the map, which would put permanently simulated AI between the zones and on the road to
-// the HQ.
+// No blind OPFOR spawn timers: enemy presence is zone garrisons, side-mission guards and OPCOM's paid
+// fortification above -- not live groups an AP clock drips onto the map, which would leave permanently
+// simulated AI between the zones and on the road to the HQ.
 
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";

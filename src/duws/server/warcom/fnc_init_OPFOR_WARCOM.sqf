@@ -146,6 +146,11 @@ sleep 1;
     // that degrades to charging nothing.
     [] call fnc_escalation;
 
+    // After generation, not racing it: the OPCOM director WARCOM launches must read a fully built map.
+    // Fire-and-forget -- mission_init_complete below must release the start even if WARCOM stalls.
+    ["INFO", "WARCOM", "Starting WARCOM (OPCOM director)"] call fnc_log;
+    [serv_zones_array, PosOfBLUHQ, WARCOM_blufor_ap, WARCOM_opfor_ap] spawn fnc_WARCOM_init;
+
     // Every completion announcement lives here rather than at the end of the zone locators: there they
     // fired while civilian towns were still being placed, telling the player the campaign was ready
     // before it was. Wrapped in BIS_fnc_Spawn so profileName, the map description and settings all read
@@ -175,9 +180,3 @@ sleep 1;
     mission_init_complete = true;
     publicVariable "mission_init_complete";
 };
-
-["INFO", "WARCOM", "Opfor Warcom Start WARCOM zone patrols."] call fnc_log;
-
-[serv_zones_array, PosOfBLUHQ, WARCOM_blufor_ap, WARCOM_opfor_ap] spawn fnc_WARCOM_init;
-while {!(["WARCOM", "WARCOM_init_done", {WARCOM_init_done}, 300] call fnc_waitLogged)} do {};
-sleep 1;
