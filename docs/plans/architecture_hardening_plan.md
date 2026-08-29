@@ -98,7 +98,7 @@ evenly, so it pays down by pocket.
 | Migration | State | Action |
 |---|---|---|
 | Mission lifecycle spine | 8 of 19 threads on the spine | Owned by [`mission_spine_unification_plan.md`](./mission_spine_unification_plan.md); not re-scoped here. |
-| Token spawner vs direct `BIS_fnc_spawnGroup` | Token API is the intended default; most threads still call direct | Migrate remaining direct callers to the token spawner (`fnc_spawn_team` / `fnc_spawn_vehicle`). |
+| Token spawner vs direct `BIS_fnc_spawnGroup` | Token API is the intended default; most threads still call direct | Owned by [`token_spawner_unification_plan.md`](./token_spawner_unification_plan.md): widen the spawner to three sides plus animation, then route the zone/garrison, mission, HQ and civilian callers through it. |
 | Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on a separate snapshot | Bring hardpoints onto the lost-token ledger so one model answers liveness everywhere. |
 | `DUWS_` prefix on globals / functions | ~549 bare `fnc_`, hundreds of bare globals | Prefix-on-touch only. No sweeping rename — see [out of scope](#out-of-scope). |
 
