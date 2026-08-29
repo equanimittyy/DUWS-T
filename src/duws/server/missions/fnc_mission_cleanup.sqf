@@ -23,20 +23,15 @@ params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false], ["
 ["INFO", "MISSION", format ["cleanup: composition %1, token %2",
     ["none", _compKey] select (_compKey != ""), _token]] call fnc_log;
 
-// Props to the sweep on the shared keep-radius clock: release drops protection and sets a deadline,
-// so the objective's buildings go once the player is clear rather than in their face.
 if (_compKey != "") then { [_compKey] call fnc_duws_release };
 
-// The mission's living units and vehicles carry a delete order, not an instant deletion. Crew and
-// vehicle were both stamped by fnc_mission_claim, so both flag here; the sweep bins them under its
-// keep-radius and the deadline. binAt matches the released composition's ~5-minute clock so the men
-// and the props they stood among expire together. Dead owned men are already collected by the
-// sweep's allDeadMen census -- keep-radius protected, so corpse intel stays reachable.
+// time + 300 matches the released composition's clock, so men and the props they stood among expire
+// together. Dead owned men ride the sweep's allDeadMen census, so only the living flag here.
 if (_token >= 0) then {
-    // isNull guard first, short-circuited: allUnits + vehicles can hand back a null reference, and
-    // getVariable on a null object returns nil, not the -1 default -- nil == _token then throws a
-    // generic error that aborts the whole select, so nothing gets flagged and the mission never cleans up.
-    private _owned = (allUnits + vehicles) select {!isNull _x && {_x getVariable ["DUWS_missionOwner", -1] == _token}};
+    // isEqualTo, not ==: a unit the sweep deleted this frame lingers non-null in the census with its
+    // variable space already gone, so getVariable hands back nil, not the -1 default, and nil == _token
+    // throws, aborting the select. isEqualTo reads the type mismatch as false instead.
+    private _owned = (allUnits + vehicles) select {(_x getVariable ["DUWS_missionOwner", -1]) isEqualTo _token};
     {
         _x setVariable ["DUWS_binMe", true];
         _x setVariable ["DUWS_binAt", time + 300];
