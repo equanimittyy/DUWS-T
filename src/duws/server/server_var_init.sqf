@@ -98,11 +98,6 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 kill_cp_kills = 10;
 kill_cp_award = 1;
 
-// Soldiers on the perimeter patrol, at the HQ and at every FOB alike. One figure for both because a
-// FOB is a small base, not a different kind of thing: a single soldier round a circuit is one a
-// two-man probe could walk straight through. Server-only, both spawns run there.
-base_patrol_squad = 8;
-
 // When a FOB or HQ garrison stops being simulated. Nothing culled it before, so every base's soldiers
 // ran pathing and targeting for the rest of the campaign regardless of distance. Server-only.
 //

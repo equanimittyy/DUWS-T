@@ -59,11 +59,10 @@ private _build = {
         if (_scoreSep > -1000000) then { _perch = _perchSep; _perchDir = _dirSep };
         _placedPerches pushBack _perch;
 
-        // Roster from the "sniper_element" token so faction pools resolve the pair. Spawned here, not via
-        // fnc_spawn_team, since the perch siting above replaces the token's own findSafePos/posture.
-        private _men = ["sniper_element", "opfor"] call DUWS_fnc_teamRoster;
-        private _group = [_perch, east, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-        _group deleteGroupWhenEmpty true;
+        // The "sniper_element" token drawn from the faction pools, raised through fnc_spawn_team with
+        // posture none and the perch as _spawnPos: the perch siting below (setPosATL, setDir) is the
+        // circuit a posture would otherwise add, which none omits, and the spawn point overrides the band.
+        private _group = ["sniper_element", _perch, 0, "none", _perch, "opfor"] call fnc_spawn_team;
         [_group] call fnc_mission_claim;
         private _target1 = units _group select 0;
         private _target2 = units _group select 1;

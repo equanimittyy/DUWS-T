@@ -164,33 +164,15 @@ if (!isNull _guardBoxObj) then {
     missionNamespace setVariable ["HQ_redeploy_guardBoxGroup", _grp, true];
 };
 
-// 6. The patrol that walks the towers.
+// 6. The patrol that walks the towers -- the same squad and circuit the FOB patrol walks, raised
+// through the token spawner on the "squad" composition. The anchors are this base's own towers,
+// stood off far enough not to path into one. Spawned from the stored XY and left to ground-snap: the
+// patrol walks a circuit, so it needs no hard placement at the tower's world height.
 private _patrolSpawnPos = missionNamespace getVariable ["HQ_redeploy_patrolSpawnPos", []];
-private _patrolUnits = missionNamespace getVariable ["HQ_redeploy_patrolUnits", []];
-if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
-    private _patrolGroup = [_patrolSpawnPos, WEST, _patrolUnits, [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    _patrolGroup deleteGroupWhenEmpty true;
-    {
-        _x allowDamage false;
-        _x enableSimulationGlobal false;
-        _x setPosWorld _patrolSpawnPos;
-    } forEach (units _patrolGroup);
-    while {count (waypoints _patrolGroup) > 0} do { deleteWaypoint ((waypoints _patrolGroup) select 0); };
-    // The anchors are this base's own towers, stood off far enough not to path into one. The circuit
-    // itself is fnc_apply_posture's, shared with the FOB pair, which walks its corners on the same
-    // orders.
-    [_patrolGroup, "hqpatrol", _patrolSpawnPos, 0, _towers apply { _x getPos [15, getDir _x] }]
-        call fnc_apply_posture;
-    [_patrolGroup] spawn {
-        params ["_grp"];
-        sleep 1.5;
-        {
-            if (!isNull _x && alive _x) then {
-                _x enableSimulationGlobal true;
-                _x allowDamage true;
-            };
-        } forEach (units _grp);
-    };
+if (count _patrolSpawnPos > 0) then {
+    private _spawnXY = [_patrolSpawnPos select 0, _patrolSpawnPos select 1];
+    private _patrolGroup = ["squad", _spawnXY, 0, "hqpatrol", _spawnXY, "blufor",
+        _towers apply { _x getPos [15, getDir _x] }] call fnc_spawn_team;
     missionNamespace setVariable ["HQ_redeploy_patrolGroup", _patrolGroup, true];
 };
 

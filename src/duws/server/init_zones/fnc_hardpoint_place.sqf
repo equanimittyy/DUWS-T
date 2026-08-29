@@ -140,17 +140,15 @@ fnc_hardpoint_garrison = {
     // in the list places no one.
     private _tokens = if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken };
     {
-        private _garrison = [_x, _side] call DUWS_fnc_teamRoster;
-        if (count _garrison > 0) then {
-            // Spawned out toward the patrol ring, not on the emplacement: at the centre they land among
-            // the bunker, bags and gun and snag on them before the circuit can pull them clear. The
-            // fallback stays off-centre for the same reason -- a bearing off _pos, never _pos itself.
-            private _sp = _pos findEmptyPosition [30, 70, _garrison select 0];
-            if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
-            private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-            _grp deleteGroupWhenEmpty true;
+        // Spawned out toward the patrol ring, not on the emplacement: at the centre the men land among
+        // the bunker, bags and gun and snag on them before the circuit can pull them clear. The fallback
+        // stays off-centre for the same reason -- a bearing off _pos, never _pos itself. Sized on the
+        // faction rifleman; the team itself is drawn inside fnc_spawn_team, which also holds its posture.
+        private _sp = _pos findEmptyPosition [30, 70, _soldier];
+        if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
+        private _grp = [_x, _pos, HP_GARRISON_PATROL_R, [_x] call DUWS_fnc_tokenPosture, _sp, _side] call fnc_spawn_team;
+        if (!isNull _grp) then {
             (units _grp) call _maxSpot;
-            [_grp, [_x] call DUWS_fnc_tokenPosture, _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
             _men append (units _grp);
         };
     } forEach _tokens;

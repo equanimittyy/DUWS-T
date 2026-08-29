@@ -14,11 +14,11 @@ private _compKey = "mission_rescue_squad";
 private _radius = 300;
 private _deadline = DUWS_curDeadlineAt;
 
-// The elite BLUFOR squad, raised first so the building check can be sized to it. From the "recon" roster
-// through the shared token vocabulary, so it stays elite and faction-safe where a hardcoded list would
-// spawn a man short on a pack that omits the role.
-private _squadClasses = ["recon", "blufor"] call DUWS_fnc_teamRoster;
-private _squadSize = count _squadClasses;
+// The elite BLUFOR squad. Its size is counted from the "recon" token up front (DUWS_fnc_tokenMenCount
+// raises no men) so the building check below can be sized to it; the squad itself is raised from the
+// same token at the chosen building, staying elite and faction-safe where a hardcoded list would spawn
+// a man short on a pack that omits the role.
+private _squadSize = ["recon"] call DUWS_fnc_tokenMenCount;
 
 // Site: enterable buildings near the offer that can garrison the whole squad, minus any in a zone (radius
 // plus margin), in a civilian town (fnc_civ_townAt, always -1 with civilians off), or on the waterline.
@@ -59,8 +59,7 @@ sleep 6;
 
 // Holed up in the building and captive: passive and unkillable until relieved, so the cordon cannot
 // wipe them before the player arrives. Maxed skill: once they come out they fight their own corner.
-private _squadGroup = [_BuildingPos, WEST, _squadClasses, [], [], 1] call BIS_fnc_spawnGroup;
-_squadGroup deleteGroupWhenEmpty true;
+private _squadGroup = ["recon", _BuildingPos, 0, "none", _BuildingPos, "blufor"] call fnc_spawn_team;
 [_squadGroup] call fnc_mission_claim;
 private _squadUnits = units _squadGroup;
 

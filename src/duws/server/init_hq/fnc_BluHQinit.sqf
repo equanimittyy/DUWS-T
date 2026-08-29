@@ -327,10 +327,7 @@ missionNamespace setVariable ["HQ_redeploy_medGuardsData", [
 if (!isNull _medTent) then { missionNamespace setVariable ["HQ_medTent_netId", netId _medTent, true]; };
 if (!isNull _guardBoxObj) then { missionNamespace setVariable ["HQ_guardBox_netId", netId _guardBoxObj, true]; };
 
-private _patrolUnits = [];
-for "_i" from 1 to base_patrol_squad do { _patrolUnits pushBack (selectRandom _baseGuardTypes); };
 private _patrolSpawnXY = _hqObj modelToWorld [1.27142, -21.9805, 0];
-missionNamespace setVariable ["HQ_redeploy_patrolUnits", _patrolUnits, true];
 missionNamespace setVariable ["HQ_redeploy_patrolSpawnPos", [
     _patrolSpawnXY select 0,
     _patrolSpawnXY select 1,

@@ -212,16 +212,10 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         };
         _spawnPos set [2, 0];
 
-        _group = [_spawnPos, EAST, [
-            opfor_SOLDIER_X, opfor_SOLDIER_X,
-            opfor_AR_SOLDIER_X, opfor_AR_SOLDIER_X,
-            opfor_LAT_SOLDIER_X,
-            opfor_GL_SOLDIER_X,
-            opfor_AR_SOLDIER_X, opfor_SOLDIER_X
-        ]] call BIS_fnc_spawnGroup;
-        {
-        [_x] call fnc_addRandomLoot;
-        } forEach units _group;
+        // The nine-man squad token drawn from the faction pool, replacing a hardcoded eight-man list.
+        // Posture none with the spawn point as _spawnPos: fnc_spawn_team places the men there and adds
+        // their loot, and this thread drives the assault -- AWARE, RED, no fleeing.
+        _group = ["squad", _spawnPos, 0, "none", _spawnPos, "opfor"] call fnc_spawn_team;
         {
             _x allowFleeing 0;
             _x disableAI "AUTOCOMBAT";
@@ -229,7 +223,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
             _x setCombatMode "RED";
         } forEach units _group;
 
-        _group deleteGroupWhenEmpty true;
         [_group] call fnc_mission_claim;
 
         _wp = _group addWaypoint [getPosATL _targetObject, 0];
