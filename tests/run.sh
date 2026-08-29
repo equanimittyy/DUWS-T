@@ -18,6 +18,9 @@ echo
 echo "== lint: composition fences (role/token resolution) =="
 python3 "$HERE/lint/check_compositions.py" || rc=1
 echo
+echo "== lint: missing broadcast (client-called registry entry not publicVariable'd) =="
+python3 "$HERE/lint/check_broadcast.py" || rc=1
+echo
 
 if [ "${1:-}" = "--no-unit" ]; then
   echo "== unit tests (skipped: --no-unit) =="

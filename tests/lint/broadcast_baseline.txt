@@ -1,0 +1,4 @@
+# Registry functions that a client appears to call but that are deliberately server-only,
+# where the remoteExec target is a variable the check cannot prove is the server. Listing a
+# name here is the explicit "server-only" marker: it tells the missing-broadcast lint the
+# entry needs no publicVariable. One fnc_ name per line. Empty today -- the tree is clean.

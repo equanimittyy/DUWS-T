@@ -105,12 +105,22 @@ evenly, so it pays down by pocket.
 | Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on their own broadcast row-presence | Closed. Hardpoints stay off the ledger by design: their liveness is a latched, client-read broadcast row that the server-only graded ledger cannot model, and unifying would strip a broadcast fact the strat-map pickers need. See [`garrison_and_reserves.md`](../info/gameplay/garrison_and_reserves.md). |
 | `DUWS_` prefix on globals / functions | ~549 bare `fnc_`, hundreds of bare globals | Prefix-on-touch only. No sweeping rename — see [out of scope](#out-of-scope). |
 
-## Phase 4 — the static lint guard
+## Phase 4 — the static lint guard (closed)
 
-Add a lint check that flags a function added to the `server_fnc_init.sqf` registry without a matching
-`publicVariable` broadcast. This catches the most common silent-failure class *statically* — the one
-guarantee a compiler-less language can buy back cheaply — and generalises the discipline behind
-[the registry baseline](#baseline--what-holds-and-must-not-churn).
+Shipped as `tests/lint/check_broadcast.py`, wired into `tests/run.sh`. It flags a function added to the
+`server_fnc_init.sqf` registry without a matching `publicVariable` broadcast — the most common
+silent-failure class, caught *statically*, the one guarantee a compiler-less language can buy back
+cheaply — generalising the discipline behind
+[the registry baseline](#baseline--what-holds-and-must-not-churn). The tree is clean today (351 entries,
+86 client-called, all broadcast), so it gates regressions from here.
+
+The design below is what shipped. The false-positive problem is a server-only function that is *correctly*
+unbroadcast — most of the registry — so flagging every unbroadcast entry is noise. The signal is a client
+caller: the name is a `remoteExec`/`remoteExecCall` target whose destination is not literally the server
+(target `2` resolves the name where it is defined), or it is `call`ed/`spawn`ed inside a `client/` file.
+Registry entry + client caller + no broadcast is the bug; a purely server-side entry is not. An entry that
+looks client-called but is deliberately server-only — a target the check cannot prove is the server — goes
+in `broadcast_baseline.txt`, the explicit server-only marker, cheaper than a heuristic that cries wolf.
 
 The design problem is false positives: a server-only function is *correctly* unbroadcast, so flagging
 every registry entry without a `publicVariable` is noise, not signal. The signal is whether a client ever
@@ -152,4 +162,6 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
 - [x] Phase 3: WARCOM BLUFOR patrol retired (removed, not migratable onto the roster-token model) —
       token-spawner migration done; hardpoint liveness kept separate by design, not migrated. `DUWS_`-prefix
       stays on-touch only, a standing policy rather than a discrete task.
-- [ ] Phase 4: add the missing-broadcast lint check to the harness.
+- [x] Phase 4: missing-broadcast lint shipped (`tests/lint/check_broadcast.py`, wired into `run.sh`);
+      flags a client-called registry entry with no `publicVariable`, with `broadcast_baseline.txt` as the
+      server-only escape hatch. Tree clean, so it guards regressions.
