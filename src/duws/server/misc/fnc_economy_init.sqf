@@ -432,11 +432,9 @@ fnc_captured_pool_setCount = {
 fnc_captured_pool_settle = {
 	if (!isServer) exitWith {};
 	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""]];
-	// Corroborate the close side: read the requester's loadout on the server (getUnitLoadout works on
-	// a remote unit) instead of trusting the client's snapshot, so the diff cannot bank a phantom
-	// deposit or hide a withdrawal. The open baseline stays client-sent -- history the server never
-	// saw -- so a faked-rich open can still over-credit, bounded by what the shelf stocked.
-	if (!isNull _requester) then { _closeLoadout = getUnitLoadout _requester; };
+	// Close is read on the client, like open, not re-read here: getUnitLoadout on the remote requester
+	// lagged its replication, so a grab just before close settled against a stale loadout and stripped
+	// gear off an honest co-op player. Trusting the client is the price; the accepted cheat is in the doc.
 	call fnc_captured_pool_friendly;
 	// A disposable launcher (CUP NLAW/M136/RPG18) is stocked and shown by its base row but leaves the
 	// arsenal as a distinct loaded fire-class (CUP_launch_NLAW -> CUP_launch_NLAW_Loaded) the raw

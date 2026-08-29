@@ -30,7 +30,7 @@ still be broken for a joining client.
 
 - [ ] Zone capture registers, marker flips, holds across save/load (SP)
 - [ ] Economy: CP/AP income, capture bounty, and support/unit costs stay in balance
-- [ ] Economy gates hold for an MP client: no unearned support-tier buy, captured-gear settle credits honestly. Known gap — the *open* loadout is still client-sent, so a faked-rich open can over-credit; deferred to [economy_second_pass.md](docs/plans/economy_second_pass.md)
+- [ ] Economy: captured-gear settle is honest in co-op — an honest client's grab right before arsenal close is not stripped on close, and shelf counts match. Settle is client-trusted by design on both open and close; the residual cheat and the 0-cost tier bypass are accepted, see [economy_second_pass.md](docs/plans/economy_second_pass.md)
 
 ## AI opposition
 
