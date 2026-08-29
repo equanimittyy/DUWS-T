@@ -26,8 +26,8 @@ if (_dl > time) then {
 	(missionNamespace getVariable ["DUWS_curReward", [0,0,0]]) params ["_cp", "_ap", "_rep"];
 	_description = _description + format [localize "STR_DUWS_T_mission_cpap", _cp, _ap];
 	if (_rep > 0) then { _description = _description + format [localize "STR_DUWS_T_mission_rep", _rep] };
-	// Concrete rolled duration in in-game hours, rounded: the map's pre-pick range has collapsed to one value.
-	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round (([_dl] call fnc_time_remaining) / 3600)];
+	// Same band the map offered; the exact deadline sits above it (the "You have until" clock).
+	_description = _description + ((missionNamespace getVariable ["DUWS_curDeadlineBand", [0,0]]) call fnc_time_band);
 };
 
 // Created server-side and left to the task framework to synchronise. NOT remoteExec'd: broadcasting

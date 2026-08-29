@@ -144,15 +144,7 @@ _handle = [] spawn {
 		_descFull = _descFull + format [localize "STR_DUWS_T_mission_cpap", _mcp, _map];
 		if (_mrep > 0) then { _descFull = _descFull + format [localize "STR_DUWS_T_mission_rep", _mrep] };
 		_mdl params ["_dlMinH", "_dlMaxH"];
-		// Hours -> "HhMM" so a sub-hour band reads as 0h40, not a bare decimal 0.6667.
-		private _fmtHM = {
-			private _m = round (_this * 60);
-			private _mm = _m mod 60;
-			format ["%1h%2", floor (_m / 60), [str _mm, "0" + str _mm] select (_mm < 10)]
-		};
-		_descFull = _descFull + (if (_dlMinH >= _dlMaxH)
-			then { format [localize "STR_DUWS_T_mission_time_fixed", _dlMinH call _fmtHM] }
-			else { format [localize "STR_DUWS_T_mission_time_range", _dlMinH call _fmtHM, _dlMaxH call _fmtHM] });
+		_descFull = _descFull + ([_dlMinH, _dlMaxH] call fnc_time_band);
 
 		// Record hard offers with their depth from friendly-held ground; the loop's tail turns depth
 		// into the 1.5x-2x multiplier. Same anchor set the frontier search measures against.

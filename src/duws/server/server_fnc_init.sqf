@@ -120,6 +120,8 @@ fnc_time_roll = compile preprocessFileLineNumbers "duws\server\missions\fnc_time
 fnc_time_remaining = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_remaining.sqf";
 fnc_time_deadline = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_deadline.sqf";
 fnc_time_clock = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_clock.sqf";
+// Broadcast: the offer picker (fnc_stratmap) renders the band client-side; the journal task renders it server-side.
+fnc_time_band = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_band.sqf";publicVariable "fnc_time_band";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
