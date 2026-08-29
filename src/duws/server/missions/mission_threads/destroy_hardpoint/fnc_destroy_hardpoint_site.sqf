@@ -1,23 +1,17 @@
-// Site-finder for the destroy-hardpoint mission. Dual-mode, matching surveyKind "hardpoint" (fnc_mission_findSite):
-//   ["ALL"]         -> enumerate every live, revealed OPFOR standalone hardpoint of a destructible type.
-//   [_candidatePos] -> vet: nearest such hardpoint to the candidate, or [] if none left.
-// The survey lists these emplacements directly (one candidate each), so sparse, scattered hardpoints each get
-// offered -- no random-dot survey to snap many dots onto whichever sits nearest a zone cluster. The vet
-// re-resolves a picked candidate to a still-live emplacement and hands back its position. None live -> [].
+// Site-finder for the destroy-hardpoint mission (surveyKind "hardpoint"). ["ALL"] enumerates candidates,
+// [_pos] vets one, re-resolving to a still-live emplacement if the picked one fell since the offer. Listed
+// directly, one per emplacement, so scattered hardpoints each get offered rather than a random-dot survey
+// clustering onto whichever sits nearest a zone.
 //
-// Intel IS a prerequisite, unlike the tower picker: only a revealed row (index 5) qualifies, so the mission
-// never sends the player after an emplacement they have not found. Under non-hardcore fog every hardpoint
-// spawns revealed, so the flag only bites in hardcore mode.
+// Revealed rows only (index 5): intel is a prerequisite here (unlike the tower picker), so the player is
+// never sent after an emplacement they have not found -- only bites in hardcore, else all spawn revealed.
+// Excludes RADIO (its own mission) and MINEFIELD (a hazard, not a garrison). Standalone only (zoneKey ""):
+// a zone-child reveals with its zone and is taken by capturing it, not as a discrete objective.
 //
-// Excludes RADIO (its own Destroy Signal Tower mission) and MINEFIELD (a hazard cleared, not a garrison
-// beaten). Standalone only (zoneKey ""): a zone-child hardpoint reveals with its zone and sits inside its
-// footprint, so it is taken by capturing the zone, not as a discrete objective, and pays no bounty.
+// Called from both the client picker and the launching thread; reads only broadcast DUWS_hardpoints
+// (presence == alive) so both reach the same verdict. Row: [key, pos, type, side, zoneKey, revealed, dir].
 //
-// Client-side in the picker (client/missions/fnc_stratmap.sqf), reads only broadcast DUWS_hardpoints;
-// presence == alive (streamer deletes the row the instant it clears). Row: [key, pos, type, side, zoneKey,
-// revealed, dir].
-//
-// Contract: ["ALL"] -> [pos, ...] ; [_candidatePos] -> [] reject, or [_hpPos] accept.
+// Contract: ["ALL"] -> [pos, ...] ; [_candidatePos] -> [] reject, or [_hpPos, _hpKey] accept.
 params ["_arg"];
 
 private _hps = (missionNamespace getVariable ["DUWS_hardpoints", []]) select {
@@ -32,8 +26,7 @@ private _best = [];
 private _bestD = 1e10;
 {
     private _d = (_x select 1) distance2D _arg;
-    if (_d < _bestD) then { _bestD = _d; _best = _x select 1 };
+    if (_d < _bestD) then { _bestD = _d; _best = [_x select 1, _x select 0] };
 } forEach _hps;
 
-if (_best isEqualTo []) exitWith { [] };
-[_best]
+_best
