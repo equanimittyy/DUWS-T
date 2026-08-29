@@ -627,6 +627,19 @@ permission is a role split the mission does not otherwise carry, and gating AP t
 in a two-player session, just mean the other cannot buy. Spend authority stays the single edit to
 `Squad_Leaders` it already is for CP.
 
+### The captured-gear settle still trusts the client open loadout
+
+The captured-gear settle credits a pool for the difference between the loadout a player opened the
+arsenal with and the one they close it with, so a search-and-bank pays out. Two holes remain, both
+deferred here from the architecture hardening pass. The *close* loadout is now read on the server
+(`server/misc/fnc_economy_init.sqf`), but the *open* baseline is still a client-sent snapshot the
+server never observed, so a client that reports a richer-than-real open can over-credit the swing —
+bounded only by what the shelf actually stocked. And the support-tier backstop guards the debit, not
+the client-side application of the effect, so a free (0-cost) bypass is not stopped at the gate.
+Closing the open baseline needs a server-side open snapshot — an arsenal-open ping — which carries
+its own delayed-ping gap and so is its own small design, not a one-line fix. Tracked as a live gap in
+[`KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md).
+
 ## Reading the war from the map
 
 **AP needs a live readout, which it has never had.** `fnc_ap_adjust` broadcasts the pool but
