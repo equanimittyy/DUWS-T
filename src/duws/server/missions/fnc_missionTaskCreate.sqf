@@ -55,3 +55,6 @@ if (_dl > time) then {
 // Double brackets: playMusic is a unary command whose one argument is an array, so written flat
 // remoteExec hands it the string alone and it throws on the type.
 [["LeadTrack02_F", 0]] remoteExec ["playMusic", [0,-2] select isDedicated];
+
+// Closes the requester's progress line: survey -> generating -> complete, now the task exists.
+[missionNamespace getVariable ["DUWS_curRequester", 0], "STR_DUWS_T_MISSION_GEN_COMPLETE"] call fnc_mission_notice;

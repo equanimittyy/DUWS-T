@@ -56,6 +56,8 @@ DUWS_curReward = [_mcp, _map, _mrep];
 DUWS_curNameKey = _mnameKey;
 DUWS_curObjective = _mobj;
 DUWS_curNoteKey = _mnote;
+// So the completion notice at task creation reaches the same screen the survey/generating lines did.
+DUWS_curRequester = _requester;
 _mdl params ["_dlMinH", "_dlMaxH"];
 // Rolled once at the mission's start, in 5-minute steps of in-game time, so the enforced deadline
 // sits behind the band the map advertised. The table's hours become steps here (x12: twelve 5-minute

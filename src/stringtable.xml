@@ -4005,6 +4005,10 @@
                 <Original>Generating mission...</Original>
                 <English>Generating mission...</English>
             </Key>
+            <Key ID="STR_DUWS_T_MISSION_GEN_COMPLETE">
+                <Original>Mission generation complete.</Original>
+                <English>Mission generation complete.</English>
+            </Key>
             <Key ID="STR_DUWS_T_MISSION_GEN_FAILED">
                 <Original>Mission generation failed. Try again.</Original>
                 <English>Mission generation failed. Try again.</English>
