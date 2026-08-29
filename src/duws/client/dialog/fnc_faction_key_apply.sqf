@@ -37,10 +37,9 @@ if (_class isEqualTo "") exitWith {
 
 ["INFO", "FACTION", format ["Key editor: %1 <- %2 (faction %3)", _key, _class, _faction]] call fnc_log;
 
-// Vehicle-only, matching fnc_faction_poolable_keys: only vehicle keys draw from a pool at spawn, so a
-// man or static key holds just the picked class -- building it a bucket would show the row a (+N)
-// count the commit then collapses away. The faction parse below is what feeds that bucket, so a
-// non-vehicle key skips it and the freeze-guarding it takes.
+// Only vehicle keys draw from a pool at spawn (fnc_faction_poolable_keys), so a man or static key
+// holds just the picked class: a bucket would show the row a (+N) count the commit then collapses
+// away, and pay the faction parse below to build it.
 private _pool = [_class];
 if (duws_faction_edit_kind isEqualTo "vehicle") then {
     // Said before the parse rather than after, because that parse walks a whole faction's CfgVehicles
