@@ -99,7 +99,7 @@ evenly, so it pays down by pocket.
 |---|---|---|
 | Mission lifecycle spine | Runner approach dropped: each thread runs its own shape, ending through the single `fnc_mission_finish` chokepoint | Closed. `fnc_mission_run` was deleted rather than widened, so there is no shared runner to migrate onto. |
 | Token spawner vs direct `BIS_fnc_spawnGroup` | Three settled systems: the token spawner for roster teams, static crewing, and bespoke direct spawns for one-offs | Done — the team callers route through the token spawner; see [`unit_spawning.md`](../info/architecture/unit_spawning.md). Remaining: retire the WARCOM BLUFOR patrol. |
-| Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on a separate snapshot | Bring hardpoints onto the lost-token ledger so one model answers liveness everywhere. |
+| Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on their own broadcast row-presence | Closed. Hardpoints stay off the ledger by design: their liveness is a latched, client-read broadcast row that the server-only graded ledger cannot model, and unifying would strip a broadcast fact the strat-map pickers need. See [`garrison_and_reserves.md`](../info/gameplay/garrison_and_reserves.md). |
 | `DUWS_` prefix on globals / functions | ~549 bare `fnc_`, hundreds of bare globals | Prefix-on-touch only. No sweeping rename — see [out of scope](#out-of-scope). |
 
 ## Phase 4 — the static lint guard
@@ -108,6 +108,14 @@ Add a lint check that flags a function added to the `server_fnc_init.sqf` regist
 `publicVariable` broadcast. This catches the most common silent-failure class *statically* — the one
 guarantee a compiler-less language can buy back cheaply — and generalises the discipline behind
 [the registry baseline](#baseline--what-holds-and-must-not-churn).
+
+The design problem is false positives: a server-only function is *correctly* unbroadcast, so flagging
+every registry entry without a `publicVariable` is noise, not signal. The signal is whether a client ever
+calls the function — so the check should gate on evidence of a remote caller: the name appears in a
+`remoteExec`/`remoteExecCall` argument anywhere, or is called from a `client/` file. A registry entry
+with a client caller and no broadcast is the failure; a purely server-side one is not. Where a caller's
+intent cannot be read statically, an explicit server-only marker is cheaper than a heuristic that cries
+wolf. Scope this before building — a lint that over-flags gets muted, and a muted lint guards nothing.
 
 ## Out of scope
 
@@ -127,7 +135,9 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
    is not worth the churn; add one reactively only if an invariant actually breaks.
 4. **One migration finished before the next.** The recurring fault is half-adoption; do not open a
    fifth half-migration to chase the first four.
-5. **The mission-spine migration stays in its own plan** and is referenced, not duplicated.
+5. **Hardpoint liveness stays off the garrison ledger.** Its broadcast, latched, client-read row-presence
+   is a different model from the server-only graded ledger, and unifying them would strip a broadcast fact
+   the strat-map pickers depend on. Kept separate by design, not a pending migration.
 
 ## Task list
 
@@ -136,6 +146,6 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
       snapshot, and the 0-cost tier bypass) server-side.
 - [x] Phase 2: two assertions shipped (poller, single-mission); the remaining three (reserve
       single-writer, tier-monotonic rows, garrison-live flag on teardown) dropped as not worth the churn.
-- [ ] Phase 3: finish the token-spawner migration; bring hardpoints onto the lost-token ledger;
-      `DUWS_`-prefix on touch only.
+- [ ] Phase 3: retire the WARCOM BLUFOR patrol (the last token-spawner item); `DUWS_`-prefix on touch
+      only. Token spawner done; hardpoint liveness kept separate by design, not migrated.
 - [ ] Phase 4: add the missing-broadcast lint check to the harness.
