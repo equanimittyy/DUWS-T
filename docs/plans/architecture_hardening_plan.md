@@ -40,8 +40,8 @@ registry `shared/includes/mission_types.hpp`, the support catalogue).
 
 ## Phase 1 — verify the correctness risks
 
-The review's four risks were inferred from reading and must be confirmed in-game. A re-read of the tree
-shows three already carry a fix; only the fourth still needs code.
+The review's four risks were inferred from reading and must be confirmed in-game. All four now carry a
+fix in the tree; the economy-gate fix leaves one residual, called out in its bullet below.
 
 - **`fnc_money_spend` non-local item-slot debit — patched, verify.** The removal now splits on locality
   (`server/misc/fnc_economy_init.sqf:246-247`): `removeItem` when the unit is server-local, otherwise
@@ -50,18 +50,25 @@ shows three already carry a fix; only the fourth still needs code.
 - **Escalation on a dedicated server — refactored, verify.** The counter no longer hangs off a
   server-only handler on a client-local damage event; each machine watches its own damage
   (`fnc_escalation_watch`) and forwards to the server (`fnc_escalation_report`) with a JIP-broadcast
-  install (`server/misc/fnc_escalation.sqf:81-127`). Verify client-caused building damage raises
-  `escalation_multiplier` on a dedicated host.
+  install (`server/misc/fnc_escalation.sqf:82-127`, watcher in `fnc_escalation_watch.sqf`). Verify
+  client-caused building damage raises `escalation_multiplier` on a dedicated host.
 - **OPFOR faction auto-detect name-fragment matching — refactored, verify.** OPFOR now publishes from
   the schema key list, not name-fragment matching, mirroring the BLUFOR side
   (`shared/factions/MODERN/AUTODETECT_opfor.sqf`, tail). Verify a faction with a role spelled
   off-pattern still fields that role OPFOR-side, and confirm no name-fragment path survives in
   `fn_factionAutoDetect.sqf`.
-- **Two economy gates trust the client — still open.** The support-tier gate is validated client-side
-  only (the server checks balance but not tier), and the captured-gear pool settles from a
-  client-supplied loadout it never corroborates. This is the one risk with no fix in the tree. Confirm
-  exploitability, then move both checks server-side. Belongs to the economy domain — see
-  [`economy_second_pass.md`](./economy_second_pass.md) if the fix grows past a gate.
+- **Two economy gates trust the client — patched, verify; one residual.** The support-tier gate now has
+  a server backstop: `fnc_pool_try_spend` re-derives the required tier from the item's own class and
+  refuses the debit, never trusting a client-named tier (`server/misc/fnc_economy_init.sqf:292-307`);
+  both the support and vehicle-drop purchase paths pass a gate descriptor. The captured-gear settle now
+  reads the requester's *close* loadout on the server rather than the client's snapshot
+  (`server/misc/fnc_economy_init.sqf:439`). Verify a bypassed client cannot buy an unearned-tier support
+  and that an arsenal draw settles honestly on a joined client. **Residual, still open:** the settle's
+  *open* baseline stays client-sent — the server never observed it, so a faked-rich open can still
+  over-credit, bounded by what the shelf stocked; and the tier backstop guards the debit, not the
+  client-side application of the effect, so a free (0-cost) bypass is not stopped. Closing the open
+  baseline needs a server-side open snapshot (an arsenal-open ping), which carries its own delayed-ping
+  gap. Belongs to the economy domain — see [`economy_second_pass.md`](./economy_second_pass.md).
 
 ## Phase 2 — an assertion behind each unasserted invariant
 
@@ -120,8 +127,8 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
 
 1. **Containment, not rewrite.** The tractable path is verify → assert → finish migrations, not a
    namespace or registry rebuild.
-2. **Verify before fixing.** Three of the four review risks are already patched on disk and two of the
-   invariants already asserted; the plan confirms in-game rather than re-fixing.
+2. **Verify before fixing.** All four review risks now carry a fix on disk (the economy gates with one
+   residual) and two of the invariants are asserted; the plan confirms in-game rather than re-fixing.
 3. **Runtime assertions are the guardrail.** SQF cannot fail a build, so each load-bearing invariant
    gets a loud log on violation — cheap, and the only check the language affords.
 4. **One migration finished before the next.** The recurring fault is half-adoption; do not open a
@@ -130,8 +137,9 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
 
 ## Task list
 
-- [ ] Phase 1: play-test-confirm the three patched risks (money debit, dedicated escalation, OPFOR
-      off-pattern role); scope and fix the two client-trusting economy gates server-side.
+- [ ] Phase 1: play-test-confirm the four patched risks (money debit, dedicated escalation, OPFOR
+      off-pattern role, economy tier + close-loadout gates); close the economy residual (settle open-loadout
+      snapshot, and the 0-cost tier bypass) server-side.
 - [ ] Phase 2: assert the three still-open invariants (reserve single-writer, tier-monotonic rows,
       garrison-live flag on teardown), copying the poller/mission-begin pattern.
 - [ ] Phase 3: finish the token-spawner migration; bring hardpoints onto the lost-token ledger;
