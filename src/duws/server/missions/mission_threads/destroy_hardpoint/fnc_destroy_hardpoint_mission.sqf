@@ -3,7 +3,8 @@
 // and MINEFIELD -- owned by the hardpoint streamer; this thread only tasks it and pays the mission reward
 // on top. The streamer owns the emplacement, its crew and its own bounty, so the two payouts stack here.
 params ["_MissionPos", "_mission_name"];
-if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([16, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 _radius = 400;
 _deadline = DUWS_curDeadlineAt;
@@ -26,7 +27,7 @@ private _bestD = 2500;
         if (_d < _bestD) then { _bestD = _d; _hpKey = _key; _hpPos = _hp };
     };
 } forEach DUWS_hardpoints;
-if (_hpKey isEqualTo "") exitWith { [16, "STR_DUWS_T_crtzxs0j", "no_hardpoint"] call fnc_mission_abort };
+if (_hpKey isEqualTo "") exitWith { [16, _requester, "no_hardpoint"] call fnc_mission_abort };
 
 // One tasking line either side of the marker/task: the emplacement and its crew already stand on the
 // map, so there is no spawn-up to narrate.

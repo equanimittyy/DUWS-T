@@ -1,6 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([2, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _deadline = DUWS_curDeadlineAt;
 
@@ -9,7 +10,7 @@ private _deadline = DUWS_curDeadlineAt;
 // that flipped since (haven captured, or friendly ground crossed the corridor) leaves none -> abort.
 private _dest = [_MissionPos] call fnc_hvt_dest_pick;
 if (_dest isEqualTo []) exitWith {
-    [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 3 km+ out with a clean corridor"] call fnc_mission_abort;
+    [2, _requester, "dest_zone_missing: no OPFOR-held zone 3 km+ out with a clean corridor"] call fnc_mission_abort;
 };
 private _destPos = _dest select 0;
 private _destName = _dest select 1;
@@ -75,14 +76,9 @@ if (_carPool isEqualTo []) then {
 private _hvtCarClass = selectRandom _carPool;
 private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "displayName");
 
-// Task and opening brief before the convoy spawn below: the three columns cost seconds of engine time to
-// stand up, and issuing the task/line after them left the player with a silent map until they finished.
-// Both read only _destName/_vehName, already resolved above -- neither needs the spawned convoys.
+// Task id resolved now; the task, brief and markers all issue below once the three columns stand.
 private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hvtcopy"] remoteExec ["fnc_duws_dialogue", 0];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 // One line of vehicles seated ON the precomputed drive route: fnc_convoy_slots spaces one road-facing slot
 // per vehicle along it, so the hulls form a real column on the path they will drive, not a scatter. Route
@@ -251,19 +247,26 @@ for "_i" from 0 to 2 do {
     };
 };
 
-if (isNull _hvt) exitWith {
-    // The officer class never crewed -- an exotic faction naming no officer role. Bail rather than
-    // leave a mission that can never be won.
-    { private _g = _x; { deleteVehicle (vehicle _x); deleteVehicle _x } forEach units _g; deleteGroup _g } forEach _groups;
-    [2, "STR_DUWS_T_crtzxs0j", "hvt_spawn_failed: no officer class"] call fnc_mission_abort;
-};
-
+// Claim the columns before the spawn-check so an abort's token sweep bins them: fnc_mission_claim stamps
+// each with this mission's token, and fnc_mission_abort tears down by that token.
 { [_x] call fnc_mission_claim } forEach _groups;
+
+if (isNull _hvt) exitWith {
+    // The officer class never crewed -- an exotic faction naming no officer role. Bail rather than leave a
+    // mission that can never be won; the claimed columns go to the sweep through the abort's token teardown.
+    [2, _requester, "hvt_spawn_failed: no officer class"] call fnc_mission_abort;
+};
 
 // Standing DEBUG trace (silent unless duws_log_level is 4) for the "killed the HVT, nothing happened"
 // ambiguity -- three columns, one carries him. Column index and car id at spawn, the peel, and the outcome
 // at teardown tell hitting a decoy apart from the officer surviving his car's destruction, from an RPT alone.
 ["DEBUG", "MISSION", format ["hvt debug: hvtIdx=%1 car=%2 carClass=%3 hvt=%4 starts=%5", _hvtIdx, netId _car, _hvtCarClass, netId _hvt, _convoyStarts]] call fnc_log;
+
+// Columns stand: issue the task and opening brief (both read only _destName/_vehName), then the markers below.
+[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hvtcopy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Search ellipse on the convoy start cluster (where the player is sent), with a fix on each start inside it.
 // The starts are one-shot: nothing tracks the convoys live, or there would be no hunt. The destination is

@@ -1,6 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([14, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 
 _radius = 600;
@@ -34,7 +35,7 @@ private _bestD = 1e9;
         if (_d < _bestD) then { _bestD = _d; _townPos = _c; _townIdx = _forEachIndex };
     };
 } forEach _circles;
-if (_townIdx < 0) exitWith { [14, "STR_DUWS_T_crtzxs0j", "no_delivery_town"] call fnc_mission_abort; };
+if (_townIdx < 0) exitWith { [14, _requester, "no_delivery_town"] call fnc_mission_abort; };
 
 // IDAP's thanks names the delivery town (the location's own name, nearest-location fallback, then a
 // generic if the map left it unnamed) so the sign-off reads for the place the player just drove to.
@@ -43,21 +44,12 @@ if (_townName == "") then { _townName = text (nearestLocation [_townPos, ""]) };
 if (_townName == "") then { _townName = localize "STR_DUWS_T_idap_town_generic" };
 private _message3 = format [localize "STR_DUWS_T_idapend", _townName];
 
-private _site = [_MissionPos, _radius, 14] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 14, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// Marker + task before the spawn-up (tens of seconds); the brief below uses pre-localised strings with
-// fixed speakers, so it stays manual rather than riding fnc_mission_present's callsign substitution.
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, "truck"] call fnc_mission_present;
-
-// Brief opens before the spawn-up so the spawn does not delay the opening line; speakers are fixed strings.
-[_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 5;
-[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 _vehPos = _targetpos;
 
@@ -173,6 +165,14 @@ _cleanupDelivery = {
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
     deleteMarker _deliveryMarkerName;
 };
+
+// Brief stays manual: fixed-speaker strings, not fnc_mission_present's callsign substitution.
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, "truck"] call fnc_mission_present;
+[_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
+sleep 5;
+[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5; // let the patrols finish spawning
 

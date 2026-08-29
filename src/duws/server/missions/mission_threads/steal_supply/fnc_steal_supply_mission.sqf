@@ -1,5 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
+private _requester = remoteExecutedOwner;
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
@@ -64,20 +65,21 @@ private _onWin = {
 private _done = { alive (_this select 0) && ((_this select 0) distance PosOfBLUHQ) < 100 };
 private _lost = [[{ !alive (_this select 0) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckfail"]]];
 
-if (!([1, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([1, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 600;
-private _site = [_MissionPos, _radius, 1] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 1, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_p7qawzl4", _mission_name, "getin",
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_supplytruckletsdothis", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplytruckoverlord", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_supplytruckcopy", 0]]
 ] call fnc_mission_present;
-
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
-if (isNil "_handles") then { _handles = [] };
 
 sleep 5; // let the guard force finish arriving before the win poll starts
 

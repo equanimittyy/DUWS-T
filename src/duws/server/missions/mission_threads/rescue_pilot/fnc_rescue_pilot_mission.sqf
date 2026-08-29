@@ -1,6 +1,7 @@
 // Locality: server; the addAction/trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 params ["_MissionPos", "_mission_name"];
-if (!([4, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([4, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 
 private _fncScript = {
@@ -404,14 +405,13 @@ _message = localize "STR_DUWS_T_pilotletsdothis";
 _message1 = localize "STR_DUWS_T_pilotfound";
 _message2 = localize "STR_DUWS_T_pilotend";
 
-private _site = [_MissionPos, _radius, 4] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 4, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// Marker + task before the spawn-up (tens of seconds); the brief below stays manual (fixed speaker,
-// pre-localised, no callsign substitution).
+// The task name finish reads back; the marker follows once the pilot is down (below).
 private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, "help"] call fnc_mission_present;
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 _vehPos = _targetpos;
 
@@ -453,6 +453,8 @@ publicVariable "currentMissionPilot";
 
 [_pilot] call DUWS_fnc_addCarryAction;
 
+// Marker + task now the pilot is down; the brief below is manual (fixed speaker).
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, "help"] call fnc_mission_present;
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_pilotcopy"] remoteExec ["fnc_duws_dialogue", 0];

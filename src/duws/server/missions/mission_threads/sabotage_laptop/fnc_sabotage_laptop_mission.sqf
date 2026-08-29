@@ -1,7 +1,8 @@
 // Locality: server; the hold-action code blocks below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 params ["_MissionPos", "_mission_name"];
-if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([8, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 
 _radius = 350;
@@ -13,7 +14,7 @@ _message = localize "STR_DUWS_T_laptopletsdothis";
 // laptop is real. The rest are decoys, a third rigged to blow, so the player must clear and sabotage each
 // to find out which. Abort only if the cluster evaporated since the offer.
 private _usable = [_MissionPos, 2, _radius] call fnc_usableBuildings;
-if (_usable isEqualTo []) exitWith { [8, "STR_DUWS_T_crtzxs0j", "no_building"] call fnc_mission_abort };
+if (_usable isEqualTo []) exitWith { [8, _requester, "no_building"] call fnc_mission_abort };
 private _bldgCount = (3 + floor random 3) min (count _usable);   // 3-5, capped at what exists
 private _bldgs = [];
 private _pool = +_usable;
@@ -26,17 +27,9 @@ private _laptopBldg = selectRandom _bldgs;
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
 
-// Marker + task before the spawn-up (tens of seconds); the brief below stays manual (fixed speaker,
-// pre-localised, no callsign substitution).
+// The task name the watcher and hold-actions key on; the marker follows once the laptops are seated (below).
 private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, "download"] call fnc_mission_present;
-
-// Brief opens the mission, before the building/laptop spawn-up below (tens of seconds): the spawn must
-// not delay the opening line. Speaker and message are fixed strings, independent of the spawned sites.
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_laptopcopy"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 // One orange objective marker per candidate building, no text: the player sees every possible site but not
 // which holds the laptop until it is cleared. Names tracked so the win and timeout paths can delete them all.
@@ -158,6 +151,13 @@ sleep 1;
     ];
     (([_patrolTokens, _c, _r] call DUWS_fnc_raiseGarrison) select { !isNull _x }) call fnc_mission_claim;
 };
+
+// Marker + task now the laptops are seated; the brief below is manual (fixed speaker).
+_markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, "download"] call fnc_mission_present;
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_laptopcopy"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
 
 // A hold-to-complete "Sabotage" on each laptop (6 s, the body-search hold). The entry always shows but
 // only progresses once no living OPFOR is within 50 m; a hold attempted with enemies up is interrupted

@@ -1,12 +1,13 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
+private _requester = remoteExecutedOwner;
 
 // Resolve the town this offer sits on. The finder returned a town centre, so the nearest registered
 // town to it is that town; civ_town_rep / civ_radii are server-only and this thread is server-side.
 private _locs  = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 if (_locs isEqualTo []) exitWith {
-    [15, "STR_DUWS_T_crtzxs0j", "no_towns_registered: civ_locations empty"] call fnc_mission_abort;
+    [15, _requester, "no_towns_registered: civ_locations empty"] call fnc_mission_abort;
 };
 private _townIndex = -1;
 private _bestD = 1e9;
@@ -15,7 +16,7 @@ private _bestD = 1e9;
     if (_d < _bestD) then { _bestD = _d; _townIndex = _forEachIndex };
 } forEach _locs;
 if (_townIndex < 0) exitWith {
-    [15, "STR_DUWS_T_crtzxs0j", "no_town_match: offer pos matched no registered town"] call fnc_mission_abort;
+    [15, _requester, "no_town_match: offer pos matched no registered town"] call fnc_mission_abort;
 };
 private _townPos    = getPos (_locs select _townIndex);
 private _townRadius = _radii param [_townIndex, 200];
@@ -24,7 +25,7 @@ private _townRadius = _radii param [_townIndex, 200];
 private _rep       = [_townIndex] call fnc_civ_repAt;
 private _enemyTown = (_rep <= -10) || {([_townIndex] call fnc_town_garrison_tierAt) > 0};
 
-if (!([15, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([15, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 // Leave clock on the shared mission-timing shape (5-min in-game steps, the same clock the deadline
 // uses): enemy towns give 10 minutes, friendly 20. TUNABLE steps.
@@ -48,7 +49,7 @@ private _zxD = 1e9;
     };
 } forEach zone_namePOS_pairs;
 if (_zx isEqualTo []) exitWith {
-    [15, "STR_DUWS_T_crtzxs0j", "escape_zone_missing: no OPFOR-held zone >=1km from town"] call fnc_mission_abort;
+    [15, _requester, "escape_zone_missing: no OPFOR-held zone >=1km from town"] call fnc_mission_abort;
 };
 
 private _townName = text (_locs select _townIndex);
@@ -65,22 +66,14 @@ private _informantClass = selectRandom _vehPool;
 private _decoyClasses = [_informantClass, selectRandom _vehPool, selectRandom _vehPool] call BIS_fnc_arrayShuffle;
 private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "displayName");
 
-// Objective marker + task, before the crowd is built: the ellipse is all the player has while it spawns.
 private _radius = _townRadius max 200;
 // Everything the hunt spawns clusters within this, so the player works one tight knot at the centre,
 // not a town-wide sweep, and the informant stays in his crowd. The task ellipse still marks the town.
 private _spawnRadius = (_townRadius * 0.5) max 100; // TUNABLE.
 // Position-based id (like every mission thread): unique per town and stable, where a round-time id
-// collides when two missions are created in the same second. Marker + task via fnc_mission_present;
-// the brief below stays manual (four-arg format, no callsign substitution).
+// collides when two missions are created in the same second.
 private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
-private _markername2 = [_townPos, _radius, _taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, "search"] call fnc_mission_present;
-
-// Brief opens the mission, before the crowd/car spawn below: those spawns cost seconds and must not
-// delay the opening line. All four fields are resolved above, none depends on the spawned units.
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_INFORMANT_COPY"] remoteExec ["fnc_duws_dialogue", 0];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 // Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition fits
 // THIS car's footprint against nearby buildings/walls/cars, or a bare road point plus createVehicle's weak
@@ -398,6 +391,12 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         [_inf, _zx, true, true] call DUWS_fnc_informant_footFlee;
     };
 };
+
+// Marker + task now the hunt stands; the brief below is manual (four-field format, no callsign substitution).
+private _markername2 = [_townPos, _radius, _taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, "search"] call fnc_mission_present;
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_INFORMANT_COPY"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Win/fail monitor. Killed -> win; reaches the zone -> escaped; deadline -> timeout.
 private _deadline = DUWS_curDeadlineAt;

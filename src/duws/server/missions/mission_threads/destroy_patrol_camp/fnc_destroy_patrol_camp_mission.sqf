@@ -1,6 +1,7 @@
 // Locality: server; the composition, spawns and monitor all run on the server. Callers remoteExec to 2.
 
 params ["_MissionPos", "_mission_name"];
+private _requester = remoteExecutedOwner;
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
@@ -138,11 +139,11 @@ private _build = {
         };
     } forEach _campCentres;
 
-    // No guard team stood up: with nothing to kill the win check would pass on the first poll. Abort at build
-    // time rather than hand the player a mission that completes itself -- the spine fails the task, sweeps the
-    // keyed composition, and pays no reward.
+    // No guard team stood up: with nothing to kill the win check would pass on the first poll. Bail at build
+    // time rather than hand the player a mission that completes itself -- the caller aborts, which releases the
+    // slot and cooldown for a fresh pick and hands the keyed composition to the sweep.
     if (_campTeamUnits isEqualTo []) exitWith {
-        ["ERROR", "MISSION", "patrol camp: no camp team raised; ending without reward"] call fnc_log;
+        ["ERROR", "MISSION", "patrol camp: no camp team raised; aborting for a fresh pick"] call fnc_log;
         "ABORT"
     };
 
@@ -163,25 +164,27 @@ private _build = {
 // Win when every camp team is dead; the roaming patrols are ambience, not part of the census.
 private _done = { ({alive _x} count _this) == 0 };
 
-if (!([18, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([18, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 1000;
-private _site = [_MissionPos, _radius, 18] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 18, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 private _taskId = format ["patrolcamp%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+// Build-time abort: no camp team stood up (a broken-faction edge), so nothing could be killed to win.
+// Caught before the mission is presented, so release the slot and cooldown for a fresh pick and hand the
+// placed camp composition to the sweep -- better than fielding a task that would win on the first poll.
+if (_handles isEqualTo "ABORT") exitWith {
+    [18, _requester, "no_camp_team", "mission_patrol_camp"] call fnc_mission_abort;
+};
+if (isNil "_handles") then { _handles = [] };
+
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", _mission_name, "destroy",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]]
 ] call fnc_mission_present;
-
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
-// Build-time abort: no camp team stood up (a broken-faction edge), so fail rather than let an empty
-// census win on the first poll. The brief has already played, so the abort speaks nothing.
-if (_handles isEqualTo "ABORT") exitWith {
-    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_patrol_camp", false, false] call fnc_mission_finish;
-};
-if (isNil "_handles") then { _handles = [] };
 
 sleep 5; // let the camp teams finish arriving before the win poll starts
 

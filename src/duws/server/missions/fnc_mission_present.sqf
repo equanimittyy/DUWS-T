@@ -1,8 +1,8 @@
 // Locality: server -- mission threads call it, all server-side.
 //
-// Draw the search marker, issue the task, then play the opening brief -- in that order, ahead of the
-// objective spawn (which can run tens of seconds), because the marker and task are all that tell the
-// player where to go. The brief reads only the nearest place name, never the objective, so it runs first.
+// Draw the search marker, issue the task, then play the opening brief. Called once the objective is built,
+// never ahead of it: the marker and task are what send the player to the site, so presenting before the
+// spawn pointed them at bare ground for the seconds it took. The brief reads only the nearest place name.
 //
 // _taskId is unique per instance (callers append a rounded position); _descText arrives already localised;
 // _brief is [[speakerKey, msgKey, delayAfter], ...], each callsign-substituted (fnc_cs) and formatted with

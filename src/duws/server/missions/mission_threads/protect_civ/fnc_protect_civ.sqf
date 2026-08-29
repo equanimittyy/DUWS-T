@@ -1,6 +1,7 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 params ["_MissionPos", "_mission_name"];
-if (!([13, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([13, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 _searchRadius   = 250;
 _spawnDist      = 230;
@@ -31,7 +32,7 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 // triggers on nothing. exitWith leaves the thread because if/then is transparent to it and nothing above
 // the body is a loop.
 if (isNull _Building) exitWith {
-    [13, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
+    [13, _requester, "no_building"] call fnc_mission_abort;
 };
 
 _buildingPositions = [_Building] call BIS_fnc_buildingPositions;
@@ -49,16 +50,14 @@ if (count _buildingPositions < 4) then {
         };
     } forEach _nearbyBuildings;
     if (!_found) exitWith {
-        [13, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
+        [13, _requester, "no_building_4pos"] call fnc_mission_abort;
     };
 };
 
-// Marker + task via fnc_mission_present, sited on _targetpos rather than _randomPos because that is
-// what the start trigger and the end sweep below both use, so all three describe one area. Drawn only
-// once the 4-position rebuild above has settled which building it is; the brief below stays manual
-// (multi-speaker sequence, callsign substitution already applied per line above).
+// The task name the start trigger and end sweep below both key on, sited on _targetpos so all three
+// describe one settled area; the marker follows once the civilian stands (below).
 private _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-_markername2 = [_targetpos, _searchRadius, _VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, "defend"] call fnc_mission_present;
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 _civilianClass = "C_Man_Fisherman_01_F";
 _civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;
@@ -101,6 +100,9 @@ _civGroup deleteGroupWhenEmpty true;
 // The one WEST unit here needs an explicit owner so teardown flags it. Claim sets ownership only --
 // DUWS_binMe is stamped later at cleanup -- so this cannot delete him mid-escort.
 [_civGroup] call fnc_mission_claim;
+
+// Marker + task now the civilian stands; the manual multi-speaker brief follows.
+_markername2 = [_targetpos, _searchRadius, _VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, "defend"] call fnc_mission_present;
 
 [_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;

@@ -3,7 +3,8 @@
 // streamer -- this thread only tasks it and pays the mission reward on top; the streamer owns the mast,
 // its crew and its own bounty, so the two payouts stack with no coupling here.
 params ["_MissionPos", "_mission_name"];
-if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([3, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 _radius = 400;
 _deadline = DUWS_curDeadlineAt;
@@ -21,7 +22,7 @@ private _bestD = 2500;
         if (_d < _bestD) then { _bestD = _d; _hpKey = _key; _hpPos = _hp };
     };
 } forEach DUWS_hardpoints;
-if (_hpKey isEqualTo "") exitWith { [3, "STR_DUWS_T_crtzxs0j", "no_radio_hp"] call fnc_mission_abort };
+if (_hpKey isEqualTo "") exitWith { [3, _requester, "no_radio_hp"] call fnc_mission_abort };
 
 // One tasking line either side of the marker/task: the mast and its crew already stand on the map, so
 // there is no spawn-up to narrate.

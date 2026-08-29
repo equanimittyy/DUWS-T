@@ -1,5 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
+private _requester = remoteExecutedOwner;
 
 // Refuse a second builder while one still lives -- ahead of fnc_mission_begin, so the refused mission
 // claims no reward, deadline or token. begin never runs here, so stamp the rest timer by hand, or the
@@ -58,20 +59,21 @@ private _onWin = {
 private _done = { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 };
 private _lost = [[{ !alive (_this) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderfail"]]];
 
-if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([6, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 600;
-private _site = [_MissionPos, _radius, 6] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 6, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_czpvn5z1", _mission_name, "getin",
     [["STR_DUWS_T_ALLSEER", "STR_DUWS_T_builderspot", 3], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_buildertask", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_buildercopy", 0]]
 ] call fnc_mission_present;
-
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
-if (isNil "_handles") then { _handles = [] };
 
 sleep 5; // let the guard force finish arriving before the win poll starts
 

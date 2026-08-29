@@ -112,6 +112,7 @@ fnc_mission_finish = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrols.sqf";
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
+fnc_mission_notice = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_notice.sqf";
 fnc_mission_gate_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_gate_left.sqf";publicVariable "fnc_mission_gate_left";
 fnc_mission_gate_time = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_gate_time.sqf";publicVariable "fnc_mission_gate_time";
 fnc_pos_claimed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_claimed.sqf";publicVariable "fnc_pos_claimed";

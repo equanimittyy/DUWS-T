@@ -1,6 +1,7 @@
 // Locality: server -- callers remoteExec to target 2; watcher threads spawned here inherit it.
 params ["_MissionPos", "_mission_name", ["_destZone", []]];
-if (!([11, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 #define DA_RADIUS      300      // objective ring drawn and searched within
 #define DA_CONVOY_DIST 1000     // fallback convoy entry distance when no OPFOR zone is known
@@ -20,7 +21,7 @@ private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-private _site = [_MissionPos, DA_RADIUS, 11] call fnc_mission_site;
+private _site = [_MissionPos, DA_RADIUS, 11, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
@@ -37,27 +38,24 @@ if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then {
 };
 if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetpos };
 
-// Marker + task before the spawn-up: the ellipse and task are all that point the player at the objective
-// while the convoy is still forming up off-screen. The brief below stays manual (Overlord line with a
-// place-name format, no callsign substitution).
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-private _marker = [_randomPos, DA_RADIUS, _taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, "destroy"] call fnc_mission_present;
-
-// Overlord's brief opens the mission, before the convoy spawn below: the spawn costs seconds and must
-// not delay the opening line. The eyes-on and approach arrow follow once the column is sited (further down).
-private _place = [_randomPos] call fnc_place_name;
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_destroyarmour_copy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // The broken-down tank: empty (createVehicle raises no crew), pre-damaged and low on fuel so the repair is
 // a real state change. Persistent so the abandoned-vehicle sweep cannot reap it before anyone arrives.
 // Neither claimed nor kept: a claim deletes, and a winner drives this home.
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 private _tank = createVehicle [opfor_MBT_TANK1_X, _vehpos, [], 0, "CAN_COLLIDE"];
 _tank setDir (random 360);
 _tank setDamage 0.7;
 _tank setFuel 0.15;
 _tank setVariable ["persistent", true];
+
+// Then Overlord's opening brief (manual, place-name format, no callsign substitution).
+private _marker = [_randomPos, DA_RADIUS, _taskId, localize "STR_DUWS_T_destroyarmour_desc", _mission_name, "destroy"] call fnc_mission_present;
+private _place = [_randomPos] call fnc_place_name;
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_destroyarmour_copy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Convoy origin: midway between the tank and the nearest OPFOR zone, jittered run to run. No known OPFOR
 // zone falls back to the fixed distance on a random bearing. Floored clear of the objective ring so the

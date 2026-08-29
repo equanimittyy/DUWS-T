@@ -1,5 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
+private _requester = remoteExecutedOwner;
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius", "_Building"];
@@ -109,20 +110,21 @@ private _onWin = {
 // Win when both ammo boxes are destroyed.
 private _done = { ((!alive (_this select 0)) || (damage (_this select 0)) == 1) && ((!alive (_this select 1)) || (damage (_this select 1)) == 1) };
 
-if (!([9, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+if (!([9, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 400;
-private _site = [_MissionPos, _radius, 9] call fnc_mission_site;
+private _site = [_MissionPos, _radius, 9, _requester] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 private _taskId = format ["cache%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
+private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+if (isNil "_handles") then { _handles = [] };
+
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_geryeddp", _mission_name, "destroy",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_cachecopy", 0]]
 ] call fnc_mission_present;
-
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
-if (isNil "_handles") then { _handles = [] };
 
 sleep 5; // let the guard force finish arriving before the win poll starts
 

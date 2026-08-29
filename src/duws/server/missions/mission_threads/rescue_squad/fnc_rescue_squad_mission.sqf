@@ -1,6 +1,7 @@
 // Locality: server -- callers remoteExec to target 2; the sub-threads spawned here inherit it.
 params ["_MissionPos", "_mission_name"];
-if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _requester = remoteExecutedOwner;
+if (!([0, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 #define SEARCH_R        400
 #define ZONE_MARGIN     150
@@ -35,7 +36,7 @@ private _candidates = ([_MissionPos, 2, SEARCH_R] call fnc_usableBuildings) sele
     && {([0, 45, 90, 135, 180, 225, 270, 315] findIf { surfaceIsWater (_bp getPos [DRY_RADIUS, _x]) }) < 0}
 };
 if (_candidates isEqualTo []) exitWith {
-    [0, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
+    [0, _requester, "no_building"] call fnc_mission_abort;
 };
 private _Building = selectRandom _candidates;
 private _BuildingPos = getPos _Building;
@@ -44,18 +45,9 @@ private _BuildingPos = getPos _Building;
 // sit up to SEARCH_R off the offer point -- so it names the squad's ground, not the offer's.
 private _place = [_BuildingPos] call fnc_place_name;
 
-// Marked on the building itself, not the offer point (it can sit up to SEARCH_R away). Marker + task
-// via fnc_mission_present; the brief below stays manual (fixed speakers, no callsign substitution).
+// Marked on the building itself, not the offer point (it can sit up to SEARCH_R away).
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-private _marker = [_BuildingPos, _radius, _taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, "help"] call fnc_mission_present;
-
-// Brief opens the mission, before the squad/cordon spawn below: those spawns cost seconds and must not
-// delay the opening line. Signal calls it in, Overlord confirms 8s on; neither reads the spawned units.
-[localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_squadcopy"] remoteExec ["fnc_duws_dialogue", 0];
+[_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 // Holed up in the building and captive: passive and unkillable until relieved, so the cordon cannot
 // wipe them before the player arrives. Maxed skill: once they come out they fight their own corner.
@@ -250,6 +242,14 @@ DUWS_rsq_holdBroken = false;
         { if (alive _x) then { _x enableAI "PATH"; _x setUnitPos "AUTO" } } forEach _sq;
     };
 };
+
+// Brief stays manual: fixed speakers, no callsign substitution.
+private _marker = [_BuildingPos, _radius, _taskId, localize "STR_DUWS_T_kievbwmd", _mission_name, "help"] call fnc_mission_present;
+[localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_squadcopy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Win = cordon broken with the squad still alive. Deadline (cordon not cleared in time) or the squad
 // wiped after it came out both fail.

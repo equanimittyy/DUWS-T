@@ -3997,6 +3997,18 @@
                 <Original>Side mission tasking unavailable until %1. Rest at HQ to fast-forward time by 3 hours.</Original>
                 <English>Side mission tasking unavailable until %1. Rest at HQ to fast-forward time by 3 hours.</English>
             </Key>
+            <Key ID="STR_DUWS_T_MISSION_GEN_SURVEY">
+                <Original>Surveying mission location...</Original>
+                <English>Surveying mission location...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MISSION_GEN_BUILD">
+                <Original>Generating mission...</Original>
+                <English>Generating mission...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MISSION_GEN_FAILED">
+                <Original>Mission generation failed. Try again.</Original>
+                <English>Mission generation failed. Try again.</English>
+            </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
                 <Spanish>== MISIÓN SECUNDARIA FALLIDA==\n\n ¡El piloto ha muerto!</Spanish>
