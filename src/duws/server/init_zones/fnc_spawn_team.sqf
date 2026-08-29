@@ -21,7 +21,9 @@
 // _spawnPos is the reserve path's alone: a reinforcement is placed on a point the reserve pass chose
 // on the zone's far side, not in the posture's own radius band. Empty means the ordinary team, which
 // spawns in its band off the centre.
-params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"]];
+// _anchors passes straight through to fnc_apply_posture: the fixed points an hqpatrol walks. Defaults
+// empty, so a caller that names none gets the same team it always did.
+params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []], ["_side", "opfor"], ["_anchors", []]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -54,6 +56,6 @@ _group deleteGroupWhenEmpty true;
 
 { [_x] call fnc_addRandomLoot } forEach units _group;
 
-[_group, _posture, _center, _radius] call fnc_apply_posture;
+[_group, _posture, _center, _radius, _anchors] call fnc_apply_posture;
 
 _group

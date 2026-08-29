@@ -60,23 +60,13 @@ switch (VERSION_X) do {
 // circuit sits inside the wall and the patrol spends it pathing through the HESCO.
 #define FOB_PATROL_RADIUS 20
 
-// The same squad the HQ walks, drawn from the same pool: a FOB is a small base, not a different
-// kind of thing, and a single soldier round the circuit is one a two-man probe could walk straight
-// through. The pool is set under an HQ_ prefix because that is where it is written
-// (init_hq/fnc_BluHQinit.sqf), not because only the HQ may read it; defaulted, because a FOB built
-// before that ran should still get a patrol rather than throw.
-private _patrolTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X]];
-private _patrolUnits = [];
-for "_i" from 1 to base_patrol_squad do { _patrolUnits pushBack (selectRandom _patrolTypes); };
-
-_groupPatrol = [_safe, WEST, _patrolUnits,[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
-_groupPatrol deleteGroupWhenEmpty true;
+// One squad walking the four corners as a circuit. Raised through the token spawner on the shared
+// "squad" composition, so it draws from the faction roster and pool like any other team rather than
+// a hand-scaled count of one guard type. The corners are its hqpatrol anchors; WHITE combat mode is
+// the patrol's own, kept after the raise so a base patrol holds fire until it is fired on.
+_groupPatrol = ["squad", _centerPos, FOB_PATROL_RADIUS, "hqpatrol", _safe, "blufor",
+	[0, 90, 180, 270] apply { _centerPos getPos [FOB_PATROL_RADIUS, _x] }] call fnc_spawn_team;
 _groupPatrol setCombatMode "WHITE";
-
-// Four corners, walked as a circuit by the same posture the HQ patrol uses.
-[_groupPatrol, "hqpatrol", _centerPos, FOB_PATROL_RADIUS,
-	[0, 90, 180, 270] apply { _centerPos getPos [FOB_PATROL_RADIUS, _x] }] call fnc_apply_posture;
-
 
 // Filed under the site so the poller can freeze them. Registered late rather than at build time
 // because a reguard raises a fresh pair, and the roster has to describe what is standing now.
