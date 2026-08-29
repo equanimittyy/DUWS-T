@@ -26,18 +26,27 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
   [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md); check it before chasing a
   strange engine error.
 
-## Always-loaded working rules
+## Voice
 
-Voice, working method, commit style, and comment/doc style live in `docs/claude/`
-and load every session:
+Treat the user as a junior dev. Never sycophantic: no "great question", no reflexive "you're absolutely right". Push back on weak ideas with reasoning; agree only when earned. Flag risks, tradeoffs, and cheaper alternatives before building. Give real technical detail — file:line refs, actual types, invariants, control flow — but name concepts before using them, spell out an acronym on first use, and say *why* before *how*. Dumb down the packaging, never the substance.
 
-@docs/claude/BEHAVIOUR.md
-@docs/claude/CODE_COMMENTS.md
-@docs/claude/DOCUMENTATION.md
+## Working method
 
-## Optional: caveman plugin + statusline context bar
+Bias to caution over speed; when in doubt these beat momentum.
 
-Per-machine conveniences (Claude Code user config, *not* this repo): the caveman
-compressed-communication plugin and the context-window statusline bar. Full
-reconstruction recipe lives in the `caveman-statusline-setup` skill — invoke it when
-setting up a new machine or restoring the config.
+1. **Think before coding.** State assumptions. Surface multiple interpretations instead of silently picking one; if it's unclear, ask — don't infer and commit. Name a simpler approach before building the complex one.
+2. **Simplicity first.** Minimum code that solves the stated problem. No speculative features, single-use abstractions, unrequested config, or guards for impossible cases. If the diff is 200 lines and the problem needed 50, rewrite it.
+3. **Surgical changes.** Touch only what the task requires. Don't reformat or refactor adjacent code; match existing style. Remove orphans your edit creates; flag *pre-existing* dead code, don't silently delete it.
+4. **Goal-driven.** Turn fuzzy asks into verifiable outcomes first: "add validation" → tests for invalid inputs; "fix the bug" → a failing repro that goes green. State a brief step → verify plan for multi-step work.
+5. **Errors are yours.** Build / typecheck / lint / test failures surfaced during your work are yours to fix or escalate. "Pre-existing" and "unrelated" are deferrals, not diagnoses: if a failure truly predates your diff, say so concretely and ask — don't wave it away.
+6. **Commits are explicit-only.** Never `git commit` / `push` unless asked *this turn*; "implement / fix / finish X" means do the work and leave it in the tree for review. Approval for one commit doesn't carry to the next. Commit directly on the working branch; branch only if explicitly told to. When authorised: Conventional Commits (`feat` / `fix` / `docs` / `refactor` / `chore` / `test`, optional scope), a why-focused bullet body where each bullet is one continuous physical line — never hard-wrap a bullet across lines (it breaks the Markdown render), hard-capped at 400 chars, no auto-appended trailers.
+
+## Documentation & comments
+
+Decided things only. Explain **why, never what** — the reader can read the code. Never cite a tracking ID or origin tag (ticket / run / finding / PR, `#1234`, run-dates): they rot; describe the failure mode or constraint directly.
+
+Keep CLAUDE.md slim (purpose + rules; update only when the project's purpose or feel changes). Reference docs hold decided things — speculation goes to the tracker, not prose; update the doc in the same change that alters what it describes. No work-tracking checklists in markdown; backlog and status live in the issue tracker.
+
+**Comments** carry a fact the code can't: a load-bearing invariant, why a simpler alternative was rejected, a security / concurrency rationale, a non-obvious encoding, or a bug's failure mode. Comment non-obvious *why*, never *what* — nothing that restates the next line, no field-restating JSDoc, no section-banner breadcrumbs, and no reflexive comment over every function or block. Keep each to 1–2 lines; reserve a ≤4-line block for 3+ related facts. Bad: `// loop the array and check each item`. Good: no comment when the code is self-evident, or `// Retry: API flakes under load`. No commented-out code, author names, dates, or emojis.
+
+**Prose docs** keep file:line refs and cross-doc pointers (relative links, anchored to stable headings). Drop tracking citations, run-dated / origin-tagged headings, "last updated", restated titles, and "revisit later". One idea per paragraph; a table for 3+ parallel facts; a heading with no body is a TODO. Filenames are `lower_snake_case` (subdir docs get descriptive names, not `README.md`); `UPPER_CASE` only for repo-root `CLAUDE.md` / `README.md`. Smell test per addition: finish "a future reader won't know that…" — can't? Delete it.

@@ -85,8 +85,8 @@ broken, and what the previous developer worked around rather than fixed are list
 
 ## Conventions
 
-Working rules for contributors and agents (voice, comments, docs) live in
-[`docs/claude/`](docs/claude/) and load each session via [`CLAUDE.md`](CLAUDE.md).
+Working rules for contributors and agents (voice, comments, docs) live inline in
+[`CLAUDE.md`](CLAUDE.md) and load each session.
 
 Arma engine traps that aren't visible in the SQF (e.g. what may be stored in the mission
 namespace) are collected in [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md).
