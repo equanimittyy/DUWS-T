@@ -186,10 +186,10 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 	private _token = _control lbData _selectedIndex;
 	private _display = ctrlParent _control;
 
-	// With neither zombie mod loaded the mode has nothing to field: say which two it takes and
-	// put the row back on DUWS, rather than start a campaign whose enemy pool is empty.
-	if (_token isEqualTo "apocalypse" && {!duws_zombie_factions_found}) exitWith {
-		hint localize "STR_DUWS_T_gamemode_apocalypse_missing";
+	// Guerilla and Apocalypse are unfinished: bounce the pick back to DUWS rather than let the
+	// player start a campaign the mode can't yet run.
+	if (_token isEqualTo "guerilla" || {_token isEqualTo "apocalypse"}) exitWith {
+		hint "Not yet available. WIP.";
 		_control lbSetCurSel 0;
 	};
 
