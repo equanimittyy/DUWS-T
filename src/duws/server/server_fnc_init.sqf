@@ -77,6 +77,9 @@ fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_b
 fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_base_weapons.sqf";
 fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_reward.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
+// Broadcast: fnc_escalation arms this on every machine (BuildingChanged is a local event) so a
+// building a client razed still reaches the server-side counter.
+fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created

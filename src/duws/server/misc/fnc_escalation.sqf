@@ -75,38 +75,17 @@ publicVariable "escalation_multiplier";
 uiSleep 1.5;
 [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-// The counter is ungated and carries no attribution: not who did it, not whether anyone was
-// watching, not whether it stood in a town. The war is getting worse and both sides are making
-// it worse, which is what makes per-building damage handlers and setShotParents unnecessary.
-// The reputation charge below is the only part that asks where the building stood.
-//
-// BuildingChanged is a local event and this runs server-only. Whether a dedicated server sees
-// it for damage a client caused is unconfirmed; if it does not, this has never worked in
-// dedicated MP and neither did the script it replaces.
-//
-// It fires on every state change rather than once per structure, so a house damaged and then
-// levelled counts twice. That is the reading the budget is sized against: it measures ruin done,
-// not buildings lost, and the census it is a fraction of is only the scale for that.
-addMissionEventHandler ["BuildingChanged", {
-    params ["_old", "_damagedObject", "_isRuin"];
+// Counts ruin done, not buildings lost: ungated, and a house damaged then levelled counts twice --
+// both sides worsen the war, which the budget is sized for. BuildingChanged is a local event, so a
+// change a client simulated never reached this server-only handler (escalation was dead on a
+// dedicated server); each machine now watches its own (fnc_escalation_watch) and forwards here.
+fnc_escalation_report = {
+    if (!isServer) exitWith {};
+    params [["_pos", [0,0,0]]];
 
-    // The census counts House on these same terms. Both sides of the ratio have to mean the
-    // same thing or the level runs past its maximum on a map that is not flattened. Military
-    // structures stay excluded on both sides for a gameplay reason rather than a symmetry one:
-    // destroying enemy fortifications is the objective, and counting it would mean every zone
-    // capture pushed the campaign toward its own loss condition.
-    private _eden = getText (configFile >> "CfgVehicles" >> typeOf _damagedObject >> "editorSubcategory");
-    private _objType = (_old call BIS_fnc_objectType) select 1;
-    if (_eden == "EdSubcat_Military" || _objType != "House") exitWith {};
-
-    private _pos = getPos _damagedObject;
-
-    // A building inside a town costs that town as well, and only with a player inside 200 m.
-    // Both, not either: escalation counts the map's total ruin and reputation records who has
-    // to live in it, so the same collapsed house is two different facts. Presence is a proxy
-    // for fault, not a replacement -- what it buys is that a WARCOM assault fought in a town
-    // the player is nowhere near can no longer hand it to the enemy.
-    // Ungated by escalation_enabled: this is civilian reputation, not escalation.
+    // A collapsed house is two facts: escalation counts total ruin; reputation charges the town it
+    // stood in, only with a player inside 200 m (a proxy for fault, so a WARCOM assault in an empty
+    // town cannot hand it over). Ungated by escalation_enabled -- this is reputation, not escalation.
     if (CIV_PRESENCE != "NONE" && {[_pos] call fnc_civ_playerNear}) then {
         private _town = [_pos] call fnc_civ_townAt;
         if (_town >= 0) then {
@@ -140,4 +119,9 @@ addMissionEventHandler ["BuildingChanged", {
     ["alert", [localize "STR_DUWS_T_escalation_title",
         format [localize "STR_DUWS_T_escalation_level", _level]]]
         remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-}];
+};
+
+// Arm only now, past the RAVAGE/WBK early return, so those modes never forward. This machine
+// directly; clients + JIP by broadcast (-2 skips the host, already covered; the fn is idempotent).
+call fnc_escalation_watch;
+remoteExec ["fnc_escalation_watch", -2, "DUWS_esc_watch_jip"];

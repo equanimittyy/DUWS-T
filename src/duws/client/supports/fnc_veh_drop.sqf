@@ -52,7 +52,9 @@ if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
 
 // Priced through the shared classifier, not the list label, so the charge is authoritative.
 private _cost = [_class] call DUWS_fnc_vehPrice;
-if !(["CP", _cost] call fnc_pool_spend) exitWith {
+// Gate descriptor: the server re-derives this vehicle's tier from _class and refuses the debit if
+// unearned, so the ladder holds even if this client's row-grey was bypassed.
+if !(["CP", _cost, ["veh", _class]] call fnc_pool_spend) exitWith {
     ["info", [localize "STR_DUWS_T_e95mc4lv", format [localize "STR_DUWS_T_p6sb3ply", _cost]]] call bis_fnc_showNotification;
     ["veh_drop"] call fnc_support_comm_add;
 };

@@ -843,8 +843,13 @@ register, because nothing it hides is a building.
 
 The split is a trade: a hide is permanent and unrestorable, so a cleared town keeps invisible houses
 for the campaign — worth paying where a composition must fit, not to stop a tree clipping a tent.
-`BuildingChanged` is a local event, so whether a dedicated server sees it for damage a client caused
-is unconfirmed ([KNOWN_ISSUES.md](../../../KNOWN_ISSUES.md)).
+
+`BuildingChanged` is a local event: only the machine that simulated the damage fires it, so a
+server-only handler misses a change a distant client caused. Escalation
+(`server/misc/fnc_escalation.sqf`) works around this — every machine registers its own watch
+(`fnc_escalation_watch`) and forwards the ruined position to the server-owned counter. The zone-centre
+re-hide handler above still runs server-only, so a client blowing up near a hidden building may fail
+to re-hide the replacement on that client; that exposure is unfixed.
 
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 

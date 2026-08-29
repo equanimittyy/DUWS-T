@@ -250,10 +250,13 @@ fnc_support_buy = {
 	// An advanced support charges both pools atomically; a regular one charges CP alone. The dual
 	// verdict is single -- both halves debit or neither does -- so a refusal here never leaves the
 	// player charged for half a purchase.
+	// Gate descriptor: the server re-derives this support's tier from _key and refuses the debit if
+	// unearned, so the ladder holds even if this client's row-grey was bypassed.
+	private _gate = ["support", _key];
 	private _bought = if (_apCost > 0) then {
-		["CPAP", [_cost, _apCost]] call fnc_pool_spend
+		["CPAP", [_cost, _apCost], _gate] call fnc_pool_spend
 	} else {
-		["CP", _cost] call fnc_pool_spend
+		["CP", _cost, _gate] call fnc_pool_spend
 	};
 	if !(_bought) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; false };
 

@@ -233,9 +233,9 @@ fnc_money_count = {
 // the same money, so this read and the removal are adjacent statements on the one machine that
 // owns the inventory -- the same reason fnc_pool_try_spend exists for CP.
 //
-// Both removal commands are needed because both slots are counted, and each ignores the other's.
-// Callers own the refusal message: the four purchase paths word it differently and one of them
-// closes a civilian on top.
+// Both slots are counted, so both removals run. removeItem is local-effect and no-ops for a player
+// not local to the server, so issue it at the unit's owner; removeMagazineGlobal already lands
+// everywhere. Callers own the refusal message, worded per purchase path.
 fnc_money_spend = {
 	if (!isServer) exitWith { false };
 	params ["_unit", ["_amount", 0]];
@@ -243,7 +243,8 @@ fnc_money_spend = {
 	private _left = _amount;
 	{
 		if (_x == "Money_roll" && _left > 0) then {
-			_unit removeItem "Money_roll";
+			if (local _unit) then { _unit removeItem "Money_roll"; }
+			else { [_unit, "Money_roll"] remoteExec ["removeItem", _unit]; };
 			_left = _left - 1;
 		};
 	} forEach (items _unit);
@@ -287,7 +288,23 @@ fnc_money_drop = {
 // remoteExec-to-self, which would queue a later-frame job and reopen the gap.
 fnc_pool_try_spend = {
 	if (!isServer) exitWith {};
-	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
+	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""], ["_gate", []]];
+	// Server-side tier backstop: the ladder was gated only on the client's greyed row, so a bypass
+	// could debit for an unearned tier. Re-derive the tier from the item's class here, never from a
+	// client-named value. Guards the debit, not the client-side effect -- a free 0-cost bypass slips.
+	if !(_gate isEqualTo []) then {
+		_gate params ["_gateKind", "_gateId"];
+		private _reqTier = switch (_gateKind) do {
+			case "support": { [_gateId] call fnc_support_tier };
+			case "veh": { [_gateId] call DUWS_fnc_vehTier };
+			default { 1 };
+		};
+		if !(["BLU", _reqTier] call DUWS_fnc_ap_unlocked) exitWith {
+			["WARN", "ECON", format ["tier gate refused %1 '%2' (tier %3) for %4",
+				_gateKind, _gateId, _reqTier, name _requester]] call fnc_log;
+			[_replyVar, false, 0] remoteExec ["fnc_pool_reply", _requester];
+		};
+	};
 	private _ok = false;
 	// Attribution comes from _requester rather than a threaded-through label: the 40 client
 	// purchase sites all reach here via fnc_pool_spend, which knows the cost but not what
@@ -335,7 +352,7 @@ fnc_pool_try_spend = {
 // (client/supports/fnc_supports_init.sqf). Returned on the side rather than in place of the verdict
 // so the forty existing call sites, which read this as a guard clause, stay as they are.
 fnc_pool_spend = {
-	params [["_pool", "CP"], ["_cost", 0]];
+	params [["_pool", "CP"], ["_cost", 0], ["_gate", []]];
 	duws_last_charge = 0;
 	// Zero cost short-circuits: several comm-menu supports are charged at unlock and pass 0 here. A
 	// dual price is [cp, ap] and short-circuits only when both halves are zero. duws_last_charge then
@@ -345,7 +362,7 @@ fnc_pool_spend = {
 	if (_zero) exitWith { true };
 	duws_spend_seq = (missionNamespace getVariable ["duws_spend_seq", 0]) + 1;
 	private _replyVar = format ["duws_spend_reply_%1", duws_spend_seq];
-	[_pool, _cost, player, _replyVar] remoteExec ["fnc_pool_try_spend", 2];
+	[_pool, _cost, player, _replyVar, _gate] remoteExec ["fnc_pool_try_spend", 2];
 	private _deadline = diag_tickTime + 5;
 	waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
 	private _replied = !isNil _replyVar;
@@ -415,6 +432,11 @@ fnc_captured_pool_setCount = {
 fnc_captured_pool_settle = {
 	if (!isServer) exitWith {};
 	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""]];
+	// Corroborate the close side: read the requester's loadout on the server (getUnitLoadout works on
+	// a remote unit) instead of trusting the client's snapshot, so the diff cannot bank a phantom
+	// deposit or hide a withdrawal. The open baseline stays client-sent -- history the server never
+	// saw -- so a faked-rich open can still over-credit, bounded by what the shelf stocked.
+	if (!isNull _requester) then { _closeLoadout = getUnitLoadout _requester; };
 	call fnc_captured_pool_friendly;
 	// A disposable launcher (CUP NLAW/M136/RPG18) is stocked and shown by its base row but leaves the
 	// arsenal as a distinct loaded fire-class (CUP_launch_NLAW -> CUP_launch_NLAW_Loaded) the raw

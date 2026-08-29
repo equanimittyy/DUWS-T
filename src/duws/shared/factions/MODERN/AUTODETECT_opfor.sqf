@@ -55,22 +55,11 @@ fnc_factionGen = {
 ];
 
 
-// make vars public - dedicated server compat
-allVariables missionNamespace select { 
-	"soldier_x" in toLowerANSI _x || 
-	{"opfor_officer" in toLowerANSI _x} || 
-	{"opfor_operator" in toLowerANSI _x} || 
-	{"opfor_crew" in toLowerANSI _x} || 
-	{"opfor_armed" in toLowerANSI _x} || 
-	{"truck_x" in toLowerANSI _x} || 
-	{"heli_x" in toLowerANSI _x} || 
-	{"air_x" in toLowerANSI _x} || 
-	{"apc_x" in toLowerANSI _x} || 
-	{"opfor_apc" in toLowerANSI _x} || 
-	{"opfor_mbt" in toLowerANSI _x} || 
-	{"opfor_turret" in toLowerANSI _x} || 
-	{"opfor_specops" in toLowerANSI _x} 
-} apply { missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] };
+// Make vars public (dedicated-server compat) from the schema key list, not name-fragment matching:
+// a fragment list silently drops a role spelled a way it does not name, leaving clients stale. OPFOR
+// has no request catalogue to append, unlike BLUFOR. Mirrors AUTODETECT_blufor.
+_publish = (["opfor"] call fnc_faction_schema) apply {_x select 0};
+{ missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] } forEach _publish;
 
 }; // end of function: fnc_factionGen
 publicVariable "fnc_factionGen";
