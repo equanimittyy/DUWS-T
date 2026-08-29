@@ -140,6 +140,8 @@ DUWS_fnc_garrisonForget = {
 // pass has nothing to top up. Per awake session; the ledger and the full potential outlive it. Both a
 // zone and a town set and clear it, the one signal that the garrison on the ground is real. It replaces
 // the peak's old double duty: the men denominator is DUWS_fnc_garrisonFullMen now, this is the liveness.
+// Zones and towns only. A hardpoint's liveness is its own broadcast DUWS_hardpoints row (latched on
+// clear, read client-side by the strat-map pickers), which this server-only graded ledger cannot model.
 DUWS_fnc_garrisonHeld = {
 	params ["_key"];
 	missionNamespace getVariable [format ["DUWS_garrisonLive_%1", _key], false]

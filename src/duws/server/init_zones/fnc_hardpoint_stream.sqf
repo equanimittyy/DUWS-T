@@ -78,7 +78,9 @@ DUWS_fnc_hardpointRaiseWorker = {
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _men = [_objs, _pos, _o get "hpSide", _key, _o get "hpGarrison"] call fnc_hardpoint_garrison;
     ([_key] call fnc_site_roster) append _men;
-    // Peak re-anchored to what actually stood up this cycle, the way a zone re-anchors on raise.
+    // Peak re-anchored to what stood up this cycle; only its presence gates clearCheck, never its value.
+    // This deployed-gate is the ledger's garrisonLive analogue, kept here because a hardpoint's own
+    // liveness is a latched DUWS_hardpoints row, not that server-only graded ledger (see garrisonHeld).
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     missionNamespace setVariable [HP_RAISE_SLOT(_key), true];
 };

@@ -58,6 +58,12 @@ and it doubles as the registry maintainer: it pushes or drops `key` on `DUWS_gar
 list the refill pass iterates. A site is on that list exactly while it's live, kept in lockstep
 because both are written in the one place.
 
+Hardpoints are not on this ledger. An emplacement's liveness is its own broadcast `DUWS_hardpoints`
+row — present means alive, the streamer deletes it on clear — read client-side by the strat-map
+pickers and latched (a cleared hardpoint never returns). That broadcast, one-shot model doesn't fit
+this server-only, graded, recapturable one, so the two are kept deliberately separate. The streamer's
+`DUWS_hpPeak_<key>` is its server-side deployed-gate, the analogue of `garrisonLive`.
+
 An old save's strength is not migrated: nothing has stamped `full` yet, so the first raise after
 an upgrade starts every garrison fresh.
 
