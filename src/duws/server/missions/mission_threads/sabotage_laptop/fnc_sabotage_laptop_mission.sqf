@@ -81,7 +81,7 @@ switch (VERSION_X) do {
         sleep 1.5;
 
         // Pass 2: freeze each settled table, then seat a laptop at rest on its now-static top -- turned 90
-        // degrees off the table heading, a hair above the surface. fnc_place_settled creates the laptop clear
+        // degrees off the table heading, base flush on the surface. fnc_place_settled creates the laptop clear
         // of the table and zeroes its velocity, so there is no drop and no settle wait.
         {
             _x params ["_table", "_isReal"];
@@ -94,7 +94,7 @@ switch (VERSION_X) do {
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
 
             private _topZ = (boundingBoxReal _table select 1) select 2;
-            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, 90]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
+            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ, 90]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
             // Frozen once seated so a patrol brushing the table can never nudge it off; the addAction target
             // needs no physics. Damage is already off from fnc_place_settled.
             _lap enableSimulationGlobal false;

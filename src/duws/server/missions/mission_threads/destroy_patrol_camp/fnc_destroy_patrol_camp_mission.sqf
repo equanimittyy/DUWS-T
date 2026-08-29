@@ -82,8 +82,6 @@ private _build = {
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
         if (!isNull _table) then {
-            private _hover = 0.02;   // seat just above the top so it does not clip; small so there is no drop
-
             // Settle on the terrain, then lock as the slot anchor. enableSimulationGlobal (not local): a
             // client left simulating renders it toppling off the anchor.
             sleep 2;
@@ -125,7 +123,7 @@ private _build = {
                         _oy = _minY + random (_maxY - _minY);
                         if (_rows findIf { [(_x select 1) - _ox, (_x select 2) - _oy] distance [0, 0] < _itemSep } < 0) exitWith {};
                     };
-                    _rows pushBack [_cls, _ox, _oy, _topZ + _hover, random 360];
+                    _rows pushBack [_cls, _ox, _oy, _topZ, random 360];
                 };
             };
             [_rows, _table, "mission_patrol_camp"] call fnc_place_settled;
