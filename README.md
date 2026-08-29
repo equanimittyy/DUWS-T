@@ -22,9 +22,6 @@ Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 The mission's internal structure (the `modules/` vs `duws/` split, boot flow, and
 subsystems) is mapped in [`docs/info/architecture.md`](docs/info/architecture.md).
 
-Feature changes and architectural decisions made in this repo are summarised in
-[`CHANGELOG.md`](CHANGELOG.md).
-
 ## Developer setup
 
 ### 1. Obtain PBO Manager
