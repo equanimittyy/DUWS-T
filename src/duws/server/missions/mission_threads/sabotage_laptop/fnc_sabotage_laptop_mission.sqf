@@ -104,6 +104,12 @@ switch (VERSION_X) do {
     };
 };
 
+// Feeds the client floating markers (client/misc/fnc_sabotage_laptop_markers.sqf); the deadline watcher
+// below prunes these on mission end.
+private _lapObjs = _laptops apply { _x select 0 };
+missionNamespace setVariable ["DUWS_sabotage_laptops",
+    (missionNamespace getVariable ["DUWS_sabotage_laptops", []]) + _lapObjs, true];
+
 // Each candidate building holds a garrisoned team, spread into that exact building by hand rather than the
 // garrison posture -- which hunts the nearest structure with >=5 slots and could put defenders in a
 // neighbour, drifting the guards off the laptop. DUWS_garrisonedBy is stamped so an overlapping zone
@@ -187,10 +193,14 @@ sleep 5; // let the patrols finish spawning
 
 // Success comes through the laptop's addAction, not a wait here, so the deadline runs on a watcher:
 // fail the mission if the clock runs out while it is still live (slot shut, token unadvanced).
-[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name] spawn {
-    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name"];
+[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name, _lapObjs] spawn {
+    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name", "_lapObjs"];
     private _token = DUWS_mission_token;
     waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
+    // Wakes for every end path (win, timeout, slot recycle): drop these from the marker list so the icons
+    // clear now, not when the props finally leave on the keep-radius clock.
+    missionNamespace setVariable ["DUWS_sabotage_laptops",
+        (missionNamespace getVariable ["DUWS_sabotage_laptops", []]) - _lapObjs, true];
     if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
         // Cross markers are raw createMarker names, cleared by hand; the ellipse and the timeout notice
         // route through finish (line [], FAILED, notify true).

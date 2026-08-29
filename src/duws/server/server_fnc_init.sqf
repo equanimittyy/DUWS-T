@@ -94,6 +94,8 @@ fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\in
 publicVariable "fnc_addBoardKillhouseActions";
 fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_killhouse_markers.sqf";
 publicVariable "fnc_killhouse_markers";
+fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_sabotage_laptop_markers.sqf";
+publicVariable "fnc_sabotage_laptop_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";

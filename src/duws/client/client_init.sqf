@@ -132,9 +132,10 @@ if (((vehiclevarname player) in game_master)) then {
 
 waituntil {sleep 1;WARCOM_init_done;};
 
-// Both register a Draw3D handler and return, so call rather than spawn.
+// Each registers a Draw3D handler and returns, so call rather than spawn.
 [] call fnc_killhouse_markers;
 [] call fnc_draw_world_icons;
+[] call fnc_sabotage_laptop_markers;
 
 
 if (isMultiplayer) then {
