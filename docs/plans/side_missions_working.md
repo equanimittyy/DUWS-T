@@ -257,10 +257,9 @@ slot of its building; a `Sabotage` action on it wins, and in hardcore it also ca
 search. Win: the laptop sabotaged. Fail: the deadline. Off the spine (the win comes through the
 laptop's own action, watched on a deadline watcher, not a one-shot predicate).
 
-The gameplay verb is reworked and shipped; the reward is **not** repriced. 10/35 predates the rework,
-when the mission was a single hold-action (effort 1) and the AP read as overpaid. The rework raised the
-required fight to a multi-building garrison clear, so the old "trim the AP" rationale is dead -- the
-number now wants a fresh read at the new effort, not the old cut.
+The gameplay verb was reworked first and the reward left at its pre-rework 30/15; the AP is now lifted
+to **30/20** to price the mission at the fight it actually demands -- a multi-building garrison clear,
+not the single hold-action it once was.
 
 ### Recover Humanitarian Supply Truck
 
@@ -339,7 +338,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 16 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
 | 17 | Eliminate Recon Patrol | elimination | cmd | 10/10/0 | 3 | done |
 | 18 | Destroy Patrol Camp | elimination | cmd | 20/15/0 | 3 | done |
-| 8 | Sabotage Laptop | sabotage | cmd | 30/15/0 | 3 | done |
+| 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 25/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
 | 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
