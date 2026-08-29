@@ -32,7 +32,7 @@ Can we play this on dedicated servers? — It should work. The mission fully sup
 
 Is this mission compatible with XXX mods? — It should work with most mods on the Steam Workshop, but compatibility with specific AI mods is for you to test. (Fully compatible with LAMBS and VCOM; others are unconfirmed.)
 
-Can we play as XXX faction? — The mission includes XOR’s automatic faction detection system, which I’ve improved for full ALIVE faction support. It should therefore work with nearly every properly configured faction mod on the Workshop.
+Can we play as XXX faction? — The mission includes XOR’s automatic faction detection system, which I’ve improved to work with nearly every properly configured faction mod on the Workshop.
 
 I’m a lazy a$$ — can I report bugs anywhere? — Doesn’t matter. I’ll take every bug report seriously.
 

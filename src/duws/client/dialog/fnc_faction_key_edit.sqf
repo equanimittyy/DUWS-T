@@ -174,7 +174,7 @@ _classCtrl ctrlAddEventHandler ["LBSelChanged", { [] call duws_faction_edit_prev
 }];
 
 // Open on the side's AutoDetect faction, or on ALL (index 0) when that pick resolves to no combo
-// row -- a custom or ALIVE faction is not in CfgFactionClasses, and ALL is the sensible catch-all
+// row -- a custom faction need not be in CfgFactionClasses, and ALL is the sensible catch-all
 // rather than whichever faction happens to sort first.
 private _sideFaction = missionNamespace getVariable [
     ["selectedFaction_OPF", "selectedFaction_BLU"] select (_side isEqualTo "blufor"), ""];

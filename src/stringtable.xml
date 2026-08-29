@@ -2177,8 +2177,8 @@
                 <German>Das Arsenal-System von DUWS_X wurde in DUWS_T vollständig überarbeitet — es unterstützt nun alle von ALIVE erstellten Fraktionen! Das bedeutet, es gibt keine verschwindenden Zielgeräte, Schalldämpfer, Brillen etc. mehr. Speichern und Laden des Restricted Arsenal wurde deaktiviert. Passe deine Ausrüstung sorgfältig an.</German>
                 <Spanish>El sistema de arsenal de DUWS_X ha sido completamente rehecho en DUWS_T — ¡ahora es compatible con todas las facciones creadas con ALIVE! Esto significa que no habrá más miras, silenciadores, gafas u otros objetos que desaparezcan. Se ha desactivado el guardado y carga del Restricted Arsenal. Ajusta tu equipamiento con cuidado.</Spanish>
                 <Chinesesimp>DUWS_X的军火库系统在DUWS_T里被完全重做————现在兼容所有ALIVE制作的阵营！这意味着不会再有消失的瞄具、消音器、眼镜栏位的物品等...并且禁止了严格军火库的保存和读取————仔细调整你的装备。</Chinesesimp>
-                <Original>The arsenal covers every ALIVE-detected faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading loadouts work only in Full mode; the tracked modes turn them off, so kit up carefully.</Original>
-                <English>The arsenal covers every ALIVE-detected faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading loadouts work only in Full mode; the tracked modes turn them off, so kit up carefully.</English>
+                <Original>The arsenal covers every detected faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading loadouts work only in Full mode; the tracked modes turn them off, so kit up carefully.</Original>
+                <English>The arsenal covers every detected faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading loadouts work only in Full mode; the tracked modes turn them off, so kit up carefully.</English>
             </Key>
             <Key ID="STR_DUWS_T_arsenalfound">
                 <Spanish>Arsenal completo disponible.</Spanish>
@@ -2838,41 +2838,6 @@
                 <Original>informant</Original>
                 <English>informant</English>
             </Key>
-            <Key ID="STR_DUWS_T_pcletsdothis">
-                <German>(Zzzzt...) Hallo? Kann mich jemand hören? Ich bin kompromittiert! Hilf mir, irgendjemand! Ich will nicht hier wegen ein bisschen Geld sterben!</German>
-                <Spanish>(Zzzzt...) ¿Hola? ¿Alguien puede oírme? Estoy comprometido! Venid a ayudarme, cualquiera! No quiero morir aquí por algo de dinero!</Spanish>
-                <Chinesesimp>(Zzzzt...)喂？谁能听见我说话？我被发现了！快来帮帮我，谁都行！我不想为了点儿钱死在这！</Chinesesimp>
-                <Original>(Zzzzt...) Hello? Is anyone on this channel? They know who I am. Somebody get out here — I'm not dying for your money.</Original>
-                <English>(Zzzzt...) Hello? Is anyone on this channel? They know who I am. Somebody get out here — I'm not dying for your money.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcwhoau">
-                <German>Hier ist Overlord 1-1, identifizieren Sie sich, over.</German>
-                <Spanish>Aquí Overlord 1-1, identifícate, over.</Spanish>
-                <Chinesesimp>表明你的身份，完毕。</Chinesesimp>
-                <Original>Identify yourself, over.</Original>
-                <English>Identify yourself, over.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcbehindme">
-                <German>Ich bin in eurer Nähe! Passt auf! Sie kommen gleich hinterher!</German>
-                <Spanish>Estoy cerca de vosotros! ¡Cuidado! Vendrán justo detrás!</Spanish>
-                <Chinesesimp>我在你们附近！看着点！他们马上就要跟过来了！</Chinesesimp>
-                <Original>I'm close to you now. Watch out, they're right behind me.</Original>
-                <English>I'm close to you now. Watch out, they're right behind me.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pciminfo">
-                <German>Ich bin euer Informant! Mein Rufname ist… Ich weiß es nicht mehr! Scheiße, kommt sofort her! Ich riskiere mein Leben für euch! Ihr habt gesagt, dass ihr mich am Leben erhaltet!</German>
-                <Spanish>¡Soy vuestro informante! Mi indicativo es… ¡No lo recuerdo! Mierda, venid ya! ¡Me juego la vida por vosotros! Dijisteis que me mantendríais con vida!</Spanish>
-                <Chinesesimp>我是你们的线人！我的代号是...我忘了！妈的，你们快点过来！我是为你们卖命的，你们之前说过可以保我不死！</Chinesesimp>
-                <Original>I'm your informant! My callsign is... I can't remember it. Just get someone out here. You told me you'd keep me alive.</Original>
-                <English>I'm your informant! My callsign is... I can't remember it. Just get someone out here. You told me you'd keep me alive.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcoverlord">
-                <German>Diese Einheimischen machen einem immer das Leben schwer… Einsatztrupp, hier ist "Overlord". Ich brauche, dass ihr sofort aufbrecht und den Informanten beschützt, mit dem wir gerade gesprochen haben. Wenn er vom Feind gefangen genommen wird, gerät die Sache völlig außer Kontrolle.</German>
-                <Spanish>Estos locales nunca dejan uno tranquilo… Equipo de Acción, aquí es "Overlord". Necesito que salgan inmediatamente para proteger al informante con el que acabamos de hablar. Si es capturado por el enemigo, el asunto se pondrá muy feo.</Spanish>
-                <Chinesesimp>这些当地人总是不让人省心...行动组。我需要你们立刻出发保护好刚刚的线人。万一他被敌人抓住，事情就闹大了。</Chinesesimp>
-                <Original>Alpha 1-1. Move now and get to the informant we just heard. If the enemy takes him alive, everything he knows goes with him.</Original>
-                <English>Alpha 1-1. Move now and get to the informant we just heard. If the enemy takes him alive, everything he knows goes with him.</English>
-            </Key>
             <Key ID="STR_DUWS_T_transIDAP">
                 <German>Ein Lieferwagen einer internationalen humanitären Organisation wurde von feindlichen Kräften beschlagnahmt. Wir müssen den Wagen zurückerobern und zur nahen Übergabestelle der internationalen humanitären Organisation bringen. (Low CP, no AP, high rep)</German>
                 <Spanish>Un camión de suministros de una organización humanitaria internacional ha sido robado por las fuerzas enemigas. Tenemos que recuperar el camión y devolverlo al punto de entrega de la organización humanitaria internacional cercano. (Low CP, no AP, high rep)</Spanish>
@@ -2919,27 +2884,6 @@
             <Key ID="STR_DUWS_T_idaptruckdown">
                 <Original>To Alpha 1-1, the aid truck is destroyed. Mission failure, disengage and RTB.</Original>
                 <English>To Alpha 1-1, the aid truck is destroyed. Mission failure, disengage and RTB.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcroger">
-                <German>Hier ist Einsatztrupp, verstanden. Unterwegs zum Zielort.</German>
-                <Spanish>Aquí Equipo de Acción, recibido. En camino al lugar objetivo.</Spanish>
-                <Chinesesimp>收到，正赶往目标地点。</Chinesesimp>
-                <Original>Copy. En route to target.</Original>
-                <English>Copy. En route to target.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcend">
-                <German>Einsatztrupp an "Overlord", Informant vorerst sicher, over.</German>
-                <Spanish>Equipo de Acción a "Overlord", informante seguro por ahora, over.</Spanish>
-                <Chinesesimp>"霸王"，线人暂时安全了。</Chinesesimp>
-                <Original>To Overlord, informant is secure for now, over.</Original>
-                <English>To Overlord, informant is secure for now, over.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pcbequick">
-                <German>Verdammt, beeilt euch verdammt noch mal! Wenn ich gefangen werde, werden es auch eure Truppen hier bereuen!</German>
-                <Spanish>Mierda, ¡apresúrense de una vez! Si me capturan, ¡vuestras tropas aquí también lo van a lamentar!</Spanish>
-                <Chinesesimp>求求你们他妈的快点！我要是被抓到了，你们在这的部队也不会有好日子过了！</Chinesesimp>
-                <Original>Hurry up, damn it. If they take me, you lose everything I've got for you.</Original>
-                <English>Hurry up, damn it. If they take me, you lose everything I've got for you.</English>
             </Key>
             <Key ID="STR_DUWS_T_protectciv">
                 <German>Wir haben einen Informanten, dessen Identität aufgeflogen ist. Er versteckt sich irgendwo in einem Gebäude. Geh dorthin und beschütze ihn, bevor der Feind ihn einholt und verhaftet — ja, wir können ihn noch nicht aus dem Gebiet evakuieren, weil wir ihn brauchen, um weiterhin vor Ort Informationen für uns zu sammeln. (Slightly low CP, no AP, high Rep)</German>

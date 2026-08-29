@@ -186,34 +186,6 @@ _factionLoadouts = [];
 //remove duplicates
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
 
-_aliveLoadouts = [];
-
-_extractStrings = {
-    params ["_data", "_resultArray"];
-    if (typeName _data == "STRING") then {
-        if (_data != "") then { _resultArray pushBackUnique _data };
-    } else {
-        if (typeName _data == "ARRAY") then {
-            { [_x, _resultArray] call _extractStrings } forEach _data;
-        };
-    };
-};
-
-{
-    _loadoutArray = getArray (configFile >> "CfgVehicles" >> _x >> "ALiVE_orbatCreator_loadout");
-    if (count _loadoutArray > 0) then {
-        _extracted = [];
-        [_loadoutArray, _extracted] call _extractStrings;
-        _aliveLoadouts append _extracted;
-    };
-    sleep 0.1;
-} forEach _factionUnitArray;
-
-_aliveLoadouts = _aliveLoadouts arrayIntersect _aliveLoadouts; // remove duplicates within Alive items
-
-_factionLoadouts = _factionLoadouts + _aliveLoadouts;
-_factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts; // final deduplication
-
 private _randomListItems = [];
 {
     private _cfg = configFile >> "CfgVehicles" >> _x;
