@@ -4068,8 +4068,8 @@
                 <English>Deny Enemy Armor</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_desc">
-                <Original>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.</Original>
-                <English>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.</English>
+                <Original>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.\n\nNote: Repairing the vehicle and entering it will also complete the mission. It must be repaired to 50% or more.</Original>
+                <English>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.\n\nNote: Repairing the vehicle and entering it will also complete the mission. It must be repaired to 50% or more.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_copy">
                 <Original>Roger Overlord. Moving to hit it before they recover it.</Original>
@@ -4102,6 +4102,10 @@
             <Key ID="STR_DUWS_T_destroyarmour_fail">
                 <Original>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</Original>
                 <English>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_taken">
+                <Original>Alpha 1-1, good work requisitioning that armor. RTB with the asset.</Original>
+                <English>Alpha 1-1, good work requisitioning that armor. RTB with the asset.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarend">
                 <German>"Overlord 1-1" an Action Squad, Radar zerstört – bestätigt. Gute Arbeit.</German>

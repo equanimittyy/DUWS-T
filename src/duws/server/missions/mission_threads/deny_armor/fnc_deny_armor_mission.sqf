@@ -8,6 +8,7 @@ if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 #define DA_DISEMBARK   140      // troops dismount once their transport is this close to the tank
 #define DA_ARRIVE      15       // a live crewman this close to the tank is working on it (AI halts at the hull)
 #define DA_ARRIVE_ZONE 150      // a repaired tank this close to its home zone has got away (fail)
+#define DA_REQUISITION_DMG 0.5  // a player-crewed hull at least this healthy (>50%) is requisitioned (win)
 
 // Repair time scales inversely with the nearest OPFOR zone's distance (NEAR at/inside NEARDIST, FAR
 // at/beyond FARDIST, linear between): a tank repaired near its own lines is the harder denial.
@@ -40,14 +41,16 @@ if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetp
 
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 
-// The broken-down tank: empty (createVehicle raises no crew), pre-damaged and low on fuel so the repair is
-// a real state change. Persistent so the abandoned-vehicle sweep cannot reap it before anyone arrives.
-// Neither claimed nor kept: a claim deletes, and a winner drives this home.
+// The broken-down tank: empty (createVehicle raises no crew), pre-damaged with part fuel and ammo so it
+// reads as a derelict, the enemy repair is a real state change, and a requisitioned hull can still RTB and
+// fight. Persistent so the abandoned-vehicle sweep cannot reap it before anyone arrives. Neither claimed
+// nor kept: a claim deletes, and a winner drives this home.
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 private _tank = createVehicle [opfor_MBT_TANK1_X, _vehpos, [], 0, "CAN_COLLIDE"];
 _tank setDir (random 360);
-_tank setDamage 0.7;
-_tank setFuel 0.15;
+_tank setDamage 0.8;
+_tank setFuel 0.5;
+_tank setVehicleAmmo 0.1;
 _tank setVariable ["persistent", true];
 
 // Then Overlord's opening brief (manual, place-name format, no callsign substitution).
@@ -81,7 +84,6 @@ if !(_nearest isEqualTo []) then {
     _bearing = (_targetpos getDir _nearest) + (random 30 - 15);
     _convoyDist = ((_zoneDist / 2) * (0.85 + random 0.3)) max (DA_RADIUS + 100);
 };
-// Longer window near the enemy's lines, shorter far out (see the DA_REPAIR_* defines).
 private _repairTime = linearConversion [DA_REPAIR_NEARDIST, DA_REPAIR_FARDIST, _zoneDist, DA_REPAIR_NEAR, DA_REPAIR_FAR, true];
 
 // Convoy start: MUST snap to a road, drive in crossing no water. Roll the approach (bearing jittered,
@@ -247,9 +249,10 @@ private _finish = {
     [_mission_name, _taskId, _status, _targetpos, DA_RADIUS, [_marker], [], false, _compKey, false, false] call fnc_mission_finish;
 };
 
-// The repair race. WIN when the tank is denied (crew dead, or tank destroyed); FAIL when a live crew drives
-// the repaired tank home, or on the deadline. Between: the crew dismount once a transport reaches the tank
-// and work the hull; the clock advances only while a crewman is at it and no player has taken it.
+// The repair race. WIN when the tank is denied (crew dead, or tank destroyed) or a player requisitions it
+// (crews it repaired past 50%); FAIL when a live crew drives the repaired tank home, or on the deadline.
+// Between: the crew dismount once a transport reaches the tank and work the hull; the clock advances only
+// while a crewman is at it and no player has taken it.
 // _underAttack = the column has gone COMBAT, OR a convoy vehicle took enemy fire (HandleDamage flag) or is
 // destroyed, or any man is down. Tripping it releases the convoy driver (below), whose exit re-enables the
 // drivers' FSM so the escort manoeuvres natively rather than staying force-marched.
@@ -269,6 +272,14 @@ while { true } do {
 
     private _liveCrew = _crewUnits select { alive _x };
     private _tankDead = !alive _tank || {(damage _tank) >= 1};
+
+    // Before the deny win, so a healthy crewed hull plays the requisition line even if the last enemy crewman
+    // fell the same tick; the hull may be the player's own repair or an enemy-fixed one boarded before it got home.
+    if (((crew _tank) findIf { isPlayer _x }) >= 0 && {(damage _tank) < DA_REQUISITION_DMG}) exitWith {
+        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_taken"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+        [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+        ["SUCCEEDED"] call _finish;
+    };
 
     if (_liveCrew isEqualTo [] || _tankDead) exitWith {
         // Tank takes precedence: a destroyed hull plays the destroyed line even when the crew died with
@@ -342,11 +353,9 @@ while { true } do {
                     _repaired = true;
                     _tank setDamage 0;
                     _tank setFuel 1;
-                    // Seat the survivors driver-first, so a crew short a man still rolls, then fold the
-                    // tank into the convoy: the crew join the convoy group so the tank road-marches home
-                    // in one column to the zone itself (the real distance to their lines) rather than
-                    // alone. The mounted security team rides back in the trucks; a team already pulled out
-                    // by an ambush is turned for home too.
+                    // Seat the survivors driver-first so a crew short a man still rolls, then fold the tank
+                    // into the convoy group: it road-marches home in one column to the zone rather than alone.
+                    // The mounted security team rides back in the trucks; an ambush-pulled team is turned home too.
                     private _seats = [{ _this moveInDriver _tank }, { _this moveInCommander _tank }, { _this moveInGunner _tank }];
                     { _x call (_seats param [_forEachIndex, {}]) } forEach _liveCrew;
                     (units _crewGrp) joinSilent _convoyGrp;
