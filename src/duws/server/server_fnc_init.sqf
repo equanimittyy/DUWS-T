@@ -270,9 +270,6 @@ fnc_recruitSuccessServer = compile preprocessFileLineNumbers "duws\server\misc\f
 publicVariable "fnc_recruitSuccessServer";
 
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
-fnc_WARCOM_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_patrol.sqf";
-fnc_WARCOM_wp_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_patrol.sqf";
-fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_blu_patrol.sqf";
 // OPCOM's hardpoint director: the AP-priced tick that tops up zones, thickens the band and raises radio
 // towers. Server-only, spawned once by fnc_WARCOM_init.
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";

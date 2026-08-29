@@ -98,7 +98,7 @@ evenly, so it pays down by pocket.
 | Migration | State | Action |
 |---|---|---|
 | Mission lifecycle spine | Runner approach dropped: each thread runs its own shape, ending through the single `fnc_mission_finish` chokepoint | Closed. `fnc_mission_run` was deleted rather than widened, so there is no shared runner to migrate onto. |
-| Token spawner vs direct `BIS_fnc_spawnGroup` | Three settled systems: the token spawner for roster teams, static crewing, and bespoke direct spawns for one-offs | Done — the team callers route through the token spawner; see [`unit_spawning.md`](../info/architecture/unit_spawning.md). Remaining: retire the WARCOM BLUFOR patrol. |
+| Token spawner vs direct `BIS_fnc_spawnGroup` | Three settled systems: the token spawner for roster teams, static crewing, and bespoke direct spawns for one-offs | Closed. Team callers route through the token spawner (see [`unit_spawning.md`](../info/architecture/unit_spawning.md)); the WARCOM BLUFOR patrol was removed rather than migrated — it spawned CfgGroups section classes with attached vehicles, which the roster-token model does not express. |
 | Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on their own broadcast row-presence | Closed. Hardpoints stay off the ledger by design: their liveness is a latched, client-read broadcast row that the server-only graded ledger cannot model, and unifying would strip a broadcast fact the strat-map pickers need. See [`garrison_and_reserves.md`](../info/gameplay/garrison_and_reserves.md). |
 | `DUWS_` prefix on globals / functions | ~549 bare `fnc_`, hundreds of bare globals | Prefix-on-touch only. No sweeping rename — see [out of scope](#out-of-scope). |
 
@@ -146,6 +146,7 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
       snapshot, and the 0-cost tier bypass) server-side.
 - [x] Phase 2: two assertions shipped (poller, single-mission); the remaining three (reserve
       single-writer, tier-monotonic rows, garrison-live flag on teardown) dropped as not worth the churn.
-- [ ] Phase 3: retire the WARCOM BLUFOR patrol (the last token-spawner item); `DUWS_`-prefix on touch
-      only. Token spawner done; hardpoint liveness kept separate by design, not migrated.
+- [x] Phase 3: WARCOM BLUFOR patrol retired (removed, not migratable onto the roster-token model) —
+      token-spawner migration done; hardpoint liveness kept separate by design, not migrated. `DUWS_`-prefix
+      stays on-touch only, a standing policy rather than a discrete task.
 - [ ] Phase 4: add the missing-broadcast lint check to the harness.

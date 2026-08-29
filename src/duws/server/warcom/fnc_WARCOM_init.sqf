@@ -58,9 +58,6 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
-[] spawn fnc_WARCOM_blu_patrol;
-
 // OPCOM's hardpoint director: the one thing that spawns OPFOR after generation, and the reader the
 // AP pool and the stored zone caps were built waiting for. It spends OPFOR Army Power to fortify the
 // ground the enemy holds -- topping up cleared zone emplacements, thickening the band, raising radio
