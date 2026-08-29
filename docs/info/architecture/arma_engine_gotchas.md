@@ -1428,6 +1428,25 @@ Dispatch the five worn slots to their own commands: `removeUniform`, `removeVest
 them afterward if they must survive. `DUWS_fnc_strip_n` (`initPlayerLocal.sqf`) does this dispatch,
 which is why the arsenal and quick-kit overdraw strip can claw back a whole kit, not just its guns.
 
+## `addMagazine` needs a container; arm a containerless civilian with `addWeaponItem`
+
+**`addMagazine` places the magazine into a worn container (uniform, vest, backpack). Several vanilla
+civilian costumes carry no uniform container at all, so the call fails silently — the magazine goes
+nowhere and returns without error. `addWeapon` afterwards then finds nothing in inventory to
+auto-load, so the weapon is added but chambers empty: the unit holds a gun it cannot fire.**
+
+This bit the informant manhunt, where the fleeing informant (a `selectRandom civ_array` body) drew a
+pistol that never shot. Load the magazine straight into the weapon instead, which bypasses inventory:
+
+```sqf
+_unit addWeapon "hgun_Rook40_F";
+_unit addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
+```
+
+`addWeaponItem` loads the round into the weapon's muzzle regardless of whether the unit has a
+container, so it works on any body class. The `addMagazine`-then-`addWeapon` order is only safe on
+units known to wear a container (soldier loadouts); do not trust it for civilian-costume units.
+
 ## `time` and `daytime` are different clocks; a world-clock timer cannot be built on `time`
 
 **`time` is real elapsed mission seconds — advanced by the simulation, scaled by `setAccTime`, but

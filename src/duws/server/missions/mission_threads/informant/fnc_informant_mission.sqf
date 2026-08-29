@@ -285,8 +285,12 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
             // shoot). Rebind _grp: the orders below must task his new group, not the emptied civ one.
             [_inf] joinSilent (createGroup [EAST, true]);
             _grp = group _inf;
-            _inf addMagazine "16Rnd_9x21_Mag";
+            // Chamber one round via addWeaponItem (works on any costume, even the containerless civ
+            // bodies where a bare addMagazine drops it nowhere); two spares ride in his pockets, which
+            // only land where the costume has a container -- a pocketless body just fights with the one.
             _inf addWeapon "hgun_Rook40_F";
+            _inf addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
+            _inf addMagazines ["16Rnd_9x21_Mag", 2];
             _grp setBehaviour "COMBAT";
             _grp setCombatMode "RED";
         } else {
