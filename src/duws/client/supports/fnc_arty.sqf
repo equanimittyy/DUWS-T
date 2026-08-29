@@ -351,7 +351,7 @@ if (_ammotype == "Laser") then {
 				case 7: {  // Mortar smoke -- walk the screen line, jittered enough to read as a wall, not a ruler
 					private _along = (random (2 * _radius)) - _radius;
 					private _p = _position vectorAdd (_smokeAxis vectorMultiply _along);
-					_bomb = _ammotype createVehicle [(_p select 0)+(random 14)-(random 14), (_p select 1)+(random 14)-(random 14), 800];
+					_bomb = _ammotype createVehicle [(_p select 0)+(random 15)-(random 15), (_p select 1)+(random 15)-(random 15), 800];
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};
