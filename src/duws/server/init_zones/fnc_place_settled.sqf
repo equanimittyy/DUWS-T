@@ -14,9 +14,11 @@
 // off it once, so a seat that moves afterwards leaves its object behind.
 //
 // Contract: [_rows, _anchor, _key, _invuln] -> [_objs]
-//   _rows    [class, offX, offY, offZ, dir] rows in the anchor's model frame. offZ is height above the anchor
-//            origin (the caller places a table-top row at the table's boundingBoxReal top); dir adds to the
-//            anchor heading. offZ and dir default to 0.
+//   _rows    [class, offX, offY, offZ, dir] rows in the anchor's model frame. offZ is where the object's
+//            resting base sits above the anchor origin, not where its model origin goes (the caller places a
+//            table-top row at the table's boundingBoxReal top); the object's own base offset is backed out so
+//            a prop whose origin rides above its lowest point does not sink. dir adds to the anchor heading.
+//            offZ and dir default to 0.
 //   _anchor  OBJECT the offsets are measured from -- its position, heading and up.
 //   _key     composition key the objects are filed under for teardown (fnc_duws_keep).
 //   _invuln  allowDamage false on each placed object (default true). They stay simulated either way; this only
@@ -40,7 +42,11 @@ fnc_place_settled = {
         // ground-holder spawns with physics live and would drift or topple off the seat without it.
         private _dirDeg = _baseDir + _dir;
         _obj setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
-        _obj setPosASL _pos;
+        // Seat the object's base, not its origin: _pos is the surface point, but setPosASL positions the
+        // model origin, so a prop whose lowest point sits below its origin (a laptop, a crate) would sink by
+        // that gap. Back the gap out along the anchor's up axis (boundingBoxReal is orientation-independent).
+        private _baseZ = (boundingBoxReal _obj select 0) select 2;
+        _obj setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
         _obj setVelocity [0, 0, 0];
 
         [_obj, _key] call fnc_duws_keep;

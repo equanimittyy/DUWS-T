@@ -1274,13 +1274,20 @@ The gap is per building and per slot, not a fixed offset, so it cannot be subtra
 class's base offset can. Seating a camping table on a laptop-hunt slot by hand left it floating a
 hand's width off the floor with the laptop stacked above it.
 
-**How to apply:** drop the prop simulated and let physx fall it the small gap onto the real floor, then
-freeze (`enableSimulationGlobal false`). Batch it -- place every prop, one `sleep`, then freeze the lot
--- so the wait is flat in the object count, not one `sleep` per prop. A prop that must carry another (a
-laptop on a table) is dropped only *after* the carrier is frozen: a prop left to settle on a
-still-simulated carrier slides off as the carrier shifts under it, but a frozen prop still collides, so
-the carried one falls onto a static, level top and comes to rest on it.
-`src/duws/server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf`.
+**How to apply:** drop the *carrier* simulated and let physx fall it the small gap onto the real floor,
+then freeze (`enableSimulationGlobal false`). Batch it -- place every carrier, one `sleep`, then freeze
+the lot -- so the wait is flat in the object count, not one `sleep` per prop.
+
+Do **not** drop a prop that rides on the carrier (a laptop on a table). A physx body created at the
+carrier's origin clips its geometry and takes an ejection impulse (see [§A physics body spawned clipping
+geometry takes a lethal collision impulse](#a-physics-body-spawned-clipping-geometry-takes-a-lethal-collision-impulse-not-a-nudge));
+left simulated to settle it keeps that impulse and comes to rest on the floor, not the top. A frozen
+carrier is not a reliable collider for a live body dropped onto it. Instead seat the carried prop at rest
+once the carrier is frozen -- create it above the top, zero its velocity, then freeze it -- via
+`fnc_place_settled` (`src/duws/server/init_zones/fnc_place_settled.sqf`), the same seat-at-rest path the
+patrol-camp intel uses. Callers:
+`src/duws/server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf`,
+`src/duws/server/missions/mission_threads/destroy_patrol_camp/fnc_destroy_patrol_camp_mission.sqf`.
 
 ## An empty group is never freed, and each side caps at 144 groups
 
