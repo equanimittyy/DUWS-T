@@ -1,12 +1,13 @@
 # Plan: route team spawns through the token spawner
 
-Many scripted spawns still call `BIS_fnc_spawnGroup` / `BIS_fnc_spawnVehicle` directly. The token
-spawner — `fnc_spawn_team` / `fnc_spawn_vehicle` over the `DUWS_teamRosters` table, the faction pools
-and the posture applier — is the intended way to raise a team that patrols or garrisons, and this plan
-finishes routing the remaining team callers through it.
+Many scripted spawns called `BIS_fnc_spawnGroup` directly. The token spawner — `fnc_spawn_team` /
+`fnc_spawn_vehicle` over the `DUWS_teamRosters` table, the faction pools and the posture applier — is
+the intended way to raise a team that patrols or garrisons, and this plan routed the remaining team
+callers through it.
 
 The scope is deliberately narrow: a **team raised from a roster row under a posture**. Individual-unit
-spawns, civilians and air support are out — they do not share that shape and gain nothing from it.
+spawns, civilians, air support and static-weapon crewing are out — they do not share that shape and
+gain nothing from it.
 
 Companion documents: the [architecture hardening plan](./architecture_hardening_plan.md), whose Phase 3
 owns this migration at a high level, and the
@@ -30,60 +31,51 @@ rather than being hand-rolled at each call site.
   handler.
 - **Out, bespoke by design:** the side-mission building ring (`fnc_garrisonBuildings`) scales its men
   by building count and spreads them with `fnc_spreadIntoBuildings`, not the one-squad-one-structure
-  `garrison` posture; its own header records the choice. It raises men by a rule, not a roster, so no
-  token expresses it.
-- **Separate function:** static weapon crewing — crewing a gun is not raising a patrol.
+  `garrison` posture — it raises men by a rule, not a roster. And the WARCOM BLUFOR patrol
+  (`fnc_WARCOM_blu_patrol`) spawns a whole faction section — a vehicle plus its roster dismounts,
+  pre-built in `fnc_BLUFOR_squad_init` — which is neither a roster team nor a single vehicle; it is
+  slated for removal (see Cleanup).
+- **Out, separate concern:** static-weapon crewing — putting a gunner on an emplaced gun is not raising
+  a patrol. It is its own refactor, tracked elsewhere, and never part of this plan.
 
-## Landed
+## Done
 
-- **`_anchors` passthrough.** `fnc_spawn_team` now forwards `fnc_apply_posture`'s fixed-anchor
-  argument, so an `hqpatrol` team — a circuit through caller-named points rather than a radius band —
-  can be raised through the token spawner.
-- **FOB patrol on the `squad` token.** `fnc_guardsFOB` was a count-scaled draw — `base_patrol_squad`
-  copies of a random guard type — and is now the shared `squad` composition drawn from the faction
-  pool, walking its corner anchors under `hqpatrol`. This is a deliberate change: a fixed whole-team
-  token replaces a hand-scaled count, which is the model the spawner is built on (attrition is a ledger
-  of lost whole tokens). It drops the `base_patrol_squad` tuning for the FOB; the HQ patrol still reads
-  that global until it is migrated the same way.
+The migration is complete on disk (unverified in-game). Every hardcoded team classlist now resolves a
+faction-safe roster token:
 
-## Remaining
+- **`_anchors` passthrough.** `fnc_spawn_team` forwards `fnc_apply_posture`'s fixed-anchor argument, so
+  an `hqpatrol` team — a circuit through caller-named points rather than a radius band — can be raised
+  through the token spawner.
+- **Loot gated to OPFOR.** `fnc_spawn_team` and `fnc_spawn_vehicle` add random loot only for an
+  OPFOR-side raise: an enemy is the player's to search, a friendly team is not.
+- **FOB and HQ patrols on the `squad` token**, walking their corner and tower anchors under `hqpatrol`;
+  `base_patrol_squad` is deleted, both patrols being whole-team tokens now rather than a scaled count.
+- **Mission and zone teams on their tokens.** The protect_civ assault (`squad`), the target_sniper pair
+  (`sniper_element`), the rescue_squad captives (`recon`) and the hardpoint garrison teams (their own
+  token) each replaced a hardcoded classlist with a pool draw under posture `none` or the token's own.
 
-| caller | cost | move |
-|---|---|---|
-| `placeHQUnits.sqf:171` (HQ patrol) | cheap | mirror the FOB migration: `squad` token, `hqpatrol`, the tower anchors — retires the last `base_patrol_squad` reader |
-| `hardpoint_place.sqf:150` | cheap | already reimplements `fnc_spawn_team` inline; replace with a real `call`, keep the maxSpot skill boost on the returned units |
-| `target_sniper_mission.sqf:65` | cheap | resolves the shipped `sniper_element` row; raise with `none` posture and the perch as `_spawnPos`, keep the per-man perch spread on the handle |
-| `protect_civ.sqf:221` | cheap | the existing `squad` token, `none` posture at the spawn point; keep the assault settings (AWARE, RED, allowFleeing 0) on the returned handle — accepts the eight-man leaderless assault becoming the nine-man squad |
-| `rescue_squad_mission.sqf:62` | medium | men are the shipped `recon` row; raise with `none` posture, then apply the captive state and per-building pin on the handle |
-| `WARCOM_blu_patrol.sqf:67` | medium | route through `fnc_spawn_vehicle`; guard the tier-1 case where the patrol "type" is a lone infantryman rather than a vehicle class |
+## Cleanup
 
-## Static-crewing function
-
-`fnc_crew_static [_weapons, _soldierClass, _side]`: raise the crew, seat them while frozen
-(`DUWS_fnc_seatStatic`), thaw, then `taskDefend`. Seating before the thaw is required, or the turret
-fires straight ahead and never traverses. Absorbs the eleven crew-for-static callers:
-`hardpoint_place.sqf:113` and `:126`, `zone_stream_init.sqf:197` and `:232`,
-`modern_simple_zone.sqf:106` and `:113`, `place_bunker_guns.sqf:10` and `:12`,
-`deny_armor_mission.sqf:120`, `fortifyFOB.sqf:165`, and `placeHQUnits.sqf:95`.
+- **Retire `fnc_WARCOM_blu_patrol`.** The BLUFOR strategic patrol is unwanted: drop the thread, its
+  spawn in `fnc_WARCOM_init.sqf:62`, and its compile in `server_fnc_init.sqf:272`. It runs today rather
+  than being literally dead, so the removal is a deliberate feature retirement, not a dead-code sweep.
 
 ## Decisions (settled)
 
-1. **The token spawner raises roster teams under a posture.** Individual units, civilians and air
-   support stay bespoke — none share the roster / posture shape.
-2. **A count-scaled *patrol* converts to a fixed roster token; a building ring does not.** The FOB
-   patrol became `squad` — a perimeter patrol maps onto a whole-team token, which is the model the
-   spawner is built on. The side-mission building ring stays bespoke: it scales by building count and
-   holds via `fnc_spreadIntoBuildings`, a shape no single roster expresses.
-3. **No new roster rows.** Every remaining team caller maps onto an existing token — `squad` for the
-   patrols and the assault, `sniper_element`, `recon`, the hardpoint's own — so the shared table and
-   the composition tool gain nothing to maintain.
-4. **Static crewing is its own function**, never the team spawner.
+1. **The token spawner raises roster teams under a posture.** Individual units, civilians, air support
+   and static crewing stay out — none share the roster / posture shape.
+2. **A count-scaled *patrol* converts to a fixed roster token; a building ring does not.** The FOB and
+   HQ patrols became `squad` — a perimeter or tower circuit maps onto a whole-team token. The
+   side-mission building ring stays bespoke: it scales by building count and holds via
+   `fnc_spreadIntoBuildings`, a shape no single roster expresses.
+3. **No new roster rows.** Every migrated caller mapped onto an existing token — `squad`,
+   `sniper_element`, `recon`, the hardpoint's own — so the shared table and the composition tool gained
+   nothing to maintain.
+4. **Loot is OPFOR's.** Only an OPFOR-side raise drops lootable gear; a friendly team does not.
 5. **The RAVAGE/WBK civilian handler stays separate**, per the existing mode-separation rule.
 
 ## Task list
 
-- [ ] Migrate the HQ patrol to the `squad` token (mirror of the FOB patrol) and delete `base_patrol_squad`.
-- [ ] Route the remaining roster-team callers onto existing tokens (`squad`, `sniper_element`, `recon`,
-      the hardpoint token), cheap swaps first; each verified by `bash tests/run.sh` and a play-test of
-      the one behaviour it touched.
-- [ ] `fnc_crew_static`; migrate the eleven crew-for-static callers.
+- [ ] Play-test the migrated spawns — FOB and HQ patrols, the protect_civ assault, the target_sniper
+      pair, the rescue_squad captives, the hardpoint garrison — code-complete but unverified in-game.
+- [ ] Retire `fnc_WARCOM_blu_patrol` (the thread, its spawn call, and its compile registration).
