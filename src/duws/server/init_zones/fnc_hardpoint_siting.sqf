@@ -26,6 +26,9 @@
 
 #define HP_FOF_STEP 40    // field-of-fire march: metres between samples down the fall line
 #define HP_FOF_MAX  320   // ... and how far out to look before calling it fully open
+// Road search radius. Must cover both the overwatch bonus band (the score ramps roadDist over 0..300)
+// and the 100 m keep-clear veto; a road past this reads as none (roadDist stays the 1e9 sentinel).
+#define HP_ROAD_SCAN 300
 
 fnc_hardpoint_survey = {
     params ["_pos"];
@@ -64,7 +67,7 @@ fnc_hardpoint_survey = {
     private _roadDrop = 0;
     private _roadDir = 0;
     private _roadLos = 0;
-    private _road = [_p, 40] call BIS_fnc_nearestRoad;
+    private _road = [_p, HP_ROAD_SCAN] call BIS_fnc_nearestRoad;
     if (!isNull _road) then {
         private _rp = getPosASL _road;
         _roadDist = _p distance2D _rp;
@@ -132,8 +135,9 @@ fnc_hardpoint_survey = {
 // The number is the terrain factor the weighted roll multiplies base weights by. Returning 0 drops a
 // type from the roll at a site that cannot hold it: water for every type, plus the per-type vetoes
 // below -- artillery needs level ground, a roadblock needs a road, a minefield needs open clear
-// ground. MG and AT never require a road: a hill overlooking nothing is still a firing position, so a
-// road multiplies the score and its absence does not veto it.
+// ground. Every type but the roadblock is also vetoed within 100 m of a road (the keep-clear below).
+// MG and AT never *require* a road -- a hill overlooking nothing is still a firing position -- but they
+// overwatch it from a 100-300 m standoff, so a road lifts the score without the gun sitting on it.
 fnc_hardpoint_score = {
     params ["_facts", "_type"];
     // roadDir (index 12) is the facing's, not the score's -- skipped. roadLos/fofDist default to "clear"
@@ -145,11 +149,17 @@ fnc_hardpoint_score = {
 
     if (_onWater) exitWith { 0 };
 
+    // Every emplacement but the roadblock keeps 100 m off any road: a gun or battery on the verge is
+    // trivially spotted and bypassed, and the overwatch nests fire on the road from a standoff, not atop
+    // it. The roadblock is the one type that belongs on the carriageway (its own road gate below). 100 is
+    // a literal, not a define: the score is pure and the unit harness does not preprocess it.
+    if (!(_type isEqualTo "ROADBLOCK") && {_roadDist < 100}) exitWith { 0 };
+
     private _ramp = { params ["_v", "_lo", "_hi"]; (((_v - _lo) / (_hi - _lo)) max 0) min 1 };
 
     private _high = [_relElev, 0, 6] call _ramp;                // local rise, 0..1
     private _flat = 1 - ([_slope, 0.6, 4] call _ramp);          // 1 flat, 0 rough
-    private _roadNear = 1 - ([_roadDist, 0, 40] call _ramp);    // 1 on the road, 0 at/over 40 m
+    private _roadNear = 1 - ([_roadDist, 0, 300] call _ramp);   // 1 at the road, 0 at/over 300 m; the keep-clear floors the gun at 100 m, so in practice 0.67 down
     private _overwatch = _roadNear * ([_roadDrop, 0, 4] call _ramp) * _roadLos;  // near, above AND visible
     private _clear = 1 - 0.6 * ([_clutter50, 0, 6] call _ramp); // 1 open, 0.4 walled in by structures
     // Interlock: a nest crosses fire with a nearby nest only if their arcs actually overlap. Proximity is

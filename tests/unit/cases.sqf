@@ -896,64 +896,70 @@ TEST_PICK = "";
 ["hp_score: AT on a roadless hill still places (no road gate)",
     ([[false, 6, 0.2, 1e9, 0, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
 
-// A road below and near multiplies both, AT the harder -- roughly triples where MG gains ~80%.
+// A road in the overwatch band (100-300 m; on-the-road is vetoed by the keep-clear) multiplies both,
+// AT the harder. At 150 m the road factor is half strength, so MG gains 40% and AT 75%.
 ["hp_score: MG gains from overwatching a road",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 2.7] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 2.1] call fnc_assertClose;
 ["hp_score: AT gains more from the road it kills on",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 3.75] call fnc_assertClose;
-// GMG lobs over cover, so the same overwatch lifts it less than the MG's ~80%.
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 2.625] call fnc_assertClose;
+// GMG lobs over cover, so the same overwatch lifts it less than the MG's 40%.
 ["hp_score: GMG gains less from a road it fires over",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "GMG"] call fnc_hardpoint_score), 2.25] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9], "GMG"] call fnc_hardpoint_score), 1.875] call fnc_assertClose;
+// The keep-clear: any non-roadblock within 100 m of a road is unplaceable, road bonus or not.
+["hp_score: MG within the keep-clear is vetoed",
+    ([[false, 6, 0.2, 50, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: AA within the keep-clear is vetoed",
+    ([[false, 0, 0.2, 80, 0, 0, 0, 0, 1e9], "AA"] call fnc_hardpoint_score), 0] call fnc_assertEq;
 
-// Structures inside 50 m box a gun nest in: the same overwatch MG (2.7) loses arcs as clutter climbs,
+// Structures inside 50 m box a gun nest in: the same overwatch MG (2.1) loses arcs as clutter climbs,
 // down to a 0.4 floor, but is never vetoed. The penalty rides on top of the overwatch multiplier.
 ["hp_score: MG among a few structures loses some of its arc",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 3], "MG"] call fnc_hardpoint_score), 1.89] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 3], "MG"] call fnc_hardpoint_score), 1.47] call fnc_assertClose;
 ["hp_score: MG walled in by a compound floors at 0.4 of its score",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 6], "MG"] call fnc_hardpoint_score), 1.08] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 6], "MG"] call fnc_hardpoint_score), 0.84] call fnc_assertClose;
 ["hp_score: GMG takes the same clutter penalty",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 6], "GMG"] call fnc_hardpoint_score), 0.9] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 6], "GMG"] call fnc_hardpoint_score), 0.75] call fnc_assertClose;
 // A flat-ground type does not read clutter: the ARTY flat score is unchanged with structures around.
 ["hp_score: clutter does not touch a non-nest type",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 6], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
 // Interlock rides on the nearest nest neighbour (nestDist facts[15]) and the two guns' facings agreeing
-// (candidate fall line aspect facts[10] vs neighbour nestDir facts[16]). The overwatch MG (2.7) lifts as
+// (candidate fall line aspect facts[10] vs neighbour nestDir facts[16]). The overwatch MG (2.1) lifts as
 // an aligned neighbour comes into the band and tapers with the gap; the sentinel 1e9 is a lone nest, no
 // bonus. aspectMag (facts[11]) is set >2.5 so the candidate faces its fall line, not the radial.
 ["hp_score: MG interlocked with an aligned nest is preferred",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 0], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 0], "MG"] call fnc_hardpoint_score), 3.36] call fnc_assertClose;
 ["hp_score: MG interlock tapers as the gap opens",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 225, 0], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 225, 0], "MG"] call fnc_hardpoint_score), 2.73] call fnc_assertClose;
 // The complaint fixed: a neighbour in range but facing the opposite way (nestDir 180 vs aspect 0) crosses
-// no fire, so the interlock bonus zeroes and the MG scores as if alone (2.7).
+// no fire, so the interlock bonus zeroes and the MG scores as if alone (2.1).
 ["hp_score: MG interlock nulled when the neighbour faces opposite",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 2.7] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 2.1] call fnc_assertClose;
 // Between aligned and opposed the bonus tapers with the facing delta: 135 deg is half.
 ["hp_score: MG interlock tapers as facings diverge",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 135], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 135], "MG"] call fnc_hardpoint_score), 2.73] call fnc_assertClose;
 // On flat ground the candidate faces the radial the score cannot see, so convergence is skipped and the
 // bonus rides on proximity alone -- an opposed neighbour still counts (aspectMag 0 < 2.5).
 ["hp_score: MG on flat ground takes interlock on proximity alone",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 3.36] call fnc_assertClose;
 // A flat-ground type does not read interlock: ARTY beside a nest neighbour keeps its flat score.
 ["hp_score: interlock does not touch a non-nest type",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 240, 120], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
-// Line of sight gates the road bonus: the overwatch MG (2.7) that cannot see the road it sits above
+// Line of sight gates the road bonus: the overwatch MG (2.1) that cannot see the road it sits above
 // (roadLos 0) falls back to the bare-hill score, as if there were no road. AT loses its larger bonus the
 // same way. Row filled through fofDist (open) so only roadLos varies.
 ["hp_score: MG blind to its road scores as if roadless",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "MG"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "MG"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
 ["hp_score: AT blind to its road loses its bonus too",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "AT"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "AT"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
 
-// Field of fire scales the nest: the overwatch MG (2.7) tapers toward a 0.6 floor as terrain masks its
+// Field of fire scales the nest: the overwatch MG (2.1) tapers toward a 0.6 floor as terrain masks its
 // shot sooner. fofDist 0 is boxed in, 140 is mid, 240+ is fully open (the default the other rows carry).
 ["hp_score: MG boxed in by a short field of fire floors at 0.6",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 0], "MG"] call fnc_hardpoint_score), 1.62] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 0], "MG"] call fnc_hardpoint_score), 1.26] call fnc_assertClose;
 ["hp_score: MG field of fire tapers with the masking distance",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 140], "MG"] call fnc_hardpoint_score), 2.16] call fnc_assertClose;
+    ([[false, 6, 0.2, 150, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 140], "MG"] call fnc_hardpoint_score), 1.68] call fnc_assertClose;
 
 // A flat-ground type reads neither: AA with the road blind and the field boxed keeps its flat-clear score.
 ["hp_score: LOS and field of fire do not touch a non-nest type",
@@ -977,10 +983,11 @@ TEST_PICK = "";
 ["hp_score: artillery on the flat",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
-// A roadblock needs a road.
+// A roadblock needs a road, and is the one type exempt from the 100 m keep-clear -- on-the-road
+// (roadDist 0) places, where every other type is vetoed inside 100 m.
 ["hp_score: roadblock vetoes no road",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "ROADBLOCK"] call fnc_hardpoint_score), 0] call fnc_assertEq;
-["hp_score: roadblock on the road",
+["hp_score: roadblock on the road (exempt from the keep-clear)",
     ([[false, 0, 0.2, 0, 0, 0, 0, 0, 1e9], "ROADBLOCK"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
 
 // OP wants height and close cover, but a thicket beyond blinds it.
@@ -1019,9 +1026,10 @@ TEST_PICK = "";
 ["hp_score: radio mast on a flat plain scores its floor",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0], "RADIO"] call fnc_hardpoint_score), 0.3] call fnc_assertClose;
 
-// An unmapped type sites anywhere until given a preference.
+// An unmapped type sites anywhere until given a preference -- but still keeps clear of roads (only the
+// roadblock is exempt), so this reads a site with no road in scan range (roadDist sentinel).
 ["hp_score: an unknown type is neutral",
-    ([[false, 0, 0, 0, 0, 0, 0, 0, 1e9], "WATCHTOWER"] call fnc_hardpoint_score), 1] call fnc_assertEq;
+    ([[false, 0, 0, 1e9, 0, 0, 0, 0, 1e9], "WATCHTOWER"] call fnc_hardpoint_score), 1] call fnc_assertEq;
 
 // --- fnc_hardpoint_facing: [type, aspectDir, aspectMag, radialDir, roadDir] -> heading ---
 // A pronounced fall line (aspectMag >= 2.5) turns an overwatch nest down the slope; a faint one, or a
