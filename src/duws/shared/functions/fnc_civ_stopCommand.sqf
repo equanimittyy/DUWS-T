@@ -10,7 +10,7 @@ _unit addAction [
 {
     params ["_target", "_caller", "_actionId"];
 
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
+    [name _caller, localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
     
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
     sleep 4;
