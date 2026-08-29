@@ -38,10 +38,13 @@ Genuinely well-built, worth guarding: the garrison attrition multiset
 `diag_log`), and the config tables that front the complexity (the faction schema, the side-mission
 registry `shared/includes/mission_types.hpp`, the support catalogue).
 
-## Phase 1 — verify the correctness risks
+## Phase 1 — verify the correctness risks (closed)
 
 The review's four risks were inferred from reading and must be confirmed in-game. All four now carry a
-fix in the tree; the economy-gate fix leaves one residual, called out in its bullet below.
+fix in the tree; the economy-gate fix leaves one residual, called out in its bullet below. Closed here:
+the fixes stand on disk and the four in-game checks move to the playtest checklist
+([`KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md)); the residual stays owned by
+[`economy_second_pass.md`](./economy_second_pass.md).
 
 - **`fnc_money_spend` non-local item-slot debit — patched, verify.** The removal now splits on locality
   (`server/misc/fnc_economy_init.sqf:246-247`): `removeItem` when the unit is server-local, otherwise
@@ -141,9 +144,9 @@ missed rename, so a partial sweep silently breaks remote clients. Prefix on touc
 
 ## Task list
 
-- [ ] Phase 1: play-test-confirm the four patched risks (money debit, dedicated escalation, OPFOR
-      off-pattern role, economy tier + close-loadout gates); close the economy residual (settle open-loadout
-      snapshot, and the 0-cost tier bypass) server-side.
+- [x] Phase 1: the four fixes stand on disk; play-test confirmation moved to the checklist
+      ([`KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md)) and the economy residual (settle open-loadout snapshot,
+      0-cost tier bypass) to [`economy_second_pass.md`](./economy_second_pass.md).
 - [x] Phase 2: two assertions shipped (poller, single-mission); the remaining three (reserve
       single-writer, tier-monotonic rows, garrison-live flag on teardown) dropped as not worth the churn.
 - [x] Phase 3: WARCOM BLUFOR patrol retired (removed, not migratable onto the roster-token model) —

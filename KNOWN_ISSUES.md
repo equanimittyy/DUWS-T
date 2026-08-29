@@ -30,11 +30,14 @@ still be broken for a joining client.
 
 - [ ] Zone capture registers, marker flips, holds across save/load (SP)
 - [ ] Economy: CP/AP income, capture bounty, and support/unit costs stay in balance
+- [ ] Economy gates hold for an MP client: no unearned support-tier buy, captured-gear settle credits honestly. Known gap — the *open* loadout is still client-sent, so a faked-rich open can over-credit; deferred to [economy_second_pass.md](docs/plans/economy_second_pass.md)
 
 ## AI opposition
 
 - [ ] Garrison strength + reserves top-up and hardpoint stream behave as intended after a capture
+- [ ] A role spelled off-pattern still fields OPFOR-side (auto-detect publishes from the schema key list)
 
 ## Multiplayer
 
 - [ ] JIP: client joining mid-campaign sees correct zone state, economy, and owned supports
+- [ ] Client-caused building damage raises escalation on a dedicated host, not only SP/hosted
