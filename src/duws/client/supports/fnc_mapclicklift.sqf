@@ -10,7 +10,7 @@ params ["_target", "_caller", "_actionId", "_arguments"];
 private _liftClickHandler = "player setVariable ['LIFT_TMPPOS', _pos]; player setVariable ['LIFT_CLICKED', true];";
 if (!(["LIFT", _liftClickHandler] call fnc_mapclick_claim)) exitWith {};
 
-private _timer = 3000;                     // timeout counter (5 min = 3000 * 0.1s)
+private _deadline = diag_tickTime + 300;   // 5 min to place all three waypoints, else abort
 private _waypoints = [];
 private _markers = [];
 private _clickPos = [];
@@ -27,7 +27,7 @@ openMap true;
 // the hint box renders beneath it.
 [localize "STR_DUWS_T_liftwp_brief"] call fnc_map_prompt;
 
-while {_timer > 0 && count _waypoints < 3} do {
+while {diag_tickTime < _deadline && count _waypoints < 3} do {
     if (!visibleMap) then {
         openMap true;
     };
@@ -41,8 +41,11 @@ while {_timer > 0 && count _waypoints < 3} do {
         if (!visibleMap) then {
             openMap true;
         };
-        player getVariable ["LIFT_CLICKED", false]
+        (player getVariable ["LIFT_CLICKED", false]) || (diag_tickTime >= _deadline)
     };
+
+    // timed out waiting for the next click: abandon selection; the incomplete-route branch below deletes markers
+    if (!(player getVariable ["LIFT_CLICKED", false])) then { break };
 
     _clickPos = player getVariable ["LIFT_TMPPOS", []];
     player setVariable ["LIFT_TMPPOS", nil];
@@ -78,8 +81,6 @@ while {_timer > 0 && count _waypoints < 3} do {
         };
     };
 
-    _timer = _timer - 1;
-    sleep 1.0;
 };
 
 player setVariable ["LiftWaypoints", _waypoints];

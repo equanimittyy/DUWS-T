@@ -37,7 +37,7 @@ _message = localize "STR_DUWS_T_boattaxicall";
 
 _spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-_boat = createVehicle [blufor_BOAT_TRANS_X, _spawnPos,[], 0, "FLY"];
+_boat = createVehicle [blufor_BOAT_TRANS_X, _spawnPos,[], 0, "NONE"];
 _boatgroup = createGroup west; 
 _pilot = _boatgroup createUnit [blufor_MARK_SOLDIER_X, [5,5,5], [], 0, "NONE"];
 _boatgroup deleteGroupWhenEmpty true;
