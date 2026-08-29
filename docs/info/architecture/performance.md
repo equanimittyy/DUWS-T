@@ -151,14 +151,6 @@ collects a landed canopy either way: `ParachuteBase` is one of its litter classe
 takes anything unmanned. Worth knowing for the BLUFOR paradrop support and for anything that reintroduces
 a scripted drop.
 
-**VCOM AI is compiled but never started.** `description.ext` includes `modules/vcom/cfgFunctions.hpp`,
-so every `VCM_fnc_*` exists and greps as live code, but nothing calls `VCM_fnc_VcomInit` — the only
-reference is the commented example at `modules/VCOM/cfgFunctions.hpp:33`. Its per-frame mine monitor and
-its AI scheduler are both registered *inside* that init
-(`modules/VCOM/Functions/fn_VcomInit.sqf:63`, `:80`), so neither ever runs, and the `Vcm_Disable`
-variables set on individual units around the mission are inert. Worth knowing before reading a VCOM
-function as a cost.
-
 **R3F's `Draw3D` handler is behind a disabled `#ifdef`.**
 `modules/R3F_LOG/fonctions_generales/lib_geometrie_3D.sqf:1018` gates it on `R3F_LOG_3D_dev_mode`, which
 the line above leaves commented out, so the per-frame bounding-box sweep it registers never runs.

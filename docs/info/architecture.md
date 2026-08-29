@@ -15,7 +15,7 @@ style.
 
 | Path | Contents | Ownership |
 |---|---|---|
-| `src/modules/` | `AIS`, `R3F_LOG`, `VCOM`, `taw_vd`, `zbe_cache` | Vendored third-party — **frozen** |
+| `src/modules/` | `AIS`, `R3F_LOG`, `taw_vd`, `zbe_cache` | Vendored third-party — **frozen** |
 | `src/duws/` | `server`, `client`, `shared` | DUWS_T (Kibot/Tomata/5U5 lineage) |
 | `src/` (root) | `mission.sqm`, `description.ext`, `stringtable.xml`, root event scripts, `DUWS_T.jpg` | Engine-pinned |
 
@@ -144,6 +144,5 @@ does not imply server-only.
 |---|---|---|
 | `AIS` | Advanced Injury System — revive/medical, an alternative to ACE or vanilla. Who it manages (players + their AI only), the `Revive` param, the ACE handoff, and the HandleDamage/unconscious traps are in [`revive_system.md`](architecture/revive_system.md) | Active |
 | `R3F_LOG` | R3F Logistics — vehicle/object lift, tow, load, and factory building | Active |
-| `VCOM` | VCOM AI — enemy AI behavior enhancement | Compiled but never started; nothing calls `VCM_fnc_VcomInit` |
 | `taw_vd` | TAW View Distance control | Active |
 | `zbe_cache` | ZBE caching — despawns distant AI for performance | Present but disabled; zone streaming owns AI despawn instead |

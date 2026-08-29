@@ -64,9 +64,8 @@ The unit tests avoid drift by **extracting the function under test from real sou
 ## Baselines (regression-gating)
 
 The lint checks gate on *new* problems, tolerating pre-existing ones listed in
-`lint/paths_baseline.txt` (6 already-dead script references) and `lint/syntax_baseline.txt` (2
-vendored VCOM files with a benign trailing `/*` block). Remove an entry once the underlying issue is
-fixed; a genuinely new failure is never masked.
+`lint/paths_baseline.txt` (6 already-dead script references) and `lint/syntax_baseline.txt` (currently
+empty). Remove an entry once the underlying issue is fixed; a genuinely new failure is never masked.
 
 ## Adding checks
 
