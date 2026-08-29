@@ -1,8 +1,7 @@
 // Server file: compiled by fnc_factions_check (server_init.sqf); the functions it defines run
 // wherever their callers do, client dialogs included.
-// First non-empty candidate, else []. Never nil: `select 0` on an empty array returns nil, and
-// assigning nil *undefines* the variable -- a faction with no static AA left _turretAA undefined
-// and took down the whole array fnc_parseFaction returns.
+// First non-empty candidate, else []. Never nil: `select 0` on [] returns nil, and assigning nil
+// *undefines* the var -- a faction with no static AA once left _turretAA undefined, felling the whole array.
 fnc_selectNonEmpty = compileFinal {
 	private _found = _this select {!(_x isEqualTo [])};
 	if (_found isEqualTo []) exitWith {[]};
@@ -39,9 +38,8 @@ fnc_vehiclePostInit = compileFinal {
 };
 
 
-// No in-tree caller left, but kept: it is publicVariable'd with the other detection helpers, so
-// a third-party faction file may still call it -- and a missing broadcast name fails silently at
-// the call site, not anywhere a linter or the boot self-check would catch.
+// No in-tree caller, kept: publicVariable'd with the other helpers, so a third-party faction file may
+// call it -- and a missing broadcast name fails silently at the call site, uncaught by lint or self-check.
 fnc_padZero = compileFinal {
 	switch (True) do { 
 		case (_this < 10): {format ["0%1", str _this]};
@@ -56,11 +54,8 @@ fnc_getEditorCategory = compileFinal {
 
 fnc_factionGetFilteredByEditorSubcat = {
 	params ["_factionData", "_factionFilter"];
-	// scope == 2 only, NOT scopeCurator == 2: createVehicle/createUnit refuse anything below public
-	// scope, and some mods (e.g. CUP's *_OCimport_* base classes) are curator-placeable yet scope 1 --
-	// admitting those put unspawnable classes in the faction pool, so a convoy/garrison draw came up a
-	// hull short when the pick landed on one. scope 2 is the hard spawn requirement, so this loses no
-	// class the mission could ever raise.
+	// scope == 2 only, NOT scopeCurator: createVehicle/createUnit refuse below-public scope, and curator-
+	// placeable scope-1 mod classes (CUP *_OCimport_*) would enter the pool unspawnable and short a draw.
 	_factionDataFiltered = _factionData select {_factionFilter in toLowerANSI getText ( configfile >> "CfgVehicles" >> _x >> "editorSubcategory" ) && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2}};
 
 	// fallback for non-standard editor categories: less accurate, but better than empty
@@ -173,9 +168,8 @@ fnc_vehicleWeaponType = compileFinal {
 };
 
 fnc_unitParseRoles = compileFinal {
-	// Unit role comes from the config icon (CfgVehicles >> type >> picture -> CfgVehicleIcons:
-	// pictureHeal/Repair/...). Weapon role comes from the held weapon's UIPicture, secondary
-	// before primary.
+	// Unit role from the config icon (CfgVehicleIcons: pictureHeal/Repair/...); weapon role from the
+	// held weapon's UIPicture, secondary before primary.
 	fnc_IsMG = compileFinal {
 		params ["_type"];
 		// Belt-fed first (default mag 100+): an MG whatever its icon. 100 clears drums so a drum SMG is not one.
@@ -187,9 +181,8 @@ fnc_unitParseRoles = compileFinal {
 	
 	fnc_IsAT = compileFinal {
 		params ["_type"];
-		// A weapon in the launcher slot that is not an AA piece (the AA case runs before this in the
-		// switch) is AT: rocket/missile launchers inherit the Launcher base whatever their icon.
-		// A grenadier carries the GL as a primary muzzle, not a launcher, so this cannot steal them.
+		// A launcher-slot weapon that isn't AA (the AA case runs first) is AT: launchers inherit Launcher
+		// whatever their icon. A grenadier's GL is a primary muzzle, not a launcher, so it's safe from this.
 		(_type != "" && {_type isKindOf ["Launcher", configFile >> "CfgWeapons"]})
 		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_at_ca.paa"}
 	};
@@ -234,9 +227,8 @@ fnc_unitParseRoles = compileFinal {
 		getNumber(configFile >> "CfgVehicles" >> _type >> "canDeactivateMines") == 1;
 	};
 	
-	// These test the classname as well as the display name, and read it from their own _type
-	// rather than the caller's _x: `call` shares the caller's scope, so reading _x only works from
-	// inside fnc_unitParseRoles' apply and errors anywhere else.
+	// These test classname as well as display name, read from their own _type not the caller's _x:
+	// `call` shares scope, so _x only resolves inside fnc_unitParseRoles' apply and errors elsewhere.
 	fnc_IsOfficer = compileFinal {
 		params ["_type"];
 		"officer" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"officer" in toLowerANSI _type}
@@ -319,20 +311,15 @@ fnc_unitParseRoles = compileFinal {
 		// (weapon sub-index 4 = muzzle-1 magazine+ammo), 9 assigned items. Full array: BIS getUnitLoadout.
 		
 		_primaryWeaponIsSuppressed = if (count _primaryWeapon > 1) then [{_primaryWeapon # 1 isNotEqualTo ""}, {false}];
-		// getUnitLoadout pads a weapon array to seven elements, absent attachments as "", so
-		// `count > 3` only means a primary weapon exists, not that it has an optic. An iron-sighted
-		// rifle read OpticsModes under CfgWeapons >> "" (no classes): selectMax got [] and returned
-		// nil, and assigning nil undefines the variable, erroring both reads below. An optic with no
-		// OpticsModes fails the same way, so check the modes, not the classname.
+		// getUnitLoadout pads a weapon array to 7 ("" for absent), so `count > 3` means a primary exists, not an optic.
+		// An iron-sighted rifle's OpticsModes under "" made selectMax [] -> nil, undefining the var; check modes, not classname.
 		private _opticsModes = [];
 		if (count _primaryWeapon > 3 && {(_primaryWeapon # 3) isNotEqualTo ""}) then {
 			_opticsModes = "true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes");
 		};
 
-		// Zero rather than the no-weapon fallback: a weapon whose optic cannot be read has no long-range
-		// optic, and 9999 would claim the opposite. A continuous-zoom scope carries OpticsModes but no
-		// discreteDistance, so the modes are non-empty yet the distances flatten to []; selectMax [] is
-		// nil, and assigning nil undefines the var and errors the reads below -- so [] falls to 0 too.
+		// Zero, not the no-weapon fallback: an unreadable optic is no long-range optic, 9999 would claim the opposite.
+		// A continuous-zoom scope has OpticsModes but no discreteDistance, so [] -> selectMax [] -> nil undefines; [] falls to 0.
 		_primaryWeaponOpticMaxZero = if (_opticsModes isEqualTo []) then {0} else {
 			private _discreteDistances = flatten (_opticsModes apply {getArray (_x >> "discreteDistance")});
 			if (_discreteDistances isEqualTo []) then {0} else {selectMax _discreteDistances}
@@ -349,9 +336,8 @@ fnc_unitParseRoles = compileFinal {
 			getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _secondaryMag >> "ammo") >> "cost")
 		};	// LAT < 400, HAT > 400
 		_hasUAVterminal = "uav" in toLowerANSI (_assignedItems # 1);
-		// param, not # 0: an unarmed unit's empty weapon array made indexing it hand the role
-		// predicates below nothing at all -- one config lookup per weaponless unit, erroring on
-		// every pass of the faction scan.
+		// param, not # 0: an unarmed unit's empty weapon array made `# 0` hand the role predicates nothing,
+		// erroring one config lookup per weaponless unit on every pass of the faction scan.
 		_primaryType = _primaryWeapon param [0, ""];
 		_secondaryType = _secondaryWeapon param [0, ""];
 		
@@ -376,10 +362,8 @@ fnc_unitParseRoles = compileFinal {
 		};	// suppressed weapon -> classified as spec ops
 		
 		switch true do {
-			// Pilots and crew first: they carry the same launchers and medikits as line infantry, so
-			// lower down a crewman with an RPG became an AT rifleman and a garrison came out dressed
-			// for a cockpit. The old fix stripped them back out by classname, but that keyword list
-			// included "officer" and so emptied the officer role for factions that spell theirs "officer".
+			// Pilots and crew first: they carry the same launchers/medikits as infantry, so lower down a crewman
+			// with an RPG became an AT rifleman. The old classname-strip fix included "officer" and emptied that role.
 			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
 			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
 			case ( [_x] call fnc_IsDiver ) : { _diver pushBackUnique _x };
@@ -410,10 +394,8 @@ fnc_unitParseRoles = compileFinal {
 
 fnc_parseFaction = compileFinal {
 	params [["_faction", if (is3DEN) then [{faction (get3DENSelected "Object" # 0)}, {faction player}] ]];
-	// Config order, not shuffled: fnc_faction_pools publishes element 0 of each role as the
-	// faction's stable representative, and a mod declares its mainstay before its variants. A
-	// shuffle changed that representative every campaign (a faction's rifleman and operator both
-	// came out as the same sniper); spawn variety comes from fnc_faction_pick over the pool.
+	// Config order, not shuffled: fnc_faction_pools publishes element 0 (a mod lists its mainstay first) as
+	// the role's stable representative -- a shuffle made rifleman and operator the same sniper. Variety: fnc_faction_pick.
 	_factionData = ("gettext (_x >> 'faction') == _faction" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
 
 	// ignore unarmed infantry
@@ -442,9 +424,8 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_tank =	[ _factionData, "tank" ] call fnc_factionGetFilteredByEditorSubcat;
 	_arty =	[ _factionData, "artillery" ] call fnc_factionGetFilteredByEditorSubcat;
 	_antiAir =	[ _factionData, "aas" ] call fnc_factionGetFilteredByEditorSubcat;
-	// Every soft-skin wheeled vehicle (isKindOf Car), cars and trucks alike: trucks sit under the
-	// "Trucks" subcategory and the cars fallback only fires when cars is wholly empty, so a faction with
-	// both dropped its trucks. Armor <= 300 keeps wheeled APCs (their own bucket) out of a transport role.
+	// Every soft-skin wheeled vehicle (isKindOf Car), cars and trucks alike -- the cars fallback only fires
+	// when cars is empty, so a faction with both once dropped its trucks. Armor <= 300 excludes wheeled APCs.
 	private _wheeledSoft = _factionData select {
 		_x isKindOf "Car"
 		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}
@@ -460,16 +441,13 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
 	private _heliByPylon = [_heliSeated] call fnc_filterByPylons;
 	_heliArmed =	_heliByPylon + (([ _heliSeated, true ] call fnc_filterByWeapons) select {!(_x in _heliByPylon)});
-	// Count cargo seats as well as legacy transportSoldier: a seat-proxy transport reports
-	// transportSoldier 0 and read as no transport, so TRANS fell through to the gunship. Floor of 4
-	// cargo seats, what the taxi and paradrop calls need.
+	// Count cargo seats as well as transportSoldier: a seat-proxy transport reports transportSoldier 0 and
+	// read as no transport, so TRANS fell to the gunship. Floor of 4 cargo seats, what taxi/paradrop need.
 	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
 	_heliTransport = (_heliList select {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}) + ([_heliList, 1, 4] call fnc_filterBySeats);
 	_heliTransport = _heliTransport arrayIntersect _heliTransport;
-	// Representative is the first entry (fnc_faction_pools_publish), and the taxi, paradrop and intro
-	// spawns read that single global, so order the transports biggest-first by troop capacity. Rank by
-	// transportSoldier or, for the seat-proxy airframes that report it as 0, actual cargo seats -- the
-	// same two measures the filter above accepts. Random patrol still draws variety from the whole pool.
+	// Representative is the first entry (fnc_faction_pools_publish), read by taxi/paradrop/intro, so order
+	// transports biggest-first by transportSoldier (or cargo seats for seat-proxy airframes). Patrol draws the whole pool.
 	private _ranked = _heliTransport apply {
 		private _c = configFile >> "CfgVehicles" >> _x;
 		[(getNumber (_c >> "transportSoldier")) max (([_x, true] call BIS_fnc_crewCount) - ([_x, false] call BIS_fnc_crewCount)), _x]
@@ -499,15 +477,10 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 };
 
 
-// One curated classname -> the pool fnc_faction_pick draws from at each spawn: the class plus the
-// rest of its faction's tightest bucket that holds it. A rifleman sits in both the whole-infantry
-// list and the grunt list; the smaller bucket is the role being filled, so it is the one expanded.
-// The class stays at the front, where fnc_faction_pools_publish reads the representative from.
-//
-// The buckets come from a parse of the class's own faction. A caller with a parse already in hand
-// (the key editor caches one per screen; the augment pass caches one per faction) passes it; a bare
-// call parses on demand. A class its own faction's parse never bucketed -- or an empty class --
-// yields itself alone, which is what a plain hand-written role global already gives.
+// One class -> the pool fnc_faction_pick draws at each spawn: the class plus the rest of its faction's
+// tightest bucket holding it (a rifleman is in both infantry and grunt; the smaller is the role). Class
+// stays first, where fnc_faction_pools_publish reads the representative. Buckets come from a parse of the
+// class's faction -- callers pass a cached one (key editor, augment) or parse on demand; unbucketed/empty yields itself.
 fnc_faction_pool_for_class = compileFinal {
 	params ["_class", ["_parsed", []]];
 	if (_class isEqualTo "") exitWith { [] };
@@ -532,20 +505,17 @@ fnc_faction_pool_for_class = compileFinal {
 };
 
 
-// Zombie faction? Matched on display name, not a per-mod class list: the mission supports two
-// zombie mods and cannot name every faction they ship, but both name theirs for what they field.
-// One test both ways -- zombies stay out of ordinary picks and are the only OPFOR the zombie mode
-// offers. Markers live in the block, not a global: the block is what is published to clients, and
-// a companion global would have to be published in lockstep.
+// Zombie faction? Matched on display name, not a per-mod class list: two zombie mods are supported and
+// cannot all be named, but both name theirs for what they field. One test both ways -- zombies stay out
+// of ordinary picks, are the only OPFOR in zombie mode. Markers live in the block (what clients get), not a lockstep global.
 fnc_factionIsZombie = compileFinal {
 	params ["_factionClass"];
 	private _name = toLower getText (configFile >> "CfgFactionClasses" >> _factionClass >> "displayName");
 	(["zombie", "undead", "infected"] findIf { _name find _x >= 0 }) >= 0
 };
 
-// All valid factions, de-duplicated (a faction may be defined for several sides).
-// _wantZombies inverts the zombie filter rather than lifting it: a caller gets the ordinary
-// factions or the zombie ones, never both in one list.
+// All valid factions, de-duplicated (a faction may be defined for several sides). _wantZombies inverts
+// the zombie filter rather than lifting it: a caller gets ordinary factions or zombies, never both.
 fnc_getAllFactionsClean = compileFinal {
 	params [["_wantZombies", false]];
 	private _factionsRef = [];
@@ -568,10 +538,8 @@ fnc_getAllFactionsClean = compileFinal {
 	_factions
 };
 
-// One dialog is reused across the BLUFOR then OPFOR rounds: the first round builds
-// it, later rounds relabel and re-enable the same display. It never closes between
-// picks, so the settings/campaign menus stacked underneath stay unreachable until
-// both factions are chosen (closing it early exposed the map for a few seconds).
+// One dialog reused across the BLUFOR then OPFOR rounds: first round builds it, later rounds relabel and
+// re-enable it. Never closes between picks, so the menus underneath stay unreachable (early close flashed the map).
 fnc_factionSelector = compileFinal {
 	params [ ["_prompt", "Select Faction"], ["_finalRound", true], ["_wantZombies", false] ];
 
@@ -584,9 +552,8 @@ fnc_factionSelector = compileFinal {
 
 	disableSerialization;
 
-	// Repaints the listbox from factionList, keeping rows whose label or classname contains the
-	// filter text. Each row carries its faction class as data, so the click handlers read that rather
-	// than indexing factionList by position -- which the sort and the filter both break.
+	// Repaints the listbox from factionList, keeping rows whose label/classname contains the filter. Each
+	// row carries its faction class as data, so handlers read that, not a factionList index (sort/filter break it).
 	duws_faction_select_fill = {
 		params ["_filter"];
 		private _disp = uiNamespace getVariable ["DUWS_factionSelectDisplay", displayNull];
@@ -631,9 +598,8 @@ fnc_factionSelector = compileFinal {
 		{
 			private _control = _display ctrlCreate [_x # 1, _x # 0];
 			_control ctrlSetText (_x # 2 # 1);
-			// DUWS setup-dialog palette: green backdrop (1450) under a translucent-black inner
-			// panel (1451) so the red action button reads crisp, plus a transparent overlay
-			// (1201) for the "no units" caption. Everything else takes the translucent black.
+			// Setup-dialog palette: green backdrop (1450) under a translucent-black panel (1451) so the red
+			// button reads crisp, a transparent overlay (1201) for the "no units" caption. Rest is translucent black.
 			switch (_x # 0) do {
 				case 1450: { _control ctrlSetBackgroundColor [0.2,0.4,0.2,1]; };
 				case 1600: { _control ctrlSetBackgroundColor [1,0,0,0.5]; };

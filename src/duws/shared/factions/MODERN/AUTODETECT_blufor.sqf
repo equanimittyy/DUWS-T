@@ -1,12 +1,8 @@
 // Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31; defines
 // faction helpers rather than running logic of its own.
-///////////
-///////////	"BLU_F", "E X P E R I M E N T A L", "BLU_F_ARID"
-///////////
 
-// The retexture handler installs once and is never removed; the generation below re-runs each time
-// the player re-picks a faction in setup. Guarding the whole file would pin the first pick; installing
-// the handler per pass would retexture each spawned vehicle once per pass.
+// Handler installed once, generation re-runs each re-pick. Guarding the file would pin the first
+// pick; installing the handler per pass would retexture each vehicle once per pass.
 if (isNil "blufor_autodetect_handler_init") then {
 	blufor_autodetect_handler_init = true;
 
@@ -32,30 +28,23 @@ fnc_factionGen = {
 	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
 							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
 
-	// Pilots and crew are excluded upstream by fnc_unitParseRoles, which tests for them first. This
-	// line is only about the basic rifleman: an officer or parade-dress variant is a poor stand-in for
-	// the man who fills out a patrol.
+	// Pilots and crew are kept out of the combat buckets upstream (fnc_unitParseRoles tests them
+	// first). This is only the basic rifleman: an officer or parade-dress variant fills a patrol poorly.
 	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
 	// The armed-boat key wants a boat with a gun on it, which no detection bucket separates out.
 	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
 
-	// Any static the faction fields, as the last rung under every turret role below: a mod static
-	// matching no specific weapon bucket still beats the vanilla placeholder. Deduped, since a combo
-	// static can land in more than one bucket.
+	// Any static the faction fields, the last rung under every turret role: beats the vanilla
+	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
 	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
 	_turretAny = _turretAny arrayIntersect _turretAny;
 
 
-// Every role key resolves through one ladder: first bucket holding anything wins, gated on the schema's
-// kind so a wrong-bucket class can't reach a spawner. A rung is skipped when the faction has nothing in
-// it, so the ladder reads as what the role degrades through. The schema's vanillaDefault column is each
-// role's NATO fallback, appended by fnc_faction_resolve as the last rung -- rows here carry no fallback,
-// so it lives in one place. Trailing notes say what reads the key.
-//
-// Operators draw from the suppressed-weapon sets the role parser fills, then the plain role -- recomputed
-// per key here rather than by a single `_spec arrayIntersect _sl`, which would sum buckets and so rate
-// anti-air men equal to light AT for an anti-tank slot.
+// Every role key resolves through one ladder: first non-empty bucket wins, gated on schema kind so a
+// wrong-bucket class can't reach a spawner; empty rungs skip, so the row reads as the degrade path.
+// vanillaDefault (NATO fallback) is appended by fnc_faction_resolve, so rows carry none. Operators
+// recompute per key, not one `_spec arrayIntersect _sl` -- that would sum buckets and misrate the slot.
 { _x call fnc_faction_resolve } forEach [
 	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry]],      //patrol, fortify, paradrop
 	["blufor_AA_SOLDIER_X",       [_aa, _hat, _lat, _grunt, _infantry]],   //shared team rosters
@@ -106,18 +95,12 @@ fnc_factionGen = {
 
 
 
-// REQUEST Units/Vehicles -- ordered lists, no padding and no fixed length: the menus offer every entry
-// in the order written here, so position in the list is the display order. A faction may list as many
-// or as few as it has. Defines labels/index for all request menu units/vehicles (not Operators);
-// request_vehicle, request_vehicle_fob, request_unit, request_unit_fob hold the classnames the
-// label/index reference.
-//
-// dialog\fnc_request_unit uses _index = lbCurSel 2100; dialog\fnc_request_unit_fob uses lbCurSel 2120.
+// REQUEST Units/Vehicles -- ordered, variable-length lists (written order = display order): labels/index
+// for request-menu units/vehicles, not Operators; the request_(vehicle|unit)(_fob) globals hold the classnames.
 
 
-// One class per menu row, or "" when the faction fields nothing for it: selectRandom on an empty
-// list is nil, and a nil classname in a request row is an entry the player can buy and no spawner
-// can raise. The empty rows are dropped below rather than offered.
+// One class per menu row, or "" when the faction fields nothing: selectRandom on [] is nil, and a nil
+// classname is a buyable row no spawner can raise, so the empty rows are dropped below, not offered.
 private _pick = {
 	private _c = _this call fnc_selectNonEmpty;
 	if (_c isEqualType "") exitWith {_c};
@@ -184,12 +167,8 @@ requestAssets = requestAssets arrayIntersect requestAssets;	// remove potential 
 } forEach requestAssets;
 
 
-// Make vars public (dedicated server compat), named from the schema rather than matched on name
-// fragments: a fragment list asking whether "blufor_soldier" appears in the lowercased name silently
-// stops covering six keys once a role is spelled AR_SOLDIER_X rather than SOLDIER_AR_X -- a key that
-// fails to publish leaves a dedicated server's clients holding whatever they had. The two request
-// catalogues are appended because they are the one thing the schema deliberately does not carry:
-// variable-length lists no one-row-per-key table can express.
+// Make vars public (dedicated-server compat) from the schema key list, not name-fragment matching (a
+// fragment silently drops a role spelled off-pattern). The two request catalogues, which the schema cannot carry, are appended.
 _publish = ((["blufor"] call fnc_faction_schema) apply {_x select 0}) + ["blufor_RQST_UNITS", "blufor_RQST_VEHICLES"];
 { missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] } forEach _publish;
 
@@ -208,6 +187,5 @@ b_arraysToRandomize = (["blufor"] call fnc_faction_schema) apply {_x select 0};
 // Pools published, not collapsed by a timer. See fnc_faction_pools for what a thread per role gets wrong.
 [b_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
-// No five-minute squad rebuild folding newly drawn role classnames into the purchasable squads:
-// server_init calls fnc_BLUFOR_squad_init once, which is right for a catalogue -- a price list that
-// reshuffles under the player mid-purchase is worse than a stable one.
+// No timed squad rebuild folding newly drawn classnames into the purchasable squads: server_init calls
+// fnc_BLUFOR_squad_init once -- a price list reshuffling under the player mid-purchase is worse than stable.

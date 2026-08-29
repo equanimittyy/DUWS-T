@@ -1,8 +1,5 @@
 // Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31; defines
 // faction helpers rather than running logic of its own.
-///////////
-///////////	"OPF_F", "E X P E R I M E N T A L", "OPF_F_ARID"
-///////////
 
 // Handler installed once, generation re-run every pass -- see AUTODETECT_opfor.sqf. The guard is
 // shared with that file because both wrappers install the same handler for the same side.
@@ -25,9 +22,8 @@ if (isNil "opfor_autodetect_handler_init") then {
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
 
 
-// Same filter the AutoDetect picker applies: the roll draws from the zombie factions in the
-// apocalypse mode and from everything else in the others, so a random OPFOR can never be zombies in
-// a campaign that is not about them -- nor an army in one that is.
+// Same filter the AutoDetect picker applies: apocalypse mode rolls zombie factions, every other mode
+// rolls the rest -- so a random OPFOR is never zombies off-theme, nor an army in the zombie campaign.
 _wantZombies = (missionNamespace getVariable ["duws_gamemode", "duws"]) isEqualTo "apocalypse";
 
 _factions = (call BIS_fnc_getFactions) select {
@@ -57,9 +53,8 @@ fnc_factionGen = {
 	// them first. This line is only about the basic rifleman.
 	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
-	// Any static the faction fields, as the last rung under every turret role: a mod static that
-	// matched no specific weapon bucket still beats the vanilla placeholder. Deduped -- a combo static
-	// can land in more than one bucket.
+	// Any static the faction fields, the last rung under every turret role: beats the vanilla
+	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
 	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
 	_turretAny = _turretAny arrayIntersect _turretAny;
 

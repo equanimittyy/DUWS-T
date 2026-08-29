@@ -1,13 +1,8 @@
 // Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31; defines
 // faction helpers rather than running logic of its own.
-///////////
-///////////	"OPF_F", "E X P E R I M E N T A L", "OPF_F_ARID"
-///////////
 
-// The retexture handler is installed once and never removed; the generation below re-runs every
-// time the player re-picks a faction in the setup screens. Guarding the whole file instead would
-// pin the first pick, and installing the handler per pass would retexture each spawned vehicle
-// once per pass.
+// Handler installed once, generation re-runs each re-pick. Guarding the file would pin the first
+// pick; installing the handler per pass would retexture each vehicle once per pass.
 if (isNil "opfor_autodetect_handler_init") then {
 	opfor_autodetect_handler_init = true;
 
@@ -35,29 +30,25 @@ fnc_factionGen = {
 	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
 							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
 
-	// Pilots and crew are kept out of the combat buckets by fnc_unitParseRoles, which tests for
-	// them first. This line is only about the basic rifleman: an officer or a parade-dress
-	// variant is a poor stand-in for the man who fills out a patrol.
+	// Pilots and crew are kept out of the combat buckets upstream (fnc_unitParseRoles tests them
+	// first). This is only the basic rifleman: an officer or parade-dress variant fills a patrol poorly.
 	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
-	// Any static the faction fields, as the last rung under every turret role: a mod static that
-	// matched no specific weapon bucket still beats the vanilla placeholder. Deduped -- a combo static
-	// can land in more than one bucket.
+	// Any static the faction fields, the last rung under every turret role: beats the vanilla
+	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
 	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
 	_turretAny = _turretAny arrayIntersect _turretAny;
 
 
-// One ladder table for every role key, shared with AUTODETECT_RANDOM_opfor so the two cannot
-// drift apart, and gated on the schema's kind so a class detection dropped in the wrong bucket
-// cannot reach a spawner that will only ever createUnit a man or createVehicle a vehicle.
+// One ladder table for every role key, shared with AUTODETECT_RANDOM_opfor so they cannot drift,
+// and gated on the schema kind so a wrong-bucket detection cannot reach a man/vehicle spawner.
 { _x call fnc_faction_resolve } forEach [
 #include "..\..\includes\autodetect_roles_opfor.hpp"
 ];
 
 
-// Make vars public (dedicated-server compat) from the schema key list, not name-fragment matching:
-// a fragment list silently drops a role spelled a way it does not name, leaving clients stale. OPFOR
-// has no request catalogue to append, unlike BLUFOR. Mirrors AUTODETECT_blufor.
+// Make vars public (dedicated-server compat) from the schema key list, not name-fragment matching
+// (a fragment silently drops a role spelled off-pattern). No request catalogue, unlike BLUFOR. Mirrors AUTODETECT_blufor.
 _publish = (["opfor"] call fnc_faction_schema) apply {_x select 0};
 { missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] } forEach _publish;
 
