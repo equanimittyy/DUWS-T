@@ -1,93 +1,81 @@
-# Unit spawning: token API vs direct spawn
+# Unit spawning: three systems
 
-Two ways to raise OPFOR groups coexist in `duws/`. The newer one is the intended default; the older
-one survives in most mission threads. This records the split, why the two are not interchangeable, and
-the open decision blocking consolidation.
+Groups in `duws/` are raised three ways, chosen by *what* is being raised — a team that patrols or
+garrisons, a crew for an emplaced weapon, or a one-off that fits neither. The three are not
+interchangeable: each owns concerns the others drop or fight, so picking the wrong one is a bug, not a
+style choice. This records the split and the rule for choosing.
 
-## The two paths
+## 1. Token spawner — teams that patrol or garrison
 
-**Token API — the intended default.** `server/init_zones/fnc_spawn_team.sqf` and
-`fnc_spawn_vehicle.sqf` raise a group from a composition *token* (`posture:name`), resolving the roster
-through `DUWS_teamRosters` (`shared/functions/fnc_spawn_vocab.sqf:50`) and the faction pools. One call
-does side, AI skill, loot, position banding and patrol orders. The rosters are data — a team added to
-the table is spawnable without touching code, which is what lets the composition TUI add one
-(see [`composition_tooling.md`](composition_tooling.md)).
+`server/init_zones/fnc_spawn_team.sqf` and `fnc_spawn_vehicle.sqf` raise a team from a composition
+*token* — a row on `DUWS_teamRosters` (`shared/functions/fnc_spawn_vocab.sqf`) that names bare roles,
+drawn from the detected faction's pools. One call resolves the side, the AI skill, random loot, the
+spawn position and the patrol orders. Use it for any team that patrols or garrisons a zone, a base or a
+mission objective.
 
-**Direct spawn — legacy.** A raw `[_pos, EAST, [class, class, ...], [], [], opfor_ai_skill] call
-BIS_fnc_spawnGroup`. The class list is hand-written inline and every downstream concern (skill, loot,
-waypoints) is the caller's to repeat or forget.
+Signature: `[_team, _center, _radius, _posture, _spawnPos, _side, _anchors] call fnc_spawn_team`.
 
-What the token path centralises, and the direct path scatters or drops:
+- **Both armies.** `_side` (`"opfor"` / `"blufor"`, default `"opfor"`) drives the engine side, the
+  skill globals and the roster prefix from one string. CIVILIAN is deliberately not a value — only the
+  two armies have a role vocabulary and skill globals, so a civilian group has no pool to draw and stays
+  bespoke (system 3).
+- **A posture, not a hand-written waypoint.** `_posture` selects the circuit and the spawn band through
+  `fnc_apply_posture` and `DUWS_postureBands`: a close or wide patrol, a one-squad `garrison`, an
+  `hqpatrol` circuit through the `_anchors` points, or `"none"` for exact placement at a supplied
+  `_spawnPos`.
+- **Loot is OPFOR's.** Random loot (`fnc_addRandomLoot`) is added only for an OPFOR-side raise: an enemy
+  team is the player's to search, a friendly one fought alongside is not. Searchable bodies also feed
+  faction detection, so loot must never be added to a group that should carry none — which is why the
+  gate is on side, not left to the caller.
+- **A token, not a raw class list.** `DUWS_fnc_teamRoster` looks the name up and returns nothing for an
+  unknown token, so a one-off or dynamically built class list has no row to name and cannot use this API
+  until a row is added for the recurring case.
 
-| Concern | Token path | Direct path |
+Data, not code: a team added to the roster table is spawnable without touching a script, which is what
+lets the composition TUI add one (see [`composition_tooling.md`](composition_tooling.md)).
+
+## 2. Static crewing — a gunner on an emplaced weapon
+
+Crewing an already-placed static weapon is its own operation: seat the gunner while the gun's simulation
+is frozen, then thaw, or the turret spawns unable to traverse (see
+[`arma_engine_gotchas.md`](arma_engine_gotchas.md)). It raises no patrol and takes no posture, so it
+never routes through the token spawner.
+
+- `DUWS_fnc_seatStatic` crews the statics a zone streams in
+  (`server/init_zones/fnc_zone_stream_init.sqf`).
+- `server/missions/fnc_place_bunker_guns.sqf` crews the two bunker guns of the destroy-cache and
+  destroy-radar objectives — one OPFOR rifleman per gun, merged into a single garrison group.
+
+## 3. Bespoke direct spawn — no team shape to share
+
+Everything else calls `BIS_fnc_spawnGroup` / `BIS_fnc_spawnVehicle` directly, because it shares neither
+a roster nor a posture and gains nothing from the token path. These are not unmigrated debt; they are
+raises that do not fit a team.
+
+| What | Where | Why bespoke |
 |---|---|---|
-| Side | `EAST` in one file | `EAST` at every call site |
-| AI skill | `opfor_ai_skill` always applied | per-site; some sites pass none (`server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf:243`) |
-| Loot / body-search identity | `fnc_addRandomLoot` on every man | only where the caller remembers |
-| Waypoints | `fnc_apply_posture`; `"none"` is a verified no-op for exact placement | hand-written or absent |
+| Player-summoned assets | CAS, transport and attack helis, paradrop, vehicle drop, ammo box, artillery (`client/supports/`) | offmap or scripted delivery, not a patrolling team |
+| Player-hired friendlies | operative recruit, PMC, partisans, HC squads, MHQ deploy (`server/misc/`, `server/dialog/`) | placed on the player, with no zone to garrison under |
+| Civilians | the transport-IDAP delivery group, the protect-civ VIP, the RAVAGE/WBK handler | no role vocabulary or skill pool; the WBK handler is mode code kept separate by rule |
+| Rule-scaled, not roster | the side-mission building ring (`fnc_garrisonBuildings`), scaling men by building count | a rule raises the men; no single roster row expresses it |
+| Bespoke seating / routing | the deny-armor convoy hulls and their repair crew, the rescue-pilot WEST pilot group | a posture band would fight the self-routing convoy or the follow behaviour |
+| Cutscene / training | the intro heli, the killhouse | one-shot scenery |
 
-## Two constraints that shape any fix
+A single mission thread can use more than one system: `deny_armor` raises its escort dismounts through
+the `team` token but its convoy hulls and repair crew direct, and `transport_idap` raises its guards
+through tokens but its civilian delivery group direct.
 
-- **`fnc_spawn_team` is OPFOR-only by design.** It hardcodes `EAST` and asks the shared roster for the
-  OPFOR side; its header states this is "the OPFOR zone spawner". WEST and CIVILIAN groups therefore
-  *cannot* route through it without adding a side parameter, which fights the file's whole design.
-- **It takes a token, not a raw class list.** `DUWS_fnc_teamRoster` looks the name up in
-  `DUWS_teamRosters` and returns nothing for an unknown token. A one-off or dynamically built class list
-  has no row to name, so it cannot use the API as written.
+## Migration record and open items
 
-## The gap: direct-spawn call sites in mission threads
+The mission-thread teams that *did* share the team shape were routed onto tokens (the FOB and HQ
+patrols, the protect-civ assault, the target-sniper pair, the rescue-squad captives and the hardpoint
+garrison); the full record is in
+[`token_spawner_unification_plan.md`](../../plans/token_spawner_unification_plan.md). Two things remain:
 
-The direct spawn sites that remain, and why each stays direct — most are not a simple migration:
-
-| Sites | What they raise | Why still direct |
-|---|---|---|
-| `protect_civ:243` | 8-man OPFOR wave | convertible — one-off composition, no row; also the site that passes no skill |
-| `deny_armor:133` | tank repair crew `[CREW, CREW, ENG]` | convertible — one-off composition |
-| `destroy_cache:152/154`, `destroy_radar:100/102` | 1-man bunker gunner | frozen static gunner: wants no posture and no loot; belongs in a shared bunker-gun helper, not the team API |
-| `protect_civ:70`, `rescue_pilot:442`, `rescue_squad:72` | WEST group | side param could route these, but they are a civilian VIP and follow-player rescue squads — they want no posture and no loot |
-| `transport_idap:121` | CIVILIAN group | not OPFOR |
-| `target_sniper:87` | OPFOR perch pair | deliberate exception, documented at the call site |
-| `deny_armor:155/165/181` | convoy vehicles | scripted self-routing convoy; posture bands would fight the convoy logic |
-
-Line numbers are anchors into `server/missions/mission_threads/<name>/`; they drift with edits.
-
-Already migrated (reference examples): `target_armor`, `target_sniper`, `rescue_squad` and
-`sabotage_laptop` call `fnc_spawn_team`/`fnc_spawn_vehicle`. `rescue_squad:118` shows the
-exact-placement pattern — a token with `"none"` posture and a supplied position. The `steal_builder`,
-`steal_supply` and `transport_idap` vehicle guards share that pattern through the existing `team` row.
-
-## Decision: side parameter
-
-`fnc_spawn_team` and `fnc_spawn_vehicle` take a trailing `_side` (`"opfor"`/`"blufor"`, default
-`"opfor"`). One string drives the engine side, the skill globals and the roster prefix; the shared
-roster already held bare role names and asked for a side (`DUWS_fnc_teamRoster`), so the primitives were
-the only OPFOR-hardcoded layer. Defaulting to `"opfor"` keeps every existing caller spawning as before —
-the argument is appended past `_spawnPos`, and no caller passed one there.
-
-CIVILIAN is deliberately *not* a value: only the two armies have a role vocabulary and skill globals
-(`format ["%1_%2", _side, role]` has no `civilian_` pool). A civilian group stays a direct
-`BIS_fnc_spawnGroup`.
-
-Not chosen: the raw-list escape hatch (let the API take a class array, not just a token). Dynamic and
-one-off class lists — the `protect_civ:243` / `deny_armor:133` one-offs — still
-cannot name a roster row, so they stay direct until a row is added for the recurring ones. The side
-parameter does not address them.
-
-## Call-site conversions still owed
-
-The primitive is done; routing sites through it is separate, per-site work. `steal_builder`,
-`steal_supply` and `transport_idap` now raise their vehicle guard through `fnc_spawn_team` with `"none"`
-posture at the vehicle point, reusing the existing `team` row rather than earning a new one. That trades
-the old hand-written three-man `[SL, LAT, SOLDIER]` guard for the six-man `team`, a deliberate difficulty
-bump; loot is unchanged in kind, since all three already looted their guards.
-
-The side parameter *enables* the WEST conversions but does not settle them: a converted site gains
-`fnc_apply_posture` and `fnc_addRandomLoot` whether it wants them or not. `rescue_squad:72` and
-`rescue_pilot:442` raise a WEST group that should follow the player, not garrison under a posture, and
-wants no loot — those stay direct by choice, not by limitation. Any conversion that adds loot to a group
-that had none changes body-search identity (searchable bodies feed faction detection), so each converted
-thread needs an in-game check of head-count, position, AI behaviour and body-search identity.
-
-The deliberate-exception sites (`target_sniper:87`, the `deny_armor` convoy hulls) remain correct as
-direct spawns: the convoy hulls need bespoke column seating that the posture band would fight, and route
-through raw `BIS_fnc_spawnVehicle` — the side parameter never reaches them.
+- **Retire `fnc_WARCOM_blu_patrol`.** The BLUFOR strategic patrol spawns a whole faction *section* — a
+  vehicle plus its roster dismounts, pre-built in `fnc_BLUFOR_squad_init` — which fits neither the team
+  token nor the vehicle token. It is unwanted and slated for removal (thread, spawn, compile
+  registration), not migration.
+- **The WEST follow-groups and one-off waves stay direct by choice.** Routing the rescue-pilot pilot or
+  the protect-civ VIP through the token spawner would hand it a posture and loot it should not have; each
+  stays bespoke until it earns a roster row, which most never will.
