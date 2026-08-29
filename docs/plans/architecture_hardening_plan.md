@@ -97,8 +97,8 @@ evenly, so it pays down by pocket.
 
 | Migration | State | Action |
 |---|---|---|
-| Mission lifecycle spine | 8 of 19 threads on the spine | Owned by [`mission_spine_unification_plan.md`](./mission_spine_unification_plan.md); not re-scoped here. |
-| Token spawner vs direct `BIS_fnc_spawnGroup` | Token API is the intended default; most threads still call direct | Owned by [`token_spawner_unification_plan.md`](./token_spawner_unification_plan.md): widen the spawner to three sides plus animation, then route the zone/garrison, mission, HQ and civilian callers through it. |
+| Mission lifecycle spine | Runner approach dropped: each thread runs its own shape, ending through the single `fnc_mission_finish` chokepoint | Closed. `fnc_mission_run` was deleted rather than widened, so there is no shared runner to migrate onto. |
+| Token spawner vs direct `BIS_fnc_spawnGroup` | Three settled systems: the token spawner for roster teams, static crewing, and bespoke direct spawns for one-offs | Done — the team callers route through the token spawner; see [`unit_spawning.md`](../info/architecture/unit_spawning.md). Remaining: retire the WARCOM BLUFOR patrol. |
 | Zone liveness (lost-token ledger) | Zones and towns on the ledger; hardpoints on a separate snapshot | Bring hardpoints onto the lost-token ledger so one model answers liveness everywhere. |
 | `DUWS_` prefix on globals / functions | ~549 bare `fnc_`, hundreds of bare globals | Prefix-on-touch only. No sweeping rename — see [out of scope](#out-of-scope). |
 

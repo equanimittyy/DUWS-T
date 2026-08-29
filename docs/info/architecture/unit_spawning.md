@@ -67,15 +67,14 @@ through tokens but its civilian delivery group direct.
 
 ## Migration record and open items
 
-The mission-thread teams that *did* share the team shape were routed onto tokens (the FOB and HQ
+The mission-thread teams that *did* share the team shape were routed onto tokens: the FOB and HQ
 patrols, the protect-civ assault, the target-sniper pair, the rescue-squad captives and the hardpoint
-garrison); the full record is in
-[`token_spawner_unification_plan.md`](../../plans/token_spawner_unification_plan.md). Two things remain:
+garrison. Two things remain:
 
 - **Retire `fnc_WARCOM_blu_patrol`.** The BLUFOR strategic patrol spawns a whole faction *section* — a
   vehicle plus its roster dismounts, pre-built in `fnc_BLUFOR_squad_init` — which fits neither the team
-  token nor the vehicle token. It is unwanted and slated for removal (thread, spawn, compile
-  registration), not migration.
+  token nor the vehicle token. It is unwanted and slated for removal — the thread, its spawn in
+  `fnc_WARCOM_init.sqf:62`, and its compile in `server_fnc_init.sqf:272` — not migration.
 - **The WEST follow-groups and one-off waves stay direct by choice.** Routing the rescue-pilot pilot or
   the protect-civ VIP through the token spawner would hand it a posture and loot it should not have; each
   stays bespoke until it earns a roster row, which most never will.
