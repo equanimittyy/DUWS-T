@@ -62,7 +62,8 @@ if (_isAir) then {
 [_vehGroup, _posture, _patrolCenter, _radius] call fnc_apply_posture;
 
 {
-    [_x] call fnc_addRandomLoot;
+    // Random loot is OPFOR's alone: a friendly crew the player fights alongside should not drop it.
+    if (_side isEqualTo "opfor") then { [_x] call fnc_addRandomLoot; };
     // Crew in a mod's own flight suit read as that mod's faction on a body search. OPFOR only: the
     // coveralls are an independent-side pilot suit, wrong on a BLUFOR crew, and body-search identity
     // only matters for the enemy the player searches. Skipped for the BLUFOR faction files that dress

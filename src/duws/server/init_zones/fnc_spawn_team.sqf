@@ -54,7 +54,9 @@ private _skill = missionNamespace getVariable [format ["%1_ai_skill", _side], op
 private _group = [_position, _army, _men, [], [], _skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 
-{ [_x] call fnc_addRandomLoot } forEach units _group;
+// Random loot is OPFOR's alone: an enemy team is the player's to search, a friendly one the player
+// fights alongside should not drop lootable gear on death.
+if (_side isEqualTo "opfor") then { { [_x] call fnc_addRandomLoot } forEach units _group; };
 
 [_group, _posture, _center, _radius, _anchors] call fnc_apply_posture;
 
