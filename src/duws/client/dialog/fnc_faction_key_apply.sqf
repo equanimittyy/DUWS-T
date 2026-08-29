@@ -37,30 +37,37 @@ if (_class isEqualTo "") exitWith {
 
 ["INFO", "FACTION", format ["Key editor: %1 <- %2 (faction %3)", _key, _class, _faction]] call fnc_log;
 
-// Said before the parse below rather than after, because that parse walks a whole faction's
-// CfgVehicles and on a heavy mod set takes long enough that the screen reads as frozen: the button
-// stops responding and nothing on it changes. The controls are disabled alongside so a second
-// impatient click cannot start the work twice.
-{ (_display displayCtrl _x) ctrlEnable false; } forEach [8623, 8625, 8629, 8630];
-(_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8' color='#ffcc55'>%1</t>",
-    localize "STR_DUWS_T_faction_edit_working"];
-// One frame for the line above to actually paint. The parse that follows holds the frame for its
-// whole run, so without this yield the message is set and overwritten without ever being drawn.
-uiSleep 0.05;
+// Vehicle-only, matching fnc_faction_poolable_keys: only vehicle keys draw from a pool at spawn, so a
+// man or static key holds just the picked class -- building it a bucket would show the row a (+N)
+// count the commit then collapses away. The faction parse below is what feeds that bucket, so a
+// non-vehicle key skips it and the freeze-guarding it takes.
+private _pool = [_class];
+if (duws_faction_edit_kind isEqualTo "vehicle") then {
+    // Said before the parse rather than after, because that parse walks a whole faction's CfgVehicles
+    // and on a heavy mod set takes long enough that the screen reads as frozen: the button stops
+    // responding and nothing on it changes. The controls are disabled alongside so a second impatient
+    // click cannot start the work twice.
+    { (_display displayCtrl _x) ctrlEnable false; } forEach [8623, 8625, 8629, 8630];
+    (_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8' color='#ffcc55'>%1</t>",
+        localize "STR_DUWS_T_faction_edit_working"];
+    // One frame for the line above to actually paint. The parse that follows holds the frame for its
+    // whole run, so without this yield the message is set and overwritten without ever being drawn.
+    uiSleep 0.05;
 
-// Per faction and per screen: the parse walks a whole faction's CfgVehicles, and its answer cannot
-// change while the confirmation screen is open.
-private _cache = uiNamespace getVariable ["duws_faction_parse_cache", createHashMap];
-private _parsed = _cache get _faction;
-if (isNil "_parsed") then {
-    _parsed = [_faction] call fnc_parseFaction;
-    _cache set [_faction, _parsed];
+    // Per faction and per screen: the parse walks a whole faction's CfgVehicles, and its answer cannot
+    // change while the confirmation screen is open.
+    private _cache = uiNamespace getVariable ["duws_faction_parse_cache", createHashMap];
+    private _parsed = _cache get _faction;
+    if (isNil "_parsed") then {
+        _parsed = [_faction] call fnc_parseFaction;
+        _cache set [_faction, _parsed];
+    };
+
+    // The pool the row locks and fnc_faction_pick later draws from -- the class plus its faction's
+    // tightest role bucket. Same classifier the post-commit augment pass runs, so an edited role and
+    // an augmented one build their pool the one way.
+    _pool = [_class, _parsed] call fnc_faction_pool_for_class;
 };
-
-// The pool the row locks and fnc_faction_pick later draws from -- the class plus its faction's
-// tightest role bucket. Same classifier the post-commit augment pass runs, so an edited role and an
-// augmented one build their pool the one way.
-private _pool = [_class, _parsed] call fnc_faction_pool_for_class;
 
 {
     private _rows = _x select 1;
