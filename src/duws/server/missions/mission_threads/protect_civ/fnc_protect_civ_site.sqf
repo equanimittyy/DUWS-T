@@ -1,7 +1,6 @@
-// Site-finder for Protect Informant (surveyKind "map"). Snaps the offer onto a real building near the
-// candidate and returns its exact position, so the informant, crate and hold ring all centre on it.
-// A building qualifies only with a real interior (>= 4 building positions), skipping sheds and doorways.
-// Runs client-side in the offer picker, so terrain queries only. Contract: [_pos] -> [] | [_buildingPos].
+// Site-finder for Protect Informant (surveyKind "map"): snaps the offer onto a real building near the
+// candidate and returns its position, so the objective centres on it. Qualifies only with a real interior
+// (>= 4 building positions). Client-side in the picker. Contract: [_pos] -> [] | [_buildingPos].
 params ["_pos"];
 
 #define ACCEPT_RADIUS 60

@@ -1,7 +1,6 @@
 // Locality: client -- inherited from client/client_init.sqf.
-// 3D icons over the protect-informant objective, drawn while a player is in range. Fed by
-// DUWS_pc_informant / DUWS_pc_crate (server, broadcast); the thread nils both at teardown. Draw3D, not a
-// stacked onEachFrame, so `onEachFrame {}` elsewhere cannot clear it.
+// 3D icons over the informant and crate while a player is in range, fed by DUWS_pc_informant /
+// DUWS_pc_crate (broadcast; nil at teardown). Draw3D so `onEachFrame {}` elsewhere cannot clear it.
 if (!hasInterface) exitWith {};
 
 DUWS_pcMarker_range = 60;

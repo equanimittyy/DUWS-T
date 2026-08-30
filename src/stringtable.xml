@@ -2946,12 +2946,12 @@
                 <English>Move Supplies</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_move_inf">
-                <Original>Move Informant</Original>
-                <English>Move Informant</English>
+                <Original>Carry Informant</Original>
+                <English>Carry Informant</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_hold_inf">
-                <Original>Hold Informant</Original>
-                <English>Hold Informant</English>
+                <Original>Place Informant</Original>
+                <English>Place Informant</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_icon_informant">
                 <Original>Informant</Original>

@@ -30,6 +30,11 @@ publicVariable "fnc_duws_dialogue_channel";
 publicVariable "fnc_duws_disposeAfter";
 publicVariable "fnc_duws_keep";
 publicVariable "fnc_duws_release";
+// Carry-a-unit module: broadcast so a client action's toggle forwards itself to the server.
+[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_unit_carry.sqf";
+publicVariable "DUWS_fnc_unitCarry";
+publicVariable "DUWS_fnc_unitDrop";
+publicVariable "DUWS_fnc_unitCarryToggle";
 publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
@@ -166,13 +171,10 @@ fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missio
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_target_recon_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_recon\fnc_target_recon_mission.sqf";
 fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ.sqf";
-// Broadcast: the finder runs client-side in the offer picker; without it findSite falls back to the
-// accept-all generic and the building gate is lost.
+// Broadcast: the finder runs client-side in the picker; else the building gate is lost to the generic.
 fnc_protect_civ_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_site.sqf";publicVariable "fnc_protect_civ_site";
 // Broadcast: the informant's Skip Prep Phase action remoteExecs this from clients.
 fnc_protect_civ_skip = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_skip.sqf";publicVariable "fnc_protect_civ_skip";
-// Broadcast: the informant's Move/Hold action remoteExecs this from clients.
-fnc_protect_civ_lead = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_lead.sqf";publicVariable "fnc_protect_civ_lead";
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap), which gates the offer

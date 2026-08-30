@@ -31,16 +31,14 @@ private _skipVar       = format ["%1_skip", _tn];
 private _prepActiveVar = format ["%1_prepActive", _tn];
 private _liveVar       = format ["%1_live", _tn];        // spawn -> teardown
 private _defendVar     = format ["%1_defend", _tn];      // defend phase only
-private _leadVar       = format ["%1_leading", _tn];     // informant following the player (prep only)
 missionNamespace setVariable [_skipVar, false];
 missionNamespace setVariable [_liveVar, true];
 missionNamespace setVariable [_defendVar, false];
-missionNamespace setVariable [_leadVar, false, true];
 missionNamespace setVariable [_prepActiveVar, true, true];
 
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
-// --- informant: a civilian-costumed WEST unit, so OPFOR reads him as the target to kill ---
+// Civilian-costumed but in a WEST group, so OPFOR treats him as the target to kill.
 private _civClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_4_F", "C_man_p_fugitive_F", "C_man_hunter_1_F", "C_Man_casual_1_F", "C_Man_casual_4_F"];
 private _grp = [[0, 0], WEST, [selectRandom _civClasses]] call BIS_fnc_spawnGroup;
 private _inf = leader _grp;
@@ -69,32 +67,30 @@ _inf addEventHandler ["HandleDamage", {
 [_grp] call fnc_mission_claim;
 DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
 
-// Idle only through prep, and paused while the player leads him: a re-issued playMoveNow cancels his aim
-// and fights the move, so it yields to both the assault and an active lead.
-[_inf, _defendVar, _leadVar] spawn {
-    params ["_inf", "_defendVar", "_leadVar"];
+// Idle only through prep, and not while carried: a re-issued playMoveNow fights his aim and the carry pose.
+[_inf, _defendVar] spawn {
+    params ["_inf", "_defendVar"];
     while { alive _inf && !(missionNamespace getVariable [_defendVar, false]) } do {
-        if !(missionNamespace getVariable [_leadVar, false]) then {
+        if (isNull (_inf getVariable ["DUWS_carriedBy", objNull])) then {
             [_inf, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
         };
         sleep 5;
     };
 };
 
-// Move/Hold: reposition the informant during prep (R3F carries objects, not people). Both actions call
-// the one server toggle; the leading flag decides which is shown, and both vanish once the assault opens.
+// Carry/Place him by hand during prep (DUWS_fnc_unitCarry, no pathfinding). The assault force-drops him,
+// so both actions vanish once it opens.
 [_inf, [localize "STR_DUWS_T_pc_move_inf",
-    { (_this select 3) params ["_t"]; [_this select 0, _this select 1, _t] remoteExec ["fnc_protect_civ_lead", 2] },
-    [_tn], 1.5, false, false, "",
-    format ["_this distance _target < 6 && !(missionNamespace getVariable ['%1', false]) && !(missionNamespace getVariable ['%2_defend', false])", _leadVar, _tn]]
+    { [_this select 0, _this select 1] call DUWS_fnc_unitCarryToggle },
+    [], 1.5, false, false, "",
+    format ["_this distance _target < 6 && isNull (_target getVariable ['DUWS_carriedBy', objNull]) && !(missionNamespace getVariable ['%1_defend', false])", _tn]]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 [_inf, [localize "STR_DUWS_T_pc_hold_inf",
-    { (_this select 3) params ["_t"]; [_this select 0, _this select 1, _t] remoteExec ["fnc_protect_civ_lead", 2] },
-    [_tn], 1.5, false, false, "",
-    format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _leadVar]]
+    { [_this select 0, _this select 1] call DUWS_fnc_unitCarryToggle },
+    [], 1.5, false, false, "",
+    "!isNull (_target getVariable ['DUWS_carriedBy', objNull])"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 
-// --- supply crate registered as an R3F creation factory (the "builder vehicle" mechanic) ---
 private _cratePos = if (count _bpos > 1) then { _bpos select 1 } else { _targetpos };
 private _crate = createVehicle ["Box_NATO_Support_F", _cratePos, [], 0, "CAN_COLLIDE"];
 _crate setPosATL _cratePos;
@@ -107,17 +103,15 @@ DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
     [], 1.4, false, false, "", "_this distance _target < 6 && !R3F_LOG_mutex_local_verrou"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _crate];
 
-// R3F init is if(!isDedicated) and waits on R3F_LOG_active, so fan it to every client via BIS_fnc_MP.
-// NOT JIP-persistent: DUWS_pc_crate is overwritten by the next instance, so a stale JIP entry would
-// re-register the factory onto a later mission's crate.
+// R3F init is client-side (if(!isDedicated), waits on R3F_LOG_active), so fan it out via BIS_fnc_MP.
+// NOT JIP: DUWS_pc_crate is reused by the next instance, so a persisted entry would re-register onto its crate.
 [[[], {
     waitUntil { !isNil "DUWS_pc_crate" && { !isNull DUWS_pc_crate } };
     [DUWS_pc_crate, 250, west, ["Fortifications", "Cargo", "Structures_Fences", "Structures_Walls", "Static"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
 }], "BIS_fnc_spawn", true, false] spawn BIS_fnc_MP;
 
 // Enrol only this crate's built objects under the mission key: R3F flags factory-made objects
-// (R3F_LOG_CF_depuis_usine, broadcast) beside the factory, so a near-crate poll separates them from a
-// builder vehicle's props, which stand far off and are never keyed here.
+// (R3F_LOG_CF_depuis_usine) beside the factory, so a near-crate poll excludes a builder vehicle's props.
 [_crate, _liveVar] spawn {
     params ["_crate", "_liveVar"];
     private _seen = [];
@@ -129,7 +123,6 @@ DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
     };
 };
 
-// --- brief: search marker, task, Overlord directive + team copy ---
 private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _mission_name, "defend",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_directive", 7], ["STR_DUWS_T_actionteam", "STR_DUWS_T_pc_copy", 0]]
 ] call fnc_mission_present;
@@ -151,9 +144,8 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
     ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 };
 
-// ============================ arrival gate ============================
-// Prep starts only when a player reaches the informant; the deadline is the never-engaged backstop and
-// disarms once prep triggers.
+// Prep starts only when a player reaches the informant; the deadline is the never-engaged backstop,
+// disarmed once prep triggers.
 private _fnArrived = { (call BIS_fnc_listPlayers) findIf { _x distance _inf < ARRIVE_DIST } >= 0 };
 waitUntil {
     sleep 1;
@@ -169,7 +161,6 @@ if (time > _deadline && !(call _fnArrived) && !(missionNamespace getVariable [_s
     [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], [], false, "mission_protect_civ", false, true] call fnc_mission_finish;
 };
 
-// ============================ prep phase ============================
 private _skipped = missionNamespace getVariable [_skipVar, false];
 [localize "STR_DUWS_T_pc_prep_hint"] remoteExec ["hint", [0, -2] select isDedicated];
 [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pc_arrive"] remoteExec ["fnc_duws_dialogue", 0];
@@ -185,9 +176,8 @@ if (!_skipped) then {
 
 missionNamespace setVariable [_prepActiveVar, false, true];   // hide the skip action
 
-// ============================ defend phase ============================
 missionNamespace setVariable [_defendVar, true];
-missionNamespace setVariable [_leadVar, false, true];   // end any lead and plant him for the fight
+[_inf] call DUWS_fnc_unitDrop;   // set him down where he stands if a player was carrying him
 _inf disableAI "PATH";
 _inf setBehaviour "AWARE";
 _inf setCombatMode "YELLOW";
@@ -202,9 +192,8 @@ sleep 2;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_pc_hold"] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_pc_hold_hint"] remoteExec ["hint", [0, -2] select isDedicated];
 
-// Lean truck dispatch: the garrison reserve's debus geometry without its held-state/pool machinery
-// (the informant site is held until the mission ends by definition). Drive to a debus short of the
-// ring, eject the squads to hunt, send the empty taxi off to the sweep.
+// Lean truck dispatch: the garrison reserve's debus geometry without its held-state/pool machinery.
+// Drive short of the ring, eject the squads to hunt, send the empty taxi to the sweep.
 private _leanDispatch = {
     params ["_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
     private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
@@ -327,7 +316,6 @@ private _vehGroups = [];
     };
 };
 
-// ============================ outcome ============================
 private _defendEnd = time + DEFEND_TIME;
 waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } };
 
