@@ -124,7 +124,7 @@ private _garrison = [];
         _garrison pushBack _grp;
     };
 } forEach _bldgs;
-_garrison call fnc_mission_claim;
+[_garrison] call fnc_mission_claim;
 sleep 1;
 
 // Ring raised like the building garrison above: per-token zoneSpawnOne, claimed as one batch. Inline
@@ -138,7 +138,7 @@ private _ring = [];
     "widepatrol:car", "closepatrol:ifv", "closepatrol:team", "closepatrol:team",
     "widepatrol:team", "widepatrol:patrol", "widepatrol:patrol"
 ];
-_ring call fnc_mission_claim;
+[_ring] call fnc_mission_claim;
 
 // Marker + task now the laptops are seated; the brief below is manual (fixed speaker).
 _markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, "download"] call fnc_mission_present;

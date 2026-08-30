@@ -71,6 +71,11 @@ while {true} do {
     private _nextPass = time + 10;
     waitUntil { sleep 0.5; DUWS_cleanup_force || {time >= _nextPass} };
 
+    // Only cleanup thread in the campaign: an unhandled throw in a spawned loop terminates it for the
+    // whole session, so one poisoned object would stop all deletion -- bodies and wrecks included.
+    // Catch per pass instead, so a bad object costs a single sweep, not the thread. Body runs inside
+    // this try at its existing indent.
+    try {
     private _now = time;
     private _candidates = [];
 
@@ -242,5 +247,8 @@ while {true} do {
     _pass = _pass + 1;
     if (_pass % LOG_EVERY == 0) then {
         ["INFO", "CLEANUP", format ["litter census %1, %2 tracked", _census, _tracked]] call fnc_log;
+    };
+    } catch {
+        ["ERROR", "CLEANUP", format ["pass threw, thread held alive: %1", _exception]] call fnc_log;
     };
 };

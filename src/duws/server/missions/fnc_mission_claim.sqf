@@ -17,6 +17,14 @@
 if (!isServer) exitWith {};
 params [["_things", []], ["_token", missionNamespace getVariable ["DUWS_mission_token", 0]]];
 
+// A token is always the running mission's instance number. A non-number here means a caller passed a
+// bare array of groups -- params then reads element 1 as the token -- which stamps a Group as the
+// owner and throws in the cleanup sweep. Default it and say so, loud rather than silently poisoning.
+if !(_token isEqualType 0) then {
+    ["WARN", "MISSION", format ["mission_claim: non-number token %1, defaulting to the running mission", typeName _token]] call fnc_log;
+    _token = missionNamespace getVariable ["DUWS_mission_token", 0];
+};
+
 if !(_things isEqualType []) then { _things = [_things] };
 
 {
