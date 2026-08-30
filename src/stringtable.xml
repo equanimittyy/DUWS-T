@@ -2838,6 +2838,10 @@
                 <Original>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</Original>
                 <English>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</English>
             </Key>
+            <Key ID="STR_DUWS_T_transIDAP_note">
+                <Original>Completing or failing this mission will gain or lose town rep.</Original>
+                <English>Completing or failing this mission will gain or lose town rep.</English>
+            </Key>
             <Key ID="STR_DUWS_T_idapletsdothis">
                 <German>Hallo? Kann mich jemand hören? Hier ist IDAP. Vor einer Stunde wurde einer unserer Lieferwagen mit humanitärer Hilfe von OPFOR beschlagnahmt... Wir bitten Sie um Hilfe bei der Rückeroberung des Wagens. Seine ungefähre Richtung und der Übergabepunkt wurden auf dem GPS aktualisiert.</German>
                 <Spanish>¿Hola? ¿Alguien me oye? Soy IDAP. Hace una hora, uno de nuestros camiones de suministros cargado de ayuda humanitaria fue robado por OPFOR... Les pedimos ayuda para recuperar el camión. Su dirección aproximada y el punto de entrega han sido actualizados en el GPS.</Spanish>
@@ -2886,8 +2890,8 @@
                 <English>One of our informants has been made and is holed up in a building in this area, with a hit team closing on him. Reach him, then use the supply crate to fortify his position while it is quiet. Hold against repeated assaults until they are spent. There is no extraction, we need him in place and still gathering.</English>
             </Key>
             <Key ID="STR_DUWS_T_protectciv_note">
-                <Original>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.</Original>
-                <English>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.</English>
+                <Original>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.&lt;br /&gt;Completing or failing this mission will gain or lose town rep.</Original>
+                <English>Keep a squad member within 300 m of the informant, or the position is judged abandoned and the mission fails.&lt;br /&gt;Completing or failing this mission will gain or lose town rep.</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_directive">
                 <Original>Priority directive, Alpha 1-1. An informant has been compromised and needs his position held against enemy attack. He is a high value asset, we need him alive.</Original>
