@@ -52,9 +52,13 @@ if (_dl > time) then {
 	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>", 5]]] spawn BIS_fnc_typeText;
 }] remoteExec ["spawn", [0,-2] select isDedicated];
 // Under the card, and one of only two places music plays -- the other is the insertion flight.
-// Double brackets: playMusic is a unary command whose one argument is an array, so written flat
-// remoteExec hands it the string alone and it throws on the type.
-[["LeadTrack02_F", 0]] remoteExec ["playMusic", [0,-2] select isDedicated];
+// Spawned per client rather than a bare playMusic remoteExec so each one honours its own mute
+// toggle (DUWS_T_muteMissionMusic, set at the medical tent); a single server-side playMusic would
+// force the sting on every client alike.
+[[], {
+	if (profileNamespace getVariable ["DUWS_T_muteMissionMusic", false]) exitWith {};
+	playMusic ["LeadTrack02_F", 0];
+}] remoteExec ["spawn", [0,-2] select isDedicated];
 
 // Closes the requester's progress line: survey -> generating -> complete, now the task exists.
 [missionNamespace getVariable ["DUWS_curRequester", 0], "STR_DUWS_T_MISSION_GEN_COMPLETE"] call fnc_mission_notice;

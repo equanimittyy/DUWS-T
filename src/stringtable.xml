@@ -2142,6 +2142,14 @@
                 <Original>Rest / Heal</Original>
                 <English>Rest / Heal</English>
             </Key>
+            <Key ID="STR_DUWS_T_TENT_MUSIC_ON">
+                <Original>Side mission music: On</Original>
+                <English>Side mission music: On</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TENT_MUSIC_OFF">
+                <Original>Side mission music: Off</Original>
+                <English>Side mission music: Off</English>
+            </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>
                 <English>Select pylon and weapon.</English>
