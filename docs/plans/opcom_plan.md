@@ -197,7 +197,7 @@ Aggressive weights threat and reach against ground the player holds.
 `selectRandomWeighted` over the highest-scoring three, not `argmax`. Argmax is deterministic and a
 player reads it inside two campaigns; sampling among the top few keeps every decision defensible
 while keeping the campaign unpredictable. It is also the mission's existing idiom —
-`server/init_zones/fnc_createzone.sqf:142` picks prefabs with it. Zone vehicles are deliberately not
+`server/init_zones/fnc_createzone.sqf:129` picks prefabs with it. Zone vehicles are deliberately not
 picked: the tier table names what a zone fields, so nothing rolls where a table could not see it.
 
 **Banking is a candidate, not a policy.** A "spend nothing" entry with a low flat score loses
@@ -251,25 +251,12 @@ than `diag_tickTime` so an expiry survives a savegame
 
 ## Why not GOAP
 
-Goal-Oriented Action Planning searches for the *chain* between a world state and a goal, and the
-chain is the product. Three reasons the commander has no chain to find:
-
-- **The sinks do not compose.** Buying a garrison at one town does not enable a QRF, and building a
-  hardpoint does not enable rapport. They are parallel actions sharing a wallet, so a planner over
-  them degenerates to picking the cheapest action that satisfies the goal — a one-step utility
-  choice carrying a search's machinery.
-- **The decision is spatial, not symbolic.** The question is never "garrison or QRF" but *which
-  town*. A symbolic planner answers that by multiplying operators by targets — four sinks against
-  twenty towns is eighty before zones are added — or by pushing target choice into the action's
-  execution, at which point the planner has stopped deciding the thing that matters.
-- **Replanning is the cost, and it lands in the worst place.** GOAP replans whenever the world
-  state moves. Scheduled scripts share about 3 ms per frame between them
-  ([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
-  so a node-expansion loop settles at roughly one expansion per frame. It can be escaped by
-  batching, but the batching would be funding a search with nothing to search.
-
-There is also a horizon mismatch: the hardpoint build tick is 20-30 minutes, and a three-step plan
-over that horizon is invalidated by the player before its second step.
+Goal-Oriented Action Planning searches for the *chain* between a world state and a goal. The
+commander has no chain to find: the sinks are parallel actions sharing a wallet, not steps that
+enable one another, and the decision that matters is spatial — *which town*, not *which sink*. A
+symbolic planner over that degenerates into a one-step utility choice carrying a search's machinery,
+and pays a replanning cost every time the player moves that a straight re-score does not. Utility
+scoring is that one-step choice without the machinery.
 
 **Planning would earn its keep one layer down, not here** — a single squad ordered to retake a town
 deciding mount, route, dismount, assault. That layer is worth hand-authoring as an explicit state
@@ -305,6 +292,12 @@ Constants take the `#define` form the zone and town garrisons use, so the tuning
 of one file.
 
 ## What the commander spends on
+
+> **Built today: the town-garrison ladder only** — the AP tier rungs and the per-tier garrison each
+> town fields ([§Town garrisons](#town-garrisons-i-through-iv)). Everything else this section
+> describes — the tasking menu, hardpoint construction as a director purchase, and the appraisal that
+> picks between them — is intended design, not yet fleshed out. Read the sinks below as the proposal
+> they are, not as a contract.
 
 The commander wakes, perceives and ranks targets exactly as the layers above describe; this
 section is its shopping list — the four sinks its Army Power buys, the archetype that weights the
@@ -416,10 +409,13 @@ does towns; the town is simply where the hooks were written first. A retaken zon
 precisely so there is something to buy back — the floor is the bill, not a permanent brand
 ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)).
 
-Extending it needs no new machinery: a zone's tier is already stored per zone, the composition table
-is already indexed by it, and `fnc_zone_strength_set` already names the zone's key to the same store
-`fnc_town_garrison_reinforce` steps. What is missing is the pair of wrappers — one applying the
-reinforcement step to a zone key, one writing a tier with a clamp.
+Extending it needs little new machinery: a zone's tier is already stored per zone, the composition
+table is already indexed by it, and zone and town strength already share one attrition ledger —
+`fnc_zone_strength` (`server/init_zones/fnc_zone_state_init.sqf:84`) reads it through
+`DUWS_fnc_garrisonStrength`, the same store `fnc_town_garrison_reinforce`
+(`server/misc/fnc_civ_state_init.sqf:166`) writes through `DUWS_fnc_garrisonUnlose`. There is no zone
+strength *setter* today, so what is missing is the pair of wrappers — one applying that reinforcement
+step to a zone key, one writing a zone tier with a clamp.
 
 Two things to settle when it lands:
 
@@ -540,9 +536,11 @@ position revisited in hour five has armour parked next to it. The emplacement is
 rolled; the troops around it are what the war has become.
 
 **The ladder is a composition table, not a bespoke list.** OPFOR garrisons are token compositions
-now — a row of `posture:token` entries resolved against the team, vehicle and special tables in
-`server/init_zones/fnc_zone_spawn_sizes.sqf:115-121,308-314,345-358`, scaled, attrition-thinned and
-raised by `DUWS_fnc_raiseGarrison` (`:242`). A hardpoint tier belongs in that file as its own small
+now — a row of `posture:token` entries (the tier compositions in `DUWS_zoneSpawnTiers`,
+`server/init_zones/fnc_zone_spawn_sizes.sqf:32`) resolved to classes by `DUWS_fnc_tokenClass` (`:91`)
+against the shared token vocabulary — the team roster in `shared/functions/fnc_spawn_vocab.sqf`, the
+vehicle rows `DUWS_spawnVehicles`/`DUWS_spawnVehiclesBlu` (`:172`,`:195`) — scaled, attrition-thinned
+and raised by `DUWS_fnc_raiseGarrison` (`:133`). A hardpoint tier belongs in that file as its own small
 table beside the zone one, for three reasons: the vehicle rows already name faction roles rather
 than classnames, so a hardpoint late in a campaign is defended by whatever the enemy fields
 everywhere else; the row's `setting` column already answers `HeavyArmor`; and a fenced table is
@@ -560,12 +558,11 @@ never its current balance — otherwise paying for one hardpoint thins the garri
 hardpoint already standing, and the player watches the war get easier because the enemy invested
 in it.
 
-That is not what the existing tables do. `DUWS_fnc_tokenClass` gates a vehicle token on the
-*current* `WARCOM_opfor_ap` (`fnc_zone_spawn_sizes.sqf:211,354`), so a zone raised the moment after
-the commander spends fields less armour than the same zone raised a minute earlier. Nothing tracks a
-high-water mark today, so one of the two has to give: either this tier accepts the existing rule, or
-a high-water global is written once and both read it. Two rules for one idea is the outcome to
-avoid, because the difference is invisible in play and only shows up as a zone that got easier.
+The existing tables already do exactly this. A vehicle token is gated on `WARCOM_opfor_ap_earned` —
+the earned high-water counter, not the spendable wallet (`fnc_zone_spawn_sizes.sqf:107-108`, and the
+comment there says so) — so a zone raised the moment after the commander spends still fields the
+armour its earned tier has unlocked. The hardpoint tier inherits that rule rather than inventing a
+second global; both columns read the same earned counter, and there is nothing to reconcile.
 
 | Knob | Value | Why |
 |---|---|---|
@@ -574,7 +571,7 @@ avoid, because the difference is invisible in play and only shows up as a zone t
 | Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying |
 | Build costs | 8-25 AP by type | Cheapest for an OP or MG nest, dearest for the battery — the same order the clear payouts run in |
 | Live cap | none | live AI is bounded by player proximity, not a count ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)) |
-| Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:19`, `fnc_captured.sqf:38-41`) |
+| Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:35`, `fnc_captured.sqf:39`) |
 
 ## Indirect-fire hardpoints
 
@@ -614,7 +611,7 @@ nothing fires at what the enemy has not seen.
 player can take, and the unmanned clause already counts that as cleared
 ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#clearance)) — capturing one is a legitimate prize for a
 hard fight, and the recycle station will pay for it (`fnc_activateBaseRecycleStation.sqf`, a
-documented ownership-free faucet in [`../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance)).
+documented ownership-free faucet in [`../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#campaign-loop)).
 
 Everything below applies to both.
 
@@ -862,7 +859,7 @@ the side flip happens at 10 m but detonation at 5 m, which is deliberately a win
 becomes a legal target before it becomes lethal. An IED or ambush event that skips either
 property is a trap, not a mechanic.
 
-`VCOM_Disable` was set on the unit so an AI mod could not override the approach behaviour. Any
+`Vcm_Disable` was set on the unit so an AI mod could not override the approach behaviour. Any
 scripted-movement event needs the same.
 
 ## Persistence
@@ -877,7 +874,7 @@ campaign. What the commander contributes to the snapshot:
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs and never re-rolls it, or the war the player has been fighting changes under them ([§The commander has an archetype](#the-commander-has-an-archetype)) |
 | Standing orders (taskings) | outcome | One row per order — type, target, budget already spent. Persisted as orders, not squads: the squad was live state the director was spawning anyway, so restore re-issues the order to the next squad the director spawns. Storing anything about the squad would store a group handle |
-| Tiers | outcome | `OPCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides in the snapshot beside them |
+| Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides in the snapshot beside them |
 
 Every persisted field is a number, a string, or an array of those — the same rule the belief store
 and the intent records already follow ([§Shape](#shape), [§Commitment: intents are sticky](#commitment-intents-are-sticky)),
@@ -896,14 +893,16 @@ is a name-keyed hashmap, adding the key later shifts nothing an older save's rea
 ## Naming: WARCOM becomes OPCOM
 
 The system is renamed **OPCOM** (Opposing Commander) when it lands, globals included:
-`WARCOM_opfor_ap` becomes `OPCOM_opfor_ap`, and so on across the prefix.
+`WARCOM_opfor_ap` becomes `OPCOM_opfor_ap`, and so on across the prefix. The rename is already
+part-done: three AP-cost constants (`OPCOM_AP_TOWER`/`OPCOM_AP_BAND`/`OPCOM_AP_TOPUP`,
+`server/server_var_init.sqf:608-610`) carry the OPCOM_ prefix while the rest of the family still
+reads `WARCOM_`, so the job is to finish a split that has already begun, not to start one.
 
 WARCOM is inherited naming and describes what the system was — a mirrored pair of spawn timers,
-one per side. It no longer describes either half. BLUFOR's commander is the player: task forces
-provision at the HQ, wait on `blu_taskforces_standby`, and move only when the player issues a
-launch order and clicks a target (`server/warcom/fnc_blu_taskforces_launch.sqf`,
-`client/warcom/fnc_WARCOM_mapclick_assault.sqf`). OPCOM is the actor this document
-describes. Naming the enemy is what distinguishes the mission from the versions it descends from.
+one per side. It no longer describes either half. BLUFOR has no commander actor at all: the player
+is it, moving their own units and calling map-click supports directly, with no standing task-force
+system on that side. OPCOM is the actor this document describes. Naming the enemy is what
+distinguishes the mission from the versions it descends from.
 
 Two constraints on when the rename lands:
 
@@ -913,10 +912,12 @@ Two constraints on when the rename lands:
   already breaks the format; landing both in one release makes the player cross one broken-save
   boundary instead of two.
 - **The zone-control arrays are the wide part.** `WARCOM_zones_controled_by_OPFOR` and
-  `WARCOM_zones_controled_by_BLUFOR` account for roughly 50 references across 21 files, and index
-  0 of the OPFOR list is the primary assault target. A mechanical replace across
-  `server_fnc_init.sqf` and `server_var_init.sqf` also has to leave `fnc_zone_state_init` loading
-  before any zone spawns.
+  `WARCOM_zones_controled_by_BLUFOR` account for roughly 52 references across 28 files, and index 0
+  of the OPFOR list is load-bearing — the sitrep display reads it as the primary target
+  (`client/misc/fnc_sitrep_display.sqf:16`) and the list is kept sorted nearest-HQ-first with the
+  just-lost zone forced to front (`fnc_zone_state_init.sqf:194-195`), so a mechanical replace has to
+  preserve ordering, not just names. It also has to leave `fnc_zone_state_init` loading before any
+  zone spawns.
 
 Player-facing exposure is three boot-time strings, so the rename is almost entirely internal.
 
@@ -974,8 +975,8 @@ Each phase is independently playable, and the ordering is forced by what the nex
   roads while it visibly has nobody in it is either a good scare or an obvious tell.
 - **Whether IED placement is persistent terrain state or spawned per approach**, and how it
   interacts with despawn.
-- **Whether ambush groups count against the same population caps as civilians**
-  (`civ_maxSpawnPerVisit`) or against the WARCOM wave budget.
+- **Whether ambush groups count against the same population control as civilians**
+  (the `civ_density` target `fnc_civ_liveTarget` enforces) or against a director budget of their own.
 - **Whether the player can learn the commander's archetype, and how.** One the player can never
   perceive is variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](../info/gameplay/intel_system.md)), and observed behaviour is the free one.
