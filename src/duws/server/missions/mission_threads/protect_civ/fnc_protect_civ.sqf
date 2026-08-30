@@ -220,7 +220,11 @@ private _leanDispatch = {
     { _x setVariable ["DUWS_binMe", true]; _x setVariable ["DUWS_binAt", time + 30] } forEach units _drv;
 };
 
-private _claim = { [_this] call fnc_mission_claim };
+// Token compiled into the claim, not read live: _claim is handed to the wave thread (which does not
+// inherit caller privates) and fires on late waves -- a group raised then must claim this mission, not
+// the next if it has begun. See fnc_missionPatrols.
+private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
+private _claim = compile format ["[_this, %1] call fnc_mission_claim", _token];
 
 // Deliver infantry tokens by truck (walk them in if the side fields none); returns the squad groups.
 private _deliverSquads = {

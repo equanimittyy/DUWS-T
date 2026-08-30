@@ -8,11 +8,13 @@ params ["_missionPos", "_radius", ["_patrols", 5]];
 private _offsets = [[30, 20], [30, 0], [35, 0]];
 
 // Claimed here, not in the builders (shared with zone/town garrisons), so teardown collects the ring
-// wherever it patrolled. Each builder is `call`ed from inside its own thread -- the only way to read
-// back the group it returns.
-private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-private _fnc_claimVeh = { [_this call fnc_spawn_vehicle] call fnc_mission_claim };
+// wherever it patrolled. Each builder runs in its own thread to read back its group. The mission token
+// is captured up front and compiled into the claim -- a spawned thread does not inherit caller privates,
+// and a group raised late must claim the mission that ordered it, not the next if a finish advanced it.
+private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
+private _fnc_claimInf = compile format ["[(['patrol'] + _this) call fnc_spawn_team, %1] call fnc_mission_claim", _token];
+private _fnc_claimTeam = compile format ["[(['team'] + _this) call fnc_spawn_team, %1] call fnc_mission_claim", _token];
+private _fnc_claimVeh = compile format ["[_this call fnc_spawn_vehicle, %1] call fnc_mission_claim", _token];
 
 for "_i" from 1 to _patrols do {
     sleep 1;

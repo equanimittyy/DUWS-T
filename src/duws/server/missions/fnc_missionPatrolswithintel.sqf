@@ -4,10 +4,12 @@
 // they are searchable like any enemy corpse; this only spawns the ring.
 params ["_missionPos", "_radius"];
 
-// See fnc_missionPatrols for why the claim lives here and why each builder runs in its own thread.
-private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-private _fnc_claimVeh = { [_this call fnc_spawn_vehicle] call fnc_mission_claim };
+// See fnc_missionPatrols for why the claim lives here, why each builder runs in its own thread, and why
+// the mission token is captured up front and compiled into the claim.
+private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
+private _fnc_claimInf = compile format ["[(['patrol'] + _this) call fnc_spawn_team, %1] call fnc_mission_claim", _token];
+private _fnc_claimTeam = compile format ["[(['team'] + _this) call fnc_spawn_team, %1] call fnc_mission_claim", _token];
+private _fnc_claimVeh = compile format ["[_this call fnc_spawn_vehicle, %1] call fnc_mission_claim", _token];
 
 sleep 1;
 [[(_missionPos select 0)+30, (_missionPos select 1)+20], _radius] spawn _fnc_claimInf;
