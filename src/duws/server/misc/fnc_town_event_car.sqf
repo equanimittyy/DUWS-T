@@ -1,7 +1,6 @@
 // Locality: server -- an ambient civilian car that drives up to and past the picked player, then on
-// toward the town, reaped once no player is near. No rep gate: it runs at any reputation
-// (docs/plans/town_events_plan.md). Model from civ_veh_array (faction-detected), driver a full
-// civilian (fnc_civ_spawnUnit), so running one down costs reputation as the resident traffic does.
+// toward the town, reaped once no player is near (docs/plans/town_events_plan.md). No rep gate.
+// Model from civ_veh_array; driver a full civilian, so running one down costs reputation.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -10,8 +9,7 @@ private _pool = missionNamespace getVariable ["civ_veh_array", []];
 if (_pool isEqualTo []) exitWith {};
 
 private _anchor = getPos _player;
-// A road out from the player so the car is seen arriving, not dropped on top of them; nearest road
-// if none is that far.
+// A road out from the player, so the car is seen arriving rather than dropped on top of them.
 private _roads = _anchor nearRoads 500;
 private _far = _roads select { (_anchor distance _x) > 150 };
 if !(_far isEqualTo []) then { _roads = _far };
@@ -43,7 +41,7 @@ _grp setBehaviour "CARELESS";
 _grp setSpeedMode "LIMITED";
 _veh limitSpeed 50;
 
-// Past the player, then on to town -- arrives and moves through rather than parking on them.
+// Through the player's spot, then on to town: moves through rather than parking on them.
 private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
 private _townPos = _centres param [_townIndex, _anchor];
 {
@@ -54,7 +52,7 @@ private _townPos = _centres param [_townIndex, _anchor];
 	_wp setWaypointCompletionRadius 20;
 } forEach [_anchor, _townPos];
 
-// Onto the cleanup sweep, off any roster. Flag the driver too: a driver who bailed on a panic is no
-// longer crew, so the vehicle sweep would not take him with the car.
+// Onto the cleanup sweep. Flag the driver too: bailed on a panic he is no longer crew, so the
+// vehicle sweep would not take him with the car.
 _veh setVariable ["DUWS_binMe", true];
 _driver setVariable ["DUWS_binMe", true];

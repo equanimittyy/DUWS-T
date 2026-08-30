@@ -1,7 +1,7 @@
 // Locality: server -- an ambient civilian helicopter that flies over the picked player and on, reaped
-// once no player is near. No rep gate: it runs at any reputation (docs/plans/town_events_plan.md). Needs
-// a civilian airframe (civ_heli_array); a men-only faction with no vanilla fallback yields none and the
-// event no-ops. Pilot a full civilian (fnc_civ_spawnUnit), so downing it costs reputation.
+// once no player is near (docs/plans/town_events_plan.md). No rep gate. Needs a civilian airframe
+// (civ_heli_array); a men-only faction with no vanilla fallback yields none and the event no-ops.
+// Pilot a full civilian, so downing it costs reputation.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -38,7 +38,7 @@ private _exit = _anchor getPos [1400, random 360];
 	_wp setWaypointCompletionRadius 60;
 } forEach [_anchor, _exit];
 
-// Onto the cleanup sweep. Flag the pilot too: a crash survivor who leaves the airframe is no longer
+// Onto the cleanup sweep. Flag the pilot too: a crash survivor out of the airframe is no longer
 // crew for the vehicle sweep to take with it.
 _heli setVariable ["DUWS_binMe", true];
 _pilot setVariable ["DUWS_binMe", true];
