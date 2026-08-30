@@ -31,9 +31,11 @@ private _skipVar       = format ["%1_skip", _tn];
 private _prepActiveVar = format ["%1_prepActive", _tn];
 private _liveVar       = format ["%1_live", _tn];        // spawn -> teardown
 private _defendVar     = format ["%1_defend", _tn];      // defend phase only
+private _leadVar       = format ["%1_leading", _tn];     // informant following the player (prep only)
 missionNamespace setVariable [_skipVar, false];
 missionNamespace setVariable [_liveVar, true];
 missionNamespace setVariable [_defendVar, false];
+missionNamespace setVariable [_leadVar, false, true];
 missionNamespace setVariable [_prepActiveVar, true, true];
 
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
@@ -67,14 +69,30 @@ _inf addEventHandler ["HandleDamage", {
 [_grp] call fnc_mission_claim;
 DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
 
-// Idle only through prep: a re-issued playMoveNow cancels his aim, so it must stop before he goes AWARE.
-[_inf, _defendVar] spawn {
-    params ["_inf", "_defendVar"];
+// Idle only through prep, and paused while the player leads him: a re-issued playMoveNow cancels his aim
+// and fights the move, so it yields to both the assault and an active lead.
+[_inf, _defendVar, _leadVar] spawn {
+    params ["_inf", "_defendVar", "_leadVar"];
     while { alive _inf && !(missionNamespace getVariable [_defendVar, false]) } do {
-        [_inf, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
+        if !(missionNamespace getVariable [_leadVar, false]) then {
+            [_inf, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
+        };
         sleep 5;
     };
 };
+
+// Move/Hold: reposition the informant during prep (R3F carries objects, not people). Both actions call
+// the one server toggle; the leading flag decides which is shown, and both vanish once the assault opens.
+[_inf, [localize "STR_DUWS_T_pc_move_inf",
+    { (_this select 3) params ["_t"]; [_this select 0, _this select 1, _t] remoteExec ["fnc_protect_civ_lead", 2] },
+    [_tn], 1.5, false, false, "",
+    format ["_this distance _target < 6 && !(missionNamespace getVariable ['%1', false]) && !(missionNamespace getVariable ['%2_defend', false])", _leadVar, _tn]]
+] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
+[_inf, [localize "STR_DUWS_T_pc_hold_inf",
+    { (_this select 3) params ["_t"]; [_this select 0, _this select 1, _t] remoteExec ["fnc_protect_civ_lead", 2] },
+    [_tn], 1.5, false, false, "",
+    format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _leadVar]]
+] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 
 // --- supply crate registered as an R3F creation factory (the "builder vehicle" mechanic) ---
 private _cratePos = if (count _bpos > 1) then { _bpos select 1 } else { _targetpos };
@@ -82,6 +100,12 @@ private _crate = createVehicle ["Box_NATO_Support_F", _cratePos, [], 0, "CAN_COL
 _crate setPosATL _cratePos;
 DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
 [_crate, "mission_protect_civ"] call fnc_duws_keep;
+
+// Reposition the build point with R3F's own carry routine (the crate is crewless, so R3F accepts it).
+[_crate, [localize "STR_DUWS_T_pc_move_crate",
+    { [_this select 0] spawn R3F_LOG_FNCT_objet_deplacer },
+    [], 1.4, false, false, "", "_this distance _target < 6 && !R3F_LOG_mutex_local_verrou"]
+] remoteExec ["addAction", [0, -2] select isDedicated, _crate];
 
 // R3F init is if(!isDedicated) and waits on R3F_LOG_active, so fan it to every client via BIS_fnc_MP.
 // NOT JIP-persistent: DUWS_pc_crate is overwritten by the next instance, so a stale JIP entry would
@@ -116,8 +140,14 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
     sleep 10;
     private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _prepActiveVar];
     [_inf, [localize "STR_DUWS_T_pc_skip",
-        { (_this select 3) params ["_sv"]; [_sv] remoteExec ["fnc_protect_civ_skip", 2] },
-        [_skipVar], 1.5, true, true, "", _cond]
+        {
+            (_this select 3) params ["_sv"];
+            // Confirm first: skipping is irreversible (starts the assault). hideOnUse off so a cancel keeps the action.
+            if ([localize "STR_DUWS_T_pc_skip_confirm", localize "STR_DUWS_T_pc_skip", true, true] call BIS_fnc_guiMessage) then {
+                [_sv] remoteExec ["fnc_protect_civ_skip", 2];
+            };
+        },
+        [_skipVar], 1.5, false, false, "", _cond]
     ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 };
 
@@ -157,6 +187,8 @@ missionNamespace setVariable [_prepActiveVar, false, true];   // hide the skip a
 
 // ============================ defend phase ============================
 missionNamespace setVariable [_defendVar, true];
+missionNamespace setVariable [_leadVar, false, true];   // end any lead and plant him for the fight
+_inf disableAI "PATH";
 _inf setBehaviour "AWARE";
 _inf setCombatMode "YELLOW";
 

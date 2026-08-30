@@ -2937,6 +2937,22 @@
                 <Original>Skip Prep Phase</Original>
                 <English>Skip Prep Phase</English>
             </Key>
+            <Key ID="STR_DUWS_T_pc_skip_confirm">
+                <Original>Are you sure you want to skip the prep phase? The assault will begin immediately.</Original>
+                <English>Are you sure you want to skip the prep phase? The assault will begin immediately.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_move_crate">
+                <Original>Move Supplies</Original>
+                <English>Move Supplies</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_move_inf">
+                <Original>Move Informant</Original>
+                <English>Move Informant</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_hold_inf">
+                <Original>Hold Informant</Original>
+                <English>Hold Informant</English>
+            </Key>
             <Key ID="STR_DUWS_T_pc_icon_informant">
                 <Original>Informant</Original>
                 <English>Informant</English>

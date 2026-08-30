@@ -171,6 +171,8 @@ fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\mission
 fnc_protect_civ_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_site.sqf";publicVariable "fnc_protect_civ_site";
 // Broadcast: the informant's Skip Prep Phase action remoteExecs this from clients.
 fnc_protect_civ_skip = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_skip.sqf";publicVariable "fnc_protect_civ_skip";
+// Broadcast: the informant's Move/Hold action remoteExecs this from clients.
+fnc_protect_civ_lead = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_lead.sqf";publicVariable "fnc_protect_civ_lead";
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap), which gates the offer
