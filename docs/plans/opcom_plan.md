@@ -111,6 +111,58 @@ The carve-out has to be explicit or it grows.
 Everything about the player's *current position and strength* goes through belief. That is the
 line, and anything that crosses it is a map hack whatever it is called.
 
+## The influence grid: one spatial substrate
+
+Not a fourth layer — a structure Perception stamps and Appraisal reads. The belief store answers
+*where the player was*; scoring needs *how contested is this ground*, and the two point-sampled terms
+it has for that cannot see a front line, cannot route a group around a strongpoint, and cannot tell a
+beaten group which way is home. A coarse influence grid answers all three from one array, so it moves
+out of the deferred column ([§Why not GOAP](#why-not-goap)) and into the first build.
+
+### Shape
+
+A flat numeric array over coarse cells, server-local, `_cell = _y * _w + _x`, under the belief
+store's serialisation rule — numbers only, no handles. Cells are large: ~1000 m against Altis is a
+~30x30 array fed by tens of stamp sources, so the whole rebuild fits the unscheduled scoring batch
+beside the appraisal. It is never persisted; it rebuilds from holdings and belief on the first tick
+of a restored campaign, so the snapshot carries none of it.
+
+Two layers, stamped each tick, then read as a signed difference `friendly - enemy`:
+
+| Layer | Stamped from |
+|---|---|
+| friendly | OPFOR ground — held zones, banded towns, hardpoints — each spread over nearby cells with a tier-weighted falloff |
+| enemy | the player's known fixed ground (HQ, FOBs, BLU-held zones) plus every belief entry, each stamped by its believed strength scaled by its confidence decay |
+
+### What reads it
+
+- **The three spatial appraisal terms** ([§Five terms](#five-terms)) are cell reads of it, not the
+  per-target point lookups first described there.
+- **Clustering, by construction.** The enemy layer already sums every belief entry that falls in a
+  cell, so *force at a place* is one cell read and never a scan over players. That resolves the
+  co-op merge question ([§Open questions](#open-questions)): four-to-eight belief stamps collapse
+  into the cells they share, and no separate clusterer is written.
+- **Route-around, as waypoint placement not pathfinding.** The engine owns the path; OPCOM owns only
+  where it points. A group sent at a target stages through the target's lowest-enemy-influence
+  neighbour cell rather than the straight line, so it arrives off the player's strongpoint without a
+  custom pathfinder. It is the behaviour the deleted spawners most lacked — they aimed *away* from
+  the player ([§Rejected](#rejected-the-opfor-spawners-this-replaces)); this aims at the player but
+  around their strength.
+- **Retreat, as a gradient.** A beaten group falls back to the nearest local maximum of the friendly
+  layer — up its own gradient, toward held ground — rather than dying in place
+  ([§Commitment](#commitment-intents-are-sticky)).
+- **The front line, free.** The sign-flip contour is the front, read by the muster check and drawn
+  by the dev overlay.
+
+### It is not the area-of-influence field
+
+`fnc_aoi_field_at` is a pointwise, binary, territorial read — `+1/-1/0` coverage with no magnitude
+and no knowledge of the player — and it drives town drift and hardpoint siting
+([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)). The grid is the
+two-sided *magnitude* read that adds the belief store and that only OPCOM's scoring consumes; it
+touches neither drift nor siting. The existing dev overlay `fnc_debug_opcom_view` is where it
+renders.
+
 ## Appraisal: utility scoring, not search
 
 Enumerate candidate `[sink, target]` pairs, score each, pick. No search, no plan, no chaining.
@@ -129,6 +181,11 @@ Five, and no more, or nobody will be able to tune it.
 | **vulnerability** | its garrison tier against that believed force |
 | **reach** | distance from the nearest OPFOR-held ground |
 | **price** | the AP cost, as a divisor |
+
+The three spatial terms — *threat*, *vulnerability*, *reach* — are cell reads of
+[the influence grid](#the-influence-grid-one-spatial-substrate); *value* and *price* are table
+lookups. That is what keeps a full appraisal pass affordable every tick: the spatial work happened
+once when the grid was stamped, and scoring only samples it.
 
 Archetype scales the terms rather than gating the sinks, which is what
 [§The commander has an archetype](#the-commander-has-an-archetype) already committed to when it
@@ -154,8 +211,9 @@ Re-scoring next tick fills free capacity; it never cancels a live intent.
 
 | Field | Holds |
 |---|---|
-| type | which sink |
+| type | which sink, plus `retreat` — the outcome a group takes when its fight turns bad |
 | target | index into the registry the sink acts on |
+| owner | the live group the intent drives; runtime state, not snapshotted |
 | expiry | `time` plus the intent's own lifetime |
 | state | ordered / in progress / done |
 
@@ -167,6 +225,25 @@ were deleted for.
 It is needed for an unrelated reason anyway: whether a withdrawing group is still a valid target for
 the director's reinforcement logic. That is an intent-ownership question and has no answer until
 intents exist — a withdrawing group is one whose intent has been released.
+
+**The intent record is the one scheduling object; the sinks are its type set.** A garrison purchase,
+a hardpoint build and a squad tasking are one record at three granularities, not three subsystems —
+[§What the commander spends on](#what-the-commander-spends-on) names the types, this record is the
+live instance of whichever won, and its `price` is the only thing a tasking carries that a build does
+not, because the squad it will own does not exist yet. One record keeps the loop reading and ranking
+a single list rather than reconciling three.
+
+**Retreat is an outcome, not only a release.** A group whose fight has turned bad withdraws up the
+friendly layer of [the influence grid](#the-influence-grid-one-spatial-substrate) — toward held
+ground — and frees its intent on arrival. Releasing the intent alone would leave the group standing
+where it broke; the gradient is what carries it somewhere the next tick can reuse it.
+
+**An assault musters before it commits.** A QRF or assault intent accumulates committed force across
+ticks and executes only once believed OPFOR force at the target exceeds the believed player force
+there — the grid's two layers read at that cell. Until then it holds and keeps buying, which is what
+a spare wallet spends on: a muster, not a wasted tick. It is deliberately willing to trade — the bar
+is the player's force *at the target*, not the player's whole strength — so it commits to a fight
+rather than waiting for a certainty it never gets.
 
 Numbers and strings only, for the same serialisation reason as the belief store, and `time` rather
 than `diag_tickTime` so an expiry survives a savegame
@@ -198,13 +275,13 @@ over that horizon is invalidated by the player before its second step.
 deciding mount, route, dismount, assault. That layer is worth hand-authoring as an explicit state
 machine rather than searching.
 
-An **influence map** — a coarse grid holding decayed per-side influence — is the standard upgrade
-to the *reach* and *threat* terms. The front line it would produce as a by-product is now produced by
-the area-of-influence coverage field ([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)),
-which sites standalone hardpoints in the OPFOR band and replaced the hand-drawn corridor an earlier
-design once used. The *grid* itself is still
-deferred: it buys a cheap "how contested is this whole region" read for scoring that a point-sampled
-field does not, so it stays an upgrade path rather than part of the first build.
+An **influence grid** — a coarse grid holding per-side influence — is the standard upgrade to the
+*reach* and *threat* terms, and it is promoted to the first build rather than deferred, because it is
+also what lets a group route around a strongpoint and a beaten group find its way home
+([The influence grid](#the-influence-grid-one-spatial-substrate)). It does not replace the
+area-of-influence coverage field ([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)),
+which stays the pointwise, territorial read that sites hardpoints and drifts towns; the grid is the
+two-sided magnitude read that adds the belief store and that only OPCOM's scoring consumes.
 
 ## The loop against the engine
 
@@ -861,7 +938,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
 
 | Phase | Contains | Why it is gated here |
 |---|---|---|
-| **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, a debug readout | Independently useful and independently testable — the artillery observation gate and the intel patrol both consume it, and it can be verified before a commander exists |
+| **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, a debug readout | Independently useful and independently testable — the artillery observation gate and the intel patrol both consume the belief store, the grid renders in the existing dev overlay, and all of it verifies before a commander exists |
 | **The loop** | One thread, the tick, the five terms, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Smallest thing that produces visible enemy behaviour |
 | **Intents** | The record, minimum lifetimes, release on completion or death | Lands with the third sink: taskings are where thrash starts costing |
 | **Archetype** | The weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
@@ -877,9 +954,10 @@ Each phase is independently playable, and the ordering is forced by what the nex
   ([§Persistence](#persistence)), but a campaign resumed with the enemy's knowledge intact and one
   resumed with the enemy blind are different difficulties, and neither is obviously right.
 - **What a co-op session does to the sighting sweep.** One call per player is cheap at four and
-  still cheap at eight; the term that grows is the belief array, since each player is a separate
-  entry and squads move together. Whether beliefs should be merged by proximity into one entry per
-  *element* rather than one per player decides whether the strength term means anything.
+  still cheap at eight, and the belief array still grows one entry per player. The merge question is
+  resolved by [the influence grid](#the-influence-grid-one-spatial-substrate): its enemy layer sums
+  every entry that falls in a cell, so the strength term reads force-at-a-place whether four players
+  or one stand there. The array stays per-player; scoring no longer sees it that way.
 - **Whether the player can perceive that the enemy is acting on stale information**, and whether
   that is worth surfacing. It is the difference between the mechanic working and the mechanic being
   appreciated, and the intel system is the obvious route.
@@ -902,9 +980,10 @@ Each phase is independently playable, and the ordering is forced by what the nex
   perceive is variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](../info/gameplay/intel_system.md)), and observed behaviour is the free one.
 - **What the commander does with a surplus.** All three sinks are throttled and one saturates
-  outright, so a commander that out-earns them banks the difference and the map stops changing.
-  Anything that absorbs it has to be something the player still notices — reinforcing a garrison
-  rather than upgrading it, or replacing losses, would work without an ever-growing map. Town
+  outright, so a commander that out-earns them banks the difference and the map stops changing. Two
+  absorbers the player still notices: reinforcing a garrison rather than upgrading it, and mustering
+  — an assault intent that keeps buying force while it waits to clear its commit bar
+  ([§Commitment](#commitment-intents-are-sticky)). Both spend without an ever-growing map. Town
   events cannot be it: they are free and rep-driven by decision
   ([§What the commander spends on](#what-the-commander-spends-on)).
 - **Whether the commander should be required to spend** rather than merely able to. Banking costs
