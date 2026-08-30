@@ -14,7 +14,7 @@
 // label heads the band in the debug spawner (fnc_debug_town_event_menu); English-only, a dev surface, like
 // the other debug labels.
 
-["Ambient",  -20,  20, [["civ_car", 3], ["civ_heli", 1]]],
+["Ambient",  -20,  20, [["civ_car", 3], ["civ_heli", 1], ["civ_convoy", 1]]],
 ["Hostile",  -20, -10, []],
 ["Neutral",   -9,   9, [["civ_stranded", 2]]],
 ["Friendly",  10,  20, []]

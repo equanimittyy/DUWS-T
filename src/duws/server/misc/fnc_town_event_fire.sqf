@@ -12,6 +12,7 @@ if (_kind isEqualTo "") exitWith {};
 switch (_kind) do {
 	case "civ_car":      { [_townIndex, _player] call fnc_town_event_car };
 	case "civ_heli":     { [_townIndex, _player] call fnc_town_event_heli };
+	case "civ_convoy":   { [_townIndex, _player] call fnc_town_event_convoy };
 	case "civ_stranded": { [_townIndex, _player] call fnc_town_event_stranded };
 	default {
 		["INFO", "CIV", format ["town event '%1' rolled at town %2 (no handler yet)", _kind, _townIndex]] call fnc_log;
