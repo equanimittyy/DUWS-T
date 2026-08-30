@@ -124,7 +124,7 @@ _unitClasses = [
     "C_IDAP_Man_Aidworker_05_F",
     "C_IDAP_Man_Aidworker_06_F"
 ];
-private _crewAnims = ["Acts_ShowingTheRightWay_loop", "Acts_JetsShooterNavigate_loop_m", "Acts_CivilIdle_2"];
+private _crewAnims = ["Acts_JetsShooterNavigate_loop_m", "Acts_CivilIdle_1", "Acts_CivilIdle_2"];
 _groupUnits = [];
 for "_i" from 1 to (count _crewAnims) do { _groupUnits pushBack (selectRandom _unitClasses); };
 _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
@@ -146,24 +146,7 @@ _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]]
     };
 } forEach units _groupDelivery;
 
-_smokeObjects = [];
-_deliverySmokeScript = [_targetDeliveryPos, _smokeObjects] spawn {
-    params ["_pos", "_smokeObjects"];
-    while {true} do {
-        if (count _smokeObjects > 0) then {
-            deleteVehicle (_smokeObjects select 0);
-            _smokeObjects deleteAt 0;
-        };
-        private _smoke = "SmokeShellGreen" createVehicle _pos;
-        _smoke setPos _pos;
-        _smokeObjects pushBack _smoke;
-        sleep 30;
-    };
-};
-
 _cleanupDelivery = {
-    if (!isNil "_deliverySmokeScript") then { terminate _deliverySmokeScript; };
-    if (!isNil "_smokeObjects") then { { deleteVehicle _x } forEach _smokeObjects; };
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
     deleteMarker _deliveryMarkerName;
 };
