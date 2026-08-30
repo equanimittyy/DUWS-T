@@ -8,7 +8,7 @@
 if (!hasInterface) exitWith {};
 
 // Label localised once, not per frame -- the Draw3D body below runs every frame.
-DUWS_laptopMarker_range  = 50;                                                    // metres, player to laptop
+DUWS_laptopMarker_range  = 10;                                                    // metres, player to laptop
 DUWS_laptopMarker_icon   = "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa";
 DUWS_laptopMarker_colour = [1, 0.5, 0, 0.5];                                      // orange, faint
 DUWS_laptopMarker_label  = localize "STR_DUWS_T_p3200mf5";

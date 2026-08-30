@@ -90,7 +90,7 @@ switch (VERSION_X) do {
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
 
             private _topZ = (boundingBoxReal _table select 1) select 2;
-            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, 90]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
+            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, random 360]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
 
             // Paired so a rigged decoy's blast can clear both props (invulnerable, so the shell alone
             // leaves them standing). Read server-side by fnc_sabotage_laptop_decoy.

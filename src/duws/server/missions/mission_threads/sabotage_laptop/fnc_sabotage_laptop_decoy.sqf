@@ -23,6 +23,9 @@ if (!_rigged) exitWith {
 // blast, and goes only to the player who triggered it. Position captured before the fuse in case the
 // object is torn down in the gap -- the bomb still goes off where the laptop was.
 ["rigged_decoy"] remoteExec ["BIS_fnc_showNotification", _caller];
+// OPFOR red the instant it is armed -- the mirror of the BLUFOR-blue success screen -- so it shows for
+// the fuse before the blast clears the prop. Global from the server, which owns the object, like the success path.
+_decoy setObjectTextureGlobal [0, "#(rgb,8,8,3)color(1,0,0,1)"];
 [getPosATL _decoy, _decoy, _decoy getVariable ["DUWS_laptop_table", objNull]] spawn {
     params ["_p", "_lap", "_table"];
     sleep 6;
