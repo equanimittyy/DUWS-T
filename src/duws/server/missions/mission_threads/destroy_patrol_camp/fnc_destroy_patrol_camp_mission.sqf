@@ -76,9 +76,7 @@ private _build = {
             };
         };
 
-        // Intel on the table: three independent 1-in-3 rolls (0-3 items) from the shared pool. The table
-        // settles, is forced upright if toppled, then frozen as the anchor; fnc_place_settled seats the items
-        // on top -- each kept simulated (so fnc_intelAnalysis can take it) yet velocity-pinned. Damage off
+        // Intel on the table: three independent 1-in-3 rolls (0-3 items) from the shared pool. Damage off
         // throughout so stray fire cannot destroy loot or table.
         private _tableIdx = _staticsArray findIf { (_x select 0) isEqualTo "Land_CampingTable_F" };
         private _table = if (_tableIdx >= 0) then { _props param [_tableIdx, objNull] } else { objNull };
@@ -99,9 +97,8 @@ private _build = {
             _table enableSimulationGlobal false;
 
             // Each item scatters to a random spot and heading on the table top (boundingBoxReal max-corner Z),
-            // inset by _edgeMargin so nothing overhangs and kept _itemSep apart so two never z-fight. Placement
-            // (seat, align, kill velocity, keep under the key) lives in fnc_place_settled. Kept objects are
-            // `persistent`, so fnc_repetitive_cleanup never reaps an unlooted item before mission end.
+            // inset by _edgeMargin so nothing overhangs and kept _itemSep apart so two never z-fight. Kept
+            // objects are `persistent`, so fnc_repetitive_cleanup never reaps an unlooted item before mission end.
             private _bb   = boundingBoxReal _table;
             private _bMin = _bb select 0;
             private _bMax = _bb select 1;
@@ -127,7 +124,9 @@ private _build = {
                     _rows pushBack [_cls, _ox, _oy, _topZ, random 360];
                 };
             };
-            [_rows, _table, "mission_patrol_camp"] call fnc_place_settled;
+            // Frozen, not simulated: the intel classes spawn as WeaponHolderSimulated, which PhysX ejects off
+            // the table and leaves hanging in the air if left live (fnc_place_settled _freeze).
+            [_rows, _table, "mission_patrol_camp", true, true] call fnc_place_settled;
         };
 
         // The camp's guard team -- the objective; all camp teams dead wins.
