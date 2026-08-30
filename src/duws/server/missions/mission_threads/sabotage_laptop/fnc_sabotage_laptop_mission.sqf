@@ -127,9 +127,8 @@ private _garrison = [];
 _garrison call fnc_mission_claim;
 sleep 1;
 
-// Off the main thread: raiseGarrison sleeps between groups, and the main thread must arm the laptops'
-// hold-actions now rather than wait the whole stagger out. fnc_mission_garrison claims each group as
-// it spawns, so a finish mid-stagger still tears them down by ownership.
+// Off the main thread: raiseGarrison sleeps between groups, but the main thread must arm the laptops'
+// hold-actions now, not wait the whole stagger out. fnc_mission_garrison owns the teardown.
 [_randomPos, _radius] spawn {
     params ["_c", "_r"];
     [

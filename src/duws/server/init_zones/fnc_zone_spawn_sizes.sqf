@@ -126,21 +126,12 @@ DUWS_fnc_spawnDiff = {
     _out
 };
 
-// Raises a token list and hands back the groups it made, in order. The one place a composition
-// becomes men, shared by the zone band and the town garrison: the stagger and the search flag are
-// rules about raising a garrison, not about which kind of ground is raising one.
-//
-// Staggered, not batched: each token raises a group, and firing a whole composition in one frame is
-// what the per-token sleep avoids. None after the last.
-//
-// Returns groups rather than appending to a caller's roster, so a caller that keeps one appends
-// after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
-// test refuses while the garrison is not yet live, and the live flag is set after this returns.
-//
-// _onRaise runs once per raised group, [_grp] as its argument, the instant that group appears --
-// before the next token's sleep. A side mission passes its claim here so a fast finish that ends
-// the mission mid-stagger still tears down every group already up: batching the claim until after
-// the return leaks whatever was raised before the win.
+// Raises a token list to groups, in order, for both the zone band and a town garrison. Staggered
+// (per-token sleep) so a whole composition never spawns in one frame. Returns the groups rather than
+// appending: safe because nothing reads a zone's roster mid-place -- the capture test refuses until the
+// garrison is flagged live, which happens after this returns.
+// _onRaise fires per group ([_grp]) the instant it appears. A mission claims here, not in one batch
+// after the return, so a win mid-stagger still owns and tears down every group already raised.
 DUWS_fnc_raiseGarrison = {
     params ["_tokens", "_pos", "_radius", ["_onRaise", {}]];
     private _grps = [];

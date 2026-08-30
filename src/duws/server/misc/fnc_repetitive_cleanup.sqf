@@ -200,11 +200,10 @@ while {true} do {
         };
     } forEach _sweep;
 
-    // A living entity claimed by a mission that is no longer the live one is an orphan a claim can never
-    // reach: it spawned on a stagger that outran the win, so fnc_mission_cleanup's single pass had
-    // already run when it appeared, and no teardown will flag it now. Swept here on the same clock as a
-    // flagged unit, so KEEP_RADIUS still holds it off-screen. Units a mission hands the player are never
-    // claimed (owner stays -1), so this cannot reach them.
+    // Orphan: a living entity owned by a mission no longer live. It spawned on a stagger that outran the
+    // win, after fnc_mission_cleanup's single pass, so no teardown will ever flag it. Swept on the same
+    // clock as a flagged unit, so KEEP_RADIUS still holds it off-screen. Units handed to the player are
+    // never claimed (owner -1), so this never reaches them.
     private _liveTok = missionNamespace getVariable ["DUWS_mission_token", 0];
     private _noLiveMission = missionNamespace getVariable ["Mission_available", true];
     private _deadOwner = {
