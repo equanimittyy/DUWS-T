@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-19 types (indices 0-18). The rework's shape is settled: each mission should pose a **distinct
+20 types (indices 0-19). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -36,6 +36,8 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a persistent AP minefield walls the ring edge opposite the patrol | `target_recon/` |
 | 18 | Destroy Patrol Camp | find 1-3 recon camps hidden in treeline by their campfire smoke, wipe out every camp team | `destroy_patrol_camp/` |
 | 14 | Recover Humanitarian Supply Truck | seize an OPFOR-guarded aid truck and drive it to the IDAP crew waiting in a neutral/BLUFOR town | `transport_idap/` |
+| 13 | Protect Informant | reach the informant, fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | `protect_civ/` (testing) |
+| 19 | Destroy Air Asset | down a tier-gated OPFOR gunship (attack heli / jet) that loiters over the ring, kept fuelled and periodically fixed by Allseer | `destroy_air/` (testing) |
 
 **Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
 Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
@@ -47,10 +49,12 @@ design bar, not pending work.
 Vehicle (6). Same verb -- steal a guarded vehicle and drive it back to home HQ -- differing only in the
 prize (supply truck vs builder vehicle). Repriced to 20/20 and 20/30; no longer the half-pay twin.
 
-**Still stale -- each needs *both* a reprice and a distinct-verb gameplay rework** -- the earlier
-"bespoke, review" row (Rescue Pilot) is stale too until reworked, not a reviewed baseline: Rescue
-Pilot (4) and Protect Informant (13). Ideas per row in the
-[tracker](#per-mission-rework-tracker).
+**Built, in play-testing (not yet accepted as *done*):** Destroy Air Asset (19, new) and Protect
+Informant (13, reworked into defend-and-build). Both are priced and playable; they sit apart from
+*done* only until a play-test signs them off. Designs below.
+
+**Still stale -- needs *both* a reprice and a distinct-verb gameplay rework:** Rescue Pilot (4) only.
+Idea in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
 
@@ -293,11 +297,42 @@ steal-and-drive pair (Steal Supply Truck, Steal Builder Vehicle) whose shape it 
 at 20/10: it shares the steal pair's fight but pays less CP/AP because the +3 REP carries part of its
 value.
 
+### Protect Informant
+
+`mission_threads/protect_civ/`. Reworked from a passive in-place defend into **defend-and-build**: the
+player reaches the informant, fortifies the building from a limited R3F supply crate through a fixed
+prep window (skippable via a confirmed action), then holds scaling OPFOR waves long enough for him to
+survive. Waves fill toward a budget that tracks BLUFOR headcount, on a deep dip or a 5-minute
+heartbeat -- infantry trucked to a debus short of the ring, up to rand(2-4) combat vehicles driving in
+from the far side. Leaving the ring empty of BLUFOR for 20 continuous seconds abandons him, counting
+as a kill. Prep starts on first player arrival (the deadline is only the never-engaged backstop). Win:
+informant alive when the defend window elapses, plus +3 REP to the nearest town. In play-testing. Full
+design of record: [`protect_informant_rework.md`](protect_informant_rework.md).
+
+### Destroy Air Asset
+
+`mission_threads/destroy_air/`. A moving-target intercept: a lone OPFOR gunship loiters over a 5 km ring
+and the player has to bring it down. Which airframe spawns is whatever the side can field -- a jet once
+it has reached the Air tier (AP 600), else the attack helicopter earned at Armor (AP 350).
+`fnc_destroy_air_site` gates the offer on the Armor tier *and* the AttackHeli campaign toggle, so a
+below-tier or air-disabled OPFOR never sees it and the slot draws another type. Win: the aircraft dead.
+Fail: the deadline. `surveyKind "map"`; the win polls `alive` on the hull, so it stays off the one-shot
+spine.
+
+Two engine traps shape the thread. The global ten-minute resupply (`fnc_AI_Master_Control`) only reaches
+assets near a player, so a gunship loitering far out runs its tank dry and falls out of the sky before
+the player finds it -- the thread refuels and rearms it on its own 300 s clock, unconditional on
+proximity. And a fast mover is unfindable from a static marker, so Allseer drops a fix on the airframe
+and re-lays it every ~150-210 s (`o_air`, `ColorEAST`), calling it in on the same cadence: a periodic
+fix the player races to, not a frame-by-frame blip.
+
 ## Planned reworks (decided, not built)
 
-The two still-stale missions. Verbs, win/fail and reward mechanics are decided; nothing here is coded
-yet. CP/AP and the deadline band are open (not set below). Build order: Rescue Pilot, Protect Informant.
-Recover Aid Truck (14) is built -- its writeup moved to [Hand-made mission designs](#recover-humanitarian-supply-truck).
+The one still-stale mission (Rescue Pilot). Its verb, win/fail and reward mechanics are decided; nothing
+here is coded yet. CP/AP and the deadline band are open (not set below). Recover Aid Truck (14) and
+Protect Informant (13) are built -- their writeups are in [Hand-made mission
+designs](#recover-humanitarian-supply-truck); Protect Informant's full design of record is
+[`protect_informant_rework.md`](protect_informant_rework.md).
 
 ### Rescue Pilot (4)
 
@@ -306,16 +341,6 @@ already in the thread), likely a pursuit on the way out. The one change: **win w
 within 100 m of BLUFOR HQ** (the thread already ends on `_pilot distance PosOfBLUHQ`, today at 50 m --
 widen to 100). Fail: pilot killed, or deadline. No new twist; this is the escort-home shape kept, only
 the delivery radius moves.
-
-### Protect Informant (13)
-
-Defend the informant in place. **Site anywhere with an enterable building near, in or out of a town
-zone** (today town-only): map survey plus a building-proximity finder. The **hold timer starts on first
-player arrival** at the informant, not at spawn -- players get time to set up before it runs; hold length
-**10 min** (up from the current 360 s). **No player leash** during the hold. Win: informant alive when
-the hold elapses. Fail: informant killed. The deadline stays as a backstop for an offer never engaged.
-Reward: **+3 REP to the nearest discovered town** via `fnc_town_rep_adjust` (was a flat +5); no
-discovered town in range means no REP. The hpp REP column moves **5 -> 3**.
 
 ## Mission catalogue (current)
 
@@ -340,13 +365,14 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 16 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
 | 17 | Eliminate Recon Patrol | elimination | cmd | 10/10/0 | 3 | done |
 | 18 | Destroy Patrol Camp | elimination | cmd | 20/15/0 | 3 | done |
+| 19 | Destroy Air Asset | elimination | cmd | 30/10/0 | 3 | testing |
 | 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 25/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
 | 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
-| 13 | Protect Informant | defend | civ | 20/10/5 | -- | stale (spec ready, not built) |
+| 13 | Protect Informant | defend | civ | 30/30/3 | 4 | testing (defend-and-build; see rework doc) |
 | 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done |
 
 ## Pricing rework (command missions)
@@ -356,16 +382,18 @@ to command/intel/tactical value, AP to materiel destroyed or manpower recovered.
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower, Sabotage
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
-note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **Every
-still-stale mission carries its old numbers and is open pricing work** -- the 2 stale rows (Rescue
-Pilot, Protect Informant). Recover Humanitarian Supply Truck is fully priced: 20/10, deadline matching
-the steal-and-drive pair.
+note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **The one
+still-stale mission carries its old numbers and is open pricing work** -- Rescue Pilot. Recover
+Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The two
+in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
+Air Asset at 30/10 (0h30-1h00).
 
 ## Per-mission rework tracker
 
-Status: `done` (shipped) or `stale` (needs rework). **Every `stale` row needs both a reprice and a
-distinct-verb gameplay rework, even where the Gameplay change cell names only one.** The Gameplay
-change cell is the current idea, not a locked spec.
+Status: `done` (shipped), `testing` (built, in play-testing, not yet signed off as done), or `stale`
+(needs rework). **Every `stale` row needs both a reprice and a distinct-verb gameplay rework, even
+where the Gameplay change cell names only one.** The Gameplay change cell is the current idea, not a
+locked spec.
 
 | Mission | Gameplay change | Status |
 |---------|-----------------|:-:|
@@ -383,12 +411,15 @@ change cell is the current idea, not a locked spec.
 | Steal Builder Vehicle | steal a guarded vehicle and drive it back to home HQ; repriced 20/30 | done |
 | Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
 | Rescue Pilot | fight in to the downed pilot, then extract him to within 100 m of HQ (verb decided, not built) | stale |
-| Protect Informant | defend the informant through a timed hold that starts on player arrival (verb decided, not built) | stale |
+| Protect Informant | defend-and-build: fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | testing |
 | Recover Humanitarian Supply Truck | retake the OPFOR-guarded aid truck and deliver it to the IDAP crew's neutral/BLUFOR town | done |
+| Destroy Air Asset | intercept and down a tier-gated OPFOR gunship (attack heli / jet) loitering over the ring | testing |
 
 ## Open decisions
 
-- Build the two remaining planned reworks above (Rescue Pilot, Protect Informant; verbs decided, none coded yet).
-- CP/AP and deadline band for the two stale rows; the reworks pricing pass follows the build.
+- Build the one remaining planned rework above (Rescue Pilot; verb decided, not coded yet).
+- CP/AP and deadline band for Rescue Pilot; its pricing pass follows the build.
+- Sign off the two in play-testing (Protect Informant, Destroy Air Asset) as *done*, or respec from
+  play-test findings.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
