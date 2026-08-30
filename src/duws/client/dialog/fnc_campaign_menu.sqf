@@ -80,10 +80,12 @@
   [2104, _defCp] call _setDefault;
 
   // Reward Multiplier (scales both CP and AP mission payouts)
+  [2106, "0.5x", "0.5"] call _addOpt;
   private _defReward = [2106, "1x", "1"] call _addOpt;
+  [2106, "1.5x", "1.5"] call _addOpt;
   [2106, "2x", "2"] call _addOpt;
+  [2106, "2.5x", "2.5"] call _addOpt;
   [2106, "3x", "3"] call _addOpt;
-  [2106, "4x", "4"] call _addOpt;
   [2106, "5x", "5"] call _addOpt;
   [2106, _defReward] call _setDefault;
 

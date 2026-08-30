@@ -21,11 +21,12 @@ if (!isNil "DUWS_rewardBoost") then {
 	private _i = DUWS_rewardBoost findIf {(_x select 0) isEqualTo _mission_name};
 	if (_i >= 0) then { _difficultyMult = (DUWS_rewardBoost select _i) select 1 };
 };
-_cp_multiplied_reward = round (_cpreward * cp_reward_multiplier * _civsOffLift * _difficultyMult);
+// One floor over the whole multiplier stack: the payout always rounds down, difficulty bonus included.
+_cp_multiplied_reward = floor (_cpreward * cp_reward_multiplier * _civsOffLift * _difficultyMult);
 // The player's reward multiplier scales both mission currencies, so one campaign knob governs CP and
 // AP payouts alike. The civs-off lift is not applied to AP: it substitutes for the absent town-CP
 // faucet, and AP already comes from zones in every configuration.
-_ap_multiplied_reward = round (_apreward * cp_reward_multiplier * _difficultyMult);
+_ap_multiplied_reward = floor (_apreward * cp_reward_multiplier * _difficultyMult);
 ["INFO", "MISSION", format ["'%1' succeeded, paying %2 CP and %3 AP",
 	_mission_name, _cp_multiplied_reward, _ap_multiplied_reward]] call fnc_log;
 [_cp_multiplied_reward, format ["mission %1", _mission_name]] remoteExec ["fnc_cp_adjust", 2];
