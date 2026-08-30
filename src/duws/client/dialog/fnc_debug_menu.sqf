@@ -39,6 +39,8 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 
+    ["Spawn town event", fnc_debug_town_event_menu, [], [1,0.667,0,1]],
+
     // Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh seven. The cache
     // is what keeps a normal back-out on the same offers; this is the intended way to roll new ones.
     ["Re-roll side missions", {
