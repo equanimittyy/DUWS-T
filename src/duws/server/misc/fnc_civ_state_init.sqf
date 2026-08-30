@@ -21,6 +21,23 @@ fnc_civ_townAt = {
 	_found
 };
 
+// Nearest town whose centre lies within _range of _pos, or -1 when none is that close. Distinct from
+// fnc_civ_townAt, which answers "inside which town" off each town's own radius: an event worked from a
+// town's approach measures against a flat threshold, and wants the closest in range rather than
+// whichever radius happens to contain the point.
+fnc_civ_townNear = {
+	if (!isServer) exitWith { -1 };
+	params [["_pos", [0,0,0]], ["_range", 800]];
+	private _locs = missionNamespace getVariable ["civ_locations", []];
+	private _best = -1;
+	private _bestDist = _range;
+	{
+		private _d = _pos distance2D (getPos _x);
+		if (_d < _bestDist) then { _bestDist = _d; _best = _forEachIndex; };
+	} forEach _locs;
+	_best
+};
+
 // A player within _radius of a position. Shared by the civilian-death charge and the building
 // destruction charge rather than each carrying its own sweep, so the two cannot drift: presence
 // is the proxy for the player having been involved and both must mean the same thing by it.

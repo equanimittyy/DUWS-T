@@ -290,6 +290,12 @@ publicVariable "fnc_recruitSuccessServer";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
+// Town-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
+// un-broadcast like the other directors.
+fnc_town_event_runner = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_runner.sqf";
+fnc_town_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_table.sqf";
+fnc_town_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_fire.sqf";
+
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";
 fnc_captured = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_captured.sqf";
