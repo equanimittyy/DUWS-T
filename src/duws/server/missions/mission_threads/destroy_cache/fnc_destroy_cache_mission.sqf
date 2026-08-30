@@ -79,7 +79,7 @@ private _build = {
     [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 
     sleep 1;
-    [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
+    [_targetpos, _radius, 3] spawn fnc_missionPatrols;
 
     [_vehicle_7, _vehicle_8]
 };
