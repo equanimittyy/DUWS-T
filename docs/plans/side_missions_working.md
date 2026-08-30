@@ -317,7 +317,9 @@ it has reached the Air tier (AP 600), else the attack helicopter earned at Armor
 `fnc_destroy_air_site` gates the offer on the Armor tier *and* the AttackHeli campaign toggle, so a
 below-tier or air-disabled OPFOR never sees it and the slot draws another type. Win: the aircraft dead.
 Fail: the deadline. `surveyKind "map"`; the win polls `alive` on the hull, so it stays off the one-shot
-spine.
+spine. **Reward scales with the airframe**, the way the vehicle patrol scales with its tier: base 30/20,
++10 CP when the side fields the jet over the attack helicopter (AP flat), an unadvertised completion
+bonus since the briefing prints the base built before the airframe rolls.
 
 Two engine traps shape the thread. The global ten-minute resupply (`fnc_AI_Master_Control`) only reaches
 assets near a player, so a gunship loitering far out runs its tank dry and falls out of the sky before
@@ -365,7 +367,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 16 | Destroy Hardpoint | sabotage | cmd | 10/10/0 | 2-3 | done |
 | 17 | Eliminate Recon Patrol | elimination | cmd | 10/10/0 | 3 | done |
 | 18 | Destroy Patrol Camp | elimination | cmd | 20/15/0 | 3 | done |
-| 19 | Destroy Air Asset | elimination | cmd | 30/10/0 | 3 | testing |
+| 19 | Destroy Air Asset | elimination | cmd | 30/20/0 (+tier) | 3 | testing |
 | 8 | Sabotage Laptop | sabotage | cmd | 30/20/0 | 3 | done |
 | 9 | Destroy Ammo Cache | sabotage | cmd | 25/15/0 | 3 | done (fixed-site, repriced; arsenal reward removed) |
 | 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
@@ -386,7 +388,7 @@ note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site
 still-stale mission carries its old numbers and is open pricing work** -- Rescue Pilot. Recover
 Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The two
 in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
-Air Asset at 30/10 (0h30-1h00).
+Air Asset at 30/20 (0h30-1h00), +10 CP when the side fields a jet over the attack helicopter.
 
 ## Per-mission rework tracker
 

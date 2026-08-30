@@ -20,6 +20,11 @@ if (_class == "") exitWith {
     [19, _requester, "no_air_asset: OPFOR fields neither jet nor gunship"] call fnc_mission_abort;
 };
 
+// +10 CP when the side fields the jet (Air tier) over the attack helicopter (Armor tier); AP flat. An
+// unadvertised completion bonus -- the briefing and map print the base, built at fnc_mission_begin
+// before this rolls. Safe to bump in place: one mission runs at a time.
+if (_jet != "") then { DUWS_curReward set [0, (DUWS_curReward select 0) + 10] };
+
 private _taskId = format ["destroyair%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
