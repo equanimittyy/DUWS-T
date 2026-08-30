@@ -42,28 +42,36 @@ private _veh = vehicle (leader _grp);
 // Altitude follows the airframe: the jet cruises high, the attack helicopter works lower. Keyed on the
 // hull, not the token, so it matches what actually spawned. Reset both the off-map entry altitude and
 // the loiter height (fnc_spawn_vehicle enters every airframe at one fixed height) to the airframe's.
-private _altitude = [400, 800] select (_veh isKindOf "Plane");
+private _altitude = [300, 700] select (_veh isKindOf "Plane");
 _veh flyInHeight _altitude;
 _veh setPosATL [(getPosATL _veh) select 0, (getPosATL _veh) select 1, _altitude];
 
 // A fast, alert circuit drawn strictly inside the mission ring, so the player runs the asset down
 // rather than chasing a loiter that drifts off the map. Each leg sits on the outer half of the radius
 // (position getPos keeps every pick well inside it) and the cycle returns through centre.
+//
+// Height jitters +/-200m off the airframe's base per leg, so the asset never flies one flat altitude the
+// player can pre-lay a shot on. flyInHeight is above-ground-level, so the floor at 100m keeps the low end
+// clear of terrain. The statement runs on the waypoint before its leg, retargeting the height as the
+// aircraft turns onto that leg.
 _grp setBehaviour "AWARE";
 _grp setCombatMode "YELLOW";
 _grp setSpeedMode "FULL";
 for "_i" from 1 to 5 do {
     private _leg = _randomPos getPos [(_radius * 0.45) + random (_radius * 0.4), random 360];
+    private _legAlt = (_altitude + (200 - random 400)) max 100;
     private _wp = _grp addWaypoint [_leg, 0];
     _wp setWaypointType "MOVE";
     _wp setWaypointBehaviour "AWARE";
     _wp setWaypointSpeed "FULL";
     _wp setWaypointCompletionRadius 500;
+    _wp setWaypointStatements ["true", format ["(vehicle this) flyInHeight %1", _legAlt]];
 };
 private _cycle = _grp addWaypoint [_randomPos, 0];
 _cycle setWaypointType "CYCLE";
 _cycle setWaypointBehaviour "AWARE";
 _cycle setWaypointSpeed "FULL";
+_cycle setWaypointStatements ["true", format ["(vehicle this) flyInHeight %1", (_altitude + (200 - random 400)) max 100]];
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_AIR_DESC", _mission_name, "kill",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_destroyair_letsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_destroyair_copy", 0]]
@@ -80,11 +88,29 @@ private _nextReportAt = time + (150 + random 60);
 // Keep it fuelled and armed on its own clock, unconditional on player proximity.
 private _nextResupplyAt = time + 300;
 
+// One-shot handoff from ring patrol to active hunt. The circuit above flies AWARE/YELLOW; the engine flips
+// the crew to COMBAT on contact, and that transition is the trigger to drop the loiter and prosecute the
+// nearest known enemy, so the asset closes on the player instead of flying its circuit past the fight.
+private _engaging = false;
+
 private _outcome = "";
 waitUntil {
     sleep 5;
     if (!alive _veh) exitWith { _outcome = "WIN"; true };
     if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+
+    if (!_engaging && {behaviour (leader _grp) == "COMBAT"}) then {
+        private _tgt = _veh findNearestEnemy _veh;
+        if (!isNull _tgt) then {
+            for "_i" from (count (waypoints _grp) - 1) to 0 step -1 do { deleteWaypoint ((waypoints _grp) select _i) };
+            _grp setCombatMode "RED";
+            private _sad = _grp addWaypoint [getPosATL _tgt, 0];
+            _sad setWaypointType "SAD";
+            _sad setWaypointBehaviour "COMBAT";
+            _sad setWaypointSpeed "FULL";
+            _engaging = true;
+        };
+    };
 
     if (time > _nextResupplyAt) then {
         _veh setFuel 1;
