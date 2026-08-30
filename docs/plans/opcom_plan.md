@@ -791,76 +791,13 @@ Four properties are why they could not stay:
 
 ## Town events: what a turned town does
 
-Where the player has driven a town into the OPFOR band, the enemy uses it: IEDs on the approach
-roads, ambushes on patrols passing through, sabotage against nearby FOBs and parked vehicles.
-Reputation stops being a modifier on civilian spawn behaviour and becomes the input to an actor that
-plans against the player. The per-town reputation change deleted the two mechanics that did this job
-badly; they are recorded below because they are the raw material the director is meant to rebuild.
-
-Decided:
-
-- **Events are free and rolled, not bought.** Reputation is the whole input: a town deep enough
-  into the OPFOR band generates them on its own, and the commander that buys garrisons, taskings
-  and hardpoints neither funds them nor schedules them
-  ([§What the commander spends on](#what-the-commander-spends-on)). Charging Army Power for
-  them would price a thing the player has already paid for by letting the town fall.
-- **Rapport moves a town's reputation; events are what a low reputation does.** Both act on a town
-  in the OPFOR band, so the division has to be stated or the two drift into each other. Rapport is
-  the commander's purchased way of dragging a town down; events are the free consequence of it
-  already being down.
-- It acts on towns in the OPFOR band (reputation `<= -10`), the same band that pays OPFOR Army
-  Power and spawns a garrison.
-- It plans outside the town's presence trigger. The civilian handler runs only when a player is
-  inside the radius; a director that can only act then cannot mine a road ahead of the player.
-- Events are attributed to the town, so clearing that town's garrison damps its events by lifting
-  its reputation a step. It no longer stops them outright: a clear is worth `+5` rather than a
-  discharge, so a town driven to `-20` is still deep in the band after one
-  ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
-
-### Preserved: hostile civilian conversion
-
-Ran at town spawn when reputation was negative, in the civilian handler. The code is gone; what it
-did is recorded here because the director is meant to rebuild it.
-
-| Property | Value |
-|---|---|
-| Count | `(abs rep * 3) min _totalGroups`, then capped at `floor (0.7 * _totalGroups)` |
-| Selection | the first N groups of the town's spawned groups |
-| Side | re-sided to `resistance` via a fresh group, old group deleted |
-| Armament | one entry from an 8-weapon pool of civilian-plausible small arms — PDW2000, AKS, SMG_05, both Hunter shotguns, DMR_06, P07, Pistol_01 — plus three magazines |
-| Interaction | `removeAllActions` locally and on every client, so no recruit/heal prompts remain |
-| Reputation | `isHostile` set true, which exempts their death from the civilian-death penalty |
-
-The 70 % ceiling means any town at or past `-7` was already saturated; the `abs rep * 3` term
-only mattered between `0` and `-7`.
-
-### Preserved: suicide bombers
-
-Ran immediately after conversion, in the same spawn pass, with the behaviour itself in a
-`fnc_civ_suicideBomberBehaviour` helper. Both are gone.
-
-Selection: `ceil (count _resistanceUnitsInTown * 0.1)` — a tenth of the converted hostiles,
-which is why deleting conversion silently zeroed this too. Candidates were civilian-sided units
-in the same town not already flagged, shuffled, each moved into its own `deleteGroupWhenEmpty`
-civilian group.
-
-Behaviour, a 0.5 s loop while alive:
-
-| Range to nearest player | Behaviour |
-|---|---|
-| > 10 m | civilian-sided, `CARELESS`/`BLUE`, fleeing disabled, random speed mode; 90 % walks at the player, 10 % wanders to a point 50–200 m off |
-| <= 10 m | re-sides to `EAST`, `isHostile` set true, switches to `COMBAT`/`RED` |
-| <= 5 m | spawns `Bo_GBU12_LGB` at its own position, broadcasts a hint, calls the shared civilian killed handler |
-
-**Two properties any replacement must keep.** First, `isHostile` is what decouples *this
-civilian is a threat* from *killing this civilian is a war crime* — without it the player is
-penalised for defending themselves, and the reputation spiral becomes unrecoverable. Second,
-the side flip happens at 10 m but detonation at 5 m, which is deliberately a window: the bomber
-becomes a legal target before it becomes lethal. An IED or ambush event that skips either
-property is a trap, not a mechanic.
-
-`Vcm_Disable` was set on the unit so an AI mod could not override the approach behaviour. Any
-scripted-movement event needs the same.
+A turned town — reputation `<= -10`, inside the OPFOR band — acts against the player on its own:
+IEDs on the approach roads, ambushes on passing patrols, sabotage against nearby FOBs. It is free
+and rolled off reputation, not an Army Power sink the commander schedules, and it plans outside the
+town's presence trigger so it can mine a road ahead of the player. The director consumes it; it is
+not part of the commander's economy, so the full design — the decided rules, the two deleted
+mechanics it must rebuild (hostile civilian conversion and suicide bombers) with their invariants,
+and its own open questions — lives in its own plan: [`town_events_plan.md`](town_events_plan.md).
 
 ## Persistence
 
@@ -937,7 +874,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
 | **The loop** | One thread, the tick, the five terms, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Smallest thing that produces visible enemy behaviour |
 | **Intents** | The record, minimum lifetimes, release on completion or death | Lands with the third sink: taskings are where thrash starts costing |
 | **Archetype** | The weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
-| **Town events** | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours, rolled off reputation outside the presence trigger | Reads the belief store and the OPFOR-band definition the loop establishes; the free consequence of a turned town, not a sink |
+| [**Town events**](town_events_plan.md) | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours, rolled off reputation outside the presence trigger | Reads the belief store and the OPFOR-band definition the loop establishes; the free consequence of a turned town, not a sink |
 
 ## Open questions
 
@@ -963,14 +900,6 @@ Each phase is independently playable, and the ordering is forced by what the nex
   writing the indirect-fire missions above; if the answer is no, the shell-spawn fallback
   (`client/supports/fnc_arty.sqf`) becomes the implementation and the gun is a target rather than a
   weapon, which is a different feature wearing the same name.
-- **The town-event roll itself:** what rate a town at `-10` generates events at against one at
-  `-20`, and whether the curve between them is worth having or the band alone should decide.
-- **Whether the regroup hold silences events along with the garrison.** A town that keeps mining
-  roads while it visibly has nobody in it is either a good scare or an obvious tell.
-- **Whether IED placement is persistent terrain state or spawned per approach**, and how it
-  interacts with despawn.
-- **Whether ambush groups count against the same population control as civilians**
-  (the `civ_density` target `fnc_civ_liveTarget` enforces) or against a director budget of their own.
 - **Whether the player can learn the commander's archetype, and how.** One the player can never
   perceive is variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](../info/gameplay/intel_system.md)), and observed behaviour is the free one.
