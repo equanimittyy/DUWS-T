@@ -28,15 +28,42 @@ if (_jet != "") then { DUWS_curReward set [0, (DUWS_curReward select 0) + 10] };
 private _taskId = format ["destroyair%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
-// fnc_spawn_vehicle flies air in from off the map at altitude, crews and dresses it, then applies the
-// posture -- widepatrol loiters it over the ring via bis_fnc_taskPatrol. Claiming the group stamps the
-// crew and hull, so the token sweep collects the wreck and any crew that bailed, wherever they came down.
-private _grp = [_class, _randomPos, _radius, "widepatrol"] call fnc_spawn_vehicle;
+// fnc_spawn_vehicle flies air in from off the map, crews and dresses it. Posture "none" leaves the
+// circuit to this file below: the shared widepatrol default (bis_fnc_taskPatrol) can neither hold every
+// leg inside the ring nor set the airframe's altitude, both of which this mission needs. Claiming the
+// group stamps the crew and hull, so the token sweep collects the wreck and any crew that bailed.
+private _grp = [_class, _randomPos, _radius, "none"] call fnc_spawn_vehicle;
 if (isNull _grp) exitWith {
     [19, _requester, "air_spawn_failed"] call fnc_mission_abort;
 };
 [_grp] call fnc_mission_claim;
 private _veh = vehicle (leader _grp);
+
+// Altitude follows the airframe: the jet cruises high, the attack helicopter works lower. Keyed on the
+// hull, not the token, so it matches what actually spawned. Reset both the off-map entry altitude and
+// the loiter height (fnc_spawn_vehicle enters every airframe at one fixed height) to the airframe's.
+private _altitude = [400, 800] select (_veh isKindOf "Plane");
+_veh flyInHeight _altitude;
+_veh setPosATL [(getPosATL _veh) select 0, (getPosATL _veh) select 1, _altitude];
+
+// A fast, alert circuit drawn strictly inside the mission ring, so the player runs the asset down
+// rather than chasing a loiter that drifts off the map. Each leg sits on the outer half of the radius
+// (position getPos keeps every pick well inside it) and the cycle returns through centre.
+_grp setBehaviour "AWARE";
+_grp setCombatMode "YELLOW";
+_grp setSpeedMode "FULL";
+for "_i" from 1 to 5 do {
+    private _leg = _randomPos getPos [(_radius * 0.45) + random (_radius * 0.4), random 360];
+    private _wp = _grp addWaypoint [_leg, 0];
+    _wp setWaypointType "MOVE";
+    _wp setWaypointBehaviour "AWARE";
+    _wp setWaypointSpeed "FULL";
+    _wp setWaypointCompletionRadius 500;
+};
+private _cycle = _grp addWaypoint [_randomPos, 0];
+_cycle setWaypointType "CYCLE";
+_cycle setWaypointBehaviour "AWARE";
+_cycle setWaypointSpeed "FULL";
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_AIR_DESC", _mission_name, "kill",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_destroyair_letsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_destroyair_copy", 0]]
