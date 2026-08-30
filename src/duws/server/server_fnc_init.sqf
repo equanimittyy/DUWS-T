@@ -299,6 +299,7 @@ fnc_town_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_t
 fnc_town_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_fire.sqf";
 fnc_town_event_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_car.sqf";
 fnc_town_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_heli.sqf";
+fnc_town_event_stranded = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_stranded.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_town_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_town_event.sqf";
 

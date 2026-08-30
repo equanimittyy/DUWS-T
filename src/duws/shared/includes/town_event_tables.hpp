@@ -16,5 +16,5 @@
 
 ["Ambient",  -20,  20, [["civ_car", 3], ["civ_heli", 1]]],
 ["Hostile",  -20, -10, []],
-["Neutral",   -9,   9, []],
+["Neutral",   -9,   9, [["civ_stranded", 2]]],
 ["Friendly",  10,  20, []]

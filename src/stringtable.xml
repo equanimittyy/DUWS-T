@@ -3106,6 +3106,18 @@
                 <Original>Him? Sorry, don't know him.</Original>
                 <English>Him? Sorry, don't know him.</English>
             </Key>
+            <Key ID="STR_DUWS_T_TOWN_STRANDED_ASK">
+                <Original>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</Original>
+                <English>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_STRANDED_THANKS">
+                <Original>Thanks for the help. Here's something for your troubles.</Original>
+                <English>Thanks for the help. Here's something for your troubles.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_STRANDED_REWARD">
+                <Original>The local dropped %1 money before driving off.</Original>
+                <English>The local dropped %1 money before driving off.</English>
+            </Key>
             <Key ID="STR_DUWS_T_mission_cpap">
                 <Original>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</Original>
                 <English>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</English>
