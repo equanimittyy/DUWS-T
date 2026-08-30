@@ -3775,6 +3775,30 @@
                 <Original>Destroy Patrol Camp</Original>
                 <English>Destroy Patrol Camp</English>
             </Key>
+            <Key ID="STR_DUWS_T_c19">
+                <Original>Destroy Air Asset</Original>
+                <English>Destroy Air Asset</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DESTROY_AIR_DESC">
+                <Original>An enemy aircraft is patrolling this area. Track it down and shoot it out of the sky.</Original>
+                <English>An enemy aircraft is patrolling this area. Track it down and shoot it out of the sky.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyair_letsdothis">
+                <Original>Alpha 1-1, Allseer is tracking an enemy aircraft loitering near %1. Shoot it down.</Original>
+                <English>Alpha 1-1, Allseer is tracking an enemy aircraft loitering near %1. Shoot it down.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyair_copy">
+                <Original>We copy Overlord, moving to intercept.</Original>
+                <English>We copy Overlord, moving to intercept.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyair_track">
+                <Original>Alpha 1-1, we have updated intel on the enemy aircraft. Its last known position is marked on your map.</Original>
+                <English>Alpha 1-1, we have updated intel on the enemy aircraft. Its last known position is marked on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyair_end">
+                <Original>Allseer confirms enemy aircraft destroyed. Good work Alpha 1-1.</Original>
+                <English>Allseer confirms enemy aircraft destroyed. Good work Alpha 1-1.</English>
+            </Key>
             <Key ID="STR_DUWS_T_c12">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>
