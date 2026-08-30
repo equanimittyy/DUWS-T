@@ -200,6 +200,18 @@ while {true} do {
         };
     } forEach _sweep;
 
+    // A living entity claimed by a mission that is no longer the live one is an orphan a claim can never
+    // reach: it spawned on a stagger that outran the win, so fnc_mission_cleanup's single pass had
+    // already run when it appeared, and no teardown will flag it now. Swept here on the same clock as a
+    // flagged unit, so KEEP_RADIUS still holds it off-screen. Units a mission hands the player are never
+    // claimed (owner stays -1), so this cannot reach them.
+    private _liveTok = missionNamespace getVariable ["DUWS_mission_token", 0];
+    private _noLiveMission = missionNamespace getVariable ["Mission_available", true];
+    private _deadOwner = {
+        private _t = _this getVariable ["DUWS_missionOwner", -1];
+        _t >= 0 && {_noLiveMission || {_t != _liveTok}}
+    };
+
     // Flagged living entities: a delete order stamped by a teardown, not litter found by class. Own
     // pass because every shared-sweep spare would protect them -- a living man is his own crew, and a
     // man and a mission vehicle both read as AllVehicles the base-keep radius would hold. Only
@@ -207,7 +219,7 @@ while {true} do {
     // decision. Dead flagged men ride the allDeadMen census above.
     {
         private _unit = _x;
-        if (!isNull _unit && {alive _unit} && {_unit getVariable ["DUWS_binMe", false]}) then {
+        if (!isNull _unit && {alive _unit} && {(_unit getVariable ["DUWS_binMe", false]) || {_unit call _deadOwner}}) then {
             private _binAt = _unit getVariable "DUWS_binAt";
             if (isNil "_binAt") then { _binAt = _now + _lifetime; _unit setVariable ["DUWS_binAt", _binAt] };
             // _unit, not _x, inside findIf: the engine binds _x to the player per element there.

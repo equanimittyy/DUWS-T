@@ -135,6 +135,7 @@ fnc_time_clock = compile preprocessFileLineNumbers "duws\server\missions\fnc_tim
 fnc_time_band = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_band.sqf";publicVariable "fnc_time_band";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
+fnc_mission_garrison = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_garrison.sqf";
 fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
 

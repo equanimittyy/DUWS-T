@@ -136,13 +136,19 @@ DUWS_fnc_spawnDiff = {
 // Returns groups rather than appending to a caller's roster, so a caller that keeps one appends
 // after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
 // test refuses while the garrison is not yet live, and the live flag is set after this returns.
+//
+// _onRaise runs once per raised group, [_grp] as its argument, the instant that group appears --
+// before the next token's sleep. A side mission passes its claim here so a fast finish that ends
+// the mission mid-stagger still tears down every group already up: batching the claim until after
+// the return leaks whatever was raised before the win.
 DUWS_fnc_raiseGarrison = {
-    params ["_tokens", "_pos", "_radius"];
+    params ["_tokens", "_pos", "_radius", ["_onRaise", {}]];
     private _grps = [];
     {
         private _grp = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then {
             _grps pushBack _grp;
+            [_grp] call _onRaise;
         };
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
     } forEach _tokens;

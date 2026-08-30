@@ -127,15 +127,16 @@ private _garrison = [];
 _garrison call fnc_mission_claim;
 sleep 1;
 
-// Patrols raise on a stagger (raiseGarrison sleeps between groups), so build them off the main thread and
-// claim each as it comes -- a quick finish still tears them down by ownership.
+// Off the main thread: raiseGarrison sleeps between groups, and the main thread must arm the laptops'
+// hold-actions now rather than wait the whole stagger out. fnc_mission_garrison claims each group as
+// it spawns, so a finish mid-stagger still tears them down by ownership.
 [_randomPos, _radius] spawn {
     params ["_c", "_r"];
-    private _patrolTokens = [
-        "widepatrol:car", "closepatrol:ifv", "closepatrol:team", "closepatrol:team",
-        "widepatrol:team", "widepatrol:patrol", "widepatrol:patrol"
-    ];
-    (([_patrolTokens, _c, _r] call DUWS_fnc_raiseGarrison) select { !isNull _x }) call fnc_mission_claim;
+    [
+        ["widepatrol:car", "closepatrol:ifv", "closepatrol:team", "closepatrol:team",
+         "widepatrol:team", "widepatrol:patrol", "widepatrol:patrol"],
+        _c, _r
+    ] call fnc_mission_garrison;
 };
 
 // Marker + task now the laptops are seated; the brief below is manual (fixed speaker).
