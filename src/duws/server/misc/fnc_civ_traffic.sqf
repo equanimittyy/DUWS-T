@@ -26,31 +26,6 @@ private _key = [_locIndex] call fnc_town_site_key;
 private _roster = [_key, "crowd"] call fnc_site_roster;
 private _bodies = missionNamespace getVariable ["civ_array", []];
 
-// Face a car the way its stretch of road runs, taken from the nearest connected node. Falls back
-// to the segment's own heading at a dead-end with nothing connected.
-private _fnc_roadDir = {
-    params ["_road"];
-    private _cons = roadsConnectedTo _road;
-    if (_cons isEqualTo []) exitWith { getDir _road };
-    [getPosATL _road, getPosATL (_cons select 0)] call BIS_fnc_dirTo
-};
-
-// "NONE" placement so the car sits where it is put rather than being bounced to the nearest
-// clear spot, which on a road is another lane or the verge.
-private _fnc_spawnCar = {
-    params ["_pos", "_dir"];
-    private _veh = createVehicle [selectRandom _pool, _pos, [], 0, "NONE"];
-    // Vanilla civilian cars carry a default FirstAidKit in cargo -- a free medkit the player would
-    // loot off every roadside spawn. Strip the inventory so a stolen car yields nothing.
-    clearItemCargoGlobal _veh;
-    clearMagazineCargoGlobal _veh;
-    clearWeaponCargoGlobal _veh;
-    clearBackpackCargoGlobal _veh;
-    _veh setDir _dir;
-    _veh setPosATL _pos;
-    _veh
-};
-
 // A parked car came to rest clean when it is roughly level, still where it was put, and on the
 // ground. A spot 3 m off the carriageway sometimes lands the car clipping a roadside building, and
 // the collision impulse pitches it over, slides it off its spot or throws it onto a roof -- any of
@@ -70,14 +45,14 @@ private _tries = 0;
 while { _parked < _nPark && _tries < _nPark * 3 } do {
     _tries = _tries + 1;
     private _road = selectRandom _roads;
-    private _dir = [_road] call _fnc_roadDir;
+    private _dir = [_road] call fnc_civ_roadDir;
     private _pos = (getPosATL _road) getPos [3, _dir + 90];
     if (count (nearestObjects [_pos, ["Car", "Truck"], 4]) > 0) then { continue };
     // The 3 m verge offset above sometimes lands the car on a roadside stone wall, which the settle
     // check below passes when the clip stays level -- then allowDamage true detonates it. Reject the
     // point outright rather than trust the settle to shove clear of a wall it is embedded in.
     if !((nearestTerrainObjects [_pos, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []) then { continue };
-    private _car = [_pos, _dir] call _fnc_spawnCar;
+    private _car = [selectRandom _pool, _pos, _dir] call fnc_civ_spawnCar;
     // Invulnerable through the settle so a clipped spawn is shoved clear instead of detonating, then
     // read back: a car that did not come to rest clean is dropped for a fresh road point. Damage is
     // restored only once it has placed -- a parked car the player cannot destroy is worse than none.
@@ -110,8 +85,8 @@ private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { 
 private _ownCentre = _centres param [_locIndex, _centerPos];
 for "_i" from 1 to _nDrive do {
     private _road = selectRandom _roads;
-    private _dir = [_road] call _fnc_roadDir;
-    private _veh = [getPosATL _road, _dir] call _fnc_spawnCar;
+    private _dir = [_road] call fnc_civ_roadDir;
+    private _veh = [selectRandom _pool, getPosATL _road, _dir] call fnc_civ_spawnCar;
 
     private _driver = [_locIndex, getPosATL _road, selectRandom _bodies, false] call fnc_civ_spawnUnit;
     if (isNull _driver) then { deleteVehicle _veh; continue };

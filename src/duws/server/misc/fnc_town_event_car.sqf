@@ -17,20 +17,8 @@ if (_roads isEqualTo []) exitWith {};
 
 private _road = selectRandom _roads;
 private _spawnPos = getPosATL _road;
-// Face along the road, from a connected node, so the car starts on the carriageway not across it.
-private _dir = getDir _road;
-private _cons = roadsConnectedTo _road;
-if !(_cons isEqualTo []) then { _dir = [_spawnPos, getPosATL (_cons select 0)] call BIS_fnc_dirTo };
-
-// "NONE" so the car sits on the carriageway rather than being bounced to the verge.
-private _veh = createVehicle [selectRandom _pool, _spawnPos, [], 0, "NONE"];
-// Vanilla civilian cars carry a default FirstAidKit -- strip cargo so a stolen one yields nothing.
-clearItemCargoGlobal _veh;
-clearMagazineCargoGlobal _veh;
-clearWeaponCargoGlobal _veh;
-clearBackpackCargoGlobal _veh;
-_veh setDir _dir;
-_veh setPosATL _spawnPos;
+private _dir = [_road] call fnc_civ_roadDir;
+private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
 
 private _driver = [_townIndex, _spawnPos, selectRandom civ_array, false] call fnc_civ_spawnUnit;
 if (isNull _driver) exitWith { deleteVehicle _veh };

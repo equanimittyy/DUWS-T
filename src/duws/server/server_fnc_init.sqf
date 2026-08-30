@@ -256,6 +256,8 @@ fnc_civ_mode_spawnGate = compile preprocessFileLineNumbers "duws\server\misc\fnc
 // shared with the plain path.
 fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_liveTarget.sqf";
 fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnUnit.sqf";
+fnc_civ_roadDir = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_roadDir.sqf";
+fnc_civ_spawnCar = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnCar.sqf";
 fnc_civ_traffic = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_traffic.sqf";
 fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recycle.sqf";
 // Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
