@@ -53,7 +53,7 @@ can route around.
 | `DUWS_opcom_belief_time` | `time` at the observation |
 | `DUWS_opcom_belief_str` | believed BLUFOR strength there |
 
-New state takes the `DUWS_` prefix regardless of the pending WARCOM-to-OPCOM rename, per
+New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner, per
 [`info/architecture.md`](../info/architecture.md#globals-have-no-namespace).
 
 A position is stored, never an object handle. That is the same latching rule the artillery target
@@ -890,36 +890,30 @@ stays out of the snapshot until that is decided ([§Open questions](#open-questi
 campaign that omits the key simply rebuilds belief from its first sensor pass. Because the snapshot
 is a name-keyed hashmap, adding the key later shifts nothing an older save's readers see.
 
-## Naming: WARCOM becomes OPCOM
+## Naming: OPCOM sits inside WARCOM
 
-The system is renamed **OPCOM** (Opposing Commander) when it lands, globals included:
-`WARCOM_opfor_ap` becomes `OPCOM_opfor_ap`, and so on across the prefix. The rename is already
-part-done: three AP-cost constants (`OPCOM_AP_TOWER`/`OPCOM_AP_BAND`/`OPCOM_AP_TOPUP`,
-`server/server_var_init.sqf:608-610`) carry the OPCOM_ prefix while the rest of the family still
-reads `WARCOM_`, so the job is to finish a split that has already begun, not to start one.
+OPCOM (Opposing Commander) is the enemy decision-making layer, and it is a *component* of WARCOM,
+not a replacement for it. WARCOM is the mission's whole war-economy system now — the AP wallets, the
+faucets that fill them, the tier ratchet, and the zone-control state — and it keeps its name. OPCOM
+is the one actor inside it that turns the enemy's share of that economy into pressure.
 
-WARCOM is inherited naming and describes what the system was — a mirrored pair of spawn timers,
-one per side. It no longer describes either half. BLUFOR has no commander actor at all: the player
-is it, moving their own units and calling map-click supports directly, with no standing task-force
-system on that side. OPCOM is the actor this document describes. Naming the enemy is what
-distinguishes the mission from the versions it descends from.
+So the prefixes split by ownership, and nothing is mass-renamed:
 
-Two constraints on when the rename lands:
+- **Shared war-economy state stays `WARCOM_`.** `WARCOM_opfor_ap`, `WARCOM_opfor_tier`, its earned
+  counter, and `WARCOM_zones_controled_by_*` are the system's, not the commander's.
+- **OPCOM's own state takes `OPCOM_`.** The build-cost constants `OPCOM_AP_TOWER`/`OPCOM_AP_BAND`/
+  `OPCOM_AP_TOPUP` already do (`server/server_var_init.sqf:608-610`); the commander's new intents and
+  archetype follow them.
+- **The belief store keeps the `DUWS_` global prefix with an `opcom_` owner tag**
+  (`DUWS_opcom_belief_*`), per the project's no-namespace convention ([§Shape](#shape)).
 
-- **It breaks saves.** The engine snapshots `missionNamespace` by variable name, and the campaign
-  snapshot ([`campaign_persistence_plan.md`](campaign_persistence_plan.md)) keys on name too, so a
-  renamed broadcast global reads back `nil` in a campaign resumed across the change. The AP rework
-  already breaks the format; landing both in one release makes the player cross one broken-save
-  boundary instead of two.
-- **The zone-control arrays are the wide part.** `WARCOM_zones_controled_by_OPFOR` and
-  `WARCOM_zones_controled_by_BLUFOR` account for roughly 52 references across 28 files, and index 0
-  of the OPFOR list is load-bearing — the sitrep display reads it as the primary target
-  (`client/misc/fnc_sitrep_display.sqf:16`) and the list is kept sorted nearest-HQ-first with the
-  just-lost zone forced to front (`fnc_zone_state_init.sqf:194-195`), so a mechanical replace has to
-  preserve ordering, not just names. It also has to leave `fnc_zone_state_init` loading before any
-  zone spawns.
+The name earns its place because WARCOM began as a mirrored pair of spawn timers, one per side, and
+no longer describes either half: BLUFOR has no commander actor — the player is it, moving their own
+units and calling map-click supports directly — and the enemy half is now a planner, not a timer.
+Naming that enemy actor is what distinguishes the mission from the versions it descends from.
 
-Player-facing exposure is three boot-time strings, so the rename is almost entirely internal.
+Because nothing is renamed, there is no naming-driven save break and no wide mechanical replace to
+sequence: new `OPCOM_` state simply lands alongside the `WARCOM_` state already in the snapshot.
 
 ## What this settles elsewhere
 
