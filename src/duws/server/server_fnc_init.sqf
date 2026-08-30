@@ -295,6 +295,8 @@ fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warco
 fnc_town_event_runner = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_runner.sqf";
 fnc_town_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_table.sqf";
 fnc_town_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_fire.sqf";
+fnc_town_event_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_car.sqf";
+fnc_town_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_heli.sqf";
 
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";

@@ -26,3 +26,16 @@ if (_cars isEqualTo []) then {
     _cars = ["C_Offroad_01_F", "C_Hatchback_01_F", "C_SUV_01_F", "C_Van_01_transport_F", "C_Quadbike_01_F"];
 };
 missionNamespace setVariable ["civ_veh_array", _cars, true];
+
+// Civilian air pool, same detection as cars: each faction's unarmed transport helicopters
+// (fnc_parseFaction index 23, _heliTransport). Most civ factions ship only men and cars, so this
+// is usually empty and falls back to the vanilla civilian light helicopter; a men-only mod with no
+// vanilla civ config leaves it empty and the heli event no-ops rather than fielding a soldier's airframe.
+private _helis = [];
+if (!isNil "fnc_parseFaction") then {
+    { _helis append (([_x] call fnc_parseFaction) param [23, []]) } forEach _civFactions;
+    if (_helis isEqualTo []) then { _helis = (["CIV_F"] call fnc_parseFaction) param [23, []] };
+};
+_helis = _helis arrayIntersect _helis;
+if (_helis isEqualTo []) then { _helis = ["C_Heli_Light_01_civil_F"] };
+missionNamespace setVariable ["civ_heli_array", _helis, true];

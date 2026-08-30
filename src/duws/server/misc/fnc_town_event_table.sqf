@@ -10,6 +10,7 @@
 params [["_rep", 0]];
 
 private _bands = [
+	[-20,  20, [["civ_car", 3], ["civ_heli", 1]]],   // ambient -- no rep gate, merges into every roll
 	[-20, -10, []],   // hostile
 	[ -9,   9, []],   // neutral
 	[ 10,  20, []]    // friendly
