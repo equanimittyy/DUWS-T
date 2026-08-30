@@ -18,13 +18,13 @@ private _findBuilding = {
     params ["_p", "_reach"];
     private _list = [nearestTerrainObjects [_p, ["HOUSE", "BUILDING"], _reach, false], [], { _p distance2D _x }, "ASCEND"] call BIS_fnc_sortBy;
     private _b = objNull;
-    { if (count (_x buildingPositions -1) >= 4) exitWith { _b = _x } } forEach _list;
+    { if (count (_x buildingPos -1) >= 4) exitWith { _b = _x } } forEach _list;
     _b
 };
 private _building = [_MissionPos, 30] call _findBuilding;
 if (isNull _building) exitWith { [13, _requester, "no_building"] call fnc_mission_abort };
 private _targetpos = getPosATL _building;
-private _bpos = _building buildingPositions -1;
+private _bpos = _building buildingPos -1;
 
 private _tn            = format ["protectciv_%1_%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 private _skipVar       = format ["%1_skip", _tn];

@@ -7,7 +7,7 @@ params ["_pos"];
 
 private _cands = [nearestTerrainObjects [_pos, ["HOUSE", "BUILDING"], ACCEPT_RADIUS, false], [], { _pos distance2D _x }, "ASCEND"] call BIS_fnc_sortBy;
 private _building = objNull;
-{ if (count (_x buildingPositions -1) >= 4) exitWith { _building = _x } } forEach _cands;
+{ if (count (_x buildingPos -1) >= 4) exitWith { _building = _x } } forEach _cands;
 
 if (isNull _building) exitWith { [] };
 [getPosATL _building]
