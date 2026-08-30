@@ -78,17 +78,14 @@ DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
     };
 };
 
-// Carry/Place him by hand during prep (DUWS_fnc_unitCarry, no pathfinding). The assault force-drops him,
-// so both actions vanish once it opens.
+// Pick him up by hand during prep (DUWS_fnc_unitCarry, no pathfinding). The carry routine puts the
+// matching put-down action on the carrier, not on him -- attached, he sits on the player and can't be
+// cursor-targeted. The assault force-drops him, clearing that carrier action, and this pickup one hides
+// on the defend flag.
 [_inf, [localize "STR_DUWS_T_pc_move_inf",
-    { [_this select 0, _this select 1] call DUWS_fnc_unitCarryToggle },
+    { [_this select 0, _this select 1, localize "STR_DUWS_T_pc_hold_inf"] call DUWS_fnc_unitCarryToggle },
     [], 1.5, false, false, "",
     format ["_this distance _target < 6 && isNull (_target getVariable ['DUWS_carriedBy', objNull]) && !(missionNamespace getVariable ['%1_defend', false])", _tn]]
-] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
-[_inf, [localize "STR_DUWS_T_pc_hold_inf",
-    { [_this select 0, _this select 1] call DUWS_fnc_unitCarryToggle },
-    [], 1.5, false, false, "",
-    "!isNull (_target getVariable ['DUWS_carriedBy', objNull])"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 
 private _cratePos = if (count _bpos > 1) then { _bpos select 1 } else { _targetpos };

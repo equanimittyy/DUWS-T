@@ -35,6 +35,8 @@ publicVariable "fnc_duws_release";
 publicVariable "DUWS_fnc_unitCarry";
 publicVariable "DUWS_fnc_unitDrop";
 publicVariable "DUWS_fnc_unitCarryToggle";
+publicVariable "DUWS_fnc_unitCarryAddDropAction";
+publicVariable "DUWS_fnc_unitCarryRemoveDropAction";
 publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
