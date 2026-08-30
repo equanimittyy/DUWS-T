@@ -130,18 +130,13 @@ DUWS_fnc_spawnDiff = {
 // (per-token sleep) so a whole composition never spawns in one frame. Returns the groups rather than
 // appending: safe because nothing reads a zone's roster mid-place -- the capture test refuses until the
 // garrison is flagged live, which happens after this returns.
-// _onRaise fires per group ([_grp]) the instant it appears. A mission claims here, not in one batch
-// after the return, so a win mid-stagger still owns and tears down every group already raised.
 DUWS_fnc_raiseGarrison = {
-    params ["_tokens", "_pos", "_radius", ["_onRaise", {}]];
+    params ["_tokens", "_pos", "_radius"];
     private _grps = [];
     {
         private _grp = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
-        if (!isNull _grp) then {
-            _grps pushBack _grp;
-            [_grp] call _onRaise;
-        };
-        if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
+        if (!isNull _grp) then { _grps pushBack _grp };
+        if (_forEachIndex < (count _tokens) - 1) then { sleep 2 };
     } forEach _tokens;
 
     // Fall damage from the placement itself, not from anything the zone chose: a man raised above his

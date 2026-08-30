@@ -127,16 +127,18 @@ private _garrison = [];
 _garrison call fnc_mission_claim;
 sleep 1;
 
-// Off the main thread: raiseGarrison sleeps between groups, but the main thread must arm the laptops'
-// hold-actions now, not wait the whole stagger out. fnc_mission_garrison owns the teardown.
-[_randomPos, _radius] spawn {
-    params ["_c", "_r"];
-    [
-        ["widepatrol:car", "closepatrol:ifv", "closepatrol:team", "closepatrol:team",
-         "widepatrol:team", "widepatrol:patrol", "widepatrol:patrol"],
-        _c, _r
-    ] call fnc_mission_garrison;
-};
+// Ring raised like the building garrison above: per-token zoneSpawnOne, claimed as one batch. Inline
+// and synchronous -- the spawn builders never yield -- so a fast finish cannot land between raise and
+// claim, and the whole ring is owned before the next line runs.
+private _ring = [];
+{
+    private _grp = [_x, _randomPos, _radius] call DUWS_fnc_zoneSpawnOne;
+    if (!isNull _grp) then { _ring pushBack _grp };
+} forEach [
+    "widepatrol:car", "closepatrol:ifv", "closepatrol:team", "closepatrol:team",
+    "widepatrol:team", "widepatrol:patrol", "widepatrol:patrol"
+];
+_ring call fnc_mission_claim;
 
 // Marker + task now the laptops are seated; the brief below is manual (fixed speaker).
 _markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, "download"] call fnc_mission_present;
