@@ -3,7 +3,7 @@
 // DUWS_pc_crate (broadcast; nil at teardown). Draw3D so `onEachFrame {}` elsewhere cannot clear it.
 if (!hasInterface) exitWith {};
 
-DUWS_pcMarker_range = 60;
+DUWS_pcMarker_range = 50;
 
 // [source global name, icon, colour, label, metres above the subject]
 DUWS_pcMarker_rows = [
