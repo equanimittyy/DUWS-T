@@ -1,18 +1,23 @@
-// Locality: any -- pure lookup over reputation, no engine state. Returns the event menu for the town
-// the runner picked, as [[kind, weight], ...] for fnc_search_drawKind. Reputation is the whole input
-// (docs/plans/town_events_plan.md), so the band owns the menu and the runner stays agnostic.
+// Locality: any -- pure lookup over reputation, no engine state. Returns a weighted event menu
+// ([[kind, weight], ...] for fnc_search_drawKind) for the town the runner picked
+// (docs/plans/town_events_plan.md).
 //
-// Edges mirror the town economy (fnc_civ_townIncome), so a town's income side and its event set cannot
-// disagree about which band it is in. Empty for now: an empty menu draws to "", and the runner fires
-// nothing.
+// Each band is [loRep, hiRep, weights]; every band whose range holds the rep merges its rows into one
+// pool, so overlapping ranges stack into a single draw and disjoint ranges partition. rep is an integer
+// clamped to +-20 (fnc_town_rep_adjust), so any threshold is a range -- "<= -10" is [-20, -10]. Default
+// edges mirror fnc_civ_townIncome; an edge off -10 stops events agreeing with the band that garrisons
+// and pays OPFOR.
 params [["_rep", 0]];
 
-// Hostile: the free consequence of a town let fall -- IEDs, ambushes, sabotage, hostile-civilian
-// conversion, suicide bombers (invariants in docs/plans/town_events_plan.md).
-if (_rep <= -10) exitWith { [] };
+private _bands = [
+	[-20, -10, []],   // hostile
+	[ -9,   9, []],   // neutral
+	[ 10,  20, []]    // friendly
+];
 
-// Friendly: what a town that trusts BLUFOR offers the player.
-if (_rep >= 10) exitWith { [] };
-
-// Neutral: no reputation to act on.
-[]
+private _menu = [];
+{
+	_x params ["_lo", "_hi", "_weights"];
+	if (_rep >= _lo && _rep <= _hi) then { _menu append _weights };
+} forEach _bands;
+_menu

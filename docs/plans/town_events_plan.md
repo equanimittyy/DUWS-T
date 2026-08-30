@@ -38,14 +38,16 @@ A single server daemon drives events, on its own clock beside the OPCOM hardpoin
 picks a live player, finds the town nearest them within a threshold distance, reads that town's
 reputation, and rolls the reputation band's table for what happens. The pipeline is three seams so
 the plumbing never changes as events are added: the daemon
-(`fnc_town_event_runner.sqf`), a rep-to-weights table (`fnc_town_event_table.sqf`, one
-`[[kind, weight], ...]` row per band), and a kind-to-behaviour dispatch (`fnc_town_event_fire.sqf`).
-Adding an event is one table row plus one dispatch case.
+(`fnc_town_event_runner.sqf`), a rep-to-weights table (`fnc_town_event_table.sqf`), and a
+kind-to-behaviour dispatch (`fnc_town_event_fire.sqf`). Adding an event is one table row plus one
+dispatch case.
 
-The table is banded across the full reputation range, not only the OPFOR band, on the same edges the
-town economy already uses (`fnc_civ_townIncome`): hostile at `<= -10`, friendly at `>= 10`, neutral
+The table is data-driven: each band is a reputation range with its own weighted menu, and every band
+whose range contains the town's reputation contributes to one merged roll — so ranges can partition the
+spectrum or overlap to stack a broad menu with a narrow deep-reputation one. The default rows reproduce
+the town economy's edges (`fnc_civ_townIncome`): hostile at `<= -10`, friendly at `>= 10`, neutral
 between. A friendly town offering the player something is the same mechanism as a turned one acting
-against them — both are what a band does — so the runner is agnostic and the band owns the menu.
+against them, so the runner is agnostic and the bands own the menu.
 
 **It anchors on a present player, not on the player's projected path.** This is a deliberate
 simplification of the predictive version above: rather than mine a road ahead of where the player is
