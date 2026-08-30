@@ -8,6 +8,8 @@ if (!isServer) exitWith {};
 
 [] spawn {
 	while {true} do {
+		// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+		try {
 		// Map-wide but one-shot: the aim value never varies, so a unit that has taken it is skipped
 		// and what remains is an array walk rather than an engine call per enemy alive. Kept
 		// map-wide rather than folded into the proximity pass below because a unit has to be
@@ -49,6 +51,10 @@ if (!isServer) exitWith {};
 		} forEach _near;
 
 		sleep 600;
+		} catch {
+			["ERROR", "AI", format ["AI master tick threw, thread held alive: %1", _exception]] call fnc_log;
+			sleep 10;
+		};
 	};
 };
 

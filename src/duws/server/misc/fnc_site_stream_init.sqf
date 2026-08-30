@@ -300,6 +300,8 @@ fnc_site_bluforOrAir = {
 fnc_site_poller = {
     if (!isServer) exitWith {};
     while {true} do {
+        // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+        try {
         sleep SITE_TICK;
 
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
@@ -472,6 +474,10 @@ fnc_site_poller = {
         if (duws_log_level >= 4) then {
             ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms",
                 count DUWS_sites, _passMs]] call fnc_log;
+        };
+        } catch {
+            ["ERROR", "STREAM", format ["site pass threw, thread held alive: %1", _exception]] call fnc_log;
+            sleep 10;
         };
     };
 };

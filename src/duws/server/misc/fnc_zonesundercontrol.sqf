@@ -12,6 +12,8 @@ if (!isServer) exitWith {};
     restores (server/missions/fnc_mission_reward.sqf).
 */
 while {true} do {
+    // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+    try {
     sleep 1800;
 
     // The tick's own sequence number, so anything that wants a "once per payout window" cap can
@@ -104,5 +106,9 @@ while {true} do {
             ["sitrepinfo", [localize "STR_DUWS_T_econ_reduced_title", format [localize "STR_DUWS_T_econ_reduced_desc", _cut]]]
                 remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
         };
+    };
+    } catch {
+        ["ERROR", "ECON", format ["econ tick threw, thread held alive: %1", _exception]] call fnc_log;
+        sleep 10;
     };
 };

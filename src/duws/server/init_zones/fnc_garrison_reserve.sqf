@@ -571,7 +571,13 @@ DUWS_fnc_garrisonReservePass = {
 DUWS_fnc_garrisonReserveLoop = {
     if (!isServer) exitWith {};
     while {true} do {
+        // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+        try {
         uiSleep DUWS_zoneReservePollPeriod;
         [] call DUWS_fnc_garrisonReservePass;
+        } catch {
+            ["ERROR", "RESERVE", format ["reserve pass threw, thread held alive: %1", _exception]] call fnc_log;
+            sleep 10;
+        };
     };
 };

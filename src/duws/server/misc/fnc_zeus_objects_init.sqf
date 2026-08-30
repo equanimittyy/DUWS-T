@@ -17,6 +17,8 @@ private _fnc_offer = {
 };
 
 while {true} do {
+	// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+	try {
 
 	if (ZeusStatus == 1) then {
 		[(allUnits + vehicles) select { side _x in [west, civilian] }] call _fnc_offer;
@@ -25,5 +27,10 @@ while {true} do {
 	};
 
 	sleep 30;
+
+	} catch {
+		["ERROR", "ZEUS", format ["curator sync threw, thread held alive: %1", _exception]] call fnc_log;
+		sleep 10;
+	};
 
 };

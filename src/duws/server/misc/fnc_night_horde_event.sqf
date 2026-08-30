@@ -16,6 +16,8 @@ if (!isClass (configFile >> "CfgVehicles" >> "zombie_runner")) then {
 };
 
 while {true} do {
+    // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+    try {
     waitUntil {
         sleep 60;
         (daytime >= 20 || daytime < 5)
@@ -109,5 +111,9 @@ while {true} do {
 
         sleep _checkInterval;
         if (daytime >= 5 && daytime < 20) then { break };
+    };
+    } catch {
+        ["ERROR", "HORDE", format ["horde tick threw, thread held alive: %1", _exception]] call fnc_log;
+        sleep 10;
     };
 };

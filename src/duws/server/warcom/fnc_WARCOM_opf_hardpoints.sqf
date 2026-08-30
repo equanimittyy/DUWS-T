@@ -9,6 +9,8 @@
 if (!isServer) exitWith {};
 
 while {true} do {
+    // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+    try {
     sleep OPCOM_HP_TICK;
 
     // One action a pass, gated by _acted rather than by exitWith/continue: inside a while body those
@@ -65,5 +67,9 @@ while {true} do {
         if (_built > 0) then {
             ["OPF", -OPCOM_AP_BAND, "opcom_band_build"] call fnc_ap_adjust;
         };
+    };
+    } catch {
+        ["ERROR", "OPCOM", format ["hardpoint tick threw, thread held alive: %1", _exception]] call fnc_log;
+        sleep 10;
     };
 };
