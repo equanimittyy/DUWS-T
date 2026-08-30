@@ -795,6 +795,27 @@ depends on the object falling, assert `enableSimulationGlobal true` — global, 
 frame boundary left the object. `DUWS_fnc_dropStatic`
 (`server/init_zones/fnc_zone_stream_init.sqf`) ends on exactly that pair.
 
+## `createVehicle` of an `Item_*` class makes a simulated holder that PhysX flings off a surface
+
+**Spawning a loot item by its `Item_*` ground class (`createVehicle "Item_MobilePhone"`) yields a
+`WeaponHolderSimulated`, a PhysX body. Placed on a table or shelf it is ejected off the surface on the
+next simulation step and hangs in the air. `enableSimulationGlobal false` does not rescue it: it only
+freezes it wherever it floated, per [§an unsimulated object does not
+fall](#an-unsimulated-object-does-not-fall-so-placing-one-in-the-air-parks-it-there).**
+
+A `GroundWeaponHolder` has no PhysX. Created in the air it stays, will not fall through geometry, will not
+bounce off a table, and — left unfrozen — keeps its inventory openable, so the item is still lootable.
+Seat loot in one of these, not in a simulated holder. Fill it on the create frame: an empty holder
+self-deletes within about a second. Its cargo takes the *bare* inventory class, not the `Item_*` body, and
+whether that class is a `CfgWeapons` item or a `CfgMagazines` round decides the slot —
+`addItemCargoGlobal` versus `addMagazineCargoGlobal`.
+
+**How to apply:** place pickup-able loot through `fnc_place_settled`'s `_asLoot` mode
+(`server/init_zones/fnc_place_settled.sqf`), which builds the holder, picks the cargo slot by config and
+seats it on the anchor. Set-dressing that is never picked up can stay a plain `Land_*` prop on the default
+path. `server/misc/fnc_debug_spawn_intel.sqf` is the tool that shows which intel classes have an `Item_*`
+body and which cargo slot each takes.
+
 ## `moveInGunner` into a simulated static leaves the turret dead; seat it frozen, then thaw
 
 **A static weapon crewed *after* its simulation is enabled keeps a gunner who never traverses: it

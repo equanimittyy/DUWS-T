@@ -112,7 +112,9 @@ private _build = {
             private _rows = [];
             for "_i" from 0 to 2 do {
                 if (random 1 < (1/3)) then {
-                    private _cls = DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights;
+                    // Bare inventory class for the holder's cargo: DUWS_intelDocuments lists the Item_*
+                    // ground bodies, so strip that prefix (fnc_place_settled seats loot in a GroundWeaponHolder).
+                    private _cls = (DUWS_intelDocuments selectRandomWeighted DUWS_intelDocumentWeights) select [5];
                     private _ox = 0;
                     private _oy = 0;
                     // Draw a spot clear of the ones already taken; keep the last draw if none comes up clear.
@@ -124,8 +126,7 @@ private _build = {
                     _rows pushBack [_cls, _ox, _oy, _topZ, random 360];
                 };
             };
-            // Frozen, not simulated: the intel classes spawn as WeaponHolderSimulated, which PhysX ejects off
-            // the table and leaves hanging in the air if left live (fnc_place_settled _freeze).
+            // _asLoot: intel rides a GroundWeaponHolder so PhysX cannot fling it off the table.
             [_rows, _table, "mission_patrol_camp", true, true] call fnc_place_settled;
         };
 
