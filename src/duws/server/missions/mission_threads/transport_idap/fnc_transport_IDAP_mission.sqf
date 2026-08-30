@@ -19,6 +19,7 @@ _message1 = localize "STR_DUWS_T_idapcopy";
 _message2 = localize "STR_DUWS_T_idapacteamgo";
 _messageClose = localize "STR_DUWS_T_idapoverlordclose";
 _messageLost = localize "STR_DUWS_T_idaptruckdown";
+_messageCrewDead = localize "STR_DUWS_T_idapcrewdead";
 
 // The crew's haven: nearest neutral/BLUFOR town, matching what the site-finder vetted (a town in the OPFOR
 // band is no hand-over point). duws_town_circles is index-aligned with civ_locations, so its index is what
@@ -128,6 +129,7 @@ _groupUnits = [];
 for "_i" from 1 to 3 do { _groupUnits pushBack (selectRandom _unitClasses); };
 _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
 
+private _marshaller = objNull;
 {
     private _offsetDist = 5 + random 3;
     private _offsetDir = random 360;
@@ -136,7 +138,7 @@ _groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]]
     _x disableAI "PATH";
     _x setBehaviour "CARELESS";
     // One man marshals; the rest just stand. The act loops, so a single switchMove holds.
-    if (_forEachIndex == 0) then { _x switchMove "Acts_JetsShooterNavigate_loop_m" };
+    if (_forEachIndex == 0) then { _x switchMove "Acts_JetsShooterNavigate_loop_m"; _marshaller = _x; };
 } forEach units _groupDelivery;
 
 _cleanupDelivery = {
@@ -157,7 +159,7 @@ sleep 5; // let the patrols finish spawning
 
 waitUntil {
     sleep 2;
-    (getDammage _truck1 > 0.95) || (_truck1 distance _targetDeliveryPos < _deliverDist) || (time > _deadline)
+    (getDammage _truck1 > 0.95) || (_truck1 distance _targetDeliveryPos < _deliverDist) || (({ alive _x } count units _groupDelivery) == 0) || (time > _deadline)
 };
 
 if (getDammage _truck1 > 0.95) exitWith {
@@ -168,6 +170,14 @@ if (getDammage _truck1 > 0.95) exitWith {
     [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, false] call fnc_mission_finish;
 };
 
+// Whole delivery crew dead: no one left to receive the aid, so the recovery can no longer complete.
+if (({ alive _x } count units _groupDelivery) == 0) exitWith {
+    call _cleanupDelivery;
+    [_speaker, _messageCrewDead] remoteExec ["fnc_duws_dialogue", 0];
+    [_townIdx, _repFail, "idap_crew_dead"] call fnc_town_rep_adjust;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, false] call fnc_mission_finish;
+};
+
 if (time > _deadline) exitWith {
     call _cleanupDelivery;
     [_townIdx, _repFail, "idap_deadline"] call fnc_town_rep_adjust;
@@ -175,6 +185,8 @@ if (time > _deadline) exitWith {
 };
 
 deleteMarker _deliveryMarkerName;
+// Truck's here: the aid's arrived, so the marshaller drops the guide-in loop and just receives the player.
+if (!isNull _marshaller) then { _marshaller switchMove "" };
 // Forced VOICE, not the SUB-NET the speaker's distress call routed to: at hand-over the crew are in the
 // room with the player, not a radio contact, so this line is in person.
 [_speakerIDAP, _message3, "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
