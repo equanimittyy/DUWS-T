@@ -114,19 +114,19 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
 ] call fnc_mission_present;
 
 // Skip Prep Phase action, 10 s in, reach-gated by the condition, JIP-keyed to the informant.
-[_inf, _skipVar, _prepActiveVar] spawn {
-    params ["_inf", "_skipVar", "_prepActiveVar"];
+[_inf, _tn, _prepActiveVar] spawn {
+    params ["_inf", "_tn", "_prepActiveVar"];
     sleep 10;
     private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _prepActiveVar];
     [_inf, [localize "STR_DUWS_T_pc_skip",
         {
-            (_this select 3) params ["_sv"];
+            (_this select 3) params ["_tn"];
             // Confirm first: skipping is irreversible (starts the assault). hideOnUse off so a cancel keeps the action.
             if ([localize "STR_DUWS_T_pc_skip_confirm", localize "STR_DUWS_T_pc_skip", true, true] call BIS_fnc_guiMessage) then {
-                [_sv] remoteExec ["fnc_protect_civ_skip", 2];
+                [_tn] remoteExec ["fnc_protect_civ_skip", 2];
             };
         },
-        [_skipVar], 1.5, false, false, "", _cond]
+        [_tn], 1.5, false, false, "", _cond]
     ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 };
 
