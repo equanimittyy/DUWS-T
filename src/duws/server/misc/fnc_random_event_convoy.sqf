@@ -18,16 +18,24 @@ private _road = selectRandom _roads;
 private _start = getPosATL _road;
 private _dir = [_road] call fnc_civ_roadDir;
 
+// Circuit first, so the column can be seated facing its first waypoint. The road runs both ways, so roadDir
+// points the cars away from their route half the time and the whole column U-turns on the spot in full view.
+// Fall back to road heading only when there is no route to aim at. Fewer than five towns shortens the loop.
+private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
+private _route = (_centres call BIS_fnc_arrayShuffle) select [0, 5 min count _centres];
+private _faceDir = if (_route isEqualTo []) then { _dir } else { [_start, _route select 0] call BIS_fnc_dirTo };
+
 private _grp = createGroup [CIVILIAN, true];
 private _count = 2 + floor random 2;
 // Seated in a line back along the road behind the lead so they do not spawn stacked; fnc_convoy_fit steps
 // each clear of a wall or an already-spawned car before createVehicle, which is what stops a tight spawn
 // detonating. Native COLUMN pulls the line back onto the road once they roll, so a point that lands off the
-// verge on a bend straightens out rather than needing an exact road seat.
+// verge on a bend straightens out rather than needing an exact road seat. The line runs along roadDir to keep
+// the hulls on the tarmac; each faces the first waypoint, not roadDir.
 for "_i" from 0 to (_count - 1) do {
 	private _class = selectRandom _pool;
 	private _pos = [_start getPos [_i * 8, _dir + 180], _class] call fnc_convoy_fit;
-	private _veh = [_class, _pos, _dir] call fnc_civ_spawnCar;
+	private _veh = [_class, _pos, _faceDir] call fnc_civ_spawnCar;
 	private _driver = [_townIndex, _pos, selectRandom civ_array, false] call fnc_civ_spawnUnit;
 	if (isNull _driver) then {
 		deleteVehicle _veh;
@@ -47,9 +55,6 @@ _grp setBehaviour "CARELESS";
 _grp setSpeedMode "LIMITED";
 _grp setFormation "COLUMN";
 
-// A looping town-to-town circuit so the column keeps rolling until the cleanup sweep reaps it, rather
-// than parking at one destination. binMe reaps the cars once they are away and no player is near. Fewer
-// than five towns on the map shortens the loop to what exists.
-private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
-private _route = (_centres call BIS_fnc_arrayShuffle) select [0, 5 min count _centres];
+// A looping town-to-town circuit so the column keeps rolling until the cleanup sweep reaps it, rather than
+// parking at one destination. binMe reaps the cars once they are away and no player is near.
 [_grp, _route, 50] call fnc_civ_loopRoute;

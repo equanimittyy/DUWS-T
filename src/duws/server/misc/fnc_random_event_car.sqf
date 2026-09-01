@@ -14,7 +14,17 @@ if (_roads isEqualTo []) exitWith {};
 
 private _road = selectRandom _roads;
 private _spawnPos = getPosATL _road;
-private _dir = [_road] call fnc_civ_roadDir;
+
+// A looping town-to-town circuit so the car keeps driving until the cleanup sweep reaps it, rather than
+// parking at one destination and sitting idle for the rest of its lifetime; spawned near the player, so
+// it is still seen setting off. Fewer than five towns on the map shortens the loop to what exists.
+private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
+private _route = (_centres call BIS_fnc_arrayShuffle) select [0, 5 min count _centres];
+
+// Seat facing the first waypoint, not the road's own heading: the road runs both ways, so roadDir points
+// the car away from its route half the time and it U-turns on the spot in full view. Fall back to road
+// heading only when there is no route to aim at.
+private _dir = if (_route isEqualTo []) then { [_road] call fnc_civ_roadDir } else { [_spawnPos, _route select 0] call BIS_fnc_dirTo };
 private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
 
 private _driver = [_townIndex, _spawnPos, selectRandom civ_array, false] call fnc_civ_spawnUnit;
@@ -26,11 +36,6 @@ _grp setBehaviour "CARELESS";
 _grp setSpeedMode "LIMITED";
 _veh limitSpeed 50;
 
-// A looping town-to-town circuit so the car keeps driving until the cleanup sweep reaps it, rather than
-// parking at one destination and sitting idle for the rest of its lifetime; spawned near the player, so
-// it is still seen setting off. Fewer than five towns on the map shortens the loop to what exists.
-private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
-private _route = (_centres call BIS_fnc_arrayShuffle) select [0, 5 min count _centres];
 [_grp, _route, 50] call fnc_civ_loopRoute;
 
 // Onto the cleanup sweep. Flag the driver too: bailed on a panic he is no longer crew, so the
