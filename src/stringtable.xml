@@ -3892,8 +3892,8 @@
                 <English>Deliver Supplies</English>
             </Key>
             <Key ID="STR_DUWS_T_DELIVER_SUPPLIES_DESC">
-                <Original>The population in this area is short on supplies. Move the aid in and deliver it to them.</Original>
-                <English>The population in this area is short on supplies. Move the aid in and deliver it to them.</English>
+                <Original>The population in this area is short on supplies. IDAP is conducting a humanitarian aid mission in conjunction with us. Drive the supplies in from HQ and deliver it to them.</Original>
+                <English>The population in this area is short on supplies. IDAP is conducting a humanitarian aid mission in conjunction with us. Drive the supplies in from HQ and deliver it to them.</English>
             </Key>
             <Key ID="STR_DUWS_T_deliversupplies_brief">
                 <Original>Alpha 1-1, we have aid prepared for civilians in %1. Deliver it to the IDAP crew for handoff and distribution.</Original>
