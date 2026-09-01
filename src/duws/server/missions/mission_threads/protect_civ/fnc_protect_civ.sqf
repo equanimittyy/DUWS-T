@@ -65,7 +65,7 @@ _inf addEventHandler ["HandleDamage", {
     _old + ((_dmg - _old) * 0.5)
 }];
 [_grp] call fnc_mission_claim;
-DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
+DUWS_float_informant = _inf; publicVariable "DUWS_float_informant";
 
 // Pick him up by hand during prep (DUWS_fnc_unitCarry, no pathfinding). The carry routine puts the
 // matching put-down action on the carrier, not on him -- attached, he sits on the player and can't be
@@ -142,7 +142,7 @@ if (time > _deadline && !(call _fnArrived) && !(missionNamespace getVariable [_s
     // Never engaged -> shared timeout notice, no death asserted.
     missionNamespace setVariable [_liveVar, false];
     missionNamespace setVariable [_prepActiveVar, false, true];
-    DUWS_pc_informant = objNull; publicVariable "DUWS_pc_informant";
+    DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
     DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
     [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], [], false, "mission_protect_civ", false, true] call fnc_mission_finish;
 };
@@ -310,7 +310,7 @@ waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } };
 missionNamespace setVariable [_defendVar, false];
 missionNamespace setVariable [_liveVar, false];
 if (!isNull DUWS_pc_crate) then { DUWS_pc_crate setVariable ["R3F_LOG_CF_credits", 0, true] };   // halt building
-DUWS_pc_informant = objNull; publicVariable "DUWS_pc_informant";
+DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
 DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
 
 if (!alive _inf) exitWith {

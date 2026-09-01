@@ -44,6 +44,10 @@ _inf disableAI "PATH";
 // Off the ACE/AIS revive path, so death is death, not an unconscious state the win poll never sees end.
 _inf setVariable ["AIS_noReviveInit", true, true];
 
+// No local reader: a client drawer (client/misc/fnc_protect_civ_markers.sqf) consumes this global to
+// mark him. Reusing protect_civ's global is safe because only one side mission runs at a time.
+DUWS_float_informant = _inf; publicVariable "DUWS_float_informant";
+
 // Leader gate is in the action body, not the condition: a non-leader still sees the action and gets told
 // why it did nothing, instead of it silently vanishing.
 [_inf, [localize "STR_DUWS_T_escortinformant_join",
@@ -85,7 +89,11 @@ waitUntil {
     (!alive _inf) || (_inf distance2D _townPos < _deliverDist) || (time > _deadline)
 };
 
-private _cleanup = { deleteMarker _hqMarker; if (!isNull _inf) then { deleteVehicle _inf } };
+private _cleanup = {
+    DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
+    deleteMarker _hqMarker;
+    if (!isNull _inf) then { deleteVehicle _inf };
+};
 
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
     [_townIdx, DUWS_curReward select 2, "escort_informant_success"] call fnc_town_rep_adjust;
