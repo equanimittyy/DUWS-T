@@ -1,6 +1,6 @@
 // Locality: server -- a stranded civilian beside a broken-down car on a roadside verge near the picked
-// player (docs/plans/town_events_plan.md). Neutral-band event. He asks players in earshot to repair the
-// car; once it is, he pays out, drops the cash and drives off. Car placed by fnc_civ_spawnCar so it settles
+// player (docs/plans/town_events_plan.md). Ambient event, no rep gate. He asks players in earshot to repair the
+// car; once it is, he drops a cash reward, the town's regard rises, and he boards and drives off. Car placed by fnc_civ_spawnCar so it settles
 // on the shoulder instead of detonating; driver a full civilian, so harming him costs reputation.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
@@ -38,7 +38,9 @@ _veh setDamage 0.8;
 private _civ = [_townIndex, _veh getPos [3, _dir + 90], selectRandom civ_array, false] call fnc_civ_spawnUnit;
 if (isNull _civ) exitWith { deleteVehicle _veh };
 (group _civ) setBehaviour "SAFE";
-doStop _civ;
+// Hold him by the car with PATH off, not doStop: doStop outlives the drive-off waypoint below
+// (docs/info/architecture/arma_engine_gotchas.md), which would leave the repaired car parked.
+_civ disableAI "PATH";
 
 // Onto the cleanup sweep from the start: if no player ever comes, the map cleanup reaps car and civ once
 // none is near. Both flagged -- a civ out of the car is not crew for the vehicle sweep to take with it.
@@ -72,18 +74,23 @@ _civ setVariable ["DUWS_binMe", true];
 			// rather than singling out one player, and the cash drops on the ground for any to grab.
 			private _amt = 1 + floor random 3;
 			[[["Money_roll", _amt]], getPosATL _civ] call fnc_money_drop;
+			// Roadside help lifts the town: +1 rep, surfaced by fnc_town_rep_announce's own card.
+			[_townIndex, 1, "roadside_help"] call fnc_town_rep_adjust;
 			if !(_heard isEqualTo []) then {
 				[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_TOWN_STRANDED_THANKS"] remoteExec ["fnc_duws_dialogue", _heard];
 				[format [localize "STR_DUWS_T_TOWN_STRANDED_REWARD", _amt]] remoteExec ["hint", _heard];
 			};
 
-			// He mounts and drives off toward town; the binMe flags reap the car once it is away and
-			// no player is near, same as the driving-traffic teardown.
-			_civ moveInDriver _veh;
+			// He walks to the door and boards (assignAsDriver + orderGetIn) rather than snapping into the
+			// seat, then drives off toward town; the binMe flags reap the car once it is away and no player
+			// is near, same as the driving-traffic teardown. PATH back on so he can reach the door and move.
 			private _grp = group _civ;
 			_grp setBehaviour "CARELESS";
 			_grp setSpeedMode "LIMITED";
 			_veh limitSpeed 50;
+			_civ enableAI "PATH";
+			_civ assignAsDriver _veh;
+			[_civ] orderGetIn true;
 			private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
 			private _wp = _grp addWaypoint [_centres param [_townIndex, getPos _civ], 0];
 			_wp setWaypointType "MOVE";

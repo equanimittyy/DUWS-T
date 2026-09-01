@@ -141,6 +141,7 @@ fnc_town_rep_announce = {
 		case "building_destroyed":    { "STR_DUWS_T_civ_rep_why_building" };
 		case "civilian_harmed":       { "STR_DUWS_T_civ_rep_why_harmed" };
 		case "healed_civilian":       { "STR_DUWS_T_civ_rep_why_healed" };
+		case "roadside_help":         { "STR_DUWS_T_civ_rep_why_roadside" };
 		case "civilian_arrested":     { "STR_DUWS_T_civ_rep_why_arrested" };
 		case "idap_success":          { "STR_DUWS_T_civ_rep_why_aid" };
 		case "idap_failed":           { "STR_DUWS_T_civ_rep_why_aid_failed" };

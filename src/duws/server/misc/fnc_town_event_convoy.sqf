@@ -1,5 +1,5 @@
-// Locality: server -- an ambient civilian convoy: 2-3 civilian cars driving town-to-town through the picked
-// player's area, reaped once no player is near (docs/plans/town_events_plan.md). No rep gate. Same road-find
+// Locality: server -- an ambient civilian convoy: 2-3 civilian cars driving a looping town-to-town circuit
+// through the picked player's area, reaped once no player is near (docs/plans/town_events_plan.md). No rep gate. Same road-find
 // and cleanup shell as fnc_town_event_car; the cars share one group and hold column on native formation AI
 // rather than the scripted convoy engine -- light enough for ambient traffic. Drivers are full civilians, so
 // running one down costs reputation.
@@ -38,7 +38,7 @@ for "_i" from 0 to (_count - 1) do {
 		_driver moveInDriver _veh;
 		// Into the one group so native formation trails them behind the lead; each driver's own
 		// (auto-delete) group empties and goes.
-		_driver joinSilent _grp;
+		[_driver] joinSilent _grp;
 		_veh limitSpeed 50;
 		_veh setVariable ["DUWS_binMe", true];
 		_driver setVariable ["DUWS_binMe", true];
@@ -50,15 +50,9 @@ _grp setBehaviour "CARELESS";
 _grp setSpeedMode "LIMITED";
 _grp setFormation "COLUMN";
 
-// Through the player's spot to a destination town, then the column is a passing sight rather than parked;
-// own town if the map has only the one. binMe reaps the cars once they are away and no player is near.
+// A looping town-to-town circuit so the column keeps rolling until the cleanup sweep reaps it, rather
+// than parking at one destination. binMe reaps the cars once they are away and no player is near. Fewer
+// than five towns on the map shortens the loop to what exists.
 private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
-private _own = _centres param [_townIndex, _anchor];
-private _dest = if (count _centres > 1) then { selectRandom (_centres - [_own]) } else { _own };
-{
-	private _wp = _grp addWaypoint [_x, 0];
-	_wp setWaypointType "MOVE";
-	_wp setWaypointSpeed "LIMITED";
-	_wp setWaypointBehaviour "CARELESS";
-	_wp setWaypointCompletionRadius 30;
-} forEach [_anchor, _dest];
+private _route = (_centres call BIS_fnc_arrayShuffle) select [0, 5 min count _centres];
+[_grp, _route, 50] call fnc_civ_loopRoute;
