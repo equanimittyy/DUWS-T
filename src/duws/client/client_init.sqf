@@ -252,7 +252,7 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // INIT Earplugs -- available on foot as well as mounted; fadeSound is a client-wide setting,
 // so nothing about the toggle was ever vehicle-specific. The action dies with the body, so
 // onPlayerRespawn.sqf re-adds it.
-player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player"];
+player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player && {profileNamespace getVariable ['DUWS_T_showEarplugs', true]}"];
 
 // Body search. Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
@@ -447,7 +447,7 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
         false,
         true,
         "",
-        "alive _target && vehicle _target == _target"
+        "alive _target && vehicle _target == _target && {profileNamespace getVariable ['DUWS_T_showDisguise', true]}"
     ];
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };

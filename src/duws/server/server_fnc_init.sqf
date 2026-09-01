@@ -534,6 +534,7 @@ fnc_command_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_com
 fnc_command_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_command_select.sqf";publicVariable "fnc_command_select";
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
 fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
+fnc_user_options_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_user_options_menu.sqf";publicVariable "fnc_user_options_menu";
 fnc_no_gm_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_no_gm_prompt.sqf";publicVariable "fnc_no_gm_prompt";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
 fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";

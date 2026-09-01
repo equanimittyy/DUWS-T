@@ -81,7 +81,8 @@ if (vehicle player != _boat) then {
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 
 
-playMusic [_music, 0];
+// Honours the per-client music mute set at the rest tent (fnc_user_options_menu).
+if (!(profileNamespace getVariable ["DUWS_T_muteMissionMusic", false])) then { playMusic [_music, 0]; };
 _boat lock true;
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_oscarmike"] remoteExec ["fnc_duws_dialogue", 0];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 

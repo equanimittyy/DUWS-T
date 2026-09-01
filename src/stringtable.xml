@@ -2146,13 +2146,41 @@
                 <Original>Rest / Heal</Original>
                 <English>Rest / Heal</English>
             </Key>
-            <Key ID="STR_DUWS_T_TENT_MUSIC_ON">
-                <Original>Side mission music: On</Original>
-                <English>Side mission music: On</English>
+            <Key ID="STR_DUWS_T_USEROPT_TITLE">
+                <Original>USER OPTIONS</Original>
+                <English>USER OPTIONS</English>
             </Key>
-            <Key ID="STR_DUWS_T_TENT_MUSIC_OFF">
-                <Original>Side mission music: Off</Original>
-                <English>Side mission music: Off</English>
+            <Key ID="STR_DUWS_T_USEROPT_TOGGLE">
+                <Original>Toggle</Original>
+                <English>Toggle</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_HINT">
+                <Original>Toggled %1 %2.</Original>
+                <English>Toggled %1 %2.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_ON">
+                <Original>ON</Original>
+                <English>ON</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_OFF">
+                <Original>OFF</Original>
+                <English>OFF</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_MUSIC">
+                <Original>Music</Original>
+                <English>Music</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_EARPLUGS">
+                <Original>Earplugs</Original>
+                <English>Earplugs</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_DISGUISE">
+                <Original>Disguise</Original>
+                <English>Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_USEROPT_VIEWDIST">
+                <Original>View Distance Settings</Original>
+                <English>View Distance Settings</English>
             </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>

@@ -131,7 +131,8 @@ if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
 
-playMusic [_music, 0];
+// Honours the per-client music mute set at the rest tent (fnc_user_options_menu).
+if (!(profileNamespace getVariable ["DUWS_T_muteMissionMusic", false])) then { playMusic [_music, 0]; };
 _helo setEffectiveCommander player;  // turn helo "blue" while player is on board.
 
 	_message = localize "STR_DUWS_T_helotaxioscmk";

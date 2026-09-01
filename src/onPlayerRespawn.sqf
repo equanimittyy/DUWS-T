@@ -15,7 +15,7 @@ player addRating 10000000;
 
 // The earplug action was attached to the old body, but fadeSound survives respawn: without
 // this re-add a player who died with earplugs in has no way to turn the volume back up.
-player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player"];
+player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player && {profileNamespace getVariable ['DUWS_T_showEarplugs', true]}"];
 
 // Same re-add reason as the earplug action above.
 [] call fnc_intel_search_action;
@@ -84,7 +84,7 @@ player addAction [
     false,
     true,
     "",
-    "alive _target && vehicle _target == _target"
+    "alive _target && vehicle _target == _target && {profileNamespace getVariable ['DUWS_T_showDisguise', true]}"
 ];
 player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 player setCaptive false;

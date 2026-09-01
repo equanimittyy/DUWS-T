@@ -24,16 +24,8 @@ if ((vehiclevarname player) in Squad_Leaders) then {
     _tent addAction [ACT_UTIL("STR_DUWS_T_4jabuvz6"), { [] spawn fnc_groupReset }, [], 50, false, true, "", "_this distance _target < 12"];
 };
 
-// Client-local audio preference: silence the sting that plays when a side mission spawns
-// (server/missions/fnc_missionTaskCreate.sqf reads the same flag before playing). Stored in
-// profileNamespace, not the campaign save -- a per-player choice that should outlast a reload
-// without riding in shared mission state, so each co-op client keeps its own.
-private _musicKey = ["STR_DUWS_T_TENT_MUSIC_ON", "STR_DUWS_T_TENT_MUSIC_OFF"] select (profileNamespace getVariable ["DUWS_T_muteMissionMusic", false]);
-_tent addAction [ACT_UTIL(_musicKey), {
-    params ["_target", "_caller", "_id"];
-    private _muted = !(profileNamespace getVariable ["DUWS_T_muteMissionMusic", false]);
-    profileNamespace setVariable ["DUWS_T_muteMissionMusic", _muted];
-    saveProfileNamespace;
-    private _key = ["STR_DUWS_T_TENT_MUSIC_ON", "STR_DUWS_T_TENT_MUSIC_OFF"] select _muted;
-    _target setUserActionText [_id, ACT_UTIL(_key)];
-}, [], 45, false, true, "", "_this distance _target < 12"];
+// Per-player display/audio options: mission-music mute plus the show/hide flags for the earplugs,
+// disguise and view-distance actions. All stored in profileNamespace (the profile, not the campaign
+// save) so each co-op client keeps its own and it survives death and reload with no server state.
+// The menu is its own function so a row can re-open it to show the flipped state.
+_tent addAction [ACT_PRIMARY_MENU("STR_DUWS_T_USEROPT_TITLE"), { [] call fnc_user_options_menu }, [], 100, false, true, "", "_this distance _target < 12"];
