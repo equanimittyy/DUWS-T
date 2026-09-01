@@ -714,7 +714,7 @@ reroute has shipped; the phases below it are the remaining work, in sequence.
 | **Floor** | `fnc_ap_adjust` integer invariant; both earned counters and both tier globals, seeded by the presets; the eight live pool reads switched to tiers; CP, AP and tier in the map readout; presets regenerated to the rungs | Without the tier globals the first AP spend downgrades that side's own patrols. Without a readout, deciding what to buy is guesswork |
 | **CP becomes a flow** | Per-use CP on supports; the intel-analysis cap | Independent of AP entirely |
 | **AP becomes spendable** | The dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund's second currency | The permanent/consumable split and the CP refund are in; what is left is the second pool |
-| **The commander** | The OPCOM director, its archetype and four sinks (town and zone garrisons, taskings, hardpoints), plus town events — designed in [`opcom_plan.md`](opcom_plan.md) | Everything above is its budget |
+| **The commander** | The OPCOM director, its archetype and four sinks (town and zone garrisons, taskings, hardpoints), plus random events — designed in [`opcom_plan.md`](opcom_plan.md) | Everything above is its budget |
 | **Reconcile the reference** | Rewrite `info/economy.md`'s pre-reroute passages: AP now spends from menus, the AP→CP converter is gone, town income routes CP to BLUFOR and AP to OPFOR, the zone CP bounty and its recapture decay are replaced by the one-time first-capture bonus, and `zones_held × 6` CP is now the AP trickle | Last: it documents shipped machinery, so it lags until the machinery stops moving |
 
 ## The tuning surface

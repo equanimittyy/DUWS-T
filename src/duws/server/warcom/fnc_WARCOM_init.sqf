@@ -52,11 +52,11 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Init OPCOM hardpoint director"] call fnc_log;
 [] spawn fnc_WARCOM_opf_hardpoints;
 
-// The town-event runner rides here beside the hardpoint director but reads civ_town_rep, which exists
+// The random-event runner rides here beside the hardpoint director but reads civ_town_rep, which exists
 // only on the plain civilian path -- so it starts only there, not under NONE/RAVAGE/WBK.
 if (!isNil "CIV_PRESENCE" && {!(CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"])}) then {
-	["INFO", "WARCOM", "Init town-event runner"] call fnc_log;
-	[] spawn fnc_town_event_runner;
+	["INFO", "WARCOM", "Init random-event runner"] call fnc_log;
+	[] spawn fnc_random_event_runner;
 };
 
 // No blind OPFOR spawn timers: enemy presence is zone garrisons, side-mission guards and OPCOM's paid

@@ -1,5 +1,5 @@
 // Locality: server -- createVehicle is server-authoritative. Places one civilian car of class _class at
-// _pos facing _dir, with its cargo stripped, and returns it. Shared by fnc_civ_traffic and the town-event
+// _pos facing _dir, with its cargo stripped, and returns it. Shared by fnc_civ_traffic and the random-event
 // cars.
 //
 // "NONE" placement so the car sits where it is put rather than being bounced to the nearest clear spot,

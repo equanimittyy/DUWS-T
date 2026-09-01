@@ -1,4 +1,4 @@
-# Town events: what a turned town does
+# Random events: what a turned town does
 
 A turned town is a behaviour the OPCOM director consumes, not part of the commander's
 economy, so it lives here rather than inside the commander plan
@@ -38,8 +38,8 @@ A single server daemon drives events, on its own clock beside the OPCOM hardpoin
 picks a live player, finds the town nearest them within a threshold distance, reads that town's
 reputation, and rolls the reputation band's table for what happens. The pipeline is three seams so
 the plumbing never changes as events are added: the daemon
-(`fnc_town_event_runner.sqf`), a rep-to-weights table (`fnc_town_event_table.sqf`), and a
-kind-to-behaviour dispatch (`fnc_town_event_fire.sqf`). Adding an event is one table row plus one
+(`fnc_random_event_runner.sqf`), a rep-to-weights table (`fnc_random_event_table.sqf`), and a
+kind-to-behaviour dispatch (`fnc_random_event_fire.sqf`). Adding an event is one table row plus one
 dispatch case.
 
 The table is data-driven: each band is a reputation range with its own weighted menu, and every band
@@ -105,7 +105,7 @@ scripted-movement event needs the same.
 
 ## Open questions
 
-- **The town-event roll itself:** what rate a town at `-10` generates events at against one at
+- **The random-event roll itself:** what rate a town at `-10` generates events at against one at
   `-20`, and whether the curve between them is worth having or the band alone should decide.
 - **Whether the regroup hold silences events along with the garrison.** A town that keeps mining
   roads while it visibly has nobody in it is either a good scare or an obvious tell.

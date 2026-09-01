@@ -3134,15 +3134,15 @@
                 <Original>Him? Sorry, don't know him.</Original>
                 <English>Him? Sorry, don't know him.</English>
             </Key>
-            <Key ID="STR_DUWS_T_TOWN_STRANDED_ASK">
+            <Key ID="STR_DUWS_T_RANDOM_STRANDED_ASK">
                 <Original>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</Original>
                 <English>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</English>
             </Key>
-            <Key ID="STR_DUWS_T_TOWN_STRANDED_THANKS">
+            <Key ID="STR_DUWS_T_RANDOM_STRANDED_THANKS">
                 <Original>Thanks for the help. Here's something for your troubles.</Original>
                 <English>Thanks for the help. Here's something for your troubles.</English>
             </Key>
-            <Key ID="STR_DUWS_T_TOWN_STRANDED_REWARD">
+            <Key ID="STR_DUWS_T_RANDOM_STRANDED_REWARD">
                 <Original>The local dropped %1 money.</Original>
                 <English>The local dropped %1 money.</English>
             </Key>

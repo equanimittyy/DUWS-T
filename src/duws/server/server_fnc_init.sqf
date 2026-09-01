@@ -296,17 +296,17 @@ publicVariable "fnc_recruitSuccessServer";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
-// Town-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
+// Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.
-fnc_town_event_runner = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_runner.sqf";
-fnc_town_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_table.sqf";
-fnc_town_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_fire.sqf";
-fnc_town_event_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_car.sqf";
-fnc_town_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_heli.sqf";
-fnc_town_event_stranded = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_stranded.sqf";
-fnc_town_event_convoy = compile preprocessFileLineNumbers "duws\server\misc\fnc_town_event_convoy.sqf";
+fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_runner.sqf";
+fnc_random_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_table.sqf";
+fnc_random_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_fire.sqf";
+fnc_random_event_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_car.sqf";
+fnc_random_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_heli.sqf";
+fnc_random_event_stranded = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_stranded.sqf";
+fnc_random_event_convoy = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_convoy.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
-fnc_debug_town_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_town_event.sqf";
+fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_random_event.sqf";
 
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";
@@ -548,7 +548,7 @@ fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_
 fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_econ_server.sqf";
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
 fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
-fnc_debug_town_event_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_town_event_menu.sqf";publicVariable "fnc_debug_town_event_menu";
+fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
 // The OPCOM debug view and its draw callback. Broadcast: the view is a menu-row handler every client
 // holds, and the server remoteExecs the callback back to whichever client asked.
 fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_opcom_view.sqf";publicVariable "fnc_debug_opcom_view";

@@ -3,7 +3,7 @@
 OPCOM is one server-side actor that turns the enemy's Army Power into pressure on the
 player: it garrisons towns, tasks squads, builds hardpoints, and lets low-reputation towns fight
 back. This document owns how it decides — what it wakes on, what it is allowed to know, how it ranks
-one target against another — what it builds, what it spends on, its archetype, and the town events
+one target against another — what it builds, what it spends on, its archetype, and the random events
 it triggers. Its wallet and the faucets that fill it are the economy's ([`economy_second_pass.md`](economy_second_pass.md#army-power)); the
 shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](../info/gameplay/hardpoints.md); the
 standalone-siting economics already in play are
@@ -317,9 +317,9 @@ handshake would only add a frame boundary between its test and its debit.
 | Tasking order | Gives a newly spawned squad a job | The rate squads spawn at | No |
 | Hardpoint construction | Builds an emplacement | One build attempt every 20-30 min | No, but capped at one purchase per tick |
 
-**Town events are not a sink.** IEDs, ambushes and sabotage out of a low-reputation town fire on
+**Random events are not a sink.** IEDs, ambushes and sabotage out of a low-reputation town fire on
 their own, rolled against the town's reputation, and cost the commander nothing
-([§Town events](#town-events-what-a-turned-town-does)). Reputation is already the input that
+([§Random events](#random-events-what-a-turned-town-does)). Reputation is already the input that
 decides whether a town garrisons and what it pays, so making the same towns also *charge* for
 acting on it would price a thing the player has already paid for by letting the town fall. Stated
 here because the shape invites the opposite: a free enemy behaviour sitting next to three
@@ -354,7 +354,7 @@ The intel patrol is deliberately the weak one — a cheap tasking that buys know
 force, and unlike the other three it goes looking for the player instead of circulating around
 what the enemy already holds. `reveal` against EAST is the mechanism.
 
-**Rapport owns dragging a town toward OPFOR; the town-event sink does not.** Both act on a town in
+**Rapport owns dragging a town toward OPFOR; the random-event sink does not.** Both act on a town in
 the OPFOR band and the division has to be stated or they will drift into each other: rapport moves
 reputation, events spend the reputation a town already has. Today a town only moves toward OPFOR
 through the player's own mistakes, and rapport is what makes the town economy two-sided.
@@ -789,7 +789,7 @@ Four properties are why they could not stay:
   into a group that had been sited to avoid them, which is the reverse of a director planning
   against where the player will be.
 
-## Town events: what a turned town does
+## Random events: what a turned town does
 
 A turned town — reputation `<= -10`, inside the OPFOR band — acts against the player on its own:
 IEDs on the approach roads, ambushes on passing patrols, sabotage against nearby FOBs. It is free
@@ -797,7 +797,7 @@ and rolled off reputation, not an Army Power sink the commander schedules, and i
 town's presence trigger so it can mine a road ahead of the player. The director consumes it; it is
 not part of the commander's economy, so the full design — the decided rules, the two deleted
 mechanics it must rebuild (hostile civilian conversion and suicide bombers) with their invariants,
-and its own open questions — lives in its own plan: [`town_events_plan.md`](town_events_plan.md).
+and its own open questions — lives in its own plan: [`random_events_plan.md`](random_events_plan.md).
 
 ## Persistence
 
@@ -874,7 +874,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
 | **The loop** | One thread, the tick, the five terms, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Smallest thing that produces visible enemy behaviour |
 | **Intents** | The record, minimum lifetimes, release on completion or death | Lands with the third sink: taskings are where thrash starts costing |
 | **Archetype** | The weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
-| [**Town events**](town_events_plan.md) | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours, rolled off reputation outside the presence trigger | Reads the belief store and the OPFOR-band definition the loop establishes; the free consequence of a turned town, not a sink |
+| [**Random events**](random_events_plan.md) | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours, rolled off reputation outside the presence trigger | Reads the belief store and the OPFOR-band definition the loop establishes; the free consequence of a turned town, not a sink |
 
 ## Open questions
 

@@ -1,4 +1,4 @@
-// Locality: server -- a placement query for the ambient town events.
+// Locality: server -- a placement query for the ambient random events.
 //
 // Candidate roads out past _anchor, narrowed to those no nearby player can see. The events used a blind
 // selectRandom over nearRoads, so on open ground a car popped in in plain view; the reserve's line-of-sight
