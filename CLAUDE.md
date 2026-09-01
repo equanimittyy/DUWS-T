@@ -23,8 +23,9 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
   and repack; never hand-edit the packed `.pbo`. Workflow: [`README.md`](README.md).
 - **Mind the engine's traps.** Arma-specific behaviours that aren't visible in the SQF
   (e.g. what may be stored in the mission namespace) are collected in
-  [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md); check it before chasing a
-  strange engine error.
+  [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md). Read it before writing
+  engine-touching SQF and before chasing a strange engine error, and add any new trap you hit in the
+  same change that works around it.
 
 ## Voice
 
