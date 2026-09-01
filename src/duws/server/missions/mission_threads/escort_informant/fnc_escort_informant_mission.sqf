@@ -92,7 +92,13 @@ waitUntil {
 private _cleanup = {
     DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
     deleteMarker _hqMarker;
-    if (!isNull _inf) then { deleteVehicle _inf };
+    // The sweep won't bin a claimed unit while it sits in a player's group, so un-recruit a live
+    // informant; his spawn claim then lets the standard teardown collect him off-screen.
+    if (alive _inf) then {
+        [_inf] joinSilent (createGroup [WEST, true]);
+        _inf disableAI "MOVE";
+        _inf disableAI "PATH";
+    };
 };
 
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
