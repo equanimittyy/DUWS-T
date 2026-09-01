@@ -1,5 +1,5 @@
 // Locality: server -- a stranded civilian beside a broken-down car on a roadside verge near the picked
-// player (docs/plans/town_events_plan.md). Ambient event, no rep gate. He asks players in earshot to repair the
+// player (docs/plans/random_events_plan.md). Ambient event, no rep gate. He asks players in earshot to repair the
 // car; once it is, he drops a cash reward, the town's regard rises, and he boards and drives off. Car placed by fnc_civ_spawnCar so it settles
 // on the shoulder instead of detonating; driver a full civilian, so harming him costs reputation.
 if (!isServer) exitWith {};
@@ -63,7 +63,7 @@ _civ setVariable ["DUWS_binMe", true];
 		// is not re-plead to; the money still drops for any.
 		if (!_pleaded && {_heard findIf { vehicle _x == _x } >= 0}) then {
 			_pleaded = true;
-			[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_TOWN_STRANDED_ASK"] remoteExec ["fnc_duws_dialogue", _heard];
+			[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RANDOM_STRANDED_ASK"] remoteExec ["fnc_duws_dialogue", _heard];
 		};
 
 		if (alive _veh && {damage _veh < REPAIRED_BELOW}) exitWith {
@@ -74,8 +74,8 @@ _civ setVariable ["DUWS_binMe", true];
 			// Roadside help lifts the town: +1 rep, surfaced by fnc_town_rep_announce's own card.
 			[_townIndex, 1, "roadside_help"] call fnc_town_rep_adjust;
 			if !(_heard isEqualTo []) then {
-				[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_TOWN_STRANDED_THANKS"] remoteExec ["fnc_duws_dialogue", _heard];
-				[format [localize "STR_DUWS_T_TOWN_STRANDED_REWARD", _amt]] remoteExec ["hint", _heard];
+				[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RANDOM_STRANDED_THANKS"] remoteExec ["fnc_duws_dialogue", _heard];
+				[format [localize "STR_DUWS_T_RANDOM_STRANDED_REWARD", _amt]] remoteExec ["hint", _heard];
 			};
 
 			// He walks to the door and boards (assignAsDriver + orderGetIn) rather than snapping into the
@@ -88,11 +88,24 @@ _civ setVariable ["DUWS_binMe", true];
 			_civ enableAI "PATH";
 			_civ assignAsDriver _veh;
 			[_civ] orderGetIn true;
+			// Ambling loop mirrors the driving traffic (fnc_civ_traffic); first leg is his own town so
+			// the repaired car heads home before joining the town-to-town cycle.
 			private _centres = (missionNamespace getVariable ["civ_locations", []]) apply { getPos _x };
-			private _wp = _grp addWaypoint [_centres param [_townIndex, getPos _civ], 0];
-			_wp setWaypointType "MOVE";
-			_wp setWaypointBehaviour "CARELESS";
-			_wp setWaypointCompletionRadius 30;
+			private _ownCentre = _centres param [_townIndex, getPos _civ];
+			private _dest = if (count _centres > 1) then { selectRandom (_centres - [_ownCentre]) } else { _ownCentre };
+			private _legs = [[_ownCentre, 30], [_dest, 30]];
+			{
+				_x params ["_wpPos", "_cr"];
+				private _wp = _grp addWaypoint [_wpPos, 0];
+				_wp setWaypointType "MOVE";
+				_wp setWaypointSpeed "LIMITED";
+				_wp setWaypointBehaviour "CARELESS";
+				_wp setWaypointCompletionRadius _cr;
+				_wp setWaypointTimeout [20, 30, 45];
+			} forEach _legs;
+			private _cyc = _grp addWaypoint [_ownCentre, 0];
+			_cyc setWaypointType "CYCLE";
+			_cyc setWaypointCompletionRadius 30;
 		};
 		sleep 1;
 	};
