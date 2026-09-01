@@ -3896,12 +3896,12 @@
                 <English>The population in this area is short on supplies. Move the aid in and deliver it to them.</English>
             </Key>
             <Key ID="STR_DUWS_T_deliversupplies_brief">
-                <Original>Alpha 1-1, civilians near %1 need supplies run in. Deliver the aid to them.</Original>
-                <English>Alpha 1-1, civilians near %1 need supplies run in. Deliver the aid to them.</English>
+                <Original>Alpha 1-1, we have aid prepared for civilians in %1. Deliver it to them.</Original>
+                <English>Alpha 1-1, we have aid prepared for civilians in %1. Deliver it to them.</English>
             </Key>
             <Key ID="STR_DUWS_T_deliversupplies_copy">
-                <Original>Copy Overlord, hauling the supplies out.</Original>
-                <English>Copy Overlord, hauling the supplies out.</English>
+                <Original>Copy Overlord. We'll haul the supplies. Out.</Original>
+                <English>Copy Overlord. We'll haul the supplies. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_deliversupplies_close">
                 <Original>The supplies are delivered and the locals are grateful. Good work Alpha 1-1.</Original>
