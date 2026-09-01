@@ -7202,29 +7202,29 @@
                 <German>Medizinmodus</German>
                 <Chinesesimp>医疗模式</Chinesesimp>
                 <Spanish>Modo Médico</Spanish>
-                <Original>Medical Mode</Original>
-                <English>Medical Mode</English>
+                <Original>Revive (overridden by ACE)</Original>
+                <English>Revive (overridden by ACE)</English>
             </Key>
             <Key ID="STR_DUWS_T_norevive">
                 <German>Keine Medizin (Deaktivieren bei Verwendung von ACE)</German>
                 <Chinesesimp>无医疗(使用ACE时关闭)</Chinesesimp>
                 <Spanish>Sin Médico (Desactivar al usar ACE)</Spanish>
-                <Original>No Medical (select when using ACE)</Original>
-                <English>No Medical (select when using ACE)</English>
+                <Original>No Revive</Original>
+                <English>No Revive</English>
             </Key>
             <Key ID="STR_DUWS_T_ais">
                 <German>AIS Medizin</German>
                 <Chinesesimp>AIS医疗</Chinesesimp>
                 <Spanish>AIS Médico</Spanish>
-                <Original>AIS Medical</Original>
-                <English>AIS Medical</English>
+                <Original>AIS Revive</Original>
+                <English>AIS Revive</English>
             </Key>
             <Key ID="STR_DUWS_T_vanillarevive">
                 <German>Vanilla Medizin</German>
                 <Chinesesimp>原版医疗</Chinesesimp>
                 <Spanish>Sanación Vanilla</Spanish>
-                <Original>Vanilla Medical</Original>
-                <English>Vanilla Medical</English>
+                <Original>Vanilla Revive</Original>
+                <English>Vanilla Revive</English>
             </Key>
             <Key ID="STR_DUWS_T_b5ri931u">
                 <German>Ohrenstöpsel entfernt</German>
