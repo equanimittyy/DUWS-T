@@ -1,4 +1,4 @@
-// Locality: server -- the town-event runner. Rolls once for an event every TOWN_EVENT_TICK; on a hit,
+// Locality: server -- the town-event runner. Rolls once for an event each tick (5-10 min, jittered); on a hit,
 // an event fires near a player against the reputation of the town nearest them
 // (docs/plans/town_events_plan.md).
 //
@@ -10,7 +10,8 @@
 //
 // Plain civilian path only: civ_town_rep and the town arrays it reads exist only there, not under
 // NONE/RAVAGE/WBK (fnc_civ_init_Tomata). WARCOM_init gates the spawn on that; this guard is the backstop.
-#define TOWN_EVENT_TICK 600
+#define TOWN_EVENT_TICK_MIN 300
+#define TOWN_EVENT_TICK_MAX 600
 #define TOWN_EVENT_CHANCE 0.5
 #define TOWN_EVENT_RANGE 800
 
@@ -22,7 +23,7 @@ while {true} do {
 	// nested if rather than exitWith/continue: inside a while body those read as end-of-iteration, not
 	// as "skip the rest, keep the clock" (see fnc_WARCOM_opf_hardpoints).
 	try {
-		sleep TOWN_EVENT_TICK;
+		sleep (TOWN_EVENT_TICK_MIN + random (TOWN_EVENT_TICK_MAX - TOWN_EVENT_TICK_MIN));
 
 		if (random 1 < TOWN_EVENT_CHANCE) then {
 			private _players = call BIS_fnc_listPlayers;
