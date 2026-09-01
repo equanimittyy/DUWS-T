@@ -39,8 +39,7 @@ _grp deleteGroupWhenEmpty true;
 _inf setCaptive false;
 _inf allowDamage true;
 _inf setBehaviour "CARELESS";
-_inf disableAI "MOVE";     // holds at HQ until recruited
-_inf disableAI "PATH";
+_inf disableAI "MOVE";     // holds at HQ until recruited; disable MOVE only, never PATH
 // Off the ACE/AIS revive path, so death is death, not an unconscious state the win poll never sees end.
 _inf setVariable ["AIS_noReviveInit", true, true];
 
@@ -89,15 +88,18 @@ waitUntil {
     (!alive _inf) || (_inf distance2D _townPos < _deliverDist) || (time > _deadline)
 };
 
+// Common teardown; each outcome adds its own informant send-off below.
 private _cleanup = {
     DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
     deleteMarker _hqMarker;
-    // The sweep won't bin a claimed unit while it sits in a player's group, so un-recruit a live
-    // informant; his spawn claim then lets the standard teardown collect him off-screen.
+};
+
+// Release a live informant (win or deadline, never death): out of the player's group, which the map
+// sweep won't bin from, and captive so nobody guns down a now-harmless civilian before GC takes him.
+private _release = {
     if (alive _inf) then {
         [_inf] joinSilent (createGroup [WEST, true]);
-        _inf disableAI "MOVE";
-        _inf disableAI "PATH";
+        _inf setCaptive true;
     };
 };
 
@@ -108,12 +110,28 @@ private _place = [_townPos] call fnc_place_name;
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
     [_townIdx, DUWS_curReward select 2, "escort_informant_success"] call fnc_town_rep_adjust;
     call _cleanup;
+    // Delivered: he blends into the town on the civilian stroll until GC takes him, never frozen.
+    call _release;
+    moveOut _inf;
+    unassignVehicle _inf;
+    _inf enableAI "MOVE";
+    [[group _inf], []] call fnc_civ_wp_Tomata;
     [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_escortinformant_close", _place]], true] call fnc_mission_finish;
 };
 
-// Death names the informant; a beat-the-clock timeout passes [] to fall back to the generic "out of
-// time" notice, so a dead line never reports on a live-but-late informant.
-private _failLine = if (!alive _inf) then { ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_escortinformant_fail"] } else { [] };
 [_townIdx, -(DUWS_curReward select 2), "escort_informant_fail"] call fnc_town_rep_adjust;
 call _cleanup;
-[_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], _failLine] call fnc_mission_finish;
+
+if (alive _inf) exitWith {
+    // Timed out but alive: he makes his own way to the town on foot and idles there until GC, not frozen.
+    call _release;
+    moveOut _inf;
+    unassignVehicle _inf;
+    _inf enableAI "MOVE";
+    _inf setBehaviour "CARELESS";
+    _inf doMove _townPos;
+    [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
+};
+
+// Informant dead: the corpse rides the dead-owned census, nothing to hand off here.
+[_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_escortinformant_fail"]] call fnc_mission_finish;
