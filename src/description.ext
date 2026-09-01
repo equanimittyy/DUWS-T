@@ -19,14 +19,9 @@ respawnOnStart=-1;
 
 //--------------------------------------------------------------
 
-// TAW INIT BEGIN --
-#include "modules\taw_vd\GUI.h"
-// TAW INIT END --
-
 class CfgFunctions
 {
 	#include "modules\AIS\cfgFunctions.hpp"
-	#include "modules\taw_vd\CfgFunctions.hpp"
 };
 
 // Rename the money item so the player's inventory and any engine-generated text read "Money", not

@@ -12,7 +12,6 @@ if (!hasInterface) exitWith {};
 private _musicOn = !(profileNamespace getVariable ["DUWS_T_muteMissionMusic", false]);
 private _earOn   = profileNamespace getVariable ["DUWS_T_showEarplugs", true];
 private _disgOn  = profileNamespace getVariable ["DUWS_T_showDisguise", true];
-private _vdOn    = profileNamespace getVariable ["DUWS_T_showViewDist", true];
 
 private _label = {
     params ["_nameKey", "_on"];
@@ -64,20 +63,6 @@ private _green = [0.082, 1, 0, 1];
             saveProfileNamespace;
             hint format [localize "STR_DUWS_T_USEROPT_HINT",
                 localize "STR_DUWS_T_USEROPT_DISGUISE",
-                localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _show)];
-            [] call fnc_user_options_menu;
-        },
-        [],
-        _green
-    ],
-    [
-        ["STR_DUWS_T_USEROPT_VIEWDIST", _vdOn] call _label,
-        {
-            private _show = !(profileNamespace getVariable ["DUWS_T_showViewDist", true]);
-            profileNamespace setVariable ["DUWS_T_showViewDist", _show];
-            saveProfileNamespace;
-            hint format [localize "STR_DUWS_T_USEROPT_HINT",
-                localize "STR_DUWS_T_USEROPT_VIEWDIST",
                 localize (["STR_DUWS_T_USEROPT_OFF", "STR_DUWS_T_USEROPT_ON"] select _show)];
             [] call fnc_user_options_menu;
         },
