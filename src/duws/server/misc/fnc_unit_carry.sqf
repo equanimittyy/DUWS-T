@@ -37,17 +37,15 @@ DUWS_fnc_unitCarry = {
     if (_dropLabel != "") then { [_unit, _carrier, _dropLabel] remoteExec ["DUWS_fnc_unitCarryAddDropAction", _carrier] };
 };
 
-// Set down in front of _carrier, or in place if none given (forced drop). Combat mode/PATH stay the caller's.
+// Set him down where he hangs; detach alone keeps his world transform. Do not setPosATL to a forward
+// point: its terrain-relative Z teleports an upper-floor drop down to the ground floor. PATH stays the caller's.
 DUWS_fnc_unitDrop = {
     if (!isServer) exitWith { _this remoteExec ["DUWS_fnc_unitDrop", 2] };
     params ["_unit", ["_carrier", objNull]];
     private _held = _unit getVariable ["DUWS_carriedBy", objNull];
     if (isNull _held) exitWith {};
     detach _unit;
-    if (!isNull _carrier) then {
-        _unit setPosATL (_carrier getPos [1.2, getDir _carrier]);
-        _unit setDir (getDir _carrier);
-    };
+    if (!isNull _carrier) then { _unit setDir (getDir _carrier) };
     { _unit enableAI _x } forEach DUWS_carrySuspendFeatures;
     [_unit, ""] remoteExec ["switchMove", 0];
     _unit setVariable ["DUWS_carriedBy", objNull, true];

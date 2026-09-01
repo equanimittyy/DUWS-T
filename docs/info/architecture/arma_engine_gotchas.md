@@ -1310,6 +1310,24 @@ patrol-camp intel uses. Callers:
 `src/duws/server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf`,
 `src/duws/server/missions/mission_threads/destroy_patrol_camp/fnc_destroy_patrol_camp_mission.sqf`.
 
+## `setPosATL` / `object getPos [dist, dir]` measure Z from the terrain, so re-seating a unit on an upper floor drops it to the ground floor
+
+**`setPosATL`'s Z is height above *terrain*, not above whatever surface (floor, roof, bridge) is under
+the object. `object getPos [distance, direction]` returns the same terrain-relative frame. So re-seating
+a unit that stands on a building's upper floor with either command snaps it to ground-floor height
+directly below.**
+
+The carry/drop helper set the informant down with `setPosATL (_carrier getPos [1.2, dir])`; a drop on
+an upper floor teleported him to the ground floor beneath the carrier. Fix: don't re-seat him at all --
+`detach` leaves a unit at its current world transform, and he is already attached 1 m in front of the
+carrier on the carrier's own floor, so he stays there and settles.
+`DUWS_fnc_unitDrop` (`src/duws/server/misc/fnc_unit_carry.sqf`).
+
+**How to apply:** to place a unit at a floor-relative point, work in the world/ASL frame --
+`modelToWorldWorld` + `setPosWorld`, or `getPosASL` -- never `setPosATL` or the `getPos [dist, dir]`
+overload. Better still, when a body is already at the wanted world spot, `detach` and let it settle
+rather than issuing any setPos.
+
 ## An empty group is never freed, and each side caps at 144 groups
 
 **`createGroup` claims a group slot that lives until it is explicitly freed. Nothing reclaims an
