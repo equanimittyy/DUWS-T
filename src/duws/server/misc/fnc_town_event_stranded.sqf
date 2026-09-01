@@ -9,11 +9,8 @@ if (isNull _player) exitWith {};
 private _pool = missionNamespace getVariable ["civ_veh_array", []];
 if (_pool isEqualTo []) exitWith {};
 
-private _anchor = getPos _player;
-// A road out from the player, so the car is come upon rather than dropped on top of them.
-private _roads = _anchor nearRoads 500;
-private _far = _roads select { (_anchor distance _x) > 150 };
-if !(_far isEqualTo []) then { _roads = _far };
+// Roads out of the player's sight where possible, so the broken-down car is come upon, not seen popping in.
+private _roads = [getPos _player] call fnc_civ_pickHiddenRoad;
 if (_roads isEqualTo []) exitWith {};
 
 // A verge point 3 m off the carriageway and clear of walls: the car reads as pulled over, and a shoulder

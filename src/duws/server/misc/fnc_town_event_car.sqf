@@ -8,11 +8,8 @@ if (isNull _player) exitWith {};
 private _pool = missionNamespace getVariable ["civ_veh_array", []];
 if (_pool isEqualTo []) exitWith {};
 
-private _anchor = getPos _player;
-// A road out from the player, so the car is seen arriving rather than dropped on top of them.
-private _roads = _anchor nearRoads 500;
-private _far = _roads select { (_anchor distance _x) > 150 };
-if !(_far isEqualTo []) then { _roads = _far };
+// Roads out of the player's sight where possible, so the car stands up unseen and drives into view.
+private _roads = [getPos _player] call fnc_civ_pickHiddenRoad;
 if (_roads isEqualTo []) exitWith {};
 
 private _road = selectRandom _roads;
