@@ -28,7 +28,7 @@ private _bestD = 1e9;
 if (_townIdx < 0) exitWith { [21, _requester, "no_delivery_town"] call fnc_mission_abort };
 
 // The aid crew's thanks names the delivery town: the location's own name, nearest-location fallback, then
-// a generic if the map left it unnamed. duws_town_circles is index-aligned with civ_locations.
+// a generic if the map left it unnamed.
 private _townName = text ((missionNamespace getVariable ["civ_locations", []]) select _townIdx);
 if (_townName == "") then { _townName = text (nearestLocation [_townPos, ""]) };
 if (_townName == "") then { _townName = localize "STR_DUWS_T_idap_town_generic" };
@@ -84,10 +84,18 @@ _delivMarker setMarkerSize [1, 1];
 private _hqMarker = format ["delivsup_hq_%1", DUWS_mission_token];
 createMarker [_hqMarker, _spawnPos];
 _hqMarker setMarkerShape "ICON";
-_hqMarker setMarkerType "hd_pickup";
+_hqMarker setMarkerType "loc_Truck";
 _hqMarker setMarkerColor "ColorBlue";
 _hqMarker setMarkerText "Supply Truck";
-[_hqMarker] spawn { params ["_m"]; sleep 120; deleteMarker _m };
+// Rides with the truck and clears once a BLUFOR crew boards -- it only exists to point the player there.
+[_hqMarker, _truck] spawn {
+    params ["_m", "_t"];
+    while { !isNull _t && { (crew _t) findIf { side _x == west } < 0 } } do {
+        _m setMarkerPos (getPosATL _t);
+        sleep 1;
+    };
+    deleteMarker _m;
+};
 
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 sleep 2;
