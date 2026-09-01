@@ -215,60 +215,58 @@ private _leanDispatch = {
 private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
 private _claim = compile format ["[_this, %1] call fnc_mission_claim", _token];
 
-// Deliver infantry tokens by truck (walk them in if the side fields none); returns the squad groups.
-private _deliverSquads = {
-    params ["_center", "_radius", "_spawnPos", "_tokens", "_claim"];
-    private _out = [];
+// Per-element spawn bearing round the ring, road-snapped for a truck. The garrison reserve stands a whole
+// wave up on one anti-flank side; a defense wants surrounding, so each element comes from its own bearing.
+private _bearingPos = {
+    params ["_center"];
+    private _raw = _center getPos [RADIUS + DUWS_zoneReserveSpawnDist, random 360];
+    private _safe = [_raw, 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+    if (_safe isEqualTo []) then { _safe = _raw };
+    [_safe] call DUWS_fnc_reserveRoadSnap
+};
+
+// One squad, its own truck, garrison-reserve style, so it rides in instead of walking. Only a side that
+// fields no troop truck, or a squad too big for one, comes on foot.
+private _deliverSquad = {
+    params ["_center", "_spawnPos", "_token", "_claim"];
     private _made = [_spawnPos, _center] call DUWS_fnc_garrisonReserveTruckSpawn;
     if (_made isEqualTo []) exitWith {
-        { private _g = [_x, _center, _radius, "hunt", _spawnPos, "opfor"] call fnc_spawn_team;
-          if (!isNull _g) then { [_g] call _claim; _out pushBack _g } } forEach _tokens;
-        _out
+        private _g = [_token, _center, RADIUS, "hunt", _spawnPos, "opfor"] call fnc_spawn_team;
+        if (isNull _g) exitWith { [] };
+        [_g] call _claim; [_g]
     };
     _made params ["_truck", "_drv", "_cap"];
-    private _aboard = [];
-    private _used = 0;
-    {
-        private _men = [_x] call DUWS_fnc_tokenMenCount;
-        if (_used + _men <= _cap) then {
-            private _g = [_x, _center, _radius, "none", _spawnPos, "opfor"] call fnc_spawn_team;
-            if (!isNull _g) then {
-                { _x moveInCargo _truck } forEach units _g;
-                [_g] call _claim;
-                _aboard pushBack _g; _out pushBack _g; _used = _used + _men;
-            };
-        } else {
-            private _g = [_x, _center, _radius, "hunt", _spawnPos, "opfor"] call fnc_spawn_team;
-            if (!isNull _g) then { [_g] call _claim; _out pushBack _g };
-        };
-    } forEach _tokens;
-    if (_aboard isEqualTo []) then {
+    private _g = [_token, _center, RADIUS, "none", _spawnPos, "opfor"] call fnc_spawn_team;
+    if (isNull _g) exitWith { { deleteVehicle _x } forEach units _drv; deleteVehicle _truck; [] };
+    if ((count units _g) > _cap) exitWith {
+        // Too big for one truck: scrap the empty taxi and walk it.
         { deleteVehicle _x } forEach units _drv; deleteVehicle _truck;
-    } else {
-        [_drv] call _claim;
-        [_center, _radius, _spawnPos, _truck, _drv, _aboard] spawn _leanDispatch;
+        [_g, "hunt", _center, RADIUS] call fnc_apply_posture;
+        [_g] call _claim; [_g]
     };
-    _out
+    { _x moveInCargo _truck } forEach units _g;
+    [_g] call _claim; [_drv] call _claim;
+    [_center, RADIUS, _spawnPos, _truck, _drv, [_g]] spawn _leanDispatch;
+    [_g]
 };
 
 // Shared with the win-time retreat: the wave loop mutates these in place (arrays pass by reference).
 private _waveGroups = [];
 private _vehGroups = [];
 
-// Wave controller: fill toward the budget on a deep dip (< 60 %) or the 5-minute heartbeat. Vehicles
-// drive in from the far side; infantry ride the truck to the debus.
-[_targetpos, _budget, _vehSubCap, _defendVar, _claim, _deliverSquads, _leanDispatch, _waveGroups, _vehGroups] spawn {
-    params ["_center", "_budget", "_vehSubCap", "_defendVar", "_claim", "_deliverSquads", "_leanDispatch", "_waveGroups", "_vehGroups"];
+// Wave controller: fill toward the budget on a deep dip (< 60 %) or the 5-minute heartbeat. Each element
+// takes its own bearing, so the waves converge from all sides rather than one.
+[_targetpos, _budget, _vehSubCap, _defendVar, _claim, _deliverSquad, _leanDispatch, _bearingPos, _waveGroups, _vehGroups] spawn {
+    params ["_center", "_budget", "_vehSubCap", "_defendVar", "_claim", "_deliverSquad", "_leanDispatch", "_bearingPos", "_waveGroups", "_vehGroups"];
     private _fnLive = { { ({ alive _x } count units _x) > 0 } count _this };
     private _lastWave = -1e9;
     while { missionNamespace getVariable [_defendVar, false] } do {
         private _live = _waveGroups call _fnLive;
         if (_live < 0.6 * _budget || { time - _lastWave >= 300 }) then {
             _lastWave = time;
-            private _spawnPos = [_center, RADIUS] call DUWS_fnc_garrisonReservePos;
             private _vehLive = _vehGroups call _fnLive;
-            private _pending = [];
             for "_slot" from 1 to (_budget - _live) do {
+                private _spawnPos = [_center] call _bearingPos;
                 private _fieldableVeh = ["car", "apc", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
                 if ((_vehLive < _vehSubCap) && { _fieldableVeh isNotEqualTo [] } && { random 1 < 0.4 }) then {
                     private _cls = [selectRandom _fieldableVeh] call DUWS_fnc_tokenClass;
@@ -277,11 +275,11 @@ private _vehGroups = [];
                         if (!isNull _g) then { [_g] call _claim; _waveGroups pushBack _g; _vehGroups pushBack _g; _vehLive = _vehLive + 1 };
                     };
                 } else {
-                    _pending pushBack (selectRandom ["team", "wp_team", "squad", "recon"]);
+                    private _tok = selectRandom ["team", "wp_team", "squad", "recon"];
+                    { _waveGroups pushBack _x } forEach ([_center, _spawnPos, _tok, _claim] call _deliverSquad);
                 };
-            };
-            if (_pending isNotEqualTo []) then {
-                { _waveGroups pushBack _x } forEach ([_center, RADIUS, _spawnPos, _pending, _claim] call _deliverSquads);
+                // Stagger so the wave stands up over seconds, not one frame of trucks and squads -- as the garrison refill does.
+                uiSleep 2;
             };
         };
         sleep 5;
