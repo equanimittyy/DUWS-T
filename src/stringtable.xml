@@ -3871,6 +3871,18 @@
                 <Original>Allseer confirms the informant is safe. Good work Alpha 1-1.</Original>
                 <English>Allseer confirms the informant is safe. Good work Alpha 1-1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_escortinformant_join">
+                <Original>Join Group</Original>
+                <English>Join Group</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escortinformant_leave">
+                <Original>Leave Group</Original>
+                <English>Leave Group</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escortinformant_notleader">
+                <Original>You are not your group's leader.</Original>
+                <English>You are not your group's leader.</English>
+            </Key>
             <Key ID="STR_DUWS_T_c21">
                 <Original>Deliver Supplies</Original>
                 <English>Deliver Supplies</English>

@@ -205,6 +205,8 @@ fnc_destroy_patrol_camp_site = compile preprocessFileLineNumbers "duws\server\mi
 fnc_destroy_air_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_mission.sqf";
 fnc_destroy_air_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_site.sqf";publicVariable "fnc_destroy_air_site";
 fnc_escort_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_mission.sqf";
+// Broadcast: the informant's Join/Leave Group actions remoteExec this from clients.
+fnc_escort_informant_group = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_group.sqf";publicVariable "fnc_escort_informant_group";
 fnc_deliver_supplies_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deliver_supplies\fnc_deliver_supplies_mission.sqf";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
