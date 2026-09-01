@@ -27,6 +27,12 @@ private _bestD = 1e9;
 } forEach _circles;
 if (_townIdx < 0) exitWith { [21, _requester, "no_delivery_town"] call fnc_mission_abort };
 
+// The aid crew's thanks names the delivery town: the location's own name, nearest-location fallback, then
+// a generic if the map left it unnamed. duws_town_circles is index-aligned with civ_locations.
+private _townName = text ((missionNamespace getVariable ["civ_locations", []]) select _townIdx);
+if (_townName == "") then { _townName = text (nearestLocation [_townPos, ""]) };
+if (_townName == "") then { _townName = localize "STR_DUWS_T_idap_town_generic" };
+
 private _hqPos = if (!isNil "bluHQ_object" && { !isNull bluHQ_object }) then { getPosATL bluHQ_object } else { +PosOfBLUHQ };
 private _spawnPos = [[_hqPos select 0, _hqPos select 1], 10, 300, 15, 0, 0.4, 0, [], []] call BIS_fnc_findSafePos;
 if (_spawnPos isEqualTo [] || { (_spawnPos select 0) == 0 && { (_spawnPos select 1) == 0 } }) then { _spawnPos = _hqPos };
@@ -48,7 +54,7 @@ switch (VERSION_X) do {
     };
 };
 
-private _crewPos = [_townPos, 0, 40, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
+private _crewPos = [_townPos, 0, 80, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
 if (_crewPos isEqualTo [] || { (_crewPos select 0) == 0 && { (_crewPos select 1) == 0 } }) then { _crewPos = _townPos };
 private _crewClasses = [
     "C_IDAP_Man_Aidworker_01_F", "C_IDAP_Man_Aidworker_02_F", "C_IDAP_Man_Aidworker_03_F",
@@ -72,7 +78,7 @@ createMarker [_delivMarker, _crewPos];
 _delivMarker setMarkerShape "ICON";
 _delivMarker setMarkerType "o_unknown";
 _delivMarker setMarkerColor "ColorGreen";
-_delivMarker setMarkerText "Supplies";
+_delivMarker setMarkerText "IDAP";
 _delivMarker setMarkerSize [1, 1];
 
 private _hqMarker = format ["delivsup_hq_%1", DUWS_mission_token];
@@ -124,15 +130,21 @@ if (time > _deadline) exitWith {
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
 };
 
-// Delivered: play the hand-over on-screen -- marshaller drops the guide-in loop, the aid comes off the
-// bed, then the emptied truck pulls away -- before the reward and the close line.
+// Delivered: the transport_IDAP hand-over. The aid crew thanks the player in person (VOICE, in the room),
+// Overlord signs off over the net, then the sacks come off the bed and the emptied truck pulls away. The
+// close line is spoken here, mid-theatre, so finish's _line is left empty.
+deleteMarker _delivMarker;
 if (!isNull _marshaller) then { _marshaller switchMove "" };
+[localize "STR_DUWS_T_IDAP", format [localize "STR_DUWS_T_idapend", _townName], "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 6;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_deliversupplies_close"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 4;
+[_townIdx, DUWS_curReward select 2, "deliver_supplies_success"] call fnc_town_rep_adjust;
 sleep 2;
 if (_box2 isEqualType objNull && { !isNull _box2 }) then { deleteVehicle _box2 };
 sleep 2;
 if (_box1 isEqualType objNull && { !isNull _box1 }) then { deleteVehicle _box1 };
 sleep 8;
 if (!isNull _truck) then { deleteVehicle _truck };
-[_townIdx, DUWS_curReward select 2, "deliver_supplies_success"] call fnc_town_rep_adjust;
 call _cleanup;
-[_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_deliversupplies_close"], true] call fnc_mission_finish;
+[_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], [], true] call fnc_mission_finish;
