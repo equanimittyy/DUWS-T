@@ -6,25 +6,26 @@
 player allowDamage false;
 
 // Revive selection must stay last in this file.
-
-// NO REVIVE vs AIS vs Vanilla vs ACE medical
+//
+// ACE medical cannot coexist with AIS and owns downing/revive itself, so its presence overrides the
+// Revive param rather than being a branch under it. Order: ACE or no-revive, then AIS, then vanilla.
 _revive = ["Revive", 1] call BIS_fnc_getParamValue;
+private _aceMedical = isClass (configFile >> "CfgPatches" >> "ace_medical") || isClass (configFile >> "CfgPatches" >> "ace_main");
 
-// NO REVIVE or ACE MEDICAL DETECTED
-if (_revive == 0 || isClass (configFile >> "CfgPatches" >> "ace_medical") || isClass (configFile >> "CfgPatches" >> "ace_main")) then {
+if (_aceMedical || _revive == 0) then {
+	// No scripted revive, engine revive off; ACE, if loaded, supplies its own on top.
 	[player] call bis_fnc_disableRevive;
 	player setVariable ["AIS_noReviveInit", true];
-	["Revive is disabled"] call BIS_fnc_logFormat;
-};
-// AIS
-if (_revive == 1) then {
-	player setVariable ["AIS_noReviveInit", false];
-	[player] call AIS_System_fnc_loadAIS;
-	[player] call bis_fnc_disableRevive;
-};
-// VANILLA
-if (_revive == 2) then {
-	player setVariable ["AIS_noReviveInit", true];
+	[format ["Revive disabled: %1", ["Revive param 0", "ACE medical detected"] select _aceMedical]] call BIS_fnc_logFormat;
+} else {
+	if (_revive == 1) then {
+		player setVariable ["AIS_noReviveInit", false];
+		[player] call AIS_System_fnc_loadAIS;
+		[player] call bis_fnc_disableRevive;
+	} else {
+		// Vanilla (_revive == 2): the only path that leaves engine revive on.
+		player setVariable ["AIS_noReviveInit", true];
+	};
 };
 
 // helper: recursively pull every item classname from a loadout
