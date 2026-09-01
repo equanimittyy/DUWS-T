@@ -48,7 +48,6 @@ switch (VERSION_X) do {
     };
 };
 
-// Receiving IDAP crew in the town (transport_IDAP shape).
 private _crewPos = [_townPos, 0, 40, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
 if (_crewPos isEqualTo [] || { (_crewPos select 0) == 0 && { (_crewPos select 1) == 0 } }) then { _crewPos = _townPos };
 private _crewClasses = [
@@ -101,18 +100,39 @@ private _cleanup = {
     deleteGroup _crew;
 };
 
+// Trigger on the crew's spot, not the town centre -- else the delivery ticks up to 40 m short of the drop.
 waitUntil {
     sleep 2;
-    (getDammage _truck > 0.95) || (_truck distance2D _townPos < _deliverDist) || (({ alive _x } count units _crew) == 0) || (time > _deadline)
+    (getDammage _truck > 0.95) || (_truck distance _crewPos < _deliverDist) || (({ alive _x } count units _crew) == 0) || (time > _deadline)
 };
 
-if (_truck distance2D _townPos < _deliverDist && getDammage _truck <= 0.95 && ({ alive _x } count units _crew) > 0) exitWith {
-    if (!isNull _marshaller) then { _marshaller switchMove "" };
-    [_townIdx, DUWS_curReward select 2, "deliver_supplies_success"] call fnc_town_rep_adjust;
+if (getDammage _truck > 0.95) exitWith {
+    [_townIdx, -(DUWS_curReward select 2), "deliver_supplies_truck_lost"] call fnc_town_rep_adjust;
     call _cleanup;
-    [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_deliversupplies_close"], true] call fnc_mission_finish;
+    [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_idaptruckdown"]] call fnc_mission_finish;
 };
 
-[_townIdx, -(DUWS_curReward select 2), "deliver_supplies_fail"] call fnc_town_rep_adjust;
+if (({ alive _x } count units _crew) == 0) exitWith {
+    [_townIdx, -(DUWS_curReward select 2), "deliver_supplies_crew_dead"] call fnc_town_rep_adjust;
+    call _cleanup;
+    [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_idapcrewdead"]] call fnc_mission_finish;
+};
+
+if (time > _deadline) exitWith {
+    [_townIdx, -(DUWS_curReward select 2), "deliver_supplies_deadline"] call fnc_town_rep_adjust;
+    call _cleanup;
+    [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
+};
+
+// Delivered: play the hand-over on-screen -- marshaller drops the guide-in loop, the aid comes off the
+// bed, then the emptied truck pulls away -- before the reward and the close line.
+if (!isNull _marshaller) then { _marshaller switchMove "" };
+sleep 2;
+if (_box2 isEqualType objNull && { !isNull _box2 }) then { deleteVehicle _box2 };
+sleep 2;
+if (_box1 isEqualType objNull && { !isNull _box1 }) then { deleteVehicle _box1 };
+sleep 8;
+if (!isNull _truck) then { deleteVehicle _truck };
+[_townIdx, DUWS_curReward select 2, "deliver_supplies_success"] call fnc_town_rep_adjust;
 call _cleanup;
-[_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
+[_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_deliversupplies_close"], true] call fnc_mission_finish;
