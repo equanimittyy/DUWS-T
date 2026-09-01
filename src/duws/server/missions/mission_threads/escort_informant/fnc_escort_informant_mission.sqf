@@ -47,6 +47,23 @@ _inf setVariable ["AIS_noReviveInit", true, true];
 // mark him. Reusing protect_civ's global is safe because only one side mission runs at a time.
 DUWS_float_informant = _inf; publicVariable "DUWS_float_informant";
 
+// Manhunt-style track: a map marker on the informant whose position is refreshed on the UAV scan
+// cadence (fnc_uav_scanner.sqf, _scanInterval) rather than per frame, so the feed reads like a drone
+// ping. The loop ends on its own once _cleanup deletes the marker (markerType of a deleted one is "").
+private _trackMarker = format ["escortinf_trk_%1", DUWS_mission_token];
+createMarker [_trackMarker, getPosATL _inf];
+_trackMarker setMarkerShape "ICON";
+_trackMarker setMarkerType "mil_warning";
+_trackMarker setMarkerColor "ColorBlue";
+_trackMarker setMarkerText "Informant";
+[_inf, _trackMarker] spawn {
+    params ["_inf", "_mk"];
+    while { !isNull _inf && { alive _inf } && { markerType _mk != "" } } do {
+        _mk setMarkerPos (getPosATL _inf);
+        sleep 5;
+    };
+};
+
 // Leader gate is in the action body, not the condition: a non-leader still sees the action and gets told
 // why it did nothing, instead of it silently vanishing.
 [_inf, [localize "STR_DUWS_T_escortinformant_join",
@@ -67,14 +84,6 @@ DUWS_float_informant = _inf; publicVariable "DUWS_float_informant";
     [], 1.5, false, false, "", "_this distance _target < 6 && (_target in units group _this)"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 
-private _hqMarker = format ["escortinf_hq_%1", DUWS_mission_token];
-createMarker [_hqMarker, _spawnPos];
-_hqMarker setMarkerShape "ICON";
-_hqMarker setMarkerType "hd_pickup";
-_hqMarker setMarkerColor "ColorBlue";
-_hqMarker setMarkerText "Informant";
-[_hqMarker] spawn { params ["_m"]; sleep 120; deleteMarker _m };
-
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 sleep 2;
 
@@ -91,7 +100,7 @@ waitUntil {
 // Common teardown; each outcome adds its own informant send-off below.
 private _cleanup = {
     DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
-    deleteMarker _hqMarker;
+    deleteMarker _trackMarker;
 };
 
 // Release a live informant (win or deadline, never death): out of the player's group, which the map
