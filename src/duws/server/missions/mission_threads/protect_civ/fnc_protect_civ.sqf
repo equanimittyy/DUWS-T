@@ -67,17 +67,6 @@ _inf addEventHandler ["HandleDamage", {
 [_grp] call fnc_mission_claim;
 DUWS_pc_informant = _inf; publicVariable "DUWS_pc_informant";
 
-// Idle only through prep, and not while carried: a re-issued playMoveNow fights his aim and the carry pose.
-[_inf, _defendVar] spawn {
-    params ["_inf", "_defendVar"];
-    while { alive _inf && !(missionNamespace getVariable [_defendVar, false]) } do {
-        if (isNull (_inf getVariable ["DUWS_carriedBy", objNull])) then {
-            [_inf, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
-        };
-        sleep 5;
-    };
-};
-
 // Pick him up by hand during prep (DUWS_fnc_unitCarry, no pathfinding). The carry routine puts the
 // matching put-down action on the carrier, not on him -- attached, he sits on the player and can't be
 // cursor-targeted. The assault force-drops him, clearing that carrier action, and this pickup one hides
