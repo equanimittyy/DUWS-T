@@ -112,8 +112,9 @@ private _release = {
     };
 };
 
-// fnc_mission_finish localises and callsign-subs its line but, unlike fnc_mission_present, never
-// %1-formats it, so bake the town name into the close line here.
+// fnc_mission_finish localises its _msg as a stringtable key, so it cannot take a line already
+// formatted with the town name (localize of a finished sentence just logs "String ... not found").
+// The win branch speaks that line itself and hands finish [] instead.
 private _place = [_townPos] call fnc_place_name;
 
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
@@ -125,7 +126,8 @@ if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
     unassignVehicle _inf;
     _inf enableAI "MOVE";
     [[group _inf], []] call fnc_civ_wp_Tomata;
-    [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_escortinformant_close", _place]], true] call fnc_mission_finish;
+    [localize "STR_DUWS_T_OVERLORD", [format [localize "STR_DUWS_T_escortinformant_close", _place]] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+    [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], [], true] call fnc_mission_finish;
 };
 
 [_townIdx, -(DUWS_curReward select 2), "escort_informant_fail"] call fnc_town_rep_adjust;

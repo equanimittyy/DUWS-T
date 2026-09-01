@@ -334,6 +334,24 @@ the card read "%1 is in ruins" — the shared key was the bug.
 **How to apply:** a `%N`-bearing key belongs to script call sites only. When config needs the
 same sentence, give it its own placeholder-free key rather than pointing both at one ID.
 
+## `localize` on a finished sentence looks it up as a key and logs "String ... not found"
+
+**`localize` only translates a stringtable ID; handed any other string it treats the whole thing as
+a key, fails the lookup, and yields no usable line while logging `String <text> not found` to the
+rpt. It is not an identity function on non-keys.** A line already run through `localize` (and
+`format`) must never be passed to something that will `localize` it again.
+
+`fnc_mission_finish` localises its `_msg` argument, so callers hand it a *key*, not text. The escort
+mission needed the delivery town's name in its close line, pre-formatted the sentence, and passed
+that to finish; finish localised the sentence, the lookup missed, and the success line went silent
+while rep and reward — the rest of finish — still ran, hiding the cause. A `%N`-bearing line cannot
+travel through a localise-the-key sink: format and speak it at the call site (`fnc_duws_dialogue`)
+and hand finish `[]` so it stays quiet.
+
+**How to apply:** decide once whether a string is a key or finished text and never cross the two. A
+line that needs runtime `format` is finished text — speak it yourself; reserve the key-taking helpers
+(`fnc_mission_finish`, anything wrapping `localize`) for bare IDs.
+
 ## A code block sees no locals from where it was written unless it is `call`ed
 
 **SQF blocks are not closures. Scoping is dynamic: a block sees the privates of whatever `call`ed
