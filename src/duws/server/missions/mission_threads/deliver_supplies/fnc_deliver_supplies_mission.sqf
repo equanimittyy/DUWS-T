@@ -54,23 +54,7 @@ switch (VERSION_X) do {
     };
 };
 
-private _crewPos = [_townPos, 0, 80, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-if (_crewPos isEqualTo [] || { (_crewPos select 0) == 0 && { (_crewPos select 1) == 0 } }) then { _crewPos = _townPos };
-private _crewClasses = [
-    "C_IDAP_Man_Aidworker_01_F", "C_IDAP_Man_Aidworker_02_F", "C_IDAP_Man_Aidworker_03_F",
-    "C_IDAP_Man_Aidworker_04_F", "C_IDAP_Man_Aidworker_05_F", "C_IDAP_Man_Aidworker_06_F"
-];
-private _crewUnits = [];
-for "_i" from 1 to 3 do { _crewUnits pushBack (selectRandom _crewClasses) };
-private _crew = [_crewPos, civilian, _crewUnits, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
-private _marshaller = objNull;
-{
-    _x setPos (_crewPos getPos [5 + random 3, random 360]);
-    _x disableAI "MOVE";
-    _x disableAI "PATH";
-    _x setBehaviour "CARELESS";
-    if (_forEachIndex == 0) then { _x switchMove "Acts_JetsShooterNavigate_loop_m"; _marshaller = _x };
-} forEach units _crew;
+([_townPos] call fnc_spawn_aid_crew) params ["_crew", "_marshaller", "_crewPos"];
 
 // Pin the exact drop on the crew; the search circle only marks the town centre.
 private _delivMarker = format ["delivsup_drop_%1", DUWS_mission_token];
@@ -142,7 +126,7 @@ if (time > _deadline) exitWith {
 // Overlord signs off over the net, then the sacks come off the bed and the emptied truck pulls away. The
 // close line is spoken here, mid-theatre, so finish's _line is left empty.
 deleteMarker _delivMarker;
-if (!isNull _marshaller) then { _marshaller switchMove "" };
+if (!isNull _marshaller) then { _marshaller setVariable ["DUWS_holdAnim", false]; _marshaller switchMove "" };
 [localize "STR_DUWS_T_IDAP", format [localize "STR_DUWS_T_idapend", _townName], "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_deliversupplies_close"] remoteExec ["fnc_duws_dialogue", 0];

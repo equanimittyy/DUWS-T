@@ -103,11 +103,8 @@ if ((["ifv"] call DUWS_fnc_tokenClass) != "") then {
     if (_cls != "") then { ([_cls, _targetpos, _radius, "widepatrol"] call fnc_spawn_vehicle) call _claim; };
 };
 
-// Delivery point: a safe spot in the crew's town. The crew, their green smoke and the map marker all sit here.
-private _targetDeliveryPos = [_townPos, 0, 80, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-if (_targetDeliveryPos isEqualTo [] || {(_targetDeliveryPos select 0) == 0 && {(_targetDeliveryPos select 1) == 0}}) then {
-    _targetDeliveryPos = _townPos;
-};
+// Delivery point: the aid crew and their map marker share the spot fnc_spawn_aid_crew resolves.
+([_townPos] call fnc_spawn_aid_crew) params ["_groupDelivery", "_marshaller", "_targetDeliveryPos"];
 
 private _deliveryMarkerName = format ["idap_delivery_%1", DUWS_mission_token];
 createMarker [_deliveryMarkerName, _targetDeliveryPos];
@@ -116,30 +113,6 @@ _deliveryMarkerName setMarkerType "o_unknown";
 _deliveryMarkerName setMarkerColor "ColorGreen";
 _deliveryMarkerName setMarkerText "IDAP";
 _deliveryMarkerName setMarkerSize [1, 1];
-
-_unitClasses = [
-    "C_IDAP_Man_Aidworker_01_F",
-    "C_IDAP_Man_Aidworker_02_F",
-    "C_IDAP_Man_Aidworker_03_F",
-    "C_IDAP_Man_Aidworker_04_F",
-    "C_IDAP_Man_Aidworker_05_F",
-    "C_IDAP_Man_Aidworker_06_F"
-];
-_groupUnits = [];
-for "_i" from 1 to 3 do { _groupUnits pushBack (selectRandom _unitClasses); };
-_groupDelivery = [_targetDeliveryPos, civilian, _groupUnits, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
-
-private _marshaller = objNull;
-{
-    private _offsetDist = 5 + random 3;
-    private _offsetDir = random 360;
-    _x setPos (_targetDeliveryPos getPos [_offsetDist, _offsetDir]);
-    _x disableAI "MOVE";
-    _x disableAI "PATH";
-    _x setBehaviour "CARELESS";
-    // One man marshals; the rest just stand. The act loops, so a single switchMove holds.
-    if (_forEachIndex == 0) then { _x switchMove "Acts_JetsShooterNavigate_loop_m"; _marshaller = _x; };
-} forEach units _groupDelivery;
 
 _cleanupDelivery = {
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
@@ -186,7 +159,7 @@ if (time > _deadline) exitWith {
 
 deleteMarker _deliveryMarkerName;
 // Truck's here: the aid's arrived, so the marshaller drops the guide-in loop and just receives the player.
-if (!isNull _marshaller) then { _marshaller switchMove "" };
+if (!isNull _marshaller) then { _marshaller setVariable ["DUWS_holdAnim", false]; _marshaller switchMove "" };
 // Forced VOICE, not the SUB-NET the speaker's distress call routed to: at hand-over the crew are in the
 // room with the player, not a radio contact, so this line is in person.
 [_speakerIDAP, _message3, "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
