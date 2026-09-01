@@ -7,8 +7,8 @@ if (!([13, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 
 #define RADIUS       300    // hold ring: fail radius, spawn radius and debus radius in one number
 #define ARRIVE_DIST  30
-#define PREP_TIME    600
-#define DEFEND_TIME  1200
+#define PREP_TIME    900
+#define DEFEND_TIME  1800
 #define ABANDON_TIME 20
 
 private _deadline = DUWS_curDeadlineAt;
@@ -57,7 +57,7 @@ _inf setVariable ["AIS_noReviveInit", true, true];
 _inf addWeapon "hgun_P07_F";
 _inf addWeaponItem ["hgun_P07_F", "16Rnd_9x21_Mag", true];
 _inf addMagazines ["16Rnd_9x21_Mag", 2];
-// Half damage, doubling effective health so no fluke ends a 30-minute mission. Scales the per-hit
+// Half damage, doubling effective health so no fluke ends a 45-minute mission. Scales the per-hit
 // increment (not the absolute) so damage still accumulates to death; negative index is whole-body.
 _inf addEventHandler ["HandleDamage", {
     params ["_u", "", "_dmg", "", "", "_hi"];

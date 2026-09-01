@@ -2918,8 +2918,8 @@
                 <English>Copy, Overlord. Moving to the informant now.</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_prep_hint">
-                <Original>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 10 minutes.</Original>
-                <English>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 10 minutes.</English>
+                <Original>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 15 minutes.</Original>
+                <English>Fortify the informant's position. Build defenses from the supply crate. The assault begins in 15 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_arrive">
                 <Original>Thank god you're here. They'll be here any minute now. We should make ready while we still can.</Original>
@@ -2938,8 +2938,8 @@
                 <English>Alpha 1-1, hold the line. Do not let them reach him.</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_hold_hint">
-                <Original>Hold your position for 20 minutes and stay within 300m of the informant.</Original>
-                <English>Hold your position for 20 minutes and stay within 300m of the informant.</English>
+                <Original>Hold your position for 30 minutes and stay within 300m of the informant.</Original>
+                <English>Hold your position for 30 minutes and stay within 300m of the informant.</English>
             </Key>
             <Key ID="STR_DUWS_T_pc_abandon">
                 <Original>No friendly forces within 300m of the informant. The mission will fail in %1s.</Original>
