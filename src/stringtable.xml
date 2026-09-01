@@ -3860,16 +3860,20 @@
                 <English>An informant in this area needs an escort to safety. Reach them and get them clear.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_brief">
-                <Original>Alpha 1-1, an informant near %1 is blown and needs a way out. Get to them and escort them clear.</Original>
-                <English>Alpha 1-1, an informant near %1 is blown and needs a way out. Get to them and escort them clear.</English>
+                <Original>Alpha 1-1, an informant needs escort to %1. Get them there safely.</Original>
+                <English>Alpha 1-1, an informant needs escort to %1. Get them there safely.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_copy">
-                <Original>Copy Overlord, moving to the informant.</Original>
-                <English>Copy Overlord, moving to the informant.</English>
+                <Original>We copy Overlord.</Original>
+                <English>We copy Overlord.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_close">
-                <Original>Allseer confirms the informant is safe. Good work Alpha 1-1.</Original>
-                <English>Allseer confirms the informant is safe. Good work Alpha 1-1.</English>
+                <Original>Good work Alpha 1-1. The informant is safely back to %1.</Original>
+                <English>Good work Alpha 1-1. The informant is safely back to %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escortinformant_fail">
+                <Original>Alpha 1-1, the informant is dead. Nothing more we can do. Disengage and RTB.</Original>
+                <English>Alpha 1-1, the informant is dead. Nothing more we can do. Disengage and RTB.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_join">
                 <Original>Join Group</Original>

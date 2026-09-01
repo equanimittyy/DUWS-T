@@ -101,12 +101,19 @@ private _cleanup = {
     };
 };
 
+// fnc_mission_finish localises and callsign-subs its line but, unlike fnc_mission_present, never
+// %1-formats it, so bake the town name into the close line here.
+private _place = [_townPos] call fnc_place_name;
+
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
     [_townIdx, DUWS_curReward select 2, "escort_informant_success"] call fnc_town_rep_adjust;
     call _cleanup;
-    [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_escortinformant_close"], true] call fnc_mission_finish;
+    [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_escortinformant_close", _place]], true] call fnc_mission_finish;
 };
 
+// Death names the informant; a beat-the-clock timeout passes [] to fall back to the generic "out of
+// time" notice, so a dead line never reports on a live-but-late informant.
+private _failLine = if (!alive _inf) then { ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_escortinformant_fail"] } else { [] };
 [_townIdx, -(DUWS_curReward select 2), "escort_informant_fail"] call fnc_town_rep_adjust;
 call _cleanup;
-[_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
+[_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], _failLine] call fnc_mission_finish;
