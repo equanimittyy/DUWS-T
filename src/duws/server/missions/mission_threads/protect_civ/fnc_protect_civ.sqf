@@ -28,9 +28,11 @@ private _bpos = _building buildingPos -1;
 
 private _tn            = format ["protectciv_%1_%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 private _skipVar       = format ["%1_skip", _tn];
+private _skipAssaultVar = format ["%1_skipAssault", _tn];   // DEBUG: end the hold early as a win
 private _prepActiveVar = format ["%1_prepActive", _tn];
 private _liveVar       = format ["%1_live", _tn];        // spawn -> teardown
 private _defendVar     = format ["%1_defend", _tn];      // defend phase only
+missionNamespace setVariable [_skipAssaultVar, false];
 missionNamespace setVariable [_skipVar, false];
 missionNamespace setVariable [_liveVar, true];
 missionNamespace setVariable [_defendVar, false];
@@ -167,6 +169,16 @@ missionNamespace setVariable [_defendVar, true];
 _inf disableAI "PATH";
 _inf setBehaviour "AWARE";
 _inf setCombatMode "YELLOW";
+
+// DEBUG: Skip Assault -- reach-gated, defend-phase only, gated on the Debug mission param so it never
+// ships to a live game. Ends the hold early through the normal win path (informant left alive).
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1) then {
+    private _cond = format ["_this distance _target < 6 && (missionNamespace getVariable ['%1', false])", _defendVar];
+    [_inf, ["DEBUG: Skip Assault",
+        { [_this select 3 select 0] remoteExec ["fnc_protect_civ_skip_assault", 2] },
+        [_tn], 1.5, false, false, "", _cond]
+    ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
+};
 
 // Budget derived once and held: 7 plus the BLUFOR headcount, counting all on the side (not the living)
 // so casualties never thin the waves.
@@ -305,7 +317,7 @@ private _vehGroups = [];
 };
 
 private _defendEnd = time + DEFEND_TIME;
-waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } };
+waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } || { missionNamespace getVariable [_skipAssaultVar, false] } };
 
 missionNamespace setVariable [_defendVar, false];
 missionNamespace setVariable [_liveVar, false];
