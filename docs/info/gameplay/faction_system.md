@@ -9,7 +9,7 @@ to `src/`. For the wider mission structure see [`architecture.md`](../architectu
 Everything hangs off a fixed set of global variables that map an **abstract DUWS role** to a **concrete
 classname** from whatever mod is in use. A "faction" is any code that assigns this schema; every consumer
 (patrols, guards, supports, request menus) reads the globals, never a mod classname directly.
-`shared/functions/fnc_faction_schema.sqf` is the one place the set is written down.
+`shared/faction_lib/fnc_faction_schema.sqf` is the one place the set is written down.
 
 Both sides spell a role the same way and hold it in the same position, so the names below take either a
 `blufor_` or an `opfor_` prefix. That is what lets a team roster name a role bare and have the side supply
@@ -31,7 +31,7 @@ Each value is a classname string, or an array of candidates (periodically re-rol
 servers and JIP clients see the same faction.
 
 **A role a side's faction files never named is borrowed, not left empty.**
-`shared/functions/fnc_faction_backfill.sqf` holds a short ladder — `AA_SOLDIER_X` from `SPECOPS_AA_X`,
+`shared/faction_lib/fnc_faction_backfill.sqf` holds a short ladder — `AA_SOLDIER_X` from `SPECOPS_AA_X`,
 then `LAT_SOLDIER_X`, then the rifleman — and `server_init.sqf` runs it once both sides have resolved and
 before the confirmation screen paints, so the player edits the borrowed class rather than a blank row. No
 BLUFOR faction file defines an anti-air, anti-tank or sniper role; a shared roster naming one would
@@ -55,7 +55,7 @@ The schema can be populated three ways, all selected at campaign start:
 ## Selection and availability
 
 Which factions the player can pick is discovered at start, not hard-wired.
-`shared/functions/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master lists —
+`shared/faction_lib/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master lists —
 `_faction_files_BLUFOR` and `_faction_files_OPFOR` (~130 entries each). Each entry is:
 
 ```text
@@ -110,7 +110,7 @@ request-menu catalogue the schema does not cover and puts the file's own classna
 globals on the way. An edited key is written back as a pool rebuilt from the picked class's
 `fnc_parseFaction` bucket, so a swap keeps the per-spawn variety instead of pinning the role to one class.
 
-`shared/functions/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
+`shared/faction_lib/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
 `[key, group, kind, required]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s
 required-key validation, and both AutoDetect wrappers' pool-publish lists — which each held their own copy
 of the list before.

@@ -53,7 +53,7 @@ fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_pl
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
 // the only machine allowed to hide a terrain object.
 fnc_clear_foliage = compile preprocessFileLineNumbers "duws\server\misc\fnc_clear_foliage.sqf";
-fnc_factions_check = compile preprocessFileLineNumbers "duws\shared\functions\fnc_factions_check_modern.sqf";
+fnc_factions_check = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_factions_check_modern.sqf";
 fnc_intro_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_intro_heli.sqf";
 publicVariable "fnc_intro_heli";
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
@@ -66,7 +66,7 @@ fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\warcom\fn
 fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_usableBuildings.sqf";
-fnc_factionRoles = compile preprocessFileLineNumbers "duws\shared\functions\fnc_factionRoles.sqf";
+fnc_factionRoles = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_factionRoles.sqf";
 fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\garrison\fnc_holdBuildingPost.sqf";
 fnc_spreadIntoBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_spreadIntoBuildings.sqf";
 fnc_search_drawKind = compile preprocessFileLineNumbers "duws\server\search\fnc_search_drawKind.sqf";
@@ -487,7 +487,7 @@ publicVariable "fnc_support_despawn";
 fnc_support_perm_grant = compile preprocessFileLineNumbers "duws\server\supports\fnc_support_perm_grant.sqf";
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
 // Ahead of faction init, which calls it. Not broadcast: generation and every spawn path are server.
-[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_pools.sqf";
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_pools.sqf";
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
@@ -509,20 +509,20 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // argument and defines nothing -- it must be compiled into the global the callers name.
 fnc_hardpoint_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
-[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_backfill.sqf";
 // The vanilla stand-in mop-up that runs after backfill for a preset or pasted faction's leftover keys.
-[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_vanilla_fill.sqf";
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_vanilla_fill.sqf";
 // The commit-time pass that turns each side's one-class-per-role globals into per-spawn pools. Server
 // only: pools are read only by the spawn paths, which are server-side.
-fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_augment.sqf";
+fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_augment.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_spawn_vocab.sqf";
 // Ahead of the two AutoDetect wrappers and fnc_custom_faction_parse, which both build their key
 // lists from it. Broadcast because the confirmation screen builds its rows from it client-side.
-fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";
-fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
+fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";
+fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 // Broadcast: both request menus and all four request handlers are client-side.
-fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
+fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 // Broadcast: the request menus grey and sort rows by the AP ladder client-side, and the squad server
 // guards read the same gate. The file sets the three globals; each is broadcast in turn.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_ap_gate.sqf";
@@ -546,7 +546,7 @@ publicVariable "DUWS_fnc_squadRow";
 // shell through this, so it must exist on every machine that can call a battery.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_derive_shell.sqf";
 publicVariable "DUWS_fnc_deriveShell";
-fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
+fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
 fnc_request_map_view = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_map_view.sqf";publicVariable "fnc_request_map_view";

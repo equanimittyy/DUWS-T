@@ -31,7 +31,7 @@ import sys
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 SRC = os.path.join(ROOT, "src")
-SCHEMA_FILE = os.path.join(SRC, "duws", "shared", "functions", "fnc_faction_schema.sqf")
+SCHEMA_FILE = os.path.join(SRC, "duws", "shared", "faction_lib", "fnc_faction_schema.sqf")
 
 # Field names whose value is a role slot (or list of them). A value that is not a
 # `*_X` slot and carries no faction prefix -- a team key, a vanilla class, "HMG" --

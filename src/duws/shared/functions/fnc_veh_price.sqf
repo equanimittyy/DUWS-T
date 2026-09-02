@@ -1,5 +1,5 @@
 // Locality: any -- broadcast from server_fnc_init. The request menu prices its rows client-side and
-// the reader (shared/functions/fnc_faction_rqst_list.sqf) reprices every vehicle through here, so it
+// the reader (shared/faction_lib/fnc_faction_rqst_list.sqf) reprices every vehicle through here, so it
 // must resolve identically on every machine. Reads only config, so a vehicle prices itself with no
 // per-faction data and a modded class is covered the moment it is detected.
 //
