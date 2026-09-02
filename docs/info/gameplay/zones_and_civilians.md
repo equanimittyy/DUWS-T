@@ -979,8 +979,8 @@ other. `fnc_civ_arrest` claims `DUWS_civ_arrested` before its own pause and test
 
 | Step | Reach | Source |
 |---|---:|---|
-| Call over | 6 m | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:59` |
-| Interaction menu | 3 m | `src/duws/shared/functions/fnc_civ_menuAction.sqf:44` |
+| Call over | 6 m | `src/duws/shared/civ/fnc_civ_stopCommand.sqf:59` |
+| Interaction menu | 3 m | `src/duws/shared/civ/fnc_civ_menuAction.sqf:44` |
 | Every menu row, re-tested server-side | 3 m | `src/duws/server/civilian/fnc_civ_request.sqf:22` |
 | Search (the player's own action, via `cursorObject`) | 3 m | `client/search/fnc_intel_search_action.sqf` |
 | Release | 3 m | `fnc_civ_release_action.sqf:27` |

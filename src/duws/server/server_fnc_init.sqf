@@ -250,9 +250,9 @@ publicVariable "fnc_addRecruitAction";
 fnc_night_horde_event = compile preprocessFileLineNumbers "duws\server\events\fnc_night_horde_event.sqf";
 publicVariable "fnc_night_horde_event";
 fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_healed.sqf";
-fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
+fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";
-fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_release_action.sqf";
+fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_release_action.sqf";
 publicVariable "fnc_civ_release_action";
 fnc_civ_release = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_release.sqf";
 publicVariable "fnc_civ_release";
@@ -279,7 +279,7 @@ fnc_civ_traffic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_ci
 fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_recycle.sqf";
 fnc_civ_pickHiddenRoad = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_pickHiddenRoad.sqf";
 // Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
-fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_clientActions.sqf";
+fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_clientActions.sqf";
 publicVariable "fnc_civ_clientActions";
 // Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.
@@ -293,7 +293,7 @@ fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\civilian\f
 publicVariable "fnc_civ_bribe_answer";
 fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arrest.sqf";
 publicVariable "fnc_civ_arrest";
-fnc_civ_menuAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_menuAction.sqf";
+fnc_civ_menuAction = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_menuAction.sqf";
 publicVariable "fnc_civ_menuAction";
 fnc_civ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_menu.sqf";
 publicVariable "fnc_civ_menu";
