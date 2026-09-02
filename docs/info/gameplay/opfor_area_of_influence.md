@@ -7,7 +7,7 @@ passive town-reputation drift, and where OPFOR's standalone hardpoints get sited
 
 ## The field
 
-`server/misc/fnc_aoi_init.sqf` defines the field as coverage, not a magnitude: a point is either
+`server/warcom/fnc_aoi_init.sqf` defines the field as coverage, not a magnitude: a point is either
 within reach of a side's ground or it isn't, with no falloff and no per-emitter strength, because
 the drift it drives is a flat step rather than a weighted one (see [Rep drift](#rep-drift)).
 `DUWS_fnc_aoi_covers` (`fnc_aoi_init.sqf:17`) is the shared primitive both sides' coverage tests
@@ -135,7 +135,7 @@ commander prefers, is [`../opcom_plan.md`](../../plans/opcom_plan.md)'s to
 add; nothing here reads a belief store or an archetype.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
-execs `fnc_debug_aoi_circles` (`server/misc/fnc_debug_aoi_circles.sqf`) to gather every emitter's
+execs `fnc_debug_aoi_circles` (`server/warcom/fnc_debug_aoi_circles.sqf`) to gather every emitter's
 `[center, radius, side]`, which `fnc_debug_aoi_draw` (`client/dialog/fnc_debug_aoi_draw.sqf`) draws
 as translucent local markers, pink for OPFOR and cyan for BLUFOR. It is reached from the dev debug
 menu, not shown to the player.
