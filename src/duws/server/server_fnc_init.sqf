@@ -212,6 +212,10 @@ fnc_escort_informant_mission = compile preprocessFileLineNumbers "duws\server\mi
 // Broadcast: the informant's Join/Leave Group actions remoteExec this from clients.
 fnc_escort_informant_group = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_group.sqf";publicVariable "fnc_escort_informant_group";
 fnc_deliver_supplies_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deliver_supplies\fnc_deliver_supplies_mission.sqf";
+// One town-snap finder for both delivery threads; broadcast, as the picker calls it client-side.
+fnc_escort_informant_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_civ_town.sqf";
+fnc_deliver_supplies_site = fnc_escort_informant_site;
+publicVariable "fnc_escort_informant_site"; publicVariable "fnc_deliver_supplies_site";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
