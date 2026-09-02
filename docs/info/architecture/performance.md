@@ -157,7 +157,7 @@ the line above leaves commented out, so the per-frame bounding-box sweep it regi
 
 **Marker creation is paired with deletion.** Every `createMarker` in the mission threads and supports has
 a matching `deleteMarker` on the paths that end the mission. The subtitle queue is also bounded —
-`client/misc/fnc_duws_dialogue_drain.sqf` dequeues on every pass and expires radio lines older than 8 s
+`client/chatter/fnc_duws_dialogue_drain.sqf` dequeues on every pass and expires radio lines older than 8 s
 rather than letting them accumulate.
 
 **Unthrottled `waitUntil`.** 36 `waitUntil` blocks contain no `sleep`, so their condition is re-evaluated

@@ -788,7 +788,7 @@ refund attached to the one restore that consumes it.
 | `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:159`, and stop the connect handler at `:214` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
-| `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
+| `client/chatter/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
 | `client/client_init.sqf:449` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |

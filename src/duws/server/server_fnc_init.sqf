@@ -24,7 +24,7 @@ publicVariable "fnc_support_claim";
 publicVariable "fnc_hcair_claim_request";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
-fnc_duws_dialogue_channel = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue_channel.sqf";
+fnc_duws_dialogue_channel = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue_channel.sqf";
 publicVariable "fnc_duws_dialogue_channel";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_composition_stream_init.sqf";
 publicVariable "fnc_duws_disposeAfter";
@@ -634,10 +634,10 @@ fnc_duws_help = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_hel
 fnc_duws_config = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_config.sqf";publicVariable "fnc_duws_config";
 fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
 fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_duws_senior_name.sqf";publicVariable "fnc_duws_senior_name";
-fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
-fnc_duws_subnet_log = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_subnet_log.sqf";publicVariable "fnc_duws_subnet_log";
-fnc_duws_subnet_render = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_subnet_render.sqf";publicVariable "fnc_duws_subnet_render";
-fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue_drain.sqf";publicVariable "fnc_duws_dialogue_drain";
+fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
+fnc_duws_subnet_log = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_subnet_log.sqf";publicVariable "fnc_duws_subnet_log";
+fnc_duws_subnet_render = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_subnet_render.sqf";publicVariable "fnc_duws_subnet_render";
+fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue_drain.sqf";publicVariable "fnc_duws_dialogue_drain";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";

@@ -7,7 +7,7 @@ initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
 initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
 duws/shared/functions/fnc_cs.sqf::*fnc_cs
 duws/shared/functions/fnc_faction_rqst_list.sqf::*fnc_faction_rqst_list
-duws/client/misc/fnc_duws_dialogue_channel.sqf::*fnc_duws_dialogue_channel
+duws/client/chatter/fnc_duws_dialogue_channel.sqf::*fnc_duws_dialogue_channel
 duws/server/civilian/fnc_civ_state_init.sqf::fnc_civ_reaction_weights
 duws/server/civilian/fnc_civ_state_init.sqf::fnc_civ_rowPrice
 duws/server/civilian/fnc_civ_state_init.sqf::fnc_civ_townBand

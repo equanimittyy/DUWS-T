@@ -32,7 +32,7 @@ PAT = re.compile("|".join(re.escape(k) for k in RETIRED))
 
 # The drain loop owns the screen, so it holds the single sanctioned call. Pinned to one file
 # rather than dropped from the ban: that is what keeps the other 273 sites from creeping back.
-ALLOWED = {"BIS_fnc_showSubtitle": "client/misc/fnc_duws_dialogue_drain.sqf"}
+ALLOWED = {"BIS_fnc_showSubtitle": "client/chatter/fnc_duws_dialogue_drain.sqf"}
 
 
 def main():
