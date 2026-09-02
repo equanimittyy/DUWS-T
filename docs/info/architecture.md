@@ -129,7 +129,7 @@ does not imply server-only.
 | System | Where | Note |
 |---|---|---|
 | Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions, plus per-town reputation. Writers, faucets and sinks in [`economy.md`](gameplay/economy.md) |
-| Persistence | `server/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
+| Persistence | `server/persistence/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
 | Unit spawning | `server/init_zones/fnc_spawn_team.sqf`, `fnc_spawn_vehicle.sqf`, `shared/functions/fnc_spawn_vocab.sqf` | Three systems, chosen by what is raised: the token spawner (rosters as data, one call for side/skill/loot/posture) for teams that patrol or garrison; static crewing for a gunner on an emplaced weapon; direct `BIS_fnc_spawnGroup` for bespoke one-offs that share no team shape. Which is which, and why they are not interchangeable, are in [`unit_spawning.md`](architecture/unit_spawning.md) |
 | Faction detection | `server/misc/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](gameplay/faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
