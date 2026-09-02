@@ -20,7 +20,7 @@ Default-on (`moreUrban = 1`, `src/duws/server/server_var_init.sqf:140`; campaign
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Survey | `server/misc/fnc_moreUrban_locations.sqf` | `MASTER_allLocations_filtered` (Locations, town-weighted, shuffled) |
+| 1. Survey | `server/init_zones/fnc_moreUrban_locations.sqf` | `MASTER_allLocations_filtered` (Locations, town-weighted, shuffled) |
 | 2. Siting | `server/init_zones/fnc_locatorzones_random.sqf` | one `_zonePos` per zone -> `fnc_createZone` |
 | 3. Build-out | `server/init_zones/fnc_createzone.sqf` | markers, prefab, fortifications, triggers |
 

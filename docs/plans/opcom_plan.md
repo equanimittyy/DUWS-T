@@ -282,7 +282,7 @@ this call — one shared loop over the whole registry, not one thread each
 | Property | Value | Why |
 |---|---|---|
 | Outer tick | 60-90 s | Refresh belief, score, commit at most one thing. The sinks keep their own cooldowns; the tick decides only whether this is a spending tick |
-| Scoring pass | inside `isNil { ... }` | Unscheduled, so it runs uninterrupted instead of being sliced at ~3 ms a frame. `server/misc/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline rather than an iteration count |
+| Scoring pass | inside `isNil { ... }` | Unscheduled, so it runs uninterrupted instead of being sliced at ~3 ms a frame. `server/init_zones/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline rather than an iteration count |
 | Clock | `time` | Intent expiries and belief stamps have to survive a savegame |
 | Orders | server-local groups only | Waypoints are silently ignored unless the group is local to the issuing machine |
 | State | numbers, strings, arrays of those | No group or object handles anywhere near the mission namespace |

@@ -533,7 +533,7 @@ other scripts compete — not by how much work it does.**
 
 Boot is the worst case: a dozen scripts spawn at once, and a loop calling a mid-cost engine command
 per iteration settles at ~one iteration per frame however many iterations. The terrain survey in
-`src/duws/server/misc/fnc_moreUrban_locations.sqf` measured ~50 candidates/second across runs of
+`src/duws/server/init_zones/fnc_moreUrban_locations.sqf` measured ~50 candidates/second across runs of
 1144, 3392 and 5909 candidates — a flat rate tracking frame rate, not workload, which is the
 signature. Nothing in the SQF hints at it; the loop simply appears to hang.
 

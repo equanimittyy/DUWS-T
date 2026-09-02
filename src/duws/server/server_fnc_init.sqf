@@ -624,7 +624,7 @@ fnc_hirePartisans = compile preprocessFileLineNumbers "duws\server\misc\fnc_hire
 publicVariable "fnc_hirePartisans";
 fnc_hirePMC = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePMC.sqf";
 publicVariable "fnc_hirePMC";
-fnc_moreUrban_locations = compile preprocessFileLineNumbers "duws\server\misc\fnc_moreUrban_locations.sqf";publicVariable "fnc_moreUrban_locations";
+fnc_moreUrban_locations = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_moreUrban_locations.sqf";publicVariable "fnc_moreUrban_locations";
 fnc_hc_init = compile preprocessFileLineNumbers "duws\client\misc\fnc_hc_init.sqf";publicVariable "fnc_hc_init";
 fnc_fob_unlock_notice = compile preprocessFileLineNumbers "duws\client\warcom\fnc_fob_unlock_notice.sqf";publicVariable "fnc_fob_unlock_notice";
 fnc_kndr_unit_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_kndr_unit_markers.sqf";publicVariable "fnc_kndr_unit_markers";
