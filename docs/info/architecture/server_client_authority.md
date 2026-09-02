@@ -52,7 +52,7 @@ function open cannot see. Three files in the tree make the point:
 |---|---|---|
 | `server/dialog/fnc_MHQ_deploy.sqf` | client, from its folder | server — the action at `shared/functions/fnc_MHQ_addActions.sqf:21` sends it to target 2 |
 | `client/supports/fnc_helolift.sqf` | server, from an early `isServer` guard | client throughout; that guard is *indented*, governing an inner block only |
-| `server/misc/fnc_createKillhouse.sqf` | server, and it is | but its `addAction` body runs on the activating client, so `player` resolves there |
+| `server/killhouse/fnc_createKillhouse.sqf` | server, and it is | but its `addAction` body runs on the activating client, so `player` resolves there |
 
 So each load-bearing function states its locality on line one:
 

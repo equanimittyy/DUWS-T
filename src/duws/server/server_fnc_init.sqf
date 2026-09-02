@@ -99,7 +99,7 @@ fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server
 publicVariable "fnc_hirePartisans_spawnDeployed";
 fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_addBoardKillhouseActions.sqf";
 publicVariable "fnc_addBoardKillhouseActions";
-fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_killhouse_markers.sqf";
+fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\killhouse\fnc_killhouse_markers.sqf";
 publicVariable "fnc_killhouse_markers";
 fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_sabotage_laptop_markers.sqf";
 publicVariable "fnc_sabotage_laptop_markers";
@@ -663,7 +663,7 @@ fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\client\sup
 publicVariable "fnc_client_addRepairActions";
 fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployHQUnits.sqf";
 publicVariable "fnc_redeployHQUnits";
-fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\misc\fnc_createKillhouse.sqf";
+fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\killhouse\fnc_createKillhouse.sqf";
 publicVariable "fnc_createKillhouse";
 fnc_lbselected = compile preprocessFileLineNumbers "duws\client\operative\fnc_lbselected.sqf";publicVariable "fnc_lbselected";
 fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\misc\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";

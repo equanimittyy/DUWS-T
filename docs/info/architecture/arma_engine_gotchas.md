@@ -649,7 +649,7 @@ silent for every shot a client fires, and again works perfectly for a hosting pl
 and have its body send the result back to whichever machine owns the state. Pass the object as
 the `remoteExec` JIP parameter so joining clients receive it — see
 [§The JIP queue is append-only](#the-jip-queue-is-append-only-unless-the-message-carries-an-id-you-choose).
-The killhouse does this in `server/misc/fnc_createKillhouse.sqf`, bouncing each hit to
+The killhouse does this in `server/killhouse/fnc_createKillhouse.sqf`, bouncing each hit to
 `killhouse_srv_target_hit`.
 
 ## `setMarkerColor` accepts an inline `#(r,g,b,a)` string, not only a `CfgMarkerColors` class

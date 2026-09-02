@@ -76,7 +76,7 @@ nothing rather than by erroring:
 
 - **It enumerates `*.sqf` only.** A composition moved into an `.hpp` becomes invisible to the tool,
   so a data file split out of a builder has to keep the `.sqf` extension even when it holds nothing
-  but an array. `server/misc/killhouse_composition.sqf` is named that way for this reason.
+  but an array. `server/killhouse/killhouse_composition.sqf` is named that way for this reason.
 - **`zbase=` is resolved by regex against the file holding the fence.** The constant it names has to
   be declared in that same file. Split the array away from its `_centerSpawnZ` and the attribute
   matches nothing, the origin silently falls back to zero, and the import lands on the terrain

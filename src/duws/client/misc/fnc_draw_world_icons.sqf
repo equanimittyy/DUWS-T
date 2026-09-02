@@ -8,7 +8,7 @@
 // stacked handler in the mission rather than its own, so any other system that wants one has to
 // work around it.
 //
-// The killhouse contact markers stay out of this table (client/misc/fnc_killhouse_markers.sqf).
+// The killhouse contact markers stay out of this table (client/killhouse/fnc_killhouse_markers.sqf).
 // Their alpha is a per-frame function of range and their subjects are a list that changes as the
 // run goes on, where everything here is a prop that stands still.
 if (!hasInterface) exitWith {};
