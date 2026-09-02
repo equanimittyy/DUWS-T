@@ -15,7 +15,7 @@ and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited i
 
 ## Status at a glance
 
-20 types (indices 0-19). The rework's shape is settled: each mission should pose a **distinct
+22 types (indices 0-21). The rework's shape is settled: each mission should pose a **distinct
 problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
 [`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
 
@@ -38,6 +38,8 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 14 | Recover Humanitarian Supply Truck | seize an OPFOR-guarded aid truck and drive it to the IDAP crew waiting in a neutral/BLUFOR town | `transport_idap/` |
 | 13 | Protect Informant | reach the informant, fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | `protect_civ/` (testing) |
 | 19 | Destroy Air Asset | down a tier-gated OPFOR gunship (attack heli / jet) that loiters over the ring, kept fuelled and periodically fixed by Allseer | `destroy_air/` (testing) |
+| 20 | Escort Informant | recruit a friendly informant who holds at HQ, then walk or drive him alive to a neutral/BLUFOR town through whatever OPFOR sits on the route | `escort_informant/` (testing) |
+| 21 | Deliver Supplies | drive an IDAP aid truck from HQ into a neutral/BLUFOR town and hand it to the waiting aid crew (transport_IDAP run forward) | `deliver_supplies/` (testing) |
 
 **Complete, kept as a fixed-site destroy (no distinct-verb rework -- accepted as-is):** Destroy Ammo
 Cache (9) and Destroy Radar (10). Both are repriced, and the cache's one-shot arsenal reward is
@@ -49,9 +51,10 @@ design bar, not pending work.
 Vehicle (6). Same verb -- steal a guarded vehicle and drive it back to home HQ -- differing only in the
 prize (supply truck vs builder vehicle). Repriced to 20/20 and 20/30; no longer the half-pay twin.
 
-**Built, in play-testing (not yet accepted as *done*):** Destroy Air Asset (19, new) and Protect
-Informant (13, reworked into defend-and-build). Both are priced and playable; they sit apart from
-*done* only until a play-test signs them off. Designs below.
+**Built, in play-testing (not yet accepted as *done*):** Destroy Air Asset (19, new), Protect
+Informant (13, reworked into defend-and-build), and the two new civilian escorts Escort Informant
+(20) and Deliver Supplies (21). All are priced and playable; they sit apart from *done* only until a
+play-test signs them off. Designs below.
 
 **Still stale -- needs *both* a reprice and a distinct-verb gameplay rework:** Rescue Pilot (4) only.
 Idea in the [tracker](#per-mission-rework-tracker).
@@ -282,8 +285,12 @@ empty; every town in reach is in the OPFOR band) the offer is dropped. The finde
 state (`duws_town_circles`, `DUWS_enemy_town_pos`). The thread re-derives the nearest non-enemy town from
 the same state and aborts (`no_delivery_town`) if the war state flipped the last one hostile in the gap.
 
-**The crew and hand-over.** Five IDAP aid workers stand idle at a safe spot in the delivery town under a
-looping green smoke plume and a green "IDAP" map marker. Delivery lifts the town's reputation by +3
+**The crew and hand-over.** Three IDAP aid workers stand idle at a safe spot in the delivery town under a
+green "IDAP" map marker, one of them marshalling the truck in with a held wave pose. The crew is raised by
+the shared `fnc_spawn_aid_crew` (`server/missions/`), which both IDAP-delivery missions call -- it returns
+`[group, marshaller, crewPos]`, pins the delivery marker and drop distance on `crewPos`, and holds the
+marshaller's gesture against the engine cancelling it until the hand-over clears `DUWS_holdAnim`. Delivery
+lifts the town's reputation by +3
 (`fnc_town_rep_adjust`, keyed by the town's own index, not `fnc_civ_townAt` on the truck's contested-
 ground spawn); losing the truck sours it by -3. `fnc_town_rep_adjust` self-guards an out-of-range index,
 so RAVAGE/WBK (towns but no reputation array) take the call harmlessly. The hpp REP column reads 3 to
@@ -327,6 +334,53 @@ the player finds it -- the thread refuels and rearms it on its own 300 s clock, 
 proximity. And a fast mover is unfindable from a static marker, so Allseer drops a fix on the airframe
 and re-lays it every ~150-210 s (`o_air`, `ColorEAST`), calling it in on the same cadence: a periodic
 fix the player races to, not a frame-by-frame blip.
+
+### Escort Informant
+
+`mission_threads/escort_informant/`. The manhunt run backwards: instead of hunting a hidden OPFOR
+informant, the player collects a *friendly* one and gets him home. A WEST unit in civilian dress spawns
+idle at BLUFOR HQ (`setCaptive false`, `allowDamage true`), so OPFOR treats him as a target and the
+escort to the surveyed town is contested. A group leader recruits him with a "Join Group" action (a
+"Leave Group" undoes it); the leader gate is in the action body, not its condition, so a non-leader still
+sees the action and is told why it did nothing. Join/Leave route through `fnc_escort_informant_group`,
+which toggles only `MOVE` (follow when in the group, hold-where-dropped when out) and never touches
+`PATH`, keeping his pathing usable. Win: informant alive within 50 m of the town. Fail: informant dead,
+or the deadline. The win polls `alive`/`distance2D` itself, so it stays off the one-shot spine.
+
+**Siting and the delivery town.** `surveyKind "town"` with **no** site finder -- it inherits
+`fnc_site_generic` and re-derives the target town in-thread: the nearest circle in `duws_town_circles`
+that is *not* in `DUWS_enemy_town_pos`, its index (aligned with `civ_locations`) driving the rep call. If
+the war state left no non-enemy town in reach, the thread aborts `no_delivery_town`. The informant spawns
+on a `BIS_fnc_findSafePos` near HQ.
+
+**Send-off and teardown.** He rides a manhunt-style map marker (`mil_warning`, refreshed every 5 s on a
+drone-ping cadence, not per frame) and reuses `protect_civ`'s `DUWS_float_informant` global and client
+drawer -- safe because one side mission runs at a time. On a win he is released from the player's group,
+set captive so nobody guns down a now-harmless civilian, and walks the Tomata civil stroll into town
+(`fnc_civ_wp_Tomata`); on a live timeout he makes his own way there on foot; dead, the corpse rides the
+dead-owned census. The +1 REP is paid on a win, -1 on any fail. Spawns no opposition of its own -- the
+fight is whatever OPFOR already sits between HQ and the town. See the [engine
+gotchas](../info/architecture/arma_engine_gotchas.md) for the localise-a-finished-sentence trap the win
+line hit: the close line names the town, so it is spoken at the call site and `fnc_mission_finish` is
+handed `[]`, never a pre-formatted sentence to re-localise.
+
+### Deliver Supplies
+
+`mission_threads/deliver_supplies/`. `transport_IDAP` run forward: the aid truck starts safe at BLUFOR HQ
+rather than under OPFOR guard in the field, and the player drives it into the surveyed town where the IDAP
+crew waits. A `C_Truck_02_transport_F` spawns near HQ with two IDAP food-sack cargo props attached to the
+bed (MODERN version only); an HQ `loc_Truck` marker rides the hull until a BLUFOR crew boards, then clears.
+The receiving crew is the shared `fnc_spawn_aid_crew` (same helper as `transport_IDAP`). Win: the truck
+within 50 m of the crew's resolved spot (`crewPos`, not the town centre -- else it ticks up to 40 m short
+of the drop). Fail: truck destroyed (`> 0.95` damage), crew all dead, or the deadline. The win is a
+delivered-vehicle predicate the thread polls itself.
+
+**Siting** mirrors Escort Informant: `surveyKind "town"`, no finder, the same non-enemy-town re-derivation
+and `no_delivery_town` abort. **Hand-over** mirrors `transport_IDAP`'s theatre: the marshaller drops its
+guide-in pose, IDAP thanks the player in the room (VOICE, naming the town), Overlord signs off over the
+net, then the sacks come off the bed and the emptied truck pulls away before teardown. +3 REP on delivery,
+-3 on each fail branch. Spawns no opposition -- like Escort Informant, the difficulty is the war state on
+the HQ-to-town route.
 
 ## Planned reworks (decided, not built)
 
@@ -376,6 +430,8 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
 | 13 | Protect Informant | defend | civ | 30/30/3 | 4 | testing (defend-and-build; see rework doc) |
 | 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done |
+| 20 | Escort Informant | escort | civ | 5/20/1 | 2 | testing (spawns no opposition; route fight is the war state) |
+| 21 | Deliver Supplies | escort | civ | 20/5/3 | 2 | testing (spawns no opposition; route fight is the war state) |
 
 ## Pricing rework (command missions)
 
@@ -386,9 +442,12 @@ Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Si
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
 note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **The one
 still-stale mission carries its old numbers and is open pricing work** -- Rescue Pilot. Recover
-Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The two
+Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The four
 in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
-Air Asset at 25/25 (0h30-1h00), +10 CP when the side fields a jet over the attack helicopter.
+Air Asset at 25/25 (0h30-1h00) with +10 CP when the side fields a jet over the attack helicopter, and
+the two new civilian escorts -- Escort Informant at 5/20/1 (1h00-1h30) and Deliver Supplies at 20/5/3
+(0h30-1h00). Both escorts spawn no opposition of their own, so their pay leans low and the REP carries
+part of the value, as with Recover Humanitarian Supply Truck.
 
 ## Per-mission rework tracker
 
@@ -416,12 +475,14 @@ locked spec.
 | Protect Informant | defend-and-build: fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | testing |
 | Recover Humanitarian Supply Truck | retake the OPFOR-guarded aid truck and deliver it to the IDAP crew's neutral/BLUFOR town | done |
 | Destroy Air Asset | intercept and down a tier-gated OPFOR gunship (attack heli / jet) loitering over the ring | testing |
+| Escort Informant | new civilian escort: recruit a friendly informant at HQ and deliver him alive to a neutral/BLUFOR town | testing |
+| Deliver Supplies | new civilian escort: drive an IDAP aid truck from HQ to the crew's neutral/BLUFOR town | testing |
 
 ## Open decisions
 
 - Build the one remaining planned rework above (Rescue Pilot; verb decided, not coded yet).
 - CP/AP and deadline band for Rescue Pilot; its pricing pass follows the build.
-- Sign off the two in play-testing (Protect Informant, Destroy Air Asset) as *done*, or respec from
-  play-test findings.
+- Sign off the four in play-testing (Protect Informant, Destroy Air Asset, Escort Informant, Deliver
+  Supplies) as *done*, or respec from play-test findings.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
