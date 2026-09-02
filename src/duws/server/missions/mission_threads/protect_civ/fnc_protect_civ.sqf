@@ -95,7 +95,7 @@ DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
 // NOT JIP: DUWS_pc_crate is reused by the next instance, so a persisted entry would re-register onto its crate.
 [[[], {
     waitUntil { !isNil "DUWS_pc_crate" && { !isNull DUWS_pc_crate } };
-    [DUWS_pc_crate, 250, west, ["Fortifications", "Cargo", "Structures_Fences", "Structures_Walls", "Static"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+    [DUWS_pc_crate, 500, west, ["Fortifications"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
 }], "BIS_fnc_spawn", true, false] spawn BIS_fnc_MP;
 
 // Enrol only this crate's built objects under the mission key: R3F flags factory-made objects
