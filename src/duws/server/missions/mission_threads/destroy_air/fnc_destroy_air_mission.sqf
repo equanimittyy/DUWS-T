@@ -82,7 +82,7 @@ private _deadline = DUWS_curDeadlineAt;
 // Allseer's fix marker on the aircraft, moved on the report cadence below. Created lazily on the first
 // report so a kill before then leaves nothing to delete.
 private _trackMarker = "";
-private _nextReportAt = time + (30 + random 150);
+private _nextReportAt = time + (15 + random 75);
 // Far from every player the global ten-minute resupply (fnc_AI_Master_Control) never reaches the asset,
 // so a long patrol runs the tank dry and the objective falls out of the sky before the player finds it.
 // Keep it fuelled and armed on its own clock, unconditional on player proximity.
@@ -131,7 +131,7 @@ waitUntil {
         };
         _trackMarker setMarkerPos (getPosATL _veh);
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_destroyair_track"] remoteExec ["fnc_duws_dialogue", 0];
-        _nextReportAt = time + (30 + random 150);
+        _nextReportAt = time + (15 + random 75);
     };
     false
 };
