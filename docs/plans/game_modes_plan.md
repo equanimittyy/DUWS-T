@@ -56,7 +56,7 @@ derived at the two read sites above. Its environment row goes: `shared/includes/
 Two mod-backed implementations sit behind one row. Ravage supplies `zombie_bolter` / `zombie_runner`
 / `zombie_walker` (`shared/factions/CIV_FACTIONS.sqf:81-95`, which already probes for them and
 falls back to plain civilians with a warning when the mod is absent); WBK supplies its own special
-zombies, listed in `server/misc/fnc_civ_handler_wbk.sqf:131-144`. Each has its own town handler and
+zombies, listed in `server/civilian/fnc_civ_handler_wbk.sqf:131-144`. Each has its own town handler and
 neither shares the plain-civilian path.
 
 **Which faction counts as zombies is decided by display name**, not by a per-mod class list:
@@ -93,11 +93,11 @@ only what flavour of civilian a town holds. Grouped by what they actually gate:
 
 | What it gates | Sites |
 |---|---|
-| Handler dispatch and town setup | `server/misc/fnc_civ_init_Tomata.sqf:177,234,238,282` |
-| Reputation and garrison suppression | `server/misc/fnc_civ_rep_Tomata.sqf:12`, `fnc_civ_garrison.sqf:8`, `fnc_escalation.sqf:9` |
-| Ravage-only spawn extras | `server/misc/fnc_civ_spawnUnit.sqf:28,44`, `fnc_civ_recycle.sqf:125,141`, `server/server_init.sqf:162` |
+| Handler dispatch and town setup | `server/civilian/fnc_civ_init_Tomata.sqf:177,234,238,282` |
+| Reputation and garrison suppression | `server/civilian/fnc_civ_rep_Tomata.sqf:12`, `fnc_civ_garrison.sqf:8`, `fnc_escalation.sqf:9` |
+| Ravage-only spawn extras | `server/civilian/fnc_civ_spawnUnit.sqf:28,44`, `fnc_civ_recycle.sqf:125,141`, `server/server_init.sqf:162` |
 | Task text and objectives | `server/misc/fnc_capture_zones_task.sqf:37,46` |
-| Disguise and recruitment | `client/dialog/fnc_disguise_menu.sqf:28`, `server/misc/fnc_disguiseAsCivilian.sqf:46`, `fnc_recruit_civilian_server.sqf:107` |
+| Disguise and recruitment | `client/dialog/fnc_disguise_menu.sqf:28`, `server/civilian/fnc_disguiseAsCivilian.sqf:46`, `fnc_recruit_civilian_server.sqf:107` |
 | Cleanup and client atmosphere | `server/missions/fnc_mission_cleanup.sqf:95-96`, `server/server_init.sqf:399`, `client/client_init.sqf:302,310,377,380` |
 
 The mode's own goal — a survivor base to build up and an escape to reach — is new content built on

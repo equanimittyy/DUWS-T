@@ -413,7 +413,7 @@ Extending it needs little new machinery: a zone's tier is already stored per zon
 table is already indexed by it, and zone and town strength already share one attrition ledger —
 `fnc_zone_strength` (`server/init_zones/fnc_zone_state_init.sqf:84`) reads it through
 `DUWS_fnc_garrisonStrength`, the same store `fnc_town_garrison_reinforce`
-(`server/misc/fnc_civ_state_init.sqf:166`) writes through `DUWS_fnc_garrisonUnlose`. There is no zone
+(`server/civilian/fnc_civ_state_init.sqf:166`) writes through `DUWS_fnc_garrisonUnlose`. There is no zone
 strength *setter* today, so what is missing is the pair of wrappers — one applying that reinforcement
 step to a zone key, one writing a zone tier with a clamp.
 

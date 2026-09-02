@@ -32,7 +32,7 @@ reach and only amplify BLUFOR's drift wherever the emitters above already cover 
 
 A town emits only once its reputation has fully crossed `±10` — the same `OPFOR_BAND` threshold
 that already flips a town's side for garrison and income
-(`server/misc/fnc_civ_garrison.sqf:33`, `fnc_civ_state_init.sqf:296-301`). A neutral town is inert,
+(`server/civilian/fnc_civ_garrison.sqf:33`, `fnc_civ_state_init.sqf:296-301`). A neutral town is inert,
 so influence spreads only from a town that has fully fallen, never one merely leaning.
 
 The reaches are large against Altis by intent: OPFOR starts holding every zone (all zones are

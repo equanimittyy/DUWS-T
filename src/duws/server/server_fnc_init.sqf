@@ -15,7 +15,7 @@ publicVariable "fnc_pool_reply";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_site_stream_init.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_state_init.sqf";
 fnc_fob_deregister = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_deregister.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_state_init.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_state_init.sqf";
 publicVariable "fnc_civ_moveToPlayerServer";
 fnc_duws_bluforNear = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_bluforNear.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_support_claim_init.sqf";
@@ -87,7 +87,7 @@ fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalat
 // Broadcast: fnc_escalation arms this on every machine (BuildingChanged is a local event) so a
 // building a client razed still reaches the server-side counter.
 fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
-fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
+fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created
 // server-local precisely because this reads server-side zone state.
@@ -103,7 +103,7 @@ fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_
 publicVariable "fnc_killhouse_markers";
 fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_sabotage_laptop_markers.sqf";
 publicVariable "fnc_sabotage_laptop_markers";
-fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_protect_civ_markers.sqf";
+fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\civilian\fnc_protect_civ_markers.sqf";
 publicVariable "fnc_protect_civ_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
@@ -216,12 +216,12 @@ fnc_escort_informant_site = compile preprocessFileLineNumbers "duws\server\missi
 fnc_deliver_supplies_site = fnc_escort_informant_site;
 publicVariable "fnc_escort_informant_site"; publicVariable "fnc_deliver_supplies_site";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
-fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
-fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
-fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_selectTowns.sqf";
+fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_init_Tomata.sqf";
+fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_setup_array.sqf";
+fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_selectTowns.sqf";
 // Broadcast for the same reason the RAVAGE and WBK handlers are: the town presence trigger names
 // it, and that trigger is global, so every machine evaluates it and every machine runs the body.
-fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_town_reveal.sqf";
+fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_town_reveal.sqf";
 publicVariable "fnc_civ_town_reveal";
 // The board's map readout. The query is broadcast because a client is what calls it, and the
 // two display halves because the server is what calls them back.
@@ -231,62 +231,62 @@ fnc_map_readout_draw = compile preprocessFileLineNumbers "duws\client\misc\fnc_m
 publicVariable "fnc_map_readout_draw";
 fnc_map_readout_open = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_open.sqf";
 publicVariable "fnc_map_readout_open";
-fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
+fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_wp_Tomata.sqf";
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
-fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_panic.sqf";
-fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";
+fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_panic.sqf";
+fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";
-fnc_recruit_civilian_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_recruit_civilian_server.sqf";
+fnc_recruit_civilian_server = compile preprocessFileLineNumbers "duws\server\civilian\fnc_recruit_civilian_server.sqf";
 publicVariable "fnc_recruit_civilian_server";
 fnc_addRecruitAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_addRecruitAction.sqf";
 publicVariable "fnc_addRecruitAction";
-fnc_night_horde_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_night_horde_event.sqf";
+fnc_night_horde_event = compile preprocessFileLineNumbers "duws\server\events\fnc_night_horde_event.sqf";
 publicVariable "fnc_night_horde_event";
-fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_healed.sqf";
+fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_healed.sqf";
 fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";
 fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_release_action.sqf";
 publicVariable "fnc_civ_release_action";
-fnc_civ_release = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_release.sqf";
+fnc_civ_release = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_release.sqf";
 publicVariable "fnc_civ_release";
 // Not broadcast, unlike the two below it: the plain civilian path is a server-side thread started
 // at town registration, so no trigger anywhere names it.
-fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";
-fnc_civ_handler_ravage = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_ravage.sqf";
+fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_handler.sqf";
+fnc_civ_handler_ravage = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_handler_ravage.sqf";
 publicVariable "fnc_civ_handler_ravage";
-fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
+fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
 // Shared by the two mode handlers above and by nothing else -- fnc_civ_handler runs mod-free and
 // takes no mutex, so it must not reach these.
-fnc_civ_mode_releaseLock = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_mode_releaseLock.sqf";
-fnc_civ_mode_spawnGate = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_mode_spawnGate.sqf";
+fnc_civ_mode_releaseLock = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_mode_releaseLock.sqf";
+fnc_civ_mode_spawnGate = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_mode_spawnGate.sqf";
 // Server-only: every caller is a handler thread or its trigger, and the trigger already resolves
 // on the machine that runs the spawn. The recycle pass is RAVAGE and WBK's alone; the ceiling is
 // shared with the plain path.
-fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_liveTarget.sqf";
-fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnUnit.sqf";
-fnc_civ_roadDir = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_roadDir.sqf";
-fnc_civ_spawnCar = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnCar.sqf";
-fnc_civ_loopRoute = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_loopRoute.sqf";
-fnc_civ_traffic = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_traffic.sqf";
-fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recycle.sqf";
-fnc_civ_pickHiddenRoad = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_pickHiddenRoad.sqf";
+fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_liveTarget.sqf";
+fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_spawnUnit.sqf";
+fnc_civ_roadDir = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_roadDir.sqf";
+fnc_civ_spawnCar = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_spawnCar.sqf";
+fnc_civ_loopRoute = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_loopRoute.sqf";
+fnc_civ_traffic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_traffic.sqf";
+fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_recycle.sqf";
+fnc_civ_pickHiddenRoad = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_pickHiddenRoad.sqf";
 // Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
 fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_clientActions.sqf";
 publicVariable "fnc_civ_clientActions";
 // Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.
-fnc_civ_request = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_request.sqf";
+fnc_civ_request = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_request.sqf";
 publicVariable "fnc_civ_request";
-fnc_civ_serve = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_serve.sqf";
+fnc_civ_serve = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_serve.sqf";
 publicVariable "fnc_civ_serve";
-fnc_civ_close = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_close.sqf";
+fnc_civ_close = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_close.sqf";
 publicVariable "fnc_civ_close";
-fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_bribe_answer.sqf";
+fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_bribe_answer.sqf";
 publicVariable "fnc_civ_bribe_answer";
-fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_arrest.sqf";
+fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arrest.sqf";
 publicVariable "fnc_civ_arrest";
 fnc_civ_menuAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_menuAction.sqf";
 publicVariable "fnc_civ_menuAction";
@@ -294,11 +294,11 @@ fnc_civ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_men
 publicVariable "fnc_civ_menu";
 fnc_civ_bribe_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_bribe_prompt.sqf";
 publicVariable "fnc_civ_bribe_prompt";
-fnc_disguiseAsCivilian = compile preprocessFileLineNumbers "duws\server\misc\fnc_disguiseAsCivilian.sqf";
+fnc_disguiseAsCivilian = compile preprocessFileLineNumbers "duws\server\civilian\fnc_disguiseAsCivilian.sqf";
 publicVariable "fnc_disguiseAsCivilian";
-fnc_scanCivilianGear = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanCivilianGear.sqf";
+fnc_scanCivilianGear = compile preprocessFileLineNumbers "duws\server\civilian\fnc_scanCivilianGear.sqf";
 publicVariable "fnc_scanCivilianGear";
-fnc_civ_resume = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_resume.sqf";
+fnc_civ_resume = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_resume.sqf";
 fnc_recruitSuccessServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_recruitSuccessServer.sqf";
 publicVariable "fnc_recruitSuccessServer";
 
@@ -307,19 +307,19 @@ fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warco
 
 // Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.
-fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_runner.sqf";
-fnc_random_event_table = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_table.sqf";
-fnc_random_event_fire = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_fire.sqf";
-fnc_random_event_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_car.sqf";
-fnc_random_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_heli.sqf";
-fnc_random_event_stranded = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_stranded.sqf";
-fnc_random_event_convoy = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_convoy.sqf";
-fnc_random_event_car_bomb = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_car_bomb.sqf";
-fnc_random_event_recon_patrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_recon_patrol.sqf";
-fnc_random_event_enemy_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_enemy_car.sqf";
-fnc_random_event_enemy_sniper = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_enemy_sniper.sqf";
+fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_runner.sqf";
+fnc_random_event_table = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_table.sqf";
+fnc_random_event_fire = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_fire.sqf";
+fnc_random_event_car = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_car.sqf";
+fnc_random_event_heli = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_heli.sqf";
+fnc_random_event_stranded = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_stranded.sqf";
+fnc_random_event_convoy = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_convoy.sqf";
+fnc_random_event_car_bomb = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_car_bomb.sqf";
+fnc_random_event_recon_patrol = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_recon_patrol.sqf";
+fnc_random_event_enemy_car = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_enemy_car.sqf";
+fnc_random_event_enemy_sniper = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_enemy_sniper.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
-fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_random_event.sqf";
+fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\events\fnc_debug_random_event.sqf";
 
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";

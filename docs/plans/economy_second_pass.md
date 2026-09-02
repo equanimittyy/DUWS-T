@@ -427,7 +427,7 @@ never the tier — losing ground must not raise the enemy's permanent ceiling �
 enemy's immediate pressure without ratcheting how dangerous it is allowed to become.
 
 **The flat income is a floor, not the main faucet.** A town whose radius reaches into an enemy
-zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:197-205`), so the enemy opens with
+zone starts at `-20` (`server/civilian/fnc_civ_init_Tomata.sqf:197-205`), so the enemy opens with
 several towns already banded and already paying — OPFOR town income outweighs any sensible flat
 constant several times over at hour zero. The constant is sized for a director holding nothing,
 and the figure that has to be checked is the combined one.
@@ -469,7 +469,7 @@ guard instead of exchanging a car for it. Beyond this, enemy AP is the OPFOR com
 any figure below on what enemy income *should* pace is written against that commander existing.
 
 **Town income alone will reach any ceiling put back.** Every town whose radius overlaps an enemy
-zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:199-201`), the deepest band, so the enemy
+zone starts at `-20` (`server/civilian/fnc_civ_init_Tomata.sqf:199-201`), the deepest band, so the enemy
 opens with its zone-adjacent towns already paying. Six such towns at 2 AP each is 12 a tick, which
 crosses 200 in roughly seventeen ticks without a flat income existing at all. The flat constant is
 therefore insurance for a director that has lost its towns, not the faucet that sets the pace.
@@ -516,7 +516,7 @@ coveted resource in the campaign.
 Three configurations register no town reputation: `CIV_PRESENCE` of `NONE`, `RAVAGE` or `WBK`.
 Civs-off leaves the town arrays empty (`server/misc/fnc_zonesundercontrol.sqf:29-39`); the two mode
 campaigns register no town reputation at all, so `fnc_civ_townIncome`
-(`server/misc/fnc_civ_state_init.sqf`) pays nobody. Under the town→CP routing that zeroes BLUFOR's
+(`server/civilian/fnc_civ_state_init.sqf`) pays nobody. Under the town→CP routing that zeroes BLUFOR's
 passive CP, leaving zone capture bounties and mission CP to carry it, and it zeroes OPFOR's town AP,
 leaving its flat floor and retake swing. BLUFOR's AP is untouched — it comes from zones, which every
 configuration has. The loss is one-sided in effect: OPFOR keeps a floor, BLUFOR's passive CP goes to
@@ -735,7 +735,7 @@ They are collected here so the next pass tunes from one list rather than hunting
 | corpse money drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
-| town worth | `server/misc/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
+| town worth | `server/civilian/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
 | mission AP band | `server/missions/mission_threads/*` | 10–40 | per-thread literal, ranked by difficulty |
 | civs-off CP lift | `server/missions/fnc_mission_reward.sqf` | ×1.5 | applied when `civ_town_rep` is empty |
 | advanced-support AP | `client/supports/fnc_supports_init.sqf` | 20–40 | 9th catalogue column, per row |

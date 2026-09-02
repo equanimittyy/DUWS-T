@@ -1,4 +1,4 @@
-// Locality: server -- inherited from server/misc/fnc_civ_handler.sqf.
+// Locality: server -- inherited from server/civilian/fnc_civ_handler.sqf.
 // Event handlers can run outside a suspendable context; re-spawn onto one before sleeping.
 if (!canSuspend) exitWith {
     _this spawn fnc_civ_rep_Tomata;

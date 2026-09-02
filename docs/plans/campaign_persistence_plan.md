@@ -243,7 +243,7 @@ that stays as the backstop, and nothing new should need it.
 |---|---|
 | The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/misc/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
-| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
+| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/civilian/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
 | Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
 
@@ -307,10 +307,10 @@ doing.
 
 **Taking Locations out of `civ_locations` is not one of them.** The civilian rewrite deliberately
 kept them: the entries are the map's own Locations, never deleted so that the `nearestLocations`
-consumers keep seeing them (`server/misc/fnc_civ_init_Tomata.sqf:145-170`). That still breaks the
+consumers keep seeing them (`server/civilian/fnc_civ_init_Tomata.sqf:145-170`). That still breaks the
 mission-namespace rule and is still worth fixing, but it does not block this plan. The snapshot
 stores town positions, and restore re-resolves each one to a Location through the same
-`nearestLocations` filter the selector uses (`server/misc/fnc_civ_selectTowns.sqf:42`); the world
+`nearestLocations` filter the selector uses (`server/civilian/fnc_civ_selectTowns.sqf:42`); the world
 guard pins the map, so the lookup returns what it stored.
 
 ## The snapshot
@@ -373,7 +373,7 @@ must not have a snapshot put the old list back.
 `server/server_init.sqf:154` calls `setDate [2035, 8, 3, time_of_day, 0]`, so without this every
 restore snaps back to the third day at the hour the campaign was configured with, and a night
 operation resumes at noon. It is gameplay state rather than presentation:
-`server/misc/fnc_night_horde_event.sqf:33` counts days off `date`, and the load screen labels each
+`server/events/fnc_night_horde_event.sqf:33` counts days off `date`, and the load screen labels each
 row with one. It is an outcome because it has to be re-applied after `setTimeMultiplier` (`:159`)
 rather than before the builders — the boot line would overwrite it.
 
@@ -387,7 +387,7 @@ them, or the allocator would hand a second zone a name already on the map.
 
 Towns go in by position even though the runtime keys them by index into `civ_locations`, because
 that index is not stable across a restore: selection's top-up wave shuffles before it draws
-(`server/misc/fnc_civ_selectTowns.sqf:125`) and the registration cull drops towns depending on
+(`server/civilian/fnc_civ_selectTowns.sqf:125`) and the registration cull drops towns depending on
 which radii survive. A Location's position comes out of the map's config and does not move.
 
 ### Territory, economy and escalation
@@ -789,7 +789,7 @@ refund attached to the one restore that consumes it.
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
-| `server/misc/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
+| `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
 | `client/client_init.sqf:449` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |

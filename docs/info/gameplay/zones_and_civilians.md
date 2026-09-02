@@ -311,9 +311,9 @@ markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
-| 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town runtime gate and markers |
-| 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_ravage` / `_wbk` twins) | fill the town on arrival, empty it after departure |
+| 1. Selection | `server/civilian/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
+| 2. Registration | `server/civilian/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town runtime gate and markers |
+| 3. Runtime | `server/civilian/fnc_civ_handler.sqf` (`_ravage` / `_wbk` twins) | fill the town on arrival, empty it after departure |
 
 **Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors and pulls
 city/village/local Locations with one `nearestLocations` call, keeping those within 5,000 m of *any*
@@ -383,7 +383,7 @@ the enemy has to have spent on it. Tier 0 is a town OPFOR does not hold, which i
 neutral and the BLUFOR band sit.
 
 The tier is stored per town in `DUWS_townGarrisonTier` and written only through
-`fnc_town_garrison_setTier` (`server/misc/fnc_civ_state_init.sqf`) — a number per town, so it
+`fnc_town_garrison_setTier` (`server/civilian/fnc_civ_state_init.sqf`) — a number per town, so it
 serialises. Towns that start inside an enemy zone are seeded at tier I rather than 0: they are enemy
 ground before anyone has played a minute, and reading them as ungarrisoned would have the commander
 appraise them as neutral.
@@ -922,7 +922,7 @@ is. Everything else the menu offers is secondary to that.
 ### The reaction curve
 
 Every request rolls one of three reactions, weighted by the town's reputation
-(`fnc_civ_reaction_weights`, `src/duws/server/misc/fnc_civ_state_init.sqf:60-71`). With `t = rep / 20`
+(`fnc_civ_reaction_weights`, `src/duws/server/civilian/fnc_civ_state_init.sqf:60-71`). With `t = rep / 20`
 clamped to `[-1, 1]`:
 
 ```sqf
@@ -981,7 +981,7 @@ other. `fnc_civ_arrest` claims `DUWS_civ_arrested` before its own pause and test
 |---|---:|---|
 | Call over | 6 m | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:59` |
 | Interaction menu | 3 m | `src/duws/shared/functions/fnc_civ_menuAction.sqf:44` |
-| Every menu row, re-tested server-side | 3 m | `src/duws/server/misc/fnc_civ_request.sqf:22` |
+| Every menu row, re-tested server-side | 3 m | `src/duws/server/civilian/fnc_civ_request.sqf:22` |
 | Search (the player's own action, via `cursorObject`) | 3 m | `client/misc/fnc_intel_search_action.sqf` |
 | Release | 3 m | `fnc_civ_release_action.sqf:27` |
 
@@ -1139,7 +1139,7 @@ coins in a town are a function of how many people the player is willing to hold 
 
 #### What a bribe costs
 
-Per row (`fnc_civ_rowPrice`, `src/duws/server/misc/fnc_civ_state_init.sqf:81-90`), and **not** scaled by
+Per row (`fnc_civ_rowPrice`, `src/duws/server/civilian/fnc_civ_state_init.sqf:81-90`), and **not** scaled by
 reputation — the curve already carries that signal by deciding whether money is asked for at all, so a
 reputation term in the amount would count it twice.
 

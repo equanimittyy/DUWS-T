@@ -452,5 +452,5 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
 // disguise feature: set captive state locally
-fnc_disguise_setCaptiveLocal = compile preprocessFileLineNumbers "duws\client\misc\fnc_disguise_setCaptiveLocal.sqf";
+fnc_disguise_setCaptiveLocal = compile preprocessFileLineNumbers "duws\client\civilian\fnc_disguise_setCaptiveLocal.sqf";
 publicVariable "fnc_disguise_setCaptiveLocal";

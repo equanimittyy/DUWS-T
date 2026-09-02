@@ -1,4 +1,4 @@
-// Locality: server -- registered once for all towns by server/misc/fnc_civ_init_Tomata.sqf.
+// Locality: server -- registered once for all towns by server/civilian/fnc_civ_init_Tomata.sqf.
 // Owns every town's OPFOR garrison: raise one when BLUFOR arrive at an enemy-held town, reinforce as the
 // commander buys, stream it out once empty long enough, settle up when cleared. The clock is
 // fnc_site_poller's; what stays here is the part a garrison does not share with a crowd or zone -- the

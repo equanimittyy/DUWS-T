@@ -37,7 +37,7 @@ mercenaries and the CP/AP squads — see [Contractor](#contractor) below.
 
 ## Vendors are streamed civilians
 
-A vendor is created by the existing `fnc_civ_spawnUnit` (`server/misc/fnc_civ_spawnUnit.sqf`) with a
+A vendor is created by the existing `fnc_civ_spawnUnit` (`server/civilian/fnc_civ_spawnUnit.sqf`) with a
 new **static "vendor" posture**: no stroll waypoints (`fnc_civ_wp_Tomata`), no traffic, fixed facing
 at a chosen building position. Everything else — the `Killed` handler, the client interaction action
 remoteExec — reuses what a civilian already gets.

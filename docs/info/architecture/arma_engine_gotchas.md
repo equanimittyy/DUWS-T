@@ -661,7 +661,7 @@ a mission needing shades outside the stock `Color*` set needs no `CfgMarkerColor
 The trap is reading the documented signature ("class from `CfgMarkerColors`") and concluding a
 `#(...)` string in existing code must be broken — it looks like the `setObjectTexture` procedural
 syntax and nothing in the config tree matches it. The civilian town ellipses in
-`server/misc/fnc_civ_init_Tomata.sqf` are painted this way and have always rendered purple; the
+`server/civilian/fnc_civ_init_Tomata.sqf` are painted this way and have always rendered purple; the
 config block that would "fix" them is dead weight.
 
 **How to apply:** use the inline form for one-off shades and keep `CfgMarkerColors` for colours the
@@ -939,7 +939,7 @@ and the group walks off mid-conversation. Both halves fail quietly, neither reac
 **How to apply:** bind the array, reverse it as its own statement, then iterate —
 `private _wps = waypoints _group; reverse _wps; { deleteWaypoint _x } forEach _wps;`. Iterating
 `for "_i" from (count _wps - 1) to 0 step -1` is equivalent and avoids `reverse`. `fnc_civ_panic.sqf`
-and the `fnc_civ_moveToPlayerServer` block in `server/misc/fnc_civ_state_init.sqf` both do the
+and the `fnc_civ_moveToPlayerServer` block in `server/civilian/fnc_civ_state_init.sqf` both do the
 bind-then-reverse form.
 
 ## A waypoint statement never runs if the group cannot reach the waypoint
@@ -1039,7 +1039,7 @@ the group's waypoints and adding a fresh set does not clear the stop — the new
 visible to `waypoints`, and simply never walked.**
 
 This is invisible at the call site because the stop and the re-order live in different functions.
-`fnc_civ_moveToPlayerServer` (`src/duws/server/misc/fnc_civ_state_init.sqf`) ends on `doStop` so a
+`fnc_civ_moveToPlayerServer` (`src/duws/server/civilian/fnc_civ_state_init.sqf`) ends on `doStop` so a
 civilian called over stands still to be spoken to; every conversation ending then routes through
 `fnc_civ_resume` into `fnc_civ_wp_Tomata`, which rebuilds the circuit and nothing more. Each
 civilian is its own group leader, so the stop held the whole group — anyone spoken to stood where

@@ -12,7 +12,7 @@ towns both register in. A site raises a composition, gets ground down by the sam
 comes back at what was left, not what it started with — one model, whichever kind of ground holds
 it. The only differences are which tier table it draws from (`DUWS_zoneSpawnTiers`,
 `src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:32`, vs `DUWS_townSpawnTiers`,
-`src/duws/server/misc/fnc_civ_state_init.sqf:63`) and what happens once it's beaten: a zone flips
+`src/duws/server/civilian/fnc_civ_state_init.sqf:63`) and what happens once it's beaten: a zone flips
 to BLUFOR, a town is cleared back toward neutral and bought up again by the commander.
 
 ## The ledger
@@ -197,7 +197,7 @@ site was ever worth, not just what happened to be standing when they arrived.
   requires BLUFOR outnumber whatever OPFOR is still present in the trigger area — `garrisonBeaten`
   alone isn't enough, the player also has to hold the ground.
 - **Town clear** fires on `garrisonBeaten` alone, checked on the poller tick
-  (`src/duws/server/misc/fnc_civ_garrison.sqf:303`) rather than an `EmptyDetector`, so a town can
+  (`src/duws/server/civilian/fnc_civ_garrison.sqf:303`) rather than an `EmptyDetector`, so a town can
   no longer be cleared by OPFOR merely withdrawing. Clearing pays a reputation credit and a
   `REGROUPING` hold, drops the tier to I — not 0; ownership survives, only the purchase was beaten
   — and reseeds the garrison to a scratch `0.3` rather than clearing it outright.
