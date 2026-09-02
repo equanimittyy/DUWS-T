@@ -19,7 +19,7 @@ returns nothing, so there is no handle to wait on and nothing to reveal the gap.
 **How to apply:** on the server, `call` a server-side function to run it inline; reserve
 `remoteExec [..., 2]` for genuinely remote callers. When a verdict must travel back to a client,
 `remoteExec` a reply function at the requesting player rather than returning a value —
-`fnc_pool_try_spend` and `fnc_pool_spend` (`src/duws/server/misc/fnc_economy_init.sqf`) are the
+`fnc_pool_try_spend` and `fnc_pool_spend` (`src/duws/server/warcom/fnc_economy_init.sqf`) are the
 two halves of that handshake.
 
 ## The JIP queue is append-only unless the message carries an ID you choose
@@ -568,7 +568,7 @@ every change through one server-side function taking a signed *delta*
 (`x = x + _delta; publicVariable "x"`); callers send it via `[_delta] remoteExec ["fn", 2]` and
 never touch the global. The server serialises the deltas as atomic statements, so nothing is lost
 whoever fires when — a delta cannot carry a stale base. Command points use this: `fnc_cp_adjust`
-(`src/duws/server/misc/fnc_economy_init.sqf`) is the sole writer of `commandpointsblu1`; the host's
+(`src/duws/server/warcom/fnc_economy_init.sqf`) is the sole writer of `commandpointsblu1`; the host's
 own `publicVariableEventHandler` does not fire for its own broadcast, so that function also
 refreshes the on-screen counter locally when `hasInterface`.
 

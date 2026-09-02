@@ -3,7 +3,7 @@
 // Shared with the client (the arsenal overlay's live-count loop); compiled before economy_init,
 // whose settle/deposit call it.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_economy_init.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\fnc_economy_init.sqf";
 publicVariable "fnc_escalation_cost";
 publicVariable "fnc_money_count";
 publicVariable "fnc_money_spend";

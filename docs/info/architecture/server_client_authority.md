@@ -17,7 +17,7 @@ another's change — the failure mode is the gotchas entry *"A shared global mut
 applies each as one uninterruptible statement.
 
 Five writers implement it, and they are the templates to copy. Three sit in
-`server/misc/fnc_economy_init.sqf`: `fnc_cp_adjust` (signed numeric delta), `fnc_ap_adjust` (delta plus
+`server/warcom/fnc_economy_init.sqf`: `fnc_cp_adjust` (signed numeric delta), `fnc_ap_adjust` (delta plus
 a target-pool selector) and `fnc_town_rep_adjust` (delta plus ownership of rounding, applied to one
 town). Two sit in `server/init_zones/fnc_zone_state_init.sqf`: `fnc_warcom_set_primary_zone` (an
 operation on a shared list, matched by value so a stale caller finds nothing rather than corrupting

@@ -516,7 +516,7 @@ is exactly what the no-hard-dependency rule exists to avoid. The friendly shelf 
 of the snapshot.
 
 The **captured-materiel pool** (`DUWS_capturedPool`, written by the `fnc_captured_pool_*` functions in
-`server/misc/fnc_economy_init.sqf`) is the opposite case, and is
+`server/warcom/fnc_economy_init.sqf`) is the opposite case, and is
 the one arsenal state that will be persisted. It is player-earned and scarce — the enemy gear brought
 back and banked — so losing it on reload loses progress, the same argument that puts the vehicle
 stockpile in the snapshot rather than the friendly cargo. Like the stockpile it is data, one

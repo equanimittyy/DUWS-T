@@ -112,7 +112,7 @@ Most of the tree already holds this, which is why the constraint is cheap:
 
 **The one gap is `fnc_ap_adjust`.** `fnc_cp_adjust` rounds the running total and logs a `WARN` on
 a fractional delta; `fnc_ap_adjust` adds and floors at 0 with no rounding anywhere
-(`server/misc/fnc_economy_init.sqf`). Nothing feeds it a fraction today, so it is latent — and it
+(`server/warcom/fnc_economy_init.sqf`). Nothing feeds it a fraction today, so it is latent — and it
 stops being latent the moment AP becomes a priced currency, because every ladder gate reads
 `> N`. A pool resting at 39.97 fails a `>40` gate while a rounded readout prints 40, and the
 player has no way to tell why. `fnc_ap_adjust` takes the CP writer's invariant verbatim.
@@ -631,7 +631,7 @@ in a two-player session, just mean the other cannot buy. Spend authority stays t
 
 The captured-gear settle credits a pool for the difference between the loadout a player opened the
 arsenal with and the one they close it with, so a search-and-bank pays out. Both the open and the
-close loadout are read on the client and sent to the server (`server/misc/fnc_economy_init.sqf`). An
+close loadout are read on the client and sent to the server (`server/warcom/fnc_economy_init.sqf`). An
 earlier hardening pass re-read the close loadout on the server to corroborate it against a lying
 client, but a remote unit's loadout replicates with lag: a grab made just before close had not always
 reached the server, so the settle diffed against a stale close and stripped gear off an *honest* co-op
@@ -729,7 +729,7 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth; wallet only |
 | `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth; wallet only |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
-| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 60/150/350/600 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (OPFOR `_ap` and BLUFOR's vehicle gates hold the same values as literals; BLUFOR's tier-3 WAVE gate is a literal 200, not the 150 rung) |
+| `DUWS_ap_tier_rungs` | `server/warcom/fnc_economy_init.sqf` | 60/150/350/600 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (OPFOR `_ap` and BLUFOR's vehicle gates hold the same values as literals; BLUFOR's tier-3 WAVE gate is a literal 200, not the 150 rung) |
 | OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 60 (T2) / APC·IFV·AA·trans-heli 150 (T3) / tank·attack-heli 350 (T4) / plane 600 (T5) | OPFOR's capability ladder; utility trucks ungated |
 | BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf` | car 60 (T2) / apc·ifv·transheli 150 (T3) / tank·attackheli 350 (T4); infantry free (T1) | BLUFOR's capability ladder; the T3 WAVE gate (armored/air in `fnc_WARCOM_blu_patrol.sqf`) is a literal 200, not the 150 vehicle rung |
 | corpse money drop | `server/search/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |

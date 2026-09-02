@@ -13,7 +13,7 @@ see [`faction_system.md`](faction_system.md). The full reroute and the work stil
 ## Authority: one server-side writer per pool
 
 `commandpointsblu1` is a networked global, so every change routes through a single server-side
-function, `fnc_cp_adjust` (`src/duws/server/misc/fnc_economy_init.sqf`), invoked as
+function, `fnc_cp_adjust` (`src/duws/server/warcom/fnc_economy_init.sqf`), invoked as
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else assigns or
 `publicVariable`s the pool. This is a hard concurrency requirement, not a style choice: mutating a
 networked global as `x = x - c; publicVariable "x"` from a client drops concurrent co-op changes and
@@ -74,7 +74,7 @@ round trip out of date, so two players buying at once both pass a gate the pool 
 are then applied in full and the floor absorbs the overshoot, which makes the second purchase free.
 
 Every purchase therefore routes through a request/reply handshake, both halves in
-`server/misc/fnc_economy_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
+`server/warcom/fnc_economy_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
 `fnc_pool_try_spend` runs on the server, tests and debits as adjacent statements against the one
 server copy, and replies with the verdict. Call sites read as a guard clause:
 
@@ -115,7 +115,7 @@ in `supports/taxi/` spend nothing.
 
 ## Escalation scales every price
 
-`fnc_escalation_cost` (`server/misc/fnc_economy_init.sqf`) multiplies a base cost by
+`fnc_escalation_cost` (`server/warcom/fnc_economy_init.sqf`) multiplies a base cost by
 `escalation_multiplier` and rounds up, so a scaled price is never cheaper than the base one.
 `fnc_pool_try_spend` applies it on entry, which covers every `fnc_pool_spend` site at once; the four
 paths listed above as handshake exceptions each apply it themselves, and are the only places that have

@@ -75,7 +75,7 @@ Coverage with no tier pushes nothing; a tier with no coverage has nothing to pus
 rep lever is capturing zones (removes OPFOR's coverage and base push where it hurts most); the
 second is buying towers (turns BLUFOR coverage into an actual pull).
 
-The writer is the existing `fnc_town_rep_adjust` (`server/misc/fnc_economy_init.sqf:136-157`),
+The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:136-157`),
 already clamped to `[-20, 20]`; the drift is a silent caller (`_silent` param, `:138`) beside its
 event callers, so it repaints the town marker without posting a notification card. Every consumer
 rep already drove — the OPFOR/BLUFOR band, town income, the map marker colour — follows for free.
