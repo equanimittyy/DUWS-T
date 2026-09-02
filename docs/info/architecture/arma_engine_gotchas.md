@@ -1326,6 +1326,12 @@ patrol-camp intel uses. Callers:
 `src/duws/server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf`,
 `src/duws/server/missions/mission_threads/destroy_patrol_camp/fnc_destroy_patrol_camp_mission.sqf`.
 
+## A shell `createVehicle`'d at rest never fuzes
+
+**A projectile round (`Sh_82mm_AMOS` and kin) has an impact fuze, so one spawned stationary has nothing
+to arm it and sits inert.** Spawn it just above the target and drive it down with `setVelocity [0, 0, -30]`
+so it impacts at once. Callers: `fnc_sabotage_laptop_decoy.sqf`, `fnc_random_event_car_bomb.sqf`.
+
 ## `setPosATL` / `object getPos [dist, dir]` measure Z from the terrain, so re-seating a unit on an upper floor drops it to the ground floor
 
 **`setPosATL`'s Z is height above *terrain*, not above whatever surface (floor, roof, bridge) is under
