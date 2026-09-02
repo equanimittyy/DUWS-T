@@ -79,10 +79,10 @@ fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.
 fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.sqf";
-fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
-fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
-fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_base_weapons.sqf";
-fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_reward.sqf";
+fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_create_ammo_lists.sqf";
+fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_basic_ammo_lists.sqf";
+fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_arsenal_base_weapons.sqf";
+fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_arsenal_reward.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 // Broadcast: fnc_escalation arms this on every machine (BuildingChanged is a local event) so a
 // building a client razed still reaches the server-side counter.
@@ -92,7 +92,7 @@ fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opf
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created
 // server-local precisely because this reads server-side zone state.
 fnc_zone_capture_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_capture_ready.sqf";
-fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
+fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
 fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans_spawnDeployed.sqf";
@@ -386,7 +386,7 @@ publicVariable "fnc_mapclick_background";
 publicVariable "fnc_mapclick_claim";
 publicVariable "fnc_mapclick_release";
 
-fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
+fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_random_name.sqf";publicVariable "fnc_random_name";
 fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_squad_init.sqf";publicVariable "fnc_BLUFOR_squad_init";
@@ -643,15 +643,15 @@ fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
 fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
-fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
+fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
 publicVariable "fnc_addQuickChangeActions";
-fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\misc\fnc_quick_kits_menu.sqf";
+fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_quick_kits_menu.sqf";
 publicVariable "fnc_quick_kits_menu";
-fnc_buildQuickKits = compile preprocessFileLineNumbers "duws\server\misc\fnc_buildQuickKits.sqf";
+fnc_buildQuickKits = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_buildQuickKits.sqf";
 publicVariable "fnc_buildQuickKits";
-fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_rearmUnit.sqf";
+fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_rearmUnit.sqf";
 publicVariable "fnc_rearmUnit";
 fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRecycleStation.sqf";
 publicVariable "fnc_activateBaseRecycleStation";

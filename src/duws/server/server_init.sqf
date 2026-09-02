@@ -374,7 +374,7 @@ if (isServer) then {
 [] spawn {
     waitUntil { sleep 1; WARCOM_init_done }; // WARCOM must have spawned the units first
     sleep 5; // brief settle before reading their gear
-    [] execVM "duws\server\misc\fnc_collectEquipmentFromUnits.sqf";
+    [] execVM "duws\server\arsenal\fnc_collectEquipmentFromUnits.sqf";
 };
 [] spawn {
     scriptName "Add to InitServer.sqf -> Prevent AI Abandoning Vehicles";

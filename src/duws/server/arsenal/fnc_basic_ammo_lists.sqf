@@ -1,4 +1,4 @@
-// Locality: server -- inherited from server/misc/fnc_create_ammo_lists.sqf.
+// Locality: server -- inherited from server/arsenal/fnc_create_ammo_lists.sqf.
 
 // Curated ACE tools/flares/tables only. Medical items are detected dynamically in
 // fnc_create_ammo_lists off ACE's own ACE_isMedicalItem flag, so that set tracks the installed ACE

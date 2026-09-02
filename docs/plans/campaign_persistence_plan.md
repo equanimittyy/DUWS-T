@@ -268,7 +268,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | `fnc_fob_server` rolls a fresh name and announces the FOB over radio behind a 5 s sleep | `server/supports/fnc_fob_server.sqf:7,20-24` | Replaying it renames every FOB and queues one callout per FOB at boot |
 | Zone names are drawn at random from a pool that records what it has spent | `server/init_zones/fnc_zone_state_init.sqf`, `fnc_createzone.sqf` | Replaying the builder renames every zone on the map. The names *and* the used list have to be restored, and the builder must not re-draw |
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
-| Arsenal contents are resolved at boot from whatever mods are loaded | `server/misc/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
+| Arsenal contents are resolved at boot from whatever mods are loaded | `server/arsenal/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
 | Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
@@ -510,7 +510,7 @@ would mean per-player markers everywhere.
 ### The friendly arsenal is not stored; the captured pool will be
 
 Faction init rebuilds the friendly virtual cargo from scratch
-(`server/misc/fnc_create_ammo_lists.sqf`), so a restore re-resolves it against whatever mods are
+(`server/arsenal/fnc_create_ammo_lists.sqf`), so a restore re-resolves it against whatever mods are
 loaded now. Storing those classnames would pin the campaign to the mod set that produced them, which
 is exactly what the no-hard-dependency rule exists to avoid. The friendly shelf therefore stays out
 of the snapshot.

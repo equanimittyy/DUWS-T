@@ -51,7 +51,7 @@ ACE-specific mission logic beyond handing control over and stocking ACE's gear.
 | Revive select | [`initPlayerLocal.sqf`](../../../src/initPlayerLocal.sqf) | Forces the no-revive branch (ACE owns wounding). |
 | AIS shutdown | [`AIS/Core/fn_preinit.sqf`](../../../src/modules/AIS/Core/fn_preinit.sqf), [`fn_postinit.sqf`](../../../src/modules/AIS/Core/fn_postinit.sqf), [`fn_aisInitPlayer.sqf`](../../../src/modules/AIS/Core/fn_aisInitPlayer.sqf) | AIS sets `ais_ace_shutDown`/`AIS_noReviveInit` and never installs its handlers. |
 | Rest & heal | [`server/dialog/fnc_rest_heal.sqf`](../../../src/duws/server/dialog/fnc_rest_heal.sqf) | Adds `ace_medical_treatment_fnc_fullHealLocal` on top of `setDamage 0`. |
-| Arsenal medical | [`server/misc/fnc_create_ammo_lists.sqf`](../../../src/duws/server/misc/fnc_create_ammo_lists.sqf) | Stocks ACE medical items, tools, and rations. |
+| Arsenal medical | [`server/arsenal/fnc_create_ammo_lists.sqf`](../../../src/duws/server/arsenal/fnc_create_ammo_lists.sqf) | Stocks ACE medical items, tools, and rations. |
 
 ### Handoff to ACE
 
@@ -77,12 +77,12 @@ the treatments ACE gates on that trait.
 When ACE is loaded, `fnc_create_ammo_lists.sqf` stocks ACE items into the virtual arsenal. Medical items
 are found off **ACE's own `ACE_isMedicalItem` config flag** rather than a hardcoded list, so the set
 tracks the installed ACE version and catches medical items that ACE-patched faction mods add. Curated ACE
-tools live in [`fnc_basic_ammo_lists.sqf`](../../../src/duws/server/misc/fnc_basic_ammo_lists.sqf); ACE
+tools live in [`fnc_basic_ammo_lists.sqf`](../../../src/duws/server/arsenal/fnc_basic_ammo_lists.sqf); ACE
 utility gear and MRE rations are appended in `fnc_create_ammo_lists.sqf`.
 
 ### Known gap
 
-The everyone-facing **rearm & heal** action ([`client/misc/fnc_ai_rearm.sqf`](../../../src/duws/client/misc/fnc_ai_rearm.sqf))
+The everyone-facing **rearm & heal** action ([`client/arsenal/fnc_ai_rearm.sqf`](../../../src/duws/client/arsenal/fnc_ai_rearm.sqf))
 heals with a bare `player setDamage 0` and has no ACE branch, unlike the game-master rest action above.
 Under ACE this leaves the player's wound/bleeding/pain state intact — visually healed, still bleeding. To
 close it, mirror the `fnc_rest_heal` ACE branch here, respecting locality (players heal on their own
@@ -153,7 +153,7 @@ most:
 
 Two heal actions sit on base objects, independent of the revive framework and present in every mode.
 
-- **Rearm & heal** — action body [`client/misc/fnc_ai_rearm.sqf`](../../../src/duws/client/misc/fnc_ai_rearm.sqf),
+- **Rearm & heal** — action body [`client/arsenal/fnc_ai_rearm.sqf`](../../../src/duws/client/arsenal/fnc_ai_rearm.sqf),
   open to everyone, attached at the medical tent
   ([`fnc_medtent_actions.sqf:13`](../../../src/duws/shared/functions/fnc_medtent_actions.sqf)), on FOBs, on
   MHQ deploy, and on ammo boxes. Full `setDamage 0` on the caller's squad. See the ACE gap above.
