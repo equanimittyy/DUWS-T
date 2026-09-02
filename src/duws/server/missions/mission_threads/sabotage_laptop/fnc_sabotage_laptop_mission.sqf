@@ -104,7 +104,7 @@ switch (VERSION_X) do {
     };
 };
 
-// Feeds the client floating markers (client/misc/fnc_sabotage_laptop_markers.sqf); the deadline watcher
+// Feeds the client floating markers (client/missions/fnc_sabotage_laptop_markers.sqf); the deadline watcher
 // below prunes these on mission end.
 private _lapObjs = _laptops apply { _x select 0 };
 missionNamespace setVariable ["DUWS_sabotage_laptops",
