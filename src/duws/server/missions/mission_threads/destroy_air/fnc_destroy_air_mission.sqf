@@ -79,9 +79,12 @@ private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_AI
 
 private _deadline = DUWS_curDeadlineAt;
 
-// Allseer's fix marker on the aircraft, moved on the report cadence below. Created lazily on the first
-// report so a kill before then leaves nothing to delete.
+// Allseer's fix: the o_air icon marks the aircraft; the arrow is set ahead of it along its heading, not
+// overlaid, so the two read as one heading cue rather than a doubled contact. Both created lazily on the
+// first report, so an early kill leaves nothing to delete.
 private _trackMarker = "";
+private _dirMarker = "";
+private _arrowLead = 300;
 private _nextReportAt = time + 15;   // first fix fixed at 15 s for an early bearing; the loop jitters the rest
 // Far from every player the global ten-minute resupply (fnc_AI_Master_Control) never reaches the asset,
 // so a long patrol runs the tank dry and the objective falls out of the sky before the player finds it.
@@ -118,25 +121,32 @@ waitUntil {
         _nextResupplyAt = time + 300;
     };
 
-    // A periodic fix, not a live blip: Allseer jumps the marker onto the asset and calls it in, so the
+    // A periodic fix, not a live blip: Allseer jumps the markers onto the asset and calls it in, so the
     // player closes on a fast mover without the intercept being handed to them frame by frame.
     if (time > _nextReportAt) then {
         if (_trackMarker == "") then {
             _trackMarker = format ["destroyairtrk%1", _taskId];
-            deleteMarker _trackMarker;   // a reused mission name can collide with a prior run's leftover
+            _dirMarker = format ["destroyairdir%1", _taskId];
+            { deleteMarker _x } forEach [_trackMarker, _dirMarker];   // a reused mission name can collide with a prior run's leftover
             createMarker [_trackMarker, getPosATL _veh];
             _trackMarker setMarkerType "o_air";
             _trackMarker setMarkerColor "ColorEAST";
             _trackMarker setMarkerText (getText (configFile >> "CfgVehicles" >> _class >> "displayName"));
+            createMarker [_dirMarker, getPosATL _veh];
+            _dirMarker setMarkerType "mil_arrow_noShadow";
+            _dirMarker setMarkerColor "ColorEAST";
         };
+        private _hdg = getDir _veh;
         _trackMarker setMarkerPos (getPosATL _veh);
+        _dirMarker setMarkerPos ((getPosATL _veh) getPos [_arrowLead, _hdg]);
+        _dirMarker setMarkerDir _hdg;
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_destroyair_track"] remoteExec ["fnc_duws_dialogue", 0];
         _nextReportAt = time + (15 + random 75);
     };
     false
 };
 
-if (_trackMarker != "") then { deleteMarker _trackMarker };
+if (_trackMarker != "") then { { deleteMarker _x } forEach [_trackMarker, _dirMarker] };
 
 if (_outcome == "WIN") then {
     [_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_destroyair_end"], true] call fnc_mission_finish;
