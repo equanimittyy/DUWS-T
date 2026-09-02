@@ -266,16 +266,18 @@ private _deliverSquad = {
 private _waveGroups = [];
 private _vehGroups = [];
 
-// Wave controller: fill toward the budget on a deep dip (< 60 %) or the 5-minute heartbeat. Each element
+// Wave controller: fill toward the budget on a deep dip (< 60 %) or the reinforcement heartbeat. Each element
 // takes its own bearing, so the waves converge from all sides rather than one.
 [_targetpos, _budget, _vehSubCap, _defendVar, _claim, _deliverSquad, _leanDispatch, _bearingPos, _waveGroups, _vehGroups] spawn {
     params ["_center", "_budget", "_vehSubCap", "_defendVar", "_claim", "_deliverSquad", "_leanDispatch", "_bearingPos", "_waveGroups", "_vehGroups"];
     private _fnLive = { { ({ alive _x } count units _x) > 0 } count _this };
     private _lastWave = -1e9;
+    private _reinforceEvery = 150 + random 150;   // rand(2.5,5) min heartbeat, re-rolled each wave
     while { missionNamespace getVariable [_defendVar, false] } do {
         private _live = _waveGroups call _fnLive;
-        if (_live < 0.6 * _budget || { time - _lastWave >= 300 }) then {
+        if (_live < 0.6 * _budget || { time - _lastWave >= _reinforceEvery }) then {
             _lastWave = time;
+            _reinforceEvery = 150 + random 150;
             private _vehLive = _vehGroups call _fnLive;
             for "_slot" from 1 to (_budget - _live) do {
                 private _spawnPos = [_center] call _bearingPos;
@@ -317,7 +319,31 @@ private _vehGroups = [];
 };
 
 private _defendEnd = time + DEFEND_TIME;
-waitUntil { sleep 2; !alive _inf || { time >= _defendEnd } || { missionNamespace getVariable [_skipAssaultVar, false] } };
+
+// Assault clock: a "will break" reminder every 5 minutes, then a per-second countdown over the final 10 s.
+// Ends with the phase (win / death / skip); the phase wait polls at 1 s so the mission ends within a second of the last tick.
+[_defendVar, _skipAssaultVar, _inf, _defendEnd] spawn {
+    params ["_defendVar", "_skipAssaultVar", "_inf", "_defendEnd"];
+    private _fnRunning = { (missionNamespace getVariable [_defendVar, false]) && { alive _inf } && { !(missionNamespace getVariable [_skipAssaultVar, false]) } };
+    private _nextRemind = time + 300;
+    while { call _fnRunning } do {
+        private _left = _defendEnd - time;
+        if (_left <= 10) exitWith {
+            for "_s" from (ceil _left) to 1 step -1 do {
+                if !(call _fnRunning) exitWith {};
+                [format [localize "STR_DUWS_T_pc_assault_secs", _s]] remoteExec ["hint", [0, -2] select isDedicated];
+                uiSleep 1;
+            };
+        };
+        if (time >= _nextRemind) then {
+            [format [localize "STR_DUWS_T_pc_assault_mins", ceil (_left / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
+            _nextRemind = _nextRemind + 300;
+        };
+        uiSleep 1;
+    };
+};
+
+waitUntil { sleep 1; !alive _inf || { time >= _defendEnd } || { missionNamespace getVariable [_skipAssaultVar, false] } };
 
 missionNamespace setVariable [_defendVar, false];
 missionNamespace setVariable [_liveVar, false];

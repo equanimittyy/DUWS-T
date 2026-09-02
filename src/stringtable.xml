@@ -2969,6 +2969,14 @@
                 <Original>No friendly forces within 300m of the informant. The mission will fail in %1s.</Original>
                 <English>No friendly forces within 300m of the informant. The mission will fail in %1s.</English>
             </Key>
+            <Key ID="STR_DUWS_T_pc_assault_mins">
+                <Original>The assault will break in %1 minute(s).</Original>
+                <English>The assault will break in %1 minute(s).</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pc_assault_secs">
+                <Original>The assault will end in %1 second(s).</Original>
+                <English>The assault will end in %1 second(s).</English>
+            </Key>
             <Key ID="STR_DUWS_T_pc_win">
                 <Original>Good work Alpha 1-1. The assault is breaking off. Ensure the area is clear and RTB. Overlord out.</Original>
                 <English>Good work Alpha 1-1. The assault is breaking off. Ensure the area is clear and RTB. Overlord out.</English>
