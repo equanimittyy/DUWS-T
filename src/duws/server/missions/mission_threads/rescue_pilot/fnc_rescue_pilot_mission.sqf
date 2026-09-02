@@ -140,15 +140,14 @@ waitUntil {
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pilotkilled"], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
 if (time > _deadline) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     _pilot setDamage 1;
-    [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
+    // _line empty + _notify true: speak the shared "out of time" call, since a missed deadline is exactly that.
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, true] call fnc_mission_finish;
 };
 
 // Reached. Start the 10-minute bleedout, reveal the pilot's icons, and send every spawned enemy group onto the
@@ -200,20 +199,18 @@ waitUntil {
     (_pilot distance PosOfBLUHQ) < 50 || !(alive _pilot) || time > _bleedout
 };
 
+// Bleedout expiry kills him; the death branch below then reports it with the KIA line. The timer's only
+// extra is the hint naming the cause.
+if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 50 && time > _bleedout) then {
+    [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
+    _pilot setDamage 1;
+};
+
 if (!(alive _pilot)) exitWith {
     call _clearIcons;
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
-};
-if ((_pilot distance PosOfBLUHQ) >= 50 && time > _bleedout) exitWith {
-    call _clearIcons;
-    CLEANUP_PILOT(_pilot);
-    if (!isNull attachedTo _pilot) then { detach _pilot; };
-    _pilot setDamage 1;
-    [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
-    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_rescue_pilot", false, true] call fnc_mission_finish;
+    [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pilotkilled"], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
 
 // Won: pilot at HQ. Off the player's back, patched enough to walk, then he makes his own way into the medical

@@ -4159,15 +4159,8 @@
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
                 <Spanish>== MISIÓN SECUNDARIA FALLIDA==\n\n ¡El piloto ha muerto!</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n飞行员阵亡 !</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe pilot was killed.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe pilot was killed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_fxysw123">
-                <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot hat gerade seinen Lagebericht eingestellt... er ist wahrscheinlich bereits an Blutverlust gestorben.</German>
-                <Spanish>== MISIÓN SECUNDARIA FALLIDA==\n\n El piloto acaba de interrumpir su informe de situación... probablemente ha muerto por hemorragia ya.</Spanish>
-                <Chinesesimp>==支线任务失败==\n\n飞行员刚刚停止了情况报告......可能他已经失血而死了。</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe pilot stopped answering the radio. He's most likely bled out.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe pilot stopped answering the radio. He's most likely bled out.</English>
+                <Original>The pilot bled out.</Original>
+                <English>The pilot bled out.</English>
             </Key>
             <Key ID="STR_DUWS_T_fxyys123">
                 <German>Der Bericht besagt, der Pilot verliert seine Lebenszeichen! Eure Truppe muss sich beeilen!</German>
@@ -4194,8 +4187,12 @@
                 <German>„Overlord“ an Einsatztrupp, gut gemacht. Ich wette, dieser Pilot vergisst euch sein ganzes Leben lang nicht.</German>
                 <Spanish>"Overlord" al escuadrón de acción, bien hecho. Apuesto a que ese piloto nunca os olvida en toda su vida.</Spanish>
                 <Chinesesimp>行动组，干得漂亮。我估计那个飞行员这辈子忘不掉你们了。</Chinesesimp>
-                <Original>To Alpha 1-1, the pilot is back safe. Good work.</Original>
-                <English>To Alpha 1-1, the pilot is back safe. Good work.</English>
+                <Original>Good work with the successful exfil Alpha 1-1. Rest and standby for further tasking.</Original>
+                <English>Good work with the successful exfil Alpha 1-1. Rest and standby for further tasking.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pilotkilled">
+                <Original>Alpha 1-1, the pilot is dead. Nothing more we can do. Disengage and RTB.</Original>
+                <English>Alpha 1-1, the pilot is dead. Nothing more we can do. Disengage and RTB.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorend">
                 <Original>To Alpha 1-1, that patrol's wiped out. Every vehicle confirmed destroyed. Good work.</Original>
@@ -4612,8 +4609,8 @@
                 <German>Dies ist „Oberherr 1-1“. Ein verbündetes Hubschrauber stürzte vor zehn Minuten an der markierten Position ab. Glücklicherweise steht der Pilot noch mit dem Kommando in Verbindung. Ihre Einheit soll als Soforteinsatztruppe vorgehen und den Piloten evakuieren.</German>
                 <Spanish>Este es "Imperador 1-1". Un helicóptero aliado se estrelló en la posición marcada hace diez minutos. Por suerte, el piloto sigue en contacto con el mando. Tu unidad debe actuar como fuerza de reacción rápida y rescatar al piloto.</Spanish>
                 <Chinesesimp>十分钟前，友军直升机在标记位置坠毁。好在飞行员仍和指挥部保持联系。你的单位现在需要作为快反部队，将飞行员救出来。</Chinesesimp>
-                <Original>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</Original>
-                <English>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</English>
+                <Original>Alpha 1-1, a friendly helicopter was shot down somewhere in the marked area. The pilot is still alive and requires exfil. Move in and recover him.</Original>
+                <English>Alpha 1-1, a friendly helicopter was shot down somewhere in the marked area. The pilot is still alive and requires exfil. Move in and recover him.</English>
             </Key>
                     <Key ID="STR_DUWS_T_mission_selector_title">
                 <Original>Mission Selector</Original>
