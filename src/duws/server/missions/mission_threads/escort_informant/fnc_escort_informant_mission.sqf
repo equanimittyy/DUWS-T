@@ -43,7 +43,7 @@ _inf disableAI "MOVE";     // holds at HQ until recruited; disable MOVE only, ne
 // Off the ACE/AIS revive path, so death is death, not an unconscious state the win poll never sees end.
 _inf setVariable ["AIS_noReviveInit", true, true];
 
-// No local reader: a client drawer (client/civilian/fnc_protect_civ_markers.sqf) consumes this global to
+// No local reader: a client drawer (client/missions/fnc_protect_civ_markers.sqf) consumes this global to
 // mark him. Reusing protect_civ's global is safe because only one side mission runs at a time.
 DUWS_float_informant = _inf; publicVariable "DUWS_float_informant";
 

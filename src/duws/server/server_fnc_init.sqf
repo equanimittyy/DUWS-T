@@ -103,7 +103,7 @@ fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\killhouse
 publicVariable "fnc_killhouse_markers";
 fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\missions\fnc_sabotage_laptop_markers.sqf";
 publicVariable "fnc_sabotage_laptop_markers";
-fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\civilian\fnc_protect_civ_markers.sqf";
+fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\missions\fnc_protect_civ_markers.sqf";
 publicVariable "fnc_protect_civ_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";

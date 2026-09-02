@@ -154,7 +154,7 @@ if (time > _deadline) exitWith {
 // crash. From here only the bleedout clock, the pilot's death, or arrival at HQ can end the mission.
 private _bleedout = time + 600;
 
-// Pilot icons, gated to the timer: DUWS_float_pilot feeds the 3D float (client/civilian/fnc_protect_civ_markers.sqf)
+// Pilot icons, gated to the timer: DUWS_float_pilot feeds the 3D float (client/missions/fnc_protect_civ_markers.sqf)
 // and the map marker tracks his position. Both cleared by _clearIcons at every exit below.
 DUWS_float_pilot = _pilot; publicVariable "DUWS_float_pilot";
 private _trackMarker = format ["rescuepilot_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
