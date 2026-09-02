@@ -161,6 +161,16 @@ spawn-time location let a wave walk off the objective if the player withdrew bef
 leaving the ground taken and the counterattack chasing nothing. A centre destination still crosses
 the wave through the players on the way in, since it spawns on the far side.
 
+Vehicle reserves under `"hunt"` are filtered to hulls that can fight infantry.
+`DUWS_fnc_classGroundCapable` (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`) rejects a class
+whose only armament is guided missiles or rockets, because the `SAD` waypoint lets a pure-ATGM carrier
+or a missile-armed AA hull park at missile range and duel from spawn rather than close — reading as a
+reinforcement idling. The role pool is re-rolled for a gun-armed variant first; the garrison reserve
+(hunt branch of `DUWS_fnc_zoneSpawnOne`) then drops the slot if the pool offers only missile carriers,
+and the protect-informant assault (`src/duws/server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf`)
+falls back to a squad. Defensive garrison postures are unaffected — a dug-in AT or AA hull is fine
+where it holds.
+
 ## The break test
 
 `DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:17`) is the

@@ -210,6 +210,28 @@ DUWS_fnc_vehicleRow = {
     if (_i < 0) then { [] } else { _table select _i }
 };
 
+// Whether a vehicle class can fight infantry: a turret gun (bullets, shells, grenades) passes, a hull
+// armed only with guided missiles or rockets fails. Callers keep failing hulls out of a "hunt"
+// reinforcement, where SAD lets a pure-ATGM or missile-AA vehicle park at range instead of closing. A
+// magazineWell-only turret reads as unarmed here -- failing safe to infantry, never keeping a gunless hull.
+DUWS_fnc_classGroundCapable = {
+    params ["_class"];
+    private _guns = ["shotBullet", "shotShell", "shotGrenade", "shotSpread", "shotSubmunitions"];
+    private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
+    private _ok = false;
+    while { !_ok && {count _queue > 0} } do {
+        private _t = _queue deleteAt 0;
+        private _mags = +(getArray (_t >> "magazines"));
+        { _mags append (getArray (configFile >> "CfgWeapons" >> _x >> "magazines")) } forEach (getArray (_t >> "weapons"));
+        {
+            private _sim = getText (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _x >> "ammo")) >> "simulation");
+            if (_sim in _guns) exitWith { _ok = true };
+        } forEach _mags;
+        _queue append ("true" configClasses (_t >> "Turrets"));
+    };
+    _ok
+};
+
 // Called rather than spawned, for the group each one hands back: the capture test counts this
 // zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
 //
@@ -234,6 +256,18 @@ DUWS_fnc_zoneSpawnOne = {
         if (_class == "") exitWith {
             ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
             grpNull
+        };
+        // A hunt vehicle must fight infantry on the objective, so re-roll the role pool for a gun-armed
+        // hull (DUWS_fnc_classGroundCapable); a pool of only missile carriers yields grpNull and the wave
+        // fields one fewer vehicle. Defensive postures keep whatever the pool drew -- a dug-in AT/AA hull
+        // is fine there.
+        if (_posture == "hunt") then {
+            private _try = 0;
+            while { _try < 6 && {!([_class] call DUWS_fnc_classGroundCapable)} } do {
+                _try = _try + 1;
+                _class = [_token] call DUWS_fnc_tokenClass;
+            };
+            if !([_class] call DUWS_fnc_classGroundCapable) exitWith { grpNull };
         };
         _grp = [_class, _pos, _size, _posture, _spawnPos] call fnc_spawn_vehicle;
     };

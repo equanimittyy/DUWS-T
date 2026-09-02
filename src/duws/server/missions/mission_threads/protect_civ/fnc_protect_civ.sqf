@@ -281,13 +281,21 @@ private _vehGroups = [];
             private _vehLive = _vehGroups call _fnLive;
             for "_slot" from 1 to (_budget - _live) do {
                 private _spawnPos = [_center] call _bearingPos;
-                private _fieldableVeh = ["car", "apc", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
-                if ((_vehLive < _vehSubCap) && { _fieldableVeh isNotEqualTo [] } && { random 1 < 0.4 }) then {
-                    private _cls = [selectRandom _fieldableVeh] call DUWS_fnc_tokenClass;
-                    if (_cls != "") then {
-                        private _g = [_cls, _center, RADIUS, "hunt", _spawnPos, "opfor"] call fnc_spawn_vehicle;
-                        if (!isNull _g) then { [_g] call _claim; _waveGroups pushBack _g; _vehGroups pushBack _g; _vehLive = _vehLive + 1 };
+                // Assault vehicle only if a gun-armed one resolves (DUWS_fnc_classGroundCapable): re-roll
+                // the pool a few times, and fall to a squad when only missile carriers come up.
+                private _cls = "";
+                if ((_vehLive < _vehSubCap) && { random 1 < 0.4 }) then {
+                    private _fieldableVeh = ["car", "apc", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
+                    private _try = 0;
+                    while { _cls == "" && {_try < 6} && {_fieldableVeh isNotEqualTo []} } do {
+                        _try = _try + 1;
+                        private _c = [selectRandom _fieldableVeh] call DUWS_fnc_tokenClass;
+                        if (_c != "" && {[_c] call DUWS_fnc_classGroundCapable}) then { _cls = _c };
                     };
+                };
+                if (_cls != "") then {
+                    private _g = [_cls, _center, RADIUS, "hunt", _spawnPos, "opfor"] call fnc_spawn_vehicle;
+                    if (!isNull _g) then { [_g] call _claim; _waveGroups pushBack _g; _vehGroups pushBack _g; _vehLive = _vehLive + 1 };
                 } else {
                     private _tok = selectRandom ["team", "wp_team", "squad", "recon"];
                     { _waveGroups pushBack _x } forEach ([_center, _spawnPos, _tok, _claim] call _deliverSquad);
