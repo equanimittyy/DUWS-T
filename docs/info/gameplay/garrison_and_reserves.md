@@ -35,11 +35,11 @@ casualties but keeps a survivor is not recorded: it streams out and comes back w
 Chip damage does not persist; only a wipe does.
 
 Both the raise and a town's tier buy call one shared derivation, `DUWS_fnc_garrisonDerive {key,
-x1, mult, stand}` (`src/duws/server/misc/fnc_garrison_strength_init.sqf:62`): it stamps `full`,
+x1, mult, stand}` (`src/duws/server/garrison/fnc_garrison_strength_init.sqf:62`): it stamps `full`,
 computes `surviving`, and splits it against `_stand` (the density-thinned standing template) into
 `[garrison, pool]`. Losses come out of the pool before they ever thin the standing garrison.
 
-The ledger API, all in `src/duws/server/misc/fnc_garrison_strength_init.sqf`:
+The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`:
 
 | Function | Does |
 |---|---|

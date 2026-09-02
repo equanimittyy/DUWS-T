@@ -10,7 +10,7 @@ publicVariable "fnc_money_spend";
 publicVariable "fnc_pool_spend";
 publicVariable "fnc_pool_reply";
 // Ahead of both state files below, which are its consumers: zones and towns share one attrition model.
-[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_garrison_strength_init.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\garrison\fnc_garrison_strength_init.sqf";
 // Ahead of them for the same reason: zones, towns and bases share one roster store.
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_site_stream_init.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_state_init.sqf";
@@ -53,7 +53,7 @@ fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_pl
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
 // the only machine allowed to hide a terrain object.
 fnc_clear_foliage = compile preprocessFileLineNumbers "duws\server\misc\fnc_clear_foliage.sqf";
-fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";
+fnc_factions_check = compile preprocessFileLineNumbers "duws\shared\functions\fnc_factions_check_modern.sqf";
 fnc_intro_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_intro_heli.sqf";
 publicVariable "fnc_intro_heli";
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
@@ -65,15 +65,15 @@ fnc_capture_zones_task = compile preprocessFileLineNumbers "duws\server\misc\fnc
 fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\warcom\fnc_AI_Master_Control.sqf";
 fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
-fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_usableBuildings.sqf";
-fnc_factionRoles = compile preprocessFileLineNumbers "duws\server\misc\fnc_factionRoles.sqf";
-fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\misc\fnc_holdBuildingPost.sqf";
-fnc_spreadIntoBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_spreadIntoBuildings.sqf";
+fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_usableBuildings.sqf";
+fnc_factionRoles = compile preprocessFileLineNumbers "duws\shared\functions\fnc_factionRoles.sqf";
+fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\garrison\fnc_holdBuildingPost.sqf";
+fnc_spreadIntoBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_spreadIntoBuildings.sqf";
 fnc_search_drawKind = compile preprocessFileLineNumbers "duws\server\search\fnc_search_drawKind.sqf";
 fnc_search_flag_group = compile preprocessFileLineNumbers "duws\server\search\fnc_search_flag_group.sqf";
 fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\search\fnc_search_dropItems.sqf";
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\search\fnc_search_claim.sqf";
-fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonBuildings.sqf";
+fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_garrisonBuildings.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fob_destroyed.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
@@ -230,11 +230,11 @@ fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\civilian\fn
 publicVariable "fnc_civ_town_reveal";
 // The board's map readout. The query is broadcast because a client is what calls it, and the
 // two display halves because the server is what calls them back.
-fnc_map_readout_query = compile preprocessFileLineNumbers "duws\server\misc\fnc_map_readout_query.sqf";
+fnc_map_readout_query = compile preprocessFileLineNumbers "duws\server\missions\fnc_map_readout_query.sqf";
 publicVariable "fnc_map_readout_query";
-fnc_map_readout_draw = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_draw.sqf";
+fnc_map_readout_draw = compile preprocessFileLineNumbers "duws\client\missions\fnc_map_readout_draw.sqf";
 publicVariable "fnc_map_readout_draw";
-fnc_map_readout_open = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_open.sqf";
+fnc_map_readout_open = compile preprocessFileLineNumbers "duws\client\missions\fnc_map_readout_open.sqf";
 publicVariable "fnc_map_readout_open";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_wp_Tomata.sqf";
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on

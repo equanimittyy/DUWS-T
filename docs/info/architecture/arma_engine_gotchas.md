@@ -436,7 +436,7 @@ stages. Release restores the background listener rather than clearing to `""` (t
 system needs the clicked position all mission), and a release from anyone but the holder is a
 no-op, so a mode clearing itself cannot disarm whoever claimed in between. A
 `waitUntil { !visibleMap }` spawn is still needed to release on the player closing the map
-(`client/misc/fnc_map_readout_open.sqf:27-35`): the engine gives no callback, and a mode abandoned
+(`client/missions/fnc_map_readout_open.sqf:27-35`): the engine gives no callback, and a mode abandoned
 that way would hold the slot for the rest of the mission. `DUWS_mapReadoutOpen` in that file only
 stops the readout opening twice; it is not a claim on the slot.
 

@@ -55,7 +55,7 @@ The schema can be populated three ways, all selected at campaign start:
 ## Selection and availability
 
 Which factions the player can pick is discovered at start, not hard-wired.
-`server/misc/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master lists —
+`shared/functions/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master lists —
 `_faction_files_BLUFOR` and `_faction_files_OPFOR` (~130 entries each). Each entry is:
 
 ```text
