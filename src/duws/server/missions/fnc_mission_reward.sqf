@@ -6,7 +6,7 @@ _apreward = _this select 1;
 _mission_name = _this select 2;
 
 // Civilians off, RAVAGE and WBK register no town reputation, which zeroes BLUFOR's passive CP
-// town faucet (server/misc/fnc_zonesundercontrol.sqf). Missions exist in every configuration, so
+// town faucet (server/warcom/fnc_zonesundercontrol.sqf). Missions exist in every configuration, so
 // the substitute rides them: mission CP lifts when the faucet is absent, restoring its rough share
 // through a route that is always there. Gated on civ_town_rep being empty, not on the mode name, so
 // a fourth mode added later inherits it. BLUFOR only -- OPFOR keeps its flat floor and a symmetric

@@ -112,7 +112,7 @@ stay resident while the furniture around them streams.
 
 ## The escalation census is a frame stall, so it is placed rather than removed
 
-`src/duws/server/misc/fnc_escalation.sqf` does a config read and a `BIS_fnc_objectType` call for every
+`src/duws/server/warcom/fnc_escalation.sqf` does a config read and a `BIS_fnc_objectType` call for every
 building damaged anywhere on the map, and a player-distance scan for each one that passes those
 filters, so the cost arrives as a burst under artillery rather than as a trickle.
 

@@ -53,7 +53,7 @@ so a candidate outside every zone in OPFOR-positive ground is the band.
 
 Every 30-minute economy tick, before that tick's income tally, each town reads coverage at its
 centre and steps its reputation by the difference of the two sides' pushes
-(`server/misc/fnc_zonesundercontrol.sqf:39-47`, sharing the tick's own `sleep 1800` at `:11-12`
+(`server/warcom/fnc_zonesundercontrol.sqf:39-47`, sharing the tick's own `sleep 1800` at `:11-12`
 rather than running a loop of its own):
 
 ```sqf

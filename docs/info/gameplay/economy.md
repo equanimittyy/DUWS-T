@@ -87,7 +87,7 @@ Three properties are load-bearing:
 - **The debit is `call fnc_cp_adjust`, not `remoteExec [..., 2]`.** Even on the server, remoteExec
   queues a scheduled job for a later frame, which would split the test from the debit and reopen the
   gap. The same applies to the server-side purchase paths that never used the handshake —
-  `server/misc/fnc_redeployHQUnits.sqf`, `server/supports/fnc_activateBaseRepairStation.sqf`,
+  `server/init_hq/fnc_redeployHQUnits.sqf`, `server/supports/fnc_activateBaseRepairStation.sqf`,
   `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`.
 - **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
   purchase entry point is `spawn`ed today — the dialog `action =` fields, the comm-menu `expression =`
@@ -188,9 +188,9 @@ which inverts what the death penalty is for.
 |---|---|---|
 | Zone first capture | `server/init_zones/fnc_captured.sqf:37-43` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier |
 | Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
-| Zone hold (AP trickle) | `server/misc/fnc_zonesundercontrol.sqf:69-82` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
-| Town income | `server/misc/fnc_zonesundercontrol.sqf:56-83` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
-| OPFOR flat income | `server/misc/fnc_zonesundercontrol.sqf:71` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
+| Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:69-82` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
+| Town income | `server/warcom/fnc_zonesundercontrol.sqf:56-83` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
+| OPFOR flat income | `server/warcom/fnc_zonesundercontrol.sqf:71` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
 | OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
@@ -248,7 +248,7 @@ only server-side caps read it.
 | Operatives | `client/operative/fnc_operator_recruit.sqf:29` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
-| Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
+| Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
 | Death | `client/client_init.sqf:172,187` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP

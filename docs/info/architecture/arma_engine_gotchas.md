@@ -883,7 +883,7 @@ for the campaign — worth paying where a composition must fit, not to stop a tr
 
 `BuildingChanged` is a local event: only the machine that simulated the damage fires it, so a
 server-only handler misses a change a distant client caused. Escalation
-(`server/misc/fnc_escalation.sqf`) works around this — every machine registers its own watch
+(`server/warcom/fnc_escalation.sqf`) works around this — every machine registers its own watch
 (`fnc_escalation_watch`) and forwards the ruined position to the server-owned counter. The zone-centre
 re-hide handler above still runs server-only, so a client blowing up near a hidden building may fail
 to re-hide the replacement on that client; that exposure is unfixed.

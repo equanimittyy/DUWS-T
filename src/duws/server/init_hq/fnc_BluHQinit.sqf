@@ -177,7 +177,7 @@ private _allObjectsData = [
 
 // The base's guns, in the same frame as the walls around them but on their own fence, not merged into
 // the composition above, because the two halves have different lifetimes: props are built once, guns
-// are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf replays these rows alone through
+// are replaced on every redeploy (init_hq/fnc_redeployHQUnits.sqf replays these rows alone through
 // fnc_placeHQUnits). The Eden export emits nothing past the heading column, so a permanent/rebuilt
 // flag on one merged array would survive only by being hand-carried back across 135 prop rows every
 // round trip. Do not merge them: the zone prefabs' single-fence-plus-isWeapon shape works there only

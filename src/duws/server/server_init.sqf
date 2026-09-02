@@ -310,7 +310,7 @@ if (isServer) then {
     // build reads as campaign economy, where a payout per body reads as a score feed. Each player
     // is told only about their own award, so the credit stays personal. Defined here beside the
     // handlers that fill the tally, but driven by the campaign economy tick in
-    // server/misc/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period still
+    // server/warcom/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period still
     // accrues its own scheduler slop and walks out of phase.
     fnc_kill_income_sweep = {
         {

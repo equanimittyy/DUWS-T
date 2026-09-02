@@ -443,7 +443,7 @@ which shape to expect and reads the group as absent rather than empty.
 **Escalation restores the ledger, not the rubble.** Destroyed buildings come back intact on a new
 session because terrain objects reset, so the map looks repaired while prices stay raised. That is
 the correct half to keep: the census counts the same total on the same world
-(`server/misc/fnc_escalation.sqf:55-70`), so one stored integer reproduces the level, the
+(`server/warcom/fnc_escalation.sqf:55-70`), so one stored integer reproduces the level, the
 multiplier and the loss condition together.
 
 ### The enemy

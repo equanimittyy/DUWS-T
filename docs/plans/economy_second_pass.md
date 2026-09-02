@@ -514,7 +514,7 @@ coveted resource in the campaign.
 ### Civilians off costs BLUFOR its passive CP faucet
 
 Three configurations register no town reputation: `CIV_PRESENCE` of `NONE`, `RAVAGE` or `WBK`.
-Civs-off leaves the town arrays empty (`server/misc/fnc_zonesundercontrol.sqf:29-39`); the two mode
+Civs-off leaves the town arrays empty (`server/warcom/fnc_zonesundercontrol.sqf:29-39`); the two mode
 campaigns register no town reputation at all, so `fnc_civ_townIncome`
 (`server/civilian/fnc_civ_state_init.sqf`) pays nobody. Under the town→CP routing that zeroes BLUFOR's
 passive CP, leaving zone capture bounties and mission CP to carry it, and it zeroes OPFOR's town AP,

@@ -149,7 +149,7 @@ that player disconnecting.
 
 FOB defences are campaign property by that test, so both spawn functions are server-only. The one redeploy
 scroll action still runs on the acting player, but it keeps only the sound and an advisory affordability
-hint: `server/misc/fnc_redeployFOBUnits.sqf` does the checking, the charging and the rebuild. The charge
+hint: `server/init_hq/fnc_redeployFOBUnits.sqf` does the checking, the charging and the rebuild. The charge
 moved off the client so that a caller who loses a race against another rebuild is turned away before
 paying, rather than charged and refunded. Getting there needed three linked changes, and the reasoning
 generalises to any per-object scroll action in a co-op mission:

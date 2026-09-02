@@ -101,7 +101,7 @@ private _reps = missionNamespace getVariable ["civ_town_rep", []];
 private _hasRep = _hit < count _reps;
 private _rep = if (_hasRep) then { _reps select _hit } else { 0 };
 // Raw worth, not throttled or rounded per town: the tick sums every banded town's worth and rounds
-// the total once (server/misc/fnc_zonesundercontrol.sqf), so a per-town round here would disagree
+// the total once (server/warcom/fnc_zonesundercontrol.sqf), so a per-town round here would disagree
 // -- a small town would read 0 while the tick, summing first, still pays it. Worth is the stable
 // per-town fact; the throttle is a campaign-total effect and shows in the pool figures.
 private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0];

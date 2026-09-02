@@ -1,5 +1,5 @@
 // Locality: server -- called by init_hq/fnc_BluHQinit.sqf when the base is built and by
-// misc/fnc_redeployHQUnits.sqf when the player rebuilds it.
+// init_hq/fnc_redeployHQUnits.sqf when the player rebuilds it.
 //
 // Both paths place the same six unit sets, so both run this. Every anchor is read from the
 // HQ_redeploy_* keys rather than taken as an argument: the rebuild has nothing but those keys to

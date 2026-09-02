@@ -14,7 +14,7 @@ publicVariable "fnc_pool_reply";
 // Ahead of them for the same reason: zones, towns and bases share one roster store.
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_site_stream_init.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_state_init.sqf";
-fnc_fob_deregister = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_deregister.sqf";
+fnc_fob_deregister = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fob_deregister.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_state_init.sqf";
 publicVariable "fnc_civ_moveToPlayerServer";
 fnc_duws_bluforNear = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_bluforNear.sqf";
@@ -62,7 +62,7 @@ fnc_OPFOR_faction_init = compile preprocessFileLineNumbers "duws\server\warcom\f
 fnc_faction_apply_locked = compile preprocessFileLineNumbers "duws\server\warcom\fnc_faction_apply_locked.sqf";publicVariable "fnc_faction_apply_locked";
 fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc_repetitive_cleanup.sqf";
 fnc_capture_zones_task = compile preprocessFileLineNumbers "duws\server\misc\fnc_capture_zones_task.sqf";
-fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\misc\fnc_AI_Master_Control.sqf";
+fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\warcom\fnc_AI_Master_Control.sqf";
 fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_usableBuildings.sqf";
@@ -74,7 +74,7 @@ fnc_search_flag_group = compile preprocessFileLineNumbers "duws\server\search\fn
 fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\search\fnc_search_dropItems.sqf";
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\search\fnc_search_claim.sqf";
 fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonBuildings.sqf";
-fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_destroyed.sqf";
+fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fob_destroyed.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.
@@ -83,10 +83,10 @@ fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\arsenal\f
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_basic_ammo_lists.sqf";
 fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_arsenal_base_weapons.sqf";
 fnc_arsenal_reward = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_arsenal_reward.sqf";
-fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
+fnc_escalation = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation.sqf";
 // Broadcast: fnc_escalation arms this on every machine (BuildingChanged is a local event) so a
 // building a client razed still reaches the server-side counter.
-fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
+fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created
@@ -326,7 +326,7 @@ fnc_random_event_enemy_sniper = compile preprocessFileLineNumbers "duws\server\e
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_random_event.sqf";
 
-fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
+fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";
 fnc_captured = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_captured.sqf";
 fnc_blufor_cap = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_blufor_cap.sqf";
@@ -396,7 +396,7 @@ fnc_guardsFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_guard
 // Broadcast: it is the FOB redeploy action's function value, so every client needs it.
 fnc_redeployFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_redeployFOB.sqf";publicVariable "fnc_redeployFOB";
 // Not broadcast: server-only, so an accidental client call fails loud.
-fnc_redeployFOBUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployFOBUnits.sqf";
+fnc_redeployFOBUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_redeployFOBUnits.sqf";
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
 fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\search\fnc_intel_payout.sqf";
@@ -661,12 +661,12 @@ fnc_client_addRecycleActions = compile preprocessFileLineNumbers "duws\client\su
 publicVariable "fnc_client_addRecycleActions";
 fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addRepairActions.sqf";
 publicVariable "fnc_client_addRepairActions";
-fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployHQUnits.sqf";
+fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_redeployHQUnits.sqf";
 publicVariable "fnc_redeployHQUnits";
 fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\killhouse\fnc_createKillhouse.sqf";
 publicVariable "fnc_createKillhouse";
 fnc_lbselected = compile preprocessFileLineNumbers "duws\client\operative\fnc_lbselected.sqf";publicVariable "fnc_lbselected";
-fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\misc\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
+fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\missions\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
 fnc_operator_init = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_init.sqf";publicVariable "fnc_operator_init";
 fnc_operator_open = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_open.sqf";publicVariable "fnc_operator_open";
 fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_recruit.sqf";publicVariable "fnc_operator_recruit";

@@ -16,7 +16,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | No ownership transfer exists anywhere. `setGroupOwner` and `setOwner` appear nowhere in `server/`, `client/` or `shared/` | — |
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
 | Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
-| `setSkill` needs locality, so HC-owned units would silently never receive skill settings | `server/misc/fnc_AI_Master_Control.sqf:5,22,26` |
+| `setSkill` needs locality, so HC-owned units would silently never receive skill settings | `server/warcom/fnc_AI_Master_Control.sqf:5,22,26` |
 
 The abbreviation is also overloaded, which matters because the file a newcomer will open first
 is the wrong one. `client/misc/fnc_hc_init.sqf` is Arma's **High Command** commanding UI —
@@ -100,7 +100,7 @@ first.
 
 ### Skill assignment
 
-`server/misc/fnc_AI_Master_Control.sqf:22-26` iterates `allUnits` and calls `setSkill` from the
+`server/warcom/fnc_AI_Master_Control.sqf:22-26` iterates `allUnits` and calls `setSkill` from the
 server. It must filter to `local _x` and be spawned on the HC as well as the server, so each
 machine sets skill on the units it owns.
 
@@ -118,7 +118,7 @@ machine sets skill on the units it owns.
 | `server/warcom/fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
 | `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
-| `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
+| `server/warcom/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
 | `info/server_client_authority.md` | Document the HC as a third machine role and the handoff contract. |
 
 ## Task list
