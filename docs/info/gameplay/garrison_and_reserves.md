@@ -163,12 +163,18 @@ the wave through the players on the way in, since it spawns on the far side.
 
 The mobile ground combat vehicle tokens — `car`, `apc`, `ifv`, `tank` — always resolve to a hull that
 can fight infantry. `DUWS_fnc_tokenClass` narrows their role pool through `DUWS_fnc_classGroundCapable`
-(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`), which fails a class armed only with guided
-missiles or rockets. This is a derivation rule, not a posture one: such a hull drawn for one of these
-tokens parks at `SAD` range and duels from spawn rather than close — idling instead of fighting —
-whether it is holding a zone or hunting one. Dedicated `aa` and the air roles are exempt; that weapon
-is their job. A combat role whose pool holds nothing gun-armed resolves `""`, so `fnc_zoneSpawnList`
-drops the token and no site fields it.
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`), which fails any class whose turrets carry no
+gun — a missile-only or unarmed hull. This is a derivation rule, not a posture one: such a hull drawn
+for one of these tokens parks at `SAD` range and duels from spawn rather than close — idling instead of
+fighting — whether it is holding a zone or hunting one. Dedicated `aa` and the air roles are exempt;
+that weapon is their job. A combat role whose pool holds nothing gun-armed resolves `""`, so
+`fnc_zoneSpawnList` drops the token and no site fields it.
+
+The same classifier (`DUWS_fnc_classArms`, one turret walk) reads the gunless hulls `car` drops into two
+dedicated tokens — `at_car` (a guided AT missile, no gun) and `aa_car` (an air-locking missile, no gun) —
+a clean three-way split of the armed-car pool, since a gun-armed hull is always `car`. Both are defined
+but wired to no composition yet, so nothing fields them; they exist for a future caller wanting a pure AT
+or AA screen rather than the gun-armed car.
 
 ## The break test
 

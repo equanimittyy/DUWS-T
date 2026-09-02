@@ -360,6 +360,8 @@ DUWS_teamRosters = [
 ];
 DUWS_spawnVehicles = [
     ["car",    "opfor_CAR_X",  "",           0],
+    ["at_car", "opfor_CAR_X",  "",           0],
+    ["aa_car", "opfor_CAR_X",  "",           0],
     ["apc",    "opfor_APC_X",  "",           0],
     ["tank",   "opfor_TANK_X", "TEST_Heavy", 100],
     ["heli",   "opfor_HELI_X", "TEST_Air",   0],
@@ -431,11 +433,13 @@ private _poolable = call fnc_faction_poolable_keys;
 ["poolable_keys: a key the schema does not carry is not poolable", "opfor_MADEUP_X" in _poolable, false] call fnc_assertEq;
 
 // --- the access filter: three reasons to drop a token, never to substitute one ---
-// DUWS_fnc_tokenClass runs the combat vehicle tokens (car/apc/ifv/tank) through
-// DUWS_fnc_classGroundCapable, which reads CfgVehicles -- absent in sqf-vm. Stub it permissive so the
-// resolution tests here see the unfiltered draw; the filter's own wiring is proven under a rejecting
-// stub below.
+// DUWS_fnc_tokenClass filters combat tokens by armament: car/apc/ifv/tank through
+// DUWS_fnc_classGroundCapable, at_car/aa_car through DUWS_fnc_classAT/classAA. All three read
+// CfgVehicles -- absent in sqf-vm -- so stub them permissive; the resolution tests here see the
+// unfiltered draw, and each filter's own wiring is proven under a rejecting stub below.
 DUWS_fnc_classGroundCapable = { true };
+DUWS_fnc_classAT = { true };
+DUWS_fnc_classAA = { true };
 ["tokenClass: a token resolves to the classname its faction role holds",
     (["apc"] call DUWS_fnc_tokenClass), "cls_apc"] call fnc_assertEq;
 ["tokenClass: a team answers for itself rather than resolving to a vehicle",
@@ -465,7 +469,21 @@ DUWS_fnc_classGroundCapable = { false };
     (["car"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
 ["tokenClass: an air token ignores the armament filter",
     (["heli"] call DUWS_fnc_tokenClass), "cls_heli"] call fnc_assertEq;
+// at_car/aa_car take their own predicate, not the gun one: with the gun filter rejecting they still
+// resolve off classAT/classAA, and drop only when their own predicate rejects.
+["tokenClass: at_car resolves off its AT filter, not the gun filter",
+    (["at_car"] call DUWS_fnc_tokenClass), "cls_car"] call fnc_assertEq;
+["tokenClass: aa_car resolves off its AA filter, not the gun filter",
+    (["aa_car"] call DUWS_fnc_tokenClass), "cls_car"] call fnc_assertEq;
 DUWS_fnc_classGroundCapable = { true };
+DUWS_fnc_classAT = { false };
+["tokenClass: at_car is dropped when nothing passes the AT filter",
+    (["at_car"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
+DUWS_fnc_classAA = { false };
+["tokenClass: aa_car is dropped when nothing passes the AA filter",
+    (["aa_car"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
+DUWS_fnc_classAT = { true };
+DUWS_fnc_classAA = { true };
 WARCOM_opfor_ap_earned = 200;
 
 ["zoneSpawnList: a tier fields its row, one group per entry",

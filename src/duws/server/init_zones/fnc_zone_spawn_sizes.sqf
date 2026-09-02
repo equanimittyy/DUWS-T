@@ -109,11 +109,16 @@ DUWS_fnc_tokenClass = {
     // Drawn per spawn, not held as one value the whole campaign fields at once: two zones raised in
     // the same second should not both put down the identical APC.
     //
-    // The mobile ground combat tokens -- car, apc, ifv, tank -- always draw a hull that can fight
-    // infantry: DUWS_fnc_classGroundCapable narrows their pool, dropping a missile-only hull that would
-    // park at range instead of taking the objective. Dedicated aa and air roles are exempt. "" when the
-    // role holds nothing gun-armed, so fnc_zoneSpawnList drops the token.
-    private _filter = [[], DUWS_fnc_classGroundCapable] select (_name in ["car", "apc", "ifv", "tank"]);
+    // Each combat token filters its pool by armament (the predicates above): car/apc/ifv/tank keep a gun
+    // hull -- a missile-only one parks at range and duels from spawn instead of taking the objective --
+    // while at_car/aa_car take the gunless AT/AA hulls car drops. "" when nothing in the pool matches, so
+    // fnc_zoneSpawnList / fnc_spawnFilter drop the token.
+    private _filter = switch true do {
+        case (_name in ["car", "apc", "ifv", "tank"]): { DUWS_fnc_classGroundCapable };
+        case (_name == "at_car"):                      { DUWS_fnc_classAT };
+        case (_name == "aa_car"):                      { DUWS_fnc_classAA };
+        default                                        { [] };
+    };
     [_role, _filter] call fnc_faction_pick
 };
 
@@ -177,6 +182,8 @@ DUWS_fnc_raiseGarrison = {
 // --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=opfor_--
 DUWS_spawnVehicles = [
     ["car",        "opfor_ARMED_CAR1_X",    "",           60],
+    ["at_car",     "opfor_ARMED_CAR1_X",    "",           60],
+    ["aa_car",     "opfor_ARMED_CAR1_X",    "",           60],
     ["truck",      "opfor_COVERED_TRUCK_X", "",           0],
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
@@ -200,6 +207,8 @@ DUWS_spawnVehicles = [
 // TRANS_HELI_X is the taxi the support functions fly and is left to them.
 DUWS_spawnVehiclesBlu = [
     ["car",        "blufor_ARMED_CAR1_X",     "", 60],
+    ["at_car",     "blufor_ARMED_CAR1_X",     "", 60],
+    ["aa_car",     "blufor_ARMED_CAR1_X",     "", 60],
     ["apc",        "blufor_APC1_X",           "", 150],
     ["ifv",        "blufor_APC2_X",           "", 150],
     ["tank",       "blufor_MBT_TANK1_X",      "", 350],
@@ -216,26 +225,39 @@ DUWS_fnc_vehicleRow = {
     if (_i < 0) then { [] } else { _table select _i }
 };
 
-// Whether a vehicle class can fight infantry: true when a turret carries a gun (bullets, shells,
-// grenades), false for a hull armed only with guided missiles or rockets. A magazineWell-only turret
-// reads as unarmed here -- the miss is fail-safe, dropping a borderline hull rather than passing a gunless one.
-DUWS_fnc_classGroundCapable = {
+// A vehicle's turret armament, walked once into [hasGun, hasMissile, hasAirMissile]: a gun fires
+// bullets/shells/grenades, a missile is guided (shotMissile), an air missile auto-locks air
+// (airLock >= 2). One walk feeds all three token filters below. A magazineWell-only turret resolves no
+// ammo and reads unarmed -- fail-safe: it drops a borderline hull rather than field a gunless combatant.
+DUWS_fnc_classArms = {
     params ["_class"];
     private _guns = ["shotBullet", "shotShell", "shotGrenade", "shotSpread", "shotSubmunitions"];
     private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
-    private _ok = false;
-    while { !_ok && {count _queue > 0} } do {
+    private _gun = false; private _msl = false; private _air = false;
+    while { count _queue > 0 } do {
         private _t = _queue deleteAt 0;
         private _mags = +(getArray (_t >> "magazines"));
         { _mags append (getArray (configFile >> "CfgWeapons" >> _x >> "magazines")) } forEach (getArray (_t >> "weapons"));
         {
-            private _sim = getText (configFile >> "CfgAmmo" >> (getText (configFile >> "CfgMagazines" >> _x >> "ammo")) >> "simulation");
-            if (_sim in _guns) exitWith { _ok = true };
+            private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
+            private _sim = getText (configFile >> "CfgAmmo" >> _ammo >> "simulation");
+            if (_sim in _guns) then { _gun = true };
+            if (_sim == "shotMissile") then {
+                _msl = true;
+                if (getNumber (configFile >> "CfgAmmo" >> _ammo >> "airLock") >= 2) then { _air = true };
+            };
         } forEach _mags;
         _queue append ("true" configClasses (_t >> "Turrets"));
     };
-    _ok
+    [_gun, _msl, _air]
 };
+
+// Token pool filters over those flags: classGroundCapable keeps a gun hull for car/apc/ifv/tank, classAT
+// and classAA the gunless dedicated AT and AA hulls. Disjoint by construction -- an air-lock round is
+// itself a shotMissile, so AT excludes _air and AA requires it; a gun hull passes neither.
+DUWS_fnc_classGroundCapable = { (_this call DUWS_fnc_classArms) select 0 };
+DUWS_fnc_classAT = { (_this call DUWS_fnc_classArms) params ["_g", "_m", "_a"]; _m && !_g && !_a };
+DUWS_fnc_classAA = { (_this call DUWS_fnc_classArms) params ["_g", "_m", "_a"]; _a && !_g };
 
 // Called rather than spawned, for the group each one hands back: the capture test counts this
 // zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
