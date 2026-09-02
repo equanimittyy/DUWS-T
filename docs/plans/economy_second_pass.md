@@ -732,7 +732,7 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 60/150/350/600 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (OPFOR `_ap` and BLUFOR's vehicle gates hold the same values as literals; BLUFOR's tier-3 WAVE gate is a literal 200, not the 150 rung) |
 | OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 60 (T2) / APC·IFV·AA·trans-heli 150 (T3) / tank·attack-heli 350 (T4) / plane 600 (T5) | OPFOR's capability ladder; utility trucks ungated |
 | BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf` | car 60 (T2) / apc·ifv·transheli 150 (T3) / tank·attackheli 350 (T4); infantry free (T1) | BLUFOR's capability ladder; the T3 WAVE gate (armored/air in `fnc_WARCOM_blu_patrol.sqf`) is a literal 200, not the 150 vehicle rung |
-| corpse money drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
+| corpse money drop | `server/search/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
 | town worth | `server/civilian/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |

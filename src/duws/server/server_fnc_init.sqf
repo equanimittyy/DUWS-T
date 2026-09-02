@@ -93,7 +93,7 @@ fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opf
 // server-local precisely because this reads server-side zone state.
 fnc_zone_capture_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_capture_ready.sqf";
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
-fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
+fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\search\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
 fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans_spawnDeployed.sqf";
 publicVariable "fnc_hirePartisans_spawnDeployed";
