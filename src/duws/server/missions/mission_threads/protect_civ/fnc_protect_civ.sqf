@@ -1,6 +1,6 @@
 // Locality: server; the action and factory bodies below run on the machine that triggers them.
 // Protect Informant, defend-and-build: reach the informant, fortify from a limited crate through a
-// fixed prep window, then hold OPFOR waves long enough for him to survive. docs/plans/protect_informant_rework.md.
+// fixed prep window, then hold OPFOR waves long enough for him to survive.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([13, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
@@ -52,7 +52,7 @@ _inf disableAI "PATH";       // holds the building even once he goes AWARE to fi
 _inf setBehaviour "CARELESS";
 _inf setCombatMode "BLUE";
 // Belt-and-suspenders against a future AIS setting change reviving him or stripping the handler below
-// (ais_revive_integration.md); the shipped "allplayables" never enrols a spawned unit.
+// (docs/info/architecture/revive_system.md); the shipped "allplayables" never enrols a spawned unit.
 _inf setVariable ["AIS_noReviveInit", true, true];
 // Chamber through the weapon: many civilian costumes have no container, so a loose magazine drops
 // nowhere (arma_engine_gotchas.md). Spares land only where the costume has pockets.

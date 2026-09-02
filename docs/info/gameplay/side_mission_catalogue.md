@@ -1,23 +1,23 @@
-# Side missions: rework plan
+# Side mission catalogue
 
-Working SSOT for the side-mission rework: the catalogue of what each mission is and how it
-actually plays, the reward pricing, and the open design ideas. Mission data itself lives in
-`src/duws/shared/includes/mission_types.hpp` (one row per type, index-aligned with the launcher
-block); this doc is the reasoning behind those numbers, not a second copy of them. The *how-to-add*
-lives in [`docs/info/gameplay/side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md).
+The per-mission catalogue: what each side mission is, how it actually plays, and the reward pricing --
+the *what* that [`side_mission_authoring.md`](side_mission_authoring.md) (the *how-to-add*) delegates to.
+Mission data itself lives in `src/duws/shared/includes/mission_types.hpp` (one row per type,
+index-aligned with the launcher block); this doc is the reasoning behind those numbers, not a second
+copy of them.
 
 The reward *pipeline* (how a base CP/AP payout is multiplied and credited) is not restated here --
-see [`docs/info/gameplay/economy.md`](../info/gameplay/economy.md#faucets) and
-[`docs/economy_second_pass.md`](economy_second_pass.md). In short: a thread's base CP/AP
+see [`economy.md`](economy.md#faucets) and
+[`economy_second_pass.md`](../../plans/economy_second_pass.md). In short: a thread's base CP/AP
 (`mission_types.hpp`) is scaled by `cp_reward_multiplier` (campaign 1-5), a ×1.5 civs-off CP lift,
 and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited in
-`src/duws/server/missions/fnc_mission_reward.sqf`. This rework only sets the **base** numbers.
+`src/duws/server/missions/fnc_mission_reward.sqf`. This catalogue only sets the **base** numbers.
 
 ## Status at a glance
 
-22 types (indices 0-21). The rework's shape is settled: each mission should pose a **distinct
-problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
-[`side_mission_authoring.md`](../info/gameplay/side_mission_authoring.md#the-design-bar)).
+22 types (indices 0-21). Each mission poses a **distinct problem**, not the same
+reach-the-marker-and-kill with a bigger garrison (the design bar is in
+[`side_mission_authoring.md`](side_mission_authoring.md#the-design-bar)).
 
 **Hand-made / reworked (a distinct verb, bespoke scripting):**
 
@@ -314,8 +314,9 @@ survive. Waves fill toward a budget that tracks BLUFOR headcount, on a deep dip 
 heartbeat -- infantry trucked to a debus short of the ring, up to rand(2-4) combat vehicles driving in
 from the far side. Leaving the ring empty of BLUFOR for 20 continuous seconds abandons him, counting
 as a kill. Prep starts on first player arrival (the deadline is only the never-engaged backstop). Win:
-informant alive when the defend window elapses, plus +3 REP to the nearest town. In play-testing. Full
-design of record: [`protect_informant_rework.md`](protect_informant_rework.md).
+informant alive when the defend window elapses, plus +3 REP to the nearest town. In play-testing; the
+thread (`fnc_protect_civ.sqf`) carries the tunables, and the AIS opt-out it needs is in
+[`revive_system.md`](../architecture/revive_system.md#ais-traps).
 
 ### Destroy Air Asset
 
@@ -361,7 +362,7 @@ set captive so nobody guns down a now-harmless civilian, and walks the Tomata ci
 (`fnc_civ_wp_Tomata`); on a live timeout he makes his own way there on foot; dead, the corpse rides the
 dead-owned census. The +1 REP is paid on a win, -1 on any fail. Spawns no opposition of its own -- the
 fight is whatever OPFOR already sits between HQ and the town. See the [engine
-gotchas](../info/architecture/arma_engine_gotchas.md) for the localise-a-finished-sentence trap the win
+gotchas](../architecture/arma_engine_gotchas.md) for the localise-a-finished-sentence trap the win
 line hit: the close line names the town, so it is spoken at the call site and `fnc_mission_finish` is
 handed `[]`, never a pre-formatted sentence to re-localise.
 
@@ -444,40 +445,3 @@ over the attack helicopter, and
 the two new civilian escorts -- Escort Informant at 5/15/1 (1h00-1h30) and Deliver Supplies at 15/5/3
 (0h30-1h00). Both escorts spawn no opposition of their own, so their pay leans low and the REP carries
 part of the value, as with Recover Humanitarian Supply Truck.
-
-## Per-mission rework tracker
-
-Status: `done` (shipped), `testing` (built, in play-testing, not yet signed off as done), or `stale`
-(needs rework). **Every `stale` row needs both a reprice and a distinct-verb gameplay rework, even
-where the Gameplay change cell names only one.** The Gameplay change cell is the current idea, not a
-locked spec.
-
-| Mission | Gameplay change | Status |
-|---------|-----------------|:-:|
-| Eliminate High-Value Target | three-convoy race, spot the odd unarmed car | done |
-| Deny Enemy Armor | repair-race convoy to a broken-down MBT | done |
-| Destroy Vehicle Patrol | roving 3-vehicle column, speed-limited until broken, tier-scaled pay | done |
-| Informant Manhunt | disguised manhunt in a town crowd | done |
-| Recon Enemy Position | standoff binocular hold that reveals a zone | done |
-| Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
-| Destroy Signal Tower | target an existing OPFOR radio hardpoint; win when the hardpoint falls | done |
-| Destroy Hardpoint | target an existing revealed OPFOR emplacement (any type but radio/minefield); win when the hardpoint falls | done |
-| Sabotage Laptop | which-building hunt: laptop hidden in one of 3-5 garrisoned, marked buildings | done |
-| Destroy Ammo Cache | kept as fixed-site destroy; repriced, one-shot arsenal reward removed | done |
-| Destroy Radar | kept as fixed-site destroy; repriced | done |
-| Steal Builder Vehicle | steal a guarded vehicle and drive it back to home HQ; repriced 20/30 | done |
-| Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
-| Rescue Pilot | escort-home shape kept (no distinct-verb rework), repriced 25/25; carry extraction via fnc_pilot_carry | testing |
-| Protect Informant | defend-and-build: fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | testing |
-| Recover Humanitarian Supply Truck | retake the OPFOR-guarded aid truck and deliver it to the IDAP crew's neutral/BLUFOR town | done |
-| Destroy Air Asset | intercept and down a tier-gated OPFOR gunship (attack heli / jet) loitering over the ring | testing |
-| Escort Informant | new civilian escort: recruit a friendly informant at HQ and deliver him alive to a neutral/BLUFOR town | testing |
-| Deliver Supplies | new civilian escort: drive an IDAP aid truck from HQ to the crew's neutral/BLUFOR town | testing |
-
-## Open decisions
-
-- Sign off the five in play-testing (Rescue Pilot, Protect Informant, Destroy Air Asset, Escort
-  Informant, Deliver Supplies) as *done*, or respec from play-test findings.
-- Decide Rescue Pilot's delivery radius: widen to 100 m (floated) or keep 50 m as shipped.
-- Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
-  already compensates.

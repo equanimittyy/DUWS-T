@@ -1,8 +1,8 @@
 # Authoring a side mission
 
-How to add a side-mission type, and the bar a new one has to clear. The rework SSOT — per-mission
-catalogue, effort ratings, reward pricing — is [`side_missions_working.md`](../../plans/side_missions_working.md);
-this doc is the *how*, not the *what*. Player-facing wording rules are in
+How to add a side-mission type, and the bar a new one has to clear. The per-mission catalogue —
+what each mission is, its effort rating, its reward pricing — is
+[`side_mission_catalogue.md`](side_mission_catalogue.md); this doc is the *how*, not the *what*. Player-facing wording rules are in
 [`player_text_style_guide.md`](player_text_style_guide.md).
 
 ## The design bar
@@ -28,9 +28,9 @@ quick to kill you. Small mission, real problem.
 | Generic (tower, cache, laptop, …) | reach the marker, destroy/kill the objective | none bespoke — the shared helper sequence, reskinned | one file per folder |
 
 All the hand-made designs are written up in full in the plan doc's
-[§Hand-made mission designs](../../plans/side_missions_working.md#hand-made-mission-designs) (the convoy reworks,
-plus [§Informant Manhunt](../../plans/side_missions_working.md#informant-manhunt) and
-[§Recon Enemy Position](../../plans/side_missions_working.md#recon-enemy-position)); read the closest one before writing a
+[§Hand-made mission designs](side_mission_catalogue.md#hand-made-mission-designs) (the convoy reworks,
+plus [§Informant Manhunt](side_mission_catalogue.md#informant-manhunt) and
+[§Recon Enemy Position](side_mission_catalogue.md#recon-enemy-position)); read the closest one before writing a
 new hand-made mission, as the worked example.
 
 ## The shape every thread runs
@@ -116,7 +116,7 @@ The dispatch strips `_mission` (8 chars) off the thread name, so the finder file
 `fnc_<name>_site.sqf` and must be `publicVariable`'d like the picker. A finder gates the offer at
 *click* time; a criterion that can only fail *after* the pick (war state moved in the gap) is handled
 by the thread aborting with a stable snake_case `_reason` slug — see the abort contract in
-[§Architecture](../../plans/side_missions_working.md#architecture-mission-owned-site-selection).
+[§Architecture](side_mission_catalogue.md#architecture-mission-owned-site-selection).
 
 ## Player-facing text and reward
 
@@ -124,7 +124,7 @@ Briefing lines, callsigns, hint-vs-card split, and punctuation follow
 [`player_text_style_guide.md`](player_text_style_guide.md); keep strings in `stringtable.xml` (English leads,
 other locales lag on purpose). Set the base CP/AP to track the *required effort*, not the archetype —
 the pricing rationale and the current effort ratings are in
-[`side_missions_working.md`](../../plans/side_missions_working.md#pricing-rework-command-missions).
+[`side_mission_catalogue.md`](side_mission_catalogue.md#pricing-rework-command-missions).
 
 ## Recipe
 
