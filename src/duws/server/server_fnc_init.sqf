@@ -644,7 +644,7 @@ fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsq
 fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\warcom\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
-fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
+fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\supports\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
 publicVariable "fnc_addQuickChangeActions";
 fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_quick_kits_menu.sqf";
