@@ -4,7 +4,7 @@
 
 // Single source for where a side mission is sited. The strategic-map picker
 // (client/missions/fnc_stratmap.sqf) offers several of these per request; the debug force tool
-// (server/misc/fnc_debug_force_mission.sqf) sites one. Both route here, so a forced mission lands
+// (server/debug/fnc_debug_force_mission.sqf) sites one. Both route here, so a forced mission lands
 // exactly where a picked one could, and the weighting lives in one place instead of drifting between
 // a real copy and a debug copy.
 //

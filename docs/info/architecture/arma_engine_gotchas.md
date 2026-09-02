@@ -829,7 +829,7 @@ whether that class is a `CfgWeapons` item or a `CfgMagazines` round decides the 
 **How to apply:** place pickup-able loot through `fnc_place_settled`'s `_asLoot` mode
 (`server/init_zones/fnc_place_settled.sqf`), which builds the holder, picks the cargo slot by config and
 seats it on the anchor. Set-dressing that is never picked up can stay a plain `Land_*` prop on the default
-path. `server/misc/fnc_debug_spawn_intel.sqf` is the tool that shows which intel classes have an `Item_*`
+path. `server/debug/fnc_debug_spawn_intel.sqf` is the tool that shows which intel classes have an `Item_*`
 body and which cargo slot each takes.
 
 ## `moveInGunner` into a simulated static leaves the turret dead; seat it frozen, then thaw

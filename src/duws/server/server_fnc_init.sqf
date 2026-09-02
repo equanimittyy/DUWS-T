@@ -402,16 +402,16 @@ fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_c
 fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";
 // Not broadcast: it fans out to clients itself, so a client call would fan out a second time.
 fnc_duws_report = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_report.sqf";
-fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_intel_search.sqf";
-fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
-fnc_debug_spawn_hardpoint = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_spawn_hardpoint.sqf";
-fnc_debug_clear_hardpoints = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_clear_hardpoints.sqf";
+fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_intel_search.sqf";
+fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_force_mission.sqf";
+fnc_debug_spawn_hardpoint = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_hardpoint.sqf";
+fnc_debug_clear_hardpoints = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_clear_hardpoints.sqf";
 // Server-only: remoteExec'd to 2 by the OPCOM debug view, it gathers the AoI reach circles and hands
 // them back to the caller to draw. Read-only, so an accidental client call fails loud, not harmfully.
 fnc_debug_aoi_circles = compile preprocessFileLineNumbers "duws\server\warcom\fnc_debug_aoi_circles.sqf";
-fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_search_flag.sqf";
-fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_spawn_intel.sqf";
-fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_garrison_query.sqf";
+fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_search_flag.sqf";
+fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_intel.sqf";
+fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_garrison_query.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
@@ -563,7 +563,7 @@ fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_
 fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
 // Not broadcast: the window remoteExecs it to the server by name, and it re-checks game_master
 // itself because any client could send it.
-fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_econ_server.sqf";
+fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_econ_server.sqf";
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
 fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
 fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
