@@ -82,8 +82,7 @@ private _deadline = DUWS_curDeadlineAt;
 // Allseer's fix marker on the aircraft, moved on the report cadence below. Created lazily on the first
 // report so a kill before then leaves nothing to delete.
 private _trackMarker = "";
-// First fix always lands 15 s in so the player gets an early bearing; later reports jitter on the loop below.
-private _nextReportAt = time + 15;
+private _nextReportAt = time + 15;   // first fix fixed at 15 s for an early bearing; the loop jitters the rest
 // Far from every player the global ten-minute resupply (fnc_AI_Master_Control) never reaches the asset,
 // so a long patrol runs the tank dry and the objective falls out of the sky before the player finds it.
 // Keep it fuelled and armed on its own clock, unconditional on player proximity.

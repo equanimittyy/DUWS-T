@@ -1,25 +1,19 @@
-// Locality: server -- addWaypoint, setBehaviour and setPos are ignored unless the group is local to the
-// machine issuing them (docs/info/architecture/arma_engine_gotchas.md); the protect_civ thread runs
-// server-side and spawns this.
+// Locality: server -- waypoint/behaviour orders need the group local to the caller
+// (docs/info/architecture/arma_engine_gotchas.md); the protect_civ thread spawns this server-side.
 //
-// Bounding-overwatch withdrawal for the infantry left standing when the assault breaks off. Each leapfrog
-// splits the survivors in two: one half holds and overwatches where it stands (AWARE, so it covers), the
-// other half falls back 100 m -- away from the nearest player, biased toward the nearest enemy zone, at
-// CARELESS so it runs rather than turns to fight. The two halves swap roles each leapfrog, so everyone
-// works rearward. A group is flagged for the map sweep the moment it clears 600 m of every player.
+// Bounding-overwatch withdrawal for the surviving foot groups when the assault breaks off: half cover
+// while half fall back 100 m toward friendly ground at CARELESS, swapping roles each leapfrog. A group
+// is binned once it clears 600 m of every player. A five-minute grace, or dropping below the two groups
+// that cover each other, ends the leapfrog and marches the rest to the nearest zone.
 //
-// A five-minute grace caps the dance. Past it -- or the instant fewer than two groups are left, since a
-// lone group has no one to cover it -- the survivors drop the leapfrog and simply march AWARE to the
-// nearest enemy zone, still swept as each clears 600 m.
-//
-// The array is groups (the surviving foot groups the caller claimed), not spawn tokens.
+// _groups is groups, not spawn tokens.
 if (!isServer) exitWith {};
 params ["_groups", "_center"];
 
 #define BOUND_DIST  100
 #define CLEAN_DIST  600
 #define GRACE       300
-#define BOUND_TIME  30    // seconds a leapfrog runs before the halves swap
+#define BOUND_TIME  30    // s per leapfrog
 
 private _fnAlive = { !isNull _this && { ({ alive _x } count units _this) > 0 } };
 
@@ -30,7 +24,7 @@ private _fnNearPlayer = {
     ([_ps, [], { _lead distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0
 };
 
-// Fallback bearing when the side holds no zone. WARCOM_zones_controled_by_OPFOR is positions, not objects.
+// WARCOM_zones_controled_by_OPFOR holds positions, not objects; fall straight out when it is empty.
 private _fnZonePos = {
     private _lead = leader _this;
     private _held = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
@@ -38,7 +32,7 @@ private _fnZonePos = {
     _center getPos [CLEAN_DIST + 800, _center getDir (getPosATL _lead)]
 };
 
-// Weighted mean of two compass bearings via their unit vectors, so the blend wraps 360 cleanly.
+// Bearings averaged as unit vectors so the blend wraps 360.
 private _fnBlend = {
     params ["_a", "_wa", "_b", "_wb"];
     (_wa * sin _a + _wb * sin _b) atan2 (_wa * cos _a + _wb * cos _b)
@@ -46,7 +40,7 @@ private _fnBlend = {
 
 private _fnClearWp = { for "_i" from ((count waypoints _this) - 1) to 0 step -1 do { deleteWaypoint [_this, _i] } };
 
-// LIMITED so a repositioning to fire stays near the post rather than becoming a move of its own.
+// LIMITED so it holds the post, not wanders.
 private _fnSentry = {
     _this call _fnClearWp;
     _this setBehaviour "AWARE"; _this setCombatMode "YELLOW"; _this setSpeedMode "LIMITED";
@@ -64,7 +58,7 @@ private _fnBound = {
     if (_safe isEqualTo []) then { _safe = _raw };
     _this call _fnClearWp;
     _this setBehaviour "CARELESS"; _this setCombatMode "BLUE"; _this setSpeedMode "FULL";
-    // Speed forced on the waypoint too, so no waypoint default can throttle a bounding leg back.
+    // FULL on the waypoint too: no default can throttle the leg back.
     private _wp = _this addWaypoint [_safe, 0];
     _wp setWaypointType "MOVE";
     _wp setWaypointSpeed "FULL";
@@ -79,7 +73,7 @@ private _fnMarch = {
     (_this addWaypoint [_safe, 0]) setWaypointType "MOVE";
 };
 
-// binAt now, not now+lifetime: past the 600 m ring it is also past the sweep's keep-radius, so it goes next pass.
+// binAt now: past 600 m it is past the sweep keep-radius too, so it goes next pass.
 private _fnBin = { { _x setVariable ["DUWS_binMe", true]; _x setVariable ["DUWS_binAt", time] } forEach units _this };
 
 private _fnClearOfPlayers = {
