@@ -462,14 +462,13 @@ fnc_site_poller = {
             } forEach (DUWS_occupants getOrDefault [_key, []]);
         } forEach DUWS_sites;
 
-        // Logged rather than assumed. This is the figure that decides whether the shape still holds:
-        // a pass approaching a frame means per-site work has crept back inline.
+        // Scheduled thread: the engine spreads the pass across frames, so _passMs is wall-clock, not a
+        // single-frame cost (arma_engine_gotchas.md). Warn only past half the tick -- cadence slipping,
+        // not the many-frame spread the scheduler does by design.
         private _passMs = round ((diag_tickTime - _t0) * 1000);
-        // Scheduled scripts share ~3 ms a frame; a pass well past that means per-site work crept back
-        // inline against the gate-then-dispatch rule. WARN not DEBUG so it shows at the default level.
-        if (_passMs > 15) then {
-            ["WARN", "STREAM", format ["site pass %1 ms over ceiling (%2 sites) -- work may have crept inline",
-                _passMs, count DUWS_sites]] call fnc_log;
+        if (_passMs > SITE_TICK * 500) then {
+            ["WARN", "STREAM", format ["site pass %1 ms of a %2 s cadence (%3 sites) -- cannot sustain, per-site work may have crept inline",
+                _passMs, SITE_TICK, count DUWS_sites]] call fnc_log;
         };
         if (duws_log_level >= 4) then {
             ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms",
