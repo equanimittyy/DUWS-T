@@ -356,27 +356,28 @@ if (!alive _inf) exitWith {
     [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_killed"], false, "mission_protect_civ", false, false] call fnc_mission_finish;
 };
 
-// Win. Surviving combat vehicles disengage to the nearest OPFOR-held zone; the infantry make a
-// bounding-overwatch withdrawal (fnc_bounding_retreat). REP to the nearest town, paid apart from
+// Win: every surviving group disengages to the nearest OPFOR-held zone. Infantry go AWARE, not CARELESS
+// like the vehicles, so they fight through contact instead of jogging past it. Town REP below is on top of
 // finish's CP/AP.
+private _held = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 {
     if (({ alive _x } count units _x) > 0) then {
         private _lead = leader _x;
-        private _held = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
         private _dest = if (_held isNotEqualTo []) then {
             ([_held, [], { _lead distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0
         } else {
             _targetpos getPos [RADIUS + 800, _targetpos getDir (getPosATL _lead)]
         };
         for "_i" from ((count (waypoints _x)) - 1) to 0 step -1 do { deleteWaypoint [_x, _i] };
-        _x setBehaviour "CARELESS";
-        _x setSpeedMode "FULL";
+        if (_x in _vehGroups) then {
+            _x setBehaviour "CARELESS";
+            _x setSpeedMode "FULL";
+        } else {
+            _x setBehaviour "AWARE";
+        };
         (_x addWaypoint [_dest, 0]) setWaypointType "MOVE";
     };
-} forEach _vehGroups;
-
-private _footGroups = _waveGroups select { !(_x in _vehGroups) && { ({ alive _x } count units _x) > 0 } };
-[_footGroups, _targetpos] spawn fnc_bounding_retreat;
+} forEach _waveGroups;
 
 if (CIV_PRESENCE != "NONE") then {
     private _locs = missionNamespace getVariable ["civ_locations", []];
