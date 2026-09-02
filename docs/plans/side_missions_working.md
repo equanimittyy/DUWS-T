@@ -52,12 +52,13 @@ Vehicle (6). Same verb -- steal a guarded vehicle and drive it back to home HQ -
 prize (supply truck vs builder vehicle). Repriced to 20/20 and 20/30; no longer the half-pay twin.
 
 **Built, in play-testing (not yet accepted as *done*):** Destroy Air Asset (19, new), Protect
-Informant (13, reworked into defend-and-build), and the two new civilian escorts Escort Informant
-(20) and Deliver Supplies (21). All are priced and playable; they sit apart from *done* only until a
-play-test signs them off. Designs below.
+Informant (13, reworked into defend-and-build), Rescue Pilot (4, escort-home shape kept and repriced),
+and the two new civilian escorts Escort Informant (20) and Deliver Supplies (21). All are priced and
+playable; they sit apart from *done* only until a play-test signs them off. Designs below.
 
-**Still stale -- needs *both* a reprice and a distinct-verb gameplay rework:** Rescue Pilot (4) only.
-Idea in the [tracker](#per-mission-rework-tracker).
+**No mission is stale.** Every type is repriced and either done or in play-testing. Rescue Pilot is the
+lone accepted exception to the distinct-verb bar -- kept as the escort-home shape (fight to the downed
+pilot, carry him out, deliver him near HQ), not reworked into a new verb.
 
 ## Architecture: mission-owned site selection
 
@@ -382,21 +383,15 @@ net, then the sacks come off the bed and the emptied truck pulls away before tea
 -3 on each fail branch. Spawns no opposition -- like Escort Informant, the difficulty is the war state on
 the HQ-to-town route.
 
-## Planned reworks (decided, not built)
+### Rescue Pilot
 
-The one still-stale mission (Rescue Pilot). Its verb, win/fail and reward mechanics are decided; nothing
-here is coded yet. CP/AP and the deadline band are open (not set below). Recover Aid Truck (14) and
-Protect Informant (13) are built -- their writeups are in [Hand-made mission
-designs](#recover-humanitarian-supply-truck); Protect Informant's full design of record is
-[`protect_informant_rework.md`](protect_informant_rework.md).
-
-### Rescue Pilot (4)
-
-Keep the current shape -- fight in to the crash site, extract the downed pilot (carry/load actions
-already in the thread), likely a pursuit on the way out. The one change: **win when the pilot is alive
-within 100 m of BLUFOR HQ** (the thread already ends on `_pilot distance PosOfBLUHQ`, today at 50 m --
-widen to 100). Fail: pilot killed, or deadline. No new twist; this is the escort-home shape kept, only
-the delivery radius moves.
+`mission_threads/rescue_pilot/`. The escort-home shape kept, not reworked into a distinct verb -- the
+accepted exception to the design bar. The player fights in to the crash site, extracts the downed pilot
+(the carry system lives in the shared `fnc_pilot_carry`, compiled into the thread), and delivers him
+near BLUFOR HQ, typically under pursuit. Win: the pilot alive within **50 m** of HQ (`_pilot distance
+PosOfBLUHQ`); a pilot left out of radius past the bleed-out fails. Fail: pilot killed, or the deadline
+(3 h fixed). Repriced to 25/25. Open polish, not blocking: widening the delivery radius to 100 m was
+floated but is not in the thread, which still delivers at 50 m.
 
 ## Mission catalogue (current)
 
@@ -427,10 +422,10 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 10 | Destroy Radar | sabotage | cmd | 15/25/0 | 3 | done (fixed-site, repriced) |
 | 1 | Steal Supply Truck | requisition | cmd | 20/20/0 | 4 | done |
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
-| 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
+| 4 | Rescue Pilot | rescue | cmd | 25/25/0 | 4 | testing (escort-home shape kept, repriced) |
 | 13 | Protect Informant | defend | civ | 30/30/3 | 4 | testing (defend-and-build; see rework doc) |
 | 14 | Recover Humanitarian Supply Truck | escort | civ | 25/10/3 | 4 | done |
-| 20 | Escort Informant | escort | civ | 5/20/1 | 2 | testing (spawns no opposition; route fight is the war state) |
+| 20 | Escort Informant | escort | civ | 5/15/1 | 2 | testing (spawns no opposition; route fight is the war state) |
 | 21 | Deliver Supplies | escort | civ | 15/5/3 | 2 | testing (spawns no opposition; route fight is the war state) |
 
 ## Pricing rework (command missions)
@@ -440,12 +435,13 @@ to command/intel/tactical value, AP to materiel destroyed or manpower recovered.
 repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
 Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Signal Tower, Sabotage
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
-note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **The one
-still-stale mission carries its old numbers and is open pricing work** -- Rescue Pilot. Recover
-Humanitarian Supply Truck is fully priced: 25/10, deadline matching the steal-and-drive pair. The four
-in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
-Air Asset at 25/25 (0h30-1h00) with +10 CP when the side fields a jet over the attack helicopter, and
-the two new civilian escorts -- Escort Informant at 5/20/1 (1h00-1h30) and Deliver Supplies at 15/5/3
+note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. Every type
+is now priced -- none carries its old numbers. Recover
+Humanitarian Supply Truck is fully priced: 25/10, deadline matching the steal-and-drive pair. The five
+in play-testing are priced but not yet signed off: Rescue Pilot at 25/25 (3 h fixed), Protect Informant
+at 30/30/3 (3 h fixed), Destroy Air Asset at 25/25 (0h30-1h00) with +10 CP when the side fields a jet
+over the attack helicopter, and
+the two new civilian escorts -- Escort Informant at 5/15/1 (1h00-1h30) and Deliver Supplies at 15/5/3
 (0h30-1h00). Both escorts spawn no opposition of their own, so their pay leans low and the REP carries
 part of the value, as with Recover Humanitarian Supply Truck.
 
@@ -471,7 +467,7 @@ locked spec.
 | Destroy Radar | kept as fixed-site destroy; repriced | done |
 | Steal Builder Vehicle | steal a guarded vehicle and drive it back to home HQ; repriced 20/30 | done |
 | Steal Supply Truck | steal a guarded vehicle and drive it back to home HQ; repriced 20/20 | done |
-| Rescue Pilot | fight in to the downed pilot, then extract him to within 100 m of HQ (verb decided, not built) | stale |
+| Rescue Pilot | escort-home shape kept (no distinct-verb rework), repriced 25/25; carry extraction via fnc_pilot_carry | testing |
 | Protect Informant | defend-and-build: fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | testing |
 | Recover Humanitarian Supply Truck | retake the OPFOR-guarded aid truck and deliver it to the IDAP crew's neutral/BLUFOR town | done |
 | Destroy Air Asset | intercept and down a tier-gated OPFOR gunship (attack heli / jet) loitering over the ring | testing |
@@ -480,9 +476,8 @@ locked spec.
 
 ## Open decisions
 
-- Build the one remaining planned rework above (Rescue Pilot; verb decided, not coded yet).
-- CP/AP and deadline band for Rescue Pilot; its pricing pass follows the build.
-- Sign off the four in play-testing (Protect Informant, Destroy Air Asset, Escort Informant, Deliver
-  Supplies) as *done*, or respec from play-test findings.
+- Sign off the five in play-testing (Rescue Pilot, Protect Informant, Destroy Air Asset, Escort
+  Informant, Deliver Supplies) as *done*, or respec from play-test findings.
+- Decide Rescue Pilot's delivery radius: widen to 100 m (floated) or keep 50 m as shipped.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
