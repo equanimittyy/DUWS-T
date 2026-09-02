@@ -28,8 +28,9 @@ for "_i" from 1 to 6 do {
 if (_spawnPos isEqualTo []) then { _spawnPos = getPosATL _road };
 
 private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
-// 80% damaged: reads as broken down, and short of 1.0 so it is repairable rather than a wreck. Every
-// player is an engineer (mission setup), so a full repair back to 0 is always reachable.
+// 80% damaged: reads as broken down, and short of 1.0 so it is repairable rather than a wreck. A field
+// toolkit caps repair at ~50% integrity on a hull this far gone (full repair needs a repair vehicle), so
+// the win test below is met at that cap, not at 0.
 _veh setDamage 0.8;
 
 private _civ = [_townIndex, _veh getPos [3, _dir + 90], selectRandom civ_array, false] call fnc_civ_spawnUnit;
@@ -44,11 +45,12 @@ _civ disableAI "PATH";
 _veh setVariable ["DUWS_binMe", true];
 _civ setVariable ["DUWS_binMe", true];
 
-// HEAR_RADIUS: earshot for his lines. REPAIRED_BELOW: the car spawns at 0.8, so a drop past this is a
-// genuine repair, not a jostle. STRANDED_TIMEOUT: backstop so the watch thread ends if a player lingers
-// near an unfixed car forever; the cleanup flags above own the actual teardown.
+// HEAR_RADIUS: earshot for his lines. REPAIRED_DMG: the car spawns at 0.8, so a drop to this or better is a
+// genuine repair, not a jostle; set at the toolkit's ~50% cap so an on-foot repair actually reaches it.
+// STRANDED_TIMEOUT: backstop so the watch thread ends if a player lingers near an unfixed car forever; the
+// cleanup flags above own the actual teardown.
 #define HEAR_RADIUS 30
-#define REPAIRED_BELOW 0.1
+#define REPAIRED_DMG 0.5
 #define STRANDED_TIMEOUT 1500
 
 [_civ, _veh, _townIndex] spawn {
@@ -66,7 +68,7 @@ _civ setVariable ["DUWS_binMe", true];
 			[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RANDOM_STRANDED_ASK"] remoteExec ["fnc_duws_dialogue", _heard];
 		};
 
-		if (alive _veh && {damage _veh < REPAIRED_BELOW}) exitWith {
+		if (alive _veh && {damage _veh <= REPAIRED_DMG}) exitWith {
 			// Whoever repaired it is in earshot; the thanks and the reward hint go to everyone there
 			// rather than singling out one player, and the cash drops on the ground for any to grab.
 			private _amt = 1 + floor random 3;
