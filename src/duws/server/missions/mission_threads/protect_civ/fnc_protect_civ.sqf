@@ -355,8 +355,9 @@ if (!alive _inf) exitWith {
     [_mission_name, _tn, "FAILED", _targetpos, RADIUS, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_killed"], false, "mission_protect_civ", false, false] call fnc_mission_finish;
 };
 
-// Win. Surviving combat vehicles disengage to the nearest OPFOR-held zone (infantry keep hunting);
-// REP to the nearest town, paid apart from finish's CP/AP.
+// Win. Surviving combat vehicles disengage to the nearest OPFOR-held zone; the infantry make a
+// bounding-overwatch withdrawal (fnc_bounding_retreat). REP to the nearest town, paid apart from
+// finish's CP/AP.
 {
     if (({ alive _x } count units _x) > 0) then {
         private _lead = leader _x;
@@ -372,6 +373,9 @@ if (!alive _inf) exitWith {
         (_x addWaypoint [_dest, 0]) setWaypointType "MOVE";
     };
 } forEach _vehGroups;
+
+private _footGroups = _waveGroups select { !(_x in _vehGroups) && { ({ alive _x } count units _x) > 0 } };
+[_footGroups, _targetpos] spawn fnc_bounding_retreat;
 
 if (CIV_PRESENCE != "NONE") then {
     private _locs = missionNamespace getVariable ["civ_locations", []];
