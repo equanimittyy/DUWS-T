@@ -312,6 +312,9 @@ fnc_random_event_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_random_event_stranded = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_stranded.sqf";
 fnc_random_event_convoy = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_convoy.sqf";
 fnc_random_event_car_bomb = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_car_bomb.sqf";
+fnc_random_event_recon_patrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_recon_patrol.sqf";
+fnc_random_event_enemy_car = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_enemy_car.sqf";
+fnc_random_event_enemy_sniper = compile preprocessFileLineNumbers "duws\server\misc\fnc_random_event_enemy_sniper.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_random_event.sqf";
 

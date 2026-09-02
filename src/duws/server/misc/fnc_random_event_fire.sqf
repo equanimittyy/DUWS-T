@@ -15,6 +15,9 @@ switch (_kind) do {
 	case "civ_convoy":   { [_townIndex, _player] call fnc_random_event_convoy };
 	case "civ_stranded": { [_townIndex, _player] call fnc_random_event_stranded };
 	case "car_bomb":     { [_townIndex, _player] call fnc_random_event_car_bomb };
+	case "recon_patrol": { [_townIndex, _player] call fnc_random_event_recon_patrol };
+	case "enemy_car":    { [_townIndex, _player] call fnc_random_event_enemy_car };
+	case "enemy_sniper": { [_townIndex, _player] call fnc_random_event_enemy_sniper };
 	default {
 		["INFO", "CIV", format ["random event '%1' rolled at town %2 (no handler yet)", _kind, _townIndex]] call fnc_log;
 	};
