@@ -38,13 +38,15 @@ So the commander reads a belief store, and only the sensors below read truth.
 
 ### Shape
 
-Parallel arrays, server-local, indexed together, every entry a number or an array of numbers. The
-same shape and the same reason as the hardpoint registry
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#why-hardpoints-are-not-zones)): the mission namespace is the save
-file, so state that might outlive a session has to be serialisable
-([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
-Not broadcast — no client reads it, and a belief the player could inspect is a belief the player
-can route around.
+Parallel arrays, server-local, indexed together, every entry a number or an array of numbers.
+Serialisable for the hardpoint registry's reason — the mission namespace is the save file, so state
+that might outlive a session cannot hold handles
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#why-hardpoints-are-not-zones),
+[`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
+The registry is the reason, not the shape: `DUWS_hardpoints` is a single mixed-type row array and is
+`publicVariable`d, so the server-local, handle-free store to model on is its companion `DUWS_sites`.
+Not broadcast — no client reads belief, and a belief the player could inspect is one the player can
+route around.
 
 | Array | Holds |
 |---|---|
@@ -160,8 +162,8 @@ Two layers, stamped each tick, then read as a signed difference `friendly - enem
 and no knowledge of the player — and it drives town drift and hardpoint siting
 ([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)). The grid is the
 two-sided *magnitude* read that adds the belief store and that only OPCOM's scoring consumes; it
-touches neither drift nor siting. The existing dev overlay `fnc_debug_opcom_view` is where it
-renders.
+touches neither drift nor siting. A grid render belongs in the dev overlay `fnc_debug_opcom_view`,
+which today draws only AoI coverage circles — the grid layer is new work, not an existing readout.
 
 ## Appraisal: utility scoring, not search
 
@@ -275,12 +277,12 @@ two-sided magnitude read that adds the belief store and that only OPCOM's scorin
 **One thread with a phase counter, not one per sink.** The shipped hardpoint monitor already made
 this call — one shared loop over the whole registry, not one thread each
 ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)); it binds harder here, because
-`src/duws` carries 25 `while {true}` loops across 19 files today.
+`src/duws` carries 24 `while {true}` loops across 21 files today.
 
 | Property | Value | Why |
 |---|---|---|
 | Outer tick | 60-90 s | Refresh belief, score, commit at most one thing. The sinks keep their own cooldowns; the tick decides only whether this is a spending tick |
-| Scoring pass | inside `isNil { ... }` | Unscheduled, so it runs uninterrupted instead of being sliced at ~3 ms a frame. `server/misc/fnc_moreUrban_locations.sqf:134-152` is the worked example, bounded by a wall-clock deadline rather than an iteration count |
+| Scoring pass | inside `isNil { ... }` | Unscheduled, so it runs uninterrupted instead of being sliced at ~3 ms a frame. `server/misc/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline rather than an iteration count |
 | Clock | `time` | Intent expiries and belief stamps have to survive a savegame |
 | Orders | server-local groups only | Waypoints are silently ignored unless the group is local to the issuing machine |
 | State | numbers, strings, arrays of those | No group or object handles anywhere near the mission namespace |
@@ -413,7 +415,7 @@ Extending it needs little new machinery: a zone's tier is already stored per zon
 table is already indexed by it, and zone and town strength already share one attrition ledger —
 `fnc_zone_strength` (`server/init_zones/fnc_zone_state_init.sqf:84`) reads it through
 `DUWS_fnc_garrisonStrength`, the same store `fnc_town_garrison_reinforce`
-(`server/civilian/fnc_civ_state_init.sqf:166`) writes through `DUWS_fnc_garrisonUnlose`. There is no zone
+(`server/civilian/fnc_civ_state_init.sqf:183`) writes through `DUWS_fnc_garrisonUnlose`. There is no zone
 strength *setter* today, so what is missing is the pair of wrappers — one applying that reinforcement
 step to a zone key, one writing a zone tier with a clamp.
 
@@ -539,8 +541,8 @@ rolled; the troops around it are what the war has become.
 now — a row of `posture:token` entries (the tier compositions in `DUWS_zoneSpawnTiers`,
 `server/init_zones/fnc_zone_spawn_sizes.sqf:32`) resolved to classes by `DUWS_fnc_tokenClass` (`:91`)
 against the shared token vocabulary — the team roster in `shared/functions/fnc_spawn_vocab.sqf`, the
-vehicle rows `DUWS_spawnVehicles`/`DUWS_spawnVehiclesBlu` (`:172`,`:195`) — scaled, attrition-thinned
-and raised by `DUWS_fnc_raiseGarrison` (`:133`). A hardpoint tier belongs in that file as its own small
+vehicle rows `DUWS_spawnVehicles`/`DUWS_spawnVehiclesBlu` (`:183`,`:208`) — scaled, attrition-thinned
+and raised by `DUWS_fnc_raiseGarrison` (`:144`). A hardpoint tier belongs in that file as its own small
 table beside the zone one, for three reasons: the vehicle rows already name faction roles rather
 than classnames, so a hardpoint late in a campaign is defended by whatever the enemy fields
 everywhere else; the row's `setting` column already answers `HeavyArmor`; and a fenced table is
@@ -611,7 +613,7 @@ nothing fires at what the enemy has not seen.
 player can take, and the unmanned clause already counts that as cleared
 ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#clearance)) — capturing one is a legitimate prize for a
 hard fight, and the recycle station will pay for it (`fnc_activateBaseRecycleStation.sqf`, a
-documented ownership-free faucet in [`../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#campaign-loop)).
+documented ownership-free faucet in [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#campaign-loop)).
 
 Everything below applies to both.
 
@@ -801,9 +803,11 @@ and its own open questions — lives in its own plan: [`random_events_plan.md`](
 
 ## Persistence
 
-The commander is campaign state, and the campaign snapshot
-([`campaign_persistence_plan.md`](campaign_persistence_plan.md)) carries the part of it that a single
-function can rebuild from numbers and strings. Live squads, spawned garrisons and in-flight fire
+The commander is campaign state. The campaign snapshot
+([`campaign_persistence_plan.md`](campaign_persistence_plan.md)) is a planned system, not shipped —
+persistence today is the engine's own `saveGame`, which keeps mission-namespace numbers implicitly
+but enumerates and versions nothing. Once built, the snapshot carries the part of the commander that
+a single function can rebuild from numbers and strings. Live squads, spawned garrisons and in-flight fire
 missions are never saved — they regenerate on player approach like everything else in a restored
 campaign. What the commander contributes to the snapshot:
 
@@ -824,8 +828,8 @@ stamp sits in the future in the next session
 nothing to build — but a campaign resumed with the enemy still knowing where it last saw the player
 and one resumed with the enemy blind are different difficulties, and neither is obviously right. It
 stays out of the snapshot until that is decided ([§Open questions](#open-questions)); a restored
-campaign that omits the key simply rebuilds belief from its first sensor pass. Because the snapshot
-is a name-keyed hashmap, adding the key later shifts nothing an older save's readers see.
+campaign that omits the key simply rebuilds belief from its first sensor pass. Because that snapshot
+is specified as a name-keyed hashmap, adding the key later would shift nothing an older save's readers see.
 
 ## Naming: OPCOM sits inside WARCOM
 
@@ -870,7 +874,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
 
 | Phase | Contains | Why it is gated here |
 |---|---|---|
-| **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, a debug readout | Independently useful and independently testable — the artillery observation gate and the intel patrol both consume the belief store, the grid renders in the existing dev overlay, and all of it verifies before a commander exists |
+| **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, a debug readout | Independently useful and independently testable — the artillery observation gate and the intel patrol both consume the belief store, the grid adds its own render to the `fnc_debug_opcom_view` overlay (AoI circles only today), and all of it verifies before a commander exists |
 | **The loop** | One thread, the tick, the five terms, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Smallest thing that produces visible enemy behaviour |
 | **Intents** | The record, minimum lifetimes, release on completion or death | Lands with the third sink: taskings are where thrash starts costing |
 | **Archetype** | The weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
