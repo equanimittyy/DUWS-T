@@ -150,16 +150,26 @@ fnc_faction_pools_publish = {
 // Falls back to the global for a role with no pool (every hand-written faction file's plain-string
 // roles), and "" for one the faction never defined at all -- fnc_factionRoles drops the empty answer,
 // same reasoning as fnc_faction_resolve above.
+//
+// _filter is an optional predicate on a candidate classname (`[class] call _filter -> bool`): a caller
+// narrows the draw to classes it passes -- DUWS_fnc_tokenClass uses it to keep a gunless hull out of a
+// combat vehicle role. "" when none pass. The default [] skips the filter, so the existing paths stay
+// byte-for-byte and infantry picks and readouts pay nothing.
 fnc_faction_pick = {
-    params ["_name"];
+    params ["_name", ["_filter", []]];
     private _pool = missionNamespace getVariable [format ["DUWS_factionPool_%1", _name], []];
-    if !(_pool isEqualTo []) exitWith { selectRandom _pool };
+    if !(_pool isEqualTo []) exitWith {
+        if (_filter isEqualTo []) exitWith { selectRandom _pool };
+        private _ok = _pool select { [_x] call _filter };
+        if (_ok isEqualTo []) then { "" } else { selectRandom _ok }
+    };
     private _v = missionNamespace getVariable [_name, ""];
-    if !(_v isEqualType []) exitWith { _v };
+    if !(_v isEqualType []) exitWith { if (_filter isEqualTo [] || {[_v] call _filter}) then { _v } else { "" } };
     if (_v isEqualTo []) exitWith { "" };
     // No pool var yet an array global: a non-poolable role (a static) whose global a Back-and-re-pick
     // left un-collapsed. Variety is the pool var's job alone; the gate in fnc_faction_pools_publish
     // clears it for a static on purpose (see fnc_faction_poolable_keys above), so the representative
     // (first entry) is the answer here too, never a random draw.
-    _v select 0
+    private _first = _v select 0;
+    if (_filter isEqualTo [] || {[_first] call _filter}) then { _first } else { "" }
 };

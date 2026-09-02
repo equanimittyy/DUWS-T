@@ -161,15 +161,14 @@ spawn-time location let a wave walk off the objective if the player withdrew bef
 leaving the ground taken and the counterattack chasing nothing. A centre destination still crosses
 the wave through the players on the way in, since it spawns on the far side.
 
-Vehicle reserves under `"hunt"` are filtered to hulls that can fight infantry.
-`DUWS_fnc_classGroundCapable` (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`) rejects a class
-whose only armament is guided missiles or rockets, because the `SAD` waypoint lets a pure-ATGM carrier
-or a missile-armed AA hull park at missile range and duel from spawn rather than close — reading as a
-reinforcement idling. The role pool is re-rolled for a gun-armed variant first; the garrison reserve
-(hunt branch of `DUWS_fnc_zoneSpawnOne`) then drops the slot if the pool offers only missile carriers,
-and the protect-informant assault (`src/duws/server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf`)
-falls back to a squad. Defensive garrison postures are unaffected — a dug-in AT or AA hull is fine
-where it holds.
+The mobile ground combat vehicle tokens — `car`, `apc`, `ifv`, `tank` — always resolve to a hull that
+can fight infantry. `DUWS_fnc_tokenClass` narrows their role pool through `DUWS_fnc_classGroundCapable`
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`), which fails a class armed only with guided
+missiles or rockets. This is a derivation rule, not a posture one: such a hull drawn for one of these
+tokens parks at `SAD` range and duels from spawn rather than close — idling instead of fighting —
+whether it is holding a zone or hunting one. Dedicated `aa` and the air roles are exempt; that weapon
+is their job. A combat role whose pool holds nothing gun-armed resolves `""`, so `fnc_zoneSpawnList`
+drops the token and no site fields it.
 
 ## The break test
 

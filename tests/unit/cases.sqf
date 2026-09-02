@@ -404,6 +404,18 @@ opfor_EMPTY_X = [];
 opfor_STATIC_ARR_X = ["cls_gun", "cls_variant"];
 ["faction_pick: a pool-less array global answers with the representative, not a random draw",
     (["opfor_STATIC_ARR_X"] call fnc_faction_pick), "cls_gun"] call fnc_assertEq;
+// An optional filter narrows the candidates before the draw, so a caller can exclude classes a context
+// must not field; "" when nothing passes, and a pool-less global is filtered the same way.
+DUWS_factionPool_opfor_FILT_X = ["keep_1", "drop_1", "keep_2"];
+["faction_pick: a filter keeps only the classes that pass",
+    (["opfor_FILT_X", { (_this select 0) in ["keep_1", "keep_2"] }] call fnc_faction_pick) in ["keep_1", "keep_2"], true] call fnc_assertEq;
+["faction_pick: a filter that rejects the whole pool answers with nothing",
+    (["opfor_FILT_X", { false }] call fnc_faction_pick), ""] call fnc_assertEq;
+opfor_FILTPLAIN_X = "only_class";
+["faction_pick: a filter drops a pool-less global that fails it",
+    (["opfor_FILTPLAIN_X", { false }] call fnc_faction_pick), ""] call fnc_assertEq;
+["faction_pick: a pool-less global that passes the filter is kept",
+    (["opfor_FILTPLAIN_X", { true }] call fnc_faction_pick), "only_class"] call fnc_assertEq;
 
 // --- fnc_faction_poolable_keys: which roles fnc_faction_pools_publish gives a pool ---
 // Pooling (a random draw per spawn) is for vehicle roles only: spawn variety is deliberately a
@@ -419,6 +431,11 @@ private _poolable = call fnc_faction_poolable_keys;
 ["poolable_keys: a key the schema does not carry is not poolable", "opfor_MADEUP_X" in _poolable, false] call fnc_assertEq;
 
 // --- the access filter: three reasons to drop a token, never to substitute one ---
+// DUWS_fnc_tokenClass runs the combat vehicle tokens (car/apc/ifv/tank) through
+// DUWS_fnc_classGroundCapable, which reads CfgVehicles -- absent in sqf-vm. Stub it permissive so the
+// resolution tests here see the unfiltered draw; the filter's own wiring is proven under a rejecting
+// stub below.
+DUWS_fnc_classGroundCapable = { true };
 ["tokenClass: a token resolves to the classname its faction role holds",
     (["apc"] call DUWS_fnc_tokenClass), "cls_apc"] call fnc_assertEq;
 ["tokenClass: a team answers for itself rather than resolving to a vehicle",
@@ -441,6 +458,14 @@ WARCOM_opfor_ap_earned = 40;
 WARCOM_opfor_ap_earned = 100;
 ["tokenClass: reaching the rung unlocks it",
     (["tank"] call DUWS_fnc_tokenClass), "cls_tank"] call fnc_assertEq;
+// The armament filter is wired to the combat tokens: a rejecting stub drops a car token to "", while
+// an air token (never armament-filtered) still resolves. Restored permissive for the tests that follow.
+DUWS_fnc_classGroundCapable = { false };
+["tokenClass: a combat vehicle token is dropped when nothing passes the armament filter",
+    (["car"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
+["tokenClass: an air token ignores the armament filter",
+    (["heli"] call DUWS_fnc_tokenClass), "cls_heli"] call fnc_assertEq;
+DUWS_fnc_classGroundCapable = { true };
 WARCOM_opfor_ap_earned = 200;
 
 ["zoneSpawnList: a tier fields its row, one group per entry",

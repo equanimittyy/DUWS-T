@@ -108,7 +108,13 @@ DUWS_fnc_tokenClass = {
     if (_ap > 0 && {(missionNamespace getVariable [_earnedVar, 0]) < _ap}) exitWith { "" };
     // Drawn per spawn, not held as one value the whole campaign fields at once: two zones raised in
     // the same second should not both put down the identical APC.
-    [_role] call fnc_faction_pick
+    //
+    // The mobile ground combat tokens -- car, apc, ifv, tank -- always draw a hull that can fight
+    // infantry: DUWS_fnc_classGroundCapable narrows their pool, dropping a missile-only hull that would
+    // park at range instead of taking the objective. Dedicated aa and air roles are exempt. "" when the
+    // role holds nothing gun-armed, so fnc_zoneSpawnList drops the token.
+    private _filter = [[], DUWS_fnc_classGroundCapable] select (_name in ["car", "apc", "ifv", "tank"]);
+    [_role, _filter] call fnc_faction_pick
 };
 
 // What is missing from _have to make it _want, counting duplicates: two patrols wanted against one
@@ -210,10 +216,9 @@ DUWS_fnc_vehicleRow = {
     if (_i < 0) then { [] } else { _table select _i }
 };
 
-// Whether a vehicle class can fight infantry: a turret gun (bullets, shells, grenades) passes, a hull
-// armed only with guided missiles or rockets fails. Callers keep failing hulls out of a "hunt"
-// reinforcement, where SAD lets a pure-ATGM or missile-AA vehicle park at range instead of closing. A
-// magazineWell-only turret reads as unarmed here -- failing safe to infantry, never keeping a gunless hull.
+// Whether a vehicle class can fight infantry: true when a turret carries a gun (bullets, shells,
+// grenades), false for a hull armed only with guided missiles or rockets. A magazineWell-only turret
+// reads as unarmed here -- the miss is fail-safe, dropping a borderline hull rather than passing a gunless one.
 DUWS_fnc_classGroundCapable = {
     params ["_class"];
     private _guns = ["shotBullet", "shotShell", "shotGrenade", "shotSpread", "shotSubmunitions"];
@@ -256,18 +261,6 @@ DUWS_fnc_zoneSpawnOne = {
         if (_class == "") exitWith {
             ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
             grpNull
-        };
-        // A hunt vehicle must fight infantry on the objective, so re-roll the role pool for a gun-armed
-        // hull (DUWS_fnc_classGroundCapable); a pool of only missile carriers yields grpNull and the wave
-        // fields one fewer vehicle. Defensive postures keep whatever the pool drew -- a dug-in AT/AA hull
-        // is fine there.
-        if (_posture == "hunt") then {
-            private _try = 0;
-            while { _try < 6 && {!([_class] call DUWS_fnc_classGroundCapable)} } do {
-                _try = _try + 1;
-                _class = [_token] call DUWS_fnc_tokenClass;
-            };
-            if !([_class] call DUWS_fnc_classGroundCapable) exitWith { grpNull };
         };
         _grp = [_class, _pos, _size, _posture, _spawnPos] call fnc_spawn_vehicle;
     };
