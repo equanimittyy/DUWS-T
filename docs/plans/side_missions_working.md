@@ -301,7 +301,7 @@ player's team acknowledges (VOICE); IDAP thanks the player on delivery (VOICE). 
 Overlord's loss to report on NET (`STR_DUWS_T_idaptruckdown`), a deadline the shared
 `fnc_mission_timeout_notice` (Overlord, NET). The deadline band is set to 0h30-1h00, matching the
 steal-and-drive pair (Steal Supply Truck, Steal Builder Vehicle) whose shape it shares. CP/AP are held
-at 20/10: it shares the steal pair's fight but pays less CP/AP because the +3 REP carries part of its
+at 25/10: it shares the steal pair's fight but pays less AP because the +3 REP carries part of its
 value.
 
 ### Protect Informant
@@ -429,7 +429,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 6 | Steal Builder Vehicle | requisition | cmd | 20/30/0 | 4 | done |
 | 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale (spec ready, not built) |
 | 13 | Protect Informant | defend | civ | 30/30/3 | 4 | testing (defend-and-build; see rework doc) |
-| 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done |
+| 14 | Recover Humanitarian Supply Truck | escort | civ | 25/10/3 | 4 | done |
 | 20 | Escort Informant | escort | civ | 5/20/1 | 2 | testing (spawns no opposition; route fight is the war state) |
 | 21 | Deliver Supplies | escort | civ | 15/5/3 | 2 | testing (spawns no opposition; route fight is the war state) |
 
@@ -442,7 +442,7 @@ Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team, Destroy Si
 Laptop) are now priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design
 note). Destroy Ammo Cache and Destroy Radar are repriced too, kept as fixed-site destroys. **The one
 still-stale mission carries its old numbers and is open pricing work** -- Rescue Pilot. Recover
-Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The four
+Humanitarian Supply Truck is fully priced: 25/10, deadline matching the steal-and-drive pair. The four
 in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
 Air Asset at 25/25 (0h30-1h00) with +10 CP when the side fields a jet over the attack helicopter, and
 the two new civilian escorts -- Escort Informant at 5/20/1 (1h00-1h30) and Deliver Supplies at 15/5/3
