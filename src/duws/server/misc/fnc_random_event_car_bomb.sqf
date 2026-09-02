@@ -65,9 +65,8 @@ _driver setVariable ["DUWS_binMe", true];
 		};
 		if (random 1 < 0.3) then { [_driver, ["Horn", _veh]] remoteExec ["action", 0] };
 
-		// Armed on the hull's distance, not the seated driver's -- and also once the car has closed as far
-		// as the roads allow and stopped, so an off-road player it cannot reach is still hit.
-		if (_veh distance _target < ARM_RANGE || {(speed _veh) < 5 && {_veh distance _target < 50}}) exitWith { _fuse = FUSE };
+		// Armed on the hull's distance, not the seated driver's.
+		if (_veh distance _target < ARM_RANGE) exitWith { _fuse = FUSE };
 		sleep 0.5;
 	};
 
