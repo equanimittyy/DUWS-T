@@ -232,7 +232,7 @@ player setUnitTrait ["uavHacker",true];
 // Squad-lead extras: High Command, and the FOB support row that arrives once BLUFOR holds a zone.
 if ((vehiclevarname player) in Squad_Leaders) then {
 	// wait until blu captures at least one zone
-	[] spawn fnc_zones_bonus;
+	[] spawn fnc_fob_unlock_notice;
 	["INFO", "BOOT", "HC init"] call fnc_log;
 	[] spawn fnc_hc_init;
 };

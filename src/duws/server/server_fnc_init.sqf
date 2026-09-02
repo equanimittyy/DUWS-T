@@ -626,7 +626,7 @@ fnc_hirePMC = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePMC.sq
 publicVariable "fnc_hirePMC";
 fnc_moreUrban_locations = compile preprocessFileLineNumbers "duws\server\misc\fnc_moreUrban_locations.sqf";publicVariable "fnc_moreUrban_locations";
 fnc_hc_init = compile preprocessFileLineNumbers "duws\client\misc\fnc_hc_init.sqf";publicVariable "fnc_hc_init";
-fnc_zones_bonus = compile preprocessFileLineNumbers "duws\client\misc\fnc_zones_bonus.sqf";publicVariable "fnc_zones_bonus";
+fnc_fob_unlock_notice = compile preprocessFileLineNumbers "duws\client\warcom\fnc_fob_unlock_notice.sqf";publicVariable "fnc_fob_unlock_notice";
 fnc_kndr_unit_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_kndr_unit_markers.sqf";publicVariable "fnc_kndr_unit_markers";
 fnc_player_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_player_markers.sqf";publicVariable "fnc_player_markers";
 fnc_earplugs = compile preprocessFileLineNumbers "duws\client\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
@@ -642,7 +642,7 @@ fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
 fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
-fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
+fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\warcom\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
