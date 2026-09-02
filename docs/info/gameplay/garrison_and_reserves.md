@@ -173,8 +173,16 @@ that weapon is their job. A combat role whose pool holds nothing gun-armed resol
 The same classifier (`DUWS_fnc_classArms`, one turret walk) reads the gunless hulls `car` drops into two
 dedicated tokens — `at_car` (a guided AT missile, no gun) and `aa_car` (an air-locking missile, no gun) —
 a clean three-way split of the armed-car pool, since a gun-armed hull is always `car`. Both are defined
-but wired to no composition yet, so nothing fields them; they exist for a future caller wanting a pure AT
-or AA screen rather than the gun-armed car.
+but not yet fielded by any composition.
+
+The intended use is OPFOR's tasking, as **static defenders** rather than line units. They are specialist
+assets — defenceless outside their niche — so when wired in they belong in `garrison` posture, held at a
+firing position, and must be kept out of the reserve/hunt pool and the enemy-multiplier scaling (one per
+zone is the threat, not a stack that grows with the setting). The exclusion is the whole point: a
+specialist that reinforces by driving into the open forfeits its only advantage and revives the very
+faults the gun filter removed — a hunting ATGM parks and duels from spawn, a hunting SAM drives in
+defenceless. Held on defense the same standoff is the asset doing its job: an ATGM killing armour at
+range, a SAM denying the airspace over the zone.
 
 ## The break test
 
