@@ -156,7 +156,8 @@ private _skipped = missionNamespace getVariable [_skipVar, false];
 if (!_skipped) then {
     private _prepEnd = time + PREP_TIME;
     while { time < _prepEnd && !(missionNamespace getVariable [_skipVar, false]) } do {
-        [format [localize "STR_DUWS_T_pc_prep_count", ceil ((_prepEnd - time) / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
+        // round the seconds before ceil: `time + PREP_TIME - time` carries float dust that would tip a clean 15 to 16.
+        [format [localize "STR_DUWS_T_pc_prep_count", ceil (round (_prepEnd - time) / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
         private _next = time + 60;
         waitUntil { sleep 1; time >= _next || time >= _prepEnd || (missionNamespace getVariable [_skipVar, false]) };
     };
@@ -336,7 +337,7 @@ private _defendEnd = time + DEFEND_TIME;
             };
         };
         if (time >= _nextRemind) then {
-            [format [localize "STR_DUWS_T_pc_assault_mins", ceil (_left / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
+            [format [localize "STR_DUWS_T_pc_assault_mins", ceil (round _left / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
             _nextRemind = _nextRemind + 300;
         };
         uiSleep 1;
