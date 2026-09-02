@@ -3005,6 +3005,10 @@
                 <Original>Supplies</Original>
                 <English>Supplies</English>
             </Key>
+            <Key ID="STR_DUWS_T_pc_icon_pilot">
+                <Original>Pilot</Original>
+                <English>Pilot</English>
+            </Key>
         </Container>
         <Container name="Intel &amp; Search">
             <Key ID="STR_DUWS_T_TOPSECRET_TITLE">
