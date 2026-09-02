@@ -431,7 +431,7 @@ vehicles as OPFOR earns Army Power while its pay stays fixed. The plain ring sti
 | 13 | Protect Informant | defend | civ | 30/30/3 | 4 | testing (defend-and-build; see rework doc) |
 | 14 | Recover Humanitarian Supply Truck | escort | civ | 20/10/3 | 4 | done |
 | 20 | Escort Informant | escort | civ | 5/20/1 | 2 | testing (spawns no opposition; route fight is the war state) |
-| 21 | Deliver Supplies | escort | civ | 20/5/3 | 2 | testing (spawns no opposition; route fight is the war state) |
+| 21 | Deliver Supplies | escort | civ | 15/5/3 | 2 | testing (spawns no opposition; route fight is the war state) |
 
 ## Pricing rework (command missions)
 
@@ -445,7 +445,7 @@ still-stale mission carries its old numbers and is open pricing work** -- Rescue
 Humanitarian Supply Truck is fully priced: 20/10, deadline matching the steal-and-drive pair. The four
 in play-testing are priced but not yet signed off: Protect Informant at 30/30/3 (3 h fixed), Destroy
 Air Asset at 25/25 (0h30-1h00) with +10 CP when the side fields a jet over the attack helicopter, and
-the two new civilian escorts -- Escort Informant at 5/20/1 (1h00-1h30) and Deliver Supplies at 20/5/3
+the two new civilian escorts -- Escort Informant at 5/20/1 (1h00-1h30) and Deliver Supplies at 15/5/3
 (0h30-1h00). Both escorts spawn no opposition of their own, so their pay leans low and the REP carries
 part of the value, as with Recover Humanitarian Supply Truck.
 
