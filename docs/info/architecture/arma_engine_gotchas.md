@@ -1756,3 +1756,24 @@ line that would have reported the count sits past the throw, so its absence is t
 **How to apply:** guard the element before the `getVariable`, short-circuited so it never runs on a null:
 `(allUnits + vehicles) select {!isNull _x && {_x getVariable ["k", -1] == _token}}`. The same shape
 protects any `findIf`/`count`/`select` over a live-entity census that reads a variable and compares it.
+
+## `setHitPointDamage` never moves `getDammage`, and field repair only touches hit points
+
+**A vehicle carries two decoupled damage stores: the overall hull value read by `damage`/`getDammage`,
+and the per-part hit points read by `getHitPointDamage`/`getAllHitPointsDamage`. Writing one does not
+recompute the other. `setDamage` writes the hull value (and cascades down to the parts); `setHitPointDamage`
+writes one part and leaves the hull value untouched.** A repair loop that only calls `setHitPointDamage`
+brings every part up but leaves `getDammage` exactly where it was — the health bar does not move.
+
+The same split governs the engine's own field repair. An engineer repairing a vehicle in the field (no
+repair vehicle or point nearby) restores **hit points only, capped** — to 40% integrity bare, ~60% with a
+toolkit — and never clears the hull's `getDammage`. Only a repair vehicle/facility with a repair specialist
+lifts the cap and repairs the hull fully. So a mission that spawns a derelict with `setDamage 0.8` and then
+tests `damage _veh <= 0.5` to detect "the player repaired it" can never win by field repair: the parts come
+up, `getDammage` stays 0.8. This is stock Arma, present mod-free.
+
+**How to apply:** to detect field repair, test the hit points, not the hull — mean part damage
+(`fnc_veh_comp_damage`, `server/misc/`) against the threshold. To fully repair from script use `setDamage 0`
+(the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a spawned derelict,
+kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage` afterwards would
+redistribute the part back to a drivable state.

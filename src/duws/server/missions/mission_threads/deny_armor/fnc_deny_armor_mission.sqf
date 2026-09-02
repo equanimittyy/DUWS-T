@@ -8,7 +8,7 @@ if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 #define DA_DISEMBARK   140      // troops dismount once their transport is this close to the tank
 #define DA_ARRIVE      15       // a live crewman this close to the tank is working on it (AI halts at the hull)
 #define DA_ARRIVE_ZONE 150      // a repaired tank this close to its home zone has got away (fail)
-#define DA_REQUISITION_DMG 0.5  // a player-crewed hull repaired to >=50% health (damage <= this) is requisitioned (win). Inclusive: a field toolkit caps repair at ~50% integrity, so a player-fixed derelict lands right at 0.5.
+#define DA_REQUISITION_DMG 0.5  // player-crewed hull at <= this mean hit-point damage (>=50% component health) is requisitioned (win). fnc_veh_comp_damage reads the parts, not raw getDammage, which field repair never moves.
 
 // Repair time scales inversely with the nearest OPFOR zone's distance (NEAR at/inside NEARDIST, FAR
 // at/beyond FARDIST, linear between): a tank repaired near its own lines is the harder denial.
@@ -51,6 +51,7 @@ _tank setDir (random 360);
 _tank setDamage 0.8;
 _tank setFuel 0.5;
 _tank setVehicleAmmo 0.1;
+[_tank] call fnc_veh_disable_engine;
 _tank setVariable ["persistent", true];
 
 // Then Overlord's opening brief (manual, place-name format, no callsign substitution).
@@ -250,7 +251,7 @@ private _finish = {
 };
 
 // The repair race. WIN when the tank is denied (crew dead, or tank destroyed) or a player requisitions it
-// (crews it repaired to 50% health or better); FAIL when a live crew drives the repaired tank home, or on the deadline.
+// (crews it repaired to 50% mean component health or better); FAIL when a live crew drives the repaired tank home, or on the deadline.
 // Between: the crew dismount once a transport reaches the tank and work the hull; the clock advances only
 // while a crewman is at it and no player has taken it.
 // _underAttack = the column has gone COMBAT, OR a convoy vehicle took enemy fire (HandleDamage flag) or is
@@ -275,7 +276,7 @@ while { true } do {
 
     // Before the deny win, so a healthy crewed hull plays the requisition line even if the last enemy crewman
     // fell the same tick; the hull may be the player's own repair or an enemy-fixed one boarded before it got home.
-    if (((crew _tank) findIf { isPlayer _x }) >= 0 && {(damage _tank) <= DA_REQUISITION_DMG}) exitWith {
+    if (((crew _tank) findIf { isPlayer _x }) >= 0 && {([_tank] call fnc_veh_comp_damage) <= DA_REQUISITION_DMG}) exitWith {
         [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_taken"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
         [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
         ["SUCCEEDED"] call _finish;
