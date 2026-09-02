@@ -143,7 +143,7 @@ object is the mission.
 ## The success roll is spent at spawn, so the price is the fight
 
 An entity that can be searched is decided when it is created, not when it is searched
-(`server/misc/fnc_search_flag_group.sqf`). What the player can find is then a function of how much OPFOR the
+(`server/search/fnc_search_flag_group.sqf`). What the player can find is then a function of how much OPFOR the
 campaign put on the ground, rather than of how often a key was pressed, and the price of a search is the
 fight that produced the thing being searched.
 

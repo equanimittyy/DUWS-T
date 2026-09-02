@@ -1096,7 +1096,7 @@ only has one of, so someone already talked to is spent.
 **One attempt per civilian, spent on the attempt.** A dialog row is redrawn on every open, so
 `DUWS_civ_arrested` is what stops the player holding the row until the 90 % surrender lands, which would
 make both the reputation hit and the 10 % runner free. Same rule and same reason as the body search,
-whose claim is taken before its payout resolves (`server/misc/fnc_search_claim.sqf`).
+whose claim is taken before its payout resolves (`server/search/fnc_search_claim.sqf`).
 
 **The town is charged −1 whether or not they comply**, because it saw the weapon raised either way. The
 notification names the figure; a town already at the `-20` floor absorbs less than was asked, and the

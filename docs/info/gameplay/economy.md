@@ -197,7 +197,7 @@ which inverts what the death penalty is for.
 | Recruit rescued civilian | `server/civilian/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | per document, always paid: 1 CP (`MobilePhone`/`Wallet_traitor`/`Files`/`Wallet_ID`), 3 (`FlashDisk`), 4 (`SmartPhone`), 5 (`FilesSecret`/`FileTopSecret`); each also rolls a per-item chance to reveal one hidden position (≤1 reveal per turn-in) |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` | ~60% of enemies carry 0–2 `Money_roll` (personal cash); intel documents no longer dropped here |
-| Search payout (`pool` kind) | `server/misc/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
+| Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Kill income | `server/server_init.sqf:257-276` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
