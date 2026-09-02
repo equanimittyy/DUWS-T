@@ -1,4 +1,4 @@
-// Locality: server -- client/dialog/fnc_debug_mission_menu.sqf remoteExecs it to target 2.
+// Locality: server -- client/debug/fnc_debug_mission_menu.sqf remoteExecs it to target 2.
 
 // Forces one side-mission type to start now. The start gate and the global mission lock are
 // *cleared* rather than bypassed, so the thread still opens through fnc_mission_begin exactly as

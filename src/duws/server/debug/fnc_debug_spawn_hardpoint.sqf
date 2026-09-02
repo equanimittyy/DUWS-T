@@ -1,4 +1,4 @@
-// Locality: server -- client/dialog/fnc_debug_hardpoint_menu.sqf remoteExecs it to target 2.
+// Locality: server -- client/debug/fnc_debug_hardpoint_menu.sqf remoteExecs it to target 2.
 
 // Stands a hardpoint up on demand to exercise the placement and streaming primitives before OPCOM or
 // the zone siting loop drives them. A dev path, not a shipped one. Each spawn takes its own key, so it

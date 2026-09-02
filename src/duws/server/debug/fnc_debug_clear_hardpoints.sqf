@@ -1,4 +1,4 @@
-// Locality: server -- client/dialog/fnc_debug_hardpoint_menu.sqf remoteExecs it to target 2.
+// Locality: server -- client/debug/fnc_debug_hardpoint_menu.sqf remoteExecs it to target 2.
 
 // Clears every dev-spawned hardpoint. Per key: delete the men the site holds -- they are not
 // composition members, so the key cannot reach them -- then retire the site so the poller stops

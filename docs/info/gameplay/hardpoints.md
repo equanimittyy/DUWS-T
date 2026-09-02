@@ -57,7 +57,7 @@ crewed in place rather than dropped and settled, because it already sits on its 
 ([below](#siting)). `OP` sits in no weight table but is seeded standalone at generation, one per
 zone on a coin flip ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are
 fully implemented — composition, garrison, streaming, clearance — but reachable today only through the
-debug spawner (`client/dialog/fnc_debug_hardpoint_menu.sqf`). No campaign-wide count is enforced on
+debug spawner (`client/debug/fnc_debug_hardpoint_menu.sqf`). No campaign-wide count is enforced on
 any type.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the

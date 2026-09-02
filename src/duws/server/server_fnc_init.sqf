@@ -557,21 +557,21 @@ fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 fnc_user_options_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_user_options_menu.sqf";publicVariable "fnc_user_options_menu";
 fnc_no_gm_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_no_gm_prompt.sqf";publicVariable "fnc_no_gm_prompt";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
-fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
-fnc_debug_quickstart = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_quickstart.sqf";publicVariable "fnc_debug_quickstart";
-fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_menu.sqf";publicVariable "fnc_debug_econ_menu";
-fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
+fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
+fnc_debug_quickstart = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_quickstart.sqf";publicVariable "fnc_debug_quickstart";
+fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_econ_menu.sqf";publicVariable "fnc_debug_econ_menu";
+fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
 // Not broadcast: the window remoteExecs it to the server by name, and it re-checks game_master
 // itself because any client could send it.
 fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_econ_server.sqf";
-fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
-fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
-fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
+fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
+fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
+fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
 // The OPCOM debug view and its draw callback. Broadcast: the view is a menu-row handler every client
 // holds, and the server remoteExecs the callback back to whichever client asked.
-fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_opcom_view.sqf";publicVariable "fnc_debug_opcom_view";
-fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_aoi_draw.sqf";publicVariable "fnc_debug_aoi_draw";
-fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
+fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_view.sqf";publicVariable "fnc_debug_opcom_view";
+fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_draw.sqf";publicVariable "fnc_debug_aoi_draw";
+fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";

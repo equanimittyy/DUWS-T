@@ -136,7 +136,7 @@ add; nothing here reads a belief store or an archetype.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
 execs `fnc_debug_aoi_circles` (`server/warcom/fnc_debug_aoi_circles.sqf`) to gather every emitter's
-`[center, radius, side]`, which `fnc_debug_aoi_draw` (`client/dialog/fnc_debug_aoi_draw.sqf`) draws
+`[center, radius, side]`, which `fnc_debug_aoi_draw` (`client/debug/fnc_debug_aoi_draw.sqf`) draws
 as translucent local markers, pink for OPFOR and cyan for BLUFOR. It is reached from the dev debug
 menu, not shown to the player.
 

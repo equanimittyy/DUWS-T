@@ -4,7 +4,7 @@
 /*
     Developer tool: mark whatever the caller was looking at as searchable under a chosen source,
     so a payout table can be exercised on a chair instead of on a garrison that has to be fought
-    first. Reached from client/dialog/fnc_debug_search_menu.sqf.
+    first. Reached from client/debug/fnc_debug_search_menu.sqf.
 */
 if (!isServer) exitWith {};
 
