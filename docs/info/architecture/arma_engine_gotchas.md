@@ -771,7 +771,7 @@ collector (the AGC mod), which rebuilds a distant corpse and drops its variables
 **How to apply:** identify an enemy corpse by the class config side, not the live side:
 `getNumber (configFile >> "CfgVehicles" >> typeOf _corpse >> "side") == 0` (0 = east, 1 = west,
 2 = independent, 3 = civilian). It is a pure config read, so it is death-stable and survives the
-corpse swap. `client/misc/fnc_intel_search_action.sqf` gates the enemy-corpse search this way.
+corpse swap. `client/search/fnc_intel_search_action.sqf` gates the enemy-corpse search this way.
 
 ## `enableSimulation` is local, so a server-side freeze leaves clients simulating
 

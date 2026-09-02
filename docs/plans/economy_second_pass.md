@@ -176,7 +176,7 @@ Two CP faucets scale with how much the player fights rather than with what they 
 watch, because activity-scaled income is what quietly turns "abundant" into "meaningless" under a
 territory economy, and neither was priced into the rebalance above.
 
-**Intel analysis is thinned at the source.** `server/misc/fnc_intelAnalysis.sqf` converts documents to
+**Intel analysis is thinned at the source.** `server/search/fnc_intelAnalysis.sqf` converts documents to
 CP with no cooldown — the larger and less bounded of the two activity faucets. Documents come from the
 body-search `document` draw (`fnc_search_claim.sqf`), so supply is bounded by the search flag rate
 rolled at spawn and that draw's document weight — a function of how much OPFOR was fought, not of how
@@ -733,7 +733,7 @@ They are collected here so the next pass tunes from one list rather than hunting
 | OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 60 (T2) / APC·IFV·AA·trans-heli 150 (T3) / tank·attack-heli 350 (T4) / plane 600 (T5) | OPFOR's capability ladder; utility trucks ungated |
 | BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf` | car 60 (T2) / apc·ifv·transheli 150 (T3) / tank·attackheli 350 (T4); infantry free (T1) | BLUFOR's capability ladder; the T3 WAVE gate (armored/air in `fnc_WARCOM_blu_patrol.sqf`) is a literal 200, not the 150 vehicle rung |
 | corpse money drop | `server/search/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
-| intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
+| intel per-item CP | `server/search/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
 | town worth | `server/civilian/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
 | mission AP band | `server/missions/mission_threads/*` | 10–40 | per-thread literal, ranked by difficulty |

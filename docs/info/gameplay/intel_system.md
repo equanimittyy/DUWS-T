@@ -223,7 +223,7 @@ entry from the searcher and left it standing for everyone else, so in co-op one 
 Living men are the one exclusion the flag cannot express, since a garrison is flagged when it spawns. That
 clause is scoped to men rather than gating the whole action, because a laptop is never dead and an intact
 vehicle is still worth opening. The condition's clause order is load-bearing and is documented where it lives
-(`client/misc/fnc_intel_search_action.sqf`); it matters at all because an action on the player is evaluated far
+(`client/search/fnc_intel_search_action.sqf`); it matters at all because an action on the player is evaluated far
 more often than one on a distant object — the player is never out of range of themselves.
 
 **The action survives its owner's death, so it has to be stripped.** An `addAction` is not removed by its owner

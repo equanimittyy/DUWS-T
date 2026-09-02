@@ -399,7 +399,7 @@ fnc_redeployFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_red
 fnc_redeployFOBUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployFOBUnits.sqf";
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
-fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";
+fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\search\fnc_intel_payout.sqf";
 // Not broadcast: it fans out to clients itself, so a client call would fan out a second time.
 fnc_duws_report = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_report.sqf";
 fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_intel_search.sqf";
@@ -412,7 +412,7 @@ fnc_debug_aoi_circles = compile preprocessFileLineNumbers "duws\server\warcom\fn
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_search_flag.sqf";
 fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_intel.sqf";
 fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_garrison_query.sqf";
-fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
+fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 
@@ -420,7 +420,7 @@ fnc_addHQBuildingActions = compile preprocessFileLineNumbers "duws\client\misc\f
 publicVariable "fnc_addHQBuildingActions";
 fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fnc_blackMarketPurchase.sqf";
 publicVariable "fnc_blackMarketPurchase";
-fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_intelAnalysis.sqf";
+fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\search\fnc_intelAnalysis.sqf";
 publicVariable "fnc_intelAnalysis";
 fnc_stratmap = compile preprocessFileLineNumbers "duws\client\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
 // Broadcast: the strategic map's mission blocks call it on whoever opened the map.

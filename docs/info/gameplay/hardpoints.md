@@ -224,7 +224,7 @@ Two ways a hidden hardpoint is found. **Proximity**: the streaming tick checks e
 zone (if any) is itself already revealed, and reveals it — a zone-child hardpoint cannot be found
 before its zone is. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever the
 eligible set is non-empty — unrevealed, and either standalone or whose parent zone is already
-revealed (`server/misc/fnc_intel_payout.sqf:51-63`) — matched by `fnc_zone_key`, the same key both a
+revealed (`server/search/fnc_intel_payout.sqf:51-63`) — matched by `fnc_zone_key`, the same key both a
 revealed zone and a hardpoint row carry.
 
 ## Clear economy
