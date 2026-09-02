@@ -75,6 +75,8 @@ fnc_ap_adjust = {
 				if (_t != WARCOM_opfor_tier) then {
 					WARCOM_opfor_tier = _t; publicVariable "WARCOM_opfor_tier";
 					["INFO", "ECON", format ["OPF tier -> %1 (earned %2)", _t, WARCOM_opfor_ap_earned]] call fnc_log;
+					// Enemy escalation is team news like the BLUFOR rise: same card, red, but no sound.
+					["tier_up_opfor", [[_t] call DUWS_fnc_tierName]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 				};
 			};
 			["INFO", "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;

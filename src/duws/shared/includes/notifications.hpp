@@ -133,6 +133,20 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // OPFOR reached a new capability tier (WARCOM_opfor_tier, fnc_economy_init). Same card as tier_up
+    // but red -- enemy escalation, a warning not a gain -- and the call site fires no accompanying sound.
+    class tier_up_opfor
+    {
+        title = "$STR_DUWS_T_TIER_UP_OPFOR_TITLE";
+        iconPicture = "\A3\Ui_f\data\GUI\Cfg\Ranks\sergeant_gs.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_TIER_UP_OPFOR_MSG";
+        color[] = {1,0.2,0.2,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class info
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

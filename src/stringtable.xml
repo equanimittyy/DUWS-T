@@ -3414,6 +3414,14 @@
                 <Original>BLUFOR has unlocked %1</Original>
                 <English>BLUFOR has unlocked %1</English>
             </Key>
+            <Key ID="STR_DUWS_T_TIER_UP_OPFOR_TITLE">
+                <Original>Enemy Power Tier</Original>
+                <English>Enemy Power Tier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TIER_UP_OPFOR_MSG">
+                <Original>OPFOR has unlocked %1</Original>
+                <English>OPFOR has unlocked %1</English>
+            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
                 <Original>--- TEAM SUPPORTS (one-time purchase) ---</Original>
                 <English>--- TEAM SUPPORTS (one-time purchase) ---</English>
