@@ -1,5 +1,5 @@
 // Locality: server -- a hostile OPFOR recon team on a wide 500 m circuit, sited 300 m+ off any road near
-// the picked player (docs/plans/random_events_plan.md). Rolled in the Hostile band; the runner holds it off
+// the picked player. Rolled in the Hostile band; the runner holds it off
 // a player inside BLUFOR territory.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];

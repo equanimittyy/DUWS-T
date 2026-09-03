@@ -1,12 +1,11 @@
 // Locality: server -- the random-event runner. Rolls once for an event each tick (5-10 min, jittered); on a hit,
-// an event fires near a player against the reputation of the town nearest them
-// (docs/plans/random_events_plan.md).
+// an event fires near a player against the reputation of the town nearest them.
 //
 // Not the blind spawn timer fnc_WARCOM_init rules out: it spends no AP and drips nothing onto an empty
 // map on a clock. It fires only near a player and only where reputation has already turned a town, so
 // it is the sanctioned free-consequence-of-reputation mechanic. Anchoring on a present player rather
-// than planning ahead of where the player will go is a deliberate simplification of the plan's
-// predictive version -- the event lands where a player can witness it.
+// than planning ahead of where the player will go is a deliberate simplification --
+// the event lands where a player can witness it.
 //
 // Plain civilian path only: civ_town_rep and the town arrays it reads exist only there, not under
 // NONE/RAVAGE/WBK (fnc_civ_init_Tomata). WARCOM_init gates the spawn on that; this guard is the backstop.
@@ -20,7 +19,7 @@ if (isNil "CIV_PRESENCE" || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) exitWit
 
 // Kinds confined to the hostile band (hi <= -10). Derived from the table so a new hostile event needs no
 // edit here: they are held off a player standing in BLUFOR territory -- a turned town does not reach a
-// player already safe on friendly ground (docs/plans/random_events_plan.md).
+// player already safe on friendly ground.
 private _hostileKinds = [];
 {
 	_x params ["", "", "_hi", "_weights"];

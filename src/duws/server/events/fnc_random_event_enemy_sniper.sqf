@@ -1,5 +1,5 @@
 // Locality: server -- a hostile OPFOR sniper team on the best overlook within 1 km of the picked player,
-// given a standing bead on that player (docs/plans/random_events_plan.md). Rolled in the Hostile band; the
+// given a standing bead on that player. Rolled in the Hostile band; the
 // runner holds it off a player inside BLUFOR territory.
 //
 // Perch scoring mirrors the eliminate-sniper mission (fnc_target_sniper_mission): terrain-only rays, cheap.

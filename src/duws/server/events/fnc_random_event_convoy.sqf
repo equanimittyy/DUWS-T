@@ -1,5 +1,5 @@
 // Locality: server -- an ambient civilian convoy: 2-3 civilian cars driving a looping town-to-town circuit
-// through the picked player's area, reaped once no player is near (docs/plans/random_events_plan.md). No rep gate. Same road-find
+// through the picked player's area, reaped once no player is near. No rep gate. Same road-find
 // and cleanup shell as fnc_random_event_car; the cars share one group and hold column on native formation AI
 // rather than the scripted convoy engine -- light enough for ambient traffic. Drivers are full civilians, so
 // running one down costs reputation.

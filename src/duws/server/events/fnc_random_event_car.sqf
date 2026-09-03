@@ -1,5 +1,5 @@
 // Locality: server -- an ambient civilian car spawned on a road near the picked player, then looping
-// town-to-town so it keeps driving until the cleanup sweep reaps it (docs/plans/random_events_plan.md).
+// town-to-town so it keeps driving until the cleanup sweep reaps it.
 // No rep gate. Model from civ_veh_array; driver a full civilian, so running one down costs reputation.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];

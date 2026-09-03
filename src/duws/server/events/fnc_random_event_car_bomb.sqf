@@ -1,5 +1,5 @@
 // Locality: server -- a vehicle-borne IED, rolled in the Hostile band (random_event_tables.hpp) so rep has
-// already turned the town (docs/plans/random_events_plan.md).
+// already turned the town.
 //
 // An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), beelining at the nearest
 // player, horn blaring, until it detonates. Built here rather than via fnc_civ_spawnUnit, which would bolt

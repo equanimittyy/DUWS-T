@@ -1059,6 +1059,24 @@ froze one hull per column dead, recovered only by the periodic teleport-snap. If
 drive the hull, issue it alone — the path order already overrides formation, so the stop buys nothing
 and never clears.
 
+## A group in COMBAT behaviour ignores a commanded move order
+
+**An AI group whose behaviour has gone `COMBAT` — engaged, taking or returning fire — owns its own
+movement through the danger FSM. A MOVE waypoint or `doMove` handed to it is deprioritised or ignored:
+the group bounds, seeks cover and keeps fighting rather than walking the order. There is no reliable
+vanilla command to make an engaged group break contact and cross to a chosen position.**
+
+`setBehaviour "AWARE"` is overridden the instant the group takes fire; `setCombatMode "BLUE"` with
+`disableAI "AUTOTARGET"` stops it firing but not the danger FSM's cover-seeking, so it still will not
+travel; only `setBehaviour "CARELESS"` moves it reliably, and CARELESS makes it ignore all threat and
+walk into fire in the open. A commanded fighting withdrawal is therefore not achievable — the choice is
+an unreliable disengage or a suicidal CARELESS run.
+
+**How to apply:** never design a retreat or a mid-fight repositioning that commands an engaged live group
+to a safe spot; it will not comply. Let a committed group fight its engagement to a decision, and reclaim
+it for movement only once it is out of combat (behaviour off `COMBAT`), when a plain move order or a
+despawn/re-virtualise works again.
+
 ## `lock true` stops a player boarding, not an AI disembarking
 
 **`vehicle lock true` blocks the player from getting in or out and blocks AI from getting *in*, but it

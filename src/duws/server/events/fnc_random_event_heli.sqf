@@ -1,5 +1,5 @@
 // Locality: server -- an ambient civilian helicopter that flies over the picked player, then loops a
-// wandering circuit across the map until the cleanup sweep reaps it (docs/plans/random_events_plan.md).
+// wandering circuit across the map until the cleanup sweep reaps it.
 // No rep gate. Needs a civilian airframe (civ_heli_array); a men-only faction with no vanilla fallback
 // yields none and the event no-ops. Pilot a full civilian, so downing it costs reputation.
 if (!isServer) exitWith {};

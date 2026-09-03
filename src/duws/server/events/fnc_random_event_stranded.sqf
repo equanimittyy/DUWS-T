@@ -1,5 +1,5 @@
 // Locality: server -- a stranded civilian beside a broken-down car on a roadside verge near the picked
-// player (docs/plans/random_events_plan.md). Ambient event, no rep gate. He asks players in earshot to repair the
+// player. Ambient event, no rep gate. He asks players in earshot to repair the
 // car; once it is, he drops a cash reward, the town's regard rises, and he boards and drives off. Car placed by fnc_civ_spawnCar so it settles
 // on the shoulder instead of detonating; driver a full civilian, so harming him costs reputation.
 if (!isServer) exitWith {};

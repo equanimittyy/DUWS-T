@@ -1,5 +1,5 @@
 // Locality: server -- a hostile OPFOR car: stands up out of sight, drives past the picked player, then
-// withdraws to the nearest OPFOR-held zone and idles (docs/plans/random_events_plan.md). Rolled in the
+// withdraws to the nearest OPFOR-held zone and idles. Rolled in the
 // Hostile band; the runner holds it off a player inside BLUFOR territory.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
