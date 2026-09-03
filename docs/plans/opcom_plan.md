@@ -477,13 +477,16 @@ form the zone and town garrisons use.
 ## What the commander spends on
 
 > **Built today: the town-garrison ladder only** — the AP tier rungs and the per-tier garrison each
-> town fields ([§Town garrisons](#town-garrisons-i-through-iv)). The tasking menu, hardpoint
-> construction as a director purchase, and the appraisal that picks between them are not yet built.
+> town fields ([§Town garrisons](#town-garrisons-i-through-iv)). A standalone fortification director also
+> shipped but is now disabled ([§What the commander builds](#what-the-commander-builds)). The tasking
+> menu and the appraisal that arbitrates the sinks are not yet built.
 
 The four sinks Army Power buys, the archetype that weights the split, and the garrison ladders on both
 sides. The director here, the hardpoint director ([§What the commander builds](#what-the-commander-builds)),
-and the turned-town behaviour are one actor sharing `WARCOM_opfor_ap`. The wallet and its faucets are
-the economy's ([`economy_second_pass.md`](economy_second_pass.md#army-power)).
+and the turned-town behaviour are one actor sharing `WARCOM_opfor_ap`: build, tasking and garrison
+compete in the one appraisal ([§Appraisal](#appraisal-utility-scoring-not-search)) — no sink runs on its
+own clock, and none spends `WARCOM_opfor_ap` unarbitrated. The wallet and its faucets are the economy's
+([`economy_second_pass.md`](economy_second_pass.md#army-power)).
 
 Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`. The
 director is server-side and single, so there is no writer to race.
@@ -617,12 +620,14 @@ Open before build:
 
 The escalation ladder and indirect-fire assets, once the commander is spending on them.
 
-**Shipped today** is simpler: a uniform per-type garrison and three flat-priced build actions — raise
-a radio tower, top a zone back toward its stored ring cap, fortify the band — priced
-`OPCOM_AP_TOWER`/`OPCOM_AP_TOPUP`/`OPCOM_AP_BAND`
-([`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting)). Nothing
+**Built but disabled**: a standalone fortification director (`fnc_WARCOM_opf_hardpoints`) spent OPFOR AP
+on three flat-priced build actions — raise a radio tower, top a zone back toward its stored ring cap,
+fortify the band, priced `OPCOM_AP_TOWER`/`OPCOM_AP_BAND`/`OPCOM_AP_TOPUP`
+([`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting)) — on its
+own clock in a fixed priority order, with no appraisal. Its spawn is cut (the file and compile stay), to
+be re-driven through the appraisal so build competes with tasking and garrison for the wallet. Nothing
 scales garrison size to `WARCOM_opfor_ap`
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Hardpoints currently
+([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Hardpoints otherwise
 generate at scenario init only.
 
 **The director builds to need.** It sites a build by reading the influence grid

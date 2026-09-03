@@ -49,19 +49,16 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-["INFO", "WARCOM", "Init OPCOM hardpoint director"] call fnc_log;
-[] spawn fnc_WARCOM_opf_hardpoints;
-
-// The random-event runner rides here beside the hardpoint director but reads civ_town_rep, which exists
-// only on the plain civilian path -- so it starts only there, not under NONE/RAVAGE/WBK.
+// The random-event runner reads civ_town_rep, which exists only on the plain civilian path -- so it
+// starts only there, not under NONE/RAVAGE/WBK.
 if (!isNil "CIV_PRESENCE" && {!(CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"])}) then {
 	["INFO", "WARCOM", "Init random-event runner"] call fnc_log;
 	[] spawn fnc_random_event_runner;
 };
 
-// No blind OPFOR spawn timers: enemy presence is zone garrisons, side-mission guards and OPCOM's paid
-// fortification above -- not live groups an AP clock drips onto the map, which would leave permanently
-// simulated AI between the zones and on the road to the HQ.
+// No blind OPFOR spawn timers: enemy presence is zone garrisons and side-mission guards -- not live
+// groups an AP clock drips onto the map, which would leave permanently simulated AI between the zones and
+// on the road to the HQ.
 
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";
