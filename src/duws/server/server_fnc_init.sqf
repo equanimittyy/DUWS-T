@@ -317,6 +317,7 @@ fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom
 fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_decay.sqf";
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_init.sqf";
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_rebuild.sqf";
+fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_perception_run.sqf";
 
 // Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.

@@ -60,6 +60,11 @@ if (!isNil "CIV_PRESENCE" && {!(CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"])}) the
 // groups an AP clock drips onto the map, which would leave permanently simulated AI between the zones and
 // on the road to the HQ.
 
+// OPCOM, the opposing commander: its perception loop starts once zones and civ state exist. Ungated by
+// game mode -- with no towns it simply has no town sources. Server-only thread.
+["INFO", "OPCOM", "Init perception loop"] call fnc_log;
+[] spawn fnc_opcom_perception_run;
+
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";
 
