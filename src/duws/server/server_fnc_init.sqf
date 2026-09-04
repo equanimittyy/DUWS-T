@@ -310,6 +310,12 @@ publicVariable "fnc_recruitSuccessServer";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
+// OPCOM (the opposing commander): server-only, so not broadcast; compiled to names the perception loop
+// calls. Belief layer -- store init, sighting sweep, decay.
+fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_belief_init.sqf";
+fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_sense.sqf";
+fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_decay.sqf";
+
 // Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.
 fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_runner.sqf";

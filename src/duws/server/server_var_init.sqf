@@ -609,6 +609,14 @@ OPCOM_AP_TOWER = 30;
 OPCOM_AP_BAND  = 12;
 OPCOM_AP_TOPUP = 8;
 
+// OPCOM perception: influence-grid geometry (metres) and belief-decay thresholds (strategic ticks,
+// ~5 and ~20 min at a 60-90 s phase). Plain globals not #define -- the opcom files that read them load
+// by compile-path and run later, out of reach of a macro scoped to this file.
+OPCOM_GRID_CELL     = 500;
+OPCOM_GRID_SPREAD   = 1000;
+OPCOM_BELIEF_FRESH  = 4;
+OPCOM_BELIEF_EXPIRE = 16;
+
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both
