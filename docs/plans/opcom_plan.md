@@ -1124,6 +1124,69 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | **Templates & Recruit** | Recruit and the roster/force-pool, `garrison`/`guard`, mustering to fill roles, the generic runner, the templates (assault / flank / encircle / probe / arty) | Movement, unit strength, the grid, and the indirect-fire missions (`arty`) — lands last |
 | **Random events** | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours | The belief store and the OPFOR-band definition the loop establishes |
 
+## Implementation
+
+Build in the [§Build order](#build-order) sequence, each phase shipped runnable and verifiable before the
+next. This section details a phase when it is picked up; only Phase 1 is detailed so far. The rest of the
+plan is the spec for the later phases — do not pre-build them, since the tuning constants and the
+engine-contact behaviours (streaming, `doArtilleryFire`, virtual combat) only settle by running the core.
+
+### Phase 1 — belief, grid, debug overlay
+
+A live perception substrate that can be *seen*, with no decisions on top: no scoring, no actions, no
+taskings, no movement, no AP spend. Those are Phase 2+.
+
+**Files.** A new `src/duws/server/opcom/`, each function loaded by a compile-path string in
+`server_fnc_init.sqf` beside the other server subsystems (misc functions load this way, not through
+`CfgFunctions`; callers use the variable name).
+
+| File | Responsibility |
+|---|---|
+| `fnc_opcom_belief_init` | Declare the belief arrays, the tick counter and the two live grid arrays (empty). Run once at OPCOM init |
+| `fnc_opcom_grid_init` | Build the static per-cell arrays once — land mask (`surfaceIsWater` per centre) and connectivity flood-fill ([§Geometry](#geometry)) |
+| `fnc_opcom_sense` | The sighting sweep and event sensors; keep-strongest write into the belief arrays ([§Sensors](#sensors)) |
+| `fnc_opcom_decay` | Age every entry by the tick counter, drop the expired ([§Decay](#decay)) |
+| `fnc_opcom_grid_rebuild` | Zero both grid arrays, deposit each source with the linear falloff ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)) |
+| `fnc_opcom_perception_run` | The loop thread — see below |
+| `fnc_debug_opcom_view` | Extend the existing overlay (AoI circles today) to render the grid and belief |
+
+**Constants** (`server_var_init.sqf`, `OPCOM_` prefix, `#define` form): `OPCOM_GRID_CELL` 500,
+`OPCOM_GRID_SPREAD` 1000, `OPCOM_BELIEF_FRESH` 4, `OPCOM_BELIEF_EXPIRE` 16. The sighting threshold `1.5`
+already exists as the artillery gate — reuse it, do not add a second ([§Sensors](#sensors)).
+
+**State** (`DUWS_opcom_` prefix, server-local, numbers/strings only — no handles): the four belief arrays
+(`_belief_key` / `_pos` / `_time` / `_str`), the strategic-tick counter `DUWS_opcom_tick`, the two live grid
+arrays (`_grid_fri` / `_grid_ene`) and the two static ones (`_grid_land` / `_grid_comp`).
+
+**The runner is the loop skeleton, perception-only.** `fnc_opcom_perception_run` is the eventual
+[§loop](#the-loop-against-the-engine) thread with both cadences already split, so Phase 2 adds the scoring
+pass into it rather than restructuring — no throwaway:
+
+- Fast base pass (~2-5 s): `fnc_opcom_sense`.
+- Strategic phase (every 12-18 fast passes): increment `DUWS_opcom_tick`, `fnc_opcom_decay`, then
+  `fnc_opcom_grid_rebuild`.
+
+Started by WARCOM init **after** zones exist and after `fnc_zone_state_init` has run — the rebuild reads
+`zone_meta_array` / `civ_locations` / `DUWS_hardpoints`, and zone-state init must precede any zone consumer.
+
+**Sensors this phase**: direct sighting (`east knowsAbout _p > 1.5`, one call per player, keep-strongest)
+and the zone-flip event. Area-of-influence (`fnc_aoi_opfor_covers`) can be added cheaply since it exists;
+the OP-hardpoint and intel-patrol sensors wait on their own systems ([§Sensors](#sensors)).
+
+**Grid sources this phase**: friendly = OPFOR zones, banded town garrisons, OPFOR hardpoints; enemy =
+BLU-held zones and belief entries ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)). The
+tasking-unit source lands with Phase 4 — no units exist yet.
+
+**Overlay**: per-cell `fri`/`ene` magnitude (two tints), a marker at each `belief_pos` tagged with its age,
+and the front-line cells (sign change against an orthogonal neighbour, [§What reads it](#what-reads-it)).
+Behind the existing debug toggle.
+
+**Verification.** Sighting a player adds one belief row (`count DUWS_opcom_belief_key` grows) and no more on
+a co-op stack in one cell; the row's age climbs each strategic tick and the row drops after
+`OPCOM_BELIEF_EXPIRE`; the overlay shows an `ene` bloom on the player fading with distance and decay, `fri`
+on held ground, and a front line where they cross. All checkable from the debug console against a live
+player, no scoring needed.
+
 ## Open questions
 
 - **The tick interval against the action cooldowns.** A 60-90 s strategic tick against a 20-30 min build
