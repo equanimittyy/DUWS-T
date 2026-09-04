@@ -200,7 +200,7 @@ expired entry is already dropped from the arrays, so it never deposits.
 | **Force ratio `r`** ([§Appraisal](#appraisal-expected-ap-return)) | `Σ(_gridFri) / (Σ(_gridEne) + 1)` over the target's 3×3 block — feeds `P(win)` and the action band |
 | **Threat** (defensive Value, [§Appraisal](#appraisal-expected-ap-return)) | `_gridEne` on and around own ground — how threatened it is, scaling a Fortify / Reinforce / Build / Recruit / Intercept Value |
 | **Force at a place** (clustering) | `_gridEne select _cell` — the deposit already summed every belief entry in the cell, so a four-to-eight-player co-op stack is one read, no separate clusterer ([§Open questions](#open-questions)) |
-| **Muster** ([§Commitment](#commitment-intents-are-sticky)) | clears when friendly force over the target 3×3 exceeds enemy; the assault's own converging taskings raise the friendly side until it does |
+| **Muster** ([§Commitment](#commitment-intents-are-sticky)) | sizes the gather: the rally force is built until it would exceed enemy over the target's 3×3 on arrival; the bar rises if the player reinforces the target mid-muster |
 | **Front line** | the cells whose signed balance differs in sign from an orthogonal neighbour's — the zero-crossing band, read by the overlay |
 | **Route-around** (live group) | among the target cell's 8 neighbours, the one with the lowest `_gridEne`; its centre is a staging waypoint handed to a spawned group's engine pathing. The full route for a *virtualised* squad is [§Routing](#routing-a-cost-field-over-the-grid) |
 ### Routing: a cost field over the grid
@@ -312,22 +312,41 @@ its economy and never chases a lone scout across empty terrain.
 
 | The action | Value |
 |---|---|
-| takes enemy ground (Attack, Rapport) | that ground's worth — zone `_points`, town `civ_town_ap` |
-| defends own ground (Intercept, Fortify, Reinforce, Build) | own worth × how threatened it is (`_gridEne` on it) |
-| builds force (Recruit) | the locked prize it unlocks × the ΔP(win) one hire buys (below) |
+| takes enemy ground (Attack) | that ground's worth — zone `_points` |
+| turns a town (Rapport) | town `civ_town_ap` × the −3 step's progress toward the −10 turn (below) |
+| defends own ground (Intercept, Build) | own worth × how threatened it is (`_gridEne` on it) |
+| refills a garrison (Reinforce) | own worth × threat × the strength deficit `1 − strength` (below) |
+| raises a tier (Fortify) | own worth × threat × the force the next tier adds (below) |
+| builds force (Recruit) | per hireable type, the best action that type unlocks (below) |
 | buys information (Scout) | Σ over its recon footprint of `cell worth × staleness` (below) |
 | attrits force (Arty) | AP-worth of enemy force expected killed — `effForce hit × AP-per-force` (below) |
 
 Enemy ground worth needs `_points` readable at scoring time — currently passed into the capture triggers
 only, so stash it in `zone_meta_array` ([§Open questions](#open-questions)).
 
-**Recruit — the locked prize.** Recruit owns no ground, so a flat Value loses to any affordable attack and
-the pool never grows. Instead its Value is the ground OPCOM *cannot currently reach for lack of force*: scan
-the Attack/Rapport candidates that fail the `P(win)` floor, take the richest, and value one hire at
-`prize × ΔP(win)` — the win-probability a single added unit buys against that target. Diminishing (the
-sigmoid flattens past `r ≈ 1`) and self-terminating (once accumulated force clears the floor the prize
-becomes a live Attack and Recruit's prize drops to the next locked target, or to a low floor when none
-remain). So OPCOM masses when a fat zone is out of reach and stops hoarding when it is not.
+**Rapport — progress toward the turn.** Rapport delivers a `supply`-flagged unit to a town, stepping its
+reputation 3 toward the −10 OPFOR turn threshold; the town only garrisons once it crosses. So a step's Value
+is `town worth × how much closer −3 gets it` — a town at −8 turns in one trip and scores near-full worth, a
+neutral town about a quarter. OPCOM finishes nearly-turned towns before starting new ones. Passive band
+drift already turns a covered town for free, so Rapport earns its keep on towns the drift will not reach
+([§Random events](#random-events-what-a-turned-town-does)).
+
+**Reinforce and Fortify — deficit versus ceiling.** Both defend own ground scaled by `own worth × threat`,
+differing in the third factor. **Reinforce** refills a garrison's HP toward its current tier, so it scores
+the **strength deficit** (`1 − strength`) — a full garrison scores 0, and OPCOM never tops up what is already
+full. **Fortify** raises the tier *ceiling*, so it scores the **force the next tier adds** over the current
+one (read from the composition table), diminishing as tiers climb — no AP poured into a ceiling that adds
+little.
+
+**Recruit — per type, demand-valued.** Recruit is one candidate *per hireable unit type*, each valued by the
+best action that type would unlock, so OPCOM hires exactly what it is short of. **Combat / armor**: the
+ground it cannot reach for lack of force — scan the Attack candidates that fail the `P(win)` floor, take the
+richest, and value one hire at `prize × ΔP(win)`, the win-probability a single added unit buys against that
+target; diminishing (the sigmoid flattens past `r ≈ 1`) and self-terminating (once accumulated force clears
+the floor the prize becomes a live Attack and the prize drops to the next locked target). **Recon**: the
+best Scout Value it would enable. **Supply**: the best Rapport Value it would enable. OPCOM hires the
+top-scoring type — massing combat force for an out-of-reach zone, buying eyes when it needs to Scout, a
+supply unit when a town is worth turning — and stops when nothing is short.
 
 **Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout, and its footprint is rings
 around its drop cell by type — recon team 1 ring, recon car 2, recon helicopter 3. A drop position's Value
@@ -423,13 +442,15 @@ A group that wins drops back to `moving`, resumes its order, and re-virtualises 
 ([§The virtualisation boundary](#the-virtualisation-boundary)); a group that loses dies. Recovery is
 winning, nothing else.
 
-**An assault musters before it commits.** In state `mustering` an Attack or Intercept intent accumulates
-committed force across ticks and executes only once OPFOR force over the target's 3×3 block exceeds the
-believed player force there — the grid's two layers read over that block (friendly known, enemy believed).
-Until
-then it holds at a staging cell and keeps buying. The bar is the player's force *at the target*, not the
-player's whole strength. Mustering is also how a force-short action waits for the units it needs rather
-than committing understrength.
+**An assault musters, then launches as one wave.** In state `mustering` an Attack or Intercept intent binds
+force across ticks and gathers it at a **safe rally** — a low-threat cell short of the target — until the
+full ROI-optimal force ([§Cost](#cost-what-an-action-stakes)) has converged. Only then does it advance, all
+together. It does **not** dribble units forward into contact, which no-retreat would turn into defeat in
+detail — a player could kill the muster a unit at a time. The gathered force is sized to exceed the believed
+player force over the target's 3×3 block on arrival (the grid's two layers read over that block, friendly
+known, enemy believed); if the player reinforces the target mid-muster the bar rises and the muster keeps
+buying. Mustering is also how a force-short action waits for the units it needs — from the roster, or from
+Recruit — rather than committing understrength.
 
 ### Unit tasking and status
 
@@ -485,9 +506,11 @@ damaged vehicle), and re-virtualising recomputes `effForce` from the live group 
 reinforce path. `guard` does not heal; it only holds ground. The rate is the sole knob (start value open,
 [§Open questions](#open-questions)); the per-tick mechanism ships from the start.
 
-A zone's effective strength is its base garrison (the tier composition, which Fortify raises) plus the
-`effForce` of every unit `garrison`ed on it, in a **distinct** store — so tasking a unit out subtracts
-its `effForce` cleanly and Fortify never touches the recruits.
+A zone's effective strength is its base garrison (the tier composition, which Fortify raises and Reinforce
+refills) plus **at most one** `garrison`ed tasking unit, held in a **distinct** slot — so tasking that unit
+out subtracts its `effForce` cleanly and Fortify never touches it. The slot caps at one: Recruit targets a
+zone whose slot is *free*, so massing force means one recruit per zone across several zones, then pulling
+them together at a muster ([§Commitment](#commitment-intents-are-sticky)), not stacking a stack on one zone.
 
 ## Movement: a tasking is virtualised until contact
 
@@ -613,7 +636,8 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 | `flank` | band 1–2, ≥2 mobile, a reachable flank cell | `fix` ×1, `maneuver` ×1+ | form (fix → frontal direct; maneuver → flank cell, λ route) → *(fix `engaged`)* assault (maneuver S&D from the flank) → resolve |
 | `encircle` | band 1–2, target pocketed (few escape cells), ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour, air or recon) | approach → make contact → resolve (survives ⇒ belief was soft, escalate; dies fast ⇒ belief confirmed, mass or re-target) |
-| `rapport` / `scout` | the action's fixed form | one role | move → act → resolve |
+| `rapport` | a `supply`-flagged unit, a town in reach | `courier` ×1 | move (to the town) → deliver (step rep 3 toward −10) → resolve |
+| `scout` | a `recon`-flagged unit, a stale valuable area | `scout` ×1 | move (to the drop position) → reveal (refresh belief over the footprint rings) → resolve |
 | `arty` | an observed belief point in range of an owned gun off cooldown, not the HQ circle | owned `guns` ×1–3 (resident hardpoints, not roster — 0 roster taskings), `spotter` ×0–1 | mark (spotter or OP holds observation) → salvo (rounds × saturation on the belief point) → assess (force dropped? re-fire : done) |
 
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points
@@ -649,6 +673,13 @@ One thread, a phase counter splitting two cadences, not one thread per action.
 No `sleep` inside the `isNil` block — unscheduled code cannot suspend. Constants take the `#define`
 form the zone and town garrisons use.
 
+**Scoring stays on the strategic phase; there is no reactive fast path.** A fresh sighting does not trigger
+an out-of-band score, even for Intercept. It does not need one: **local defense is emergent** — a player
+hitting an OPFOR holding streams its garrison in on the fast pass, before contact, and the spawned group
+fights at once with no OPCOM decision. Intercept is only the *dispatch of a mobile reserve* to threatened
+ground that has no adequate local garrison, and that reserve must travel regardless, so the up-to-90 s
+decision latency is dwarfed by transit. One scoring path, no re-entrancy against the strategic pass.
+
 ## What the commander spends on
 
 > **Built today: the town-garrison ladder only** — the AP tier rungs and the per-tier garrison each
@@ -683,10 +714,10 @@ Three levels, not one:
 |---|---|---|---|---|
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
-| Rapport | offensive | a town in reach | tasking-spawn | 1 |
-| Recruit | buildup | the locked prize; spawns `garrison` on an OPFOR-held zone | tasking-spawn | 1 (spawned `garrison`) |
+| Rapport | offensive | a town in reach (needs a `supply` unit) | tasking-spawn | 1 (`supply` courier) |
+| Recruit | buildup | the highest-value unmet unit need; spawns `garrison` on a free-slot OPFOR zone | tasking-spawn | 1 (spawned `garrison`) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 |
-| Scout | recon | a recon unit's drop position covering stale valuable cells | tasking-spawn | 1 |
+| Scout | recon | a `recon` unit's drop position covering stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 |
 | Build | defensive | an own threatened cell | hardpoint build | 0 |
@@ -696,10 +727,15 @@ Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and te
 [§Templates](#templates-the-execution-forms).
 
 **Recruit fills the roster; every other unit-dispatching action drains it.** Recruit is the RTS "hire a
-unit": it spawns a group `garrison`ed on the target zone, adding to that zone's distinct reinforcement
-store ([§Unit strength](#unit-strength)). OPCOM then draws that unit for an Attack, Intercept, Rapport or
-Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing
-strength.
+unit": it spawns a group `garrison`ed on a free-slot OPFOR zone (one tasking unit per zone,
+[§Unit strength](#unit-strength)). OPCOM then draws that unit for an Attack, Intercept, Rapport or Scout,
+which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
+
+**Recruit chooses the type by demand.** It is scored once per hireable type — combat, armor, `recon`,
+`supply` — each against the best action that type unlocks ([§Value](#value-the-worth-of-the-ground-in-play)),
+so OPCOM hires eyes when it needs to Scout, a courier when a town is worth turning, and combat force to mass
+for an out-of-reach zone. Unit capability flags (`recon` enables Scout, `supply` enables Rapport) ride on
+the token composition (below); a plain combat unit carries neither.
 
 Three notes:
 
@@ -727,6 +763,12 @@ budget ([§The virtualisation boundary](#the-virtualisation-boundary)).
 use ([§What the commander builds](#what-the-commander-builds)) — an array of tokens like `team` or `car`,
 resolved by `DUWS_fnc_tokenClass` against the shared roster. Recruit chooses from a menu of compositions;
 the exact rows are unset, tuned in one place, never hardcoded at a spawn site.
+
+**Capability flags ride on the composition.** A composition may carry a `recon` or `supply` flag — `recon`
+makes the unit eligible to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)),
+`supply` makes it eligible to Rapport. A plain combat or armor composition carries neither and can only
+Attack, Intercept or hold. Recruit's per-type scoring is a score per flagged composition, so specialist
+units enter the roster only when the action they enable is worth their hire.
 
 ### The commander has an archetype
 
@@ -839,8 +881,15 @@ generate at scenario init only.
 ([§The influence grid](#the-influence-grid-one-spatial-substrate)): a believed BLUFOR build-up — a
 cell whose belief-store magnitude has climbed — pulls fortification toward the pressure; a gap in its
 own line — a front-contour stretch thin on friendly influence — pulls it toward the hole. This is the
-same `[sink, target]` score the appraisal runs; a build's *target* is a site, its threat and
-vulnerability terms are the "need".
+Build action scored like any other; its *target* is the threatened cell, its Value is `own worth × threat`
+there ([§Value](#value-the-worth-of-the-ground-in-play)).
+
+**The type is tier-gated and archetype-weighted.** Given the site, the hardpoint type comes from the
+earned-AP ladder below (OP/MG → AT → AA/mortar → battery), picked by a weight the archetype tilts — an
+indirect-fire lean fields more mortars and batteries, an armour-heavy defence more AT — the same
+`archWeight` mechanism the action classes use ([§The commander has an archetype](#the-commander-has-an-archetype)).
+The grid is magnitude-only, so the pick is not a typed counter (AT under specifically-armour) until belief
+carries threat category ([§Open questions](#open-questions)).
 
 ### The director and the escalation ladder
 
@@ -1077,9 +1126,12 @@ Each phase is independently playable; the ordering is forced by what the next ph
 
 ## Open questions
 
-- **The tick interval against the action cooldowns.** A 60-90 s tick against a 20-30 min build tick
-  means the commander's reaction time to a sighting is set by whichever action it wants. Whether Intercept
-  (a reactive strike on a fresh sighting) needs a faster path than the shared tick is a play question.
+- **The tick interval against the action cooldowns.** A 60-90 s strategic tick against a 20-30 min build
+  tick sets how fast the commander re-plans; the values tune in play. Intercept needs no faster path — local
+  defense is emergent and QRF dispatch travels regardless ([§The loop](#the-loop-against-the-engine)).
+- **Typed belief for counter-building.** The grid is force magnitude only, so Build cannot site a typed
+  counter — AT specifically under armour, AA under air. Extending belief to carry a threat category would
+  enable it ([§What the commander builds](#what-the-commander-builds)).
 - **Whether the belief store should persist** ([§Persistence](#persistence)).
 - **What a co-op session does to the sighting sweep.** One call per player, the belief array grows one
   entry per player. The merge is resolved by [the influence grid](#the-influence-grid-one-spatial-substrate):
