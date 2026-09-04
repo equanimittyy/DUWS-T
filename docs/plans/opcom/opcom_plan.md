@@ -2,10 +2,10 @@
 
 OPCOM is one server-side actor that turns the enemy's Army Power into pressure: it garrisons towns,
 tasks squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet and the faucets
-that fill it are the economy's ([`economy_second_pass.md`](economy_second_pass.md#army-power)); the
-shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](../info/gameplay/hardpoints.md);
+that fill it are the economy's ([`economy_second_pass.md`](../economy_second_pass.md#army-power)); the
+shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](../../info/gameplay/hardpoints.md);
 the standalone-siting economics are
-[`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting).
+[`info/opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md#band-siting).
 
 ## The three layers
 
@@ -26,8 +26,8 @@ The commander reads a belief store. Only the sensors below read truth (`allPlaye
 
 Parallel arrays, server-local, indexed together, every entry a number or an array of numbers.
 Serialisable — the mission namespace is the save file, so state that might outlive a session holds no
-handles ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#why-hardpoints-are-not-zones),
-[`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
+handles ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#why-hardpoints-are-not-zones),
+[`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
 Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a single mixed-type,
 `publicVariable`d row array). Not broadcast — no client reads belief.
 
@@ -43,7 +43,7 @@ rather than appending, and only when the new reading is stronger or the stored o
 (keep-strongest). So a co-op stack is one row, not a row per sighting.
 
 New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner
-([`info/architecture.md`](../info/architecture.md#globals-have-no-namespace)).
+([`info/architecture.md`](../../info/architecture.md#globals-have-no-namespace)).
 
 Store a position, never an object handle — an object reference re-resolves every tick and follows a
 player through respawn, taxi and fast travel. Same latching rule as the artillery target grid
@@ -61,7 +61,7 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 
 `east knowsAbout _p` is a side-wide query — the whole sighting sweep is one call per player, no
 `nearEntities`, no scan over `allUnits`
-([`info/performance.md`](../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)).
+([`info/performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)).
 Threshold `1.5` is shared with the artillery observation gate — one constant, do not add a second.
 
 ### Decay
@@ -237,7 +237,7 @@ not persisted — it recomputes from the current cell to the target on load.
 
 `fnc_aoi_field_at` is a pointwise, binary read — `+1/-1/0` coverage, no magnitude, no player
 knowledge — and it drives town drift and hardpoint siting
-([`opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md)). The grid is the
+([`opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md)). The grid is the
 two-sided force magnitude that adds the belief store and only OPCOM's scoring consumes; it touches
 neither drift nor siting, and its footprints are small where the AOI reaches are kilometres. Its render
 is new work on the dev overlay `fnc_debug_opcom_view`, which today draws only AoI coverage circles.
@@ -437,7 +437,7 @@ case of a template.
 
 **There is no retreat.** A committed group fights its engagement to a decision: the engine owns a group
 in `COMBAT` and will not execute a commanded withdrawal
-([`arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
+([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
 A group that wins drops back to `moving`, resumes its order, and re-virtualises on clearing the ring
 ([§The virtualisation boundary](#the-virtualisation-boundary)); a group that loses dies. Recovery is
 winning, nothing else.
@@ -473,12 +473,12 @@ check already runs. A virtualised tasking is `virtual` by definition — no read
 reinforcement logic key off both fields.
 
 Numbers and strings only. `time`, not `diag_tickTime`, so an expiry survives a savegame
-([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 ### Unit strength
 
 Each tasking unit carries a strength figure, computed and saved the way a zone's is
-([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)) — reuse the zone
+([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#zone-tiers)) — reuse the zone
 helpers (`fnc_zone_strength`, `DUWS_fnc_garrisonStrength`, `DUWS_fnc_garrisonUnlose`), never a parallel
 store.
 
@@ -521,7 +521,7 @@ until a player closes to within its streaming ring. Its role binding
 spawns.
 This is the mobile analogue of hardpoint streaming, which wakes and sleeps a fixed emplacement on a
 `spawnRadius`/`grace` band
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Movement and streaming
+([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)). Movement and streaming
 run on the loop's fast base pass, not the strategic tick ([§The loop](#the-loop-against-the-engine)).
 
 ### One nominal speed per unit type
@@ -692,7 +692,7 @@ sides. The director here, the hardpoint director ([§What the commander builds](
 and the turned-town behaviour are one actor sharing `WARCOM_opfor_ap`: every action competes in the one
 appraisal ([§Appraisal](#appraisal-expected-ap-return)) — no sink runs on its own clock, and none spends
 `WARCOM_opfor_ap` unarbitrated. The wallet and its faucets are the economy's
-([`economy_second_pass.md`](economy_second_pass.md#army-power)).
+([`economy_second_pass.md`](../economy_second_pass.md#army-power)).
 
 Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`. The
 director is server-side and single, so there is no writer to race.
@@ -796,12 +796,12 @@ Rolled once at WARCOM init, never re-rolled — campaign state, in the persisten
 
 Towns gain purchasable garrisons on both sides, benchmarked against a zone garrison (fortified groups
 with a squad leader each, occupied buildings, nearby guard towers). Zones carry a tier of their own,
-rolled at generation ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)).
+rolled at generation ([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#zone-tiers)).
 Towns and zones draw from one token vocabulary but keep separate composition sets.
 
 Both sinks reach both kinds of ground — the commander upgrades and reinforces zones as it does towns.
 A retaken zone is floored to `0.3` so there is something to buy back
-([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)).
+([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#zone-tiers)).
 
 Extension machinery: a zone's tier is stored per zone, the composition table is indexed by it, and
 zone and town strength share one attrition ledger — `fnc_zone_strength`
@@ -823,12 +823,12 @@ target.
 
 The OPFOR side is built: tiers 0 to IV in `DUWS_townSpawnTiers`, per-town tier in
 `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`
-([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv)).
+([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv)).
 
 - **Reputation decides whether a town garrisons; AP decides how hard.** Crossing `-10` writes tier I.
 - **Clearing a town drops the tier to I, not 0, with no refund.** The director must spend again to
   restore it, and cannot for the three hours the town spends regrouping
-  ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
+  ([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
 - **A cleared town is pinned to the `0.3` strength floor for the rest of the campaign.**
 - **Tier IV is more units, not fortifications** — it reaches the zone benchmark by occupying
   buildings.
@@ -849,7 +849,7 @@ upgrades one.
 
 Captured ground carries no tier and no strength — no inherited garrison, no destroyed state. What
 OPFOR left is OPFOR's, floored at `0.3`, re-read only when they retake it
-([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#blufor-inherits-nothing)).
+([`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#blufor-inherits-nothing)).
 
 Buying tier I creates a garrison at **zero strength**; each reinforcement adds **30 %** — four to
 reach full from nothing, three from the `0.3` floor. A tenth-multiple: both strength stores quantise
@@ -870,11 +870,11 @@ The escalation ladder and indirect-fire assets, once the commander is spending o
 **Built but disabled**: a standalone fortification director (`fnc_WARCOM_opf_hardpoints`) spent OPFOR AP
 on three flat-priced build actions — raise a radio tower, top a zone back toward its stored ring cap,
 fortify the band, priced `OPCOM_AP_TOWER`/`OPCOM_AP_BAND`/`OPCOM_AP_TOPUP`
-([`info/opfor_area_of_influence.md`](../info/gameplay/opfor_area_of_influence.md#band-siting)) — on its
+([`info/opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md#band-siting)) — on its
 own clock in a fixed priority order, with no appraisal. Its spawn is cut (the file and compile stay), to
 be re-driven through the appraisal so build competes with tasking and garrison for the wallet. Nothing
 scales garrison size to `WARCOM_opfor_ap`
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Hardpoints otherwise
+([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)). Hardpoints otherwise
 generate at scenario init only.
 
 **The director builds to need.** It sites a build by reading the influence grid
@@ -924,7 +924,7 @@ shared vocabulary — the team roster in `shared/functions/fnc_spawn_vocab.sqf`,
 `DUWS_fnc_raiseGarrison` (`:144`). Put the hardpoint tier in that file as its own small table beside
 the zone one: the vehicle rows name faction roles not classnames, the row's `setting` column answers
 `HeavyArmor`, and a fenced table is editable through the composition TUI
-([`info/composition_tooling.md`](../info/architecture/composition_tooling.md)).
+([`info/composition_tooling.md`](../../info/architecture/composition_tooling.md)).
 
 **Both columns key off the highest AP the enemy has reached, never its current balance** — a vehicle
 token is gated on `WARCOM_opfor_ap_earned`, the earned high-water counter, not the spendable wallet
@@ -936,14 +936,14 @@ token is gated on `WARCOM_opfor_ap_earned`, the earned high-water counter, not t
 | Build tick | one candidate every 20-30 min |
 | Build gate | OPFOR AP above 10 |
 | Build costs | 8-25 AP by type — cheapest for an OP or MG nest, dearest for the battery |
-| Live cap | none — live AI is bounded by player proximity ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)) |
+| Live cap | none — live AI is bounded by player proximity ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)) |
 | Clear pays | CP only (`fnc_mission_reward.sqf:35`, `fnc_captured.sqf:39`) |
 
 ## Indirect-fire hardpoints
 
 Persistent enemy assets that act on the campaign. Two tiers sharing one fire-mission implementation.
 None of the fire missions ships today — the mortar and artillery cores exist as clearable emplacements
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#hardpoint-types)) but run no missions.
+([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#hardpoint-types)) but run no missions.
 
 A zone's own mortar is separate and stays as it is: several zone prefabs site a tube that
 `fnc_static_resolve` turns into the holding faction's mortar, crewed by the zone's manning pass, firing
@@ -951,7 +951,7 @@ on the engine's judgement, not counted against the caps below.
 
 `doArtilleryFire` must be issued from the machine where the gun is local; both are server-spawned, so
 the server issues it — the same locality rule that broke `fnc_helolift`
-([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#waypoint-and-flight-commands-are-ignored-unless-the-group-is-local-to-that-machine)).
+([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#waypoint-and-flight-commands-are-ignored-unless-the-group-is-local-to-that-machine)).
 
 | | Mortar pit | Artillery battery |
 |---|---|---|
@@ -964,9 +964,9 @@ the server issues it — the same locality rule that broke `fnc_helolift`
 Reach is the gun's — `inRangeOfArtillery` decides what a piece can touch. The battery is a vehicle, so
 pin it: `disableAI "PATH"` on the crew plus `allowFleeing 0`. Killing the crew leaves an intact gun
 the player can take, and the unmanned clause counts that as cleared
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#clearance)); the recycle station pays for it
+([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#clearance)); the recycle station pays for it
 (`fnc_activateBaseRecycleStation.sqf`, an ownership-free faucet in
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#campaign-loop)).
+[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#campaign-loop)).
 
 Applies to both:
 
@@ -1041,13 +1041,13 @@ first ([§Open questions](#open-questions)).
 
 **One artillery battery and two mortar pits alive at once, across the whole map.** The cap spans both
 flavours — a zone that rolls a mortar pit consumes one of the two. Clearing one frees its slot. Not
-enforced today ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#hardpoint-types)); lands with the
+enforced today ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#hardpoint-types)); lands with the
 fire missions. These are the only hardpoints with permanent crews — three guns is ~six units that
 never despawn.
 
 **If AA is ever made resident, it needs its own cap.** The shipped AA streams like any other type,
 waking early on a 5,000 m air ring
-([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)); pinning it resident
+([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)); pinning it resident
 would add a fourth permanent-crew type.
 
 ## Rejected: the OPFOR spawners this replaces
@@ -1077,7 +1077,7 @@ reputation, planned outside the town's presence trigger so it can mine a road ah
 
 ## Persistence
 
-The campaign snapshot ([`campaign_persistence_plan.md`](campaign_persistence_plan.md)) is planned, not
+The campaign snapshot ([`campaign_persistence_plan.md`](../campaign_persistence_plan.md)) is planned, not
 shipped — persistence today is the engine's `saveGame`. Live squads, spawned garrisons and in-flight
 fire missions are never saved; they regenerate on player approach.
 
@@ -1085,11 +1085,11 @@ fire missions are never saved; they regenerate on player approach.
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs, never re-rolls ([§The commander has an archetype](#the-commander-has-an-archetype)) |
 | Standing units & orders | outcome | One row per unit — its tasking, target, current cell, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at its cell (accumulator 0, chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
-| Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
+| Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](../economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
 Every persisted field is a number, a string, or an array of those. Time-based fields store on `time`
 and are written as remaining durations, never absolute stamps
-([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 Whether the belief store persists is open ([§Open questions](#open-questions)); it is shaped to
 serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Belief
@@ -1127,65 +1127,12 @@ Each phase is independently playable; the ordering is forced by what the next ph
 ## Implementation
 
 Build in the [§Build order](#build-order) sequence, each phase shipped runnable and verifiable before the
-next. This section details a phase when it is picked up; only Phase 1 is detailed so far. The rest of the
-plan is the spec for the later phases — do not pre-build them, since the tuning constants and the
-engine-contact behaviours (streaming, `doArtilleryFire`, virtual combat) only settle by running the core.
+next. Each phase's implementation spec is its own doc, picked up when the phase is; do not pre-build the
+later phases, since the tuning constants and the engine-contact behaviours (streaming, `doArtilleryFire`,
+virtual combat) only settle by running the core. The rest of this plan is the design spec those phase
+docs draw on.
 
-### Phase 1 — belief, grid, debug overlay
-
-A live perception substrate that can be *seen*, with no decisions on top: no scoring, no actions, no
-taskings, no movement, no AP spend. Those are Phase 2+.
-
-**Files.** A new `src/duws/server/opcom/`, each function loaded by a compile-path string in
-`server_fnc_init.sqf` beside the other server subsystems (misc functions load this way, not through
-`CfgFunctions`; callers use the variable name).
-
-| File | Responsibility |
-|---|---|
-| `fnc_opcom_belief_init` | Declare the belief arrays, the tick counter and the two live grid arrays (empty). Run once at OPCOM init |
-| `fnc_opcom_grid_init` | Build the static per-cell arrays once — land mask (`surfaceIsWater` per centre) and connectivity flood-fill ([§Geometry](#geometry)) |
-| `fnc_opcom_sense` | The sighting sweep and event sensors; keep-strongest write into the belief arrays ([§Sensors](#sensors)) |
-| `fnc_opcom_decay` | Age every entry by the tick counter, drop the expired ([§Decay](#decay)) |
-| `fnc_opcom_grid_rebuild` | Zero both grid arrays, deposit each source with the linear falloff ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)) |
-| `fnc_opcom_perception_run` | The loop thread — see below |
-| `fnc_debug_opcom_view` | Extend the existing overlay (AoI circles today) to render the grid and belief |
-
-**Constants** (`server_var_init.sqf`, `OPCOM_` prefix, `#define` form): `OPCOM_GRID_CELL` 500,
-`OPCOM_GRID_SPREAD` 1000, `OPCOM_BELIEF_FRESH` 4, `OPCOM_BELIEF_EXPIRE` 16. The sighting threshold `1.5`
-already exists as the artillery gate — reuse it, do not add a second ([§Sensors](#sensors)).
-
-**State** (`DUWS_opcom_` prefix, server-local, numbers/strings only — no handles): the four belief arrays
-(`_belief_key` / `_pos` / `_time` / `_str`), the strategic-tick counter `DUWS_opcom_tick`, the two live grid
-arrays (`_grid_fri` / `_grid_ene`) and the two static ones (`_grid_land` / `_grid_comp`).
-
-**The runner is the loop skeleton, perception-only.** `fnc_opcom_perception_run` is the eventual
-[§loop](#the-loop-against-the-engine) thread with both cadences already split, so Phase 2 adds the scoring
-pass into it rather than restructuring — no throwaway:
-
-- Fast base pass (~2-5 s): `fnc_opcom_sense`.
-- Strategic phase (every 12-18 fast passes): increment `DUWS_opcom_tick`, `fnc_opcom_decay`, then
-  `fnc_opcom_grid_rebuild`.
-
-Started by WARCOM init **after** zones exist and after `fnc_zone_state_init` has run — the rebuild reads
-`zone_meta_array` / `civ_locations` / `DUWS_hardpoints`, and zone-state init must precede any zone consumer.
-
-**Sensors this phase**: direct sighting (`east knowsAbout _p > 1.5`, one call per player, keep-strongest)
-and the zone-flip event. Area-of-influence (`fnc_aoi_opfor_covers`) can be added cheaply since it exists;
-the OP-hardpoint and intel-patrol sensors wait on their own systems ([§Sensors](#sensors)).
-
-**Grid sources this phase**: friendly = OPFOR zones, banded town garrisons, OPFOR hardpoints; enemy =
-BLU-held zones and belief entries ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)). The
-tasking-unit source lands with Phase 4 — no units exist yet.
-
-**Overlay**: per-cell `fri`/`ene` magnitude (two tints), a marker at each `belief_pos` tagged with its age,
-and the front-line cells (sign change against an orthogonal neighbour, [§What reads it](#what-reads-it)).
-Behind the existing debug toggle.
-
-**Verification.** Sighting a player adds one belief row (`count DUWS_opcom_belief_key` grows) and no more on
-a co-op stack in one cell; the row's age climbs each strategic tick and the row drops after
-`OPCOM_BELIEF_EXPIRE`; the overlay shows an `ene` bloom on the player fading with distance and decay, `fri`
-on held ground, and a front line where they cross. All checkable from the debug console against a live
-player, no scoring needed.
+- Phase 1 — belief, grid, debug overlay: [`phase_1_belief_and_grid.md`](phase_1_belief_and_grid.md)
 
 ## Open questions
 
@@ -1208,7 +1155,7 @@ player, no scoring needed.
   console test before writing the indirect-fire missions; if no, the shell-spawn fallback
   (`client/supports/fnc_arty.sqf`) becomes the implementation.
 - **Whether the player can learn the commander's archetype, and how** — the intel system
-  ([`info/intel_system.md`](../info/gameplay/intel_system.md)), or observed behaviour.
+  ([`info/intel_system.md`](../../info/gameplay/intel_system.md)), or observed behaviour.
 - **What the commander does with a surplus.** Absorbers: Recruit (only while a locked prize exists — its
   Value is demand-driven, [§Value](#value-the-worth-of-the-ground-in-play)), reinforcing a garrison rather
   than upgrading it, and mustering — an assault that keeps buying force while it waits to clear its commit

@@ -80,7 +80,7 @@ nothing left rather than silently awarding nothing.
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
 | An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
-| An unrevealed enemy patrol | — | waiting on [`../opcom_plan.md`](../../plans/opcom_plan.md) |
+| An unrevealed enemy patrol | — | waiting on [`../opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
