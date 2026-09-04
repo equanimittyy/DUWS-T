@@ -15,7 +15,7 @@ Three layers, one thread.
 |---|---|---|
 | **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per player |
 | **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
-| **Commitment** | Turns a choice into an intent with a minimum lifetime and an owner. Re-scoring fills free capacity; it cannot cancel a live intent | Between ticks |
+| **Commitment** | Turns a choice into an intent with a minimum lifetime and an owner. Re-scoring fills free capacity and may abandon a still-virtual intent whose ROI has collapsed, but never one whose units are in contact | Between ticks |
 
 ## Perception: the commander plans against belief, never against truth
 
@@ -250,6 +250,30 @@ action's phases are authored, not searched ([§Templates](#templates-the-executi
 set is small — the flat action list ([§What the commander spends on](#what-the-commander-spends-on))
 against its valid targets — tens of pairs, a full pass every strategic phase.
 
+### Candidate enumeration: gate, then score
+
+Each strategic phase, sweep every action against its valid targets, drop what a cheap test rejects, then
+score only the survivors. Tens–low-hundreds of pairs before the gate, fewer after.
+
+| Action | Targets swept |
+|---|---|
+| Attack | each BLU-held zone |
+| Intercept | each belief entry near own ground |
+| Rapport | each town not yet turned |
+| Recruit | one — the locked prize ([§Value](#value-the-worth-of-the-ground-in-play)) |
+| Reinforce | each own holding below its strength cap |
+| Scout | drop positions for an available recon unit's footprint |
+| Arty | each observed belief point in range of an owned gun |
+| Fortify | each own holding below its tier ceiling |
+| Build | each own threatened / thin-line cell |
+| Bank | one null |
+
+The gate splits by how the action pays ([§Cost](#cost-what-an-action-stakes)):
+
+- **Spend actions** (Recruit, Reinforce, Fortify, Build, Arty) — drop when `Cost > wallet`.
+- **Commit actions** (Attack, Intercept, Rapport, Scout) — drop when the roster holds no eligible unit,
+  and drop an offensive one whose `P(win)` is below the floor (a doomed assault never scores).
+
 ### The score
 
 ```
@@ -263,8 +287,8 @@ weight tilts it by action class. No term normalisation — the units already agr
 | Factor | Is | Reads |
 |---|---|---|
 | `P(win)` | probability the action succeeds | the force ratio (below) |
-| `Value` | AP worth of the ground in play | zone `_points` / town `civ_town_ap`, × threat for a defensive action |
-| `Cost` | AP the action spends | the sink's price ([§What the commander spends on](#what-the-commander-spends-on)) |
+| `Value` | AP worth of what the action returns | ground worth, or the locked prize / intel / kills for Recruit / Scout / Arty ([§Value](#value-the-worth-of-the-ground-in-play)) |
+| `Cost` | AP the action spends or the force it stakes | a spend action's price, a commit action's force reacquisition ([§Cost](#cost-what-an-action-stakes)) |
 | `archWeight` | the archetype's lean on this action class | a per-class table ([§The commander has an archetype](#the-commander-has-an-archetype)) |
 
 ### P(win): the force ratio, Lanchester-square
@@ -289,10 +313,59 @@ its economy and never chases a lone scout across empty terrain.
 | The action | Value |
 |---|---|
 | takes enemy ground (Attack, Rapport) | that ground's worth — zone `_points`, town `civ_town_ap` |
-| defends own ground (Intercept, Fortify, Reinforce, Build, Recruit) | own worth × how threatened it is (`_gridEne` on it) |
+| defends own ground (Intercept, Fortify, Reinforce, Build) | own worth × how threatened it is (`_gridEne` on it) |
+| builds force (Recruit) | the locked prize it unlocks × the ΔP(win) one hire buys (below) |
+| buys information (Scout) | Σ over its recon footprint of `cell worth × staleness` (below) |
+| attrits force (Arty) | AP-worth of enemy force expected killed — `effForce hit × AP-per-force` (below) |
 
 Enemy ground worth needs `_points` readable at scoring time — currently passed into the capture triggers
 only, so stash it in `zone_meta_array` ([§Open questions](#open-questions)).
+
+**Recruit — the locked prize.** Recruit owns no ground, so a flat Value loses to any affordable attack and
+the pool never grows. Instead its Value is the ground OPCOM *cannot currently reach for lack of force*: scan
+the Attack/Rapport candidates that fail the `P(win)` floor, take the richest, and value one hire at
+`prize × ΔP(win)` — the win-probability a single added unit buys against that target. Diminishing (the
+sigmoid flattens past `r ≈ 1`) and self-terminating (once accumulated force clears the floor the prize
+becomes a live Attack and Recruit's prize drops to the next locked target, or to a low floor when none
+remain). So OPCOM masses when a fat zone is out of reach and stops hoarding when it is not.
+
+**Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout, and its footprint is rings
+around its drop cell by type — recon team 1 ring, recon car 2, recon helicopter 3. A drop position's Value
+is `Σ` over the footprint cells of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`:
+offensive is attackable enemy ground worth in the cell, defensive is own ground worth exposed through it. A
+wider-range unit covers more cells (higher Value) at a higher reacquisition Cost, so range trades against
+unit price on the ROI axis with no extra knob.
+
+**Arty — force killed.** Value is the AP-worth of the enemy force a mission is expected to kill,
+`effForce in the blast × AP-per-force`. It targets the exact belief position, not the cell; positional
+uncertainty grows with belief staleness, so OPCOM widens saturation (more rounds, more AP) to cover it and
+expected kill falls as belief ages — fresh recon makes Arty lethal, stale belief wastes it
+([§Indirect-fire hardpoints](#indirect-fire-hardpoints)).
+
+### Cost: what an action stakes
+
+`Cost` is Army Power, but two families stake it differently.
+
+**Spend actions** (Recruit, Reinforce, Fortify, Build, Arty) pay fresh AP from the wallet: `Cost` is the
+price — a tier rung, a hardpoint, a hire, a fire mission's rounds × saturation.
+
+**Commit actions** (Attack, Intercept, Rapport, Scout) spend no fresh AP; they stake roster units already
+paid for. `Cost` is the **AP to reacquire the force committed** — `Σ effForce × AP-per-force` over the units
+in the tasking, so a bigger commit stakes more and must clear a higher bar. `AP-per-force` is one exchange
+rate, single-sourced from Recruit's hire price, and it also prices force elsewhere (Arty's kill Value).
+
+**Abandoning defense is part of the cost.** A unit holding threatened own ground is already worth
+`own worth × _gridEne` there — the Value a Reinforce would score. Pulling it into an attack forfeits that,
+so its commit cost is `reacquisition + defenseAbandoned`: reacquisition AP plus the own-ground worth it was
+covering, scaled by the threat rise its removal causes (drop it from `_gridFri`, net threat on nearby own
+ground climbs). A unit on quiet ground costs ~reacquisition alone; one on a hot backline costs far more and
+stays put unless the prize outweighs losing the ground.
+
+**Force allocation is ROI-optimal.** An Attack is scored at the force size that maximises
+`prize × P(win) / Cost` — add units while each one's ΔP(win) still pays for its commit cost, stop when it
+does not. Since `P(win)` saturates past `r ≈ 1` this lands near "enough to win plus a small margin", and
+the abandonment cost holds the backline without a reserve knob. A Probe inverts the rule — it minimises
+stake, not ROI ([§Templates](#templates-the-execution-forms)).
 
 ### Action follows the force ratio
 
@@ -302,7 +375,7 @@ only, so stash it in `zone_meta_array` ([§Open questions](#open-questions)).
 |---|---|
 | ≥ 2 | assault — overwhelming, direct |
 | 1 – 2 | flank / encircle — envelop, not a frontal charge |
-| 0.5 – 1 | probe / harass, or muster and keep buying |
+| 0.5 – 1 | probe (recon-by-fire), or muster and keep buying |
 | < 0.5 | hold — do not attack; Fortify or muster instead |
 
 The band selects the **execution template** ([§Templates](#templates-the-execution-forms)) the runner
@@ -321,7 +394,10 @@ whenever anything sensible is affordable and winning when everything else has sa
 ## Commitment: intents are sticky
 
 A chosen action becomes an intent record and stays one until it completes, dies, or expires.
-Re-scoring next tick fills free capacity; it never cancels a live intent.
+Re-scoring next tick fills free capacity. It may **abandon a still-virtual intent** — recall its units to
+the roster — but only when the target's ROI has fallen *well below* the commit bar; the hysteresis gap
+(`OPCOM_COMMIT_HYSTERESIS`, [§Open questions](#open-questions)) stops a small wobble sending columns
+marching back and forth. Once a tasking's units are in contact it is locked ([§There is no retreat](#commitment-intents-are-sticky), below) — the world can shift under a virtual march, never under a firefight.
 
 | Field | Holds |
 |---|---|
@@ -451,9 +527,18 @@ recomputes on load.
 
 ### The virtualisation boundary
 
-A tasking unvirtualises — spawns as a native A3 group — when its cell closes to within **K cells**
-(Chebyshev, `max(abs(dx), abs(dy))`) of any player's cell. Inside the ring the group is real, the engine
-owns its pathfinding, and the tasking issues its order *best-effort*.
+A tasking unvirtualises — spawns as a native A3 group — on either of two triggers: its cell closes to
+within **K cells** (Chebyshev, `max(abs(dx), abs(dy))`) of any player's cell, **or** it reaches an opposing
+force (an OPFOR assault closing on a BLUFOR-held cell). Inside the ring the group is real, the engine owns
+its pathfinding, and the tasking issues its order *best-effort*.
+
+**Streaming is side-symmetric, and the engine resolves combat.** A BLUFOR zone or town garrison is
+virtualised and streamed exactly as an OPFOR one — stored as strength and a cell, spawned on contact. An
+OPFOR assault that reaches a BLUFOR-held cell unstreams *that garrison too*; both sides go live and the A3
+engine fights it out, survivors re-virtualising on clearing ([§Unit strength](#unit-strength)). OPCOM never
+dices a combat — `P(win)` is its *scoring* estimate, never a resolver. Off-screen contact (no player near)
+still spawns both sides briefly; the per-locality cap bounds it
+([§What the commander spends on](#what-the-commander-spends-on)).
 
 **K is per unit type, not one ring** (tune in play) — each type's render range in cells. The streaming
 check runs on the fast base pass against live player cells, so the margin against a fast player comes
@@ -468,8 +553,9 @@ caught before contact.
 | Rotary | 5 | ~2.5–3.5 km |
 | Fixed wing | 8 | ~4–5.5 km |
 
-**Hysteresis.** A live group stows back to a cell once it passes `K + 1` cells from every player — one
-full cell of margin so a group on the edge cannot flicker — whether or not it has fired.
+**Hysteresis.** A live group stows back to a cell once it passes `K + 1` cells from every player **and holds
+no live contact** — one full cell of margin so a group on the edge cannot flicker. A group in a firefight
+stays live until it resolves, whether or not a player is near.
 
 The boundary is a square ring in cell space, so a tasking on the diagonal streams in ~1.4x further than
 orthogonally — acceptable for spawn-before-contact.
@@ -526,18 +612,22 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 | `assault` | band ≥ 2 | `attacker` ×1 | approach (direct route) → S&D → resolve |
 | `flank` | band 1–2, ≥2 mobile, a reachable flank cell | `fix` ×1, `maneuver` ×1+ | form (fix → frontal direct; maneuver → flank cell, λ route) → *(fix `engaged`)* assault (maneuver S&D from the flank) → resolve |
 | `encircle` | band 1–2, target pocketed (few escape cells), ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
-| `probe` | band 0.5–1 | `harasser` ×1 | approach → harass → ⚠ ([§Open questions](#open-questions)) |
+| `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour, air or recon) | approach → make contact → resolve (survives ⇒ belief was soft, escalate; dies fast ⇒ belief confirmed, mass or re-target) |
 | `rapport` / `scout` | the action's fixed form | one role | move → act → resolve |
-| `arty` | an observed `ene`-high cell, a battery/mortar off cooldown, not the HQ circle | `guns` ×1–3, `spotter` ×0–1 | mark (spotter holds observation) → salvo (guns concentrate on one cell, K rounds) → assess (force dropped? re-fire : done) |
+| `arty` | an observed belief point in range of an owned gun off cooldown, not the HQ circle | owned `guns` ×1–3 (resident hardpoints, not roster — 0 roster taskings), `spotter` ×0–1 | mark (spotter or OP holds observation) → salvo (rounds × saturation on the belief point) → assess (force dropped? re-fire : done) |
 
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points
   outward toward BLU-held ground — the routes out. Blockers occupy them; crushers collapse inward once
   sealed.
-- **Saturation** (`arty`): concentrates several guns on one cell rather than one gun per target, over the
-  existing fire-mission machinery and caps ([§Indirect-fire hardpoints](#indirect-fire-hardpoints),
+- **Saturation** (`arty`): concentrates several guns on the belief point rather than one gun per target,
+  over the existing fire-mission machinery and caps ([§Indirect-fire hardpoints](#indirect-fire-hardpoints),
   [§Observation is the trigger](#observation-is-the-trigger)).
-- **`probe`** ends in a hold or a pull-back, which the no-retreat rule complicates
-  ([§Commitment](#commitment-intents-are-sticky), [§Open questions](#open-questions)).
+- **`probe` is disposable recon-by-fire.** No-retreat forbids poke-and-withdraw, so a probe instead
+  converts uncertain belief into *observed defender strength by drawing fire*, reaching what recon cannot
+  (a dug-in town garrison). Its force is the cheapest the roster holds and never a high-AP asset (armour,
+  air) or a recon unit; the element is expected to be lost and the intel de-risks a bigger commit. Unit
+  selection minimises stake — the inverse of the ROI-optimal sizing every other commit uses
+  ([§Cost](#cost-what-an-action-stakes)).
 
 | Constant | Value |
 |---|---|
@@ -582,8 +672,9 @@ Three levels, not one:
 
 - **Action** — what OPCOM commits AP to; the unit the appraisal scores and Commitment holds. The flat
   list below.
-- **Sink** — how an action is paid and run: a tier purchase, a hardpoint build, a tasking-spawn, or a
-  resident asset. A property of the action, not a level OPCOM decides at.
+- **Sink** — how an action is paid and run: a tier purchase, a strength purchase, a hardpoint build, a
+  tasking-spawn, or a bought fire mission on an owned gun. A property of the action, not a level OPCOM
+  decides at.
 - **Tasking** — an order handed to one unit ([§Unit tasking and status](#unit-tasking-and-status)). An
   action emits none (economic), one (a simple tasking), or several (a template,
   [§Templates](#templates-the-execution-forms)).
@@ -593,10 +684,10 @@ Three levels, not one:
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
 | Rapport | offensive | a town in reach | tasking-spawn | 1 |
-| Recruit | buildup | an OPFOR-held zone (+ a cell it spans) | tasking-spawn | 1 (spawned `garrison`) |
+| Recruit | buildup | the locked prize; spawns `garrison` on an OPFOR-held zone | tasking-spawn | 1 (spawned `garrison`) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 |
-| Scout | recon | a stale / thin-belief area | tasking-spawn | 1 |
-| Arty | offensive | an observed `ene`-high cell | resident indirect-fire asset | 0 |
+| Scout | recon | a recon unit's drop position covering stale valuable cells | tasking-spawn | 1 |
+| Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 |
 | Build | defensive | an own threatened cell | hardpoint build | 0 |
 | Bank | — | — | none | 0 |
@@ -617,13 +708,20 @@ Three notes:
   ([§Random events](#random-events-what-a-turned-town-does)).
 - **Nothing absorbs a surplus.** Every action is rate-limited; a commander that out-earns them banks the
   difference ([§Open questions](#open-questions)).
-- **Scout and Recruit do not gain AP directly** — Scout buys knowledge, Recruit buys capacity, so their
-  Value does not fit the AP-return cleanly ([§Open questions](#open-questions)). Scout is the weak sensor:
-  cheap, buys knowledge not force; `reveal` against EAST is the mechanism.
+- **Scout and Recruit earn no AP directly, but both carry an AP Value** — Recruit's is the locked prize it
+  unlocks × the ΔP(win) a hire buys, Scout's is the worth-at-stake × staleness its footprint reveals
+  ([§Value](#value-the-worth-of-the-ground-in-play)). Scout is the weak sensor: cheap, recon-flagged units
+  only, `reveal` against EAST is the mechanism.
 
 Units spawn only from OPFOR-held ground — a held zone today, the planned OPFOR FOB hardpoint once it
-exists — never on demand beside the player. Taking the zone cuts what it can raise. No more than
-`OPCOM_MAX_TASKINGS` (start 10) taskings run live-or-virtual at once ([§Open questions](#open-questions)).
+exists — never on demand beside the player. Taking the zone cuts what it can raise.
+
+**The cap is on live groups per locality, not on planning.** Virtualised taskings are cheap and uncapped —
+OPCOM may hold many in flight. What binds is spawned AI: the sim only ever holds live groups where a player
+or an active contact is, so `OPCOM_MAX_TASKINGS` (start 10) is a budget **per active locality** — a player's
+proximity bubble or an off-screen contact point — not one global number. A big offensive on one side of the
+map then cannot starve a defender's spawn on the other, and in co-op each player's locality keeps its own
+budget ([§The virtualisation boundary](#the-virtualisation-boundary)).
 
 **A unit's force is a token composition.** Drawn from the same `posture:token` vocabulary the garrisons
 use ([§What the commander builds](#what-the-commander-builds)) — an array of tokens like `team` or `car`,
@@ -827,9 +925,9 @@ Applies to both:
 |---|---|
 | Target set | BLU-held zone centres, FOB positions, players in the open, each only while observed. **Never** aimed inside the 100 m HQ circle |
 | Range gate | `_gun inRangeOfArtillery [[_pos], _mag]`, and nothing else |
-| Willingness | a roll per opportunity ([§Chance to fire](#chance-to-fire)) |
+| Willingness | the Arty appraisal decides, not an autonomous roll ([§Chance to fire](#chance-to-fire)) |
 | Accuracy | deliberate scatter, scaled by range and observation quality ([§Scatter](#scatter)) |
-| Ammo | finite (`setVehicleAmmo`); a gun that runs dry goes quiet |
+| Ammo | paid in AP per mission, not a finite physical store — the wallet is the limiter |
 | Telegraph | Allseer radio line plus a temporary marker ~20 s before impact |
 
 **HQ exclusion.** No fire mission may be *aimed* inside a 100 m radius around `PosOfBLUHQ`. Rounds may
@@ -874,11 +972,16 @@ direct observation.
 
 ### Chance to fire
 
-A gun off cooldown with a valid observed target rolls rather than firing on a schedule — roughly 40 %
-for a mortar pit, 30 % for a battery, evaluated every five minutes. The cooldown starts only when a
-mission fires. The telegraph (radio line + marker) is required. Finite ammo means a dry gun stays quiet
-until rearmed; with the logistics tasking dropped (Reinforce is an economic top-up), how a battery
-rearms — and whether it offers an interdiction target — is open ([§Open questions](#open-questions)).
+A fire mission is the **Arty action**, scored and committed like any other
+([§Appraisal](#appraisal-expected-ap-return)): OPCOM buys it with AP, `Cost` scaling with the rounds and
+saturation it chooses, and it fires only when that action wins its phase — not on an autonomous schedule.
+The owned gun off cooldown and in range is the availability *gate*, nothing more; the appraisal decides
+whether and how hard to fire. The cooldown starts when a mission fires; the telegraph (radio line + marker)
+is required.
+
+**AP is the ammunition.** Because each mission is paid in AP, there is no separate finite-ammo store to
+rearm — the wallet is the limiter and the rearm problem dissolves. The zone's own mortar (above) is the
+exception: it fires autonomously on the engine's judgement and is not an OPCOM action.
 
 **Fallback if AI static-mortar fire proves unreliable:** spawn the shells directly, as the player's
 own artillery support does (`client/supports/fnc_arty.sqf` creates rounds at 800 m altitude with
@@ -991,25 +1094,18 @@ Each phase is independently playable; the ordering is forced by what the next ph
   (`client/supports/fnc_arty.sqf`) becomes the implementation.
 - **Whether the player can learn the commander's archetype, and how** — the intel system
   ([`info/intel_system.md`](../info/gameplay/intel_system.md)), or observed behaviour.
-- **What the commander does with a surplus.** Three absorbers: Recruit (banking force as standing units,
-  [§Actions, sinks and taskings](#actions-sinks-and-taskings)), reinforcing a garrison rather than
-  upgrading it, and mustering — an assault intent that keeps buying force while it waits to clear its
-  commit bar ([§Commitment](#commitment-intents-are-sticky)). Town events cannot be it — they are free
-  and rep-driven.
-- **How Scout and Recruit score.** Neither returns AP directly — Scout buys knowledge, Recruit buys
-  capacity — so neither fits the AP-return cleanly. A flat archetype allocation, or an AP-proxy Value, is
-  open ([§Appraisal](#appraisal-expected-ap-return)).
+- **What the commander does with a surplus.** Absorbers: Recruit (only while a locked prize exists — its
+  Value is demand-driven, [§Value](#value-the-worth-of-the-ground-in-play)), reinforcing a garrison rather
+  than upgrading it, and mustering — an assault that keeps buying force while it waits to clear its commit
+  bar ([§Commitment](#commitment-intents-are-sticky)). With no prize and nothing to defend, Bank wins. Town
+  events cannot absorb — they are free and rep-driven.
 - **The `garrison` heal rate** `OPCOM_GARRISON_HEAL_RATE` — the per-tick fraction restored. The mechanism
   ships; only the value tunes ([§Unit strength](#unit-strength)).
-- **Probe versus no retreat.** The `probe` template ends in a hold or pull-back, but a committed group
-  cannot be withdrawn ([§Commitment](#commitment-intents-are-sticky)). Either drop probe, or keep it a
-  ranged harasser that never closes to combat.
-- **Arty's Value.** It attrits force, not ground; confirm its Value stays ground-derived (the worth of
-  what that force threatens), since a player has no intrinsic worth ([§Appraisal](#appraisal-expected-ap-return)).
-- **Candidate enumeration.** The exact `[action, target]` set built each pass — how targets are gathered
-  per action, and how many pairs that is.
-- **What `OPCOM_MAX_TASKINGS` (10) caps** — total standing units, or concurrent active operations.
-- **How resident guns rearm.** Reinforce restores garrison HP, not ammo, and the logistics truck is
-  dropped, so a dry mortar or battery has no rearm path and no interdiction target. Unlimited ammo, a slow
-  passive rearm, or a revived logistics tasking — open.
+- **The commit hysteresis gap** `OPCOM_COMMIT_HYSTERESIS` — how far below the commit bar a still-virtual
+  intent's ROI must fall before it is abandoned. Wide enough to kill flapping, narrow enough to still drop a
+  dead prize ([§Commitment](#commitment-intents-are-sticky)).
+- **The `AP-per-force` exchange rate** — single-sourced from Recruit's hire price, it prices commit `Cost`
+  and Arty's kill Value; the value tunes ([§Cost](#cost-what-an-action-stakes)).
+- **The per-locality live-group budget** — the value of `OPCOM_MAX_TASKINGS` per active locality, and how a
+  bubble is delimited (a player ring, an off-screen contact) ([§What the commander spends on](#what-the-commander-spends-on)).
 - **Whether the commander should be required to spend** rather than merely able to.
