@@ -14,7 +14,7 @@ Three layers, one thread.
 | Layer | Does | Runs |
 |---|---|---|
 | **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per player |
-| **Appraisal** | Scores each candidate `[sink, target]` pair on five named terms, picks by weighted random over the top few | Every tick, one unscheduled batch |
+| **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
 | **Commitment** | Turns a choice into an intent with a minimum lifetime and an owner. Re-scoring fills free capacity; it cannot cancel a live intent | Between ticks |
 
 ## Perception: the commander plans against belief, never against truth
@@ -36,7 +36,11 @@ Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a sing
 | `DUWS_opcom_belief_key` | what is believed about: a player's `netId`, a zone index, a FOB index, the player HQ |
 | `DUWS_opcom_belief_pos` | `[x,y,0]` as last observed, never a live lookup |
 | `DUWS_opcom_belief_time` | the strategic-tick counter at the observation |
-| `DUWS_opcom_belief_str` | believed BLUFOR strength there |
+| `DUWS_opcom_belief_str` | believed BLUFOR force there, firepower-weighted ([§The quantity](#the-quantity-force-not-coverage)) |
+
+One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
+rather than appending, and only when the new reading is stronger or the stored one has gone stale
+(keep-strongest). So a co-op stack is one row, not a row per sighting.
 
 New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner
 ([`info/architecture.md`](../info/architecture.md#globals-have-no-namespace)).
@@ -90,10 +94,26 @@ line and route-around — which the point-sampled terms cannot.
 
 ### The quantity: force, not coverage
 
-Every cell holds a **force** figure in headcount-equivalent units — one unit ≈ one infantryman, a
-vehicle worth its crew plus a fixed bonus. Two layers carry it: `friendly` is OPFOR force, `enemy` is
-believed BLUFOR force. This is the unit the muster check needs; the AOI
-field's binary coverage cannot supply it ([§It is not the AOI field](#it-is-not-the-area-of-influence-field)).
+Every cell holds a **force** figure in **firepower-weighted** units, not a body count: each unit
+contributes a combat-power value set by its engine type category (`isKindOf`), so a tank outweighs a
+rifleman. One table serves both sides — OPFOR (ours, known) and believed BLUFOR (read off a sighting) —
+and a modded faction's units classify the same way, so the metric carries no mod dependency.
+
+| Category (`isKindOf`) | Power (starter, tune) |
+|---|---|
+| Man | 1 |
+| Car — armed | 3 |
+| Car — unarmed / logistics | 0–1 |
+| Armored (APC / IFV) | 6 |
+| Tank (MBT) | 12 |
+| Helicopter | 15 |
+| Plane | 15 |
+
+A unit contributes its power **scaled by its current condition** ([§Unit strength](#unit-strength)), so a
+depleted group weighs less with no extra logic — the grid deposits `effForce` (power × condition), never
+full strength. Two layers carry it: `friendly` is OPFOR force, `enemy` is believed BLUFOR force. This is
+the unit the muster check and the force ratio need; the AOI field's binary coverage cannot supply it
+([§It is not the AOI field](#it-is-not-the-area-of-influence-field)).
 
 ### Geometry
 
@@ -138,23 +158,26 @@ for "_cy" from (_scy - _k) max 0 to (_scy + _k) min (_w - 1) do {
 ```
 
 Falloff is linear and floors at 0 on the reach edge. Footprints are small — this is a force field, not
-the AOI coverage projection, so a source spreads over its own body plus one cell, never the 2–5 km AOI
-reaches.
+the AOI coverage projection, so a source spreads ~1 km (`OPCOM_GRID_SPREAD`, 2 cells), never the 2–5 km
+AOI reaches. That spread bleeds force across cell boundaries, so a unit just outside a read footprint
+still counts, fading with distance — the read box does not need a hard edge.
 
-**Friendly layer** (`DUWS_opcom_grid_fri`) — OPFOR force, known exactly, no belief scaling:
+**Friendly layer** (`DUWS_opcom_grid_fri`) — OPFOR force, known exactly, no belief scaling. Weight is
+category-power ([§The quantity](#the-quantity-force-not-coverage)) summed over the source, condition-scaled
+where the source is a unit:
 
 | Source | Position | Weight | Reach |
 |---|---|---|---|
-| OPFOR-held zone | `zone_meta_array` pos (`select 1`) | tier headcount (`fnc_zone_tier` 1–4 → I≈6 … IV≈18) | zone size (`select 2`) + `OPCOM_GRID_SPREAD` |
-| Banded town | `civ_locations` | `DUWS_townGarrisonTier` headcount, same tier→count map | `civ_radii` + `OPCOM_GRID_SPREAD` |
-| OPFOR hardpoint | `DUWS_hardpoints` pos (`select 1`) | crew ≈ 2 | `OPCOM_GRID_SPREAD` |
-| OPFOR tasking in flight | intent's stored (virtualised) or live pos | its composition headcount | `OPCOM_GRID_SPREAD` |
+| OPFOR-held zone, base garrison | `zone_meta_array` pos (`select 1`) | base-tier composition force (Fortify raises this; recruits do not) | zone size (`select 2`) + `OPCOM_GRID_SPREAD` |
+| Banded town garrison | `civ_locations` | `DUWS_townGarrisonTier` composition force | `civ_radii` + `OPCOM_GRID_SPREAD` |
+| OPFOR hardpoint | `DUWS_hardpoints` pos (`select 1`) | its crew / weapon power | `OPCOM_GRID_SPREAD` |
+| OPFOR unit (`garrison` / `guard` / tasking) | its cell — stored (virtual) or live | its `effForce` ([§Unit strength](#unit-strength)) | `OPCOM_GRID_SPREAD` |
 
 **Enemy layer** (`DUWS_opcom_grid_ene`) — believed BLUFOR force:
 
 | Source | Position | Weight | Reach |
 |---|---|---|---|
-| BLU-held zone | zone pos | its known garrison headcount, nominal where none exists | zone size + `OPCOM_GRID_SPREAD` |
+| BLU-held zone | zone pos | its known garrison force, nominal where none exists | zone size + `OPCOM_GRID_SPREAD` |
 | Belief entry | `DUWS_opcom_belief_pos` | `DUWS_opcom_belief_str` × decay factor | `OPCOM_GRID_SPREAD` |
 
 A belief entry covers a sighted player, a discovered HQ and a discovered FOB alike. The decay factor
@@ -165,7 +188,7 @@ expired entry is already dropped from the arrays, so it never deposits.
 | Constant | Value |
 |---|---|
 | `OPCOM_GRID_CELL` | 500 m |
-| `OPCOM_GRID_SPREAD` | 500 m — point-source footprint, added to a zone/town radius |
+| `OPCOM_GRID_SPREAD` | 1 km (2 cells) — force-projection footprint, added to a zone/town radius |
 
 ### What reads it
 
@@ -174,11 +197,10 @@ expired entry is already dropped from the arrays, so it never deposits.
 
 | Read | How |
 |---|---|
-| **threat** term ([§Five terms](#five-terms)) | `_gridEne select _targetCell` |
-| **reach** term | `_gridFri select _targetCell` — high near OPFOR force |
-| **vulnerability** term | garrison tier ÷ (`_gridEne select _targetCell` + 1) |
+| **Force ratio `r`** ([§Appraisal](#appraisal-expected-ap-return)) | `Σ(_gridFri) / (Σ(_gridEne) + 1)` over the target's 3×3 block — feeds `P(win)` and the action band |
+| **Threat** (defensive Value, [§Appraisal](#appraisal-expected-ap-return)) | `_gridEne` on and around own ground — how threatened it is, scaling a Fortify / Reinforce / Build / Recruit / Intercept Value |
 | **Force at a place** (clustering) | `_gridEne select _cell` — the deposit already summed every belief entry in the cell, so a four-to-eight-player co-op stack is one read, no separate clusterer ([§Open questions](#open-questions)) |
-| **Muster** ([§Commitment](#commitment-intents-are-sticky)) | clears when `_gridFri select _targetCell > _gridEne select _targetCell`; the assault's own converging taskings raise the friendly side until it does |
+| **Muster** ([§Commitment](#commitment-intents-are-sticky)) | clears when friendly force over the target 3×3 exceeds enemy; the assault's own converging taskings raise the friendly side until it does |
 | **Front line** | the cells whose signed balance differs in sign from an orthogonal neighbour's — the zero-crossing band, read by the overlay |
 | **Route-around** (live group) | among the target cell's 8 neighbours, the one with the lowest `_gridEne`; its centre is a staging waypoint handed to a spawned group's engine pathing. The full route for a *virtualised* squad is [§Routing](#routing-a-cost-field-over-the-grid) |
 ### Routing: a cost field over the grid
@@ -192,12 +214,13 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
 
 - `stepLen` is `OPCOM_GRID_CELL` orthogonally, `OPCOM_GRID_CELL * sqrt 2` on a diagonal — 8-neighbour
   steps. Water cells (land mask false) are impassable to ground; air and boat treat every cell passable.
-- `_lambda` is **0 for a direct route** (QRF, supply, rapport — distance only, ignores the enemy) and
-  **1 for a flank** (an assault the director judges worth flanking — the path bends around believed
-  enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
+- `_lambda` is **0 for a direct route** (rapport, scout, the Assault template — distance only,
+  ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
+  believed enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
   scoring block** — run it scheduled or on its own bounded pass.
-- **When a flank is ordered**: an assault intent, and only where the direct line crosses enemy above a
-  threshold *and* a lower-cost detour exists — otherwise it goes direct. Tuning, not fixed here.
+- **When λ=1 is used**: the band picked the Flank or Encircle template
+  ([§Templates](#templates-the-execution-forms)), and a lower-cost detour around believed enemy force
+  exists — otherwise the maneuver goes direct. Tuning, not fixed here.
 
 **Recompute cadence.** Belief only updates on the strategic phase ([§The loop](#the-loop-against-the-engine)),
 so routes recompute there, never on the fast pass. A direct route is recomputed when its target cell
@@ -219,55 +242,81 @@ two-sided force magnitude that adds the belief store and only OPCOM's scoring co
 neither drift nor siting, and its footprints are small where the AOI reaches are kilometres. Its render
 is new work on the dev overlay `fnc_debug_opcom_view`, which today draws only AoI coverage circles.
 
-## Appraisal: utility scoring, not search
+## Appraisal: expected AP return
 
-Enumerate candidate `[sink, target]` pairs, score each, pick. No search, no lookahead — selection is a
-flat score; a committed play's phases are authored, not searched
-([§Playbook](#playbook-coordinated-multi-unit-plays)). The
-candidate set is small — towns in the OPFOR band, held zones, a handful of corridors — tens of pairs,
-a full pass every tick.
+Enumerate candidate `[action, target]` pairs, score each as an **expected Army Power return**, pick by
+weighted random over the top few. No search, no lookahead — the score is a flat number, and a committed
+action's phases are authored, not searched ([§Templates](#templates-the-execution-forms)). The candidate
+set is small — the flat action list ([§What the commander spends on](#what-the-commander-spends-on))
+against its valid targets — tens of pairs, a full pass every strategic phase.
 
-### Five terms
+### The score
 
-Five, and no more.
+```
+score = archWeight[archetype][actionClass] × P(win) × Value / Cost
+```
 
-| Term | Reads |
+One number: the expected AP returned per AP spent. `Value` and `Cost` are both Army Power, so `Value /
+Cost` is a dimensionless return-on-investment; `P(win)` scales it to the *expected* return; the archetype
+weight tilts it by action class. No term normalisation — the units already agree.
+
+| Factor | Is | Reads |
+|---|---|---|
+| `P(win)` | probability the action succeeds | the force ratio (below) |
+| `Value` | AP worth of the ground in play | zone `_points` / town `civ_town_ap`, × threat for a defensive action |
+| `Cost` | AP the action spends | the sink's price ([§What the commander spends on](#what-the-commander-spends-on)) |
+| `archWeight` | the archetype's lean on this action class | a per-class table ([§The commander has an archetype](#the-commander-has-an-archetype)) |
+
+### P(win): the force ratio, Lanchester-square
+
+Read the grid's two layers over the target's 3×3 block, `r = Σ friendly / (Σ enemy + 1)`
+([§What reads it](#what-reads-it)), and map it:
+
+```
+P(win) = r² / (r² + 1)
+```
+
+Squared, not linear: combat power compounds with numbers (Lanchester), so parity (`r = 1`) is a coin-flip
+(`0.5`), a 2:1 edge (`r = 2`) a strong favourite (`0.8`), and a hopeless ratio floors near 0. The same `r`
+also picks the action's **form** through a band; that is *how*, not *whether* — `P(win)` alone scales the
+score ([§Action follows the force ratio](#action-follows-the-force-ratio)).
+
+### Value: the worth of the ground in play
+
+A player has no worth of its own — it earns Value only through the ground it threatens, so OPCOM defends
+its economy and never chases a lone scout across empty terrain.
+
+| The action | Value |
 |---|---|
-| **value** | what the target is worth: zone worth, town AP income |
-| **threat** | believed BLUFOR force near it, from the belief store alone |
-| **vulnerability** | its garrison tier against that believed force |
-| **reach** | distance from the nearest OPFOR-held ground |
-| **price** | the AP cost, as a divisor |
+| takes enemy ground (Attack, Rapport) | that ground's worth — zone `_points`, town `civ_town_ap` |
+| defends own ground (Intercept, Fortify, Reinforce, Build, Recruit) | own worth × how threatened it is (`_gridEne` on it) |
 
-The three spatial terms — *threat*, *vulnerability*, *reach* — are cell reads of
-[the influence grid](#the-influence-grid-one-spatial-substrate); *value* and *price* are table
-lookups. Archetype scales the terms, never gates the sinks: Defensive weights value and vulnerability
-on ground it holds, Aggressive weights threat and reach against ground the player holds.
+Enemy ground worth needs `_points` readable at scoring time — currently passed into the capture triggers
+only, so stash it in `zone_meta_array` ([§Open questions](#open-questions)).
 
 ### Action follows the force ratio
 
-*What* the commander does at a target follows the believed force ratio there, not the raw score alone.
-Read the grid's two layers over the target's 3x3 block, `r = friendly / (enemy + 1)`, and let it gate
-which actions are candidates:
+*What* form an offensive action takes follows the same `r`, over the target's 3×3 block:
 
-| Ratio r | Action band |
+| Ratio `r` | Form (band) |
 |---|---|
-| >= 2 | assault — overwhelming, commit directly |
-| 1 – 2 | maneuver — envelop, not a frontal charge |
+| ≥ 2 | assault — overwhelming, direct |
+| 1 – 2 | flank / encircle — envelop, not a frontal charge |
 | 0.5 – 1 | probe / harass, or muster and keep buying |
-| < 0.5 | hold, avoid, or call reinforcement — do not attack |
+| < 0.5 | hold — do not attack; Fortify or muster instead |
 
-The bands are candidates, not commands: the weighted-random pick still runs within the band and
-archetype still weights the terms. Thresholds tune in play.
+The band selects the **execution template** ([§Templates](#templates-the-execution-forms)) the runner
+runs; it does not re-score. `P(win)` (whether) and the band (how) read one `r` and do two jobs. Thresholds
+tune in play.
 
 ### Weighted random over the top few, not the best
 
 `selectRandomWeighted` over the highest-scoring three, not `argmax` — the mission's existing idiom
-(`server/init_zones/fnc_createzone.sqf:129`). Zone vehicles are not picked this way: the tier table
-names what a zone fields.
+(`server/init_zones/fnc_createzone.sqf:129`), weighted by the scores themselves. Zone vehicles are not
+picked this way: the tier table names what a zone fields.
 
-Banking is a candidate, not a policy — a "spend nothing" entry with a low flat score, losing whenever
-anything sensible is affordable and winning when everything else has saturated.
+Banking (`Bank`) is a candidate, not a policy — a "spend nothing" entry with a low flat score, losing
+whenever anything sensible is affordable and winning when everything else has saturated.
 
 ## Commitment: intents are sticky
 
@@ -276,18 +325,20 @@ Re-scoring next tick fills free capacity; it never cancels a live intent.
 
 | Field | Holds |
 |---|---|
-| type | which sink, or a play id |
-| target | index into the registry the sink acts on |
-| owner | the live group the intent drives; runtime state, not snapshotted |
+| type | the action id ([§What the commander spends on](#what-the-commander-spends-on)) |
+| target | the objective — a registry index (zone, town) or a cell |
+| roles | `[role, unitRef, status]` bindings drawn from the roster: one for a simple tasking, several for a multi-unit template, none for an economic action |
+| phase | index into the template's phase list ([§Templates](#templates-the-execution-forms)) |
 | expiry | `time` plus the intent's own lifetime |
 | state | mustering / ordered / in progress / done |
 
-A released group is one whose intent has completed; that ownership state is what the director's
-reinforcement logic tests before treating a group as a valid target.
+A released unit is one whose intent has completed; that ownership state is what the reinforcement logic
+tests before treating a unit as a valid target.
 
-**One record type, three granularities.** A garrison purchase, a hardpoint build and a squad tasking
-are one intent record, not three subsystems. `price` is the only field a tasking carries that a build
-does not — the squad it will own does not exist yet.
+**One record, every granularity.** An economic spend (Fortify, Build, Bank), a single tasking and a
+multi-unit template are the same record — `roles` is empty, one entry, or several. There is no separate
+play record ([§Templates](#templates-the-execution-forms)): a simple tasking is the one-role, one-phase
+case of a template.
 
 **There is no retreat.** A committed group fights its engagement to a decision: the engine owns a group
 in `COMBAT` and will not execute a commanded withdrawal
@@ -296,17 +347,22 @@ A group that wins drops back to `moving`, resumes its order, and re-virtualises 
 ([§The virtualisation boundary](#the-virtualisation-boundary)); a group that loses dies. Recovery is
 winning, nothing else.
 
-**An assault musters before it commits.** In state `mustering` a QRF or assault intent accumulates
-committed force across ticks and executes only once OPFOR force at the target cell exceeds the believed
-player force there — the grid's two layers read at that cell (friendly known, enemy believed). Until
+**An assault musters before it commits.** In state `mustering` an Attack or Intercept intent accumulates
+committed force across ticks and executes only once OPFOR force over the target's 3×3 block exceeds the
+believed player force there — the grid's two layers read over that block (friendly known, enemy believed).
+Until
 then it holds at a staging cell and keeps buying. The bar is the player's force *at the target*, not the
 player's whole strength. Mustering is also how a force-short action waits for the units it needs rather
 than committing understrength.
 
-### Unit status
+### Unit tasking and status
 
-The commander reads a status per live group — its own units, known exactly, refreshed on the fast pass.
-Coordinated moves and the reinforcement logic both key off it.
+Each unit carries two orthogonal fields:
+
+- **Tasking** — its standing order: `garrison` (default on spawn — zone-bound reinforcement),
+  `guard` (idle hold-anywhere, takes up space), `assault`, `rapport`, `scout`, `move`,
+  or a template role. `garrison` and `guard` are the two resting taskings; the rest are active.
+- **Status** — how the current tasking is going, read per live group on the fast pass:
 
 | Status | Read |
 |---|---|
@@ -316,17 +372,54 @@ Coordinated moves and the reinforcement logic both key off it.
 | `dead` | `count units _g == 0` |
 
 Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, on the fast pass the streaming
-check already runs. A virtualised tasking is `virtual` by definition — no read.
+check already runs. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
+reinforcement logic key off both fields.
 
 Numbers and strings only. `time`, not `diag_tickTime`, so an expiry survives a savegame
 ([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+
+### Unit strength
+
+Each tasking unit carries a strength figure, computed and saved the way a zone's is
+([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#zone-tiers)) — reuse the zone
+helpers (`fnc_zone_strength`, `DUWS_fnc_garrisonStrength`, `DUWS_fnc_garrisonUnlose`), never a parallel
+store.
+
+```
+fullForce = Σ elementPower                     // the hired composition, fixed
+effForce  = Σ elementPower × condition          // current
+strength  = effForce / fullForce                // 0..1
+```
+
+Condition per element:
+
+| Element | Condition |
+|---|---|
+| Infantry | alive (1) or dead (0) — unit count falls out of the sum |
+| Vehicle | `1 − damage`; crew is never counted (a lost crew refills) |
+
+`effForce` is what the grid deposits ([§The quantity](#the-quantity-force-not-coverage)), so a shot-up
+group already weighs less in `r` with no extra logic; `strength` is the normalised figure for display,
+heal targets and persistence. Streaming spawns a group to *match* its stored strength (fewer bodies, a
+damaged vehicle), and re-virtualising recomputes `effForce` from the live group before it despawns
+([§The virtualisation boundary](#the-virtualisation-boundary)).
+
+**`garrison` heals.** A unit in `garrison` regenerates `effForce` toward `fullForce` each tick —
+`effForce = min(fullForce, effForce + OPCOM_GARRISON_HEAL_RATE × fullForce)` — mirroring the zone
+reinforce path. `guard` does not heal; it only holds ground. The rate is the sole knob (start value open,
+[§Open questions](#open-questions)); the per-tick mechanism ships from the start.
+
+A zone's effective strength is its base garrison (the tier composition, which Fortify raises) plus the
+`effForce` of every unit `garrison`ed on it, in a **distinct** store — so tasking a unit out subtracts
+its `effForce` cleanly and Fortify never touches the recruits.
 
 ## Movement: a tasking is virtualised until contact
 
 A tasking moves *virtualised*: its position is a **grid cell**, stepped along a route chain
 ([§Routing](#routing-a-cost-field-over-the-grid)) by a per-type speed model, holding no group handle,
-until a player closes to within its streaming ring. Its intent's `owner`
-([§Commitment](#commitment-intents-are-sticky)) is null while virtualised, a live group once it spawns.
+until a player closes to within its streaming ring. Its role binding
+([§Commitment](#commitment-intents-are-sticky)) references a cell while virtualised, a live group once it
+spawns.
 This is the mobile analogue of hardpoint streaming, which wakes and sleeps a fixed emplacement on a
 `spawnRadius`/`grace` band
 ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#streaming-and-garrison)). Movement and streaming
@@ -383,53 +476,26 @@ orthogonally — acceptable for spawn-before-contact.
 
 ### Spawn posture follows the order
 
-- A **move order** — patrol, supply, rapport — spawns in `SAFE`/`AWARE` and drives or walks to its
+- A **move order** — rapport, scout, a patrol — spawns in `SAFE`/`AWARE` and drives or walks to its
   objective.
-- A **combat order** — QRF, assault — spawns in `AWARE` with a Seek & Destroy waypoint on the target.
+- A **combat order** — Attack or Intercept — spawns in `AWARE` with a Seek & Destroy waypoint on the target.
 
 Set the posture at spawn, not a tick later.
 
-## Playbook: coordinated multi-unit plays
+## Templates: the execution forms
 
-A play commits several units in named roles and runs a fixed phase sequence off their status. It is a
-composite intent ([§Commitment](#commitment-intents-are-sticky)) and a scored candidate like any sink;
-the influence grid carries the spatial work, the play sequences the coordination. Plays are an authored
-list — a new play is an entry, like an archetype
-([§The commander has an archetype](#the-commander-has-an-archetype)); there is no planner.
+A template is a unit-dispatching action's execution form — named roles and a phase sequence the runner
+steps off unit status. It is **not** a separately scored subsystem: the action is scored
+([§Appraisal](#appraisal-expected-ap-return)), the template is *how* it runs. A simple tasking is the
+one-role, one-phase template; a coordinated maneuver is a many-role one. One runner executes both, so
+adding a coordinated behaviour is adding a bigger template, not a new subsystem — there is no planner.
 
-### The play record
+### The runner
 
-The composite intent extends the §Commitment record with two fields:
+One generic stepper, on the strategic phase, over every live intent that holds roles:
 
-| Field | Holds |
-|---|---|
-| roles | array of `[role, unitRef, status]` bindings |
-| phase | index into the play's phase list |
-
-`type` is the play id (`flank` / `encircle` / `arty_saturation`); `target` is the objective cell.
-
-### Candidacy, scoring, mustering
-
-- A play enters the candidate set only when it *applies*: the force-ratio band fits
-  ([§Action follows the force ratio](#action-follows-the-force-ratio)), enough roles are fillable from
-  the roster, and the geometry holds.
-- Scored on the five terms, archetype-weighted, picked by the same weighted-random as any sink
-  ([§Weighted random over the top few, not the best](#weighted-random-over-the-top-few-not-the-best)).
-- Committing binds roles from the roster. Short a role, the play commits in `mustering` and waits —
-  buying or pulling the missing unit — before its first phase ([§Commitment](#commitment-intents-are-sticky)).
-
-### The roster
-
-The free-unit pool: live groups and virtualised taskings whose intent is released — never assigned, or
-an order or play completed. A unit bound to a play leaves the pool and returns on the play's end or
-abort. One unit, one owner.
-
-### The play-runner
-
-One generic stepper, on the strategic phase:
-
-1. Refresh each bound unit's status ([§Unit status](#unit-status)).
-2. A required role `dead` or lost → **abort**: release surviving units to the pool (an engaged survivor fights its contact to a decision, a clear one re-virtualises), no AP refund.
+1. Refresh each bound unit's status ([§Unit tasking and status](#unit-tasking-and-status)).
+2. A required role `dead` or lost → **abort**: release surviving units to the roster (an engaged survivor fights its contact to a decision, a clear one re-virtualises), no AP refund.
 3. Otherwise advance `phase` when the current phase's transition predicate holds — predicates read child
    status and geometry, nothing else.
 4. Last phase complete → done, release the units.
@@ -438,34 +504,53 @@ The runner sequences phases only; bound units move by the route and streaming ma
 ([§Routing](#routing-a-cost-field-over-the-grid),
 [§Movement](#movement-a-tasking-is-virtualised-until-contact)), it does not path.
 
-### The three plays
+### The roster
 
-| Play | Applies | Roles | Phases (→ on transition) |
+The free-unit pool: every uncommitted unit — those `garrison`ed on a zone or on a `guard` hold. Binding a
+unit to a template pulls it from the pool; drawing a `garrison`ed one strips that zone's reinforcement
+([§Unit strength](#unit-strength)). A released unit returns to the pool. One unit, one owner.
+
+### Filling roles
+
+- A template applies only when its band fits ([§Action follows the force ratio](#action-follows-the-force-ratio)),
+  enough roles are fillable from the roster, and the geometry holds.
+- Committing binds roles from the roster. Short a role, the intent commits in `mustering` and waits —
+  Recruit or pull the missing unit — before its first phase ([§Commitment](#commitment-intents-are-sticky)).
+
+### The templates
+
+The band picks one for an Attack or Intercept; the rest are the fixed form of their action.
+
+| Template | Picked when | Roles | Phases (→ on transition) |
 |---|---|---|---|
-| `flank` | ratio 1–2, ≥2 mobile groups, a reachable flank cell | `fix` ×1, `maneuver` ×1+ | form (fix → frontal, direct route; maneuver → flank cell, λ route) → *(fix `engaged`)* assault (maneuver S&D from the flank) → resolve |
-| `encircle` | friendly force leads across the ring of cells around the target, ≥3 mobile groups, target in a pocket (few escape cells) | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
-| `arty_saturation` | a battery/mortar off cooldown, an observed `ene`-high cell, not the HQ circle | `guns` ×1–3, `spotter` ×0–1 | mark (spotter holds observation) → salvo (guns concentrate on the one cell, K rounds) → assess (cell force dropped? re-fire : done) |
+| `assault` | band ≥ 2 | `attacker` ×1 | approach (direct route) → S&D → resolve |
+| `flank` | band 1–2, ≥2 mobile, a reachable flank cell | `fix` ×1, `maneuver` ×1+ | form (fix → frontal direct; maneuver → flank cell, λ route) → *(fix `engaged`)* assault (maneuver S&D from the flank) → resolve |
+| `encircle` | band 1–2, target pocketed (few escape cells), ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
+| `probe` | band 0.5–1 | `harasser` ×1 | approach → harass → ⚠ ([§Open questions](#open-questions)) |
+| `rapport` / `scout` | the action's fixed form | one role | move → act → resolve |
+| `arty` | an observed `ene`-high cell, a battery/mortar off cooldown, not the HQ circle | `guns` ×1–3, `spotter` ×0–1 | mark (spotter holds observation) → salvo (guns concentrate on one cell, K rounds) → assess (force dropped? re-fire : done) |
 
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points
   outward toward BLU-held ground — the routes out. Blockers occupy them; crushers collapse inward once
   sealed.
-- **Saturation** (`arty_saturation`): concentrates several guns on one cell rather than one gun per
-  target, over the existing fire-mission machinery and caps
-  ([§Indirect-fire hardpoints](#indirect-fire-hardpoints),
+- **Saturation** (`arty`): concentrates several guns on one cell rather than one gun per target, over the
+  existing fire-mission machinery and caps ([§Indirect-fire hardpoints](#indirect-fire-hardpoints),
   [§Observation is the trigger](#observation-is-the-trigger)).
+- **`probe`** ends in a hold or a pull-back, which the no-retreat rule complicates
+  ([§Commitment](#commitment-intents-are-sticky), [§Open questions](#open-questions)).
 
 | Constant | Value |
 |---|---|
-| `OPCOM_PLAY_TIMEOUT` | per-play deadline before abort (tune) |
+| `OPCOM_TEMPLATE_TIMEOUT` | per-template deadline before abort (tune) |
 
 ## The loop against the engine
 
-One thread, a phase counter splitting two cadences, not one thread per sink.
+One thread, a phase counter splitting two cadences, not one thread per action.
 
 | Property | Value |
 |---|---|
-| Fast base pass | ~2-5 s. Advance in-flight taskings (accumulator + cell pop), refresh live-group status ([§Unit status](#unit-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)). Cheap only — no scoring, no routing search |
-| Strategic phase | every 12-18 base passes (60-90 s). Refresh belief, rebuild the grid, advance live plays ([§Playbook](#playbook-coordinated-multi-unit-plays)), score, commit at most one thing, recompute routes due for it. The sinks keep their own cooldowns |
+| Fast base pass | ~2-5 s. Advance in-flight taskings (accumulator + cell pop), refresh live-group status ([§Unit tasking and status](#unit-tasking-and-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)). Cheap only — no scoring, no routing search |
+| Strategic phase | every 12-18 base passes (60-90 s). Refresh belief, rebuild the grid, advance live templates ([§Templates](#templates-the-execution-forms)), score, commit at most one thing, recompute routes due for it. Actions keep their own cooldowns |
 | Scoring pass | inside `isNil { ... }` — unscheduled, runs uninterrupted. `server/init_zones/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline. The route search runs outside it |
 | Clock | `time` — intent expiries and belief stamps must survive a savegame |
 | Orders | server-local groups only — waypoints are silently ignored unless the group is local to the issuing machine |
@@ -479,66 +564,88 @@ form the zone and town garrisons use.
 > **Built today: the town-garrison ladder only** — the AP tier rungs and the per-tier garrison each
 > town fields ([§Town garrisons](#town-garrisons-i-through-iv)). A standalone fortification director also
 > shipped but is now disabled ([§What the commander builds](#what-the-commander-builds)). The tasking
-> menu and the appraisal that arbitrates the sinks are not yet built.
+> menu and the appraisal that arbitrates the actions are not yet built.
 
-The four sinks Army Power buys, the archetype that weights the split, and the garrison ladders on both
+The actions Army Power buys, the archetype that weights the split, and the garrison ladders on both
 sides. The director here, the hardpoint director ([§What the commander builds](#what-the-commander-builds)),
-and the turned-town behaviour are one actor sharing `WARCOM_opfor_ap`: build, tasking and garrison
-compete in the one appraisal ([§Appraisal](#appraisal-utility-scoring-not-search)) — no sink runs on its
-own clock, and none spends `WARCOM_opfor_ap` unarbitrated. The wallet and its faucets are the economy's
+and the turned-town behaviour are one actor sharing `WARCOM_opfor_ap`: every action competes in the one
+appraisal ([§Appraisal](#appraisal-expected-ap-return)) — no sink runs on its own clock, and none spends
+`WARCOM_opfor_ap` unarbitrated. The wallet and its faucets are the economy's
 ([`economy_second_pass.md`](economy_second_pass.md#army-power)).
 
 Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`. The
 director is server-side and single, so there is no writer to race.
 
-| Sink | Effect | Throttled by | Saturates? |
-|---|---|---|---|
-| Town garrison upgrade | Raises the purchased tier of one town | Tier ceiling of IV times the towns in the OPFOR band | Yes |
-| Tasking order | Gives a newly spawned squad a job | The rate squads spawn at | No |
-| Hardpoint construction | Builds an emplacement | One build attempt every 20-30 min | No, but capped at one purchase per tick |
+### Actions, sinks and taskings
 
-**Random events are not a sink.** IEDs, ambushes and sabotage out of a low-reputation town fire on
-their own, rolled against reputation, and cost the commander nothing
-([§Random events](#random-events-what-a-turned-town-does)).
+Three levels, not one:
 
-Every sink is rate-limited and none absorbs a surplus. A commander that out-earns all three banks the
-difference ([§Open questions](#open-questions)).
+- **Action** — what OPCOM commits AP to; the unit the appraisal scores and Commitment holds. The flat
+  list below.
+- **Sink** — how an action is paid and run: a tier purchase, a hardpoint build, a tasking-spawn, or a
+  resident asset. A property of the action, not a level OPCOM decides at.
+- **Tasking** — an order handed to one unit ([§Unit tasking and status](#unit-tasking-and-status)). An
+  action emits none (economic), one (a simple tasking), or several (a template,
+  [§Templates](#templates-the-execution-forms)).
 
-Taskings spawn only from OPFOR-held ground — a held zone today, the planned OPFOR FOB hardpoint once
-it exists — never on demand beside the player. Taking the zone cuts the squads it was launching.
+| Action | Class | Target | Sink | Taskings |
+|---|---|---|---|---|
+| Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
+| Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
+| Rapport | offensive | a town in reach | tasking-spawn | 1 |
+| Recruit | buildup | an OPFOR-held zone (+ a cell it spans) | tasking-spawn | 1 (spawned `garrison`) |
+| Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 |
+| Scout | recon | a stale / thin-belief area | tasking-spawn | 1 |
+| Arty | offensive | an observed `ene`-high cell | resident indirect-fire asset | 0 |
+| Fortify | defensive | an own town / zone | tier purchase | 0 |
+| Build | defensive | an own threatened cell | hardpoint build | 0 |
+| Bank | — | — | none | 0 |
 
-| Tasking | Job |
-|---|---|
-| QRF | Respond to contact, under a commander that decides whether to spend the reserve |
-| Supply | Move between held towns and zones, restoring garrison strength en route |
-| Rapport | Occupy a town and drag its reputation toward OPFOR |
-| Intel patrol | Sweep for BLUFOR and report what it finds, feeding target selection |
+Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and templates are
+[§Templates](#templates-the-execution-forms).
 
-Intel patrol is the weak one — cheap, buys knowledge not force, and goes looking for the player.
-`reveal` against EAST is the mechanism.
+**Recruit fills the roster; every other unit-dispatching action drains it.** Recruit is the RTS "hire a
+unit": it spawns a group `garrison`ed on the target zone, adding to that zone's distinct reinforcement
+store ([§Unit strength](#unit-strength)). OPCOM then draws that unit for an Attack, Intercept, Rapport or
+Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing
+strength.
 
-Rapport moves a town's reputation; the random-event sink spends the reputation a town already has.
+Three notes:
 
-**A tasking's force is a token composition.** Drawn from the same `posture:token` vocabulary the
-garrisons use ([§What the commander builds](#what-the-commander-builds)) — an array of tokens like
-`team` or `car`, resolved by `DUWS_fnc_tokenClass` against the shared roster. The commander chooses
-from a menu of compositions per tasking; the exact rows are unset, tuned in one place, never hardcoded
-at a spawn site.
+- **Random events are not an action.** IEDs, ambushes and sabotage out of a low-reputation town fire on
+  their own, rolled against reputation, and cost the commander nothing
+  ([§Random events](#random-events-what-a-turned-town-does)).
+- **Nothing absorbs a surplus.** Every action is rate-limited; a commander that out-earns them banks the
+  difference ([§Open questions](#open-questions)).
+- **Scout and Recruit do not gain AP directly** — Scout buys knowledge, Recruit buys capacity, so their
+  Value does not fit the AP-return cleanly ([§Open questions](#open-questions)). Scout is the weak sensor:
+  cheap, buys knowledge not force; `reveal` against EAST is the mechanism.
+
+Units spawn only from OPFOR-held ground — a held zone today, the planned OPFOR FOB hardpoint once it
+exists — never on demand beside the player. Taking the zone cuts what it can raise. No more than
+`OPCOM_MAX_TASKINGS` (start 10) taskings run live-or-virtual at once ([§Open questions](#open-questions)).
+
+**A unit's force is a token composition.** Drawn from the same `posture:token` vocabulary the garrisons
+use ([§What the commander builds](#what-the-commander-builds)) — an array of tokens like `team` or `car`,
+resolved by `DUWS_fnc_tokenClass` against the shared roster. Recruit chooses from a menu of compositions;
+the exact rows are unset, tuned in one place, never hardcoded at a spawn site.
 
 ### The commander has an archetype
 
-One archetype rolled per campaign, deciding how the director splits income across the sinks.
+One archetype rolled per campaign, deciding how the appraisal weights the action classes
+([§Appraisal](#appraisal-expected-ap-return)) — the `archWeight[archetype][actionClass]` factor in the
+score.
 
-| Archetype | Spends toward |
+| Archetype | Weights toward |
 |---|---|
-| Defensive | Town garrisons and hardpoints; fortifies what it holds |
+| Defensive | Fortify, Reinforce, Build, Recruit, Intercept; hardens and defends what it holds |
 | Balanced | No strong lean — the baseline the others are tuned against |
-| Aggressive | Taskings, especially QRF and rapport; projects force, leaves ground thin |
+| Aggressive | Attack, Rapport; projects force, leaves ground thin |
 
-A single authored list. Further leans — indirect fire, armour — become entries in it.
+A single authored table of per-class weights. Further leans — indirect fire, armour — become entries in
+it.
 
-- **Weights, not switches.** An archetype biases the roll via `selectRandomWeighted`; it never removes
-  a sink.
+- **Weights, not switches.** An archetype multiplies an action class's score; it never removes an action.
 - **It cannot override the ladder.** An Aggressive commander with no armour tier reached fields no
   armour. Archetype decides what the enemy buys, never what it may buy.
 - **It is not difficulty.** `opfor_ai_skill` sets how well the enemy shoots.
@@ -769,8 +876,9 @@ direct observation.
 
 A gun off cooldown with a valid observed target rolls rather than firing on a schedule — roughly 40 %
 for a mortar pit, 30 % for a battery, evaluated every five minutes. The cooldown starts only when a
-mission fires. The telegraph (radio line + marker) is required. Finite ammo gives an OPFOR resupply
-run an interdiction target.
+mission fires. The telegraph (radio line + marker) is required. Finite ammo means a dry gun stays quiet
+until rearmed; with the logistics tasking dropped (Reinforce is an economic top-up), how a battery
+rearms — and whether it offers an interdiction target — is open ([§Open questions](#open-questions)).
 
 **Fallback if AI static-mortar fire proves unreliable:** spawn the shells directly, as the player's
 own artillery support does (`client/supports/fnc_arty.sqf` creates rounds at 800 m altitude with
@@ -801,7 +909,9 @@ behaviours in them are worth rebuilding as commander decisions:
 - **Dismounts.** Above AP 100 both spawners built a second `opfor_INFTEAM_X` and `joinSilent`ed it
   into the vehicle group. Keep as a composition the commander buys.
 - **The ammo truck.** A 45-90 min timer ran `opfor_AMMO_TRUCK_X` along the patrol route and announced
-  it over Allseer — the germ of the Supply tasking.
+  it over Allseer. Garrison restoration is now the Reinforce action
+  ([§Actions, sinks and taskings](#actions-sinks-and-taskings)), an economic top-up — the physical truck,
+  and the interdiction target it offered, are not carried ([§Open questions](#open-questions)).
 
 The director must not reproduce their shape: routes closed with a `CYCLE` and never despawned, cadence
 was unconditional, AP was read but never spent (a one-way ratchet), and they sited spawns >1500 m from
@@ -822,7 +932,7 @@ fire missions are never saved; they regenerate on player approach.
 | State | Kind | Contract |
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs, never re-rolls ([§The commander has an archetype](#the-commander-has-an-archetype)) |
-| Standing orders (taskings) | outcome | One row per order — type, target, route mode, current cell, budget spent. Persisted as the order and its virtualised cell, never a live squad: restore resumes the tasking at its cell (accumulator 0, chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) and it streams to a live group on player approach |
+| Standing units & orders | outcome | One row per unit — its tasking, target, current cell, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at its cell (accumulator 0, chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
 | Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
 Every persisted field is a number, a string, or an array of those. Time-based fields store on `time`
@@ -855,22 +965,22 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | Phase | Contains | Reads |
 |---|---|---|
 | **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, the land mask + connectivity, a debug readout | Nothing prior — the artillery observation gate and the intel patrol both consume the belief store; the grid adds its render to `fnc_debug_opcom_view` (AoI circles only today) |
-| **The loop** | One thread, the two cadences (fast pass + strategic phase), the five terms and the force-ratio bands, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Belief + grid |
-| **Intents** | The record, minimum lifetimes, release on completion or death | The loop; lands with the third sink (taskings) |
-| **Movement** | Virtualised taskings — cell-stepping with the accumulator, cost-field routing (direct/flank λ), cell streaming (Chebyshev K + hysteresis), the unit-status read | Grid + Intents |
-| **Archetype** | The weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | The loop it modifies |
-| **Playbook** | The composite intent, the roster, mustering to fill roles, the generic play-runner, the three plays | Movement, unit status, the grid, and the indirect-fire missions (`arty_saturation`) — lands last |
+| **The loop** | One thread, the two cadences (fast pass + strategic phase), the AP-return score and the force-ratio bands, the economic actions (Fortify, Build) and Bank, flat archetype weights | Belief + grid |
+| **Intents** | The record (roles + phase), minimum lifetimes, release on completion or death | The loop; lands with the first tasking-spawn actions |
+| **Movement** | Virtualised taskings — cell-stepping with the accumulator, cost-field routing (direct/flank λ), cell streaming (Chebyshev K + hysteresis), the tasking/status reads and unit strength | Grid + Intents |
+| **Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | The loop it modifies |
+| **Templates & Recruit** | Recruit and the roster/force-pool, `garrison`/`guard`, mustering to fill roles, the generic runner, the templates (assault / flank / encircle / probe / arty) | Movement, unit strength, the grid, and the indirect-fire missions (`arty`) — lands last |
 | **Random events** | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours | The belief store and the OPFOR-band definition the loop establishes |
 
 ## Open questions
 
-- **The tick interval against the sink cooldowns.** A 60-90 s tick against a 20-30 min build tick
-  means the commander's reaction time to a sighting is set by whichever sink it wants. Whether QRF
-  needs a faster path than the shared tick is a play question.
+- **The tick interval against the action cooldowns.** A 60-90 s tick against a 20-30 min build tick
+  means the commander's reaction time to a sighting is set by whichever action it wants. Whether Intercept
+  (a reactive strike on a fresh sighting) needs a faster path than the shared tick is a play question.
 - **Whether the belief store should persist** ([§Persistence](#persistence)).
 - **What a co-op session does to the sighting sweep.** One call per player, the belief array grows one
   entry per player. The merge is resolved by [the influence grid](#the-influence-grid-one-spatial-substrate):
-  its enemy layer sums every entry in a cell, so the strength term reads force-at-a-place whether four
+  its enemy layer sums every entry in a cell, so the force ratio reads force-at-a-place whether four
   players or one stand there.
 - **Whether the player can perceive that the enemy is acting on stale information**, and whether that
   is worth surfacing. The intel system is the obvious route.
@@ -881,8 +991,25 @@ Each phase is independently playable; the ordering is forced by what the next ph
   (`client/supports/fnc_arty.sqf`) becomes the implementation.
 - **Whether the player can learn the commander's archetype, and how** — the intel system
   ([`info/intel_system.md`](../info/gameplay/intel_system.md)), or observed behaviour.
-- **What the commander does with a surplus.** Two absorbers: reinforcing a garrison rather than
+- **What the commander does with a surplus.** Three absorbers: Recruit (banking force as standing units,
+  [§Actions, sinks and taskings](#actions-sinks-and-taskings)), reinforcing a garrison rather than
   upgrading it, and mustering — an assault intent that keeps buying force while it waits to clear its
   commit bar ([§Commitment](#commitment-intents-are-sticky)). Town events cannot be it — they are free
   and rep-driven.
+- **How Scout and Recruit score.** Neither returns AP directly — Scout buys knowledge, Recruit buys
+  capacity — so neither fits the AP-return cleanly. A flat archetype allocation, or an AP-proxy Value, is
+  open ([§Appraisal](#appraisal-expected-ap-return)).
+- **The `garrison` heal rate** `OPCOM_GARRISON_HEAL_RATE` — the per-tick fraction restored. The mechanism
+  ships; only the value tunes ([§Unit strength](#unit-strength)).
+- **Probe versus no retreat.** The `probe` template ends in a hold or pull-back, but a committed group
+  cannot be withdrawn ([§Commitment](#commitment-intents-are-sticky)). Either drop probe, or keep it a
+  ranged harasser that never closes to combat.
+- **Arty's Value.** It attrits force, not ground; confirm its Value stays ground-derived (the worth of
+  what that force threatens), since a player has no intrinsic worth ([§Appraisal](#appraisal-expected-ap-return)).
+- **Candidate enumeration.** The exact `[action, target]` set built each pass — how targets are gathered
+  per action, and how many pairs that is.
+- **What `OPCOM_MAX_TASKINGS` (10) caps** — total standing units, or concurrent active operations.
+- **How resident guns rearm.** Reinforce restores garrison HP, not ammo, and the logistics truck is
+  dropped, so a dry mortar or battery has no rearm path and no interdiction target. Unlimited ammo, a slow
+  passive rearm, or a revived logistics tasking — open.
 - **Whether the commander should be required to spend** rather than merely able to.
