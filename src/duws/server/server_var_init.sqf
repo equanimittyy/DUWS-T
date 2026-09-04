@@ -617,6 +617,12 @@ OPCOM_GRID_SPREAD   = 1000;
 OPCOM_BELIEF_FRESH  = 4;
 OPCOM_BELIEF_EXPIRE = 16;
 
+// Men-count placeholders the grid rebuild deposits where no real strength is tracked: a BLU-held zone
+// (the player's garrison is not modelled, but the commander knows it is held) and a standing OPFOR
+// hardpoint (its crew). Phase 2 replaces both with firepower-weighted force.
+OPCOM_GRID_ZONE_ENEMY_MEN = 8;
+OPCOM_GRID_HP_MEN         = 3;
+
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both

@@ -44,8 +44,8 @@ declares:
 
 - `belief_init`: the four belief arrays (`_belief_key` / `_pos` / `_time` / `_str`) and the strategic-tick
   counter `DUWS_opcom_tick`.
-- `grid_init`: the two live grid arrays (`_grid_fri` / `_grid_ene`) and the two static ones
-  (`_grid_land` / `_grid_comp`).
+- `grid_init`: the two live grid arrays (`_grid_fri` / `_grid_ene`), the two static ones
+  (`_grid_land` / `_grid_comp`), and the cached cell width `_grid_w` every reader indexes by.
 
 ## The runner is the loop skeleton, perception-only
 
@@ -71,6 +71,13 @@ intel-patrol sensors wait on their own systems ([§Sensors](opcom_plan.md#sensor
 Friendly = OPFOR zones, banded town garrisons, OPFOR hardpoints; enemy = BLU-held zones and belief entries
 ([§Rebuild](opcom_plan.md#rebuild-deposit-each-source-with-a-linear-falloff)). The tasking-unit source
 lands with Phase 4 — no units exist yet.
+
+The deposited weight is a **men count**, not the firepower-weighted force the spec describes: both layers
+must share a metric for the ratio to mean anything, and the enemy layer is fed by `belief_str`, which is
+only headcount. The per-source weight expression is the swap point — Phase 2 introduces firepower-weighting
+on both sides at once (friendly from a token→class power table, enemy from a belief that carries a type),
+alongside the scoring that first reads the ratio. A BLU-held zone and a standing hardpoint have no tracked
+men, so they deposit the nominal `OPCOM_GRID_ZONE_ENEMY_MEN` / `OPCOM_GRID_HP_MEN`.
 
 ## Overlay
 
