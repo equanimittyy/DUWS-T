@@ -101,5 +101,5 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     // Opens the map and rings every AoI emitter's reach, hatched in its side's colour, so the influence
     // field the commander reads is visible rather than inferred from town colours.
-    ["OPCOM view: toggle AoI overlay", fnc_debug_opcom_view, [], [1,0.667,0,1]]
+    ["OPCOM view: toggle influence overlay", fnc_debug_opcom_view, [], [1,0.667,0,1]]
 ]] call fnc_open_action_menu;
