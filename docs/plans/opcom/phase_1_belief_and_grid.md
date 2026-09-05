@@ -29,10 +29,10 @@ In `server_var_init.sqf`, `OPCOM_` prefix, plain global assignment — **not** `
 that read them load by compile-path and run later, out of reach of a preprocessor macro scoped to
 `server_var_init.sqf`; the existing `OPCOM_*` and `AOI_*` constants are plain globals for the same reason.
 
-- `OPCOM_GRID_CELL` 500
-- `OPCOM_GRID_SPREAD` 1000
-- `OPCOM_BELIEF_FRESH` 4
-- `OPCOM_BELIEF_EXPIRE` 16
+- `OPCOM_GRID_CELL` 500, `OPCOM_GRID_SPREAD` 1000 — grid geometry, metres.
+- `OPCOM_TICK_PERIOD` 5 — the single loop cadence, seconds ([§The runner](#the-runner)).
+- `OPCOM_BELIEF_FRESH_S` 240, `OPCOM_BELIEF_EXPIRE_S` 960 — belief horizons in real time (4 / 16 min).
+- `OPCOM_BELIEF_FRESH` / `OPCOM_BELIEF_EXPIRE` — those horizons in ticks, **derived** (`_S / OPCOM_TICK_PERIOD`), so the tick period stays a pure resolution knob: retune it and the memory horizon holds. Kept in ticks, not seconds, so a savegame gap does not silently age belief.
 
 The sighting threshold `1.5` already exists as the artillery gate — reuse it, do not add a second
 ([§Sensors](opcom_plan.md#sensors)).
@@ -47,15 +47,16 @@ declares:
 - `grid_init`: the two live grid arrays (`_grid_fri` / `_grid_ene`), the two static ones
   (`_grid_land` / `_grid_comp`), and the cached cell width `_grid_w` every reader indexes by.
 
-## The runner is the loop skeleton, perception-only
+## The runner
 
-`fnc_opcom_perception_run` is the eventual [§loop](opcom_plan.md#the-loop-against-the-engine) thread with
-both cadences already split, so Phase 2 adds the scoring pass into it rather than restructuring — no
-throwaway. On start it runs `fnc_opcom_belief_init` and `fnc_opcom_grid_init` once, then loops:
+`fnc_opcom_perception_run` is the [§loop](opcom_plan.md#the-loop-against-the-engine) thread. On start it
+runs `fnc_opcom_belief_init` and `fnc_opcom_grid_init` once, then loops on one cadence — every
+`OPCOM_TICK_PERIOD` (5 s): increment `DUWS_opcom_tick`, `fnc_opcom_sense`, `fnc_opcom_decay`,
+`fnc_opcom_grid_rebuild`.
 
-- Fast base pass (~2-5 s): `fnc_opcom_sense`.
-- Strategic phase (every 12-18 fast passes): increment `DUWS_opcom_tick`, `fnc_opcom_decay`, then
-  `fnc_opcom_grid_rebuild`.
+One cadence, not a fast/strategic split: Phase 2 adds its scoring and single action commit on this same
+tick, and Phase 4 steps movement here (a finer step as the period shrinks), so both drop in without
+restructuring — no throwaway.
 
 Started by WARCOM init **after** zones exist and after `fnc_zone_state_init` has run — the rebuild reads
 `zone_meta_array` / `civ_locations` / `DUWS_hardpoints`, and zone-state init must precede any zone consumer.
@@ -88,6 +89,6 @@ front-line cells (sign change against an orthogonal neighbour,
 ## Verification
 
 Sighting a player adds one belief row (`count DUWS_opcom_belief_key` grows) and no more on a co-op stack in
-one cell; the row's age climbs each strategic tick and the row drops after `OPCOM_BELIEF_EXPIRE`; the
+one cell; the row's age climbs each tick and the row drops after `OPCOM_BELIEF_EXPIRE`; the
 overlay shows an `ene` bloom on the player fading with distance and decay, `fri` on held ground, and a
 front line where they cross. All checkable from the debug console against a live player, no scoring needed.

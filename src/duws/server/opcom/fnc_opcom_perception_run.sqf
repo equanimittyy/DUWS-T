@@ -1,24 +1,17 @@
 // Locality: server. The OPCOM loop thread, spawned once by WARCOM init after zones and civ state exist.
-// Phase 1 is perception-only: it maintains the belief store and the influence grid and takes no
-// decisions. The two cadences are already split so Phase 2 slots its scoring pass into the strategic
-// phase without restructuring. The fast base pass runs only the cheap sighting sweep; the strategic
-// phase ages belief and rebuilds the grid from current holdings and belief.
+// Phase 1 is perception-only: each tick it perceives, ages belief and rebuilds the influence grid from
+// current holdings and belief -- no decisions. One cadence, not a fast/strategic split: Phase 2 adds its
+// scoring and single action commit on this same tick, and Phase 4 steps movement here (a finer step as
+// OPCOM_TICK_PERIOD shrinks), so both drop in without restructuring.
 if (!isServer) exitWith {};
 
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
-call fnc_opcom_grid_rebuild;                  // one field up front, so it is not all-zero until the first phase
 
-private _phaseEvery = 18;                      // fast passes per strategic phase (12-18; ~72 s here, tune)
-private _pass = 0;
 while {true} do {
+    DUWS_opcom_tick = DUWS_opcom_tick + 1;
     call fnc_opcom_sense;
-    _pass = _pass + 1;
-    if (_pass >= _phaseEvery) then {
-        _pass = 0;
-        DUWS_opcom_tick = DUWS_opcom_tick + 1;
-        call fnc_opcom_decay;
-        call fnc_opcom_grid_rebuild;
-    };
-    sleep 4;
+    call fnc_opcom_decay;
+    call fnc_opcom_grid_rebuild;
+    sleep OPCOM_TICK_PERIOD;
 };

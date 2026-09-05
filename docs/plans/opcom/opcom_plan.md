@@ -66,9 +66,10 @@ Threshold `1.5` is shared with the artillery observation gate — one constant, 
 
 ### Decay
 
-Confidence falls with the age of the stamp, counted in **strategic ticks**, not seconds: a stamp holds
-the tick counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks:
-`OPCOM_BELIEF_FRESH` 4 and `OPCOM_BELIEF_EXPIRE` 16 (≈ 5 and 20 min at a 60–90 s strategic phase; tune).
+Confidence falls with the age of the stamp, counted in **ticks**, not seconds: a stamp holds the tick
+counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks, derived from
+real-time horizons over `OPCOM_TICK_PERIOD` — `OPCOM_BELIEF_FRESH` (240 s, 4 min) and `OPCOM_BELIEF_EXPIRE`
+(960 s, 16 min) — so retuning the tick holds the memory horizon.
 
 | Age of stamp | Treated as |
 |---|---|
@@ -222,16 +223,17 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
   ([§Templates](#templates-the-execution-forms)), and a lower-cost detour around believed enemy force
   exists — otherwise the maneuver goes direct. Tuning, not fixed here.
 
-**Recompute cadence.** Belief only updates on the strategic phase ([§The loop](#the-loop-against-the-engine)),
-so routes recompute there, never on the fast pass. A direct route is recomputed when its target cell
-changes; a flank route every `OPCOM_ROUTE_RECOMPUTE_PHASES` strategic phases (belief drifts under it, so
-a stale corridor is no longer safe), or immediately if the chain is exhausted before then. The chain is
+**Recompute cadence.** A direct route is recomputed when its target cell changes; a flank route every
+`OPCOM_ROUTE_RECOMPUTE_TICKS` ticks (belief drifts under it, so a stale corridor is no longer safe), or
+immediately if the chain is exhausted before then. Belief updates each tick, but the route search runs
+outside the scoring block and only when a route is actually due, not every tick
+([§The loop](#the-loop-against-the-engine)). The chain is
 not persisted — it recomputes from the current cell to the target on load.
 
 | Constant | Value |
 |---|---|
 | `OPCOM_ROUTE_LAMBDA` | flank threat-avoidance weight (tune) |
-| `OPCOM_ROUTE_RECOMPUTE_PHASES` | strategic phases between flank re-routes (start 3–4, tune) |
+| `OPCOM_ROUTE_RECOMPUTE_TICKS` | ticks between flank re-routes (start 12–24, ~1–2 min; tune) |
 
 ### It is not the area-of-influence field
 
@@ -248,11 +250,11 @@ Enumerate candidate `[action, target]` pairs, score each as an **expected Army P
 weighted random over the top few. No search, no lookahead — the score is a flat number, and a committed
 action's phases are authored, not searched ([§Templates](#templates-the-execution-forms)). The candidate
 set is small — the flat action list ([§What the commander spends on](#what-the-commander-spends-on))
-against its valid targets — tens of pairs, a full pass every strategic phase.
+against its valid targets — tens of pairs, a full pass every tick.
 
 ### Candidate enumeration: gate, then score
 
-Each strategic phase, sweep every action against its valid targets, drop what a cheap test rejects, then
+Each tick, sweep every action against its valid targets, drop what a cheap test rejects, then
 score only the survivors. Tens–low-hundreds of pairs before the gate, fewer after.
 
 | Action | Targets swept |
@@ -459,7 +461,7 @@ Each unit carries two orthogonal fields:
 - **Tasking** — its standing order: `garrison` (default on spawn — zone-bound reinforcement),
   `guard` (idle hold-anywhere, takes up space), `assault`, `rapport`, `scout`, `move`,
   or a template role. `garrison` and `guard` are the two resting taskings; the rest are active.
-- **Status** — how the current tasking is going, read per live group on the fast pass:
+- **Status** — how the current tasking is going, read per live group each tick:
 
 | Status | Read |
 |---|---|
@@ -468,8 +470,8 @@ Each unit carries two orthogonal fields:
 | `engaged` | live and in combat — `behaviour leader _g == "COMBAT"`, or `leader _g knowsAbout <nearest player> > 1.5` (the sighting threshold) |
 | `dead` | `count units _g == 0` |
 
-Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, on the fast pass the streaming
-check already runs. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
+Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, alongside the streaming check
+that already runs each tick. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
 reinforcement logic key off both fields.
 
 Numbers and strings only. `time`, not `diag_tickTime`, so an expiry survives a savegame
@@ -522,7 +524,7 @@ spawns.
 This is the mobile analogue of hardpoint streaming, which wakes and sleeps a fixed emplacement on a
 `spawnRadius`/`grace` band
 ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)). Movement and streaming
-run on the loop's fast base pass, not the strategic tick ([§The loop](#the-loop-against-the-engine)).
+run each loop tick ([§The loop](#the-loop-against-the-engine)).
 
 ### One nominal speed per unit type
 
@@ -537,7 +539,7 @@ cross-country speed per type; road versus open ground is unmodelled.
 | Rotary | passable | ~200 km/h |
 | Fixed wing | passable | ~400 km/h |
 
-**Cell-stepped, with a carry.** A tasking holds a cell plus a metre accumulator. Each fast pass
+**Cell-stepped, with a carry.** A tasking holds a cell plus a metre accumulator. Each tick
 `acc += speed * dt`; while `acc` covers the next step's length (`OPCOM_GRID_CELL`, or `* sqrt 2`
 diagonal), pop the next cell off the route chain and subtract it. A slow infantry crosses one cell over
 several passes; a fixed-wing pops many cells in one pass. Position stays a pure cell for streaming, force
@@ -564,9 +566,9 @@ still spawns both sides briefly; the per-locality cap bounds it
 ([§What the commander spends on](#what-the-commander-spends-on)).
 
 **K is per unit type, not one ring** (tune in play) — each type's render range in cells. The streaming
-check runs on the fast base pass against live player cells, so the margin against a fast player comes
-from the loop rate, not a fat ring: even a 200 km/h player crosses ~half a cell between passes and is
-caught before contact.
+check runs each tick against live player cells, so the margin against a fast player comes from the tick
+rate, not a fat ring: even a 200 km/h player crosses ~half a cell (~280 m at a 5 s tick) between ticks and
+is caught before contact.
 
 | Unit type | K | ≈ real |
 |---|---|---|
@@ -601,7 +603,7 @@ adding a coordinated behaviour is adding a bigger template, not a new subsystem 
 
 ### The runner
 
-One generic stepper, on the strategic phase, over every live intent that holds roles:
+One generic stepper, each tick, over every live intent that holds roles:
 
 1. Refresh each bound unit's status ([§Unit tasking and status](#unit-tasking-and-status)).
 2. A required role `dead` or lost → **abort**: release surviving units to the roster (an engaged survivor fights its contact to a decision, a clear one re-virtualises), no AP refund.
@@ -659,26 +661,31 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 
 ## The loop against the engine
 
-One thread, a phase counter splitting two cadences, not one thread per action.
+One thread, one cadence, not one thread per action.
 
 | Property | Value |
 |---|---|
-| Fast base pass | ~2-5 s. Advance in-flight taskings (accumulator + cell pop), refresh live-group status ([§Unit tasking and status](#unit-tasking-and-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)). Cheap only — no scoring, no routing search |
-| Strategic phase | every 12-18 base passes (60-90 s). Refresh belief, rebuild the grid, advance live templates ([§Templates](#templates-the-execution-forms)), score, commit at most one thing, recompute routes due for it. Actions keep their own cooldowns |
+| Tick | every `OPCOM_TICK_PERIOD` (5 s). Increment the tick counter, then: refresh belief, rebuild the grid, advance in-flight taskings (accumulator + cell pop) and live templates ([§Templates](#templates-the-execution-forms)), refresh live-group status ([§Unit tasking and status](#unit-tasking-and-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)), score, commit at most one thing, recompute the routes due for it |
 | Scoring pass | inside `isNil { ... }` — unscheduled, runs uninterrupted. `server/init_zones/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline. The route search runs outside it |
-| Clock | `time` — intent expiries and belief stamps must survive a savegame |
+| Clock | the tick counter `DUWS_opcom_tick` — intent expiries and belief age count in ticks, which persist with the mission namespace where `time` / `diag_tickTime` do not |
 | Orders | server-local groups only — waypoints are silently ignored unless the group is local to the issuing machine |
 | State | numbers, strings, arrays of those — no group or object handles near the mission namespace |
 
-No `sleep` inside the `isNil` block — unscheduled code cannot suspend. Constants take the `#define`
-form the zone and town garrisons use.
+No `sleep` inside the `isNil` block — unscheduled code cannot suspend. Constants are plain server globals:
+the opcom files load by compile-path and read them at runtime, out of a preprocessor macro's reach.
 
-**Scoring stays on the strategic phase; there is no reactive fast path.** A fresh sighting does not trigger
-an out-of-band score, even for Intercept. It does not need one: **local defense is emergent** — a player
-hitting an OPFOR holding streams its garrison in on the fast pass, before contact, and the spawned group
-fights at once with no OPCOM decision. Intercept is only the *dispatch of a mobile reserve* to threatened
-ground that has no adequate local garrison, and that reserve must travel regardless, so the up-to-90 s
-decision latency is dwarfed by transit. One scoring path, no re-entrancy against the strategic pass.
+**One cadence; there is no separate reactive fast path.** A fresh sighting is acted on at the next tick,
+like everything else, at most `OPCOM_TICK_PERIOD` away. It needs no out-of-band path: **local defense is
+emergent** — a player hitting an OPFOR holding streams its garrison in before contact, and the spawned
+group fights at once with no OPCOM decision. Intercept is only the *dispatch of a mobile reserve* to
+threatened ground with no adequate local garrison, and that reserve must travel regardless, so a one-tick
+decision latency is dwarfed by transit. One scoring path, no re-entrancy.
+
+Keeping the tick fast is deliberate, not a cost: a finer tick reads as a more reactive commander, and the
+per-tick work scales with it rather than breaking — movement steps shorter (step = nominal speed ×
+`OPCOM_TICK_PERIOD`), and the action economy spends in finer grain (balanced on per-action cost and the AP
+faucet, gated by affordability, with intent minimum lifetimes holding a commitment steady across the
+faster re-scoring — [§Commitment](#commitment-intents-are-sticky)).
 
 ## What the commander spends on
 
@@ -1093,7 +1100,7 @@ and are written as remaining durations, never absolute stamps
 
 Whether the belief store persists is open ([§Open questions](#open-questions)); it is shaped to
 serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Belief
-ages in strategic ticks ([§Decay](#decay)), so the tick counter persists with the store when it does —
+ages in ticks ([§Decay](#decay)), so the tick counter persists with the store when it does —
 omit both and a restore starts the counter at 0 against freshly stamped belief, no stale ages. The
 snapshot is a name-keyed hashmap, so adding the key later shifts nothing an older save's readers see.
 
@@ -1117,7 +1124,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | Phase | Contains | Reads |
 |---|---|---|
 | **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, the land mask + connectivity, a debug readout | Nothing prior — the artillery observation gate and the intel patrol both consume the belief store; the grid adds its render to `fnc_debug_opcom_view` (AoI circles only today) |
-| **The loop** | One thread, the two cadences (fast pass + strategic phase), the AP-return score and the force-ratio bands, the economic actions (Fortify, Build) and Bank, flat archetype weights | Belief + grid |
+| **The loop** | One thread, one cadence (the tick), the AP-return score and the force-ratio bands, the economic actions (Fortify, Build) and Bank, flat archetype weights | Belief + grid |
 | **Intents** | The record (roles + phase), minimum lifetimes, release on completion or death | The loop; lands with the first tasking-spawn actions |
 | **Movement** | Virtualised taskings — cell-stepping with the accumulator, cost-field routing (direct/flank λ), cell streaming (Chebyshev K + hysteresis), the tasking/status reads and unit strength | Grid + Intents |
 | **Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | The loop it modifies |
@@ -1136,9 +1143,10 @@ docs draw on.
 
 ## Open questions
 
-- **The tick interval against the action cooldowns.** A 60-90 s strategic tick against a 20-30 min build
-  tick sets how fast the commander re-plans; the values tune in play. Intercept needs no faster path — local
-  defense is emergent and QRF dispatch travels regardless ([§The loop](#the-loop-against-the-engine)).
+- **Action-economy granularity against the tick.** The loop is one `OPCOM_TICK_PERIOD` (5 s) tick that
+  scores and commits at most one action; the per-action AP costs, the faucet rate, and the intent minimum
+  lifetimes that hold a commitment steady across that fast re-scoring all tune in play in Phase 2. The tick
+  itself is settled — one cadence, no separate action cooldown clocks ([§The loop](#the-loop-against-the-engine)).
 - **Typed belief for counter-building.** The grid is force magnitude only, so Build cannot site a typed
   counter — AT specifically under armour, AA under air. Extending belief to carry a threat category would
   enable it ([§What the commander builds](#what-the-commander-builds)).

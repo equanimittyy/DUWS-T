@@ -609,13 +609,24 @@ OPCOM_AP_TOWER = 30;
 OPCOM_AP_BAND  = 12;
 OPCOM_AP_TOPUP = 8;
 
-// OPCOM perception: influence-grid geometry (metres) and belief-decay thresholds (strategic ticks,
-// ~5 and ~20 min at a 60-90 s phase). Plain globals not #define -- the opcom files that read them load
-// by compile-path and run later, out of reach of a macro scoped to this file.
-OPCOM_GRID_CELL     = 500;
-OPCOM_GRID_SPREAD   = 1000;
-OPCOM_BELIEF_FRESH  = 4;
-OPCOM_BELIEF_EXPIRE = 16;
+// OPCOM perception. Plain globals not #define -- the opcom files that read them load by compile-path and
+// run later, out of reach of a macro scoped to this file. Influence-grid geometry in metres:
+OPCOM_GRID_CELL   = 500;
+OPCOM_GRID_SPREAD = 1000;
+
+// The single loop cadence in seconds: one tick senses, ages belief and rebuilds the grid (Phase 2 scores
+// and commits one action on the same tick; Phase 4 steps movement here too). Kept fast on purpose -- a
+// finer tick reads as a more reactive commander, and movement/economy scale with it (smaller steps, finer
+// spend) rather than breaking.
+OPCOM_TICK_PERIOD = 5;
+
+// Belief decay in real time, converted to tick counts so OPCOM_TICK_PERIOD stays a pure resolution knob:
+// retune the tick and the memory horizon holds. Counted in ticks, not seconds, so a savegame gap does not
+// silently age belief (diag_tickTime is not restored -- docs/info/architecture/arma_engine_gotchas.md).
+OPCOM_BELIEF_FRESH_S  = 240;
+OPCOM_BELIEF_EXPIRE_S = 960;
+OPCOM_BELIEF_FRESH  = OPCOM_BELIEF_FRESH_S  / OPCOM_TICK_PERIOD;
+OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
 
 // Men-count placeholders the grid rebuild deposits where no real strength is tracked: a BLU-held zone
 // (the player's garrison is not modelled, but the commander knows it is held) and a standing OPFOR
