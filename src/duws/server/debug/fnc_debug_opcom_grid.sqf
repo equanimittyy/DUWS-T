@@ -38,10 +38,10 @@ for "_i" from 0 to (_w * _w - 1) do {
     };
 };
 
-// Belief stamps, each with its age in strategic ticks.
+// Belief stamps: position, age in ticks, and the stamped threat (headcount with humans weighted).
 private _bel = [];
 {
-    _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex)];
+    _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
 [_cells, _bel] remoteExec ["fnc_debug_opcom_grid_draw", _requester];

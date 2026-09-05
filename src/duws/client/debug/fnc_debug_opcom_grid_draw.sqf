@@ -30,13 +30,13 @@ private _half = OPCOM_GRID_CELL / 2;
 } forEach _cells;
 
 {
-    _x params ["_p", "_age"];
+    _x params ["_p", "_age", "_str"];
     private _nm = format ["duws_opcom_bel_%1", _forEachIndex];
     createMarkerLocal [_nm, [_p select 0, _p select 1]];
     _nm setMarkerShapeLocal "ICON";
     _nm setMarkerTypeLocal "mil_dot";
     _nm setMarkerColorLocal "#(1,0.3,0.3,1)";
-    _nm setMarkerTextLocal format ["belief %1t", _age];
+    _nm setMarkerTextLocal format ["threat %1 · %2t", _str, _age];
     _names pushBack _nm;
 } forEach _bel;
 
