@@ -63,7 +63,7 @@ Started by WARCOM init **after** zones exist and after `fnc_zone_state_init` has
 
 ## Sensors this phase
 
-Direct sighting (`east knowsAbout _p > 1.5`, one call per player, keep-strongest) and the zone-flip event.
+Direct sighting over BLUFOR groups (`east knowsAbout (leader _grp) > 1.5`, one call per group, keep-strongest; threat = each AI one man, each human `OPCOM_PLAYER_WORTH`) and the zone-flip event.
 Area-of-influence (`fnc_aoi_opfor_covers`) can be added cheaply since it exists; the OP-hardpoint and
 intel-patrol sensors wait on their own systems ([§Sensors](opcom_plan.md#sensors)).
 
@@ -88,7 +88,7 @@ front-line cells (sign change against an orthogonal neighbour,
 
 ## Verification
 
-Sighting a player adds one belief row (`count DUWS_opcom_belief_key` grows) and no more on a co-op stack in
-one cell; the row's age climbs each tick and the row drops after `OPCOM_BELIEF_EXPIRE`; the
+Sighting a BLUFOR group adds one belief row (`count DUWS_opcom_belief_key` grows), one per group; the row's
+age climbs each tick and the row drops after `OPCOM_BELIEF_EXPIRE`; the
 overlay shows an `ene` bloom on the player fading with distance and decay, `fri` on held ground, and a
 front line where they cross. All checkable from the debug console against a live player, no scoring needed.

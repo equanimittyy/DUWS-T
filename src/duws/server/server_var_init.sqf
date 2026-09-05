@@ -628,6 +628,10 @@ OPCOM_BELIEF_EXPIRE_S = 960;
 OPCOM_BELIEF_FRESH  = OPCOM_BELIEF_FRESH_S  / OPCOM_TICK_PERIOD;
 OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
 
+// Threat men a sighted BLUFOR group is worth: each AI counts as one, each human as OPCOM_PLAYER_WORTH --
+// a player is more dangerous than an equal AI, so a group carrying one weighs heavier on the grid. Tune.
+OPCOM_PLAYER_WORTH = 3;
+
 // Men-count placeholders the grid rebuild deposits where no real strength is tracked: a BLU-held zone
 // (the player's garrison is not modelled, but the commander knows it is held) and a standing OPFOR
 // hardpoint (its crew). Phase 2 replaces both with firepower-weighted force.

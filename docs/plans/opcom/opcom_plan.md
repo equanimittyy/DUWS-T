@@ -13,7 +13,7 @@ Three layers, one thread.
 
 | Layer | Does | Runs |
 |---|---|---|
-| **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per player |
+| **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per BLUFOR group |
 | **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
 | **Commitment** | Turns a choice into an intent with a minimum lifetime and an owner. Re-scoring fills free capacity and may abandon a still-virtual intent whose ROI has collapsed, but never one whose units are in contact | Between ticks |
 
@@ -33,14 +33,15 @@ Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a sing
 
 | Array | Holds |
 |---|---|
-| `DUWS_opcom_belief_key` | what is believed about: a player's `netId`, a zone index, a FOB index, the player HQ |
+| `DUWS_opcom_belief_key` | what is believed about: a BLUFOR group's `netId`, a zone index, a FOB index, the player HQ |
 | `DUWS_opcom_belief_pos` | `[x,y,0]` as last observed, never a live lookup |
-| `DUWS_opcom_belief_time` | the strategic-tick counter at the observation |
-| `DUWS_opcom_belief_str` | believed BLUFOR force there, firepower-weighted ([§The quantity](#the-quantity-force-not-coverage)) |
+| `DUWS_opcom_belief_time` | the tick counter at the observation |
+| `DUWS_opcom_belief_str` | believed BLUFOR force there ([§The quantity](#the-quantity-force-not-coverage)) — each AI counts one, each human `OPCOM_PLAYER_WORTH`, so a group carrying players weighs heavier |
 
 One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
 rather than appending, and only when the new reading is stronger or the stored one has gone stale
-(keep-strongest). So a co-op stack is one row, not a row per sighting.
+(keep-strongest). Belief tracks groups, not individual players, so a squad is one row whether or not it
+carries a player, and players sharing a group are not double-counted.
 
 New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner
 ([`info/architecture.md`](../../info/architecture.md#globals-have-no-namespace)).
@@ -53,14 +54,14 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 
 | Sensor | Writes | Cost |
 |---|---|---|
-| Direct sighting | `east knowsAbout _p > 1.5` stamps that player's position, group size and `time` | one engine call per player per tick |
+| Direct sighting | for each BLUFOR group, `east knowsAbout (leader _grp) > 1.5` stamps the leader's position, the group's threat (each AI one, each human `OPCOM_PLAYER_WORTH`), and the tick | one engine call per BLUFOR group per tick |
 | Observation post | an OP hardpoint covering ground stamps what it sees | [§Observation is the trigger](#observation-is-the-trigger) |
-| Area of influence | a player standing inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per player per tick |
+| Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
 | Intel patrol tasking | a purchased sensor ([§What the commander spends on](#what-the-commander-spends-on)) | the tasking's own cost |
 
-`east knowsAbout _p` is a side-wide query — the whole sighting sweep is one call per player, no
-`nearEntities`, no scan over `allUnits`
+`east knowsAbout` is a side-wide query — the sighting sweep is one call per BLUFOR group (on its leader),
+no `nearEntities`, no scan over `allUnits`
 ([`info/performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)).
 Threshold `1.5` is shared with the artillery observation gate — one constant, do not add a second.
 
@@ -1151,10 +1152,10 @@ docs draw on.
   counter — AT specifically under armour, AA under air. Extending belief to carry a threat category would
   enable it ([§What the commander builds](#what-the-commander-builds)).
 - **Whether the belief store should persist** ([§Persistence](#persistence)).
-- **What a co-op session does to the sighting sweep.** One call per player, the belief array grows one
-  entry per player. The merge is resolved by [the influence grid](#the-influence-grid-one-spatial-substrate):
-  its enemy layer sums every entry in a cell, so the force ratio reads force-at-a-place whether four
-  players or one stand there.
+- **What a co-op session does to the sighting sweep.** One call per BLUFOR group, the belief array grows one
+  entry per group (players sharing a group are one row, and each human is worth `OPCOM_PLAYER_WORTH`). The
+  merge is resolved by [the influence grid](#the-influence-grid-one-spatial-substrate): its enemy layer sums
+  every entry in a cell, so the force ratio reads force-at-a-place whether four players or one stand there.
 - **Whether the player can perceive that the enemy is acting on stale information**, and whether that
   is worth surfacing. The intel system is the obvious route.
 - **Whether an AI gunner in a static mortar or a self-propelled gun reliably executes
