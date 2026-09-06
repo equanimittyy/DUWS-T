@@ -22,7 +22,7 @@ private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _pick = [_MissionPos] call fnc_recon_observe_pick;
 if (_pick isEqualTo []) exitWith {
-    [12, _requester] call fnc_mission_abort;
+    [12, _requester, "no_target_pick"] call fnc_mission_abort;
 };
 private _kind   = _pick select 0;
 private _target = _pick select 1;
@@ -74,7 +74,7 @@ for "_i" from 0 to 17 do {
     };
 };
 if (_overwatch isEqualTo []) exitWith {
-    [12, _requester] call fnc_mission_abort;
+    [12, _requester, "no_overwatch"] call fnc_mission_abort;
 };
 
 // The anchor the 3D marker and hold LOS ride: the real target, which the overwatch was verified to have
