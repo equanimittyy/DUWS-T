@@ -146,6 +146,16 @@ HC_air_station_seconds = 300; publicVariable "HC_air_station_seconds";
 // as a scatter of named globals a restore would have to know one at a time.
 DUWS_support_permanent = []; publicVariable "DUWS_support_permanent";
 
+// Vehicle garage state. DUWS_garage_stored is an array of serializable specs (no object handle ever
+// enters it), and the four expansion flags are broadcast booleans; both are plain data, so engine
+// saveGame carries them with no extra machinery. Base capacity is owned from the start, so no base
+// flag exists -- the highest owned expansion, or the base default, sets the caps.
+DUWS_garage_stored = []; publicVariable "DUWS_garage_stored";
+garage_exp1_owned = false; publicVariable "garage_exp1_owned";
+garage_exp2_owned = false; publicVariable "garage_exp2_owned";
+garage_exp3_owned = false; publicVariable "garage_exp3_owned";
+garage_exp4_owned = false; publicVariable "garage_exp4_owned";
+
 // Zone payouts. Capture is an event reward; holding is an AP trickle on the economy tick
 // (zone_ap_trickle, below).
 //

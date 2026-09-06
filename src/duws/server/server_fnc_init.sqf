@@ -565,6 +565,14 @@ publicVariable "DUWS_fnc_squadRow";
     "DUWS_vehPriceBands", "DUWS_fnc_vehTurretWeapons", "DUWS_fnc_vehWeapons", "DUWS_fnc_vehPylonCount",
     "DUWS_fnc_vehArmed", "DUWS_fnc_vehHasMainGun", "DUWS_fnc_vehKind", "DUWS_fnc_vehWeaponScore", "DUWS_fnc_vehPrice"
 ];
+// Broadcast: the depot menu reads the garage tier table, caps, pool usage and next-tier client-side,
+// and the server store/retrieve/buy paths read the same globals. Loaded after fnc_veh_price and
+// fnc_ap_gate, whose DUWS_fnc_vehKind and DUWS_fnc_ap_unlocked it calls.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_garage_spec.sqf";
+{ publicVariable _x } forEach [
+    "DUWS_garage_tiers", "DUWS_fnc_vehDomain", "DUWS_fnc_garageCaps", "DUWS_fnc_garageUsed",
+    "DUWS_fnc_garageDomainIndex", "DUWS_fnc_garageNextTier", "DUWS_fnc_vehSpecCapture", "DUWS_fnc_vehSpecApply"
+];
 // Broadcast: the fire-mission strike runs client-side and resolves a faction's real mortar/arty
 // shell through this, so it must exist on every machine that can call a battery.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_derive_shell.sqf";
@@ -703,6 +711,12 @@ publicVariable "fnc_wbk_survivorKilled_server";
 publicVariable "fnc_pylon_set_with_cost";
 publicVariable "fnc_pylon_hint_nocp";
 publicVariable "fnc_pylon_hint_success";
+// The vehicle garage store/retrieve/buy. Broadcast like the pylon purchase above: the depot menu
+// only ever remoteExecs these to the server, but keeping them defined everywhere matches the pattern.
+[] call compile preprocessFileLineNumbers "duws\server\supports\fnc_garage_init.sqf";
+publicVariable "fnc_garage_store";
+publicVariable "fnc_garage_retrieve";
+publicVariable "fnc_garage_buy_slot";
 
 // Registry self-check. preprocessFile on a path that does not resolve returns "", which
 // compiles to an empty {} and then no-ops at every call site with no error anywhere -- a
