@@ -4,26 +4,28 @@
 #   <short-hash>  pack src\ as it stood at that commit
 #   INVALID       the typed value did not resolve to a commit
 #
-# The menu and prompt go through Write-Host / Read-Host (the console), so stdout carries
-# only the result token and repack.cmd can capture it with a for /f. Written for Windows
-# PowerShell 5.1: no `u{} escapes, no ternary, no Expand-Archive-only features.
+# The menu goes to stderr and the choice through Read-Host, so stdout carries only the
+# result token and repack.cmd can capture it with a for /f. Write-Host is unreliable here:
+# under for /f the child's stdout is a pipe and those lines never reach the console, so the
+# human-facing menu uses [Console]::Error -- stderr is inherited, never captured. Written for
+# Windows PowerShell 5.1: no `u{} escapes, no ternary, no Expand-Archive-only features.
 $ErrorActionPreference = 'SilentlyContinue'
 
 $sep = [char]31   # git %x1f field separator; a subject can hold spaces, this cannot.
 $log = @(git log -5 --format='%h%x1f%s' 2>$null)
 $hashes = @()
 
-Write-Host ''
-Write-Host '[repack] Pick a source to pack:'
-Write-Host '   0) working tree (current src\)   [default -- press Enter]'
+[Console]::Error.WriteLine('')
+[Console]::Error.WriteLine('[repack] Pick a source to pack:')
+[Console]::Error.WriteLine('   0) working tree (current src\)   [default -- press Enter]')
 for ($i = 0; $i -lt $log.Count; $i++) {
     $parts = $log[$i] -split $sep, 2
     $hashes += $parts[0]
     $desc = ''
     if ($parts.Count -gt 1) { $desc = $parts[1] }
-    Write-Host ('   {0}) {1}  {2}' -f ($i + 1), $parts[0], $desc)
+    [Console]::Error.WriteLine('   {0}) {1}  {2}' -f ($i + 1), $parts[0], $desc)
 }
-Write-Host '   or paste a full commit hash'
+[Console]::Error.WriteLine('   or paste a full commit hash')
 
 $c = Read-Host '[repack] Choice'
 if ($null -eq $c) { $c = '' }
