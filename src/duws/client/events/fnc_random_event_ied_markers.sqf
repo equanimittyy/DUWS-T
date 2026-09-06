@@ -11,7 +11,7 @@ DUWS_iedMarker_range = 50;                                             // metres
 DUWS_iedMarker_icon  = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";   // marker 168, loc_Fortress (docs/info/external/arma3_markers.md)
 // OPFOR's own red, read from the engine so it tracks the side colour every other surface uses.
 DUWS_iedMarker_colour = +(east call BIS_fnc_sideColor);
-DUWS_iedMarker_colour set [3, 0.9];
+DUWS_iedMarker_colour set [3, 1];
 
 addMissionEventHandler ["Draw3D", {
     {
@@ -25,7 +25,7 @@ addMissionEventHandler ["Draw3D", {
                 DUWS_iedMarker_icon,
                 DUWS_iedMarker_colour,
                 _x modelToWorldVisual [0, 0, 0.5],   // vertical centre of the low pile
-                0.4, 0.4, 0
+                0.8, 0.8, 0
             ];
         };
     } forEach (missionNamespace getVariable ["DUWS_ied_piles", []]);

@@ -16,10 +16,10 @@ if (isNull _player) exitWith {};
 
 #define IED_COUNT_MIN 4
 #define IED_COUNT_MAX 6
-#define IED_AREA 350
+#define IED_REACH 350
 #define IED_MIN_SEP 40
 #define IED_LIVE_CHANCE 0.35
-#define ARM_RANGE 30
+#define ARM_RANGE 10
 #define FUSE (0.5 + random 1)
 #define LIFETIME 1200
 #define TICK 0.5
@@ -30,14 +30,24 @@ private _pileClasses = [
 	"Land_WoodenCart_F", "Land_Sacks_heap_F", "Land_Sacks_goods_F", "Land_Pallets_F"
 ];
 
-// Roads across the town's approaches, thinned so piles do not clump: a greedy spread that keeps each new
-// road IED_MIN_SEP off the ones already taken.
-private _anchor = if (_townIndex >= 0) then {
+private _townPos = getPos _player;
+private _townRadius = 0;
+if (_townIndex >= 0) then {
 	private _locs = missionNamespace getVariable ["civ_locations", []];
-	if (_townIndex < count _locs) then { getPos (_locs select _townIndex) } else { getPos _player };
-} else { getPos _player };
+	private _radii = missionNamespace getVariable ["civ_radii", []];
+	if (_townIndex < count _locs) then {
+		_townPos = getPos (_locs select _townIndex);
+		_townRadius = _radii param [_townIndex, 0];
+	};
+};
+private _fieldReach = _townRadius + IED_REACH;
 
-private _roads = (_anchor nearRoads IED_AREA) call BIS_fnc_arrayShuffle;
+// Roads ringing the town's approaches, out to IED_REACH past its edge but never inside the town itself --
+// the roads in are mined, the streets are not. Thinned so piles do not clump: a greedy spread that keeps
+// each new road IED_MIN_SEP off the ones already taken. With no town (player fallback) _townRadius is 0,
+// so the ring filter is a no-op and this stays the old anchor-centred search.
+private _roads = (_townPos nearRoads _fieldReach) select { (_x distance2D _townPos) >= _townRadius };
+_roads = _roads call BIS_fnc_arrayShuffle;
 if (_roads isEqualTo []) exitWith {};
 
 private _count = IED_COUNT_MIN + floor (random (IED_COUNT_MAX - IED_COUNT_MIN + 1));
@@ -45,14 +55,18 @@ private _spots = [];
 {
 	if (count _spots >= _count) exitWith {};
 	private _rp = getPosATL _x;
-	if ((_spots findIf { (_x distance2D _rp) < IED_MIN_SEP }) < 0) then { _spots pushBack _rp };
+	if ((_spots findIf { (getPosATL _x distance2D _rp) < IED_MIN_SEP }) < 0) then { _spots pushBack _x };
 } forEach _roads;
 if (_spots isEqualTo []) exitWith {};
 
-// Sit each pile on the verge (a few metres off the road point) rather than the crown, flat to the slope.
+// Sit each pile off to one side of the road (perpendicular to how the stretch runs), out on the verge and
+// flat to the slope, rather than on the crown where traffic would clip it.
 private _piles = [];
 {
-	private _off = _x getPos [3 + random 3, random 360];
+	private _road = _x;
+	private _rp = getPosATL _road;
+	private _side = ([_road] call fnc_civ_roadDir) + selectRandom [90, -90];
+	private _off = _rp getPos [3 + random 3, _side];
 	private _pile = createVehicle [selectRandom _pileClasses, [_off select 0, _off select 1, 0], [], 0, "CAN_COLLIDE"];
 	if (!isNull _pile) then {
 		_pile setPosATL [_off select 0, _off select 1, 0];
@@ -104,8 +118,8 @@ if (_liveCount == 0) exitWith {
 	};
 };
 
-[_piles, _anchor] spawn {
-	params ["_piles", "_anchor"];
+[_piles, _townPos, _fieldReach] spawn {
+	params ["_piles", "_townPos", "_fieldReach"];
 	private _deadline = time + LIFETIME;
 	// Runs until every live pile has resolved (defused or blown) or the field times out.
 	while {
@@ -113,7 +127,7 @@ if (_liveCount == 0) exitWith {
 		&& { { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles > 0 }
 	} do {
 		// No one near the field: nothing can trip, so skip the per-pile scan until a player returns.
-		if ((allPlayers findIf { alive _x && { (_x distance2D _anchor) < IED_AREA + 100 } }) < 0) then {
+		if ((allPlayers findIf { alive _x && { (_x distance2D _townPos) < _fieldReach + 100 } }) < 0) then {
 			sleep TICK;
 		} else {
 		{
