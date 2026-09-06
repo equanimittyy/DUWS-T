@@ -181,10 +181,10 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1) then {
     ] remoteExec ["addAction", [0, -2] select isDedicated, _inf];
 };
 
-// Budget derived once and held: 7 plus the BLUFOR headcount, counting all on the side (not the living)
+// Budget derived once and held: 5 plus the BLUFOR headcount, counting all on the side (not the living)
 // so casualties never thin the waves.
-private _budget = 7 + ({ side group _x == west } count (call BIS_fnc_listPlayers));
-private _vehSubCap = 2 + floor random 3;   // rand(2,4) live combat vehicles, rolled once
+private _budget = 5 + ({ side group _x == west } count (call BIS_fnc_listPlayers));
+private _vehSubCap = 6;   // hard ceiling on live combat vehicles
 
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_pc_assault"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 2;
@@ -306,7 +306,8 @@ private _vehGroups = [];
             for "_slot" from 1 to (_budget - _live) do {
                 private _spawnPos = [_center] call _bearingPos;
                 private _fieldableVeh = ["car", "apc", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
-                if ((_vehLive < _vehSubCap) && { _fieldableVeh isNotEqualTo [] } && { random 1 < 0.4 }) then {
+                // Odds decay 0.1^(n/5) in live-vehicle count: certain at 0, 10% at 5, barred at the cap of 6.
+                if ((_vehLive < _vehSubCap) && { _fieldableVeh isNotEqualTo [] } && { random 1 < (0.1 ^ (_vehLive / 5)) }) then {
                     private _cls = [selectRandom _fieldableVeh] call DUWS_fnc_tokenClass;
                     if (_cls != "") then {
                         private _g = [_cls, _center, RADIUS, "hunt", _spawnPos, "opfor"] call fnc_spawn_vehicle;
