@@ -2,19 +2,35 @@
 // influence-grid overlay: the commander's own grid (friendly/enemy force per cell, the front line, and
 // each belief stamp), a server-only picture the dev otherwise cannot see. Independent of the AoI toggle
 // (fnc_debug_aoi_view) -- each owns its own marker set and clears only its own. A second call clears it.
-// Re-checked against game_master because the function is broadcast to every client. English-only debug.
+// While up it re-requests on the OPCOM tick cadence so it tracks the live grid instead of freezing at the
+// moment it opened. Re-checked against game_master because the function is broadcast to every client.
+// English-only debug.
 if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 
-// Overlay up already -> tear it down. The vanishing markers are the feedback; a hint would render
-// beneath the open map anyway.
-private _grid = missionNamespace getVariable ["DUWS_dbgOpcomMarkers", []];
-if (count _grid > 0) exitWith {
-    { deleteMarkerLocal _x } forEach _grid;
-    missionNamespace setVariable ["DUWS_dbgOpcomMarkers", []];
+// Flag, not marker presence, drives the toggle: a fast off/on before the first draw still reads as "up".
+// Dropping it also stops the refresh loop.
+if (missionNamespace getVariable ["DUWS_dbgOpcomOn", false]) exitWith {
+    DUWS_dbgOpcomOn = false;
+    { if ((_x find "duws_opcom_") == 0) then { deleteMarkerLocal _x } } forEach allMapMarkers;
+    // Clear the delta state so a reopen rebuilds the lattice from scratch rather than reusing dropped markers.
+    missionNamespace setVariable ["DUWS_dbgOpcomSig", []];
+    missionNamespace setVariable ["DUWS_dbgOpcomBelN", 0];
     hint "OPCOM grid: overlay cleared.";
 };
 
 openMap [true, false];
-// The grid and belief store live only on the server, so they are gathered there and handed back to draw.
-[player] remoteExec ["fnc_debug_opcom_grid", 2];
+DUWS_dbgOpcomOn = true;
+// Generation token: a quick off/on can leave the old loop mid-sleep, so tag this loop and let only the
+// newest run -- otherwise two loops double-request forever. 5s mirrors OPCOM_TICK_PERIOD, which is a
+// server-only global and nil here.
+private _gen = (missionNamespace getVariable ["DUWS_dbgOpcomGen", 0]) + 1;
+DUWS_dbgOpcomGen = _gen;
+[_gen] spawn {
+    params ["_gen"];
+    while {DUWS_dbgOpcomOn && {DUWS_dbgOpcomGen == _gen}} do {
+        // Grid and belief store live only on the server, so they are gathered there and handed back to draw.
+        [player] remoteExec ["fnc_debug_opcom_grid", 2];
+        sleep 5;
+    };
+};
