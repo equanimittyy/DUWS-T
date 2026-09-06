@@ -8,7 +8,7 @@ if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 #define DA_DISEMBARK   140      // troops dismount once their transport is this close to the tank
 #define DA_ARRIVE      15       // a live crewman this close to the tank is working on it (AI halts at the hull)
 #define DA_ARRIVE_ZONE 150      // a repaired tank this close to its home zone has got away (fail)
-#define DA_REQUISITION_DMG 0.5  // player-crewed hull at <= this mean hit-point damage (>=50% component health) is requisitioned (win). fnc_veh_comp_damage reads the parts, not raw getDammage, which field repair never moves.
+#define DA_REQUISITION_DMG 0.65  // player-crewed hull repaired to <= this mean hit-point damage (>=35% component health) wins. Toolkit field repair floors at ~0.6; the gate sits just above it for headroom. fnc_veh_comp_damage reads the parts, not raw getDammage, which field repair never moves.
 
 // Repair time scales inversely with the nearest OPFOR zone's distance (NEAR at/inside NEARDIST, FAR
 // at/beyond FARDIST, linear between): a tank repaired near its own lines is the harder denial.

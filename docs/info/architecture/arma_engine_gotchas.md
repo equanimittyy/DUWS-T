@@ -1798,16 +1798,18 @@ writes one part and leaves the hull value untouched.** A repair loop that only c
 brings every part up but leaves `getDammage` exactly where it was — the health bar does not move.
 
 The same split governs the engine's own field repair. An engineer repairing a vehicle in the field (no
-repair vehicle or point nearby) restores **hit points only, capped** — to 40% integrity bare, ~60% with a
-toolkit — and never clears the hull's `getDammage`. Only a repair vehicle/facility with a repair specialist
-lifts the cap and repairs the hull fully. So a mission that spawns a derelict with `setDamage 0.8` and then
-tests `damage _veh <= 0.5` to detect "the player repaired it" can never win by field repair: the parts come
-up, `getDammage` stays 0.8. This is stock Arma, present mod-free.
+repair vehicle or point nearby) restores **hit points only, capped** — a toolkit reaches only ~40% integrity
+(~0.6 hit-point damage), less without one — and never clears the hull's `getDammage`. Only a repair
+vehicle/facility with a repair specialist lifts the cap and repairs the hull fully. So a mission that spawns
+a derelict and tests `damage _veh` to detect "the player repaired it" can never win by field repair: the
+parts come up (only to the ~0.6 cap), `getDammage` stays put. This is stock Arma, present mod-free.
 
 **How to apply:** to detect field repair, test the hit points, not the hull — mean part damage
-(`fnc_veh_comp_damage`, `server/misc/`) against the threshold, and drop the structural `HitHull`/`HitBody`
-points from that mean: they no more field-repair than the hull value does, so leaving them in pins the mean
-above the gate however well the player fixes the drivable parts. To fully repair from script use `setDamage 0`
+(`fnc_veh_comp_damage`, `server/misc/`) against a threshold set just above the ~0.6 repair cap (a gate at or
+below the cap is unreachable, or a coin-flip on float rounding), and drop the structural `HitHull`/`HitBody`
+points from that mean: they no
+more field-repair than the hull value does, so leaving them in pins the mean above the gate however well the
+player fixes the drivable parts. To fully repair from script use `setDamage 0`
 (the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a spawned derelict,
 kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage` afterwards would
 redistribute the part back to a drivable state.

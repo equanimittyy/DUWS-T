@@ -45,12 +45,12 @@ _civ disableAI "PATH";
 _veh setVariable ["DUWS_binMe", true];
 _civ setVariable ["DUWS_binMe", true];
 
-// HEAR_RADIUS: earshot for his lines. REPAIRED_DMG: mean hit-point damage at/below this is a genuine
-// repair, not a jostle -- spawns ~0.8, a toolkit field repair reaches ~0.4, so the cap sits between.
+// HEAR_RADIUS: earshot for his lines. REPAIRED_DMG: mean hit-point damage at/below this counts as repaired.
+// Spawns uniform 0.7; a toolkit field repair floors at ~0.6, so the gate sits just above that floor for headroom.
 // STRANDED_TIMEOUT: backstop so the watch thread ends if a player lingers near an unfixed car forever; the
 // cleanup flags above own the actual teardown.
 #define HEAR_RADIUS 30
-#define REPAIRED_DMG 0.5
+#define REPAIRED_DMG 0.65
 #define STRANDED_TIMEOUT 1500
 
 [_civ, _veh, _townIndex] spawn {
