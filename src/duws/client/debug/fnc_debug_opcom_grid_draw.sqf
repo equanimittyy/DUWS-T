@@ -10,6 +10,14 @@ params [["_cells", []], ["_bel", []], ["_cell", 500]];
 
 private _names = [];
 private _half = _cell / 2;
+
+// Cell-fill alpha knobs, tunable live from the debug console (set the global, re-toggle the overlay).
+// alpha = floor + span * (force min cap) / cap. Phase 1 per-cell force is small, so the default cap of
+// 30 pins most cells near the floor; drop the cap (or raise the floor) to make a faint grid readable.
+// A span of 0 gives every cell a flat floor alpha.
+private _aFloor = missionNamespace getVariable ["DUWS_dbgOpcomAlphaFloor", 0.15];
+private _aSpan  = missionNamespace getVariable ["DUWS_dbgOpcomAlphaSpan", 0.5];
+private _aCap   = (missionNamespace getVariable ["DUWS_dbgOpcomAlphaCap", 30]) max 1;
 {
     _x params ["_c", "_f", "_e", "_front"];
     private _nm = format ["duws_opcom_cell_%1", _forEachIndex];
@@ -22,9 +30,9 @@ private _half = _cell / 2;
         _nm setMarkerAlphaLocal 0.8;
     } else {
         // #(r,g,b,a) inline form, not a CfgMarkerColors name (the map has no cyan); alpha carries
-        // magnitude, capped at 30 men so a strong cell does not saturate flat.
+        // magnitude through the knobs above.
         _nm setMarkerColorLocal (["#(1,0.3,0.3,1)", "#(0.4,0.7,1,1)"] select ((_f - _e) > 0));
-        _nm setMarkerAlphaLocal (0.15 + 0.5 * ((abs (_f - _e)) min 30) / 30);
+        _nm setMarkerAlphaLocal (_aFloor + _aSpan * ((abs (_f - _e)) min _aCap) / _aCap);
     };
     _names pushBack _nm;
 } forEach _cells;
