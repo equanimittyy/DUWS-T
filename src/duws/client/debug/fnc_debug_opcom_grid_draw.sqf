@@ -11,10 +11,8 @@ params [["_cells", []], ["_bel", []], ["_cell", 500]];
 private _names = [];
 private _half = _cell / 2;
 
-// Cell-fill alpha knobs, tunable live from the debug console (set the global, re-toggle the overlay).
-// alpha = floor + span * (force min cap) / cap. Phase 1 per-cell force is small, so the default cap of
-// 30 pins most cells near the floor; drop the cap (or raise the floor) to make a faint grid readable.
-// A span of 0 gives every cell a flat floor alpha.
+// Live-tunable fill alpha (set the global, re-toggle). Phase 1 per-cell force is small, so the default
+// cap pins most cells near the floor; drop the cap or raise the floor to read a faint grid.
 private _aFloor = missionNamespace getVariable ["DUWS_dbgOpcomAlphaFloor", 0.15];
 private _aSpan  = missionNamespace getVariable ["DUWS_dbgOpcomAlphaSpan", 0.5];
 private _aCap   = (missionNamespace getVariable ["DUWS_dbgOpcomAlphaCap", 30]) max 1;
@@ -51,3 +49,11 @@ private _aCap   = (missionNamespace getVariable ["DUWS_dbgOpcomAlphaCap", 30]) m
 missionNamespace setVariable ["DUWS_dbgOpcomMarkers", _names];
 
 ["DEBUG", "OPCOM", format ["overlay draw: %1 markers (%2 cells, %3 belief)", count _names, count _cells, count _bel]] call fnc_log;
+
+// Engine truth, not just what we asked for: a marker that never registered, or a create that returned ""
+// on a name clash, is invisible with no error. Sample reads marker 0 back to catch a bad pos/colour/size.
+private _first = _names param [0, ""];
+["DEBUG", "OPCOM", format ["overlay check: registered=%1 blank=%2 mapOpen=%3 | first=%4 pos=%5 color=%6 size=%7 alpha=%8",
+    {(_x find "duws_opcom_") == 0} count allMapMarkers,
+    {_x isEqualTo ""} count _names,
+    visibleMap, _first, getMarkerPos _first, getMarkerColor _first, markerSize _first, markerAlpha _first]] call fnc_log;
