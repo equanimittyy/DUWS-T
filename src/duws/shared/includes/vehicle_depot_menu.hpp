@@ -16,6 +16,10 @@ class vehicledepotmenu
 
     class controls
     {
+        // The REQUESTS-menu layering: a faint outer panel with darker filled boxes on top (the header
+        // strip and the three panels below), so the boxes read as raised over the ground rather than
+        // the dialog being one flat black rectangle. Colours match request_menu.hpp -- 0.3 outer, 0.5
+        // boxes -- so the two dialogs sit in the same visual family.
         class background_depot: RscText
         {
             idc = 2199;
@@ -23,7 +27,7 @@ class vehicledepotmenu
             y = 0.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 39 * GUI_GRID_W;
             h = 23.4 * GUI_GRID_H;
-            colorBackground[] = {0,0,0,0.5};
+            colorBackground[] = {0,0,0,0.3};
         };
         class titletext: RscText
         {
@@ -37,6 +41,14 @@ class vehicledepotmenu
         };
 
         // --- Header readouts: CP, AP, and the three garage pools as used / total ---
+        class headerFrame: RscFrame
+        {
+            x = 0.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 2.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 38.8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
+        };
         class cpLabel: RscText
         {
             text = "CP";
@@ -95,6 +107,7 @@ class vehicledepotmenu
             y = 3.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 17.3 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
         };
         class modList: RscListBox
         {
@@ -144,6 +157,7 @@ class vehicledepotmenu
             y = 3.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 12.6 * GUI_GRID_W;
             h = 17.3 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
         };
         class garStoredList: RscListBox
         {
@@ -182,6 +196,7 @@ class vehicledepotmenu
             y = 3.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 12.3 * GUI_GRID_W;
             h = 17.3 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
         };
         class recList: RscListBox
         {
