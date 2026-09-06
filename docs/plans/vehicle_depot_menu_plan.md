@@ -114,9 +114,11 @@ the preview into the confirmation retires `fnc_veh_recycle_preview_server` and i
 changed between confirm and Yes), deletes and credits, then hints an itemised report to the recycler: a
 `Recycled:` header, one `<display name> for X CP` line per vehicle — the name from
 `getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName")`, as
-`fnc_activateBaseRepairStation.sqf:52` reads it — and a closing `Total: T CP.` line. A `hint` truncates a
-long body, so identical classes collapse to one counted line (`3× Hunter HMG for 15 CP`) to keep a bulk
-recycle legible; the report ends with a terminal period, per the player-text convention.
+`fnc_activateBaseRepairStation.sqf:52` reads it — and a closing `Total: T CP.` line. A `hint` fits
+only a few lines, so the report shows at most **five** vehicle lines — identical classes collapsed to
+one counted line (`3× Hunter HMG for 15 CP`) — and folds any remainder into a final `+N more for X CP`
+line. The `Total: T CP.` line always sums everything recycled, not just the shown lines, and ends with a
+terminal period per the player-text convention.
 
 Any purchase, store, retrieve, or recycle refills the affected list by clearing and rebuilding inside
 `isNil {}`, following `fnc_support_list_fill.sqf`.
@@ -293,5 +295,6 @@ and at the HQ helipad:
   one earns.
 - The single Recycle button raises one Yes/No prompt naming the count and total CP; No leaves the pad
   untouched, Yes deletes the vehicles, credits the total, and hints an itemised report whose per-line
-  amounts and total match what was credited.
+  amounts and total match what was credited; recycling more than five distinct vehicles shows five lines
+  plus a `+N more` remainder while the total still covers everything.
 - After a `saveGame` and reload, the stored vehicles and the purchased capacity both survive.
