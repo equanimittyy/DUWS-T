@@ -4005,8 +4005,12 @@
                 <German>Eines unserer Flugzeuge wurde in der Nähe dieses Ortes abgeschossen. Satellitenmeldungen zeigen, dass der Pilot schwere Verletzungen erlitten hat und stark blutet – beeil dich zum Absturzort und bring ihn sicher zurück zur Basis. (Nur noch 10 Minuten, bis der Pilot an Blutverlust stirbt!) (Avg CP, very high AP)</German>
                 <Spanish>Uno de nuestros aviones fue derribado cerca de esta posición. Los informes satelitales indican que el piloto sufre graves heridas y hemorragia intensa – apúrate al lugar del accidente aéreo y tráelo seguro de vuelta a la base. (¡Quedan solo 10 minutos hasta que el piloto muera por hemorragia!) (Avg CP, very high AP)</Spanish>
                 <Chinesesimp>我们的一架飞机在这个位置附近被击落。卫星报告显示飞行员重伤失血，快到坠机地点把他安全带回基地。(距离飞行员失血而死仅有10分钟)(平均CP，极高AP)</Chinesesimp>
-                <Original>One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.</Original>
-                <English>One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.</English>
+                <Original>One of our aircraft went down near this position. The pilot's alive. Get to the crash site and carry him back to base.</Original>
+                <English>One of our aircraft went down near this position. The pilot's alive. Get to the crash site and carry him back to base.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuepilot_note">
+                <Original>The pilot will begin bleeding out once players are within range. He will have 10 minutes.</Original>
+                <English>The pilot will begin bleeding out once players are within range. He will have 10 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_drop_pilot">
                 <German>Pilot absetzen</German>
