@@ -4,12 +4,12 @@
 // stamp tagged with its age. Local, so only the dev sees them; names are recorded so fnc_debug_opcom_view
 // can clear them. English-only, like the rest of the debug surface.
 if (!hasInterface) exitWith {};
-params [["_cells", []], ["_bel", []]];
+params [["_cells", []], ["_bel", []], ["_cell", 500]];
 
 { deleteMarkerLocal _x } forEach (missionNamespace getVariable ["DUWS_dbgOpcomMarkers", []]);
 
 private _names = [];
-private _half = OPCOM_GRID_CELL / 2;
+private _half = _cell / 2;
 {
     _x params ["_c", "_f", "_e", "_front"];
     private _nm = format ["duws_opcom_cell_%1", _forEachIndex];

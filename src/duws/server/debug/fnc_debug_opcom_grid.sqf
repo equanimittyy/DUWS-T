@@ -44,4 +44,5 @@ private _bel = [];
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
-[_cells, _bel] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
+// Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
+[_cells, _bel, _cell] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
