@@ -3,7 +3,7 @@
 //
 // A scatter of identical junk piles on the roads around the town. Each is independently, secretly live
 // (IED_LIVE_CHANCE, no floor -- a field of pure decoys is a legal, deliberately anticlimactic outcome, and
-// all-live is vanishingly rare). A live pile cooks car_bomb's 155 when a BLUFOR man stands or crouches, or
+// all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR man stands or crouches, or
 // any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, which is the only way to
 // crawl in and defuse it (fnc_random_event_ied_defuse). Every pile, live or decoy, carries that same prone
 // defuse and a client-side world icon (fnc_random_event_ied_markers), so the two cannot be told apart --
@@ -149,8 +149,8 @@ if (_liveCount == 0) exitWith {
 						params ["_pile", "_pp"];
 						sleep FUSE;
 						// Spawn the shell above ground and shove it down: a shell created at rest never
-						// fuzes (arma_engine_gotchas.md). 155mm, as car_bomb, up from the 82mm mortar.
-						private _bomb = createVehicle ["Sh_155mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+						// fuzes (arma_engine_gotchas.md). 82mm mortar shell, smaller than car_bomb's 155.
+						private _bomb = createVehicle ["Sh_82mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
 						_bomb setVelocity [0, 0, -30];
 						if (!isNull _pile) then { deleteVehicle _pile };
 					};
