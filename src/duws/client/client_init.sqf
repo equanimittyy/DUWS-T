@@ -199,26 +199,6 @@ player addEventHandler ["killed", {
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
-// The molotov projectile is local only to the thrower's machine, so track it here: trail to all machines,
-// ignite handed to the server.
-player addEventHandler ["Fired", {
-    params ["", "", "", "", "_ammo", "", "_projectile"];
-    if (_ammo != "DUWS_MolotovAmmo") exitWith {};
-    [_projectile] remoteExec ["fnc_molotov_trail", 0];
-    [_projectile] spawn {
-        params ["_p"];
-        private _end = time + 15;
-        waitUntil {
-            sleep 0.1;
-            isNull _p || {time > _end} || {(vectorMagnitude velocity _p) < 2 && {(getPosATL _p select 2) < 0.6}}
-        };
-        if (isNull _p) exitWith {};
-        private _pos = getPosATL _p;
-        deleteVehicle _p;
-        [_pos] remoteExec ["fnc_molotov_ignite", 2];
-    };
-}];
-
 // Stamina/fatigue from the lobby param (default off). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
 player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
@@ -284,12 +264,6 @@ player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, tr
 // so it is reachable anywhere on the map, and it dies with the body, so onPlayerRespawn re-adds.
 if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
 	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, [], 20, true, true, "", "_this == player"];
-};
-
-// Debug only: shelve the throwables so a tester can draw them. The whitelist reads the same cargo var,
-// so this both stocks and permits them; live play has no arsenal source for them yet.
-if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1) then {
-	[missionNamespace, ["DUWS_StoneMag", "DUWS_MolotovMag"], true] call BIS_fnc_addVirtualMagazineCargo;
 };
 
 // Create Diary/Help entry on the Map
