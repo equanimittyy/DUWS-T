@@ -3876,8 +3876,8 @@
                 <English>Escort Informant</English>
             </Key>
             <Key ID="STR_DUWS_T_ESCORT_INFORMANT_DESC">
-                <Original>An informant in this area needs an escort to safety. Reach them and get them clear.</Original>
-                <English>An informant in this area needs an escort to safety. Reach them and get them clear.</English>
+                <Original>An informant needs safe escort from HQ to the town in this area. Ensure their safe return home.</Original>
+                <English>An informant needs safe escort from HQ to the town in this area. Ensure their safe return home.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_brief">
                 <Original>Alpha 1-1, an informant needs escort to %1. Get them there safely.</Original>
