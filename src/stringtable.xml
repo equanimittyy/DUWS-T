@@ -4178,12 +4178,9 @@
                 <Original>The pilot bled out.</Original>
                 <English>The pilot bled out.</English>
             </Key>
-            <Key ID="STR_DUWS_T_fxyys123">
-                <German>Der Bericht besagt, der Pilot verliert seine Lebenszeichen! Eure Truppe muss sich beeilen!</German>
-                <Spanish>El informe indica que el piloto está perdiendo signos vitales! Tu escuadrón debe apresurarse!</Spanish>
-                <Chinesesimp>报告说飞行员正失去生命体征！你的小队需要加快速度了！</Chinesesimp>
-                <Original>The pilot's fading fast. Two minutes, maybe less.</Original>
-                <English>The pilot's fading fast. Two minutes, maybe less.</English>
+            <Key ID="STR_DUWS_T_pilot_bleed_count">
+                <Original>The pilot will bleed out in %1 minute(s). Get him back to HQ.</Original>
+                <English>The pilot will bleed out in %1 minute(s). Get him back to HQ.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotfound">
                 <German>Scheiße... Mein Bein ist verletzt. Hast du ein Sanitätspaket?</German>

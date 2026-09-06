@@ -194,6 +194,18 @@ private _clearIcons = {
 
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
+// Bleedout hint: refresh the minutes-left count every 60 s, mirroring the Protect Informant prep counter.
+// Stops the moment the pilot reaches HQ, dies, or the clock expires -- the expiry hint below names the
+// cause of death, so this counter never has to draw zero.
+[_pilot, _bleedout] spawn {
+    params ["_pilot", "_bleedout"];
+    while { alive _pilot && { (_pilot distance PosOfBLUHQ) >= 50 } && { time < _bleedout } } do {
+        [format [localize "STR_DUWS_T_pilot_bleed_count", ceil (round (_bleedout - time) / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
+        private _next = time + 60;
+        waitUntil { sleep 1; time >= _next || !(alive _pilot) || (_pilot distance PosOfBLUHQ) < 50 || time >= _bleedout };
+    };
+};
+
 waitUntil {
     sleep 1;
     (_pilot distance PosOfBLUHQ) < 50 || !(alive _pilot) || time > _bleedout
