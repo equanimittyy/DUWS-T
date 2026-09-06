@@ -101,10 +101,22 @@ Retrieve the selected stored vehicle, Buy the next expansion level. Storing chec
 vehicle's domain, so a full land pool does not block storing an aircraft.
 
 **Recycle panel.** Lists the empty pad vehicles with each one's reward from
-`DUWS_fnc_vehicleRecycleReward` (see [Recycle payout](#recycle-payout)), with a Recycle button. The
-existing bulk behaviour — recycle every empty vehicle on the pad through `fnc_veh_recycle_action` — is
-preserved as the button's action; the per-vehicle rewards are shown so the payout is legible before
-committing.
+`DUWS_fnc_vehicleRecycleReward` (see [Recycle payout](#recycle-payout)). A **single** Recycle button
+replaces the old pair of recycle and preview actions and runs a confirm-then-report flow. On click it
+gathers the empty pad vehicles, sums their rewards client-side (the reward function is broadcast, so the
+client computes the same total the server will credit), and raises a Yes/No confirmation —
+`[format [<key>, _count, _total], _title, true, true] call BIS_fnc_guiMessage`, the Yes/No idiom already
+used at `client/arsenal/fnc_ai_rearm.sqf:4`. The prompt reads "Are you sure you want to recycle N
+vehicles for T CP?". On Yes it calls `fnc_veh_recycle_action` on the server; No does nothing. Folding
+the preview into the confirmation retires `fnc_veh_recycle_preview_server` and its preview string.
+
+`fnc_veh_recycle_action` recomputes the set at commit (the server is authority and the pad may have
+changed between confirm and Yes), deletes and credits, then hints an itemised report to the recycler: a
+`Recycled:` header, one `<display name> for X CP` line per vehicle — the name from
+`getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName")`, as
+`fnc_activateBaseRepairStation.sqf:52` reads it — and a closing `Total: T CP.` line. A `hint` truncates a
+long body, so identical classes collapse to one counted line (`3× Hunter HMG for 15 CP`) to keep a bulk
+recycle legible; the report ends with a terminal period, per the player-text convention.
 
 Any purchase, store, retrieve, or recycle refills the affected list by clearing and rebuilding inside
 `isNil {}`, following `fnc_support_list_fill.sqf`.
@@ -193,8 +205,9 @@ always computed the same way.
 
 `DUWS_fnc_calculateVehicleValue` (`fnc_activateBaseRecycleStation.sqf:4`) stays the raw combat-value
 estimate (seats, weapon classes, and the supply / car / tank / air multipliers). A new wrapper,
-`DUWS_fnc_vehicleRecycleReward [_veh]`, applies the recycle policy on top and is called by both the
-preview (`fnc_veh_recycle_preview_server`) and the action (`fnc_veh_recycle_action`):
+`DUWS_fnc_vehicleRecycleReward [_veh]`, applies the recycle policy on top. It is `publicVariable`'d like
+`DUWS_fnc_calculateVehicleValue` so the client can total it for the confirmation prompt and the server
+can credit the identical figure — one function, two callers, no drift:
 
 - A civilian vehicle keeps **half** its value — an extra ×0.5 on top of the existing car multiplier —
   detected by `getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "side") == 3`, the same test
@@ -226,8 +239,11 @@ New keys in `stringtable.xml`, English only — the DE/ES/ZH tags lag on purpose
 later. Use a per-topic prefix (`STR_DUWS_T_DEPOT_*`, `STR_DUWS_T_GARAGE_*`): the menu title, three
 section headers, the five expansion-level labels, the Store / Retrieve / Buy-expansion button labels,
 the three pool readouts (land, air, boats), and the success and error hints (domain pool full, nothing
-selected, cannot afford, AP-rung locked, stored, retrieved). Player text keeps terminal periods on hints and none on button labels, and names
-each action and its cost without scene-setting.
+selected, cannot afford, AP-rung locked, stored, retrieved). The recycle flow adds the confirm prompt
+("recycle %1 vehicles for %2 CP?"), the report header, a per-line "%1 for %2 CP" (with a "%1× " prefix
+for grouped classes), and the "Total: %1 CP." line; the old `STR_DUWS_T_PREVIEW_*` recycle keys are
+retired with the preview function. Player text keeps terminal periods on hints and none on button
+labels, and names each action and its cost without scene-setting.
 
 ## Files
 
@@ -248,8 +264,9 @@ Changed:
 - `client/supports/fnc_client_addRecycleActions.sqf` — retire its action block (folded into the menu)
 - `server/supports/fnc_activateBaseRepairStation.sqf`, `fnc_activateBaseRecycleStation.sqf` — register
   the single depot client action and add garage activation; in the recycle station, drop both
-  `_excludedClasses` copies and add the `DUWS_fnc_vehicleRecycleReward` wrapper (civilian ×0.5, floor 1)
-  called by preview and action
+  `_excludedClasses` copies and add the broadcast `DUWS_fnc_vehicleRecycleReward` wrapper (civilian ×0.5,
+  floor 1); retire `fnc_veh_recycle_preview_server`, and give `fnc_veh_recycle_action` the itemised
+  report hint
 - `client/supports/fnc_supports_init.sqf:307-309` — activate the garage with the depot
 - `stringtable.xml` — the new keys
 - `tests/unit/functions.txt` — add any new function that gets a unit test (the path list is hardcoded)
@@ -274,4 +291,7 @@ and at the HQ helipad:
 - Recycle credits CP for every empty pad vehicle (no class is refused now), matches the shown reward,
   pays at least 1 CP for a quad or tractor, and pays a civilian vehicle half what an equivalent military
   one earns.
+- The single Recycle button raises one Yes/No prompt naming the count and total CP; No leaves the pad
+  untouched, Yes deletes the vehicles, credits the total, and hints an itemised report whose per-line
+  amounts and total match what was credited.
 - After a `saveGame` and reload, the stored vehicles and the purchased capacity both survive.
