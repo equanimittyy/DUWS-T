@@ -23,7 +23,10 @@ for ($i = 0; $i -lt $log.Count; $i++) {
     $hashes += $parts[0]
     $desc = ''
     if ($parts.Count -gt 1) { $desc = $parts[1] }
-    [Console]::Error.WriteLine('   {0}) {1}  {2}' -f ($i + 1), $parts[0], $desc)
+    # Build the line first: inside a .NET method call's parens the commas are argument
+    # separators, so an inline '... -f a, b, c' would hand -f only its first arg and throw.
+    $line = '   {0}) {1}  {2}' -f ($i + 1), $parts[0], $desc
+    [Console]::Error.WriteLine($line)
 }
 [Console]::Error.WriteLine('   or paste a full commit hash')
 
