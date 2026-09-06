@@ -297,6 +297,12 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
         [_zp, _zbMin, _zbMax, 5, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos
     };
 
+    // BIS_fnc_findSafePos returns the centre of its blacklist -- [0,0] for the [[0,0],[0,0]] arg above --
+    // when it exhausts its attempts without settling a spot (a sample or town with no clear ground in band).
+    // [0,0] is open sea off Altis' SW corner yet clears every gate below (far from all zones, ~10 km from an
+    // HQ well inside the 1.5x reach), so unguarded it would be offered and started. Drop the feature.
+    if (((_cand select 0) == 0) && {(_cand select 1) == 0}) then { _shortlist = _shortlist select {!((_x select 0) isEqualTo _fData)}; continue };
+
     // Off every zone/town by 400 m -- the drift a thread's objective takes before fnc_missionTargetPos
     // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
     if ([_cand, 400] call fnc_pos_claimed) then { continue };

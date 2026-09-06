@@ -1664,6 +1664,24 @@ finder's returned position to `[x,y]` before it becomes an offer, so a snapping 
 (`fnc_informant_site`, `fnc_recon_observe_site`) cannot leak a Z. The threads derive their own ground
 positions later and only ever measure the offer point with `distance2D`, so the Z was dead weight anyway.
 
+## `BIS_fnc_findSafePos` returns the blacklist centre on failure, not `[]`
+
+**When `BIS_fnc_findSafePos` exhausts its attempts without finding a spot, it does not signal failure —
+it returns the centre of its first blacklist area. With the common `[[0,0],[0,0]]` blacklist idiom that
+centre is `[0,0]`, a real-looking position at the map origin (open sea off Altis' SW corner). A caller
+that treats any non-`[]` return as success accepts it.**
+
+A side mission using the whole-map placement survey (`fnc_mission_findSite`, `surveyKind "map"`) sampled
+a coastal dot; `findSafePos` could not settle clear ground within the band and returned `[0,0]`. `[0,0]`
+cleared every downstream gate — far from all zones (not `fnc_pos_claimed`), far from co-offers, and ~10 km
+from an HQ well inside the `zones_max_dist_from_hq * 1.5` reach — so the mission was offered on the map and
+started in the water. The "no fit, draw another" path never fired because `[0,0]` was not `[]`.
+
+**How to apply:** after every `BIS_fnc_findSafePos` call whose result feeds placement, reject the origin
+explicitly — `if (((_p select 0) == 0) && {(_p select 1) == 0}) then { /* treat as no fit */ }`. No valid
+position on a real map is exactly `[0,0]`, so the component test is safe and catches both the `[0,0]` and
+`[0,0,0]` shapes. Do not rely on an `isEqualTo []` no-fit check upstream — this function never returns `[]`.
+
 ## `doSuppressiveFire` needs line of sight and picks the heaviest weapon, so it levels a building
 
 **`unit doSuppressiveFire target` does nothing when the unit cannot see the target, and when it does
