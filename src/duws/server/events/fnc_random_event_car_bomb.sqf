@@ -1,17 +1,17 @@
 // Locality: server -- a vehicle-borne IED, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town.
 //
-// An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), beelining at the nearest
-// player, horn blaring, until it detonates. Built here rather than via fnc_civ_spawnUnit, which would bolt
-// on a recruit action and a flee-on-fire panic handler. Killing the driver only trades the run-in for a
-// short dead-man cook-off.
+// An OPFOR soldier in a civilian car: overtly hostile (friendly AI engages it), beelining at the nearest
+// player, horn blaring, until it detonates. The driver is the faction's own soldier (opfor_SOLDIER_X), not a
+// civ-model body -- a civilian occupant reads as Civilian in Zeus/Curator even inside an EAST group. Built
+// here rather than via fnc_civ_spawnUnit, which would bolt on a recruit action and a flee-on-fire panic
+// handler. Killing the driver only trades the run-in for a short dead-man cook-off.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
 private _pool = missionNamespace getVariable ["civ_veh_array", []];
-private _bodies = missionNamespace getVariable ["civ_array", []];
-if (_pool isEqualTo [] || {_bodies isEqualTo []}) exitWith {};
+if (_pool isEqualTo [] || {opfor_SOLDIER_X isEqualTo ""}) exitWith {};
 
 // Out of sight where possible, so it drives into view rather than popping in beside the player.
 private _roads = [getPos _player] call fnc_civ_pickHiddenRoad;
@@ -21,7 +21,7 @@ private _spawnPos = getPosATL (selectRandom _roads);
 private _veh = [selectRandom _pool, _spawnPos, [_spawnPos, getPos _player] call BIS_fnc_dirTo] call fnc_civ_spawnCar;
 
 private _grp = createGroup [EAST, true];
-private _driver = _grp createUnit [selectRandom _bodies, _spawnPos, [], 0, "NONE"];
+private _driver = _grp createUnit [opfor_SOLDIER_X, _spawnPos, [], 0, "NONE"];
 if (isNull _driver) exitWith { deleteVehicle _veh };
 _driver moveInDriver _veh;
 _driver setVariable ["Vcm_Disable", true];   // keep an AI mod from overriding the beeline
@@ -79,8 +79,10 @@ _driver setVariable ["DUWS_binMe", true];
 	sleep _fuse;
 	if (!isNull _veh) then {
 		// Spawned above the hull and shoved down: a shell created at rest never fuzes (arma_engine_gotchas.md).
+		// Arty-grade 155mm round, the artillery-support shell (supports_radio_modern.hpp), not the 82mm mortar.
 		private _p = getPosATL _veh;
-		private _bomb = createVehicle ["Sh_82mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+		private _bomb = createVehicle ["Sh_155mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
 		_bomb setVelocity [0, 0, -30];
+		_veh setDamage 1;   // car cooks off on its own too, not just shredded by the shell blast
 	};
 };
