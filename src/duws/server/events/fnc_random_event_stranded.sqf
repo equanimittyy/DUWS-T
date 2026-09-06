@@ -1,7 +1,8 @@
 // Locality: server -- a stranded civilian beside a broken-down car on a roadside verge near the picked
 // player. Ambient event, no rep gate. He asks players in earshot to repair the
 // car; once it is, he drops a cash reward, the town's regard rises, and he boards and drives off. Car placed by fnc_civ_spawnCar so it settles
-// on the shoulder instead of detonating; driver a full civilian, so harming him costs reputation.
+// on the shoulder instead of detonating; driver a full civilian, so harming him costs reputation. Car is
+// locked to players so it cannot be boarded or driven off, only repaired.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -33,6 +34,11 @@ private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
 [_veh, 0.8] call fnc_veh_set_comp_damage;
 [_veh] call fnc_veh_disable_engine;
 
+// Locked to players so the win is to repair the car from outside, not board or drive it off -- and no
+// hijacking the repaired car either. LOCKEDPLAYER, not full lock, so the civ himself can still board and
+// drive off once it is fixed; the toolkit repair action is external and is not gated by the lock.
+_veh setVehicleLock "LOCKEDPLAYER";
+
 private _civ = [_townIndex, _veh getPos [3, _dir + 90], selectRandom civ_array, false] call fnc_civ_spawnUnit;
 if (isNull _civ) exitWith { deleteVehicle _veh };
 (group _civ) setBehaviour "SAFE";
@@ -57,7 +63,10 @@ _civ setVariable ["DUWS_binMe", true];
 	params ["_civ", "_veh", "_townIndex"];
 	private _pleaded = false;
 	private _deadline = time + STRANDED_TIMEOUT;
-	while { alive _civ && {!isNull _veh} && {time < _deadline} } do {
+	// alive _veh, not !isNull: a destroyed or deleted car ends the watch at once, so the civ is not left
+	// pleading for repair on a wreck. He is never deleted here -- his DUWS_binMe flag reaps him once no
+	// player is near, car or no car.
+	while { alive _civ && {alive _veh} && {time < _deadline} } do {
 		private _heard = (call BIS_fnc_listPlayers) select { _x distance _civ < HEAR_RADIUS };
 
 		// His plea: set off by a player on foot -- a driver passing does not trigger it -- but heard by
