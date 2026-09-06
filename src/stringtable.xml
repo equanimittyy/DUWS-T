@@ -4147,8 +4147,8 @@
                 <German>Nicht genung sichere Positionen für die Generierung der Mission gefunden. Versuche es erneut.</German>
                 <Spanish>No hay suficientes posiciones seguras para la generación de misiones. Intente de nuevo.</Spanish>
                 <Chinesesimp>没有足够的安全位置来生成任务。再试一次。</Chinesesimp>
-                <Original>Not enough safe positions to generate the mission. Try again.</Original>
-                <English>Not enough safe positions to generate the mission. Try again.</English>
+                <Original>Mission generation failed. Try the side mission picker again.</Original>
+                <English>Mission generation failed. Try the side mission picker again.</English>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
@@ -4168,8 +4168,8 @@
                 <English>Mission generation complete.</English>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_GEN_FAILED">
-                <Original>Mission generation failed. Try again.</Original>
-                <English>Mission generation failed. Try again.</English>
+                <Original>Mission generation failed. Try the side mission picker again.</Original>
+                <English>Mission generation failed. Try the side mission picker again.</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
