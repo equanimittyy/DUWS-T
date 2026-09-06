@@ -28,9 +28,9 @@ for "_i" from 1 to 6 do {
 if (_spawnPos isEqualTo []) then { _spawnPos = getPosATL _road };
 
 private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
-// 80% damaged: broken down but short of 1.0 so it is repairable, not a wreck. Engine killed below so it
-// can't be driven off until fixed. Win test reads component damage, not raw health (fnc_veh_comp_damage).
-_veh setDamage 0.8;
+// Uniform 70% component damage: broken down but a field toolkit clears the win gate. Engine killed below
+// so it can't be driven off until fixed; win test reads component damage (fnc_veh_comp_damage).
+[_veh, 0.7] call fnc_veh_set_comp_damage;
 [_veh] call fnc_veh_disable_engine;
 
 private _civ = [_townIndex, _veh getPos [3, _dir + 90], selectRandom civ_array, false] call fnc_civ_spawnUnit;

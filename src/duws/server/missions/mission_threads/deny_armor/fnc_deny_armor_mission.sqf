@@ -48,7 +48,7 @@ private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), rou
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 private _tank = createVehicle [opfor_MBT_TANK1_X, _vehpos, [], 0, "CAN_COLLIDE"];
 _tank setDir (random 360);
-_tank setDamage 0.8;
+[_tank, 0.7] call fnc_veh_set_comp_damage;
 _tank setFuel 0.5;
 _tank setVehicleAmmo 0.1;
 [_tank] call fnc_veh_disable_engine;

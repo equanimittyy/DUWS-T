@@ -138,10 +138,11 @@ fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_
 fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
 
-// Derelict-recovery: repair gate read on hit points (raw getDammage never moves under field repair) and
-// an engine-kill that immobilises a spawned derelict until repaired.
+// Derelict-recovery: repair gate read on hit points (raw getDammage never moves under field repair), a
+// uniform component-damage spawn, and an engine-kill that immobilises a spawned derelict until repaired.
 fnc_veh_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_comp_damage.sqf";
 fnc_veh_disable_engine = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_disable_engine.sqf";
+fnc_veh_set_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_set_comp_damage.sqf";
 
 // Shared convoy driving: a self-generated road-graph route builder, a slot layout that seats the column ON
 // that route, and a driver that puts every hull on the route with setDriveOnPath (no native lead pathing).
