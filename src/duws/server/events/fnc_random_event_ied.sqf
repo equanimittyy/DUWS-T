@@ -2,8 +2,10 @@
 // already turned the town against the player.
 //
 // A scatter of identical junk piles on the roads around the town. Each is independently, secretly live
-// (IED_LIVE_CHANCE, no floor -- a field of pure decoys is a legal, deliberately anticlimactic outcome, and
-// all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR man stands or crouches, or
+// (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
+// usual outcome: the point is to make the player treat every pile as a threat, not to kill them; a live pile
+// is the exception and all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR
+// man stands or crouches, or
 // any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, which is the only way to
 // crawl in and defuse it (fnc_random_event_ied_defuse). Every pile, live or decoy, carries that same prone
 // defuse and a client-side world icon (fnc_random_event_ied_markers), so the two cannot be told apart --
@@ -14,11 +16,11 @@ if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
-#define IED_COUNT_MIN 4
+#define IED_COUNT_MIN 1
 #define IED_COUNT_MAX 6
 #define IED_REACH 350
 #define IED_MIN_SEP 40
-#define IED_LIVE_CHANCE 0.35
+#define IED_LIVE_CHANCE 0.06
 #define ARM_RANGE 10
 #define FUSE (0.5 + random 1)
 #define LIFETIME 1200
