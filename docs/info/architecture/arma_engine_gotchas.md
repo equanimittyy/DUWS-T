@@ -1606,7 +1606,21 @@ draw. The fix is to not broadcast: call `BIS_fnc_taskCreate` server-side and let
 synchronise it to the owner side's clients, joiners included. A native create keeps each reference as
 its own netId string, so a real position destination draws a clean map pin with no flood.
 `fnc_missionTaskCreate` / `fnc_missionTaskEnd` create, retire and delete every side-mission task this
-way; `fnc_night_horde_event` uses the same native calls.
+way, with a position destination.
+
+Two known problems sit around this:
+
+- **`fnc_night_horde_event.sqf:56` passes `objNull` as the destination.** It creates server-side like the
+  others, but an objNull destination is still a reference the map draw resolves each open frame — the same
+  trap `fnc_capture_zones_task.sqf` avoids by passing `[]`. The fix is to pass `[]`. It only bites in
+  RAVAGE mode (the event spawns from `server_init.sqf` only there), which is why it has gone unnoticed.
+- **A curator/Zeus session throws a look-alike flood that is not the mission's fault.** With the Arma 3
+  Zeus DLC and Zeus Enhanced loaded and the player as `game_master`, the same
+  `objectFromNetId`/`groupFromNetId` errors appear (e.g. `type OBJECT ... in player1`, and a live enemy
+  unit such as `O Alpha 1-1:4`) as the curator layer re-resolves the player and spotted units. Tell it
+  apart from the task-create flood by cadence: this one arrives in discrete bursts tied to spot events,
+  not the continuous every-open-frame stream a broadcast task produces, and it names a live OPFOR unit no
+  mission task ever owns. Unassigning `game_master` makes it stop; it is out of the mission's scope.
 
 ## `uiNamespace` outlives a mission restart, but spawned loops do not
 
