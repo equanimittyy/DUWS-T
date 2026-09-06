@@ -28,9 +28,9 @@ for "_i" from 1 to 6 do {
 if (_spawnPos isEqualTo []) then { _spawnPos = getPosATL _road };
 
 private _veh = [selectRandom _pool, _spawnPos, _dir] call fnc_civ_spawnCar;
-// Uniform 70% component damage: broken down but a field toolkit clears the win gate. Engine killed below
-// so it can't be driven off until fixed; win test reads component damage (fnc_veh_comp_damage).
-[_veh, 0.7] call fnc_veh_set_comp_damage;
+// Uniform 80% component damage: heavily wrecked but a field toolkit clears the win gate. Engine killed
+// below so it can't be driven off until fixed; win test reads component damage (fnc_veh_comp_damage).
+[_veh, 0.8] call fnc_veh_set_comp_damage;
 [_veh] call fnc_veh_disable_engine;
 
 private _civ = [_townIndex, _veh getPos [3, _dir + 90], selectRandom civ_array, false] call fnc_civ_spawnUnit;
@@ -45,8 +45,8 @@ _civ disableAI "PATH";
 _veh setVariable ["DUWS_binMe", true];
 _civ setVariable ["DUWS_binMe", true];
 
-// HEAR_RADIUS: earshot for his lines. REPAIRED_DMG: mean hit-point damage at/below this counts as repaired.
-// Spawns uniform 0.7; a toolkit field repair floors at ~0.6, so the gate sits just above that floor for headroom.
+// HEAR_RADIUS: earshot for his lines. REPAIRED_DMG: mean hit-point damage at/below this counts as repaired --
+// a toolkit floors the repairable parts at ~0.6 and the mean now counts the un-repaired hull, so it keeps only thin headroom.
 // STRANDED_TIMEOUT: backstop so the watch thread ends if a player lingers near an unfixed car forever; the
 // cleanup flags above own the actual teardown.
 #define HEAR_RADIUS 30

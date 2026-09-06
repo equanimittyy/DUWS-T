@@ -8,7 +8,7 @@ if (!([11, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 #define DA_DISEMBARK   140      // troops dismount once their transport is this close to the tank
 #define DA_ARRIVE      15       // a live crewman this close to the tank is working on it (AI halts at the hull)
 #define DA_ARRIVE_ZONE 150      // a repaired tank this close to its home zone has got away (fail)
-#define DA_REQUISITION_DMG 0.65  // player-crewed hull repaired to <= this mean hit-point damage (>=35% component health) wins. Toolkit field repair floors at ~0.6; the gate sits just above it for headroom. fnc_veh_comp_damage reads the parts, not raw getDammage, which field repair never moves.
+#define DA_REQUISITION_DMG 0.65  // player-crewed hull repaired to <= this mean hit-point damage (>=35% component health) wins. Toolkit field repair floors the repairable parts at ~0.6; fnc_veh_comp_damage now means every part (the un-repaired hull included), so the gate keeps only thin headroom over that floor. Reads the parts, not raw getDammage, which field repair never moves.
 
 // Repair time scales inversely with the nearest OPFOR zone's distance (NEAR at/inside NEARDIST, FAR
 // at/beyond FARDIST, linear between): a tank repaired near its own lines is the harder denial.
@@ -48,7 +48,7 @@ private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), rou
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 private _tank = createVehicle [opfor_MBT_TANK1_X, _vehpos, [], 0, "CAN_COLLIDE"];
 _tank setDir (random 360);
-[_tank, 0.7] call fnc_veh_set_comp_damage;
+[_tank, 0.8] call fnc_veh_set_comp_damage;
 _tank setFuel 0.5;
 _tank setVehicleAmmo 0.1;
 [_tank] call fnc_veh_disable_engine;

@@ -1824,13 +1824,16 @@ parts come up (only to the ~0.6 cap), `getDammage` stays put. This is stock Arma
 
 **How to apply:** to detect field repair, test the hit points, not the hull — mean part damage
 (`fnc_veh_comp_damage`, `server/misc/`) against a threshold set just above the ~0.6 repair cap (a gate at or
-below the cap is unreachable, or a coin-flip on float rounding), and drop the structural `HitHull`/`HitBody`
-points from that mean: they no
-more field-repair than the hull value does, so leaving them in pins the mean above the gate however well the
-player fixes the drivable parts. To fully repair from script use `setDamage 0`
-(the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a spawned derelict,
-kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage` afterwards would
-redistribute the part back to a drivable state.
+below the cap is unreachable, or a coin-flip on float rounding). The mean averages *every* hit point. The
+engine is pinned dead at spawn so the derelict can't be driven off, but it field-repairs like any part, so
+once the player fixes it the engine no longer weighs on the mean. The structural `HitHull`/`HitBody` points
+do *not* field-repair — they hold their spawn damage and pull the mean up for good — so the gate stays
+reachable only while the field-repairable parts outnumber them ~3:1 (the crossover at a 0.8 spawn / 0.6 cap
+/ 0.65 gate): a hull with few repairable parts and heavy structural points can sit above the gate however
+well it is fixed, so keep an eye on odd/modded vehicle hit-point layouts. To fully repair from script use
+`setDamage 0` (the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a
+spawned derelict, kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage`
+afterwards would redistribute the part back to a drivable state.
 
 ## A civilian-class unit made hostile by `createUnit` into an enemy group still reads Civilian in Zeus
 
