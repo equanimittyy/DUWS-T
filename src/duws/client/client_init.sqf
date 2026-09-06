@@ -137,6 +137,7 @@ waituntil {sleep 1;WARCOM_init_done;};
 [] call fnc_draw_world_icons;
 [] call fnc_sabotage_laptop_markers;
 [] call fnc_protect_civ_markers;
+[] call fnc_random_event_ied_markers;
 
 
 if (isMultiplayer) then {

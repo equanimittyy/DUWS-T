@@ -105,6 +105,8 @@ fnc_sabotage_laptop_markers = compile preprocessFileLineNumbers "duws\client\mis
 publicVariable "fnc_sabotage_laptop_markers";
 fnc_protect_civ_markers = compile preprocessFileLineNumbers "duws\client\missions\fnc_protect_civ_markers.sqf";
 publicVariable "fnc_protect_civ_markers";
+fnc_random_event_ied_markers = compile preprocessFileLineNumbers "duws\client\events\fnc_random_event_ied_markers.sqf";
+publicVariable "fnc_random_event_ied_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
