@@ -1811,3 +1811,17 @@ above the gate however well the player fixes the drivable parts. To fully repair
 (the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a spawned derelict,
 kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage` afterwards would
 redistribute the part back to a drivable state.
+
+## A civilian-class unit made hostile by `createUnit` into an enemy group still reads Civilian in Zeus
+
+**A man of a CIVILIAN-faction class created with `group createUnit [...]` straight into an EAST (or WEST)
+group does not reliably take that side: the curator/Zeus layer still lists and colours it Civilian — the
+side its config carries — so a game master sees a civilian where the mission has an enemy, and the unit
+will not open fire even set to COMBAT.** Re-grouping it after creation fixes both: `[_unit] joinSilent
+(createGroup [EAST, true])` registers the live side for the curator icon and for engagement.
+
+**How to apply:** to turn a civ-model unit hostile and have it read hostile everywhere, create it, then
+`joinSilent` it into a fresh side group rather than creating it into that group in one step — keeping the
+civilian costume while the side is real. The VBIED driver (`server/events/fnc_random_event_car_bomb.sqf`)
+and the informant manhunt (`server/missions/mission_threads/informant/fnc_informant_mission.sqf`) both do
+this.
