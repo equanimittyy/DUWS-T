@@ -160,7 +160,7 @@ while { count _startRoads < 3 } do {
     // seat a whole column out at sea. The shared safe-pos helper falls back to the raw offered point
     // (already _spawnR out on the run bearing, inside the area) so the start stays where the column belongs.
     private _cand = _MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)];
-    _startRoads pushBack [[_cand, 250, 8] call fnc_convoy_safepos, _dirZone];
+    _startRoads pushBack [[_cand, 250, 0, 8] call fnc_mission_safepos, _dirZone];
 };
 
 private _hvtIdx = floor random 3;

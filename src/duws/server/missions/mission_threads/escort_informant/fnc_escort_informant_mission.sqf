@@ -28,8 +28,7 @@ private _bestD = 1e9;
 if (_townIdx < 0) exitWith { [20, _requester, "no_delivery_town"] call fnc_mission_abort };
 
 private _hqPos = if (!isNil "bluHQ_object" && { !isNull bluHQ_object }) then { getPosATL bluHQ_object } else { +PosOfBLUHQ };
-private _spawnPos = [[_hqPos select 0, _hqPos select 1], 10, 120, 8, 0, 0.4, 0, [], []] call BIS_fnc_findSafePos;
-if (_spawnPos isEqualTo [] || { (_spawnPos select 0) == 0 && { (_spawnPos select 1) == 0 } }) then { _spawnPos = _hqPos };
+private _spawnPos = [_hqPos, 120, 10, 8, 0.4] call fnc_mission_safepos;
 
 private _civClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_4_F", "C_man_p_fugitive_F", "C_man_hunter_1_F", "C_Man_casual_1_F", "C_Man_casual_4_F"];
 private _grp = [_spawnPos, WEST, [selectRandom _civClasses]] call BIS_fnc_spawnGroup;
