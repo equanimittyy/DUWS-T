@@ -25,9 +25,11 @@ Three decisions govern everything below:
   deleted from the world. Capture covers class, textures, pylon loadout, per-hitpoint damage, fuel,
   and cargo — so a vehicle the player has paid to modify and has half-wrecked comes back exactly as
   it was left.
-- **Garage capacity is a radio-tower-style ladder.** Extra slots are bought in the new menu with CP,
-  each tier gated on an AP rung and on owning the tier below it — the same shape as the three radio
-  towers, not a flat purchasable counter.
+- **Garage capacity is three domain pools raised by a radio-tower-style ladder.** Land, air, and boat
+  vehicles count against separate caps. A base level is owned from the start; four expansion levels,
+  bought in order in the new menu, each raise all three caps at once. Every level costs CP; the upper
+  ones also cost AP and, from Expansion II on, are gated on an earned-AP rung — the same shape as the
+  radio towers, not a flat purchasable counter.
 
 ## The REQUESTS framework being reused
 
@@ -76,7 +78,8 @@ supports catalogue, so garage tiers never leak into the REQUESTS supports listbo
 
 A new dialog class `vehicledepotmenu` in `shared/includes/vehicle_depot_menu.hpp`, `#include`d from
 `description.ext` next to `request_menu.hpp`, `idd = -1`, built from the same `defines.hpp` controls on
-the `GUI_GRID_*` grid. Header readouts show CP, AP, and garage capacity as "used / total". Three headed
+the `GUI_GRID_*` grid. Header readouts show CP, AP, and the three garage pools as "used / total" for
+land, air, and boats. Three headed
 panels sit side by side — Modification, Garage, Recycle — each a `RscFrame` over a `RscListBox` with its
 own action buttons, plus one EXIT button. Each button's `action` string spawns its handler, exactly as
 the REQUESTS panels do.
@@ -94,7 +97,8 @@ hoisted sub-dialogs (below) on the selected vehicle. The skin and pylon UIs them
 **Garage panel.** Lists stored-vehicle rows (display name plus a short state summary, `lbData` = stored
 index) and, below them, the garage-tier ladder rendered with `DUWS_fnc_tierListFill` — owned tiers
 green, an affordable next tier orange, AP-locked tiers greyed. Buttons: Store the selected pad vehicle,
-Retrieve the selected stored vehicle, Buy the next slot tier.
+Retrieve the selected stored vehicle, Buy the next expansion level. Storing checks the pool for the
+vehicle's domain, so a full land pool does not block storing an aircraft.
 
 **Recycle panel.** Lists the empty pad vehicles with each one's value from
 `DUWS_fnc_calculateVehicleValue`, with a Recycle button. The existing bulk behaviour — recycle every
@@ -149,12 +153,36 @@ any engine quirk found while implementing it is logged in `arma_engine_gotchas.m
 
 ## Garage capacity ladder
 
-A data table (for example `DUWS_garage_tiers` in `shared/functions/`) of rows
-`[_key, _addCapacity, _cpCost, _apCost, _apTier, _flagVar, _labelKey]`, with a base-capacity constant.
-Ownership is a per-tier team flag persisted like a PERM support; capacity is the base plus the added
-capacity of every owned tier. Rows render through `DUWS_fnc_tierListFill`, price through
-`fnc_support_cost_bracket`, and gate sequentially and by AP rung through `DUWS_fnc_ap_unlocked` — the
-radio-tower shape, kept out of the supports catalogue.
+Capacity is three independent caps — land, air, boats — set by a five-level ladder. The base level is
+owned from campaign start; the four expansion levels are bought in order, each setting **absolute**
+caps for all three pools (not additive deltas):
+
+| Level | Land | Air | Boats | Cost | Earned-AP rung |
+|---|---|---|---|---|---|
+| Base | 3 | 1 | 3 | owned at start | — |
+| Expansion I | 6 | 3 | 6 | 10 CP | none |
+| Expansion II | 10 | 5 | 10 | 20 CP + 5 AP | Mechanised (tier 3, ≥150) |
+| Expansion III | 15 | 8 | 15 | 40 CP + 15 AP | Armour (tier 4, ≥350) |
+| Expansion IV | 25 | 15 | 25 | 50 CP + 25 AP | Air (tier 5, ≥600) |
+
+The data lives in a table in `shared/functions/`, for example `DUWS_garage_tiers`, of rows
+`[_key, _landCap, _airCap, _boatCap, _cpCost, _apCost, _apTier, _flagVar, _labelKey]`. Ownership is a
+per-level team flag persisted like a PERM support. The current caps are the highest owned level's row,
+so a purchase overwrites the caps rather than summing.
+
+A purchase is gated on owning the level below it and, for Expansion II onward, on the earned-AP rung in
+the table (`["BLU", _apTier] call DUWS_fnc_ap_unlocked`, resolved against `DUWS_ap_tier_rungs =
+[60, 150, 350, 600]`, `fnc_economy_init.sqf:41`). Expansion I has no rung — CP only. The AP *cost* on
+II–IV is spent from the current AP pool through `fnc_pool_spend`, separate from the earned-AP *rung*,
+which is a ratchet and never spent. Rows render through `DUWS_fnc_tierListFill`, price through
+`fnc_support_cost_bracket`. The table stays out of the supports catalogue so it never appears in the
+REQUESTS supports listbox or the comm menu.
+
+A stored vehicle's domain is derived from its class through `DUWS_fnc_vehKind`
+(`shared/functions/fnc_veh_price.sqf`): the plane, helicopter, and UAV kinds count as air; boat counts
+as boats; everything else (tanks, cars, logistics, AA, artillery) counts as land. A pool's used count
+is the number of stored vehicles whose class maps to that domain, so no domain tag needs storing
+alongside the spec.
 
 ## Persistence
 
@@ -173,9 +201,9 @@ If the campaign writes team unlocks to the separate save container described in
 
 New keys in `stringtable.xml`, English only — the DE/ES/ZH tags lag on purpose and are retranslated
 later. Use a per-topic prefix (`STR_DUWS_T_DEPOT_*`, `STR_DUWS_T_GARAGE_*`): the menu title, three
-section headers, garage-tier labels, the Store / Retrieve / Buy-slot button labels, the capacity
-readout, and the success and error hints (garage full, nothing selected, cannot afford, AP-locked,
-stored, retrieved). Player text keeps terminal periods on hints and none on button labels, and names
+section headers, the five expansion-level labels, the Store / Retrieve / Buy-expansion button labels,
+the three pool readouts (land, air, boats), and the success and error hints (domain pool full, nothing
+selected, cannot afford, AP-rung locked, stored, retrieved). Player text keeps terminal periods on hints and none on button labels, and names
 each action and its cost without scene-setting.
 
 ## Files
@@ -213,7 +241,10 @@ and at the HQ helipad:
 - Skin the vehicle, mount a pylon, damage it, and drop its fuel, then Store it: it despawns and capacity
   used increments. Retrieve it: it returns on the pad with the same class, skin, pylon, damage, fuel, and
   cargo. Storing at full capacity is refused.
-- The next garage slot tier is greyed until its AP rung is earned and the tier below it is owned, then
-  costs CP (and any AP) and raises capacity when bought.
+- Expansion I costs 10 CP once the base is owned. Expansion II and up are greyed until their earned-AP
+  rung (Mechanised, then Armour, then Air) is reached and the level below is owned, then spend CP and AP
+  and raise all three caps when bought.
+- Fill the land pool, then confirm a further land vehicle is refused while an aircraft still stores
+  against the separate air pool.
 - Recycle still credits CP for empty pad vehicles and matches the shown value.
 - After a `saveGame` and reload, the stored vehicles and the purchased capacity both survive.
