@@ -13,5 +13,5 @@
 // the other debug labels.
 
 ["Ambient",  -20,  20, [["civ_car", 3], ["civ_stranded", 2], ["civ_heli", 1], ["civ_convoy", 1]]],
-["Hostile",  -20, -10, [["car_bomb", 3], ["recon_patrol", 3], ["enemy_car", 2], ["enemy_sniper", 2]]],
+["Hostile",  -20, -10, [["car_bomb", 3], ["recon_patrol", 3], ["enemy_car", 2], ["enemy_sniper", 2], ["ied", 2]]],
 ["Friendly",  10,  20, []]

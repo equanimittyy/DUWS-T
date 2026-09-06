@@ -1,0 +1,139 @@
+// Locality: server -- roadside IEDs, rolled in the Hostile band (random_event_tables.hpp) so rep has
+// already turned the town against the player.
+//
+// A scatter of identical junk piles on the roads around the town. Each is independently, secretly live
+// (IED_LIVE_CHANCE, no floor -- a field of pure decoys is a legal, deliberately anticlimactic outcome, and
+// all-live is vanishingly rare). A live pile cooks car_bomb's 155 when a BLUFOR man stands or crouches, or
+// any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, which is the only way to
+// crawl in and defuse it (fnc_random_event_ied_defuse). No emplacer unit exists, so nothing here is marked
+// isHostile and nothing can be shot: the shell has no instigator, so a civilian caught in the blast is
+// charged to no one, and the fire.sqf legal-target invariant has no unit to apply to.
+if (!isServer) exitWith {};
+params [["_townIndex", -1], ["_player", objNull]];
+if (isNull _player) exitWith {};
+
+#define IED_COUNT_MIN 4
+#define IED_COUNT_MAX 6
+#define IED_AREA 350
+#define IED_MIN_SEP 40
+#define IED_LIVE_CHANCE 0.35
+#define ARM_RANGE 30
+#define FUSE (0.5 + random 1)
+#define LIFETIME 1200
+#define TICK 0.5
+
+private _pileClasses = [
+	"Land_GarbageBags_F", "Land_GarbagePallet_F", "Land_GarbageWashingMachine_F",
+	"Land_LuggageHeap_03_F", "Land_LuggageHeap_01_F", "Land_Tyres_F", "Land_JunkPile_F",
+	"Land_WoodenCart_F", "Land_Sacks_heap_F", "Land_Sacks_goods_F", "Land_Pallets_F"
+];
+
+// Roads across the town's approaches, thinned so piles do not clump: a greedy spread that keeps each new
+// road IED_MIN_SEP off the ones already taken.
+private _anchor = if (_townIndex >= 0) then {
+	private _locs = missionNamespace getVariable ["civ_locations", []];
+	if (_townIndex < count _locs) then { getPos (_locs select _townIndex) } else { getPos _player };
+} else { getPos _player };
+
+private _roads = (_anchor nearRoads IED_AREA) call BIS_fnc_arrayShuffle;
+if (_roads isEqualTo []) exitWith {};
+
+private _count = IED_COUNT_MIN + floor (random (IED_COUNT_MAX - IED_COUNT_MIN + 1));
+private _spots = [];
+{
+	if (count _spots >= _count) exitWith {};
+	private _rp = getPosATL _x;
+	if ((_spots findIf { (_x distance2D _rp) < IED_MIN_SEP }) < 0) then { _spots pushBack _rp };
+} forEach _roads;
+if (_spots isEqualTo []) exitWith {};
+
+// Sit each pile on the verge (a few metres off the road point) rather than the crown, flat to the slope.
+private _piles = [];
+{
+	private _off = _x getPos [3 + random 3, random 360];
+	private _pile = createVehicle [selectRandom _pileClasses, [_off select 0, _off select 1, 0], [], 0, "CAN_COLLIDE"];
+	if (!isNull _pile) then {
+		_pile setPosATL [_off select 0, _off select 1, 0];
+		_pile setVectorUp (surfaceNormal (getPosATL _pile));
+		_pile enableSimulation false;   // a live charge must not be nudged off its spot by traffic
+		private _live = random 1 < IED_LIVE_CHANCE;
+		_pile setVariable ["DUWS_ied_state", _live select ["decoy", "live"], false];
+		if (_live) then {
+			// Public so a client's hold-action condition can see it; false on defuse/blast drops the action.
+			_pile setVariable ["DUWS_ied_live", true, true];
+			private _act = [
+				_pile,
+				localize "STR_DUWS_T_EVENT_IED_DEFUSE",
+				"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_ca.paa",
+				"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_ca.paa",
+				"(_target getVariable ['DUWS_ied_live', false]) && {stance player == 'PRONE'} && {_target distance player < 4}",
+				"(_target getVariable ['DUWS_ied_live', false]) && {stance player == 'PRONE'}",
+				{}, {},
+				{ params ["_pile"]; [_pile] remoteExec ["fnc_random_event_ied_defuse", 2]; },
+				{}, [], 6, 0, true, false
+			];
+			// Every interface (the SP/listen host included), but not a dedicated server that has none;
+			// JIP-keyed to the pile so a late joiner gets it and deleting the pile drops the queued message.
+			_act remoteExec ["BIS_fnc_holdActionAdd", [0, -2] select isDedicated, _pile];
+		};
+		_piles pushBack _pile;
+	};
+} forEach _spots;
+if (_piles isEqualTo []) exitWith {};
+
+private _liveCount = { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles;
+["INFO", "CIV", format ["IED event: %1 piles (%2 live) near town %3", count _piles, _liveCount, _townIndex]] call fnc_log;
+
+// Pure-decoy field: no proximity watch to run, just reap the junk after its life.
+if (_liveCount == 0) exitWith {
+	[_piles] spawn {
+		params ["_piles"];
+		sleep LIFETIME;
+		{ if (!isNull _x) then { deleteVehicle _x } } forEach _piles;
+	};
+};
+
+[_piles, _anchor] spawn {
+	params ["_piles", "_anchor"];
+	private _deadline = time + LIFETIME;
+	// Runs until every live pile has resolved (defused or blown) or the field times out.
+	while {
+		time < _deadline
+		&& { { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles > 0 }
+	} do {
+		// No one near the field: nothing can trip, so skip the per-pile scan until a player returns.
+		if ((allPlayers findIf { alive _x && { (_x distance2D _anchor) < IED_AREA + 100 } }) < 0) then {
+			sleep TICK;
+		} else {
+		{
+			private _pile = _x;
+			if (!isNull _pile && { (_pile getVariable ["DUWS_ied_state", "decoy"]) == "live" }) then {
+				private _pp = getPosATL _pile;
+				// Trip on any BLUFOR in range that is not a lone prone man: crew ride vehicle _u != _u,
+				// so a drive-over always fires; only crawling in on foot is safe.
+				private _trip = {
+					alive _x
+					&& { side (group _x) == west }
+					&& { (_x distance2D _pp) < ARM_RANGE }
+					&& { !(vehicle _x == _x && { stance _x == "PRONE" }) }
+				} count allUnits > 0;
+				if (_trip) then {
+					_pile setVariable ["DUWS_ied_state", "gone", false];
+					_pile setVariable ["DUWS_ied_live", false, true];
+					[_pile, _pp] spawn {
+						params ["_pile", "_pp"];
+						sleep FUSE;
+						// Spawn the shell above ground and shove it down: a shell created at rest never
+						// fuzes (arma_engine_gotchas.md). 155mm, as car_bomb, up from the 82mm mortar.
+						private _bomb = createVehicle ["Sh_155mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+						_bomb setVelocity [0, 0, -30];
+						if (!isNull _pile) then { deleteVehicle _pile };
+					};
+				};
+			};
+		} forEach _piles;
+		sleep TICK;
+	};
+	};
+	{ if (!isNull _x) then { deleteVehicle _x } } forEach _piles;
+};

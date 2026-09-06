@@ -334,6 +334,9 @@ fnc_random_event_car_bomb = compile preprocessFileLineNumbers "duws\server\event
 fnc_random_event_recon_patrol = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_recon_patrol.sqf";
 fnc_random_event_enemy_car = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_enemy_car.sqf";
 fnc_random_event_enemy_sniper = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_enemy_sniper.sqf";
+fnc_random_event_ied = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_ied.sqf";
+// A client's completed defuse hold remoteExecs this to the server by name; not broadcast, clients never run it.
+fnc_random_event_ied_defuse = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_ied_defuse.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_random_event.sqf";
 
