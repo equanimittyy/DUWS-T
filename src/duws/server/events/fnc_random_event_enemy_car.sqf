@@ -18,6 +18,7 @@ private _spawnPos = getPosATL (selectRandom _roads);
 // posture none: no patrol circuit, so the drive-past waypoints below are its only orders.
 private _grp = [_class, _spawnPos, 0, "none", _spawnPos, "opfor"] call fnc_spawn_vehicle;
 if (isNull _grp) exitWith {};
+private _veh = vehicle (units _grp select 0);
 
 #define LIFETIME 1200
 
@@ -29,6 +30,11 @@ private _pastRoads = _past nearRoads 250;
 if !(_pastRoads isEqualTo []) then {
 	_past = getPosATL ([_pastRoads, [_past], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0);
 };
+
+// fnc_spawn_vehicle seats every hull at heading 0, crosswise on the carriageway until the drive-past
+// waypoint swings it round. Seat it on the road point facing that waypoint from the off.
+_veh setDir ([_spawnPos, _past] call BIS_fnc_dirTo);
+_veh setPosATL _spawnPos;
 
 private _wp1 = _grp addWaypoint [_past, 0];
 _wp1 setWaypointType "MOVE";
@@ -47,7 +53,6 @@ if !(WARCOM_zones_controled_by_OPFOR isEqualTo []) then {
 _grp setBehaviour "AWARE";
 _grp setSpeedMode "LIMITED";
 
-private _veh = vehicle (units _grp select 0);
 _veh setVariable ["DUWS_binMe", true];
 _veh setVariable ["DUWS_binAt", time + LIFETIME];
 {
