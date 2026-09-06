@@ -1,8 +1,8 @@
 // Locality: the client that asked -- fnc_debug_opcom_grid remoteExecs it back here each OPCOM tick while
 // the overlay is up. Draws the whole-map influence grid: a neutral border per cell (the lattice) and a
-// centre dot coloured by who leads it -- red OPFOR, blue BLU (its force plus belief), yellow on the front
-// line, white where empty -- with an "OPF/BLU" force readout as text; belief stamps ride on top as blue
-// warnings.
+// centre dot coloured by who leads it -- blue OPFOR (its holdings), red BLU (your force plus belief),
+// yellow on the front line, white where empty -- with a "friendly/enemy" force readout as text; belief
+// stamps ride on top as red warnings.
 //
 // Delta, not full redraw: the lattice and dot positions never move, so the first call builds every marker
 // and later calls only recolour/retext the dots and reconcile the belief set (whose count varies). A full
@@ -38,11 +38,11 @@ private _sample = "";
         if (_front) then {
             _col = "#(1,1,0.2,1)";
         } else {
-            if (_f > _e) then { _col = "#(1,0.3,0.3,1)" };
-            if (_e > _f) then { _col = "#(0.4,0.7,1,1)" };
+            if (_f > _e) then { _col = "#(0.4,0.7,1,1)" };
+            if (_e > _f) then { _col = "#(1,0.3,0.3,1)" };
         };
         private _txt = "";
-        if (_f > 0.05 || _e > 0.05) then { _txt = format ["OPF %1 BLU %2", _f toFixed 1, _e toFixed 1] };
+        if (_f > 0.05 || _e > 0.05) then { _txt = format ["%1/%2", _f toFixed 1, _e toFixed 1] };
 
         private _dm = format ["duws_opcom_dot_%1", _i];
         if (_rebuild) then {
@@ -75,7 +75,7 @@ private _belN = missionNamespace getVariable ["DUWS_dbgOpcomBelN", 0];
         createMarkerLocal [_nm, [_p select 0, _p select 1]];
         _nm setMarkerShapeLocal "ICON";
         _nm setMarkerTypeLocal "mil_warning";
-        _nm setMarkerColorLocal "#(0.3,0.6,1,1)";
+        _nm setMarkerColorLocal "#(1,0.2,0.2,1)";
         _nm setMarkerSizeLocal [1, 1];
     } else {
         _nm setMarkerPosLocal [_p select 0, _p select 1];
