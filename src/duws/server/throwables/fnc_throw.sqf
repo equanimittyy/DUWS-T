@@ -22,9 +22,10 @@ private _dur = (((_from distance2D _to) / 14) max 0.6) min 2.5;
 	sleep _dur;
 	// Molotov lands as a scripted fire (server owns the networked flame); ignite works in ATL.
 	if (_kind == "molotov") exitWith { [ASLToATL _to] call fnc_molotov_ignite; };
-	// Stone does no damage -- the crowd harasses, it does not kill. A light camera knock on anyone it lands
-	// beside sells the hit; run it local on each near owner.
+	// Stone does no damage -- the crowd harasses, it does not kill. Sell the hit instead: a thud at the
+	// impact that carries to everyone near, and a firm camera knock on any player it lands beside.
+	["duws\shared\sounds_npics\support\thud.wav", objNull, false, _to, 1.6, 1, 70] remoteExec ["playSound3D", 0];
 	{
-		[0.35, 0.7, 6] remoteExec ["addCamShake", _x];
-	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 2.5} });
+		[3, 0.8, 15] remoteExec ["addCamShake", _x];
+	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
 };
