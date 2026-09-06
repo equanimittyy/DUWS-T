@@ -1,7 +1,7 @@
 // Locality: server -- an angry crowd, rolled in the Hostile band so rep has already turned the town.
 //
 // MOB_SIZE unarmed CIVILIANs, one group, that gather in the town and close on the nearest BLUFOR to jeer
-// and stone them. The thrown rock is DUWS_StoneMag, lobbed through the DUWS_Throw weapon (throwables.hpp).
+// and stone them. The thrown rock is DUWS_StoneMag, lobbed through the base-game Throw weapon (throwables.hpp).
 //
 // Deliberately NOT isHostile and left on the civilian side: the crowd itself never opens fire, so there is
 // no self-defence to protect, and gunning it down is meant to stay the war crime it is (the civilian-death
@@ -14,7 +14,7 @@ if (isNull _player) exitWith {};
 private _bodies = missionNamespace getVariable ["civ_array", []];
 if (_bodies isEqualTo []) exitWith {};
 
-#define MOB_SIZE 10
+#define MOB_SIZE 15
 #define GATHER 20
 #define CLOSE_RANGE 8
 #define THROW_RANGE 18
@@ -31,7 +31,7 @@ for "_i" from 1 to MOB_SIZE do {
 	private _u = _grp createUnit [selectRandom _bodies, _pos, [], 0, "NONE"];
 	if (!isNull _u) then {
 		removeAllWeapons _u;
-		_u addWeapon "DUWS_Throw";
+		_u addWeapon "Throw";
 		_u addMagazines ["DUWS_StoneMag", 6];
 		_u selectWeapon "DUWS_StoneMuzzle";
 		// The war-crime trap only bites if these carry the same death charge a spawned civilian does:

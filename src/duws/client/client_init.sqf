@@ -286,6 +286,12 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, [], 20, true, true, "", "_this == player"];
 };
 
+// Debug only: shelve the throwables so a tester can draw them. The whitelist reads the same cargo var,
+// so this both stocks and permits them; live play has no arsenal source for them yet.
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1) then {
+	[missionNamespace, ["DUWS_StoneMag", "DUWS_MolotovMag"], true] call BIS_fnc_addVirtualMagazineCargo;
+};
+
 // Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;
 

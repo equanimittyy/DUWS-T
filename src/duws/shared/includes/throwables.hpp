@@ -1,6 +1,6 @@
-// Throwable stone and molotov on base-game assets: a CfgAmmo pair, a CfgMagazines pair, and a DUWS_Throw
-// weapon carrying both. The molotov ammo does not explode; a Fired handler ignites it on landing
-// and trails it in flight (client_init, fnc_molotov_ignite, fnc_molotov_trail).
+// Throwable stone and molotov on base-game assets: a CfgAmmo pair, a CfgMagazines pair, and two muzzles
+// appended to the base-game Throw weapon every unit carries. The molotov ammo does not explode; a Fired
+// handler ignites it on landing and trails it in flight (client_init, fnc_molotov_ignite, fnc_molotov_trail).
 
 class CfgAmmo
 {
@@ -52,12 +52,12 @@ class CfgMagazines
 
 class CfgWeapons
 {
-	class ThrowMuzzle;
-	class Throw;
-	// addWeapon this to a thrower to grant both throwables.
-	class DUWS_Throw: Throw
+	// Append muzzles to the base-game Throw weapon every unit already carries, so the stone and molotov
+	// throw with no weapon to grant. removeAllWeapons strips Throw, so a stripped thrower re-adds "Throw".
+	class Throw
 	{
-		muzzles[] = {"DUWS_StoneMuzzle", "DUWS_MolotovMuzzle"};
+		class ThrowMuzzle;
+		muzzles[] += {"DUWS_StoneMuzzle", "DUWS_MolotovMuzzle"};
 		class DUWS_StoneMuzzle: ThrowMuzzle
 		{
 			magazines[] = {"DUWS_StoneMag"};
