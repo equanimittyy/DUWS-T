@@ -1,6 +1,6 @@
 // Locality: client -- the addAction body for the HQ depot's "Vehicle Depot" action, so it runs on
 // whoever opens it. Creates the unified dialog, stashes the pad-trigger netId for the async rebuilds
-// (a store/retrieve/buy/recycle round-trips the server, which remoteExecs fnc_depot_menu_fill back),
+// (a store/retrieve/recycle round-trips the server, which remoteExecs fnc_depot_menu_fill back),
 // sets the static button labels once, and fills the three panels.
 if (!hasInterface) exitWith {};
 params ["_trg"];
@@ -20,7 +20,7 @@ ctrlSetText [1000, format ["%1", missionNamespace getVariable ["commandpointsblu
 ctrlSetText [1002, format ["%1", missionNamespace getVariable ["WARCOM_blufor_ap", "--"]]];
 
 // Static button labels: the two priced modification actions carry their fixed cost; the rest are
-// plain. The Buy label is dynamic (it names the next level's price) and is set by the fill.
+// plain. Capacity levels are bought in the REQUESTS menu, so no buy button lives here.
 ctrlSetText [2012, format ["%1 (2 CP)", localize "STR_DUWS_T_repair_vehicle"]];
 ctrlSetText [2013, localize "STR_DUWS_T_check_vehicle_status"];
 ctrlSetText [2014, localize "STR_DUWS_T_vehicle_appearance"];

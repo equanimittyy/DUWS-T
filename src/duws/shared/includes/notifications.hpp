@@ -348,6 +348,32 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_RADIO3";
     };
 
+    // The four garage expansions wear the depot's own repair glyph: they are the depot growing, and no
+    // stock icon depicts a motor pool any closer. Class name is unlock_<key> like every perm-grant card.
+    class unlock_garage1 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_GARAGE1";
+    };
+
+    class unlock_garage2 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_GARAGE2";
+    };
+
+    class unlock_garage3 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_GARAGE3";
+    };
+
+    class unlock_garage4 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_GARAGE4";
+    };
+
     class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

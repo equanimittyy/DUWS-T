@@ -1,4 +1,5 @@
-// The vehicle garage: store a pad vehicle to data, retrieve it, and buy a capacity level.
+// The vehicle garage: store a pad vehicle to data and retrieve it. Capacity levels are bought from
+// the REQUESTS menu as permanent supports (client/supports/fnc_supports_init.sqf).
 //
 // Executed by the registry rather than stored as one function: this file defines several.
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one place to
@@ -49,36 +50,5 @@ fnc_garage_retrieve = {
     publicVariable "DUWS_garage_stored";
 
     [format [localize "STR_DUWS_T_GARAGE_RETRIEVED", getText (configFile >> "CfgVehicles" >> (_spec select 0) >> "displayName")]] remoteExec ["hint", _caller];
-    [] remoteExec ["fnc_depot_menu_fill", _caller];
-};
-
-// Buys the next capacity level. Direct server-side debit, the repair-station/pylon precedent: this
-// path never reaches the client purchase handshake, so escalation is applied to the CP half here to
-// match the bracket the menu shows. The earned-AP rung is a ratchet checked with DUWS_fnc_ap_unlocked
-// and never spent; the AP cost is a separate debit from the current pool.
-fnc_garage_buy_slot = {
-    if (!isServer) exitWith {};
-    params ["_caller", "_tierKey"];
-    private _i = DUWS_garage_tiers findIf { (_x select 0) == _tierKey };
-    if (_i <= 0) exitWith {};   // base (0) and unknown (-1) are not buyable
-    private _row = DUWS_garage_tiers select _i;
-    _row params ["", "", "", "", "_cpCost", "_apCost", "_apTier", "_flag"];
-
-    if (missionNamespace getVariable [_flag, false]) exitWith { [localize "STR_DUWS_T_GARAGE_OWNED"] remoteExec ["hint", _caller]; };
-    private _prevFlag = (DUWS_garage_tiers select (_i - 1)) select 7;
-    if (_prevFlag != "" && {!(missionNamespace getVariable [_prevFlag, false])}) exitWith { [localize "STR_DUWS_T_GARAGE_ORDER"] remoteExec ["hint", _caller]; };
-    if !(["BLU", _apTier] call DUWS_fnc_ap_unlocked) exitWith {
-        [format [localize "STR_DUWS_T_tier_locked_hint", [_apTier] call DUWS_fnc_tierName]] remoteExec ["hint", _caller];
-    };
-
-    private _cp = [_cpCost] call fnc_escalation_cost;
-    if (commandpointsblu1 < _cp || {WARCOM_blufor_ap < _apCost}) exitWith { [localize "STR_DUWS_T_GARAGE_NO_CP"] remoteExec ["hint", _caller]; };
-
-    [-_cp, "garage_tier"] call fnc_cp_adjust;
-    if (_apCost > 0) then { ["BLU", -_apCost, "garage_tier"] call fnc_ap_adjust; };
-    missionNamespace setVariable [_flag, true];
-    publicVariable _flag;
-
-    [localize "STR_DUWS_T_GARAGE_BOUGHT"] remoteExec ["hint", _caller];
     [] remoteExec ["fnc_depot_menu_fill", _caller];
 };

@@ -43,6 +43,16 @@ fnc_support_catalogue = {
 		["radio2",    "PERM", 40, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false, 10],
 		["radio3",    "PERM", 60, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false, 20],
 
+		// The four vehicle-garage capacity levels: each raises the depot's land/air/boat storage caps
+		// (the cap figures live in DUWS_garage_tiers, shared/functions/fnc_garage_spec.sqf). Permanent,
+		// order-gated behind the depot then each prior level (the filter below), and priced like the
+		// radio towers -- CP alone at first, a climbing AP half from level II on. No comm item: they
+		// place nothing, and the store/retrieve buttons live in the depot dialog, not the 0-8 menu.
+		["garage1",   "PERM", 10, "support_garage1_available",     "STR_DUWS_T_garage_exp1_row",      "",           false],
+		["garage2",   "PERM", 20, "support_garage2_available",     "STR_DUWS_T_garage_exp2_row",      "",           false,  5],
+		["garage3",   "PERM", 40, "support_garage3_available",     "STR_DUWS_T_garage_exp3_row",      "",           false, 15],
+		["garage4",   "PERM", 50, "support_garage4_available",     "STR_DUWS_T_garage_exp4_row",      "",           false, 25],
+
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
@@ -87,6 +97,13 @@ fnc_support_defs = {
 		// cannot skip to III and the drift's amplifier only ever climbs one step at a time.
 		if (_key == "radio2" && {!(["support_radio1_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "radio3" && {!(["support_radio2_available"] call fnc_support_owned)}) then { _keep = false };
+		// The garage expansions are meaningless without the depot they enlarge, then unlock in order like
+		// the radio tiers: the first is hidden until the vehicle depot is owned, each later one until the
+		// level below it is.
+		if (_key == "garage1" && {!(["support_veh_repair_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "garage2" && {!(["support_garage1_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "garage3" && {!(["support_garage2_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "garage4" && {!(["support_garage3_available"] call fnc_support_owned)}) then { _keep = false };
 		_keep
 	}
 };
@@ -108,12 +125,14 @@ fnc_support_cost_bracket = {
 // and both mortars at Motorised (tier 2); transport lift, HALO insertion and the precision strikes
 // at tier 3; artillery and the gunship at tier 4; the CAS jet and the area munitions (cluster, napalm)
 // at tier 5. The three radio towers climb the ladder in lockstep with their own I/II/III levels, so
-// each tier of the drift amplifier is earned rather than bought straight off.
+// each tier of the drift amplifier is earned rather than bought straight off. The garage expansions
+// do the same: the first is tier 1 (unlisted), the upper three climb tiers 3-5, so a bigger motor
+// pool is earned alongside the strikes it would shelter.
 DUWS_support_tiers = [
 	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar", 2], ["mortar_smoke", 2],
-	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3],
-	["arty", 4], ["hcAttChop", 4], ["radio3", 4],
-	["hcCAS", 5], ["cluster", 5], ["napalm", 5]
+	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3],
+	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4],
+	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5]
 ];
 fnc_support_tier = {
 	params ["_key"];

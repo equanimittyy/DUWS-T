@@ -5,9 +5,10 @@
 // Laid out on the 40x25 GUI grid from defines.hpp. Header readouts: CP (idc 1000) and AP (idc 1002)
 // reuse the request menu's idcs so client_init's publicVariableEventHandlers update them live; the
 // three garage pool readouts (2003/2004/2005) are set by the fill. Row identity rides in lbData -- a
-// pad vehicle's netId, a stored vehicle's index, a tier's key -- so a button action reads the
-// selection rather than a position. Button actions carry literal control idcs because the
-// preprocessor does not expand #defines inside string literals.
+// pad vehicle's netId, a stored vehicle's index -- so a button action reads the selection rather than
+// a position. Capacity levels are bought from the REQUESTS menu, not here (fnc_supports_init.sqf).
+// Button actions carry literal control idcs because the preprocessor does not expand #defines inside
+// string literals.
 class vehicledepotmenu
 {
     idd = -1;
@@ -134,7 +135,7 @@ class vehicledepotmenu
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _v = objectFromNetId (lbData [2011, _i]); if (!isNull _v) then { closeDialog 0; [_v] call fnc_veh_pylons_dialog } }";
         };
 
-        // --- Panel 2: Storage garage (stored vehicles over the capacity ladder) ---
+        // --- Panel 2: Storage garage (the stored vehicles; capacity is bought in the REQUESTS menu) ---
         class garFrame: RscFrame
         {
             idc = 2020;
@@ -150,14 +151,8 @@ class vehicledepotmenu
             x = 14 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
-            h = 7 * GUI_GRID_H;
+            h = 11.5 * GUI_GRID_H;
             sizeEx = 0.025;
-        };
-        class garTierList: garStoredList
-        {
-            idc = 2022;
-            y = 12.3 * GUI_GRID_H + GUI_GRID_Y;
-            h = 4.2 * GUI_GRID_H;
         };
         class garStore: RscButton
         {
@@ -176,15 +171,6 @@ class vehicledepotmenu
             x = 20.4 * GUI_GRID_W + GUI_GRID_X;
             tooltip = "";
             action = "private _i = lbCurSel 2021; if (_i >= 0) then { private _d = lbData [2021, _i]; if (_d != '') then { [player, parseNumber _d, uiNamespace getVariable ['DUWS_depotMenu_ctx','']] remoteExec ['fnc_garage_retrieve', 2] } }";
-        };
-        class garBuy: garStore
-        {
-            idc = 2025;
-            x = 14 * GUI_GRID_W + GUI_GRID_X;
-            y = 18.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12 * GUI_GRID_W;
-            tooltip = "";
-            action = "private _d = uiNamespace getVariable ['DUWS_depot_nextTier','']; if (_d != '') then { [player, _d] remoteExec ['fnc_garage_buy_slot', 2] }";
         };
 
         // --- Panel 3: Recycle (the empty pad vehicles and their reward) ---

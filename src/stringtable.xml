@@ -3538,6 +3538,22 @@
                 <Original>BLUFOR has upgraded to Radio Tower III</Original>
                 <English>BLUFOR has upgraded to Radio Tower III</English>
             </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_GARAGE1">
+                <Original>BLUFOR has expanded the vehicle garage</Original>
+                <English>BLUFOR has expanded the vehicle garage</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_GARAGE2">
+                <Original>BLUFOR has expanded the vehicle garage (II)</Original>
+                <English>BLUFOR has expanded the vehicle garage (II)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_GARAGE3">
+                <Original>BLUFOR has expanded the vehicle garage (III)</Original>
+                <English>BLUFOR has expanded the vehicle garage (III)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_GARAGE4">
+                <Original>BLUFOR has expanded the vehicle garage (IV)</Original>
+                <English>BLUFOR has expanded the vehicle garage (IV)</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
@@ -4708,42 +4724,6 @@
                 <Original>Retrieved %1.</Original>
                 <English>Retrieved %1.</English>
             </Key>
-            <Key ID="STR_DUWS_T_GARAGE_OWNED">
-                <Original>That level is already owned.</Original>
-                <English>That level is already owned.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_ORDER">
-                <Original>Buy the level below it first.</Original>
-                <English>Buy the level below it first.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_NO_CP">
-                <Original>Not enough CP or AP.</Original>
-                <English>Not enough CP or AP.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_BOUGHT">
-                <Original>Storage capacity expanded.</Original>
-                <English>Storage capacity expanded.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_LVL_BASE">
-                <Original>Base</Original>
-                <English>Base</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_LVL_1">
-                <Original>Expansion I</Original>
-                <English>Expansion I</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_LVL_2">
-                <Original>Expansion II</Original>
-                <English>Expansion II</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_LVL_3">
-                <Original>Expansion III</Original>
-                <English>Expansion III</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_LVL_4">
-                <Original>Expansion IV</Original>
-                <English>Expansion IV</English>
-            </Key>
             <Key ID="STR_DUWS_T_DEPOT_MENU">
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
@@ -4775,14 +4755,6 @@
             <Key ID="STR_DUWS_T_GARAGE_STORE_TIP">
                 <Original>Stores the vehicle selected in the modification list.</Original>
                 <English>Stores the vehicle selected in the modification list.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_BUY_BTN">
-                <Original>Buy expansion</Original>
-                <English>Buy expansion</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_MAXED">
-                <Original>Fully expanded</Original>
-                <English>Fully expanded</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORED_ROW">
                 <Original>%1 (hull %2%, fuel %3%)</Original>
@@ -5896,6 +5868,22 @@
             <Key ID="STR_DUWS_T_radio_tower_3">
                 <Original>Radio Tower III</Original>
                 <English>Radio Tower III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_garage_exp1_row">
+                <Original>Garage Expansion I</Original>
+                <English>Garage Expansion I</English>
+            </Key>
+            <Key ID="STR_DUWS_T_garage_exp2_row">
+                <Original>Garage Expansion II</Original>
+                <English>Garage Expansion II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_garage_exp3_row">
+                <Original>Garage Expansion III</Original>
+                <English>Garage Expansion III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_garage_exp4_row">
+                <Original>Garage Expansion IV</Original>
+                <English>Garage Expansion IV</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>
@@ -7154,6 +7142,22 @@
             <Key ID="STR_DUWS_T_sdesc_radio3">
                 <Original>The strongest reputation amplifier across covered towns (tier III); requires tier II.</Original>
                 <English>The strongest reputation amplifier across covered towns (tier III); requires tier II.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_garage1">
+                <Original>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (expansion I); requires the depot.</Original>
+                <English>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (expansion I); requires the depot.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_garage2">
+                <Original>Raises the storage caps to 10 land, 5 air, 10 boat (expansion II); requires expansion I.</Original>
+                <English>Raises the storage caps to 10 land, 5 air, 10 boat (expansion II); requires expansion I.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_garage3">
+                <Original>Raises the storage caps to 15 land, 8 air, 15 boat (expansion III); requires expansion II.</Original>
+                <English>Raises the storage caps to 15 land, 8 air, 15 boat (expansion III); requires expansion II.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_garage4">
+                <Original>Raises the storage caps to 25 land, 15 air, 25 boat (expansion IV); requires expansion III.</Original>
+                <English>Raises the storage caps to 25 land, 15 air, 25 boat (expansion IV); requires expansion III.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_mhq_slot">
                 <Original>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</Original>

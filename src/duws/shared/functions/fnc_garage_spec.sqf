@@ -4,19 +4,20 @@
 // capture/apply pair is the only substantive engine work: a stored vehicle is turned into plain
 // serializable data and back, so no object handle ever has to survive the store.
 
-// The capacity ladder. Land, air and boat are three independent pools; each level sets ABSOLUTE
-// caps for all three (a purchase overwrites the caps, it does not add to them), so the live caps are
-// always the highest owned level's row. Base is owned from campaign start and carries no flag; the
-// four expansion levels are bought in order, each gated on owning the level below and -- from
-// Expansion II on -- on an earned-AP rung (DUWS_fnc_ap_unlocked against DUWS_ap_tier_rungs). The AP
-// cost is spent from the pool; the rung is a ratchet and never spent.
-//   [key, land, air, boat, cpCost, apCost, apTier, flagVar, labelKey]
+// The capacity ladder as pure caps. Land, air and boat are three independent pools; each level sets
+// ABSOLUTE caps for all three (a purchase overwrites the caps, it does not add to them), so the live
+// caps are always the highest owned level's row. Base is owned from campaign start and carries no
+// flag. The four expansion levels are permanent supports bought from the REQUESTS menu, in order --
+// their price, AP cost and tier gate live in the support catalogue (client/supports/fnc_supports_init.sqf),
+// beside the radio towers they mirror. Ownership is the catalogue flag named here, which this table
+// reads to pick the live caps; nothing else about a level lives in two places.
+//   [key, land, air, boat, flag]
 DUWS_garage_tiers = [
-    ["base",  3,  1,  3,   0,  0, 1, "",                  "STR_DUWS_T_GARAGE_LVL_BASE"],
-    ["exp1",  6,  3,  6,  10,  0, 1, "garage_exp1_owned", "STR_DUWS_T_GARAGE_LVL_1"],
-    ["exp2", 10,  5, 10,  20,  5, 3, "garage_exp2_owned", "STR_DUWS_T_GARAGE_LVL_2"],
-    ["exp3", 15,  8, 15,  40, 15, 4, "garage_exp3_owned", "STR_DUWS_T_GARAGE_LVL_3"],
-    ["exp4", 25, 15, 25,  50, 25, 5, "garage_exp4_owned", "STR_DUWS_T_GARAGE_LVL_4"]
+    ["base",    3,  1,  3, ""],
+    ["garage1", 6,  3,  6, "support_garage1_available"],
+    ["garage2",10,  5, 10, "support_garage2_available"],
+    ["garage3",15,  8, 15, "support_garage3_available"],
+    ["garage4",25, 15, 25, "support_garage4_available"]
 ];
 
 // A stored vehicle's domain, from the same DUWS_fnc_vehKind classifier the price and tier read, so
@@ -36,7 +37,7 @@ DUWS_fnc_vehDomain = {
 DUWS_fnc_garageCaps = {
     private _caps = [3, 1, 3];
     {
-        _x params ["", "_l", "_a", "_b", "", "", "", "_flag"];
+        _x params ["", "_l", "_a", "_b", "_flag"];
         if (_flag != "" && {missionNamespace getVariable [_flag, false]}) then { _caps = [_l, _a, _b]; };
     } forEach DUWS_garage_tiers;
     _caps
@@ -59,17 +60,6 @@ DUWS_fnc_garageUsed = {
 DUWS_fnc_garageDomainIndex = {
     params ["_domain"];
     ["land", "air", "boat"] find _domain
-};
-
-// The next unbought expansion level's row, or [] when all four are owned. The buy button always
-// targets this rather than an arbitrary selection -- levels are bought in order.
-DUWS_fnc_garageNextTier = {
-    private _next = [];
-    {
-        _x params ["", "", "", "", "", "", "", "_flag"];
-        if (_flag != "" && {!(missionNamespace getVariable [_flag, false])}) exitWith { _next = _x; };
-    } forEach DUWS_garage_tiers;
-    _next
 };
 
 // A stored vehicle captured to plain serializable data. Index layout, read back by DUWS_fnc_vehSpecApply:
