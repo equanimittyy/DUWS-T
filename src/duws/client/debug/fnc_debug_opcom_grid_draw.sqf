@@ -1,7 +1,7 @@
 // Locality: the client that asked -- fnc_debug_opcom_grid remoteExecs it back here. Draws the whole-map
 // influence grid: a neutral-white border per cell (the lattice) and a centre dot coloured by who leads
-// the cell -- blue friendly (OPFOR holdings), red enemy (BLU + belief), yellow on the front line, white
-// where empty -- with a "friendly/enemy" force readout as its text. Belief stamps ride on top as red
+// the cell -- red OPFOR (its holdings), blue BLU (your force + belief), yellow on the front line, white
+// where empty -- with an "OPF/BLU" force readout as its text. Belief stamps ride on top as BLU
 // warnings. Water cells are skipped unless DUWS_dbgOpcomGridWater is set. Local, so only the dev sees
 // them; names are recorded so fnc_debug_opcom_view can clear them. English-only, like the rest of the
 // debug surface.
@@ -35,8 +35,8 @@ private _water = missionNamespace getVariable ["DUWS_dbgOpcomGridWater", false];
         if (_front) then {
             _col = "#(1,1,0.2,1)";
         } else {
-            if (_f > _e) then { _col = "#(0.4,0.7,1,1)" };
-            if (_e > _f) then { _col = "#(1,0.3,0.3,1)" };
+            if (_f > _e) then { _col = "#(1,0.3,0.3,1)" };
+            if (_e > _f) then { _col = "#(0.4,0.7,1,1)" };
         };
         private _dm = format ["duws_opcom_dot_%1", _i];
         createMarkerLocal [_dm, [_c select 0, _c select 1]];
@@ -44,9 +44,10 @@ private _water = missionNamespace getVariable ["DUWS_dbgOpcomGridWater", false];
         _dm setMarkerTypeLocal "mil_dot";
         _dm setMarkerColorLocal _col;
         _dm setMarkerSizeLocal [0.6, 0.6];
-        // One decimal, not round: Phase 1 per-cell force is often below 1, which round would show as 0.
+        // Labelled by side, not friendly/enemy, so the frame is unambiguous. One decimal, not round:
+        // Phase 1 per-cell force is often below 1, which round would show as 0.
         if (_f > 0.05 || _e > 0.05) then {
-            _dm setMarkerTextLocal format ["%1/%2", _f toFixed 1, _e toFixed 1];
+            _dm setMarkerTextLocal format ["OPF %1 BLU %2", _f toFixed 1, _e toFixed 1];
         };
         _names pushBack _dm;
     };
@@ -58,7 +59,7 @@ private _water = missionNamespace getVariable ["DUWS_dbgOpcomGridWater", false];
     createMarkerLocal [_nm, [_p select 0, _p select 1]];
     _nm setMarkerShapeLocal "ICON";
     _nm setMarkerTypeLocal "mil_warning";
-    _nm setMarkerColorLocal "#(1,0.2,0.2,1)";
+    _nm setMarkerColorLocal "#(0.3,0.6,1,1)";
     _nm setMarkerSizeLocal [1, 1];
     _nm setMarkerTextLocal format ["threat %1 · %2t", _str, _age];
     _names pushBack _nm;
