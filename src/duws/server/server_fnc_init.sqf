@@ -340,6 +340,10 @@ fnc_random_event_ied = compile preprocessFileLineNumbers "duws\server\events\fnc
 // A client's completed defuse hold remoteExecs this to the server by name; not broadcast, clients never run it.
 fnc_random_event_ied_defuse = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_ied_defuse.sqf";
 fnc_random_event_mob = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_mob.sqf";
+// A thrower's Fired handler remoteExecs this to the server by name where the molotov lands; not broadcast.
+fnc_molotov_ignite = compile preprocessFileLineNumbers "duws\server\throwables\fnc_molotov_ignite.sqf";
+// Broadcast to every machine from the thrower's Fired handler to render the in-flight trail.
+fnc_molotov_trail = compile preprocessFileLineNumbers "duws\client\throwables\fnc_molotov_trail.sqf";publicVariable "fnc_molotov_trail";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_random_event.sqf";
 

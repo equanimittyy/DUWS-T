@@ -1,8 +1,9 @@
 // Locality: server -- an angry crowd, rolled in the Hostile band so rep has already turned the town.
 //
 // MOB_SIZE unarmed CIVILIANs, one group, that gather in the town and close on the nearest BLUFOR to jeer
-// and pelt them with cosmetic stones (harmless: the rock is deleted before it can matter, damage disabled).
-// Deliberately NOT isHostile and left on the civilian side: the crowd never hurts the player, so there is
+// and stone them. The thrown rock is DUWS_StoneMag, lobbed through the DUWS_Throw weapon (throwables.hpp).
+//
+// Deliberately NOT isHostile and left on the civilian side: the crowd itself never opens fire, so there is
 // no self-defence to protect, and gunning it down is meant to stay the war crime it is (the civilian-death
 // charge). This is the one Hostile-band event whose "attackers" are civilians by design, so the fire.sqf
 // isHostile invariant is waived here and only here.
@@ -30,6 +31,9 @@ for "_i" from 1 to MOB_SIZE do {
 	private _u = _grp createUnit [selectRandom _bodies, _pos, [], 0, "NONE"];
 	if (!isNull _u) then {
 		removeAllWeapons _u;
+		_u addWeapon "DUWS_Throw";
+		_u addMagazines ["DUWS_StoneMag", 6];
+		_u selectWeapon "DUWS_StoneMuzzle";
 		// The war-crime trap only bites if these carry the same death charge a spawned civilian does:
 		// createUnit skips fnc_civ_spawnUnit (and its unwanted recruit action / flee-on-fire), so wire
 		// the Killed handler on by hand and stamp the town it charges, or the hit would fall on town -1.
@@ -67,20 +71,14 @@ _grp setSpeedMode "LIMITED";
 			};
 		} forEach units _grp;
 
-		// One member within range lobs a cosmetic stone at the player's head, arced, gone in 2 s.
-		private _throwers = (units _grp) select { alive _x && { (_x distance _target) < THROW_RANGE } };
+		// A close member with stones left faces the player and throws a stone.
+		// VERIFY IN EDITOR: a mission-config throw weapon actually throwing for AI is the one unproven link.
+		private _throwers = (units _grp) select { alive _x && { (_x distance _target) < THROW_RANGE } && { "DUWS_StoneMag" in magazines _x } };
 		if !(_throwers isEqualTo []) then {
 			private _t = selectRandom _throwers;
-			private _from = eyePos _t;
-			private _rock = createVehicle ["Land_Stone_Small_F", _from, [], 0, "CAN_COLLIDE"];
-			if (!isNull _rock) then {
-				_rock allowDamage false;
-				_rock setPosASL _from;
-				private _v = (_from vectorFromTo (eyePos _target)) vectorMultiply 18;
-				_v set [2, (_v select 2) + 4];
-				_rock setVelocity _v;
-				_rock spawn { sleep 2; deleteVehicle _this };
-			};
+			_t setDir (_t getDir _target);
+			_t selectWeapon "DUWS_StoneMuzzle";
+			_t forceWeaponFire ["DUWS_StoneMuzzle", "DUWS_StoneMuzzle"];
 		};
 		sleep TICK;
 	};

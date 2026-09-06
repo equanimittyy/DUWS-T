@@ -37,6 +37,10 @@ class CfgMagazines
 	};
 };
 
+// Mission-local throwables (stone, molotov) on vanilla assets -- reopens CfgMagazines and adds CfgAmmo /
+// CfgWeapons. No mod required.
+#include "duws\shared\includes\throwables.hpp"
+
 //////////////////////////
 //////////////////////////
 

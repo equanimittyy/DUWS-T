@@ -199,6 +199,26 @@ player addEventHandler ["killed", {
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
+// On throwing a DUWS_MolotovAmmo bottle: broadcast its in-flight trail (fnc_molotov_trail), then track it
+// to rest and ignite it there (fnc_molotov_ignite, server-side).
+player addEventHandler ["Fired", {
+    params ["", "", "", "", "_ammo", "", "_projectile"];
+    if (_ammo != "DUWS_MolotovAmmo") exitWith {};
+    [_projectile] remoteExec ["fnc_molotov_trail", 0];
+    [_projectile] spawn {
+        params ["_p"];
+        private _end = time + 15;
+        waitUntil {
+            sleep 0.1;
+            isNull _p || {time > _end} || {(vectorMagnitude velocity _p) < 2 && {(getPosATL _p select 2) < 0.6}}
+        };
+        if (isNull _p) exitWith {};
+        private _pos = getPosATL _p;
+        deleteVehicle _p;
+        [_pos] remoteExec ["fnc_molotov_ignite", 2];
+    };
+}];
+
 // Stamina/fatigue from the lobby param (default off). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
 player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
