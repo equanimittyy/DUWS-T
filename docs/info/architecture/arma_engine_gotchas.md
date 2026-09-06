@@ -1805,7 +1805,9 @@ tests `damage _veh <= 0.5` to detect "the player repaired it" can never win by f
 up, `getDammage` stays 0.8. This is stock Arma, present mod-free.
 
 **How to apply:** to detect field repair, test the hit points, not the hull — mean part damage
-(`fnc_veh_comp_damage`, `server/misc/`) against the threshold. To fully repair from script use `setDamage 0`
+(`fnc_veh_comp_damage`, `server/misc/`) against the threshold, and drop the structural `HitHull`/`HitBody`
+points from that mean: they no more field-repair than the hull value does, so leaving them in pins the mean
+above the gate however well the player fixes the drivable parts. To fully repair from script use `setDamage 0`
 (the enemy-recovery branch of the deny-armour mission does exactly this). To immobilise a spawned derelict,
 kill the engine hit point *after* `setDamage` (`fnc_veh_disable_engine`) — a `setDamage` afterwards would
 redistribute the part back to a drivable state.
