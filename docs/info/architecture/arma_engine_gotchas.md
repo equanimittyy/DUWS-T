@@ -1667,9 +1667,9 @@ positions later and only ever measure the offer point with `distance2D`, so the 
 ## `BIS_fnc_findSafePos` returns the blacklist centre on failure, not `[]`
 
 **When `BIS_fnc_findSafePos` exhausts its attempts without finding a spot, it does not signal failure —
-it returns the centre of its first blacklist area. With the common `[[0,0],[0,0]]` blacklist idiom that
-centre is `[0,0]`, a real-looking position at the map origin (open sea off Altis' SW corner). A caller
-that treats any non-`[]` return as success accepts it.**
+it returns the map origin. With the common `[[0,0],[0,0]]` blacklist idiom the return is `[0,0]`; with an
+empty or omitted blacklist it is `[0,0,0]`. Either is a real-looking position at the map origin (open sea
+off Altis' SW corner), and a caller that treats any non-`[]` return as success accepts it.**
 
 A side mission using the whole-map placement survey (`fnc_mission_findSite`, `surveyKind "map"`) sampled
 a coastal dot; `findSafePos` could not settle clear ground within the band and returned `[0,0]`. `[0,0]`

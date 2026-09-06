@@ -197,7 +197,7 @@ private _leanDispatch = {
     params ["_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
     private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
     private _debusPos = [_debusRaw, 0, 80, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-    if (_debusPos isEqualTo []) then { _debusPos = _debusRaw };
+    if (_debusPos isEqualTo [] || { (_debusPos select 0) == 0 && { (_debusPos select 1) == 0 } }) then { _debusPos = _debusRaw };
     _drv setBehaviour "CARELESS";
     _drv setSpeedMode "FULL";
     (_drv addWaypoint [_debusPos, 0]) setWaypointType "MOVE";
@@ -234,7 +234,7 @@ private _bearingPos = {
     params ["_center"];
     private _raw = _center getPos [RADIUS + DUWS_zoneReserveSpawnDist, random 360];
     private _safe = [_raw, 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-    if (_safe isEqualTo []) then { _safe = _raw };
+    if (_safe isEqualTo [] || { (_safe select 0) == 0 && { (_safe select 1) == 0 } }) then { _safe = _raw };
     [_safe] call DUWS_fnc_reserveRoadSnap
 };
 
