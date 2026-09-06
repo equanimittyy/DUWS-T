@@ -100,10 +100,11 @@ green, an affordable next tier orange, AP-locked tiers greyed. Buttons: Store th
 Retrieve the selected stored vehicle, Buy the next expansion level. Storing checks the pool for the
 vehicle's domain, so a full land pool does not block storing an aircraft.
 
-**Recycle panel.** Lists the empty pad vehicles with each one's value from
-`DUWS_fnc_calculateVehicleValue`, with a Recycle button. The existing bulk behaviour — recycle every
-empty vehicle on the pad through `fnc_veh_recycle_action` — is preserved as the button's action; the
-per-vehicle values are shown so the payout is legible before committing.
+**Recycle panel.** Lists the empty pad vehicles with each one's reward from
+`DUWS_fnc_vehicleRecycleReward` (see [Recycle payout](#recycle-payout)), with a Recycle button. The
+existing bulk behaviour — recycle every empty vehicle on the pad through `fnc_veh_recycle_action` — is
+preserved as the button's action; the per-vehicle rewards are shown so the payout is legible before
+committing.
 
 Any purchase, store, retrieve, or recycle refills the affected list by clearing and rebuilding inside
 `isNil {}`, following `fnc_support_list_fill.sqf`.
@@ -184,6 +185,28 @@ as boats; everything else (tanks, cars, logistics, AA, artillery) counts as land
 is the number of stored vehicles whose class maps to that domain, so no domain tag needs storing
 alongside the spec.
 
+## Recycle payout
+
+Recycling drops the hardcoded exclusion list and pays for every empty vehicle instead, with two policy
+adjustments centralised in one shared reward function so the preview quote and the credited amount are
+always computed the same way.
+
+`DUWS_fnc_calculateVehicleValue` (`fnc_activateBaseRecycleStation.sqf:4`) stays the raw combat-value
+estimate (seats, weapon classes, and the supply / car / tank / air multipliers). A new wrapper,
+`DUWS_fnc_vehicleRecycleReward [_veh]`, applies the recycle policy on top and is called by both the
+preview (`fnc_veh_recycle_preview_server`) and the action (`fnc_veh_recycle_action`):
+
+- A civilian vehicle keeps **half** its value — an extra ×0.5 on top of the existing car multiplier —
+  detected by `getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "side") == 3`, the same test
+  already used at `server/civilian/fnc_disguiseAsCivilian.sqf:24`. This reads `side` from config, so it
+  covers modded civilian classes too, in keeping with the mission's mod-agnostic principle, and a
+  missing `side` defaults to East (0) so military hulls are never mistaken for civilian.
+- Every reward floors at 1 CP (`1 max round _v`), so even a quad or tractor returns something.
+
+Removing the exclusion deletes the two copies of `_excludedClasses` (`:61`, `:82`), and centring the
+reward in one function retires the by-hand rounding guard the current code needs to keep the quote and
+the credit in step (`:98-100`). The total payout is the sum of the per-vehicle rewards.
+
 ## Persistence
 
 `fnc_autoSave.sqf` is a plain `saveGame`, which serializes the mission namespace. Garage state is
@@ -224,7 +247,9 @@ Changed:
 - `client/supports/fnc_client_addRepairActions.sqf` — hoist the sub-dialogs, remove its addAction block
 - `client/supports/fnc_client_addRecycleActions.sqf` — retire its action block (folded into the menu)
 - `server/supports/fnc_activateBaseRepairStation.sqf`, `fnc_activateBaseRecycleStation.sqf` — register
-  the single depot client action and add garage activation
+  the single depot client action and add garage activation; in the recycle station, drop both
+  `_excludedClasses` copies and add the `DUWS_fnc_vehicleRecycleReward` wrapper (civilian ×0.5, floor 1)
+  called by preview and action
 - `client/supports/fnc_supports_init.sqf:307-309` — activate the garage with the depot
 - `stringtable.xml` — the new keys
 - `tests/unit/functions.txt` — add any new function that gets a unit test (the path list is hardcoded)
@@ -246,5 +271,7 @@ and at the HQ helipad:
   and raise all three caps when bought.
 - Fill the land pool, then confirm a further land vehicle is refused while an aircraft still stores
   against the separate air pool.
-- Recycle still credits CP for empty pad vehicles and matches the shown value.
+- Recycle credits CP for every empty pad vehicle (no class is refused now), matches the shown reward,
+  pays at least 1 CP for a quad or tractor, and pays a civilian vehicle half what an equivalent military
+  one earns.
 - After a `saveGame` and reload, the stored vehicles and the purchased capacity both survive.
