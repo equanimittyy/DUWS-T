@@ -68,13 +68,9 @@ DUWS_fnc_putInVehicle = {
     private _vehicle = cursorTarget;
     if (isNull _vehicle || !(_vehicle isKindOf "AllVehicles") || _vehicle == _caller) then {
         private _nearVehicles = nearestObjects [_caller, ["Car","Tank","Helicopter","Ship"], 5];
-        if (count _nearVehicles > 0) then {
-            _vehicle = _nearVehicles select 0;
-        } else {
-            hint localize "STR_DUWS_T_no_vehicle_near";
-            breakOut "";
-        };
+        _vehicle = if (count _nearVehicles > 0) then { _nearVehicles select 0 } else { objNull };
     };
+    if (isNull _vehicle) exitWith { hint localize "STR_DUWS_T_no_vehicle_near"; };
 
     [_caller, _pilot, _vehicle] remoteExec ["DUWS_fnc_serverPutInVehicle", 2];
 };
@@ -98,32 +94,30 @@ DUWS_fnc_serverPutInVehicle = {
         [_caller, localize "STR_DUWS_T_pilot_already_in_vehicle"] remoteExec ["hint", _caller];
     };
 
-    private _hasSeat = false;
+    // Pick a seat first, cargo before commander before gunner, before touching the pilot.
     private _seatType = "";
-    if (_vehicle emptyPositions "cargo" > 0) then {
-        _hasSeat = true;
-        _seatType = "cargo";
-        _pilot moveInCargo _vehicle;
-    } else {
-        if (_vehicle emptyPositions "commander" > 0) then {
-            _hasSeat = true;
-            _seatType = "commander";
-            _pilot moveInCommander _vehicle;
-        } else {
-            if (_vehicle emptyPositions "gunner" > 0) then {
-                _hasSeat = true;
-                _seatType = "gunner";
-                _pilot moveInGunner _vehicle;
-            };
-        };
+    if (_vehicle emptyPositions "cargo" > 0) then { _seatType = "cargo"; }
+    else {
+        if (_vehicle emptyPositions "commander" > 0) then { _seatType = "commander"; }
+        else { if (_vehicle emptyPositions "gunner" > 0) then { _seatType = "gunner"; }; };
     };
-
-    if (!_hasSeat) exitWith {
+    if (_seatType == "") exitWith {
         [_caller, localize "STR_DUWS_T_no_available_seat"] remoteExec ["hint", _caller];
     };
 
-    sleep 0.5;
+    // Detach from the carrier BEFORE seating. moveInCargo on a unit still attachTo the player leaves the
+    // attachment pinning him to the player's back rather than the seat -- the "loaded but still carried"
+    // bug. Carry state is cleared here so a failed grab below can restore it cleanly.
+    detach _pilot;
+    _pilot setVariable ["isCarried", false, true];
+    _pilot setVariable ["carrier", nil, true];
 
+    switch (_seatType) do {
+        case "cargo": { _pilot moveInCargo _vehicle; };
+        case "commander": { _pilot moveInCommander _vehicle; };
+        case "gunner": { _pilot moveInGunner _vehicle; };
+    };
+    sleep 0.5;
     if (vehicle _pilot != _vehicle) then {
         switch (_seatType) do {
             case "cargo": { _pilot moveInCargo _vehicle; };
@@ -134,12 +128,14 @@ DUWS_fnc_serverPutInVehicle = {
     };
 
     if (vehicle _pilot != _vehicle) exitWith {
+        // Grab failed after the detach; put him back on the carrier's back so he is not left stranded.
+        _pilot attachTo [_caller, [0.17, 0.1, 0.11]];
+        [_pilot, -180] remoteExec ["setDir", 0];
+        _pilot setVariable ["isCarried", true, true];
+        _pilot setVariable ["carrier", _caller, true];
         [_caller, localize "STR_DUWS_T_failed_put_vehicle"] remoteExec ["hint", _caller];
     };
 
-    detach _pilot;
-    _pilot setVariable ["isCarried", false, true];
-    _pilot setVariable ["carrier", nil, true];
     _pilot setVariable ["inVehicle", _vehicle, true];
     _pilot disableAI "ALL";
     _speaker = localize "STR_DUWS_T_actionteam";

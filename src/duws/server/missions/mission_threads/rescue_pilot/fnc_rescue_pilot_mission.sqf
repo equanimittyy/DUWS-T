@@ -228,12 +228,21 @@ if (!(alive _pilot)) exitWith {
 // Won: pilot at HQ. Off the player's back, patched enough to walk, then he makes his own way into the medical
 // tent and despawns there. Timeout-guarded so a stuck path still ends the walk and the mission.
 call _clearIcons;
-if (!isNull attachedTo _pilot) then {
-    detach _pilot;
-    CLEANUP_PILOT(_pilot);
+// Home: strip every carry/vehicle hook so the carry options vanish and no one can pick him up or seat him
+// again, then get him out of whatever holds him -- off a player's back, or self-dismounted from a vehicle --
+// so he limps to the tent on his own.
+CLEANUP_PILOT(_pilot);
+if (!isNull attachedTo _pilot) then { detach _pilot; };
+if (vehicle _pilot != _pilot) then {
+    moveOut _pilot;
+    private _outBy = time + 1;
+    waitUntil { vehicle _pilot == _pilot || time > _outBy };
 };
 
 _pilot setDamage 0.4;
+// Force the limp gait no matter his actual HP: overall 0.4 damage walks near-normally, a hurt leg is what
+// reads as a wounded man making his own way in. Set after setDamage so it isn't overwritten.
+_pilot setHitPointDamage ["HitLegs", 0.6];
 [_pilot, ""] remoteExec ["switchMove", 0];
 _pilot enableAI "ALL";
 _pilot enableAI "PATH";
@@ -241,7 +250,8 @@ private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId
 if (!isNull _tent) then {
     _pilot doMove (getPosATL _tent);
     private _walkTimeout = time + 30;
-    waitUntil { sleep 1; !(alive _pilot) || (_pilot distance _tent < 3) || time > _walkTimeout };
+    // Re-wound the leg each tick: a player healing him mid-walk would otherwise clear it and drop the limp.
+    waitUntil { sleep 1; _pilot setHitPointDamage ["HitLegs", 0.6]; !(alive _pilot) || (_pilot distance _tent < 3) || time > _walkTimeout };
 };
 
 [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];

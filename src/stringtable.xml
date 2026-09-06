@@ -4087,8 +4087,8 @@
                 <English>No vehicle close enough to load the pilot into.</English>
             </Key>
             <Key ID="STR_DUWS_T_no_available_seat">
-                <Original>No free seat in that vehicle for the pilot.</Original>
-                <English>No free seat in that vehicle for the pilot.</English>
+                <Original>Couldn't find a seat.</Original>
+                <English>Couldn't find a seat.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot_dead">
                 <Original>The pilot is dead.</Original>
