@@ -1,4 +1,4 @@
-// Locality: server -- remoteExec'd to 2 by fnc_debug_opcom_view. Gathers every AoI emitter's reach as
+// Locality: server -- remoteExec'd to 2 by fnc_debug_aoi_view. Gathers every AoI emitter's reach as
 // [center, radius, side] and hands the list straight back to the requesting client to draw, the way
 // fnc_map_readout_query answers the board. Server-side because the reaches (the AOI_* constants) and
 // the banded-town reputations are server-only; the emitter positions are mostly broadcast, but

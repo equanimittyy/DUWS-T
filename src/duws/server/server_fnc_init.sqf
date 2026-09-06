@@ -580,9 +580,10 @@ fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\debug\fnc
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
 fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
 fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
-// The OPCOM debug view and its draw callback. Broadcast: the view is a menu-row handler every client
-// holds, and the server remoteExecs the callback back to whichever client asked.
+// The OPCOM/AoI debug views and their draw callbacks. Broadcast: each view is a menu-row handler every
+// client holds, and the server remoteExecs the callback back to whichever client asked.
 fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_view.sqf";publicVariable "fnc_debug_opcom_view";
+fnc_debug_aoi_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_view.sqf";publicVariable "fnc_debug_aoi_view";
 fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_draw.sqf";publicVariable "fnc_debug_aoi_draw";
 fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_grid_draw.sqf";publicVariable "fnc_debug_opcom_grid_draw";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
