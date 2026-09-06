@@ -303,6 +303,23 @@ order, one string silently never displays — a latent wrong-message bug.
 nothing in-game, grep for a second `<Key ID>` with the same ID before assuming the change didn't
 take, and fold any new duplicate into one copy rather than leaving a dead twin.
 
+## A config class opened with a body twice at one scope warns, and the RPT line points past it
+
+**Two `class Foo { ... }` blocks at the same scope in the merged `description.ext` — the include
+chain counts as one file — log `.Foo: Member already defined`. The engine still merges them, but
+the reported line is the token *after* the second block, not the block itself, and it names the
+duplicated class, not where the duplicate lives.**
+
+A `#include` that opens `class CfgMagazines` collides with an inline `class CfgMagazines` already
+in `description.ext`: the warning read `File throwables.hpp, line 53: .CfgMagazines: Member already
+defined`, but line 53 was the `class CfgWeapons` that followed the magazine block — the parser only
+notices at the next token. Chasing the line wastes the session; the class path (`.CfgMagazines`) is
+the real lead. Only two files opening a config class produce exactly one such warning, one per load.
+
+**How to apply:** keep one bodied block per top-level config class across the whole include chain.
+When two owners both need to add members (a feature include plus an inline block), fold them into a
+single block rather than reopening. Read the class named in the message, not the line it cites.
+
 ## `format` discards surplus arguments, so a missing `%N` never errors
 
 **`format` matches placeholders to the array positionally and drops any argument with no matching
