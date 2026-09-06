@@ -2874,7 +2874,7 @@
                 <Original>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</Original>
                 <English>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</English>
             </Key>
-            <Key ID="STR_DUWS_T_transIDAP_note">
+            <Key ID="STR_DUWS_T_townrep_note">
                 <Original>Completing or failing this mission will gain or lose town rep.</Original>
                 <English>Completing or failing this mission will gain or lose town rep.</English>
             </Key>
