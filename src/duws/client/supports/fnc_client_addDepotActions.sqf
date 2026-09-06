@@ -14,7 +14,7 @@ if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call 
 // One "Vehicle Depot" action replaces the old pair (Vehicle Customization / Vehicle Recycling): it
 // opens the unified dialog, whose three panels cover modification, storage and recycling.
 _depot addAction [
-    ACT_SECONDARY_MENU("STR_DUWS_T_DEPOT_MENU"),
+    ACT_PRIMARY_MENU("STR_DUWS_T_DEPOT_MENU"),
     { params ["_t", "_c", "_i", "_args"]; _args call fnc_vehicle_depot_menu; },
     [_trg],
     90,
