@@ -24,10 +24,14 @@ Phase 1 landing has made stale (§C).
    belief already ages in ticks, the counter persists with the mission namespace, and one clock avoids
    a mixed-unit comparison bug in the commitment code.
 
+   _COMMENT_OPUS_: Confirmed real (plan:431/:478 vs :671). Only finding that's an actual trap, not tidiness — a seconds-vs-ticks compare in Phase 3 commit code. Agree ticks is the pick. Highest priority.
+
 2. **Recruit's candidate count.** The enumeration table says Recruit sweeps "one — the locked prize"
    (opcom_plan.md:267), but §Value and §What the commander spends on define Recruit as one candidate
    **per hireable type** (combat/armor/recon/supply), each valued by the best action that type unlocks
    (:344-352, :744-748). Fix the enumeration row to "one per hireable type".
+
+   _COMMENT_OPUS_: Confirmed (:267 vs :344/:744). Pure doc fix, cheap.
 
 ## B. Gaps and optimistic spots — resolve before the phase that depends on them
 
@@ -45,6 +49,8 @@ Phase 1 landing has made stale (§C).
    damage; still, specify A* with a distance heuristic and early exit on reaching the target, plus a
    budget of at most one route search per tick.
 
+   _COMMENT_OPUS_: Overstated. Router walks only land+connected cells; the connectivity mask prunes 3844 well before any search. Phase 4 concern, not near-term. A*/one-per-tick advice still fine.
+
 3. **The streaming margin is argued against a 200 km/h player** (opcom_plan.md:581-583). A jet at
    700+ km/h crosses ~1 km (2 cells) per 5 s tick and can overfly an infantry ring (K=1) unstreamed —
    a virtual unit is invisible and unhittable to CAS. Either raise K against airborne players
@@ -55,6 +61,8 @@ Phase 1 landing has made stale (§C).
    store would restore rows whose keys never match again (they would decay out harmlessly, but
    keep-strongest dedup is lost). Cheapest resolution: decide *not* to persist belief and close the
    open question.
+
+   _COMMENT_OPUS_: Confirmed — netId key at `fnc_opcom_sense.sqf:14` (`_key = netId _grp`). Not stable across save/load. Agree: don't persist belief.
 
 5. **`defenseAbandoned` implies a counterfactual grid** ("drop it from `_gridFri`, net threat …
    climbs", opcom_plan.md:381-384). A per-candidate grid rebuild is unaffordable; state the intended
@@ -74,6 +82,8 @@ matches the phase doc, including the documented men-count-not-firepower interim.
    (opcom_plan.md:246) and the Build-order row's "(AoI circles only today)" (:1127) are now false —
    the grid and belief render shipped (`fnc_debug_opcom_grid.sqf` / `fnc_debug_opcom_grid_draw.sqf`).
 
+   _COMMENT_OPUS_: Confirmed firsthand — I shipped the grid. 2 stale lines. Fix NOW; cheaper than the A-items. Reprioritise this section by cost, not phase.
+
 2. **The zone-flip sensor is claimed for Phase 1 but not implemented.**
    `phase_1_belief_and_grid.md:66-67` lists it in-phase; no writer of `DUWS_opcom_belief_*` exists
    outside `server/opcom/` — direct sighting is the sole sensor. Either implement the hook or move it
@@ -85,14 +95,20 @@ matches the phase doc, including the documented men-count-not-firepower interim.
    requires restore to feed state back "before the loop runs" (opcom_plan.md:1094) — that contract
    breaks if the loop ever restarts. State an init-if-nil contract for `belief_init` in the plan.
 
+   _COMMENT_OPUS_: Confirmed unconditional call at `fnc_opcom_perception_run.sqf:8`. But latent — loop spawns once, `while{true}`, never restarts today. Contract-statement, not a live bug.
+
 4. **No failure containment in the loop.** A throw in sense/rebuild kills the perception thread
    silently for the rest of the mission; the disabled `fnc_WARCOM_opf_hardpoints.sqf:71-72` wrapped
    its tick and logged. Worth one line in §The loop.
+
+   _COMMENT_OPUS_: Confirmed, also latent — same reasoning as C3.
 
 5. **Housekeeping** (code, not plan): stale doc path `docs/plans/opcom_plan.md` in
    `fnc_WARCOM_opf_hardpoints.sqf:8` and `fnc_createzone.sqf:160`; `fnc_init_OPFOR_WARCOM.sqf:149-151`
    still calls the launch "the OPCOM director" though it now starts perception only; dead `_key`
    assignment on the BLU branch of `fnc_opcom_grid_rebuild.sqf:38`.
+
+   _COMMENT_OPUS_: Confirmed dead `_key` at `fnc_opcom_grid_rebuild.sqf:38` — computed every zone, used only in the else branch (:42). Hoist into else. Rest trivial.
 
 ## D. Watch items — not defects
 
