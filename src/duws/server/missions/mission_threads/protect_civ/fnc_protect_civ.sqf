@@ -273,6 +273,31 @@ private _vehGroups = [];
     private _lastWave = -1e9;
     private _reinforceEvery = 150 + random 150;   // rand(2.5,5) min heartbeat, re-rolled each wave
     while { missionNamespace getVariable [_defendVar, false] } do {
+        // Re-aim stragglers: a hunt element that reaches the ring and empties its SAD sits on the
+        // satisfied cycle rather than pressing in (a vehicle stalls at the wall it can't drive
+        // through). Any live group gone still and out of contact is pointed back at the informant --
+        // the live object, since a player may have carried him off _targetpos during prep. A group
+        // already on the point, or one in a firefight, is left to it.
+        private _inf = missionNamespace getVariable ["DUWS_float_informant", objNull];
+        private _tgt = if (!isNull _inf && { alive _inf }) then { getPosATL _inf } else { _center };
+        {
+            private _g = _x;
+            if (({ alive _x } count units _g) > 0) then {
+                private _lead = leader _g;
+                private _veh = vehicle _lead;
+                // Skip a squad still riding its delivery truck (leader is cargo in a foreign group):
+                // the lean dispatch owns its debus, and re-tasking it mid-ride would fight that.
+                if ((_veh == _lead || { group _veh == _g })
+                    && { behaviour _lead != "COMBAT" }
+                    && { unitReady _lead }
+                    && { speed _veh < 3 }
+                    && { _lead distance2D _tgt > 60 }) then {
+                    for "_i" from ((count (waypoints _g)) - 1) to 0 step -1 do { deleteWaypoint [_g, _i] };
+                    [_g, "hunt", _tgt, RADIUS] call fnc_apply_posture;
+                };
+            };
+        } forEach _waveGroups;
+
         private _live = _waveGroups call _fnLive;
         if (_live < 0.6 * _budget || { time - _lastWave >= _reinforceEvery }) then {
             _lastWave = time;
