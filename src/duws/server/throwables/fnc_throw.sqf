@@ -11,6 +11,10 @@ private _from = eyePos _thrower;
 // Flight time from horizontal range, clamped so a point-blank lob still arcs and a long heave is not floaty.
 private _dur = (((_from distance2D _to) / 14) max 0.6) min 2.5;
 
+// Throw gesture on every machine, launched with the projectile. "throwGrenade" is the engine's own throw
+// action, so it animates for the thrower's stance (unarmed here); an unknown action name is a silent no-op,
+// so this stays safe if the name ever changes.
+[_thrower, "throwGrenade"] remoteExec ["playActionNow", 0];
 [_kind, _from, _to, _dur] remoteExec ["fnc_throw_visual", 0];
 
 [_kind, _to, _dur] spawn {
@@ -18,8 +22,8 @@ private _dur = (((_from distance2D _to) / 14) max 0.6) min 2.5;
 	sleep _dur;
 	// Molotov lands as a scripted fire (server owns the networked flame); ignite works in ATL.
 	if (_kind == "molotov") exitWith { [ASLToATL _to] call fnc_molotov_ignite; };
-	// Stone does no damage -- the crowd harasses, it does not kill (gunning it down is the war crime the
-	// event is built around). A light camera knock on anyone it lands beside sells the hit; run it local.
+	// Stone does no damage -- the crowd harasses, it does not kill. A light camera knock on anyone it lands
+	// beside sells the hit; run it local on each near owner.
 	{
 		[0.35, 0.7, 6] remoteExec ["addCamShake", _x];
 	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 2.5} });

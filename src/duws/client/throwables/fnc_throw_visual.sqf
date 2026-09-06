@@ -8,21 +8,22 @@ private _obj = createSimpleObject [_p3d, ASLToAGL _from];
 if (isNull _obj) exitWith {};
 if (_kind == "molotov") then { [_obj] call fnc_molotov_trail; };
 
-[_obj, _from, _to, _dur, _kind] spawn {
-	params ["_obj", "_from", "_to", "_dur", "_kind"];
-	private _peak = 2 + _dur * 3;
-	private _t0 = time;
-	while { !isNull _obj && {(time - _t0) < _dur} } do {
-		private _k = (time - _t0) / _dur;
-		private _p = _from vectorAdd ((_to vectorDiff _from) vectorMultiply _k);
-		// Parabola: 0 at both ends, _peak at the midpoint.
-		_p set [2, (_p select 2) + 4 * _peak * _k * (1 - _k)];
-		_obj setPosASL _p;
-		sleep 0.02;
+// Frame-synced flight: an EachFrame handler steps the arc by real elapsed time, so it stays smooth whatever
+// the scheduler does. A spawn + sleep loop advances in scheduler ticks, not frames, and visibly stutters.
+private _peak = 2 + _dur * 3;
+addMissionEventHandler ["EachFrame", {
+	_thisArgs params ["_obj", "_from", "_to", "_dur", "_peak", "_t0", "_kind"];
+	if (isNull _obj) exitWith { removeMissionEventHandler ["EachFrame", _thisEventHandler] };
+	private _k = (diag_tickTime - _t0) / _dur;
+	if (_k >= 1) exitWith {
+		_obj setPosASL _to;
+		removeMissionEventHandler ["EachFrame", _thisEventHandler];
+		// Molotov lingers a beat so its trail/fire reads over the object before it goes; a stone just drops.
+		if (_kind == "molotov") then { [_obj] spawn { params ["_o"]; sleep 1; deleteVehicle _o } } else { deleteVehicle _obj };
 	};
-	if (isNull _obj) exitWith {};
-	_obj setPosASL _to;
-	// Let the molotov settle a beat so its trail/fire reads over the object before it goes; a stone just drops.
-	if (_kind == "molotov") then { sleep 1 };
-	deleteVehicle _obj;
-};
+	private _p = _from vectorAdd ((_to vectorDiff _from) vectorMultiply _k);
+	// Parabola: 0 at both ends, _peak at the midpoint.
+	_p set [2, (_p select 2) + 4 * _peak * _k * (1 - _k)];
+	_obj setPosASL _p;
+	_obj setDir (getDir _obj + 12);   // slow tumble so it reads as thrown, not sliding
+}, [_obj, _from, _to, _dur, _peak, diag_tickTime, _kind]];
