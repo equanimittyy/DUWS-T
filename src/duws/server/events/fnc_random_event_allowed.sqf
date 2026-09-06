@@ -1,8 +1,8 @@
 // Locality: server. True if this event kind may fire at the player's position. Hostile kinds -- those in a
 // rep band topping out <= -10, derived from the table so a new hostile event needs no edit here -- are held
-// off a player standing on BLUFOR-covered ground: a turned town does not reach a player already safe on
-// friendly territory. Benign kinds always pass. Shared by the runner's roll and the debug spawner so both
-// honour the same AoI gate.
+// off only near the player HQ: home base is the one guaranteed safe haven. Friendly towns, captured zones
+// and FOBs do NOT hold them off -- forward friendly ground stays fair game. Benign kinds always pass.
+// Shared by the runner's roll and the debug spawner so both honour the same gate.
 params ["_kind", "_player"];
 private _hostileKinds = [];
 {
@@ -11,4 +11,5 @@ private _hostileKinds = [];
 } forEach [
 #include "..\..\shared\includes\random_event_tables.hpp"
 ];
-!(_kind in _hostileKinds) || {!([getPos _player] call fnc_aoi_blufor_covers)}
+private _nearHQ = !(PosOfBLUHQ isEqualTo []) && {(getPos _player) distance2D PosOfBLUHQ <= AOI_HQ_REACH};
+!(_kind in _hostileKinds) || {!_nearHQ}

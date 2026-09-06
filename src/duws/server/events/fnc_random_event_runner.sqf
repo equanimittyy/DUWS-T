@@ -33,7 +33,7 @@ while {true} do {
 					private _rep = [_town] call fnc_civ_repAt;
 					private _kind = [[_rep] call fnc_random_event_table] call fnc_search_drawKind;
 					// Empty band or empty table draws to "" -- the expected path until events exist. A hostile
-					// kind is held off a player the BLUFOR AOI already covers (fnc_random_event_allowed).
+					// kind is held off a player within the HQ safe haven (fnc_random_event_allowed).
 					if !(_kind isEqualTo "") then {
 						if ([_kind, _player] call fnc_random_event_allowed) then {
 							[_kind, _town, _player] call fnc_random_event_fire;

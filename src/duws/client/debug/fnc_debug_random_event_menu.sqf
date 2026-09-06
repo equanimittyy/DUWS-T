@@ -1,7 +1,7 @@
 // Locality: client -- an fnc_open_action_menu row handler, so it runs on whoever opened the menu.
 /*
     Developer tool: spawn one random event by hand, bypassing the runner's roll but still honouring the
-    BLUFOR AoI gate. Three stages, each a
+    HQ safe-haven gate. Three stages, each a
     call back into this function: pick a player, pick a table (reputation band), pick an event in it.
     The final pick remoteExecs fnc_debug_random_event to the server, which resolves that player's nearest
     town and fires it. Reached from fnc_debug_menu.sqf; strings are English-only for the same reason.
@@ -54,7 +54,7 @@ switch (_stage) do {
 			_rows pushBack [format ["%1  (weight %2)", _kind, _w], {
 				params ["_p", "_kind"];
 				[_kind, _p] remoteExec ["fnc_debug_random_event", 2];
-				hint format ["Spawning random event '%1' on %2.\n\nBypasses the runner roll but still honors the BLUFOR\nAoI gate: a hostile kind on friendly ground is suppressed.", _kind, name _p];
+				hint format ["Spawning random event '%1' on %2.\n\nBypasses the runner roll but still honors the HQ gate:\na hostile kind within HQ reach is suppressed.", _kind, name _p];
 			}, [_player, _kind], [1,0.667,0,1]];
 		} forEach _weights;
 		[format ["Spawn '%1' event: pick one", (_bands select _bandIdx) select 0], _rows] call fnc_open_action_menu;
