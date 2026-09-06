@@ -53,6 +53,8 @@ _driver setVariable ["DUWS_binMe", true];
 	private _fuse = -1;
 	private _deadline = time + TIMEOUT;
 	private _lastMove = [0, 0, 0];
+	// Horn is a vehicle weapon, not the "Horn" action-menu entry an AI never triggers.
+	private _horn = ((weapons _veh) select { (_x find "Horn") > -1 }) param [0, ""];
 
 	while { !isNull _veh && {time < _deadline} } do {
 		// Driver down or the hull can't move: cook off where it sits.
@@ -67,7 +69,8 @@ _driver setVariable ["DUWS_binMe", true];
 			_lastMove = getPos _target;
 			_driver doMove _lastMove;
 		};
-		if (random 1 < 0.3) then { [_driver, ["Horn", _veh]] remoteExec ["action", 0] };
+		// forceWeaponFire: global effect, so firing server-side (hull is server-local) honks for every client.
+		if (_horn != "" && {random 1 < 0.3}) then { _veh forceWeaponFire [_horn, _horn] };
 
 		// Armed on the hull's distance, not the seated driver's.
 		if (_veh distance _target < ARM_RANGE) exitWith { _fuse = FUSE };

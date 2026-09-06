@@ -1825,3 +1825,20 @@ will not open fire even set to COMBAT.** Re-grouping it after creation fixes bot
 civilian costume while the side is real. The VBIED driver (`server/events/fnc_random_event_car_bomb.sqf`)
 and the informant manhunt (`server/missions/mission_threads/informant/fnc_informant_mission.sqf`) both do
 this.
+
+## The `"Horn"` action is a player keybind; an AI honks by firing the horn as a vehicle weapon
+
+**`vehicle action ["Horn", vehicle]`, or the same on the driver, sounds the horn only for a player. "Horn"
+is a keybound action-menu entry and the `action` command drives the action menu, which an AI unit has no
+entry in — called on an AI driver it is a silent no-op: no error, no sound.** The horn is not an action
+under the hood but a vehicle weapon (`CarHorn`, `SportCarHorn`, `TruckHorn` and the like, carried in the
+hull's `weapons[]`), so an AI beeps it the way it fires any weapon. The VBIED's run-in horn
+(`server/events/fnc_random_event_car_bomb.sqf`) stayed silent for exactly this reason — it drove the beep
+through `action ["Horn", ...]`.
+
+**How to apply:** read the hull's own horn out of `weapons _veh` (its class name contains `Horn`) and fire
+it with `_veh forceWeaponFire [_horn, _horn]`. `forceWeaponFire` is a global effect on a local argument: run
+it where the hull is local — for a server-spawned event vehicle that is the server, and every client then
+hears it, so no `remoteExec` is wanted (running it on a client where the hull is remote does nothing).
+`BIS_fnc_fire` beeps a horn too and adds the weapon first where the hull lacks one, but a civilian car
+already carries its horn, so the direct fire is enough.
