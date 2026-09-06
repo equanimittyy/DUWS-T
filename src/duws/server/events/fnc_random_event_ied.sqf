@@ -59,7 +59,7 @@ private _piles = [];
 		_pile setVectorUp (surfaceNormal (getPosATL _pile));
 		_pile enableSimulation false;   // a live charge must not be nudged off its spot by traffic
 		private _live = random 1 < IED_LIVE_CHANCE;
-		_pile setVariable ["DUWS_ied_state", _live select ["decoy", "live"], false];
+		_pile setVariable ["DUWS_ied_state", ["decoy", "live"] select _live, false];
 		// Public so a client's hold-action condition and the world icon can see the pile. Set on every pile,
 		// live or decoy, so the two are indistinguishable; false on defuse or trip drops both the action and
 		// the icon.
