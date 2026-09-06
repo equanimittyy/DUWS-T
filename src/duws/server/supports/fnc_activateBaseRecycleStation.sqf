@@ -54,71 +54,73 @@ if (isNil "DUWS_fnc_calculateVehicleValue") then {
     publicVariable "DUWS_fnc_calculateVehicleValue";
 };
 
-if (isNil "fnc_veh_recycle_preview_server") then {
-    fnc_veh_recycle_preview_server = {
-        params ["_caller", "_trg"];
-
-        private _excludedClasses = ["B_Quadbike_01_F","C_Hatchback_01_F","C_Hatchback_01_sport_F","C_Offroad_01_F","C_SUV_01_F","C_Tractor_01_F","C_Van_01_Transport_F","C_Van_01_Box_F","C_Van_02_Vehicle_F","C_Van_02_transport_F","C_Truck_02_transport_F","C_Truck_02_covered_F"];
-
-        private _vehicles = vehicles inAreaArray _trg;
-        private _recyclableVehicles = [];
-        { if (count crew _x == 0 && !(typeOf _x in _excludedClasses)) then { _recyclableVehicles pushBack _x; }; } forEach _vehicles;
-
-        private _totalValue = 0;
-        { _totalValue = _totalValue + ([_x] call DUWS_fnc_calculateVehicleValue); } forEach _recyclableVehicles;
-        // Rounded as the payout is, or the preview quotes a figure the credit contradicts.
-        _totalValue = round _totalValue;
-
-        private _msg = format [localize "STR_DUWS_T_PREVIEW_VALUE", count _recyclableVehicles, _totalValue];
-        [_msg] remoteExec ["hint", _caller];
+// The recycle policy on top of the raw combat-value estimate, so the client's confirmation quote and
+// the server's credit are one function and cannot drift. Civilian hulls (config side 3, the same test
+// as fnc_disguiseAsCivilian, so modded civilian classes are covered) pay half; every reward floors at
+// 1 CP so even a quad or tractor returns something. A missing side reads as East (0), so a military
+// hull is never mistaken for civilian.
+if (isNil "DUWS_fnc_vehicleRecycleReward") then {
+    DUWS_fnc_vehicleRecycleReward = compileFinal {
+        params ["_veh"];
+        private _v = [_veh] call DUWS_fnc_calculateVehicleValue;
+        if (getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "side") == 3) then { _v = _v * 0.5; };
+        1 max round _v
     };
-    publicVariable "fnc_veh_recycle_preview_server";
+    publicVariable "DUWS_fnc_vehicleRecycleReward";
 };
 
 if (isNil "fnc_veh_recycle_action") then {
     fnc_veh_recycle_action = {
-        params ["_caller", "_trg"];
+        params ["_caller", "_trgNetId"];
+        private _trg = objectFromNetId _trgNetId;
+        if (isNull _trg) exitWith {};
+        // Recomputed at commit: the server is authority and the pad may have changed between the
+        // client's confirmation and the Yes. No class is excluded now -- every empty vehicle pays.
+        private _vehs = (vehicles inAreaArray _trg) select { count crew _x == 0 };
+        if (count _vehs == 0) exitWith { [localize "STR_DUWS_T_recycleempty"] remoteExec ["hint", _caller]; };
 
-        private _excludedClasses = ["B_Quadbike_01_F","C_Hatchback_01_F","C_Hatchback_01_sport_F","C_Offroad_01_F","C_SUV_01_F","C_Tractor_01_F","C_Van_01_Transport_F","C_Van_01_Box_F","C_Van_02_Vehicle_F","C_Van_02_transport_F","C_Truck_02_transport_F","C_Truck_02_covered_F"];
-
-        private _vehicles = vehicles inAreaArray _trg;
-        private _recyclableVehicles = [];
-        private _hasExcluded = false;
+        // Identical classes collapse to one counted line for the report; the reward is summed as each
+        // vehicle is deleted so the credit and the itemised hint cannot disagree.
+        private _entries = [];   // [class, count, sumReward, displayName]
+        private _total = 0;
         {
-            if (count crew _x == 0) then {
-                if (typeOf _x in _excludedClasses) then { _hasExcluded = true; }
-                else { _recyclableVehicles pushBack _x; };
+            private _cls = typeOf _x;
+            private _r = [_x] call DUWS_fnc_vehicleRecycleReward;
+            _total = _total + _r;
+            private _idx = _entries findIf { (_x select 0) == _cls };
+            if (_idx < 0) then {
+                _entries pushBack [_cls, 1, _r, getText (configFile >> "CfgVehicles" >> _cls >> "displayName")];
+            } else {
+                private _e = _entries select _idx;
+                _e set [1, (_e select 1) + 1];
+                _e set [2, (_e select 2) + _r];
             };
-        } forEach _vehicles;
+            deleteVehicle _x;
+        } forEach _vehs;
 
-        private _count = count _recyclableVehicles;
-        if (_count > 0) then {
-            private _totalReward = 0;
-            { _totalReward = _totalReward + ([_x] call DUWS_fnc_calculateVehicleValue); deleteVehicle _x; } forEach _recyclableVehicles;
-            // Half-point seat values and the 0.8/1.1/1.5 class multipliers make this a float;
-            // round once here so the hint and the credited amount cannot disagree.
-            _totalReward = round _totalReward;
-            [_totalReward, "recycle_station"] remoteExec ["fnc_cp_adjust", 2];
-            [format [localize "STR_DUWS_T_recyclesuccess", _count, _totalReward]] remoteExec ["hint", _caller];
-        } else {
-            if (_hasExcluded) then { [localize "STR_DUWS_T_recyclenotallowed"] remoteExec ["hint", _caller]; }
-            else { [localize "STR_DUWS_T_recycleempty"] remoteExec ["hint", _caller]; };
+        [_total, "recycle_station"] call fnc_cp_adjust;
+
+        // A hint fits only a few lines: show at most five collapsed lines and fold the rest into one
+        // "+N more" line, but always total everything recycled.
+        private _report = [localize "STR_DUWS_T_GARAGE_RECYCLE_HEADER"];
+        {
+            _x params ["", "_n", "_sum", "_dn"];
+            if (_n > 1) then {
+                _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_LINE_MULTI", _n, _dn, _sum];
+            } else {
+                _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_LINE", _dn, _sum];
+            };
+        } forEach (_entries select [0, 5]);
+        private _rest = _entries select [5];
+        if (count _rest > 0) then {
+            private _restN = 0; private _restCp = 0;
+            { _restN = _restN + (_x select 1); _restCp = _restCp + (_x select 2); } forEach _rest;
+            _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_MORE", _restN, _restCp];
         };
+        _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_TOTAL", _total];
+
+        [_report joinString "\n"] remoteExec ["hint", _caller];
+        [] remoteExec ["fnc_depot_menu_fill", _caller];
     };
     publicVariable "fnc_veh_recycle_action";
 };
-
-private _helipad = objectFromNetId (missionNamespace getVariable ["HQ_helipad_netId", ""]);
-private _depot = objectFromNetId (missionNamespace getVariable ["HQ_repairDepot_netId", ""]);
-if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/Depot not found"] call fnc_log; };
-
-if (missionNamespace getVariable ["HQ_recycleStation_active", false]) exitWith {};
-missionNamespace setVariable ["HQ_recycleStation_active", true, true];
-
-private _trg = createTrigger ["EmptyDetector", getPosATL _helipad, true];
-_trg setTriggerArea [5, 5, 0, false, 5];
-
-// Suffixed JIP id: supports/fnc_activateBaseRepairStation.sqf resolves _depot from the same
-// HQ_repairDepot_netId, and an object-keyed id is that object's netId, so the two would evict
-// each other.
-[_depot, netId _trg] remoteExec ["fnc_client_addRecycleActions", 0, format ["hq_recycle_%1", netId _depot]];

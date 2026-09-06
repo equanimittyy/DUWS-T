@@ -45,6 +45,7 @@ class CfgMagazines
 #include "duws\shared\includes\squadmng.hpp"
 #include "duws\shared\includes\renamesquad.hpp"
 #include "duws\shared\includes\request_menu.hpp"
+#include "duws\shared\includes\vehicle_depot_menu.hpp"
 #include "duws\shared\includes\fobmanager.hpp"
 #include "duws\shared\includes\notifications.hpp"
 #include "duws\shared\includes\enviro_menu.hpp"

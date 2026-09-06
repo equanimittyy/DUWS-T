@@ -692,10 +692,22 @@ fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\
 publicVariable "fnc_activateBaseRecycleStation";
 fnc_activateBaseRepairStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRepairStation.sqf";
 publicVariable "fnc_activateBaseRepairStation";
-fnc_client_addRecycleActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addRecycleActions.sqf";
-publicVariable "fnc_client_addRecycleActions";
-fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addRepairActions.sqf";
-publicVariable "fnc_client_addRepairActions";
+// The unified vehicle depot: one client action opening one dialog whose three panels cover
+// modification, storage and recycling. Broadcast because every one of these is client-side -- the
+// action registration, the dialog opener and fill, the recycle confirmation, and the two hoisted
+// modification sub-dialogs the menu opens on the selected vehicle.
+fnc_client_addDepotActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addDepotActions.sqf";
+publicVariable "fnc_client_addDepotActions";
+fnc_vehicle_depot_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_vehicle_depot_menu.sqf";
+publicVariable "fnc_vehicle_depot_menu";
+fnc_depot_menu_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_menu_fill.sqf";
+publicVariable "fnc_depot_menu_fill";
+fnc_depot_recycle_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_recycle_confirm.sqf";
+publicVariable "fnc_depot_recycle_confirm";
+fnc_veh_appearance_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_appearance_dialog.sqf";
+publicVariable "fnc_veh_appearance_dialog";
+fnc_veh_pylons_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_pylons_dialog.sqf";
+publicVariable "fnc_veh_pylons_dialog";
 fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_redeployHQUnits.sqf";
 publicVariable "fnc_redeployHQUnits";
 fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\killhouse\fnc_createKillhouse.sqf";

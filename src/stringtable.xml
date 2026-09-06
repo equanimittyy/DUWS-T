@@ -4670,26 +4670,12 @@
                 <Original>HALO Group (AI Only)</Original>
                 <English>HALO Group (AI Only)</English>
             </Key>
-            <Key ID="STR_DUWS_T_recyclenotallowed">
-                <German>Dieses Fahrzeug kann nicht recycelt werden.</German>
-                <Spanish>Este vehículo no se puede reciclar.</Spanish>
-                <Chinesesimp>该载具无法回收</Chinesesimp>
-                <Original>This vehicle cannot be recycled.</Original>
-                <English>This vehicle cannot be recycled.</English>
-            </Key>
             <Key ID="STR_DUWS_T_recycleempty">
                 <German>Kein Fahrzeug in der Fahrzeugrecyclingstation.</German>
                 <Spanish>No hay vehículo dentro de la Estación de Reciclaje de Vehículos.</Spanish>
                 <Chinesesimp>载具回收站内没有载具。</Chinesesimp>
                 <Original>There's no vehicle in the Vehicle Recycling Station.</Original>
                 <English>There's no vehicle in the Vehicle Recycling Station.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_recyclesuccess">
-                <Spanish>Has reciclado %1 vehículo(s) con éxito, has obtenido %2 CP.</Spanish>
-                <German>%1 Fahrzeug erfolgreich recycelt, %2 CP erhalten.</German>
-                <Chinesesimp>成功回收%1辆载具，获得%2CP</Chinesesimp>
-                <Original>Recycled %1 vehicle(s) and earned %2 CP.</Original>
-                <English>Recycled %1 vehicle(s) and earned %2 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_OPERATOR_HEALED">
                 <Original>Operator Healed</Original>
@@ -4701,20 +4687,6 @@
                 <Chinesesimp>回收载具</Chinesesimp>
                 <Original>Recycle Vehicle</Original>
                 <English>Recycle Vehicle</English>
-            </Key>
-            <Key ID="STR_DUWS_T_PREVIEW_RECYCLE_VALUE">
-                <Original>Preview recycling value</Original>
-                <English>Preview recycling value</English>
-                <German>Recyclingwert anzeigen</German>
-                <Spanish>Vista previa del valor de reciclaje</Spanish>
-                <Chinesesimp>预览回收价值</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_PREVIEW_VALUE">
-                <Original>Found %1 recyclable vehicles, total estimated value: %2 CP.</Original>
-                <English>Found %1 recyclable vehicles, total estimated value: %2 CP.</English>
-                <German>%1 recyclebare Fahrzeuge gefunden, geschätzter Gesamtwert: %2 KP</German>
-                <Spanish>Se encontraron %1 vehículos reciclables, valor total estimado: %2 PC</Spanish>
-                <Chinesesimp>发现 %1 辆可回收载具，预计总价值：%2 CP</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_NONE_SELECTED">
                 <Original>Nothing selected.</Original>
@@ -4771,6 +4743,74 @@
             <Key ID="STR_DUWS_T_GARAGE_LVL_4">
                 <Original>Expansion IV</Original>
                 <English>Expansion IV</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_MENU">
+                <Original>Vehicle Depot</Original>
+                <English>Vehicle Depot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_GARAGE">
+                <Original>Vehicle Storage Garage</Original>
+                <English>Vehicle Storage Garage</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_POOL_LAND">
+                <Original>Land %1/%2</Original>
+                <English>Land %1/%2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_POOL_AIR">
+                <Original>Air %1/%2</Original>
+                <English>Air %1/%2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_POOL_BOAT">
+                <Original>Boats %1/%2</Original>
+                <English>Boats %1/%2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_STORE_BTN">
+                <Original>Store</Original>
+                <English>Store</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RETRIEVE_BTN">
+                <Original>Retrieve</Original>
+                <English>Retrieve</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_STORE_TIP">
+                <Original>Stores the vehicle selected in the modification list.</Original>
+                <English>Stores the vehicle selected in the modification list.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_BUY_BTN">
+                <Original>Buy expansion</Original>
+                <English>Buy expansion</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_MAXED">
+                <Original>Fully expanded</Original>
+                <English>Fully expanded</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_STORED_ROW">
+                <Original>%1 (hull %2%, fuel %3%)</Original>
+                <English>%1 (hull %2%, fuel %3%)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_CONFIRM">
+                <Original>Recycle %1 vehicles for %2 CP?</Original>
+                <English>Recycle %1 vehicles for %2 CP?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_HEADER">
+                <Original>Recycled:</Original>
+                <English>Recycled:</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_LINE">
+                <Original>%1 for %2 CP</Original>
+                <English>%1 for %2 CP</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_LINE_MULTI">
+                <Original>%1× %2 for %3 CP</Original>
+                <English>%1× %2 for %3 CP</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_MORE">
+                <Original>+%1 more for %2 CP</Original>
+                <English>+%1 more for %2 CP</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_TOTAL">
+                <Original>Total: %1 CP.</Original>
+                <English>Total: %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>

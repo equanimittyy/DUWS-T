@@ -2,12 +2,9 @@ if (!isServer) exitWith {};
 
 if (isNil "fnc_veh_repair_action") then {
     fnc_veh_repair_action = {
-        params ["_caller", "_trg"];
-        private _vehicles = vehicles inAreaArray _trg;
-        private _count = count _vehicles;
-        if (_count == 0) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
-        if (_count > 1) exitWith { [localize "STR_DUWS_T_repair_too_many"] remoteExec ["hint", _caller]; };
-        private _veh = _vehicles select 0;
+        params ["_caller", "_vehNetId"];
+        private _veh = objectFromNetId _vehNetId;
+        if (isNull _veh) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
         private _fuel = fuel _veh;
         private _needsFuel = _fuel < 0.8;
         private _hitPoints = getAllHitPointsDamage _veh select 0;
@@ -41,14 +38,10 @@ if (isNil "fnc_veh_repair_action") then {
 
 if (isNil "fnc_veh_repair_check_status") then {
     fnc_veh_repair_check_status = {
-        params ["_caller", "_trgNetId"];
+        params ["_caller", "_vehNetId"];
         if (!isServer) exitWith {};
-        private _trg = objectFromNetId _trgNetId;
-        if (isNull _trg) exitWith {};
-        private _vehicles = vehicles inAreaArray _trg;
-        if (count _vehicles == 0) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
-        if (count _vehicles > 1) exitWith { [localize "STR_DUWS_T_repair_too_many"] remoteExec ["hint", _caller]; };
-        private _veh = _vehicles select 0;
+        private _veh = objectFromNetId _vehNetId;
+        if (isNull _veh) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
         private _vehName = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
 
         private _hitPoints = [];
@@ -111,10 +104,11 @@ if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/D
 if (missionNamespace getVariable ["HQ_repairStation_active", false]) exitWith {};
 missionNamespace setVariable ["HQ_repairStation_active", true, true];
 
+// The one pad trigger for the whole depot: the recycle station and the garage read the empty vehicles
+// standing in this area, so it is created once here and its netId handed to the client action.
 private _trg = createTrigger ["EmptyDetector", getPosATL _helipad, true];
 _trg setTriggerArea [5, 5, 0, false, 5];
 
-// Suffixed JIP id: supports/fnc_activateBaseRecycleStation.sqf resolves _depot from the same
-// HQ_repairDepot_netId, and an object-keyed id is that object's netId, so the two would evict
-// each other.
-[_depot, netId _trg] remoteExec ["fnc_client_addRepairActions", 0, format ["hq_repair_%1", netId _depot]];
+// One "Vehicle Depot" client action opens the unified dialog (modification, storage, recycle). The
+// depot-keyed JIP id keeps this registration distinct so a rejoin does not evict it.
+[_depot, netId _trg] remoteExec ["fnc_client_addDepotActions", 0, format ["hq_depot_%1", netId _depot]];
