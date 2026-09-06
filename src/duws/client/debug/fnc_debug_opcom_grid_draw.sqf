@@ -44,8 +44,9 @@ private _water = missionNamespace getVariable ["DUWS_dbgOpcomGridWater", false];
         _dm setMarkerTypeLocal "mil_dot";
         _dm setMarkerColorLocal _col;
         _dm setMarkerSizeLocal [0.6, 0.6];
+        // One decimal, not round: Phase 1 per-cell force is often below 1, which round would show as 0.
         if (_f > 0.05 || _e > 0.05) then {
-            _dm setMarkerTextLocal format ["%1/%2", round _f, round _e];
+            _dm setMarkerTextLocal format ["%1/%2", _f toFixed 1, _e toFixed 1];
         };
         _names pushBack _dm;
     };
