@@ -27,27 +27,52 @@ if not exist "src\mission.sqm" (
   exit /b 1
 )
 
-rem Build stamp names both the staged log line and the output .pbo, so the file
-rem in MPMissions\ self-identifies its source commit (a stale build reads exactly
-rem like a fix that failed). No git tree falls back to "nogit"; the mission still
-rem builds, it just cannot name itself.
+rem Choose the source to pack: the live working tree, or src\ as of one of the last five
+rem commits (or any commit hash typed in). scripts\pick_commit.ps1 draws the menu on the
+rem console and returns one token on stdout -- WORKING, a short hash, or INVALID.
+set "PICK="
+for /f "delims=" %%i in ('powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\pick_commit.ps1"') do set "PICK=%%i"
+if not defined PICK (
+  echo [repack] ERROR: no selection returned by the commit picker.
+  exit /b 1
+)
+if /I "%PICK%"=="INVALID" (
+  echo [repack] That did not match a commit. Cancelled.
+  exit /b 0
+)
+
+rem The build stamp names both the staged log line and the output .pbo, so the file in
+rem MPMissions\ self-identifies its source (a stale build reads exactly like a fix that
+rem failed). Working tree: short HEAD, plus -dirty if src\ has uncommitted edits (-d in the
+rem .pbo name). A chosen commit: that commit's short hash, and never dirty -- the archive
+rem staged below is the pristine tree at that commit, not the working copy.
+set "SRCMODE=working"
+set "COMMIT="
+if /I not "%PICK%"=="WORKING" (
+  set "SRCMODE=commit"
+  set "COMMIT=%PICK%"
+)
+
 set "STAMP=nogit"
-for /f "delims=" %%i in ('git rev-parse --short HEAD 2^>nul') do set "STAMP=%%i"
-rem Scoped to src\ because only src\ is packed: a docs-only edit is not a different
-rem build. -dirty flags uncommitted src\ edits in the log; -d is its short form in
-rem the .pbo name. Set inside the loop so any number of dirty paths yields one suffix.
 set "DIRTY="
 set "DIRTYNAME="
-for /f "delims=" %%i in ('git status --porcelain -- src 2^>nul') do (
-  set "DIRTY=-dirty"
-  set "DIRTYNAME=-d"
+if "%SRCMODE%"=="commit" (
+  set "STAMP=%PICK%"
+) else (
+  for /f "delims=" %%i in ('git rev-parse --short HEAD 2^>nul') do set "STAMP=%%i"
+  rem Set inside the loop so any number of dirty paths yields one suffix.
+  for /f "delims=" %%i in ('git status --porcelain -- src 2^>nul') do (
+    set "DIRTY=-dirty"
+    set "DIRTYNAME=-d"
+  )
 )
-rem Locale-independent, unlike %DATE%/%TIME%; powershell is already required below. The
-rem sortable 's' format is one bare token, so it needs no quotes nested inside the for.
+
+rem Locale-independent, unlike %DATE%/%TIME%; powershell is already required. The sortable
+rem 's' format is one bare token, so it needs no quotes nested inside the for.
 set "BUILT=unknown"
 for /f "delims=" %%i in ('powershell -NoProfile -Command "Get-Date -Format s"') do set "BUILT=%%i"
 
-rem Hash the commit into the .pbo name so each build is a distinct file on disk.
+rem Hash the source commit into the .pbo name so each build is a distinct file on disk.
 set "MISSION=DUWS_T_%STAMP%%DIRTYNAME%.altis"
 set "OUT=%MISSION%.pbo"
 
@@ -64,27 +89,27 @@ if /I not "%CONFIRM%"=="y" (
   exit /b 0
 )
 
-rem pboc names the .pbo after the packed folder, so stage src\ as %MISSION%\.
-echo [repack] Staging src\ as %MISSION% ...
+rem pboc names the .pbo after the packed folder, so stage the source as %MISSION%\.
 if exist "%STAGE%" rmdir /s /q "%STAGE%"
 mkdir "%STAGE%\%MISSION%"
-robocopy "src" "%STAGE%\%MISSION%" /MIR /NFL /NDL /NJH /NJS /NP >nul
-if errorlevel 8 (
-  echo [repack] ERROR: staging copy failed.
+if "%SRCMODE%"=="commit" (call :stage_commit) else (call :stage_working)
+if errorlevel 1 (
+  if exist "%STAGE%" rmdir /s /q "%STAGE%"
+  exit /b 1
+)
+if not exist "%STAGE%\%MISSION%\mission.sqm" (
+  echo [repack] ERROR: staged tree has no mission.sqm.
   rmdir /s /q "%STAGE%"
   exit /b 1
 )
 
-rem Write the same stamp into the staged copy, not src\, so a repack never dirties
-rem the working tree and no generated hash is ever committed. STAMP/DIRTY/BUILT are
-rem the values computed above for the .pbo name.
+rem Write the same stamp into the staged copy, not src\, so a repack never dirties the
+rem working tree and no generated hash is ever committed.
 echo [repack] Build stamp: %STAMP%%DIRTY% %BUILT%
 (
   echo // Generated into the staging tree by repack.cmd; see src\duws\shared\includes\build_stamp.hpp.
   echo #define DUWS_BUILD_STAMP "%STAMP%%DIRTY% %BUILT%"
 ) > "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp"
-rem robocopy exits 1 on success (files copied) and nothing between it and this write
-rem clears ERRORLEVEL, so verify the file exists rather than trust a stale ERRORLEVEL.
 if not exist "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp" (
   echo [repack] ERROR: could not write the build stamp.
   rmdir /s /q "%STAGE%"
@@ -93,7 +118,7 @@ if not exist "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp" (
 
 echo [repack] Packing to %OUT% ...
 rem Remove any prior build left in the repo root so only this build's .pbo remains;
-rem each commit produces a distinctly-named .pbo and stale ones would otherwise pile up.
+rem each source produces a distinctly-named .pbo and stale ones would otherwise pile up.
 del /q "DUWS_T*.altis.pbo" 2>nul
 "%PBOC%" pack "%STAGE%\%MISSION%" -o .
 if errorlevel 1 (
@@ -118,4 +143,32 @@ if errorlevel 1 (
 )
 
 echo [repack] Done. Wrote %OUT%
+exit /b 0
+
+:stage_working
+echo [repack] Staging working tree src\ as %MISSION% ...
+robocopy "src" "%STAGE%\%MISSION%" /MIR /NFL /NDL /NJH /NJS /NP >nul
+rem robocopy returns 0-7 on success; 8 and up is a real failure.
+if errorlevel 8 (
+  echo [repack] ERROR: staging copy failed.
+  exit /b 1
+)
+exit /b 0
+
+:stage_commit
+echo [repack] Staging src\ at commit %COMMIT% as %MISSION% ...
+rem git archive of the src\ subtree at the chosen commit, extracted into the stage. The
+rem <commit>:src tree-ish emits the subtree at the archive root, so it lands as %MISSION%\
+rem the same way robocopy does. A zip via Expand-Archive avoids a tar dependency.
+git archive --format=zip -o "%STAGE%\src.zip" "%COMMIT%:src" 2>nul
+if errorlevel 1 (
+  echo [repack] ERROR: git archive failed for %COMMIT%:src ^(does src\ exist at that commit?^).
+  exit /b 1
+)
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%STAGE%\src.zip' -DestinationPath '%STAGE%\%MISSION%' -Force"
+if errorlevel 1 (
+  echo [repack] ERROR: could not extract the commit archive.
+  exit /b 1
+)
+del /q "%STAGE%\src.zip" 2>nul
 exit /b 0

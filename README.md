@@ -44,10 +44,13 @@ won't run in the Linux devcontainer):
 - **`scripts/unpack.cmd`**: extracts `DUWS_T.altis.pbo` into a flat `src/` folder. Run it
   once to seed `src/`, then commit `src/`. It asks for confirmation first and warns
   that re-running replaces `src/` and discards edits.
-- **`repack.cmd`**: packs `src/` back into `DUWS_T_<hash>.altis.pbo` at the repo root,
+- **`repack.cmd`**: packs the mission into `DUWS_T_<hash>.altis.pbo` at the repo root,
   asking before it overwrites the `.pbo`, then normalizes the PBO's internal paths to Arma's
   backslash convention via `scripts/normalize_pbo.ps1`. The result is ready to load in Arma.
-  It first deletes any prior `DUWS_T*.altis.pbo` in the root, so only the newest build remains.
+  It first prompts (via `scripts/pick_commit.ps1`) for the source to pack — the live `src/`
+  working tree (default, Enter), one of the last five commits, or any commit hash typed in;
+  a commit build packs that commit's `src/` pristine via `git archive`, so it is never `-dirty`.
+  It also deletes any prior `DUWS_T*.altis.pbo` in the root, so only the newest build remains.
 
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
