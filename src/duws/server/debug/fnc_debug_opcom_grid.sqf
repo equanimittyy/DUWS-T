@@ -4,7 +4,9 @@
 // force are emitted, so the marker count tracks the active front, not the whole 3844-cell grid.
 if (!isServer) exitWith {};
 params ["_requester"];
-if (isNil "DUWS_opcom_grid_w") exitWith {};   // loop has not built the grid yet
+if (isNil "DUWS_opcom_grid_w") exitWith {
+    ["DEBUG", "OPCOM", "overlay gather: grid not built yet, nothing sent"] call fnc_log;
+};
 
 private _w = DUWS_opcom_grid_w;
 private _cell = OPCOM_GRID_CELL;
@@ -43,6 +45,8 @@ private _bel = [];
 {
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
+
+["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief stamps -> %3", count _cells, count _bel, _requester]] call fnc_log;
 
 // Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
 [_cells, _bel, _cell] remoteExec ["fnc_debug_opcom_grid_draw", _requester];

@@ -41,3 +41,5 @@ private _half = _cell / 2;
 } forEach _bel;
 
 missionNamespace setVariable ["DUWS_dbgOpcomMarkers", _names];
+
+["DEBUG", "OPCOM", format ["overlay draw: %1 markers (%2 cells, %3 belief)", count _names, count _cells, count _bel]] call fnc_log;
