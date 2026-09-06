@@ -325,6 +325,7 @@ fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\opcom\
 fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_runner.sqf";
 fnc_random_event_table = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_table.sqf";
 fnc_random_event_fire = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_fire.sqf";
+fnc_random_event_allowed = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_allowed.sqf";
 fnc_random_event_car = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_car.sqf";
 fnc_random_event_heli = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_heli.sqf";
 fnc_random_event_stranded = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_stranded.sqf";

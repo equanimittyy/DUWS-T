@@ -17,17 +17,6 @@
 if (!isServer) exitWith {};
 if (isNil "CIV_PRESENCE" || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) exitWith {};
 
-// Kinds confined to the hostile band (hi <= -10). Derived from the table so a new hostile event needs no
-// edit here: they are held off a player standing in BLUFOR territory -- a turned town does not reach a
-// player already safe on friendly ground.
-private _hostileKinds = [];
-{
-	_x params ["", "", "_hi", "_weights"];
-	if (_hi <= -10) then { { _hostileKinds pushBackUnique (_x select 0) } forEach _weights };
-} forEach [
-#include "..\..\shared\includes\random_event_tables.hpp"
-];
-
 while {true} do {
 	// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). Gated with
 	// nested if rather than exitWith/continue: inside a while body those read as end-of-iteration, not
@@ -44,9 +33,9 @@ while {true} do {
 					private _rep = [_town] call fnc_civ_repAt;
 					private _kind = [[_rep] call fnc_random_event_table] call fnc_search_drawKind;
 					// Empty band or empty table draws to "" -- the expected path until events exist. A hostile
-					// kind is skipped on a player the BLUFOR AOI already covers (skip if no valid player).
+					// kind is held off a player the BLUFOR AOI already covers (fnc_random_event_allowed).
 					if !(_kind isEqualTo "") then {
-						if !(_kind in _hostileKinds && {[getPos _player] call fnc_aoi_blufor_covers}) then {
+						if ([_kind, _player] call fnc_random_event_allowed) then {
 							[_kind, _town, _player] call fnc_random_event_fire;
 						};
 					};
