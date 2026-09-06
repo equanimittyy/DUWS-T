@@ -19,6 +19,8 @@ switch (_kind) do {
 	case "enemy_car":    { [_townIndex, _player] call fnc_random_event_enemy_car };
 	case "enemy_sniper": { [_townIndex, _player] call fnc_random_event_enemy_sniper };
 	case "ied":          { [_townIndex, _player] call fnc_random_event_ied };
+	// Civilian "attackers" by design: the isHostile invariant above is waived here (fnc_random_event_mob).
+	case "angry_mob":    { [_townIndex, _player] call fnc_random_event_mob };
 	default {
 		["INFO", "CIV", format ["random event '%1' rolled at town %2 (no handler yet)", _kind, _townIndex]] call fnc_log;
 	};
