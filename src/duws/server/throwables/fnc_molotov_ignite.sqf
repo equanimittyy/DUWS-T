@@ -1,5 +1,5 @@
-// Locality: server -- at _pos, spawns a vanilla fire object and ramps damage each second on anything within
-// _radius until _dur elapses, then removes the fire. Called from the thrower's Fired handler (client_init).
+// Locality: server -- spawns the fire and owns the radius burn where the molotov lands. remoteExec'd to the
+// server from the thrower's Fired handler (client_init).
 if (!isServer) exitWith {};
 params [["_pos", [0,0,0]], ["_radius", 5], ["_dur", 15]];
 

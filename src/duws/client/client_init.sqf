@@ -199,8 +199,8 @@ player addEventHandler ["killed", {
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
-// On throwing a DUWS_MolotovAmmo bottle: broadcast its in-flight trail (fnc_molotov_trail), then track it
-// to rest and ignite it there (fnc_molotov_ignite, server-side).
+// The molotov projectile is local only to the thrower's machine, so track it here: trail to all machines,
+// ignite handed to the server.
 player addEventHandler ["Fired", {
     params ["", "", "", "", "_ammo", "", "_projectile"];
     if (_ammo != "DUWS_MolotovAmmo") exitWith {};

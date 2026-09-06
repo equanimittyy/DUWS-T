@@ -54,7 +54,7 @@ class CfgWeapons
 {
 	class ThrowMuzzle;
 	class Throw;
-	// Standalone throw weapon (see header) carrying the stone and molotov; addWeapon this to a thrower.
+	// addWeapon this to a thrower to grant both throwables.
 	class DUWS_Throw: Throw
 	{
 		muzzles[] = {"DUWS_StoneMuzzle", "DUWS_MolotovMuzzle"};

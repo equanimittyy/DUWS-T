@@ -71,8 +71,6 @@ _grp setSpeedMode "LIMITED";
 			};
 		} forEach units _grp;
 
-		// A close member with stones left faces the player and throws a stone.
-		// VERIFY IN EDITOR: a mission-config throw weapon actually throwing for AI is the one unproven link.
 		private _throwers = (units _grp) select { alive _x && { (_x distance _target) < THROW_RANGE } && { "DUWS_StoneMag" in magazines _x } };
 		if !(_throwers isEqualTo []) then {
 			private _t = selectRandom _throwers;

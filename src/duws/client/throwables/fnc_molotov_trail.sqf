@@ -1,5 +1,5 @@
-// Locality: any interface -- attaches a local flame/smoke emitter to the molotov bottle _p and removes it
-// once _p is gone or 15 s pass. Broadcast to every machine from the thrower's Fired handler (client_init).
+// Locality: any interface -- the emitter is createVehicleLocal, so this must run on every machine; broadcast
+// from the thrower's Fired handler (client_init).
 if (!hasInterface) exitWith {};
 params [["_p", objNull]];
 if (isNull _p) exitWith {};
