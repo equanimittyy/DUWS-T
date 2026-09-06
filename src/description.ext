@@ -35,9 +35,35 @@ class CfgMagazines
 	{
 		displayName = "Money";
 	};
+
+	// Stone and molotov throwables on vanilla assets, kept in this one CfgMagazines block: a second
+	// top-level CfgMagazines warns "Member already defined". Their ammo and Throw muzzles are in throwables.hpp.
+	class HandGrenade;
+	class DUWS_StoneMag: HandGrenade
+	{
+		scope = 2;
+		displayName = "Stone";
+		displayNameShort = "Stone";
+		descriptionShort = "Thrown stone.";
+		model = "\A3\weapons_f\ammo\stone_3.p3d";
+		ammo = "DUWS_StoneAmmo";
+		count = 1;
+		mass = 3;
+	};
+	class DUWS_MolotovMag: HandGrenade
+	{
+		scope = 2;
+		displayName = "Molotov";
+		displayNameShort = "Molotov";
+		descriptionShort = "Improvised incendiary.";
+		model = "\A3\structures_f\items\food\bottleplastic_v1_f.p3d";
+		ammo = "DUWS_MolotovAmmo";
+		count = 1;
+		mass = 5;
+	};
 };
 
-// Mission-local throwables (stone, molotov) on vanilla assets; no mod required.
+// Throwables: stone/molotov ammo and the Throw-weapon muzzles (magazines are in the CfgMagazines above).
 #include "duws\shared\includes\throwables.hpp"
 
 //////////////////////////

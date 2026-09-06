@@ -1,6 +1,7 @@
-// Throwable stone and molotov on base-game assets: a CfgAmmo pair, a CfgMagazines pair, and two muzzles
-// appended to the base-game Throw weapon every unit carries. The molotov ammo does not explode; a Fired
-// handler ignites it on landing and trails it in flight (client_init, fnc_molotov_ignite, fnc_molotov_trail).
+// Throwable stone and molotov on base-game assets: a CfgAmmo pair here, plus two muzzles appended to the
+// base-game Throw weapon every unit carries. Their magazines (DUWS_StoneMag/DUWS_MolotovMag) live in
+// description.ext's CfgMagazines. The molotov ammo does not explode; a Fired handler ignites it on landing
+// and trails it in flight (client_init, fnc_molotov_ignite, fnc_molotov_trail).
 
 class CfgAmmo
 {
@@ -20,33 +21,6 @@ class CfgAmmo
 		simulation = "shotGrenade";
 		timeToLive = 20;
 		explosionTime = 30;
-	};
-};
-
-class CfgMagazines
-{
-	class HandGrenade;
-	class DUWS_StoneMag: HandGrenade
-	{
-		scope = 2;
-		displayName = "Stone";
-		displayNameShort = "Stone";
-		descriptionShort = "Thrown stone.";
-		model = "\A3\weapons_f\ammo\stone_3.p3d";
-		ammo = "DUWS_StoneAmmo";
-		count = 1;
-		mass = 3;
-	};
-	class DUWS_MolotovMag: HandGrenade
-	{
-		scope = 2;
-		displayName = "Molotov";
-		displayNameShort = "Molotov";
-		descriptionShort = "Improvised incendiary.";
-		model = "\A3\structures_f\items\food\bottleplastic_v1_f.p3d";
-		ammo = "DUWS_MolotovAmmo";
-		count = 1;
-		mass = 5;
 	};
 };
 
