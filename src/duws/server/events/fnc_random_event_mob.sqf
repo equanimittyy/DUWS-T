@@ -11,12 +11,17 @@
 // and scatters; or the window closes (or they lose contact) and they melt into an aimless town stroll.
 // Either way the DUWS_binMe flag hands the bodies to the map cleanup.
 //
+// Escalation variant (_escalate, the angry_mob2 kind): a few of the crowd are tagged instigators but stay
+// in the harass group so they blend in. After a fuse they throw molotovs, then break off into their own
+// EAST group -- marked isHostile so the kill no longer charges a war crime -- and open fire, which panics
+// the rest into scattering. Still civilians as they throw, so cutting them down before the break is the crime.
+//
 // Deliberately NOT isHostile and left on the civilian side: the crowd itself never opens fire, so there is
 // no self-defence to protect, and gunning it down is meant to stay the war crime it is (the civilian-death
 // charge). This is the one Hostile-band event whose "attackers" are civilians by design, so the fire.sqf
 // isHostile invariant is waived here and only here.
 if (!isServer) exitWith {};
-params [["_townIndex", -1], ["_player", objNull]];
+params [["_townIndex", -1], ["_player", objNull], ["_escalate", false]];
 if (isNull _player) exitWith {};
 
 private _bodies = missionNamespace getVariable ["civ_array", []];
@@ -39,6 +44,11 @@ if (_bodies isEqualTo []) exitWith {};
 #define ROAR_JITTER 1.2
 #define PANIC_FIRE 40
 #define ACTIVATE_TIMEOUT 300
+#define INSTIGATORS 3
+#define INST_FUSE 30
+#define INST_FUSE_SPREAD 30
+#define INST_ARM_GAP 3
+#define MOLO_SPREAD 6
 
 private _locs = missionNamespace getVariable ["civ_locations", []];
 private _centre = if (_townIndex >= 0 && _townIndex < count _locs) then { getPos (_locs select _townIndex) } else { getPos _player };
@@ -67,6 +77,16 @@ for "_i" from 1 to MOB_SIZE do {
 		_u setVariable ["DUWS_binAt", time + LIFETIME];
 	};
 };
+
+// angry_mob2: tag a few of the crowd as instigators but leave them in the harass group so they blend in and
+// roar/stone with everyone. Kept counted in _mobbers on purpose -- the subplot breaks them out to EAST only
+// after the fuse, so that count-drop lands on the same beat as the panic it sets, not before.
+private _instigators = [];
+if (_escalate) then {
+	_instigators = (units _grp select { alive _x }) call BIS_fnc_arrayShuffle;
+	_instigators resize (INSTIGATORS min count _instigators);
+};
+
 private _mobbers = { alive _x } count units _grp;
 if (_mobbers == 0) exitWith {};
 // CARELESS so the crowd walks where ordered and ignores danger rather than scattering for cover; BLUE so it
@@ -75,8 +95,8 @@ _grp setBehaviour "CARELESS";
 _grp setCombatMode "BLUE";
 _grp setSpeedMode "LIMITED";
 
-[_grp, _townIndex, _centre, _mobbers] spawn {
-	params ["_grp", "_townIndex", "_centre", "_mobbers"];
+[_grp, _townIndex, _centre, _mobbers, _escalate, _instigators] spawn {
+	params ["_grp", "_townIndex", "_centre", "_mobbers", "_escalate", "_instigators"];
 
 	private _radii = missionNamespace getVariable ["civ_radii", []];
 	private _townRadius = _radii param [_townIndex, 0];
@@ -104,6 +124,51 @@ _grp setSpeedMode "LIMITED";
 		// stroll margin lets it mill a while before the reaper may take it.
 		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL]; _x setVariable ["DUWS_nextThrow", time + random THROW_COOLDOWN] } forEach units _grp;
 		_grp setVariable ["DUWS_mob_roaring", true];
+
+		// Escalation subplot on its own fuse. The instigators harass with the crowd until it expires, then
+		// break out to EAST -- which both drops the crowd count and sets the panic flag, so the harass loop
+		// scatters the rest on the same beat as the first shot.
+		if (_escalate && { count _instigators > 0 }) then {
+			[_instigators, _grp] spawn {
+				params ["_instigators", "_grp"];
+				sleep (INST_FUSE + random INST_FUSE_SPREAD);
+				private _live = _instigators select { alive _x };
+				if (_live isEqualTo []) exitWith {};
+				// One to three throw, still blended and still civilian. Aim scattered a random offset --
+				// provocateurs, not marksmen -- and each staggered a beat so the bottles do not land as one salvo.
+				private _throwers = (_live call BIS_fnc_arrayShuffle) select [0, 1 + floor random INSTIGATORS];
+				{
+					[_x] spawn {
+						params ["_r"];
+						sleep (random 1.5);
+						private _b = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };
+						if (!alive _r || { _b isEqualTo [] }) exitWith {};
+						private _t = [_b, _r] call BIS_fnc_nearestPosition;
+						_r setDir (_r getDir _t);
+						[_r, (getPosASL _t) getPos [random MOLO_SPREAD, random 360], "molotov"] call fnc_throw;
+					};
+				} forEach _throwers;
+
+				sleep INST_ARM_GAP;
+				// Break out to EAST and open fire. isHostile so the kill no longer bills a civilian death:
+				// fnc_civ_handler exempts only isHostile / resistance, so a bare EAST civ body still charges.
+				// Chambered via addWeaponItem so a pocketless civ body still fights.
+				private _east = createGroup [EAST, true];
+				{
+					_x setVariable ["isHostile", true];
+					_x setCaptive false;
+					[_x] joinSilent _east;
+					_x addWeapon "hgun_Rook40_F";
+					_x addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
+					_x addMagazines ["16Rnd_9x21_Mag", 2];
+					_x setUnitPos "UP";
+				} forEach (_instigators select { alive _x });
+				_east setBehaviour "COMBAT";
+				_east setCombatMode "RED";
+				_east setSpeedMode "LIMITED";
+				_grp setVariable ["DUWS_mob_panic", true];
+			};
+		};
 		private _deadline = time + LIFETIME;
 		private _lastMove = [0, 0, 0];
 		private _nextRoar = 0;
