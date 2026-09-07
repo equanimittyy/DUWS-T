@@ -41,7 +41,6 @@ if (_bodies isEqualTo []) exitWith {};
 #define STROLL 90
 #define TICK 2
 #define ROAR_EVERY 12
-#define ROAR_JITTER 1.2
 #define PANIC_FIRE 40
 #define ACTIVATE_TIMEOUT 300
 #define INSTIGATORS_MIN 3
@@ -124,9 +123,8 @@ _grp setSpeedMode "LIMITED";
 		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL]; _x setVariable ["DUWS_nextThrow", time + random THROW_COOLDOWN] } forEach units _grp;
 		_grp setVariable ["DUWS_mob_roaring", true];
 
-		// Escalation subplot on its own fuse. The instigators harass with the crowd until the fuse expires or the
-		// mob ends for any reason (mob_over), then break out to EAST. When the fuse wins that race the break's
-		// count-drop and panic flag scatter the rest on the same beat as the first shot.
+		// Escalation subplot on its own fuse: after it (or any mob end) the instigators break out to EAST and fire.
+		// The crowd is not force-scattered -- it keeps harassing until BLUFOR fires back near it or a rioter is hit.
 		if (_escalate && { count _instigators > 0 }) then {
 			[_instigators, _grp] spawn {
 				params ["_instigators", "_grp"];
@@ -136,6 +134,8 @@ _grp setSpeedMode "LIMITED";
 				waitUntil { sleep 1; (time >= _fuse) || { _grp getVariable ["DUWS_mob_over", false] } || { ({ alive _x } count _instigators) == 0 } };
 				private _live = _instigators select { alive _x };
 				if (_live isEqualTo []) exitWith {};
+				// Discount the instigators leaving for EAST from the headcount, so the loop's death-scatter reads only real hits.
+				_grp setVariable ["DUWS_mob_broke", count _live];
 				// Break out to EAST and open fire. isHostile so the kill no longer bills a civilian death:
 				// fnc_civ_handler exempts only isHostile / resistance, so a bare EAST civ body still charges.
 				// Chambered via addWeaponItem so a pocketless civ body still fights.
@@ -155,7 +155,7 @@ _grp setSpeedMode "LIMITED";
 					_x setSkill ["spotTime", 1];
 					_x setSkill ["general", 1];
 					_x setUnitPos "UP";
-				} forEach (_instigators select { alive _x });
+				} forEach _live;
 				_east setBehaviour "COMBAT";
 				_east setCombatMode "RED";
 				_east setSpeedMode "NORMAL";
@@ -170,7 +170,6 @@ _grp setSpeedMode "LIMITED";
 					_wp setWaypointCombatMode "RED";
 					_wp setWaypointSpeed "NORMAL";
 				};
-				_grp setVariable ["DUWS_mob_panic", true];
 			};
 		};
 		private _deadline = time + LIFETIME;
@@ -179,7 +178,7 @@ _grp setSpeedMode "LIMITED";
 
 		while { { alive _x } count units _grp > 0 } do {
 			if (time >= _deadline) exitWith {};
-			if ((_grp getVariable ["DUWS_mob_panic", false]) || { ({ alive _x } count units _grp) < _mobbers }) exitWith { _scatter = true };
+			if ((_grp getVariable ["DUWS_mob_panic", false]) || { ({ alive _x } count units _grp) < (_mobbers - (_grp getVariable ["DUWS_mob_broke", 0])) }) exitWith { _scatter = true };
 
 			// Every BLUFOR man still in reach of the crowd -- players and AI alike, not one chosen target.
 			private _blu = (allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} }) select { (_x distance2D (leader _grp)) < CHASE };
@@ -187,15 +186,15 @@ _grp setSpeedMode "LIMITED";
 
 			private _target = [_blu, leader _grp] call BIS_fnc_nearestPosition;
 
-			// Roar carried by a third of the followers, each staggered a beat so the copies do not phase into
-			// one flat tone. Never the leader: its command chatter cuts a say3D short.
+			// Roar carried by a third of the followers, each delayed a random slice of the whole interval so they
+			// scatter across it instead of firing as one wave. Never the leader: its command chatter cuts a say3D short.
 			if (time > _nextRoar) then {
 				_nextRoar = time + ROAR_EVERY;
 				private _crowd = ((units _grp) - [leader _grp]) call BIS_fnc_arrayShuffle;
 				for "_i" from 0 to (round (count _crowd / 3) - 1) do {
 					private _v = _crowd param [_i, objNull];
 					if (!isNull _v && { alive _v }) then {
-						[_v] spawn { params ["_v"]; sleep (random ROAR_JITTER); if (alive _v && { group _v getVariable ["DUWS_mob_roaring", false] }) then { _v say3D "DUWS_angry_mob" }; };
+						[_v] spawn { params ["_v"]; sleep (random ROAR_EVERY); if (alive _v && { group _v getVariable ["DUWS_mob_roaring", false] }) then { _v say3D "DUWS_angry_mob" }; };
 					};
 				};
 			};
