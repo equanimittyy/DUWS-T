@@ -21,6 +21,7 @@ private _line = switch (toUpper _row) do {
     case "AID": { "STR_DUWS_T_ASK_AID_REFUSE" };
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_REFUSE" };
     case "INFORMANT": { "STR_DUWS_T_INTEL_INFORMANT_ASK_MISS" };
+    case "SAFEHOUSE": { "STR_DUWS_T_RAID_SAFEHOUSE_ASK_MISS" };
     default { "STR_DUWS_T_stfu" };
 };
 

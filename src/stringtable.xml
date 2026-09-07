@@ -3144,6 +3144,50 @@
                 <Original>Him? Sorry, don't know him.</Original>
                 <English>Him? Sorry, don't know him.</English>
             </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_READY">
+                <Original>Raid Informant Safehouse</Original>
+                <English>Raid Informant Safehouse</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_DESC">
+                <Original>An OPFOR informant safehouse is hidden amongst the local populace here. Work with the locals for a lead, find the right one, breach it, and seize the intel cache inside.</Original>
+                <English>An OPFOR informant safehouse is hidden amongst the local populace here. Work with the locals for a lead, find the right one, breach it, and seize the intel cache inside.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_NOTE">
+                <Original>Breaching the wrong house will incur a rep penalty.</Original>
+                <English>Breaching the wrong house will incur a rep penalty.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_BRIEF">
+                <Original>Alpha 1-1, Allseer has located an enemy safehouse full of intel amongst the population of %1. Find it, breach it, and retrieve the cache.</Original>
+                <English>Alpha 1-1, Allseer has located an enemy safehouse full of intel amongst the population of %1. Find it, breach it, and retrieve the cache.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_COPY">
+                <Original>Roger that Overlord. We'll be en route to the location now.</Original>
+                <English>Roger that Overlord. We'll be en route to the location now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_ASK_ACTION">
+                <Original>Ask about the safehouse</Original>
+                <English>Ask about the safehouse</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_ASK_HIT">
+                <Original>Oh yeah. There's been some suspicious people in town recently.</Original>
+                <English>Oh yeah. There's been some suspicious people in town recently.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_ASK_BEARING">
+                <Original>The safehouse lies to the %1.</Original>
+                <English>The safehouse lies to the %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_ASK_RULEDOUT">
+                <Original>One of the houses has been ruled out on your map.</Original>
+                <English>One of the houses has been ruled out on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_ASK_MISS">
+                <Original>Sorry. Don't know anything.</Original>
+                <English>Sorry. Don't know anything.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_DONE">
+                <Original>Well done Alpha 1-1. Secure the intel and RTB for analysis.</Original>
+                <English>Well done Alpha 1-1. Secure the intel and RTB for analysis.</English>
+            </Key>
             <Key ID="STR_DUWS_T_RANDOM_STRANDED_ASK">
                 <Original>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</Original>
                 <English>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</English>

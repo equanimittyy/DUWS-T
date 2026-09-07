@@ -136,29 +136,10 @@ _grp setSpeedMode "LIMITED";
 				if (_live isEqualTo []) exitWith {};
 				// Discount the instigators leaving for EAST from the headcount, so the loop's death-scatter reads only real hits.
 				_grp setVariable ["DUWS_mob_broke", count _live];
-				// Break out to EAST and open fire. isHostile so the kill no longer bills a civilian death:
-				// fnc_civ_handler exempts only isHostile / resistance, so a bare EAST civ body still charges.
-				// Chambered via addWeaponItem so a pocketless civ body still fights.
-				private _east = createGroup [EAST, true];
-				{
-					_x setVariable ["isHostile", true];
-					_x setCaptive false;
-					[_x] joinSilent _east;
-					_x addWeapon "hgun_Rook40_F";
-					_x addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
-					_x addMagazines ["16Rnd_9x21_Mag", 2];
-					// Elite, mirroring the eliminate-snipers cell (fnc_target_sniper_mission): max the aim and spotting skills.
-					_x setSkill ["aimingAccuracy", 1];
-					_x setSkill ["aimingShake", 1];
-					_x setSkill ["aimingSpeed", 1];
-					_x setSkill ["spotDistance", 1];
-					_x setSkill ["spotTime", 1];
-					_x setSkill ["general", 1];
-					_x setUnitPos "UP";
-				} forEach _live;
-				_east setBehaviour "COMBAT";
-				_east setCombatMode "RED";
-				_east setSpeedMode "NORMAL";
+				// Break out to EAST and open fire, via the shared civ-to-hostile flip: the Rook40 sidearm and
+				// elite aim/spot skills the mob has always fielded, now the one shape the safehouse-raid guards
+				// flip through too (fnc_civ_flip_hostile).
+				private _east = [_live, "pistol", 1] call fnc_civ_flip_hostile;
 				// A fresh EAST group starts blind and would mill until it stumbled into contact -- reveal the players and
 				// send it hunting so the cell engages the moment it turns, not whenever it happens to detect them.
 				private _blu = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };

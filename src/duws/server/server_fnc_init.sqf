@@ -230,6 +230,16 @@ fnc_deliver_supplies_mission = compile preprocessFileLineNumbers "duws\server\mi
 fnc_escort_informant_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_civ_town.sqf";
 fnc_deliver_supplies_site = fnc_escort_informant_site;
 publicVariable "fnc_escort_informant_site"; publicVariable "fnc_deliver_supplies_site";
+fnc_raid_safehouse_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_mission.sqf";
+// Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap); undefined there, findSite
+// falls back to the accept-all generic and the door/cluster gate is silently lost.
+fnc_raid_safehouse_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_site.sqf";publicVariable "fnc_raid_safehouse_site";
+// Broadcast: adds the breach HitPart and the ask action on every client (remoteExec'd out from the thread).
+fnc_raid_safehouse_arm = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_arm.sqf";publicVariable "fnc_raid_safehouse_arm";
+fnc_raid_safehouse_ask_addAction = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_ask_addAction.sqf";publicVariable "fnc_raid_safehouse_ask_addAction";
+fnc_raid_safehouse_ask_request = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_ask_request.sqf";
+fnc_raid_safehouse_ask_reveal = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_ask_reveal.sqf";
+fnc_raid_safehouse_breach = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_breach.sqf";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_setup_array.sqf";
@@ -250,6 +260,8 @@ fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
 fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_panic.sqf";
+// Server-only: the angry-mob escalation and the safehouse-raid breach both call it to flip blended civilians to an armed EAST cell.
+fnc_civ_flip_hostile = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_flip_hostile.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";

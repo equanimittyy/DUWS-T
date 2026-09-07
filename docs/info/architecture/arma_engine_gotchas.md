@@ -1972,3 +1972,29 @@ each tick — does force a hit, but the hull slides and snaps to its aimed headi
 as looking wrong. If you ever do drive a hull by `setVelocity`: ramp the speed in a *script variable*, never by
 re-reading `vectorMagnitude velocity`, because PhysX damps an externally set velocity on a wheeled hull within
 the tick, so the read-back returns near zero and the ramp collapses to a crawl.
+
+## A building door locks by variable, not command, and there is no per-door hit event
+
+**A house door is locked against the engine's own "Open" action by setting the object variable
+`bis_disabled_Door_<N>` to `1` (clear to `0` to unlock); there is no `lockDoor` command. Opening or
+closing a leaf is `animateDoor ["Door_<N>_rot", 1|0]`, which is a LOCAL effect — it must run on every
+machine that draws the house, not just the server. And no event fires when a specific door is shot: the
+engine reports a hit only through `HitPart`, on the whole object and on the shooter's machine.**
+
+The door count and the source names vary by model, so a lock loop sets `bis_disabled_Door_1..N` over a
+bounded range (the engine ignores indices a model lacks) and only ever animates `Door_<N>_rot`. That
+naming is not universal — a house whose doors use a different animation source can be neither locked nor
+swung by this shape, so a mission that depends on the mechanic must *filter its candidate houses to those
+that actually define `Door_1_rot`* (config check `isClass (configFile >> "CfgVehicles" >> typeOf _h >>
+"AnimationSources" >> "Door_1_rot")`), which both guarantees the mechanic works and reads as "this house
+has a lockable door". Leaving `bis_disabled_Door_*` set on a terrain building outlives the mission —
+terrain houses are never deleted — so a mission that locks town houses MUST clear the variable back to `0`
+on every end path, or it strands the town with permanently unopenable doors.
+
+**How to apply:** to make "shoot the door open" a breach, add a `HitPart` handler to the house on all
+machines (see [§Practice targets ignore damage](#practice-targets-ignore-damage-entirely-hitpart-fires-on-the-shooter-not-the-owner)
+for why it is all-machines-then-bounce-to-server), unlock every `bis_disabled_Door_*` and `remoteExec` the
+`animateDoor` sweep to `0` (all machines) from the server. The raid-safehouse mission
+(`server/missions/mission_threads/raid_safehouse/`) drives locks this way: `fnc_raid_safehouse_arm` adds the
+per-house `HitPart`, `fnc_raid_safehouse_breach` does the server-side unlock, and the thread clears the lock
+variables on its win/fail/cleanup path.
