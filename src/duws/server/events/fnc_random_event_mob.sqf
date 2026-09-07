@@ -63,11 +63,11 @@ for "_i" from 1 to MOB_SIZE do {
 		// the Killed handler on by hand and stamp the town it charges, or the hit would fall on town -1.
 		_u setVariable ["civ_locIndex", _townIndex];
 		_u addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
-		// createUnit also skips the civ flee-on-fire handler, so this is what lets a warning shot break the
-		// mob: any BLUFOR round landing near one rioter panics the whole group (read in the loop / the arm wait).
+		// createUnit also skips the civ flee-on-fire handler, so this is what lets nearby gunfire break the mob:
+		// any round near one rioter -- a player's, or an instigator's once he draws -- panics the whole group.
 		_u addEventHandler ["FiredNear", {
 			params ["_unit", "_firer", "_distance"];
-			if (_distance < PANIC_FIRE && {!isNull _firer} && {side group _firer == west}) then {
+			if (_distance < PANIC_FIRE && {!isNull _firer}) then {
 				(group _unit) setVariable ["DUWS_mob_panic", true];
 			};
 		}];
