@@ -29,6 +29,6 @@ private _dur = (((_from distance2D _to) / 8) max 1.2) min 3.5;
 	// bare 7- and 3-element arrays counted as that many operands and threw. [[...]] passes them as one operand.
 	[["duws\shared\sounds_npics\support\thud.wav", objNull, false, _to, 1.6, 1, 70]] remoteExec ["playSound3D", 0];
 	{
-		[[3, 0.8, 15]] remoteExec ["addCamShake", _x];
+		[[1.5, 0.8, 15]] remoteExec ["addCamShake", _x];
 	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
 };

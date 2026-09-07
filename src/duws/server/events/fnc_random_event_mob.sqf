@@ -172,10 +172,9 @@ _grp setSpeedMode "LIMITED";
 		};
 	};
 
-	// The mob is over: silence any roar still ringing out. say3D has no stop, so saying a silent stub over
-	// each unit replaces its current sound; the flag keeps a late roar-spawn from starting a new one.
+	// The mob is over: stop roaring. say3D cannot be cut (a fresh one queues rather than replaces), so a
+	// clip already playing just tails off; the flag keeps a late roar-spawn from starting a new one.
 	_grp setVariable ["DUWS_mob_roaring", false];
-	{ if (alive _x) then { _x say3D "DUWS_silence" } } forEach units _grp;
 
 	// Terminal. Panic scatters, fast and upright; anything else (never armed, broke contact, window closed)
 	// melts into an aimless town stroll. DUWS_binMe hands the bodies to cleanup either way.
