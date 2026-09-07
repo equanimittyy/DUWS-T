@@ -184,6 +184,9 @@ private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = ((_surveyKind isEqualTo "town") || _allowUrban) && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
 private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
+// Capture-zone enumerates OPFOR zones as hardpoint enumerates emplacements, but anchors ON the target
+// zone -- so it alone skips the zone-interior claimed gate below.
+private _useCapture = !_useTown && {_surveyKind isEqualTo "capturezone"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
 
 // The features phase 2 surveys: town centres, the live target hardpoints, a whole-map sample, or OPFOR zones
@@ -192,12 +195,11 @@ private _band = if (_hard) then {_hardBand} else {_frontierBand};
 private _features = if (_useTown) then {
     +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
-    if (_useHardpoint) then {
-        // Enumerate: one candidate per live target hardpoint, listed by the type's own finder in ["ALL"] mode
-        // (so the RADIO-vs-other filter stays in the finder, not duplicated here -- a "hardpoint" type must
-        // define a finder that answers ["ALL"]). A sparse, discrete set: listing it directly gives every
-        // target an even shot, where a random-dot survey would snap many dots onto whichever target sits
-        // nearest a zone cluster and never surface the rest. Tiny realise band -- the vet snaps back exactly.
+    if (_useHardpoint || _useCapture) then {
+        // Enumerate: one candidate per discrete target -- a live hardpoint, or an OPFOR zone for the capture
+        // type -- via the type's finder in ["ALL"] mode, so an enumerate type MUST define a finder answering
+        // ["ALL"]. Listing directly gives every target an even shot where a random-dot survey would cluster
+        // onto whichever sits nearest a zone. Tiny realise band -- the vet snaps back exactly.
         (["ALL"] call _finder) apply { [_x, 0, 50] }
     } else {
         if (_useMap) then {
@@ -245,7 +247,7 @@ private _valid = [];
     if (_ok) then {
         // _fnUrbanWeight scores an arbitrary position (frontline bell for easy, _fnHardScore for hard), so it
         // serves the town, map and hardpoint surveys; _fnZoneWeight is zone-list-specific and stays for zones.
-        private _score = if (_useTown || _useMap || _useHardpoint) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
+        private _score = if (_useTown || _useMap || _useHardpoint || _useCapture) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
         _valid pushBack [_fData, _fCenter, _score];
     };
 } forEach _features;
@@ -305,7 +307,8 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
 
     // Off every zone/town by 400 m -- the drift a thread's objective takes before fnc_missionTargetPos
     // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
-    if ([_cand, 400] call fnc_pos_claimed) then { continue };
+    // The capture type is exempt: it deliberately anchors on a zone, which this ownership-blind gate rejects.
+    if (!_useCapture && {[_cand, 400] call fnc_pos_claimed}) then { continue };
 
     private _clear = true;
     { if (_cand distance _x < 250) exitWith { _clear = false } } forEach _avoid;

@@ -3941,6 +3941,26 @@
                 <Original>The supplies are delivered and the locals are grateful. Good work Alpha 1-1.</Original>
                 <English>The supplies are delivered and the locals are grateful. Good work Alpha 1-1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_c22">
+                <Original>Capture Zone</Original>
+                <English>Capture Zone</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CAPTURE_ZONE_DESC">
+                <Original>Command wants the marked OPFOR zone taken. Assault it and drive the garrison out to bring it under BLUFOR control.</Original>
+                <English>Command wants the marked OPFOR zone taken. Assault it and drive the garrison out to bring it under BLUFOR control.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_capturezoneoverlord">
+                <Original>New tasking Alpha 1-1. OPFOR holds zone %1 near %2. Assault it and take it for BLUFOR.</Original>
+                <English>New tasking Alpha 1-1. OPFOR holds zone %1 near %2. Assault it and take it for BLUFOR.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_capturezonecopy">
+                <Original>Copy Overlord. Moving on the zone now.</Original>
+                <English>Copy Overlord. Moving on the zone now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_capturezoneclose">
+                <Original>To Alpha 1-1, the zone's ours. Good work. Overlord out.</Original>
+                <English>To Alpha 1-1, the zone's ours. Good work. Overlord out.</English>
+            </Key>
             <Key ID="STR_DUWS_T_c12">
                 <Original>Recon Enemy Position</Original>
                 <English>Recon Enemy Position</English>

@@ -64,14 +64,17 @@
 //
 // surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the countryside
 // off OPFOR zones, "town" scans populated towns, "map" samples the whole HQ-reach area, "hardpoint"
-// enumerates the live target hardpoints directly. Set "town" for a type that belongs in a built-up area
+// enumerates the live target hardpoints directly, "capturezone" enumerates the OPFOR-held zones directly.
+// Set "town" for a type that belongs in a built-up area
 // (informant, CQB, the civilian pair). Set "map" for a type not tied to a zone, placed straight on the
 // sampled dot: the hard/easy dial (not a zone anchor) pulls it toward meaningful ground (hard scores 0 with
 // no enemy near, so it still clusters on enemy density; easy favours the frontline). Set "hardpoint" for a
 // type that destroys an existing emplacement (tower, hardpoint): the survey lists those emplacements one per
 // candidate via the type's finder in ["ALL"] mode -- so a "hardpoint" type MUST define a finder that answers
 // ["ALL"] -- giving a sparse, scattered target set even coverage where a random-dot survey would collapse
-// onto whichever target sits nearest a zone cluster. The deny-armor convoy uses "map" too: its spawn is free
+// onto whichever target sits nearest a zone cluster. "capturezone" shares that enumerate path (its finder
+// must answer ["ALL"] too) but sources revealed OPFOR-held zones, and its objective sits ON the zone, so it
+// is the one surveyKind exempt from findSite's zone-interior claimed gate. The deny-armor convoy uses "map" too: its spawn is free
 // but needDest still ties the haven it drives to a zone. The HVT convoy stays "zone" -- its finder anchors
 // the eject on a discovered held zone, not a dot. The front-vs-deep bias is separate -- it is the offer's
 // hard/easy dial, not the survey source.
@@ -104,4 +107,5 @@
 ["fnc_destroy_patrol_camp_mission", "STR_DUWS_T_c18", "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Patrol Camp",       { [18] call fnc_mission_launch }, 20, 15, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, true, 1, "map"]],
 ["fnc_destroy_air_mission",      "STR_DUWS_T_c19", "STR_DUWS_T_DESTROY_AIR_DESC",     "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Air Asset",         { [19] call fnc_mission_launch }, 25, 25, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, true, 1, "map"]],
 ["fnc_escort_informant_mission", "STR_DUWS_T_c20", "STR_DUWS_T_ESCORT_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Escort Informant",          { [20] call fnc_mission_launch }, 5, 15, 1, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, true, 1, "town"]],
-["fnc_deliver_supplies_mission", "STR_DUWS_T_c21", "STR_DUWS_T_DELIVER_SUPPLIES_DESC", "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Deliver Supplies",          { [21] call fnc_mission_launch }, 15, 5, 3, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, true, 1, "town"]]
+["fnc_deliver_supplies_mission", "STR_DUWS_T_c21", "STR_DUWS_T_DELIVER_SUPPLIES_DESC", "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Deliver Supplies",          { [21] call fnc_mission_launch }, 15, 5, 3, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, true, 1, "town"]],
+["fnc_capture_zone_mission",     "STR_DUWS_T_c22", "STR_DUWS_T_CAPTURE_ZONE_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Capture Zone",             { [22] call fnc_mission_launch }, 20, 20, 0, [1.5,2], "command", "assault", "", [false, 0, false, true, 1, "capturezone"]]

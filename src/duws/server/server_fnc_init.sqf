@@ -180,6 +180,10 @@ fnc_destroy_hardpoint_mission = compile preprocessFileLineNumbers "duws\server\m
 // on a live, revealed, destructible OPFOR hardpoint being in reach. Undefined on a non-host client,
 // findSite falls back to the accept-all generic and the hardpoint gate is silently lost.
 fnc_destroy_hardpoint_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_hardpoint\fnc_destroy_hardpoint_site.sqf";publicVariable "fnc_destroy_hardpoint_site";
+fnc_capture_zone_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\capture_zone\fnc_capture_zone_mission.sqf";
+// Broadcast: the finder runs client-side in the picker to enumerate the revealed OPFOR zones to target;
+// without it a non-host client falls back to the accept-all generic and the enumerate is lost.
+fnc_capture_zone_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\capture_zone\fnc_capture_zone_site.sqf";publicVariable "fnc_capture_zone_site";
 fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_mission.sqf";
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_target_recon_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_recon\fnc_target_recon_mission.sqf";
