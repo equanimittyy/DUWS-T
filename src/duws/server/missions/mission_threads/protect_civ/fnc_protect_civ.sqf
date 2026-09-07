@@ -91,12 +91,20 @@ DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
     [], 1.4, false, false, "", "_this distance _target < 6 && !R3F_LOG_mutex_local_verrou"]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _crate];
 
-// R3F init is client-side (if(!isDedicated), waits on R3F_LOG_active), so fan it out via BIS_fnc_MP.
-// NOT JIP: DUWS_pc_crate is reused by the next instance, so a persisted entry would re-register onto its crate.
-[[[], {
-    waitUntil { !isNil "DUWS_pc_crate" && { !isNull DUWS_pc_crate } };
-    [DUWS_pc_crate, 500, west, ["Fortifications"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
-}], "BIS_fnc_spawn", true, false] spawn BIS_fnc_MP;
+// R3F factory init is client-local (init_creation_factory guards !isDedicated, waits R3F_LOG_active), so this
+// runs everywhere and persists as a JIP order for late joiners. Keyed by netId and carrying the crate object
+// (not the reused DUWS_pc_crate global) so a later mission's crate isn't re-registered onto; dropped on its release.
+private _crateJip = format ["DUWS_pcFactory_%1", netId _crate];
+[_crate, {
+    params ["_crate"];
+    if (!hasInterface || isNull _crate) exitWith {};
+    [_crate, 500, west, ["Fortifications"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+}] remoteExec ["call", 0, _crateJip];
+[_crate, _crateJip] spawn {
+    params ["_crate", "_crateJip"];
+    waitUntil { sleep 5; isNull _crate || !alive _crate };
+    remoteExec ["", _crateJip];
+};
 
 // Enrol only this crate's built objects under the mission key: R3F flags factory-made objects
 // (R3F_LOG_CF_depuis_usine) beside the factory, so a near-crate poll excludes a builder vehicle's props.
