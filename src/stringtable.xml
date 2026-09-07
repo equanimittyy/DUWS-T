@@ -4319,6 +4319,10 @@
                 <Original>Alpha 1-1, good work sabotaging the enemy laptop. Out.</Original>
                 <English>Alpha 1-1, good work sabotaging the enemy laptop. Out.</English>
             </Key>
+            <Key ID="STR_DUWS_T_laptopdestroyed">
+                <Original>Alpha 1-1, the laptop's been destroyed. Whatever intel it held is now lost. RTB. Out.</Original>
+                <English>Alpha 1-1, the laptop's been destroyed. Whatever intel it held is now lost. RTB. Out.</English>
+            </Key>
             <Key ID="STR_DUWS_T_RIGGED_DECOY_TITLE">
                 <Original>Rigged Decoy</Original>
                 <English>Rigged Decoy</English>

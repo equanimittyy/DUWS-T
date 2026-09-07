@@ -26,6 +26,8 @@ for "_i" from 1 to _bldgCount do { _bldgs pushBack (_pool deleteAt (floor random
 private _laptopBldg = selectRandom _bldgs;
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
+// Set to the real laptop in the settle loop; the deadline watcher fails the mission if it is wrecked.
+private _realLap = objNull;
 
 // The task name the watcher and hold-actions key on; the marker follows once the laptops are seated (below).
 private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
@@ -82,24 +84,40 @@ switch (VERSION_X) do {
         // interpenetrate and physx kicks it away.
         {
             _x params ["_table", "_isReal"];
-            // allowDamage false hardens the real objective -- patrol fire that destroyed it would make the
-            // mission unwinnable. setVelocity zeroes the slot-to-floor drop residual so the live table rests.
+            // Table stays hardened -- it is the laptop's mount, and a rigged decoy deletes its own props by
+            // hand (fnc_sabotage_laptop_decoy). setVelocity zeroes the slot-to-floor drop residual so it rests.
             _table setVectorUp [0, 0, 1];
             _table setVelocity [0, 0, 0];
             _table allowDamage false;
             [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
 
             private _topZ = (boundingBoxReal _table select 1) select 2;
-            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, random 360]], _table, "mission_sabotage_laptop"] call fnc_place_settled) select 0;
+            // Every laptop is destructible now (_invuln false): wreck the real one and the mission fails
+            // (watcher below); a wrecked rigged decoy cooks its bomb off (Killed handler below).
+            private _lap = ([[["Land_Laptop_unfolded_F", 0, 0, _topZ + 0.01, random 360]], _table, "mission_sabotage_laptop", false] call fnc_place_settled) select 0;
 
-            // Paired so a rigged decoy's blast can clear both props (invulnerable, so the shell alone
-            // leaves them standing). Read server-side by fnc_sabotage_laptop_decoy.
+            // Paired so a rigged decoy's blast can clear both props. Read server-side by fnc_sabotage_laptop_decoy.
             _lap setVariable ["DUWS_laptop_table", _table];
             // Rigged roll is fixed here, not at the action, so a decoy's fate is the same for whoever
             // reaches it. Only decoys are ever rigged.
             private _rigged = !_isReal && {random 1 < 0.33};
+            // Fire the cook-off once: DUWS_laptop_boomed is claimed by whichever path detonates first, so the
+            // sabotage blast wrecking the laptop a frame before its own deleteVehicle drops no second shell.
+            if (_rigged) then {
+                _lap addEventHandler ["Killed", {
+                    params ["_lap"];
+                    if (_lap getVariable ["DUWS_laptop_boomed", false]) exitWith {};
+                    _lap setVariable ["DUWS_laptop_boomed", true];
+                    // Shell above the spot and driven down: one created at rest never fuzes (arma_engine_gotchas.md).
+                    private _p = getPosATL _lap;
+                    private _bomb = createVehicle ["Sh_82mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+                    _bomb setVelocity [0, 0, -30];
+                    private _table = _lap getVariable ["DUWS_laptop_table", objNull];
+                    if (!isNull _table) then { deleteVehicle _table };
+                }];
+            };
             _laptops pushBack [_lap, _isReal, _rigged];
-            if (_isReal) then { _targetpos = getPosATL _lap };
+            if (_isReal) then { _targetpos = getPosATL _lap; _realLap = _lap };
         } forEach _pending;
     };
 };
@@ -195,18 +213,21 @@ sleep 5; // let the patrols finish spawning
 
 // Success comes through the laptop's addAction, not a wait here, so the deadline runs on a watcher:
 // fail the mission if the clock runs out while it is still live (slot shut, token unadvanced).
-[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name, _lapObjs] spawn {
-    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name", "_lapObjs"];
+[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name, _lapObjs, _realLap] spawn {
+    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name", "_lapObjs", "_realLap"];
     private _token = DUWS_mission_token;
-    waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
-    // Wakes for every end path (win, timeout, slot recycle): drop these from the marker list so the icons
-    // clear now, not when the props finally leave on the keep-radius clock.
+    // Also wakes if the real laptop is wrecked (isNull-guarded: a non-MODERN build seats no laptop).
+    waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token || (!isNull _realLap && {!alive _realLap}) };
+    // Wakes for every end path (win, timeout, slot recycle, wreck): drop these from the marker list so the
+    // icons clear now, not when the props finally leave on the keep-radius clock.
     missionNamespace setVariable ["DUWS_sabotage_laptops",
         (missionNamespace getVariable ["DUWS_sabotage_laptops", []]) - _lapObjs, true];
-    if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
-        // Cross markers are raw createMarker names, cleared by hand; the ellipse and the timeout notice
-        // route through finish (line [], FAILED, notify true).
+    private _blown = !isNull _realLap && {!alive _realLap};
+    if ((time > _deadline || _blown) && !Mission_available && DUWS_mission_token == _token) then {
+        // Cross markers are raw createMarker names, cleared by hand; the ellipse routes through finish. A
+        // wrecked laptop speaks its own line; a timeout falls through to the generic notice (line []).
         { deleteMarker _x } forEach _crosses;
-        [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], [], false, "mission_sabotage_laptop", false, true] call fnc_mission_finish;
+        private _line = if (_blown) then { ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_laptopdestroyed"] } else { [] };
+        [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], _line, false, "mission_sabotage_laptop", false, true] call fnc_mission_finish;
     };
 };
