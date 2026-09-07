@@ -3,16 +3,15 @@
 if (!isServer) exitWith {};
 params [["_pos", [0,0,0]], ["_radius", 5], ["_dur", 15]];
 
-// A small carpet of flame like the napalm strike (fnc_arty): a few test_EmptyObjectForFireBig scattered over
-// the splash. The object burns for as long as it lives, so it is spawned once and deleted only at the end --
-// deleting a burning one puffs dying smoke, so refreshing it mid-burn reads as smog rather than fire.
+// A small splash where the bottle bursts: test_EmptyObjectForFireSmall, the trail's clean flame. FireBig (the
+// napalm class in fnc_arty) is an oily smoke column that smothers its own flame at a bottle's scale. Burns while
+// it lives, so spawn once and delete only at the end -- deleting a burning one puffs dying smoke.
 private _fires = [];
 private _spread = _radius min 3;
-for "_i" from 1 to 3 do {
+for "_i" from 1 to 2 do {
 	private _fp = [(_pos select 0) + (random _spread) - (random _spread), (_pos select 1) + (random _spread) - (random _spread), _pos select 2];
-	// Command form, like the napalm strike (fnc_arty): the array/placement form of createVehicle does not
-	// light this config emitter -- the object spawns but stays dark.
-	private _f = "test_EmptyObjectForFireBig" createVehicle _fp;
+	// Command form -- the array/placement form of createVehicle leaves this config emitter dark.
+	private _f = "test_EmptyObjectForFireSmall" createVehicle _fp;
 	_f setPosATL _fp;
 	_fires pushBack _f;
 };
