@@ -836,7 +836,9 @@ it from `time`). An age within the last tick means the observer is sensing it *n
 only remembered. `unit targetKnowledge target` carries the same per (observer, target). Both are
 per-observer, so aggregate over a bounded observer set rather than making one side-wide call. Applied in
 `server/opcom/fnc_opcom_sense.sqf`: each live OPFOR observer's `nearTargets` is swept, a BLUFOR group with a
-fresh age is stamped at its live position, and a group nobody is sensing this tick holds at last-seen and decays.
+fresh age is stamped at the observer's *remembered* position for it (element 0, not the target's live
+position — the live position drags belief along on a teleport), and a group nobody is sensing this tick
+holds at last-seen and decays.
 
 ## A `Killed` handler added on the server does not fire for a client-local unit
 
