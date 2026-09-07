@@ -1882,3 +1882,22 @@ it where the hull is local — for a server-spawned event vehicle that is the se
 hears it, so no `remoteExec` is wanted (running it on a client where the hull is remote does nothing).
 `BIS_fnc_fire` beeps a horn too and adds the weapon first where the hull lacks one, but a civilian car
 already carries its horn, so the direct fire is enough.
+
+## An AI driver will not run over a man on foot; it brakes and steers around, stopping short
+
+**A `doMove` at a player's position does not make an AI car ram them, even under `CARELESS` / `combatMode
+"BLUE"` / `speedMode "FULL"`. The driver's pathfinder treats a person as an obstacle to avoid and a
+destination as a place to arrive: it slows, steers around the body, and halts a few metres off — so a
+suicide car detonating on proximity never actually reaches its target on foot.** Tightening the arm range or
+the fuse does not help; the hull simply never closes the last stretch.
+
+**How to apply:** drive the final approach yourself. Inside a rush distance, `_driver disableAI "PATH"` to
+stop the AI steering, then each short tick push the hull straight at the target with
+`_veh setVelocity [(sin _brg) * _spd, (cos _brg) * _spd, (velocity _veh) select 2]`, where `_brg = _veh
+getDir _target` — re-aimed every tick so it tracks a dodging target, keeping the current vertical velocity so
+gravity still applies. Ramp `_spd` up from the hull's current `vectorMagnitude velocity`, capped at its config
+`maxSpeed` (km/h ÷ 3.6), rather than a flat number: a flat `setVelocity` teleports every car to one speed,
+ignoring its own acceleration and top speed, so a slow hull lurches to full pace in a frame.
+`server/events/fnc_random_event_car_bomb.sqf` rams this way for its last 60 m. Re-enable `PATH` if the target
+breaks back out of rush range, or the pathless hull will coast to a stop. Poll fast (~0.05 s) during the rush:
+at ramming speed a half-second tick steps tens of metres and overshoots the contact window.
