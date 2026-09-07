@@ -21,7 +21,7 @@ switch (_kind) do {
 	case "ied":          { [_townIndex, _player] call fnc_random_event_ied };
 	// Civilian "attackers" by design: the isHostile invariant above is waived here (fnc_random_event_mob).
 	case "angry_mob":    { [_townIndex, _player] call fnc_random_event_mob };
-	// Same event, escalation on: instigators throw molotovs, then draw pistols and turn EAST (fnc_random_event_mob).
+	// Same event, escalation on: instigators break off, draw pistols and turn EAST after a fuse (fnc_random_event_mob).
 	case "angry_mob2":   { [_townIndex, _player, true] call fnc_random_event_mob };
 	default {
 		["INFO", "CIV", format ["random event '%1' rolled at town %2 (no handler yet)", _kind, _townIndex]] call fnc_log;
