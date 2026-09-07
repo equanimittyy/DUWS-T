@@ -212,21 +212,21 @@ private _clearIcons = {
 // cause of death, so this counter never has to draw zero.
 [_pilot, _bleedout] spawn {
     params ["_pilot", "_bleedout"];
-    while { alive _pilot && { (_pilot distance PosOfBLUHQ) >= 50 } && { time < _bleedout } } do {
+    while { alive _pilot && { (_pilot distance PosOfBLUHQ) >= 20 } && { time < _bleedout } } do {
         [format [localize "STR_DUWS_T_pilot_bleed_count", ceil (round (_bleedout - time) / 60)]] remoteExec ["hint", [0, -2] select isDedicated];
         private _next = time + 60;
-        waitUntil { sleep 1; time >= _next || !(alive _pilot) || (_pilot distance PosOfBLUHQ) < 50 || time >= _bleedout };
+        waitUntil { sleep 1; time >= _next || !(alive _pilot) || (_pilot distance PosOfBLUHQ) < 20 || time >= _bleedout };
     };
 };
 
 waitUntil {
     sleep 1;
-    (_pilot distance PosOfBLUHQ) < 50 || !(alive _pilot) || time > _bleedout
+    (_pilot distance PosOfBLUHQ) < 20 || !(alive _pilot) || time > _bleedout
 };
 
 // Bleedout expiry kills him; the death branch below then reports it with the KIA line. The timer's only
 // extra is the hint naming the cause.
-if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 50 && time > _bleedout) then {
+if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 20 && time > _bleedout) then {
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0, -2] select isDedicated, false];
     _pilot setDamage 1;
 };
