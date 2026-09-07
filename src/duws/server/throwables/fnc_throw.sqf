@@ -27,6 +27,8 @@ _obj setPosASL _spawn;
 private _d = _to vectorDiff _spawn;
 private _loft = 0.9 + random 0.4;
 _obj setVelocity [(_d select 0) / _dur, (_d select 1) / _dur, (((_d select 2) + 4.905 * _dur * _dur) / _dur) * _loft];
+// Random tumble (rad/s per axis): each object spins on its own axis at its own rate, so none slides flat.
+_obj setAngularVelocity [random 16 - 8, random 16 - 8, random 16 - 8];
 
 [_obj, _to, _dur] spawn {
 	params ["_obj", "_to", "_dur"];
