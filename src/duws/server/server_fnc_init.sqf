@@ -344,8 +344,8 @@ fnc_random_event_ied = compile preprocessFileLineNumbers "duws\server\events\fnc
 // A client's completed defuse hold remoteExecs this to the server by name; not broadcast, clients never run it.
 fnc_random_event_ied_defuse = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_ied_defuse.sqf";
 fnc_random_event_mob = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_mob.sqf";
-// A thrown can: fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
-// bounces it. createVehicle is global, so the one server-simulated can networks to every machine on its own.
+// Thrown junk: fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
+// bounces it. createVehicle is global, so the one server-simulated object networks to every machine on its own.
 fnc_throw = compile preprocessFileLineNumbers "duws\server\throwables\fnc_throw.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_random_event.sqf";
