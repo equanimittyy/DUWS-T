@@ -1,8 +1,8 @@
 // Locality: server -- roadside IEDs, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town against the player.
 //
-// A line of identical junk piles laid down one stretch of road on the town's approach, none inside any town
-// zone (the run stops at a town edge). Each is independently, secretly live
+// A loose scatter of identical junk piles on the roads ahead of the player, out in open country at least
+// MIN_DIST off and clear of every town. Each is independently, secretly live
 // (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
 // usual outcome: the point is to make the player wary of every pile, not to kill them; a live pile is the
 // exception and all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR man
@@ -19,8 +19,10 @@ if (isNull _player) exitWith {};
 
 #define IED_COUNT_MIN 1
 #define IED_COUNT_MAX 6
-#define IED_REACH 350
-#define IED_MIN_SEP 50
+#define MIN_DIST 300
+#define FWD_SPREAD 200
+#define SCATTER 250
+#define IED_MIN_SEP 70
 #define IED_LIVE_CHANCE 0.06
 #define ARM_RANGE 10
 #define FIELD_WATCH 500
@@ -37,63 +39,35 @@ private _pileClasses = [
 private _locs  = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 
-// Every town zone as [centre, radius], so a run can be denied entry to ALL of them, not just the one this
-// event anchored on -- a stretch walking toward a neighbouring town stops at its edge.
+// Every town zone as [centre, radius], so no pile lands inside one -- the field sits out in open country.
 private _towns = [];
 { _towns pushBack [getPos _x, _radii param [_forEachIndex, 0]] } forEach _locs;
 private _fnc_inTown = { params ["_p"]; (_towns findIf { (_p distance2D (_x select 0)) < (_x select 1) }) >= 0 };
 
-// Seed the stretch on the event's town (or the player when off-town), reaching IED_REACH past the town edge.
-private _townPos = getPos _player;
-private _townRadius = 0;
-if (_townIndex >= 0 && {_townIndex < count _locs}) then {
-	_townPos = getPos (_locs select _townIndex);
-	_townRadius = _radii param [_townIndex, 0];
-};
-private _fieldReach = _townRadius + IED_REACH;
+// Anchor the field forward of the player -- MIN_DIST..MIN_DIST+FWD_SPREAD ahead of where they face -- so it
+// is come upon down the road rather than dropped on them or pinned to a town.
+private _anchor = _player getPos [MIN_DIST + random FWD_SPREAD, getDir _player];
 
-private _cands = (_townPos nearRoads _fieldReach) select { !([getPosATL _x] call _fnc_inTown) };
-if (_cands isEqualTo []) exitWith {};
-_cands = _cands call BIS_fnc_arrayShuffle;
+// Roads across the area around that anchor: never in a town, and never inside MIN_DIST of the player (the
+// forward bias alone does not hold the floor once the scatter reaches back toward them).
+private _roads = (_anchor nearRoads SCATTER) select {
+	!([getPosATL _x] call _fnc_inTown) && { (_x distance2D _player) >= MIN_DIST }
+};
+if (_roads isEqualTo []) exitWith {};
+_roads = _roads call BIS_fnc_arrayShuffle;
 
 private _count = IED_COUNT_MIN + floor (random (IED_COUNT_MAX - IED_COUNT_MIN + 1));
 
-// Lay the piles down one continuous stretch of road, IED_MIN_SEP apart, instead of scattering them around the
-// town. Walk the network from a seed, always taking the connected segment that turns least so the line hugs
-// the road, dropping a pile each time IED_MIN_SEP of road has been covered; stop at a dead end or a town edge.
-// Try a handful of seeds and keep the longest run.
+// Scatter the piles across the area IED_MIN_SEP apart -- a loose spread over whatever roads are around, not a
+// row marching down one of them. Greedy: keep each new road IED_MIN_SEP off the ones already taken.
 private _spots = [];
 {
-	private _seed = _x;
-	private _run  = [_seed];
-	private _cur  = _seed;
-	private _prev = objNull;
-	private _accum = 0;
-	private _guard = 0;
-	while { count _run < _count && {_guard < 500} } do {
-		_guard = _guard + 1;
-		private _curPos = getPosATL _cur;
-		// _heading is the bearing we arrived on -- the seed segment's own getDir seeds the very first step.
-		private _heading = if (isNull _prev) then { getDir _cur } else { (getPosATL _prev) getDir _curPos };
-		private _nexts = (roadsConnectedTo _cur) select { _x != _prev && {_x != _cur} };
-		if (_nexts isEqualTo []) exitWith {};
-		private _next = objNull;
-		private _bestTurn = 999;
-		{
-			private _turn = 180 - abs (abs (_heading - (_curPos getDir (getPosATL _x))) - 180);
-			if (_turn < _bestTurn) then { _bestTurn = _turn; _next = _x };
-		} forEach _nexts;
-		if ([getPosATL _next] call _fnc_inTown) exitWith {};
-		_accum = _accum + (_curPos distance2D (getPosATL _next));
-		_prev = _cur;
-		_cur  = _next;
-		if (_accum >= IED_MIN_SEP) then { _run pushBack _cur; _accum = 0 };
-	};
-	if (count _run > count _spots) then { _spots = _run };
 	if (count _spots >= _count) exitWith {};
-} forEach (_cands select [0, 8 min count _cands]);
+	private _rp = getPosATL _x;
+	if ((_spots findIf { (getPosATL _x distance2D _rp) < IED_MIN_SEP }) < 0) then { _spots pushBack _x };
+} forEach _roads;
 
-// Sit each pile off to one side of the road (perpendicular to how the stretch runs), out on the verge and
+// Sit each pile off to one side of the road (perpendicular to how the road runs), out on the verge and
 // flat to the slope, rather than on the crown where traffic would clip it.
 private _piles = [];
 {
@@ -144,7 +118,7 @@ missionNamespace setVariable ["DUWS_ied_piles",
 	(missionNamespace getVariable ["DUWS_ied_piles", []]) + _piles, true];
 
 private _liveCount = { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles;
-["INFO", "CIV", format ["IED event: %1 piles (%2 live) near town %3", count _piles, _liveCount, _townIndex]] call fnc_log;
+["INFO", "CIV", format ["IED event: %1 piles (%2 live) ahead of player, rolled at town %3", count _piles, _liveCount, _townIndex]] call fnc_log;
 
 // Pure-decoy field: no proximity watch to run, just reap the junk after its life.
 if (_liveCount == 0) exitWith {
