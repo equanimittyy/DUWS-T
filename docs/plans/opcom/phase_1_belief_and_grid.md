@@ -81,14 +81,15 @@ alongside the scoring that first reads the ratio. A BLU-held zone and a standing
 men, so they deposit the nominal `OPCOM_GRID_ZONE_ENEMY_MEN` / `OPCOM_GRID_HP_MEN`.
 
 OPFOR's own men are counted from what is actually standing, not from the redeploy ledger. A live zone or
-town garrison deposits its living roster men (`fnc_site_alive`), so a casualty — a rifleman or a vehicle
-crewman — drops the friendly weight the tick it happens; only a stowed site, with no men on the ground,
+town garrison deposits its living infantry — alive roster men whose source token is a team — so an infantry
+casualty drops the friendly weight the tick it happens; only a stowed site, with no men on the ground,
 falls back to the ledger's surviving-token men (`garrisonSurviving` → `tokenListMen`), the same whole-token
-figure that drives redeploy and the map bar. This is the deliberate asymmetry with belief: OPFOR knows its
-own force exactly and continuously, while enemy force is fogged behind the last sighting. Two gaps are
-accepted until the Phase 2 firepower table lands: a never-raised zone has no ledger stamped yet and reads 0
-until first raised, and the ledger fallback is infantry-only (vehicle tokens owe no men), so a stowed
-armored site reads lighter than the same site live.
+figure that drives redeploy and the map bar. Vehicle crews are excluded from both counts — a team token
+owes men, a vehicle token owes none — so the live count and the ledger count the same population and cannot
+disagree. This is the deliberate asymmetry with belief: OPFOR knows its own infantry exactly and
+continuously, while enemy force is fogged behind the last sighting. Two things wait for the Phase 2
+firepower table: a never-raised zone has no ledger stamped yet and reads 0 until first raised, and vehicles
+carry no weight on either layer until that table brings them in.
 
 ## Overlay
 

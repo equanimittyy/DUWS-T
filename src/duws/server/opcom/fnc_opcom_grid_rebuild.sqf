@@ -31,14 +31,15 @@ private _deposit = {
     };
 };
 
-// OPFOR's own force is what it actually has standing: it knows its own casualties, so a live site
-// deposits its living men (each death and each vehicle crewman counted, by roster), and only a stowed
-// site -- no men on the ground -- falls back to the redeploy ledger's surviving-token men. The
-// whole-token ledger stays the redeploy and map-bar truth; this is just OPCOM's live-force picture, and
-// it is the asymmetry with belief: own force exact, enemy force fogged behind sighting.
+// OPFOR's own force is what it has standing. A live site counts its living infantry -- alive roster men
+// whose source token is a team, so a casualty drops the weight that tick; a stowed site (no men on the
+// ground) falls back to the ledger's surviving-token men, left whole-token for redeploy and the map bar.
+// Crew are excluded both ways (a vehicle token owes no men), so the counts match until Phase 2 weights vehicles.
 private _garrisonMen = {
     params ["_key"];
-    if ([_key] call DUWS_fnc_garrisonHeld) exitWith { [_key] call fnc_site_alive };
+    if ([_key] call DUWS_fnc_garrisonHeld) exitWith {
+        { alive _x && {!(([(group _x) getVariable ["DUWS_srcToken", ""]] call DUWS_fnc_teamRow) isEqualTo [])} } count ([_key] call fnc_site_roster)
+    };
     [[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
 };
 
