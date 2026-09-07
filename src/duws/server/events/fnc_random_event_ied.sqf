@@ -3,15 +3,15 @@
 //
 // A scatter of identical junk piles on the roads around the town. Each is independently, secretly live
 // (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
-// usual outcome: the point is to make the player treat every pile as a threat, not to kill them; a live pile
-// is the exception and all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR
-// man stands or crouches, or
-// any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, which is the only way to
-// crawl in and defuse it (fnc_random_event_ied_defuse). Every pile, live or decoy, carries that same prone
-// defuse and a client-side world icon (fnc_random_event_ied_markers), so the two cannot be told apart --
-// a decoy clears to nothing, a live one to a command point. No emplacer unit exists, so nothing here is marked
-// isHostile and nothing can be shot: the shell has no instigator, so a civilian caught in the blast is
-// charged to no one, and the fire.sqf legal-target invariant has no unit to apply to.
+// usual outcome: the point is to make the player wary of every pile, not to kill them; a live pile is the
+// exception and all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR man
+// stands or crouches, or any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, so a
+// live one is only approached safely by crawling in prone. The disarm (fnc_random_event_ied_defuse) is not
+// stance-gated; every pile, live or decoy, carries that same disarm within reach and a client-side world icon
+// (fnc_random_event_ied_markers), so the two cannot be told apart -- a decoy clears to nothing, a live one to
+// a command point. No emplacer unit exists, so nothing here is marked isHostile and nothing can be shot: the
+// shell has no instigator, so a civilian caught in the blast is charged to no one, and the fire.sqf
+// legal-target invariant has no unit to apply to.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -76,19 +76,18 @@ private _piles = [];
 		_pile enableSimulation false;   // a live charge must not be nudged off its spot by traffic
 		private _live = random 1 < IED_LIVE_CHANCE;
 		_pile setVariable ["DUWS_ied_state", ["decoy", "live"] select _live, false];
-		// Public so a client's hold-action condition and the world icon can see the pile. Set on every pile,
-		// live or decoy, so the two are indistinguishable; false on defuse or trip drops both the action and
-		// the icon.
+		// Public so each client's hold-action condition and world icon read the pile; set on every pile so
+		// live and decoy look alike, cleared on defuse or trip to drop both the action and the icon.
 		_pile setVariable ["DUWS_ied_active", true, true];
-		// A live pile takes the full 6 s prone defuse; a decoy has no charge to work, so its defuse is
-		// instant (duration 0). The tell comes only once the player has already committed and triggered it.
+		// Live pile: full 6 s defuse. Decoy: no charge, so instant (duration 0) -- the tell comes only once
+		// the player has already committed. Not stance-gated; only the trip ignores a prone man.
 		private _act = [
 			_pile,
 			localize "STR_DUWS_T_EVENT_IED_DEFUSE",
-			"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_ca.paa",
-			"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_ca.paa",
-			"(_target getVariable ['DUWS_ied_active', false]) && {stance player == 'PRONE'} && {_target distance player < 4}",
-			"(_target getVariable ['DUWS_ied_active', false]) && {stance player == 'PRONE'}",
+			"\a3\Ui_f\data\IGUI\Cfg\Actions\take_ca.paa",
+			"\a3\Ui_f\data\IGUI\Cfg\Actions\take_ca.paa",
+			"(_target getVariable ['DUWS_ied_active', false]) && {_target distance player < 4}",
+			"(_target getVariable ['DUWS_ied_active', false])",
 			{}, {},
 			{ params ["_pile"]; [_pile] remoteExec ["fnc_random_event_ied_defuse", 2]; },
 			{}, [], ([0, 6] select _live), 0, true, false
