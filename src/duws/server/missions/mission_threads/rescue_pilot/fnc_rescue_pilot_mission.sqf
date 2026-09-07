@@ -63,13 +63,22 @@ switch (VERSION_X) do {
 private _group = [[_heliPos select 0, (_heliPos select 1) + 2], WEST, [blufor_HELI_PILOT_X]] call BIS_fnc_spawnGroup;
 _pilot = units _group select 0;
 _group deleteGroupWhenEmpty true;
-// Captive the whole mission: the threat is the bleedout clock and the enemy converging on the crew who carry
-// him, not the pilot being shot -- an unarmed casualty enemies keep gunning down would just be noise on the timer.
+// Captive until a rescuer reaches him (dropped below): while the patrols still ring the crash, an un-captived
+// prone casualty would just be gunned down off the timer before anyone could arrive.
 _pilot setCaptive true;
 [_pilot, "Acts_InjuredLyingRifle01"] remoteExec ["switchMove", 0];
 removeAllItems _pilot;
 _pilot setDamage 0.8;
 _pilot disableAI "PATH";
+// Halve every incoming hit (protect-informant's clamp) so one round can't finish a man spawned at 0.8 once he
+// loses captive; scripted setDamage does not fire HandleDamage, so the 0.8 and the win-state patch still land.
+// AIS never enrols a spawned unit, but AIS_noReviveInit guards this handler from being stripped (revive_system.md).
+_pilot setVariable ["AIS_noReviveInit", true, true];
+_pilot addEventHandler ["HandleDamage", {
+    params ["_u", "", "_dmg", "", "", "_hi"];
+    private _old = if (_hi < 0) then { damage _u } else { _u getHitIndex _hi };
+    _old + ((_dmg - _old) * 0.5)
+}];
 
 _pilot addEventHandler ["Killed", {
     params ["_unit", "_killer"];
@@ -153,6 +162,10 @@ if (time > _deadline) exitWith {
 // Reached. Start the 10-minute bleedout, reveal the pilot's icons, and send every spawned enemy group onto the
 // crash. From here only the bleedout clock, the pilot's death, or arrival at HQ can end the mission.
 private _bleedout = time + 600;
+
+// Drop captive now a rescuer is on him: the converging patrols (below) engage the pilot too, not only the crew
+// carrying him. The HandleDamage clamp at spawn is what keeps that under-fire window survivable.
+_pilot setCaptive false;
 
 // Pilot icons, gated to the timer: DUWS_float_pilot feeds the 3D float (client/missions/fnc_protect_civ_markers.sqf)
 // and the map marker tracks his position. Both cleared by _clearIcons at every exit below.
