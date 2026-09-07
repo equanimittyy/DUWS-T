@@ -39,10 +39,11 @@ Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a sing
 | `DUWS_opcom_belief_str` | believed BLUFOR force there ([§The quantity](#the-quantity-force-not-coverage)) — each AI counts one, each human `OPCOM_PLAYER_WORTH`, so a group carrying players weighs heavier |
 
 One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
-rather than appending, and only on a fresh acquisition — `knowsAbout` past the gate and not falling
-([§Sensors](#sensors)), the reading superseding the stored one outright. Belief tracks groups, not
-individual players, so a squad is one row whether or not it carries a player, and players sharing a group
-are not double-counted.
+rather than appending, and only when an observer is sensing the group *this tick* ([§Sensors](#sensors)),
+the reading superseding the stored one outright. Believed force is the observed men-count at that last
+sighting, held between sightings — not re-derived each tick. Belief tracks groups, not individual players,
+so a squad is one row whether or not it carries a player, and players sharing a group are not
+double-counted.
 
 New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner
 ([`info/architecture.md`](../../info/architecture.md#globals-have-no-namespace)).
@@ -55,17 +56,19 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 
 | Sensor | Writes | Cost |
 |---|---|---|
-| Direct sighting | for each BLUFOR group, an *acquisition* — `east knowsAbout (leader _grp) > 1.5` and not falling since last tick — stamps the leader's position, the group's threat (each AI one, each human `OPCOM_PLAYER_WORTH`), and the tick; a falling scalar (contact fading) does not write, so the stamp freezes at last-seen and decays | one engine call per BLUFOR group per tick |
+| Direct sighting | each live OPFOR observer's `nearTargets` is swept; a BLUFOR group with a *fresh* position time (sensed this tick) has its leader position, threat (each AI one, each human `OPCOM_PLAYER_WORTH`) and the tick stamped. A group nobody senses this tick is untouched — its stamp holds at last-seen and decays. `knowsAbout` cannot serve here: it lingers side-wide while any unit merely remembers a target, so it reads the same watching a mover as remembering a ghost ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)) | one `nearTargets` per live OPFOR group per tick |
 | Absence | a group whose belief row resolves (`groupFromNetId`) to a dead, drained or deleted group is dropped, so a confirmed-gone force stops depositing; server-polled, never a `Killed` handler | one resolve per group-keyed row per tick |
 | Observation post | an OP hardpoint covering ground stamps what it sees | [§Observation is the trigger](#observation-is-the-trigger) |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
 | Intel patrol tasking | a purchased sensor ([§What the commander spends on](#what-the-commander-spends-on)) | the tasking's own cost |
 
-`east knowsAbout` is a side-wide query — the sighting sweep is one call per BLUFOR group (on its leader),
-no `nearEntities`, no scan over `allUnits`
+The sighting sweep is one `nearTargets` per live OPFOR group (on its leader), bounded by `OPCOM_SENSE_RANGE`
+— no `nearEntities`, no scan over `allUnits`
 ([`info/performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)).
-Threshold `1.5` is shared with the artillery observation gate — one constant, do not add a second.
+Observers are the OPFOR groups actually spawned near the fight, so a stowed garrison neither senses nor
+costs. The artillery observation gate keeps its own `knowsAbout > 1.5` test — a separate, position-free
+trigger — so no shared constant is owed here.
 
 ### Decay
 

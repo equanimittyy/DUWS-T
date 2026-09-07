@@ -812,28 +812,30 @@ corpse swap. `client/search/fnc_intel_search_action.sqf` gates the enemy-corpse 
 
 **`side knowsAbout target` returns a 0–4 aggregate knowledge value that rises while the target is
 actually being sensed and *decays over seconds-to-minutes* after contact breaks. It is not "can be seen
-right now", and it is unrelated to the target's position. Sampling the target's live position on the
-strength of `knowsAbout > threshold` keeps reporting the true *current* position all through the decay
-tail — so a stored "last seen" follows a target nothing is observing, and a teleport or fast-travel drags
-the stamp to the new position.**
+right now", it is unrelated to the target's position, and it is side-wide: it stays high while *any* unit
+on the side merely remembers the target. Sampling the target's live position on the strength of
+`knowsAbout > threshold` keeps reporting the true *current* position all through that memory tail — so a
+stored "last seen" follows a target nothing is observing, and a teleport or fast-travel drags the stamp to
+the new position.**
 
-OPCOM's belief sensor is the worked example. Gating on `east knowsAbout _ldr > 1.5` alone and stamping
+OPCOM's belief sensor is the worked example. Gating on `east knowsAbout _ldr > 1.5` and stamping
 `getPosATL _ldr` (the leader's live position) made a player who fast-travels to their HQ — never
-re-observed, but with `east knowsAbout` not yet decayed below the gate — bloom enemy force at the HQ on the
-next sweep, though nothing saw the move. A stale-refresh path re-stamped the live position once a stamp
-aged past its fresh window with no new sighting, compounding it. Storing a position rather than an object
-handle does not save it — the handle-follows-a-respawn trap
-([§Non-serializable handles](#non-serializable-handles-must-not-live-in-the-mission-namespace) warns of the
-handle form) is dodged, but the sensor re-samples the live position anyway while the scalar lingers.
+re-observed, but with `east knowsAbout` not decayed below the gate — bloom enemy force at the HQ, though
+nothing saw the move. The decisive property is that the scalar reads the same flat-high value whether an
+observer is *watching a mover* (the position should track) or merely *remembering a ghost* (it must
+freeze), because it lingers side-wide until every unit that knew the target has died. No function of the
+scalar or its derivative separates those two states, so an "only stamp while it is rising / not falling"
+edge gate does **not** fix it — a re-stamp on every flat-high tick still followed the target and reset the
+stamp's age so it never decayed.
 
-**How to apply:** treat `knowsAbout` as a lagging integrator and detect genuine acquisition from its
-*edge*, not its level — store the previous tick's value and only write a live position when the scalar is
-not decreasing (rising, or pinned high while still in contact); a falling scalar means fading memory, so
-freeze the last-seen position and let it decay. Where per-observer cost is affordable,
-`unit targetKnowledge target` returns the engine's own last-known position plus a current-visible flag —
-a real decaying last-seen that never teleports — but it is per-observer, not the side-wide one-call query.
-Applied in `server/opcom/fnc_opcom_sense.sqf`: the sweep tracks the prior tick's scalar per group
-(`DUWS_opcom_ka_prev`) and stamps only while it is not falling.
+**How to apply:** do not reconstruct "seen now" from `knowsAbout`. Read the engine's own last-seen instead:
+`unit nearTargets range` (per observer) returns each known target with a **position time** — the mission
+time its position was last fixed — so a fix within the last tick means the observer is sensing it *now*,
+and a stale time means it is only remembered. `unit targetKnowledge target` carries the same information
+per (observer, target). Both are per-observer, so aggregate over a bounded observer set rather than making
+one side-wide call. Applied in `server/opcom/fnc_opcom_sense.sqf`: each live OPFOR observer's `nearTargets`
+is swept, a BLUFOR group with a fresh position time is stamped at its live position, and a group nobody is
+sensing this tick is left to hold at last-seen and decay.
 
 ## A `Killed` handler added on the server does not fire for a client-local unit
 

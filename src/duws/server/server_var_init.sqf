@@ -639,6 +639,11 @@ OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
 // a player is more dangerous than an equal AI, so a group carrying one weighs heavier on the grid. Tune.
 OPCOM_PLAYER_WORTH = 3;
 
+// How far an OPFOR observer's knowledge query reaches in the sighting sweep. A bound on nearTargets, not a
+// detection-range model: the engine returns only targets the observer actually knows about, so this just
+// caps the scan cost. Generous, so a genuinely-spotted distant vehicle is not clipped.
+OPCOM_SENSE_RANGE = 5000;
+
 // Men-count placeholders the grid rebuild deposits where no real strength is tracked: a BLU-held zone
 // (the player's garrison is not modelled, but the commander knows it is held) and a standing OPFOR
 // hardpoint (its crew). Phase 2 replaces both with firepower-weighted force.
