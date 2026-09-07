@@ -2,7 +2,8 @@
 // already turned the town.
 //
 // An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), beelining at the nearest
-// player, horn blaring, until it detonates. Built here rather than via fnc_civ_spawnUnit, which would bolt
+// player until it detonates, an OPFOR-red world icon (fnc_random_event_ied_markers) marking it from range so
+// the player reads the overt threat before it closes. Built here rather than via fnc_civ_spawnUnit, which would bolt
 // on a recruit action and a flee-on-fire panic handler. Killing the driver only trades the run-in for a
 // short dead-man cook-off.
 if (!isServer) exitWith {};
@@ -40,6 +41,11 @@ _veh limitSpeed 200;
 _veh setVariable ["DUWS_binMe", true];
 _driver setVariable ["DUWS_binMe", true];
 
+// Broadcast the car so each client draws an OPFOR-red icon over it (fnc_random_event_ied_markers), read
+// further out than a roadside pile. Removed from the list on detonation or teardown; the honk was unreliable.
+missionNamespace setVariable ["DUWS_vbied_cars",
+	(missionNamespace getVariable ["DUWS_vbied_cars", []]) + [_veh], true];
+
 // FUSE: run-in delay once armed within ARM_RANGE (1-3 s). DEADMAN: cook-off when the driver is killed or
 // the hull is immobilised (2-5 s), so shooting the driver buys distance, not a clean defuse. TIMEOUT reaps
 // a car that reaches no one.
@@ -53,8 +59,6 @@ _driver setVariable ["DUWS_binMe", true];
 	private _fuse = -1;
 	private _deadline = time + TIMEOUT;
 	private _lastMove = [0, 0, 0];
-	// Horn is a vehicle weapon, not the "Horn" action-menu entry an AI never triggers.
-	private _horn = ((weapons _veh) select { (_x find "Horn") > -1 }) param [0, ""];
 
 	while { !isNull _veh && {time < _deadline} } do {
 		// Driver down or the hull can't move: cook off where it sits.
@@ -69,8 +73,6 @@ _driver setVariable ["DUWS_binMe", true];
 			_lastMove = getPos _target;
 			_driver doMove _lastMove;
 		};
-		// forceWeaponFire: global effect, so firing server-side (hull is server-local) honks for every client.
-		if (_horn != "" && {random 1 < 0.3}) then { _veh forceWeaponFire [_horn, _horn] };
 
 		// Armed on the hull's distance, not the seated driver's.
 		if (_veh distance _target < ARM_RANGE) exitWith { _fuse = FUSE };
@@ -79,11 +81,16 @@ _driver setVariable ["DUWS_binMe", true];
 
 	// No fuse: timed out or ran dry of targets.
 	if (_fuse < 0) exitWith {
+		missionNamespace setVariable ["DUWS_vbied_cars",
+			(missionNamespace getVariable ["DUWS_vbied_cars", []]) - [_veh], true];
 		if (!isNull _driver) then { deleteVehicle _driver };
 		if (!isNull _veh) then { deleteVehicle _veh };
 	};
 
 	sleep _fuse;
+	// Drop the icon the moment it commits to blowing, ahead of the wreck.
+	missionNamespace setVariable ["DUWS_vbied_cars",
+		(missionNamespace getVariable ["DUWS_vbied_cars", []]) - [_veh], true];
 	if (!isNull _veh) then {
 		// Spawned above the hull and shoved down: a shell created at rest never fuzes (arma_engine_gotchas.md).
 		// 155mm, the artillery-support shell (supports_radio_modern.hpp), up from the 82mm mortar.
