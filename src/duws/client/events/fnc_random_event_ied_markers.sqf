@@ -12,11 +12,11 @@
 // independent of the other marker handlers (client/killhouse, client/missions).
 if (!hasInterface) exitWith {};
 
-DUWS_iedMarker_range   = 30;                                                    // metres, player to pile
+DUWS_iedMarker_range   = 15;                                                    // metres, player to pile
 DUWS_vbiedMarker_range = 100;                                                   // metres -- read the moving car further out
 DUWS_iedMarker_icon  = "\A3\ui_f\data\map\markers\military\unknown_CA.paa";     // marker 266, mil_unknown (docs/info/external/arma3_markers.md)
 DUWS_iedMarker_colour = [1, 1, 0, 1];                                           // yellow; alpha set per-frame by distance
-DUWS_iedMarker_full  = 10;                                                      // metres -- fully opaque here, fading to 5% at _range
+DUWS_iedMarker_full  = 0;                                                       // metres -- fully opaque here, fading to 5% at _range
 // VBIED is overt, a known threat: OPFOR's own red, read from the engine so it tracks the side colour.
 DUWS_vbiedMarker_icon   = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";         // marker 168, loc_Fortress (docs/info/external/arma3_markers.md)
 DUWS_vbiedMarker_colour = +(east call BIS_fnc_sideColor);                       // RGB only; alpha set per-frame by distance

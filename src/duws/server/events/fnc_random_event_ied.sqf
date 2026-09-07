@@ -5,7 +5,7 @@
 // MIN_DIST off and clear of every town. Each is independently, secretly live
 // (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
 // usual outcome: the point is to make the player wary of every pile, not to kill them; a live pile is the
-// exception and all-live is vanishingly rare). A live pile cooks an 82mm mortar shell when a BLUFOR man
+// exception and all-live is vanishingly rare). A live pile cooks a 155mm artillery shell when a BLUFOR man
 // stands or crouches, or any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, so a
 // live one is only approached safely by crawling in prone. The disarm (fnc_random_event_ied_defuse) is not
 // stance-gated; every pile, live or decoy, carries that same disarm within reach and a client-side world icon
@@ -21,8 +21,8 @@ if (isNull _player) exitWith {};
 #define IED_COUNT_MAX 6
 #define MIN_DIST 300
 #define FWD_SPREAD 200
-#define SCATTER 250
-#define IED_MIN_SEP 70
+#define SCATTER 300
+#define IED_MIN_SEP 50
 #define IED_LIVE_CHANCE 0.06
 #define ARM_RANGE 10
 #define FIELD_WATCH 500
@@ -58,8 +58,10 @@ _roads = _roads call BIS_fnc_arrayShuffle;
 
 private _count = IED_COUNT_MIN + floor (random (IED_COUNT_MAX - IED_COUNT_MIN + 1));
 
-// Scatter the piles across the area IED_MIN_SEP apart -- a loose spread over whatever roads are around, not a
-// row marching down one of them. Greedy: keep each new road IED_MIN_SEP off the ones already taken.
+// Scatter the piles across the area -- a loose spread over whatever roads are around, not a row marching down
+// one of them. Greedy: keep each new road IED_MIN_SEP (50 m) off the ones already taken. That is only a floor,
+// so over the wide SCATTER area the gaps come out highly variable -- some piles nearly adjacent, others far
+// across the field.
 private _spots = [];
 {
 	if (count _spots >= _count) exitWith {};
@@ -162,8 +164,8 @@ if (_liveCount == 0) exitWith {
 						params ["_pile", "_pp"];
 						sleep FUSE;
 						// Spawn the shell above ground and shove it down: a shell created at rest never
-						// fuzes (arma_engine_gotchas.md). 82mm mortar shell, smaller than car_bomb's 155.
-						private _bomb = createVehicle ["Sh_82mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+						// fuzes (arma_engine_gotchas.md). 155mm artillery shell, as car_bomb.
+						private _bomb = createVehicle ["Sh_155mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
 						_bomb setVelocity [0, 0, -30];
 						if (!isNull _pile) then { deleteVehicle _pile };
 					};
