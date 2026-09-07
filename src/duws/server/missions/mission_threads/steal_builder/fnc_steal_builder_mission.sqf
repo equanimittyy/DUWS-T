@@ -43,15 +43,24 @@ private _build = {
     _bld1
 };
 
-// On win: convert the recovered vehicle into an R3F mobile factory and pin its persistent BLD-V marker.
-// Run via BIS_fnc_MP so the factory registers on every machine, not just the server.
+// On win: register the recovered vehicle as an R3F mobile factory + BLD-V marker -- both client-local, so this
+// runs everywhere and persists as a JIP order for late joiners. Keyed by netId and carrying the vehicle itself
+// (not the reused BLD1 global) so a later win can't clobber it; dropped on the vehicle's death so it never leaks.
 private _onWin = {
-    private _init_code = {
-        waitUntil {!isNil "BLD1"};
-        [BLD1, -1, west, "LIGHT"] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
-        [BLD1, "mil_triangle", "ColorBlue", "2", "2", "BLD-V"] call kndr_assignMarker;
+    private _bld = BLD1;
+    if (isNull _bld) exitWith {};
+    private _jipId = format ["DUWS_bldFactory_%1", netId _bld];
+    [_bld, {
+        params ["_bld"];
+        if (!hasInterface || isNull _bld) exitWith {};
+        [_bld, -1, west, "LIGHT"] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+        [_bld, "mil_triangle", "ColorBlue", "2", "2", "BLD-V"] call kndr_assignMarker;
+    }] remoteExec ["call", 0, _jipId];
+    [_bld, _jipId] spawn {
+        params ["_bld", "_jipId"];
+        waitUntil { sleep 5; isNull _bld || !alive _bld };
+        remoteExec ["", _jipId];
     };
-    [[[], _init_code], "BIS_fnc_spawn", true, true] spawn BIS_fnc_MP;
 };
 
 // Win: the recovered builder vehicle reaches BLUFOR HQ intact. Early-lose: it is destroyed (the _done
