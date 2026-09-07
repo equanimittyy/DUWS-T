@@ -1891,15 +1891,10 @@ destination as a place to arrive: it slows, steers around the body, and halts a 
 suicide car detonating on proximity never actually reaches its target on foot.** Tightening the arm range or
 the fuse does not help; the hull simply never closes the last stretch.
 
-**How to apply:** drive the final approach yourself. Once the target is inside the ram range, `_driver disableAI
-"PATH"` to stop the AI steering and `_veh engineOn true` so the wheels stay powered, then each short tick push
-the hull at the target with `_veh setVelocity [(sin _brg) * _spd, (cos _brg) * _spd, (velocity _veh) select 2]`,
-where `_brg = _veh getDir _target` — re-aimed every tick so it tracks a dodging target, keeping the current
-vertical velocity so gravity still applies. Ramp `_spd` in a *script variable* (seed it once from the hull's
-speed at takeover, add `accel × dt` each tick, cap at config `maxSpeed`, km/h ÷ 3.6). Do **not** re-read
-`vectorMagnitude velocity` to ramp: PhysX damps an externally set velocity on a wheeled hull within the tick, so
-the read-back returns near zero and the ramp collapses to a crawl — the car looks like it stops. A flat
-`setVelocity` is the other failure: it teleports every car to one speed, ignoring its own acceleration and top
-speed. Poll fast (~0.05 s): at ramming speed a half-second tick steps tens of metres.
-`server/events/fnc_random_event_car_bomb.sqf` rams this way; it latches the commitment once armed and blows on a
-timer, so it never needs the AI back and a juking target can make it miss but not stall it out.
+**How to apply:** accept the standoff. `server/events/fnc_random_event_car_bomb.sqf` drives in on the pathfinder
+and detonates on proximity within its arm range plus a short fuse, rather than trying to make physical contact.
+The alternative — scripting the last stretch by hand with `disableAI "PATH"` then `setVelocity` at the target
+each tick — does force a hit, but the hull slides and snaps to its aimed heading unnaturally, so it was dropped
+as looking wrong. If you ever do drive a hull by `setVelocity`: ramp the speed in a *script variable*, never by
+re-reading `vectorMagnitude velocity`, because PhysX damps an externally set velocity on a wheeled hull within
+the tick, so the read-back returns near zero and the ramp collapses to a crawl.

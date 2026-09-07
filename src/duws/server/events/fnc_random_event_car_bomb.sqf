@@ -1,10 +1,11 @@
 // Locality: server -- a vehicle-borne IED, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town.
 //
-// An OPFOR driver in a civilian car rams the nearest player and detonates -- overtly hostile, so friendly AI
-// engages it and an OPFOR-red world icon (fnc_random_event_ied_markers) warns of it from range. Built here,
-// not via fnc_civ_spawnUnit, which would bolt on a recruit action and a flee-on-fire panic handler; killing
-// the driver only trades the run-in for a short dead-man cook-off.
+// An OPFOR driver in a civilian car beelines at the nearest player and detonates on a short fuse once it
+// closes within ARM_RANGE -- overtly hostile, so friendly AI engages it and an OPFOR-red world icon
+// (fnc_random_event_ied_markers) warns of it from range. Built here, not via fnc_civ_spawnUnit, which would
+// bolt on a recruit action and a flee-on-fire panic handler; killing the driver only trades the run-in for a
+// short dead-man cook-off.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -45,10 +46,8 @@ _driver setVariable ["DUWS_binMe", true];
 missionNamespace setVariable ["DUWS_vbied_cars",
 	(missionNamespace getVariable ["DUWS_vbied_cars", []]) + [_veh], true];
 
-#define RUSH 30                  // activation range: inside this it is armed and will detonate
-#define ARM_HOLD 3               // seconds it rams after arming, then blows wherever it reached (no proximity fuze)
-#define RAM_ACCEL 8              // ram acceleration, capped at the hull's own maxSpeed
-#define FUSE (0.1 + random 0.2)
+#define ARM_RANGE 30             // arms when the hull gets this close to the target
+#define FUSE (1 + random 2)      // run-in delay from arming to the blast
 #define DEADMAN (2 + random 3)   // driver-killed / hull-stuck cook-off: shooting the driver buys distance
 #define TIMEOUT 300              // reap a car that reaches no one
 
@@ -57,11 +56,6 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 	private _fuse = -1;
 	private _deadline = time + TIMEOUT;
 	private _lastMove = [0, 0, 0];
-	private _armAt = -1;    // time it first reached RUSH and armed; latched -- once armed it always detonates
-	private _ramSpd = 0;    // ram speed (m/s), ramped in script (see the armed branch)
-	// Hull's own top speed, config km/h -> m/s (the /3.6); the ram caps here.
-	private _maxSpd = (getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "maxSpeed")) / 3.6;
-	if (_maxSpd <= 0) then { _maxSpd = 30 };
 
 	while { !isNull _veh && {time < _deadline} } do {
 		// Driver down or the hull can't move: cook off where it sits.
@@ -71,34 +65,15 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 		if (_live isEqualTo []) exitWith {};
 		private _target = [_live, _veh] call BIS_fnc_nearestPosition;
 
-		// Arm on first reaching the activation range, latched: seed the ram speed from the road speed it arrived
-		// with and take the wheel (the AI won't ram a man on foot -- arma_engine_gotchas.md).
-		if (_armAt < 0 && {(_veh distance _target) < RUSH}) then {
-			_armAt = time;
-			_ramSpd = vectorMagnitude (velocity _veh);
-			_driver disableAI "PATH";
+		// Re-issue doMove only when the target moved -- a restart every tick thrashes the pathfinder.
+		if ((getPos _target) distance _lastMove > 15) then {
+			_lastMove = getPos _target;
+			_driver doMove _lastMove;
 		};
 
-		if (_armAt >= 0) then {
-			// Armed: ram for ARM_HOLD, then detonate wherever it reached -- a juking player can make it miss but
-			// never defuse it. Ramp _ramSpd ourselves and drive the hull by velocity, engine forced on so the
-			// wheels carry it. Reading the hull's velocity back to ramp would collapse it -- PhysX damps an
-			// externally set speed each tick, so the tracked value is the only stable one.
-			if (time - _armAt > ARM_HOLD) exitWith { _fuse = FUSE };
-			_ramSpd = (_ramSpd + RAM_ACCEL * 0.05) min _maxSpd;
-			_veh engineOn true;
-			private _brg = _veh getDir _target;
-			_veh setVelocity [(sin _brg) * _ramSpd, (cos _brg) * _ramSpd, (velocity _veh) select 2];
-			sleep 0.05;
-		} else {
-			// Not yet armed: let the AI drive the roads in. Re-issue doMove only when the target moved -- a
-			// restart every tick thrashes the pathfinder.
-			if ((getPos _target) distance _lastMove > 15) then {
-				_lastMove = getPos _target;
-				_driver doMove _lastMove;
-			};
-			sleep 0.5;
-		};
+		// Armed on the hull's distance, not the seated driver's.
+		if (_veh distance _target < ARM_RANGE) exitWith { _fuse = FUSE };
+		sleep 0.5;
 	};
 
 	// No fuse: timed out or ran dry of targets.
