@@ -1,7 +1,7 @@
 // Locality: client -- the addAction body for the HQ depot's "Vehicle Depot" action, so it runs on
 // whoever opens it. Creates the unified dialog, stashes the pad-trigger netId for the async rebuilds
 // (a store/retrieve/recycle round-trips the server, which remoteExecs fnc_depot_menu_fill back),
-// sets the static button labels once, and fills the three panels.
+// sets the static button labels once, and fills the Landing Pad and garage lists.
 if (!hasInterface) exitWith {};
 params ["_trg"];
 if (isNull _trg) exitWith {};
@@ -15,12 +15,12 @@ if (isNull _display) exitWith {};
 // null-check it when a server-triggered refill arrives after the dialog was closed.
 uiNamespace setVariable ["DUWS_depotMenu_disp", _display];
 uiNamespace setVariable ["DUWS_depotMenu_ctx", netId _trg];
+// No garage list is selected on open, so Retrieve refuses until one is clicked.
+uiNamespace setVariable ["DUWS_depotMenu_activeGarage", -1];
 
 ctrlSetText [1000, format ["%1", missionNamespace getVariable ["commandpointsblu1", "--"]]];
 ctrlSetText [1002, format ["%1", missionNamespace getVariable ["WARCOM_blufor_ap", "--"]]];
 
-// Static button labels: the two priced modification actions carry their fixed cost; the rest are
-// plain. Capacity levels are bought in the REQUESTS menu, so no buy button lives here.
 ctrlSetText [2012, format ["%1 (2 CP)", localize "STR_DUWS_T_repair_vehicle"]];
 ctrlSetText [2013, localize "STR_DUWS_T_check_vehicle_status"];
 ctrlSetText [2014, localize "STR_DUWS_T_vehicle_appearance"];

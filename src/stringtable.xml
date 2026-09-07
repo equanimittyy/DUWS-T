@@ -1763,16 +1763,6 @@
                 <English>Adjust Vehicle Pylons</English>
                 <Chinese>调整载具挂架</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_VEHICLE_CUSTOMIZATION">
-                <Original>Vehicle Customization</Original>
-                <English>Vehicle Customization</English>
-                <Chinese>载具改装</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_VEHICLE_RECYCLING">
-                <Original>Vehicle Recycling</Original>
-                <English>Vehicle Recycling</English>
-                <Chinese>载具回收</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_REQ_MISSIONS">
                 <Original>MISSIONS</Original>
                 <English>MISSIONS</English>
@@ -4732,9 +4722,9 @@
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
             </Key>
-            <Key ID="STR_DUWS_T_DEPOT_GARAGE">
-                <Original>Vehicle Storage Garage</Original>
-                <English>Vehicle Storage Garage</English>
+            <Key ID="STR_DUWS_T_DEPOT_LANDING_PAD">
+                <Original>Landing Pad</Original>
+                <English>Landing Pad</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_POOL_LAND">
                 <Original>Land %1/%2</Original>
@@ -4757,36 +4747,20 @@
                 <English>Retrieve</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORE_TIP">
-                <Original>Stores the vehicle selected in the modification list.</Original>
-                <English>Stores the vehicle selected in the modification list.</English>
+                <Original>Stores the selected landing-pad vehicle.</Original>
+                <English>Stores the selected landing-pad vehicle.</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORED_ROW">
                 <Original>%1 (hull %2%, fuel %3%)</Original>
                 <English>%1 (hull %2%, fuel %3%)</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_RECYCLE_CONFIRM">
-                <Original>Recycle %1 vehicles for %2 CP?</Original>
-                <English>Recycle %1 vehicles for %2 CP?</English>
+                <Original>Recycle %1 for %2 CP?</Original>
+                <English>Recycle %1 for %2 CP?</English>
             </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_HEADER">
-                <Original>Recycled:</Original>
-                <English>Recycled:</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_LINE">
-                <Original>%1 for %2 CP</Original>
-                <English>%1 for %2 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_LINE_MULTI">
-                <Original>%1× %2 for %3 CP</Original>
-                <English>%1× %2 for %3 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_MORE">
-                <Original>+%1 more for %2 CP</Original>
-                <English>+%1 more for %2 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RECYCLE_TOTAL">
-                <Original>Total: %1 CP.</Original>
-                <English>Total: %1 CP.</English>
+            <Key ID="STR_DUWS_T_GARAGE_RECYCLED">
+                <Original>Recycled %1 for %2 CP.</Original>
+                <English>Recycled %1 for %2 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>

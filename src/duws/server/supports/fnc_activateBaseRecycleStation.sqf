@@ -71,55 +71,20 @@ if (isNil "DUWS_fnc_vehicleRecycleReward") then {
 
 if (isNil "fnc_veh_recycle_action") then {
     fnc_veh_recycle_action = {
-        params ["_caller", "_trgNetId"];
-        private _trg = objectFromNetId _trgNetId;
-        if (isNull _trg) exitWith {};
-        // Recomputed at commit: the server is authority and the pad may have changed between the
-        // client's confirmation and the Yes. No class is excluded now -- every empty vehicle pays.
-        private _vehs = (vehicles inAreaArray _trg) select { count crew _x == 0 };
-        if (count _vehs == 0) exitWith { [localize "STR_DUWS_T_recycleempty"] remoteExec ["hint", _caller]; };
+        params ["_caller", "_vehNetId"];
+        // The reward is re-derived at commit: the server is authority, so a pad that changed between
+        // the client's confirmation and the Yes cannot mis-credit. A crewed hull is refused -- the pad
+        // list only offers empty ones, but deleting an occupied vehicle would kill its crew.
+        private _veh = objectFromNetId _vehNetId;
+        if (isNull _veh) exitWith { [localize "STR_DUWS_T_recycleempty"] remoteExec ["hint", _caller]; };
+        if (count crew _veh > 0) exitWith {};
 
-        // Identical classes collapse to one counted line for the report; the reward is summed as each
-        // vehicle is deleted so the credit and the itemised hint cannot disagree.
-        private _entries = [];   // [class, count, sumReward, displayName]
-        private _total = 0;
-        {
-            private _cls = typeOf _x;
-            private _r = [_x] call DUWS_fnc_vehicleRecycleReward;
-            _total = _total + _r;
-            private _idx = _entries findIf { (_x select 0) == _cls };
-            if (_idx < 0) then {
-                _entries pushBack [_cls, 1, _r, getText (configFile >> "CfgVehicles" >> _cls >> "displayName")];
-            } else {
-                private _e = _entries select _idx;
-                _e set [1, (_e select 1) + 1];
-                _e set [2, (_e select 2) + _r];
-            };
-            deleteVehicle _x;
-        } forEach _vehs;
+        private _name = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
+        private _reward = [_veh] call DUWS_fnc_vehicleRecycleReward;
+        deleteVehicle _veh;
+        [_reward, "recycle_station"] call fnc_cp_adjust;
 
-        [_total, "recycle_station"] call fnc_cp_adjust;
-
-        // A hint fits only a few lines: show at most five collapsed lines and fold the rest into one
-        // "+N more" line, but always total everything recycled.
-        private _report = [localize "STR_DUWS_T_GARAGE_RECYCLE_HEADER"];
-        {
-            _x params ["", "_n", "_sum", "_dn"];
-            if (_n > 1) then {
-                _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_LINE_MULTI", _n, _dn, _sum];
-            } else {
-                _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_LINE", _dn, _sum];
-            };
-        } forEach (_entries select [0, 5]);
-        private _rest = _entries select [5];
-        if (count _rest > 0) then {
-            private _restN = 0; private _restCp = 0;
-            { _restN = _restN + (_x select 1); _restCp = _restCp + (_x select 2); } forEach _rest;
-            _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_MORE", _restN, _restCp];
-        };
-        _report pushBack format [localize "STR_DUWS_T_GARAGE_RECYCLE_TOTAL", _total];
-
-        [_report joinString "\n"] remoteExec ["hint", _caller];
+        [format [localize "STR_DUWS_T_GARAGE_RECYCLED", _name, _reward]] remoteExec ["hint", _caller];
         [] remoteExec ["fnc_depot_menu_fill", _caller];
     };
     publicVariable "fnc_veh_recycle_action";

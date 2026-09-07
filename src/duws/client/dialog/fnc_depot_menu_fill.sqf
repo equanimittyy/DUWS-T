@@ -1,6 +1,6 @@
-// Locality: client -- fills the depot dialog's three panels and the header readouts. Called by the
-// opener (client/dialog/fnc_vehicle_depot_menu.sqf) and remoteExec'd back to the caller by each
-// server store/retrieve/recycle so the menu reflects the committed change.
+// Locality: client -- fills the depot dialog's Landing Pad list, the three garage lists, and the
+// header readouts. Called by the opener (client/dialog/fnc_vehicle_depot_menu.sqf) and remoteExec'd
+// back to the caller by each server store/retrieve/recycle so the menu reflects the committed change.
 //
 // Guarded on the stored display handle: a server-triggered refill can arrive after the player closed
 // the dialog, and isNull on the handle detects that (the gotchas doc's UI-handle idiom). While the
@@ -13,34 +13,37 @@ if (isNull _trg) exitWith {};
 private _pad = (vehicles inAreaArray _trg) select { count crew _x == 0 };
 private _caps = [] call DUWS_fnc_garageCaps;
 private _used = [] call DUWS_fnc_garageUsed;
+private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
 
 // Clear and rebuild unscheduled so the lists never render empty for a frame -- the callers are all
 // scheduled (opener spawned, refill follows a server round-trip), where the engine can suspend right
 // after an lbClear. Same reason as client/dialog/fnc_support_list_fill.sqf.
 isNil {
-    // Modification and Recycle both list the empty pad vehicles; identity (netId) rides in lbData.
+    // Landing pad: the empty pad vehicles, alphabetical; netId in lbData.
     lbClear 2011;
-    lbClear 2031;
     {
         private _name = getText (configFile >> "CfgVehicles" >> typeOf _x >> "displayName");
-        private _nid = netId _x;
-        private _mi = lbAdd [2011, _name];
-        lbSetData [2011, _mi, _nid];
-        private _reward = [_x] call DUWS_fnc_vehicleRecycleReward;
-        private _ri = lbAdd [2031, format ["%1 (%2 CP)", _name, _reward]];
-        lbSetData [2031, _ri, _nid];
+        private _i = lbAdd [2011, _name];
+        lbSetData [2011, _i, netId _x];
     } forEach _pad;
+    lbSort [2011];
 
-    // Stored vehicles, lbData = stored index; a short state summary rides in the label.
-    lbClear 2021;
+    // Garage, one list per domain; lbData keeps the FLAT stored index so Retrieve is domain-agnostic.
+    { lbClear _x; } forEach [2021, 2022, 2025];
     {
-        private _cls = _x select 0;
+        _x params ["_cls"];
         private _name = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
         private _hp = round ((1 - (_x select 4)) * 100);
         private _fuel = round ((_x select 5) * 100);
-        private _si = lbAdd [2021, format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel]];
-        lbSetData [2021, _si, str _forEachIndex];
-    } forEach (missionNamespace getVariable ["DUWS_garage_stored", []]);
+        private _idc = switch ([_cls] call DUWS_fnc_vehDomain) do {
+            case "air":  { 2022 };
+            case "boat": { 2025 };
+            default      { 2021 };
+        };
+        private _row = lbAdd [_idc, format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel]];
+        lbSetData [_idc, _row, str _forEachIndex];
+    } forEach _stored;
+    { lbSort [_x]; } forEach [2021, 2022, 2025];
 
     // Header readouts. CP/AP refreshed here too: the host's own publicVariableEventHandler does not
     // fire for its own broadcast, so a server-side debit would not otherwise reach the host's boxes.
