@@ -279,6 +279,9 @@ DUWS_fnc_addCarryAction = {
     if (!alive _pilot) exitWith {};
     if (_pilot getVariable ["isCarried", false]) exitWith {};
 
+    // Stable per-pilot JIP id: a re-add (one per drop/pickup) overwrites this one slot instead of stacking a
+    // fresh persistent order, and removeCarryAction clears it by the same id. JIP=true here grew the queue per re-add.
+    private _jipId = format ["DUWS_carryAct_%1", netId _pilot];
     [_pilot, {
         params ["_pilot"];
         if (!isNil {_pilot getVariable "carryActionAdded"}) exitWith {};
@@ -321,12 +324,15 @@ DUWS_fnc_addCarryAction = {
             5
         ];
         _pilot setVariable ["carryActionID", _actionID];
-    }] remoteExec ["call", 0, true];
+    }] remoteExec ["call", 0, _jipId];
 };
 
 DUWS_fnc_removeCarryAction = {
     params ["_pilot"];
     if (isNull _pilot) exitWith {};
+    // Clear the JIP order with the action, or it outlives the pilot and a late joiner re-adds a carry action on
+    // a resolved mission. Server owns the queue -- clear once there.
+    if (isServer) then { remoteExec ["", format ["DUWS_carryAct_%1", netId _pilot]] };
     private _carryActionID = _pilot getVariable ["carryActionID", -1];
     if (_carryActionID != -1) then {
         _pilot removeAction _carryActionID;
