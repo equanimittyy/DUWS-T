@@ -10,7 +10,9 @@ private _fires = [];
 private _spread = _radius min 3;
 for "_i" from 1 to 3 do {
 	private _fp = [(_pos select 0) + (random _spread) - (random _spread), (_pos select 1) + (random _spread) - (random _spread), _pos select 2];
-	private _f = createVehicle ["test_EmptyObjectForFireBig", _fp, [], 0, "CAN_COLLIDE"];
+	// Command form, like the napalm strike (fnc_arty): the array/placement form of createVehicle does not
+	// light this config emitter -- the object spawns but stays dark.
+	private _f = "test_EmptyObjectForFireBig" createVehicle _fp;
 	_f setPosATL _fp;
 	_fires pushBack _f;
 };

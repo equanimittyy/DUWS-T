@@ -93,6 +93,13 @@ spawns its carpet once and deletes at the end; it never refreshes.
 **How to apply:** spawn the fire (or a small scatter of them) once at impact, run whatever damage loop over
 the burn window, and delete the set only when the window closes. `fnc_molotov_ignite.sqf` is built this way.
 
+**Spawn it with the command form, not the array form.** `"test_EmptyObjectForFireBig" createVehicle _pos`
+lights the flame; the placement/array form `createVehicle ["test_EmptyObjectForFireBig", _pos, [], 0,
+"CAN_COLLIDE"]` creates the object but leaves it dark — the emitter never runs. The two `createVehicle`
+syntaxes are not interchangeable for these config effect helpers. Both the napalm strike (`fnc_arty.sqf`)
+and `fnc_molotov_ignite.sqf` use the command form; the molotov once regressed to the array form and spawned
+invisible fires until it was switched back.
+
 ## Non-serializable handles must not live in the mission namespace
 
 **Never store a `DISPLAY`, `CONTROL`, `SCRIPT`, `LOCATION`, or other handle type in a
