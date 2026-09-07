@@ -1,10 +1,11 @@
 // Locality: server -- an angry crowd, rolled in the Hostile band so rep has already turned the town.
 //
 // MOB_SIZE unarmed CIVILIANs gather in the town square and hold there. Mob mode arms once -- the moment any
-// BLUFOR (player or AI) steps inside the town radius -- and from then the crowd swarms: each rioter paths to
-// its own point just off the nearest BLUFOR so they clot rather than string into a formation line, a third
-// of the followers carry the roar (never the leader, whose order chatter cuts say3D short), and a rock is
-// lobbed at every BLUFOR man in reach, not one chosen target (fnc_throw does the lob and its animation).
+// BLUFOR (player or AI) steps inside the town radius -- and from then the crowd closes to a STANDOFF ring and
+// holds there, each rioter pathing to its own point on the ring so they bunch rather than string into a
+// formation line or pile onto the player. A third of the followers carry the roar (never the leader, whose
+// order chatter cuts say3D short), and each tick every rioter in range may lob at the nearest BLUFOR it can
+// reach -- a volley from all sides, not one rock at one man (fnc_throw does the lob and its animation).
 //
 // Mob mode ends one of two ways: the crowd panics -- a BLUFOR shot lands near them, or one of them drops --
 // and scatters; or the window closes (or they lose contact) and they melt into an aimless town stroll.
@@ -23,9 +24,12 @@ if (_bodies isEqualTo []) exitWith {};
 
 #define MOB_SIZE 15
 #define GATHER 20
-#define CLOSE_RANGE 8
+#define STANDOFF 10
+#define STANDOFF_SPREAD 3
+#define FACE_RANGE 14
 #define THROW_RANGE 18
-#define BUNCH 6
+#define THROW_COOLDOWN 3
+#define THROW_JITTER 3
 #define REISSUE 6
 #define CHASE 250
 #define LIFETIME 300
@@ -98,7 +102,7 @@ _grp setSpeedMode "LIMITED";
 	if (_activated) then {
 		// Window starts on contact, not at spawn, so a mob that forms late still gets its full run; the
 		// stroll margin lets it mill a while before the reaper may take it.
-		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL] } forEach units _grp;
+		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL]; _x setVariable ["DUWS_nextThrow", time + random THROW_COOLDOWN] } forEach units _grp;
 		private _deadline = time + LIFETIME;
 		private _lastMove = [0, 0, 0];
 		private _nextRoar = 0;
@@ -126,33 +130,42 @@ _grp setSpeedMode "LIMITED";
 				};
 			};
 
-			// Bunch, do not deploy: each rioter paths to its own point just off the nearest BLUFOR, re-issued
-			// only when he has moved, so they clot on him instead of a group move stringing them into a line.
+			// Hold a ring a short way off the nearest BLUFOR: each rioter paths to its own point on it, re-issued
+			// only when he has moved, so they bunch at range instead of a group move stringing them into a line.
 			if ((getPos _target) distance _lastMove > REISSUE) then {
 				_lastMove = getPos _target;
-				{ if (alive _x) then { _x doMove (_target getPos [random BUNCH, random 360]) } } forEach units _grp;
+				{ if (alive _x) then { _x doMove (_target getPos [STANDOFF + random STANDOFF_SPREAD, random 360]) } } forEach units _grp;
 			};
 
 			// Up close, turn on the nearest BLUFOR and jeer; guarded on animationState so the gesture is not
 			// restarted every tick (which reads as a stutter).
 			{
-				if (alive _x && { (_x distance _target) < CLOSE_RANGE }) then {
+				if (alive _x && { (_x distance _target) < FACE_RANGE }) then {
 					_x setDir (_x getDir _target);
 					if (animationState _x != "amovpercmstpsnonwnondnon_talking") then { _x playMove "AmovPercMstpSnonWnonDnon_talking" };
 				};
 			} forEach units _grp;
 
-			// One rock at every BLUFOR with a rioter within range, so the whole squad gets pelted, not just
-			// the nearest man.
+			// A staggered volley: each rioter throws on its own cooldown, and the lob itself is delayed a random
+			// fraction of the tick, so even rioters that come off cooldown together do not launch as one salvo.
 			{
-				private _b = _x;
-				private _shooters = (units _grp) select { alive _x && { (_x distance _b) < THROW_RANGE } };
-				if !(_shooters isEqualTo []) then {
-					private _t = selectRandom _shooters;
-					_t setDir (_t getDir _b);
-					[_t, getPosASL _b, "stone"] call fnc_throw;
+				private _r = _x;
+				if (alive _r && { time > (_r getVariable ["DUWS_nextThrow", 0]) }) then {
+					private _reach = _blu select { (_r distance2D _x) < THROW_RANGE };
+					if !(_reach isEqualTo []) then {
+						_r setVariable ["DUWS_nextThrow", time + THROW_COOLDOWN + random THROW_JITTER];
+						[_r, _reach] spawn {
+							params ["_r", "_reach"];
+							sleep (random TICK);
+							_reach = _reach select { !isNull _x && { alive _x } };
+							if (!alive _r || { _reach isEqualTo [] }) exitWith {};
+							private _b = [_reach, _r] call BIS_fnc_nearestPosition;
+							_r setDir (_r getDir _b);
+							[_r, getPosASL _b, "stone"] call fnc_throw;
+						};
+					};
 				};
-			} forEach _blu;
+			} forEach units _grp;
 
 			sleep TICK;
 		};

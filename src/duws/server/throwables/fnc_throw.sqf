@@ -8,8 +8,9 @@ params [["_thrower", objNull], ["_to", [0, 0, 0]], ["_kind", "stone"]];
 if (isNull _thrower) exitWith {};
 
 private _from = eyePos _thrower;
-// Flight time from horizontal range, clamped so a point-blank lob still arcs and a long heave is not floaty.
-private _dur = (((_from distance2D _to) / 14) max 0.6) min 2.5;
+// Flight time from horizontal range: a slow, high lob you can actually watch, clamped so a point-blank throw
+// still arcs and a long heave is not floaty.
+private _dur = (((_from distance2D _to) / 8) max 1.2) min 3.5;
 
 // Throw gesture on every machine, launched with the projectile. "throwGrenade" is the engine's own throw
 // action, so it animates for the thrower's stance (unarmed here); an unknown action name is a silent no-op,
@@ -24,8 +25,10 @@ private _dur = (((_from distance2D _to) / 14) max 0.6) min 2.5;
 	if (_kind == "molotov") exitWith { [ASLToATL _to] call fnc_molotov_ignite; };
 	// Stone does no damage -- the crowd harasses, it does not kill. Sell the hit instead: a thud at the
 	// impact that carries to everyone near, and a firm camera knock on any player it lands beside.
-	["duws\shared\sounds_npics\support\thud.wav", objNull, false, _to, 1.6, 1, 70] remoteExec ["playSound3D", 0];
+	// Both wrapped in an extra array: remoteExec reads the params as a command's operand list (max 2), so the
+	// bare 7- and 3-element arrays counted as that many operands and threw. [[...]] passes them as one operand.
+	[["duws\shared\sounds_npics\support\thud.wav", objNull, false, _to, 1.6, 1, 70]] remoteExec ["playSound3D", 0];
 	{
-		[3, 0.8, 15] remoteExec ["addCamShake", _x];
+		[[3, 0.8, 15]] remoteExec ["addCamShake", _x];
 	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
 };
