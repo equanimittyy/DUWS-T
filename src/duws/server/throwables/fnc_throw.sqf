@@ -1,42 +1,39 @@
-// Locality: server -- thrown junk, the mod-free stand-in for a hurled object. A real dynamic body created and
-// launched with setVelocity, so PhysX flies it, drops it under gravity, and bounces it off walls and vehicles.
-// createVehicle is global, so the one server-simulated object renders and physics-networks to every machine --
-// no per-client cosmetic. Does no damage: the crowd harasses, it does not kill (a camera knock sells the miss).
+// Locality: server -- thrown junk, a mod-free stand-in for a hurled object. A dynamic body launched with
+// setVelocity, so PhysX arcs and bounces it. createVehicle is global, so one server object networks to every
+// machine (no per-client draw). No damage by design: the crowd harasses, it does not kill.
 if (!isServer) exitWith {};
 params [["_thrower", objNull], ["_to", [0, 0, 0]]];
 if (isNull _thrower) exitWith {};
 
-// Small vanilla debris that simulates as a dynamic PhysX body, picked at random so a volley is not all one can.
+// Small vanilla debris, each a dynamic PhysX body so it bounces; picked at random for a mixed volley.
 #define THROW_JUNK ["Land_Can_Dented_F", "Land_Can_V2_F", "Land_Can_V3_F", "Land_Can_Rusty_F", "Land_Can_V1_F", "Land_BakedBeans_F", "Land_BottlePlastic_V1_F", "Land_BottlePlastic_V2_F", "Land_TacticalBacon_F"]
 
 private _from = eyePos _thrower;
-// Flight time from horizontal range: a slow, high lob you can actually watch, clamped so a point-blank throw
-// still arcs and a long heave is not floaty.
-private _dur = (((_from distance2D _to) / 8) max 1.2) min 3.5;
+// Flight time from range, jittered x0.8-1.05 (biased under 1 to stay readable, never floaty), clamped [1.1, 3.5].
+private _dur = ((((_from distance2D _to) / 8) * (0.8 + random 0.25)) max 1.1) min 3.5;
 
-// Spawn a hand's length in front of the eyes, not on them: a physics body created clipping the thrower's own
-// head takes a collision impulse off it and is flung (arma_engine_gotchas.md). The thrower already faces _to.
+// Spawn a hand's length ahead of the eyes: a physics body created clipping the thrower is flung (arma_engine_gotchas.md).
 private _dir = vectorNormalized (_to vectorDiff _from);
 private _spawn = _from vectorAdd (_dir vectorMultiply 0.5);
 
-// Throw gesture on every machine. "throwGrenade" is the engine's own throw action; an unknown name is a silent
-// no-op, so this stays safe if it ever changes.
+// Throw gesture on every machine; an unknown action name is a silent no-op, so safe if it ever changes.
 [_thrower, "throwGrenade"] remoteExec ["playActionNow", 0];
 
 // CAN_COLLIDE so the engine drops it exactly where told rather than nudging it clear of nearby geometry.
 private _obj = createVehicle [selectRandom THROW_JUNK, _spawn, [], 0, "CAN_COLLIDE"];
 _obj setPosASL _spawn;
-// Launch velocity that reaches _to in _dur under 9.81 gravity (vertical term counters the drop); PhysX and any
-// obstacle in the path take it from there.
+// Ballistic launch: velocity to reach _to in _dur under 9.81 gravity (4.905 = g/2). _loft varies arc height on
+// its own -- >1 lofts higher and lands a touch long, fine for no-damage junk.
 private _d = _to vectorDiff _spawn;
-_obj setVelocity [(_d select 0) / _dur, (_d select 1) / _dur, ((_d select 2) + 4.905 * _dur * _dur) / _dur];
+private _loft = 0.9 + random 0.4;
+_obj setVelocity [(_d select 0) / _dur, (_d select 1) / _dur, (((_d select 2) + 4.905 * _dur * _dur) / _dur) * _loft];
 
 [_obj, _to, _dur] spawn {
 	params ["_obj", "_to", "_dur"];
 	sleep _dur;
-	// addCamShake is a command, wrapped in an extra array: remoteExec reads the params as a command's operand
-	// list (max 2), so a bare 3-element array counts as three operands and throws. [[...]] passes one operand.
+	// addCamShake is a command: remoteExec reads a command's operands (max 2), so a bare 3-element array counts
+	// as three and throws -- [[...]] passes it as one operand.
 	{ [[1.5, 0.8, 15]] remoteExec ["addCamShake", _x] } forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
-	sleep 3;   // let it finish bouncing and settle before it vanishes
+	sleep 3;   // let it settle after bouncing before it vanishes
 	if (!isNull _obj) then { deleteVehicle _obj };
 };
