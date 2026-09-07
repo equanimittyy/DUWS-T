@@ -808,6 +808,33 @@ collector (the AGC mod), which rebuilds a distant corpse and drops its variables
 2 = independent, 3 = civilian). It is a pure config read, so it is death-stable and survives the
 corpse swap. `client/search/fnc_intel_search_action.sqf` gates the enemy-corpse search this way.
 
+## `knowsAbout` is a decaying knowledge scalar, not a current-visibility flag
+
+**`side knowsAbout target` returns a 0–4 aggregate knowledge value that rises while the target is
+actually being sensed and *decays over seconds-to-minutes* after contact breaks. It is not "can be seen
+right now", and it is unrelated to the target's position. Sampling the target's live position on the
+strength of `knowsAbout > threshold` keeps reporting the true *current* position all through the decay
+tail — so a stored "last seen" follows a target nothing is observing, and a teleport or fast-travel drags
+the stamp to the new position.**
+
+OPCOM's belief sensor gates on `east knowsAbout _ldr > 1.5` (`server/opcom/fnc_opcom_sense.sqf:13`) and
+stamps `getPosATL _ldr` (`:15`) — the leader's live position. A player who fast-travels to their HQ has
+not been re-observed, but `east knowsAbout` on that leader has not yet decayed below the gate, so the next
+sweep stamps the HQ position and the influence grid blooms enemy force there though nothing saw the move.
+The stale-refresh path (`:27-29`) compounds it, re-stamping the live position once a stamp ages past its
+fresh window with no new sighting. Storing a position rather than an object handle does not save it — the
+handle-follows-a-respawn trap ([§Non-serializable handles](#non-serializable-handles-must-not-live-in-the-mission-namespace)
+warns of the handle form) is dodged, but the sensor re-samples the live position anyway while the scalar
+lingers.
+
+**How to apply:** treat `knowsAbout` as a lagging integrator and detect genuine acquisition from its
+*edge*, not its level — store the previous tick's value and only write a live position when the scalar is
+not decreasing (rising, or pinned high while still in contact); a falling scalar means fading memory, so
+freeze the last-seen position and let it decay. Where per-observer cost is affordable,
+`unit targetKnowledge target` returns the engine's own last-known position plus a current-visible flag —
+a real decaying last-seen that never teleports — but it is per-observer, not the side-wide one-call query.
+Fix planned in [`../../plans/opcom/belief_fidelity.md`](../../plans/opcom/belief_fidelity.md#fix-2-position-freshness-acquisition-not-knowledge).
+
 ## `enableSimulation` is local, so a server-side freeze leaves clients simulating
 
 **`enableSimulation` only affects the machine it runs on; `enableSimulationGlobal` (server-only)
