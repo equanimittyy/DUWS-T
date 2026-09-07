@@ -1,8 +1,7 @@
-// Locality: server -- a scripted lob, the mod-free stand-in for a thrown weapon. Custom throwables cannot
-// exist without an addon: a magazine/weapon/ammo defined in description.ext lives in missionConfigFile, which
-// addMagazines and muzzle bindings never see -- they resolve against configFile (arma_engine_gotchas.md). So
-// nothing is thrown through the inventory; this arcs a cosmetic stone from the thrower to a point and owns the
-// landing effect. The flight is drawn on every machine (fnc_throw_visual, createSimpleObject is local).
+// Locality: server -- a thrown can, the mod-free stand-in for a hurled object. A real dynamic body created and
+// launched with setVelocity, so PhysX flies it, drops it under gravity, and bounces it off walls and vehicles.
+// createVehicle is global, so the one server-simulated can renders and physics-networks to every machine -- no
+// per-client cosmetic. Does no damage: the crowd harasses, it does not kill (a camera knock sells the near-miss).
 if (!isServer) exitWith {};
 params [["_thrower", objNull], ["_to", [0, 0, 0]]];
 if (isNull _thrower) exitWith {};
@@ -12,20 +11,29 @@ private _from = eyePos _thrower;
 // still arcs and a long heave is not floaty.
 private _dur = (((_from distance2D _to) / 8) max 1.2) min 3.5;
 
-// Throw gesture on every machine, launched with the projectile. "throwGrenade" is the engine's own throw
-// action, so it animates for the thrower's stance (unarmed here); an unknown action name is a silent no-op,
-// so this stays safe if the name ever changes.
-[_thrower, "throwGrenade"] remoteExec ["playActionNow", 0];
-[_from, _to, _dur] remoteExec ["fnc_throw_visual", 0];
+// Spawn a hand's length in front of the eyes, not on them: a physics body created clipping the thrower's own
+// head takes a collision impulse off it and is flung (arma_engine_gotchas.md). The thrower already faces _to.
+private _dir = vectorNormalized (_to vectorDiff _from);
+private _spawn = _from vectorAdd (_dir vectorMultiply 0.5);
 
-// Stone does no damage -- the crowd harasses, it does not kill. Sell the hit with a firm camera knock on any
-// player it lands beside.
-[_to, _dur] spawn {
-	params ["_to", "_dur"];
+// Throw gesture on every machine. "throwGrenade" is the engine's own throw action; an unknown name is a silent
+// no-op, so this stays safe if it ever changes.
+[_thrower, "throwGrenade"] remoteExec ["playActionNow", 0];
+
+// CAN_COLLIDE so the engine drops it exactly where told rather than nudging it clear of nearby geometry.
+private _can = createVehicle ["Land_Can_V2_F", _spawn, [], 0, "CAN_COLLIDE"];
+_can setPosASL _spawn;
+// Launch velocity that reaches _to in _dur under 9.81 gravity (vertical term counters the drop); PhysX and any
+// obstacle in the path take it from there.
+private _d = _to vectorDiff _spawn;
+_can setVelocity [(_d select 0) / _dur, (_d select 1) / _dur, ((_d select 2) + 4.905 * _dur * _dur) / _dur];
+
+[_can, _to, _dur] spawn {
+	params ["_can", "_to", "_dur"];
 	sleep _dur;
 	// addCamShake is a command, wrapped in an extra array: remoteExec reads the params as a command's operand
-	// list (max 2), so the bare 3-element array counted as three operands and threw. [[...]] passes one operand.
-	{
-		[[1.5, 0.8, 15]] remoteExec ["addCamShake", _x];
-	} forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
+	// list (max 2), so a bare 3-element array counts as three operands and throws. [[...]] passes one operand.
+	{ [[1.5, 0.8, 15]] remoteExec ["addCamShake", _x] } forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
+	sleep 3;   // let it finish bouncing and settle before it vanishes
+	if (!isNull _can) then { deleteVehicle _can };
 };
