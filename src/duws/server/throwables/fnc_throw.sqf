@@ -22,6 +22,9 @@ private _spawn = _from vectorAdd (_dir vectorMultiply 0.5);
 // CAN_COLLIDE so the engine drops it exactly where told rather than nudging it clear of nearby geometry.
 private _obj = createVehicle [selectRandom THROW_JUNK, _spawn, [], 0, "CAN_COLLIDE"];
 _obj setPosASL _spawn;
+// Featherweight so a mid-flight collision nudges a player rather than killing one (impact damage scales with
+// mass) -- holds the no-damage intent now that it is a real physics body. Light enough still bounces cleanly.
+_obj setMass 1;
 // Ballistic launch: velocity to reach _to in _dur under 9.81 gravity (4.905 = g/2). _loft varies arc height on
 // its own -- >1 lofts higher and lands a touch long, fine for no-damage junk.
 private _d = _to vectorDiff _spawn;
