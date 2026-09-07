@@ -36,7 +36,7 @@ if (_duwst_isClient) then
 {
     [] execVM "duws\client\client_init.sqf"; 
 };
-setGroupIconsVisible [true,false]; //now everyone can see enemies on map
+setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
 // INIT R3F Logistics
 // - has to be run by client and server
 waitUntil {sleep 5;serverinit_complete};

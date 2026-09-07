@@ -16,7 +16,7 @@ publicVariable "fnc_hirePartisans_clientMap";
 // Per-client beacon builder for the patrol-camp mission; the server remoteExecs it to stand a wood-smoke
 // column on each camp's fire (a #particlesource must be built locally on every machine, see the file).
 DUWS_fnc_campSmoke = compile preprocessFileLineNumbers "duws\client\misc\fnc_camp_smoke.sqf";
-setGroupIconsVisible [true,false]; //now everyone can see enemies on map
+setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
 titleCut ["", "BLACK FADED", 999];
 waitUntil {sleep 0.1;!isNull player};
 	while {!(["BOOT", "serverinit_complete from the server", {serverinit_complete}, 300] call fnc_waitLogged)} do {};

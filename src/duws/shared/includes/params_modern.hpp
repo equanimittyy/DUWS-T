@@ -59,6 +59,17 @@ class Params {
         default = 900;
     };
 
+    // Toggles map group icons (setGroupIconsVisible). Friendly groups always show; enemy groups show
+    // only where BLUFOR has intel (knowsAbout), so it tracks live detections rather than revealing the
+    // whole map. Off by default. Icon visibility is per-machine display state, so each client applies it
+    // in client_init (INIT and the server inits repeat it for the host); a dedicated server has no map.
+    class DUWS_GroupIcons {
+        title = "Map Group Icons";
+        values[] = {0,1};
+        texts[] = {"Off","On"};
+        default = 0;
+    };
+
     // Inert separator: a value-less row the engine renders but never reads, splitting the
     // gameplay options above from the developer options below.
     class DUWS_Divider_Dev {

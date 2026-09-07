@@ -2,7 +2,7 @@
 // The config menu overwrites many of these from player input; treat the values here as defaults.
 
 VERSION_X = "MODERN";publicVariable "VERSION_X";
-setGroupIconsVisible [true,false]; //now everyone can see enemies on map
+setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
 OPFOR_Faction_X = "OPF_F";
 BLUFOR_Faction_X = "BLU_F";
 switch (VERSION_X) do {

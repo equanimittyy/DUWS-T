@@ -10,7 +10,7 @@
 ["INFO", "BOOT", "server_var_init done"] call fnc_log;
 [] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
 ["INFO", "BOOT", "server_fnc_init done"] call fnc_log;
-setGroupIconsVisible [true,false]; //now everyone can see enemies on map
+setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
 [] spawn fnc_moreUrban_locations;
 
 createCenter sideLogic;
