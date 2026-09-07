@@ -103,6 +103,7 @@ _grp setSpeedMode "LIMITED";
 		// Window starts on contact, not at spawn, so a mob that forms late still gets its full run; the
 		// stroll margin lets it mill a while before the reaper may take it.
 		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL]; _x setVariable ["DUWS_nextThrow", time + random THROW_COOLDOWN] } forEach units _grp;
+		_grp setVariable ["DUWS_mob_roaring", true];
 		private _deadline = time + LIFETIME;
 		private _lastMove = [0, 0, 0];
 		private _nextRoar = 0;
@@ -125,7 +126,7 @@ _grp setSpeedMode "LIMITED";
 				for "_i" from 0 to (round (count _crowd / 3) - 1) do {
 					private _v = _crowd param [_i, objNull];
 					if (!isNull _v && { alive _v }) then {
-						[_v] spawn { params ["_v"]; sleep (random ROAR_JITTER); if (alive _v) then { _v say3D "DUWS_angry_mob" }; };
+						[_v] spawn { params ["_v"]; sleep (random ROAR_JITTER); if (alive _v && { group _v getVariable ["DUWS_mob_roaring", false] }) then { _v say3D "DUWS_angry_mob" }; };
 					};
 				};
 			};
@@ -170,6 +171,11 @@ _grp setSpeedMode "LIMITED";
 			sleep TICK;
 		};
 	};
+
+	// The mob is over: silence any roar still ringing out. say3D has no stop, so saying a silent stub over
+	// each unit replaces its current sound; the flag keeps a late roar-spawn from starting a new one.
+	_grp setVariable ["DUWS_mob_roaring", false];
+	{ if (alive _x) then { _x say3D "DUWS_silence" } } forEach units _grp;
 
 	// Terminal. Panic scatters, fast and upright; anything else (never armed, broke contact, window closed)
 	// melts into an aimless town stroll. DUWS_binMe hands the bodies to cleanup either way.

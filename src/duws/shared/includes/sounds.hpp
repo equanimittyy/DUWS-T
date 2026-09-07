@@ -40,4 +40,11 @@ class CfgSounds
         sound[] = {"duws\shared\sounds_npics\support\angry_mob.wav", 1.4, 1};
         titles[] = {};
     };
+    // Silent stub said on a rioter to cut its in-flight roar: say3D replaces a unit's current sound, and the
+    // engine has no stop command, so the mob's roar is silenced by saying this over it (fnc_random_event_mob).
+    class DUWS_silence {
+        name = "DUWS_silence";
+        sound[] = {"duws\shared\sounds_npics\support\silence.wav", 1, 1};
+        titles[] = {};
+    };
 };
