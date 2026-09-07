@@ -829,13 +829,14 @@ edge gate does **not** fix it — a re-stamp on every flat-high tick still follo
 stamp's age so it never decayed.
 
 **How to apply:** do not reconstruct "seen now" from `knowsAbout`. Read the engine's own last-seen instead:
-`unit nearTargets range` (per observer) returns each known target with a **position time** — the mission
-time its position was last fixed — so a fix within the last tick means the observer is sensing it *now*,
-and a stale time means it is only remembered. `unit targetKnowledge target` carries the same information
-per (observer, target). Both are per-observer, so aggregate over a bounded observer set rather than making
-one side-wide call. Applied in `server/opcom/fnc_opcom_sense.sqf`: each live OPFOR observer's `nearTargets`
-is swept, a BLUFOR group with a fresh position time is stamped at its live position, and a group nobody is
-sensing this tick is left to hold at last-seen and decay.
+`unit nearTargets range` (per observer) returns each known target as `[pos, type, side, cost, object, age]`,
+where the last element is the **age** of the fix — seconds since the observer last pinned the target's
+position, ~0 while sensing it and growing once contact breaks, *not* an absolute timestamp (do not subtract
+it from `time`). An age within the last tick means the observer is sensing it *now*; a large age means it is
+only remembered. `unit targetKnowledge target` carries the same per (observer, target). Both are
+per-observer, so aggregate over a bounded observer set rather than making one side-wide call. Applied in
+`server/opcom/fnc_opcom_sense.sqf`: each live OPFOR observer's `nearTargets` is swept, a BLUFOR group with a
+fresh age is stamped at its live position, and a group nobody is sensing this tick holds at last-seen and decays.
 
 ## A `Killed` handler added on the server does not fire for a client-local unit
 

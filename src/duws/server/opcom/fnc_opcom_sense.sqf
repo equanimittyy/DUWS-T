@@ -1,6 +1,6 @@
 // Locality: server. The direct-sighting sweep, one perception pass, built on the engine's own last-seen.
 // Each live OPFOR observer reports which BLUFOR groups it is sensing RIGHT NOW (nearTargets, gated on a
-// fresh position time); every freshly-seen group has its leader position, observed men-count and the tick
+// fresh position age); every freshly-seen group has its leader position, observed men-count and the tick
 // stamped. A group nobody senses this tick is left untouched -- its stamp holds at last-seen and decay
 // carries its confidence down, so belief never follows an unobserved or teleporting target, and force is
 // the men-count at the last real sighting, held between sightings (not re-derived per tick).
@@ -8,7 +8,7 @@
 // This replaced a knowsAbout-derivative gate: `east knowsAbout` is side-wide and lingers high while *any*
 // observer merely REMEMBERS a target, so it cannot tell a watched mover from a remembered ghost and kept
 // re-stamping the live position of unobserved targets (docs/info/architecture/arma_engine_gotchas.md).
-// nearTargets carries a per-target position time, which does separate the two.
+// nearTargets carries a per-target position age, which does separate the two.
 //
 // Grouping observation by group netId is the one omnipotence OPCOM is granted -- a real observer would not
 // know exact squad membership -- and it keeps the store one row per force, merged per cell by the grid.
@@ -17,13 +17,15 @@
 // through their own hooks, not here.
 if (!isServer) exitWith {};
 
-// nearTargets element indices (BIKI order). The one-shot probe below logs a raw entry to the RPT, so a
-// shape mismatch shows up on the first playtest rather than silently misgating.
-private _NT_OBJECT  = 4;   // the sensed target object (objNull when only its type is known)
-private _NT_POSTIME = 5;   // mission time (s) the observer last fixed the target's position
+// nearTargets element indices, confirmed by the probe: [pos, type, side, cost, object, age]. Element 5 is
+// the AGE of the fix -- seconds since the observer last pinned the target's position, ~0 while sensing it,
+// growing once contact is lost -- not an absolute timestamp. Two one-shot probes log a live and a stale
+// sample so any shape/semantics drift shows in the RPT rather than silently misgating.
+private _NT_OBJECT = 4;   // the sensed target object (objNull when only its type is known)
+private _NT_POSAGE = 5;   // seconds since the observer last fixed the target's position (age)
 
 // Which BLUFOR groups a live OPFOR observer is sensing this tick, keyed by group netId. nearTargets also
-// carries remembered (stale) targets, so a position time within the last tick is what marks "seen now".
+// carries remembered (stale) targets, so an age within one tick is what marks "seen now" vs "still remembered".
 private _freshSeen = createHashMap;
 {
     private _obs = leader _x;
@@ -36,9 +38,14 @@ private _freshSeen = createHashMap;
         {
             private _tgt = _x select _NT_OBJECT;
             if (!isNull _tgt && {side (group _tgt) == west}) then {
-                if ((time - (_x select _NT_POSTIME)) <= OPCOM_TICK_PERIOD) then {
-                    _freshSeen set [netId (group _tgt), true];
+                private _age = _x select _NT_POSAGE;
+                // Confirms element 5 is an age that grows for a remembered target (if it never fires, 5 is
+                // not age and the fresh gate is wrong -- fall back to nearTargetsCurrent).
+                if (isNil "DUWS_opcom_ntStaleProbed" && {_age > OPCOM_TICK_PERIOD}) then {
+                    DUWS_opcom_ntStaleProbed = true;
+                    ["DEBUG", "OPCOM", format ["nearTargets stale sample age=%1 obj=%2", _age, _tgt]] call fnc_log;
                 };
+                if (_age <= OPCOM_TICK_PERIOD) then { _freshSeen set [netId (group _tgt), true] };
             };
         } forEach _known;
     };
