@@ -54,8 +54,8 @@ class Params {
     // side-mission objectives are not affected by shortening it.
     class DUWS_CleanupLifetime {
         title = "Garbage Collection";
-        values[] = {300,600,900,1200,1800,2400,3000,3600};
-        texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
+        values[] = {300,600,900,1200,1500,1800};
+        texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","25 minutes","30 minutes"};
         default = 900;
     };
 
