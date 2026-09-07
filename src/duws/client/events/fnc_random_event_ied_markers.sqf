@@ -57,7 +57,7 @@ addMissionEventHandler ["Draw3D", {
                 DUWS_vbiedMarker_icon,
                 _c,
                 _x modelToWorldVisual [0, 0, 1.5],   // above the car roof
-                0.8, 0.8, 0
+                0.5, 0.5, 0
             ];
         };
     } forEach (missionNamespace getVariable ["DUWS_vbied_cars", []]);

@@ -1,8 +1,8 @@
 // Locality: server -- a vehicle-borne IED, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town.
 //
-// An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), beelining at the nearest
-// player until it detonates, an OPFOR-red world icon (fnc_random_event_ied_markers) marking it from range so
+// An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), ramming the nearest player and
+// detonating on contact, an OPFOR-red world icon (fnc_random_event_ied_markers) marking it from range so
 // the player reads the overt threat before it closes. Built here rather than via fnc_civ_spawnUnit, which would bolt
 // on a recruit action and a flee-on-fire panic handler. Killing the driver only trades the run-in for a
 // short dead-man cook-off.
@@ -46,11 +46,11 @@ _driver setVariable ["DUWS_binMe", true];
 missionNamespace setVariable ["DUWS_vbied_cars",
 	(missionNamespace getVariable ["DUWS_vbied_cars", []]) + [_veh], true];
 
-// FUSE: run-in delay once armed within ARM_RANGE (1-3 s). DEADMAN: cook-off when the driver is killed or
-// the hull is immobilised (2-5 s), so shooting the driver buys distance, not a clean defuse. TIMEOUT reaps
-// a car that reaches no one.
-#define ARM_RANGE 30
-#define FUSE (1 + random 2)
+// ARM_RANGE: contact distance -- it rams the target and blows near-instant (FUSE), not at a standoff. DEADMAN:
+// cook-off when the driver is killed or the hull is immobilised (2-5 s), so shooting the driver buys distance,
+// not a clean defuse. TIMEOUT reaps a car that reaches no one.
+#define ARM_RANGE 7
+#define FUSE (0.1 + random 0.2)
 #define DEADMAN (2 + random 3)
 #define TIMEOUT 300
 
@@ -74,9 +74,11 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 			_driver doMove _lastMove;
 		};
 
-		// Armed on the hull's distance, not the seated driver's.
-		if (_veh distance _target < ARM_RANGE) exitWith { _fuse = FUSE };
-		sleep 0.5;
+		// Ram: detonate on contact (ARM_RANGE, the hull reaching the target), not at a standoff. Poll fast
+		// while closing so the arm window is not jumped at ramming speed.
+		private _d = _veh distance _target;
+		if (_d < ARM_RANGE) exitWith { _fuse = FUSE };
+		sleep ([0.5, 0.05] select (_d < 80));
 	};
 
 	// No fuse: timed out or ran dry of targets.
