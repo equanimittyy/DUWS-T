@@ -25,5 +25,5 @@ addMissionEventHandler ["EachFrame", {
 	// Parabola: 0 at both ends, _peak at the midpoint.
 	_p set [2, (_p select 2) + 4 * _peak * _k * (1 - _k)];
 	_obj setPosASL _p;
-	_obj setDir (getDir _obj + 12);   // slow tumble so it reads as thrown, not sliding
+	_obj setDir (getDir _obj + 4);   // slow tumble so it reads as thrown, not sliding
 }, [_obj, _from, _to, _dur, _peak, diag_tickTime, _kind]];
