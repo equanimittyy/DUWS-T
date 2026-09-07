@@ -225,12 +225,10 @@ if (!(alive _pilot)) exitWith {
     [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pilotkilled"], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
 
-// Won: pilot at HQ. Off the player's back, patched enough to walk, then he makes his own way into the medical
-// tent and despawns there. Timeout-guarded so a stuck path still ends the walk and the mission.
+// Win banked here, at winning range: task closed, reward paid, Overlord calls it in -- player is free the
+// instant he reaches HQ. His limp to the tent and despawn there run as a background tail (below), off this thread.
 call _clearIcons;
-// Home: strip every carry/vehicle hook so the carry options vanish and no one can pick him up or seat him
-// again, then get him out of whatever holds him -- off a player's back, or self-dismounted from a vehicle --
-// so he limps to the tent on his own.
+// Off whatever holds him -- a player's back or a vehicle -- and every carry hook stripped, so he limps in alone.
 CLEANUP_PILOT(_pilot);
 if (!isNull attachedTo _pilot) then { detach _pilot; };
 if (vehicle _pilot != _pilot) then {
@@ -246,25 +244,34 @@ _pilot setHitPointDamage ["HitLegs", 0.6];
 [_pilot, ""] remoteExec ["switchMove", 0];
 _pilot enableAI "ALL";
 _pilot enableAI "PATH";
-private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
-if (!isNull _tent) then {
-    _pilot doMove (getPosATL _tent);
-    private _walkTimeout = time + 30;
-    // Re-wound the leg each tick: a player healing him mid-walk would otherwise clear it and drop the limp.
-    waitUntil { sleep 1; _pilot setHitPointDamage ["HitLegs", 0.6]; !(alive _pilot) || (_pilot distance _tent < 3) || time > _walkTimeout };
-};
 
-[_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
-deleteVehicle _pilot;
-missionNamespace setVariable ["currentMissionPilot", nil];
-publicVariable "currentMissionPilot";
-sleep 5;
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 
 // Guaranteed and called, not spawned into a client function: intel_payout began `if (!hasInterface)
 // exitWith {}`, so spawning it from this server thread evaporated the reward on a dedicated server. The
 // mission site stands in for the earner's position -- a server thread has no one player to ask.
 if (hardcore_mode_enable) then { [_heliPos] call fnc_intel_payout };
+
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+
+// Flavor tail: he limps to the tent and despawns (5 min or within 5 m). finish already reopened the mission
+// slot, so a later rescue can reclaim currentMissionPilot while he still walks -- clear it only if still ours.
+[_pilot, _speaker1, _message2] spawn {
+    params ["_pilot", "_speaker1", "_message2"];
+    private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
+    if (!isNull _tent) then {
+        _pilot doMove (getPosATL _tent);
+        private _walkTimeout = time + 300;
+        // Re-wound the leg each tick: a player healing him mid-walk would otherwise clear it and drop the limp.
+        waitUntil { sleep 1; _pilot setHitPointDamage ["HitLegs", 0.6]; !(alive _pilot) || (_pilot distance _tent < 5) || time > _walkTimeout };
+    };
+    if (alive _pilot) then { [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0]; };
+    private _wasCurrent = (missionNamespace getVariable ["currentMissionPilot", objNull]) isEqualTo _pilot;
+    deleteVehicle _pilot;
+    if (_wasCurrent) then {
+        missionNamespace setVariable ["currentMissionPilot", nil];
+        publicVariable "currentMissionPilot";
+    };
+};
