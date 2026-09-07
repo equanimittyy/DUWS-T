@@ -57,8 +57,7 @@ R3F_LOG_CFG_can_be_transported_cargo = R3F_LOG_CFG_can_be_transported_cargo +
 	["land_plasticbarrier_02_f", 2],
 	["bagbunker_base_f", 15],
 	["land_bagbunker_small_f", 6],
-	["bagfence_base_f", 2],
-	["flagcarriercore", 2]
+	["bagfence_base_f", 2]
 ];
 
 R3F_LOG_CFG_can_be_moved_by_player = R3F_LOG_CFG_can_be_moved_by_player +

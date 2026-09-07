@@ -263,11 +263,15 @@ DUWS_zoneStructureHooks = createHashMapFromArray [
             [_key] call fnc_duws_deploy;
             ["INFO", "STREAM", format ["deployed %1", _key]] call fnc_log;
         };
+        // The zone flag is pinned, not stowed, so it was hidden rather than deleted -- show it again.
+        { if (_x isKindOf "FlagPole_F") then { _x hideObjectGlobal false } } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
     }],
     ["sleep", { params ["_key", "_o"];
         if ([_key] call fnc_duws_stow) then {
             ["INFO", "STREAM", format ["stowed %1", _key]] call fnc_log;
         };
+        // Hide the pinned flag rather than delete it, so it keeps its identity but leaves no lone pole.
+        { if (_x isKindOf "FlagPole_F") then { hideObjectGlobal _x } } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
     }]
 ];
 

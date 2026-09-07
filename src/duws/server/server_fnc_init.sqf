@@ -67,6 +67,7 @@ fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 // Defines fnc_guard_lock / fnc_guard_register / fnc_guard_watch (locks critical objects out of Zeus).
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_asset_guard.sqf";
+fnc_zone_flag_logistics = compile preprocessFileLineNumbers "duws\server\misc\fnc_zone_flag_logistics.sqf";
 fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_usableBuildings.sqf";
 fnc_factionRoles = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_factionRoles.sqf";
 fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\garrison\fnc_holdBuildingPost.sqf";

@@ -56,6 +56,8 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flg = missionNamespace getVariable [_flagVarName, objNull];
     if (!isNull _flg) then {
         _flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
+        // Zone lost to OPFOR: close the carry gate so the flagpole can no longer be moved.
+        [_flg, false] call fnc_zone_flag_logistics;
     };
 };
 

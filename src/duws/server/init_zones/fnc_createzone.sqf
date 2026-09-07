@@ -263,11 +263,11 @@ _occ set ["airRingCommitted", true];
 // are deliberately not behind this: only the stow needs the composition to exist.
 waitUntil { scriptDone _prefabScript };
 
-// Zone flag: one red pole just off centre, filed under the zone key (fnc_duws_keep) so it stows and
-// deploys with the zone -- an inactive, streamed-out zone otherwise shows a lone flag in open country.
-// Placed after the prefab so its clear pass cannot take it, and before the stow so it packs up with the
-// rest. Idempotent: createzone is re-entrant (a zone rebuilds through it), so reuse the standing flag
-// rather than laying a second at a fresh offset and orphaning the first.
+// Zone flag: one red pole just off centre, pinned to the zone composition (third fnc_duws_keep arg) and
+// hidden, not deleted, while the zone streams out -- pinning keeps it the same object across stream
+// cycles so its namespace ref, texture, Zeus-lock and carry wiring survive, and hiding spares an
+// inactive zone a lone flag in open country. Placed after the prefab so its clear pass cannot take it.
+// Idempotent: createzone is re-entrant, so reuse the standing flag rather than orphaning it with a second.
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
 	private _flagVarName = format ["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 	if (isNull (missionNamespace getVariable [_flagVarName, objNull])) then {
@@ -286,9 +286,11 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 		_flg setPosATL [_flagPos select 0, _flagPos select 1, 0];
 		_flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
 		missionNamespace setVariable [_flagVarName, _flg];
-		[_flg, _zoneKey] call fnc_duws_keep;
+		[_flg, _zoneKey, true] call fnc_duws_keep;
 		// Hold the flag out of Zeus so a game master cannot delete the zone marker (fnc_asset_guard).
 		[_flg] call fnc_guard_register;
+		// Carry logistics: OPFOR-held at spawn, so not yet movable. Arms the 50 m tether to the centre.
+		[_flg, false, _zonePos] call fnc_zone_flag_logistics;
 	};
 };
 

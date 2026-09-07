@@ -52,6 +52,8 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flg = missionNamespace getVariable [_flagVarName, objNull];
     if (!isNull _flg) then {
         _flg setFlagTexture "\A3\Data_F\Flags\flag_blue_CO.paa";
+        // BLUFOR holds the zone now: open the carry gate on its flagpole.
+        [_flg, true] call fnc_zone_flag_logistics;
     };
 };
 
