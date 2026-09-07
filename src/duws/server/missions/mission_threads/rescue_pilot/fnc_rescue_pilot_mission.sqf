@@ -269,10 +269,19 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
+// Pilot's own thanks, keyed 2 s behind Overlord's wrap-up: he is a VOICE speaker and the drain
+// empties VOICE before NET, so firing the two together would put his line ahead of the call it
+// answers. The gap lets Overlord's line land first.
+[_speaker1, _message2] spawn {
+    params ["_speaker1", "_message2"];
+    sleep 2;
+    [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
+};
+
 // Flavor tail: he limps to the tent and despawns (5 min or within 5 m). finish already reopened the mission
 // slot, so a later rescue can reclaim currentMissionPilot while he still walks -- clear it only if still ours.
-[_pilot, _speaker1, _message2] spawn {
-    params ["_pilot", "_speaker1", "_message2"];
+[_pilot] spawn {
+    params ["_pilot"];
     private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
     if (!isNull _tent) then {
         _pilot doMove (getPosATL _tent);
@@ -280,7 +289,6 @@ _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
         // Re-wound the leg each tick: a player healing him mid-walk would otherwise clear it and drop the limp.
         waitUntil { sleep 1; _pilot setHitPointDamage ["HitLegs", 0.6]; !(alive _pilot) || (_pilot distance _tent < 5) || time > _walkTimeout };
     };
-    if (alive _pilot) then { [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0]; };
     private _wasCurrent = (missionNamespace getVariable ["currentMissionPilot", objNull]) isEqualTo _pilot;
     deleteVehicle _pilot;
     if (_wasCurrent) then {
