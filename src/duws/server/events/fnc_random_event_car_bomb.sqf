@@ -1,12 +1,10 @@
 // Locality: server -- a vehicle-borne IED, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town.
 //
-// An OPFOR driver in a civilian car: overtly hostile (friendly AI engages it), ramming the nearest player and,
-// once inside its activation range, detonating a few seconds later wherever it has reached -- so a target juking
-// it onto an obstacle cannot defuse it. An OPFOR-red world icon (fnc_random_event_ied_markers) marks it from
-// range so the player reads the overt threat before it closes. Built here rather than via fnc_civ_spawnUnit,
-// which would bolt on a recruit action and a flee-on-fire panic handler. Killing the driver only trades the
-// run-in for a short dead-man cook-off.
+// An OPFOR driver in a civilian car rams the nearest player and detonates -- overtly hostile, so friendly AI
+// engages it and an OPFOR-red world icon (fnc_random_event_ied_markers) warns of it from range. Built here,
+// not via fnc_civ_spawnUnit, which would bolt on a recruit action and a flee-on-fire panic handler; killing
+// the driver only trades the run-in for a short dead-man cook-off.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
@@ -33,8 +31,8 @@ _driver moveInDriver _veh;
 _driver setVariable ["Vcm_Disable", true];   // keep an AI mod from overriding the beeline
 _driver allowFleeing 0;
 
-// CARELESS/BLUE: drives the road run-in straight at the target, never peeling off to fight or flee (the
-// scripted rush below handles the finish the AI won't). binMe reaps a torn-down run.
+// CARELESS/BLUE/FULL: drives the run-in without stopping to fight or flee; the scripted rush handles the
+// close-in ram the AI won't. binMe reaps a torn-down run.
 _grp setBehaviour "CARELESS";
 _grp setCombatMode "BLUE";
 _grp setSpeedMode "FULL";
@@ -42,23 +40,17 @@ _veh limitSpeed 200;
 _veh setVariable ["DUWS_binMe", true];
 _driver setVariable ["DUWS_binMe", true];
 
-// Broadcast the car so each client draws an OPFOR-red icon over it (fnc_random_event_ied_markers), read
-// further out than a roadside pile. Removed from the list on detonation or teardown.
+// Broadcast the car so clients draw its OPFOR-red icon (fnc_random_event_ied_markers); pulled from the list
+// on detonation or teardown.
 missionNamespace setVariable ["DUWS_vbied_cars",
 	(missionNamespace getVariable ["DUWS_vbied_cars", []]) + [_veh], true];
 
-// RUSH: activation range -- inside it the car is armed and detonates for certain ARM_HOLD seconds later,
-// wherever it has reached by then. No proximity fuze: the ram just drives the hull at the target for that
-// window (the AI pathfinder brakes and steers around a man on foot and stops short, so the script takes the
-// wheel). RAM_ACCEL: ram acceleration, capped at the hull's own maxSpeed. DEADMAN: cook-off when the driver is
-// killed or the hull is immobilised (2-5 s), so shooting the driver buys distance, not a clean defuse. TIMEOUT
-// reaps a car that reaches no one.
-#define RUSH 30
-#define ARM_HOLD 3
-#define RAM_ACCEL 8
+#define RUSH 30                  // activation range: inside this it is armed and will detonate
+#define ARM_HOLD 3               // seconds it rams after arming, then blows wherever it reached (no proximity fuze)
+#define RAM_ACCEL 8              // ram acceleration, capped at the hull's own maxSpeed
 #define FUSE (0.1 + random 0.2)
-#define DEADMAN (2 + random 3)
-#define TIMEOUT 300
+#define DEADMAN (2 + random 3)   // driver-killed / hull-stuck cook-off: shooting the driver buys distance
+#define TIMEOUT 300              // reap a car that reaches no one
 
 [_veh, _driver] spawn {
 	params ["_veh", "_driver"];
@@ -66,7 +58,7 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 	private _deadline = time + TIMEOUT;
 	private _lastMove = [0, 0, 0];
 	private _armAt = -1;   // time the car entered RUSH and armed; -1 whenever it is outside RUSH
-	// The hull's own top speed (config km/h -> m/s); the rush ramps up to but never past it.
+	// Hull's own top speed, config km/h -> m/s (the /3.6); the ram caps here.
 	private _maxSpd = (getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "maxSpeed")) / 3.6;
 	if (_maxSpd <= 0) then { _maxSpd = 30 };
 
@@ -93,8 +85,8 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 			sleep 0.05;
 		} else {
 			_armAt = -1;
-			// Still far: hand it back to the AI to drive the roads in. Re-issue doMove only when the target has
-			// moved, to spare the pathfinder a restart every tick.
+			// Far: let the AI drive the roads in. Re-issue doMove only when the target moved -- a restart every
+			// tick thrashes the pathfinder.
 			_driver enableAI "PATH";
 			if ((getPos _target) distance _lastMove > 15) then {
 				_lastMove = getPos _target;
