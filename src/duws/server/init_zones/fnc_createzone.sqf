@@ -262,6 +262,27 @@ _occ set ["airRingCommitted", true];
 // leaving the composition and its gunners standing for the campaign. The markers and triggers above
 // are deliberately not behind this: only the stow needs the composition to exist.
 waitUntil { scriptDone _prefabScript };
+
+// Zone flag: one red pole just off centre, filed under the zone key (fnc_duws_keep) so it stows and
+// deploys with the zone -- an inactive, streamed-out zone otherwise shows a lone flag in open country.
+// Placed after the prefab so its clear pass cannot take it, and before the stow so it packs up with the
+// rest. Idempotent: createzone is re-entrant (a zone rebuilds through it), so reuse the standing flag
+// rather than laying a second at a fresh offset and orphaning the first.
+if (VERSION_X == "MODERN" || simple_zones_enable) then {
+	private _flagVarName = format ["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
+	if (isNull (missionNamespace getVariable [_flagVarName, objNull])) then {
+		// Straight off the zone centre, snapped to the ground -- not BIS_fnc_findSafePos, whose 3 m search
+		// fails on any slope and then returns a random map position, which flung the flag off its zone (the
+		// [0,0,0] guard never caught that far fallback).
+		private _flagPos = _zonePos getPos [15 + random 10, random 360];
+		private _flg = createVehicle ["FlagPole_F", _flagPos, [], 0, "CAN_COLLIDE"];
+		_flg setPosATL [_flagPos select 0, _flagPos select 1, 0];
+		_flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
+		missionNamespace setVariable [_flagVarName, _flg];
+		[_flg, _zoneKey] call fnc_duws_keep;
+	};
+};
+
 if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) then {
 	[_zoneKey] call DUWS_fnc_zoneStow;
 };
@@ -301,19 +322,3 @@ _trg setTriggerTimeout [30, 30, 30, true];
 private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 missionNamespace setVariable [_trgVarName, _trg];
 _trg setVariable ["isZoneCaptureTrigger", true];
-
-if (VERSION_X == "MODERN" || simple_zones_enable) then {
-    private _offsetDist = 15 + random 10;
-    private _offsetDir = random 360;
-    private _flagPos = _zonePos getPos [_offsetDist, _offsetDir];
-    
-    // Safe-pos so the flag doesn't hang in the air
-    private _safePos = [_flagPos, 0, 3, 1, 0, 0.2, 0] call BIS_fnc_findSafePos;
-    if (_safePos isEqualTo [0,0,0]) then { _safePos = _flagPos };
-    _safePos set [2, 0];
-    
-    private _flg = "FlagPole_F" createVehicle _safePos;
-    private _flagVarName = format["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
-    missionNamespace setVariable [_flagVarName, _flg];
-    _flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
-};
