@@ -39,9 +39,10 @@ Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a sing
 | `DUWS_opcom_belief_str` | believed BLUFOR force there ([§The quantity](#the-quantity-force-not-coverage)) — each AI counts one, each human `OPCOM_PLAYER_WORTH`, so a group carrying players weighs heavier |
 
 One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
-rather than appending, and only when the new reading is stronger or the stored one has gone stale
-(keep-strongest). Belief tracks groups, not individual players, so a squad is one row whether or not it
-carries a player, and players sharing a group are not double-counted.
+rather than appending, and only on a fresh acquisition — `knowsAbout` past the gate and not falling
+([§Sensors](#sensors)), the reading superseding the stored one outright. Belief tracks groups, not
+individual players, so a squad is one row whether or not it carries a player, and players sharing a group
+are not double-counted.
 
 New state takes the `DUWS_` prefix with an `opcom_` tag naming its owner
 ([`info/architecture.md`](../../info/architecture.md#globals-have-no-namespace)).
@@ -54,7 +55,8 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 
 | Sensor | Writes | Cost |
 |---|---|---|
-| Direct sighting | for each BLUFOR group, `east knowsAbout (leader _grp) > 1.5` stamps the leader's position, the group's threat (each AI one, each human `OPCOM_PLAYER_WORTH`), and the tick | one engine call per BLUFOR group per tick |
+| Direct sighting | for each BLUFOR group, an *acquisition* — `east knowsAbout (leader _grp) > 1.5` and not falling since last tick — stamps the leader's position, the group's threat (each AI one, each human `OPCOM_PLAYER_WORTH`), and the tick; a falling scalar (contact fading) does not write, so the stamp freezes at last-seen and decays | one engine call per BLUFOR group per tick |
+| Absence | a group whose belief row resolves (`groupFromNetId`) to a dead, drained or deleted group is dropped, so a confirmed-gone force stops depositing; server-polled, never a `Killed` handler | one resolve per group-keyed row per tick |
 | Observation post | an OP hardpoint covering ground stamps what it sees | [§Observation is the trigger](#observation-is-the-trigger) |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
@@ -66,6 +68,11 @@ no `nearEntities`, no scan over `allUnits`
 Threshold `1.5` is shared with the artillery observation gate — one constant, do not add a second.
 
 ### Decay
+
+Decay models *lost track* only — a group that is alive but unseen, its stamp aging as confidence in it
+falls. A group *confirmed gone* (destroyed, drained by a merge, or deleted) is not left to decay: the
+absence sensor ([§Sensors](#sensors)) drops its row the same tick, so a stamp aging to expiry now means
+strictly "not seen since", never "may already be dead".
 
 Confidence falls with the age of the stamp, counted in **ticks**, not seconds: a stamp holds the tick
 counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks, derived from
