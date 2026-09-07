@@ -3,25 +3,34 @@
 if (!isServer) exitWith {};
 params [["_pos", [0,0,0]], ["_radius", 5], ["_dur", 15]];
 
-// A small carpet of flame, spawned the way the napalm strike does it (fnc_arty): several of the same fire
-// emitter scattered over the splash so it reads as a patch of fire, not one point. Count kept low -- the
-// object is a heavy particle-and-light emitter and up to three molotovs can land at once.
-private _fires = [];
-private _spread = _radius min 3;
-for "_i" from 1 to 3 do {
-	private _fp = [(_pos select 0) + (random _spread) - (random _spread), (_pos select 1) + (random _spread) - (random _spread), _pos select 2];
-	private _f = "test_EmptyObjectForFireBig" createVehicle _fp;
-	_f setPosATL _fp;
-	_fires pushBack _f;
-};
+// test_EmptyObjectForFireBig burns for only ~2-3s and then self-extinguishes (arma_engine_gotchas.md), so
+// one spawn cannot hold a fire for _dur. Napalm hides this by spawning fresh ones every salvo; here a short
+// refresh does it -- each cycle lights a new scattered batch, then deletes the previous so the flame never
+// gaps. Kept to a small napalm-style carpet: the object is a heavy particle-and-light emitter.
+#define FIRE_COUNT 3
+#define FIRE_REFRESH 2
 
-[_fires, _pos, _radius, _dur] spawn {
-	params ["_fires", "_pos", "_radius", "_dur"];
+[_pos, _radius, _dur] spawn {
+	params ["_pos", "_radius", "_dur"];
+	private _spread = _radius min 3;
 	private _end = time + _dur;
+	private _fires = [];
+	private _nextFire = 0;
 	while { time < _end } do {
-		{
-			if (alive _x) then { _x setDamage (((damage _x) + 0.06) min 1) };
-		} forEach (_pos nearEntities [["Man", "Car", "Motorcycle", "Tank", "Air"], _radius]);
+		if (time >= _nextFire) then {
+			_nextFire = time + FIRE_REFRESH;
+			private _new = [];
+			for "_i" from 1 to FIRE_COUNT do {
+				private _fp = [(_pos select 0) + (random _spread) - (random _spread), (_pos select 1) + (random _spread) - (random _spread), _pos select 2];
+				private _f = createVehicle ["test_EmptyObjectForFireBig", _fp, [], 0, "CAN_COLLIDE"];
+				_f setPosATL _fp;
+				_new pushBack _f;
+			};
+			// Delete the old batch only after the new is lit, so the two overlap and the fire never blinks out.
+			{ if (!isNull _x) then { deleteVehicle _x } } forEach _fires;
+			_fires = _new;
+		};
+		{ if (alive _x) then { _x setDamage (((damage _x) + 0.06) min 1) } } forEach (_pos nearEntities [["Man", "Car", "Motorcycle", "Tank", "Air"], _radius]);
 		sleep 1;
 	};
 	{ if (!isNull _x) then { deleteVehicle _x } } forEach _fires;
