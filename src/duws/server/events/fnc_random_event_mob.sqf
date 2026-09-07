@@ -125,13 +125,16 @@ _grp setSpeedMode "LIMITED";
 		{ _x setVariable ["DUWS_binAt", time + LIFETIME + STROLL]; _x setVariable ["DUWS_nextThrow", time + random THROW_COOLDOWN] } forEach units _grp;
 		_grp setVariable ["DUWS_mob_roaring", true];
 
-		// Escalation subplot on its own fuse. The instigators harass with the crowd until it expires, then
-		// break out to EAST -- which both drops the crowd count and sets the panic flag, so the harass loop
-		// scatters the rest on the same beat as the first shot.
+		// Escalation subplot on its own fuse. The instigators harass with the crowd until the fuse expires or the
+		// mob ends for any reason (mob_over), then break out to EAST. When the fuse wins that race the break's
+		// count-drop and panic flag scatter the rest on the same beat as the first shot.
 		if (_escalate && { count _instigators > 0 }) then {
 			[_instigators, _grp] spawn {
 				params ["_instigators", "_grp"];
-				sleep (INST_FUSE + random INST_FUSE_SPREAD);
+				// Turn on the fuse, or at once if the mob ends first for any reason (a shot panics it, a rioter drops,
+				// it times out or loses the players) -- an early end does not let the instigators off.
+				private _fuse = time + INST_FUSE + random INST_FUSE_SPREAD;
+				waitUntil { sleep 1; (time >= _fuse) || { _grp getVariable ["DUWS_mob_over", false] } || { ({ alive _x } count _instigators) == 0 } };
 				private _live = _instigators select { alive _x };
 				if (_live isEqualTo []) exitWith {};
 				// One to three throw, still blended and still civilian. Aim scattered a random offset --
@@ -237,9 +240,11 @@ _grp setSpeedMode "LIMITED";
 		};
 	};
 
-	// The mob is over: stop roaring. say3D cannot be cut (a fresh one queues rather than replaces), so a
-	// clip already playing just tails off; the flag keeps a late roar-spawn from starting a new one.
+	// The mob is over: stop roaring, and raise mob_over so a still-waiting instigator turns now instead of
+	// sleeping out its fuse (see the subplot). say3D cannot be cut (a fresh one queues rather than replaces),
+	// so a clip already playing just tails off; the roaring flag keeps a late roar-spawn from starting a new one.
 	_grp setVariable ["DUWS_mob_roaring", false];
+	_grp setVariable ["DUWS_mob_over", true];
 
 	// Terminal. Panic scatters, fast and upright; anything else (never armed, broke contact, window closed)
 	// melts into an aimless town stroll. DUWS_binMe hands the bodies to cleanup either way.
