@@ -260,11 +260,6 @@ _pilot enableAI "PATH";
 
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 
-// Guaranteed and called, not spawned into a client function: intel_payout began `if (!hasInterface)
-// exitWith {}`, so spawning it from this server thread evaporated the reward on a dedicated server. The
-// mission site stands in for the earner's position -- a server thread has no one player to ask.
-if (hardcore_mode_enable) then { [_heliPos] call fnc_intel_payout };
-
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
