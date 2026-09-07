@@ -532,6 +532,10 @@ private _respawnPos = [
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
 if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", netId _helipad, true]; };
 
+// Hold the interaction-critical HQ fixtures out of Zeus, so a game master cannot delete the base's
+// building, heal tent, map board or vehicle depot (fnc_asset_guard).
+{ if (!isNull _x) then { [_x] call fnc_guard_register } } forEach [_hqObj, _medTent, _mapBoard, _repairDepot];
+
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
 ["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;
 // Drawn through the shared function so the HQ, every FOB and the MHQ all advertise the one radius

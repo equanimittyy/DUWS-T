@@ -241,6 +241,10 @@ if (ZeusStatus != 0) then {
 	[] spawn fnc_zeus_objects_init;
 };
 
+// Keeps interaction-critical objects (HQ fixtures, zone flags, FOB, MHQ) locked out of Zeus so a game
+// master cannot delete them; re-asserts the lock periodically in case a mod re-adds them to Zeus.
+[] spawn fnc_guard_watch;
+
 // Set the date/time AFTER setting the current weather
 setDate [2035, 8, 3, time_of_day, 0];
 

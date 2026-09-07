@@ -40,6 +40,10 @@ switch (VERSION_X) do {
 // evict each other; those two suffix a string instead.
 [_fob, _fob_owner] remoteExec ["fnc_FOBactions", [0,-2] select isDedicated,_fob];
 
+// Hold the FOB out of Zeus so a game master cannot delete it by accident (fnc_asset_guard). Combat
+// destruction is unaffected -- that runs through fnc_fob_destroyed, not a curator delete.
+[_fob] call fnc_guard_register;
+
 _refortify = false;
 [(getpos _fob), _fob, _refortify] spawn fnc_fortifyFOB;
 

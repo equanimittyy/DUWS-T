@@ -61,6 +61,9 @@ MHQ_tent = objNull;
 MHQ_tent = createVehicle ["CamoNet_INDP_big_F", getPos MHQ1, [], 0, "CAN_COLLIDE"];
 MHQ_tent setDir _mhqDir;
 
+// Hold the MHQ and its deployed arsenal box and tent out of Zeus (fnc_asset_guard).
+{ if (!isNull _x) then { [_x] call fnc_guard_register } } forEach [MHQ1, MHQ_ammobox, MHQ_tent];
+
 // Both objects are placed, so the screens can come back. Everything below this is markers, respawn
 // registration and flags -- nothing anyone can see appearing.
 ["IN", _fadePlayers] call fnc_baseFade;

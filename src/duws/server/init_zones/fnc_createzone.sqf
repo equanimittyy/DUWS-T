@@ -271,15 +271,24 @@ waitUntil { scriptDone _prefabScript };
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
 	private _flagVarName = format ["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 	if (isNull (missionNamespace getVariable [_flagVarName, objNull])) then {
-		// Straight off the zone centre, snapped to the ground -- not BIS_fnc_findSafePos, whose 3 m search
-		// fails on any slope and then returns a random map position, which flung the flag off its zone (the
-		// [0,0,0] guard never caught that far fallback).
-		private _flagPos = _zonePos getPos [15 + random 10, random 360];
+		// Near the zone centre and clear of anything solid, so it does not spawn inside a prefab wall or a
+		// map building. Not BIS_fnc_findSafePos: its 3 m search failed on any slope and returned a random
+		// map position, flinging the flag off its zone (the [0,0,0] guard never caught that far fallback).
+		// Try offsets on a ring; take the first clear of props and structures, else fall back to the first.
+		private _cands = [];
+		for "_i" from 1 to 16 do { private _t = _zonePos getPos [8 + random 18, random 360]; _t set [2, 0]; _cands pushBack _t; };
+		private _idx = _cands findIf {
+			(nearestObjects [_x, [], 2, true]) isEqualTo []
+			&& {(nearestTerrainObjects [_x, ["BUILDING", "HOUSE", "ROCK", "ROCKS"], 2.5]) isEqualTo []}
+		};
+		private _flagPos = _cands select (_idx max 0);
 		private _flg = createVehicle ["FlagPole_F", _flagPos, [], 0, "CAN_COLLIDE"];
 		_flg setPosATL [_flagPos select 0, _flagPos select 1, 0];
 		_flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
 		missionNamespace setVariable [_flagVarName, _flg];
 		[_flg, _zoneKey] call fnc_duws_keep;
+		// Hold the flag out of Zeus so a game master cannot delete the zone marker (fnc_asset_guard).
+		[_flg] call fnc_guard_register;
 	};
 };
 
