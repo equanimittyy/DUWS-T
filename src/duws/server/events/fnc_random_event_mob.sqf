@@ -168,6 +168,13 @@ _grp setSpeedMode "LIMITED";
 					_x addWeapon "hgun_Rook40_F";
 					_x addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
 					_x addMagazines ["16Rnd_9x21_Mag", 2];
+					// Elite, mirroring the eliminate-snipers cell (fnc_target_sniper_mission): max the aim and spotting skills.
+					_x setSkill ["aimingAccuracy", 1];
+					_x setSkill ["aimingShake", 1];
+					_x setSkill ["aimingSpeed", 1];
+					_x setSkill ["spotDistance", 1];
+					_x setSkill ["spotTime", 1];
+					_x setSkill ["general", 1];
 					_x setUnitPos "UP";
 				} forEach (_instigators select { alive _x });
 				_east setBehaviour "COMBAT";
