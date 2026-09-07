@@ -31,6 +31,17 @@ private _deposit = {
     };
 };
 
+// OPFOR's own force is what it actually has standing: it knows its own casualties, so a live site
+// deposits its living men (each death and each vehicle crewman counted, by roster), and only a stowed
+// site -- no men on the ground -- falls back to the redeploy ledger's surviving-token men. The
+// whole-token ledger stays the redeploy and map-bar truth; this is just OPCOM's live-force picture, and
+// it is the asymmetry with belief: own force exact, enemy force fogged behind sighting.
+private _garrisonMen = {
+    params ["_key"];
+    if ([_key] call DUWS_fnc_garrisonHeld) exitWith { [_key] call fnc_site_alive };
+    [[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
+};
+
 // Zones: OPFOR-held deposit their garrison men to friendly; BLU-held are known enemy ground (a
 // territorial fact the commander has for free), so they deposit a nominal baseline even unsighted.
 {
@@ -39,8 +50,7 @@ private _deposit = {
     if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) then {
         [_ene, _zp, OPCOM_GRID_ZONE_ENEMY_MEN, _zs + OPCOM_GRID_SPREAD] call _deposit;
     } else {
-        private _men = [[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen;
-        [_fri, _zp, _men, _zs + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, _zp, [_key] call _garrisonMen, _zs + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach zone_meta_array;
 
@@ -51,8 +61,7 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 {
     if (_x >= 1) then {
         private _key = [_forEachIndex] call fnc_town_site_key;
-        private _men = [[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen;
-        [_fri, getPos (_locs select _forEachIndex), _men, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, getPos (_locs select _forEachIndex), [_key] call _garrisonMen, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
 
