@@ -172,7 +172,18 @@ _grp setSpeedMode "LIMITED";
 				} forEach (_instigators select { alive _x });
 				_east setBehaviour "COMBAT";
 				_east setCombatMode "RED";
-				_east setSpeedMode "LIMITED";
+				_east setSpeedMode "NORMAL";
+				// A fresh EAST group starts blind and would mill until it stumbled into contact -- reveal the players and
+				// send it hunting so the cell engages the moment it turns, not whenever it happens to detect them.
+				private _blu = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };
+				if !(_blu isEqualTo []) then {
+					{ _east reveal [_x, 4] } forEach _blu;
+					private _wp = _east addWaypoint [getPosATL ([_blu, leader _east] call BIS_fnc_nearestPosition), 0];
+					_wp setWaypointType "SAD";
+					_wp setWaypointBehaviour "COMBAT";
+					_wp setWaypointCombatMode "RED";
+					_wp setWaypointSpeed "NORMAL";
+				};
 				_grp setVariable ["DUWS_mob_panic", true];
 			};
 		};
