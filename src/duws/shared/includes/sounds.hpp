@@ -40,11 +40,4 @@ class CfgSounds
         sound[] = {"duws\shared\sounds_npics\support\angry_mob.wav", 1.4, 1};
         titles[] = {};
     };
-    // Stone impact, say3D'd on the nearest player (fnc_throw). Via CfgSounds, not playSound3D: that command
-    // silently drops a mission .wav, and no OGG encoder was available offline to give it the format it wants.
-    class DUWS_thud {
-        name = "DUWS_thud";
-        sound[] = {"duws\shared\sounds_npics\support\thud.wav", 2, 1};
-        titles[] = {};
-    };
 };

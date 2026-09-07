@@ -23,12 +23,8 @@ private _dur = (((_from distance2D _to) / 8) max 1.2) min 3.5;
 	sleep _dur;
 	// Molotov lands as a scripted fire (server owns the networked flame); ignite works in ATL.
 	if (_kind == "molotov") exitWith { [ASLToATL _to] call fnc_molotov_ignite; };
-	// Stone does no damage -- the crowd harasses, it does not kill. Sell the hit instead: a thud near the
-	// impact, and a firm camera knock on any player it lands beside.
-	// say3D (CfgSounds), not playSound3D: that command silently drops a mission .wav. It is server-side and
-	// auto-broadcasts, so riding it on the nearest player plays the thud for everyone at that player's spot.
-	private _near = allPlayers select { alive _x && {(_x distance2D _to) < 40} };
-	if !(_near isEqualTo []) then { ([_near, _to] call BIS_fnc_nearestPosition) say3D "DUWS_thud"; };
+	// Stone does no damage -- the crowd harasses, it does not kill. Sell the hit with a firm camera knock on
+	// any player it lands beside.
 	// addCamShake is a command, wrapped in an extra array: remoteExec reads the params as a command's operand
 	// list (max 2), so the bare 3-element array counted as three operands and threw. [[...]] passes one operand.
 	{
