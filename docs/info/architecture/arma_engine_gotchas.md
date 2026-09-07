@@ -82,17 +82,16 @@ parent reference and delete its own source once the parent is null (`waitUntil {
 deleteVehicle _src`): `isNull` flips true wherever the parent is binned, host or client, so every machine
 reaps its own source exactly once. The patrol-camp beacon (`fnc_camp_smoke.sqf`) is built this way.
 
-## The config fire object burns for a few seconds, then self-extinguishes
+## Never refresh a config fire object — deleting a burning one puffs smoke
 
-**A `test_EmptyObjectForFireBig` (and its smaller siblings) emits fire for only ~2-3 seconds after
-`createVehicle`, then the flame dies on its own — the object may linger, but it stops burning. One spawn
-cannot hold a fire for a scripted duration.** The napalm strike (`fnc_arty.sqf`) never notices because it
-keeps spawning new ones every salvo across its run; a one-shot source (a molotov landing) lights, flickers,
-and is gone.
+**A `test_EmptyObjectForFireBig` (and its smaller siblings) burns for as long as the object lives, so a fire
+is held by spawning the object once and deleting it only when the effect ends. Do NOT churn it — respawning
+on an interval to "sustain" the flame backfires, because `deleteVehicle` on a still-burning one leaves a
+dying-smoke puff, and doing that repeatedly reads as smog, not fire.** The napalm strike (`fnc_arty.sqf`)
+spawns its carpet once and deletes at the end; it never refreshes.
 
-**How to apply:** to sustain a fire, refresh it on a short interval shorter than that burn life — light a
-new batch, then delete the previous one so the two overlap and the flame never blinks out — and delete the
-last batch when the effect ends. `fnc_molotov_ignite.sqf` does this over its burn window.
+**How to apply:** spawn the fire (or a small scatter of them) once at impact, run whatever damage loop over
+the burn window, and delete the set only when the window closes. `fnc_molotov_ignite.sqf` is built this way.
 
 ## Non-serializable handles must not live in the mission namespace
 
