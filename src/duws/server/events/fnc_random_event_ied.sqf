@@ -116,8 +116,8 @@ private _piles = [];
 		private _act = [
 			_pile,
 			localize "STR_DUWS_T_EVENT_IED_DEFUSE",
-			"\a3\Ui_f\data\IGUI\Cfg\Actions\take_ca.paa",
-			"\a3\Ui_f\data\IGUI\Cfg\Actions\take_ca.paa",
+			"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
+			"\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
 			"(_target getVariable ['DUWS_ied_active', false]) && {_target distance player < 4}",
 			"(_target getVariable ['DUWS_ied_active', false])",
 			{}, {},
