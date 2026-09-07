@@ -137,22 +137,26 @@ _grp setSpeedMode "LIMITED";
 				waitUntil { sleep 1; (time >= _fuse) || { _grp getVariable ["DUWS_mob_over", false] } || { ({ alive _x } count _instigators) == 0 } };
 				private _live = _instigators select { alive _x };
 				if (_live isEqualTo []) exitWith {};
-				// One to three throw, still blended and still civilian. Aim scattered a random offset --
-				// provocateurs, not marksmen -- and each staggered a beat so the bottles do not land as one salvo.
-				private _throwers = (_live call BIS_fnc_arrayShuffle) select [0, 1 + floor random INSTIGATORS];
-				{
-					[_x] spawn {
-						params ["_r"];
-						sleep (random 1.5);
-						private _b = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };
-						if (!alive _r || { _b isEqualTo [] }) exitWith {};
-						private _t = [_b, _r] call BIS_fnc_nearestPosition;
-						_r setDir (_r getDir _t);
-						[_r, (getPosASL _t) getPos [random MOLO_SPREAD, random 360], "molotov"] call fnc_throw;
-					};
-				} forEach _throwers;
-
-				sleep INST_ARM_GAP;
+				// Molotovs are the aggressive opener: throw only if the fuse ran out with the mob still up, or the mob
+				// ended in violence (DUWS_mob_hostileEnd -- a shot, or a downed rioter). A peaceful end -- timed out or
+				// lost the players -- still draws the pistols below, but skips the firebombs: no one left to answer.
+				if ((time >= _fuse) || { _grp getVariable ["DUWS_mob_hostileEnd", false] }) then {
+					// Aim scattered a random offset -- provocateurs, not marksmen -- and each staggered a beat so the
+					// bottles do not land as one salvo. Still blended and still civilian as they throw.
+					private _throwers = (_live call BIS_fnc_arrayShuffle) select [0, 1 + floor random INSTIGATORS];
+					{
+						[_x] spawn {
+							params ["_r"];
+							sleep (random 1.5);
+							private _b = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };
+							if (!alive _r || { _b isEqualTo [] }) exitWith {};
+							private _t = [_b, _r] call BIS_fnc_nearestPosition;
+							_r setDir (_r getDir _t);
+							[_r, (getPosASL _t) getPos [random MOLO_SPREAD, random 360], "molotov"] call fnc_throw;
+						};
+					} forEach _throwers;
+					sleep INST_ARM_GAP;
+				};
 				// Break out to EAST and open fire. isHostile so the kill no longer bills a civilian death:
 				// fnc_civ_handler exempts only isHostile / resistance, so a bare EAST civ body still charges.
 				// Chambered via addWeaponItem so a pocketless civ body still fights.
@@ -244,6 +248,9 @@ _grp setSpeedMode "LIMITED";
 	// sleeping out its fuse (see the subplot). say3D cannot be cut (a fresh one queues rather than replaces),
 	// so a clip already playing just tails off; the roaring flag keeps a late roar-spawn from starting a new one.
 	_grp setVariable ["DUWS_mob_roaring", false];
+	// Aggressive end (a shot, or a downed rioter) vs peaceful (timed out / lost the players): the instigator
+	// subplot throws molotovs only on the former. Set before mob_over so a waiting subplot sees both together.
+	_grp setVariable ["DUWS_mob_hostileEnd", _scatter];
 	_grp setVariable ["DUWS_mob_over", true];
 
 	// Terminal. Panic scatters, fast and upright; anything else (never armed, broke contact, window closed)
