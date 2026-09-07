@@ -1891,13 +1891,15 @@ destination as a place to arrive: it slows, steers around the body, and halts a 
 suicide car detonating on proximity never actually reaches its target on foot.** Tightening the arm range or
 the fuse does not help; the hull simply never closes the last stretch.
 
-**How to apply:** drive the final approach yourself. Inside a rush distance, `_driver disableAI "PATH"` to
-stop the AI steering, then each short tick push the hull straight at the target with
-`_veh setVelocity [(sin _brg) * _spd, (cos _brg) * _spd, (velocity _veh) select 2]`, where `_brg = _veh
-getDir _target` — re-aimed every tick so it tracks a dodging target, keeping the current vertical velocity so
-gravity still applies. Ramp `_spd` up from the hull's current `vectorMagnitude velocity`, capped at its config
-`maxSpeed` (km/h ÷ 3.6), rather than a flat number: a flat `setVelocity` teleports every car to one speed,
-ignoring its own acceleration and top speed, so a slow hull lurches to full pace in a frame.
-`server/events/fnc_random_event_car_bomb.sqf` rams this way for its last 60 m. Re-enable `PATH` if the target
-breaks back out of rush range, or the pathless hull will coast to a stop. Poll fast (~0.05 s) during the rush:
-at ramming speed a half-second tick steps tens of metres and overshoots the contact window.
+**How to apply:** drive the final approach yourself. Once the target is inside the ram range, `_driver disableAI
+"PATH"` to stop the AI steering and `_veh engineOn true` so the wheels stay powered, then each short tick push
+the hull at the target with `_veh setVelocity [(sin _brg) * _spd, (cos _brg) * _spd, (velocity _veh) select 2]`,
+where `_brg = _veh getDir _target` — re-aimed every tick so it tracks a dodging target, keeping the current
+vertical velocity so gravity still applies. Ramp `_spd` in a *script variable* (seed it once from the hull's
+speed at takeover, add `accel × dt` each tick, cap at config `maxSpeed`, km/h ÷ 3.6). Do **not** re-read
+`vectorMagnitude velocity` to ramp: PhysX damps an externally set velocity on a wheeled hull within the tick, so
+the read-back returns near zero and the ramp collapses to a crawl — the car looks like it stops. A flat
+`setVelocity` is the other failure: it teleports every car to one speed, ignoring its own acceleration and top
+speed. Poll fast (~0.05 s): at ramming speed a half-second tick steps tens of metres.
+`server/events/fnc_random_event_car_bomb.sqf` rams this way; it latches the commitment once armed and blows on a
+timer, so it never needs the AI back and a juking target can make it miss but not stall it out.

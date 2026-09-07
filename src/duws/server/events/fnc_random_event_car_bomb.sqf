@@ -57,7 +57,8 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 	private _fuse = -1;
 	private _deadline = time + TIMEOUT;
 	private _lastMove = [0, 0, 0];
-	private _armAt = -1;   // time the car entered RUSH and armed; -1 whenever it is outside RUSH
+	private _armAt = -1;    // time it first reached RUSH and armed; latched -- once armed it always detonates
+	private _ramSpd = 0;    // ram speed (m/s), ramped in script (see the armed branch)
 	// Hull's own top speed, config km/h -> m/s (the /3.6); the ram caps here.
 	private _maxSpd = (getNumber (configFile >> "CfgVehicles" >> typeOf _veh >> "maxSpeed")) / 3.6;
 	if (_maxSpd <= 0) then { _maxSpd = 30 };
@@ -69,25 +70,29 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 		private _live = allPlayers select { alive _x };
 		if (_live isEqualTo []) exitWith {};
 		private _target = [_live, _veh] call BIS_fnc_nearestPosition;
-		private _d = _veh distance _target;
 
-		if (_d < RUSH) then {
-			// Armed inside the activation range. Drive the hull at the target ourselves -- the AI won't ram a
-			// man on foot (arma_engine_gotchas.md) -- ramping velocity at RAM_ACCEL up to maxSpeed, re-aimed each
-			// tick. No proximity fuze: it rams for ARM_HOLD then blows wherever it reached, so a juking player
-			// can make it miss but never defuse it.
-			if (_armAt < 0) then { _armAt = time };
-			if (time - _armAt > ARM_HOLD) exitWith { _fuse = FUSE };
+		// Arm on first reaching the activation range, latched: seed the ram speed from the road speed it arrived
+		// with and take the wheel (the AI won't ram a man on foot -- arma_engine_gotchas.md).
+		if (_armAt < 0 && {(_veh distance _target) < RUSH}) then {
+			_armAt = time;
+			_ramSpd = vectorMagnitude (velocity _veh);
 			_driver disableAI "PATH";
-			private _spd = ((vectorMagnitude (velocity _veh)) + RAM_ACCEL * 0.05) min _maxSpd;
+		};
+
+		if (_armAt >= 0) then {
+			// Armed: ram for ARM_HOLD, then detonate wherever it reached -- a juking player can make it miss but
+			// never defuse it. Ramp _ramSpd ourselves and drive the hull by velocity, engine forced on so the
+			// wheels carry it. Reading the hull's velocity back to ramp would collapse it -- PhysX damps an
+			// externally set speed each tick, so the tracked value is the only stable one.
+			if (time - _armAt > ARM_HOLD) exitWith { _fuse = FUSE };
+			_ramSpd = (_ramSpd + RAM_ACCEL * 0.05) min _maxSpd;
+			_veh engineOn true;
 			private _brg = _veh getDir _target;
-			_veh setVelocity [(sin _brg) * _spd, (cos _brg) * _spd, (velocity _veh) select 2];
+			_veh setVelocity [(sin _brg) * _ramSpd, (cos _brg) * _ramSpd, (velocity _veh) select 2];
 			sleep 0.05;
 		} else {
-			_armAt = -1;
-			// Far: let the AI drive the roads in. Re-issue doMove only when the target moved -- a restart every
-			// tick thrashes the pathfinder.
-			_driver enableAI "PATH";
+			// Not yet armed: let the AI drive the roads in. Re-issue doMove only when the target moved -- a
+			// restart every tick thrashes the pathfinder.
 			if ((getPos _target) distance _lastMove > 15) then {
 				_lastMove = getPos _target;
 				_driver doMove _lastMove;
