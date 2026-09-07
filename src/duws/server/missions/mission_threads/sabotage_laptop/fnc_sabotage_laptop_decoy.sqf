@@ -26,9 +26,6 @@ if (!_rigged) exitWith {
 // OPFOR red the instant it is armed -- the mirror of the BLUFOR-blue success screen -- so it shows for
 // the fuse before the blast clears the prop. Global from the server, which owns the object, like the success path.
 _decoy setObjectTextureGlobal [0, "#(rgb,8,8,3)color(1,0,0,1)"];
-// Claim the cook-off first: the laptop is destructible, so this blast can wreck it a frame before the
-// deleteVehicle below and fire its Killed handler (fnc_sabotage_laptop_mission); the flag blocks a second shell.
-_decoy setVariable ["DUWS_laptop_boomed", true];
 [getPosATL _decoy, _decoy, _decoy getVariable ["DUWS_laptop_table", objNull]] spawn {
     params ["_p", "_lap", "_table"];
     sleep 6;
@@ -38,8 +35,8 @@ _decoy setVariable ["DUWS_laptop_boomed", true];
     // and replicates to every client.
     private _bomb = createVehicle ["Sh_82mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
     _bomb setVelocity [0, 0, -30];
-    // Clear the props by hand: the table is invulnerable so the blast leaves it standing, and the laptop is
-    // removed rather than left as a wreck. Deleted server-side, where both are local.
+    // Clear the laptop and its table with the blast: both are invulnerable props, so the shell would
+    // otherwise leave them standing on the crater. Deleted here on the server, where both are local.
     deleteVehicle _lap;
     deleteVehicle _table;
 };
