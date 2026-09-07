@@ -26,6 +26,14 @@ if (MHQ_deployed) then {
 
 removeAllActions MHQ1;
 
+// Drop both JIP orders so a client joining before the next designation isn't handed a deploy action or map icon
+// against the wreck (the release path clears these; destruction is the other way the MHQ ends). This thread runs
+// on every machine but the server owns the JIP queue, so clear once there.
+if (isServer) then {
+    remoteExec ["", "duws_mhq_actions"];
+    remoteExec ["", "duws_mhq_marker"];
+};
+
 // Stamped here and not on the release path, which this thread never reaches: handing a working
 // vehicle back is not what is being priced. Mission time, like every other cooldown here.
 MHQ_lockout_until = time + MHQ_lockout_seconds;

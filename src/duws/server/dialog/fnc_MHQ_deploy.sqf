@@ -73,7 +73,7 @@ if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
 [MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,false];
 sleep 0.2;
-[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_cmbq8ut7"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,false];
+[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_cmbq8ut7"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
 
 _respawn_location = MHQ1 getRelPos [4,270];
 MHQ_respawn = [west, _respawn_location] call BIS_fnc_addRespawnPosition;

@@ -1,8 +1,8 @@
 // Locality: all machines -- some callers remoteExec to target 0, others to target 2, so it can run anywhere.
-// The JIP-flagged callers share the id "duws_mhq_actions", so the queue holds one entry at the
-// MHQ's current state rather than the whole deploy/undeploy history. Replacement is safe because
-// each branch below opens with removeAllActions. "select" is not part of that: it carries no JIP
-// flag and does something else.
+// The JIP-flagged action callers share the id "duws_mhq_actions": the queue holds one entry at the MHQ's
+// current state, not the deploy/undeploy history, and each branch reopens with removeAllActions. The map
+// icon is JIP-flagged separately as "duws_mhq_marker" (here and in MHQ_deploy/undeploy) for the same reason;
+// both ids are dropped when the MHQ ends (release or destruction). "select" is not JIP-invoked -- it also runs one-time setup.
 
 #include "..\includes\action_style.hpp"
 
@@ -13,7 +13,7 @@ if (_addAction == "select") then {
 	waitUntil {!isNil "MHQ1"};
 	if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
-	[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,false];
+	[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
 
 	// The persistence ring, following the MHQ because it drives. Fixed name rather than one derived
 	// from a position that changes, and only from the server: this branch is remoteExec'd to 2, and

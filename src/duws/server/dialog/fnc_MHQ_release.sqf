@@ -33,6 +33,8 @@ publicVariable "MHQ1";
 // The deploy and undeploy entries are JIP-flagged under this id, so without clearing it a joining
 // client is handed an action against a vehicle that stopped being the MHQ before they arrived.
 remoteExec ["", "duws_mhq_actions"];
+// The map icon is JIP-flagged the same way; drop it too, or a late joiner marks a truck that is no longer the MHQ.
+remoteExec ["", "duws_mhq_marker"];
 
 ["INFO", "SUPPORT", "MHQ released"] call fnc_log;
 ["info", [localize "STR_DUWS_T_MHQ_RELEASED_TITLE", localize "STR_DUWS_T_MHQ_RELEASED_MSG"]]
