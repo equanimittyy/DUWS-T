@@ -35,6 +35,6 @@ _obj setAngularVelocity [random 16 - 8, random 16 - 8, random 16 - 8];   // rand
 	sleep _dur;
 	// [[...]] passes the array as ONE operand: remoteExec reads a command's operands (max 2), so a bare 3-element array throws.
 	{ [[1.5, 0.8, 15]] remoteExec ["addCamShake", _x] } forEach (allPlayers select { alive _x && {(_x distance2D _to) < 3} });
-	sleep 3;   // let it settle after bouncing before it vanishes
+	sleep 5;   // let it settle after bouncing before it vanishes
 	if (!isNull _obj) then { deleteVehicle _obj };
 };
