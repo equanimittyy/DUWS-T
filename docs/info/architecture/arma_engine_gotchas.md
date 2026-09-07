@@ -817,15 +817,14 @@ strength of `knowsAbout > threshold` keeps reporting the true *current* position
 tail — so a stored "last seen" follows a target nothing is observing, and a teleport or fast-travel drags
 the stamp to the new position.**
 
-OPCOM's belief sensor gates on `east knowsAbout _ldr > 1.5` (`server/opcom/fnc_opcom_sense.sqf:13`) and
-stamps `getPosATL _ldr` (`:15`) — the leader's live position. A player who fast-travels to their HQ has
-not been re-observed, but `east knowsAbout` on that leader has not yet decayed below the gate, so the next
-sweep stamps the HQ position and the influence grid blooms enemy force there though nothing saw the move.
-The stale-refresh path (`:27-29`) compounds it, re-stamping the live position once a stamp ages past its
-fresh window with no new sighting. Storing a position rather than an object handle does not save it — the
-handle-follows-a-respawn trap ([§Non-serializable handles](#non-serializable-handles-must-not-live-in-the-mission-namespace)
-warns of the handle form) is dodged, but the sensor re-samples the live position anyway while the scalar
-lingers.
+OPCOM's belief sensor is the worked example. Gating on `east knowsAbout _ldr > 1.5` alone and stamping
+`getPosATL _ldr` (the leader's live position) made a player who fast-travels to their HQ — never
+re-observed, but with `east knowsAbout` not yet decayed below the gate — bloom enemy force at the HQ on the
+next sweep, though nothing saw the move. A stale-refresh path re-stamped the live position once a stamp
+aged past its fresh window with no new sighting, compounding it. Storing a position rather than an object
+handle does not save it — the handle-follows-a-respawn trap
+([§Non-serializable handles](#non-serializable-handles-must-not-live-in-the-mission-namespace) warns of the
+handle form) is dodged, but the sensor re-samples the live position anyway while the scalar lingers.
 
 **How to apply:** treat `knowsAbout` as a lagging integrator and detect genuine acquisition from its
 *edge*, not its level — store the previous tick's value and only write a live position when the scalar is
@@ -833,7 +832,32 @@ not decreasing (rising, or pinned high while still in contact); a falling scalar
 freeze the last-seen position and let it decay. Where per-observer cost is affordable,
 `unit targetKnowledge target` returns the engine's own last-known position plus a current-visible flag —
 a real decaying last-seen that never teleports — but it is per-observer, not the side-wide one-call query.
-Fix planned in [`../../plans/opcom/belief_fidelity.md`](../../plans/opcom/belief_fidelity.md#fix-2-position-freshness-acquisition-not-knowledge).
+Applied in `server/opcom/fnc_opcom_sense.sqf`: the sweep tracks the prior tick's scalar per group
+(`DUWS_opcom_ka_prev`) and stamps only while it is not falling.
+
+## A `Killed` handler added on the server does not fire for a client-local unit
+
+**A unit event handler runs only on the machine that added it, and `Killed` on that machine fires when
+the unit is local to it. Add a `Killed` handler on the server for a unit that is local to a client — a
+player, or an AI in a player's group in co-op — and the death may never reach the server-side handler.
+Server-authoritative bookkeeping that hangs off a unit's death cannot rely on a server-added `Killed`.**
+
+The trap hides in single-player: there the one machine is server and client, every unit is local, and the
+handler always fires — so a design tested only in SP looks correct. It breaks in co-op, where BLUFOR
+player groups are local to their clients. Server-spawned units (an OPFOR garrison, a mission-spawned
+civilian) are server-local, so the pattern is safe for them — `DUWS_fnc_garrisonReserveWatch`
+(`server/init_zones/fnc_garrison_reserve.sqf:192-211`) adds a `Killed` on the server to record a garrison
+wipe and works precisely because those units never leave the server. The mission's other `Killed` adds
+follow the same rule — a player's own death handler is added on that player's client
+(`modules/AIS/Core/fn_aisInitPlayer.sqf`), never on the server.
+
+**How to apply:** to react to a client-local unit's death on the server, either add the handler where the
+unit is local (client init, then `remoteExec` the fact to the server) or, for a whole side, *poll* on the
+server instead of handling the event. OPCOM's belief prune (`server/opcom/fnc_opcom_belief_prune.sqf`)
+takes the poll: rather than a `Killed` handler on each sighted BLUFOR unit, it resolves each believed
+group by `netId` every tick (`groupFromNetId`, a server-authoritative read for a group local to any
+machine) and drops the row when no unit is left alive — catching a wipe, a merge-drain and a deleted group
+with one server-side test.
 
 ## `enableSimulation` is local, so a server-side freeze leaves clients simulating
 
