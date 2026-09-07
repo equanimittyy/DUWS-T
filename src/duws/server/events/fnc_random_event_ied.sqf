@@ -17,8 +17,8 @@ if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
-#define IED_COUNT_MIN 1
-#define IED_COUNT_MAX 6
+#define IED_COUNT_MIN 4
+#define IED_COUNT_MAX 12
 #define MIN_DIST 300
 #define FWD_SPREAD 200
 #define SCATTER 300
@@ -103,6 +103,9 @@ private _piles = [];
 		// Every interface (the SP/listen host included), but not a dedicated server that has none;
 		// JIP-keyed to the pile so a late joiner gets it and deleting the pile drops the queued message.
 		_act remoteExec ["BIS_fnc_holdActionAdd", [0, -2] select isDedicated, _pile];
+		// Hand every pile to the sweep at spawn -- live or decoy, approached or not, it collects on its
+		// own clock. A junk pile is a static prop, so a raw DUWS_binMe flag is inert (fnc_random_event_ied_defuse).
+		[_pile, LIFETIME] call fnc_duws_disposeAfter;
 		_piles pushBack _pile;
 	};
 } forEach _spots;
@@ -122,14 +125,14 @@ missionNamespace setVariable ["DUWS_ied_piles",
 private _liveCount = { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles;
 ["INFO", "CIV", format ["IED event: %1 piles (%2 live) ahead of player, rolled at town %3", count _piles, _liveCount, _townIndex]] call fnc_log;
 
-// Pure-decoy field: no proximity watch to run, just reap the junk after its life.
+// Pure-decoy field: no proximity watch to run. Just drop the icons after its life; the piles delete
+// themselves on the disposeAfter clock set at spawn.
 if (_liveCount == 0) exitWith {
 	[_piles] spawn {
 		params ["_piles"];
 		sleep LIFETIME;
 		missionNamespace setVariable ["DUWS_ied_piles",
 			(missionNamespace getVariable ["DUWS_ied_piles", []]) - _piles, true];
-		{ if (!isNull _x) then { [_x] call fnc_duws_disposeAfter } } forEach _piles;
 	};
 };
 
@@ -175,7 +178,7 @@ if (_liveCount == 0) exitWith {
 		sleep TICK;
 	};
 	};
+	// Only drop the icons; each pile deletes itself on the disposeAfter clock set at spawn.
 	missionNamespace setVariable ["DUWS_ied_piles",
 		(missionNamespace getVariable ["DUWS_ied_piles", []]) - _piles, true];
-	{ if (!isNull _x) then { [_x] call fnc_duws_disposeAfter } } forEach _piles;
 };
