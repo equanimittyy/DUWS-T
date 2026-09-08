@@ -5,7 +5,8 @@
 // Class-agnostic on the building (survives modded/unrecognised maps), catalog-driven on the furniture
 // (which is ours). fnc_furnish_grid infers the interior as a per-storey cell grid split into rooms; this
 // fills it in ordered passes, each reserving the cells it takes in the grid's `occupied` flag -- so no two
-// pieces share a cell and the nav-path cells stay clear (a trooper is not sealed behind a sofa). Facing is
+// pieces share a cell, and the nav-path cells and flagged doorways stay clear (no trooper sealed behind a
+// sofa, no door blocked). Facing is
 // by construction, corrected per class by catalog frontYaw. Pieces are measured, not assumed: a wall piece
 // is seated on its wall plane (no clip, no float) and an anchor too big for its cell is rejected. A room is
 // placed frozen and woken once laid out. An empty grid (a ruin, a view-only prop) degrades to the seed nav
@@ -75,7 +76,7 @@ fnc_furnish_building = {
     private _seatOK = {
         params ["_wp"];
         private _c = [_wp] call _cellAt;
-        _c isNotEqualTo [] && {!(_c select 5)} && {(_c select 1) != "blocked"}
+        _c isNotEqualTo [] && {!(_c select 5)} && {(_c select 1) != "blocked"} && {(_c select 1) != "door"}
     };
 
     // Grid-pack a random subset of a set's clutter across a placed anchor's measured top, seated on the
@@ -298,9 +299,9 @@ fnc_furnish_building = {
         // Rug pass: flat covers on any free floor (open or near-wall), reserved so nothing packs onto them.
         private _rugClasses = ["rug", _set] call fnc_furnish_classesFor;
         if (_rugClasses isNotEqualTo []) then {
-            private _nRug = (floor ((count (_rcells select { (_x select 1) != "blocked" })) / RUG_DIV)) min RUG_MAX;
+            private _nRug = (floor ((count (_rcells select { (_x select 1) != "blocked" && {(_x select 1) != "door"} })) / RUG_DIV)) min RUG_MAX;
             for "_k" from 1 to _nRug do {
-                private _free = _rcells select { (_x select 1) != "blocked" && {!(_x select 5)} };
+                private _free = _rcells select { (_x select 1) != "blocked" && {(_x select 1) != "door"} && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_rugClasses] call _pickCapped;
                 if (_cls == "") exitWith {};

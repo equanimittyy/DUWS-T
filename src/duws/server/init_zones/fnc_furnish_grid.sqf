@@ -8,7 +8,8 @@
 // GEOM wall ring -- then the surviving cells flood-fill into rooms. Cached on the building, built once.
 //
 // Cell: [posASL, state, nearBearing, clearance, roomId, occupied, i, j, storey]
-//   state       "open" (no wall in reach) | "near" (wall to back onto) | "blocked" (too tight to hold)
+//   state       "open" (nothing in reach) | "near" (wall to back onto) | "door" (a wall gap, kept clear) |
+//               "blocked" (too tight to hold)
 //   nearBearing bearing of the nearest wall, or -1 if none within reach
 //   clearance   nearest-wall distance in metres (a full miss reads as the ray length)
 //   roomId      flood-fill room label; blocked cells stay -1
@@ -103,18 +104,33 @@ fnc_furnish_grid = {
                     // Wall ring at chest height, not the floor, so a low sill is not read as a wall.
                     private _cb = _floorASL vectorAdd [0, 0, GRID_CHEST];
                     private _clear = WALL_REACH; private _nearBearing = -1;
+                    private _dist = [];
                     {
                         private _ce = _cb vectorAdd [WALL_REACH * sin _x, WALL_REACH * cos _x, 0];
                         _rays = _rays + 1;
                         private _r = lineIntersectsSurfaces [_cb, _ce, objNull, objNull, true, 1, "GEOM"];
+                        private _d = WALL_REACH;
                         if (_r isNotEqualTo []) then {
-                            private _d = _cb distance ((_r select 0) select 0);
+                            _d = _cb distance ((_r select 0) select 0);
                             if (_d < _clear) then { _clear = _d; _nearBearing = _x };
                         };
+                        _dist pushBack _d;
                     } forEach _ringBearings;
 
+                    // Doorway: a wall in reach on two opposite ring bearings with the cross axis open is a jamb
+                    // pair, not a backing wall -- tag it so furniture skips the gap while flood-fill still joins
+                    // the rooms through it (non-blocked). Opposite of ring index k is k+4, perpendicular axis k+2.
+                    private _door = false;
+                    {
+                        private _o = (_x + 2) mod 4;
+                        if ((_dist select _x) <= WALL_NEAR && {(_dist select (_x + 4)) <= WALL_NEAR}
+                            && {(_dist select _o) > WALL_NEAR} && {(_dist select (_o + 4)) > WALL_NEAR})
+                            exitWith { _door = true };
+                    } forEach [0, 1, 2, 3];
+
                     private _state = if (_clear < BLOCKED_CLEAR) then { "blocked" }
-                        else { if (_clear <= WALL_NEAR) then { "near" } else { "open" } };
+                        else { if (_door) then { "door" }
+                        else { if (_clear <= WALL_NEAR) then { "near" } else { "open" } } };
 
                     _cells pushBack [_floorASL, _state, _nearBearing, _clear, -1, false, _i, _j, _sIdx];
                 };
