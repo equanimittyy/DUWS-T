@@ -489,9 +489,9 @@ DUWS_hardpointBounty = createHashMapFromArray [
 // streams, so OPCOM keeps firing between raids. On each, one element screens wide (widepatrol) to catch
 // the assault on the rim while the rest hold close.
 DUWS_hardpointGarrison = createHashMapFromArray [
-    ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
-    ["OP", ["closepatrol:team", "widepatrol:recon"]], ["AA", "wp_team"], ["MORTAR", ["wp_team", "widepatrol:patrol"]], ["ARTY", ["wp_team", "wp_team", "widepatrol:team"]],
-    ["RADIO", ["wp_team", "widepatrol:wp_team", "widepatrol:team"]], ["MINEFIELD", ""]
+    ["MG", "closepatrol:team"], ["AT", "closepatrol:wp_team"], ["GMG", "closepatrol:team"], ["ROADBLOCK", "closepatrol:team"],
+    ["OP", ["closepatrol:team", "widepatrol:recon"]], ["AA", "closepatrol:wp_team"], ["MORTAR", ["closepatrol:wp_team", "widepatrol:patrol"]], ["ARTY", ["closepatrol:wp_team", "closepatrol:wp_team", "widepatrol:team"]],
+    ["RADIO", ["closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:team"]], ["MINEFIELD", ""]
 ];
 
 // Per-posture spawn band and circuit radius, each a fraction of the spawn radius the caller passes.

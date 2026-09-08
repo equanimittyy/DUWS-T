@@ -31,7 +31,8 @@
 // row editor splits input on commas and would cut a nested list in half
 // (docs/info/architecture/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing plain strings.
 //
-// A bare name defaults to closepatrol, so a caller that names no posture still gets what it always got.
+// A bare name (no posture prefix) defaults to "none": no standing orders, the caller drives the group
+// itself. Shipped data always prefixes its posture, so bare is for a caller that orders its own unit.
 DUWS_fnc_tokenName = {
     params ["_token"];
     private _parts = _token splitString ":";
@@ -42,7 +43,7 @@ DUWS_fnc_tokenName = {
 DUWS_fnc_tokenPosture = {
     params ["_token"];
     private _parts = _token splitString ":";
-    if (count _parts < 2) exitWith { "closepatrol" };
+    if (count _parts < 2) exitWith { "none" };
     _parts select 0
 };
 

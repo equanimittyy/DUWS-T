@@ -542,10 +542,10 @@ private _have = ["patrol","team"];
     (["team"] call DUWS_fnc_tokenName), "team"] call fnc_assertEq;
 ["tokenPosture: the posture is the half before the colon",
     (["garrison:team"] call DUWS_fnc_tokenPosture), "garrison"] call fnc_assertEq;
-// The orders every team and every vehicle walked when a posture was a column on the roster row, so
-// a side mission that names only a team keeps getting what it always got.
-["tokenPosture: a bare token falls back to a close patrol",
-    (["team"] call DUWS_fnc_tokenPosture), "closepatrol"] call fnc_assertEq;
+// A bare token carries no posture, so it resolves to none: no standing orders, for a caller that
+// raises a unit it drives itself. A caller wanting a patrol names the posture.
+["tokenPosture: a bare token falls back to none, no standing orders",
+    (["team"] call DUWS_fnc_tokenPosture), "none"] call fnc_assertEq;
 // The lookups strip the posture themselves; a row matched on the whole string would find nothing.
 ["teamRow: a posture-carrying token still finds its roster row",
     ((["garrison:team"] call DUWS_fnc_teamRow) select 0), "team"] call fnc_assertEq;
