@@ -63,21 +63,25 @@ Smarter assignment is a later refinement, not a first-cut requirement.
 
 ## Pillar 3 — the furniture catalog
 
-Everything class-specific about furniture lives in one authored catalog, an `.hpp` config table in the style
-of [`mission_types.hpp`](../../src/duws/shared/includes/mission_types.hpp), validated by a lint the way the
-composition fences are ([`fnc_BluHQinit.sqf:38`](../../src/duws/server/init_hq/fnc_BluHQinit.sqf)): every
-catalog class must resolve in `CfgVehicles`/`CfgWeapons` and name a known role.
+Everything class-specific about furniture lives in one authored catalog, an `.hpp` array-literal table in
+the style of [`mission_types.hpp`](../../src/duws/shared/includes/mission_types.hpp) (`#include`d as the body
+of an SQF array), validated by a lint the way the composition fences are
+([`fnc_BluHQinit.sqf:38`](../../src/duws/server/init_hq/fnc_BluHQinit.sqf)): every catalog class must resolve
+in `CfgVehicles`/`CfgMagazines`/`CfgWeapons` and name a known role.
 
-Each entry carries:
+Each entry carries `[class, role, frontYaw, set[], seats]`:
 
 | Field | Meaning |
 |---|---|
-| `role` | `table` / `desk` / `chair` / `sofa` / `bed` / `cabinet` / `rug` / `clutter` — selects the placement pass |
-| `frontYaw` | degrees added so the model's +Y becomes its real front |
+| `role` | one of five placement categories, each its own pass: `anchor` / `seat` / `wall` / `rug` / `clutter` |
+| `frontYaw` | degrees subtracted from a target bearing so the model's real front lands on it (`heading = target − frontYaw`); it is the bearing the model's front points at when placed at heading 0 |
 | `set[]` | which furniture sets the piece belongs to (`living` / `sleeping` / `work`) |
-| `seats` | `-1` = chairs on every open side (dining table); `N` = exactly `N` on the front (a desk is `1`) |
-| `backToWall` | `1` = must sit in a `near-wall` cell, back to the wall (sofa, bed, cabinet) |
-| `wants[]` | pairings the placer should try to satisfy (a desk `wants` a chair) |
+| `seats` | anchors only: `-1` = a seat on every open side (dining table); `N` = exactly `N` on the front (a desk is `1`); `0` (ignored) otherwise |
+
+The five categories: **anchor** needs open floor and takes seats beside it (table, desk); **seat** sits at
+an anchor's edge, never standalone; **wall** stands back-flush and perpendicular to a wall (sofa, bed,
+cabinet); **rug** lies on any free floor; **clutter** sits on an anchor's top. `backToWall` and a `wants`
+list are not stored — they are exactly `role == "wall"` and `role == "anchor"`, so the role carries them.
 
 Footprint is read from `boundingBoxReal` at runtime, not stored — it is exact and free.
 
@@ -94,17 +98,17 @@ Runtime, over the cached grid, per room. Ordered passes, each reserving the cell
 grid** — the reservation is what makes clip-avoidance deterministic rather than luck: two pieces can never be
 handed the same cell.
 
-1. **Wall pass.** `near-wall` cells take `backToWall` furniture (sofa, cabinet, bed, and a desk when it
-   backs a wall), placed back-to-wall — its back is `frontYaw + 180` toward the wall bearing — with the
-   footprint checked against neighbouring cells before reserving.
-2. **Anchor pass.** `open`-centre cells with clearance take tables; then the anchor's seats per its `seats`
-   rule (a desk one chair on its front, a table chairs on each open side), each seat faced at the anchor by
-   construction (its heading is the bearing from its offset back to the anchor centre plus its own
-   `frontYaw`).
+1. **Wall pass.** `near-wall` cells take `wall` furniture (sofa, bed, cabinet), placed back-flush and
+   perpendicular to the wall — its front points into the room, `heading = wallBearing + 180 − frontYaw` —
+   with the footprint checked against neighbouring cells before reserving.
+2. **Anchor pass.** `open` cells with clearance take anchors (tables and desks alike, in the open, not
+   backed to a wall); then the anchor's seats per its `seats` rule (a table a seat on each open side, a desk
+   one on its front), each seat faced at the anchor by construction (its heading is the bearing from its
+   offset back to the anchor centre, minus the seat's own `frontYaw`).
 3. **Surface pass.** Clutter grid-packed across an anchor's top, seated on the anchor object so it travels
    and turns with the table. This pass already exists in
    [`fnc_furnish_building.sqf`](../../src/duws/server/init_zones/fnc_furnish_building.sqf) and is kept.
-4. **Rug pass.** Flat floor covers centred in still-open cells.
+4. **Rug pass.** Flat floor covers on any free floor cell, open or near-wall.
 5. **Path preservation.** The straight-line cells linking consecutive `buildingPos` are never reserved, so a
    walk path stays clear. This doubles as the garrison-conflict fix: the nav lattice's connectivity is left
    open, so a trooper is not sealed behind a sofa. Doorway-exact avoidance is not attempted (door world
@@ -119,33 +123,20 @@ Density is a fill target — a fraction of a room's cells, or until cells run ou
 A **grid cell**, per storey:
 
 ```
-[cellPosASL, state, wallBearings, clearance, roomId, occupied]
-//  state        "open" | "near" | "blocked"
-//  wallBearings bearings of walls within reach (empty unless "near")
-//  clearance    nearest wall distance, metres
-//  roomId       set by Pillar 2; -1 before segmentation
-//  occupied     reservation flag, set during placement
+[posASL, state, nearBearing, clearance, roomId, occupied, i, j, storey]
+//  state       "open" | "near" | "blocked"
+//  nearBearing bearing of the nearest wall, or -1 if none within reach
+//  clearance   nearest wall distance, metres
+//  roomId      set by Pillar 2; -1 before segmentation (blocked cells stay -1)
+//  occupied    reservation flag, set during placement
+//  i, j        storey grid coords, for room adjacency
 ```
 
-A **catalog entry** (`.hpp`):
+A **catalog entry** — an SQF-array row `[class, role, frontYaw, set[], seats]`:
 
 ```
-class Land_TableBig_01_F {
-    role = "table";
-    frontYaw = 0;
-    set[] = {"living"};
-    seats = -1;          // chairs on every open side
-    backToWall = 0;
-    wants[] = {"chair"};
-};
-class OfficeTable_01_new_F {
-    role = "desk";
-    frontYaw = 0;        // calibrated
-    set[] = {"work"};
-    seats = 1;           // one chair, on the front
-    backToWall = 1;
-    wants[] = {"chair"};
-};
+["Land_TableBig_01_F",  "anchor", 0, ["living"], -1],   // a seat on every open side
+["OfficeTable_01_new_F", "anchor", 0, ["work"],    1]    // one seat, on the front
 ```
 
 Placed rows are still `[class, offX, offY, offZ, dir]` in the anchor's model frame, the

@@ -9,7 +9,7 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 private _catalog = [
 #include "..\..\shared\includes\furniture_catalog.hpp"
 ];
-private _classes = (_catalog select { (_x select 1) in ["desk", "chair", "sofa", "bed", "cabinet"] }) apply { _x select 0 };
+private _classes = (_catalog select { (_x select 1) in ["anchor", "seat", "wall"] }) apply { _x select 0 };
 
 private _rows = [["-- clear spawned --", { ["", player] remoteExec ["fnc_furnish_calibrate_spawn", 2] }, [], [1, 0.4, 0.4, 1]]];
 {

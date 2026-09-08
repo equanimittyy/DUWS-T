@@ -125,11 +125,12 @@ fnc_furnish_building = {
     // Reserves the anchor footprint and every seated cell. Returns the objects placed.
     private _placeAnchor = {
         params ["_cell", "_class", "_set"];
-        (_catalog get _class) params ["", "_fy", "", "_seats", "_btw", "_wants"];
-        _cell params ["_cpos", "", "_nearB"];
+        (_catalog get _class) params ["", "_fy", "", "_seats"];
+        _cell params ["_cpos"];
 
-        private _heading = if (_btw > 0 && {_nearB >= 0}) then { (_nearB + 180) - _fy } else { 0 };
-        private _frame = [_cpos, _heading] call _frameAt;
+        // Anchors sit in the open, no wall backing, so a fixed heading; a desk's single seat still lands
+        // on its real front via the frontYaw offset in the seat block below.
+        private _frame = [_cpos, 0] call _frameAt;
         private _aObj = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false] call fnc_place_settled) select 0;
         deleteVehicle _frame;
         private _out = [_aObj];
@@ -139,8 +140,8 @@ fnc_furnish_building = {
         private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
         private _topZ = (_bb select 1) select 2;
 
-        if (_seats != 0 && {"chair" in _wants}) then {
-            private _chairs = ["chair", _set] call fnc_furnish_classesFor;
+        if (_seats != 0) then {
+            private _chairs = ["seat", _set] call fnc_furnish_classesFor;
             if (_chairs isNotEqualTo []) then {
                 private _edges = if (_seats < 0) then {
                     [[0, _hy + SEAT_GAP], [0, -(_hy + SEAT_GAP)], [_hx + SEAT_GAP, 0], [-(_hx + SEAT_GAP), 0]]
@@ -224,9 +225,8 @@ fnc_furnish_building = {
         private _rcells = _rooms get _rid;
         private _set = _prio select (_forEachIndex mod (count _prio));
 
-        // Wall pass: back-to-wall pieces onto near cells, spaced by reservation.
-        private _wallClasses = [];
-        { _wallClasses append ([_x, _set] call fnc_furnish_classesFor) } forEach ["sofa", "bed", "cabinet"];
+        // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
+        private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
         if (_wallClasses isNotEqualTo []) then {
             private _nWall = floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV);
             for "_k" from 1 to _nWall do {
@@ -236,9 +236,8 @@ fnc_furnish_building = {
             };
         };
 
-        // Anchor pass: tables/desks into the roomiest free open cells first.
-        private _anchorClasses = [];
-        { _anchorClasses append ([_x, _set] call fnc_furnish_classesFor) } forEach ["table", "desk"];
+        // Anchor pass: anchors into the roomiest free open cells first.
+        private _anchorClasses = ["anchor", _set] call fnc_furnish_classesFor;
         if (_anchorClasses isNotEqualTo []) then {
             private _nAnch = 1 max floor ((count (_rcells select { (_x select 1) == "open" })) / FILL_DIV);
             for "_k" from 1 to _nAnch do {
@@ -249,12 +248,12 @@ fnc_furnish_building = {
             };
         };
 
-        // Rug pass: flat covers on cells still open.
+        // Rug pass: flat covers on any free floor (open or near-wall), reserved so nothing packs onto them.
         private _rugClasses = ["rug", _set] call fnc_furnish_classesFor;
         if (_rugClasses isNotEqualTo []) then {
-            private _nRug = floor ((count (_rcells select { (_x select 1) == "open" })) / RUG_DIV);
+            private _nRug = floor ((count (_rcells select { (_x select 1) != "blocked" })) / RUG_DIV);
             for "_k" from 1 to _nRug do {
-                private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} };
+                private _free = _rcells select { (_x select 1) != "blocked" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
                 private _cell = selectRandom _free;
                 private _frame = [_cell select 0, 0] call _frameAt;

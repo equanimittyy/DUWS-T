@@ -7,10 +7,10 @@ furniture_catalog.hpp is the one place class-specific furniture knowledge lives;
 non-numeric frontYaw -- compiles into the array clean and then misplaces or drops a piece
 at runtime with no error. This catches the class before it ships, python-only.
 
-Per row [class, role, frontYaw, set[], seats, backToWall, wants[]] it checks:
-  - exactly 7 columns; class a non-empty string, unique across the file;
+Per row [class, role, frontYaw, set[], seats] it checks:
+  - exactly 5 columns; class a non-empty string, unique across the file;
   - role in the known set; every set[] entry a known set, list non-empty;
-  - frontYaw numeric; seats an integer; backToWall 0 or 1; every wants[] entry a known role.
+  - frontYaw numeric; seats an integer.
 
 It does NOT check that a class resolves in CfgVehicles/CfgMagazines/CfgWeapons -- python
 cannot read the engine config, so the runtime loader logs and skips an unresolved class --
@@ -23,7 +23,7 @@ import sys
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 CATALOG = os.path.join(ROOT, "src", "duws", "shared", "includes", "furniture_catalog.hpp")
 
-ROLES = {"table", "desk", "chair", "sofa", "bed", "cabinet", "rug", "clutter"}
+ROLES = {"anchor", "seat", "wall", "rug", "clutter"}
 SETS = {"living", "sleeping", "work"}
 
 
@@ -97,13 +97,12 @@ def main():
             fails.append((r[:40], "row is not a [...] literal"))
             continue
         cols = split_top(r[1:-1])
-        if len(cols) != 7:
-            fails.append((r[:40], f"{len(cols)} columns, expected 7"))
+        if len(cols) != 5:
+            fails.append((r[:40], f"{len(cols)} columns, expected 5"))
             continue
         cls = unquote(cols[0])
         role = unquote(cols[1])
         sets = parse_list(cols[3])
-        wants = parse_list(cols[6])
         tag = cls or r[:40]
         if not cls:
             fails.append((tag, "class is not a quoted string"))
@@ -119,10 +118,6 @@ def main():
             fails.append((tag, f"set[] '{cols[3]}' empty or names an unknown set"))
         if not is_int(cols[4]):
             fails.append((tag, f"seats '{cols[4]}' not an integer"))
-        if cols[5].strip() not in ("0", "1"):
-            fails.append((tag, f"backToWall '{cols[5]}' not 0 or 1"))
-        if wants is None or any(w not in ROLES for w in wants):
-            fails.append((tag, f"wants[] '{cols[6]}' not a list of known roles"))
 
     print(f"[furniture] checked {len(rows)} catalog row(s), {len(seen)} class(es)")
     if fails:
