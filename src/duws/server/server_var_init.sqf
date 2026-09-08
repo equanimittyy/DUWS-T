@@ -621,8 +621,9 @@ OPCOM_AP_TOPUP = 8;
 OPCOM_GRID_CELL   = 500;
 OPCOM_GRID_SPREAD = 1000;
 
-// The single loop cadence in seconds: one tick senses, ages belief and rebuilds the grid (Phase 2 scores
-// and commits one action on the same tick; Phase 4 steps movement here too). Kept fast on purpose -- a
+// The single loop cadence in seconds: one tick senses, ages belief and rebuilds the grid (the decision
+// loop scores and commits one action on the same tick; the tasking phase steps movement here too). Kept
+// fast on purpose -- a
 // finer tick reads as a more reactive commander, and movement/economy scale with it (smaller steps, finer
 // spend) rather than breaking.
 OPCOM_TICK_PERIOD = 5;

@@ -1,8 +1,9 @@
 # Audit: opcom_plan.md
 
 A full-document review of [`opcom_plan.md`](opcom_plan.md), cross-checked against the shipped Phase 1
-code under `src/duws/server/opcom/`. The pre-Phase-2 plan-doc gates it raised are now closed in the plan;
-this doc is kept as the tracker for the items deferred to the phase or code change that owns them.
+code under `src/duws/server/opcom/`. The plan-doc gates it raised — which block the decision-loop and
+orchestration phases, not the force-weighting phase next in line — are now closed in the plan; this doc is
+kept as the tracker for the items deferred to the phase or code change that owns them.
 
 ## Verdict
 
@@ -11,10 +12,11 @@ this doc is kept as the tracker for the items deferred to the phase or code chan
 follow documented engine gotchas, and the phase order is forced by read dependencies. Phase 1 as built
 matches its spec.
 
-The gates that blocked Phase 2 are resolved in `opcom_plan.md`: the intent-clock contradiction (now ticks
-everywhere), Recruit's candidate count (one per hireable type), the Attack/Intercept/Rapport resolve
-predicate and ownership handoff, and the stale-statement sweep from Phase 1 landing. What remains is
-later-phase design and code housekeeping, tracked below against the change that owns each.
+The gates that blocked the decision-loop and template work are resolved in `opcom_plan.md`: the
+intent-clock contradiction (now ticks everywhere), Recruit's candidate count (one per hireable type), the
+Attack/Intercept/Rapport resolve predicate and ownership handoff, and the stale-statement sweep from
+Phase 1 landing. What remains is later-phase design and code housekeeping, tracked below against the
+change that owns each.
 
 ## Remaining — code housekeeping (any time; no design decision)
 
@@ -32,7 +34,7 @@ Not plan defects; correct when next touching these files.
 
 ## Remaining — deferred to a later phase
 
-- **Movement (Phase 4):**
+- **Movement (Phase 3 — the tasking-wiring phase):**
   - The router is specified as Dijkstra; use A* with a distance heuristic, early exit on the target, and
     a budget of one route search per tick. The connectivity mask already prunes most of the 3844 cells, so
     the cost is contained — but say A* in the plan before the phase builds it.
@@ -40,9 +42,9 @@ Not plan defects; correct when next touching these files.
     ring (K=1) unstreamed, invisible to CAS. Either raise K against airborne players (precedent: the AA
     hardpoint's 5000 m air ring) or note the exploit as accepted.
   - `defenseAbandoned` reads as a counterfactual grid rebuild, which is unaffordable per candidate. State
-    the approximation — read `_gridEne` around the unit's own cell as the threat term — so Phase 2's
-    successor does not implement the literal counterfactual.
-- **Templates:** the resolve predicate and capture handoff are now specified
+    the approximation — read `_gridEne` around the unit's own cell as the threat term — so the decision
+    loop does not implement the literal counterfactual.
+- **Orchestration:** the resolve predicate and capture handoff are now specified
   ([§The resolve phase](opcom_plan.md#the-resolve-phase-what-ends-a-template)); the open task is the
   verification the section calls out — confirm the zone-capture trigger fires for an AI-only fight with no
   player near, else have OPCOM's resolve call the capture functions itself.
@@ -58,7 +60,7 @@ Not plan defects; correct when next touching these files.
 
 - **Grid rebuild cost.** Zeroing 2×3844 cells plus depositing every source each 5 s tick runs in
   scheduled space and should be fine, but the plan budgets wall-clock only to the scoring pass. Measure the
-  rebuild once under a full map before Phase 2 stacks scoring on the same tick.
+  rebuild once under a full map before the decision loop stacks scoring on the same tick.
 - **Nominal enemy deposit on empty BLU zones** (`OPCOM_GRID_ZONE_ENEMY_MEN`) means OPCOM never sees an
   undefended zone as empty. Belief-consistent (territorial facts are free, strength is not) and arguably
   good design; the constant is the knob that sets baseline OPCOM caution.

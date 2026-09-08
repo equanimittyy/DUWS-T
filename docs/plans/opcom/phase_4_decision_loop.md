@@ -1,20 +1,25 @@
-# OPCOM Phase 2 — the loop: appraisal and the economic actions
+# OPCOM Phase 4 — the decision loop (draft: the economic slice)
 
-The second build phase of [`opcom_plan.md`](opcom_plan.md), in that plan's
-[§Build order](opcom_plan.md#build-order). Phase 1 shipped perception — belief, the grid, and the tick
-that senses, ages and rebuilds. Phase 2 puts a *decision* on that tick: score the actions the commander
-can afford, commit one, and spend Army Power. It stops at the economic actions — the ones that emit no
-unit ([§Actions, sinks and taskings](opcom_plan.md#actions-sinks-and-taskings)): **Fortify, Build, Bank**.
-Everything that dispatches a unit (Attack, Intercept, Rapport, Recruit, Scout, Reinforce, Arty) waits on
-the roster, intents and movement of Phases 3–6 and is gated out here.
+**Early draft.** Written ahead of its phase and covering only the *economic* half of the decision loop
+(Fortify, Build, Bank); the tasking-automation half — auto-Recruit and auto-issued orders over the P3
+mechanism — is added when Phase 4 begins. Kept as a working draft, not a finished spec.
+
+The decision loop is Phase 4 of [`opcom_plan.md`](opcom_plan.md), in that plan's
+[§Build order](opcom_plan.md#build-order). Phase 1 shipped perception; Phase 2 makes force real
+(firepower weighting); Phase 3 wires up recruitment, tasking and movement under manual control. Phase 4
+puts a *decision* on the tick: score the actions the commander can afford, commit one, and spend Army
+Power. This draft stops at the economic actions — the ones that emit no unit
+([§Actions, sinks and taskings](opcom_plan.md#actions-sinks-and-taskings)): **Fortify, Build, Bank**. The
+unit-dispatching actions (Attack, Intercept, Rapport, Recruit, Scout, Reinforce, Arty) drive the P3
+mechanism and are the other half of this phase, not yet drafted here.
 
 ## Scope
 
 The economic subset is deliberate: it exercises the whole appraisal spine — enumerate, gate, score,
 weighted-random pick, commit one, spend — against actions that resolve the same tick they commit, so no
 intent record, no unit, and no movement is needed to see the commander behave. The score
-([§The score](opcom_plan.md#the-score)) runs in full with two phase-2 simplifications, each a documented
-swap point later phases replace:
+([§The score](opcom_plan.md#the-score)) runs in full with two draft simplifications, each a documented
+swap point a later step replaces:
 
 - **`P(win)` is 1 for an economic action** — a purchase has no combat outcome. The force-ratio `r`
   ([§P(win)](opcom_plan.md#pwin-the-force-ratio-lanchester-square)) is still built as a grid read (below),

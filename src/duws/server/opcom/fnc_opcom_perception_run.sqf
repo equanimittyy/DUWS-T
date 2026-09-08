@@ -1,8 +1,8 @@
 // Locality: server. The OPCOM loop thread, spawned once by WARCOM init after zones and civ state exist.
 // Phase 1 is perception-only: each tick it perceives, ages and prunes belief, and rebuilds the influence grid from
-// current holdings and belief -- no decisions. One cadence, not a fast/strategic split: Phase 2 adds its
-// scoring and single action commit on this same tick, and Phase 4 steps movement here (a finer step as
-// OPCOM_TICK_PERIOD shrinks), so both drop in without restructuring.
+// current holdings and belief -- no decisions. One cadence, not a fast/strategic split: the decision loop
+// adds its scoring and single action commit on this same tick, and the tasking phase steps movement here
+// (a finer step as OPCOM_TICK_PERIOD shrinks), so both drop in without restructuring.
 if (!isServer) exitWith {};
 
 call fnc_opcom_belief_init;

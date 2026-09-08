@@ -694,7 +694,7 @@ predicate per action.
   trigger in `fnc_createzone.sqf`, which drives `fnc_captured.sqf` / `fnc_blufor_cap.sqf` to set
   `WARCOM_zones_controled_by_*`, move the markers, and settle the payout. OPCOM owns only the
   precondition (defenders gone); ownership stays single-sourced in that machinery. **Verify before the
-  Templates phase ships** that the trigger fires for an AI-only fight with no player near — if it is
+  Orchestration phase ships** that the trigger fires for an AI-only fight with no player near — if it is
   gated on player proximity, OPCOM's resolve calls the same capture functions itself rather than
   duplicating the flip.
 - **Intercept** — resolves when the threatened ground is clear: the belief entries that scored it have
@@ -1174,13 +1174,15 @@ Each phase is independently playable; the ordering is forced by what the next ph
 
 | Phase | Contains | Reads |
 |---|---|---|
-| **Belief** | The four arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, a debug readout | Nothing prior — the artillery observation gate and the intel patrol both consume the belief store; the grid and belief render was added to `fnc_debug_opcom_view` beside its AoI circles |
-| **The loop** | The scoring pass on the existing tick, the AP-return score and the grid reads it scores on (threat, force balance, the force ratio), the economic actions (Fortify, Build) and Bank, flat archetype weights. The band → template pick waits for the offensive actions that consume it | Belief + grid |
-| **Intents** | The record (roles + phase), minimum lifetimes, release on completion or death | The loop; lands with the first tasking-spawn actions |
-| **Movement** | Virtualised taskings — cell-stepping with the accumulator, cost-field routing (direct/flank λ), cell streaming (Chebyshev K + hysteresis), the tasking/status reads and unit strength | Grid + Intents |
-| **Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | The loop it modifies |
-| **Templates & Recruit** | Recruit and the roster/force-pool, `garrison`/`guard`, mustering to fill roles, the generic runner, the templates (assault / flank / encircle / probe / arty) | Movement, unit strength, the grid, and the indirect-fire missions (`arty`) — lands last |
-| **Random events** | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours | The belief store and the OPFOR-band definition the loop establishes |
+| **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
+| **2 — Force weighting** | Replace the men-count metric with firepower: one shared force function turning a garrison's tokens, vehicles and statics into category-power, deposited by **both** grid layers — friendly holdings and enemy belief — so the two share one metric. `fnc_opcom_sense` stamps enemy type / power, not just headcount | The grid + belief it re-weights |
+| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (cell-stepping accumulator, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
+| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with minimum lifetimes and hysteresis; flat archetype weights | The P3 mechanism + grid / force |
+| **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
+| **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
+
+Random events (turned-town IED / ambush / sabotage, hostile conversion) are out of this roadmap — that
+behaviour shipped separately; the design section below documents what it does, not an OPCOM build phase.
 
 ## Implementation
 
@@ -1190,15 +1192,18 @@ later phases, since the tuning constants and the engine-contact behaviours (stre
 virtual combat) only settle by running the core. The rest of this plan is the design spec those phase
 docs draw on.
 
-- Phase 1 — belief, grid, debug overlay: **shipped**; the code is `src/duws/server/opcom/` and its debug
-  overlay under `client/debug/` (the phase doc is retired now the phase is built).
-- Phase 2 — the loop: appraisal and the economic actions: [`phase_2_loop_and_economy.md`](phase_2_loop_and_economy.md)
+- Phase 1 — Perception: **shipped**; the code is `src/duws/server/opcom/` and its debug overlay under
+  `client/debug/` (the phase doc is retired now the phase is built).
+- Phase 2 — Force weighting: next up; the spec doc lands when the phase starts.
+- Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).
+  Covers only the appraisal + economic-actions slice; the tasking-automation half is added when P4 begins.
 
 ## Open questions
 
 - **Action-economy granularity against the tick.** The loop is one `OPCOM_TICK_PERIOD` (5 s) tick that
   scores and commits at most one action; the per-action AP costs, the faucet rate, and the intent minimum
-  lifetimes that hold a commitment steady across that fast re-scoring all tune in play in Phase 2. The tick
+  lifetimes that hold a commitment steady across that fast re-scoring all tune in play in the decision loop
+  (Phase 4). The tick
   itself is settled — one cadence, no separate action cooldown clocks ([§The loop](#the-loop-against-the-engine)).
 - **Typed belief for counter-building.** The grid is force magnitude only, so Build cannot site a typed
   counter — AT specifically under armour, AA under air. Extending belief to carry a threat category would
