@@ -1194,7 +1194,9 @@ docs draw on.
 
 - Phase 1 — Perception: **shipped**; the code is `src/duws/server/opcom/` and its debug overlay under
   `client/debug/` (the phase doc is retired now the phase is built).
-- Phase 2 — Force weighting: [`phase_2_force_weighting.md`](phase_2_force_weighting.md)
+- Phase 2 — Force weighting: **shipped**; the force model is `src/duws/server/opcom/fnc_opcom_force.sqf`
+  with the single-class classifier in `shared/factions/MODERN/fn_factionAutoDetect.sqf` (the phase doc is
+  retired now the phase is built).
 - Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).
   Covers only the appraisal + economic-actions slice; the tasking-automation half is added when P4 begins.
 
