@@ -4781,10 +4781,6 @@
                 <Original>Retrieved %1.</Original>
                 <English>Retrieved %1.</English>
             </Key>
-            <Key ID="STR_DUWS_T_GARAGE_PAD_OCCUPIED">
-                <Original>Landing pad not clear of vehicles.</Original>
-                <English>Landing pad not clear of vehicles.</English>
-            </Key>
             <Key ID="STR_DUWS_T_DEPOT_MENU">
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
@@ -4816,10 +4812,6 @@
             <Key ID="STR_DUWS_T_GARAGE_RETRIEVE_BTN">
                 <Original>Retrieve</Original>
                 <English>Retrieve</English>
-            </Key>
-            <Key ID="STR_DUWS_T_GARAGE_RETRIEVE_MAP_BTN">
-                <Original>Retrieve (Map)</Original>
-                <English>Retrieve (Map)</English>
             </Key>
             <Key ID="STR_DUWS_T_DEPOT_MAP_PLACE">
                 <Original>PLACE VEHICLE</Original>

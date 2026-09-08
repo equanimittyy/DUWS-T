@@ -2055,10 +2055,12 @@ is what breaks that link.
 into whatever solid already occupies that point. On its first simulated frame the physics engine resolves
 the interpenetration with a separating impulse large enough to throw the vehicle clear and cook it off.**
 
-The vehicle depot's pad retrieve (`server/supports/fnc_garage_init.sqf`) drops a stored vehicle dead centre
-of the landing pad with `createVehicle [..., 0, "CAN_COLLIDE"]`. `CAN_COLLIDE` is what holds it on centre —
-the empty-position specials nudge it to a gap — but it also means the hull spawns straight into the pad prop
-or terrain, and the ejection follows. A radius-0 placement without the special behaves the same way.
+This bites whenever an object is placed on an exact mark that terrain or another object already occupies —
+a static gun on a composition line, a unit dropped onto a tower, a vehicle dropped on a pad. `CAN_COLLIDE`
+is what holds it on the mark (the empty-position specials nudge it to a gap instead), but it also means the
+object spawns straight into whatever is there, and the ejection follows. A radius-0 placement without the
+special behaves the same way. It is the reason the vehicle depot retrieves via a map click through
+`createVehicle [..., 5, "NONE"]` (`server/supports/fnc_garage_init.sqf`) rather than forcing a pad centre.
 
 **How to apply:** spawn it with `enableSimulationGlobal false` in the same frame as the `createVehicle`
 (before any suspension, so no physics tick runs first), pose it — `setDir`, then re-seat with `setPosATL`

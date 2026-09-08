@@ -27,7 +27,6 @@ ctrlSetText [2014, localize "STR_DUWS_T_vehicle_appearance"];
 ctrlSetText [2015, format ["%1 (5CP)", localize "STR_DUWS_T_vehicle_pylons"]];
 ctrlSetText [2023, localize "STR_DUWS_T_GARAGE_STORE_BTN"];
 ctrlSetText [2024, localize "STR_DUWS_T_GARAGE_RETRIEVE_BTN"];
-ctrlSetText [2026, localize "STR_DUWS_T_GARAGE_RETRIEVE_MAP_BTN"];
 ctrlSetText [2032, localize "STR_DUWS_T_recycleaction"];
 
 [] call fnc_depot_menu_fill;

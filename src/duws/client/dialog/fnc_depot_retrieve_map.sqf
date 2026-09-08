@@ -1,6 +1,6 @@
-// Locality: client -- the "Retrieve (Map)" handler, spawned so it can hold the map open and wait on a
-// click (fnc_map_pick_pos). The marked position and flat stored index go to the server, which re-derives
-// and re-validates the ring rather than trusting this client's point.
+// Locality: client -- the Retrieve handler, spawned so it can hold the map open and wait on a click
+// (fnc_map_pick_pos). The marked position and flat stored index go to the server, which re-derives and
+// re-validates the ring rather than trusting this client's point.
 //
 // The bound is DUWS_base_keep_radius, not cosmetic: a vehicle outside it is collected by the base
 // cleanup sweep (server/misc/fnc_repetitive_cleanup.sqf), so the pick re-prompts instead of accepting a

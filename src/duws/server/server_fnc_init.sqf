@@ -774,7 +774,6 @@ publicVariable "fnc_pylon_hint_success";
 // ever remoteExecs these to the server, but keeping them defined everywhere matches the pattern.
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_garage_init.sqf";
 publicVariable "fnc_garage_store";
-publicVariable "fnc_garage_retrieve";
 publicVariable "fnc_garage_retrieve_map";
 
 // Registry self-check. preprocessFile on a path that does not resolve returns "", which

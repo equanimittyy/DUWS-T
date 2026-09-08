@@ -94,10 +94,12 @@ if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/D
 if (missionNamespace getVariable ["HQ_repairStation_active", false]) exitWith {};
 missionNamespace setVariable ["HQ_repairStation_active", true, true];
 
-// The one pad trigger for the whole depot: the recycle station and the garage read the empty vehicles
-// standing in this area, so it is created once here and its netId handed to the client action.
+// The depot's detection area: the recycle station and the garage read the empty vehicles standing in
+// it, so it is created once here and its netId handed to the client action. A 100 m radius rather than
+// pad-sized, so a vehicle retrieved to a map-clicked spot anywhere in base can be driven back near the
+// depot and stored or recycled without threading it onto the pad prop.
 private _trg = createTrigger ["EmptyDetector", getPosATL _helipad, true];
-_trg setTriggerArea [5, 5, 0, false, 5];
+_trg setTriggerArea [100, 100, 0, false, 100];
 
 // One "Vehicle Depot" client action opens the unified dialog (modification, storage, recycle). The
 // depot-keyed JIP id keeps this registration distinct so a rejoin does not evict it.
