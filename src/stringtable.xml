@@ -3577,20 +3577,20 @@
                 <English>BLUFOR has upgraded to Radio Tower III</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE1">
-                <Original>BLUFOR has expanded the vehicle garage</Original>
-                <English>BLUFOR has expanded the vehicle garage</English>
+                <Original>BLUFOR has upgraded to Vehicle Garage</Original>
+                <English>BLUFOR has upgraded to Vehicle Garage</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE2">
-                <Original>BLUFOR has expanded the vehicle garage (II)</Original>
-                <English>BLUFOR has expanded the vehicle garage (II)</English>
+                <Original>BLUFOR has upgraded to Vehicle Garage II</Original>
+                <English>BLUFOR has upgraded to Vehicle Garage II</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE3">
-                <Original>BLUFOR has expanded the vehicle garage (III)</Original>
-                <English>BLUFOR has expanded the vehicle garage (III)</English>
+                <Original>BLUFOR has upgraded to Vehicle Garage III</Original>
+                <English>BLUFOR has upgraded to Vehicle Garage III</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE4">
-                <Original>BLUFOR has expanded the vehicle garage (IV)</Original>
-                <English>BLUFOR has expanded the vehicle garage (IV)</English>
+                <Original>BLUFOR has upgraded to Vehicle Garage IV</Original>
+                <English>BLUFOR has upgraded to Vehicle Garage IV</English>
             </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
