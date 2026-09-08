@@ -53,8 +53,8 @@ fnc_furnish_building = {
     #define FILL_DIV 22        // ~1 anchor per this many open room cells
     #define WALL_DIV 7         // ~1 wall piece per this many near-wall cells
     #define RUG_DIV 40         // ~1 rug per this many open room cells
-    #define WALL_MAX 4         // max wall pieces per room
-    #define ANCHOR_MAX 2       // max anchors per room
+    #define WALL_MAX 5         // max wall pieces per room
+    #define ANCHOR_MAX 1       // max anchors per room
     #define RUG_MAX 2          // max rugs per room
 
     private _catalog = call fnc_furnish_catalog;
@@ -179,13 +179,14 @@ fnc_furnish_building = {
                     for "_k" from 1 to _seats do { _e pushBack [_d * sin _fy, _d * cos _fy] };
                     _e
                 };
+                // One chair class for the whole set, so a table is not ringed by mismatched seats.
+                private _cc = selectRandom _chairs;
+                private _cfy = (_catalog get _cc) select 1;
                 private _rows = [];
                 {
                     _x params ["_ox", "_oy"];
                     private _wp = _aObj modelToWorld [_ox, _oy, 0];
                     if ([_wp] call _seatOK) then {
-                        private _cc = selectRandom _chairs;
-                        private _cfy = (_catalog get _cc) select 1;
                         // Heading is the bearing from the seat back to the anchor centre, less the chair's
                         // own front offset, so the seat faces the table by construction.
                         _rows pushBack [_cc, _ox, _oy, 0, ((- _ox) atan2 (- _oy)) - _cfy];

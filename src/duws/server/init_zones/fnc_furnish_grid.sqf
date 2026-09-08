@@ -33,7 +33,7 @@ fnc_furnish_grid = {
     #define BLOCKED_CLEAR 0.35
     #define STOREY_GAP 2.5
     #define STOREY_BIN 0.5     // Z histogram bin for the floor-level split
-    #define MIN_ROOM_CELLS 12  // a room below this is a stairwell/sliver: dropped, not furnished
+    #define MIN_ROOM_CELLS 20  // a room below this is a stairwell/sliver: dropped, not furnished
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
 
     private _seeds = _building buildingPos -1;
