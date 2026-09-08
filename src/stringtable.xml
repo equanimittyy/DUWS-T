@@ -2073,8 +2073,8 @@
                 <Chinesesimp>载具的严重受损部位已修理至可用的最低水平并加油，消耗2CP。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_not_enough_cp">
-                <Original>Not enough Command Points (need 2 CP).</Original>
-                <English>Not enough Command Points (need 2 CP).</English>
+                <Original>Not enough Command Points (need %1 CP).</Original>
+                <English>Not enough Command Points (need %1 CP).</English>
                 <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_437x650k">
@@ -4758,8 +4758,8 @@
                 <English>Recycle Vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_NONE_SELECTED">
-                <Original>Nothing selected.</Original>
-                <English>Nothing selected.</English>
+                <Original>No vehicle selected.</Original>
+                <English>No vehicle selected.</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_CREWED">
                 <Original>Empty the vehicle before storing it.</Original>

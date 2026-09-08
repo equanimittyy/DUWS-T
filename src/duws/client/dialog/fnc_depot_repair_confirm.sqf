@@ -3,7 +3,7 @@
 // broadcast) cannot drift.
 if (!hasInterface) exitWith {};
 private _sel = lbCurSel 2011;
-if (_sel < 0) exitWith { hint localize "STR_DUWS_T_repair_no_vehicle"; };
+if (_sel < 0) exitWith { hint localize "STR_DUWS_T_GARAGE_NONE_SELECTED"; };
 private _nid = lbData [2011, _sel];
 private _veh = objectFromNetId _nid;
 if (isNull _veh) exitWith { hint localize "STR_DUWS_T_repair_no_vehicle"; };

@@ -9,7 +9,7 @@ if (isNil "fnc_veh_repair_action") then {
         // A third of the recycle reward, rounded up: a service always undercuts scrap-and-rebuy, and
         // ceil of a >=1 reward needs no separate floor.
         private _repairCost = ceil (([_veh] call DUWS_fnc_vehicleRecycleReward) * 0.33);
-        if (commandpointsblu1 < _repairCost) exitWith { [localize "STR_DUWS_T_repair_not_enough_cp"] remoteExec ["hint", _caller]; };
+        if (commandpointsblu1 < _repairCost) exitWith { [format [localize "STR_DUWS_T_repair_not_enough_cp", _repairCost]] remoteExec ["hint", _caller]; };
         // call, not remoteExec to self: a queued debit runs a frame later and splits the
         // check above from the deduction.
         [-_repairCost, "repair_station"] call fnc_cp_adjust;
