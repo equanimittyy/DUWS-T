@@ -38,7 +38,10 @@ DUWS_dbgFurnishEH = addMissionEventHandler ["Draw3D", {
     private _mode = missionNamespace getVariable ["DUWS_dbgFurnishMode", "state"];
     private _palette = [[0.4,0.7,1,0.9],[1,0.5,0.3,0.9],[0.5,1,0.4,0.9],[1,1,0.3,0.9],[0.8,0.4,1,0.9],[0.3,1,0.9,0.9],[1,0.6,0.8,0.9],[0.7,0.7,0.7,0.9]];
     {
-        _x params ["_pos", "_state", "_room"];
+        _x params ["_posASL", "_state", "_room"];
+        // drawIcon3D positions are AGL world visual (as fnc_draw_world_icons feeds it), but the cells are
+        // ASL from the grid probes -- an ASL Z draws every icon terrain-altitude metres up in the sky.
+        private _pos = ASLToAGL _posASL;
         if (player distance _pos <= 40) then {
             private _col = if (_mode == "room") then {
                 if (_room < 0) then { [0.5,0.5,0.5,0.6] } else { _palette select (_room mod (count _palette)) }
