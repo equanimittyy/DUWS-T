@@ -2,16 +2,12 @@
 // registered in server_fnc_init.sqf after fnc_place_settled, fnc_furnish_grid and fnc_furnish_catalog,
 // which it calls. Not broadcast: callers remoteExec it to the server.
 //
-// Furnishes an arbitrary building lived-in, class-agnostic on the building (so it survives modded/
-// unrecognised maps) but catalog-driven on the furniture (which is ours). fnc_furnish_grid infers the
-// interior as a per-storey cell grid split into rooms; this places furniture over it in ordered passes,
-// each reserving the cells it fills in the grid's own `occupied` flag -- so two pieces can never take the
-// same cell (deterministic clip-avoidance) and the nav-path cells stay clear (so a garrison trooper is
-// not sealed behind a sofa). Facing is by construction: a seat's heading is the bearing to its anchor,
-// a wall piece's front points off its wall -- each corrected by the class's catalog frontYaw.
-//
-// A building with no usable interior geometry (a ruin, a view-only prop) yields an empty grid; furnish
-// then degrades to the seed nav points, flat, and logs it, rather than silently doing nothing.
+// Class-agnostic on the building (survives modded/unrecognised maps), catalog-driven on the furniture
+// (which is ours). fnc_furnish_grid infers the interior as a per-storey cell grid split into rooms; this
+// fills it in ordered passes, each reserving the cells it takes in the grid's `occupied` flag -- so no two
+// pieces share a cell and the nav-path cells stay clear (a trooper is not sealed behind a sofa). Facing is
+// by construction, corrected per class by catalog frontYaw. An empty grid (a ruin, a view-only prop)
+// degrades to the seed nav points, flat, logged.
 //
 // Contract: [_building, _key, _sets, _quota] -> [_objs placed]
 //   _building  OBJECT to furnish
@@ -63,7 +59,6 @@ fnc_furnish_building = {
         params ["_p", "_r"];
         { if ((_p distance2D (_x select 0)) <= _r) then { _x set [5, true] } } forEach _grid;
     };
-    // Nearest grid cell to a world point within a cell's reach, or [].
     private _cellAt = {
         params ["_p"];
         private _hit = []; private _bd = 0.5;
@@ -120,9 +115,8 @@ fnc_furnish_building = {
         _f
     };
 
-    // Place an anchor (table/desk) at a cell, then its seats per the catalog `seats` rule and its clutter.
-    // A dining table (seats -1) takes a chair on each open side; a desk (seats N) takes N on its front.
-    // Reserves the anchor footprint and every seated cell. Returns the objects placed.
+    // Place an anchor with its seats (per the `seats` rule) and clutter, reserving the footprint and each
+    // seated cell.
     private _placeAnchor = {
         params ["_cell", "_class", "_set"];
         (_catalog get _class) params ["", "_fy", "", "_seats"];

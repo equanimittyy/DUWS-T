@@ -1,8 +1,7 @@
 // Locality: client -- an fnc_debug_furnish_menu row handler, runs on whoever opened the menu. Lists the
-// catalog classes whose facing matters (a chair, sofa, bed, desk -- not flat clutter or a rug) and spawns
-// the picked one at heading 0 so the dev can read its front bearing and record frontYaw in
-// furniture_catalog.hpp. No SQF command reports a model's front, so this hand-calibration is the only way
-// to get it. Re-checked against game_master because the function is broadcast. English-only debug.
+// catalog classes whose facing matters (anchor/seat/wall, not flat clutter or a rug) and spawns the picked
+// one at heading 0 so the dev reads its front bearing to record frontYaw. game_master because broadcast.
+// English-only debug.
 if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 

@@ -6,7 +6,7 @@ params ["_building", "_requester", ["_mode", "state"]];
 if (isNull _building) exitWith {};
 
 private _grid = [_building] call fnc_furnish_grid;
-// Lite rows: the drawer needs only where each cell is, its state and its room id.
+// Lite rows: pos, state, room id -- all the drawer needs.
 private _cells = _grid apply { [_x select 0, _x select 1, _x select 4] };
 ["DEBUG", "FURNISH", format ["overlay gather: %1 cell(s) (%2) -> %3", count _cells, _mode, _requester]] call fnc_log;
 [_cells, _mode] remoteExec ["fnc_debug_furnish_grid_draw", _requester];

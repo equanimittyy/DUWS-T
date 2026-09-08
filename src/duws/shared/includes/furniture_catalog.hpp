@@ -17,11 +17,10 @@
 //                wall    -- placed back-flush and perpendicular to a wall (sofa, bed, cabinet).
 //                rug     -- laid flat on any free floor.
 //                clutter -- seated on an anchor's top.
-//   frontYaw   degrees to subtract from a target bearing so the MODEL's real front lands on it:
-//              heading = targetFrontBearing - frontYaw. It is the compass bearing the model's front
-//              points at when the object sits at heading 0 (its +Y due north). No command reports a
-//              model's front, so it is hand-read once per class with the calibration debug tool and
-//              recorded here. 0 = uncalibrated (front assumed +Y); a mis-faced piece is a playtest fix.
+//   frontYaw   degrees subtracted from a target bearing so the model's real front lands on it (heading =
+//              target - frontYaw); i.e. the bearing the front points at when placed at heading 0 (+Y due
+//              north). Hand-read per class with the calibration tool, since no command reports a model's
+//              front. 0 = uncalibrated (front assumed +Y); a mis-face is a playtest fix, not a crash.
 //   seats      anchors only: -1 = a seat on every open side (dining table); N = exactly N on the front
 //              (a desk is 1). 0 (ignored) for every other role.
 

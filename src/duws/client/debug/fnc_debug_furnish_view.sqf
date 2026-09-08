@@ -1,8 +1,7 @@
 // Locality: client -- an fnc_debug_furnish_menu row handler, runs on whoever opened the menu. Toggles the
-// furnishing grid overlay for one building: a 3D dot per floor cell, coloured by state (open/near/blocked)
-// or by room id. The grid is server-built and static (cached on the building), so this fires one gather,
-// not a refresh loop. A Draw3D handler is the drawer -- the cells are sub-metre interior points a map
-// marker cannot show. Re-checked against game_master because the function is broadcast. English-only debug.
+// furnishing grid overlay for one building, coloured by cell state or by room id. Drawn with a Draw3D
+// handler, not map markers, since the cells are sub-metre interior points; the grid is cached server-side,
+// so one gather, no refresh loop. Re-checked against game_master because broadcast. English-only debug.
 if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 params [["_target", objNull], ["_mode", "state"]];
