@@ -14,6 +14,8 @@
 //            weapons pistol|submachinegun|assault_rifle|machinegun|sniper|launcher -- one of that
 //              BIS_fnc_itemType subcategory from the pool, chambered + spares.
 //            vest / civ_backpack / backpack -- from the matching pool, the lowest 3 by armour/capacity.
+//          A nested array is "pick one of these", e.g. ["vest", ["submachinegun","assault_rifle"], "pistol"];
+//          "NONE" in a set is an empty chance, so ["submachinegun","NONE"] gives an SMG or nothing.
 //   _opts  [_hostile, _skill, _stance, _mags]: flip on/off; six aim-skills to _skill (-1 = leave);
 //            setUnitPos _stance ("" = leave); _mags spare magazines (default 3).
 if (!isServer) exitWith { grpNull };
@@ -83,6 +85,8 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
 
     {
         private _tok = _x;
+        if (_tok isEqualType []) then { _tok = selectRandom _tok };   // nested array = pick one of the set
+        if (toUpper _tok == "NONE") then { continue };                // "NONE" = an empty slot (a chance of nothing)
         switch (_tok) do {
             case "vest": {
                 private _v = [_vestPool, _vestScore] call _lowPick;
