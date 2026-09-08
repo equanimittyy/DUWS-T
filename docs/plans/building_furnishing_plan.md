@@ -1,11 +1,17 @@
 # Structure-aware building furnishing
 
 Furnish an arbitrary building so it reads lived-in, without a per-building-class template and without a
-mod. The problem the safehouse raid exposed: a house full of hidden guards and a house full of innocent
-locals must look identical, and both must look occupied — but the current furnishing drops one prop per
-interior position on a flat `setVectorUp [0,0,1]` seat
+mod. Build it as a **standalone shared helper** (`fnc_furnish_building`) driven by a debug tool that
+furnishes any building the dev points at — decoupled from any mission for now, so the placement can be
+tuned against real Altis houses on demand before anything depends on it. Wiring it into missions (the
+raid safehouse first) is a **separate, deferred** step, below.
+
+The need surfaced in the safehouse raid: a house of hidden guards and a house of innocent locals must
+look identical, and both must look occupied — but the furnishing there drops one prop per interior
+position on a flat `setVectorUp [0,0,1]` seat
 ([`fnc_raid_safehouse_mission.sqf:120`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf)),
-which clips on uneven floors and never groups into anything that reads as a room.
+which clips on uneven floors and never groups into anything that reads as a room. That is the motivating
+case, not a dependency: the helper knows nothing about the raid.
 
 The mod that does this well — ZEI (Zeus and Eden Interiors) — keys a hand-authored composition to each
 building **classname**. That is a non-starter here: it is a mod, it is unmaintained, and a class-keyed
@@ -26,10 +32,11 @@ No command reports rooms, walls, or doorways directly. Four class-agnostic signa
 - **Interior positions** — `_building buildingPos -1` / `BIS_fnc_buildingPositions`: the AI nav points, one
   per usable interior spot, already spread through the rooms. These are the only "where furniture goes"
   the engine volunteers.
-- **Inner vs perimeter** — the mission's `_fnc_innerSlots`
+- **Inner vs perimeter** — sort those positions by distance to their own centroid: inner slots sit in
+  open floor, outer slots against walls. A free clearance proxy before a single ray is cast. The helper
+  computes this itself — the safehouse mission's `_fnc_innerSlots`
   ([`fnc_raid_safehouse_mission.sqf:55`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf))
-  sorts those positions by distance to their own centroid. Inner slots sit in open floor; outer slots sit
-  against walls. A free clearance proxy before a single ray is cast.
+  does the same trick, but a shared helper must not reach into a mission-local function.
 - **Model axis** — `getDir _building`. Interior walls run along the model's own axes, so a cluster turned
   to `getDir` (or +90°) sits parallel to the walls rather than skew.
 - **Solid geometry** — `lineIntersectsSurfaces` against the building's `GEOM` LOD reports walls and their
@@ -48,7 +55,8 @@ It is mitigated, not solved, below.
 
 Server-side, run once when the building is furnished — no loop. Per building:
 
-1. **Collect candidate slots.** `_fnc_innerSlots` of the building. Group them by floor first (cluster the
+1. **Collect candidate slots.** `buildingPos -1`, sorted by distance to their centroid (in-helper, per
+   above). Group them by floor first (cluster the
    `select 2` heights; a 3 m gap is a storey) so a ray never treats the floor above as a wall and a cluster
    never lands half in a ceiling.
 2. **Probe each candidate** (Tier 2 core). From the slot raised to chest height (~1.1 m, so a floor or a
@@ -112,14 +120,32 @@ Reusable by any mission or zone prefab that wants a building furnished, per the 
 placement logic lives in a shared `fnc_*` and the mission holds only the call and its data (see the memory
 on extracting placement helpers). The cluster library is data it reads, not logic each caller repeats.
 
-## Integration
+## Debug harness (this phase)
 
-The safehouse mission drops its `FURNITURE` define and per-slot loop
+Exercise the helper with no mission running, using the same cursor-capture idiom as the search-flag tool
+([`fnc_debug_menu.sqf:36`](../../src/duws/client/debug/fnc_debug_menu.sqf)):
+
+- **`fnc_debug_menu.sqf`** — a new row "Furnish cursor building" that captures `cursorObject` in the menu
+  file (read there, before the submenu's dialog takes the pointer, exactly as the search-flag row does)
+  and hands it to a set-picker submenu.
+- **`fnc_debug_furnish_menu.sqf`** (new, `client/debug/`) — mirrors
+  [`fnc_debug_search_menu.sqf`](../../src/duws/client/debug/fnc_debug_search_menu.sqf): offers the
+  cluster-set names (living / sleeping / work, plus "all") as rows; each `remoteExec`s
+  `[_building, "debug_furnish", _sets, _quota] call fnc_furnish_building` to the server (2).
+  `game_master`-gated, English-only, like its siblings. Registered + `publicVariable`'d in
+  `server_fnc_init.sqf` alongside `fnc_debug_search_menu`.
+
+Point at any house, pick a set, watch it furnish — no safehouse, no `mission_types`, no reputation.
+
+## Mission integration (deferred)
+
+Not in this phase; tracked separately so the standalone helper lands and is tuned first. Once proven on the
+debug tool, the safehouse mission drops its `FURNITURE` define and per-slot loop
 ([`fnc_raid_safehouse_mission.sqf:94`,`:119`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf))
 for one `[_bldg, "mission_raid_safehouse", ["living"], _quota] call fnc_furnish_building` per candidate
-house. The intel crate stays its own placement (it is a functional objective, seated at a back slot), but
-moves onto `fnc_place_settled` so it base-seats like everything else rather than the current raw
-`createVehicle` + `setPosATL`.
+house, and the intel crate moves onto `fnc_place_settled` so it base-seats like everything else rather than
+the current raw `createVehicle` + `setPosATL`. Both decoy and real houses would then furnish from the same
+call, so neither reads different — the concealment the raid depends on. Detailed when the phase is scheduled.
 
 ## Engine specifics and gotchas
 
@@ -140,8 +166,8 @@ implementation, per `CLAUDE.md`.
 - **Cost is bounded and one-shot.** Worst case per house is (candidate slots × 8 rays); it runs once at
   furnish time on the server, never in a loop. Cap the probe to the slots actually in contention (rank by
   the free inner/outer proxy first, probe only the top handful) so a 60-position building does not cast
-  hundreds of rays. For the safehouse that is up to 8 houses at mission start — acceptable, but the cap
-  keeps a future 30-building caller honest.
+  hundreds of rays. The debug tool furnishes one building per click; the cap keeps a future many-building
+  caller (the safehouse furnishes up to 8 houses at mission start) honest.
 
 ## Risks and fallbacks
 
@@ -155,9 +181,9 @@ implementation, per `CLAUDE.md`.
 
 ## Verification
 
-- Playtest across the common Altis house classes the safehouse already surveys
+- Debug tool ("Furnish cursor building") across the common Altis house classes
   (`Land_i_Stone_HouseSmall_V1/2/3`, `Land_i_House_Small_02_*`, `Land_i_House_Big_01_*`): clusters sit on the
   floor, back to a wall, no clipping, no two clusters overlapping, clutter on the tabletops.
 - A house with no interior geometry falls back rather than erroring, and says so in the RPT.
-- Decoy and real houses furnish from the same call, so neither reads different from the other — the
-  concealment the raid depends on.
+- Deterministic shape regardless of caller: the same building furnishes the same way whether the debug
+  tool or (later) a mission drives it.
