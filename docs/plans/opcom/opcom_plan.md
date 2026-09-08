@@ -553,6 +553,11 @@ out subtracts its `effForce` cleanly and Fortify never touches it. The slot caps
 zone whose slot is *free*, so massing force means one recruit per zone across several zones, then pulling
 them together at a muster ([§Commitment](#commitment-intents-are-sticky)), not stacking a stack on one zone.
 
+A zone **under attack** locks that slot. While its garrison holds live contact with a BLUFOR force, its
+`garrison`ed unit is not a unit any offensive may draw — a contested zone's reserve can only feed its own
+defence, never be stripped to mount an attack elsewhere while the player is pressing it. The lock lifts when
+contact clears and the zone re-virtualises.
+
 ## Movement: a tasking is virtualised until contact
 
 A tasking moves *virtualised*: its position is a **grid cell**, stepped along a route chain
