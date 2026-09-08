@@ -872,8 +872,8 @@ OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-t
 |---|---|---|
 | rifles | `["squad"]` | — |
 | weapons team | `["wp_team"]` | — |
-| APC | `["apc"]` | — |
-| IFV | `["ifv"]` | — |
+| APC | `["apc"]` | `transport` |
+| IFV | `["ifv"]` | `transport` |
 | MBT | `["tank"]` | — |
 | recon (foot) | `["recon"]` | `recon` |
 | recon (car) | `["car"]` | `recon` |
@@ -897,7 +897,8 @@ That rate is the single force↔AP knob and also prices commit `Cost` and Arty's
 hired to win a fight and nothing more; a flagged row also unlocks an action. `recon` makes the unit eligible
 to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)), `supply` to Rapport,
 `transport` to carry another unit ([§Transport](#transport-carrying-a-unit-to-the-fight)); a row may carry
-several, as the truck both couriers and ferries. Recruit scores one candidate per demand group — force,
+several, as the truck both couriers and ferries and a carrier (APC or IFV) fights while ferrying a section.
+Recruit scores one candidate per demand group — force,
 `recon`, `supply`, `transport` — so a specialist enters the roster only when the action it enables is worth
 its hire.
 
