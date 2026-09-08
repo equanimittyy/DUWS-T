@@ -35,6 +35,7 @@
 ["Land_WoodenTable_small_F",        "anchor",  0, ["living"], -1],
 ["Land_TableSmall_01_F",            "anchor",  0, ["living"], -1],
 ["Land_TableBig_01_F",              "anchor",  0, ["living"], -1],
+["Land_WoodenCounter_01_F",         "anchor",  0, ["living"],  2],   // counter bar: stools on the front
 ["Land_CampingChair_V2_F",          "seat",    0, ["living"],  0],
 ["Land_CampingChair_V2_white_F",    "seat",    0, ["living"],  0],
 ["Land_ChairPlastic_F",             "seat",    0, ["living"],  0],
@@ -43,6 +44,10 @@
 ["Land_ArmChair_01_F",              "wall",    0, ["living"],  0],
 ["Land_Sofa_01_F",                  "wall",    0, ["living"],  0],
 ["Land_Bench_F",                    "wall",    0, ["living"],  0],
+["Land_Bench_05_F",                 "wall",    0, ["living"],  0],
+["Land_RattanTable_01_F",           "wall",    0, ["living"],  0],
+["Fridge_01_closed_F",              "wall",    0, ["living"],  0],
+["Fridge_01_open_F",                "wall",    0, ["living"],  0],
 ["Land_Rug_01_F",                   "rug",     0, ["living"],  0],
 ["Land_Rug_01_Traditional_F",       "rug",     0, ["living"],  0],
 ["Land_BakedBeans_F",               "clutter", 0, ["living"],  0],
@@ -77,6 +82,16 @@
 ["Land_PainKillers_F",              "clutter", 0, ["living"],  0],
 ["Land_VitaminBottle_F",            "clutter", 0, ["living"],  0],
 
+// -- storage: racks + shelves, wall-flush, fit any room --
+["Land_Metal_rack_F",               "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Metal_rack_Tall_F",          "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Metal_wooden_rack_F",        "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Rack_F",                     "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_ShelvesWooden_F",            "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_ShelvesWooden_blue_F",       "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_ShelvesWooden_khaki_F",      "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_FlowerPot_01_Flower_F",      "wall",    0, ["living", "sleeping", "work"], 0],
+
 // -- sleeping --
 ["Land_WoodenBed_01_F",             "wall",    0, ["sleeping"], 0, 1],   // at most one bed per room
 
@@ -84,6 +99,9 @@
 ["OfficeTable_01_new_F",            "anchor",  0, ["work"],     1],
 ["OfficeTable_01_old_F",            "anchor",  0, ["work"],     1],
 ["Land_OfficeChair_01_F",           "seat",    0, ["work"],     0],
+["Land_Workbench_01_F",             "wall",    0, ["work"],     0],
+["Land_OfficeCabinet_01_F",         "wall",    0, ["work"],     0],
+["Land_OfficeCabinet_02_F",         "wall",    0, ["work"],     0],
 ["Land_Laptop_unfolded_F",          "clutter", 0, ["work"],     0],
 ["Land_Laptop_F",                   "clutter", 0, ["work"],     0],
 ["Land_Laptop_device_F",            "clutter", 0, ["work"],     0],
