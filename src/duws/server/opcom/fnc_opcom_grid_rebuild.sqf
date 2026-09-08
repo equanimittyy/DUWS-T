@@ -1,10 +1,9 @@
 // Locality: server. Rebuilds both live force layers from scratch each strategic phase: zero them, then
-// deposit every force source once with a linear falloff to its reach edge. A source is a men count at a
-// position -- friendly = OPFOR holdings (zone/town garrisons, hardpoints), enemy = BLU-held zones and
-// belief. Men-count is the Phase 1 metric: both layers must share it (belief carries only headcount), so
-// the force ratio that reads this in Phase 2 is meaningful. The per-source weight is the swap point where
-// Phase 2 introduces firepower-weighting on both sides. Each deposit scans only the box around its source
-// cell -- never the whole grid, never a pass over allUnits.
+// deposit every force source once with a linear falloff to its reach edge. A source is a firepower value
+// at a position -- friendly = OPFOR holdings (zone/town garrisons, hardpoints), enemy = BLU-held zones and
+// belief. Both layers share the one firepower metric (the force model, fnc_opcom_force), so the force
+// ratio that reads this is meaningful -- a tank-heavy holding outweighs an equal headcount of infantry.
+// Each deposit scans only the box around its source cell -- never the whole grid, never a pass over allUnits.
 if (!isServer) exitWith {};
 
 private _cell = OPCOM_GRID_CELL;
@@ -31,18 +30,18 @@ private _deposit = {
     };
 };
 
-// A site's own force is its standing men (DUWS_fnc_garrisonMen: live roster, else stowed ledger), the
-// Phase 1 metric both layers share. Crew are excluded until Phase 2 weights vehicles.
+// A site's own force is DUWS_fnc_garrisonForce: its infantry men plus the power of its surviving vehicle
+// and static tokens, live roster or stowed ledger. Crew are not counted -- the vehicle already carries them.
 
-// Zones: OPFOR-held deposit their garrison men to friendly; BLU-held are known enemy ground (a
+// Zones: OPFOR-held deposit their garrison force to friendly; BLU-held are known enemy ground (a
 // territorial fact the commander has for free), so they deposit a nominal baseline even unsighted.
 {
     _x params ["", "_zp", "_zs"];
     private _key = format ["zone_%1_%2", round (_zp select 0), round (_zp select 1)];
     if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) then {
-        [_ene, _zp, OPCOM_GRID_ZONE_ENEMY_MEN, _zs + OPCOM_GRID_SPREAD] call _deposit;
+        [_ene, _zp, OPCOM_GRID_ZONE_ENEMY_FORCE, _zs + OPCOM_GRID_SPREAD] call _deposit;
     } else {
-        [_fri, _zp, [_key] call DUWS_fnc_garrisonMen, _zs + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, _zp, [_key] call DUWS_fnc_garrisonForce, _zs + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach zone_meta_array;
 
@@ -53,16 +52,17 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 {
     if (_x >= 1) then {
         private _key = [_forEachIndex] call fnc_town_site_key;
-        [_fri, getPos (_locs select _forEachIndex), [_key] call DUWS_fnc_garrisonMen, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, getPos (_locs select _forEachIndex), [_key] call DUWS_fnc_garrisonForce, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
 
-// Standing OPFOR hardpoints, a nominal crew each (Phase 2 reads real crew / weapon power).
+// Standing OPFOR hardpoints: each composes its force from its emplaced static and its loose garrison,
+// keyed on the type in its registry row (DUWS_fnc_hpForce). A row stands until the emplacement is cleared.
 {
-    if ((_x select 3) isEqualTo "opfor") then { [_fri, _x select 1, OPCOM_GRID_HP_MEN, OPCOM_GRID_SPREAD] call _deposit };
+    if ((_x select 3) isEqualTo "opfor") then { [_fri, _x select 1, [_x select 2] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD] call _deposit };
 } forEach DUWS_hardpoints;
 
-// Belief: each surviving stamp deposits its headcount scaled by age decay (an expired stamp is already
+// Belief: each surviving stamp deposits its firepower scaled by age decay (an expired stamp is already
 // gone from the arrays). Covers a sighted player, a discovered HQ and a discovered FOB alike.
 {
     private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);

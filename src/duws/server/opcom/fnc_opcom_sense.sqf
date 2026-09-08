@@ -1,8 +1,8 @@
 // Locality: server. The direct-sighting sweep -- one perception pass on the engine's own last-seen. Each
 // live OPFOR observer reports the BLUFOR it senses now (nearTargets, gated on a fresh position age); each
 // freshly-seen group is stamped with the observer's remembered position (element 0, NOT the live position),
-// its observed men-count and the tick. A group nobody senses holds at last-seen and decays; force is the
-// men-count at that sighting, held between sightings.
+// its firepower (the force model, fnc_opcom_force) and the tick. A group nobody senses holds at last-seen
+// and decays; force is the firepower at that sighting, held between sightings.
 //
 // Two engine traps shape this (see arma_engine_gotchas.md). `east knowsAbout` is side-wide and lingers high
 // while anyone merely remembers a target, so it cannot tell a watched mover from a ghost -- hence the
@@ -46,8 +46,25 @@ private _seen = createHashMap;
                     if (_age < ((_seen getOrDefault [_k, [[], 0, 1e9]]) select 2)) then {
                         private _pos = +(_x select _NT_POS);
                         _pos set [2, 0];
-                        private _players = {isPlayer _x} count units _g;
-                        private _str = ((count units _g) - _players) + OPCOM_PLAYER_WORTH * _players;
+                        private _gu = units _g;
+                        private _players = {isPlayer _x} count _gu;
+                        // Firepower, not headcount: each dismounted man 1, each crewed vehicle its class
+                        // power (counted once), plus an additive premium per human aboard. Full power --
+                        // belief is fogged by age decay, not by tracking a sighted hull's damage.
+                        private _seenVeh = [];
+                        private _fp = 0;
+                        {
+                            private _veh = vehicle _x;
+                            if (_veh isEqualTo _x) then {
+                                _fp = _fp + 1;
+                            } else {
+                                if !(_veh in _seenVeh) then {
+                                    _seenVeh pushBack _veh;
+                                    _fp = _fp + ([typeOf _veh] call DUWS_fnc_classPower);
+                                };
+                            };
+                        } forEach _gu;
+                        private _str = _fp + OPCOM_PLAYER_WORTH * _players;
                         _seen set [_k, [_pos, _str, _age]];
                     };
                 };

@@ -36,11 +36,11 @@ Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a sing
 | `DUWS_opcom_belief_key` | what is believed about: a BLUFOR group's `netId`, a zone index, a FOB index, the player HQ |
 | `DUWS_opcom_belief_pos` | `[x,y,0]` as last observed, never a live lookup |
 | `DUWS_opcom_belief_time` | the tick counter at the observation |
-| `DUWS_opcom_belief_str` | believed BLUFOR force there ([§The quantity](#the-quantity-force-not-coverage)) — each AI counts one, each human `OPCOM_PLAYER_WORTH`, so a group carrying players weighs heavier |
+| `DUWS_opcom_belief_str` | believed BLUFOR firepower there ([§The quantity](#the-quantity-force-not-coverage)) — each dismounted man 1, each crewed vehicle its class power, plus `OPCOM_PLAYER_WORTH` added per human aboard, so a group carrying players weighs heavier |
 
 One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
 rather than appending, and only when an observer is sensing the group *this tick* ([§Sensors](#sensors)),
-the reading superseding the stored one outright. Believed force is the observed men-count at that last
+the reading superseding the stored one outright. Believed force is the observed firepower at that last
 sighting, held between sightings — not re-derived each tick. Belief tracks groups, not individual players,
 so a squad is one row whether or not it carries a player, and players sharing a group are not
 double-counted.
@@ -1175,7 +1175,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | Phase | Contains | Reads |
 |---|---|---|
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
-| **2 — Force weighting** | First extract a single-class classifier from the faction detector (a `class → category` resolver, so a sighted enemy class classifies on the fly), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy power, not headcount | The grid + belief it re-weights |
+| **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
 | **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (cell-stepping accumulator, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
 | **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with minimum lifetimes and hysteresis; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |

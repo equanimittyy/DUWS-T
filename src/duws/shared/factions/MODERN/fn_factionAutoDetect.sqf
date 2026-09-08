@@ -178,10 +178,13 @@ fnc_classifyVehicle = compileFinal {
 
 	if (_class isKindOf "CAManBase") exitWith {"man"};
 
+	// Artillery -- a towed mortar or a self-propelled gun -- weighs as static_arty whatever its hull kind,
+	// since indirect fire holds no ground. Ahead of the Tank/Car kind tests a self-propelled piece else hits.
+	if (getNumber (_cfg >> "artilleryScanner") == 1) exitWith {"static_arty"};
+
 	private _wpn = [_class] call fnc_vehicleWeaponType;
 
 	if (_class isKindOf "StaticWeapon") exitWith {
-		if (getNumber (_cfg >> "artilleryScanner") == 1) exitWith {"static_arty"};
 		if ("GMG_F" in _wpn) exitWith {"static_hi"};
 		if (([_class] call fnc_isThreatTo) in ["air", "armor"]) exitWith {"static_hi"};
 		"static_mg"

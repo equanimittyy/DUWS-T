@@ -636,8 +636,9 @@ OPCOM_BELIEF_EXPIRE_S = 960;
 OPCOM_BELIEF_FRESH  = OPCOM_BELIEF_FRESH_S  / OPCOM_TICK_PERIOD;
 OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
 
-// Threat men a sighted BLUFOR group is worth: each AI counts as one, each human as OPCOM_PLAYER_WORTH --
-// a player is more dangerous than an equal AI, so a group carrying one weighs heavier on the grid. Tune.
+// Additive firepower premium per human in a sighted BLUFOR group: the group's hardware is priced in full
+// (fnc_opcom_sense), then each human aboard adds this on top -- a player is more dangerous than the same
+// vehicle or rifle in AI hands, so a crewed or carried player weighs heavier on the grid. Tune.
 OPCOM_PLAYER_WORTH = 3;
 
 // How far an OPFOR observer's knowledge query reaches in the sighting sweep. A bound on nearTargets, not a
@@ -645,11 +646,10 @@ OPCOM_PLAYER_WORTH = 3;
 // caps the scan cost. Generous, so a genuinely-spotted distant vehicle is not clipped.
 OPCOM_SENSE_RANGE = 5000;
 
-// Men-count placeholders the grid rebuild deposits where no real strength is tracked: a BLU-held zone
-// (the player's garrison is not modelled, but the commander knows it is held) and a standing OPFOR
-// hardpoint (its crew). Phase 2 replaces both with firepower-weighted force.
-OPCOM_GRID_ZONE_ENEMY_MEN = 8;
-OPCOM_GRID_HP_MEN         = 3;
+// The force a BLU-held zone deposits to the enemy layer: the player's garrison strength is not modelled,
+// so the commander knows the ground is held but not how strongly and reads a fixed nominal. A standing
+// OPFOR hardpoint has no such nominal -- its force composes from its static and garrison (DUWS_fnc_hpForce).
+OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 

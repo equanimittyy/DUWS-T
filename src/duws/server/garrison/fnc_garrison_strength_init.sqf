@@ -41,16 +41,28 @@ DUWS_fnc_garrisonSurviving = {
 	[[_key] call DUWS_fnc_garrisonLost, [_key] call DUWS_fnc_garrisonFull] call DUWS_fnc_spawnDiff
 };
 
-// The men a garrison contributes to OPCOM's force grid: a headcount with crew excluded (a vehicle token
-// owes no men), so the friendly and belief layers stay comparable. Live counts alive roster infantry (a
-// casualty drops it that tick); stowed falls to the ledger's surviving-token men. The OPCOM rebuild and
-// the force-emission dev readout share this one count so the readout cannot drift from what is deposited.
+// The infantry men a garrison fields, crew excluded (a vehicle token owes no men). Live counts alive
+// roster infantry (a casualty drops it that tick); stowed falls to the ledger's surviving-token men. The
+// men component of DUWS_fnc_garrisonForce below, which is what the grid and the readout actually deposit.
 DUWS_fnc_garrisonMen = {
 	params ["_key"];
 	if ([_key] call DUWS_fnc_garrisonHeld) exitWith {
 		{ alive _x && {!(([(group _x) getVariable ["DUWS_srcToken", ""]] call DUWS_fnc_teamRow) isEqualTo [])} } count ([_key] call fnc_site_roster)
 	};
 	[[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
+};
+
+// The firepower a garrison contributes to OPCOM's force grid: its infantry men (each 1) plus the power of
+// its surviving vehicle and static tokens, so a tank far outweighs an equal headcount of riflemen. Vehicle
+// attrition is whole-token -- a destroyed vehicle leaves the surviving set through the loss ledger, so a
+// mauled garrison weighs less with no per-object health tracked. The OPCOM rebuild and the force-emission
+// dev readout share this one figure so the readout cannot drift from what is deposited.
+DUWS_fnc_garrisonForce = {
+	params ["_key"];
+	private _vehTokens = ([_key] call DUWS_fnc_garrisonSurviving) select {
+		([[_x] call DUWS_fnc_tokenName] call DUWS_fnc_teamRow) isEqualTo []
+	};
+	([_key] call DUWS_fnc_garrisonMen) + ([_vehTokens] call DUWS_fnc_tokenListForce)
 };
 
 // The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and

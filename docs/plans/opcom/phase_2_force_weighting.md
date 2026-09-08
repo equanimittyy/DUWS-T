@@ -49,23 +49,24 @@ power table and the grid rewiring below make sense; they consume it.
 
 ## Files
 
-Flat under `src/duws/server/opcom/`, registered by compile-path in `server_fnc_init.sqf` like the Phase 1
-functions; the garrison changes extend the existing garrison-strength module.
+Flat under `src/duws/server/opcom/`. The force model is *executed* at load (`[] call compile` in
+`server_fnc_init.sqf`) to define its several functions, unlike the Phase 1 files that each compile to one
+name; the garrison changes extend the existing garrison-strength module.
 
 | File | Change |
 |---|---|
-| `fnc_opcom_force` *(new)* | The one home of the power model and the single category → power table. Two resolvers feed it: `DUWS_fnc_tokenPower` (our token → category → power, category known from the token name) and `DUWS_fnc_classPower` (a class → category → power via the standalone `fnc_classifyVehicle` — for enemy sightings, including classes outside the detected roster). `DUWS_fnc_effForce` sums `power × condition` over a list of live objects |
-| `fnc_garrison_strength_init` *(modify)* | Replace `DUWS_fnc_garrisonMen` with `DUWS_fnc_garrisonForce` — live roster → `effForce`, else stowed → Σ `tokenPower` over the ledger's surviving tokens — and add `DUWS_fnc_tokenListForce` beside `tokenListMen`. The ledger already *is* tokens, so the stowed path needs no class lookup |
-| `fnc_opcom_grid_rebuild` *(modify)* | Deposit `garrisonForce` for zones/towns, a hardpoint's composed force (its stowed static + patrol(s), below) instead of the flat nominal, and the renamed force nominal for a BLU-held zone. No structural change to the deposit lambda |
+| `fnc_opcom_force` *(new)* | The one home of the power model: the `OPCOM_FORCE` category → power table and the resolvers reading it. `DUWS_fnc_tokenPower` (our token → category → power, category from the token name); `DUWS_fnc_classPower` (a class → category → power via the standalone `fnc_classifyVehicle`, for enemy sightings including classes outside the detected roster); `DUWS_fnc_tokenListForce` (Σ `tokenPower` over a token list); `DUWS_fnc_hpForce` (a hardpoint type → its composed static + garrison force) |
+| `fnc_garrison_strength_init` *(modify)* | Add `DUWS_fnc_garrisonForce` = `garrisonMen` (its infantry men, unchanged, live roster or stowed ledger) + Σ `tokenPower` over the surviving *vehicle/static* tokens. `garrisonMen` stays as the men component; the grid and readout now deposit `garrisonForce` |
+| `fnc_opcom_grid_rebuild` *(modify)* | Deposit `garrisonForce` for zones/towns, a hardpoint's composed `hpForce` instead of the flat nominal, and the renamed force nominal for a BLU-held zone. No structural change to the deposit lambda |
 | `fnc_opcom_sense` *(modify)* | Stamp a sighted group's **firepower** into `belief_str`: Σ `classPower(typeOf)` over its sighted members and their vehicles, plus the additive player bonus (below). No condition scaling — belief is fogged, age decay is the fog |
 | `fnc_debug_force_emission` *(modify)* | Report **force**, not "men"; keep the (live)/(ledger)/(nominal) tag |
 
 ## The power model
 
 Per-category power (the plan's starter table
-([§The quantity](opcom_plan.md#the-quantity-force-not-coverage)) with statics added), the categories being
-the faction detector's own buckets. Values are tune starters, held as plain server globals (`OPCOM_`
-prefix, out of a preprocessor macro's reach like the other OPCOM constants):
+([§The quantity](opcom_plan.md#the-quantity-force-not-coverage)) with statics added). Values are tune
+starters, held in the `OPCOM_FORCE` hashmap in `fnc_opcom_force` — the coarse force buckets, one power
+each, that both resolvers land on:
 
 | Category | Power |
 |---|---|
@@ -92,60 +93,56 @@ one power value, so:
 - **a sighted enemy** class resolves through `fnc_classifyVehicle`, then category → power, the result held
   in belief.
 
-The IFV/MBT and static sub-splits live in `fnc_classifyVehicle`, off per-class config: a tracked hull that
-carries dismounts and mounts an autocannon is an IFV (9), one with no dismounts an MBT (12), one with only
-an MG a tracked APC (4); a static splits MG (2) from AT / AA / GMG (4, by `threat[]` / `GMG_F`) from
-mortar / artillery (1, by `artilleryScanner`). The detector is untouched.
+The IFV/MBT and static sub-splits live in `fnc_classifyVehicle`, off per-class config: any `artilleryScanner`
+piece is `static_arty` (1) whatever its hull — a towed mortar or a self-propelled gun, since indirect fire
+holds no ground — checked ahead of the hull-kind tests; a tracked hull that carries dismounts and mounts an
+autocannon is an IFV (9), one with no dismounts an MBT (12), one with only an MG a tracked APC (4); a static
+splits MG (2) from AT / AA / GMG (4, by `threat[]` / `GMG_F`). The detector is untouched.
 
-**OPFOR** force is condition-scaled, so `effForce = Σ power × condition` and the grid deposits `effForce`
-— a shot-up holding weighs less with no extra logic ([§Unit strength](opcom_plan.md#unit-strength)):
+**OPFOR holdings** are priced whole-token, not per-object: `garrisonForce` is the site's infantry men
+(`garrisonMen`, live roster or stowed ledger) plus the power of its **surviving vehicle and static
+tokens**. Attrition rides the existing whole-token loss ledger — a destroyed vehicle leaves the surviving
+set, so a mauled holding weighs less — and there is deliberately **no** per-object `× (1 − damage)`: a
+damaged-but-alive vehicle counts full until it is killed. This keeps the metric consistent with the
+codebase's whole-token model (a placed token is placed full) and needs no live-object walk; crew are not
+counted, the vehicle carries them ([§Unit strength](opcom_plan.md#unit-strength)).
 
-- **Live** (a raised OPFOR site): iterate the roster, valuing each element by its token (`tokenPower`). A
-  team contributes its alive men (each 1); a vehicle contributes `tokenPower × (1 − damage)`, a static the
-  same. A man **inside** a vehicle is not counted — the vehicle already carries him (crew is never counted,
-  mirroring `garrisonMen` today and the plan's crew rule).
-- **Stowed** (a site streamed out): no live objects, so `garrisonForce` falls to `tokenListForce` over the
-  ledger's **surviving** tokens at full condition — the ledger has already dropped the lost ones, exactly
-  as the men-count path works now.
-
-**Belief** does not condition-scale: an enemy sighting deposits full `classPower`, and age decay is the
-only fog — the commander does not track a sighted vehicle's damage.
+**Belief** is likewise not condition-scaled: an enemy sighting deposits full `classPower`, and age decay
+is the only fog — the commander does not track a sighted vehicle's damage.
 
 The single table is the point: our holdings resolve through `tokenPower`, enemy sightings through
-`classPower`, but both land on the one category → power table — so the grid rebuild, the sense sweep and
-the debug readout cannot drift into different metrics.
+`classPower`, but both land on the one `OPCOM_FORCE` table — so the grid rebuild, the sense sweep and the
+debug readout cannot drift into different metrics.
 
 ## Sources
 
-- **OPFOR zone / town garrison** — `DUWS_fnc_garrisonForce` (live `effForce`, else stowed token power),
-  replacing `garrisonMen` at both `fnc_opcom_grid_rebuild` call sites.
-- **OPFOR hardpoint** — no power of its own; its force **composes** from its constituent assets (our
-  tokens, so `tokenPower`): the emplaced static weapon plus any patrol group(s) that belong to it. So a mortar
-  pit reads ~1 (indirect fire barely holds ground), while an AT emplacement with a covering patrol reads
-  the AT static plus the patrol's men and vehicles. Replaces the flat `OPCOM_GRID_HP_MEN`. *Implementation
-  to confirm:* source the static class and patrol roster from the hardpoint record/ledger, and check that
-  composition is tracked for a **stowed** hardpoint (it survives stow) — else the stowed value falls back
-  to the static alone.
+- **OPFOR zone / town garrison** — `DUWS_fnc_garrisonForce` (infantry men + surviving vehicle/static token
+  power), replacing `garrisonMen` at both `fnc_opcom_grid_rebuild` call sites.
+- **OPFOR hardpoint** — `DUWS_fnc_hpForce`, summed off the type's composition layout
+  (`DUWS_hardpointComp_<type>`): every emplaced weapon in it, each `classPower`-priced and added (a prop —
+  sandbag, gate, mast — classifies to nothing and adds 0), plus its loose garrison
+  (`DUWS_hardpointGarrison[type]` token(s) through `tokenListForce`). Counting the layout means a two-gun
+  roadblock counts both guns and a fortified radio base its whole nest, not one nominal; reading the layout
+  data (not live objects) means it holds deployed or stowed. Replaces the flat `OPCOM_GRID_HP_MEN`.
 - **BLU-held zone** — a fixed nominal, `OPCOM_GRID_ZONE_ENEMY_FORCE` (starter 8, renamed from
   `_ENEMY_MEN`). The player's garrison is not modelled, so the commander only knows the ground is held,
   not how strongly. A later OPCOM step is intended to read the actual BLUFOR garrison strength here
   instead of a nominal; see [§Forward note](#forward-note).
-- **Belief (sighted BLUFOR)** — `fnc_opcom_sense` sums `classPower(typeOf)` over the sighted group and its
-  vehicles (full power, no condition), then **adds** the player bonus per human aboard: `OPCOM_PLAYER_WORTH`
-  becomes an *additive* premium (starter 3), not the old men multiplier. So a player on foot deposits
-  `1 + 3`, a player in an APC deposits `6 + 3` — the hardware plus a fixed "a human is more dangerous"
-  bump. Age decay in the grid ([§Decay](opcom_plan.md#decay)) is the only fog thereafter.
+- **Belief (sighted BLUFOR)** — `fnc_opcom_sense` sums firepower over the sighted group: each dismounted
+  man 1, each crewed vehicle its `classPower` (counted once), then **adds** the player bonus per human
+  aboard — `OPCOM_PLAYER_WORTH` is an *additive* premium (starter 3), not the old men multiplier. So a
+  player on foot deposits `1 + 3`, a player in an APC `4 + 3` (the APC's power plus the bump). Age decay in
+  the grid ([§Decay](opcom_plan.md#decay)) is the only fog thereafter.
 
 ## Constants
 
-In `server_var_init.sqf`, replacing the two Phase 1 placeholders:
+The category → power table is the `OPCOM_FORCE` hashmap in `fnc_opcom_force`, beside the token → category
+map the resolvers use (`DUWS_forceTokenCat`). In `server_var_init.sqf`, the two scalar grid/sense knobs:
 
-- The power table above (a category → power map).
 - `OPCOM_GRID_ZONE_ENEMY_FORCE` — was `OPCOM_GRID_ZONE_ENEMY_MEN` (8).
 - `OPCOM_PLAYER_WORTH` (3) — same constant, now read as an additive power premium per human, not a
   headcount multiplier. Its comment changes to match.
-- `OPCOM_GRID_HP_MEN` is dropped with no replacement — a hardpoint's force composes from its static and
-  patrol(s) through `tokenPower`, not from a constant.
+- `OPCOM_GRID_HP_MEN` is dropped with no replacement — a hardpoint's force composes through `DUWS_fnc_hpForce`.
 
 ## Forward note
 

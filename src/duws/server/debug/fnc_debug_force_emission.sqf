@@ -1,7 +1,7 @@
 // Locality: server -- remoteExec'd to 2 by the Debug menu's force-emission row, which hands over the
 // caller and the clicked position. Reports the emitter nearest the click, its OPCOM force-grid deposit
 // and where the count came from -- (live) roster, (ledger) surviving tokens, or a fixed (nominal) --
-// back to the caller's hint. Reads the same DUWS_fnc_garrisonMen the grid rebuild does, so the readout
+// back to the caller's hint. Reads the same DUWS_fnc_garrisonForce the grid rebuild does, so the readout
 // matches the deposit. English-only, like the rest of the debug surface.
 if (!isServer) exitWith {};
 
@@ -41,7 +41,7 @@ if (_kind isEqualTo "zone") then {
 		_lines = [
 			format ["[FORCE EMISSION] %1", _key],
 			"  BLU-held zone -> enemy layer",
-			format ["  emitting: %1 men (nominal)", OPCOM_GRID_ZONE_ENEMY_MEN],
+			format ["  emitting: %1 force (nominal)", OPCOM_GRID_ZONE_ENEMY_FORCE],
 			format ["  reach: %1 m   dist: %2 m", _reach, round _best]
 		];
 	} else {
@@ -49,7 +49,7 @@ if (_kind isEqualTo "zone") then {
 		_lines = [
 			format ["[FORCE EMISSION] %1", _key],
 			format ["  OPFOR zone, tier %1 -> friendly layer", [_key] call fnc_zone_tier],
-			format ["  emitting: %1 men (%2)", [_key] call DUWS_fnc_garrisonMen, _tag],
+			format ["  emitting: %1 force (%2)", [_key] call DUWS_fnc_garrisonForce, _tag],
 			format ["  reach: %1 m   dist: %2 m", _reach, round _best]
 		];
 	};
@@ -58,7 +58,7 @@ if (_kind isEqualTo "zone") then {
 	_lines = [
 		format ["[FORCE EMISSION] %1", _key],
 		format ["  OPFOR hardpoint (%1) -> friendly layer", _type],
-		format ["  emitting: %1 men (nominal)", OPCOM_GRID_HP_MEN],
+		format ["  emitting: %1 force (composed)", [_type] call DUWS_fnc_hpForce],
 		format ["  reach: %1 m   dist: %2 m", OPCOM_GRID_SPREAD, round _best]
 	];
 };
