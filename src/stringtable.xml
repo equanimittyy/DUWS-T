@@ -4786,9 +4786,13 @@
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
             </Key>
-            <Key ID="STR_DUWS_T_DEPOT_LANDING_PAD">
-                <Original>Landing Pad</Original>
-                <English>Landing Pad</English>
+            <Key ID="STR_DUWS_T_DEPOT_TITLE">
+                <Original>VEHICLE DEPOT</Original>
+                <English>VEHICLE DEPOT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_GARAGE">
+                <Original>GARAGE</Original>
+                <English>GARAGE</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_POOL_LAND">
                 <Original>Land %1/%2</Original>

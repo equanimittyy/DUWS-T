@@ -25,23 +25,28 @@ class vehicledepotmenu
             h = 23.4 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
         };
-        class titletext: RscText
-        {
-            idc = 2000;
-            text = "$STR_DUWS_T_DEPOT_MENU";
-            style = ST_CENTER;
-            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 1 * GUI_GRID_H + GUI_GRID_Y;
-            w = 39 * GUI_GRID_W;
-            h = 1.2 * GUI_GRID_H;
-        };
+        // Two titled outline boxes, mirroring the REQUESTS menu's REQUESTS INTERFACE / SUPPORTS frames:
+        // each RscFrame draws a white outline with its title at the corner over a darker fill, and there
+        // is no separate centred dialog title -- the frame corners name the halves.
 
+        // Left box: VEHICLE DEPOT. Holds the CP/AP readouts, the modification toolbar and the Landing Pad
+        // list; every toolbar button acts on the selected list row.
+        class padFrame: RscFrame
+        {
+            idc = 2010;
+            text = "$STR_DUWS_T_DEPOT_TITLE";
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 1.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 20.9 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
+        };
         class cpFrame: RscFrame
         {
             text = "$STR_DUWS_T_rqfuzzt0";
             sizeEx = 0.025;
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.4 * GUI_GRID_H + GUI_GRID_Y;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 2 * GUI_GRID_H + GUI_GRID_Y;
             w = 6 * GUI_GRID_W;
             h = 1.9 * GUI_GRID_H;
         };
@@ -49,8 +54,8 @@ class vehicledepotmenu
         {
             idc = 1000;
             text = "--";
-            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.85 * GUI_GRID_H + GUI_GRID_Y;
+            x = 1.8 * GUI_GRID_W + GUI_GRID_X;
+            y = 2.45 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.2 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
@@ -58,32 +63,19 @@ class vehicledepotmenu
         class apFrame: cpFrame
         {
             text = "$STR_DUWS_T_01aj6v4j";
-            x = 7.3 * GUI_GRID_W + GUI_GRID_X;
+            x = 7.7 * GUI_GRID_W + GUI_GRID_X;
         };
         class apValue: cpValue
         {
             idc = 1002;
-            x = 7.7 * GUI_GRID_W + GUI_GRID_X;
-        };
-
-        // Left half: the Landing Pad box. Its modification toolbar sits inside, above the list; every
-        // toolbar button acts on the selected Landing Pad row.
-        class padFrame: RscFrame
-        {
-            idc = 2010;
-            text = "$STR_DUWS_T_DEPOT_LANDING_PAD";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18.5 * GUI_GRID_W;
-            h = 16.9 * GUI_GRID_H;
-            colorBackground[] = {0,0,0,0.5};
+            x = 8.1 * GUI_GRID_W + GUI_GRID_X;
         };
         class toolRepair: RscButton
         {
             idc = 2012;
             sizeEx = 0.025;
             x = 1.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 4.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_action', 2] } }";
@@ -104,9 +96,9 @@ class vehicledepotmenu
         {
             idc = 2011;
             x = 1.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 5.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.9 * GUI_GRID_W;
-            h = 12.6 * GUI_GRID_H;
+            h = 14.2 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class padCheckStatus: RscButton
@@ -114,7 +106,7 @@ class vehicledepotmenu
             idc = 2013;
             sizeEx = 0.025;
             x = 1.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_check_status', 2] } }";
@@ -127,17 +119,17 @@ class vehicledepotmenu
             action = "[] spawn fnc_depot_recycle_confirm";
         };
 
-        // Right half: the Garage box, mirroring the Landing Pad box. Three domain lists stack inside one
-        // frame, one selection between them: each onLBSelChanged clears the other two and records its idc
-        // as the active list for Retrieve. The -1 writes re-fire the handler, but the sel>=0 guard drops
-        // them, so there is no recursion.
+        // Right box: GARAGE. Three domain lists stack inside one frame, one selection between them: each
+        // onLBSelChanged clears the other two and records its idc as the active list for Retrieve. The -1
+        // writes re-fire the handler, but the sel>=0 guard drops them, so there is no recursion.
         class garageFrame: RscFrame
         {
             idc = 2020;
+            text = "$STR_DUWS_T_DEPOT_GARAGE";
             x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 1.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
-            h = 16.9 * GUI_GRID_H;
+            h = 20.9 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.5};
         };
         class landHeader: RscText
@@ -146,7 +138,7 @@ class vehicledepotmenu
             text = "";
             sizeEx = 0.025;
             x = 20.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 2 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
@@ -154,31 +146,31 @@ class vehicledepotmenu
         {
             idc = 2021;
             x = 20.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 3.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.9 * GUI_GRID_W;
-            h = 3.4 * GUI_GRID_H;
+            h = 4.6 * GUI_GRID_H;
             sizeEx = 0.025;
             onLBSelChanged = "params ['_c','_s']; if (_s >= 0) then { uiNamespace setVariable ['DUWS_depotMenu_activeGarage', ctrlIDC _c]; { if (_x != ctrlIDC _c) then { lbSetCurSel [_x, -1] } } forEach [2021,2022,2025] }";
         };
         class airHeader: landHeader
         {
             idc = 2004;
-            y = 9.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
         };
         class airList: landList
         {
             idc = 2022;
-            y = 11 * GUI_GRID_H + GUI_GRID_Y;
+            y = 9.1 * GUI_GRID_H + GUI_GRID_Y;
         };
         class boatHeader: landHeader
         {
             idc = 2005;
-            y = 14.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14 * GUI_GRID_H + GUI_GRID_Y;
         };
         class boatList: landList
         {
             idc = 2025;
-            y = 15.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.1 * GUI_GRID_H + GUI_GRID_Y;
         };
 
         // Store reads the selected Landing Pad row; the server routes it to its domain pool. Retrieve
@@ -188,7 +180,7 @@ class vehicledepotmenu
             idc = 2023;
             sizeEx = 0.025;
             x = 20.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_GARAGE_STORE_TIP";
@@ -203,13 +195,15 @@ class vehicledepotmenu
             action = "private _g = uiNamespace getVariable ['DUWS_depotMenu_activeGarage', -1]; if (_g < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _i = lbCurSel _g; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _d = lbData [_g, _i]; if (_d != '') then { [player, parseNumber _d, uiNamespace getVariable ['DUWS_depotMenu_ctx','']] remoteExec ['fnc_garage_retrieve', 2] }";
         };
 
+        // Own row under both boxes at the right-hand end, mirroring the REQUESTS exit: neither box owns
+        // leaving the dialog.
         class exitbutton: RscButton
         {
             idc = 2099;
             text = "EXIT";
             sizeEx = 0.025;
             x = 33 * GUI_GRID_W + GUI_GRID_X;
-            y = 22 * GUI_GRID_H + GUI_GRID_Y;
+            y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 6 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             action = "closeDialog 0";
