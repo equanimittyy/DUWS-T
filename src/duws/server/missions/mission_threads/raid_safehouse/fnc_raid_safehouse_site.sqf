@@ -14,13 +14,26 @@
 // Contract: [_candidatePos] -> [] reject, or [_candidatePos] accept.
 params ["_pos"];
 
-// TUNABLE. Must match the thread's building-search radius so finder and thread see the same cluster.
-#define ACCEPT_RADIUS 250
+// TUNABLE. Sweep the whole town -- its own radius, floored so a tight hamlet still spans a fair block.
+// Must match the thread's radius so finder and thread see the same cluster.
+#define MIN_RADIUS 350
 // Floor 3 candidates stay uncleared, so the crowd can only ever rule out (count - 2) decoys; below ~5 the
 // asking barely narrows anything, so gate the offer on a cluster wide enough to make the deduction matter.
 #define MIN_BUILDINGS 5
 
-private _bldgs = nearestTerrainObjects [_pos, ["House"], ACCEPT_RADIUS, true];
+// Radius from the town this candidate sits in: duws_town_circles is the client-safe broadcast of the
+// server-only civ_locations/civ_radii (fnc_civ_init_Tomata), so it is readable inside the picker.
+// Nearest circle wins; no towns (civilians off) leaves the MIN_RADIUS floor.
+private _townRad = 0;
+private _bestD = 1e9;
+{
+    _x params ["_c", "_r"];
+    private _d = _c distance2D _pos;
+    if (_d < _bestD) then { _bestD = _d; _townRad = _r };
+} forEach (missionNamespace getVariable ["duws_town_circles", []]);
+private _radius = MIN_RADIUS max _townRad;
+
+private _bldgs = nearestTerrainObjects [_pos, ["House"], _radius, true];
 private _usable = _bldgs select {
     !(((_x buildingPos 3) select 0) == 0) &&
     { isClass (configFile >> "CfgVehicles" >> typeOf _x >> "AnimationSources" >> "Door_1_rot") }

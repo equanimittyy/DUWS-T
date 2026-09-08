@@ -10,10 +10,11 @@
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
-// TUNABLE. Total candidate houses cap, the building-search radius (matches the site finder), and the
-// per-house occupant count. Groups run large, so the house cap is deliberately low.
+// TUNABLE. Total candidate houses cap, the building-search radius floor (matches the site finder; the
+// live radius is the town's own, floored here), and the per-house occupant count. Groups run large, so
+// the house cap is deliberately low.
 #define MAX_HOUSES 8
-#define SEARCH_RADIUS 250
+#define MIN_RADIUS 350
 
 // Resolve the town this offer sits on (the finder returned a town centre): the nearest registered town is
 // it. civ_locations / civ_radii are server-only, and this is server-side. Needed for the wrong-raid rep
@@ -29,7 +30,7 @@ private _townRadius = _radii param [_townIndex, 200];
 
 if (!([23, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
-private _radius = SEARCH_RADIUS;
+private _radius = MIN_RADIUS max _townRadius;
 
 // Door-having, enterable houses only -- a house with no lockable door is no safehouse (see the site finder).
 private _usable = ([_MissionPos, 3, _radius] call fnc_usableBuildings) select {
