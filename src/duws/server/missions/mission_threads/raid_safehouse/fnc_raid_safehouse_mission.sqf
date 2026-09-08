@@ -64,9 +64,9 @@ private _fnc_innerSlots = {
     _scored apply { _x select 1 }
 };
 
-// Spawns one blended safehouse guard: a raw CIVILIAN-side body, captive and unarmed while it hides, held
-// in place until the breach flips it. Kept off fnc_civ_spawnUnit so it carries no town billing (it is an
-// enemy, not a local) -- only the rating-cancel below, in case it is shot before it turns.
+// Spawns one blended safehouse guard: a raw CIVILIAN-side body, captive and unarmed while it hides among
+// the house's occupants until the breach flips it. Kept off fnc_civ_spawnUnit so it carries no town billing
+// (it is an enemy, not a local) -- only the rating-cancel below, in case it is shot before it turns.
 private _fnc_spawnGuard = {
     params ["_pos"];
     private _g = createGroup [CIVILIAN, true];
@@ -77,7 +77,6 @@ private _fnc_spawnGuard = {
     _u setDir (random 360);
     _u setPosATL _pos;
     _u setBehaviour "SAFE";
-    _u disableAI "PATH";                                   // hold inside until the flip enables it
     _u setVariable ["DUWS_safehouse_occupant", true];
     // Cancel only the engine's global civ-kill rating tank if shot before the flip; once EAST, a kill is
     // a plain enemy kill and carries no penalty to undo.
@@ -137,7 +136,11 @@ private _marks = [];
     [_bldg] remoteExec ["fnc_raid_safehouse_arm", 0, _bldg];
 
     // Occupants: 3-5, spread across the slots. Real house = concealed guards; decoys = innocent locals
-    // (spawned as town civilians, so killing them bills the town on top of the raid's own rep cost).
+    // (spawned as town civilians, so killing them bills the town on top of the raid's own rep cost). Both
+    // garrison their house through fnc_holdBuildingPost -- a doMove loop between the building's positions
+    // with pathing left on, so they work the house rather than freeze on one spot and give a decoy away by
+    // standing where a guard would not. The loop keys off the unit, so it survives a guard's flip to EAST:
+    // the same men then hold and fight from the house instead of charging the street.
     private _n = (3 + floor random 3) min count _slots;
     private _occupants = [];
     for "_i" from 0 to (_n - 1) do {
@@ -149,11 +152,13 @@ private _marks = [];
             if (!isNull _c) then {
                 _c setVariable ["DUWS_safehouse_occupant", true];   // keep the ask poll off the shut-in locals
                 _c setPosATL _spos;
-                _c disableAI "PATH";
             };
             _c
         };
-        if (!isNull _u) then { _occupants pushBack _u; _allUnits pushBack _u };
+        if (!isNull _u) then {
+            _occupants pushBack _u; _allUnits pushBack _u;
+            [_u, _bldg, _slots, "AUTO"] spawn fnc_holdBuildingPost;
+        };
     };
     _bldg setVariable ["DUWS_safehouse_occupants", _occupants];
     if (_isReal) then { _guards append _occupants };
@@ -183,6 +188,24 @@ missionNamespace setVariable ["DUWS_safehouse_decoys", _decoys];
 missionNamespace setVariable ["DUWS_safehouse_guards", _guards];
 DUWS_safehouse_active = true;
 publicVariable "DUWS_safehouse_active";
+
+// Entry breach: a raider who gets inside a candidate without shooting a door (through a gap, a blown wall)
+// still cracks it. Cheap poll over the not-yet-breached houses for a player stood on an interior position.
+[_bldgs] spawn {
+    params ["_bldgs"];
+    while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
+        {
+            private _h = _x;
+            if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
+                private _slots = _h buildingPos -1;
+                if ((allPlayers findIf { private _p = _x; (_slots findIf { _p distance _x < 2.5 }) >= 0 }) >= 0) then {
+                    [_h, "ALL"] call fnc_raid_safehouse_breach;
+                };
+            };
+        } forEach _bldgs;
+        sleep 2;   // TUNABLE
+    };
+};
 
 // Thicken the street crowd so there is always someone to ask, and re-open every local already in town (a
 // survivor of an earlier event still reads asked). Occupants are flagged out -- only the street answers.
