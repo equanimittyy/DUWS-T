@@ -26,7 +26,7 @@ isNil {
         private _i = lbAdd [2011, _name];
         lbSetData [2011, _i, netId _x];
     } forEach _pad;
-    lbSort [2011];
+    lbSort [2011, "ASC"];
 
     // Garage, one list per domain; lbData keeps the FLAT stored index so Retrieve is domain-agnostic.
     { lbClear _x; } forEach [2021, 2022, 2025];
@@ -43,7 +43,7 @@ isNil {
         private _row = lbAdd [_idc, format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel]];
         lbSetData [_idc, _row, str _forEachIndex];
     } forEach _stored;
-    { lbSort [_x]; } forEach [2021, 2022, 2025];
+    { lbSort [_x, "ASC"]; } forEach [2021, 2022, 2025];
 
     // Header readouts. CP/AP refreshed here too: the host's own publicVariableEventHandler does not
     // fire for its own broadcast, so a server-side debit would not otherwise reach the host's boxes.

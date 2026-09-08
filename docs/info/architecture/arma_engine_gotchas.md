@@ -292,6 +292,20 @@ expose raw `<t ...>` tags as listbox rows. Row colour has its own channel —
 The reusable action menu does this for every row, in `fnc_open_action_menu`
 (`src/duws/client/dialog/fnc_open_action_menu.sqf`).
 
+## `lbSort` by IDC needs a direction, and the missing one aborts the whole fill
+
+**The array form is `lbSort [idc, "ASC" | "DESC"]`. Passing `lbSort [idc]` throws "1 elements
+provided, 2 expected" — a runtime error, not a silent no-op.**
+
+The danger is where it lands: an uncaught error halts the rest of its code block. A fill that sorts
+one list partway through then populates more lists and writes headers below loses everything after
+the bad sort — the later lists render empty and the headers never update, which reads as "the
+listboxes are broken" rather than as a sort call.
+
+**How to apply:** always give `lbSort` its direction. The bare-IDC commands (`lbAdd`, `lbSetData`,
+`lbSort`) act on the top display, so a fill that sorts several lists must pass `[idc, "ASC"]` for
+each.
+
 ## `BIS_fnc_showSubtitle` is one slot: the next call wipes the line mid-read
 
 **A second `BIS_fnc_showSubtitle` replaces the screen immediately. There is no queue, and the
