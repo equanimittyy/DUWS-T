@@ -35,6 +35,8 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     // the pointer gone, so reading it there is a guess at what the player was looking at.
     ["Flag cursor object as searchable", fnc_debug_search_menu, [cursorObject], [1,0.667,0,1]],
 
+    ["Furnish cursor building", fnc_debug_furnish_menu, [cursorObject], [1,0.667,0,1]],
+
     ["Adjust CP / AP / Town / Escalation", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
