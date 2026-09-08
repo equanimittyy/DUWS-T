@@ -167,6 +167,51 @@ fnc_vehicleWeaponType = compileFinal {
 	flatten ((flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _type >> "Turrets") apply {getArray (_x >> 'weapons')})) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
 };
 
+// One class -> its OPCOM force category, the key the Phase 2 power table hangs a value off
+// (docs/plans/opcom/phase_2_force_weighting.md). Context-free: a sighted enemy may be a class outside any
+// detected roster (a mod, DLC, captured or civilian hull), so it resolves a class alone, with no faction to
+// parse -- which is why it reuses the per-class leaves above but never fnc_parseFaction's faction-context buckets.
+fnc_classifyVehicle = compileFinal {
+	params ["_class"];
+	if (_class isEqualTo "") exitWith {""};
+	private _cfg = configFile >> "CfgVehicles" >> _class;
+
+	if (_class isKindOf "CAManBase") exitWith {"man"};
+
+	private _wpn = [_class] call fnc_vehicleWeaponType;
+
+	if (_class isKindOf "StaticWeapon") exitWith {
+		if (getNumber (_cfg >> "artilleryScanner") == 1) exitWith {"static_arty"};
+		if ("GMG_F" in _wpn) exitWith {"static_hi"};
+		if (([_class] call fnc_isThreatTo) in ["air", "armor"]) exitWith {"static_hi"};
+		"static_mg"
+	};
+
+	if (_class isKindOf "Helicopter" || {_class isKindOf "Plane"}) exitWith {"air"};
+
+	private _hasCannon = "CannonCore" in _wpn;
+	private _carriesTroops = getNumber (_cfg >> "transportSoldier") > 0;
+
+	// No dismounts is an MBT; dismounts with an autocannon an IFV; dismounts with only an MG a tracked APC.
+	if (_class isKindOf "Tank") exitWith {
+		if (!_carriesTroops) exitWith {"tank"};
+		if (_hasCannon) exitWith {"ifv"};
+		"apc"
+	};
+
+	// armor > 300 is the detector's wheeled-APC gate; an autocannon hull carrying dismounts is a wheeled IFV.
+	if (_class isKindOf "Car") exitWith {
+		if (getNumber (_cfg >> "armor") > 300) exitWith {
+			if (_hasCannon && _carriesTroops) exitWith {"ifv"};
+			"apc"
+		};
+		if (_wpn isNotEqualTo []) exitWith {"car_armed"};
+		"car_unarmed"
+	};
+
+	""
+};
+
 fnc_unitParseRoles = compileFinal {
 	// Unit role from the config icon (CfgVehicleIcons: pictureHeal/Repair/...); weapon role from the
 	// held weapon's UIPicture, secondary before primary.
@@ -684,4 +729,4 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_classifyVehicle","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };

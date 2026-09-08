@@ -14,32 +14,38 @@ dependency.
 
 ## Prerequisite: a single-class classifier (build this first)
 
-Friendly classification is free — our units carry their token, and the token names its category. The
-enemy layer is the problem: it classifies a **sighted** class at runtime, and a human can field a class
-outside the detected BLUFOR roster (a mod unit, a captured or civilian vehicle, a DLC type), so the grid
-must resolve an *arbitrary* class name to a category on the fly.
+Our own units never need classifying — a unit carries its composition token and the token names its
+category (`tokenPower` maps token → category with no config read). The enemy layer is the problem: it
+prices a **sighted** class at runtime, and a human can field a class outside any detected roster (a mod
+unit, a captured or civilian vehicle, a DLC type), so the grid must resolve an *arbitrary* class name to a
+category **in isolation**, with no faction to parse.
 
-`fn_factionAutoDetect` today classifies only in **bulk**: it filters a faction's whole class list into
-named bucket-lists (`_turretHMG` / `_turretGMG` / `_turretMortar` / `_turretAA` / `_turretAT`,
-`_apcWheeled` / `_apcTracked`, `_tank`, `_arty`, `_antiAir`, `_carArmed` / `_carTransport`, `_heliArmed`
-…) through list-filters (`fnc_factionGetFilteredByEditorSubcat`, `fnc_filterBySeats` / `ByWeapons` /
-`ByPylons` / `ByUtility`, plus `armor` / `radarType` / `artilleryScanner` reads). The per-class rules are
-buried inside those `select {}` passes; there is no `class → category` resolver to call for one class.
+`fn_factionAutoDetect` cannot serve that. It classifies only in **bulk** — `fnc_parseFaction` takes a
+faction and sorts its whole class list into ~28 named buckets — and that machinery cannot be turned into a
+one-class resolver, for three structural reasons:
 
-So the first P2 task is a **behaviour-preserving extraction**: lift those per-class predicates into a
-reusable `DUWS_fnc_classifyVehicle [_class] → category`. The detector then maps it over the roster (same
-buckets, no change to what it detects); runtime `classPower` calls it per sighting; and the IFV/MBT split
-and the static sub-splits live in it once, not in two places. Contained to the one `MODERN` faction family
-(the only detect family; `CIV_FACTIONS` is civilians).
+- **Bucketing is faction-contextual.** `fnc_factionGetFilteredByEditorSubcat` filters by
+  `editorSubcategory` first and only falls to `isKindOf` / config heuristics when the *whole faction* has
+  no class in that subcategory. Which bucket a class lands in depends on the classes beside it; a lone
+  class has no such context.
+- **Buckets overlap and break ties by list.** The static splits each scan the whole turret list and pick a
+  strict-kind list *or* a loose weapon / threat list (`selectNonEmpty`); a class can sit in several. One
+  category per class cannot represent that.
+- **The accurate path needs the faction.** `editorSubcategory` is the preferred signal and `isKindOf` the
+  explicitly "less accurate" fallback. A one-class resolver has only the fallback tier, so routing the
+  detector through it would downgrade detection for every faction — a regression on the mod-compat heart.
 
-Two cautions: `fn_factionAutoDetect` is the mod-compatibility heart, and detection is already known
-unreliable — the extraction must not change the buckets it produces, only where the rules live. If
-profiling later shows live classification is hot, the detector's existing bucket-lists seed an inverse
-`class → category` cache for the detected faction cheaply; treat that as an optimisation, not a
-first-cut requirement — a sighting is classified once and then held in belief.
+So the classifier is a **new, standalone** function, `fnc_classifyVehicle [_class] → category`, in
+`fn_factionAutoDetect.sqf` beside the leaf predicates it reuses (`fnc_isThreatTo`, `fnc_vehicleWeaponType`,
+and the raw `armor` / `artilleryScanner` / `transportSoldier` reads). Sharing those per-class leaves keeps
+it in step with the detector, but it does **not** call `fnc_parseFaction`, and `fnc_parseFaction` is left
+untouched. Its categories are the coarse force buckets — one per power value — not the detector's finer
+ones; the IFV/MBT split and the static sub-splits live here, once. Contained to `MODERN` (the only detect
+family; `CIV_FACTIONS` is civilians).
 
-Only once the classifier stands does the power table and the grid rewiring below make sense; they consume
-it.
+Cost is bounded without a bucket cache: an enemy sighting is classified once and its category held in
+belief, so `classifyVehicle` runs once per sighting, never per grid rebuild. Only once it stands do the
+power table and the grid rewiring below make sense; they consume it.
 
 ## Files
 
@@ -48,7 +54,7 @@ functions; the garrison changes extend the existing garrison-strength module.
 
 | File | Change |
 |---|---|
-| `fnc_opcom_force` *(new)* | The one home of the power model and the single category → power table. Two resolvers feed it: `DUWS_fnc_tokenPower` (our token → category → power, category known from the token name) and `DUWS_fnc_classPower` (a class → category → power via the extracted `DUWS_fnc_classifyVehicle` — for enemy sightings, including classes outside the detected roster). `DUWS_fnc_effForce` sums `power × condition` over a list of live objects |
+| `fnc_opcom_force` *(new)* | The one home of the power model and the single category → power table. Two resolvers feed it: `DUWS_fnc_tokenPower` (our token → category → power, category known from the token name) and `DUWS_fnc_classPower` (a class → category → power via the standalone `fnc_classifyVehicle` — for enemy sightings, including classes outside the detected roster). `DUWS_fnc_effForce` sums `power × condition` over a list of live objects |
 | `fnc_garrison_strength_init` *(modify)* | Replace `DUWS_fnc_garrisonMen` with `DUWS_fnc_garrisonForce` — live roster → `effForce`, else stowed → Σ `tokenPower` over the ledger's surviving tokens — and add `DUWS_fnc_tokenListForce` beside `tokenListMen`. The ledger already *is* tokens, so the stowed path needs no class lookup |
 | `fnc_opcom_grid_rebuild` *(modify)* | Deposit `garrisonForce` for zones/towns, a hardpoint's composed force (its stowed static + patrol(s), below) instead of the flat nominal, and the renamed force nominal for a BLU-held zone. No structural change to the deposit lambda |
 | `fnc_opcom_sense` *(modify)* | Stamp a sighted group's **firepower** into `belief_str`: Σ `classPower(typeOf)` over its sighted members and their vehicles, plus the additive player bonus (below). No condition scaling — belief is fogged, age decay is the fog |
@@ -78,19 +84,18 @@ Mortar / artillery weighs almost nothing: indirect fire holds no ground and must
 it barely moves the force grid even though it is a real threat elsewhere (it earns its keep through the
 `arty` action, not by garrisoning).
 
-Classification is a build-time job, not a grid-time one (the
-[prerequisite](#prerequisite-a-single-class-classifier-build-this-first) above). P2 hangs a power off each
-detector bucket, so:
+Classification runs once per sighting, not per grid rebuild (the
+[prerequisite](#prerequisite-a-single-class-classifier-build-this-first) above). Each force category hangs
+one power value, so:
 
-- **our units** carry their token; `tokenPower` maps token → category → power, no `isKindOf`;
-- **a sighted enemy** class resolves through `DUWS_fnc_classifyVehicle` (the [prerequisite](#prerequisite-a-single-class-classifier-build-this-first)) —
-  the same rules the detector buckets BLUFOR with, now callable per class, so a class outside the detected
-  roster still classifies.
+- **our units** carry their token; `tokenPower` maps token → category → power, no config read;
+- **a sighted enemy** class resolves through `fnc_classifyVehicle`, then category → power, the result held
+  in belief.
 
-The IFV/MBT split needs a **detector** change: today `tank` is `isKindOf "Tank"` and swallows tracked
-IFVs, so telling IFV (9) from MBT (12) is a rule added at detect time (e.g. a tracked class with
-`transportSoldier > 0` is an IFV), never a grid-time test. Static MG vs AT / AA / GMG splits the same way,
-off `turrets` vs `turretCannon` / `antiAir`.
+The IFV/MBT and static sub-splits live in `fnc_classifyVehicle`, off per-class config: a tracked hull that
+carries dismounts and mounts an autocannon is an IFV (9), one with no dismounts an MBT (12), one with only
+an MG a tracked APC (4); a static splits MG (2) from AT / AA / GMG (4, by `threat[]` / `GMG_F`) from
+mortar / artillery (1, by `artilleryScanner`). The detector is untouched.
 
 **OPFOR** force is condition-scaled, so `effForce = Σ power × condition` and the grid deposits `effForce`
 — a shot-up holding weighs less with no extra logic ([§Unit strength](opcom_plan.md#unit-strength)):
