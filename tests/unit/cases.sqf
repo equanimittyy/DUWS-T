@@ -1127,3 +1127,27 @@ missionNamespace setVariable ["DUWS_zoneTier_hpcapk", 2];
 missionNamespace setVariable ["DUWS_garrisonLost_emptyk", []];
 ["garrisonDerive: an empty composition derives an empty garrison and pool",
     (["emptyk", [], 3] call DUWS_fnc_garrisonDerive), [[], []]] call fnc_assertEq;
+
+// --- fnc_in_base_keep: the depot map-retrieve ring bound, shared by the client pick and the server
+// guard. Runs first while PosOfBLUHQ is still unset, to exercise the unknown-HQ branch. ---
+["in_base_keep: an unknown HQ position is never inside",
+    ([[0, 0, 0]] call fnc_in_base_keep), false] call fnc_assertEq;
+
+PosOfBLUHQ = [1000, 1000, 0];
+// DUWS_base_keep_radius still unset here -> the 250 m fallback bounds a JIP client that missed the broadcast.
+["in_base_keep: fallback radius accepts a point on the 250 m ring",
+    ([[1250, 1000, 0]] call fnc_in_base_keep), true] call fnc_assertEq;
+["in_base_keep: fallback radius refuses past 250 m",
+    ([[1251, 1000, 0]] call fnc_in_base_keep), false] call fnc_assertEq;
+
+DUWS_base_keep_radius = 500;
+["in_base_keep: reads the broadcast radius, not the fallback",
+    ([[1300, 1000, 0]] call fnc_in_base_keep), true] call fnc_assertEq;
+["in_base_keep: the bound is 2D, so height is ignored",
+    ([[1100, 1000, 40]] call fnc_in_base_keep), true] call fnc_assertEq;
+["in_base_keep: a point outside the ring is refused",
+    ([[1600, 1000, 0]] call fnc_in_base_keep), false] call fnc_assertEq;
+
+PosOfBLUHQ = [];
+["in_base_keep: an empty HQ position is never inside",
+    ([[1000, 1000, 0]] call fnc_in_base_keep), false] call fnc_assertEq;

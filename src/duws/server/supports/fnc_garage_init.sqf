@@ -55,8 +55,8 @@ fnc_garage_retrieve = {
     [] remoteExec ["fnc_depot_menu_fill", _caller];
 };
 
-// Map-placement retrieve: the position is a player's map click, so it is bounded here against the HQ
-// ring rather than trusted -- beyond DUWS_base_keep_radius the cleanup sweep collects vehicles. No
+// Map-placement retrieve: the position is a player's map click, so it is re-bounded here against the HQ
+// ring (fnc_in_base_keep) rather than trusted -- beyond it the cleanup sweep collects vehicles. No
 // pad-clear check: the player picks open ground, and placement radius 5 drops the vehicle on the
 // nearest gap so a click over another vehicle does not stack. No refill: the dialog is closed for the pick.
 fnc_garage_retrieve_map = {
@@ -64,7 +64,7 @@ fnc_garage_retrieve_map = {
     params ["_caller", "_index", "_pos"];
     private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
     if (_index < 0 || _index >= count _stored) exitWith { [localize "STR_DUWS_T_GARAGE_NONE_SELECTED"] remoteExec ["hint", _caller]; };
-    if (isNil "PosOfBLUHQ" || {PosOfBLUHQ isEqualTo []} || {(_pos distance2D PosOfBLUHQ) > DUWS_base_keep_radius}) exitWith { [localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE"] remoteExec ["hint", _caller]; };
+    if (!([_pos] call fnc_in_base_keep)) exitWith { [localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE"] remoteExec ["hint", _caller]; };
 
     private _spec = _stored select _index;
     private _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];

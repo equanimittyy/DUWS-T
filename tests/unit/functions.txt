@@ -6,6 +6,7 @@
 initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
 initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
 duws/shared/functions/fnc_cs.sqf::*fnc_cs
+duws/shared/functions/fnc_in_base_keep.sqf::*fnc_in_base_keep
 duws/shared/faction_lib/fnc_faction_rqst_list.sqf::*fnc_faction_rqst_list
 duws/client/chatter/fnc_duws_dialogue_channel.sqf::*fnc_duws_dialogue_channel
 duws/server/civilian/fnc_civ_state_init.sqf::fnc_civ_reaction_weights
