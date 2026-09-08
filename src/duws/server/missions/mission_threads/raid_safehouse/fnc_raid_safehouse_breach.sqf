@@ -22,7 +22,7 @@ if (_house getVariable ["DUWS_safehouse_real", false]) then {
         sleep (random 12);   // TUNABLE
         private _live = _guards select { alive _x };
         if (_live isEqualTo []) exitWith {};
-        private _grp = [_live, "opfor_auto", 1] call fnc_civ_flip_hostile;
+        private _grp = [_live, "EAST", "opfor", ["vest", "assault_rifle"], [true, 1]] call fnc_civ_arm;
         // Reveal the raiders so the cell engages on turn, not when it happens to spot them (mob pattern).
         if (!isNull _grp) then {
             { _grp reveal [_x, 4] } forEach (allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} });

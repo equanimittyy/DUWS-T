@@ -136,10 +136,9 @@ _grp setSpeedMode "LIMITED";
 				if (_live isEqualTo []) exitWith {};
 				// Discount the instigators leaving for EAST from the headcount, so the loop's death-scatter reads only real hits.
 				_grp setVariable ["DUWS_mob_broke", count _live];
-				// Break out to EAST and open fire, via the shared civ-to-hostile flip: the Rook40 sidearm and
-				// elite aim/spot skills the mob has always fielded, now the one shape the safehouse-raid guards
-				// flip through too (fnc_civ_flip_hostile).
-				private _east = [_live, "pistol", 1] call fnc_civ_flip_hostile;
+				// Break out to EAST and open fire via the shared loadout helper: an elite EAST cell with an
+				// OPFOR-pool sidearm -- the same shape the safehouse guards and fleeing informant arm through.
+				private _east = [_live, "EAST", "opfor", ["pistol"], [true, 1]] call fnc_civ_arm;
 				// A fresh EAST group starts blind and would mill until it stumbled into contact -- reveal the players and
 				// send it hunting so the cell engages the moment it turns, not whenever it happens to detect them.
 				private _blu = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };

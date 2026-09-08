@@ -260,8 +260,8 @@ fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
 fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_panic.sqf";
-// Server-only: the angry-mob escalation and the safehouse-raid breach both call it to flip blended civilians to an armed EAST cell.
-fnc_civ_flip_hostile = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_flip_hostile.sqf";
+// Server-only: shared loadout helper -- arms civ-costume bodies from the faction gear pools and optionally flips them hostile (safehouse raid, angry mob, informant flee, protect-civ protectee).
+fnc_civ_arm = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arm.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";

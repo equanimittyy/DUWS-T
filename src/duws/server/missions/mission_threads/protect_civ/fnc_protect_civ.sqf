@@ -54,11 +54,9 @@ _inf setCombatMode "BLUE";
 // Belt-and-suspenders against a future AIS setting change reviving him or stripping the handler below
 // (docs/info/architecture/revive_system.md); the shipped "allplayables" never enrols a spawned unit.
 _inf setVariable ["AIS_noReviveInit", true, true];
-// Chamber through the weapon: many civilian costumes have no container, so a loose magazine drops
-// nowhere (arma_engine_gotchas.md). Spares land only where the costume has pockets.
-_inf addWeapon "hgun_P07_F";
-_inf addWeaponItem ["hgun_P07_F", "16Rnd_9x21_Mag", true];
-_inf addMagazines ["16Rnd_9x21_Mag", 2];
+// Arm the protectee in place: a blufor-pool sidearm. Non-hostile mode leaves his WEST group, captive
+// state and disabled PATH (set above) untouched.
+[[_inf], "WEST", "blufor", ["pistol"], [false]] call fnc_civ_arm;
 // Half damage, doubling effective health so no fluke ends a 45-minute mission. Scales the per-hit
 // increment (not the absolute) so damage still accumulates to death; negative index is whole-body.
 _inf addEventHandler ["HandleDamage", {

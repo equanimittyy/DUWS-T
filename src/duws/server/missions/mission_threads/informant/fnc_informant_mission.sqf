@@ -279,20 +279,9 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         private _grp = group _inf;
         while { (count (waypoints _grp)) > 0 } do { deleteWaypoint [_grp, 0] };
         if (_armed) then {
-            _inf setCaptive false;
-            // Car gone and under fire -- already blown, so AI-mod combat no longer gives him away. Onto
-            // EAST so the pistol fight actually engages WEST (a CIVILIAN unit set COMBAT still won't
-            // shoot). Rebind _grp: the orders below must task his new group, not the emptied civ one.
-            [_inf] joinSilent (createGroup [EAST, true]);
-            _grp = group _inf;
-            // Chamber one round via addWeaponItem (works on any costume, even the containerless civ
-            // bodies where a bare addMagazine drops it nowhere); two spares ride in his pockets, which
-            // only land where the costume has a container -- a pocketless body just fights with the one.
-            _inf addWeapon "hgun_Rook40_F";
-            _inf addWeaponItem ["hgun_Rook40_F", "16Rnd_9x21_Mag", true];
-            _inf addMagazines ["16Rnd_9x21_Mag", 2];
-            _grp setBehaviour "COMBAT";
-            _grp setCombatMode "RED";
+            // Break cover to an EAST pistol (OPFOR pool). Rebind _grp -- the orders below task his new
+            // group, not the emptied civ one. No skill bump (a lone fleer, not a cell); UP is forced below.
+            _grp = [[_inf], "EAST", "opfor", ["pistol"], [true, -1]] call fnc_civ_arm;
         } else {
             _grp setBehaviour "CARELESS";
         };
