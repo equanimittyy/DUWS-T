@@ -56,6 +56,7 @@ fnc_furnish_building = {
     #define WALL_MAX 5         // max wall pieces per room
     #define ANCHOR_MAX 1       // max anchors per room
     #define RUG_MAX 2          // max rugs per room
+    #define PLACE_RETRY 3      // stop a room's pass after this many overlap rejects in a row (saturated)
 
     private _catalog = call fnc_furnish_catalog;
     private _objs = [];
@@ -292,18 +293,24 @@ fnc_furnish_building = {
         // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
         private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
         if (_wallClasses isNotEqualTo []) then {
+            // Fill up to _nWall pieces; an overlap reject frees its cap slot and counts a miss, and
+            // PLACE_RETRY misses in a row means the room is saturated, so stop rather than spin. A placement
+            // resets the run, so a crowded corner does not cut the whole pass short.
             private _nWall = (floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV)) min WALL_MAX;
-            for "_k" from 1 to _nWall do {
+            private _placed = 0; private _miss = 0;
+            while { _placed < _nWall && _miss < PLACE_RETRY } do {
                 private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_wallClasses] call _pickCapped;
                 if (_cls == "") exitWith {};   // every wall class hit its per-room cap
-                private _placedW = [selectRandom _free, _cls] call _placeWall;
-                if (_placedW isEqualTo []) then {
-                    // footprint rejected: free the cap slot so another wall class can still take the room
+                private _res = [selectRandom _free, _cls] call _placeWall;
+                if (_res isEqualTo []) then {
                     _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                    _miss = _miss + 1;
                 } else {
-                    _placedW call _keepFrozen;
+                    _res call _keepFrozen;
+                    _placed = _placed + 1;
+                    _miss = 0;
                 };
             };
         };
@@ -311,19 +318,25 @@ fnc_furnish_building = {
         // Anchor pass: anchors into the roomiest free open cells first.
         private _anchorClasses = ["anchor", _set] call fnc_furnish_classesFor;
         if (_anchorClasses isNotEqualTo []) then {
+            // Retry as the wall pass: a rejected anchor (too big for the cell, or overlapping) frees its cap
+            // slot and retries with another class -- the roomiest cell stays the best bet -- giving up after
+            // PLACE_RETRY misses in a row.
             private _nAnch = (1 max floor ((count (_rcells select { (_x select 1) == "open" })) / FILL_DIV)) min ANCHOR_MAX;
-            for "_k" from 1 to _nAnch do {
+            private _placed = 0; private _miss = 0;
+            while { _placed < _nAnch && _miss < PLACE_RETRY } do {
                 private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_anchorClasses] call _pickCapped;
                 if (_cls == "") exitWith {};
                 private _cell = ([_free, [], { -(_x select 3) }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-                private _placed = [_cell, _cls, _set] call _placeAnchor;
-                if (_placed isEqualTo []) then {
-                    // footprint rejected: give the cap slot back so a smaller class can still fill the room
+                private _res = [_cell, _cls, _set] call _placeAnchor;
+                if (_res isEqualTo []) then {
                     _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                    _miss = _miss + 1;
                 } else {
-                    _placed call _keepFrozen;
+                    _res call _keepFrozen;
+                    _placed = _placed + 1;
+                    _miss = 0;
                 };
             };
         };
