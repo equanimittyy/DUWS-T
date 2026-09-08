@@ -22,7 +22,7 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 ["BLU", _triggerPos] call fnc_zone_control_set;
 
 ["us_takencontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_takencontrol"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_takencontrol", _place]] remoteExec ["fnc_duws_dialogue", 0];
 
 // First-ever capture pays a flat liberation bonus in both currencies, once per zone. The key is
 // recorded in DUWS_zone_first_captured so a reload -- or this zone lost and later retaken through

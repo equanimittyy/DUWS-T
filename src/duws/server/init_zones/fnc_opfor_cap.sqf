@@ -39,7 +39,7 @@ private _retakenKey = [_triggerPos] call fnc_zone_key;
 missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _retakenKey], true];
 
 ["us_lostcontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_lostcontrol", _place]] remoteExec ["fnc_duws_dialogue", 0];
 
 
 // The same AP swing a capture pays, reversed: no consolation share for BLUFOR, since losing ground is

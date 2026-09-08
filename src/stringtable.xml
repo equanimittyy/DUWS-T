@@ -3652,15 +3652,15 @@
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone eingenommen. Gut gemacht.</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos capturado una zona enemiga. Buen trabajo.</Spanish>
                 <Chinesesimp>战区所有单位注意，我们占领了一个敌军据点。干得漂亮。</Chinesesimp>
-                <Original>All units in the AO, be advised. We have secured an enemy zone. Well done.</Original>
-                <English>All units in the AO, be advised. We have secured an enemy zone. Well done.</English>
+                <Original>All units in the AO, be advised. We have secured %1. Well done.</Original>
+                <English>All units in the AO, be advised. We have secured %1. Well done.</English>
             </Key>
             <Key ID="STR_DUWS_T_lostcontrol">
                 <German>Hier ist "Overlord 1-1". Achtung, freundliche Einheiten haben eine Zone verloren.</German>
                 <Spanish>Aquí es "Overlord 1-1". Atención, las fuerzas amigas han perdido una zona.</Spanish>
                 <Chinesesimp>注意，友军丢失了一个据点。</Chinesesimp>
-                <Original>Be advised, friendly forces have lost a zone.</Original>
-                <English>Be advised, friendly forces have lost a zone.</English>
+                <Original>Be advised, friendly forces have lost %1.</Original>
+                <English>Be advised, friendly forces have lost %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_9dt4d8rm">
                 <German>Mission erfolgreich!</German>
@@ -3687,8 +3687,8 @@
                 <German>Verbündete Kräfte haben die Kontrolle über %1 erlangt</German>
                 <Chinesesimp>友军已控制 %1</Chinesesimp>
                 <Spanish>Fuerzas aliadas han tomado el control de: %1</Spanish>
-                <Original>The zone is under friendly control.</Original>
-                <English>The zone is under friendly control.</English>
+                <Original>%1 is under friendly control.</Original>
+                <English>%1 is under friendly control.</English>
             </Key>
             <Key ID="STR_DUWS_T_q0seuzgl">
                 <German>Veloren: %1</German>
@@ -3701,8 +3701,8 @@
                 <German>Verbündete Kräfte haben die Kontrolle über %1 verloren</German>
                 <Chinesesimp>友军已经丧失了 %1 的控制权</Chinesesimp>
                 <Spanish>Las fuerzas aliadas han perdido el control de: %1</Spanish>
-                <Original>The zone has fallen to the enemy.</Original>
-                <English>The zone has fallen to the enemy.</English>
+                <Original>%1 has fallen to the enemy.</Original>
+                <English>%1 has fallen to the enemy.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonereveal">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone ausgemacht. Sie ist nun auf euren GPS-Terminals einsehbar.</German>
