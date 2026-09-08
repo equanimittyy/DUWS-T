@@ -32,8 +32,9 @@ fnc_garage_store = {
 };
 
 // Recreates a stored vehicle on the pad from its spec and drops the entry. The spawn position is
-// derived from the trigger here, never taken from the client. createVehicle's placement radius finds
-// a clear spot so a retrieve onto an occupied pad does not stack vehicles.
+// derived from the trigger here, never taken from the client. The vehicle is placed dead centre of the
+// pad (placement 0, CAN_COLLIDE so the engine does not nudge it off centre), so the pad must be clear
+// first -- refuse when any vehicle still stands in the trigger area rather than scatter it to a gap.
 fnc_garage_retrieve = {
     if (!isServer) exitWith {};
     params ["_caller", "_index", "_trgNetId"];
@@ -41,9 +42,10 @@ fnc_garage_retrieve = {
     if (isNull _trg) exitWith {};
     private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
     if (_index < 0 || _index >= count _stored) exitWith { [localize "STR_DUWS_T_GARAGE_NONE_SELECTED"] remoteExec ["hint", _caller]; };
+    if (count (vehicles inAreaArray _trg) > 0) exitWith { [localize "STR_DUWS_T_GARAGE_PAD_OCCUPIED"] remoteExec ["hint", _caller]; };
 
     private _spec = _stored select _index;
-    private _veh = createVehicle [_spec select 0, getPosATL _trg, [], 4, "NONE"];
+    private _veh = createVehicle [_spec select 0, getPosATL _trg, [], 0, "CAN_COLLIDE"];
     [_veh, _spec] call DUWS_fnc_vehSpecApply;
 
     DUWS_garage_stored deleteAt _index;
