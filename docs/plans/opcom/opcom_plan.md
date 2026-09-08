@@ -227,7 +227,8 @@ expired entry is already dropped from the arrays, so it never deposits.
 | **Route-around** (live group) | among the target cell's 8 neighbours, the one with the lowest `_gridEne`; its centre is a staging waypoint handed to a spawned group's engine pathing. The full route for a *virtualised* squad is [§Routing](#routing-a-cost-field-over-the-grid) |
 ### Routing: a cost field over the grid
 
-A virtualised tasking follows a **cell chain** produced by a shortest-path search over the grid, walking
+Routing branches on movement type. A **wheeled or tracked** tasking routes on roads (below); an **infantry,
+air or boat** tasking follows a **cell chain** produced by a shortest-path search over the grid, walking
 its cell centres in world space ([§One nominal speed](#one-nominal-speed-per-unit-type)); search cost
 per step:
 
@@ -236,7 +237,8 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
 ```
 
 - `stepLen` is `OPCOM_GRID_CELL` orthogonally, `OPCOM_GRID_CELL * sqrt 2` on a diagonal — 8-neighbour
-  steps. Water cells (land mask false) are impassable to ground; air and boat treat every cell passable.
+  steps. Water cells (land mask false) are impassable to infantry — the only ground type still on the grid
+  field — while air and boat treat every cell passable.
 - `_lambda` is **0 for a direct route** (rapport, scout, the Assault template — distance only,
   ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
   believed enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
@@ -256,6 +258,26 @@ not persisted — it recomputes from its current position's cell to the target o
 |---|---|
 | `OPCOM_ROUTE_LAMBDA` | flank threat-avoidance weight (tune) |
 | `OPCOM_ROUTE_RECOMPUTE_TICKS` | ticks between flank re-routes (start 12–24, ~1–2 min; tune) |
+
+**Wheeled and tracked route on roads.** A ground vehicle does not take the grid cost field — it must
+travel by road. Its route is the world-space polyline from `fnc_convoy_path` `[start, dest]`, the OPFOR
+convoy road router: an A* over the engine road graph (`roadsConnectedTo`) that snaps each end to the
+nearest road and returns a chain of `road` and off-road `gap` segments. The virtual world-point steps that
+polyline exactly as it steps a cell chain, and recomputes it when the target moves; on de-virtualisation the
+live column drives it with `fnc_convoy_drive` (`setDriveOnPath`) — the same engine the convoy missions
+already use. Reuse this subsystem, do not re-derive road pathing.
+
+- **Off-road only to bridge.** A vehicle leaves the road only on a `gap` segment the router emits where no
+  road connects — the stub from each end onto the network, or a crossing between road components A* cannot
+  join — then resumes on road; a wholly roadless target is one `gap`.
+- **Isolated strips are the router's job, not OPCOM's.** `fnc_convoy_path` already repairs
+  sparsely-connected nodes and, when components cannot join, exits on the start-side road nearest the
+  destination before the gap, so a unit never snaps onto a disconnected strip and stalls. OPCOM water-checks
+  any `gap` (`fnc_route_has_water`) so a bridge never runs a hull into the sea.
+- **Roads are distance-first.** The road A* weighs length, not `_gridEne` — a route on rails cannot bend
+  around belief the way the λ=1 flank does, so wheeled/tracked take the shortest connecting road path and
+  the flank / encircle maneuvers stay grid-routed foot and air plays
+  ([§Templates](#templates-the-execution-forms)).
 
 ### It is not the area-of-influence field
 
@@ -566,7 +588,7 @@ contact clears and the zone re-virtualises.
 
 ## Movement: a tasking is virtualised until contact
 
-A tasking moves *virtualised*: its position is a **world point** stepping along a grid-planned route chain
+A tasking moves *virtualised*: its position is a **world point** stepping along a planned route chain
 ([§Routing](#routing-a-cost-field-over-the-grid)) by a per-type speed model, holding no group handle,
 until a player closes to within its streaming ring. Like a zone or a hardpoint it is a force source the
 grid *reads* at that point ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)), never bound to
@@ -592,11 +614,12 @@ spread (a jet outruns a foot soldier ~80×) is compressed so the virtual layer n
 | Fixed wing | passable | 2 | 10 s |
 | Boat | water only (land impassable) | 10 | 50 s |
 
-**World-stepped along the cell chain.** Each type's ticks-per-cell is a world rate,
+**World-stepped along the route chain.** Each type's ticks-per-cell is a world rate,
 `stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick (infantry ≈17 m, a fixed-wing 250 m). Each tick the
-tasking advances its world point that far toward the next cell centre on its route chain; on reaching a
-centre it aims at the next. A diagonal needs no special case — the longer world distance to a corner cell
-falls out of the step. The cell for streaming and force deposit is `worldToCell` of that point, computed on
+tasking advances its world point that far toward the next **waypoint** on its route chain — a cell centre
+on a grid route, a road node on a convoy route ([§Routing](#routing-a-cost-field-over-the-grid)) — then aims
+at the one after. On a grid route a diagonal needs no special case; the longer world distance to a corner
+cell falls out of the step. The cell for streaming and force deposit is `worldToCell` of that point, computed on
 demand ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)). Water is handled in the route, not
 per step — a ground route never contains a water cell ([§Routing](#routing-a-cost-field-over-the-grid)).
 
