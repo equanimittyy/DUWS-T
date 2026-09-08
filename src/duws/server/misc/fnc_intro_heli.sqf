@@ -147,6 +147,11 @@ _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_ar
 // hearing a callsign. Do not reconcile the two -- it is intro flavour, not an attribution bug.
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_moving"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 1;
+// Held 3 s -- half the KillaTomata memorial card below.
+[["5U5 and equanimity presents...", "PLAIN", 1]] remoteExec ["titleText", 0];
+sleep 3;
+[2] remoteExec ["titleFadeOut", 0];
+sleep 2;
 [["DUWST", "PLAIN", 0, true]] remoteExec ["cutRsc", 0];
 sleep 8;
 // Double brackets: remoteExec hands the command an argument list, so a unary command whose one
