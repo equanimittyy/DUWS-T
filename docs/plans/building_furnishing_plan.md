@@ -1,189 +1,223 @@
 # Structure-aware building furnishing
 
-Furnish an arbitrary building so it reads lived-in, without a per-building-class template and without a
-mod. Build it as a **standalone shared helper** (`fnc_furnish_building`) driven by a debug tool that
-furnishes any building the dev points at — decoupled from any mission for now, so the placement can be
-tuned against real Altis houses on demand before anything depends on it. Wiring it into missions (the
-raid safehouse first) is a **separate, deferred** step, below.
+Furnish an arbitrary building so it reads lived-in, with no per-building-class template and no mod
+dependency, on vanilla or modded maps alike. The design splits along the one line that keeps that promise:
 
-The need surfaced in the safehouse raid: a house of hidden guards and a house of innocent locals must
-look identical, and both must look occupied — but the furnishing there drops one prop per interior
-position on a flat `setVectorUp [0,0,1]` seat
-([`fnc_raid_safehouse_mission.sqf:120`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf)),
-which clips on uneven floors and never groups into anything that reads as a room. That is the motivating
-case, not a dependency: the helper knows nothing about the raid.
+- **Building geometry is inferred, never keyed on class.** A modded map's building classes are unknown, so
+  nothing may branch on them (`CLAUDE.md` §Principles). The interior is reconstructed from class-agnostic
+  engine probes into a floor-plan grid.
+- **Furniture is ours, so its metadata is authored.** The furniture classes we place are a finite set we
+  ship. A per-class catalog — each piece's front, role, and placement rule — is therefore fair game, and is
+  the only place class-specific knowledge is allowed to live.
 
-The mod that does this well — ZEI (Zeus and Eden Interiors) — keys a hand-authored composition to each
-building **classname**. That is a non-starter here: it is a mod, it is unmaintained, and a class-keyed
-template leaves every unrecognised or modded building bare, breaking the mission's portability rule
-(`CLAUDE.md` §Principles). So the furnishing has to *infer* a building's interior from what the engine can
-be asked at runtime, place composition **clusters** into it, and fall back gracefully when the inference
-comes back empty.
+This supersedes the earlier probe-ranked-slots approach that placed one cluster per interior nav point. That
+shape furnished only the AI nav lattice — a sparse combat grid, not a room map — so houses read empty and
+furniture landed exactly where garrison troops stand. The grid below furnishes the floor itself and reserves
+what it fills, which is what makes the result dense, clip-free, and out of the garrison's way at once.
 
-This builds directly on
-[`fnc_place_settled`](../../src/duws/server/init_zones/fnc_place_settled.sqf), which already seats a row of
-objects flush on an anchor's surface at rest (align, base-seat, zero velocity, no freeze). The furnishing
-decides *where* and *which way*; `fnc_place_settled` does the *how* of each cluster.
+Two approaches were considered and rejected. Hand-authored compositions keyed to each building class (as
+ZEI, Tinter, and Phronk all do) furnish nothing on an unrecognised building — the portability rule forbids
+it as a sole strategy. Ingesting those mods' composition libraries is licence-blocked: DUWS_T is
+CC BY-NC-SA 3.0 ([`src/license.TXT`](../../src/license.TXT)), whose NonCommercial and Share-Alike terms are
+irreconcilable with Tinter's GPL-3.0, and Phronk's is unlicensed. Using either would need the authors'
+written permission. So placement is computed, not authored per building.
 
-## What the engine can tell us about a building
+The seating primitive is unchanged: [`fnc_place_settled`](../../src/duws/server/init_zones/fnc_place_settled.sqf)
+already seats a row of objects flush on an anchor at rest (align, base-seat, zero velocity, no freeze). The
+system below decides *where* and *which way*; `fnc_place_settled` does the *how* of each placement.
 
-No command reports rooms, walls, or doorways directly. Four class-agnostic signals stand in:
+## Pillar 1 — the floor-plan grid
 
-- **Interior positions** — `_building buildingPos -1` / `BIS_fnc_buildingPositions`: the AI nav points, one
-  per usable interior spot, already spread through the rooms. These are the only "where furniture goes"
-  the engine volunteers.
-- **Inner vs perimeter** — sort those positions by distance to their own centroid: inner slots sit in
-  open floor, outer slots against walls. A free clearance proxy before a single ray is cast. The helper
-  computes this itself — the safehouse mission's `_fnc_innerSlots`
-  ([`fnc_raid_safehouse_mission.sqf:55`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf))
-  does the same trick, but a shared helper must not reach into a mission-local function.
-- **Model axis** — `getDir _building`. Interior walls run along the model's own axes, so a cluster turned
-  to `getDir` (or +90°) sits parallel to the walls rather than skew.
-- **Solid geometry** — `lineIntersectsSurfaces` against the building's `GEOM` LOD reports walls and their
-  range along a ray. This is the Tier 2 signal that turns "probably clear" into "clear for 1.8 m, wall to
-  the north". Already used elsewhere in the tree for the same kind of structure query
-  ([`fnc_garrison_reserve.sqf:30`](../../src/duws/server/init_zones/fnc_garrison_reserve.sqf),
-  [`fnc_recon_observe_mission.sqf:67`](../../src/duws/server/missions/mission_threads/recon/fnc_recon_observe_mission.sqf)).
+No command reports rooms, walls, or doorways. The grid reconstructs the interior from geometry, per storey.
 
-What stays invisible: **doorway positions.** `fnc_house_doors`
-([`fnc_house_doors.sqf`](../../src/duws/shared/functions/fnc_house_doors.sqf)) returns door *animation
-sources*, not their world positions, and there is no clean command for the latter. A doorway reads to the
-raycast as an open direction like any other gap, so the placement cannot deliberately keep clear of one.
-It is mitigated, not solved, below.
+- **Seeds.** `_building buildingPos -1` returns the AI nav points — guaranteed-interior, on walkable floor.
+  Their bounding box (not the building footprint, which includes roof overhang) gives the interior extent;
+  clustering their heights splits storeys, a ~3 m Z gap being a floor boundary.
+- **Cells.** Lay a grid of ~0.5 m cells across that extent at each storey's floor height. Each cell earns
+  its place by two probes, so the grid matches the real (concave) rooms rather than the convex seed box:
+  - **Floor test** — a short ray straight down from just above floor Z. A hit at floor height means real
+    floor here; a miss or a far hit means a hole or outside the room, and the cell is dropped. The LOD that
+    reports the walkable surface (`ROADWAY`) is the first candidate; the working LOD is settled in playtest
+    and recorded in the gotchas doc.
+  - **Wall ring** — eight rays at chest height (~1.1 m) on `GEOM` LOD, the same probe the current code and
+    [`fnc_garrison_reserve.sqf:30`](../../src/duws/server/init_zones/fnc_garrison_reserve.sqf) already use.
+    Yields each cell's nearest-wall distance and the bearings of walls within a cell's reach.
+- **Cell state.** Each surviving cell is tagged `open` (no wall within reach), `near-wall` (with the wall
+  bearings recorded, for backing furniture on), or `blocked` (too tight to hold anything).
 
-## The algorithm
+Cost is the design's main risk and is bounded deliberately: the seed bounding box is tight, cell count is
+capped (the grid coarsens rather than exceeding it), and the finished grid is cached on the building via
+`setVariable` so it is built once and reused. It runs server-side, once per building, never in a loop.
 
-Server-side, run once when the building is furnished — no loop. Per building:
+## Pillar 2 — room segmentation
 
-1. **Collect candidate slots.** `buildingPos -1`, sorted by distance to their centroid (in-helper, per
-   above). Group them by floor first (cluster the
-   `select 2` heights; a 3 m gap is a storey) so a ray never treats the floor above as a wall and a cluster
-   never lands half in a ceiling.
-2. **Probe each candidate** (Tier 2 core). From the slot raised to chest height (~1.1 m, so a floor or a
-   low threshold is not read as a wall), cast `lineIntersectsSurfaces` in 8 compass directions out to a
-   short reach (~2.5 m), `GEOM` LOD, the building not ignored (its walls are what we want to hit). For each
-   ray record the hit range; missing = open past the reach. From the 8:
-   - **clearance** = the minimum hit range (how much open floor the slot has),
-   - **wall bearing** = the direction of the nearest hit (what the cluster backs onto),
-   - **open bearing** = the direction of the farthest hit (what the cluster faces).
-3. **Rank and pick.** Sort candidates by clearance descending. Place clusters into the best slots until the
-   building's quota is met (quota scales with slot count — a one-room hut takes one cluster, a big house
-   three or four). Skip any slot whose clearance is below the chosen cluster's footprint radius, and any
-   slot within a spacing minimum of an already-placed cluster, so clusters never overlap or crowd.
-4. **Orient and seat.** Back the cluster onto the wall bearing (its rear edge toward the wall, front to the
-   open bearing) and hand the rows to `fnc_place_settled` with the slot as anchor — base-seated on the
-   floor, velocity zeroed. Snap the facing to the nearer of `getDir _building` / +90° when a wall was found,
-   so a cluster reads as aligned to the room rather than to an arbitrary ray.
-5. **Clutter pass.** For a cluster that carries a flat surface (a table), scatter 2–4 small items across its
-   top as offset rows on the *cluster's table object* as anchor — so the clutter travels and turns with the
-   table. This is ZEI's "object fill" idea, kept to surfaces we placed ourselves rather than trying to find
-   a map building's own shelves.
+A house is many rooms; one furniture set across the whole interior looks wrong (a bed in the kitchen). After
+the grid exists, flood-fill the connected `open`/`near-wall` cells into **rooms**, each cell tagged with a
+room id. A wall line between two fills separates two rooms; a gap in the wall (a doorway) keeps them one
+fill, which is acceptable — an open-plan pair furnished as one room reads fine.
 
-**Fallback (no walls found).** An open-plan structure, or one whose `GEOM` LOD the rays miss, returns no
-hits. Then drop to the Tier 1 shape: place at the innermost slots, orient to `getDir _building` with a
-random 0/90° flip, no clearance skip. Worse alignment, but never bare — and logged, because a building that
-silently furnishes to the fallback everywhere is the tell that the probe reach or LOD is wrong.
+Segmentation lands as its own phase, before any furniture is placed, so the room labelling can be inspected
+on the debug overlay on its own. A furniture set is then chosen per room, not per building — but the set-to-
+room assignment (which room becomes a bedroom) is left simple at first: assign by room size or at random.
+Smarter assignment is a later refinement, not a first-cut requirement.
+
+## Pillar 3 — the furniture catalog
+
+Everything class-specific about furniture lives in one authored catalog, an `.hpp` config table in the style
+of [`mission_types.hpp`](../../src/duws/shared/includes/mission_types.hpp), validated by a lint the way the
+composition fences are ([`fnc_BluHQinit.sqf:38`](../../src/duws/server/init_hq/fnc_BluHQinit.sqf)): every
+catalog class must resolve in `CfgVehicles`/`CfgWeapons` and name a known role.
+
+Each entry carries:
+
+| Field | Meaning |
+|---|---|
+| `role` | `table` / `desk` / `chair` / `sofa` / `bed` / `cabinet` / `rug` / `clutter` — selects the placement pass |
+| `frontYaw` | degrees added so the model's +Y becomes its real front |
+| `set[]` | which furniture sets the piece belongs to (`living` / `sleeping` / `work`) |
+| `seats` | `-1` = chairs on every open side (dining table); `N` = exactly `N` on the front (a desk is `1`) |
+| `backToWall` | `1` = must sit in a `near-wall` cell, back to the wall (sofa, bed, cabinet) |
+| `wants[]` | pairings the placer should try to satisfy (a desk `wants` a chair) |
+
+Footprint is read from `boundingBoxReal` at runtime, not stored — it is exact and free.
+
+**Obtaining the front is honest hand-calibration, not runtime derivation.** No SQF command reports a model's
+semantic front: memory points are unreadable, no config field carries it, and bounding-box asymmetry is too
+fragile. `frontYaw` is authored once per class with a calibration debug tool that spawns each catalog class
+at heading 0 beside a north reference, so the dev reads the model's front bearing and records the offset. A
+furniture class absent from the catalog is skipped, not guessed — an unknown *furniture* class is our own
+gap to fill, distinct from an unknown *building* class, which the grid still handles.
+
+## Pillar 4 — the dynamic placer
+
+Runtime, over the cached grid, per room. Ordered passes, each reserving the cells it fills in an **occupancy
+grid** — the reservation is what makes clip-avoidance deterministic rather than luck: two pieces can never be
+handed the same cell.
+
+1. **Wall pass.** `near-wall` cells take `backToWall` furniture (sofa, cabinet, bed, and a desk when it
+   backs a wall), placed back-to-wall — its back is `frontYaw + 180` toward the wall bearing — with the
+   footprint checked against neighbouring cells before reserving.
+2. **Anchor pass.** `open`-centre cells with clearance take tables; then the anchor's seats per its `seats`
+   rule (a desk one chair on its front, a table chairs on each open side), each seat faced at the anchor by
+   construction (its heading is the bearing from its offset back to the anchor centre plus its own
+   `frontYaw`).
+3. **Surface pass.** Clutter grid-packed across an anchor's top, seated on the anchor object so it travels
+   and turns with the table. This pass already exists in
+   [`fnc_furnish_building.sqf`](../../src/duws/server/init_zones/fnc_furnish_building.sqf) and is kept.
+4. **Rug pass.** Flat floor covers centred in still-open cells.
+5. **Path preservation.** The straight-line cells linking consecutive `buildingPos` are never reserved, so a
+   walk path stays clear. This doubles as the garrison-conflict fix: the nav lattice's connectivity is left
+   open, so a trooper is not sealed behind a sofa. Doorway-exact avoidance is not attempted (door world
+   positions are not exposed — [`fnc_house_doors.sqf`](../../src/duws/shared/functions/fnc_house_doors.sqf)
+   returns animation sources only); the path-cell rule is the approximation.
+
+Density is a fill target — a fraction of a room's cells, or until cells run out — the single honest knob for
+"too empty / too cluttered".
 
 ## Data shapes
 
-A **cluster** is a `fnc_place_settled` row list plus the metadata the placement needs:
+A **grid cell**, per storey:
 
 ```
-["living",                        // set name
- 1.4,                             // footprint radius, metres -- the clearance gate and spacing minimum
- [["Land_CampingTable_F",  0,    0,   0, 0],
-  ["Land_CampingChair_V1_F", 0.6, 0.2, 0, 200],
-  ["Land_WoodenBox_TarpAll_F", -0.7, -0.3, 0, 45]],
- [["ItemWatch", 0, 0, <tabletop-Z>, 0], ...]]   // clutter rows, seated on the table object
+[cellPosASL, state, wallBearings, clearance, roomId, occupied]
+//  state        "open" | "near" | "blocked"
+//  wallBearings bearings of walls within reach (empty unless "near")
+//  clearance    nearest wall distance, metres
+//  roomId       set by Pillar 2; -1 before segmentation
+//  occupied     reservation flag, set during placement
 ```
 
-Rows are `[class, offX, offY, offZ, dir]` in the anchor's model frame, exactly the
+A **catalog entry** (`.hpp`):
+
+```
+class Land_TableBig_01_F {
+    role = "table";
+    frontYaw = 0;
+    set[] = {"living"};
+    seats = -1;          // chairs on every open side
+    backToWall = 0;
+    wants[] = {"chair"};
+};
+class OfficeTable_01_new_F {
+    role = "desk";
+    frontYaw = 0;        // calibrated
+    set[] = {"work"};
+    seats = 1;           // one chair, on the front
+    backToWall = 1;
+    wants[] = {"chair"};
+};
+```
+
+Placed rows are still `[class, offX, offY, offZ, dir]` in the anchor's model frame, the
 [`fnc_place_settled`](../../src/duws/server/init_zones/fnc_place_settled.sqf) contract; `offZ` for a
-tabletop clutter row is the table's `boundingBoxReal` top. A small **library** holds a few sets — a living
-set, a sleeping set, a work/desk set — each a handful of clusters, picked from by the caller's eligible-set
-list so a civilian home and a command post draw different furniture from one mechanism.
+tabletop clutter row is the anchor's `boundingBoxReal` top.
 
-## New helper
+## Reused vs new
 
-`fnc_furnish_building` — server-only (createVehicle and the raycasts run where the building is), registered
-in `server_fnc_init.sqf` ahead of its callers, alongside `fnc_place_settled`.
-
-```
-// Contract: [_building, _key, _sets, _quota] -> [_objs placed]
-//   _building  the structure to furnish
-//   _key       teardown key filed through fnc_duws_keep
-//   _sets      eligible cluster-set names (e.g. ["living","sleeping"]); [] = all
-//   _quota     max clusters; default scales from interior slot count
-```
-
-Reusable by any mission or zone prefab that wants a building furnished, per the house rule that reusable
-placement logic lives in a shared `fnc_*` and the mission holds only the call and its data (see the memory
-on extracting placement helpers). The cluster library is data it reads, not logic each caller repeats.
-
-## Debug harness (this phase)
-
-Exercise the helper with no mission running, using the same cursor-capture idiom as the search-flag tool
-([`fnc_debug_menu.sqf:36`](../../src/duws/client/debug/fnc_debug_menu.sqf)):
-
-- **`fnc_debug_menu.sqf`** — a new row "Furnish cursor building" that captures `cursorObject` in the menu
-  file (read there, before the submenu's dialog takes the pointer, exactly as the search-flag row does)
-  and hands it to a set-picker submenu.
-- **`fnc_debug_furnish_menu.sqf`** (new, `client/debug/`) — mirrors
-  [`fnc_debug_search_menu.sqf`](../../src/duws/client/debug/fnc_debug_search_menu.sqf): offers the
-  cluster-set names (living / sleeping / work, plus "all") as rows; each `remoteExec`s
-  `[_building, "debug_furnish", _sets, _quota] call fnc_furnish_building` to the server (2).
-  `game_master`-gated, English-only, like its siblings. Registered + `publicVariable`'d in
-  `server_fnc_init.sqf` alongside `fnc_debug_search_menu`.
-
-Point at any house, pick a set, watch it furnish — no safehouse, no `mission_types`, no reputation.
-
-## Mission integration (deferred)
-
-Not in this phase; tracked separately so the standalone helper lands and is tuned first. Once proven on the
-debug tool, the safehouse mission drops its `FURNITURE` define and per-slot loop
-([`fnc_raid_safehouse_mission.sqf:94`,`:119`](../../src/duws/server/missions/mission_threads/raid_safehouse/fnc_raid_safehouse_mission.sqf))
-for one `[_bldg, "mission_raid_safehouse", ["living"], _quota] call fnc_furnish_building` per candidate
-house, and the intel crate moves onto `fnc_place_settled` so it base-seats like everything else rather than
-the current raw `createVehicle` + `setPosATL`. Both decoy and real houses would then furnish from the same
-call, so neither reads different — the concealment the raid depends on. Detailed when the phase is scheduled.
+- **Reused:** `fnc_place_settled` (base-seating + teardown key), the eight-ray `GEOM` wall probe, the
+  surface grid-pack, the `game_master`-gated debug-menu harness
+  ([`fnc_debug_menu.sqf`](../../src/duws/client/debug/fnc_debug_menu.sqf),
+  [`fnc_debug_furnish_menu.sqf`](../../src/duws/client/debug/fnc_debug_furnish_menu.sqf)).
+- **New:** the grid builder + cache, the floor probe, room segmentation, the `.hpp` catalog + its lint, the
+  calibration tool, and the ordered occupancy placer. `fnc_furnish_building`'s guts are rewritten around
+  these; its current inline `_lib` becomes the catalog.
+- **Not used:** the composition system ([`fnc_composition_place.sqf`](../../src/duws/server/init_zones/fnc_composition_place.sqf))
+  seats at ground z=0 and is composition-based, not algorithmic.
 
 ## Engine specifics and gotchas
 
-Log these in [`arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) as they are hit during
-implementation, per `CLAUDE.md`.
+Log these in [`arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) as they are hit, per
+`CLAUDE.md`.
 
-- **`lineIntersectsSurfaces` is ASL.** Its begin/end are ASL positions and hits come back ASL; a
-  `buildingPos` is AGL, so convert (`AGLToASL`) before probing. Probe from chest height, not the floor, or
-  the floor plane and low sills read as walls.
-- **Query `GEOM`, not `VIEW`/`FIRE`.** Physical clearance is the geometry LOD; a view-LOD probe walks
-  through thin walls a body cannot. Pass the building un-ignored so its own walls register.
-- **Base-seat, never origin-seat.** `fnc_place_settled` already backs the model's `boundingBoxReal` base
-  out along the surface up — this is why the flat `setPosATL` it replaces let props sink or float.
-- **Multi-floor.** `buildingPos -1` spans every storey. Bucket by height before probing so a cluster is
-  placed and cleared within one floor.
-- **No PhysX freeze.** `fnc_place_settled` zeroes velocity and leaves the object unfrozen; furniture is set
-  `allowDamage false` there, so stray fire does not scatter a room mid-raid.
-- **Cost is bounded and one-shot.** Worst case per house is (candidate slots × 8 rays); it runs once at
-  furnish time on the server, never in a loop. Cap the probe to the slots actually in contention (rank by
-  the free inner/outer proxy first, probe only the top handful) so a 60-position building does not cast
-  hundreds of rays. The debug tool furnishes one building per click; the cap keeps a future many-building
-  caller (the safehouse furnishes up to 8 houses at mission start) honest.
+- **`lineIntersectsSurfaces` is ASL.** Begin/end and hits are ASL; a `buildingPos` is AGL, so `AGLToASL`
+  before probing. Probe walls from chest height, not the floor, or the floor plane and low sills read as
+  walls.
+- **Floor LOD is unsettled.** The down-ray floor test needs the LOD that carries the walkable surface;
+  `ROADWAY` is the first candidate, `GEOM` the fallback. Record which one works.
+- **Query `GEOM` for walls, building un-ignored.** A view-LOD probe walks through thin walls a body cannot;
+  the building must not be ignored, or its own walls do not register.
+- **Multi-floor.** `buildingPos -1` spans every storey; bucket by height before gridding so a ray never
+  treats the floor above as a wall.
+- **Grid cost.** Worst case is (cells × 9 rays) per building; capped, cached, and one-shot on the server.
+  Watch the RPT on a large building; coarsen the cell size if a build spikes a frame.
+- **Base-seat, never origin-seat.** `fnc_place_settled` backs the model's `boundingBoxReal` base out along
+  the surface up and sets `allowDamage false`, so props neither sink nor scatter under fire.
 
 ## Risks and fallbacks
 
-- **A building with no usable `GEOM` walls** (a ruin, a prop with only a view LOD) → every ray misses → the
-  Tier 1 fallback furnishes it flat and aligned to `getDir`. Never bare, and the fallback count is logged.
-- **A doorway faced by a cluster.** Not preventable without door positions; the cluster still backs onto a
-  real wall (the raycast guarantees that), so at worst it faces an opening rather than blocks one.
-- **A modded building with a bizarre interior.** The probe is geometry-driven, so it degrades to "less
-  clearance found, fewer clusters placed" rather than clipping — the failure mode is a sparse room, not a
-  broken one.
+- **No usable `GEOM`/floor geometry** (a ruin, a view-only prop) → the grid comes back empty → furnish falls
+  back to the seed nav points, flat and aligned to `getDir`, and logs the degrade so a silently-empty grid
+  is visible rather than mistaken for a bare building.
+- **Concave rooms and interior walls** are handled by per-cell probing, but a building with no interior
+  walls between areas segments as one room — furnished as one set, which reads acceptably.
+- **A modded building with a strange interior** degrades to fewer valid cells and a sparser room, never to
+  clipping — the occupancy grid refuses overlap by construction.
+- **Calibration is manual**, so a new furniture class looks wrong (faces askew) until its `frontYaw` is
+  recorded. The lint catches an unresolved class, not an uncalibrated front; a mis-faced piece is a visual
+  bug found in playtest, not a crash.
+
+## Phases
+
+Each phase is independently testable, and the two geometry phases land and are inspected before any
+furniture is placed.
+
+1. **Grid builder + debug overlay.** Build and cache the per-storey cell grid; a debug overlay draws each
+   cell (open / near-wall / blocked) on the pointed-at building. No furniture. Proves the floor plan.
+2. **Room segmentation + overlay colouring.** Flood-fill cells into rooms; the overlay colours cells by room
+   id. Still no furniture. Proves the room split.
+3. **Catalog + calibration tool.** The `.hpp` schema and its lint, the calibration debug tool, and
+   `frontYaw`/`role`/`rule` filled for the ~30 classes already supplied.
+4. **Dynamic placer.** The ordered occupancy passes, per room, replacing the current placement in
+   `fnc_furnish_building`.
+5. *(later)* Garrison cell-reservation: expose the occupied cells / nav indices so the garrison spawner
+   skips furnished positions. Wiring the garrison side is a separate change to garrison code.
 
 ## Verification
 
-- Debug tool ("Furnish cursor building") across the common Altis house classes
-  (`Land_i_Stone_HouseSmall_V1/2/3`, `Land_i_House_Small_02_*`, `Land_i_House_Big_01_*`): clusters sit on the
-  floor, back to a wall, no clipping, no two clusters overlapping, clutter on the tabletops.
-- A house with no interior geometry falls back rather than erroring, and says so in the RPT.
-- Deterministic shape regardless of caller: the same building furnishes the same way whether the debug
-  tool or (later) a mission drives it.
+- Phase 1: the overlay's cells match the visible interior across common Altis houses
+  (`Land_i_Stone_HouseSmall_V1/2/3`, `Land_i_House_Small_02_*`, `Land_i_House_Big_01_*`) — floor cells on
+  floor, wall cells on walls, nothing outside the shell.
+- Phase 2: the overlay's room ids match the eye's reading of the rooms.
+- Phase 4: furniture sits on the floor, backs to walls where the rule says, seats face their anchors, no two
+  pieces overlap, the walk path between doorways stays clear, and density reads lived-in rather than sparse.
+- A building with no usable geometry falls back rather than erroring, and says so in the RPT.
