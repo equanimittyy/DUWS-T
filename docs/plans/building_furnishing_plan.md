@@ -69,7 +69,7 @@ of an SQF array), validated by a lint the way the composition fences are
 ([`fnc_BluHQinit.sqf:38`](../../src/duws/server/init_hq/fnc_BluHQinit.sqf)): every catalog class must resolve
 in `CfgVehicles`/`CfgMagazines`/`CfgWeapons` and name a known role.
 
-Each entry carries `[class, role, frontYaw, set[], seats]`:
+Each entry carries `[class, role, frontYaw, set[], seats, maxPerRoom?]`:
 
 | Field | Meaning |
 |---|---|
@@ -77,6 +77,7 @@ Each entry carries `[class, role, frontYaw, set[], seats]`:
 | `frontYaw` | degrees subtracted from a target bearing so the model's real front lands on it (`heading = target − frontYaw`); it is the bearing the model's front points at when placed at heading 0 |
 | `set[]` | which furniture sets the piece belongs to (`living` / `sleeping` / `work`) |
 | `seats` | anchors only: `-1` = a seat on every open side (dining table); `N` = exactly `N` on the front (a desk is `1`); `0` (ignored) otherwise |
+| `maxPerRoom` | optional cap on how many of this class a room gets across the distinct-piece passes (wall/anchor/rug); absent or `0` = no limit (a bed is `1`) |
 
 The five categories: **anchor** needs open floor and takes seats beside it (table, desk); **seat** sits at
 an anchor's edge, never standalone; **wall** stands back-flush and perpendicular to a wall (sofa, bed,

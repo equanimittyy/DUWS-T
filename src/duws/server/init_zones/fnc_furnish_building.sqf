@@ -50,6 +50,9 @@ fnc_furnish_building = {
     #define FILL_DIV 22        // ~1 anchor per this many open room cells
     #define WALL_DIV 7         // ~1 wall piece per this many near-wall cells
     #define RUG_DIV 40         // ~1 rug per this many open room cells
+    #define WALL_MAX 4         // max wall pieces per room
+    #define ANCHOR_MAX 2       // max anchors per room
+    #define RUG_MAX 2          // max rugs per room
 
     private _catalog = call fnc_furnish_catalog;
     private _objs = [];
@@ -113,6 +116,22 @@ fnc_furnish_building = {
         _f setPosASL _posASL;
         _f setVectorDirAndUp [[sin _heading, cos _heading, 0], [0, 0, 1]];
         _f
+    };
+
+    // maxPerRoom enforcement: _pickCapped returns a random pool class still under its cap, or "" when all
+    // are capped out (which stops the pass). _classCount is re-made per room below; both resolve it off the
+    // caller's scope at call time.
+    private _classCount = createHashMap;
+    private _pickCapped = {
+        params ["_pool"];
+        private _avail = _pool select {
+            private _m = (_catalog get _x) select 4;
+            _m <= 0 || {(_classCount getOrDefault [_x, 0]) < _m}
+        };
+        if (_avail isEqualTo []) exitWith { "" };
+        private _c = selectRandom _avail;
+        _classCount set [_c, (_classCount getOrDefault [_c, 0]) + 1];
+        _c
     };
 
     // Place an anchor with its seats (per the `seats` rule) and clutter, reserving the footprint and each
@@ -218,40 +237,47 @@ fnc_furnish_building = {
         private _rid = _x;
         private _rcells = _rooms get _rid;
         private _set = _prio select (_forEachIndex mod (count _prio));
+        private _classCount = createHashMap;   // per-room, drives the maxPerRoom caps below
 
         // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
         private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
         if (_wallClasses isNotEqualTo []) then {
-            private _nWall = floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV);
+            private _nWall = (floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV)) min WALL_MAX;
             for "_k" from 1 to _nWall do {
                 private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
-                _objs pushBack ([selectRandom _free, selectRandom _wallClasses] call _placeWall);
+                private _cls = [_wallClasses] call _pickCapped;
+                if (_cls == "") exitWith {};   // every wall class hit its per-room cap
+                _objs pushBack ([selectRandom _free, _cls] call _placeWall);
             };
         };
 
         // Anchor pass: anchors into the roomiest free open cells first.
         private _anchorClasses = ["anchor", _set] call fnc_furnish_classesFor;
         if (_anchorClasses isNotEqualTo []) then {
-            private _nAnch = 1 max floor ((count (_rcells select { (_x select 1) == "open" })) / FILL_DIV);
+            private _nAnch = (1 max floor ((count (_rcells select { (_x select 1) == "open" })) / FILL_DIV)) min ANCHOR_MAX;
             for "_k" from 1 to _nAnch do {
                 private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
+                private _cls = [_anchorClasses] call _pickCapped;
+                if (_cls == "") exitWith {};
                 private _cell = ([_free, [], { -(_x select 3) }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-                _objs append ([_cell, selectRandom _anchorClasses, _set] call _placeAnchor);
+                _objs append ([_cell, _cls, _set] call _placeAnchor);
             };
         };
 
         // Rug pass: flat covers on any free floor (open or near-wall), reserved so nothing packs onto them.
         private _rugClasses = ["rug", _set] call fnc_furnish_classesFor;
         if (_rugClasses isNotEqualTo []) then {
-            private _nRug = floor ((count (_rcells select { (_x select 1) != "blocked" })) / RUG_DIV);
+            private _nRug = (floor ((count (_rcells select { (_x select 1) != "blocked" })) / RUG_DIV)) min RUG_MAX;
             for "_k" from 1 to _nRug do {
                 private _free = _rcells select { (_x select 1) != "blocked" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
+                private _cls = [_rugClasses] call _pickCapped;
+                if (_cls == "") exitWith {};
                 private _cell = selectRandom _free;
                 private _frame = [_cell select 0, 0] call _frameAt;
-                _objs pushBack (([[selectRandom _rugClasses, 0, 0, 0, 0], _frame, _key, true, false] call fnc_place_settled) select 0);
+                _objs pushBack (([[_cls, 0, 0, 0, 0], _frame, _key, true, false] call fnc_place_settled) select 0);
                 deleteVehicle _frame;
                 [_cell select 0, 0.5] call _reserve;
             };
