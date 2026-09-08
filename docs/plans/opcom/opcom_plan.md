@@ -70,6 +70,10 @@ Observers are the OPFOR groups actually spawned near the fight, so a stowed garr
 costs. The artillery observation gate keeps its own `knowsAbout > 1.5` test — a separate, position-free
 trigger — so no shared constant is owed here.
 
+Only direct sighting and its absence check are live today. The observation-post, area-of-influence,
+zone-flip and intel-patrol sensors each attach with the system that fires them — hardpoints, the AOI
+field, the zone-capture event, a purchased tasking — in the phase that lands that system, not before.
+
 ### Decay
 
 Decay models *lost track* only — a group that is alive but unseen, its stamp aging as confidence in it
@@ -259,7 +263,8 @@ knowledge — and it drives town drift and hardpoint siting
 ([`opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md)). The grid is the
 two-sided force magnitude that adds the belief store and only OPCOM's scoring consumes; it touches
 neither drift nor siting, and its footprints are small where the AOI reaches are kilometres. Its render
-is new work on the dev overlay `fnc_debug_opcom_view`, which today draws only AoI coverage circles.
+rides on the dev overlay `fnc_debug_opcom_view`, alongside the AoI coverage circles
+(`fnc_debug_opcom_grid` / `fnc_debug_opcom_grid_draw`).
 
 ## Appraisal: expected AP return
 
@@ -279,7 +284,7 @@ score only the survivors. Tens–low-hundreds of pairs before the gate, fewer af
 | Attack | each BLU-held zone |
 | Intercept | each belief entry near own ground |
 | Rapport | each town not yet turned |
-| Recruit | one — the locked prize ([§Value](#value-the-worth-of-the-ground-in-play)) |
+| Recruit | one per hireable type (combat / armor / recon / supply) — each the prize that type unlocks ([§Value](#value-the-worth-of-the-ground-in-play)) |
 | Reinforce | each own holding below its strength cap |
 | Scout | drop positions for an available recon unit's footprint |
 | Arty | each observed belief point in range of an owned gun |
@@ -443,7 +448,7 @@ marching back and forth. Once a tasking's units are in contact it is locked ([§
 | target | the objective — a registry index (zone, town) or a cell |
 | roles | `[role, unitRef, status]` bindings drawn from the roster: one for a simple tasking, several for a multi-unit template, none for an economic action |
 | phase | index into the template's phase list ([§Templates](#templates-the-execution-forms)) |
-| expiry | `time` plus the intent's own lifetime |
+| expiry | the tick counter `DUWS_opcom_tick` at commit plus the intent's own lifetime, in ticks |
 | state | mustering / ordered / in progress / done |
 
 A released unit is one whose intent has completed; that ownership state is what the reinforcement logic
@@ -491,8 +496,10 @@ Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, alongsi
 that already runs each tick. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
 reinforcement logic key off both fields.
 
-Numbers and strings only. `time`, not `diag_tickTime`, so an expiry survives a savegame
-([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
+Numbers and strings only. Expiry counts in ticks off the shared `DUWS_opcom_tick` counter — the one
+clock belief also ages on — never `time` or `diag_tickTime`. One clock means the commitment code never
+compares seconds against ticks, and the counter persists with the mission namespace where the two engine
+clocks do not ([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 ### Unit strength
 
@@ -676,6 +683,28 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 |---|---|
 | `OPCOM_TEMPLATE_TIMEOUT` | per-template deadline before abort (tune) |
 
+### The resolve phase: what ends a template
+
+`resolve` is not a combat step; it is the transition that frees the units and writes the outcome, one
+predicate per action.
+
+- **Attack** — resolves when the target zone holds no live BLUFOR. The committed group is live and in
+  contact by this phase, so the test is a direct count of BLUFOR within the zone radius, not a belief
+  read. On clear, the flip is **not** re-implemented: it reuses the capture path — the zone-capture
+  trigger in `fnc_createzone.sqf`, which drives `fnc_captured.sqf` / `fnc_blufor_cap.sqf` to set
+  `WARCOM_zones_controled_by_*`, move the markers, and settle the payout. OPCOM owns only the
+  precondition (defenders gone); ownership stays single-sourced in that machinery. **Verify before the
+  Templates phase ships** that the trigger fires for an AI-only fight with no player near — if it is
+  gated on player proximity, OPCOM's resolve calls the same capture functions itself rather than
+  duplicating the flip.
+- **Intercept** — resolves when the threatened ground is clear: the belief entries that scored it have
+  decayed or dropped and no live BLUFOR remains in the target block. Nothing changes hands; the units
+  release to `garrison` on the ground they were sent to hold.
+- **Rapport** — resolves when the courier delivers its step (rep moved 3 toward the −10 turn threshold)
+  or dies en route. The town turning is not the resolve — one trip rarely crosses the threshold, and the
+  garrison-on-turn belongs to the town-band system ([§Random events](#random-events-what-a-turned-town-does)),
+  not the template.
+
 ## The loop against the engine
 
 One thread, one cadence, not one thread per action.
@@ -687,6 +716,7 @@ One thread, one cadence, not one thread per action.
 | Clock | the tick counter `DUWS_opcom_tick` — intent expiries and belief age count in ticks, which persist with the mission namespace where `time` / `diag_tickTime` do not |
 | Orders | server-local groups only — waypoints are silently ignored unless the group is local to the issuing machine |
 | State | numbers, strings, arrays of those — no group or object handles near the mission namespace |
+| Fault containment | the tick body is wrapped so a throw in sense / rebuild / score is caught and logged, never silently killing the perception thread for the rest of the mission |
 
 No `sleep` inside the `isNil` block — unscheduled code cannot suspend. Constants are plain server globals:
 the opcom files load by compile-path and read them at runtime, out of a preprocessor macro's reach.
@@ -1111,12 +1141,16 @@ fire missions are never saved; they regenerate on player approach.
 | Standing units & orders | outcome | One row per unit — its tasking, target, current cell, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at its cell (accumulator 0, chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
 | Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](../economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
-Every persisted field is a number, a string, or an array of those. Time-based fields store on `time`
-and are written as remaining durations, never absolute stamps
+Every persisted field is a number, a string, or an array of those. Time-based fields — intent expiries
+and belief ages alike — count in ticks off the shared `DUWS_opcom_tick` counter, which persists with the
+store, never on `time` or the process-relative `diag_tickTime`
 ([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 Whether the belief store persists is open ([§Open questions](#open-questions)); it is shaped to
-serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Belief
+serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Either
+way `fnc_opcom_belief_init` declares each array and the tick counter **init-if-nil** — only where unset,
+never unconditionally — so a restore that fed the store back before the loop starts is not wiped, and a
+loop restart cannot zero live belief. Belief
 ages in ticks ([§Decay](#decay)), so the tick counter persists with the store when it does —
 omit both and a restore starts the counter at 0 against freshly stamped belief, no stale ages. The
 snapshot is a name-keyed hashmap, so adding the key later shifts nothing an older save's readers see.
@@ -1140,8 +1174,8 @@ Each phase is independently playable; the ordering is forced by what the next ph
 
 | Phase | Contains | Reads |
 |---|---|---|
-| **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, the influence grid stamped from belief and holdings, the land mask + connectivity, a debug readout | Nothing prior — the artillery observation gate and the intel patrol both consume the belief store; the grid adds its render to `fnc_debug_opcom_view` (AoI circles only today) |
-| **The loop** | One thread, one cadence (the tick), the AP-return score and the force-ratio bands, the economic actions (Fortify, Build) and Bank, flat archetype weights | Belief + grid |
+| **Belief** | The four arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, a debug readout | Nothing prior — the artillery observation gate and the intel patrol both consume the belief store; the grid and belief render was added to `fnc_debug_opcom_view` beside its AoI circles |
+| **The loop** | The scoring pass on the existing tick, the AP-return score and the grid reads it scores on (threat, force balance, the force ratio), the economic actions (Fortify, Build) and Bank, flat archetype weights. The band → template pick waits for the offensive actions that consume it | Belief + grid |
 | **Intents** | The record (roles + phase), minimum lifetimes, release on completion or death | The loop; lands with the first tasking-spawn actions |
 | **Movement** | Virtualised taskings — cell-stepping with the accumulator, cost-field routing (direct/flank λ), cell streaming (Chebyshev K + hysteresis), the tasking/status reads and unit strength | Grid + Intents |
 | **Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype) | The loop it modifies |
@@ -1156,7 +1190,9 @@ later phases, since the tuning constants and the engine-contact behaviours (stre
 virtual combat) only settle by running the core. The rest of this plan is the design spec those phase
 docs draw on.
 
-- Phase 1 — belief, grid, debug overlay: [`phase_1_belief_and_grid.md`](phase_1_belief_and_grid.md)
+- Phase 1 — belief, grid, debug overlay: **shipped**; the code is `src/duws/server/opcom/` and its debug
+  overlay under `client/debug/` (the phase doc is retired now the phase is built).
+- Phase 2 — the loop: appraisal and the economic actions: [`phase_2_loop_and_economy.md`](phase_2_loop_and_economy.md)
 
 ## Open questions
 
