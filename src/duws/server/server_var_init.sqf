@@ -651,6 +651,30 @@ OPCOM_SENSE_RANGE = 5000;
 // OPFOR hardpoint has no such nominal -- its force composes from its static and garrison (DUWS_fnc_hpForce).
 OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 
+// OPCOM tasking (Phase 3). Scalar tunables only; the per-type speed/reach tables and the recruit menu are
+// data, kept with the store in fnc_opcom_tasking_init so they resolve at runtime alongside the force model.
+// Server-only, read by the tasking phase of the perception loop.
+
+// The single force<->AP exchange rate: a hire costs ceil(force * this), and the same rate prices a
+// commitment's Cost and Arty's kill Value, so no price can drift out of step with what a unit is worth.
+// Start at parity (one point of firepower = one Army Power); tune against the AP faucet in the decision loop.
+OPCOM_AP_PER_FORCE = 1;
+
+// Order-sticky hold in ticks: once OPCOM issues a unit's order it may not re-issue for this many ticks, an
+// anti-flap lock against the fast re-score, not a success deadline. One global span covers every active
+// tasking (per-unit march cost lives in the speed model, an urgent abandon in the hysteresis gap). Resting
+// garrison/guard taskings are unheld. Six ticks at the 5 s cadence is 30 s.
+OPCOM_COMMIT_HOLD = 6;
+
+// Per-tick fraction of fullForce a garrison-tasking unit regenerates toward full, mirroring the zone
+// reinforce path; guard does not heal. 0.05 restores a unit to full in ~20 ticks (~100 s). Tune.
+OPCOM_GARRISON_HEAL_RATE = 0.05;
+
+// Flank-route threat-avoidance weight: how hard a lambda=1 grid route (Flank/Encircle) bends around believed
+// enemy force. A direct route (Attack/Scout/Rapport) runs lambda=0 and ignores it. Templates are Phase 5, so
+// P3 routes direct; the cost-field knob ships wired to the router. Tune.
+OPCOM_ROUTE_LAMBDA = 1;
+
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both

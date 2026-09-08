@@ -7,6 +7,7 @@ if (!isServer) exitWith {};
 
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
+call fnc_opcom_tasking_init;
 
 while {true} do {
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
@@ -14,6 +15,10 @@ while {true} do {
     call fnc_opcom_decay;
     call fnc_opcom_belief_prune;
     call fnc_opcom_grid_rebuild;
+
+    // Step the taskings after the grid it reads is fresh. Fault-contained so a Phase 3 bug logs and the
+    // perception thread lives -- the grid/belief half must keep running even if the tasking half throws.
+    try { call fnc_opcom_task_step } catch { ["ERROR", "OPCOM", format ["task step threw: %1", _exception]] call fnc_log };
 
     // A missing line means the tick threw before here and the loop is dead; friCells/eneCells 0
     // means the grid holds no force this tick; belief is the count of live sighting stamps; fresh is the

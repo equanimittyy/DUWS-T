@@ -354,6 +354,17 @@ fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\opcom\fn
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_init.sqf";
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_rebuild.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_perception_run.sqf";
+// Tasking layer (Phase 3): the strength and streaming helpers are executed to define them (like the force
+// model); the store init, router, recruit/task primitives, per-tick step and hand-drive harness compile to
+// names the loop and the harness call. strength before stream (deVirt uses matchStrength).
+[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_strength.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_stream.sqf";
+fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_tasking_init.sqf";
+fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_route.sqf";
+fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_recruit.sqf";
+fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_task.sqf";
+fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_task_step.sqf";
+fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_debug_task.sqf";
 
 // Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.
