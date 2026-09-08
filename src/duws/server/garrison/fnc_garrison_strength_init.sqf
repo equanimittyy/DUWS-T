@@ -41,6 +41,18 @@ DUWS_fnc_garrisonSurviving = {
 	[[_key] call DUWS_fnc_garrisonLost, [_key] call DUWS_fnc_garrisonFull] call DUWS_fnc_spawnDiff
 };
 
+// The men a garrison contributes to OPCOM's force grid: a headcount with crew excluded (a vehicle token
+// owes no men), so the friendly and belief layers stay comparable. Live counts alive roster infantry (a
+// casualty drops it that tick); stowed falls to the ledger's surviving-token men. The OPCOM rebuild and
+// the force-emission dev readout share this one count so the readout cannot drift from what is deposited.
+DUWS_fnc_garrisonMen = {
+	params ["_key"];
+	if ([_key] call DUWS_fnc_garrisonHeld) exitWith {
+		{ alive _x && {!(([(group _x) getVariable ["DUWS_srcToken", ""]] call DUWS_fnc_teamRow) isEqualTo [])} } count ([_key] call fnc_site_roster)
+	};
+	[[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
+};
+
 // The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and
 // the multiplier, stamp the site's full potential (mult copies of x1), seed its live reserve pool, and
 // return [garrison, pool]. The survivors split by the standing template -- its worth is the garrison,

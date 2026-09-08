@@ -31,17 +31,8 @@ private _deposit = {
     };
 };
 
-// OPFOR's own force is what it has standing. A live site counts its living infantry -- alive roster men
-// whose source token is a team, so a casualty drops the weight that tick; a stowed site (no men on the
-// ground) falls back to the ledger's surviving-token men, left whole-token for redeploy and the map bar.
-// Crew are excluded both ways (a vehicle token owes no men), so the counts match until Phase 2 weights vehicles.
-private _garrisonMen = {
-    params ["_key"];
-    if ([_key] call DUWS_fnc_garrisonHeld) exitWith {
-        { alive _x && {!(([(group _x) getVariable ["DUWS_srcToken", ""]] call DUWS_fnc_teamRow) isEqualTo [])} } count ([_key] call fnc_site_roster)
-    };
-    [[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
-};
+// A site's own force is its standing men (DUWS_fnc_garrisonMen: live roster, else stowed ledger), the
+// Phase 1 metric both layers share. Crew are excluded until Phase 2 weights vehicles.
 
 // Zones: OPFOR-held deposit their garrison men to friendly; BLU-held are known enemy ground (a
 // territorial fact the commander has for free), so they deposit a nominal baseline even unsighted.
@@ -51,7 +42,7 @@ private _garrisonMen = {
     if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) then {
         [_ene, _zp, OPCOM_GRID_ZONE_ENEMY_MEN, _zs + OPCOM_GRID_SPREAD] call _deposit;
     } else {
-        [_fri, _zp, [_key] call _garrisonMen, _zs + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, _zp, [_key] call DUWS_fnc_garrisonMen, _zs + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach zone_meta_array;
 
@@ -62,7 +53,7 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 {
     if (_x >= 1) then {
         private _key = [_forEachIndex] call fnc_town_site_key;
-        [_fri, getPos (_locs select _forEachIndex), [_key] call _garrisonMen, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
+        [_fri, getPos (_locs select _forEachIndex), [_key] call DUWS_fnc_garrisonMen, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
     };
 } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
 

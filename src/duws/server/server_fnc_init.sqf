@@ -454,6 +454,7 @@ fnc_debug_opcom_grid = compile preprocessFileLineNumbers "duws\server\debug\fnc_
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_search_flag.sqf";
 fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_intel.sqf";
 fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_garrison_query.sqf";
+fnc_debug_force_emission = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_force_emission.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";

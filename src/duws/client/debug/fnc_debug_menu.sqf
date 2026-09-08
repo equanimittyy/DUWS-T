@@ -111,6 +111,26 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         };
     }, [], [1,0.667,0,1]],
 
+    // Click-to-inspect, same idiom as the ledger row above: read one emitter's OPCOM force-grid deposit and
+    // where the men count came from -- (live) roster, (ledger) surviving tokens, or a fixed (nominal).
+    ["Force emission: click a site", {
+        [] spawn {
+            DUWS_dbgForceClicked = false;
+            openMap [true, false];
+            waitUntil { !isNull (findDisplay 12) };
+            // Banner, not hint: the engine draws the hint box beneath the open map, so it is invisible
+            // while the map is up. The answer arrives as a hint once the map is closed, below.
+            ["<t size='2' color='#00ffff'>Click a zone or OPFOR hardpoint to read its force emission. </t><br/>Dev tool: the OPCOM force-grid deposit and its source -- (live), (ledger) or (nominal). Close the map to cancel."] call fnc_map_prompt;
+            onMapSingleClick "DUWS_dbgForcePos = _pos; DUWS_dbgForceClicked = true; onMapSingleClick ''; true";
+            waitUntil { DUWS_dbgForceClicked || !visibleMap };
+            onMapSingleClick "";
+            [""] call fnc_map_prompt;
+            if (!DUWS_dbgForceClicked) exitWith {};
+            openMap [false, false];
+            [[DUWS_dbgForcePos select 0, DUWS_dbgForcePos select 1, 0], player] remoteExec ["fnc_debug_force_emission", 2];
+        };
+    }, [], [1,0.667,0,1]],
+
     // Two independent map overlays. AoI rings every emitter's reach in its side's colour; OPCOM grid
     // paints the whole-map influence lattice with a per-cell force dot and belief warnings.
     ["AoI view: toggle emitter reaches", fnc_debug_aoi_view, [], [1,0.667,0,1]],
