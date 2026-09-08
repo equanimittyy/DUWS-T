@@ -3,9 +3,9 @@
 // among decoys, so it needs a real block to hunt through, not a lone house.
 //
 // Runs client-side in the picker (client/missions/fnc_stratmap.sqf), where the server-only
-// fnc_usableBuildings is unavailable -- so it re-implements that building test as a pure engine query.
-// The door check is load-bearing: the raid locks every candidate and the player breaches by shooting a
-// door, so a doorless house cannot play.
+// fnc_usableBuildings is unavailable -- so it counts enterable buildings inline. The door check is
+// load-bearing (the raid locks every candidate and the player breaches by shooting a door, so a doorless
+// house cannot play) and runs through the broadcast fnc_house_doors, shared with the thread's gate.
 //
 // Contract: [_candidatePos] -> [] reject, or [_candidatePos] accept.
 params ["_pos"];
@@ -30,19 +30,9 @@ private _bestD = 1e9;
 private _radius = MIN_RADIUS max _townRad;
 
 private _bldgs = nearestTerrainObjects [_pos, ["House"], _radius, true];
-private _pos3 = _bldgs select { !(((_x buildingPos 3) select 0) == 0) };
-private _usable = _pos3 select {
-    isClass (configFile >> "CfgVehicles" >> typeOf _x >> "AnimationSources" >> "Door_1_rot")
+private _usable = _bldgs select {
+    !(((_x buildingPos 3) select 0) == 0) && {(count ([_x] call fnc_house_doors)) > 0}
 };
-
-["DEBUG", "MISSION", format ["safehouse finder: r=%1 house=%2 pos3=%3 door=%4 need=%5",
-    round _radius, count _bldgs, count _pos3, count _usable, MIN_BUILDINGS]] call fnc_log;
-// Door-source discovery: dump the object's real animation sources (animationNames is engine-side, so it
-// resolves the model + inheritance where the CfgVehicles path missed). Names door detection/lock/breach.
-{
-    ["DEBUG", "MISSION", format ["safehouse probe: cls=%1 anims=%2", typeOf _x, animationNames _x]] call fnc_log;
-} forEach (_pos3 select [0, 3 min count _pos3]);
-
 if ((count _usable) < MIN_BUILDINGS) exitWith { [] };
 
 [_pos]

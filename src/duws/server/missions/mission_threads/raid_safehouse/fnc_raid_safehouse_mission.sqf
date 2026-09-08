@@ -32,10 +32,9 @@ if (!([23, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 
 private _radius = MIN_RADIUS max _townRadius;
 
-// Door-having, enterable houses only -- a house with no lockable door is no safehouse (see the site finder).
-private _usable = ([_MissionPos, 3, _radius] call fnc_usableBuildings) select {
-    isClass (configFile >> "CfgVehicles" >> typeOf _x >> "AnimationSources" >> "Door_1_rot")
-};
+// Door-having, enterable houses only -- a house with no openable door can't be locked or breached, so it
+// is no safehouse (matches the site finder's gate).
+private _usable = ([_MissionPos, 3, _radius] call fnc_usableBuildings) select { (count ([_x] call fnc_house_doors)) > 0 };
 if (count _usable < 4) exitWith { [23, _requester, "no_door_cluster"] call fnc_mission_abort };
 
 private _count = (4 + floor random (MAX_HOUSES - 3)) min (count _usable);   // 4-8, capped at what exists
