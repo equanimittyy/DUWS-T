@@ -104,10 +104,20 @@ _handle = [] spawn {
 	// Fill the hard slots first, from hardEligible types only. If that pool empties before they're
 	// filled, _hardWant collapses to _hardFilled, so the remaining slots draw easy from the whole bag.
 	private _wantHard = _hardFilled < _hardWant;
-	private _pool = if (_wantHard) then { _bag select { _x select 2 } } else { _bag };
-	if (_pool isEqualTo []) then { _wantHard = false; _hardWant = _hardFilled; _pool = _bag };
+	private _idx = -1;
 
-	private _idx = (_pool apply {_x select 0}) selectRandomWeighted (_pool apply {_x select 1});
+	// Debug one-shot: force a chosen type into this draw, still through the normal site finder so a
+	// no-fit drops it as a random draw would -- placement is never faked. Set by the re-roll picker.
+	private _forced = missionNamespace getVariable ["DUWS_dbgForceDrawType", -1];
+	if (_forced >= 0 && {(_bag findIf {(_x select 0) == _forced}) >= 0}) then {
+		_idx = _forced;
+		_wantHard = false;
+		DUWS_dbgForceDrawType = -1;
+	} else {
+		private _pool = if (_wantHard) then { _bag select { _x select 2 } } else { _bag };
+		if (_pool isEqualTo []) then { _wantHard = false; _hardWant = _hardFilled; _pool = _bag };
+		_idx = (_pool apply {_x select 0}) selectRandomWeighted (_pool apply {_x select 1});
+	};
 	_bag = _bag select { (_x select 0) != _idx };
 
 	private _threadName = (_missionDefs select _idx) select 0;
