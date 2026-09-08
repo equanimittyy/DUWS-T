@@ -55,13 +55,6 @@ if (_isFob) then {
     }, [], false, COST_COLOUR];
 };
 
-// HQ only: these came off the HQ terminal, which a FOB does not have. Both are paid in cash rather
-// than CP, which is the scarcer of the two and the reason they are marked.
-if (!_isFob) then {
-    _rows pushBack [localize "STR_DUWS_T_HIRE_PARTISANS", { [player] remoteExec ["fnc_hirePartisans", 2] }, [], false, COST_COLOUR];
-    _rows pushBack [localize "STR_DUWS_T_HIRE_PMC", { [player] remoteExec ["fnc_hirePMC", 2] }, [], false, COST_COLOUR];
-};
-
 if (count _rows > count _slots) then {
     ["WARN", "UI", format ["fnc_command_fill: %1 entries for %2 slots, the surplus is not shown",
         count _rows, count _slots]] call fnc_log;
