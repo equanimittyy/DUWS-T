@@ -262,11 +262,12 @@ not persisted — it recomputes from its current position's cell to the target o
 **Wheeled and tracked route on roads.** A ground vehicle does not take the grid cost field — it must
 travel by road. Its route is the world-space polyline from `fnc_convoy_path` `[start, dest]`, the OPFOR
 convoy road router: an A* over the engine road graph (`roadsConnectedTo`) that snaps each end to the
-nearest road and returns a chain of `road` and off-road `gap` segments. While virtualised, OPCOM borrows only the
-*route*: its world-point steps that polyline exactly as it steps a cell chain — its own cheap stepper, no
-driving engine — recomputing when the target moves. `fnc_convoy_drive` (`setDriveOnPath`) enters only at
-de-virtualisation, to drive the live column, the same engine the convoy missions already use. Reuse both,
-do not re-derive road pathing.
+nearest road and returns a chain of `road` and off-road `gap` segments. OPCOM borrows only the *routing* —
+`fnc_convoy_path` — never the convoy driving engine. Its world-point steps that polyline exactly as it steps
+a cell chain (its own cheap stepper), recomputing when the target moves. On de-virtualisation the vehicle
+spawns on the route and takes its normal A3 order ([§Spawn posture](#spawn-posture-follows-the-order)),
+driving from there under native AI: there is no `fnc_convoy_drive` and no column to hold, because OPCOM
+fields **one hull per tasking**, never a convoy. Reuse the router, do not re-derive road pathing.
 
 - **Off-road only to bridge.** A vehicle leaves the road only on a `gap` segment the router emits where no
   road connects — the stub from each end onto the network, or a crossing between road components A* cannot
