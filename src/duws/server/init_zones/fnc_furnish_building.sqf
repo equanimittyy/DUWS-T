@@ -2,9 +2,19 @@
 // registered in server_fnc_init.sqf after fnc_place_settled, which it calls. Not broadcast: callers
 // remoteExec it to the server.
 //
-// No per-class template, because the mission must survive modded and unrecognised buildings: the interior
-// is inferred (buildingPos nav points, GEOM-LOD wall probes), never keyed to a classname. A building with
-// no GEOM walls (a ruin, a view-only prop) furnishes flat and logs it, so the degrade shows in the RPT.
+// No per-class template and no authored offsets, so the mission survives modded and unrecognised buildings.
+// The interior is inferred (buildingPos nav points + GEOM-LOD wall probes) and the furniture packed from
+// boundingBoxReal at runtime -- spacing, facing, tabletop height, wall backing, clip avoidance all computed.
+// So a chair faces its table by construction (heading = bearing to the table centre), not a hand-set angle.
+//
+// The engine cannot report a class's role (a stool and a small crate measure alike), so the library groups
+// classes by role rather than guessing:
+//   anchor   a surface things sit at and on (table, desk); the centre of a cluster.
+//   seat     placed at the anchor's edges, facing in.
+//   surface  sits on an anchor's top (props or inventory items both).
+//   floor    stands on the floor, backed against a wall (bed, crate, cabinet).
+//
+// A building with no GEOM walls (a ruin, a view-only prop) still furnishes, logged, so the degrade shows.
 //
 // Contract: [_building, _key, _sets, _quota] -> [_objs placed]
 //   _building  OBJECT to furnish
@@ -16,24 +26,23 @@ fnc_furnish_building = {
     params ["_building", ["_key", "furnish"], ["_sets", []], ["_quota", 0]];
     if (isNull _building) exitWith { [] };
 
-    // Cluster library: [setName, footprint(m), propRows, tableRowIdx, clutterItems].
-    //   propRows      fnc_place_settled rows [class, offX, offY, offZ, dir] in the cluster frame; row 0 is
-    //                 the anchor piece and +Y is the cluster front.
-    //   tableRowIdx   which placed prop carries a tabletop for the clutter pass, or -1 for none.
-    //   clutterItems  [item, offX, offY] scattered on that tabletop; the top Z is read off the table at run.
+    // [setName, [[role, [classes]], ...]]. Placeholder classes -- swap in real ones per role.
     private _lib = [
-        ["living", 1.6,
-            [["Land_CampingTable_F", 0, 0, 0, 0], ["Land_CampingChair_V1_F", 0.55, 0.2, 0, 180],
-             ["Land_CampingChair_V2_F", -0.55, 0.2, 0, 180], ["Land_WoodenBox_TarpAll_F", 0.95, -0.9, 0, 20]],
-            0, [["ItemMap", -0.2, 0.05], ["ItemWatch", 0.2, -0.05]]],
-        ["sleeping", 1.4,
-            [["Land_Sleeping_bag_blue_F", 0, 0, 0, 0], ["Land_Suitcase_F", 0.85, -0.45, 0, 90],
-             ["Land_WoodenBox_TarpAll_F", -0.8, -0.35, 0, 0]],
-            -1, []],
-        ["work", 1.6,
-            [["Land_CampingTable_F", 0, 0, 0, 0], ["Land_CampingChair_V1_F", 0, -0.55, 0, 0],
-             ["Land_PlasticCase_01_medium_F", 0.85, 0.3, 0, 0], ["Land_WoodenBox_TarpAll_F", -0.9, -0.2, 0, 30]],
-            0, [["ItemGPS", -0.15, 0.1], ["FirstAidKit", 0.15, -0.1]]]
+        ["living", [
+            ["anchor",  ["Land_CampingTable_F"]],
+            ["seat",    ["Land_CampingChair_V1_F", "Land_CampingChair_V2_F"]],
+            ["surface", ["ItemMap", "ItemWatch"]],
+            ["floor",   ["Land_WoodenBox_TarpAll_F"]]
+        ]],
+        ["sleeping", [
+            ["floor",   ["Land_Sleeping_bag_blue_F", "Land_Suitcase_F", "Land_WoodenBox_TarpAll_F"]]
+        ]],
+        ["work", [
+            ["anchor",  ["Land_CampingTable_F"]],
+            ["seat",    ["Land_CampingChair_V1_F"]],
+            ["surface", ["ItemGPS", "FirstAidKit"]],
+            ["floor",   ["Land_PlasticCase_01_medium_F", "Land_WoodenBox_TarpAll_F"]]
+        ]]
     ];
 
     private _eligible = if (_sets isEqualTo []) then { _lib } else { _lib select { (_x select 0) in _sets } };
@@ -84,53 +93,100 @@ fnc_furnish_building = {
         ["WARN", "FURNISH", format ["%1 yielded no GEOM walls; furnishing flat", typeOf _building]] call fnc_log;
     };
 
-    // Most open first, then greedy. The crowd gate below is 3D distance, so a slot on the floor above is
-    // never counted as crowding one below it.
-    _probed sort false;
+    _probed sort false;   // most open first
+
+    #define SEAT_GAP 0.45      // table edge to seat centre
+    #define MIN_CLEAR 0.6      // a slot tighter than this holds nothing
+    #define MIN_SPACING 2.0    // between cluster centres, so adjacent nav points do not stack
+    #define WALL_NEAR 1.6      // a wall this close makes a slot a floor-piece spot, not a table spot
+
+    // Which classes a set lists for a role, or [].
+    private _roleClasses = {
+        params ["_set", "_role"];
+        private _r = (_set select 1) select { (_x select 0) == _role };
+        if (_r isEqualTo []) then { [] } else { (_r select 0) select 1 }
+    };
 
     private _objs = [];
-    private _placed = [];   // [pos, footprint]
+    private _placed = [];   // cluster centres, for the spacing gate
     {
         if (count _placed < _quota) then {
             _x params ["_clear", "_slot", "_wallDir", "_hit"];
-            private _fit = _eligible select { (_x select 1) <= _clear };
-            if (_fit isNotEqualTo []) then {
-                private _cl = selectRandom _fit;
-                private _fp = _cl select 1;
-                if ((_placed findIf { (_slot distance (_x select 0)) < (_fp + (_x select 1)) }) < 0) then {
-                    // Face away from the nearest wall, snapped to the building's own axis so the cluster
-                    // reads parallel to the room rather than skew to an arbitrary ray. No wall in reach ->
-                    // face the axis, quarter-turned by placement order for variety.
-                    private _face = if (_wallDir >= 0) then {
-                        private _f = _wallDir + 180;
-                        _bdir + 90 * round ((_f - _bdir) / 90)
-                    } else {
-                        _bdir + (if ((count _placed) mod 2 == 0) then { 0 } else { 90 })
-                    };
+            if (_clear >= MIN_CLEAR && {(_placed findIf { (_slot distance _x) < MIN_SPACING }) < 0}) then {
+                private _set = selectRandom _eligible;
+                private _anchors = [_set, "anchor"] call _roleClasses;
+                private _floors  = [_set, "floor"]  call _roleClasses;
 
-                    // fnc_place_settled needs an object to ride, so stand an invisible one at the slot to
-                    // carry the frame. Up is vertical: a house storey is flat within itself.
-                    private _anchor = createVehicle ["Land_HelipadEmpty_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
-                    _anchor setPosASL (AGLToASL _slot);
-                    _anchor setVectorDirAndUp [[sin _face, cos _face, 0], [0, 0, 1]];
+                // Tables in open floor; floor pieces where a wall is close to back onto. A set with no anchor
+                // is floor-only, one with no floor is anchor-only.
+                private _useFloor = (_anchors isEqualTo []) ||
+                    {_floors isNotEqualTo [] && {_wallDir >= 0 && {_clear < WALL_NEAR}}};
 
-                    _objs append ([_cl select 2, _anchor, _key, true, false] call fnc_place_settled);
+                // Face away from the nearest wall, snapped to the building's own axis so the cluster reads
+                // parallel to the room. No wall in reach -> the axis, quarter-turned by order for variety.
+                private _face = if (_wallDir >= 0) then {
+                    _bdir + 90 * round (((_wallDir + 180) - _bdir) / 90)
+                } else {
+                    _bdir + (if ((count _placed) mod 2 == 0) then { 0 } else { 90 })
+                };
 
-                    // Clutter anchored on the table object, so its height is the table's real boundingBoxReal
-                    // top rather than a per-class guess.
-                    private _ti = _cl select 3;
-                    if (_ti >= 0 && {_ti < count _objs}) then {
-                        private _tbl = _objs select ((count _objs) - (count (_cl select 2)) + _ti);
-                        private _topZ = (boundingBoxReal _tbl select 1) select 2;
-                        private _crows = (_cl select 4) apply { [_x select 0, _x select 1, _x select 2, _topZ, 0] };
-                        if (_crows isNotEqualTo []) then {
-                            _objs append ([_crows, _tbl, _key, true, true] call fnc_place_settled);
+                // Invisible frame at the slot for fnc_place_settled to ride; up is vertical, since a storey
+                // is flat within itself.
+                private _frame = createVehicle ["Land_HelipadEmpty_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
+                _frame setPosASL (AGLToASL _slot);
+                _frame setVectorDirAndUp [[sin _face, cos _face, 0], [0, 0, 1]];
+
+                private _did = false;
+                if (_useFloor && {_floors isNotEqualTo []}) then {
+                    _objs append ([[[selectRandom _floors, 0, 0, 0, 0]], _frame, _key, true, false] call fnc_place_settled);
+                    _did = true;
+                } else {
+                    if (_anchors isNotEqualTo []) then {
+                        // Anchor first, then measure it: seat and tabletop offsets come from its real bounds,
+                        // so the pack fits any table without a per-class number.
+                        private _aObj = ([[[selectRandom _anchors, 0, 0, 0, 0]], _frame, _key, true, false] call fnc_place_settled) select 0;
+                        _objs pushBack _aObj;
+                        _did = true;
+
+                        private _bb = boundingBoxReal _aObj;
+                        private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
+                        private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
+                        private _topZ = (_bb select 1) select 2;
+
+                        // Seats at the edge mid-points, only where the seat still fits the measured clearance.
+                        // Heading is the bearing from the seat back to the anchor centre, so it faces the table.
+                        private _seatCls = [_set, "seat"] call _roleClasses;
+                        if (_seatCls isNotEqualTo []) then {
+                            private _edges = [];
+                            if (_hy + SEAT_GAP <= _clear) then { _edges append [[0, _hy + SEAT_GAP], [0, -(_hy + SEAT_GAP)]] };
+                            if (_hx + SEAT_GAP <= _clear) then { _edges append [[_hx + SEAT_GAP, 0], [-(_hx + SEAT_GAP), 0]] };
+                            private _seatRows = _edges apply {
+                                _x params ["_ox", "_oy"];
+                                [selectRandom _seatCls, _ox, _oy, 0, (- _ox) atan2 (- _oy)]
+                            };
+                            if (_seatRows isNotEqualTo []) then {
+                                _objs append ([_seatRows, _frame, _key, true, false] call fnc_place_settled);
+                            };
+                        };
+
+                        // Surface items across the tabletop, anchored on the anchor object so the resting
+                        // height is its real top. A prop and an inventory item take different seating in
+                        // fnc_place_settled (raw createVehicle vs a GroundWeaponHolder), so split by config.
+                        private _surf = [_set, "surface"] call _roleClasses;
+                        if (_surf isNotEqualTo []) then {
+                            private _n = count _surf;
+                            private _rows = [];
+                            { _rows pushBack [_x, (_forEachIndex - (_n - 1) / 2) * 0.3, 0, _topZ, 0] } forEach _surf;
+                            private _propRows = _rows select { isClass (configFile >> "CfgVehicles" >> (_x select 0)) };
+                            private _lootRows = _rows select { !(isClass (configFile >> "CfgVehicles" >> (_x select 0))) };
+                            if (_propRows isNotEqualTo []) then { _objs append ([_propRows, _aObj, _key, true, false] call fnc_place_settled) };
+                            if (_lootRows isNotEqualTo []) then { _objs append ([_lootRows, _aObj, _key, true, true] call fnc_place_settled) };
                         };
                     };
-
-                    deleteVehicle _anchor;
-                    _placed pushBack [_slot, _fp];
                 };
+
+                deleteVehicle _frame;
+                if (_did) then { _placed pushBack _slot };
             };
         };
     } forEach _probed;
