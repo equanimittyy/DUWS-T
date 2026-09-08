@@ -6,8 +6,10 @@
 // (which is ours). fnc_furnish_grid infers the interior as a per-storey cell grid split into rooms; this
 // fills it in ordered passes, each reserving the cells it takes in the grid's `occupied` flag -- so no two
 // pieces share a cell and the nav-path cells stay clear (a trooper is not sealed behind a sofa). Facing is
-// by construction, corrected per class by catalog frontYaw. An empty grid (a ruin, a view-only prop)
-// degrades to the seed nav points, flat, logged.
+// by construction, corrected per class by catalog frontYaw. Pieces are measured, not assumed: a wall piece
+// is seated on its wall plane (no clip, no float) and an anchor too big for its cell is rejected. A room is
+// placed frozen and woken once laid out. An empty grid (a ruin, a view-only prop) degrades to the seed nav
+// points, flat, logged.
 //
 // Contract: [_building, _key, _sets, _quota] -> [_objs placed]
 //   _building  OBJECT to furnish
@@ -134,24 +136,34 @@ fnc_furnish_building = {
         _c
     };
 
+    // Per-room sim gate: hold each piece frozen from placement until its room is laid out, so none takes a
+    // physics step mid-build. Global, not local -- the local form leaves clients simulating it.
+    private _keepFrozen = {
+        { _x enableSimulationGlobal false; _roomObjs pushBack _x; _objs pushBack _x } forEach _this;
+    };
+
     // Place an anchor with its seats (per the `seats` rule) and clutter, reserving the footprint and each
     // seated cell.
     private _placeAnchor = {
         params ["_cell", "_class", "_set"];
         (_catalog get _class) params ["", "_fy", "", "_seats"];
-        _cell params ["_cpos"];
+        _cell params ["_cpos", "", "", "_clear"];
 
         // Anchors sit in the open, no wall backing, so a fixed heading; a desk's single seat still lands
         // on its real front via the frontYaw offset in the seat block below.
         private _frame = [_cpos, 0] call _frameAt;
         private _aObj = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false] call fnc_place_settled) select 0;
         deleteVehicle _frame;
-        private _out = [_aObj];
 
         private _bb = boundingBoxReal _aObj;
         private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
         private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
         private _topZ = (_bb select 1) select 2;
+
+        // Reject an anchor whose half-extent overruns the cell's clearance (its nearest-wall distance): it
+        // would overhang a wall. The caller frees the cap slot, so a big table just will not take a tight cell.
+        if ((_hx max _hy) > _clear) exitWith { deleteVehicle _aObj; [] };
+        private _out = [_aObj];
 
         if (_seats != 0) then {
             private _chairs = ["seat", _set] call fnc_furnish_classesFor;
@@ -194,7 +206,7 @@ fnc_furnish_building = {
     private _placeWall = {
         params ["_cell", "_class"];
         (_catalog get _class) params ["", "_fy"];
-        _cell params ["_cpos", "", "_nearB"];
+        _cell params ["_cpos", "", "_nearB", "_clear"];
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _frame = [_cpos, _heading] call _frameAt;
         private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false] call fnc_place_settled) select 0;
@@ -202,6 +214,16 @@ fnc_furnish_building = {
         private _bb = boundingBoxReal _o;
         private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
         private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
+
+        // Seat the back on the wall: depth toward the wall is the box projected onto the wall bearing (model
+        // +Y points at _heading), so shift the centre by clearance-minus-depth along it -- a deep piece pulls
+        // off so it cannot clip through, a shallow one closes the gap.
+        if (_nearB >= 0) then {
+            private _th = _nearB - _heading;
+            private _depth = _hx * abs (sin _th) + _hy * abs (cos _th);
+            private _shift = _clear - _depth;
+            _o setPosASL ((getPosASL _o) vectorAdd [_shift * sin _nearB, _shift * cos _nearB, 0]);
+        };
         [_o, (_hx max _hy) + 0.2] call _reserve;
         _o
     };
@@ -238,6 +260,7 @@ fnc_furnish_building = {
         private _rcells = _rooms get _rid;
         private _set = _prio select (_forEachIndex mod (count _prio));
         private _classCount = createHashMap;   // per-room, drives the maxPerRoom caps below
+        private _roomObjs = [];                // this room's pieces, frozen until the room is laid out
 
         // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
         private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
@@ -248,7 +271,7 @@ fnc_furnish_building = {
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_wallClasses] call _pickCapped;
                 if (_cls == "") exitWith {};   // every wall class hit its per-room cap
-                _objs pushBack ([selectRandom _free, _cls] call _placeWall);
+                [[selectRandom _free, _cls] call _placeWall] call _keepFrozen;
             };
         };
 
@@ -262,7 +285,13 @@ fnc_furnish_building = {
                 private _cls = [_anchorClasses] call _pickCapped;
                 if (_cls == "") exitWith {};
                 private _cell = ([_free, [], { -(_x select 3) }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-                _objs append ([_cell, _cls, _set] call _placeAnchor);
+                private _placed = [_cell, _cls, _set] call _placeAnchor;
+                if (_placed isEqualTo []) then {
+                    // footprint rejected: give the cap slot back so a smaller class can still fill the room
+                    _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                } else {
+                    _placed call _keepFrozen;
+                };
             };
         };
 
@@ -277,11 +306,15 @@ fnc_furnish_building = {
                 if (_cls == "") exitWith {};
                 private _cell = selectRandom _free;
                 private _frame = [_cell select 0, 0] call _frameAt;
-                _objs pushBack (([[_cls, 0, 0, 0, 0], _frame, _key, true, false] call fnc_place_settled) select 0);
+                private _rugObj = ([[_cls, 0, 0, 0, 0], _frame, _key, true, false] call fnc_place_settled) select 0;
                 deleteVehicle _frame;
+                [_rugObj] call _keepFrozen;
                 [_cell select 0, 0.5] call _reserve;
             };
         };
+
+        // Room laid out and validated: wake the whole set together.
+        { _x enableSimulationGlobal true } forEach _roomObjs;
     } forEach _bySize;
 
     ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _objs, count _bySize]] call fnc_log;
