@@ -54,9 +54,9 @@ _inf setCombatMode "BLUE";
 // Belt-and-suspenders against a future AIS setting change reviving him or stripping the handler below
 // (docs/info/architecture/revive_system.md); the shipped "allplayables" never enrols a spawned unit.
 _inf setVariable ["AIS_noReviveInit", true, true];
-// Arm the protectee in place: a blufor-pool sidearm. Non-hostile mode leaves his WEST group, captive
-// state and disabled PATH (set above) untouched.
-[[_inf], "WEST", "blufor", ["pistol"], [false]] call fnc_civ_arm;
+// Arm the protectee in place: one blufor-pool weapon and a low-armour vest. Non-hostile mode leaves
+// his WEST group, captive state and disabled PATH (set above) untouched.
+[[_inf], "WEST", "blufor", [["pistol", "submachinegun", "assault_rifle"], "vest"], [false]] call fnc_civ_arm;
 // Half damage, doubling effective health so no fluke ends a 45-minute mission. Scales the per-hit
 // increment (not the absolute) so damage still accumulates to death; negative index is whole-body.
 _inf addEventHandler ["HandleDamage", {
