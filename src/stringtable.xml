@@ -1838,6 +1838,10 @@
                 <Original>This FOB is already being redeployed.</Original>
                 <English>This FOB is already being redeployed.</English>
             </Key>
+            <Key ID="STR_DUWS_T_HQ_REDEPLOY_BUSY">
+                <Original>Base units are already being redeployed.</Original>
+                <English>Base units are already being redeployed.</English>
+            </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
                 <English>Check Vehicle Status</English>

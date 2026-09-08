@@ -21,6 +21,13 @@ if (commandpointsblu1 < 2) exitWith {
         format [localize "STR_DUWS_T_REDEPLOY_COST", 2]]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
+// Lock before charging. The two builders raise these flags too, but they run a frame later as
+// spawned threads, so a second click landing before they start would read both flags false at the
+// check above, pass it, and charge a second time. Set here, synchronously, it is already up when
+// the next request arrives. Each builder clears its own flag when it finishes.
+_fob setVariable ["FOB_fortify_busy", true];
+_fob setVariable ["FOB_guard_busy", true];
+
 // call, not remoteExec to self, and escalation applied here rather than in fnc_pool_try_spend:
 // identical to fnc_redeployHQUnits for the same reason, since this path never reaches the purchase
 // handshake either.

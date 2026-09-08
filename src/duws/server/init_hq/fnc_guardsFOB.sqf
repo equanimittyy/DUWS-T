@@ -7,10 +7,9 @@ if (!isServer) exitWith {};
 
 params ["_centerPos", "_fob"];
 
-// One reguard at a time, for the same reason as fnc_fortifyFOB: the scroll action is on every
-// machine, so two players can fire it at once. No refund arm any more -- fnc_redeployFOBUnits
-// reads this flag before it charges, so a second caller is turned away rather than paid back.
-if (_fob getVariable ["FOB_guard_busy", false]) exitWith {};
+// Marks the reguard in progress and is cleared at the end of this pass. fnc_redeployFOBUnits raises
+// it before it charges and reads it to turn a second click away rather than pay it back; the build
+// path (fnc_fob_server) raises it here on first guard.
 _fob setVariable ["FOB_guard_busy", true];
 
 // Reguard replaces the FOB's garrison wholesale, not adds to it: read off the FOB by roster, not passed

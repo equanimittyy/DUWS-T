@@ -6,11 +6,10 @@ if (!isServer) exitWith {};
 
 params ["_centerPos", "_fob", ["_refortify", false]];
 
-// One rebuild at a time. The scroll action lives on every machine, so two players can fire it
-// at once; without this the second would spawn a duplicate ring over the first. No refund arm any
-// more -- fnc_redeployFOBUnits reads this flag before it charges, so a second caller is turned
-// away rather than paid back.
-if (_fob getVariable ["FOB_fortify_busy", false]) exitWith {};
+// Marks the rebuild in progress and is cleared at the end of this pass. fnc_redeployFOBUnits raises
+// it before it charges and reads it to turn a second click away rather than pay it back, so the
+// gate is held from the charge through to completion; the build path (fnc_fob_server) raises it here
+// on first fortify.
 _fob setVariable ["FOB_fortify_busy", true];
 
 // Refortify replaces the previous ring rather than adding to it. The current turrets are read
