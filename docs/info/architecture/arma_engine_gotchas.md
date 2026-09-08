@@ -2048,3 +2048,22 @@ deep-copy it first (`+value`). A cache meant to be read-only can skip the copy, 
 `set`/`pushBack` into it. Grouping cached cells into rooms with `pushBack` (as the placer does) copies only
 the references, so mutating a grouped cell still writes through to the cached one — the deep copy up front
 is what breaks that link.
+
+## `createVehicle` with `CAN_COLLIDE` onto a solid explodes on the first simulated frame
+
+**A vehicle created at an exact point with the `"CAN_COLLIDE"` special (or placement radius `0`) is placed
+into whatever solid already occupies that point. On its first simulated frame the physics engine resolves
+the interpenetration with a separating impulse large enough to throw the vehicle clear and cook it off.**
+
+The vehicle depot's pad retrieve (`server/supports/fnc_garage_init.sqf`) drops a stored vehicle dead centre
+of the landing pad with `createVehicle [..., 0, "CAN_COLLIDE"]`. `CAN_COLLIDE` is what holds it on centre —
+the empty-position specials nudge it to a gap — but it also means the hull spawns straight into the pad prop
+or terrain, and the ejection follows. A radius-0 placement without the special behaves the same way.
+
+**How to apply:** spawn it with `enableSimulationGlobal false` in the same frame as the `createVehicle`
+(before any suspension, so no physics tick runs first), pose it — `setDir`, then re-seat with `setPosATL`
+because the rotation displaces the object — zero its `setVelocity`, then thaw with `enableSimulationGlobal
+true` a beat later. Frozen, it takes no impulse; released from rest, a shallow clip depenetrates as a gentle
+nudge. As a backstop, hold `allowDamage false` across the settle so any residual shove cannot cook it off —
+but set it *after* restoring any stored damage, because `allowDamage false` suppresses `setDamage`. This is
+the same freeze-pose-thaw the HQ hard placement uses (`init_hq/fnc_placeHQUnits.sqf`).
