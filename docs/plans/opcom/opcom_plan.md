@@ -445,11 +445,17 @@ whenever anything sensible is affordable and winning when everything else has sa
 
 ## Commitment: intents are sticky
 
-A chosen action becomes an intent record and stays one until it completes, dies, or expires.
-Re-scoring next tick fills free capacity. It may **abandon a still-virtual intent** — recall its units to
-the roster — but only when the target's ROI has fallen *well below* the commit bar; the hysteresis gap
-(`OPCOM_COMMIT_HYSTERESIS`, [§Open questions](#open-questions)) stops a small wobble sending columns
-marching back and forth. Once a tasking's units are in contact it is locked ([§There is no retreat](#commitment-intents-are-sticky), below) — the world can shift under a virtual march, never under a firefight.
+A chosen action becomes an intent record and stays one until it completes, dies, or is re-tasked.
+The commit **hold** — a minimum span of ticks before OPCOM may re-issue that unit's order — steadies a
+commitment against the fast re-score; it is an anti-flap lock, not a deadline the tasking must succeed
+within. Re-scoring next tick fills free capacity and may re-task a unit whose hold has passed. It may also
+**abandon a still-virtual intent** — recall its units to the roster — before the hold is up, but only when
+the target's ROI has fallen *well below* the commit bar; the hysteresis gap (`OPCOM_COMMIT_HYSTERESIS`,
+[§Open questions](#open-questions)) stops a small wobble sending columns marching back and forth. Once a
+tasking's units **de-virtualise** — spawn as a live A3 group — OPCOM can no longer steer them: they run
+their spawned order ([§Spawn posture](#spawn-posture-follows-the-order)) and control returns only when they
+re-virtualise ([§The virtualisation boundary](#the-virtualisation-boundary)). The world can shift under a
+virtual march, never under a spawned group.
 
 | Field | Holds |
 |---|---|
@@ -457,7 +463,7 @@ marching back and forth. Once a tasking's units are in contact it is locked ([§
 | target | the objective — a registry index (zone, town) or a cell |
 | roles | `[role, unitRef, status]` bindings drawn from the roster: one for a simple tasking, several for a multi-unit template, none for an economic action |
 | phase | index into the template's phase list ([§Templates](#templates-the-execution-forms)) |
-| expiry | the tick counter `DUWS_opcom_tick` at commit plus the intent's own lifetime, in ticks |
+| hold | `DUWS_opcom_tick` at commit plus the intent's minimum lifetime — the earliest tick OPCOM may re-issue this unit's order; an anti-flap lock, not a success deadline |
 | state | mustering / ordered / in progress / done |
 
 A released unit is one whose intent has completed; that ownership state is what the reinforcement logic
@@ -505,7 +511,7 @@ Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, alongsi
 that already runs each tick. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
 reinforcement logic key off both fields.
 
-Numbers and strings only. Expiry counts in ticks off the shared `DUWS_opcom_tick` counter — the one
+Numbers and strings only. The hold counts in ticks off the shared `DUWS_opcom_tick` counter — the one
 clock belief also ages on — never `time` or `diag_tickTime`. One clock means the commitment code never
 compares seconds against ticks, and the counter persists with the mission namespace where the two engine
 clocks do not ([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
@@ -622,11 +628,23 @@ orthogonally — acceptable for spawn-before-contact.
 
 ### Spawn posture follows the order
 
-- A **move order** — rapport, scout, a patrol — spawns in `SAFE`/`AWARE` and drives or walks to its
-  objective.
-- A **combat order** — Attack or Intercept — spawns in `AWARE` with a Seek & Destroy waypoint on the target.
+A de-virtualised unit runs a native A3 order that is the **closest engine equivalent of its tasking**, set
+at spawn, not a tick later. OPCOM does not steer it after that — a spawned group is out of its hands until
+it re-virtualises ([§Commitment](#commitment-intents-are-sticky)), so the spawned order has to carry the
+whole intent on its own.
 
-Set the posture at spawn, not a tick later.
+| Tasking | A3 order |
+|---|---|
+| Assault (Attack / Intercept) | Seek & Destroy on the target point, `AWARE` |
+| Supply (Rapport, and a Build / town Reinforce / town Fortify truck) | move to the target cell in `SAFE`; on arrival delete the unit and fire the tasking's success |
+| Scout | move to the point in stealth, combat mode `GREEN` — hold fire, return fire only, never initiates |
+| Move / reposition | move to the cell in `SAFE` / `AWARE` |
+| Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
+
+`garrison` and Recruit issue no standing order: a recruited unit joins its zone garrison's reinforcement
+pool ([§Unit strength](#unit-strength)) virtually, and takes an order only when its zone de-virtualises and
+it spawns to defend through the existing posture circuit, or when OPCOM later tasks it for one of the rows
+above.
 
 ### Transport: carrying a unit to the fight
 
@@ -816,7 +834,7 @@ Three levels, not one:
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
 | Rapport | offensive | a town in reach (needs a `supply` unit) | tasking-spawn | 1 (`supply` courier) |
-| Recruit | buildup | the highest-value unmet unit need; spawns `garrison` on a free-slot OPFOR zone | tasking-spawn | 1 (spawned `garrison`) |
+| Recruit | buildup | the highest-value unmet unit need; raises a `garrison` unit into a free-slot OPFOR zone's reinforcement pool | tasking-spawn | 1 (`garrison`, resting — no active order) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 for a zone; 1 (`supply` truck) for a town |
 | Scout | recon | a `recon` unit's route sweeping stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
@@ -828,9 +846,9 @@ Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and te
 [§Templates](#templates-the-execution-forms).
 
 **Recruit fills the roster; every other unit-dispatching action drains it.** Recruit is the RTS "hire a
-unit": it spawns a group `garrison`ed on a free-slot OPFOR zone (one tasking unit per zone,
-[§Unit strength](#unit-strength)). OPCOM then draws that unit for an Attack, Intercept, Rapport or Scout,
-which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
+unit": it raises a group into a free-slot OPFOR zone's garrison reinforcement pool (one tasking unit per
+zone, [§Unit strength](#unit-strength)) — virtual, with no standing order until its zone de-virtualises to
+defend. OPCOM then draws that unit for an Attack, Intercept, Rapport or Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
 
 **Recruit chooses by demand.** It is scored once per demand group — generic force, `recon`, `supply`,
 `transport` — each against the best action that group unlocks ([§Value](#value-the-worth-of-the-ground-in-play)),
