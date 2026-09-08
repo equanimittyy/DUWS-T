@@ -1175,7 +1175,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | Phase | Contains | Reads |
 |---|---|---|
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
-| **2 — Force weighting** | Replace the men-count metric with firepower: one shared force function turning a garrison's tokens, vehicles and statics into category-power, deposited by **both** grid layers — friendly holdings and enemy belief — so the two share one metric. `fnc_opcom_sense` stamps enemy type / power, not just headcount | The grid + belief it re-weights |
+| **2 — Force weighting** | First extract a single-class classifier from the faction detector (a `class → category` resolver, so a sighted enemy class classifies on the fly), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy power, not headcount | The grid + belief it re-weights |
 | **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (cell-stepping accumulator, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
 | **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with minimum lifetimes and hysteresis; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
@@ -1194,7 +1194,7 @@ docs draw on.
 
 - Phase 1 — Perception: **shipped**; the code is `src/duws/server/opcom/` and its debug overlay under
   `client/debug/` (the phase doc is retired now the phase is built).
-- Phase 2 — Force weighting: next up; the spec doc lands when the phase starts.
+- Phase 2 — Force weighting: [`phase_2_force_weighting.md`](phase_2_force_weighting.md)
 - Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).
   Covers only the appraisal + economic-actions slice; the tasking-automation half is added when P4 begins.
 
