@@ -48,9 +48,8 @@ private _seen = createHashMap;
                         _pos set [2, 0];
                         private _gu = units _g;
                         private _players = {isPlayer _x} count _gu;
-                        // Firepower, not headcount: each dismounted man 1, each crewed vehicle its class
-                        // power (counted once), plus an additive premium per human aboard. Full power --
-                        // belief is fogged by age decay, not by tracking a sighted hull's damage.
+                        // Firepower, not headcount: dismounted men 1 each, each crewed vehicle its class
+                        // power once (crew not re-counted), +premium per human. Decay is the fog, not damage.
                         private _seenVeh = [];
                         private _fp = 0;
                         {

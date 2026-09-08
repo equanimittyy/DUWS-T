@@ -2,7 +2,7 @@
 // deposit every force source once with a linear falloff to its reach edge. A source is a firepower value
 // at a position -- friendly = OPFOR holdings (zone/town garrisons, hardpoints), enemy = BLU-held zones and
 // belief. Both layers share the one firepower metric (the force model, fnc_opcom_force), so the force
-// ratio that reads this is meaningful -- a tank-heavy holding outweighs an equal headcount of infantry.
+// ratio that reads this is meaningful.
 // Each deposit scans only the box around its source cell -- never the whole grid, never a pass over allUnits.
 if (!isServer) exitWith {};
 
@@ -30,8 +30,7 @@ private _deposit = {
     };
 };
 
-// A site's own force is DUWS_fnc_garrisonForce: its infantry men plus the power of its surviving vehicle
-// and static tokens, live roster or stowed ledger. Crew are not counted -- the vehicle already carries them.
+// A site's own force is DUWS_fnc_garrisonForce (its men plus the power of its surviving vehicle/static tokens).
 
 // Zones: OPFOR-held deposit their garrison force to friendly; BLU-held are known enemy ground (a
 // territorial fact the commander has for free), so they deposit a nominal baseline even unsighted.
@@ -56,8 +55,8 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
     };
 } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
 
-// Standing OPFOR hardpoints: each composes its force from its emplaced static and its loose garrison,
-// keyed on the type in its registry row (DUWS_fnc_hpForce). A row stands until the emplacement is cleared.
+// Standing OPFOR hardpoints: DUWS_fnc_hpForce off the type in each registry row. A row stands until
+// cleared, so every row is a live emitter.
 {
     if ((_x select 3) isEqualTo "opfor") then { [_fri, _x select 1, [_x select 2] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD] call _deposit };
 } forEach DUWS_hardpoints;

@@ -167,7 +167,7 @@ fnc_vehicleWeaponType = compileFinal {
 	flatten ((flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _type >> "Turrets") apply {getArray (_x >> 'weapons')})) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
 };
 
-// One class -> its OPCOM force category, the key the Phase 2 power table hangs a value off
+// One class -> its OPCOM force category, the key the force power table hangs a value off
 // (docs/plans/opcom/phase_2_force_weighting.md). Context-free: a sighted enemy may be a class outside any
 // detected roster (a mod, DLC, captured or civilian hull), so it resolves a class alone, with no faction to
 // parse -- which is why it reuses the per-class leaves above but never fnc_parseFaction's faction-context buckets.

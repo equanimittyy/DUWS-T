@@ -52,11 +52,9 @@ DUWS_fnc_garrisonMen = {
 	[[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
 };
 
-// The firepower a garrison contributes to OPCOM's force grid: its infantry men (each 1) plus the power of
-// its surviving vehicle and static tokens, so a tank far outweighs an equal headcount of riflemen. Vehicle
-// attrition is whole-token -- a destroyed vehicle leaves the surviving set through the loss ledger, so a
-// mauled garrison weighs less with no per-object health tracked. The OPCOM rebuild and the force-emission
-// dev readout share this one figure so the readout cannot drift from what is deposited.
+// The firepower a garrison contributes to the force grid: its infantry men (garrisonMen) plus the power of
+// its surviving vehicle and static tokens. Attrition is whole-token -- a destroyed vehicle leaves the
+// surviving set through the loss ledger, so a mauled garrison weighs less with no per-object health tracked.
 DUWS_fnc_garrisonForce = {
 	params ["_key"];
 	private _vehTokens = ([_key] call DUWS_fnc_garrisonSurviving) select {
