@@ -598,7 +598,7 @@ publicVariable "DUWS_fnc_squadRow";
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_garage_spec.sqf";
 { publicVariable _x } forEach [
     "DUWS_garage_tiers", "DUWS_fnc_vehDomain", "DUWS_fnc_garageCaps", "DUWS_fnc_garageUsed",
-    "DUWS_fnc_garageDomainIndex", "DUWS_fnc_vehSpecCapture", "DUWS_fnc_vehSpecApply"
+    "DUWS_fnc_garageDomainIndex", "DUWS_fnc_vehAmmoFrac", "DUWS_fnc_vehSpecCapture", "DUWS_fnc_vehSpecApply"
 ];
 // Broadcast: the fire-mission strike runs client-side and resolves a faction's real mortar/arty
 // shell through this, so it must exist on every machine that can call a battery.

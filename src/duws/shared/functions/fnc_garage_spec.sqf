@@ -62,6 +62,19 @@ DUWS_fnc_garageDomainIndex = {
     ["land", "air", "boat"] find _domain
 };
 
+// One coarse ammo fraction (rounds / capacity, all turrets): setVehicleAmmo restores a single
+// fraction to every weapon, so per-magazine detail is pointless. An unarmed hull reads -1. Shared
+// by the store path and the depot status readout so both report the same number.
+DUWS_fnc_vehAmmoFrac = {
+    params ["_veh"];
+    private _cur = 0; private _cap = 0;
+    {
+        _cur = _cur + (_x select 2);
+        _cap = _cap + getNumber (configFile >> "CfgMagazines" >> (_x select 0) >> "count");
+    } forEach magazinesAllTurrets _veh;
+    if (_cap > 0) then { _cur / _cap } else { -1 }
+};
+
 // A stored vehicle captured to plain serializable data. Index layout, read back by DUWS_fnc_vehSpecApply:
 //   0 class     1 textures (getObjectTextures)     2 pylon magazines (getPylonMagazines, in order)
 //   3 hitpoints (getAllHitPointsDamage)            4 overall damage    5 fuel
@@ -70,16 +83,6 @@ DUWS_fnc_garageDomainIndex = {
 // No object reference is kept: the caller deletes the vehicle after this returns.
 DUWS_fnc_vehSpecCapture = {
     params ["_veh"];
-
-    // One coarse ammo fraction (rounds / capacity, all turrets): setVehicleAmmo restores a single
-    // fraction to every weapon, so per-magazine detail is pointless. An unarmed hull reads -1.
-    private _cur = 0; private _cap = 0;
-    {
-        _cur = _cur + (_x select 2);
-        _cap = _cap + getNumber (configFile >> "CfgMagazines" >> (_x select 0) >> "count");
-    } forEach magazinesAllTurrets _veh;
-    private _ammo = if (_cap > 0) then { _cur / _cap } else { -1 };
-
     [
         typeOf _veh,
         getObjectTextures _veh,
@@ -88,7 +91,7 @@ DUWS_fnc_vehSpecCapture = {
         damage _veh,
         fuel _veh,
         [getWeaponCargo _veh, getMagazineCargo _veh, getItemCargo _veh, getBackpackCargo _veh],
-        _ammo
+        [_veh] call DUWS_fnc_vehAmmoFrac
     ]
 };
 

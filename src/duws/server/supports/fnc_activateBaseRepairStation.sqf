@@ -80,6 +80,8 @@ if (isNil "fnc_veh_repair_check_status") then {
         };
 
         _lines pushBack format ["Fuel: %1%", round (fuel _veh * 100)];
+        private _ammoFrac = [_veh] call DUWS_fnc_vehAmmoFrac;
+        if (_ammoFrac >= 0) then { _lines pushBack format ["Ammo: %1%", round (_ammoFrac * 100)]; };
         [_lines joinString "\n"] remoteExec ["hint", _caller];
     };
     publicVariable "fnc_veh_repair_check_status";
