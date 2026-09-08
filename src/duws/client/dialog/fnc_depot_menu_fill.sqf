@@ -35,8 +35,7 @@ isNil {
         private _name = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
         private _hp = round ((1 - (_x select 4)) * 100);
         private _fuel = round ((_x select 5) * 100);
-        // param, not select: a spec stored before ammo was tracked has no index 7. -1 marks an unarmed
-        // hull (or an untracked spec), which drops the ammo readout.
+        // param, not select: a pre-tracking spec has no index 7. -1 (unarmed or untracked) drops the readout.
         private _ammoFrac = _x param [7, -1];
         private _idc = switch ([_cls] call DUWS_fnc_vehDomain) do {
             case "air":  { 2022 };

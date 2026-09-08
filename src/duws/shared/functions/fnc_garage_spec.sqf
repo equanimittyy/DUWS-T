@@ -71,9 +71,8 @@ DUWS_fnc_garageDomainIndex = {
 DUWS_fnc_vehSpecCapture = {
     params ["_veh"];
 
-    // One coarse ammo fraction, rounds over magazine capacity across every turret. setVehicleAmmo
-    // restores a single fraction to all weapons, so no per-magazine detail is worth keeping. An
-    // unarmed hull has no magazines and reads -1, which the readout and the restore both skip.
+    // One coarse ammo fraction (rounds / capacity, all turrets): setVehicleAmmo restores a single
+    // fraction to every weapon, so per-magazine detail is pointless. An unarmed hull reads -1.
     private _cur = 0; private _cap = 0;
     {
         _cur = _cur + (_x select 2);

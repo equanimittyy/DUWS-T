@@ -1,7 +1,6 @@
-// Locality: client -- the Repair button's handler, spawned so the modal confirmation can block.
-// Quotes the full-service cost client-side (a third of the recycle reward; DUWS_fnc_vehicleRecycleReward
-// is broadcast) and confirms before committing. The server re-derives the same cost at commit, so the
-// quote cannot drift.
+// Locality: client -- the Repair button's handler, spawned so the modal confirmation can block. The
+// server re-derives the same cost at commit, so quoting it here (DUWS_fnc_vehicleRecycleReward is
+// broadcast) cannot drift.
 if (!hasInterface) exitWith {};
 private _sel = lbCurSel 2011;
 if (_sel < 0) exitWith { hint localize "STR_DUWS_T_repair_no_vehicle"; };
