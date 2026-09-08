@@ -65,6 +65,20 @@ fnc_furnish_building = {
         params ["_p", "_r"];
         { if ((_p distance2D (_x select 0)) <= _r) then { _x set [5, true] } } forEach _grid;
     };
+    // Cells whose centre lies inside a piece's real footprint: its oriented box (hx,hy half-extents, model
+    // +Y along _heading) grown by _m. A circle mis-covers a long piece, so reserving and testing the true
+    // box is what keeps pieces from overlapping -- and overlapping boxes are what physx flings on wake.
+    private _boxCells = {
+        params ["_p", "_heading", "_hx", "_hy", "_m"];
+        private _bx = _hx + _m; private _by = _hy + _m;
+        private _s = sin _heading; private _c = cos _heading;
+        _grid select {
+            private _v = (_x select 0) vectorDiff _p;
+            private _lx = (_v select 0) * _c - (_v select 1) * _s;
+            private _ly = (_v select 0) * _s + (_v select 1) * _c;
+            (abs _lx <= _bx) && {abs _ly <= _by}
+        }
+    };
     private _cellAt = {
         params ["_p"];
         private _hit = []; private _bd = 0.5;
@@ -164,6 +178,10 @@ fnc_furnish_building = {
         // Reject an anchor whose half-extent overruns the cell's clearance (its nearest-wall distance): it
         // would overhang a wall. The caller frees the cap slot, so a big table just will not take a tight cell.
         if ((_hx max _hy) > _clear) exitWith { deleteVehicle _aObj; [] };
+
+        // Reject if the footprint overlaps a piece already placed (a wall from the earlier pass).
+        private _fpCells = [getPosASL _aObj, 0, _hx, _hy, 0.15] call _boxCells;
+        if ((_fpCells findIf { _x select 5 }) >= 0) exitWith { deleteVehicle _aObj; [] };
         private _out = [_aObj];
 
         if (_seats != 0) then {
@@ -200,11 +218,14 @@ fnc_furnish_building = {
         };
 
         _out append ([_aObj, _hx, _hy, _topZ, _set] call _surfacePack);
-        [_aObj, (_hx max _hy) + SEAT_GAP + 0.2] call _reserve;
+        // Reserve the table plus its seat ring as one oriented footprint (heading 0) so nothing later packs
+        // into the chairs.
+        { _x set [5, true] } forEach ([getPosASL _aObj, 0, _hx + SEAT_GAP, _hy + SEAT_GAP, 0.1] call _boxCells);
         _out
     };
 
-    // Place a single back-to-wall piece (sofa/bed/cabinet) at a near cell, front off the wall.
+    // Place a single back-to-wall piece (sofa/bed/cabinet) at a near cell, front off the wall; returns [_o],
+    // or [] when the seated footprint would overlap a placed piece.
     private _placeWall = {
         params ["_cell", "_class"];
         (_catalog get _class) params ["", "_fy"];
@@ -226,8 +247,12 @@ fnc_furnish_building = {
             private _shift = _clear - _depth;
             _o setPosASL ((getPosASL _o) vectorAdd [_shift * sin _nearB, _shift * cos _nearB, 0]);
         };
-        [_o, (_hx max _hy) + 0.2] call _reserve;
-        _o
+        // Reject if the seated footprint overlaps an already-placed piece (or the push-out drove it into
+        // one); otherwise reserve the true oriented footprint.
+        private _fpCells = [getPosASL _o, _heading, _hx, _hy, 0.1] call _boxCells;
+        if ((_fpCells findIf { _x select 5 }) >= 0) exitWith { deleteVehicle _o; [] };
+        { _x set [5, true] } forEach _fpCells;
+        [_o]
     };
 
     // Group cells by room, largest first, so the main room reads as the living set.
@@ -273,7 +298,13 @@ fnc_furnish_building = {
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_wallClasses] call _pickCapped;
                 if (_cls == "") exitWith {};   // every wall class hit its per-room cap
-                [[selectRandom _free, _cls] call _placeWall] call _keepFrozen;
+                private _placedW = [selectRandom _free, _cls] call _placeWall;
+                if (_placedW isEqualTo []) then {
+                    // footprint rejected: free the cap slot so another wall class can still take the room
+                    _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                } else {
+                    _placedW call _keepFrozen;
+                };
             };
         };
 
