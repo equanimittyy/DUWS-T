@@ -446,9 +446,12 @@ whenever anything sensible is affordable and winning when everything else has sa
 ## Commitment: intents are sticky
 
 A chosen action becomes an intent record and stays one until it completes, dies, or is re-tasked.
-The commit **hold** — a minimum span of ticks before OPCOM may re-issue that unit's order — steadies a
-commitment against the fast re-score; it is an anti-flap lock, not a deadline the tasking must succeed
-within. Re-scoring next tick fills free capacity and may re-task a unit whose hold has passed. It may also
+The commit **hold** — `OPCOM_COMMIT_HOLD`, one global span of **6 ticks (30 s)** before OPCOM may re-issue
+that unit's order — steadies a commitment against the fast re-score; it is an anti-flap lock, not a deadline
+the tasking must succeed within. One number covers every active tasking: per-unit march cost already lives
+in movement speed ([§One nominal speed](#one-nominal-speed-per-unit-type)) and an urgent abandon in the
+hysteresis gap below, so the hold need only damp same-value flapping. Resting `garrison` and `guard`
+taskings are unheld — hold 0, freely drawable. Re-scoring next tick fills free capacity and may re-task a unit whose hold has passed. It may also
 **abandon a still-virtual intent** — recall its units to the roster — before the hold is up, but only when
 the target's ROI has fallen *well below* the commit bar; the hysteresis gap (`OPCOM_COMMIT_HYSTERESIS`,
 [§Open questions](#open-questions)) stops a small wobble sending columns marching back and forth. Once a
@@ -463,7 +466,7 @@ virtual march, never under a spawned group.
 | target | the objective — a registry index (zone, town) or a cell |
 | roles | `[role, unitRef, status]` bindings drawn from the roster: one for a simple tasking, several for a multi-unit template, none for an economic action |
 | phase | index into the template's phase list ([§Templates](#templates-the-execution-forms)) |
-| hold | `DUWS_opcom_tick` at commit plus the intent's minimum lifetime — the earliest tick OPCOM may re-issue this unit's order; an anti-flap lock, not a success deadline |
+| hold | `DUWS_opcom_tick` at commit plus `OPCOM_COMMIT_HOLD` (6 ticks) — earliest tick OPCOM may re-issue this unit's order; a global anti-flap lock, not a success deadline |
 | state | mustering / ordered / in progress / done |
 
 A released unit is one whose intent has completed; that ownership state is what the reinforcement logic
@@ -481,7 +484,9 @@ A group that wins drops back to `moving`, resumes its order, and re-virtualises 
 ([§The virtualisation boundary](#the-virtualisation-boundary)); a group that loses dies. Recovery is
 winning, nothing else.
 
-**An assault musters, then launches as one wave.** In state `mustering` an Attack or Intercept intent binds
+**A multi-unit assault musters, then launches as one wave.** Mustering is a template behaviour (Phase 5,
+[§Build order](#build-order)): the single-unit Attack or Intercept that P3 fields draws one unit and marches
+it straight to contact, no gather. When an intent spans several units, in state `mustering` it binds
 force across ticks and gathers it at a **safe rally** — a low-threat cell short of the target — until the
 full ROI-optimal force ([§Cost](#cost-what-an-action-stakes)) has converged. Only then does it advance, all
 together. It does **not** dribble units forward into contact, which no-retreat would turn into defeat in
@@ -572,23 +577,24 @@ run each loop tick ([§The loop](#the-loop-against-the-engine)).
 
 ### One nominal speed per unit type
 
-Model arrival only — which cell the squad is in and when it crosses the streaming ring. One
-cross-country speed per type; road versus open ground is unmodelled.
+Model arrival only — which cell the squad is in and when it crosses the streaming ring. One speed per type,
+road versus open ground unmodelled, given as **ticks per cell** and tuned for play, not realism: the true
+spread (a jet outruns a foot soldier ~80×) is compressed so the virtual layer neither crawls nor teleports.
 
-| Unit type | Water | Nominal speed (tune in play) |
-|---|---|---|
-| Infantry | impassable | ~5 km/h |
-| Wheeled | impassable | ~40 km/h |
-| Tracked | impassable | ~30 km/h |
-| Rotary | passable | ~200 km/h |
-| Fixed wing | passable | ~400 km/h |
-| Boat | water only (land impassable) | ~45 km/h |
+| Unit type | Water | Ticks per cell | ≈ per cell |
+|---|---|---|---|
+| Infantry | impassable | 30 | 150 s |
+| Wheeled | impassable | 15 | 75 s |
+| Tracked | impassable | 20 | 100 s |
+| Rotary | passable | 5 | 25 s |
+| Fixed wing | passable | 2 | 10 s |
+| Boat | water only (land impassable) | 10 | 50 s |
 
-**Cell-stepped, with a carry.** A tasking holds a cell plus a metre accumulator. Each tick
-`acc += speed * dt`; while `acc` covers the next step's length (`OPCOM_GRID_CELL`, or `* sqrt 2`
-diagonal), pop the next cell off the route chain and subtract it. A slow infantry crosses one cell over
-several passes; a fixed-wing pops many cells in one pass. Position stays a pure cell for streaming, force
-deposit and routing; the accumulator is motion bookkeeping only. Water is handled in the route, not per
+**Cell-stepped, with a carry.** A tasking holds a cell plus a fractional-cell accumulator. Each tick
+`acc += 1 / ticksPerCell`; while `acc` covers the next step (1 orthogonal, `sqrt 2` diagonal), pop the next
+cell off the route chain and subtract it. Infantry fills a cell over 30 ticks, a fixed-wing every two.
+Position stays a pure cell for streaming, force deposit and routing; the accumulator is motion bookkeeping
+only. Water is handled in the route, not per
 step — a ground route never contains a water cell ([§Routing](#routing-a-cost-field-over-the-grid)).
 
 Persisted state is the cell, the target and the route mode — all numbers, so a virtualised tasking
@@ -1330,10 +1336,10 @@ docs draw on.
 ## Open questions
 
 - **Action-economy granularity against the tick.** The loop is one `OPCOM_TICK_PERIOD` (5 s) tick that
-  scores and commits at most one action; the per-action AP costs, the faucet rate, and the intent minimum
-  lifetimes that hold a commitment steady across that fast re-scoring all tune in play in the decision loop
-  (Phase 4). The tick
-  itself is settled — one cadence, no separate action cooldown clocks ([§The loop](#the-loop-against-the-engine)).
+  scores and commits at most one action; the per-action AP costs, the faucet rate and the single global
+  commit hold (`OPCOM_COMMIT_HOLD`) that steadies an intent across that fast re-scoring all tune in play in
+  the decision loop (Phase 4). The tick itself is settled — one cadence, no separate action cooldown clocks
+  ([§The loop](#the-loop-against-the-engine)).
 - **Typed belief for counter-building.** The grid is force magnitude only, so Build cannot site a typed
   counter — AT specifically under armour, AA under air. Extending belief to carry a threat category would
   enable it ([§What the commander builds](#what-the-commander-builds)).
