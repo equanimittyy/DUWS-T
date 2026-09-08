@@ -18,6 +18,9 @@ echo
 echo "== lint: composition fences (role/token resolution) =="
 python3 "$HERE/lint/check_compositions.py" || rc=1
 echo
+echo "== lint: furniture catalog (row shape / vocabulary) =="
+python3 "$HERE/lint/check_furniture_catalog.py" || rc=1
+echo
 echo "== lint: missing broadcast (client-called registry entry not publicVariable'd) =="
 python3 "$HERE/lint/check_broadcast.py" || rc=1
 echo

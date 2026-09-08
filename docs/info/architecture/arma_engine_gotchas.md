@@ -2012,3 +2012,39 @@ for why it is all-machines-then-bounce-to-server), unlock every `bis_disabled_Do
 (`server/missions/mission_threads/raid_safehouse/`) drives locks this way: `fnc_raid_safehouse_arm` adds the
 per-house `HitPart`, `fnc_raid_safehouse_breach` does the server-side unlock, and the thread clears the lock
 variables on its win/fail/cleanup path.
+
+## A `Draw3D` / `onEachFrame` block captures no local variables from where it was added
+
+**The code handed to `addMissionEventHandler ["Draw3D", {...}]` (and `onEachFrame`) runs in a fresh scope
+every frame, not the scope it was written in. A `private` from the enclosing function is `nil` inside the
+block at draw time — there is no closure over locals.**
+
+So anything the drawer needs must be reachable without a captured local: a mission-namespace global read
+inside the block, or a literal inlined into the block. `fnc_draw_world_icons.sqf` puts its whole row table
+in the global `DUWS_icon3d_rows`; the furnishing grid overlay (`client/debug/fnc_debug_furnish_view.sqf`)
+reads its mode from a global and inlines its colour palette in the block. A palette left as an outer
+`private _palette` compiles clean and then draws nothing (or errors on the `nil`) once the handler fires.
+
+**How to apply:** store per-draw state a Draw3D block reads in `missionNamespace` globals set before the
+handler is added, or inline constants directly in the block. Tear the handler down by the id
+`addMissionEventHandler` returns (`removeMissionEventHandler ["Draw3D", _id]`), never with a bare
+`onEachFrame {}`, which clears every stacked handler in the mission, not just yours.
+
+## An array cached with `setVariable` is a shared reference; a consumer that mutates it corrupts the cache
+
+**SQF arrays are reference types. `setVariable`, `pushBack`, and plain assignment all store the *reference*,
+not a copy — only `+` deep-copies. So an array stashed on an object with `setVariable` and read back by a
+consumer that then mutates it (or its nested arrays) is writing through to the cached copy.**
+
+The building furnishing grid (`server/init_zones/fnc_furnish_grid.sqf`) caches its per-storey cell array on
+the building with `setVariable` so it is built once. The placer (`fnc_furnish_building.sqf`) stamps an
+`occupied` flag on each cell as it reserves it — mutating the cells in place. Without a copy, a second
+furnish of the same building would read the cache back with every cell already flagged occupied from the
+first run and place nothing. The fix is `_grid = +_grid` on read, so the passes mutate a private deep copy
+and the cache stays pristine.
+
+**How to apply:** any function that reads a `setVariable` cache and writes into the returned structure must
+deep-copy it first (`+value`). A cache meant to be read-only can skip the copy, but then no consumer may
+`set`/`pushBack` into it. Grouping cached cells into rooms with `pushBack` (as the placer does) copies only
+the references, so mutating a grouped cell still writes through to the cached one — the deep copy up front
+is what breaks that link.

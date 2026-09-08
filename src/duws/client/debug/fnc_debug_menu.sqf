@@ -37,6 +37,9 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Furnish cursor building", fnc_debug_furnish_menu, [cursorObject], [1,0.667,0,1]],
 
+    // Building-independent, so top-level rather than behind the cursor-building gate of the furnish submenu.
+    ["Calibrate furniture fronts", { call fnc_debug_furnish_calibrate }, [], [1,0.667,0,1]],
+
     ["Adjust CP / AP / Town / Escalation", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],

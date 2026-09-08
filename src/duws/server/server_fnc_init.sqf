@@ -48,8 +48,13 @@ publicVariable "fnc_duws_deploy";
 // instead of freezing them. After fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_place_settled.sqf";
 
-// Structure-aware building furnishing. Loaded after place_settled, which it calls; server-only, so not
-// broadcast (the debug menu remoteExecs it to the server).
+// Furniture catalog reader and the interior floor-plan grid. Both feed the placer below, so loaded ahead
+// of it; server-only, not broadcast.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_catalog.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_grid.sqf";
+
+// Structure-aware building furnishing. Loaded after place_settled, the grid and the catalog, which it
+// calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_building.sqf";
 
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
@@ -633,6 +638,14 @@ fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_de
 fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_grid_draw.sqf";publicVariable "fnc_debug_opcom_grid_draw";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
+// Furnishing grid overlay and front-calibration tool. The view/draw/calibrate handlers are broadcast
+// (menu-row handlers every client holds; the server remoteExecs the draw back to the asker); the gather
+// and calibrate-spawn are server-only, remoteExec'd to 2.
+fnc_debug_furnish_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_view.sqf";publicVariable "fnc_debug_furnish_view";
+fnc_debug_furnish_grid_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_grid_draw.sqf";publicVariable "fnc_debug_furnish_grid_draw";
+fnc_debug_furnish_calibrate = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_calibrate.sqf";publicVariable "fnc_debug_furnish_calibrate";
+fnc_furnish_grid_gather = compile preprocessFileLineNumbers "duws\server\debug\fnc_furnish_grid_gather.sqf";
+fnc_furnish_calibrate_spawn = compile preprocessFileLineNumbers "duws\server\debug\fnc_furnish_calibrate_spawn.sqf";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";

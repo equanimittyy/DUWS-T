@@ -24,6 +24,10 @@ _rows pushBack ["all (living + sleeping + work)", {
     [_this, "debug_furnish", [], 0] remoteExec ["fnc_furnish_building", 2];
 }, _target, [1, 0.667, 0, 1]];
 
+// Geometry overlays (no furniture): the floor-plan grid, coloured by cell state or by room id.
+_rows pushBack ["grid overlay: state (open / near / blocked)", { _this call fnc_debug_furnish_view }, [_target, "state"], [0.3, 0.8, 1, 1]];
+_rows pushBack ["grid overlay: rooms", { _this call fnc_debug_furnish_view }, [_target, "room"], [0.3, 0.8, 1, 1]];
+
 private _name = typeOf _target;
 if (_name isEqualTo "") then { _name = str _target };
 
