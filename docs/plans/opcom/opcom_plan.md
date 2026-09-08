@@ -174,6 +174,12 @@ the AOI coverage projection, so a source spreads ~1 km (`OPCOM_GRID_SPREAD`, 2 c
 AOI reaches. That spread bleeds force across cell boundaries, so a unit just outside a read footprint
 still counts, fading with distance — the read box does not need a hard edge.
 
+No single cell holds a source's full weight. The deposit discounts each cell by its distance from the
+source *position*, and a source rarely sits on a cell centre, so even the nearest cell reads below the
+weight and neighbours fall off from there; overlapping sources sum, so a cell can also exceed any one
+weight. Every read is a sum over a block ([§What reads it](#what-reads-it)), never one cell against a
+headcount — so the debug overlay's per-cell figure is the field value at that cell, not the emitter's men.
+
 **Friendly layer** (`DUWS_opcom_grid_fri`) — OPFOR force, known exactly, no belief scaling. Weight is
 category-power ([§The quantity](#the-quantity-force-not-coverage)) summed over the source, condition-scaled
 where the source is a unit:

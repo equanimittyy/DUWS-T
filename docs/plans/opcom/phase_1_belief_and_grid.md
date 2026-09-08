@@ -87,9 +87,10 @@ falls back to the ledger's surviving-token men (`garrisonSurviving` → `tokenLi
 figure that drives redeploy and the map bar. Vehicle crews are excluded from both counts — a team token
 owes men, a vehicle token owes none — so the live count and the ledger count the same population and cannot
 disagree. This is the deliberate asymmetry with belief: OPFOR knows its own infantry exactly and
-continuously, while enemy force is fogged behind the last sighting. Two things wait for the Phase 2
-firepower table: a never-raised zone has no ledger stamped yet and reads 0 until first raised, and vehicles
-carry no weight on either layer until that table brings them in.
+continuously, while enemy force is fogged behind the last sighting. A never-raised zone stamps its full
+base composition into the ledger at registration (`fnc_createzone` → `garrisonSetFull`), so it deposits
+real force from tick 1 rather than reading 0 until first raised. One thing still waits for the Phase 2
+firepower table: vehicles carry no weight on either layer until that table brings them in.
 
 ## Overlay
 
