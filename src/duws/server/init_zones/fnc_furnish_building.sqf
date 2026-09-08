@@ -26,22 +26,21 @@ fnc_furnish_building = {
     params ["_building", ["_key", "furnish"], ["_sets", []], ["_quota", 0]];
     if (isNull _building) exitWith { [] };
 
-    // [setName, [[role, [classes]], ...]]. Placeholder classes -- swap in real ones per role.
+    // [setName, [[role, [classes]], ...]]. A role's classes are a pool; the packer picks per placement.
     private _lib = [
         ["living", [
-            ["anchor",  ["Land_CampingTable_F"]],
-            ["seat",    ["Land_CampingChair_V1_F", "Land_CampingChair_V2_F"]],
-            ["surface", ["ItemMap", "ItemWatch"]],
-            ["floor",   ["Land_WoodenBox_TarpAll_F"]]
+            ["anchor",  ["Land_CampingTable_small_F", "Land_CampingTable_F", "Land_CampingTable_small_white_F", "Land_CampingTable_white_F", "Land_WoodenTable_large_F", "Land_WoodenTable_small_F", "Land_TableSmall_01_F", "Land_TableBig_01_F"]],
+            ["seat",    ["Land_CampingChair_V2_F", "Land_CampingChair_V2_white_F", "Land_ChairPlastic_F", "Land_RattanChair_01_F", "Land_ChairWood_F"]],
+            ["surface", ["Land_BakedBeans_F", "Land_Can_Dented_F", "Land_Can_V2_F", "Land_Can_V3_F", "Land_Can_Rusty_F", "Land_Can_V1_F", "Land_CerealsBox_F", "Land_Tableware_01_fork_F", "Land_Tableware_01_knife_F", "Land_Tableware_01_spoon_F", "Land_Tableware_01_stackOfNapkins_F", "Land_Tableware_01_napkin_F", "Land_Tableware_01_cup_F", "Land_BottlePlastic_V1_F", "Land_BottlePlastic_V2_F", "Land_PowderedMilk_F", "Land_RiceBox_F", "Land_TacticalBacon_F", "Land_TinContainer_F", "Lantern_01_red_F", "Lantern_01_green_F", "Lantern_01_blue_F", "Lantern_01_black_F", "Land_Antibiotic_F", "Land_Antimalaricum_01_F", "Land_Bandage_F", "Land_BloodBag_F", "Land_HeatPack_F", "Land_DisinfectantSpray_F", "Land_PainKillers_F", "Land_VitaminBottle_F"]],
+            ["floor",   ["Land_ArmChair_01_F", "Land_Sofa_01_F", "Land_Bench_F", "Land_Rug_01_F", "Land_Rug_01_Traditional_F"]]
         ]],
         ["sleeping", [
-            ["floor",   ["Land_Sleeping_bag_blue_F", "Land_Suitcase_F", "Land_WoodenBox_TarpAll_F"]]
+            ["floor",   ["Land_WoodenBed_01_F"]]
         ]],
         ["work", [
-            ["anchor",  ["Land_CampingTable_F"]],
-            ["seat",    ["Land_CampingChair_V1_F"]],
-            ["surface", ["ItemGPS", "FirstAidKit"]],
-            ["floor",   ["Land_PlasticCase_01_medium_F", "Land_WoodenBox_TarpAll_F"]]
+            ["anchor",  ["OfficeTable_01_new_F", "OfficeTable_01_old_F"]],
+            ["seat",    ["Land_OfficeChair_01_F"]],
+            ["surface", ["Land_Laptop_unfolded_F", "Land_Laptop_F", "Land_Laptop_device_F", "Land_Camera_01_F", "Land_FMradio_F", "Land_HandyCam_F", "Leaflet_05_Stack_F", "Leaflet_05_Old_F", "Leaflet_05_New_F", "Newspaper_01_F", "Land_Notepad_F", "Land_PenBlack_F", "Land_PenRed_F", "Land_PencilBlue_F", "Land_PencilGreen_F", "Land_PencilRed_F", "Land_PencilYellow_F", "Land_PensAndPencils_F", "Land_Wallet_01_F", "Land_Creditcard_01_F", "Land_Key_01_F", "Land_Battery_F", "Land_DuctTape_F", "Land_Pliers_F", "Land_MultiMeter_F", "Land_Screwdriver_V2_F", "Land_Screwdriver_V1_F", "Land_Meter3m_F", "Land_Wrench_F", "Land_DustMask_F", "Land_Gloves_F", "AluminiumFoil_01_F", "Land_Matches_F"]]
         ]]
     ];
 
@@ -99,6 +98,9 @@ fnc_furnish_building = {
     #define MIN_CLEAR 0.6      // a slot tighter than this holds nothing
     #define MIN_SPACING 2.0    // between cluster centres, so adjacent nav points do not stack
     #define WALL_NEAR 1.6      // a wall this close makes a slot a floor-piece spot, not a table spot
+    #define CELL 0.4           // tabletop grid pitch; also the min gap between clutter items
+    #define TOP_MARGIN 0.12    // keep clutter off the table lip
+    #define CLUTTER_CAP 8      // max clutter items on one table
 
     // Which classes a set lists for a role, or [].
     private _roleClasses = {
@@ -169,14 +171,32 @@ fnc_furnish_building = {
                             };
                         };
 
-                        // Surface items across the tabletop, anchored on the anchor object so the resting
-                        // height is its real top. A prop and an inventory item take different seating in
-                        // fnc_place_settled (raw createVehicle vs a GroundWeaponHolder), so split by config.
+                        // Surface clutter: grid-pack a random subset of the pool across the measured tabletop,
+                        // one class per cell, jittered and randomly turned, so a 30-class pool reads as
+                        // scattered clutter -- not a carpet, not a single overflowing row. The cell pitch is
+                        // the min gap; the top margin keeps items off the lip; height is the real top. A prop
+                        // and an inventory item seat differently in fnc_place_settled (raw createVehicle vs a
+                        // GroundWeaponHolder), so split by config.
                         private _surf = [_set, "surface"] call _roleClasses;
                         if (_surf isNotEqualTo []) then {
-                            private _n = count _surf;
-                            private _rows = [];
-                            { _rows pushBack [_x, (_forEachIndex - (_n - 1) / 2) * 0.3, 0, _topZ, 0] } forEach _surf;
+                            private _uhx = (_hx - TOP_MARGIN) max 0;
+                            private _uhy = (_hy - TOP_MARGIN) max 0;
+                            private _cols = 1 max floor (2 * _uhx / CELL);
+                            private _rowsN = 1 max floor (2 * _uhy / CELL);
+                            private _cells = [];
+                            for "_i" from 0 to (_cols - 1) do {
+                                for "_j" from 0 to (_rowsN - 1) do {
+                                    _cells pushBack [(- _uhx) + CELL / 2 + _i * CELL, (- _uhy) + CELL / 2 + _j * CELL];
+                                };
+                            };
+                            // Shuffle by random key, then take the fill count: a spread pick, not the first cells.
+                            private _shuf = _cells apply { [random 1, _x] };
+                            _shuf sort true;
+                            private _n = ((1 max round ((count _cells) * 0.45)) min CLUTTER_CAP) min (count _cells);
+                            private _rows = (_shuf select [0, _n]) apply {
+                                (_x select 1) params ["_cx", "_cy"];
+                                [selectRandom _surf, _cx + (random 0.12) - 0.06, _cy + (random 0.12) - 0.06, _topZ, random 360]
+                            };
                             private _propRows = _rows select { isClass (configFile >> "CfgVehicles" >> (_x select 0)) };
                             private _lootRows = _rows select { !(isClass (configFile >> "CfgVehicles" >> (_x select 0))) };
                             if (_propRows isNotEqualTo []) then { _objs append ([_propRows, _aObj, _key, true, false] call fnc_place_settled) };
