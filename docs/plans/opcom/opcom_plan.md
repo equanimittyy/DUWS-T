@@ -193,7 +193,7 @@ where the source is a unit:
 | OPFOR-held zone, base garrison | `zone_meta_array` pos (`select 1`) | base-tier composition force (Fortify raises this; recruits do not) | zone size (`select 2`) + `OPCOM_GRID_SPREAD` |
 | Banded town garrison | `civ_locations` | `DUWS_townGarrisonTier` composition force | `civ_radii` + `OPCOM_GRID_SPREAD` |
 | OPFOR hardpoint | `DUWS_hardpoints` pos (`select 1`) | its crew / weapon power | `OPCOM_GRID_SPREAD` |
-| OPFOR unit (`garrison` / `guard` / tasking) | its cell — stored (virtual) or live | its `effForce` ([§Unit strength](#unit-strength)) | `OPCOM_GRID_SPREAD` |
+| OPFOR unit (`garrison` / `guard` / tasking) | its world position — stored (virtual) or live | its `effForce` ([§Unit strength](#unit-strength)) | `OPCOM_GRID_SPREAD` |
 
 **Enemy layer** (`DUWS_opcom_grid_ene`) — believed BLUFOR force:
 
@@ -227,7 +227,8 @@ expired entry is already dropped from the arrays, so it never deposits.
 | **Route-around** (live group) | among the target cell's 8 neighbours, the one with the lowest `_gridEne`; its centre is a staging waypoint handed to a spawned group's engine pathing. The full route for a *virtualised* squad is [§Routing](#routing-a-cost-field-over-the-grid) |
 ### Routing: a cost field over the grid
 
-A virtualised tasking follows a **cell chain** produced by a shortest-path search over the grid, cost
+A virtualised tasking follows a **cell chain** produced by a shortest-path search over the grid, walking
+its cell centres in world space ([§One nominal speed](#one-nominal-speed-per-unit-type)); search cost
 per step:
 
 ```
@@ -249,7 +250,7 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
 immediately if the chain is exhausted before then. Belief updates each tick, but the route search runs
 outside the scoring block and only when a route is actually due, not every tick
 ([§The loop](#the-loop-against-the-engine)). The chain is
-not persisted — it recomputes from the current cell to the target on load.
+not persisted — it recomputes from its current position's cell to the target on load.
 
 | Constant | Value |
 |---|---|
@@ -565,11 +566,12 @@ contact clears and the zone re-virtualises.
 
 ## Movement: a tasking is virtualised until contact
 
-A tasking moves *virtualised*: its position is a **grid cell**, stepped along a route chain
+A tasking moves *virtualised*: its position is a **world point** stepping along a grid-planned route chain
 ([§Routing](#routing-a-cost-field-over-the-grid)) by a per-type speed model, holding no group handle,
-until a player closes to within its streaming ring. Its role binding
-([§Commitment](#commitment-intents-are-sticky)) references a cell while virtualised, a live group once it
-spawns.
+until a player closes to within its streaming ring. Like a zone or a hardpoint it is a force source the
+grid *reads* at that point ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)), never bound to
+the grid — only sampled by it. Its role binding ([§Commitment](#commitment-intents-are-sticky)) references
+that point while virtualised, a live group once it spawns.
 This is the mobile analogue of hardpoint streaming, which wakes and sleeps a fixed emplacement on a
 `spawnRadius`/`grace` band
 ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#streaming-and-garrison)). Movement and streaming
@@ -590,23 +592,25 @@ spread (a jet outruns a foot soldier ~80×) is compressed so the virtual layer n
 | Fixed wing | passable | 2 | 10 s |
 | Boat | water only (land impassable) | 10 | 50 s |
 
-**Cell-stepped, with a carry.** A tasking holds a cell plus a fractional-cell accumulator. Each tick
-`acc += 1 / ticksPerCell`; while `acc` covers the next step (1 orthogonal, `sqrt 2` diagonal), pop the next
-cell off the route chain and subtract it. Infantry fills a cell over 30 ticks, a fixed-wing every two.
-Position stays a pure cell for streaming, force deposit and routing; the accumulator is motion bookkeeping
-only. Water is handled in the route, not per
-step — a ground route never contains a water cell ([§Routing](#routing-a-cost-field-over-the-grid)).
+**World-stepped along the cell chain.** Each type's ticks-per-cell is a world rate,
+`stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick (infantry ≈17 m, a fixed-wing 250 m). Each tick the
+tasking advances its world point that far toward the next cell centre on its route chain; on reaching a
+centre it aims at the next. A diagonal needs no special case — the longer world distance to a corner cell
+falls out of the step. The cell for streaming and force deposit is `worldToCell` of that point, computed on
+demand ([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)). Water is handled in the route, not
+per step — a ground route never contains a water cell ([§Routing](#routing-a-cost-field-over-the-grid)).
 
-Persisted state is the cell, the target and the route mode — all numbers, so a virtualised tasking
-serialises with its order ([§Persistence](#persistence)). The accumulator resets to 0 and the chain
-recomputes on load.
+Persisted state is the world position, the target and the route mode — all numbers, so a virtualised
+tasking serialises with its order ([§Persistence](#persistence)). The route chain recomputes from that
+position on load.
 
 ### The virtualisation boundary
 
-A tasking unvirtualises — spawns as a native A3 group — on either of two triggers: its cell closes to
-within **K cells** (Chebyshev, `max(abs(dx), abs(dy))`) of any player's cell, **or** it reaches an opposing
-force (an OPFOR assault closing on a BLUFOR-held cell). Inside the ring the group is real, the engine owns
-its pathfinding, and the tasking issues its order *best-effort*.
+A tasking unvirtualises — spawns as a native A3 group at its world point — on either of two triggers: its
+cell (the `worldToCell` of that point) closes to within **K cells** (Chebyshev, `max(abs(dx), abs(dy))`) of
+any player's cell, **or** it reaches an opposing force (an OPFOR assault closing on a BLUFOR-held cell).
+Inside the ring the group is real, the engine owns its pathfinding, and the tasking issues its order
+*best-effort*.
 
 **Streaming is side-symmetric, and the engine resolves combat.** A BLUFOR zone or town garrison is
 virtualised and streamed exactly as an OPFOR one — stored as strength and a cell, spawned on contact. An
@@ -787,7 +791,7 @@ One thread, one cadence, not one thread per action.
 
 | Property | Value |
 |---|---|
-| Tick | every `OPCOM_TICK_PERIOD` (5 s). Increment the tick counter, then: refresh belief, rebuild the grid, advance in-flight taskings (accumulator + cell pop) and live templates ([§Templates](#templates-the-execution-forms)), refresh live-group status ([§Unit tasking and status](#unit-tasking-and-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)), score, commit at most one thing, recompute the routes due for it |
+| Tick | every `OPCOM_TICK_PERIOD` (5 s). Increment the tick counter, then: refresh belief, rebuild the grid, advance in-flight taskings (a world step along the route chain) and live templates ([§Templates](#templates-the-execution-forms)), refresh live-group status ([§Unit tasking and status](#unit-tasking-and-status)), run the streaming check against live player cells ([§Movement](#movement-a-tasking-is-virtualised-until-contact)), score, commit at most one thing, recompute the routes due for it |
 | Scoring pass | inside `isNil { ... }` — unscheduled, runs uninterrupted. `server/init_zones/fnc_moreUrban_locations.sqf:126-138` is the worked example, bounded by a wall-clock deadline. The route search runs outside it |
 | Clock | the tick counter `DUWS_opcom_tick` — intent expiries and belief age count in ticks, which persist with the mission namespace where `time` / `diag_tickTime` do not |
 | Orders | server-local groups only — waypoints are silently ignored unless the group is local to the issuing machine |
@@ -1271,7 +1275,7 @@ fire missions are never saved; they regenerate on player approach.
 | State | Kind | Contract |
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs, never re-rolls ([§The commander has an archetype](#the-commander-has-an-archetype)) |
-| Standing units & orders | outcome | One row per unit — its tasking, target, current cell, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at its cell (accumulator 0, chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
+| Standing units & orders | outcome | One row per unit — its tasking, target, current world position, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at that position (chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
 | Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](../economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
 Every persisted field is a number, a string, or an array of those. Time-based fields — intent expiries
@@ -1309,7 +1313,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 |---|---|---|
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
-| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (cell-stepping accumulator, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
+| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
 | **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with minimum lifetimes and hysteresis; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
