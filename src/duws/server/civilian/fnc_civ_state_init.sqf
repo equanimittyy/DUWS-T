@@ -73,9 +73,9 @@ fnc_civ_repAt = {
 // --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
 	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
-	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
-	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
-	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
 ];
 // --DUWS-UNITCOMP END--
 
