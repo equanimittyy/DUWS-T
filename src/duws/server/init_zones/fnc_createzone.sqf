@@ -217,6 +217,11 @@ private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
 ["INFO", "ZONES", format ["%1 is tier %2, fielding %3", _zoneKey, _zoneTier,
 	DUWS_zoneSpawnTiers select (_zoneTier - 1)]] call fnc_log;
 
+// OPCOM's force grid reads a stowed zone's ledger, but nothing stamps it until the zone first raises --
+// so an unvisited zone reads as zero force. SetFull not Derive: the reserve pool belongs to the raise.
+private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+[_zoneKey, [[_zoneTier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
+
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
 // follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
 // at which this function can report completion -- it never returns.
