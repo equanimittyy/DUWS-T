@@ -284,9 +284,9 @@ score only the survivors. Tens–low-hundreds of pairs before the gate, fewer af
 | Attack | each BLU-held zone |
 | Intercept | each belief entry near own ground |
 | Rapport | each town not yet turned |
-| Recruit | one per hireable type (combat / armor / recon / supply) — each the prize that type unlocks ([§Value](#value-the-worth-of-the-ground-in-play)) |
+| Recruit | one per demand group (force / recon / supply / transport) — each the prize that group unlocks ([§Value](#value-the-worth-of-the-ground-in-play)) |
 | Reinforce | each own holding below its strength cap |
-| Scout | drop positions for an available recon unit's footprint |
+| Scout | routes for an available recon unit's sweep footprint |
 | Arty | each observed belief point in range of an owned gun |
 | Fortify | each own holding below its tier ceiling |
 | Build | each own threatened / thin-line cell |
@@ -294,7 +294,9 @@ score only the survivors. Tens–low-hundreds of pairs before the gate, fewer af
 
 The gate splits by how the action pays ([§Cost](#cost-what-an-action-stakes)):
 
-- **Spend actions** (Recruit, Reinforce, Fortify, Build, Arty) — drop when `Cost > wallet`.
+- **Spend actions** (Recruit, Reinforce, Fortify, Build, Arty) — drop when `Cost > wallet`; a supply-gated
+  build — Build, or a *town* Reinforce or Fortify — also drops when no `supply` truck is on hand to carry it
+  ([§Supply](#supply-gates-the-town-side-builds)).
 - **Commit actions** (Attack, Intercept, Rapport, Scout) — drop when the roster holds no eligible unit,
   and drop an offensive one whose `P(win)` is below the floor (a doomed assault never scores).
 
@@ -341,7 +343,7 @@ its economy and never chases a lone scout across empty terrain.
 | defends own ground (Intercept, Build) | own worth × how threatened it is (`_gridEne` on it) |
 | refills a garrison (Reinforce) | own worth × threat × the strength deficit `1 − strength` (below) |
 | raises a tier (Fortify) | own worth × threat × the force the next tier adds (below) |
-| builds force (Recruit) | per hireable type, the best action that type unlocks (below) |
+| builds force (Recruit) | per demand group, the best action that group unlocks (below) |
 | buys information (Scout) | Σ over its recon footprint of `cell worth × staleness` (below) |
 | attrits force (Arty) | AP-worth of enemy force expected killed — `effForce hit × AP-per-force` (below) |
 
@@ -362,22 +364,29 @@ full. **Fortify** raises the tier *ceiling*, so it scores the **force the next t
 one (read from the composition table), diminishing as tiers climb — no AP poured into a ceiling that adds
 little.
 
-**Recruit — per type, demand-valued.** Recruit is one candidate *per hireable unit type*, each valued by the
-best action that type would unlock, so OPCOM hires exactly what it is short of. **Combat / armor**: the
-ground it cannot reach for lack of force — scan the Attack candidates that fail the `P(win)` floor, take the
-richest, and value one hire at `prize × ΔP(win)`, the win-probability a single added unit buys against that
-target; diminishing (the sigmoid flattens past `r ≈ 1`) and self-terminating (once accumulated force clears
-the floor the prize becomes a live Attack and the prize drops to the next locked target). **Recon**: the
-best Scout Value it would enable. **Supply**: the best Rapport Value it would enable. OPCOM hires the
-top-scoring type — massing combat force for an out-of-reach zone, buying eyes when it needs to Scout, a
-supply unit when a town is worth turning — and stops when nothing is short.
+**Recruit — per group, demand-valued.** Recruit is one candidate *per demand group*, each valued by the
+best action that group would unlock, so OPCOM hires exactly what it is short of. **Force** (any unflagged
+row, infantry or armour — both only add force): the ground it cannot reach for lack of force — scan the
+Attack candidates that fail the `P(win)` floor, take the richest, and value one hire at `prize × ΔP(win)`,
+the win-probability a single added unit buys against that target, taking the unflagged row whose
+`ΔP(win) / hire cost` is best; diminishing (the sigmoid flattens past `r ≈ 1`) and self-terminating (once
+accumulated force clears the floor the prize becomes a live Attack and the prize drops to the next locked
+target). **Recon**: the best Scout Value it would enable. **Supply**: the best delivery it would enable — a Rapport, or a Build,
+town Fortify or town Reinforce otherwise gated for want of a truck. **Transport**: the best Attack or Intercept it unlocks by making an out-of-reach objective
+reachable — across water, or nearer in transit time than a foot unit could manage
+([§Transport](#transport-carrying-a-unit-to-the-fight)). OPCOM hires the top-scoring group — massing force
+for an out-of-reach zone, buying eyes when it needs to Scout, a courier when a town is worth turning, a
+carrier when the fight is across water — and stops when nothing is short.
 
-**Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout, and its footprint is rings
-around its drop cell by type — recon team 1 ring, recon car 2, recon helicopter 3. A drop position's Value
-is `Σ` over the footprint cells of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`:
-offensive is attackable enemy ground worth in the cell, defensive is own ground worth exposed through it. A
-wider-range unit covers more cells (higher Value) at a higher reacquisition Cost, so range trades against
-unit price on the ROI axis with no extra knob.
+**Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout, and its reveal footprint is a
+Chebyshev radius set by platform — `recon (foot)` its own cell (radius 0), `recon (car)` the 3×3 around it
+(radius 1), `recon (heli)` the 5×5 (radius 2). The reveal is abstract and continuous: each tick along its
+one-shot route the unit stamps fresh belief for every BLUFOR within that radius of its current cell, no
+line-of-sight — buying perception where OPCOM has no observer. A route's Value is `Σ` over the cells its
+footprint sweeps of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`: offensive is
+attackable enemy ground worth in the cell, defensive is own ground worth exposed through it. A wider-range
+unit sweeps more cells (higher Value) at a higher reacquisition Cost, so range trades against unit price on
+the ROI axis with no extra knob.
 
 **Arty — force killed.** Value is the AP-worth of the enemy force a mission is expected to kill,
 `effForce in the blast × AP-per-force`. It targets the exact belief position, not the cell; positional
@@ -562,6 +571,7 @@ cross-country speed per type; road versus open ground is unmodelled.
 | Tracked | impassable | ~30 km/h |
 | Rotary | passable | ~200 km/h |
 | Fixed wing | passable | ~400 km/h |
+| Boat | water only (land impassable) | ~45 km/h |
 
 **Cell-stepped, with a carry.** A tasking holds a cell plus a metre accumulator. Each tick
 `acc += speed * dt`; while `acc` covers the next step's length (`OPCOM_GRID_CELL`, or `* sqrt 2`
@@ -601,6 +611,7 @@ is caught before contact.
 | Tracked | 2 | ~1–1.4 km |
 | Rotary | 5 | ~2.5–3.5 km |
 | Fixed wing | 8 | ~4–5.5 km |
+| Boat | 2 | ~1–1.4 km |
 
 **Hysteresis.** A live group stows back to a cell once it passes `K + 1` cells from every player **and holds
 no live contact** — one full cell of margin so a group on the edge cannot flicker. A group in a firefight
@@ -616,6 +627,42 @@ orthogonally — acceptable for spawn-before-contact.
 - A **combat order** — Attack or Intercept — spawns in `AWARE` with a Seek & Destroy waypoint on the target.
 
 Set the posture at spawn, not a tick later.
+
+### Transport: carrying a unit to the fight
+
+A `transport`-flagged unit ([§What the commander spends on](#what-the-commander-spends-on)) carries one
+other tasking unit to speed its march or cross water it could not. The carry is a bookkeeping binding on the
+transport's intent; the ride is best-effort in the A3 sim.
+
+- **Capacity is one unit, any size — seats are not checked to carry.** A transport carries at most one
+  infantry tasking unit whatever its headcount, and its hull's cargo seats do not gate the load. This is
+  deliberate: a detected faction whose only transport seats two men can still ferry a whole squad
+  *virtually*, so the mechanic never depends on a mod fielding a roomy carrier. Seats bind only when the
+  pair goes live.
+- **Load and transit, virtualised.** A transport and a unit on the same cell embark: the carried unit gives
+  up its own cell and route and rides the transport's, stepping at the transport's speed and **ignoring its
+  own water-impassability** — so a foot squad crosses a strait it could never walk. Position, force deposit
+  and routing all follow the transport's cell while embarked.
+- **De-virtualisation is best-effort.** When the pair streams in ([§The virtualisation
+  boundary](#the-virtualisation-boundary)) the transport spawns, and the carried unit is `moveInCargo`'d
+  into it only if the hull's seats fit the whole load.
+  - **Fits** — the unit spawns aboard and is, in the ledger, immediately unloaded onto the transport's cell
+    as an independent unit. Its life is no longer tied to the transport: it stays physically seated until
+    its AI or an order disembarks it, but if the hull is destroyed with it still aboard, A3 kills the live
+    men and the ordinary per-unit status read records the loss — there is no bookkeeping death cascade.
+  - **Does not fit** — the carried unit's de-virtualisation is aborted; it stays virtual and tied to the
+    transport. If the transport is destroyed while live, the tied unit dies with it, having never got out.
+- **Unload at the destination.** At its drop cell the carried unit disembarks, reclaims its own cell at that
+  position, and resumes its own tasking and speed.
+
+A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
+its routes are water-only and it exists to ferry rather than hold ground. Its class resolves from the
+existing Ship/boat faction key (`fnc_veh_price` maps `isKindOf "Ship"` to the boat band; the `blufor_BOAT_*`
+rows in the faction schema), not a new token backfill; an OPFOR-side boat rides on faction detection, and
+where none is detected the sea-ferry falls to a rotary transport. A boat classifies to a small fixed
+firepower (`boat` = 2, a light presence on par with an unarmed car), so it deposits a little threat on the
+grid and its hire prices at `2 × rate` rather than free — no zero-cost carrier. This adds a `boat` bucket to
+the force model and a `Ship` branch to the classifier, built with the transport.
 
 ## Templates: the execution forms
 
@@ -663,7 +710,7 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 | `encircle` | band 1–2, target pocketed (few escape cells), ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour, air or recon) | approach → make contact → resolve (survives ⇒ belief was soft, escalate; dies fast ⇒ belief confirmed, mass or re-target) |
 | `rapport` | a `supply`-flagged unit, a town in reach | `courier` ×1 | move (to the town) → deliver (step rep 3 toward −10) → resolve |
-| `scout` | a `recon`-flagged unit, a stale valuable area | `scout` ×1 | move (to the drop position) → reveal (refresh belief over the footprint rings) → resolve |
+| `scout` | a `recon`-flagged unit, a stale valuable area | `scout` ×1 | move (along the route) → reveal (stamp belief within the platform radius each tick) → resolve |
 | `arty` | an observed belief point in range of an owned gun off cooldown, not the HQ circle | owned `guns` ×1–3 (resident hardpoints, not roster — 0 roster taskings), `spotter` ×0–1 | mark (spotter or OP holds observation) → salvo (rounds × saturation on the belief point) → assess (force dropped? re-fire : done) |
 
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points
@@ -770,11 +817,11 @@ Three levels, not one:
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
 | Rapport | offensive | a town in reach (needs a `supply` unit) | tasking-spawn | 1 (`supply` courier) |
 | Recruit | buildup | the highest-value unmet unit need; spawns `garrison` on a free-slot OPFOR zone | tasking-spawn | 1 (spawned `garrison`) |
-| Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 |
-| Scout | recon | a `recon` unit's drop position covering stale valuable cells | tasking-spawn | 1 |
+| Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 for a zone; 1 (`supply` truck) for a town |
+| Scout | recon | a `recon` unit's route sweeping stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
-| Fortify | defensive | an own town / zone | tier purchase | 0 |
-| Build | defensive | an own threatened cell | hardpoint build | 0 |
+| Fortify | defensive | an own town / zone | tier purchase | 0 for a zone; 1 (`supply` truck) for a town |
+| Build | defensive | an own threatened cell | hardpoint build | 1 (`supply` truck) |
 | Bank | — | — | none | 0 |
 
 Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and templates are
@@ -785,11 +832,12 @@ unit": it spawns a group `garrison`ed on a free-slot OPFOR zone (one tasking uni
 [§Unit strength](#unit-strength)). OPCOM then draws that unit for an Attack, Intercept, Rapport or Scout,
 which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
 
-**Recruit chooses the type by demand.** It is scored once per hireable type — combat, armor, `recon`,
-`supply` — each against the best action that type unlocks ([§Value](#value-the-worth-of-the-ground-in-play)),
-so OPCOM hires eyes when it needs to Scout, a courier when a town is worth turning, and combat force to mass
-for an out-of-reach zone. Unit capability flags (`recon` enables Scout, `supply` enables Rapport) ride on
-the token composition (below); a plain combat unit carries neither.
+**Recruit chooses by demand.** It is scored once per demand group — generic force, `recon`, `supply`,
+`transport` — each against the best action that group unlocks ([§Value](#value-the-worth-of-the-ground-in-play)),
+so OPCOM hires eyes when it needs to Scout, a courier when a town is worth turning, a carrier when the fight
+is across water, and plain force to mass for an out-of-reach zone. Capability flags (`recon` enables Scout,
+`supply` a delivery run — Rapport, Build or a town harden, `transport` a carry) ride on the menu row
+(below); an unflagged row carries none and can only add force to a fight.
 
 Three notes:
 
@@ -813,16 +861,71 @@ proximity bubble or an off-screen contact point — not one global number. A big
 map then cannot starve a defender's spawn on the other, and in co-op each player's locality keeps its own
 budget ([§The virtualisation boundary](#the-virtualisation-boundary)).
 
-**A unit's force is a token composition.** Drawn from the same `posture:token` vocabulary the garrisons
-use ([§What the commander builds](#what-the-commander-builds)) — an array of tokens like `team` or `car`,
-resolved by `DUWS_fnc_tokenClass` against the shared roster. Recruit chooses from a menu of compositions;
-the exact rows are unset, tuned in one place, never hardcoded at a spawn site.
+**A unit's force is a token composition, hired from one menu.** Each buyable unit is a row in
+`DUWS_opcom_recruitMenu`, tuned in that one place and never hardcoded at a spawn site: an id, a composition
+(an array of tokens like `squad` or `tank` from the same vocabulary the garrisons use, resolved by
+`DUWS_fnc_tokenClass` against the detected faction), and a set of capability flags. The tokens are **bare**
+— no posture prefix, so each resolves to the `none` posture and the recruited unit takes its orders from
+OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-the-order)).
 
-**Capability flags ride on the composition.** A composition may carry a `recon` or `supply` flag — `recon`
-makes the unit eligible to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)),
-`supply` makes it eligible to Rapport. A plain combat or armor composition carries neither and can only
-Attack, Intercept or hold. Recruit's per-type scoring is a score per flagged composition, so specialist
-units enter the roster only when the action they enable is worth their hire.
+| Row | Composition | Flags |
+|---|---|---|
+| rifles | `["squad"]` | — |
+| weapons team | `["wp_team"]` | — |
+| APC | `["apc"]` | — |
+| IFV | `["ifv"]` | — |
+| MBT | `["tank"]` | — |
+| recon (foot) | `["recon"]` | `recon` |
+| recon (car) | `["car"]` | `recon` |
+| recon (heli) | `["transheli"]` | `recon` |
+| truck | `["truck"]` | `supply`, `transport` |
+| transport helicopter | `["transheli"]` | `transport` |
+| boat | `["boat"]` | `transport` |
+
+The three `recon` rows differ only by platform, which sets the Scout reveal radius
+([§Value](#value-the-worth-of-the-ground-in-play)) — OPCOM buys the reach it needs. The vocabulary has no
+dedicated scout helicopter, so `recon (heli)` and the transport helicopter share the one `transheli`
+platform, told apart by their flag.
+
+**Price is force, not a per-row number.** A hire costs `ceil(force × OPCOM_AP_PER_FORCE)` — the
+composition's firepower ([§The quantity](#the-quantity-force-not-coverage)) times the one force→AP rate — so
+a tank costs several times a rifle section and no price can drift out of step with what a unit is worth.
+That rate is the single force↔AP knob and also prices commit `Cost` and Arty's kill Value
+([§Cost](#cost-what-an-action-stakes)), so the menu carries no price column.
+
+**Capability flags decide what a unit unlocks; there is no unit "type".** An unflagged row is generic force,
+hired to win a fight and nothing more; a flagged row also unlocks an action. `recon` makes the unit eligible
+to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)), `supply` to Rapport,
+`transport` to carry another unit ([§Transport](#transport-carrying-a-unit-to-the-fight)); a row may carry
+several, as the truck both couriers and ferries. Recruit scores one candidate per demand group — force,
+`recon`, `supply`, `transport` — so a specialist enters the roster only when the action it enables is worth
+its hire.
+
+### Supply gates the town-side builds
+
+A `supply` truck runs one kind of errand — drive from OPFOR ground to a target cell and be spent on arrival
+— behind four actions: turn a town (Rapport), build a hardpoint (Build), and restore or upgrade a *town*
+garrison (Reinforce refills its strength toward the tier, Fortify raises the tier). Each binds one truck at
+commit and does not resolve until that truck arrives.
+
+- **Committed, not guaranteed.** The AP is paid up front — a spend action still pays its price at commit,
+  Rapport still stakes its courier — and the order binds to one *specific* truck, sent to the target cell.
+  The result lands only when the truck arrives, where it is deleted: the hardpoint spawns, the garrison
+  refills, the tier raises, or the town steps toward turning.
+- **Interdiction is the counterplay.** Kill the bound truck en route and the order fails outright — no
+  build, and the AP is not refunded. Binding to *that* truck rather than "a truck" means the order dies with
+  its carrier instead of waiting on one that will never come.
+- **No truck, no commit.** These actions gate on a truck being on hand — idle in the roster, or affordable
+  to Recruit this tick. With none, the action drops from scoring, so a player who keeps killing trucks keeps
+  OPFOR from fortifying its towns and raising new hardpoints at all. OPCOM need not hold a standing truck
+  reserve; it may buy one only when it has a build worth making.
+- **Zones need no supply.** A zone is where OPFOR originates, so reinforcing or fortifying a *zone* garrison
+  resolves on paying AP alone — no truck, no delivery. The asymmetry reads as OPFOR trucking matériel outward
+  from its zones to the contested towns and the open field.
+
+The delivery is a plain one-unit courier tasking (move to the cell → deliver → resolve), the same shape as
+Rapport's ([§Templates](#templates-the-execution-forms)); the build it triggers reuses the existing purchase
+machinery, fired on arrival rather than at commit.
 
 ### The commander has an archetype
 
@@ -1234,8 +1337,9 @@ docs draw on.
 - **The commit hysteresis gap** `OPCOM_COMMIT_HYSTERESIS` — how far below the commit bar a still-virtual
   intent's ROI must fall before it is abandoned. Wide enough to kill flapping, narrow enough to still drop a
   dead prize ([§Commitment](#commitment-intents-are-sticky)).
-- **The `AP-per-force` exchange rate** — single-sourced from Recruit's hire price, it prices commit `Cost`
-  and Arty's kill Value; the value tunes ([§Cost](#cost-what-an-action-stakes)).
+- **The `AP-per-force` exchange rate** `OPCOM_AP_PER_FORCE` — the single force→AP knob: a hire costs
+  `ceil(force × rate)` and the same rate prices commit `Cost` and Arty's kill Value; only the value tunes
+  ([§Cost](#cost-what-an-action-stakes)).
 - **The per-locality live-group budget** — the value of `OPCOM_MAX_TASKINGS` per active locality, and how a
   bubble is delimited (a player ring, an off-screen contact) ([§What the commander spends on](#what-the-commander-spends-on)).
 - **Whether the commander should be required to spend** rather than merely able to.
