@@ -14,17 +14,12 @@ if (isNil "fnc_veh_repair_action") then {
         // check above from the deduction.
         [-_repairCost, "repair_station"] call fnc_cp_adjust;
 
-        // Ungated: services whatever the hull's state. The patch floors damage at 0.3, never a full heal.
+        // Ungated full service: full repair, refuel and rearm, whatever the hull's state.
+        _veh setDamage 0;
         _veh setFuel 1;
-        {
-            private _dmg = _veh getHitPointDamage _x;
-            if (typeName _dmg == "STRING") then { _dmg = parseNumber _dmg; };
-            if (typeName _dmg == "ARRAY") then { _dmg = if (count _dmg > 0) then { _dmg select 0 } else { 0 }; };
-            if (_dmg > 0.3) then { _veh setHitPointDamage [_x, 0.3]; };
-        } forEach (getAllHitPointsDamage _veh select 0);
         _veh setVehicleAmmo 1;
 
-        [localize "STR_DUWS_T_repair_done"] remoteExec ["hint", _caller];
+        [format [localize "STR_DUWS_T_repair_done", _repairCost]] remoteExec ["hint", _caller];
     };
     publicVariable "fnc_veh_repair_action";
 };

@@ -2068,8 +2068,8 @@
                 <Chinesesimp>停机坪上有多辆载具，一次只能修理一辆。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_done">
-                <Original>The vehicle's severely damaged components have been repaired to a usable level and refueled. Cost: 2 CP.</Original>
-                <English>The vehicle's severely damaged components have been repaired to a usable level and refueled. Cost: 2 CP.</English>
+                <Original>Repaired, rearmed and refueled. Cost: %1 CP.</Original>
+                <English>Repaired, rearmed and refueled. Cost: %1 CP.</English>
                 <Chinesesimp>载具的严重受损部位已修理至可用的最低水平并加油，消耗2CP。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_not_enough_cp">
