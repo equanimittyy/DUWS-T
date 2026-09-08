@@ -52,15 +52,16 @@ DUWS_fnc_garrisonMen = {
 	[[_key] call DUWS_fnc_garrisonSurviving] call DUWS_fnc_tokenListMen
 };
 
-// The firepower a garrison contributes to the force grid: its infantry men (garrisonMen) plus the power of
-// its surviving vehicle and static tokens. Attrition is whole-token -- a destroyed vehicle leaves the
-// surviving set through the loss ledger, so a mauled garrison weighs less with no per-object health tracked.
+// The firepower a garrison contributes to the force grid: its infantry men (garrisonMen), the power of its
+// surviving vehicle tokens, and a zone's centre statics (DUWS_fnc_zoneStaticForce). Vehicle attrition is
+// whole-token -- a destroyed vehicle leaves the surviving set through the loss ledger, so a mauled garrison
+// weighs less with no per-object health tracked.
 DUWS_fnc_garrisonForce = {
 	params ["_key"];
 	private _vehTokens = ([_key] call DUWS_fnc_garrisonSurviving) select {
 		([[_x] call DUWS_fnc_tokenName] call DUWS_fnc_teamRow) isEqualTo []
 	};
-	([_key] call DUWS_fnc_garrisonMen) + ([_vehTokens] call DUWS_fnc_tokenListForce)
+	([_key] call DUWS_fnc_garrisonMen) + ([_vehTokens] call DUWS_fnc_tokenListForce) + ([_key] call DUWS_fnc_zoneStaticForce)
 };
 
 // The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and

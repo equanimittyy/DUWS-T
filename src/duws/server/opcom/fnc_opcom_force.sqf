@@ -70,3 +70,26 @@ DUWS_fnc_hpForce = {
     private _tokens = if (_gar isEqualType "") then { [_gar] - [""] } else { _gar };
     _static + ([_tokens] call DUWS_fnc_tokenListForce)
 };
+
+// A zone's surviving centre statics -> their force. The prefab guns at a zone centre are streamed
+// composition members, not garrison tokens, so garrisonForce adds them here. Stow-independent: the alive
+// StaticWeapon members when deployed, else the stow records -- survivors only, since a wrecked gun is
+// never recorded, so destruction persists across a stream cycle and never respawns.
+DUWS_fnc_zoneStaticForce = {
+    params ["_key"];
+    private _n = 0;
+    if (_key in DUWS_stowed) then {
+        {
+            if ((_x select 0) isKindOf ["StaticWeapon", configFile >> "CfgVehicles"]) then {
+                _n = _n + ([_x select 0] call DUWS_fnc_classPower);
+            };
+        } forEach (DUWS_stowed getOrDefault [_key, []]);
+    } else {
+        {
+            if (alive _x && {_x isKindOf "StaticWeapon"}) then {
+                _n = _n + ([typeOf _x] call DUWS_fnc_classPower);
+            };
+        } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
+    };
+    _n
+};
