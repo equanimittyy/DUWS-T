@@ -5,32 +5,25 @@ if (isNil "fnc_veh_repair_action") then {
         params ["_caller", "_vehNetId"];
         private _veh = objectFromNetId _vehNetId;
         if (isNull _veh) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
-        private _fuel = fuel _veh;
-        private _needsFuel = _fuel < 0.8;
-        private _hitPoints = getAllHitPointsDamage _veh select 0;
-        private _needsRepair = false;
-        {
-            private _dmg = _veh getHitPointDamage _x;
-            if (typeName _dmg == "STRING") then { _dmg = parseNumber _dmg; };
-            if (typeName _dmg == "ARRAY") then { _dmg = if (count _dmg > 0) then { _dmg select 0 } else { 0 }; };
-            if (_dmg > 0.3) then { _needsRepair = true; };
-        } forEach _hitPoints;
-        if (!_needsFuel && !_needsRepair) exitWith { [localize "STR_DUWS_T_repair_no_need"] remoteExec ["hint", _caller]; };
-        // Escalation applied here: this path never reaches the purchase handshake.
-        private _repairCost = [2] call fnc_escalation_cost;
+
+        // Cost tracks the hull's worth: a third of what recycling it would pay, rounded up, so a full
+        // service is always cheaper than scrapping and re-requesting. ceil of a >=1 reward is never 0.
+        private _repairCost = ceil (([_veh] call DUWS_fnc_vehicleRecycleReward) * 0.33);
         if (commandpointsblu1 < _repairCost) exitWith { [localize "STR_DUWS_T_repair_not_enough_cp"] remoteExec ["hint", _caller]; };
         // call, not remoteExec to self: a queued debit runs a frame later and splits the
         // check above from the deduction.
         [-_repairCost, "repair_station"] call fnc_cp_adjust;
-        if (_needsFuel) then { _veh setFuel 1; };
-        if (_needsRepair) then {
-            {
-                private _dmg = _veh getHitPointDamage _x;
-                if (typeName _dmg == "STRING") then { _dmg = parseNumber _dmg; };
-                if (typeName _dmg == "ARRAY") then { _dmg = if (count _dmg > 0) then { _dmg select 0 } else { 0 }; };
-                if (_dmg > 0.3) then { _veh setHitPointDamage [_x, 0.3]; };
-            } forEach _hitPoints;
-        };
+
+        // Ungated full service: top off fuel, patch every hitpoint down to the 0.3 floor, and rearm.
+        _veh setFuel 1;
+        {
+            private _dmg = _veh getHitPointDamage _x;
+            if (typeName _dmg == "STRING") then { _dmg = parseNumber _dmg; };
+            if (typeName _dmg == "ARRAY") then { _dmg = if (count _dmg > 0) then { _dmg select 0 } else { 0 }; };
+            if (_dmg > 0.3) then { _veh setHitPointDamage [_x, 0.3]; };
+        } forEach (getAllHitPointsDamage _veh select 0);
+        _veh setVehicleAmmo 1;
+
         [localize "STR_DUWS_T_repair_done"] remoteExec ["hint", _caller];
     };
     publicVariable "fnc_veh_repair_action";

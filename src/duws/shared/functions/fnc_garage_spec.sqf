@@ -66,9 +66,21 @@ DUWS_fnc_garageDomainIndex = {
 //   0 class     1 textures (getObjectTextures)     2 pylon magazines (getPylonMagazines, in order)
 //   3 hitpoints (getAllHitPointsDamage)            4 overall damage    5 fuel
 //   6 cargo [getWeaponCargo, getMagazineCargo, getItemCargo, getBackpackCargo]
+//   7 ammo fraction (current rounds / capacity across all turrets), or -1 when the hull is unarmed
 // No object reference is kept: the caller deletes the vehicle after this returns.
 DUWS_fnc_vehSpecCapture = {
     params ["_veh"];
+
+    // One coarse ammo fraction, rounds over magazine capacity across every turret. setVehicleAmmo
+    // restores a single fraction to all weapons, so no per-magazine detail is worth keeping. An
+    // unarmed hull has no magazines and reads -1, which the readout and the restore both skip.
+    private _cur = 0; private _cap = 0;
+    {
+        _cur = _cur + (_x select 2);
+        _cap = _cap + getNumber (configFile >> "CfgMagazines" >> (_x select 0) >> "count");
+    } forEach magazinesAllTurrets _veh;
+    private _ammo = if (_cap > 0) then { _cur / _cap } else { -1 };
+
     [
         typeOf _veh,
         getObjectTextures _veh,
@@ -76,7 +88,8 @@ DUWS_fnc_vehSpecCapture = {
         getAllHitPointsDamage _veh,
         damage _veh,
         fuel _veh,
-        [getWeaponCargo _veh, getMagazineCargo _veh, getItemCargo _veh, getBackpackCargo _veh]
+        [getWeaponCargo _veh, getMagazineCargo _veh, getItemCargo _veh, getBackpackCargo _veh],
+        _ammo
     ]
 };
 
@@ -85,7 +98,8 @@ DUWS_fnc_vehSpecCapture = {
 // every client.
 DUWS_fnc_vehSpecApply = {
     params ["_veh", "_spec"];
-    _spec params ["", "_textures", "_pylonMags", "_hitpoints", "_damage", "_fuel", "_cargo"];
+    // Ammo defaults to -1 (skip) so a spec saved before ammo was tracked keeps createVehicle's full load.
+    _spec params ["", "_textures", "_pylonMags", "_hitpoints", "_damage", "_fuel", "_cargo", ["_ammo", -1]];
 
     { _veh setObjectTextureGlobal [_forEachIndex, _x]; } forEach _textures;
 
@@ -101,6 +115,7 @@ DUWS_fnc_vehSpecApply = {
     } forEach _hpNames;
 
     _veh setFuel _fuel;
+    if (_ammo >= 0) then { _veh setVehicleAmmo _ammo; };
 
     _cargo params ["_w", "_m", "_i", "_b"];
     clearWeaponCargoGlobal _veh;

@@ -78,7 +78,7 @@ class vehicledepotmenu
             y = 4.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
-            action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_action', 2] } }";
+            action = "[] spawn fnc_depot_repair_confirm";
         };
         class toolPylons: toolRepair
         {

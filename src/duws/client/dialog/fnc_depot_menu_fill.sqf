@@ -35,12 +35,20 @@ isNil {
         private _name = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
         private _hp = round ((1 - (_x select 4)) * 100);
         private _fuel = round ((_x select 5) * 100);
+        // param, not select: a spec stored before ammo was tracked has no index 7. -1 marks an unarmed
+        // hull (or an untracked spec), which drops the ammo readout.
+        private _ammoFrac = _x param [7, -1];
         private _idc = switch ([_cls] call DUWS_fnc_vehDomain) do {
             case "air":  { 2022 };
             case "boat": { 2025 };
             default      { 2021 };
         };
-        private _row = lbAdd [_idc, format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel]];
+        private _rowText = if (_ammoFrac < 0) then {
+            format [localize "STR_DUWS_T_GARAGE_STORED_ROW_NOAMMO", _name, _hp, _fuel]
+        } else {
+            format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel, round (_ammoFrac * 100)]
+        };
+        private _row = lbAdd [_idc, _rowText];
         lbSetData [_idc, _row, str _forEachIndex];
     } forEach _stored;
     { lbSort [_x, "ASC"]; } forEach [2021, 2022, 2025];

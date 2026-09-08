@@ -2047,11 +2047,6 @@
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of it and the campaign is lost.</Original>
                 <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of it and the campaign is lost.</English>
             </Key>
-            <Key ID="STR_DUWS_T_repair_no_need">
-                <Original>Vehicle status does not meet repair standards (fuel ≤ 80% and component damage over 70%). Repair unavailable.</Original>
-                <English>Vehicle status does not meet repair standards (fuel ≤ 80% and component damage over 70%). Repair unavailable.</English>
-                <Chinesesimp>载具状态不符合维修标准（油量≤80%且有部件损伤超过70%），无法修理。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_vehicle_repair">
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
@@ -4819,12 +4814,20 @@
                 <English>Stores the selected landing-pad vehicle.</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORED_ROW">
+                <Original>%1 (hull %2%, fuel %3%, ammo %4%)</Original>
+                <English>%1 (hull %2%, fuel %3%, ammo %4%)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARAGE_STORED_ROW_NOAMMO">
                 <Original>%1 (hull %2%, fuel %3%)</Original>
                 <English>%1 (hull %2%, fuel %3%)</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_RECYCLE_CONFIRM">
                 <Original>Recycle %1 for %2 CP?</Original>
                 <English>Recycle %1 for %2 CP?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_REPAIR_CONFIRM">
+                <Original>Repair, rearm and refuel %1 for %2 CP?</Original>
+                <English>Repair, rearm and refuel %1 for %2 CP?</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_RECYCLED">
                 <Original>Recycled %1 for %2 CP.</Original>

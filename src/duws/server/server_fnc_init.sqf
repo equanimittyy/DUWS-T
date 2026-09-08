@@ -722,6 +722,8 @@ fnc_depot_menu_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_
 publicVariable "fnc_depot_menu_fill";
 fnc_depot_recycle_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_recycle_confirm.sqf";
 publicVariable "fnc_depot_recycle_confirm";
+fnc_depot_repair_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_repair_confirm.sqf";
+publicVariable "fnc_depot_repair_confirm";
 fnc_veh_appearance_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_appearance_dialog.sqf";
 publicVariable "fnc_veh_appearance_dialog";
 fnc_veh_pylons_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_pylons_dialog.sqf";
