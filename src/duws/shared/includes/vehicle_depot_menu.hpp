@@ -174,14 +174,14 @@ class vehicledepotmenu
         };
 
         // Store reads the selected Landing Pad row; the server routes it to its domain pool. Retrieve
-        // reads whichever garage list is active.
+        // reads whichever garage list is active and drops the vehicle on the pad.
         class garStore: RscButton
         {
             idc = 2023;
             sizeEx = 0.025;
             x = 20.8 * GUI_GRID_W + GUI_GRID_X;
             y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.8 * GUI_GRID_W;
+            w = 5.7 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_GARAGE_STORE_TIP";
             action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_garage_store', 2] }";
@@ -189,10 +189,20 @@ class vehicledepotmenu
         class garRetrieve: garStore
         {
             idc = 2024;
-            x = 29.8 * GUI_GRID_W + GUI_GRID_X;
-            w = 8.9 * GUI_GRID_W;
+            x = 26.8 * GUI_GRID_W + GUI_GRID_X;
+            w = 5.7 * GUI_GRID_W;
             tooltip = "";
             action = "private _g = uiNamespace getVariable ['DUWS_depotMenu_activeGarage', -1]; if (_g < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _i = lbCurSel _g; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _d = lbData [_g, _i]; if (_d != '') then { [player, parseNumber _d, uiNamespace getVariable ['DUWS_depotMenu_ctx','']] remoteExec ['fnc_garage_retrieve', 2] }";
+        };
+        // Closes the dialog and runs the map-placement flow, which reads the same active-garage
+        // selection before opening the map, so no argument rides on the action.
+        class garRetrieveMap: garStore
+        {
+            idc = 2026;
+            x = 32.8 * GUI_GRID_W + GUI_GRID_X;
+            w = 5.9 * GUI_GRID_W;
+            tooltip = "";
+            action = "[] spawn fnc_depot_retrieve_map";
         };
 
         // Own row under both boxes at the right-hand end, mirroring the REQUESTS exit: neither box owns

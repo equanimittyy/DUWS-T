@@ -656,9 +656,11 @@ zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both
 // the sweep (fnc_repetitive_cleanup.sqf) and the ring drawn around every base
 // (fnc_baseRangeMarker.sqf), because a ring that disagreed with the sweep would promise a player
-// their vehicle was safe on ground where it is collected. Not broadcast: the markers are made with
-// global-effect commands and the sweep is server-only.
+// their vehicle was safe on ground where it is collected. Broadcast so the depot's map-placement
+// retrieve (client/dialog/fnc_depot_retrieve_map.sqf) bounds the click to the same ring it validates
+// against server-side; publicVariable reaches JIP clients too.
 DUWS_base_keep_radius = 250;
+publicVariable "DUWS_base_keep_radius";
 
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.

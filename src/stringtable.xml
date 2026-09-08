@@ -4817,6 +4817,22 @@
                 <Original>Retrieve</Original>
                 <English>Retrieve</English>
             </Key>
+            <Key ID="STR_DUWS_T_GARAGE_RETRIEVE_MAP_BTN">
+                <Original>Retrieve (Map)</Original>
+                <English>Retrieve (Map)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_MAP_PLACE">
+                <Original>PLACE VEHICLE</Original>
+                <English>PLACE VEHICLE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_MAP_HINT">
+                <Original>Click inside the HQ area to drop the vehicle. Close the map to cancel.</Original>
+                <English>Click inside the HQ area to drop the vehicle. Close the map to cancel.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEPOT_MAP_OUTSIDE">
+                <Original>Outside the HQ area.</Original>
+                <English>Outside the HQ area.</English>
+            </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORE_TIP">
                 <Original>Stores the selected landing-pad vehicle.</Original>
                 <English>Stores the selected landing-pad vehicle.</English>
