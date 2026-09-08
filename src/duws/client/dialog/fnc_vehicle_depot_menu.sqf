@@ -21,10 +21,10 @@ uiNamespace setVariable ["DUWS_depotMenu_activeGarage", -1];
 ctrlSetText [1000, format ["%1", missionNamespace getVariable ["commandpointsblu1", "--"]]];
 ctrlSetText [1002, format ["%1", missionNamespace getVariable ["WARCOM_blufor_ap", "--"]]];
 
-ctrlSetText [2012, format ["%1 (2 CP)", localize "STR_DUWS_T_repair_vehicle"]];
+ctrlSetText [2012, format ["%1 (2CP)", localize "STR_DUWS_T_repair_vehicle"]];
 ctrlSetText [2013, localize "STR_DUWS_T_check_vehicle_status"];
 ctrlSetText [2014, localize "STR_DUWS_T_vehicle_appearance"];
-ctrlSetText [2015, format ["%1 (5 CP)", localize "STR_DUWS_T_vehicle_pylons"]];
+ctrlSetText [2015, format ["%1 (5CP)", localize "STR_DUWS_T_vehicle_pylons"]];
 ctrlSetText [2023, localize "STR_DUWS_T_GARAGE_STORE_BTN"];
 ctrlSetText [2024, localize "STR_DUWS_T_GARAGE_RETRIEVE_BTN"];
 ctrlSetText [2032, localize "STR_DUWS_T_recycleaction"];

@@ -66,47 +66,47 @@ class vehicledepotmenu
             x = 7.7 * GUI_GRID_W + GUI_GRID_X;
         };
 
-        // Modification toolbar: every button acts on the selected Landing Pad row.
+        // Left half: the Landing Pad box. Its modification toolbar sits inside, above the list; every
+        // toolbar button acts on the selected Landing Pad row.
+        class padFrame: RscFrame
+        {
+            idc = 2010;
+            text = "$STR_DUWS_T_DEPOT_LANDING_PAD";
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 16.9 * GUI_GRID_H;
+            colorBackground[] = {0,0,0,0.5};
+        };
         class toolRepair: RscButton
         {
             idc = 2012;
             sizeEx = 0.025;
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8 * GUI_GRID_W;
+            x = 1.3 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.1 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_action', 2] } }";
         };
         class toolPylons: toolRepair
         {
             idc = 2015;
-            x = 9.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 7.3 * GUI_GRID_W + GUI_GRID_X;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _v = objectFromNetId (lbData [2011, _i]); if (!isNull _v) then { closeDialog 0; [_v] call fnc_veh_pylons_dialog } }";
         };
         class toolAppearance: toolRepair
         {
             idc = 2014;
-            x = 18 * GUI_GRID_W + GUI_GRID_X;
+            x = 13.3 * GUI_GRID_W + GUI_GRID_X;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _v = objectFromNetId (lbData [2011, _i]); if (!isNull _v) then { closeDialog 0; [_v] call fnc_veh_appearance_dialog } }";
-        };
-
-        class padFrame: RscFrame
-        {
-            idc = 2010;
-            text = "$STR_DUWS_T_DEPOT_LANDING_PAD";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.1 * GUI_GRID_H + GUI_GRID_Y;
-            w = 22 * GUI_GRID_W;
-            h = 13.8 * GUI_GRID_H;
-            colorBackground[] = {0,0,0,0.5};
         };
         class padList: RscListBox
         {
             idc = 2011;
             x = 1.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 21.4 * GUI_GRID_W;
-            h = 10.6 * GUI_GRID_H;
+            y = 6.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 17.9 * GUI_GRID_W;
+            h = 12.6 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class padCheckStatus: RscButton
@@ -114,79 +114,71 @@ class vehicledepotmenu
             idc = 2013;
             sizeEx = 0.025;
             x = 1.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 18 * GUI_GRID_H + GUI_GRID_Y;
-            w = 10.4 * GUI_GRID_W;
+            y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_check_status', 2] } }";
         };
         class padRecycle: padCheckStatus
         {
             idc = 2032;
-            x = 12.2 * GUI_GRID_W + GUI_GRID_X;
-            w = 10.5 * GUI_GRID_W;
+            x = 10.3 * GUI_GRID_W + GUI_GRID_X;
+            w = 8.9 * GUI_GRID_W;
             action = "[] spawn fnc_depot_recycle_confirm";
         };
 
-        // Three stacked garage lists, one selection between them: each onLBSelChanged clears the other
-        // two and records its idc as the active list for Retrieve. The -1 writes re-fire the handler,
-        // but the sel>=0 guard drops them, so there is no recursion.
-        class landFrame: RscFrame
+        // Right half: the Garage box, mirroring the Landing Pad box. Three domain lists stack inside one
+        // frame, one selection between them: each onLBSelChanged clears the other two and records its idc
+        // as the active list for Retrieve. The -1 writes re-fire the handler, but the sel>=0 guard drops
+        // them, so there is no recursion.
+        class garageFrame: RscFrame
         {
             idc = 2020;
-            x = 24 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.1 * GUI_GRID_H + GUI_GRID_Y;
-            w = 15 * GUI_GRID_W;
-            h = 4.2 * GUI_GRID_H;
+            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 16.9 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.5};
         };
         class landHeader: RscText
         {
             idc = 2003;
             text = "";
-            x = 24.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.4 * GUI_GRID_W;
+            sizeEx = 0.025;
+            x = 20.8 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.1 * GUI_GRID_H + GUI_GRID_Y;
+            w = 17.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
         class landList: RscListBox
         {
             idc = 2021;
-            x = 24.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 7.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.4 * GUI_GRID_W;
-            h = 2.6 * GUI_GRID_H;
+            x = 20.8 * GUI_GRID_W + GUI_GRID_X;
+            y = 6.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 17.9 * GUI_GRID_W;
+            h = 3.4 * GUI_GRID_H;
             sizeEx = 0.025;
             onLBSelChanged = "params ['_c','_s']; if (_s >= 0) then { uiNamespace setVariable ['DUWS_depotMenu_activeGarage', ctrlIDC _c]; { if (_x != ctrlIDC _c) then { lbSetCurSel [_x, -1] } } forEach [2021,2022,2025] }";
-        };
-        class airFrame: landFrame
-        {
-            idc = 2033;
-            y = 10.6 * GUI_GRID_H + GUI_GRID_Y;
         };
         class airHeader: landHeader
         {
             idc = 2004;
-            y = 10.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 9.9 * GUI_GRID_H + GUI_GRID_Y;
         };
         class airList: landList
         {
             idc = 2022;
-            y = 12 * GUI_GRID_H + GUI_GRID_Y;
-        };
-        class boatFrame: landFrame
-        {
-            idc = 2034;
-            y = 15.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 11 * GUI_GRID_H + GUI_GRID_Y;
         };
         class boatHeader: landHeader
         {
             idc = 2005;
-            y = 15.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.7 * GUI_GRID_H + GUI_GRID_Y;
         };
         class boatList: landList
         {
             idc = 2025;
-            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.8 * GUI_GRID_H + GUI_GRID_Y;
         };
 
         // Store reads the selected Landing Pad row; the server routes it to its domain pool. Retrieve
@@ -195,9 +187,9 @@ class vehicledepotmenu
         {
             idc = 2023;
             sizeEx = 0.025;
-            x = 24 * GUI_GRID_W + GUI_GRID_X;
-            y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7 * GUI_GRID_W;
+            x = 20.8 * GUI_GRID_W + GUI_GRID_X;
+            y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_GARAGE_STORE_TIP";
             action = "private _i = lbCurSel 2011; if (_i >= 0) then { private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_garage_store', 2] } }";
@@ -205,7 +197,8 @@ class vehicledepotmenu
         class garRetrieve: garStore
         {
             idc = 2024;
-            x = 31.6 * GUI_GRID_W + GUI_GRID_X;
+            x = 29.8 * GUI_GRID_W + GUI_GRID_X;
+            w = 8.9 * GUI_GRID_W;
             tooltip = "";
             action = "private _g = uiNamespace getVariable ['DUWS_depotMenu_activeGarage', -1]; if (_g < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _i = lbCurSel _g; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _d = lbData [_g, _i]; if (_d != '') then { [player, parseNumber _d, uiNamespace getVariable ['DUWS_depotMenu_ctx','']] remoteExec ['fnc_garage_retrieve', 2] }";
         };

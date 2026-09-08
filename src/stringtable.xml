@@ -1754,13 +1754,13 @@
                 <Chinese>停机坪上没有飞行载具，请先停放一辆飞行载具在停机坪上。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_vehicle_appearance">
-                <Original>Adjust Vehicle Appearance/Accessories</Original>
-                <English>Adjust Vehicle Appearance/Accessories</English>
+                <Original>Appearance</Original>
+                <English>Appearance</English>
                 <Chinese>调整载具外观/挂件</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_vehicle_pylons">
-                <Original>Adjust Vehicle Pylons</Original>
-                <English>Adjust Vehicle Pylons</English>
+                <Original>Pylons</Original>
+                <English>Pylons</English>
                 <Chinese>调整载具挂架</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_REQ_MISSIONS">
@@ -2058,8 +2058,8 @@
                 <Chinesesimp>载具改装站(5CP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_vehicle">
-                <Original>Repair and Refuel Vehicle</Original>
-                <English>Repair and Refuel Vehicle</English>
+                <Original>Repair</Original>
+                <English>Repair</English>
                 <Chinesesimp>修理并加油</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_no_vehicle">
