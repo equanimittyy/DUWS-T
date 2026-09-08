@@ -3,16 +3,17 @@
 //
 // Reconstructs a building's interior as a per-storey grid of floor cells, class-agnostic (no command
 // reports rooms or walls, so it is inferred by geometry -- the one shape that survives a modded map).
-// buildingPos nav points seed the interior extent and split the storeys; a ~0.5 m cell grid over that
-// extent is carved to the real (concave) room by two probes per cell -- a floor down-ray and an 8-ray
-// GEOM wall ring -- then the surviving cells flood-fill into rooms. Cached on the building, built once.
+// The grid is laid in the building's own frame so it tracks a rotated building's walls, split into
+// storeys by nav-point height density (robust to a stairway bridging two floors), and each ~0.5 m cell
+// is carved to the real room by two probes -- a floor down-ray and a heading-aligned 8-ray GEOM wall
+// ring. Surviving cells flood-fill into rooms; a room too small to use is dropped. Cached, built once.
 //
 // Cell: [posASL, state, nearBearing, clearance, roomId, occupied, i, j, storey]
 //   state       "open" (nothing in reach) | "near" (wall to back onto) | "door" (a wall gap, kept clear) |
 //               "blocked" (too tight to hold)
 //   nearBearing bearing of the nearest wall, or -1 if none within reach
 //   clearance   nearest-wall distance in metres (a full miss reads as the ray length)
-//   roomId      flood-fill room label; blocked cells stay -1
+//   roomId      flood-fill room label; a blocked or dropped-room cell stays -1
 //   occupied    reservation flag, false here; the placer sets it
 //   i, j        storey grid coords, for room adjacency
 //
@@ -31,6 +32,8 @@ fnc_furnish_grid = {
     #define WALL_NEAR 0.85
     #define BLOCKED_CLEAR 0.35
     #define STOREY_GAP 2.5
+    #define STOREY_BIN 0.5     // Z histogram bin for the floor-level split
+    #define MIN_ROOM_CELLS 12  // a room below this is a stairwell/sliver: dropped, not furnished
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
 
     private _seeds = _building buildingPos -1;
@@ -39,37 +42,61 @@ fnc_furnish_grid = {
         []
     };
 
-    // Split storeys on a height jump: buildingPos -1 spans every floor, and a ray must never treat the
-    // floor above as this storey's wall. Sorted by Z, a gap over STOREY_GAP is a storey boundary.
-    private _sorted = [_seeds, [], { _x select 2 }, "ASCEND"] call BIS_fnc_sortBy;
-    private _storeys = [];
-    private _cur = [];
-    private _prevZ = -1e9;
+    // Work in the building's own frame: buildingPos are world points, so a world-axis grid sits skewed
+    // across a rotated building and straddles its walls. worldToModel drops every seed into local X/Y/Z,
+    // the grid is laid on those axes, and modelToWorld projects each cell back -- so the rows run along
+    // the walls, and the wall ring is turned by the same heading to shoot along them.
+    private _bdir = getDir _building;
+    private _ringBearings = [0, 45, 90, 135, 180, 225, 270, 315];
+    private _ring = _ringBearings apply { _x + _bdir };
+    private _lseeds = _seeds apply { _building worldToModel _x };
+
+    // Floor levels by Z density: a floor holds many nav points at one height, a stairway only a sparse ramp
+    // between them, so a plain gap-since-last-point split fuses the floors a stair bridges -- and one grid
+    // plane per (i,j) then drops a floor. Bin the local Z; each dense bin a storey clear of the last is a
+    // level; attach every seed to its nearest level, so each real floor gets its own plane.
+    private _zs = _lseeds apply { _x select 2 };
+    private _z0 = selectMin _zs;
+    private _binN = 1 + floor ((selectMax _zs - _z0) / STOREY_BIN);
+    private _hist = []; for "_b" from 1 to _binN do { _hist pushBack 0 };
     {
-        if ((_x select 2) - _prevZ > STOREY_GAP && {_cur isNotEqualTo []}) then {
-            _storeys pushBack _cur; _cur = [];
+        private _bi = floor ((_x - _z0) / STOREY_BIN);
+        _hist set [_bi, (_hist select _bi) + 1];
+    } forEach _zs;
+    private _thr = 3 max ceil ((count _zs) / _binN * 0.75);
+    private _levels = [];
+    {
+        if (_x >= _thr) then {
+            private _z = _z0 + (_forEachIndex + 0.5) * STOREY_BIN;
+            if (_levels isEqualTo [] || {_z - (_levels select (count _levels - 1)) >= STOREY_GAP}) then {
+                _levels pushBack _z;
+            };
         };
-        _cur pushBack _x;
-        _prevZ = _x select 2;
-    } forEach _sorted;
-    if (_cur isNotEqualTo []) then { _storeys pushBack _cur };
+    } forEach _hist;
+    if (_levels isEqualTo []) then { _levels = [(_z0 + selectMax _zs) / 2] };
+
+    private _buckets = _levels apply { [] };
+    {
+        private _z = _x select 2;
+        private _best = 0; private _bd = 1e9;
+        { private _dd = abs (_z - _x); if (_dd < _bd) then { _bd = _dd; _best = _forEachIndex } } forEach _levels;
+        (_buckets select _best) pushBack _x;
+    } forEach _lseeds;
+    private _storeys = [];
+    { if (_x isNotEqualTo []) then { _storeys pushBack [_levels select _forEachIndex, _x] } } forEach _buckets;
 
     private _cells = [];
     private _rays = 0;
-    private _ringBearings = [0, 45, 90, 135, 180, 225, 270, 315];
 
     {
         private _sIdx = _forEachIndex;
-        private _sSeeds = _x;
-        // Interior extent from the seed bounding box, not the building footprint (which includes roof
-        // overhang). Floor plane is the storey's mean seed height; each cell then snaps to its own floor hit.
-        private _minX = 1e12; private _maxX = -1e12; private _minY = 1e12; private _maxY = -1e12; private _sumZ = 0;
+        _x params ["_floorZ", "_sSeeds"];
+        // Interior extent from the local seed box, not the building footprint (which includes roof overhang).
+        private _minX = 1e12; private _maxX = -1e12; private _minY = 1e12; private _maxY = -1e12;
         {
             _minX = _minX min (_x select 0); _maxX = _maxX max (_x select 0);
             _minY = _minY min (_x select 1); _maxY = _maxY max (_x select 1);
-            _sumZ = _sumZ + (_x select 2);
         } forEach _sSeeds;
-        private _floorZ = _sumZ / count _sSeeds;
 
         // Pad the box half a cell so wall-hugging floor is not clipped, then size the grid; coarsen the
         // pitch if the cell count would blow the cap on a large building.
@@ -88,14 +115,14 @@ fnc_furnish_grid = {
 
         for "_i" from 0 to (_nx - 1) do {
             for "_j" from 0 to (_ny - 1) do {
-                private _cx = _ox + (_i + 0.5) * _pitch;
-                private _cy = _oy + (_j + 0.5) * _pitch;
-                private _guessASL = AGLToASL [_cx, _cy, _floorZ];
+                private _lx = _ox + (_i + 0.5) * _pitch;
+                private _ly = _oy + (_j + 0.5) * _pitch;
+                private _guessASL = AGLToASL (_building modelToWorld [_lx, _ly, _floorZ]);
 
                 // Floor down-ray (GEOM, building un-ignored): a hit near the plane is real floor, and its
                 // Z snaps the cell exactly onto the floor. A miss is a hole or outside the room -- drop it.
-                private _fb = _guessASL vectorAdd [0, 0, 0.4];
-                private _fe = _guessASL vectorAdd [0, 0, -0.6];
+                private _fb = _guessASL vectorAdd [0, 0, 0.5];
+                private _fe = _guessASL vectorAdd [0, 0, -0.8];
                 _rays = _rays + 1;
                 private _fr = lineIntersectsSurfaces [_fb, _fe, objNull, objNull, true, 1, "GEOM"];
                 if (_fr isNotEqualTo []) then {
@@ -115,7 +142,7 @@ fnc_furnish_grid = {
                             if (_d < _clear) then { _clear = _d; _nearBearing = _x };
                         };
                         _dist pushBack _d;
-                    } forEach _ringBearings;
+                    } forEach _ring;
 
                     // Doorway: a wall in reach on two opposite ring bearings with the cross axis open is a jamb
                     // pair, not a backing wall -- tag it so furniture skips the gap while flood-fill still joins
@@ -169,7 +196,16 @@ fnc_furnish_grid = {
         };
     } forEach _cells;
 
-    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s), %4 ray(s)", typeOf _building, count _cells, _room, _rays]] call fnc_log;
+    // Drop a room too small to use -- a stairwell, a balcony sliver, a closet -- so it neither reads as a
+    // room nor takes a piece; its cells stay walkable in the grid but lose their room id.
+    private _roomSize = createHashMap;
+    { private _r = _x select 4; if (_r >= 0) then { _roomSize set [_r, (_roomSize getOrDefault [_r, 0]) + 1] } } forEach _cells;
+    { if ((_x select 4) >= 0 && {(_roomSize getOrDefault [_x select 4, 0]) < MIN_ROOM_CELLS}) then { _x set [4, -1] } } forEach _cells;
+    private _keptN = 0;
+    { if (_x >= MIN_ROOM_CELLS) then { _keptN = _keptN + 1 } } forEach _roomSize;
+
+    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s)",
+        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays]] call fnc_log;
     _building setVariable ["DUWS_furnishGrid", _cells];
     _cells
 };
