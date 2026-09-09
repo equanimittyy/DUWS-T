@@ -82,9 +82,9 @@ absence sensor ([§Sensors](#sensors)) drops its row the same tick, so a stamp a
 strictly "not seen since", never "may already be dead".
 
 Confidence falls with the age of the stamp, counted in **ticks**, not seconds: a stamp holds the tick
-counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks, derived from
-real-time horizons over `OPCOM_TICK_PERIOD` — `OPCOM_BELIEF_FRESH` (240 s, 4 min) and `OPCOM_BELIEF_EXPIRE`
-(960 s, 16 min) — so retuning the tick holds the memory horizon.
+counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks like every
+OPCOM duration — `OPCOM_BELIEF_FRESH` (48 ticks, 4 min) and `OPCOM_BELIEF_EXPIRE` (192 ticks, 16 min);
+their wall-clock is the tick count times `OPCOM_TICK_PERIOD`, which is not meant to change.
 
 | Age of stamp | Treated as |
 |---|---|
@@ -682,9 +682,10 @@ is caught before contact.
 | Fixed wing | 8 | ~4–5.5 km |
 | Boat | 2 | ~1–1.4 km |
 
-**Hysteresis.** A live group stows back to a cell once it passes `K + 1` cells from every player **and holds
-no live contact** — one full cell of margin so a group on the edge cannot flicker. A group in a firefight
-stays live until it resolves, whether or not a player is near.
+**Hysteresis.** A live group stows back to a cell once it has held `> K + 1` cells from every player **and
+no live contact** for `OPCOM_REVIRT_GRACE` consecutive ticks. The cell of margin alone cannot stop a fast
+flyover crossing the band in a single tick, so the stow waits out a debounce that any re-entry or contact
+resets. A group in a firefight stays live until it resolves, whether or not a player is near.
 
 The boundary is a square ring in cell space, so a tasking on the diagonal streams in ~1.4x further than
 orthogonally — acceptable for spawn-before-contact.

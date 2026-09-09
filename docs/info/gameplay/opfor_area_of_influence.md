@@ -124,7 +124,7 @@ At campaign generation, `fnc_hardpoint_site_aoi` (`fnc_hardpoint_place.sqf:335-3
 `count serv_zones_array` standalone combat hardpoints uniformly across the band — there is no front
 yet to weight toward. After generation, a low-frequency director,
 `server/warcom/fnc_WARCOM_opf_hardpoints.sqf`, spawned unconditionally from
-`server/warcom/fnc_WARCOM_init.sqf:57`, spends OPFOR Army Power once per `OPCOM_HP_TICK` (600 s) on
+`server/warcom/fnc_WARCOM_init.sqf:57`, spends OPFOR Army Power once per `OPCOM_HP_PERIOD` (120 ticks, 600 s) on
 one of: raising a radio tower toward the cap, topping a depleted zone back toward its stored
 `DUWS_hpCap_<zoneKey>` (`fnc_hardpoint_place.sqf:283-285`), or fortifying the band with one more
 standalone emplacement — priced `OPCOM_AP_TOWER`/`OPCOM_AP_TOPUP`/`OPCOM_AP_BAND`
@@ -150,7 +150,7 @@ menu, not shown to the player.
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
 | `AOI_OPFOR_TOWER_CAP` | 5 | ceiling on `DUWS_opforRadioLevel`; OPFOR's push bottoms out at `-6` |
-| `OPCOM_HP_TICK` | 600 s | how often the hardpoint director acts |
+| `OPCOM_HP_PERIOD` | 120 ticks (600 s) | how often the hardpoint director acts |
 | `OPCOM_AP_TOWER` | 30 | AP cost to raise a radio tower |
 | `OPCOM_AP_TOPUP` | 8 | AP cost to top up a depleted zone |
 | `OPCOM_AP_BAND` | 12 | AP cost to fortify the band |

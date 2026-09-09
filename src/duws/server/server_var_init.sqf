@@ -606,12 +606,12 @@ AOI_OPFOR_TOWER_CAP = 5;
 DUWS_opforRadioLevel = 0;
 DUWS_bluforRadioLevel = 0;
 
-// OPCOM's hardpoint director: how often it decides (seconds) and the Army Power each build costs. It
+// OPCOM's hardpoint director: how often it decides (ticks) and the Army Power each build costs. It
 // makes at most one build a pass, in the priority the costs sit in below -- a tower is the dearest and
 // the strongest rep lever, a zone top-up the cheapest. Priced so the enemy spends AP it earns from the
 // towns it holds rather than fortifying for free, which is the escalation loop: rep won earns AP, AP
 // buys fortification, fortification wins more rep. Server-only (OPCOM runs on the server); tuning.
-OPCOM_HP_TICK  = 600;
+OPCOM_HP_PERIOD = 120;   // ticks; 600s @ 5s tick
 OPCOM_AP_TOWER = 30;
 OPCOM_AP_BAND  = 12;
 OPCOM_AP_TOPUP = 8;
@@ -630,23 +630,21 @@ OPCOM_GRID_BOX_BUFFER_CELLS = 10;
 
 // The single loop cadence in seconds: one tick senses, ages belief and rebuilds the grid (the decision
 // loop scores and commits one action on the same tick; the tasking phase steps movement here too). Kept
-// fast on purpose -- a
-// finer tick reads as a more reactive commander, and movement/economy scale with it (smaller steps, finer
-// spend) rather than breaking.
+// fast on purpose -- a finer tick reads as a more reactive commander, and movement/economy scale with it
+// (smaller steps, finer spend) rather than breaking.
+//
+// Canonical time unit for OPCOM: every duration below is in ticks. This is the sole value in seconds --
+// it defines the tick. A real sleep multiplies its tick count by this; changing it rescales every span.
 OPCOM_TICK_PERIOD = 5;
 
-// Belief decay in real time, converted to tick counts so OPCOM_TICK_PERIOD stays a pure resolution knob:
-// retune the tick and the memory horizon holds. Counted in ticks, not seconds, so a savegame gap does not
+// Belief horizon in ticks. Ages are stored as tick stamps, not diag_tickTime, so a savegame gap does not
 // silently age belief (diag_tickTime is not restored -- docs/info/architecture/arma_engine_gotchas.md).
-OPCOM_BELIEF_FRESH_S  = 240;
-OPCOM_BELIEF_EXPIRE_S = 960;
-OPCOM_BELIEF_FRESH  = OPCOM_BELIEF_FRESH_S  / OPCOM_TICK_PERIOD;
-OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
+OPCOM_BELIEF_FRESH  = 48;    // 240s @ 5s tick
+OPCOM_BELIEF_EXPIRE = 192;   // 960s @ 5s tick
 
 // Ticks a live tasking must stay clear of every player before it re-virtualises -- a run, not one far
 // sample, so a fast flyover cannot spawn then stow a group in a single pass.
-OPCOM_REVIRT_GRACE_S     = 60;
-OPCOM_REVIRT_GRACE_TICKS = ceil (OPCOM_REVIRT_GRACE_S / OPCOM_TICK_PERIOD);
+OPCOM_REVIRT_GRACE = 12;     // 60s @ 5s tick
 
 // Additive firepower premium per human in a sighted BLUFOR group: the group's hardware is priced in full
 // (fnc_opcom_sense), then each human aboard adds this on top -- a player is more dangerous than the same

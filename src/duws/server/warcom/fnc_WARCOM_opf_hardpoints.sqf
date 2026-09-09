@@ -11,7 +11,7 @@ if (!isServer) exitWith {};
 while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
     try {
-    sleep OPCOM_HP_TICK;
+    sleep (OPCOM_HP_PERIOD * OPCOM_TICK_PERIOD);
 
     // One action a pass, gated by _acted rather than by exitWith/continue: inside a while body those
     // read as end-of-iteration, not as the "skip the rest, keep the clock" this wants.
