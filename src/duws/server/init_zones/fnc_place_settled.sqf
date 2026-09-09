@@ -12,7 +12,7 @@
 // top) and it rotates and travels with the anchor. The anchor should already be settled/frozen: the seats
 // are read off it once, so a seat that moves afterwards leaves its object behind.
 //
-// Contract: [_rows, _anchor, _key, _invuln, _asLoot] -> [_objs]
+// Contract: [_rows, _anchor, _key, _invuln, _asLoot, _freeze] -> [_objs]
 //   _rows    [class, offX, offY, offZ, dir] in the anchor's model frame. offZ is where the object's resting
 //            base sits above the anchor origin (the caller places a table-top row at the table's
 //            boundingBoxReal top); dir adds to the anchor heading. offZ and dir default to 0. When _asLoot,
@@ -21,8 +21,10 @@
 //   _key     composition key the objects are filed under for teardown (fnc_duws_keep).
 //   _invuln  allowDamage false on each placed object (default true). Stops stray fire; independent of _asLoot.
 //   _asLoot  each class is a pickup-able inventory item, seated in a GroundWeaponHolder (default false).
+//   _freeze  props only: enableSimulationGlobal false on the create frame, before a physics tick can eject a
+//            flush-seated body off the floor (default false). Leaves it frozen; loot has no PhysX to freeze.
 fnc_place_settled = {
-    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false]];
+    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false]];
     private _up = vectorUp _anchor;
     private _baseDir = getDir _anchor;
 
@@ -43,7 +45,11 @@ fnc_place_settled = {
             };
             _holder
         } else {
-            createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"]
+            private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+            // Freeze pre-tick: a CAN_COLLIDE body seated flush on the floor reads as interpenetration and the
+            // first physics tick ejects it upward; a caller that freezes it right after locks in that float.
+            if (_freeze) then { _o enableSimulationGlobal false };
+            _o
         };
         if (_invuln) then { _obj allowDamage false };
 
