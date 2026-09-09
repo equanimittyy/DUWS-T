@@ -46,7 +46,7 @@ _driver setVariable ["DUWS_binMe", true];
 missionNamespace setVariable ["DUWS_vbied_cars",
 	(missionNamespace getVariable ["DUWS_vbied_cars", []]) + [_veh], true];
 
-#define ARM_RANGE 30             // arms when the hull gets this close to the target
+#define ARM_RANGE 20             // arms when the hull gets this close to the target
 #define FUSE (1 + random 2)      // run-in delay from arming to the blast
 #define DEADMAN (2 + random 3)   // driver-killed / hull-stuck cook-off: shooting the driver buys distance
 #define TIMEOUT 300              // reap a car that reaches no one

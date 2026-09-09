@@ -11,7 +11,7 @@ DUWS_vbiedMarker_range = 100;                                                   
 // VBIED is overt, a known threat: OPFOR's own red, read from the engine so it tracks the side colour.
 DUWS_vbiedMarker_icon   = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";         // marker 168, loc_Fortress (docs/info/external/arma3_markers.md)
 DUWS_vbiedMarker_colour = +(east call BIS_fnc_sideColor);                       // RGB only; alpha set per-frame by distance
-DUWS_vbiedMarker_full   = 30;                                                   // metres -- fully opaque here (the car's ARM_RANGE), fading to 5% at _range
+DUWS_vbiedMarker_full   = 20;                                                   // metres -- fully opaque here (the car's ARM_RANGE), fading to 5% at _range
 
 addMissionEventHandler ["Draw3D", {
     {
