@@ -110,10 +110,11 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
 private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
 
-// Guard watcher: a two-stage alarm scoped to the building GARRISON only -- side-wide knowsAbout reads flat-high
-// off any distant firefight (arma_engine_gotchas.md), and letting the outer ring arm the execution would make
-// the cordon an instant-fail tripwire, not a fight. Suspicion is escapable, and its reset keys on LINE OF SIGHT
-// because knowsAbout lingers for minutes after contact is lost; a confirmed sighting arms the clock for good.
+// Guard watcher: a two-stage alarm. The whole cordon spots you -- a garrison OR patrol sighting raises the one
+// global alarm -- but detection reads each observer's OWN knowsAbout plus a line-of-sight check within range,
+// never side-wide east knowsAbout, which reads flat-high off any distant firefight (arma_engine_gotchas.md).
+// Suspicion is escapable and its reset keys on LINE OF SIGHT (knowsAbout lingers for minutes after contact is
+// lost); a confirmed sighting arms the clock for good, and killing the garrison is what frees the hostage.
 [_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
     params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
@@ -121,6 +122,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     #define LOS_RANGE 150
     #define GRACE_SUS 8
     #define CLOCK_BASE 60     // armed once and never called off
+    #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
 
     // Bring the cordon in to hunt the building. Reused when the hostage is freed.
     private _convergeRing = {
@@ -144,6 +146,8 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
     private _lastSeen = -1e9;            // last time any player was in a guard's sight
     private _seenPrev = [];              // players seen last tick, so "spotted" fires once per player
+    private _lastKill = -1e9;            // time of the last cordon death; opens the takedown grace
+    private _prevObsAlive = -1;          // cordon alive count last tick; a drop stamps _lastKill
     // Called by call, so it reads and writes the loop's own _alarmAt / _state.
     private _arm = {
         _alarmAt = time + CLOCK_BASE;
@@ -182,10 +186,16 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             [_hostage] spawn { params ["_h"]; sleep 5; if (alive _h) then { _h setDamage 1 }; };
         };
 
-        // Per player, does a garrison guard see him within range, and how well (knowsAbout grades the sighting)?
-        // Suspicion is one mission-wide state; the seen set only steers who the per-player "spotted" hint reaches.
+        // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm. Each
+        // reads its OWN knowsAbout (graded suspicion vs confirmed) plus a line-of-sight check within range.
         private _players = allPlayers select { side _x == west && { alive _x } };
-        private _garr = units _garrison select { alive _x };
+        private _obs = units _garrison select { alive _x };
+        { _obs append (units _x select { alive _x }) } forEach _ring;
+        // A cordon death opens a brief grace where the alarm can't arm, so a coordinated team can drop the
+        // spotters in one burst before a survivor radios it in.
+        private _obsAlive = count _obs;
+        if (_obsAlive < _prevObsAlive) then { _lastKill = time };
+        _prevObsAlive = _obsAlive;
         private _seenNow = [];
         private _confirmed = false;
         {
@@ -197,7 +207,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                 private _k = _u knowsAbout _pl;
                 if (_k > _knowsP) then { _knowsP = _k };
                 if (!_losP && { _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then { _losP = true };
-            } forEach _garr;
+            } forEach _obs;
             if (_losP && { _knowsP > SUS_KNOWS }) then { _seenNow pushBack _pl };
             if (_losP && { _knowsP > CONFIRM }) then { _confirmed = true };
         } forEach _players;
@@ -207,7 +217,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             // Committed. Countdown broadcast until freed (garrison dead) or executed (clock expired).
             [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
         } else {
-            if (_confirmed) then { call _arm } else {
+            if (_confirmed && { time - _lastKill > GRACE_KILL }) then { call _arm } else {
                 if (count _seenNow > 0) then {
                     _state = "SUS";
                     // Warn only the players newly in a guard's sight, each on his own machine.
