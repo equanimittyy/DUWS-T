@@ -952,6 +952,7 @@ OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-t
 | APC | `["apc"]` | `transport` |
 | IFV | `["ifv"]` | `transport` |
 | MBT | `["tank"]` | — |
+| attack helicopter | `["attackheli"]` | — |
 | recon (foot) | `["recon"]` | `recon` |
 | recon (car) | `["car"]` | `recon` |
 | recon (heli) | `["transheli"]` | `recon` |
