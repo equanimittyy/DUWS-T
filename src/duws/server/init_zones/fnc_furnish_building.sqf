@@ -62,6 +62,10 @@ fnc_furnish_building = {
     private _catalog = call fnc_furnish_catalog;
     private _objs = [];
 
+    // Grid axis. Floor pieces face this to sit square to the room; a world-north heading skews them diagonally
+    // across the grid on a rotated building.
+    private _bdir = getDir _building;
+
     // Mark every grid cell within _r of a point occupied. One-shot server pass, so a linear scan is fine.
     private _reserve = {
         params ["_p", "_r"];
@@ -191,9 +195,9 @@ fnc_furnish_building = {
         (_catalog get _class) params ["", "_fy", "", "_seats"];
         _cell params ["_cpos", "", "", "_clear"];
 
-        // Anchors sit in the open, no wall backing, so a fixed heading; a desk's single seat still lands
-        // on its real front via the frontYaw offset in the seat block below.
-        private _frame = [_cpos, 0] call _frameAt;
+        // Anchors sit in the open, no wall backing, so face the grid axis (square to the room); a desk's single
+        // seat still lands on its real front via the frontYaw offset in the seat block below.
+        private _frame = [_cpos, _bdir] call _frameAt;
         private _aObj = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
         deleteVehicle _frame;
 
@@ -207,7 +211,7 @@ fnc_furnish_building = {
         if ((_hx max _hy) > _clear) exitWith { deleteVehicle _aObj; [] };
 
         // Reject if the footprint overlaps a piece already placed (a wall from the earlier pass).
-        private _fpCells = [getPosASL _aObj, 0, _hx, _hy, 0.15] call _boxCells;
+        private _fpCells = [getPosASL _aObj, _bdir, _hx, _hy, 0.15] call _boxCells;
         if ((_fpCells findIf { _x select 5 }) >= 0) exitWith { deleteVehicle _aObj; [] };
         private _out = [_aObj];
 
@@ -245,18 +249,44 @@ fnc_furnish_building = {
         };
 
         _out append ([_aObj, _hx, _hy, _topZ, _set] call _surfacePack);
-        // Reserve the table plus its seat ring as one oriented footprint (heading 0) so nothing later packs
+        // Reserve the table plus its seat ring as one oriented footprint (the grid axis) so nothing later packs
         // into the chairs.
-        { _x set [5, true] } forEach ([getPosASL _aObj, 0, _hx + SEAT_GAP, _hy + SEAT_GAP, 0.1] call _boxCells);
+        { _x set [5, true] } forEach ([getPosASL _aObj, _bdir, _hx + SEAT_GAP, _hy + SEAT_GAP, 0.1] call _boxCells);
         _out
     };
 
+    // True when a seated piece's body is buried in the building: the one-point seat clearance under-reads on an
+    // odd profile or a corner. Rays span a slightly-inset footprint ring (its own geometry ignored), so a back
+    // merely flush with the wall is not read as a clip.
+    private _clipsBuilding = {
+        params ["_o", "_hx", "_hy"];
+        private _ihx = (_hx - 0.1) max 0.05;
+        private _ihy = (_hy - 0.1) max 0.05;
+        private _bb = boundingBoxReal _o;
+        private _pts = [[_ihx, _ihy], [-_ihx, _ihy], [_ihx, -_ihy], [-_ihx, -_ihy], [0, _ihy], [0, -_ihy], [_ihx, 0], [-_ihx, 0]];
+        private _hit = false;
+        {
+            private _mz = _x;
+            private _beg = AGLToASL (_o modelToWorld [0, 0, _mz]);
+            {
+                _x params ["_lx", "_ly"];
+                private _r = lineIntersectsSurfaces [_beg, AGLToASL (_o modelToWorld [_lx, _ly, _mz]), _o, objNull, true, 1, "GEOM"];
+                if (_r isNotEqualTo []) exitWith { _hit = true };
+            } forEach _pts;
+            if (_hit) exitWith {};
+        } forEach [((_bb select 0) select 2) + 0.1, ((_bb select 1) select 2) - 0.1];
+        _hit
+    };
+
     // Place a single back-to-wall piece (sofa/bed/cabinet) at a near cell, front off the wall; returns [_o],
-    // or [] when the seated footprint would overlap a placed piece.
+    // or [] when the seated footprint would overlap a placed piece or stays buried in the wall.
     private _placeWall = {
         params ["_cell", "_class"];
         (_catalog get _class) params ["", "_fy"];
         _cell params ["_cpos", "", "_nearB", "_clear"];
+        // Snap a corner cell's 45-degree ring read to the nearest grid axis so the piece sits square, not
+        // diagonal; a straight wall already reads a cardinal and is untouched.
+        if (_nearB >= 0) then { _nearB = _bdir + 90 * round ((_nearB - _bdir) / 90) };
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _frame = [_cpos, _heading] call _frameAt;
         private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
@@ -274,6 +304,14 @@ fnc_furnish_building = {
             private _shift = _clear - _depth;
             // setPosWorld, not setPosASL: the piece came back frozen and a frozen body ignores setPosASL.
             _o setPosWorld ((getPosWorld _o) vectorAdd [_shift * sin _nearB, _shift * cos _nearB, 0]);
+
+            // Pull off the wall in 0.1 m steps until the body clears, reject if still buried past 0.4 m.
+            private _steps = 0;
+            while { [_o, _hx, _hy] call _clipsBuilding && {_steps < 4} } do {
+                _o setPosWorld ((getPosWorld _o) vectorAdd [-0.1 * sin _nearB, -0.1 * cos _nearB, 0]);
+                _steps = _steps + 1;
+            };
+            if ([_o, _hx, _hy] call _clipsBuilding) exitWith { deleteVehicle _o; [] };
         };
         // Reject if the seated footprint overlaps an already-placed piece (or the push-out drove it into
         // one); otherwise reserve the true oriented footprint.
@@ -367,21 +405,35 @@ fnc_furnish_building = {
             };
         };
 
-        // Rug pass: flat covers on any free floor (open or near-wall), reserved so nothing packs onto them.
+        // Rug pass: flat floor covers, footprint-checked and reserved like an anchor -- a rug slid under a
+        // placed piece shares its floor-height bounding box and flings both apart on thaw.
         private _rugClasses = ["rug", _set] call fnc_furnish_classesFor;
         if (_rugClasses isNotEqualTo []) then {
             private _nRug = (floor ((count (_rcells select { (_x select 1) != "blocked" && {(_x select 1) != "door"} })) / RUG_DIV)) min RUG_MAX;
-            for "_k" from 1 to _nRug do {
+            private _placed = 0; private _miss = 0;
+            while { _placed < _nRug && _miss < PLACE_RETRY } do {
                 private _free = _rcells select { (_x select 1) != "blocked" && {(_x select 1) != "door"} && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_rugClasses] call _pickCapped;
                 if (_cls == "") exitWith {};
                 private _cell = selectRandom _free;
-                private _frame = [_cell select 0, 0] call _frameAt;
+                private _frame = [_cell select 0, _bdir] call _frameAt;
                 private _rugObj = ([[[_cls, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
                 deleteVehicle _frame;
-                [_rugObj] call _keepFrozen;
-                [_cell select 0, 0.5] call _reserve;
+                private _bb = boundingBoxReal _rugObj;
+                private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
+                private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
+                private _fpCells = [getPosASL _rugObj, _bdir, _hx, _hy, 0.1] call _boxCells;
+                if ((_fpCells findIf { _x select 5 }) >= 0) then {
+                    deleteVehicle _rugObj;
+                    _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                    _miss = _miss + 1;
+                } else {
+                    { _x set [5, true] } forEach _fpCells;
+                    [_rugObj] call _keepFrozen;
+                    _placed = _placed + 1;
+                    _miss = 0;
+                };
             };
         };
     } forEach _bySize;
