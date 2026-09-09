@@ -393,7 +393,7 @@ fnc_random_event_ied_defuse = compile preprocessFileLineNumbers "duws\server\eve
 fnc_random_event_mob = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_mob.sqf";
 // Thrown junk: fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
 // bounces it. createVehicle is global, so the one server-simulated object networks to every machine on its own.
-fnc_throw = compile preprocessFileLineNumbers "duws\server\throwables\fnc_throw.sqf";
+fnc_throw = compile preprocessFileLineNumbers "duws\server\misc\fnc_throw.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
 fnc_debug_random_event = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_random_event.sqf";
 
