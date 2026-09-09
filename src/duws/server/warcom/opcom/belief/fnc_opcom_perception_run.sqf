@@ -13,6 +13,8 @@ while {true} do {
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
     call fnc_opcom_sense;
     call fnc_opcom_recon_sense;
+    // OP posts' recon screen, driven on OPCOM's tick beside the belief sensors (defined in fnc_hardpoint_stream).
+    call DUWS_fnc_hardpointOPSense;
     call fnc_opcom_decay;
     call fnc_opcom_belief_prune;
     call fnc_opcom_grid_rebuild;

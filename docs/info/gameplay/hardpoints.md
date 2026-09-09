@@ -175,15 +175,18 @@ are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoi
 at most one OP out in the band per zone — counted into the generation banner and laid in the band
 pass, not rolled from any weight table.
 
-`DUWS_fnc_hardpointOPObserve` (`fnc_hardpoint_stream.sqf:296`) ticks every `OP_OBSERVE_PERIOD` (60 s)
-while the post is deployed and, at `OP_OBSERVE_CHANCE` odds (0.2), fires `DUWS_fnc_hardpointOPBurst`
-(`:281`): it pins OPFOR's knowledge of every live BLUFOR within `OP_OBSERVE_RADIUS` (1,000 m) to a
-full identification — `reveal [_unit, 4]` run against every live EAST group, since `reveal` writes
-knowledge onto a group, not a side — and red-cards each compromised *player* on their own machine.
-Convoy groups (`DUWS_convoy_handled`) are skipped, or the reveal would promote a scripted column out
-of SAFE and false-trip a mission's under-attack test. The per-tick roll makes the ring a risk, not a
-certain reveal: a post left alive keeps feeding its sector to the enemy, so the player kills it or
-routes around its ring.
+`DUWS_fnc_hardpointOPSense` (`fnc_hardpoint_stream.sqf`) is swept once per OPCOM perception tick
+alongside the belief sensors, not on a per-post clock: each standing OPFOR post rolls a per-tick
+chance (`OP_OBSERVE_CHANCE`, 0.02 — roughly one fix every four to five minutes at the 5 s tick) and on a hit fires
+`DUWS_fnc_hardpointOPBurst`. The burst pins OPFOR's knowledge of every live BLUFOR within
+`OP_OBSERVE_K` Chebyshev grid cells (k = 2, ~1,000 m on axis) to a full identification — `reveal
+[_unit, 4]` run against every live EAST group, since `reveal` writes knowledge onto a group, not a
+side — stamps each caught group into OPCOM belief for certain, and red-cards each compromised *player*
+on their own machine. Convoy groups (`DUWS_convoy_handled`) are skipped, or the reveal would promote a
+scripted column out of SAFE and false-trip a mission's under-attack test. The per-tick roll makes the
+ring a risk, not a certain reveal, and the belief stamp lands whether the post is deployed or stowed:
+a post left alive keeps feeding its sector to the enemy, so the player kills it or routes around its
+ring.
 
 ## Clearance
 

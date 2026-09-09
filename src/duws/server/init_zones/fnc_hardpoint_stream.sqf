@@ -19,13 +19,11 @@ if (!isServer) exitWith {};
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
-// The post's recon screen. Reach is Chebyshev grid cells (OP_OBSERVE_K), OPCOM's own measure -- the same
-// cells as OPCOM_RECON_K/streamK -- kept wider than the garrison stream so a player cannot sit just outside
-// the garrison ring unseen. It reports on a beat, not continuously, so a player can break out; the per-wake
-// chance keeps the fix uncertain. The period is in OPCOM ticks, so its belief-stamping beat rides OPCOM's clock.
+// The post's recon screen. Reach (OP_OBSERVE_K) is kept wider than the garrison stream so a player cannot
+// sit just outside the garrison ring unseen; it rolls per tick rather than firing every one, so the fix
+// stays a risk to break out of, not a certain reveal.
 #define OP_OBSERVE_K 2             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=2 ~ 1000 m on axis
-#define OP_OBSERVE_PERIOD 12       // OPCOM ticks between wakes; x OPCOM_TICK_PERIOD for the real interval
-#define OP_OBSERVE_CHANCE 0.2
+#define OP_OBSERVE_CHANCE 0.02     // per OPCOM tick; ~0.24/min at OPCOM_TICK_PERIOD 5
 
 // The OPFOR radio-tower amplifier is the live count of uncleared "RADIO" rows, capped. Recomputed
 // from the registry whenever a tower is registered or cleared -- never incremented in place -- so it
@@ -274,9 +272,8 @@ DUWS_fnc_hardpointClear = {
 // fnc_convoy_drive) are skipped: they cruise SAFE on a scripted route, and feeding them this reveal would
 // promote the column out of SAFE and false-trip a mission's under-attack test with no real contact. The card
 // is remoteExec'd to each player object, so only the compromised player sees it, on their own machine, in SP
-// and MP alike. Reach is grid cells, so the whole fix no-ops until the grid is built (the poller can wake a
-// post first); the per-wake roll lives in the observe loop and the dev map-click fires at 100%, so within
-// the fn the fix is unconditional.
+// and MP alike. Reach is grid cells, so the whole fix no-ops until the grid is built; the per-tick roll lives
+// in DUWS_fnc_hardpointOPSense and the dev map-click fires at 100%, so within the fn the fix is unconditional.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
     if (isNil "DUWS_opcom_grid_w") exitWith {};
@@ -328,19 +325,15 @@ DUWS_fnc_hardpointOPBurst = {
     } forEach _blu;
 };
 
-// [_key, _pos] spawn DUWS_fnc_hardpointOPObserve -- the recon screen a standalone enemy observation post
-// runs while it stands. Each period, at OP_OBSERVE_CHANCE odds, it fires a burst (DUWS_fnc_hardpointOPBurst),
-// so a post left alive keeps feeding its sector to the enemy and pressures the player to kill it or route
-// around its ring -- but the per-wake roll means it can miss, so the ring is a risk, not a certain reveal.
-// Runs off the poller on its own clock, so its beat is independent of the streaming tick and it reports
-// whether the post is deployed or stowed. Terminates when the post's row leaves DUWS_hardpoints (cleared,
-// dev-cleared or retired); the up-to-one-period lag before it notices is harmless -- the post is already gone.
-DUWS_fnc_hardpointOPObserve = {
-    params ["_key", "_pos"];
-    while { (DUWS_hardpoints findIf { (_x select 0) isEqualTo _key }) > -1 } do {
-        if (random 1 < OP_OBSERVE_CHANCE) then { [_pos] call DUWS_fnc_hardpointOPBurst };
-        sleep (OP_OBSERVE_PERIOD * OPCOM_TICK_PERIOD);
-    };
+// The observation posts' recon screen, run each OPCOM perception tick beside the belief sensors. Reading the
+// registry live means a cleared post drops out with no per-post loop to terminate. OPFOR posts only: a
+// BLUFOR OP (the dev tool can place one) must not report BLUFOR to OPFOR.
+DUWS_fnc_hardpointOPSense = {
+    {
+        if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"} && {random 1 < OP_OBSERVE_CHANCE}) then {
+            [_x select 1] call DUWS_fnc_hardpointOPBurst;
+        };
+    } forEach DUWS_hardpoints;
 };
 
 // One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its
@@ -550,11 +543,6 @@ fnc_hardpoint_register = {
     _mk setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
-
-    // An enemy observation post runs a recon screen on its own clock (DUWS_fnc_hardpointOPObserve), keyed to
-    // the registry row so it dies with the post. OPFOR posts only: a BLUFOR OP (the dev tool can place one)
-    // must not report BLUFOR to OPFOR.
-    if (_type isEqualTo "OP" && {_side isEqualTo "opfor"}) then { [_key, _pos] spawn DUWS_fnc_hardpointOPObserve; };
 
     // The boom opens for its own side and bars the enemy; armed once per key, the trigger outlives the
     // stow/deploy cycles the composition goes through.

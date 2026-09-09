@@ -208,7 +208,7 @@ Everything `spawn`/`execVM`'d runs in the scheduled environment, where the engin
 
 ## A shared array written from two scheduled scripts is consistent only across a suspension-free section
 
-Scheduled SQF is cooperative: one script runs at a time, and control passes only at a suspension point (`sleep`, `waitUntil`, a yielding `call`). A read-modify-write on a shared array is therefore atomic *only if no suspension falls between the read and the write*. OPCOM belief is written by two scripts — the perception loop (`fnc_opcom_perception_run`) and each observation post's `spawn` (`DUWS_fnc_hardpointOPObserve`, off the hardpoint poller) — and stays consistent only because every belief stamp (`findIf`, then `pushBack`/`set` across the four parallel `DUWS_opcom_belief_*` arrays) runs suspension-free.
+Scheduled SQF is cooperative: one script runs at a time, and control passes only at a suspension point (`sleep`, `waitUntil`, a yielding `call`). A read-modify-write on a shared array is therefore atomic *only if no suspension falls between the read and the write*. OPCOM belief is written by the perception loop (`fnc_opcom_perception_run`, which runs all its sensors inline) and, concurrently, by a `remoteExec`'d debug OP burst (`DUWS_fnc_hardpointOPBurst` from the dev map-click, which lands in its own scheduled thread on the server); it stays consistent only because every belief stamp (`findIf`, then `pushBack`/`set` across the four parallel `DUWS_opcom_belief_*` arrays) runs suspension-free.
 
 **Fix:** keep each belief write one unbroken block. A `sleep`/`waitUntil` between the `findIf` and its writes, or between the four array writes, lets the other script interleave mid-update and tear the index alignment the four arrays depend on.
 
