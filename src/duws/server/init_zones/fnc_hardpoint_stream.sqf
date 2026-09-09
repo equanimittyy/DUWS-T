@@ -1,45 +1,32 @@
-// Locality: server -- the hardpoint streaming hooks and the site registration that reuses the shared
-// poller. A hardpoint is a site like a zone: it registers with fnc_site_register, files one garrison
-// occupant, and the poller in fnc_site_stream_init cycles it against the shared player list. What
-// differs from a zone is the lifecycle -- one gun-and-garrison emplacement that wakes, sleeps and can
-// be cleared, but is never captured or retaken -- so the hooks here are the zone's shape stripped to
-// that and given a clearance check in place of a capture.
+// Server-only. A hardpoint reuses the zone/site streaming shape (fnc_site_register, one garrison
+// occupant, fnc_site_stream_init's poller) but never captures or retakes -- only wakes, sleeps, clears.
 if (!isServer) exitWith {};
 
-// The per-key slot a raise worker files its result in for the tick to adopt, the way a zone's raise
-// hands back through ZONE_RAISE_SLOT.
+// Raise-worker handback slot the tick adopts, the zone's ZONE_RAISE_SLOT pattern reused for hardpoints.
 #define HP_RAISE_SLOT(key) (format ["DUWS_hpRaise_%1", key])
 
-// The same handback slot for a resident battery's loose-garrison raise, kept distinct from HP_RAISE_SLOT
-// so a mortar or artillery hardpoint can cycle its defenders without disturbing the composition raise it
-// never runs.
+// Handback slot for a resident battery's loose-garrison raise -- kept distinct from HP_RAISE_SLOT so it
+// never disturbs the composition raise this type never runs.
 #define HP_LOOSE_SLOT(key) (format ["DUWS_hpLooseRaise_%1", key])
 
-// How close a player must come to mark a hardpoint on the map, tighter than any streaming ring so the
-// emplacement is revealed about when it comes into view rather than when its garrison streams in.
+// Tighter than any streaming ring, so a hardpoint reveals about when it comes into view, not when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
-// The post's recon screen. Reach (OP_OBSERVE_K) is kept wider than the garrison stream so a player cannot
-// sit just outside the garrison ring unseen; it rolls per tick rather than firing every one, so the fix
-// stays a risk to break out of, not a certain reveal.
+// Reach kept wider than the garrison stream so a player cannot sit just outside it unseen; the chance
+// rolls per tick rather than firing every one, so the fix is a risk to break out of, not a certain reveal.
 #define OP_OBSERVE_K 2             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=2 ~ 1000 m on axis
 #define OP_OBSERVE_CHANCE 0.02     // per OPCOM tick; ~0.24/min at OPCOM_TICK_PERIOD 5
 
-// The OPFOR radio-tower amplifier is the live count of uncleared "RADIO" rows, capped. Recomputed
-// from the registry whenever a tower is registered or cleared -- never incremented in place -- so it
-// cannot drift out of step with what actually stands, and clearing a mast drops the enemy's global
-// rep push by a point everywhere at once. Called only for RADIO changes; other types leave it be.
+// OPFOR radio amplifier = live count of uncleared "RADIO" rows, capped. Recomputed from the registry
+// rather than incremented in place, so it cannot drift out of step with what actually stands.
 DUWS_fnc_aoi_opforRecount = {
     DUWS_opforRadioLevel = (({(_x select 2) isEqualTo "RADIO"} count DUWS_hardpoints) min AOI_OPFOR_TOWER_CAP);
     ["INFO", "HARDPOINT", format ["OPFOR radio level -> %1", DUWS_opforRadioLevel]] call fnc_log;
 };
 
-// zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone up or coming up. A zone-coupled hardpoint
-// reads this instead of its own ring, so its defence rises and falls with the garrison. An
-// unregistered zone reads an empty map, fields default false, so one sited before its zone stays down.
-//
-// raising, not only awake: awake flips true only after the whole garrison spawns -- minutes on a big
-// zone -- so gating on it alone raised the emplacement last or never. raising catches the zone as it commits.
+// A zone-coupled hardpoint mirrors this instead of its own ring; an unregistered zone reads an empty
+// map and defaults false. Checks raising too: awake alone flips true only once the whole garrison has
+// spawned -- minutes on a big zone -- so gating on it alone raised the emplacement late or never.
 DUWS_fnc_hardpointZoneAwake = {
     private _o = [_this, "garrison"] call fnc_site_occupant;
     (_o getOrDefault ["awake", false]) || {_o getOrDefault ["raising", false]}
@@ -54,9 +41,8 @@ DUWS_fnc_hardpointRaiseWorker = {
     sleep 5;
     private _site = [_key] call fnc_site_at;
     private _pos = _site get "pos";
-    // The same trigger that started the raise, re-confirmed after the pause. A zone-coupled hardpoint
-    // follows its zone; a standalone one re-tests presence on its ring, air ring included, so an AA
-    // woken by a jet overhead is not dropped by a ground-only recheck.
+    // Re-confirmed with the same test that started the raise: a standalone hardpoint re-tests its own
+    // ring including air ring, so an AA woken by a jet overhead is not dropped by a ground-only recheck.
     private _zk = _o getOrDefault ["hpZoneKey", ""];
     private _stillUp = if (_zk isEqualTo "") then {
         [_pos, (_site get "radius") + (_o get "buffer"), _o get "minAI", _o getOrDefault ["airRing", 0]] call fnc_site_bluforOrAir
@@ -74,22 +60,16 @@ DUWS_fnc_hardpointRaiseWorker = {
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _men = [_objs, _pos, _o get "hpSide", _key, _o get "hpGarrison"] call fnc_hardpoint_garrison;
     ([_key] call fnc_site_roster) append _men;
-    // Peak re-anchored to what stood up this cycle; only its presence gates clearCheck, never its value.
-    // This deployed-gate is the ledger's garrisonLive analogue, kept here because a hardpoint's own
-    // liveness is a latched DUWS_hardpoints row, not that server-only graded ledger (see garrisonHeld).
+    // Peak re-anchored to what stood up this cycle; only its presence gates clearCheck, never its value --
+    // a hardpoint's own liveness is a latched DUWS_hardpoints row, not the graded garrisonHeld ledger.
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     missionNamespace setVariable [HP_RAISE_SLOT(_key), true];
 };
 
-// A resident battery's loose garrison, brought back on approach. The composition and its gun crew never
-// left -- they are pinned so OPCOM can fire the battery with no player near -- so this raises only the
-// defenders (fnc_hardpoint_garrison's _looseOnly) and appends them to the standing roster. No composition
-// deploy and no re-crew: the pieces are already up and manned. Peak is not touched -- the pieces define
-// clearance for these types and are always deployed, so it stays anchored on the crew set from register.
+// Resident battery's loose garrison only -- the pieces and crew are pinned and never left, so this skips
+// composition deploy/re-crew and leaves peak untouched (it stays anchored on the crew set at register).
 DUWS_fnc_hardpointLooseRaiseWorker = {
     params ["_key", "_o"];
-    // Confirmed after a pause, like the composition raise: a helicopter transiting the ring must not
-    // stand the defenders up for someone already leaving.
     sleep 5;
     private _site = [_key] call fnc_site_at;
     private _pos = _site get "pos";
@@ -102,10 +82,8 @@ DUWS_fnc_hardpointLooseRaiseWorker = {
     missionNamespace setVariable [HP_LOOSE_SLOT(_key), true];
 };
 
-// Uncrew, collect, stow -- the zone teardown order, so a gun is empty before its composition stows
-// (fnc_duws_stow refuses a crewed member) and the men are collected rather than deleted with the
-// props. Pinned guns keep their crew and never stow: the resident-crew step sets that flag, and both
-// tests below honour it.
+// Uncrew, collect, stow -- fnc_duws_stow refuses a crewed member, so a gun must be empty before its
+// composition stows. Pinned guns keep their crew and skip this: the resident-crew step flags that.
 DUWS_fnc_hardpointStow = {
     params ["_key"];
     {
@@ -120,16 +98,12 @@ DUWS_fnc_hardpointStow = {
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
 };
 
-// Cleared when its own garrison is beaten: the roster is the crew plus the loose defenders, so an
-// alive count of zero is the emplacement taken. By roster, not proximity -- a passing patrol does not
-// man the gun, and a spatial scan per hardpoint per pass is exactly what the poller forbids inline.
-// Judged only while deployed -- DUWS_hpPeak_<key> present -- so a stowed emplacement's empty roster is
-// never mistaken for a garrison beaten.
+// Cleared when the roster (crew + loose defenders) hits zero, not by proximity -- a passing patrol
+// does not man the gun, and a spatial scan per hardpoint per pass is what the poller forbids inline.
+// Judged only while deployed (peak present), so a stowed emplacement's empty roster never reads as beaten.
 //
-// A minefield has no garrison; it is spent when no armed mine is left. A detonated mine deletes
-// itself and a defused one goes inactive, so its own hazard list is the count. Judged on its own
-// branch because peak, roster and grace say nothing about it -- it never stows, so the mines it holds
-// are always the real ones.
+// A minefield has no garrison: it is spent when no armed mine is left, judged on its own branch since
+// peak/roster/grace say nothing about it -- it never stows, so the mines it holds are always the real ones.
 DUWS_fnc_hardpointClearCheck = {
     params ["_key", "_o"];
     if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {
@@ -137,23 +111,18 @@ DUWS_fnc_hardpointClearCheck = {
         if (({!isNull _x && {mineActive _x}} count _mines) > 0) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
-    // <= 0 covers a stowed hardpoint (peak nil, defaulted to 0): its men are off the map and there is
-    // no roster to beat. Same guard, same reason, as the zone capture test.
+    // <= 0 covers a stowed hardpoint too (peak nil defaults to 0) -- same guard as the zone capture test.
     if ((missionNamespace getVariable [format ["DUWS_hpPeak_%1", _key], 0]) <= 0) exitWith {};
     if !(_o get "awake") exitWith {};
-    // A radio tower is taken by wrecking its mast, not by beating its garrison: the mast is the one
-    // live, damageable member (fnc_hardpoint_build), so the tower stands until it is destroyed even with
-    // every defender dead. Judged only while deployed -- the peak guard above -- so the mast being off
-    // the map for a stow is never read as one wrecked.
+    // A radio tower is taken by wrecking its mast, not by beating its garrison -- the mast stands until
+    // destroyed even with every defender dead. The peak guard above stops a stowed mast reading as wrecked.
     if ((_o get "hpType") isEqualTo "RADIO") exitWith {
         private _comp = DUWS_compositions getOrDefault [_key, []];
         if ((_comp findIf { !isNull _x && {alive _x} && {typeOf _x isEqualTo DUWS_radioMastClass} }) > -1) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
-    // A mortar pit or artillery battery is taken by wrecking its guns, not by killing their crews:
-    // the pieces are pinned resident for OPCOM to task, so a crew killed off an intact gun would
-    // otherwise retire a battery that still stands. Judged on the same pieces the garrison crews --
-    // static mortars, and artillery vehicles by artilleryScanner -- so a modded battery clears alike.
+    // A mortar/artillery battery is taken by wrecking its guns, not killing crews: the pieces are pinned
+    // resident for OPCOM to task, so a crew killed off an intact gun must not retire a battery still standing.
     if ((_o get "hpType") in ["MORTAR", "ARTY"]) exitWith {
         private _comp = DUWS_compositions getOrDefault [_key, []];
         private _standing = if ((_o get "hpType") isEqualTo "MORTAR") then {
@@ -169,9 +138,8 @@ DUWS_fnc_hardpointClearCheck = {
     [_key, _o] call DUWS_fnc_hardpointClear;
 };
 
-// The place a hardpoint is announced by: the nearer of the closest zone and the closest map town, the
-// zone taking a tie and standing in whenever no town is found -- so a name still comes back with the
-// civilian town system off, since zones are always present.
+// Nearer of the closest zone or town; the zone takes a tie and stands in when no town is found, so a
+// name still comes back with the civilian town system off (zones are always present).
 DUWS_fnc_hardpointNearestPlace = {
     params ["_pos"];
     private _zoneName = "";
@@ -189,22 +157,18 @@ DUWS_fnc_hardpointNearestPlace = {
         _townDist = _pos distance2D (locationPosition (_near select 0));
     };
 
-    // Town only when strictly closer; the zone takes an exact tie and every case with no town.
     private _place = if (_townName != "" && {_townDist < _zoneDist}) then { _townName } else { _zoneName };
     if (_place isEqualTo "") then { "the area" } else { _place }
 };
 
-// Latched -- a cleared hardpoint stays cleared. The site is not retired here: deleting it would mutate
-// the map the poller is mid-iteration over, so the occupant is only marked inert, its registry row
-// dropped and the composition released to the cleanup sweep. The dev clear and, later, OPCOM retire
-// the inert site from outside the pass.
+// Latched, not retired here: deleting the site would mutate the map the poller is mid-iteration over, so
+// the occupant is only marked inert; the dev clear and, later, OPCOM retire it from outside the pass.
 DUWS_fnc_hardpointClear = {
     params ["_key", "_o"];
     _o set ["cleared", true];
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
     missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], nil];
-    // Deleted, not flagged: a cleared hardpoint is destroyed, so it leaves the registry rather than
-    // sitting in it as a dead row for OPCOM to filter past every pass.
+    // Deleted, not flagged, so it leaves the registry rather than sitting as a dead row OPCOM filters past every pass.
     private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
     if (_i >= 0) then {
         DUWS_hardpoints deleteAt _i;
@@ -214,16 +178,13 @@ DUWS_fnc_hardpointClear = {
     // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
     if ((_o get "hpType") isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
     deleteMarker (format ["hpm_%1", _key]);
-    // The garrison stays where it fell and is handed to the sweep with a delete order, not collected in
-    // the player's face. A radio tower falls when its mast is wrecked, so defenders can still be alive
-    // at clear; deleting them where the player is looking reads as a bug. Flagged, they despawn once the
-    // player is KEEP_RADIUS clear -- the same rule as everything else the sweep bins. The flag lives on
-    // the unit, so the later fnc_site_retire roster-clear cannot strip it, and the men are not
-    // composition members so release never reaches them; this is what now empties the roster.
+    // Flagged for the sweep, not deleted here: a radio tower's defenders can still be alive when its mast
+    // is wrecked, and deleting them in the player's face reads as a bug. The flag lives on the unit so the
+    // later fnc_site_retire roster-clear cannot strip it; the men aren't composition members, so this is
+    // what empties the roster.
     //
-    // Both rosters: a resident battery keeps its crew on a separate "crew" roster, so binning only the
-    // loose garrison would strand the gunners. The crew roster is empty for every other type, so the
-    // second pass is a no-op there.
+    // Both rosters, since a resident battery's crew sits on a separate "crew" roster -- binning only the
+    // loose garrison would strand the gunners. Empty for every other type, so that pass is a no-op there.
     {
         {
             if (!isNull _x && {alive _x}) then {
@@ -234,9 +195,8 @@ DUWS_fnc_hardpointClear = {
     } forEach ["garrison", "crew"];
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
-    // The auto-gate trigger is keyed to the composition, not a member, so release never reaches it;
-    // drop it here or it evaluates over a cleared key for the rest of the campaign. objNull for every
-    // non-roadblock key, so the lookup is a harmless no-op there.
+    // The gate trigger is keyed to the composition, not a member, so release never reaches it -- drop it
+    // here or it evaluates over a cleared key for the rest of the campaign (objNull elsewhere is a no-op).
     private _gateTrg = missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull];
     if (!isNull _gateTrg) then {
         deleteVehicle _gateTrg;
@@ -244,9 +204,8 @@ DUWS_fnc_hardpointClear = {
     };
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 
-    // A standalone strongpoint the player hunted down pays a bounty scaled to its type (DUWS_hardpointBounty)
-    // and announces itself. A zone emplacement pays nothing -- taking the zone already credits its defences
-    // -- and neither does a minefield, a hazard cleared rather than a garrison beaten.
+    // Only a standalone strongpoint pays a bounty and announces itself: a zone emplacement pays nothing
+    // (taking the zone already credits its defences), nor does a minefield -- a hazard, not a garrison beaten.
     if !((_o get "hpZoneKey") isEqualTo "") exitWith {};
     if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {};
     (DUWS_hardpointBounty getOrDefault [_o get "hpType", [5, 0]]) params ["_cp", "_ap"];
@@ -263,17 +222,11 @@ DUWS_fnc_hardpointClear = {
     };
 };
 
-// [_pos] call DUWS_fnc_hardpointOPBurst -- one recon fix from a post at _pos: pin OPFOR's knowledge of every
-// live BLUFOR within OP_OBSERVE_K grid cells to a full identification (reveal 4), stamp each caught group
-// into OPCOM belief, and red-card each compromised player. reveal is a knowledge write, hence server-only. Its left operand must be a unit or a
-// group, never a side, so an OPFOR-wide fix means revealing each caught BLUFOR to every live EAST group in
-// turn -- allGroups holds only spawned groups, so this reaches the OPFOR actually in play, not the
-// virtualised garrisons still behind the site poller. Convoy groups (DUWS_convoy_handled, set by
-// fnc_convoy_drive) are skipped: they cruise SAFE on a scripted route, and feeding them this reveal would
-// promote the column out of SAFE and false-trip a mission's under-attack test with no real contact. The card
-// is remoteExec'd to each player object, so only the compromised player sees it, on their own machine, in SP
-// and MP alike. Reach is grid cells, so the whole fix no-ops until the grid is built; the per-tick roll lives
-// in DUWS_fnc_hardpointOPSense and the dev map-click fires at 100%, so within the fn the fix is unconditional.
+// reveal's left operand must be a unit or group, never a side, so an OPFOR-wide fix means revealing to
+// every live EAST group -- allGroups holds only spawned groups, reaching OPFOR actually in play, not
+// virtualised garrisons behind the site poller. Convoy groups are skipped: revealing them would promote
+// a SAFE scripted column out of SAFE and false-trip a mission's under-attack test with no real contact.
+// No-ops until the grid is built (isNil guard below); the per-tick roll lives in DUWS_fnc_hardpointOPSense.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
     if (isNil "DUWS_opcom_grid_w") exitWith {};
@@ -298,9 +251,8 @@ DUWS_fnc_hardpointOPBurst = {
         };
     } forEach _blu;
 
-    // A guaranteed belief write, not just the engine reveal above: a stowed post with no live observer still
-    // feeds the commander what crosses its reach. No separate OPCOM guard -- belief is built before the grid
-    // (fnc_opcom_perception_run), so the grid guard above already means the belief store exists.
+    // A guaranteed belief write, not just the reveal above: a stowed post with no live observer still feeds
+    // the commander. No separate OPCOM guard needed -- belief is built before the grid, so it already exists.
     private _grpsSeen = [];
     {
         private _g = group _x;
@@ -325,9 +277,8 @@ DUWS_fnc_hardpointOPBurst = {
     } forEach _blu;
 };
 
-// The observation posts' recon screen, run each OPCOM perception tick beside the belief sensors. Reading the
-// registry live means a cleared post drops out with no per-post loop to terminate. OPFOR posts only: a
-// BLUFOR OP (the dev tool can place one) must not report BLUFOR to OPFOR.
+// Reads the registry live, so a cleared post drops out with no per-post loop to terminate. OPFOR posts
+// only: a BLUFOR OP (the dev tool can place one) must not report BLUFOR to OPFOR.
 DUWS_fnc_hardpointOPSense = {
     {
         if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"} && {random 1 < OP_OBSERVE_CHANCE}) then {
@@ -336,19 +287,16 @@ DUWS_fnc_hardpointOPSense = {
     } forEach DUWS_hardpoints;
 };
 
-// One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its
-// withdraw and retake arms: a hardpoint is present or not, and standing or cleared.
+// The zone poller's hook shape stripped of withdraw/retake: a hardpoint is only present or not, standing or cleared.
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
     if (_o getOrDefault ["cleared", false]) exitWith {};
     if (_here) then {
         _o set ["lastSeen", _now];
 
-        // Proximity reveal, the way walking into a zone reveals it. Behind _here so the precise player
-        // scan only runs when someone is already in the wider streaming ring and this hardpoint is still
-        // hidden, and behind the parent zone for a zone-child hardpoint -- the same gate the intel draw
-        // applies, so closing on a gun never marks it before its zone is found. fnc_hardpoint_reveal
-        // no-ops once the row is flagged, so a player loitering in range does not re-announce it.
+        // Gated behind _here so the precise player scan only runs inside the wider streaming ring, and
+        // behind the parent zone for a zone-child hardpoint -- closing on a gun never marks it before its
+        // zone is found. fnc_hardpoint_reveal itself no-ops once flagged, so loitering in range doesn't re-announce it.
         private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
         if (_i > -1 && {!((DUWS_hardpoints select _i) select 5)}) then {
             private _pzk = _o getOrDefault ["hpZoneKey", ""];
@@ -366,14 +314,10 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     [_key, _o] call DUWS_fnc_hardpointClearCheck;
     if (_o getOrDefault ["cleared", false]) exitWith {};
 
-    // Resident-composition types (mortar, artillery, minefield): the pieces and their gun crew are pinned
-    // and never stream -- OPCOM tasks the battery with no player near -- but the loose garrison does, so a
-    // battery no longer stands its defenders in an empty field for the whole campaign. awake stays true (the
-    // pieces are the clearance target and are always up); a private looseUp cycle drives just the defenders.
-    // A minefield fields no loose garrison, so the arm falls straight through for it.
+    // Resident types keep pieces/crew pinned (OPCOM tasks with no player near) but still stream the loose
+    // garrison; awake stays true since the pieces are always up. A minefield has no loose garrison to cycle.
     if (_o get "neverStream") exitWith {
         if ((_o get "hpGarrison") isEqualTo "") exitWith {};   // no loose garrison (minefield): nothing to cycle
-        // A loose raise in flight owns the garrison until it reports, the way the composition raise arm does.
         if (_o getOrDefault ["looseRaising", false]) exitWith {
             private _res = missionNamespace getVariable [HP_LOOSE_SLOT(_key), nil];
             if (isNil "_res") exitWith {};
@@ -381,9 +325,8 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
             _o set ["looseRaising", false];
             _o set ["looseUp", _res];
         };
-        // Held while near, within grace, or with a defender in a fight -- the standalone stow rule. The
-        // garrison roster is the loose men alone (the crew is a separate driven occupant), so a defender in
-        // COMBAT holds the stow while the crew dueling from a pinned gun does not.
+        // Garrison roster is the loose men alone (crew is a separate driven occupant), so a defender in
+        // COMBAT holds the stow here while the crew dueling from a pinned gun does not.
         private _up = _here
             || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
             || {([_key] call fnc_site_roster) findIf { alive _x && {behaviour _x isEqualTo "COMBAT"} } > -1};
@@ -411,13 +354,10 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         _o set ["awake", _res];
     };
 
-    // Zone-coupled hardpoints mirror their parent zone -- up when its garrison is, so a zone's whole
-    // defence rises and falls together instead of each emplacement waking on its own ring. Standalone
-    // ones hold while near, within grace, or in a fight: a roster in COMBAT is the engine's own contact
-    // state (fnc_apply_posture spawns them SAFE, the engine promotes them the moment they detect anything),
-    // so a gun dueling a player from beyond its ring is not stowed out from under the fight and re-raised
-    // at full strength when the player closes again. The roster scan is the bounded list the clear-check
-    // already walks, and || defers it to the stow-decision frame -- out of ring and past grace.
+    // Standalone hardpoints hold while near, within grace, or in a fight: COMBAT is the engine's own
+    // contact state (fnc_apply_posture spawns SAFE, the engine promotes on detection), so a gun dueling a
+    // player from beyond its ring isn't stowed out from under the fight and re-raised at full strength.
+    // The roster scan is the bounded list the clear-check already walks; || defers it to this frame.
     private _zk = _o getOrDefault ["hpZoneKey", ""];
     private _up = if (_zk isEqualTo "") then {
         _here
@@ -440,11 +380,9 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
-// [_key, _open] call fnc_roadblock_gate_set -- raise (_open 1) or lower (0) the live boom of the
-// roadblock filed under _key. Re-resolved from the composition every call rather than held as a
-// reference: the boom is a streamed prop fnc_duws_deploy re-creates as a new object on each raise, so a
-// stored handle would point at a deleted one after the first stow. A no-op while the composition is
-// stowed (no member is the gate) -- the trigger below re-opens it on the next arrival once it is back.
+// Re-resolved from the composition every call, not held as a reference: fnc_duws_deploy re-creates the
+// boom as a new object on each raise, so a stored handle would point at a deleted one after the first
+// stow. No-ops while stowed; the trigger below re-opens it on the next arrival once it's back.
 fnc_roadblock_gate_set = {
     params ["_key", "_open"];
     private _members = DUWS_compositions getOrDefault [_key, []];
@@ -453,17 +391,11 @@ fnc_roadblock_gate_set = {
     (_members select _i) animate ["door_1_rot", _open];
 };
 
-// Arms the roadblock's boom as a side-aware auto-gate, mirroring the BLUFOR HQ gate (fnc_BluHQinit) but
-// keyed to the composition, not the object: the boom streams, so a netId-bound trigger like the HQ one
-// dangles after the first stow. Server-local trigger, so its statements run only where DUWS_compositions
-// lives. The boom rises only while an own-side or civilian *mobile vehicle* stands in the area and drops
-// when none does, so it passes its own traffic (car, truck, APC/IFV, tank, bike) and civilians, and bars
-// the enemy -- and the third party too, unlike a bare "not the enemy" test, which would wave an
-// independent faction through the checkpoint. Gated on LandVehicle-minus-StaticWeapon, not any unit, on
-// purpose: the roadblock's own crewed statics and foot garrison sit inside the 20m area and, counted as
-// friendlies, would pin the boom open forever -- the road never barred. StaticWeapon is itself a
-// LandVehicle, so it is carved back out explicitly, or the guns re-pin it. A boom stops vehicles, not men
-// (who walk around it), so keying on mobile vehicles is also what it physically does.
+// Keyed to the composition, not the object, unlike the BLUFOR HQ gate (fnc_BluHQinit): the boom streams,
+// so a netId-bound trigger dangles after the first stow. Server-local, since DUWS_compositions is server-only.
+// Requires own-side/civilian, not just "not enemy", so an independent faction isn't waved through. Gated
+// on LandVehicle-minus-StaticWeapon: the roadblock's own crewed statics and foot garrison sit inside the
+// 20m area and, counted as friendlies, would pin the boom open forever if not carved out.
 fnc_roadblock_gate_arm = {
     params ["_key", "_pos", "_side"];
     if !(isNull (missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull])) exitWith {};
@@ -480,31 +412,17 @@ fnc_roadblock_gate_arm = {
     missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], _trg];
 };
 
-// Files the hardpoint as a streamed site over the composition the caller just built, and either crews it now
-// or stows it uncrewed. The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream
-// and airRing come from DUWS_hardpointStreaming and the loose garrison from DUWS_hardpointGarrison, so the
-// dev tool, the zone loop and OPCOM all site a given type the same way and one pair of tables tunes them.
-// hpSide and the garrison token are the serialisable spec a later raise rebuilds from.
+// Streaming spec (spawnRadius, grace, neverStream, airRing, garrison token) comes from the type's tables,
+// not the caller, so the dev tool, zone loop and OPCOM all site a given type the same way.
 //
-// A standalone hardpoint streams on BLUFOR presence over its own ring -- a player, friendly AI, or an
-// aircraft in its air ring, the same arrival test a zone answers to; a zone one -- a _zoneKey names its
-// parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls together rather
-// than each emplacement waking on its own radius. The caller builds but never mans it: an emplacement BLUFOR
-// are already near (or a resident type) is crewed here and stands deployed, and every other is stowed
-// uncrewed at once and re-crewed by the raise worker on approach -- the zone lifecycle, where a garrison
-// rises on stream-in, not at build. So campaign start never pays the drop-and-settle for the emplacements
-// nobody is near, and an occupant is never left asleep over a standing composition.
+// Crewed now only if BLUFOR are already near (or the type is resident); otherwise stowed uncrewed and
+// re-crewed by the raise worker on approach, so campaign start never pays the drop-and-settle for
+// emplacements nobody is near.
 //
-// neverStream (mortar, artillery, minefield) keeps its composition resident so OPCOM can task it with no
-// player near: the pieces and their gun crew are pinned against every stow and release, so only a clear
-// takes them down. What still streams is the loose garrison -- the defenders are stowed while the ring is
-// empty and raised on approach, so a battery does not stand its patrol in a field nobody visits for the
-// whole campaign. It keeps the tick, unlike a zone's driven emplacement: the composition raise/stow arm
-// short-circuits for it, but its clearance check runs and, below the short-circuit, a loose-garrison-only
-// stow/raise arm cycles the defenders. A minefield has no loose garrison, so only its mines remain.
+// neverStream (mortar/artillery/minefield) pins the pieces and gun crew resident for OPCOM to task with
+// no player near, but still streams the loose garrison; a minefield has none to stream.
 //
-// _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone) and
-// rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
+// _zoneKey "" is standalone, on its own ring; set, it mirrors that zone's garrison instead.
 fnc_hardpoint_register = {
     params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
@@ -519,20 +437,16 @@ fnc_hardpoint_register = {
     _occ set ["hpZoneKey", _zoneKey];
     _occ set ["lastSeen", time];
 
-    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence
-    // is liveness; the clearance check deletes the row when the emplacement falls. Revealed follows the
-    // same fog a zone's does -- shown at once with no hardcore fog, hidden until intel finds it under
-    // hardcore -- so a hardpoint sited at campaign start is on the map exactly when its zone would be. Dir
-    // is the heading it faced; the survey reads a nest neighbour's to score interlocking fire.
+    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence is
+    // liveness -- the clearance check deletes the row on fall. Revealed follows the zone's fog rule (shown
+    // at once, or hidden until intel finds it under hardcore). Dir is read by the survey to score interlocking fire.
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable, _dir];
     publicVariable "DUWS_hardpoints";
     // A newly-registered tower raises the amplifier; recount from the row just pushed.
     if (_type isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
 
-    // A small OPFOR-coloured bunker icon carrying the type in caps, no area ring. Created for every
-    // registered hardpoint here so the caller need not, and left standing through stow: a marker is a
-    // map object, not a streamed unit, so a stowed emplacement still marks its ground. Alpha tracks the
-    // reveal flag; fnc_hardpoint_reveal flips it to 1 when the intel system finds this one.
+    // Left standing through stow: a marker is a map object, not a streamed unit, so a stowed emplacement
+    // still marks its ground. Alpha tracks the reveal flag; fnc_hardpoint_reveal flips it to 1 on discovery.
     private _mk = format ["hpm_%1", _key];
     createMarker [_mk, _pos];
     _mk setMarkerShape "ICON";
@@ -544,37 +458,25 @@ fnc_hardpoint_register = {
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 
-    // The boom opens for its own side and bars the enemy; armed once per key, the trigger outlives the
-    // stow/deploy cycles the composition goes through.
+    // Armed once per key: the trigger outlives the stow/deploy cycles the composition goes through.
     if (_type isEqualTo "ROADBLOCK") then { [_key, _pos, _side] call fnc_roadblock_gate_arm; };
 
-    // Crew now or stow. The caller built the composition but never manned it, so the drop-and-settle is
-    // paid here only for an emplacement that will actually stand: a resident type, or one BLUFOR are
-    // already near. Everything else -- every hardpoint the siting loop lays while the players are still at
-    // their HQ -- is stowed uncrewed at once and re-crewed by the raise worker when someone approaches, so
-    // campaign start no longer pays the settle for emplacements nobody is near. The dev tool spawns onto
-    // the player, so its hardpoints read up and crew immediately.
+    // The dev tool spawns onto the player, so its hardpoints read up and crew immediately.
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _crewNow = {
         private _men = [_objs, _pos, _side, _key, _occ get "hpGarrison"] call fnc_hardpoint_garrison;
         ([_key] call fnc_site_roster) append _men;
         _occ set ["awake", true];
-        // Peak = the garrison it stood up with; its presence marks the hardpoint deployed and worth
-        // judging for clearance.
         missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     };
 
     if (_neverStream) exitWith {
-        // Resident composition (mortar, artillery, minefield): the pieces are pinned against every stow so
-        // OPCOM can task the battery with no player near, and a minefield's mines are never stowed off the
-        // map. Two occupants -- the zone shape for a site whose parts stream on opposite terms. The gun crew
-        // rides a driven "crew" occupant the poller never touches (a frozen crew cannot fire the mission that
-        // justifies residency), and the loose garrison stays on the streamed "garrison" occupant, so its stow
-        // is the ordinary fnc_site_collect over a crew-free roster. awake stays true (the pieces are the
-        // clearance target and are always deployed); looseUp drives just the defenders.
+        // Two occupants for parts that stream on opposite terms: the gun crew rides a driven "crew"
+        // occupant the poller never touches (a frozen crew can't fire the mission residency exists for),
+        // while the loose garrison stays on the streamed "garrison" occupant and stows normally.
         { [_x, _key, true] call fnc_duws_keep } forEach _objs;
-        // Crew the pieces once, resident. Token "" crews the guns and places no loose men. Under a driven
-        // occupant so the poller skips it and the clearance peak reads a garrison that is always present.
+        // Token "" crews the guns only, no loose men. Filed under the driven "crew" occupant so the poller
+        // skips it and the clearance peak reads a garrison that's always present.
         private _crew = [_objs, _pos, _side, _key, ""] call fnc_hardpoint_garrison;
         if (count _crew > 0) then {
             ([_key, "crew"] call fnc_site_occupant_register) set ["driven", true];

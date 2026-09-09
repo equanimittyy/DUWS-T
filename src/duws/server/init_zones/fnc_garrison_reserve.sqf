@@ -1,19 +1,10 @@
-// Locality: server -- every path here raises men, sorts networked lists or reads server-side garrison
-// state, none of which a client may do. Executed at load (`[] call compile ...`) to define the globals
-// below; the loop and the killed handler are launched later, at WARCOM init.
-//
-// The reinforcement half of the garrison reserve model, shared by zones and towns (a town is a garrison site
-// like a zone, differing only in which composition table it draws from). Accounting -- pool, owed-men count,
-// live group count, global throttle -- is fnc_zone_state_init's; the raise seeds the pool and sets the
-// ceiling; the strength ledger is fnc_garrison_strength_init's. Here: the refill pass topping a fought-over
-// site to its x1 group count from the pool, the far-side placement keeping a wave off the player's approach,
-// the two triggers that fire it, and the break test for beaten. Model:
-// docs/info/gameplay/garrison_and_reserves.md.
+// Locality: server -- every path here raises men or touches server-side garrison state; none of it a
+// client may do. Defined at load, but the loop and the killed handler start later, at WARCOM init.
+// Reinforcement half of the garrison model: accounting lives in fnc_zone_state_init, the strength ledger
+// in fnc_garrison_strength_init. Model: docs/info/gameplay/garrison_and_reserves.md.
 
-// Whether a garrison is beaten: live men plus reserve-owed men, worn to a tenth of full fighting potential
-// -- the campaign's one capture line, learned once, counting owed reserves so a site cannot fall on an empty
-// perimeter while waves are still owed. Denominator is the ledger's full potential; no full stamped means
-// not beaten. Read by the zone capture trigger and, for a town, the tick that clears it.
+// Counts reserve-owed men with live men so a site can't fall on an empty perimeter while waves are still
+// owed; no full-potential stamp yet reads as not-beaten, never as beaten.
 DUWS_fnc_garrisonBeaten = {
     params ["_key"];
     private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
@@ -21,27 +12,24 @@ DUWS_fnc_garrisonBeaten = {
     (([_key] call fnc_zone_garrison_count) + ([_key] call DUWS_fnc_garrisonReserveMen)) <= (0.1 * _fullMen)
 };
 
-// Whether _unit has an unbroken line of sight to a point over _pos. eyePos is ASL, so the target is
-// lifted to standing head height and converted to match. An empty intersection list is a clear line --
-// the point is seen. VIEW and GEOM together answer terrain and buildings both.
+// eyePos is ASL, so the target is lifted to standing head height and converted to match. VIEW and GEOM
+// together answer terrain and buildings both; an empty intersection list means a clear line.
 DUWS_fnc_posSeenBy = {
     params ["_pos", "_unit"];
     private _to = AGLToASL [_pos select 0, _pos select 1, 1.5];
     (lineIntersectsSurfaces [eyePos _unit, _to, _unit, objNull, true, 1, "VIEW", "GEOM"]) isEqualTo []
 };
 
-// Where a reinforcement wave stands up: on the site's far side, past the players, preferably unseen.
-// Three pulls in priority order over a flat distance floor, so a player never watches a squad appear
-// and never gets flanked from their own approach direction.
+// Far side, past the players, preferably unseen -- so a player never watches a squad appear or gets
+// flanked from their own approach direction.
 DUWS_fnc_garrisonReservePos = {
     params ["_center", "_radius"];
     private _reach = _radius + DUWS_streamArrivalMargin;
     private _players = (call BIS_fnc_listPlayers) select { alive _x && {(_x distance2D _center) < _reach} };
     if (_players isEqualTo []) then { _players = (call BIS_fnc_listPlayers) select { alive _x } };
 
-    // Anti-flank, non-negotiable: the reserve comes from the side away from the players, so it meets
-    // them head-on as they advance rather than from behind their axis of approach. bluDir is the
-    // centre-to-centroid bearing; the spawn sits opposite it.
+    // Anti-flank, non-negotiable: the reserve spawns opposite the players' centroid bearing, so it
+    // meets them head-on rather than flanking from behind their axis of approach.
     private _centroid = _center;
     if (_players isNotEqualTo []) then {
         private _cx = 0; private _cy = 0;
@@ -50,42 +38,36 @@ DUWS_fnc_garrisonReservePos = {
     };
     private _antiDir = (_center getDir _centroid) + 180;
 
-    // Soft nudge toward the nearest OPFOR zone, so the wave reads as coming from friendly ground when the
-    // geometry allows. Clamped to a narrow arc off the anti-approach bearing: the anti-flank rule wins any
-    // conflict, so this only ever bends the spawn, never swings it back toward the players. Zones are the
-    // nearest friendly-ground signal there is; a town reserve nudges toward one all the same.
+    // Soft nudge toward the nearest OPFOR zone so the wave reads as coming from friendly ground; clamped
+    // to a narrow arc since anti-flank always wins -- this only ever bends the spawn, never swings it
+    // back toward the players. Applies to town reserves too: zones are the only friendly-ground signal
+    // there is.
     private _others = (missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []]) select {
         (_x distance2D _center) > _radius
     };
     if (_others isNotEqualTo []) then {
         private _near = ([_others, [], { _center distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-        // Signed shortest turn from the anti-approach bearing toward the zone bearing, in -180..180,
-        // then clamped to +-50 degrees.
+        // Signed shortest turn (-180..180) from anti-approach to zone bearing, then clamped to +-50 degrees.
         private _delta = ((( _center getDir _near) - _antiDir + 540) mod 360) - 180;
         _antiDir = _antiDir + ((_delta max -50) min 50);
     };
 
-    // Start the ray just past the zone on the far side. The per-player reject in the candidate loop below
-    // is the real floor -- it keeps every man DUWS_zoneReserveSpawnDist clear of the players -- so the
-    // base distance only has to clear the objective, not reach past the fireteam. Adding the farthest
-    // player's range on top of that stood the wave a kilometre out the back of the zone, a blob too far
-    // to close on the objective before the fight was over.
+    // Base distance only has to clear the objective; the per-player reject in the loop below is the real
+    // floor. Adding the farthest player's range on top (an earlier version) stood the wave a kilometre
+    // out the back of the zone, too far to close before the fight was over.
     private _baseDist = _radius + DUWS_zoneReserveSpawnDist;
 
-    // A few candidate bearings off the anti-approach line; keep the one the fewest players can see.
-    // Bounded, and cast at spawn time only -- a wave every few minutes, a handful of rays per candidate
-    // -- so the cost never lands on a frame budget. Prefer-hidden, accept-best: it never blocks a spawn.
+    // Cast only at spawn time (a wave every few minutes, a handful of rays per candidate) so the cost
+    // never lands on a frame budget. Prefer-hidden, accept-best -- it never blocks a spawn.
     private _best = [];
     private _bestSeen = 1e9;
     {
         private _cand = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-        // Snap onto the nearest road so the truck-borne wave stands up on drivable ground. Done before
-        // the seen-check and the floor reject so both judge the point the wave actually spawns on: a road
-        // segment can sit closer to the players or in worse cover than the raw candidate.
+        // Snapped before the seen-check and floor reject so both judge the point the wave actually spawns
+        // on: a road segment can sit closer to the players or in worse cover than the raw candidate.
         if (_cand isNotEqualTo []) then { _cand = [_cand] call DUWS_fnc_reserveRoadSnap };
-        // Reject an empty result (findSafePos hands back [] on bad ground) and one it pulled back
-        // inside the floor. An empty candidate must not reach the spawners: they read [] as "no
-        // override" and would drop the reserve into the objective band, on top of the players.
+        // An empty candidate must not reach the spawners: they read [] as "no override" and would drop
+        // the reserve into the objective band, on top of the players.
         if (_cand isNotEqualTo [] && {(_players findIf { (_cand distance2D _x) < DUWS_zoneReserveSpawnDist }) < 0}) then {
             private _seen = { [_cand, _x] call DUWS_fnc_posSeenBy } count _players;
             if (_seen < _bestSeen) then { _bestSeen = _seen; _best = _cand };
@@ -94,12 +76,10 @@ DUWS_fnc_garrisonReservePos = {
 
     if (_best isNotEqualTo []) exitWith { _best };
 
-    // The preferred arc was all bad ground -- a far side facing the sea, most often, where every
-    // findSafePos above refused the water (waterMode 0 lands nothing offshore). Widen to the rest of
-    // the circle for any land that still clears the floor: the anti-flank bearing is given up before a
-    // spawn in the water, because a wave dropped offshore is lost outright -- it drowns or strands a
-    // kilometre out -- which is strictly worse than one that comes in from a poor angle. First land
-    // wins here rather than fewest-seen: being on the map at all outranks cover.
+    // Preferred arc was all bad ground -- usually a far side facing the sea, where waterMode 0 refuses
+    // to land offshore. Widened to the rest of the circle: anti-flank is given up before a water spawn,
+    // since a wave dropped offshore drowns or strands outright, worse than one from a poor angle. First
+    // land wins here rather than fewest-seen: being on the map at all outranks cover.
     private _wide = [];
     {
         if (_wide isEqualTo []) then {
@@ -110,15 +90,13 @@ DUWS_fnc_garrisonReservePos = {
     } forEach [90, -90, 120, -120, 150, -150, 180];
     if (_wide isNotEqualTo []) exitWith { _wide };
 
-    // Water and blocked ground the whole way round -- a speck of an island. The plain anti-approach
-    // point, floor unenforced: getPos rather than findSafePos so this can never return [] and collapse
-    // the spawn into the objective band on top of the players.
+    // Whole circle blocked -- a speck of an island. Falls back to getPos, not findSafePos, so this can
+    // never return [] and collapse the spawn into the objective band on top of the players.
     _center getPos [_baseDist, _antiDir]
 };
 
-// Nearest road to a point, or the point unchanged when none is within DUWS_zoneReserveRoadSearch. The
-// reserve rides trucks, so a wave stands up on drivable ground. Sorted here rather than trusting
-// nearRoads' own order.
+// Reserve rides trucks, so a wave needs drivable ground. Sorted explicitly -- nearRoads' own order
+// isn't trustworthy.
 DUWS_fnc_reserveRoadSnap = {
     params ["_pos"];
     private _roads = _pos nearRoads DUWS_zoneReserveRoadSearch;
@@ -126,20 +104,14 @@ DUWS_fnc_reserveRoadSnap = {
     getPosATL (([_roads, [], { _pos distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0)
 };
 
-// One spaced spawn slot for a wave. The lead point is pushed _i gaps back along _dir -- the outbound
-// bearing, so the tail runs away from the objective and the players, never toward them -- then snapped to
-// a road near there. A multi-vehicle wave lines up nose-to-tail on drivable ground with room between, and
-// successive vehicles can take different roads rather than stacking on one point. A slot that lands within
-// a gap of any vehicle already on the ground, or on water, is rejected and the ray steps another gap out to
-// retry: good spacing outranks being exactly on a road (two vehicles on one point brew up on spawn), and
-// neither outranks staying out of the sea. Bounded retries, then the lead point -- land by construction.
+// Lead point is pushed _i gaps back along the outbound bearing so the tail runs away from the objective,
+// never toward it. Good spacing outranks landing exactly on a road (two vehicles on one point brew up on
+// spawn), and neither outranks staying out of the sea. Bounded retries, then the lead point -- land by
+// construction.
 DUWS_fnc_reserveConvoySlot = {
     params ["_lead", "_dir", "_i"];
-    // A slot is taken if any vehicle already stands within a gap of it: this wave's own trucks (each
-    // spawned the frame its slot was picked, so it is on the ground before the next slot is drawn), a
-    // concurrent wave's, or ambient civ traffic. Read straight off the world with nearestObjects -- the
-    // same clear-ground test civilian cars settle on -- rather than a private list that only ever saw
-    // this one wave.
+    // Read straight off the world with nearestObjects -- the same clear-ground test civilian cars settle
+    // on -- rather than a private list, so a concurrent wave's trucks and ambient civ traffic count too.
     private _fnc_clear = { (nearestObjects [_this, ["LandVehicle"], DUWS_reserveConvoyGap]) isEqualTo [] };
     private _out = [];
     private _step = _i;
@@ -148,9 +120,8 @@ DUWS_fnc_reserveConvoySlot = {
         _tries = _tries + 1;
         private _raw = _lead getPos [_step * DUWS_reserveConvoyGap, _dir];
         private _snap = [_raw] call DUWS_fnc_reserveRoadSnap;
-        // A slot over water is no slot: the outbound bearing can run a coastal wave off the shoreline
-        // step by step, and a vehicle stood up on the sea surface sinks. Reject it like a collision and
-        // step further out to look for land past it.
+        // A slot over water sinks a vehicle -- the outbound bearing can walk a coastal wave off the
+        // shoreline step by step. Rejected like a collision so the ray steps further out for land.
         if (!surfaceIsWater _snap && {_snap call _fnc_clear}) then {
             _out = _snap;
         } else {
@@ -161,17 +132,15 @@ DUWS_fnc_reserveConvoySlot = {
             };
         };
     };
-    // Every stepped slot was water or crowded: fall back to the wave lead, which garrisonReservePos
-    // guarantees is on land. Crowding a vehicle onto the lead is recoverable; the sea is not.
+    // Falls back to the wave lead -- garrisonReservePos guarantees it's on land. Crowding a vehicle
+    // there is recoverable; the sea is not.
     if (_out isEqualTo []) then { _out = _lead };
     _out
 };
 
-// Hands the next convoy slot for a refill wave and records it. _wave carries the wave's lead point and
-// outbound bearing, chosen once on the first call and reused after, so every vehicle in the wave lines up
-// off the same lead rather than each re-picking a far-side point and stacking on it. Both _wave and
-// _slots are the caller's own arrays, mutated in place (arrays pass by reference), so the running wave
-// state lives in the refill loop, not here.
+// _wave's lead point and bearing are chosen once, on the first call, and reused so every vehicle in the
+// wave lines up off the same lead instead of re-picking and stacking. _wave/_slots are the caller's own
+// arrays, mutated in place (SQF arrays pass by reference) -- wave state lives in the refill loop, not here.
 DUWS_fnc_reserveWaveSlot = {
     params ["_center", "_radius", "_wave", "_slots"];
     if (_wave isEqualTo []) then {
@@ -184,11 +153,8 @@ DUWS_fnc_reserveWaveSlot = {
     _pos
 };
 
-// Hangs a killed handler on a site's groups. It does two jobs: records the group's token into the loss
-// ledger when the group is wiped, and pulls an immediate refill wave on a deep dip. Called for the
-// initial garrison and for every reserve that later joins it, so a wiped reinforcement is both recorded
-// and answered. The key and the group's source token ride each unit rather than the group, which a dead
-// man can outlive. The token was tagged on the group by DUWS_fnc_zoneSpawnOne when it was raised.
+// Key and token ride each unit, not the group -- a dead man can outlive his group's own lifetime.
+// DUWS_srcToken was tagged on the group by DUWS_fnc_zoneSpawnOne when it was raised.
 DUWS_fnc_garrisonReserveWatch = {
     params ["_key", "_grps"];
     {
@@ -200,8 +166,8 @@ DUWS_fnc_garrisonReserveWatch = {
                 private _unit = _this select 0;
                 private _k = _unit getVariable ["DUWS_garrisonKey", ""];
                 if (_k == "") exitWith {};
-                // Record the token lost only when its whole group is down -- destroy the group, lose the
-                // token. Chip damage that leaves survivors is not recorded, so the survivors come back.
+                // Recorded lost only when the whole group is down; chip damage with survivors doesn't
+                // count -- those survivors come back.
                 if (({ alive _x } count units (group _unit)) == 0) then {
                     [_k, _unit getVariable ["DUWS_garrisonToken", ""]] call DUWS_fnc_garrisonRecordLoss;
                 };
@@ -211,9 +177,9 @@ DUWS_fnc_garrisonReserveWatch = {
     } forEach _grps;
 };
 
-// The event path. Debounced so a mass-casualty moment fires one wave, not one per body, and gated on a
-// deep dip so shallow attrition waits for the heartbeat. Nothing to pull if the pool is spent or the
-// site has no live ceiling -- stowed, cleared or mid-raise all read as zero.
+// Debounced so a mass-casualty moment fires one wave, not one per body; gated on a deep dip so shallow
+// attrition waits for the heartbeat. Ceiling reads zero for stowed, cleared or mid-raise alike, so
+// nothing-to-pull is one check.
 DUWS_fnc_garrisonReserveOnKill = {
     params ["_key"];
     if (!isServer) exitWith {};
@@ -227,14 +193,12 @@ DUWS_fnc_garrisonReserveOnKill = {
     [_key] spawn DUWS_fnc_garrisonReserveRefillOne;
 };
 
-// Picks the reserve's delivery truck: the faction's own troop-transport keys -- the covered
-// (opfor_COVERED_TRUCK_X, the "truck" token) and the open (opfor_TRANS_TRUCK_X, the "transport" token).
-// Both are defined per faction as actual troop carriers, so no kind test is needed to keep infantry off a
-// car or a technical: these keys never name one, and the earlier isKindOf "Truck" gate only rejected
-// legitimate mod trucks that do not inherit from the vanilla Truck class, dropping the whole wave to foot.
-// True when the vehicle class fields any turret weapon. Walked over the config, not a spawned object: the
-// pick happens before the truck exists. A stack over nested Turrets so a commander cupola on a mod hull
-// drawn as transport counts too; a turret with an empty weapons[] (cargo/FFV firing seats) does not.
+// Truck token keys ("truck" -> opfor_COVERED_TRUCK_X covered, "transport" -> opfor_TRANS_TRUCK_X open) are
+// always real troop carriers, so no kind test is needed -- the earlier isKindOf "Truck" gate rejected
+// legitimate mod trucks that don't inherit from vanilla Truck, dropping the whole wave to foot.
+// Walked over the config, not a spawned object, since the pick happens before the truck exists. Recurses
+// over nested Turrets so a commander cupola on a mod hull counts too; a turret with empty weapons[]
+// (cargo/FFV firing seats) does not.
 DUWS_fnc_classIsArmed = {
     params ["_class"];
     private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
@@ -250,11 +214,10 @@ DUWS_fnc_classIsArmed = {
     _armed
 };
 
-// Resolved through tokenClass so an auto-detected faction's pooled variant is drawn the same as a
-// hand-written class; empties dropped. Weighted toward an unarmed hull: the truck is a taxi, and an
-// unarmed one needs no gunner and cannot be held up trading fire on the run in -- an armed one is drawn
-// only when the faction offers nothing else, and is then crewed on spawn. "" when the side defines
-// neither key, and the caller then walks the squad in.
+// Resolved through tokenClass so a pooled auto-detected variant draws the same as a hand-written class;
+// empties dropped. Weighted toward an unarmed hull -- a taxi needs no gunner and can't be held up trading
+// fire on the run in -- so armed is only drawn when the faction offers nothing else. "" when the side
+// defines neither key; the caller then walks the squad in.
 DUWS_fnc_reserveTruckClass = {
     private _opts = ["truck", "transport"] apply { [_x, "OPF"] call DUWS_fnc_tokenClass };
     _opts = _opts select { _x != "" };
@@ -264,13 +227,11 @@ DUWS_fnc_reserveTruckClass = {
     selectRandom _opts
 };
 
-// Stands up an empty delivery truck and its lone driver on the far side, ready to be loaded. The driver
-// is the truck's own configured crew class raised into an east group of its own -- decoupled from the
-// squads it carries, so a lost squad never costs the truck its driver and the driver never sits on any
-// squad's roster. A driver always; plus a gunner for each armed turret, so a mod transport that mounts a
-// gun does not roll in with it dead -- all crew share the driver's group, so every teardown path that
-// clears the driver clears them too. The truck is never rostered or garrison-flagged; the dispatch monitor
-// owns its whole life. Returns [truck, driverGroup, cargoSeats], or [] when no truck resolves or none seats a driver.
+// Driver is the truck's own crew class in a fresh east group, decoupled from the squads it carries -- a
+// lost squad never costs the truck its driver, and the driver never sits on any squad's roster. A gunner
+// is raised for each armed turret too, sharing the driver's group, so a mod transport that mounts a gun
+// doesn't roll in dead, and every teardown path that clears the driver clears them all. Truck is never
+// rostered or garrison-flagged -- the dispatch monitor owns its whole life.
 DUWS_fnc_garrisonReserveTruckSpawn = {
     params ["_spawnPos", "_center"];
     private _tclass = call DUWS_fnc_reserveTruckClass;
@@ -288,30 +249,23 @@ DUWS_fnc_garrisonReserveTruckSpawn = {
     _driver moveInDriver _truck;
     // A truck that seated no driver would never move: scrap it and let the caller walk the squad in.
     if (isNull (driver _truck)) exitWith { deleteVehicle _driver; deleteVehicle _truck; deleteGroup _drv; [] };
-    // An armed transport (some mod trucks mount an MG) would otherwise roll in with a dead gun. Crew every
-    // weapon turret from the driver's group, so the gunners fight and are torn down on the same paths that
-    // delete the driver. Non-FFV turrets only -- allTurrets skips the cargo firing seats, which are passengers.
+    // An armed transport (some mod trucks mount an MG) would otherwise roll in with a dead gun -- crewed
+    // from the driver's group so gunners fight and are torn down on the same paths that delete the driver.
+    // Non-FFV turrets only: allTurrets skips the cargo firing seats, which are passengers.
     {
         if ((_truck weaponsTurret _x) isNotEqualTo []) then {
             private _gunner = _drv createUnit [_crewCls, _spawnPos, [], 0, "NONE"];
             _gunner moveInTurret [_truck, _x];
         };
     } forEach allTurrets _truck;
-    // The engine reaps the driver group the moment it empties, so every teardown path below -- despawn,
-    // mid-ride scrap, the oversize-squad scrap -- only has to delete the driver, never the group, and a
-    // long campaign's worth of delivery runs cannot leak empty groups toward the per-side group cap.
+    // Engine reaps the driver group the moment it empties (deleteGroupWhenEmpty), so every teardown path
+    // below only deletes the driver, never the group -- a long campaign's delivery runs can't leak empty
+    // groups toward the per-side group cap.
     _drv deleteGroupWhenEmpty true;
     [_truck, _drv, _truck emptyPositions "Cargo"]
 };
 
-// Sends one loaded truck on its way and hands its passengers off. Driven CARELESS so the man at the wheel
-// runs the route instead of stopping to fight, to a debus point short of the objective on the far side;
-// held aboard through contact; then every squad hard-ejected in cover to hunt the zone centre. Same
-// failure modes as any ride -- truck killed, driver down, immobilised, heavily damaged, arrived, or a
-// hard ride ceiling -- each ending the ride and dropping whoever is left. A capture mid-ride scraps the
-// whole load, truck and driver included, rather than debussing onto ground no longer OPFOR. Finally the
-// driver runs the empty truck off the field and it despawns on a fixed timer. _grps is every squad
-// aboard: the truck is shared, so its disposal cannot ride any one squad's group.
+// _grps is every squad aboard: the truck is shared, so its disposal cannot ride any one squad's group.
 DUWS_fnc_garrisonReserveDispatch = {
     params ["_key", "_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
     private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
@@ -319,8 +273,8 @@ DUWS_fnc_garrisonReserveDispatch = {
     if (_debusPos isEqualTo []) then { _debusPos = _debusRaw };
 
     // CARELESS so the driver runs the route instead of stopping to fight -- the same trick the support
-    // transports use to drive/fly through fire (fnc_paradrop, fnc_request_hcCAS). The waypoint is the
-    // driver group's own; the debus hunt orders the passengers take below are on their own groups.
+    // transports use to drive/fly through fire (fnc_paradrop, fnc_request_hcCAS). Waypoint is the driver
+    // group's own; the debus hunt orders below are on the passenger groups.
     _drv setBehaviour "CARELESS";
     _drv setSpeedMode "FULL";
     private _wp = _drv addWaypoint [_debusPos, 0];
@@ -340,18 +294,17 @@ DUWS_fnc_garrisonReserveDispatch = {
         };
         // Drop the ride waypoint so it does not fight the escape waypoint added below.
         for "_i" from ((count (waypoints _drv)) - 1) to 0 step -1 do { deleteWaypoint [_drv, _i] };
-        // A capture or stow during the ride takes the objective out from under the wave: scrap it -- every
-        // squad aboard, the truck and the driver -- rather than debus onto ground that just changed hands.
-        // The squads are already on the roster, matching the refill loop's own mid-spawn delete path.
+        // A capture or stow during the ride takes the objective out from under the wave: scrap the whole
+        // load -- squads, truck, driver -- rather than debus onto ground that just changed hands. Squads
+        // are already rostered, matching the refill loop's own mid-spawn delete path.
         if !([_key] call DUWS_fnc_garrisonHeld) exitWith {
             { { deleteVehicle _x } forEach units _x } forEach _grps;
             { deleteVehicle _x } forEach units _drv;
             if (!isNull _truck) then { deleteVehicle _truck };
         };
-        // moveOut, not a get-out order: the truck may be dead, dying or still rolling on the timeout path,
-        // and an ordered dismount only fires from a stopped, live vehicle. A hard eject is the one exit
-        // that fires in every state. Guarded on alive, since men may have brewed up with the truck --
-        // their loss is already recorded by the caller's killed-watch.
+        // moveOut, not a get-out order: an ordered dismount only fires from a stopped, live vehicle, and
+        // the truck here may be dead, dying or still rolling. Guarded on alive -- brewed-up men are
+        // already recorded by the caller's killed-watch.
         {
             private _g = _x;
             { if (alive _x) then { unassignVehicle _x; moveOut _x } } forEach units _g;
@@ -359,12 +312,10 @@ DUWS_fnc_garrisonReserveDispatch = {
                 [_g, "hunt", _center, _radius] call fnc_apply_posture;
             };
         } forEach _grps;
-        // The driver's work is done: point the empty truck off the far side, away from the players, then
-        // hand it to the map cleanup sweep with a delete order rather than scrapping it here. Flagged for the
-        // sweep, it and its crew are reaped together once they are KEEP_RADIUS clear of every player -- the
-        // same rule the sweep bins a cleared garrison by, so a delivery truck never blinks out under a
-        // player's eyes and needs no despawn timer of its own. binMe overrides the in-use spare a live
-        // AI-crewed mobile truck would otherwise get; the small binAt grace lets it pull away first.
+        // Points the empty truck off the far side, then hands it to the map cleanup sweep with a delete
+        // order instead of scrapping it here -- same KEEP_RADIUS rule a cleared garrison is binned by, so
+        // it never blinks out under a player's eyes. binMe overrides the in-use-spare exemption a live
+        // AI-crewed truck would otherwise get; the binAt grace lets it pull away first.
         if (alive _truck && {alive (driver _truck)}) then {
             private _escapePos = _center getPos [_radius + DUWS_reserveEscapeDist, _center getDir _spawnPos];
             _drv setBehaviour "CARELESS";
@@ -372,10 +323,8 @@ DUWS_fnc_garrisonReserveDispatch = {
             private _ewp = _drv addWaypoint [_escapePos, 0];
             _ewp setWaypointType "MOVE";
         };
-        // Flag the hull and its crew alike, on one clock. The sweep clears a manned truck's crew with the
-        // hull, but a driver or gunner who has left it -- brewed up and bailed, or dismounted when the truck
-        // was immobilised -- is no longer crew, and a hull-only flag would leave him standing as an orphan
-        // OPFOR man nothing reaps. Flagged himself, he is binned whether he is still aboard or on foot.
+        // Crew flagged individually too, not just the hull: a driver or gunner who bailed or dismounted is
+        // no longer crew, and a hull-only flag would leave him standing as an orphan nothing reaps.
         _truck setVariable ["DUWS_binMe", true];
         _truck setVariable ["DUWS_binAt", time + 30];
         {
@@ -385,9 +334,8 @@ DUWS_fnc_garrisonReserveDispatch = {
     };
 };
 
-// Rosters and killed-watches a standalone reserve group, or clears it if the site flipped during its
-// raise. The truck-borne squads are committed inline in the refill loop instead: their delete-on-flip is
-// the dispatch monitor's, since the truck they ride is shared and must not be deleted with one squad.
+// Truck-borne squads are committed inline in the refill loop instead -- their delete-on-flip is the
+// dispatch monitor's, since the shared truck must not be deleted with just one squad.
 DUWS_fnc_garrisonReserveCommit = {
     params ["_key", "_grp", "_roster"];
     if (isNull _grp) exitWith {};
@@ -401,22 +349,18 @@ DUWS_fnc_garrisonReserveCommit = {
     };
 };
 
-// Tops one site back up to its x1 group ceiling out of the pool. Bounded three ways: the site still held
-// (live), pool not spent, and the global throttle below the engine wall -- a player making no progress
-// frees no room and gets no wave, which is intended. The ceiling is the full x1 capacity, so reserves
-// bring a mauled site back to its designed group count, not merely to what last deployed.
+// Bounded three ways -- site held, pool not spent, throttle below the engine wall -- so a stalled player
+// frees no room and gets no wave; that's intended. Ceiling is the full x1 capacity, so reserves restore
+// the site's designed group count, not just what last deployed.
 //
-// Infantry ride in, batched: consecutive squads share one truck until it is at least half full, then it
-// is dispatched and the next squad opens a fresh truck -- so a wave arrives spread across several trucks
-// rather than packed into one, and no squad is coupled to the vehicle carrying it. Vehicle tokens drive
-// themselves in and never batch; a squad too big for a whole truck, or a side that fields no truck, walks.
+// Infantry batch into trucks (dispatch at half-full, next squad opens a fresh one) so a wave spreads
+// across several trucks and no squad is coupled to its ride; vehicle tokens never batch, oversize squads
+// and truckless sides walk.
 //
-// No lock, on purpose. The poll and the killed handler can both reach one site at once, and two refills
-// are made safe rather than serialised: they share the pool, roster and live group count and both stop
-// at the ceiling; each token is deleted by value located fresh, so a token the other refill already took
-// is skipped rather than a stale index deleting the wrong slot; and each refill loads its own trucks from
-// its own locals. A latch would only save the redundant checks, and one left stuck true by a mid-wave
-// error would silently kill the site's reinforcement for the whole session.
+// No lock, on purpose: the poll and killed handler can both reach one site at once, so two refills run
+// safe rather than serialised -- shared pool/roster/count both stop at the ceiling, each token deleted by
+// value located fresh (never a stale index), each refill loads its own trucks from its own locals. A
+// latch stuck true by a mid-wave error would silently kill the site's reinforcement for the session.
 DUWS_fnc_garrisonReserveRefillOne = {
     params ["_key"];
     if (!isServer) exitWith {};
@@ -429,22 +373,20 @@ DUWS_fnc_garrisonReserveRefillOne = {
     private _pool = [_key] call DUWS_fnc_garrisonReserve;
     private _roster = [_key] call fnc_zone_roster;
 
-    // The truck currently being loaded, held open across iterations so consecutive squads share it.
-    // Dispatched and replaced once at least half its cargo is filled; flushed on every loop exit below.
+    // Held open across iterations so consecutive squads share one truck; flushed on every loop exit below.
     private _truck = objNull;
     private _drv = grpNull;
     private _trkPos = [];
     private _cap = 0;
     private _used = 0;
     private _aboard = [];
-    // Convoy staging for the wave: _wave holds the lead point and outbound bearing (set on the first
-    // spawn, reused after); _slots is every point placed so far, so each vehicle lines up spaced off the
-    // lead rather than stacking on it. The whole wave shares one convoy line.
+    // _wave/_slots stage the convoy: lead point and bearing set once, every vehicle spaces off it
+    // (see DUWS_fnc_reserveWaveSlot).
     private _wave = [];
     private _slots = [];
-    // Set when the pool holds nothing the side can field right now, to break the loop cleanly and still
-    // reach the flush below. A bare exitWith here is ambiguous -- it may exit the whole function rather
-    // than just the loop -- and would then strand a part-loaded truck undispatched.
+    // Set instead of exitWith so the loop breaks cleanly and still reaches the flush below -- a bare
+    // exitWith here is ambiguous, it may exit the whole function rather than just the loop, and would
+    // strand a part-loaded truck undispatched.
     private _spent = false;
 
     while {
@@ -454,15 +396,15 @@ DUWS_fnc_garrisonReserveRefillOne = {
         && {([_key] call DUWS_fnc_garrisonGroupCount) < _ceiling}
         && {(call DUWS_fnc_opforGroupCount) < DUWS_zoneGroupCeiling}
     } do {
-        // A random fieldable token, so a lost group is answered by any of the pool rather than a fixed
-        // order -- a downed tank might bring another tank or a rifle section. Fieldable is what the side
-        // can raise right now: a team always, a vehicle only once its AP and settings resolve its class,
-        // and an unfieldable one waits in the pool rather than blocking the wave.
+        // Random fieldable token so a lost group is answered by any of the pool, not a fixed order -- a
+        // downed tank might bring another tank or a rifle section. Fieldable: a team always, a vehicle
+        // only once AP/settings resolve its class; unfieldable tokens wait in the pool rather than block
+        // the wave.
         private _fieldable = _pool select { ([_x] call DUWS_fnc_tokenClass) != "" };
         if (_fieldable isEqualTo []) then { _spent = true } else {
-            // Located fresh at delete time, not by the index the list above carried: a concurrent refill
-            // of the same site may have taken this token since, so a value gone from the pool is skipped
-            // this iteration rather than shifting the delete onto the wrong slot.
+            // Located fresh at delete time, not by the index the list above carried -- a concurrent
+            // refill may have taken this token since, so a value now gone from the pool is skipped
+            // rather than shifting the delete onto the wrong slot.
             private _fi = _pool find (selectRandom _fieldable);
             if (_fi >= 0) then {
                 private _tok = _pool deleteAt _fi;
@@ -473,9 +415,8 @@ DUWS_fnc_garrisonReserveRefillOne = {
                     private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
                     [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                 } else {
-                    // Send the open truck off if this squad will not fit what is left in it, then make sure
-                    // a truck is open. Trucks are opened only at the point of loading, so an open one always
-                    // has a squad aboard and either room to spare or a full-enough load about to dispatch.
+                    // Trucks are opened only at the point of loading, so an open one always has a squad
+                    // aboard, and either room to spare or a full-enough load about to dispatch.
                     if (!isNull _truck && {_aboard isNotEqualTo []} && {_used + _men > _cap}) then {
                         [_key, _center, _radius, _trkPos, _truck, _drv, _aboard] call DUWS_fnc_garrisonReserveDispatch;
                         _truck = objNull; _drv = grpNull; _aboard = []; _used = 0; _cap = 0; _trkPos = [];
@@ -489,9 +430,8 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         };
                     };
                     if (isNull _truck || {_men > _cap}) then {
-                        // No truck fielded, or a squad too big for a whole one: walk it in. Scrap a fresh
-                        // empty truck first if the oversize squad was the only reason one was opened -- an
-                        // empty delivery asset must not be left standing on the far side.
+                        // Scrap a fresh empty truck first if the oversize squad was the only reason one
+                        // was opened -- an empty delivery asset must not be left standing on the far side.
                         if (!isNull _truck && {_aboard isEqualTo []}) then {
                             { deleteVehicle _x } forEach units _drv;
                             deleteVehicle _truck;
@@ -501,10 +441,10 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
                         [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                     } else {
-                        // Raise the squad orderless so it rides then hunts at the debus, board it, and
-                        // roster it now while the site is held (the loop's own guard). If a mid-ride capture
-                        // later scraps the ride the dispatch monitor deletes the group; the stale roster
-                        // entry is the teardown sweep's to clear, as for any reserve.
+                        // Raised orderless so it rides then hunts at the debus; rostered now while the
+                        // site is held (the loop's own guard). If a mid-ride capture scraps the ride, the
+                        // dispatch monitor deletes the group and leaves the stale roster entry for the
+                        // teardown sweep, as for any reserve.
                         private _grp = [_tok, _center, _radius, "none", _trkPos] call DUWS_fnc_zoneSpawnOne;
                         if (!isNull _grp) then {
                             { _x moveInCargo _truck } forEach units _grp;
@@ -520,14 +460,13 @@ DUWS_fnc_garrisonReserveRefillOne = {
                     };
                 };
             };
-            // Staggered so a wave arrives as a run of groups over a few seconds rather than a one-frame
-            // spawn spike on the site the player is already fighting.
+            // Staggered so a wave reads as a run of groups over a few seconds, not a one-frame spawn spike.
             uiSleep 2;
         };
     };
-    // Flush a part-loaded truck so a wave that ends below half full still delivers what it raised. A truck
-    // opened but never boarded -- a squad-raise that failed right after it was created -- is scrapped here
-    // rather than left standing empty on the far side.
+    // Flushes a part-loaded truck so a wave that ends below half full still delivers what it raised. One
+    // opened but never boarded (a squad-raise that failed right after) is scrapped instead of left
+    // standing empty.
     if (!isNull _truck) then {
         if (_aboard isNotEqualTo []) then {
             [_key, _center, _radius, _trkPos, _truck, _drv, _aboard] call DUWS_fnc_garrisonReserveDispatch;
@@ -538,12 +477,10 @@ DUWS_fnc_garrisonReserveRefillOne = {
     };
 };
 
-// One pass over every contested garrison site with a pool: refill it. Skips a quiet site -- its pool
-// waits until it is being fought, by the same presence test that raises a garrison. The most-crowded
-// fight resupplies first, so the site the players are actually in tops up before a lightly-held one.
-// Refills are spawned per site, so their waves stagger independently and one site's sleep never holds
-// the next. Iterates the live-garrison registry, so a zone and a town are both candidates by the same
-// rule -- the one place the two site kinds meet.
+// Skips a quiet site -- its pool waits until it's being fought, by the same presence test that raises a
+// garrison. Most-crowded fight resupplies first; refills are spawned per site so waves stagger
+// independently and one site's sleep never holds the next. Iterates the live-garrison registry, so a
+// zone and a town are candidates by the same rule -- the one place the two site kinds meet.
 DUWS_fnc_garrisonReservePass = {
     if (!isServer) exitWith {};
     private _players = (call BIS_fnc_listPlayers) select { alive _x };
@@ -566,8 +503,8 @@ DUWS_fnc_garrisonReservePass = {
     { [_x select 1] spawn DUWS_fnc_garrisonReserveRefillOne } forEach _cand;
 };
 
-// The heartbeat: one server loop, launched once at WARCOM init beside the site poller. The 5-minute
-// beat tops sites up during a steady grind; the killed handler covers the deep dips between beats.
+// Launched once at WARCOM init beside the site poller. The poll beat tops sites up during a steady
+// grind; the killed handler covers the deep dips between beats.
 DUWS_fnc_garrisonReserveLoop = {
     if (!isServer) exitWith {};
     while {true} do {

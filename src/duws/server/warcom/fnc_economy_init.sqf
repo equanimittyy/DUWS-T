@@ -12,9 +12,8 @@
 // session in co-op).
 fnc_cp_adjust = {
 	if (!isServer) exitWith {};
-	// _reason is a short label naming what caused the change. It exists only for the log:
-	// a bare "CP -5" cannot be told apart from a death penalty, a purchase or a lost zone
-	// after the fact. Optional so a missed call site still works.
+	// _reason exists only for the log: a bare "CP -5" cannot be told apart from a death
+	// penalty, a purchase or a lost zone after the fact. Optional so a missed call site still works.
 	params [["_delta", 0], ["_reason", ""]];
 	// Integer invariant: the HUD prints the pool raw, so a fraction reaching it renders
 	// as "32.05". Round the total rather than the delta -- that also normalises a pool
@@ -35,9 +34,8 @@ fnc_cp_adjust = {
 
 // The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a one-way
 // ratchet (earned only ever rises; spending never touches it), so a spent-down wallet cannot drop the tier.
-// Capability sites read the earned counter directly; this integer is the coarse summary, for the readout
-// and save. Five tiers: tier 1 is infantry free at 0 AP, the four rungs above gate vehicle classes,
-// steepening past tier 2 (against OPFOR's ~94 AP/hr from six zones: motorised ~0.6 h to jets ~6.4 h).
+// Capability sites read the earned counter directly; this integer is only the readout/save summary.
+// Five tiers, steepening past tier 2 against OPFOR's ~94 AP/hr from six zones (motorised ~0.6 h to jets ~6.4 h).
 DUWS_ap_tier_rungs = [60, 150, 350, 600]; publicVariable "DUWS_ap_tier_rungs";
 // Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {
@@ -50,18 +48,14 @@ DUWS_fnc_ap_tier = {
 // and logs rather than crediting the wrong pool; no HUD counter to refresh. Floored at 0 like CP:
 // losing a zone subtracts the zone's full worth, so an unclamped pool could sit deeply negative.
 //
-// Integer invariant, the CP writer's verbatim: every ladder gate reads "> N", so a pool resting at
-// 39.97 fails a > 40 gate while a rounded readout prints 40 and the player has no way to tell why.
-// Round the total rather than the delta -- that also normalises a pool already holding a fraction.
-// Sub-point payouts must accumulate whole points at the caller; rounding here would swallow them,
-// so a fractional delta is logged.
+// Integer invariant, same rounding rule as fnc_cp_adjust: every ladder gate reads "> N", so a pool
+// resting at 39.97 fails a > 40 gate while a rounded readout prints 40 and the player has no way to tell why.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
-	// _earned is the part of a positive delta that also credits the one-way earned counter and so can
-	// raise the tier. The recurring faucets each side genuinely earns pass it -- BLUFOR's zone trickle,
-	// missions and first-capture bonus; OPFOR's town, zone and flat income. Spends, swings, consolation
-	// and refunds leave it 0, so ground regained and money spent never move the ladder. Never negative:
-	// the counter only rises, which is what makes the tier a ratchet.
+	// _earned credits the one-way earned counter (never the ladder wallet), so it is passed only by
+	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
+	// first-capture bonus; OPFOR's town, zone and flat income. Spends, swings, consolation and refunds
+	// leave it 0, so ground regained and money spent never move the ladder.
 	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
@@ -83,8 +77,7 @@ fnc_ap_adjust = {
 		};
 		case "BLU": {
 			WARCOM_blufor_ap = round ((WARCOM_blufor_ap + _delta) max 0); publicVariable "WARCOM_blufor_ap";
-			// PV handler updates ctrl 1002 on remote clients; do it here for the host, whose own
-			// publicVariableEventHandler does not fire for its own broadcast (the request menu AP box).
+			// Same host PV gap as fnc_cp_adjust above (ctrl 1002, the request menu AP box).
 			if (hasInterface) then { ctrlSetText [1002, format ["%1", WARCOM_blufor_ap]]; };
 			if (_earned > 0) then {
 				WARCOM_blufor_ap_earned = round (WARCOM_blufor_ap_earned + _earned); publicVariable "WARCOM_blufor_ap_earned";
@@ -92,8 +85,7 @@ fnc_ap_adjust = {
 				if (_t != WARCOM_blufor_tier) then {
 					WARCOM_blufor_tier = _t; publicVariable "WARCOM_blufor_tier";
 					["INFO", "ECON", format ["BLU tier -> %1 (earned %2)", _t, WARCOM_blufor_ap_earned]] call fnc_log;
-					// Earned AP is a ratchet, so a change is always a rise: announce the new tier to the
-					// whole team. Skip a dedicated server, which has no screen or audio device.
+					// Skip a dedicated server, which has no screen or audio device to receive this on.
 					["tier_up", [[_t] call DUWS_fnc_tierName]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 					"boots" remoteExec ["playSound", [0,-2] select isDedicated];
 				};
@@ -114,18 +106,14 @@ fnc_ap_adjust = {
 // that pair, which is what keeps one announce thread per pair rather than one per charge.
 civ_rep_pending = createHashMap;
 
-// Posts one card for a town and a cause once that pair stops moving, and names the town, the
-// cause and the applied figure.
-//
 // One card per burst, not per charge: a fire mission changes the damage state of dozens of
-// buildings within a few seconds and each one is its own charge, so a card each buries the screen
-// and pushes everything else off it. Accumulating also means the number the player reads is what
-// the barrage actually cost rather than the last -2 of forty.
+// buildings within a few seconds and each one is its own charge, so a card each would bury the
+// screen -- and accumulating means the number reported is the whole barrage, not the last -2 of forty.
 //
 // The cause is half the key rather than a field, so a barrage that levels houses *and* kills
-// civilians posts one card for each. Summing across causes would report a figure under a heading
-// that only explains part of it -- and with a heal and a demolition in the same window the two
-// could cancel into a card that named the wrong direction, or into no card at all.
+// civilians posts one card for each; summing across causes would report a figure under a heading
+// that only explains part of it, and a heal alongside a demolition in one window could cancel into
+// a card naming the wrong direction, or no card at all.
 fnc_town_rep_announce = {
 	params ["_townIndex", "_reason"];
 	private _key = format ["%1:%2", _townIndex, _reason];
@@ -238,10 +226,10 @@ fnc_money_count = {
 	{ _x == "Money_roll" } count (itemsWithMagazines _unit)
 };
 
-// Spends money and reports whether it could. Server-only, and the caller says nothing about the
-// price until this returns: a client's count is a snapshot, and in co-op two players can spend
-// the same money, so this read and the removal are adjacent statements on the one machine that
-// owns the inventory -- the same reason fnc_pool_try_spend exists for CP.
+// Server-only, and the caller says nothing about the price until this returns: a client's count
+// is a snapshot, and in co-op two players can spend the same money, so this read and the removal
+// are adjacent statements on the one machine that owns the inventory -- the same reason
+// fnc_pool_try_spend exists for CP.
 //
 // Both slots are counted, so both removals run. removeItem is local-effect and no-ops for a player
 // not local to the server, so issue it at the unit's owner; removeMagazineGlobal already lands
@@ -316,9 +304,8 @@ fnc_pool_try_spend = {
 		};
 	};
 	private _ok = false;
-	// Attribution comes from _requester rather than a threaded-through label: the 40 client
-	// purchase sites all reach here via fnc_pool_spend, which knows the cost but not what
-	// the player was buying.
+	// Attribution comes from _requester, not a threaded-through label: all client purchase sites
+	// reach here via fnc_pool_spend, which knows the cost but not what the player was buying.
 	private _who = format ["purchase by %1", name _requester];
 	// What was actually charged, sent back with the verdict so a refund pays exactly this and
 	// never the base price. A scalar for CP/AP, a [cp, ap] pair for the dual case. Escalation is
@@ -356,11 +343,9 @@ fnc_pool_try_spend = {
 
 // Client half of the purchase handshake: blocks until the server rules on the request, so callers
 // must already be scheduled -- every purchase entry point is spawned. Refuses on timeout rather than
-// falling through: silence must not let a purchase happen. A zero cost short-circuits, because
-// several comm-menu supports are charged at unlock time and pass 0 here. duws_last_charge carries
-// what was actually debited, for the one caller that has to record it
-// (client/supports/fnc_supports_init.sqf). Returned on the side rather than in place of the verdict
-// so the forty existing call sites, which read this as a guard clause, stay as they are.
+// falling through: silence must not let a purchase happen. The charge amount is returned on the side
+// (duws_last_charge) rather than in place of the verdict, so the forty existing call sites, which
+// read this as a guard clause, stay as they are.
 fnc_pool_spend = {
 	params [["_pool", "CP"], ["_cost", 0], ["_gate", []]];
 	duws_last_charge = 0;

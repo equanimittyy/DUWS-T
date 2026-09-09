@@ -1,12 +1,5 @@
-// Locality: server -- createVehicle and fnc_static_place run where the composition is built and the
-// faction globals are authoritative. Definitions only; the callers are the dev spawner now, and the
-// zone siting loop and OPCOM later.
-//
-// A hardpoint is a composition placed onto a heading. The prefabs place their rows at fixed offsets;
-// a hardpoint rotates the whole layout about its centre, so a heading turns the cover with the core
-// rather than turning the core inside a fixed ring. The prefab split is reused: props are
-// ground-snapped, then weapon rows go through fnc_static_place, which resolves the vanilla placeholder
-// to _side's own gun and writes the absolute height a weapon row carries.
+// Locality: server -- createVehicle and fnc_static_place need the authoritative faction globals, which live only there.
+// A hardpoint rotates the whole layout (cover + core) about its centre rather than turning the core inside a fixed ring, so cover stays aligned with the guns on any heading.
 
 // [_ox, _oy, _dir] call fnc_hardpoint_rotate -> [x, y] rotated onto heading _dir (clockwise like
 // setDir; +Y is the layout's facing). Pure, so the rotation is unit-tested.
@@ -16,12 +9,7 @@ fnc_hardpoint_rotate = {
 };
 
 // [_type, _pos, _dir, _side, _key] call fnc_hardpoint_build -> [objects]
-//   _type  "MG" / "AT" / ... / "MINEFIELD"; the suffix of DUWS_hardpointComp_<type>
-//   _pos   [x, y]; the layout centre
-//   _dir   heading in degrees the layout faces
-//   _side  "opfor" / "blufor"; which faction the guns resolve to
-//   _key   composition key the objects are filed under for teardown
-//   _variant  "AT" / "AP"; MINEFIELD only, ignored by every other type
+//   _type is the suffix of DUWS_hardpointComp_<type> ("MG"/"AT"/.../"MINEFIELD"); _variant ("AT"/"AP") only matters for MINEFIELD.
 fnc_hardpoint_build = {
     params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_variant", "AT"]];
     private _px = _pos select 0;
@@ -39,13 +27,11 @@ fnc_hardpoint_build = {
         []
     };
 
-    // Props via the shared placer, frozen and hardened as the zone prefabs build theirs. Hardpoints stand
-    // on a heading (offsets rotated by _dir) and never tilt; weapon rows are skipped here and placed in the
-    // second pass below, where their absolute Z survives instead of being stamped to terrain like a prop.
+    // Props go through the shared placer frozen and hardened, offsets rotated by _dir, never tilted. Weapon rows
+    // are skipped here and placed below instead, so their absolute Z survives rather than being stamped to terrain like a prop.
     private _placed = [_rows, [_px, _py], _key, [_dir, [], "all"]] call fnc_composition_place;
-    // The radio mast alone is left simulated and damageable, so the player clears the tower by destroying
-    // it; fnc_hardpoint_stream reads the mast, not the roster. The placer hardened every prop, so undo it
-    // on the mast. RADIO only -- no other type fields one, so this loop is a no-op there.
+    // The radio mast alone stays simulated/damageable so the player can destroy the tower; fnc_hardpoint_stream reads
+    // the mast, not the roster. The placer hardened every prop, so this undoes it on the mast only (a no-op for other types).
     if (_type isEqualTo "RADIO") then {
         {
             if (typeOf _x isEqualTo DUWS_radioMastClass) then {
@@ -55,8 +41,8 @@ fnc_hardpoint_build = {
         } forEach _placed;
     };
 
-    // Weapons second. fnc_static_place adds the row's own offset to the origin it is handed, so the
-    // rotated offset is folded into the origin and the row passed with a zeroed X/Y.
+    // Weapons second: fnc_static_place adds the row's own offset to the origin, so the rotated offset is folded
+    // into the origin here and the row is passed with a zeroed X/Y to avoid applying it twice.
     {
         if !(_x param [5, false]) then { continue };
         _x params ["_wc", "_wox", "_woy", "_woz", "_wdir"];
@@ -70,27 +56,18 @@ fnc_hardpoint_build = {
 
 // [_objs, _pos, _side, _key, _teamToken] call fnc_hardpoint_garrison -> [men]
 //
-// _teamToken names the loose defenders' team in DUWS_teamRosters -- "team" for the regular six, "" for none, or
-// an array of tokens for a site fielding several groups -- resolved to classnames here rather than passed as a
-// list, so the token is what the site stores and a re-raise draws fresh teams from. The emplacement is manned
-// regardless of it: a gun without a gunner is scenery, not a defence, so every gun takes a crewman whether or
-// not any loose defender does. Side-generic via DUWS_fnc_teamRoster's side prefix and the <side>_SOLDIER_X
-// gun-crew global, so the dev tool's OPFOR and BLUFOR spawns each field their own men.
+// _teamToken is "team" / "" / an array of tokens, resolved to classnames here (not passed as a list) so a
+// re-raise draws fresh teams from what the site stores. Every gun is crewed regardless of the token -- an
+// unmanned gun is scenery, not a defence.
 //
-// Two kinds of gun, crewed two ways. A static weapon goes through DUWS_fnc_manStatics, the path a zone mans its
-// emplacements with -- it thaws the frozen gun, drops it to settle on the ground and seats a gunner, because a
-// static is placed frozen and sometimes on a bunker roof. Artillery is a vehicle, already sitting on its
-// tracks, so it skips the drop: its gunner is moved straight in and the piece is thawed so OPCOM can task it.
-// artilleryScanner is the config flag the faction auto-detect reads to call a vehicle artillery, so a modded
-// battery is caught the same way.
+// Static weapons crew via DUWS_fnc_manStatics (thaw, drop to settle, seat a gunner -- they start frozen,
+// sometimes on a roof); artillery is already on its tracks, so its gunner moves straight in and only the
+// piece thaws. artilleryScanner is the auto-detect flag that catches a modded battery the same way.
 //
-// The loose garrison patrols close, not dug in: this is the radius fnc_apply_posture works its circuit off,
-// kept tight so the men hold the emplacement's approaches rather than roaming the whole zone. _looseOnly skips
-// the gun and artillery crewing and places only the loose defenders. A resident battery (mortar, artillery)
-// keeps its crew pinned on the pieces across a garrison stow, so the raise that brings its defenders back must
-// not re-crew guns that were never emptied. The battery files crew and loose men under separate site rosters
-// (crew on a driven occupant, loose on the streamed one), so a garrison stow collects the loose roster through
-// fnc_site_collect and never reaches the crew.
+// HP_GARRISON_PATROL_R is kept tight so the loose garrison holds the emplacement's approaches instead of
+// roaming the zone. _looseOnly places only that patrol. A resident battery's crew stays pinned on the guns
+// across a garrison stow -- crew and loose men are filed under separate rosters, so the stow
+// (fnc_site_collect) only ever touches the loose one and never re-crews a gun that was never emptied.
 #define HP_GARRISON_PATROL_R 100
 fnc_hardpoint_garrison = {
     params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_teamToken", ""], ["_looseOnly", false]];
@@ -99,13 +76,10 @@ fnc_hardpoint_garrison = {
         ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
     private _men = [];
 
-    // Emplacement defenders must actually see the player. spawnGroup's overall-skill roll leaves spotting
-    // to the difficulty curve, which reads low enough here that a nest gets walked up on before it reacts.
-    // Force max detection (distance + reaction) on every defender; aiming stays on the skill roll, so they
-    // spot without becoming an aimbot.
+    // spawnGroup's skill roll leaves spotting to the difficulty curve, which reads low enough that a nest gets
+    // walked up on before it reacts; force max spotDistance/spotTime only, so defenders spot without becoming an aimbot.
     private _maxSpot = { { _x setSkill ["spotDistance", 1]; _x setSkill ["spotTime", 1] } forEach _this };
 
-    // Static guns first, always crewed: one man per gun, dropped and settled.
     private _guns = _objs select { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} };
     if (!_looseOnly && {count _guns > 0}) then {
         private _sp = _pos findEmptyPosition [0, 30, _soldier];
@@ -117,7 +91,6 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    // Artillery vehicles: a gunner straight in, no drop, and thawed so the battery can fire.
     private _arty = _objs select { !isNull _x && {alive _x} && {!(_x isKindOf "StaticWeapon")}
         && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1} };
     if (!_looseOnly && {count _arty > 0}) then {
@@ -133,17 +106,12 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    // Then the loose defenders. Each holds the posture its token names (DUWS_fnc_tokenPosture):
-    // closepatrol:team holds around the emplacement -- the gun holds the position while the teams work
-    // its approaches -- and widepatrol:team screens wider instead.
-    // The token is one team or a list of them (a radio tower fields several); an empty or unknown token
-    // in the list places no one.
+    // Each loose defender holds the posture its token names (DUWS_fnc_tokenPosture): closepatrol:team works the
+    // emplacement's approaches while the gun holds; widepatrol:team screens wider instead.
     private _tokens = if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken };
     {
-        // Spawned out toward the patrol ring, not on the emplacement: at the centre the men land among
-        // the bunker, bags and gun and snag on them before the circuit can pull them clear. The fallback
-        // stays off-centre for the same reason -- a bearing off _pos, never _pos itself. Sized on the
-        // faction rifleman; the team itself is drawn inside fnc_spawn_team, which also holds its posture.
+        // Spawn out toward the patrol ring, not the emplacement itself -- at the centre men land among the bunker,
+        // bags and gun and snag on them before the patrol circuit clears them; the fallback keeps the same off-centre bearing.
         private _sp = _pos findEmptyPosition [30, 70, _soldier];
         if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
         private _grp = [_x, _pos, HP_GARRISON_PATROL_R, [_x] call DUWS_fnc_tokenPosture, _sp, _side] call fnc_spawn_team;
@@ -165,16 +133,12 @@ fnc_hardpoint_garrison = {
 
 // [_type, _fnCand, _anchor, _rejectInZone] call fnc_hardpoint_best_ground -> [_cand, _facts, _radialDir] | []
 //
-// Hunt the best ground a single named type can hold. Draw candidates from _fnCand (given _anchor as
-// _this), survey each, drop any inside HP_SITE_SPACING of a nest already down, and keep only those the
-// type scores above zero on -- LOS and field of fire included, via fnc_hardpoint_score. Stop once a few
-// viable spots are in hand or the draw budget (HP_TYPE_DRAWS) is spent, then weighted-pick by score so the
-// type's best ground is likeliest without being the only answer. [] when no draw held it.
+// Weighted-picks among viable draws (score > 0) rather than taking the single best, so a type's likeliest
+// ground isn't its only possible ground. Ground only -- no spawn, no registry -- so this is the shared core
+// of both the undirected slate roll (fnc_hardpoint_lay) and the directed fnc_hardpoint_spawn_sited.
 //
-// Roadblock is snapped to a nearby road first (it vetoes off one); _rejectInZone drops a snap that crossed
-// into a zone, which the standalone passes want (zone roadblocks sit on the zone's own road) and the zone
-// pass does not. Ground only -- no spawn, no registry -- so it is the shared core of both the undirected
-// slate roll (fnc_hardpoint_lay) and the directed fnc_hardpoint_spawn_sited.
+// _rejectInZone drops a road snap that crossed into a zone: standalone passes want that (zone roadblocks
+// sit on the zone's own road already), the zone pass does not.
 fnc_hardpoint_best_ground = {
     params ["_type", "_fnCand", ["_anchor", []], ["_rejectInZone", false]];
     private _pool = [];
@@ -198,9 +162,9 @@ fnc_hardpoint_best_ground = {
             if (_rejectInZone && {[_c] call fnc_aoi_in_any_zone}) then { continue };
         };
         private _f = [_c] call fnc_hardpoint_survey;
-        if ((_f select 8) < HP_SITE_SPACING) then { continue };  // spaced off the nests already down
+        if ((_f select 8) < HP_SITE_SPACING) then { continue };
         private _s = [_f, _type] call fnc_hardpoint_score;
-        if (_s <= 0) then { continue };  // this ground cannot hold the type
+        if (_s <= 0) then { continue };
         _pool pushBack [_c, _f, _rdir];
         _pool pushBack _s;
     };
@@ -210,16 +174,13 @@ fnc_hardpoint_best_ground = {
 
 // [_type, _fnCand, _key, _regZoneKey, _anchor, _side] call fnc_hardpoint_spawn_sited -> [_objs, []] | []
 //
-// Directed smart-spawn: hunt the best ground a named type can hold among _fnCand's draws (survey + score, LOS
-// and field of fire included), face it, build it and file it under _key. Returns [] if no draw held the type.
-// This is the tail fnc_hardpoint_lay runs per rolled type; a caller that already knows the type it wants --
-// OPCOM reinforcing a specific gap with a specific weapon -- calls here instead of rolling a slate. _regZoneKey
-// files the row under a parent zone ("" = standalone, which also gates the roadblock snap out of zone
-// interiors).
+// The tail fnc_hardpoint_lay runs per rolled type; a caller that already knows the type it wants (OPCOM
+// reinforcing a gap with a specific weapon) calls here directly instead of rolling a slate. _regZoneKey
+// files the row under a parent zone ("" = standalone, which also gates the roadblock snap out of zones).
 //
-// Build, then register -- register decides whether to crew now or stow: a hardpoint out of a player's reach is
-// stowed uncrewed and only re-crewed when someone approaches, so campaign start never pays the drop-and-settle
-// for emplacements nobody is near. Runs spawned: register sleeps in the crew drop when it crews one inline.
+// Register decides whether to crew now or stow -- an emplacement out of a player's reach stays uncrewed
+// until approached, so campaign start never pays the drop-and-settle for nobody. Runs spawned: register
+// sleeps in the crew drop when it crews inline.
 fnc_hardpoint_spawn_sited = {
     params ["_type", "_fnCand", "_key", ["_regZoneKey", ""], ["_anchor", []], ["_side", "opfor"]];
     private _best = [_type, _fnCand, _anchor, _regZoneKey isEqualTo ""] call fnc_hardpoint_best_ground;
@@ -236,47 +197,29 @@ fnc_hardpoint_spawn_sited = {
 
 // [_count, _keyPrefix, _regZoneKey, _fnCand, _fnTick, _fnReset, _weights] call fnc_hardpoint_lay -> hardpoints placed.
 //
-// The shared placement loop behind both the zone pass and the AoI band pass: they differ only in where a
-// candidate comes from, so that is the one thing passed in. _fnCand is code returning [_pos, _radialDir] for a
-// draw, or [] to skip it (an off-band or in-zone sample). _fnReset, if given, is called once per emplacement
-// before its draws and its result is handed to every _fnCand call as _this: the AoI pass uses it to fix one
-// local search anchor per hardpoint, so the draws stay in a single neighbourhood the survey can compare. The
-// zone pass omits it (anchor []) and ignores _this.
+// Shared placement loop for the zone pass and the AoI band pass -- they differ only in where a candidate
+// comes from (_fnCand), so that's the one thing passed in. _fnReset runs once per emplacement and its
+// result is handed to every _fnCand call as _this: the AoI pass uses it to fix one local search anchor per
+// hardpoint so draws stay comparable; the zone pass omits it.
 //
-// Type first, ground second. The whole slate of types is rolled up front from the pass's weight map (the zone
-// or standalone DUWS_hardpointWeight*, picked by _regZoneKey below) -- MG common, AA and roadblock rarer -- so
-// the realised mix is the weights, not what the terrain favours. Each rolled type is then handed to
-// fnc_hardpoint_spawn_sited, which hunts and scores the best ground it can hold (fnc_hardpoint_best_ground) and
-// places it, so terrain decides only WHERE a type lands, never WHICH is placed. The old order did the reverse
-// -- pick the best-scoring spot, then roll a type there -- which let high ground (that MG and AT score huge on)
-// win nearly every site and starved the flat-ground type (AA) and the road-gated one (roadblock). A type that
-// finds no ground in its draw budget is dropped and logged, never swapped for another -- swapping is the
-// terrain skew this order removes. Minefields and the fire-support types are in no map, OPCOM's to place,
-// never rolled here (OPs join the scenario passes below via an inline OP-only mix). _radialDir is the outward
-// "toward the approach" bearing fnc_hardpoint_facing hands the
-// flat types, while the overwatch nests face their own fall line. _regZoneKey files each row under a parent
-// zone ("" = standalone). Every emplacement carries the type's own garrison, fielded by fnc_hardpoint_register
-// when it crews (or by the raise that later crews it), on top of any gun's crew.
+// Type is rolled before ground is hunted, not the reverse: the old order picked the best-scoring spot first
+// and rolled a type there, which let high ground (that MG/AT score huge on) win nearly every site and starve
+// AA and roadblock. Rolling the whole slate up front from the weight map means terrain decides only WHERE a
+// type lands, never WHICH is placed; a type with no ground in its draw budget is dropped and logged, never
+// swapped -- swapping is the skew this order removes. Minefields and fire-support types are OPCOM's to
+// place and are never rolled here.
 //
-// _fnTick, if given, is called with the running placed count after each placement -- a batch pass with no
-// per-zone sub-unit to report between (the AoI band) can still tick the generation banner.
-//
-// Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline, so build-out cannot
-// call it inline.
+// Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline, so build-out cannot call it inline.
 fnc_hardpoint_lay = {
     params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}], ["_fnReset", {[]}], ["_weights", []]];
-    // Zone rings and standalone emplacements roll different type mixes: the map's keys are the roll set,
-    // its values the base weights. Standalone ground (the AoI band, OPCOM's solo builds) fields AA and
-    // more roadblocks; a zone's ring does not. The zoneKey is the discriminator already threaded here.
-    // A scenario pass (a flank line, the AA net, the roadblock net) hands its own single-purpose map and
-    // skips that choice; [] means "unset, pick by zoneKey" for the callers that do not care.
+    // Zone rings and standalone ground roll different type mixes (AA and more roadblocks off the zone rings);
+    // [] picks by _regZoneKey for callers that don't care, while a scenario pass (flank/AA/roadblock net) hands its own single-purpose map instead.
     if (_weights isEqualTo []) then {
         _weights = if (_regZoneKey isEqualTo "") then { DUWS_hardpointWeightSolo } else { DUWS_hardpointWeightZone };
     };
     // Flattened [type, weight, ...] for selectRandomWeighted; the roll reads base weight alone, no ground.
     private _typeRoll = [];
     { _typeRoll pushBack _x; _typeRoll pushBack (_weights get _x) } forEach (keys _weights);
-    // The whole slate of types up front, before any terrain is read, so the realised mix is the weights.
     private _slate = [];
     for "_i" from 1 to _count do { _slate pushBack (selectRandomWeighted _typeRoll) };
 
@@ -284,16 +227,12 @@ fnc_hardpoint_lay = {
     private _tally = createHashMap;
     {
         private _type = _x;
-        // One anchor per emplacement: the AoI pass fixes a local search neighbourhood here; other passes
-        // return [] and their candidate blocks ignore it. The hunt, facing and spawn are
-        // fnc_hardpoint_spawn_sited; this loop only rolls the type, keys it and tallies what landed. The
-        // key is formed from the running placed count, so a dropped type consumes no index.
+        // _key uses the running _placed count, not the loop index, so a dropped type consumes no index slot.
         private _anchor = call _fnReset;
         private _key = format ["%1_%2", _keyPrefix, _placed];
         private _res = [_type, _fnCand, _key, _regZoneKey, _anchor] call fnc_hardpoint_spawn_sited;
         if (_res isEqualTo []) then {
-            // No ground for this type in the draw budget -- dropped, not swapped: a swap is the terrain
-            // skew the type-first order removes. A roadblock in roadless country is the usual cause.
+            // A roadblock in roadless country is the usual cause of a drop here.
             ["INFO", "HARDPOINT", format ["%1 dropped a %2: no ground it can hold", _keyPrefix, _type]] call fnc_log;
         } else {
             _placed = _placed + 1;
@@ -308,10 +247,8 @@ fnc_hardpoint_lay = {
 
 // [_zoneKey, _radius] call fnc_hardpoint_zone_cap -> how many emplacements a zone's ring may hold.
 //
-// Radius sets the ground there is to cover, stepped every HP_CAP_STEP metres and floored at one. Tier
-// adds one per step above I -- the fortification OPCOM has bought into the zone -- so radius and tier are
-// the two levers, the map's and the commander's. Read live at every count decision (the campaign-start
-// roll, the plan pre-roll, OPCOM's top-up) rather than cached, so the three never drift and a zone that
+// Radius (stepped every HP_CAP_STEP, floored at one) and tier (one more per step above I, OPCOM's bought
+// fortification) are the two levers. Read live at every count decision rather than cached, so a zone that
 // climbs tier earns a higher ceiling without the stored radius cap being rewritten.
 fnc_hardpoint_zone_cap = {
     params ["_zoneKey", "_radius"];
@@ -321,14 +258,11 @@ fnc_hardpoint_zone_cap = {
 
 // [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
-// A zone's own fortification ring, drawn from anywhere in the zone and faced radially out. Radius and
-// tier cap how many it can hold (fnc_hardpoint_zone_cap: bigger zone or higher tier, more emplacements);
-// a random count up to that cap is laid at campaign start, and OPCOM tops the ring back up toward it later.
-// The layered defence around the zone -- nests leaning toward and away from the fight -- is the flank
-// passes' job now (fnc_hardpoint_site_flank), spread across the map rather than ringed per zone.
+// A zone's own fortification ring, drawn from anywhere in the zone and faced radially out; layered defence
+// around it (nests leaning toward/away from the fight) is the flank passes' job now (fnc_hardpoint_site_flank).
 //
-// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no second
-// set. Runs spawned, via fnc_hardpoint_lay's crew drop. _fnTick climbs the generation banner per gun.
+// Idempotent per zone -- the stored cap is the guard, so a rebuild through fnc_createZone lays no second set.
+// Runs spawned, via fnc_hardpoint_lay's crew drop.
 fnc_hardpoint_site_zone = {
     params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
@@ -351,23 +285,19 @@ fnc_hardpoint_site_zone = {
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
 };
 
-// The band pass's local-search sampler, shared by the campaign-start pass and OPCOM's band build so
-// both hunt ground the same cheap way: one fixed anchor per emplacement, then draws confined to its
-// neighbourhood rather than scattered across every zone's band.
+// Shared local-search sampler for the band pass (campaign-start and OPCOM's band build): one fixed anchor
+// per emplacement, then draws confined to its neighbourhood rather than scattered across every zone's band.
 //
-// [] call fnc_hardpoint_band_anchor -> [_pos, _radialDir, _zoneCentre] or []. One valid in-band
-// anchor; bandPos returns [] on a missed draw, so retry a handful of times rather than dropping the
-// whole hardpoint to a single unlucky roll. Handed to fnc_hardpoint_lay as its per-emplacement reset.
+// [] call fnc_hardpoint_band_anchor -> [_pos, _radialDir, _zoneCentre] or []. Retries a handful of times on a
+// missed draw (DUWS_fnc_aoi_bandPos can return []) rather than dropping the whole hardpoint to one unlucky roll.
 fnc_hardpoint_band_anchor = {
     private _a = [];
     for "_i" from 1 to 8 do { _a = call DUWS_fnc_aoi_bandPos; if !(_a isEqualTo []) exitWith {} };
     _a
 };
 
-// _anchor call fnc_hardpoint_band_cand -> [_pos, _radialDir] or []. A draw within HP_AOI_LOCAL_R of
-// the anchor, gated like the band (OPFOR-positive, outside every zone) and faced outward from the
-// anchor's source zone. _this is the anchor fnc_hardpoint_lay carries in from the reset above; a
-// missed or in-zone sample returns [] to skip.
+// _anchor call fnc_hardpoint_band_cand -> [_pos, _radialDir] or []. A draw within HP_AOI_LOCAL_R of the
+// anchor, gated like the band (OPFOR-positive, outside every zone) and faced outward from the anchor's source zone.
 fnc_hardpoint_band_cand = {
     // _this IS the anchor array itself, not a wrapper -- params would destructure it element-by-element
     // and hand back only its first element, so take it whole.
@@ -386,37 +316,27 @@ fnc_hardpoint_band_cand = {
 
 // [_count, _toHQ, _fnTick] call fnc_hardpoint_site_flank -> emplacements placed.
 //
-// A flank line of gun nests (MG/AT/GMG, DUWS_hardpointWeightNest) spread through the OPFOR band and weighted
-// by distance to BLU HQ, not tied to any one zone -- the same band the roadblock and AA nets draw from.
-// _toHQ true is the frontline -- biased toward the HQ side of the band (the forward positions facing where
-// the player pushes from) and faced at HQ, so a flat-ground nest points down the approach; a real slope
-// still wins the fall line (fnc_hardpoint_facing). _toHQ false is the backline -- biased to the far side,
-// faced away from HQ. The bias is a sampled lean: each emplacement draws HP_FLANK_SAMPLES band anchors and
-// keeps the one nearest (front) or farthest (back) from HQ, then hunts ground around it like the AoI band
-// pass. No HQ placed yet leaves nothing to weight toward, so it falls back to a plain band anchor.
-// Standalone rows ("") -- band emplacements, not part of any zone's ring cap. Runs spawned:
-// fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
+// A flank line of gun nests weighted by distance to BLU HQ, not tied to any one zone -- same band the
+// roadblock and AA nets draw from. _toHQ true is the frontline: biased toward and faced at HQ (a flat-ground
+// nest points down the approach; a real slope still wins the fall line via fnc_hardpoint_facing). _toHQ
+// false is the backline: biased away, faced away from HQ. Each emplacement samples HP_FLANK_SAMPLES band
+// anchors and keeps the nearest (front) or farthest (back) from HQ; no HQ yet falls back to a plain anchor.
 //
-// _toHQ is read from this scope by the reset and candidate blocks below -- they run inside fnc_hardpoint_lay
-// but resolve it up the call stack (SQF dynamic scope), so it need not be threaded through lay's params.
+// _toHQ is read from this scope by the reset/candidate blocks below rather than threaded through lay's
+// params -- they run inside fnc_hardpoint_lay but resolve it up the call stack via SQF's dynamic scoping.
 fnc_hardpoint_site_flank = {
     params ["_count", "_toHQ", ["_fnTick", {}]];
     if (_count <= 0) exitWith { 0 };
     private _prefix = ["hpback", "hpfront"] select _toHQ;
     private _placed = [_count, _prefix, "", {
-        // _this is the reset's HQ-weighted band anchor. band_cand hunts a local draw and gates it
-        // (OPFOR-positive, outside zones); only its outward facing is swapped for one keyed to HQ.
+        // Same gating as band_cand; only the outward facing is swapped for one keyed to HQ below.
         private _d = _this call fnc_hardpoint_band_cand;
         if (_d isEqualTo []) exitWith { [] };
         _d params ["_c"];
-        // Frontline faces HQ (kept on flat ground by fnc_hardpoint_facing); backline faces away. No HQ yet
-        // keeps the band's own outward radial.
         private _rdir = if (PosOfBLUHQ isEqualTo []) then { _d select 1 }
             else { [PosOfBLUHQ getDir _c, _c getDir PosOfBLUHQ] select _toHQ };
         [_c, _rdir]
     }, _fnTick, {
-        // Sample a handful of band anchors and keep the one the flank wants: nearest HQ for the frontline,
-        // farthest for the backline. No HQ to weight toward -> the first plain band anchor.
         if (PosOfBLUHQ isEqualTo []) exitWith { call fnc_hardpoint_band_anchor };
         private _best = [];
         private _bestD = [-1, 1e12] select _toHQ;
@@ -437,27 +357,19 @@ fnc_hardpoint_site_flank = {
 
 // [_roadTargets, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
 //
-// Lays the roadblock net rolled in fnc_hardpoint_plan_counts. Each target is [zonePos, endpointPos]: a block
-// is a point along endpoint -> zone at a random depth, kept only where the OPFOR field is positive so it
-// never lands in friendly ground. fnc_hardpoint_best_ground snaps the draw to a road (main road preferred)
-// and rejects a snap that crossed into a zone, so the block sits on an open road, not a zone interior; each
-// then faces back along that road toward its endpoint -- HQ for the approach pass, the neighbour zone for the
-// inter-zone pass -- so its guns cover the way through. Endpoint [] (no HQ at plan time) -> a plain band draw
-// near the zone so the pass still lays. Standalone rows ("").
+// Each target is [zonePos, endpointPos]: a block sits along endpoint -> zone at a random depth, kept only in
+// OPFOR-held ground, snapped to a road by fnc_hardpoint_best_ground and faced back toward its endpoint (HQ
+// for the approach pass, the neighbour zone for the inter-zone pass). Endpoint [] (no HQ at plan time) falls
+// back to a plain band draw near the zone.
 //
-// One lay call over the whole pre-expanded target list, so the generation banner climbs unbroken: the
-// per-emplacement reset hands out the next target, and a dropped block (no road it can hold) still consumes
-// its target so the banner total stays honest. Runs spawned: fnc_hardpoint_register sleeps in the crew drop
-// when it crews one inline.
+// One lay call over the whole pre-expanded target list: the reset hands out the next target per emplacement,
+// and a dropped block still consumes its target so the generation banner total stays honest.
 fnc_hardpoint_site_roadblocks = {
     params ["_roadTargets", ["_fnTick", {}]];
     private _count = count _roadTargets;
     if (_count <= 0) exitWith { 0 };
     private _idx = 0;
     private _placed = [_count, "hproad", "", {
-        // _this is the reset's assigned [zonePos, endpointPos]. Draw along endpoint -> zone at a random depth
-        // and keep it only in OPFOR-held ground; best_ground then snaps it to a road and faces it back toward
-        // the endpoint. No endpoint (no HQ at plan time) -> a band draw near the zone.
         _this params ["_zpos", "_epos"];
         if (_epos isEqualTo []) exitWith {
             private _a = call fnc_hardpoint_band_anchor;
@@ -469,8 +381,8 @@ fnc_hardpoint_site_roadblocks = {
         private _ey = _epos select 1;
         private _p = [_ex + ((_zpos select 0) - _ex) * _f, _ey + ((_zpos select 1) - _ey) * _f, 0];
         private _c = [_p, 0, HP_ROAD_SNAP, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };  // OPFOR-held approach only
-        [_c, _c getDir _epos]  // face back toward the endpoint; facing snaps to the road heading nearer it
+        if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
+        [_c, _c getDir _epos]  // facing gets snapped to the nearer road heading downstream, in fnc_hardpoint_facing
     }, _fnTick, {
         private _t = _roadTargets select _idx;
         _idx = _idx + 1;
@@ -482,14 +394,11 @@ fnc_hardpoint_site_roadblocks = {
 
 // [_n] call fnc_hardpoint_seed_radio -> radio towers placed.
 //
-// Stands _n OPFOR radio towers in the band. A tower is placed deliberately, so this does not roll a
-// type through fnc_hardpoint_lay: for each mast it samples a pool of band positions from
-// DUWS_fnc_aoi_bandPos, drops any inside another tower's AoI or too close to an emplacement, and stands
-// the "RADIO" hardpoint on the best-scoring hilltop of what survives -- so masts neither share ground
-// nor nest coverage, and each crowns the highest crest in its pool. Each raises DUWS_opforRadioLevel
-// through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of coverage. A global sequence
-// keys the towers, so a campaign-start seed and OPCOM's later raises never collide. Runs spawned:
-// fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
+// Deliberately placed, not rolled through fnc_hardpoint_lay: samples band positions, drops any inside
+// another tower's AoI or too close to an emplacement, and stands RADIO on the best-scoring hilltop of what
+// survives, so masts neither share ground nor nest coverage. Each raises DUWS_opforRadioLevel (via
+// fnc_hardpoint_register) and projects AOI_TOWER_REACH of coverage; a global sequence keys the towers so a
+// campaign-start seed and OPCOM's later raises never collide.
 #define HP_RADIO_SPACING 250
 #define HP_RADIO_SAMPLES 6
 fnc_hardpoint_seed_radio = {
@@ -499,11 +408,8 @@ fnc_hardpoint_seed_radio = {
     while { _placed < _n && {_tries < _n * 12} } do {
         _tries = _tries + 1;
 
-        // Stand the mast on the best hilltop in a sampled pool, not the first band draw that clears: a
-        // tower wants a crest that reaches. Each candidate is surveyed once (the survey serves both the
-        // spacing gate and the RADIO score), and the top spot is kept. A draw inside another tower's AoI
-        // -- within AOI_TOWER_REACH of a standing RADIO, checked live so nested coverage never forms --
-        // or too close to an emplacement is dropped before scoring.
+        // One survey per candidate serves both the spacing gate and the RADIO score. AoI overlap is checked live
+        // against standing RADIO towers (not a cached count), so nested coverage never forms.
         private _best = [];
         private _bestScore = -1;
         for "_i" from 1 to HP_RADIO_SAMPLES do {
@@ -535,30 +441,21 @@ fnc_hardpoint_seed_radio = {
 
 // [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadTargets, _obs, _total]
 //
-// Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints up
-// front instead of counting zones. The passes: per-zone ring (round(random cap) under the same radius cap
-// fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers); the roadblock net (two passes,
-// below); the two flank lines; a per-zone observation-post coin flip (HP_OBS_P, spread through the band like the
-// AA net); radio (rolled by the caller and passed in, since the seed call must be handed the same value); and
-// the AA net (one per zone, derived by the caller). Radio and AA are only summed into the total. Here, not in
-// WARCOM init, so the count formulas are not duplicated away from HP_CAP_STEP.
+// Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints
+// up front instead of counting zones. Radio and AA are rolled by the caller and only summed in here, so the
+// seed/spawn calls are handed the same numbers. Lives here, not in WARCOM init, so the count formulas aren't
+// duplicated away from HP_CAP_STEP.
 //
-// Flank throttle: gun nests offset from the zones matter most on a small map, where a zone stands alone and its
-// flanks are open. As zones multiply they screen each other, so the same per-zone flank density just carpets
-// the countryside. Below HP_FLANK_KNEE the flank lines track the zone count exactly (a 4-6 zone game is
-// unchanged); above it each extra zone adds only HP_FLANK_SLOPE of a zone to the flank budget, so density per
-// zone falls as the map grows. Rings and AA are left per-zone, untouched here.
+// Flank throttle: nests offset from a zone matter most when it stands alone with open flanks; as zones
+// multiply they screen each other, so flat per-zone density just carpets the map. Below HP_FLANK_KNEE the
+// flank lines track zone count exactly; above it each extra zone adds only HP_FLANK_SLOPE of a zone to the
+// budget, so density per zone falls as the map grows.
 //
-// Roadblocks in two passes, not one hub-and-spoke: a spray of blocks all sat on the BLU HQ -> zone lines reads
-// as an arrow pointing home. Pass A places the approach block with probability HP_ROAD_HQ_P (faced at HQ); pass
-// B places an inter-zone block with probability HP_ROAD_NBR_P on the line to a random zone that is NOT the
-// nearest one -- a longer, off-axis link the player cannot read as "toward HQ". The nearest zone is excluded so
-// the link is not the obvious short hop to the neighbour already beside it; under 3 zones no such neighbour
-// exists, so pass B is skipped. Each block is handed to fnc_hardpoint_site_roadblocks as a [zonePos,
-// endpointPos] target, drawn along endpoint -> zone and faced at the endpoint, so pass A faces HQ and pass B
-// faces its neighbour. No HQ yet -> pass A's endpoint is [] and that block falls back to a band draw. The list
-// is returned so the banner totals real blocks; the HP_ROAD_HQ_P + HP_ROAD_NBR_P per-zone rates land the net at
-// ~1.2x zones, at most one block per pass.
+// Roadblocks roll in two passes, not one hub-and-spoke, because a spray of blocks all on the BLU HQ -> zone
+// lines reads as an arrow pointing home. Pass A is the HQ approach block (HP_ROAD_HQ_P); pass B is an
+// inter-zone block (HP_ROAD_NBR_P) to a random zone that is NOT the nearest one, so it can't be read as
+// "toward HQ" or as the obvious short hop to the neighbour already beside it -- skipped under 3 zones, where
+// no such neighbour exists. No HQ yet -> pass A's endpoint is [] and falls back to a band draw at lay time.
 #define HP_FLANK_KNEE 6
 #define HP_FLANK_SLOPE 0.5
 #define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
@@ -569,10 +466,8 @@ fnc_hardpoint_plan_counts = {
     private _zc = count serv_zones_array;
     private _zoneCounts = [];
     private _roadTargets = [];
-    // Radio + AA (_zc) are the deterministic passes; sum them straight in. Rings roll per zone below.
     private _total = _radioN + _zc;
-    // Observation posts are a per-zone coin flip out in the band, not a ring gun: one standalone OP with
-    // probability HP_OBS_P per zone, summed here so the banner totals them and laid in its own band pass.
+    // Observation posts are a per-zone coin flip in the band, not a ring gun -- summed here, laid in their own band pass.
     private _obs = 0;
     {
         _x params ["", "_zpos", "_hpSize"];
@@ -584,16 +479,11 @@ fnc_hardpoint_plan_counts = {
     } forEach zone_meta_array;
     _total = _total + _obs;
 
-    // Roadblock net, two passes (see header). Endpoints resolved here: HQ for pass A, a random non-closest
-    // zone for pass B.
     private _hqSet = !(PosOfBLUHQ isEqualTo []);
     {
         private _zpos = _x select 1;
         private _zi = _forEachIndex;
-        // Pass A: the HQ approach block, present with probability HP_ROAD_HQ_P. Endpoint [] with no HQ -> a
-        // band draw at lay time.
         if (random 1 < HP_ROAD_HQ_P) then { _roadTargets pushBack [_zpos, if (_hqSet) then { PosOfBLUHQ } else { [] }] };
-        // Pass B: an inter-zone block with probability HP_ROAD_NBR_P, to a random zone that is not the nearest.
         if (_zc >= 3) then {
             private _closest = -1;
             private _cd = 1e12;
@@ -612,7 +502,6 @@ fnc_hardpoint_plan_counts = {
     } forEach zone_meta_array;
     _total = _total + count _roadTargets;
 
-    // Flank lines, throttled above the knee so a big map is not carpeted (see header).
     private _fz = if (_zc <= HP_FLANK_KNEE) then { _zc } else { HP_FLANK_KNEE + round ((_zc - HP_FLANK_KNEE) * HP_FLANK_SLOPE) };
     private _lo = floor (_fz / 2);
     private _backline = _lo + floor random (_fz - _lo + 1);
@@ -621,10 +510,9 @@ fnc_hardpoint_plan_counts = {
     [_zoneCounts, _backline, _frontline, _roadTargets, _obs, _total]
 };
 
-// [_zoneKey, _radius] call fnc_hardpoint_debug -> the dev readout for a zone's ring: its cap split into
-// the radius and tier halves, and how many stand against it. Zone-only -- towns raise no ring -- so the
-// garrison query appends it for a zone, not a town. Reads fnc_hardpoint_zone_cap and the live registry
-// and recomputes neither, so what it prints is the cap OPCOM tops the ring up toward.
+// [_zoneKey, _radius] call fnc_hardpoint_debug -> the dev readout for a zone's ring cap (radius + tier
+// halves) and how many stand against it. Zone-only -- towns raise no ring. Reads fnc_hardpoint_zone_cap and
+// the live registry rather than recomputing, so what it prints matches what OPCOM tops the ring up toward.
 fnc_hardpoint_debug = {
     params ["_zoneKey", "_radius"];
     private _tier = [_zoneKey] call fnc_zone_tier;

@@ -1,4 +1,3 @@
-// Locality: server -- see callers.
 
 // Shared with the client (the arsenal overlay's live-count loop); compiled before economy_init,
 // whose settle/deposit call it.
@@ -30,7 +29,7 @@ publicVariable "fnc_duws_dialogue_channel";
 publicVariable "fnc_duws_disposeAfter";
 publicVariable "fnc_duws_keep";
 publicVariable "fnc_duws_release";
-// Carry-a-unit module: broadcast so a client action's toggle forwards itself to the server.
+// Broadcast so a client action's toggle forwards itself to the server.
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_unit_carry.sqf";
 publicVariable "DUWS_fnc_unitCarry";
 publicVariable "DUWS_fnc_unitDrop";
@@ -40,21 +39,18 @@ publicVariable "DUWS_fnc_unitCarryRemoveDropAction";
 publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
-// Shared prop-placement primitive for every composition (zones, hardpoints, cache/radar missions). After
-// fnc_duws_keep, which it calls; server-only, so not broadcast.
+// After fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_place.sqf";
 
 // Settled-object counterpart to fnc_composition_place: seats simulated pieces (loot, live props) at rest
 // instead of freezing them. After fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_place_settled.sqf";
 
-// Furniture catalog reader and the interior floor-plan grid. Both feed the placer below, so loaded ahead
-// of it; server-only, not broadcast.
+// Both feed the placer below, so loaded ahead of it; server-only, not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_catalog.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_grid.sqf";
 
-// Structure-aware building furnishing. Loaded after place_settled, the grid and the catalog, which it
-// calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
+// Loaded after place_settled, the grid and the catalog, which it calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_building.sqf";
 
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
@@ -154,13 +150,13 @@ fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_
 fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
 
-// Derelict-recovery: repair gate read on hit points (raw getDammage never moves under field repair), a
+// Repair gate read on hit points (raw getDammage never moves under field repair), a
 // uniform component-damage spawn, and an engine-kill that immobilises a spawned derelict until repaired.
 fnc_veh_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_comp_damage.sqf";
 fnc_veh_disable_engine = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_disable_engine.sqf";
 fnc_veh_set_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_set_comp_damage.sqf";
 
-// Shared convoy driving: a self-generated road-graph route builder, a slot layout that seats the column ON
+// A self-generated road-graph route builder, a slot layout that seats the column ON
 // that route, and a driver that puts every hull on the route with setDriveOnPath (no native lead pathing).
 // Used by the HVT hunt, the deny-armour convoy and the roving vehicle patrol.
 fnc_convoy_path = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convoy_path.sqf";
@@ -177,7 +173,7 @@ fnc_transport_IDAP_mission = compile preprocessFileLineNumbers "duws\server\miss
 // Gates the offer on a neutral/BLUFOR town existing for the crew to wait in; runs client-side in the picker.
 fnc_transport_IDAP_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\transport_idap\fnc_transport_IDAP_site.sqf";publicVariable "fnc_transport_IDAP_site";
 fnc_target_hvt_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_target_hvt_mission.sqf";
-// The HVT convoy's destination picker and site-finder. Broadcast: the site-finder runs client-side in the
+// Broadcast: the site-finder runs client-side in the
 // offer picker (fnc_stratmap), and it calls the destination picker, which calls fnc_route_has_water.
 fnc_hvt_dest_pick = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_hvt_dest_pick.sqf";publicVariable "fnc_hvt_dest_pick";
 fnc_target_hvt_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_target_hvt_site.sqf";publicVariable "fnc_target_hvt_site";
@@ -263,7 +259,7 @@ fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\civilian\fn
 // it, and that trigger is global, so every machine evaluates it and every machine runs the body.
 fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_town_reveal.sqf";
 publicVariable "fnc_civ_town_reveal";
-// The board's map readout. The query is broadcast because a client is what calls it, and the
+// The query is broadcast because a client is what calls it, and the
 // two display halves because the server is what calls them back.
 fnc_map_readout_query = compile preprocessFileLineNumbers "duws\server\missions\fnc_map_readout_query.sqf";
 publicVariable "fnc_map_readout_query";
@@ -275,7 +271,7 @@ fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
 fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_panic.sqf";
-// Server-only: shared loadout helper -- arms civ-costume bodies from the faction gear pools and optionally flips them hostile (safehouse raid, angry mob, informant flee, protect-civ protectee).
+// Shared loadout helper for the safehouse raid, angry mob, informant flee and protect-civ protectee.
 fnc_civ_arm = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arm.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
@@ -318,7 +314,7 @@ fnc_civ_pickHiddenRoad = compile preprocessFileLineNumbers "duws\server\civilian
 // Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
 fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_clientActions.sqf";
 publicVariable "fnc_civ_clientActions";
-// Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
+// Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.
 fnc_civ_request = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_request.sqf";
 publicVariable "fnc_civ_request";
@@ -360,7 +356,7 @@ fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\warcom\o
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_init.sqf";
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_rebuild.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
-// taskings\ (Phase 3): streaming, ferry and garrison executed to define them; the store init, router,
+// taskings\: streaming, ferry and garrison executed to define them; the store init, router,
 // recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
@@ -373,8 +369,7 @@ fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\tas
 fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_task_step.sqf";
 fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_debug_task.sqf";
 
-// Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
-// un-broadcast like the other directors.
+// Server-side only, so left un-broadcast like the other directors.
 fnc_random_event_runner = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_runner.sqf";
 fnc_random_event_table = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_table.sqf";
 fnc_random_event_fire = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_fire.sqf";
@@ -391,7 +386,7 @@ fnc_random_event_ied = compile preprocessFileLineNumbers "duws\server\events\fnc
 // A client's completed defuse hold remoteExecs this to the server by name; not broadcast, clients never run it.
 fnc_random_event_ied_defuse = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_ied_defuse.sqf";
 fnc_random_event_mob = compile preprocessFileLineNumbers "duws\server\events\fnc_random_event_mob.sqf";
-// Thrown junk: fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
+// fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
 // bounces it. createVehicle is global, so the one server-simulated object networks to every machine on its own.
 fnc_throw = compile preprocessFileLineNumbers "duws\server\misc\fnc_throw.sqf";
 // Not broadcast: the debug menu remoteExecs it to the server by name, having re-checked game_master first.
@@ -426,7 +421,7 @@ fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_garrison_reserve.sqf";
 
 // MODERN is the baseline composition era, always compiled: fnc_zone_prefab_set falls back to it for
-// any era that ships no set of its own. A future era layers its own builders alongside these.
+// any era that ships no set of its own.
 
 fnc_modern_CommStation = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_CommStation.sqf";
 fnc_modern_outpost1 = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_outpost1.sqf";
@@ -436,7 +431,7 @@ fnc_modern_simple_zone = compile preprocessFileLineNumbers "duws\server\init_zon
 fnc_modern_StorageBunker = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_StorageBunker.sqf";
 fnc_modern_vehfittingstation = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_vehfittingstation.sqf";
 fnc_modern_FieldHospital = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_FieldHospital.sqf";
-// Era resolvers over the two composition sets (zone prefabs, hardpoint layouts). After the builders
+// After the builders
 // above so the zone set can reference them; the hardpoint resolver is read later by the placer.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_sets.sqf";
 
@@ -544,7 +539,7 @@ fnc_request_vehicle = compile preprocessFileLineNumbers "duws\client\dialog\fnc_
 fnc_request_support = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_support.sqf";publicVariable "fnc_request_support";
 fnc_support_list_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_support_list_fill.sqf";publicVariable "fnc_support_list_fill";
 fnc_support_sel_changed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_support_sel_changed.sqf";publicVariable "fnc_support_sel_changed";
-// The support catalogue and both of its mechanisms. Executed rather than stored: the file defines
+// Executed rather than stored: the file defines
 // several functions, and all of them run on the buyer's machine.
 [] call compile preprocessFileLineNumbers "duws\client\supports\fnc_supports_init.sqf";
 publicVariable "fnc_support_catalogue";
@@ -569,11 +564,11 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
-// The area-of-influence field: the coverage primitives and dominance read by the rep drift and the
+// The coverage primitives and dominance read by the rep drift and the
 // hardpoint band siting. Ahead of the hardpoint placer, whose band pass reads it. Definitions only.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\fnc_aoi_init.sqf";
-// Terrain scoring and the minefield generator: definitions only, read by the siting loop that is yet
-// to be written. Loaded here rather than at zone-gen time so both are in hand before generation runs.
+// Terrain scoring and the minefield generator: definitions only. Loaded here rather than at zone-gen
+// time so both are in hand before generation runs.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_siting.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_minefield.sqf";
 // Layout data the placer reads by name (DUWS_hardpointComp_<type>). Ahead of the placer so no build
@@ -590,8 +585,7 @@ fnc_hardpoint_reveal = compile preprocessFileLineNumbers "duws\server\init_zones
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_backfill.sqf";
 // The vanilla stand-in mop-up that runs after backfill for a preset or pasted faction's leftover keys.
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_vanilla_fill.sqf";
-// The commit-time pass that turns each side's one-class-per-role globals into per-spawn pools. Server
-// only: pools are read only by the spawn paths, which are server-side.
+// Server only: pools are read only by the spawn paths, which are server-side.
 fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_augment.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_spawn_vocab.sqf";
@@ -653,18 +647,18 @@ fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\debug\fnc
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
 fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
 fnc_debug_random_event_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_random_event_menu.sqf";publicVariable "fnc_debug_random_event_menu";
-// The OPCOM/AoI debug views and their draw callbacks. Broadcast: each view is a menu-row handler every
+// Broadcast: each view is a menu-row handler every
 // client holds, and the server remoteExecs the callback back to whichever client asked.
 fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_view.sqf";publicVariable "fnc_debug_opcom_view";
 fnc_debug_aoi_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_view.sqf";publicVariable "fnc_debug_aoi_view";
 fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_draw.sqf";publicVariable "fnc_debug_aoi_draw";
 fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_grid_draw.sqf";publicVariable "fnc_debug_opcom_grid_draw";
-// The OPCOM hand-drive menu and its picker; broadcast so a client can open them, then remoteExec fnc_debug_opcom back.
+// Broadcast so a client can open them, then remoteExec fnc_debug_opcom back.
 fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_menu.sqf";publicVariable "fnc_debug_opcom_menu";
 fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
-// Furnishing grid overlay and front-calibration tool. The view/draw/calibrate handlers are broadcast
+// The view/draw/calibrate handlers are broadcast
 // (menu-row handlers every client holds; the server remoteExecs the draw back to the asker); the gather
 // and calibrate-spawn are server-only, remoteExec'd to 2.
 fnc_debug_furnish_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_view.sqf";publicVariable "fnc_debug_furnish_view";
@@ -757,10 +751,9 @@ fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\
 publicVariable "fnc_activateBaseRecycleStation";
 fnc_activateBaseRepairStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRepairStation.sqf";
 publicVariable "fnc_activateBaseRepairStation";
-// The unified vehicle depot: one client action opening one dialog whose three panels cover
-// modification, storage and recycling. Broadcast because every one of these is client-side -- the
-// action registration, the dialog opener and fill, the recycle confirmation, and the two hoisted
-// modification sub-dialogs the menu opens on the selected vehicle.
+// Broadcast because every one of these is client-side -- the action registration, the dialog
+// opener and fill, the recycle confirmation, and the two hoisted modification sub-dialogs the
+// menu opens on the selected vehicle.
 fnc_client_addDepotActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addDepotActions.sqf";
 publicVariable "fnc_client_addDepotActions";
 fnc_vehicle_depot_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_vehicle_depot_menu.sqf";
@@ -796,7 +789,7 @@ publicVariable "fnc_wbk_survivorKilled_server";
 publicVariable "fnc_pylon_set_with_cost";
 publicVariable "fnc_pylon_hint_nocp";
 publicVariable "fnc_pylon_hint_success";
-// The vehicle garage store/retrieve. Broadcast like the pylon purchase above: the depot menu only
+// Broadcast like the pylon purchase above: the depot menu only
 // ever remoteExecs these to the server, but keeping them defined everywhere matches the pattern.
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_garage_init.sqf";
 publicVariable "fnc_garage_store";

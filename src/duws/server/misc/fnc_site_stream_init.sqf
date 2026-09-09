@@ -1,32 +1,21 @@
-// Locality: server -- publishes the site store. Called once from server_fnc_init, ahead of the zone
-// and town state files, which are its consumers.
-//
-// A site is a keyed place that carries occupants and puts them away when nobody is near: a zone, a
-// town, a FOB, the HQ. Its key is the one already in use -- zone_<x>_<y>, town_<n>, FOB_<n>, HQ.
-// A site holds one record per occupant it carries, so a town's crowd and a town's garrison are two
-// occupants of one site rather than two systems that happen to share a radius.
+// Locality: server -- publishes the site store; loaded ahead of the zone/town state files that consume it.
+// Site key: zone_<x>_<y> / town_<n> / FOB_<n> / HQ. One record per occupant, so a town's crowd and garrison are two occupants of one site, not two systems sharing a radius.
 if (!isServer) exitWith {};
 
-// Plain values only. The mission namespace is written into save games and everything in it must have
-// a serialized form, so the hooks -- which are CODE -- live in a store of their own and are rebuilt
-// at boot rather than restored (docs/info/architecture/arma_engine_gotchas.md).
+// Mission namespace values must serialize into save games; hooks are CODE, so they live in their own
+// store, rebuilt at boot rather than restored (docs/info/architecture/arma_engine_gotchas.md).
 if (isNil "DUWS_sites") then { DUWS_sites = createHashMap };
 if (isNil "DUWS_occupants") then { DUWS_occupants = createHashMap };
 if (isNil "DUWS_siteHooks") then { DUWS_siteHooks = createHashMap };
 
-// Disposal is a property of the site, not of what it carries. A zone's infantry is deleted and a
-// FOB's is frozen and they are the same kind of thing, so the choice sits one level up.
-//
-//   stream -- occupants are taken off the map: men deleted, structures stowed. What was lost is
-//             remembered as attrition rather than as objects.
-//   freeze -- everything stays where it is with simulation off. For a site whose contents are the
-//             player's property: rebuilding those from a table would hand back every soldier who
-//             had been killed and every point of damage a building had taken.
+// Disposal is a property of the site, not of what it carries: a zone's infantry is deleted, a FOB's
+// is frozen, same kind of thing decided one level up.
+// stream: occupants come off the map, losses counted as attrition. freeze: simulation off in place --
+// rebuilding player-owned contents from a table would refund every killed soldier and repaired damage point.
 #define DISPOSAL_DEFAULT "stream"
 
-// Registered once, by whatever builds the place. Idempotent: a zone that is rebuilt keeps the record
-// it already had, because the state on it -- the vacate latch, the empty clock -- describes the
-// ground rather than the garrison currently standing on it.
+// Idempotent: a rebuilt zone keeps its existing record -- the vacate latch and empty clock describe
+// the ground, not the garrison currently standing on it.
 fnc_site_register = {
     params ["_key", "_pos", "_radius", ["_disposal", DISPOSAL_DEFAULT]];
     private _s = DUWS_sites getOrDefault [_key, createHashMap];
@@ -35,8 +24,8 @@ fnc_site_register = {
         DUWS_sites set [_key, _s];
         DUWS_occupants set [_key, []];
     };
-    // Refreshed on every registration: a zone can be rebuilt at a different radius, and a stale one
-    // would stream against ground the site no longer covers.
+    // Refreshed every call: a rebuilt zone can change radius, and a stale one would stream against
+    // ground the site no longer covers.
     _s set ["pos", _pos];
     _s set ["radius", _radius];
     _s set ["disposal", _disposal];
@@ -45,23 +34,18 @@ fnc_site_register = {
 
 fnc_site_at = { params ["_key"]; DUWS_sites getOrDefault [_key, createHashMap] };
 
-// Buffer, grace and the whole presence answer are per occupant rather than per site, which the numbers
-// force: a town's crowd is noticed 200 m out and cleaned up after 60 s, and the garrison standing in the
-// same town is 400 and 120. Towns can sit 210 m apart where zones_spacing holds zones 1200 apart, and a
-// long grace on a crowd leaves a trail of populated towns behind a player crossing the map -- two
-// decisions about one town that a single pair of fields would have to pick a winner between. "Is anyone
-// here" therefore has two answers at one town, and each occupant keeps its own.
+// Buffer/grace/presence live per occupant, not per site: a town's crowd (200 m/60 s) and its garrison
+// (400 m/120 s) need different answers, and towns sit close enough (210 m apart vs 1200 m zone spacing)
+// that one shared pair of fields could not serve both without a trail of populated towns behind a
+// crossing player.
 //
-// awaitVacate starts latched: an occupant registered under a player's feet would otherwise read them
-// as having just walked up and raise its men around them.
+// awaitVacate starts latched, else an occupant registered under a player's feet reads them as just
+// having walked up and raises men around them.
 //
-// awake starts true on a frozen site and false on a streamed one, because it describes what is
-// standing rather than what is wanted: a streamed occupant has spawned nothing yet, while a frozen
-// one is registered around men who already exist and are already simulated. Starting it false would
-// leave the freeze with no transition to make -- the first empty pass would find the field already
-// saying "asleep" and never switch simulation off -- so a base nobody was near when the poller made
-// its first pass would stay fully simulated for the campaign. That is the HQ almost every game: it
-// registers at base build and the poller does not start until zone build-out has finished.
+// awake starts true on a frozen site (men already exist and are simulated) and false on a streamed one
+// (nothing spawned yet) -- describing what stands, not what's wanted. Starting frozen awake=false would
+// leave no transition to flip simulation off, so a base nobody is near on the poller's first pass (the
+// HQ, almost every game) would stay fully simulated all campaign.
 fnc_site_occupant_register = {
     params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120], ["_latch", true],
             ["_aiAware", true], ["_minAI", 2]];
@@ -82,11 +66,8 @@ fnc_site_occupant_register = {
     _o
 };
 
-// [_key, _kind, _side, _profile] call fnc_site_occupant_register_profile -> occupant
-//
-// Registers an occupant with the presence numbers a named profile carries, so the buffer, grace, latch,
-// AI-aware gate and hold-count for every site kind live in DUWS_streamProfiles rather than inline at
-// each caller. The default is the zone profile -- the same values this function already defaults to.
+// Presence numbers come from a named profile in DUWS_streamProfiles (buffer, grace, latch, AI-aware,
+// hold-count), not inlined per caller. Default profile matches this function's own defaults.
 fnc_site_occupant_register_profile = {
     params ["_key", "_kind", "_side", "_profile"];
     (DUWS_streamProfiles getOrDefault [_profile, [400, 120, true, true, 2]])
@@ -94,8 +75,8 @@ fnc_site_occupant_register_profile = {
     [_key, _kind, _side, _buffer, _grace, _latch, _aiAware, _minAI] call fnc_site_occupant_register
 };
 
-// createHashMap rather than nil for a miss: every caller reads fields off the answer, and a nil
-// would fault the whole pass rather than the one site that was never registered.
+// createHashMap rather than nil for a miss: callers read fields off the answer, and nil would fault
+// the whole pass rather than just the unregistered site.
 fnc_site_occupant = {
     params ["_key", "_kind"];
     private _list = DUWS_occupants getOrDefault [_key, []];
@@ -103,36 +84,31 @@ fnc_site_occupant = {
     if (_i < 0) then { createHashMap } else { _list select _i }
 };
 
-// Kept apart from the records so those stay serializable. Rebuilt at boot by whatever registers the
-// site, which is also what makes a reloaded campaign safe: the data comes back from the save and the
-// behaviour comes back from the source.
 fnc_site_hooks_set = {
     params ["_key", "_kind", "_hooks"];
     (DUWS_siteHooks getOrDefault [_key, createHashMap, true]) set [_kind, _hooks];
 };
 
-// A default is required rather than optional: a site whose hooks have not been registered yet must
-// answer, not fault, and "present" answering nil would read as false and quietly stop a whole kind
-// from ever waking.
+// A default is required, not optional: an unregistered site must answer, not fault -- "present"
+// returning nil would read as false and quietly stop a whole kind from ever waking.
 fnc_site_hook = {
     params ["_key", "_kind", "_name", ["_default", {}]];
     ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
         getOrDefault [_name, _default]
 };
 
-// Asked of the store rather than by comparing the answer against {}. Whether isEqualTo holds for two
-// separately compiled empty blocks is not a property worth resting a dispatch on.
+// Asked of the store, not by comparing against {}: whether isEqualTo holds for two separately
+// compiled empty CODE blocks isn't safe to dispatch on.
 fnc_site_hasHook = {
     params ["_key", "_kind", "_name"];
     _name in keys ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
 };
 
-// Every unit an occupant spawned, one array per site and kind.
-// A roster, not a per-unit flag: the capture condition polls this count twice a second, and walking
-// allUnits for stamped units would scan hundreds of entries on a firefight's frames. Dead men stay on it
-// (a corpse is still the site's to collect, and the count asks about the living); a unit that changes
-// hands -- a recruited civilian is the player's now -- is dropped, or teardown would delete a man in their
-// squad. Held outside the occupant record (references, not save state), the name derived once.
+// A roster (unit array per site+kind), not a per-unit flag: the capture condition polls this count
+// twice a second, and walking allUnits for stamped units would scan hundreds of entries mid-firefight.
+// Dead men stay on it (still the site's to collect; the count asks about the living). A unit that
+// changes hands (a recruited civilian) is dropped, or teardown would delete a man from their new squad.
+// Held outside the occupant record as references, not save state; the var name is derived once.
 fnc_site_roster_var = {
     params ["_siteKey", ["_kind", "garrison"]];
     format ["DUWS_siteUnits_%1_%2", _siteKey, _kind]
@@ -142,14 +118,14 @@ fnc_site_roster = {
     params ["_siteKey", ["_kind", "garrison"]];
     private _var = [_siteKey, _kind] call fnc_site_roster_var;
     private _r = missionNamespace getVariable [_var, []];
-    // Stored on first read so every later caller appends into the same array rather than into a
-    // copy the next read would discard.
+    // Stored on first read so later callers append into the same array, not a copy the next read
+    // would discard.
     if (isNil {missionNamespace getVariable _var}) then { missionNamespace setVariable [_var, _r] };
     _r
 };
 
 // Emptied in place, not replaced: callers hold the array itself, and swapping in a new one would
-// leave them appending into an array nothing reads.
+// leave them appending into one nothing reads.
 fnc_site_roster_clear = {
     params ["_siteKey", ["_kind", "garrison"]];
     private _r = [_siteKey, _kind] call fnc_site_roster;
@@ -163,13 +139,11 @@ fnc_site_roster_drop = {
     if (_i >= 0) then { _r deleteAt _i };
 };
 
-// The ground is gone: a FOB the player removed or an enemy destroyed. Everything keyed to it leaves
-// the store together, because nothing else ever will -- a record left behind goes on being asked
-// whether anybody is standing where the base used to be for the rest of the campaign, and a frozen
-// site pays a spatial query for that answer every pass.
-//
+// Everything keyed to a retired site leaves the store together -- a record left behind keeps being
+// asked whether anybody's at the (now gone) base for the rest of the campaign, paying a spatial query
+// every pass.
 // Rosters are emptied in place before their variables go, so anything still holding one of those
-// arrays reads it as empty rather than appending into a list nothing will collect.
+// arrays reads it as empty rather than appending into a list nothing collects.
 fnc_site_retire = {
     params ["_key"];
     {
@@ -182,13 +156,13 @@ fnc_site_retire = {
     DUWS_siteHooks deleteAt _key;
 };
 
-// Takes an occupant's men off the map with everything they leave behind.
-// By roster, never proximity: a radius sweep once took a neighbouring town's garrison, which then read
-// its untouched survivors as a mauling nobody inflicted and came back thinned for the campaign. A vehicle
-// goes only once nothing living is aboard, so a site-crewed transport leaves with its crew while a
-// player-parked one (not on the roster) stays; empty groups are swept too (not every spawner sets
-// deleteGroupWhenEmpty). A composition member is never taken this way (the persistent flag says so) --
-// collecting a zone turret gunner's emplacement would delete a gun about to be stowed.
+// By roster, never proximity: a radius sweep once caught a neighbouring town's garrison, which then
+// read its untouched survivors as a mauling nobody inflicted and came back thinned all campaign.
+// A vehicle goes only once nothing living is aboard, so a site-crewed transport leaves with its crew
+// while a player-parked one (off roster) stays; empty groups are swept too since not every spawner
+// sets deleteGroupWhenEmpty.
+// A composition member is never taken this way (persistent flag) -- collecting a zone turret gunner
+// would delete a gun about to be stowed.
 fnc_site_collect = {
     params ["_siteKey", ["_kind", "garrison"]];
     private _men = ([_siteKey, _kind] call fnc_site_roster) select { !isNull _x };
@@ -207,10 +181,10 @@ fnc_site_collect = {
     [_siteKey, _kind] call fnc_site_roster_clear;
 };
 
-// The groups a raise hands back, flattened to the men in them. A roster is a unit list everywhere,
-// so a garrison can be counted, thinned and collected without every caller having to know whether it
-// is holding groups or men. Global rather than a local helper: the callers are a spawned worker and
-// a hook the poller calls, and SQF has no closures -- neither can see the scope it was written in.
+// A roster is a unit list everywhere, so a garrison can be counted, thinned and collected without
+// every caller knowing whether it holds groups or men.
+// Global rather than local: callers are a spawned worker and a poller hook, and SQF has no closures --
+// neither can see the scope this was written in.
 fnc_site_men_of = {
     params ["_grps"];
     private _men = [];
@@ -218,22 +192,19 @@ fnc_site_men_of = {
     _men
 };
 
-// What an occupant is worth, wherever its men happen to be standing. Deliberately not bounded by the
-// site radius: a patrol that has wandered out is still the site's, and reinforcements that walk in
-// are not, which is the whole reason a roster exists.
+// Deliberately not bounded by the site radius: a patrol that's wandered out is still the site's, and
+// reinforcements walking in are not -- the whole reason a roster exists.
 fnc_site_alive = {
     params ["_siteKey", ["_kind", "garrison"]];
     { alive _x } count ([_siteKey, _kind] call fnc_site_roster)
 };
 
-// The freeze, as a disposal mode: nothing is rebuilt or deleted, each registered occupant just has its
-// simulation switched off where it stands and back on when anybody arrives (where nearly all of an idle
-// soldier's cost sits). enableSimulationGlobal, not enableSimulation -- the latter is local, so a
-// server-side freeze would leave clients still simulating them. This is why a base is exempt from
-// streaming: rebuilding one from a table would refund every killed soldier and lose its buildings' damage,
-// and it must stay a live respawn point. Only registered occupants freeze (a player-parked vehicle is not
-// the site's). The roster is read each pass, not captured, so a wholesale redeploy does not leave a watcher
-// thawing units that no longer exist; only units whose state differs are touched (the command broadcasts).
+// Freeze: nothing rebuilt or deleted, an occupant's simulation flips off where it stands.
+// enableSimulationGlobal, not enableSimulation -- the latter is local, so a server-side freeze would
+// leave clients still simulating.
+// Only registered occupants freeze (a player-parked vehicle isn't the site's). The roster is read each
+// pass, not captured, so a wholesale redeploy doesn't leave a watcher thawing units that no longer
+// exist; only units whose state differs are touched (the command already broadcasts).
 fnc_site_setFrozen = {
     params ["_key", "_o", "_awake"];
     {
@@ -244,40 +215,34 @@ fnc_site_setFrozen = {
     } forEach ([_key, _o get "kind"] call fnc_site_roster);
 };
 
-// The key a town's occupants file under. One place builds it, so the crowd and the garrison cannot
-// disagree about which town they are in.
+// Built in one place, so the crowd and garrison can't disagree about which town they're in.
 fnc_town_site_key = {
     params ["_townIndex"];
     format ["town_%1", _townIndex]
 };
 
-// How often every site is asked whether anything should change. Ten seconds because that is how long
-// a player stands somewhere before anything appears, and a garrison materialising late is the pop-in
-// every hold and latch in this system exists to prevent. Zones and crowds already ran at this; only
-// the town garrison was slower, at thirty.
+// Ten seconds: how long a player can stand somewhere before anything should appear, since a
+// late-materialising garrison is the pop-in every hold/latch here exists to prevent. Zones and crowds
+// already ran at this; only the town garrison was slower, at thirty.
 #define SITE_TICK 10
 
-// [_players, _pos, _ring] call fnc_site_near -> is any player within the ring. The presence test
-// for occupants that answer to players alone -- a town's crowd, and a base thawing on approach.
+// The presence test for occupants that answer to players alone -- a town's crowd, and a base thawing
+// on approach.
 fnc_site_near = {
     params ["_players", "_pos", "_ring"];
     (_players findIf { _x distance _pos < _ring }) >= 0
 };
 
-// [_pos, _ring, _minAI, _airRing, _airSpeed] call fnc_site_bluforOrAir -> BLUFOR present.
-//
-// The ground ring is answered by fnc_duws_bluforNear (a player, or _minAI friendly AI); the air ring,
-// when an occupant declares one (0 = none), additionally by any single BLUFOR aircraft -- player or AI
-// flown -- reaching in from beyond it. An AA emplacement must wake for a jet high overhead its ground
-// ring never reaches, and bluforNear discounts anything airborne, so the air answer is folded back in
-// here. The hardpoint form of presence, shared by the raise worker and the register so a wake and its
-// confirmation cannot reach opposite answers and strand the gun.
-//
-// _airSpeed (0 = no gate) and _playerAir filter the air answer to a zone's kind of threat: aircraft
-// under the speed, and -- when _playerAir -- only player-crewed ones or a UAV, so an AI transit or an AI
-// support heli is not a wake. AA passes neither (speed 0, _playerAir false): catching any jet at cruise
-// is what an AA ring is for. Both match the poller's prebuilt committed-air list, so a zone's wake and
-// this re-confirmation cannot disagree.
+// Ground ring: fnc_duws_bluforNear (player, or _minAI friendly AI). Air ring (occupant-declared,
+// 0 = none): any BLUFOR aircraft reaching in from beyond it, player or AI flown -- folded in here
+// because bluforNear discounts anything airborne, and an AA emplacement must still wake for a jet
+// overhead its ground ring never reaches.
+// Shared by the raise worker and the register, so a wake and its confirmation can't reach opposite
+// answers and strand the gun.
+// _airSpeed (0 = no gate) and _playerAir narrow the air answer to a zone's threat: under-speed and,
+// when _playerAir, only player-crewed or a UAV -- so an AI transit or support heli isn't a wake. AA
+// passes neither, to catch any jet at cruise. Both match the poller's prebuilt committed-air list, so
+// wake and re-confirmation can't disagree.
 fnc_site_bluforOrAir = {
     params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0], ["_playerAir", false]];
     if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
@@ -289,14 +254,12 @@ fnc_site_bluforOrAir = {
     }) >= 0
 };
 
-// One thread for every site, replacing a thread per zone plus a sleeper per FOB plus two town loops.
-//
-// The saving is the shared pre-gate, not the thread count: instead of every zone thread running
-// fnc_duws_bluforNear (a nearEntities + player-list build) each tick -- 240 spatial queries a minute over
-// a mostly empty map -- the player list is built once and every site distance-tested against it, the
-// spatial query paid only where somebody is. The risk is one long pass (scheduled scripts share ~3 ms a
-// frame), so the rule this poller is written to: gate, then dispatch -- never do real work inline. Every
-// hook below either answers a question or spawns a worker.
+// Replaces a thread per zone plus a sleeper per FOB plus two town loops with one. The saving is the
+// shared pre-gate, not the thread count: per-zone fnc_duws_bluforNear calls cost ~240 spatial queries a
+// minute over a mostly empty map; here the player list is built once and every site distance-tested
+// against it first, paying the spatial query only where somebody is.
+// Scheduled scripts share ~3 ms a frame, so the rule this poller is written to: gate, then dispatch,
+// never do real work inline. Every hook below either answers a question or spawns a worker.
 fnc_site_poller = {
     if (!isServer) exitWith {};
     while {true} do {
@@ -305,21 +268,16 @@ fnc_site_poller = {
         sleep SITE_TICK;
 
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
-        // Both lists built once for the whole pass, which is the point of the shared thread. A crowd
-        // is held up by a player and a garrison by any BLUFOR, so the two answers differ and each
-        // occupant says which it wants -- but neither costs a spatial query until somebody is
-        // actually within reach of the site being asked about.
+        // A crowd is held up by a player, a garrison by any BLUFOR -- two different answers, so both
+        // lists are built once here, and neither costs a spatial query until somebody is actually
+        // within reach of the site being asked about.
         private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
-        // WEST aircraft positions, for the air ring an occupant declares. Off the engine's vehicle
-        // list, not allUnits: one entry per aircraft rather than one per crew seat, and a far shorter
-        // list to walk than every man in the mission. Two of them, built in one pass:
-        //   _westAir           every WEST aircraft, for an AA ring that must catch any jet, AI-flown
-        //                      included -- that is the emplacement's whole job.
-        //   _westAirCommitted  a zone's kind of threat only: player-crewed aircraft (a player in a
-        //                      seat, or any UAV -- a player drives one by terminal with its body never
-        //                      aboard, so its crew never reads as a player) holding under
-        //                      DUWS_zoneAirCommitSpeed. An AI transit or an AI support heli is neither,
-        //                      so it never stands a garrison up.
+        // WEST aircraft positions for occupant-declared air rings, off the vehicle list (not
+        // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
+        // _westAir: every WEST aircraft, for an AA ring that must catch any jet, AI-flown included.
+        // _westAirCommitted: player-crewed aircraft (or any UAV -- its operator flies by terminal,
+        // body never aboard, so crew never reads as a player) holding under DUWS_zoneAirCommitSpeed,
+        // since an AI transit or support heli should never stand a garrison up.
         private _westAir = [];
         private _westAirCommitted = [];
         {
@@ -331,10 +289,9 @@ fnc_site_poller = {
                 _westAirCommitted pushBack _ap;
             };
         } forEach (vehicles select { _x isKindOf "Air" });
-        // The hostile half of the same gate, for the frozen sites below. Built here rather than
-        // asked per site, because a base with nothing near it would otherwise pay a spatial query
-        // every pass for the whole campaign -- and with the HQ plus a FOB per zone and a half, that
-        // is more of them than the per-zone threads this poller replaced ever ran.
+        // Hostile half of the same gate, for frozen sites below. Built once here rather than per
+        // site: with the HQ plus a FOB per zone-and-a-half, per-site spatial queries would run more
+        // often than the per-zone threads this poller replaced.
         private _east = (allUnits select { side _x == EAST }) apply { getPosATL _x };
         private _now = time;
         private _t0 = diag_tickTime;
@@ -349,30 +306,27 @@ fnc_site_poller = {
             {
                 private _o = _x;
                 private _kind = _o get "kind";
-                // An occupant a sibling orders. A zone's prefab has to be standing before anyone is
-                // placed on it and its turrets have to be crewed out before it can be stowed, so
-                // those two are driven by the garrison's own cycle rather than reaching their own
-                // conclusions about presence a fraction of a second apart from it.
+                // "driven" occupants are ordered by a sibling: a zone's prefab must stand before
+                // anyone is placed on it, and turrets must be crewed before stowing, so those two
+                // follow the garrison's own cycle instead of reaching their own presence conclusion a
+                // fraction of a second apart from it.
                 if (_o getOrDefault ["driven", false]) then { continue };
                 private _ring = _radius + (_o get "buffer");
                 private _here = if (_o get "aiAware") then {
-                    // Fewer AI hold a site than raise one. That hysteresis stops a zone flickering
+                    // Fewer AI hold a site than raise one -- hysteresis that stops a zone flickering
                     // off around the edges of the force that just took it.
                     private _min = if (_o get "awake") then {
                         _o getOrDefault ["minAIHold", _o get "minAI"]
                     } else { _o get "minAI" };
-                    // The cheap list gates the expensive helper rather than answering in its place:
-                    // fnc_duws_bluforNear still decides every ground arrival, so zones and towns go on
-                    // deciding it the same way. What the gate removes is a spatial query per site per
-                    // pass across a map that is nearly always empty of anyone.
+                    // Gates the expensive helper rather than replacing it: fnc_duws_bluforNear still
+                    // decides every ground arrival, so zones and towns keep deciding it the same way.
                     private _ground = (_west findIf { _x distance _pos < _ring }) >= 0
                         && { [_pos, _ring, _min] call fnc_duws_bluforNear };
-                    // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring. Only an
-                    // occupant that declares one (AA, or a zone) pays it, and it stays a distance test
-                    // over a prebuilt list. bluforNear discounts anything airborne, so this is the
-                    // whole of a site's reach against aircraft. airRingCommitted picks the committed
-                    // list -- a zone wakes only for player-crewed air or a UAV holding on-station; AA
-                    // leaves it unset and reads every aircraft, to catch a jet at cruise.
+                    // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring, only for
+                    // occupants that declare one (AA, or a zone), against the prebuilt list --
+                    // bluforNear discounts anything airborne, so this is a site's whole reach against
+                    // aircraft. airRingCommitted picks player-crewed/UAV only for a zone; AA reads
+                    // every aircraft to catch a jet at cruise.
                     _ground || {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
@@ -384,48 +338,39 @@ fnc_site_poller = {
                     [_players, _pos, _ring] call fnc_site_near
                 };
 
-                // A frozen site wakes on either side. A garrison that cannot be woken by an attacker
-                // is a garrison that loses its base while nobody is looking, and the shared BLUFOR
-                // test cannot answer it -- its AI arm exists to notice BLUFOR arriving on OPFOR
-                // ground, so at a friendly base it would count the garrison standing in the middle
-                // of the radius and never let it sleep.
-                //
-                // Gated by the cheap list first, the same way the BLUFOR arm is: the helper still
-                // decides, because it resolves crew and filters the dead where a bare unit list
-                // does neither, but it is only reached where somebody is actually within range.
+                // A frozen site must wake on either side too: a garrison the shared BLUFOR test can't
+                // rouse (its AI arm watches for BLUFOR on OPFOR ground) would sit in the middle of the
+                // radius unable to ever sleep, and lose its base while nobody's looking.
+                // Gated by the cheap list first: fnc_opfor_count_at still decides (it resolves crew
+                // and filters the dead, which the bare _east list does neither), reached only once
+                // somebody is actually within range.
                 if (_frozen && {!_here} && {(_east findIf { _x distance _pos < _ring }) >= 0}) then {
                     _here = ([_pos, _ring] call fnc_opfor_count_at) > 0;
                 };
 
-                // One empty sighting spends the latch, and a site cannot clear it and wake on the
-                // same pass: the arrival test cannot tell somebody walking up from somebody already
-                // standing in the middle, so an occupant registered under a player's feet would
-                // otherwise raise its men around them.
+                // Latch-clear and wake happen on different passes: the arrival test can't distinguish
+                // someone walking up from someone already standing there, so doing both in one pass
+                // would raise men around whoever was already inside.
                 if (_o get "awaitVacate") then {
                     if (!_here) then { _o set ["awaitVacate", false] };
                     _here = false;
                 };
 
-                // The empty clock, kept for every occupant whether or not it drives the default
-                // transitions below: an occupant with a cycle of its own still measures how long the
-                // site has been empty against its own grace.
+                // emptySince is kept for every occupant, even one with its own cycle below, since it
+                // still measures how long the site's been empty against its own grace.
                 if (_here) then { _o set ["emptySince", -1] } else {
                     if ((_o get "emptySince") < 0) then { _o set ["emptySince", diag_tickTime] };
                 };
 
-                // An occupant that answers to more than presence keeps its own cycle and is handed
-                // the answers this pass already has. A crowd exists whenever somebody is there; a
-                // garrison also answers to the reputation band, to what the commander has bought and
-                // to whether its town has been cleared, and folding those into wake-and-sleep would
-                // mean expressing them as a presence test they are not.
-                // if/else rather than an early exit: exitWith inside a forEach block ends the whole
-                // loop, so one occupant with a cycle of its own would stop every occupant after it
-                // from being serviced at all.
+                // An occupant that answers to more than presence (a garrison also weighs reputation,
+                // purchases, and whether its town is cleared) keeps its own cycle and is handed this
+                // pass's answers rather than folding into a presence test it isn't.
+                // if/else, not an early exit: exitWith inside a forEach ends the whole loop, so one
+                // occupant with its own cycle would stop every occupant after it from being serviced.
                 if (_frozen) then {
-                    // A frozen occupant has no wake-and-sleep transition to make: it is always
-                    // there, and all that changes is whether it is running. The grace period still
-                    // applies, so a player crossing the fence does not thaw the base and refreeze it
-                    // a second later.
+                    // A frozen occupant is always there -- only whether it's running changes. Grace
+                    // still applies so a player crossing the fence doesn't thaw and immediately
+                    // refreeze the base.
                     private _awake = _here || {_now - (_o getOrDefault ["lastSeen", -1e6]) <= (_o get "grace")};
                     if (_here) then { _o set ["lastSeen", _now] };
                     if !((_o get "awake") isEqualTo _awake) then {
@@ -445,9 +390,9 @@ fnc_site_poller = {
                             [_key, _o] call _fnc_sleep;
                         };
                     } else {
-                        // Two consecutive polls rather than a sleep-and-retest. Both forms exist for the
-                        // same reason -- a helicopter crossing the radius should not commit a fill --
-                        // and this one does not stall the pass that holds every other site's clock.
+                        // Two consecutive polls, not a sleep-and-retest: both exist so a helicopter
+                        // transiting the radius doesn't commit a fill, but this form doesn't stall the
+                        // shared pass that holds every other site's clock.
                         private _fnc_present = [_key, _kind, "present", {true}] call fnc_site_hook;
                         if (_here && {_o get "seenLast"} && {[_key, _o] call _fnc_present}) then {
                             _o set ["awake", true];
@@ -462,9 +407,9 @@ fnc_site_poller = {
             } forEach (DUWS_occupants getOrDefault [_key, []]);
         } forEach DUWS_sites;
 
-        // Scheduled thread: the engine spreads the pass across frames, so _passMs is wall-clock, not a
-        // single-frame cost (arma_engine_gotchas.md). Warn only past half the tick -- cadence slipping,
-        // not the many-frame spread the scheduler does by design.
+        // Scheduled thread: the engine spreads the pass across frames, so _passMs is wall-clock, not
+        // single-frame cost (arma_engine_gotchas.md). Warn only past half the tick, since that's
+        // cadence slipping, not the scheduler's by-design multi-frame spread.
         private _passMs = round ((diag_tickTime - _t0) * 1000);
         if (_passMs > SITE_TICK * 500) then {
             ["WARN", "STREAM", format ["site pass %1 ms of a %2 s cadence (%3 sites) -- cannot sustain, per-site work may have crept inline",

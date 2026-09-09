@@ -1,68 +1,51 @@
-// Locality: server -- spawn once the group has its move waypoint(s) or a CYCLE loop. The convoy
-// reliability engine: one control group in, native AI drives and fights it on release or teardown.
-//
-// Native vehicle route CALCULATION wedges the lead on open ground and at junctions, so this routes the
-// road itself (fnc_convoy_path) and puts EVERY hull on that fixed polyline via setDriveOnPath. Only each
-// hull's DRIVER gets disableAI "FSM" (the loop that would re-path it to a formation slot); gunner and
-// commander keep their AI, so the escort fights while the column keeps driving. PATH and AUTOCOMBAT stay
-// on -- setDriveOnPath needs PATH, and the HVT-peel and deny-armour ambush tests read behaviour.
-//
-// Legs are self-managed (native waypoint completion is not trusted, the lead not being native-driven);
-// spacing is held by a forceSpeed band with a no-overtake clamp. Recovery escalates on a per-hull wedge
-// counter: pace governor -> path re-issue -> regroup -> teleport (last resort, seats by original _pos so
-// a designed order like the HVT car's middle slot survives). Leadership is pinned to the lowest FIXED
-// column position, not live progress, so a stalled lead cannot hand off to a hull behind it.
-//
-// Hulls are read live: one joining mid-run (repaired tank) is picked up, one leaving (peeled HVT car)
-// dropped. DUWS_convoy_release (break and fight) and DUWS_convoy_stop (teardown) both hand every hull
-// back to native AI.
+// Server-side: call once the group has waypoint(s) or a CYCLE loop. One control group in; native AI
+// drives and fights it again on release or teardown.
+// Native route calc wedges the lead at junctions, so the road is pre-routed (fnc_convoy_path) and every
+// hull rides it via setDriveOnPath. Only each DRIVER gets disableAI "FSM" -- gunner/commander keep AI so
+// the escort still fights -- and PATH/AUTOCOMBAT stay on: setDriveOnPath needs PATH, and the HVT-peel /
+// deny-armour ambush tests read behaviour.
+// Legs are self-managed (native waypoint completion isn't trusted); spacing holds via a forceSpeed band
+// with a no-overtake clamp. Recovery escalates per wedged hull: pace governor -> path re-issue -> regroup
+// -> teleport (seats by original _pos so a designed order, e.g. the HVT car's slot, survives). Leadership
+// is pinned to the lowest FIXED position, not live progress, so a stalled lead can't hand off to a hull
+// behind it.
+// Hulls are read live: a joiner (repaired tank) is picked up, a leaver (peeled HVT car) dropped.
+// DUWS_convoy_release/_stop hand every hull back to native AI.
 params ["_group"];
 
-// Cross-system contract: flags this group as under scripted convoy control for the whole drive. The OPFOR OP
-// recon burst (DUWS_fnc_hardpointOPBurst) reveals BLUFOR to every EAST group map-wide; without this skip it
-// injects that knowledge into a convoy anywhere on the map, promoting the column out of SAFE and false-tripping
-// a mission's behaviour-based under-attack test. Cleared at teardown, so a released group is fair game again.
+// Flags this group as under scripted convoy control: without it, the OPFOR OP recon burst
+// (DUWS_fnc_hardpointOPBurst) reveals BLUFOR map-wide, promoting the column out of SAFE and false-tripping
+// a mission's under-attack test. Cleared at teardown, so a released group is fair game again.
 _group setVariable ["DUWS_convoy_handled", true];
 
-#define CV_TICK        0.5     // control period. Kept short: forceSpeed is held open-loop between ticks, so a
-                               // long period is dead time in the spacing loop -- at ~1.5 s the tail oscillated
-                               // (dead time approached the target gap). 0.5 s keeps the loop responsive.
-#define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_STUCK_MAX   30      // ticks (~15 s) the WHOLE column may stay frozen (nothing moving, lead not just
-                               // arriving) before the teleport-snap fires. The soft recovery ladder below (path
-                               // re-issue, then a native-path regroup) gets its chance across this window first;
-                               // a regroup that cannot free the column escalates here.
-#define CV_REGROUP_AT  10      // wedged ticks (~5 s) a follower may sit before the native-path regroup fires: the
-                               // column halts and every hull re-forms behind the front hull. Above CV_REISSUE so
-                               // the cheap path re-commit gets its shot first; well below CV_STUCK_MAX so the
-                               // view-safe regroup is tried long before the teleport.
-#define CV_FORMED      15      // a follower whose along-route gap to the hull ahead is within one slot + this (m)
-                               // counts as re-formed during a regroup; all followers formed -> the column resumes
-#define CV_REISSUE     6       // wedged ticks (~3 s) before a road hull's setDriveOnPath is re-committed, and the
-                               // cadence of re-tries after. A soft recovery well below CV_STUCK_MAX: a forceSpeed 0
-                               // (the rear-end / no-overtake clamp when the column bunches) drops a hull off its
-                               // committed path onto native idle, where a later positive forceSpeed is only a
-                               // ceiling and cannot restart it. Re-committing the path restores the setpoint. Gated
-                               // on the wedge (not every tick) so a rolling hull is never re-issued -- that churns.
+#define CV_TICK        0.5     // control period, kept short: forceSpeed is open-loop between ticks, and at
+                               // ~1.5 s dead time approached the target gap and the tail oscillated.
+#define CV_STUCK_KMH   3
+#define CV_STUCK_MAX   30      // ticks (~15 s) the whole column may sit frozen before the teleport-snap fires;
+                               // sized to let the softer path re-issue / regroup recovery run its course first.
+#define CV_REGROUP_AT  10      // wedged ticks (~5 s) before the native-path regroup fires. Above CV_REISSUE so
+                               // the cheap path re-commit gets first shot; well below CV_STUCK_MAX so the
+                               // view-safe regroup is tried before the teleport.
+#define CV_FORMED      15      // gap to the hull ahead within one slot + this (m) counts as "formed" during a
+                               // regroup; all formed -> the column resumes.
+#define CV_REISSUE     6       // wedged ticks (~3 s) before setDriveOnPath is re-committed, and retry cadence
+                               // after: forceSpeed 0 (the bunching clamp) drops a hull onto native idle, where a
+                               // later positive forceSpeed is only a ceiling and can't restart it. Gated on the
+                               // wedge so a rolling hull is never re-issued.
 #define CV_ARRIVE      25      // lead within this of the leg waypoint -> the leg is done, advance to the next
-// Gap mode (a leg the road search could not connect -- see the off-road branch): the lead pathfinds NATIVELY
-// across the gap and the followers replay its driven track. A crumb is the lead's position, laid once it has
-// advanced CV_STEP from the last, and only the last CV_TRAIL are kept as the follow-window. Native routing is
-// trusted here -- and only here -- because the alternative on a roadless gap is a blind straight line through
-// whatever water or terrain lies between the ends; native pathing routes around it and rejoins the road on its
-// own. The FIRST successful crossing is cached in full (see _gapCache) and replayed on every later lap, so a
-// CYCLE patrol proves each gap once instead of re-rolling native routing -- the least reliable step -- each lap.
+// Gap mode (a leg the road search could not connect): the lead pathfinds NATIVELY across it and followers
+// replay its driven track (a crumb laid every CV_STEP, last CV_TRAIL kept). Native routing is trusted only
+// here because the alternative is a blind straight line through whatever lies between the ends. The first
+// successful crossing is cached (_gapCache) and replayed on later laps, so a CYCLE patrol proves each gap once.
 #define CV_STEP        8       // lead must advance this far (m) before a new crumb is laid
 #define CV_TRAIL       40      // crumbs kept (~320 m of track): longer than any column, short enough that a
                                // CYCLE patrol's looping track never snaps a follower onto a previous lap
 #define CV_SNAP_SCAN   40      // teleport-snap: route points ahead of the lead scanned for a straight anchor
-#define CV_SNAP_STRAIGHT 45    // teleport-snap: max total heading change (deg) over the column span for an anchor
-                               // to count as straight enough -- loose on purpose, just keeps the realign off a
-                               // hard bend. Too tight sent the scan hunting far ahead for a near-perfect stretch,
-                               // teleporting the column well forward of where it actually was.
+#define CV_SNAP_STRAIGHT 45    // teleport-snap: max heading change (deg) over the column span to count as
+                               // straight; loose on purpose -- too tight sent the scan hunting for a
+                               // near-perfect stretch, teleporting the column well past its actual spot.
 #define CV_SNAP_AHEAD  60      // teleport-snap: cap (m) on how far ahead of the lead the anchor may sit, so the
-                               // snap realigns the column near where it is instead of flinging it forward to a
-                               // distant straight. In metres (not point count): route point spacing varies.
+                               // snap stays near the column instead of flinging it forward to a distant straight.
 
 // forceSpeed takes m/s. If an in-game check (a truck given `forceSpeed 8` rolls at ~29 km/h) proves it
 // is km/h instead, set CV_KMH2FS to 1.0 so km/h values pass straight through.
@@ -71,34 +54,26 @@ _group setVariable ["DUWS_convoy_handled", true];
 #define CV_NOLIMIT     1e10    // limitSpeed reset ("no cap"): -1 does NOT reset (forces helis reverse); the
                                // default is 2*maxSpeed, so a value past any vehicle's top speed removes the cap
 
-#define CV_CRUISE_FRAC 0.85    // convoy cruise = this fraction of the slowest hull's config top speed, then
-                               // capped at CV_CRUISE_MAX. Below top on purpose: the difference is the headroom a
-                               // lagging follower spends to close a gap. Zero headroom (cruise == top) leaves
+#define CV_CRUISE_FRAC 0.85    // convoy cruise = this fraction of the slowest hull's top speed, capped at
+                               // CV_CRUISE_MAX. Below top on purpose: zero headroom (cruise == top) leaves
                                // small lags uncloseable and the column string-unstable.
-#define CV_CRUISE_MAX  45      // hard ceiling on convoy cruise (km/h). Config maxSpeed is the flat-out downhill
-                               // figure (wheeled hulls ~90-110), far above a sane road-convoy pace, so an
-                               // all-wheeled column paced to it would zoom and drag the followers along. A
-                               // genuinely slow tracked hull (top below this) still sets its own slower pace.
+#define CV_CRUISE_MAX  45      // hard ceiling on convoy cruise (km/h): config maxSpeed is a flat-out downhill
+                               // figure (wheeled hulls ~90-110), far above a sane convoy pace. A genuinely slow
+                               // tracked hull (top below this) still sets its own slower pace.
 #define CV_CATCHUP_GAIN 20     // catch-up ceiling = cruise + this (km/h), never past the hull's own top: a
-                               // lagging follower runs a little above cruise to close, not flat out -- full-top
-                               // catch-up overshoots station into the same stop-start it is meant to damp.
-#define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot (~22 m, see
-                               // fnc_convoy_slots): long escorts must not spawn bumper-to-bumper and explode,
-                               // but the column closes to this once rolling.
-#define CV_GAP_KP      1.5     // spacing gain: km/h added to the cruise setpoint per metre the along-route gap
-                               // exceeds CV_GAP_WANT (negative when closer than target). A gentle ramp around
-                               // cruise, clamped to [0, catch-up].
-#define CV_GAP_KD      0.7     // damping gain: km/h per km/h of closing speed (aheadSpd - mySpd). Brakes an
-                               // overshoot while closing; when the lead accelerates it feeds the tail forward
-                               // with it, instead of reacting a tick late once the gap has already opened.
+                               // full-top catch-up overshoots station into the stop-start it's meant to damp.
+#define CV_GAP_WANT    20      // target spacing to the hull ahead (m); tighter than the spawn slot (~22 m, see
+                               // fnc_convoy_slots) so long escorts don't spawn bumper-to-bumper and explode.
+#define CV_GAP_KP      1.5     // spacing gain: km/h added to cruise per metre the along-route gap exceeds
+                               // CV_GAP_WANT -- a gentle ramp, not a hard snap to target spacing.
+#define CV_GAP_KD      0.7     // damping gain: km/h per km/h of closing speed. Brakes overshoot while closing,
+                               // and feeds the tail forward when the lead accelerates instead of reacting late.
 #define CV_GAP_HARD    4       // straight-line: closer than this, hard-stop -- backstop against rear-ending
-#define CV_LAG_OK      28      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases. Kept
-                               // close to CV_GAP_WANT (only ~8 m of slack): a wider tolerance let the lead hold
-                               // full cruise while a follower fell to ~2x target spacing, so the lead outran a
-                               // lagging tail before reacting -- the followers' catch-up headroom is finite.
-#define CV_LAG_STOP    70      // at or past this the lead eases to a halt until the column closes up. The
-                               // CV_LAG_OK..this ramp is deliberately narrow (~40 m) so the lead sheds speed
-                               // steeply once the column stretches, rather than drifting on at near-cruise.
+#define CV_LAG_OK      28      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases.
+                               // Kept close to CV_GAP_WANT: a wider tolerance let the lead hold full cruise
+                               // while a follower fell to ~2x target spacing before reacting -- catch-up headroom is finite.
+#define CV_LAG_STOP    70      // at or past this the lead halts until the column closes up. The CV_LAG_OK..this
+                               // ramp is deliberately narrow (~40 m) so the lead sheds speed steeply, not slowly.
 #define CV_REROUTE     30      // leg waypoint drifted this far from the route's end -> recompute the route
 
 private _route  = [];             // the current leg's drivable polyline (from fnc_convoy_path), start..dest
@@ -117,22 +92,18 @@ private _regroupLead = objNull;   // the hull the regroup forms up behind (froze
 private _regroupTicks = 0;        // ticks the current regroup has run; gates the doMove re-issue to CV_REISSUE cadence
 private _allStuck    = 0;         // consecutive ticks the WHOLE column is frozen -- drives the Tier 4 teleport
 private _dumped = false;          // one-time level-4 dump of the waypoint list, so a stuck start is diagnosable
-// A caller that pre-seats its column ON the route hands that route in DUWS_convoy_route0: the driver reuses it
-// for the first leg (no recompute) and skips the spawn-ordering snap (the column already sits on it, in order).
-// A caller that does not gets the one-time snap instead, so ordering is guaranteed either way.
+// A caller that pre-seats its column ON the route hands it via DUWS_convoy_route0: the driver reuses it for the
+// first leg and skips the spawn-ordering snap. A caller that doesn't gets the one-time snap instead.
 private _route0 = _group getVariable ["DUWS_convoy_route0", []];
 private _needInitOrder = (_route0 isEqualTo []);
 
-// A leg's route is a list of SEGMENTS from fnc_convoy_path, each [points, "road"|"gap"]. The driver walks them
-// in order: _segs holds the leg's segments, _segIdx the current one, _segTarget its end (the lead's goal until
-// it hands off to the next segment). A "road" segment is driven on its fixed polyline with setDriveOnPath; a
-// "gap" segment (the span the road search could not bridge) is driven with the lead pathfinding natively while
-// the followers replay its crumb trail. So off-road complements the road route rather than replacing the leg,
-// and every follower/spacing/recovery helper runs unchanged over whichever _route the current segment sets.
-// _legOffroad = the current segment is a gap, and gates every gap branch; a road segment never touches the
-// crumb machinery. _pathed tracks whether a hull holds a setDriveOnPath (cleared before a doMove); _gapIssued
-// is the gap analogue of _issued (a fixed route re-issues on index change, a growing crumb trail as the lead
-// advances). _legTargetCached is the waypoint the segments were built for, to spot a drifted waypoint.
+// A leg's route is a list of SEGMENTS from fnc_convoy_path, each [points, "road"|"gap"]: _segs holds them,
+// _segIdx the current one, _segTarget its end. "road" drives the fixed polyline via setDriveOnPath; "gap"
+// (unbridgeable by the road search) has the lead pathfind natively while followers replay its crumb trail.
+// This lets off-road complement the route instead of replacing it -- every follower/spacing/recovery helper
+// runs unchanged over whichever _route the current segment sets.
+// _legOffroad gates gap branches; _pathed tracks a committed setDriveOnPath (cleared before doMove);
+// _gapIssued is the gap analogue of _issued; _legTargetCached is the waypoint the segments were built for.
 private _segs       = [];
 private _segIdx     = 0;
 private _segTarget  = [];
@@ -141,21 +112,16 @@ private _legOffroad = false;
 private _crumbs   = [];
 private _pathed   = createHashMap;   // netId -> a setDriveOnPath is committed (clear before a doMove)
 private _gapIssued = createHashMap;  // netId -> last gap issue [startIdx, leadPos]
-// Gap-trail cache: the first successful crossing of a gap is remembered and replayed on every later lap,
-// so a CYCLE patrol proves each gap once instead of re-running native pathfinding every time round. The gap
-// is exactly where native routing is least reliable, so a proven line is worth most there. _gapTrail
-// accumulates the WHOLE crossing (not the CV_TRAIL follow-window), committed to _gapCache only once the
-// column clears the gap onto the next segment -- a line that dead-ended is never cached. _gapReplay = the
-// current gap is being driven from a cached trail (lead and followers ride the fixed line with setDriveOnPath
-// like a road segment, no native re-cross); _gapSetupKey guards the once-per-gap cache lookup and keys the
-// commit. Cached crossings are permanent, exactly like the road-route cache: a setDriveOnPath hull keeps the
-// engine's local avoidance, so it rounds a wreck newly on the line as it would on a road route, and Tier 4
-// blinks the column past any residual block -- so a proven crossing is never discarded and re-proved.
+// _gapTrail accumulates the WHOLE crossing (uncapped, unlike the CV_TRAIL crumb window), committed to
+// _gapCache only once the column clears the gap -- a dead-ended line is never cached. _gapReplay = this gap is
+// being driven from a cached trail (setDriveOnPath, no native re-cross); _gapSetupKey guards the once-per-gap
+// cache lookup. Cached crossings are never invalidated: a setDriveOnPath hull still rounds a wreck newly on
+// the line via its own local avoidance, and Tier 4 blinks past any residual block anyway.
 private _gapCache  = createHashMap;  // gapKey -> full proven crossing trail (ends at the road-entry point)
-private _gapTrail  = [];             // accumulating full crossing while native-crossing (uncapped, unlike _crumbs)
-private _gapReplay = false;          // current gap driven from a cached trail (no native re-cross)
+private _gapTrail  = [];
+private _gapReplay = false;
 private _gapStart  = [];             // current segment's fixed first point; with _segTarget it keys the gap cache
-private _gapSetupKey = "";           // key of the gap whose cache lookup has run this crossing ("" = not yet)
+private _gapSetupKey = "";           // "" = no gap crossing set up yet this leg
 
 // Load segment _i of _segs -> [points, isGap, endPoint, cumulativeArcLengths, startPoint]. The caller assigns
 // these to _route / _legOffroad / _segTarget / _cum / _gapStart; _segTarget and _gapStart are captured here
@@ -170,9 +136,8 @@ private _fnc_segAt = {
     [_pts, (_seg select 1) == "gap", _pts select (count _pts - 1), _cm, _pts select 0]
 };
 
-// Gap-trail cache key: the gap's fixed endpoints (road exit -> road entry) bucketed to 5 m, matching the road
-// route cache's scheme. Both come from fnc_convoy_path and are deterministic, so a CYCLE lap re-crossing the
-// same gap resolves to the same key and reuses the proven trail.
+// Gap-trail cache key: the gap's fixed endpoints bucketed to 5 m (matching the road-route cache). Deterministic
+// from fnc_convoy_path, so a CYCLE lap re-crossing the same gap resolves to the same key and reuses the trail.
 private _fnc_gapKey = {
     params ["_a", "_b"];
     format ["%1_%2_%3_%4",
@@ -211,11 +176,10 @@ private _stationBack = {
     _res
 };
 
-// Pick a snap anchor on a relatively straight stretch of the route, so realigning the column does not lay it
-// across a harsh bend (hulls laid back from a corner sit crossways / off the road). Loose by design: scans
-// forward from _from and returns the first index whose window -- back over the column length _backLen and one
-// point forward -- turns less than CV_SNAP_STRAIGHT degrees in total; if the route stays curvy through the
-// scan, returns the straightest index found. Indices clamped to the route interior.
+// Pick a snap anchor on a relatively straight stretch, so realigning the column doesn't lay it across a harsh
+// bend (hulls sit crossways off the road). Scans forward from _from for the first index whose window (back
+// over _backLen, one point forward) turns less than CV_SNAP_STRAIGHT degrees total; falls back to the
+// straightest index found. Indices clamped to the route interior.
 private _fnc_straightAnchor = {
     params ["_from", "_backLen"];
     private _n = count _route;
@@ -225,12 +189,10 @@ private _fnc_straightAnchor = {
     private _bestI = _lo;
     private _bestTurn = 1e9;
     for "_i" from _lo to _hi do {
-        // Stop scanning once the anchor would sit more than CV_SNAP_AHEAD past where the lead is, so the snap
-        // stays near the column instead of teleporting it forward to a distant straight; keep the best so far.
-        // Measured from the lead's own index (_from - 2, since _from starts the search 2 points ahead), not the
-        // search start, so the cap is a true distance-ahead-of-lead regardless of route point spacing.
+        // Stop scanning once the anchor would sit more than CV_SNAP_AHEAD past the lead (keep the best found so far).
+        // Measured from the lead's own index (_from - 2, since _from starts the search 2 points ahead) so the cap
+        // is a true distance-ahead-of-lead regardless of route point spacing.
         if (_i > _lo && {((_cum select _i) - (_cum select ((_from - 2) max 0))) > CV_SNAP_AHEAD}) exitWith {};
-        // walk back from _i until _backLen of route is covered, then sum absolute heading change through _i+1
         private _acc = 0; private _k = _i;
         while { _k > 1 && {_acc < _backLen} } do {
             _acc = _acc + ((_route select _k) distance2D (_route select (_k - 1)));
@@ -250,9 +212,9 @@ private _fnc_straightAnchor = {
     _bestI
 };
 
-// Teleport a wedged hull onto a clean spot: reject one fouled by another vehicle or a static and back off
-// along the column axis until clear (the station sits on our own road route, so it almost always is), level
-// any flipped hull and face it down the route, kill its momentum, and drop its path order for a fresh issue.
+// Teleport a wedged hull onto a clean spot: reject one fouled by another vehicle/static and back off along the
+// column axis until clear (the station sits on our own route, so it almost always is); level a flipped hull,
+// face it down-route, kill momentum, and drop its path order for a fresh issue.
 private _snapHull = {
     params ["_veh", "_pos", "_faceDir"];
     private _p = _pos;
@@ -304,16 +266,16 @@ while {
     && {!(_group getVariable ["DUWS_convoy_stop", false])}
     && {!(_group getVariable ["DUWS_convoy_release", false])}
 } do {
-    // Driven hulls = every crewed vehicle whose driver is in this group, taken live so a hull joining or
-    // leaving mid-run is followed without the caller tracking a list. Each hull is added once (only its
-    // driver adds it), so the array is already distinct.
+    // Driven hulls = every crewed vehicle whose driver is in this group, taken live so a joiner/leaver is
+    // followed without the caller tracking a list. Each hull is added once (only its driver adds it), so the
+    // array is already distinct.
     private _hulls = [];
     { if (vehicle _x != _x && {driver (vehicle _x) == _x}) then { _hulls pushBack (vehicle _x) } } forEach units _group;
 
-    // One-time config as a hull first appears: keep a bumped/immobilised crew aboard rather than dumped onto
-    // the road to block the column; clear any inherited path order/road-lock (a peeled car); cache its config
-    // top speed. forceFollowRoad stays FALSE throughout -- our route already includes the off-road stubs, and
-    // a road-lock would forbid driving them.
+    // One-time config as a hull first appears: keep a bumped/immobilised crew aboard rather than dumped onto the
+    // road (blocking the column); clear any inherited path order/road-lock (a peeled car); cache its config top
+    // speed. forceFollowRoad stays FALSE throughout -- our route already includes off-road stubs, and a
+    // road-lock would forbid driving them.
     {
         private _id = netId _x;
         if (isNull (_seen getOrDefault [_id, objNull])) then {
@@ -326,8 +288,7 @@ while {
             _x forceFollowRoad false;
             private _t = getNumber (configOf _x >> "maxSpeed");
             _topspd set [_id, if (_t > 0) then { _t } else { 60 }];
-            // Only the driver's FSM is disabled, so the hull holds setDriveOnPath while the gunner keeps its
-            // AI and fights (see the header). PATH and AUTOCOMBAT stay on.
+            // Only the driver's FSM is disabled -- gunner/commander keep AI and fight (see the header).
             (driver _x) disableAI "FSM";
         };
     } forEach _hulls;
@@ -341,9 +302,9 @@ while {
         // position; thereafter each leg starts at the anchor the previous one reached (set on advance).
         if (_legStart isEqualTo []) then { _legStart = getPosATL (vehicle (leader _group)) };
         private _wpCount = count (waypoints _group);
-        // Skip a placeholder waypoint: Arma gives every group an implicit waypoint 0 at its start whose
-        // waypointPosition reads [0,0,0], and a wrapped/advanced index can land on an empty slot. Step past
-        // any [0,0,0] to the next real waypoint, so the column never sits waiting on the map origin.
+        // Skip a placeholder waypoint: Arma gives every group an implicit waypoint 0 whose position reads
+        // [0,0,0], and a wrapped/advanced index can land on an empty slot -- step past any [0,0,0] so the
+        // column never sits waiting on the map origin.
         while { _legIdx < _wpCount && {(waypointPosition [_group, _legIdx]) isEqualTo [0, 0, 0]} } do { _legIdx = _legIdx + 1 };
         private _wpTarget = if (_legIdx < _wpCount) then { waypointPosition [_group, _legIdx] } else { [0, 0, 0] };
         if (duws_log_level >= 4 && {!_dumped}) then {
@@ -356,9 +317,9 @@ while {
         if (_wpTarget isEqualTo [0, 0, 0]) then {
             { _x forceSpeed 0 } forEach _live;
         } else {
-            // (Re)build the leg's segmented route when the leg changed (segments emptied on advance) or the
-            // waypoint drifted from what the segments were built for. Cache by the rounded [legStart, waypoint]
-            // (5 m buckets) so a CYCLE patrol reuses each lap's legs. A rebuild starts at segment 0.
+            // (Re)build the leg's segmented route when the leg changed or the waypoint drifted from what the
+            // segments were built for. Cached by rounded [legStart,waypoint] (5 m buckets) so a CYCLE patrol
+            // reuses each lap's legs.
             if (_segs isNotEqualTo [] && {_wpTarget distance2D _legTargetCached > CV_REROUTE}) then { _segs = [] };
             if (_segs isEqualTo []) then {
                 private _key = format ["%1_%2_%3_%4",
@@ -366,9 +327,9 @@ while {
                     round ((_wpTarget select 0) / 5), round ((_wpTarget select 1) / 5)];
                 _segs = _cache getOrDefault [_key, []];
                 if (_segs isEqualTo []) then {
-                    // Hold the column while a fresh route computes. fnc_convoy_path yields across frames on a
-                    // long search, so this forceSpeed 0 keeps the hulls put meanwhile; on a fast (single-frame)
-                    // compute it is overwritten by the real speed later this tick, so the column never stops.
+                    // Hold the column while a fresh route computes: fnc_convoy_path yields across frames on a
+                    // long search, so this forceSpeed 0 keeps hulls put meanwhile; a fast (single-frame) compute
+                    // is overwritten by the real speed later this tick.
                     { _x forceSpeed 0 } forEach _live;
                     _segs = [_legStart, _wpTarget] call fnc_convoy_path;
                     _cache set [_key, _segs];
@@ -383,26 +344,23 @@ while {
                 if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["route grp=%1 leg=%2 segs=%3 seg0=%4 pts=%5", _group, _legIdx, count _segs, ["road", "gap"] select _legOffroad, count _route]] call fnc_log };
             };
 
-            // Convoy cruise = the slowest live hull's config top speed (a slow tracked hull sets the pace, a
-            // fast escort does not run off), below top by CV_CRUISE_FRAC for catch-up headroom and capped at
-            // CV_CRUISE_MAX so an all-wheeled column does not zoom. Catch-up is cruise + a small gain, never
-            // past the hull's own top. Recomputed live so a hull joining/leaving reshapes the pace.
+            // Convoy cruise = the slowest live hull's top speed (a fast escort doesn't run off); recomputed live
+            // each tick so a hull joining or leaving reshapes the pace.
             private _topMin = 1e9;
             { _topMin = _topMin min (_topspd getOrDefault [netId _x, 60]) } forEach _live;
             if (_topMin >= 1e9) then { _topMin = 60 };
             private _cruise  = (_topMin * CV_CRUISE_FRAC) min CV_CRUISE_MAX;
             private _catchup = (_cruise + CV_CATCHUP_GAIN) min _topMin;
 
-            // Gap leg: rebuild _route from the lead's crumb trail BEFORE progress/spacing, so every helper below
-            // (progress, gap, recovery) runs over the crumbs exactly as it does over a road route. The lead used
-            // here is last tick's (the re-pick below refines it once crumbs exist); at gap entry that is the road
-            // leg's frontmost hull, which is right. Lay a crumb once it has advanced CV_STEP, cap the trail, and
-            // rebuild the arc-length table _cum. On the first gap tick the trail is one point; followers hold or
-            // aim straight at the lead until it lengthens (see the issue branch), which is the intended stagger.
+            // Rebuild _route from the lead's crumb trail BEFORE progress/spacing, so every helper below runs over
+            // the crumbs exactly as it does over a road route. Lead here is last tick's (refined below once
+            // crumbs exist). Lay a crumb once advanced CV_STEP, cap the trail, rebuild _cum; on the first gap
+            // tick the trail is one point and followers aim straight at the lead until it lengthens -- the
+            // intended stagger.
             if (_legOffroad && {count _live > 0}) then {
-                // Once per gap entry: resolve the cache. A hit replays the proven trail (the whole column rides
-                // the fixed line with setDriveOnPath like a road segment -- see the dispatch below -- so no native
-                // re-cross); a miss crosses natively and accumulates a fresh trail to cache on success.
+                // Once per gap entry, resolve the cache: a hit replays the proven trail (whole column rides it via
+                // setDriveOnPath, no native re-cross); a miss crosses natively and accumulates a fresh trail to
+                // cache on success.
                 private _key = [_gapStart, _segTarget] call _fnc_gapKey;
                 if (_key != _gapSetupKey) then {
                     _gapSetupKey = _key;
@@ -434,22 +392,21 @@ while {
             private _prog = createHashMap;
             { private _v = _x; _prog set [netId _v, [getPosATL _v] call _progressOf] } forEach _live;
 
-            // Fixed convoy position per hull (0 = front), assigned once and never re-derived from live progress:
-            // the column's order stays put, so a hull that stalls or briefly reverses keeps ITS slot instead of
-            // being reordered, and the teleport realign (below) seats everyone in this order rather than in the
-            // scrambled progress order a stall produces. The spawn batch all appears the first tick, ordered by
-            // how the caller seated it on the route (front hull highest progress); a later joiner (the repaired
-            // deny tank) appears alone and takes the next rear slot.
+            // Fixed convoy position per hull (0 = front), assigned once, never re-derived from live progress: a
+            // stalled or reversing hull keeps its slot instead of being reordered, and the teleport realign seats
+            // everyone by this order rather than scrambled progress. The spawn batch all appears the first tick,
+            // ordered by how the caller seated it (front = highest progress); a later joiner (the repaired deny
+            // tank) takes the next rear slot.
             private _unassigned = _live select { isNil { _pos get (netId _x) } };
             if (_unassigned isNotEqualTo []) then {
                 { _pos set [netId _x, _nextPos]; _nextPos = _nextPos + 1 } forEach
                     ([_unassigned, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy);
             };
 
-            // Lead = the live hull with the lowest fixed position (the frontmost SEATED hull), not the frontmost
-            // by live progress: a stalled or briefly-reversing lead must not hand its slot to a hull behind it,
-            // which would then drive a backward route slice. Only the front hull's death moves the lead to the
-            // next position. cv_lead is read by callers (HVT's tracking marker).
+            // Lead = the live hull with the lowest fixed position, not the frontmost by live progress: a stalled
+            // or reversing lead must not hand its slot to a hull behind it (that hull would then drive a
+            // backward route slice). Only the front hull's death advances the lead. cv_lead is read externally
+            // (HVT's tracking marker).
             private _lead = objNull; private _bestPos = 1e9;
             { private _p = _pos getOrDefault [netId _x, 1e9]; if (_p < _bestPos) then { _bestPos = _p; _lead = _x } } forEach _live;
             if (isNull _lead) then { _lead = _live select 0 };
@@ -461,15 +418,13 @@ while {
                 private _liveFollowers = _live select { _x != _lead };
                 private _leadProg = _prog getOrDefault [_leadId, -1];
 
-                // TIER 3 REGROUP (native-path, view-safe): a follower wedged past CV_REGROUP_AT ticks tripped
-                // _regroup -- Tier 2's path re-issue could not free it. The column halts and every other hull
-                // native-pathfinds up to close the gap on the hull ahead, re-forming behind the frozen front hull
-                // in whatever order they arrive (we renumber on success, so exact order does not matter). Native
-                // pathing -- dropped for normal driving, fnc_convoy_path routes instead -- is trusted here only as
-                // a recovery nudge from a free spot: it rounds a dynamic block a re-committed setDriveOnPath cannot.
-                // On success the order they formed up in is committed to _pos; a regroup that cannot close the
-                // column up escalates to the Tier 4 teleport, which seats by the ORIGINAL _pos so the designed
-                // order (e.g. the HVT car's middle slot) is restored on failure.
+                // TIER 3 REGROUP (native-path, view-safe): a follower wedged past CV_REGROUP_AT tripped _regroup
+                // -- Tier 2's path re-issue couldn't free it. The column halts and every other hull native-
+                // pathfinds up to close the gap on the hull ahead, re-forming behind the frozen front hull in
+                // arrival order (renumbered on success). Native pathing -- dropped for normal driving -- is
+                // trusted here only as a recovery nudge: it rounds a dynamic block a re-committed setDriveOnPath
+                // cannot. Failure to close up escalates to the Tier 4 teleport, which seats by the ORIGINAL _pos
+                // so the designed order (e.g. the HVT car's slot) survives.
                 if (_regroup) then {
                     if (isNull _regroupLead || {!(_regroupLead in _live)}) then {
                         private _f = objNull; private _bp = -2;
@@ -484,10 +439,10 @@ while {
                         if (_pathed getOrDefault [netId _regroupLead, false]) then { _regroupLead setDriveOnPath []; _pathed set [netId _regroupLead, false] };
                         private _reformFollowers = _live select { _x != _regroupLead };
                         private _allFormed = true;
-                        // Re-issue the doMove on Tier 2's CV_REISSUE cadence (~3 s), not every tick: a native doMove
-                        // re-pathed every 0.5 s never settles (each call restarts the search), and it would thrash the
-                        // same hull faster than the road re-issue this escalated from. forceSpeed still governs the
-                        // approach every tick; the move order persists between re-issues.
+                        // Re-issue the doMove on CV_REISSUE cadence (~3 s), not every tick: re-pathing every 0.5 s
+                        // never settles (each call restarts the search) and would thrash faster than the road
+                        // re-issue this escalated from. forceSpeed still governs the approach every tick; the move
+                        // order persists between re-issues.
                         private _reissueNow = (_regroupTicks mod CV_REISSUE) == 0;
                         {
                             private _me = _x; private _meId = netId _me;
@@ -509,19 +464,17 @@ while {
                             };
                             private _off = _me distance2D _slot;
                             _me forceSpeed KMH((_off * 0.6) max 6 min _catchup);
-                            // Formed = along-route gap to the hull ahead within one slot + CV_FORMED (closed up).
                             private _gap = if (_myProg < 0 || {_aheadProg < 0}) then { 0 } else { ((_cum select _aheadProg) - (_cum select _myProg)) max 0 };
                             if (_gap > CV_GAP_WANT + CV_FORMED) then { _allFormed = false };
                         } forEach _reformFollowers;
                         _regroupTicks = _regroupTicks + 1;
                         if (_allFormed) then {
-                            // Success: commit the order they formed up in (front = 0), reset issue flags, resume.
                             private _ordered = [_live, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
                             { _pos set [netId _x, _forEachIndex] } forEach _ordered;
                             { _issued set [netId _x, -999]; _gapIssued set [netId _x, []]; _pathed set [netId _x, false]; _stuck set [netId _x, 0] } forEach _live;
-                            // The renumber may have moved the front hull; adopt it as the lead now, not a tick late.
-                            // Everything below this point in the tick (leg advance, teleport trigger) reads _lead, and
-                            // cv_lead / leader _group feed the HVT marker and the next leg's start bootstrap.
+                            // The renumber may move the front hull; adopt it as lead now, not a tick late -- leg
+                            // advance, the teleport trigger, cv_lead, and leader _group (feeding the HVT marker)
+                            // all read _lead below this point.
                             _lead = _ordered select 0;
                             _leadProg = _prog getOrDefault [netId _lead, -1];
                             _group setVariable ["cv_lead", _lead];
@@ -531,30 +484,28 @@ while {
                         };
                     };
                 } else {
-                    // Issue drive orders. Road leg: put every hull -- lead included -- on its slice of the fixed
-                    // route with setDriveOnPath. Gap leg, first crossing: the lead pathfinds NATIVELY to the target
-                    // (doMove) so it rounds the water/terrain the road search could not, and the followers replay its
-                    // crumb trail ending at its live position -- tracing the exact ground it proved drivable, in
-                    // column. Gap leg, replay (_gapReplay): _route is the cached proven trail, so every hull -- lead
-                    // included -- drives it with setDriveOnPath exactly like a road leg, no native re-cross.
+                    // Issue drive orders. Road leg: every hull -- lead included -- gets its slice of the fixed
+                    // route via setDriveOnPath. Gap leg, first crossing: the lead pathfinds NATIVELY (doMove) to
+                    // round terrain the road search couldn't, and followers replay its crumb trail to its live
+                    // position. Gap leg, replay: _route is the cached proven trail, so every hull drives it with
+                    // setDriveOnPath like a road leg, no native re-cross.
                     {
                         private _me = _x; private _meId = netId _me;
                         if (_legOffroad && {!_gapReplay} && {_me == _lead}) then {
-                            // Native lead across the gap (first crossing, no cached trail). Clear any committed path
-                            // first (a setDriveOnPath and a doMove fight), then aim at the segment end (the road it
-                            // rejoins); re-issued each tick is cheap for doMove, and keeps it aimed as the leg updates.
-                            // A replayed gap skips this: _route is the cached trail, so the lead falls to the road
-                            // branch and drives the fixed line like any hull.
+                            // Native lead across the gap: clear any committed path first (setDriveOnPath and doMove
+                            // fight), then aim at the segment end -- cheap to re-issue each tick, keeping it aimed
+                            // as the leg updates. A replayed gap skips this: the lead falls to the road branch and
+                            // drives the cached fixed line like any hull.
                             if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
                             _me doMove _segTarget;
                         } else {
                             private _mp = _prog getOrDefault [_meId, -1];
                             private _startIdx = (_mp + 1) max 0;
                             if (_legOffroad && !_gapReplay) then {
-                                // Follower on the crumb trail: drive the crumbs from just ahead of it through to the
-                                // lead's LIVE position, so it chases the moving lead, not a stale trail end. Re-issue
-                                // only when the slice shifts or the lead advanced CV_STEP (the trail grew) -- not every
-                                // tick (that churns setDriveOnPath). Too few crumbs yet (gap entry): aim at the lead.
+                                // Follower on the crumb trail: drive from just ahead of it through to the lead's
+                                // LIVE position, so it chases the moving lead, not a stale trail end. Re-issue only
+                                // when the slice shifts or the trail grew by CV_STEP (not every tick -- that churns
+                                // setDriveOnPath). Too few crumbs yet (gap entry): aim straight at the lead.
                                 private _leadPos = getPosATL _lead;
                                 private _iss = _gapIssued getOrDefault [_meId, []];
                                 if (count _crumbs < 2 || {_mp < 0}) then {
@@ -564,31 +515,26 @@ while {
                                 } else {
                                     if (_iss isEqualTo [] || {(_iss select 0) != _startIdx} || {(_leadPos distance2D (_iss select 1)) >= CV_STEP}) then {
                                         private _slice = if (_startIdx <= (count _crumbs - 1)) then { _crumbs select [_startIdx] } else { [] };
-                                        // setDriveOnPath alone (see the road branch): a doStop it cannot clear would
-                                        // freeze the follower on the crumb trail.
+                                        // setDriveOnPath alone (see the road branch): a doStop it can't clear would
+                                        // freeze this hull.
                                         _me setDriveOnPath (_slice + [_leadPos]);
                                         _pathed set [_meId, true];
                                         _gapIssued set [_meId, [_startIdx, _leadPos]];
                                     };
                                 };
                             } else {
-                                // Road leg: issue the remaining fixed route once; forward progress needs no re-issue
-                                // (that churns setDriveOnPath and stutters). Re-issue only when forced (leg change /
-                                // recovery, -999), when the hull REGRESSED behind its issued start, or when it is
-                                // WEDGED -- commanded to move but halted. A forceSpeed 0 (the rear-end / no-overtake
-                                // clamp when the column bunches) drops the hull off its committed path onto native idle,
-                                // where the later positive forceSpeed is a ceiling that cannot restart it (see CV_REISSUE);
-                                // re-committing the path is the soft recovery the crumb branch already gets for free by
-                                // re-issuing every CV_STEP. Cadence-gated so a rolling hull is never re-issued.
+                                // Road leg: issue the remaining route once; forward progress needs no re-issue (churns
+                                // setDriveOnPath). Re-issue only when forced (leg change/recovery, -999), REGRESSED
+                                // behind its issued start, or WEDGED (see CV_REISSUE for why forceSpeed 0 strands a
+                                // hull off its path). Cadence-gated so a rolling hull is never re-issued.
                                 private _last = _issued getOrDefault [_meId, -999];
                                 private _stuckTicks = _stuck getOrDefault [_meId, 0];
                                 private _wedged = speed _me < CV_STUCK_KMH && {_stuckTicks >= CV_REISSUE} && {(_stuckTicks mod CV_REISSUE) == 0};
                                 if (_last == -999 || {_startIdx < _last} || _wedged) then {
                                     private _slice = if (_startIdx <= (count _route - 1)) then { _route select [_startIdx] } else { [_route select (count _route - 1)] };
-                                    // setDriveOnPath alone -- no doStop first. The path order overrides the group's
-                                    // formation on its own, so the hull needs no stop to break formation; and a preceding
-                                    // doStop is NOT cleared by setDriveOnPath, so it froze one hull per column, halted on
-                                    // the spot until the recovery snap re-ran the same stop.
+                                    // setDriveOnPath alone -- no doStop first: the path order overrides formation on
+                                    // its own, and a preceding doStop is NOT cleared by setDriveOnPath, so it froze
+                                    // one hull per column until the recovery snap re-ran the same stop.
                                     _me setDriveOnPath _slice;
                                     _pathed set [_meId, true];
                                     _issued set [_meId, _startIdx];
@@ -604,9 +550,9 @@ while {
                         private _meId  = netId _me;
                         private _myProg = _prog getOrDefault [_meId, -1];
 
-                        // The hull directly ahead = the next LOWER fixed position that is live (the one it trails in
-                        // the seated column), else the lead. Fixed order, so spacing holds the column shape even when
-                        // a stall scrambles live progress; its progress then feeds the along-route gap below.
+                        // Hull directly ahead = the next LOWER fixed position that's live, else the lead. Fixed
+                        // order holds the column shape even when a stall scrambles live progress; its progress
+                        // feeds the along-route gap below.
                         private _myPos = _pos getOrDefault [_meId, 1e9];
                         private _ahead = _lead;
                         private _aheadPos = -1;
@@ -624,15 +570,12 @@ while {
                             else { ((_cum select _aheadProg) - (_cum select _myProg)) max 0 };
                         if (_gap > _maxGap) then { _maxGap = _gap };
 
-                        // Hold the gap with forceSpeed (a real SETPOINT on a setDriveOnPath hull). Cruise-anchored
-                        // car-following: the setpoint is the shared convoy cruise (a GLOBAL reference every hull
-                        // targets -- unlike matching the neighbour's own speed, which amplifies the lead's wobble
-                        // rearward and leaves the tail oscillating), trimmed by the along-route spacing error and
-                        // damped by the relative velocity. The damping term brakes an overshoot while closing and,
-                        // when the lead accelerates, feeds the tail forward with it rather than a tick late once
-                        // the gap has already opened. Rear-end hard-stop and a no-overtake clamp use straight-line
-                        // distance (the along-route gap cannot tell "just behind" from "just past" the hull ahead
-                        // on the tick, so a fast closer could slip by). forceSpeed is m/s -> KMH().
+                        // Hold the gap with forceSpeed (a real setpoint on a setDriveOnPath hull), cruise-anchored:
+                        // the setpoint is the shared convoy cruise (a GLOBAL reference) trimmed by spacing error and
+                        // closing-speed damping -- matching the neighbour's own speed instead would amplify the
+                        // lead's wobble rearward and leave the tail oscillating. Hard-stop and the no-overtake clamp
+                        // use straight-line distance, not along-route: the along-route gap can't tell "just behind"
+                        // from "just past" the hull ahead on the tick, so a fast closer could slip by.
                         private _d        = _me distance2D _ahead;
                         private _aheadSpd = speed _ahead;         // km/h
                         private _mySpd    = speed _me;            // km/h
@@ -642,10 +585,10 @@ while {
                         if (_d < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };  // never outrun the hull ahead
                         _me forceSpeed KMH(_fs);
 
-                        // Wedge counter: a hull meant to move (_fs above the halt threshold) but halted is stuck.
-                        // Counts up per tick, cleared on real movement so a legitimate halt never counts. Past
-                        // CV_REISSUE the road branch re-commits the path (Tier 2); past CV_REGROUP_AT this follower
-                        // trips the whole-column regroup (Tier 3, block above), which the teleport (Tier 4) backstops.
+                        // Wedge counter: a hull meant to move (_fs above halt threshold) but halted is stuck; counts
+                        // up per tick, cleared on real movement so a legitimate halt never counts. Past CV_REISSUE
+                        // the road branch re-commits the path (Tier 2); past CV_REGROUP_AT this follower trips the
+                        // whole-column regroup (Tier 3), backstopped by Tier 4.
                         if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
                             private _n = (_stuck getOrDefault [_meId, 0]) + 1;
                             _stuck set [_meId, _n];
@@ -662,17 +605,16 @@ while {
                         };
                     } forEach _liveFollowers;
 
-                    // Lead paces the column: convoy cruise closed up, easing toward a halt as the widest gap
-                    // opens past CV_LAG_OK, so the column always waits for its tail. A lone hull with no column
-                    // to hold runs uncapped at its own native top.
+                    // Lead paces the column: convoy cruise closed up, easing to a halt as the widest gap opens past
+                    // CV_LAG_OK, so the column always waits for its tail. A lone hull with no column to hold runs
+                    // uncapped at its own top.
                     private _factor = ((CV_LAG_STOP - _maxGap) / (CV_LAG_STOP - CV_LAG_OK)) max 0 min 1;
                     if (_liveFollowers isEqualTo []) then { _lead forceSpeed -1 } else { _lead forceSpeed KMH(_cruise * _factor) };
 
-                    // Lead wedge counter: same as the followers', but a lead deliberately eased to a halt for the
-                    // tail (factor 0) or already arriving is NOT counted -- only a lead that should be rolling but
-                    // is not. A wedged lead nudges ITSELF forward rather than halting the column into a regroup: a
-                    // native doMove one route hop rounds a dynamic block from a free spot, then re-acquires the
-                    // committed path next tick (issued -> -999). A lead the nudge cannot free is caught by the teleport.
+                    // Lead wedge counter: same as followers', but a lead deliberately eased to a halt (factor 0) or
+                    // arriving is NOT counted -- only a lead that should be rolling but isn't. A wedged lead nudges
+                    // ITSELF forward (one native doMove hop rounds a dynamic block) rather than halting the column
+                    // into a regroup; a lead the nudge can't free is caught by the teleport.
                     private _leadMoving = _factor > 0 && {(_lead distance2D _segTarget) > CV_ARRIVE};
                     if (_leadMoving && {speed _lead < CV_STUCK_KMH}) then {
                         private _n = (_stuck getOrDefault [_leadId, 0]) + 1;
@@ -696,17 +638,16 @@ while {
                     };
                 };
 
-                // Segment / leg advance: the lead reached the current segment's end. More segments left in this
-                // leg -> load the next one; this is where a road<->gap handoff happens (gap crossed, resume road,
-                // or road driven up to the gap edge). No segments left -> the leg is done: advance the waypoint
-                // (wrap on a CYCLE), route the next leg from the anchor just reached, and empty _segs so the
-                // block above rebuilds it. Skipped during a regroup: the column is halted and re-forming, so the
-                // lead must not advance the leg out from under it (that would swap _route mid-reform).
+                // Segment/leg advance: the lead reached the current segment's end. More segments left -> load the next
+                // (road<->gap handoff happens here). No segments left -> the leg is done: advance the waypoint (wrap
+                // on CYCLE), route the next leg from the anchor just reached, empty _segs so the block above
+                // rebuilds it. Skipped during a regroup: the lead must not swap _route out from under a column
+                // mid-reform.
                 if (!_regroup && {(_lead distance2D _segTarget) < CV_ARRIVE}) then {
-                    // The lead cleared the segment. If it was a gap crossed NATIVELY (not a replay), that trail is
-                    // now proven: cache it (ending at the rejoin point) so later laps replay it instead of re-running
-                    // native pathfinding. Only on a clean arrival -- a regroup skips this block, so a line the column
-                    // could not hold is never cached. _gapSetupKey/_segTarget still name the completing gap here.
+                    // If the segment cleared was a gap crossed NATIVELY (not a replay), the trail is now proven:
+                    // cache it (ending at the rejoin point) so later laps replay it instead of re-pathfinding. Only
+                    // on a clean arrival -- a regroup skips this block, so a line the column couldn't hold is never
+                    // cached.
                     if (_legOffroad && {!_gapReplay} && {count _gapTrail >= 2}) then {
                         _gapCache set [_gapSetupKey, _gapTrail + [_segTarget]];
                         if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["gap cached %1 grp=%2 (pts=%3)", _gapSetupKey, _group, count _gapTrail + 1]] call fnc_log };
@@ -730,16 +671,13 @@ while {
                     };
                 };
 
-                // TIER 4 RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the
-                // route in FIXED-position order and teleport it there. Fires when the whole column has stayed
-                // frozen for CV_STUCK_MAX ticks -- Tier 3's regroup could not free it -- and once at spawn
-                // (callers spawn their hulls in a rough line, not already trailing on the route). Whole-column
-                // only, unconditional (a mangled column is worse than a blink); the anchor is a loosely straight
-                // stretch (_fnc_straightAnchor) so the column is not realigned across a bend. Hulls are seated by
-                // their FIXED position (front first), NOT live progress: a failed regroup never committed a
-                // renumber, so this restores the ORIGINAL designed order (e.g. the HVT car's middle slot).
-                // The frozen-column counter is read every tick, regroup state included, so a stalled regroup
-                // escalates here; it counts only while the lead is not merely arriving.
+                // TIER 4 RECOVERY / spawn ordering (one snap, two triggers): realign the WHOLE convoy onto the route
+                // in FIXED-position order and teleport it there. Fires after CV_STUCK_MAX ticks frozen (Tier 3
+                // couldn't free it) and once at spawn (callers seat hulls in a rough line, not already trailing the
+                // route). Whole-column, unconditional -- a mangled column is worse than a blink; the anchor is a
+                // loosely straight stretch (_fnc_straightAnchor) so realigning doesn't cross a bend. Hulls seat by
+                // FIXED position, not live progress, so a failed regroup's original designed order (e.g. the HVT
+                // car's slot) is restored. The frozen counter counts only while the lead isn't merely arriving.
                 if ((_lead distance2D _segTarget) > CV_ARRIVE && {(_live findIf { speed _x >= CV_STUCK_KMH }) < 0}) then {
                     _allStuck = _allStuck + 1;
                 } else {
@@ -762,11 +700,8 @@ while {
                         _pathed set [netId _x, false];
                         _stuck  set [netId _x, 0];
                     } forEach _ordered;
-                    // A cached gap trail is NOT dropped here, mirroring the road-route cache: a hull driving it with
-                    // setDriveOnPath keeps the engine's local avoidance, so it rounds a wreck newly on the line the
-                    // same way it does on a road route, and the teleport itself already blinks the column past any
-                    // residual block. Discarding a proven crossing would force a needless native re-prove every lap.
-                    // The teleport seated everyone; drop any regroup in flight and reset the frozen counter.
+                    // A cached gap trail is NOT dropped here either (see the gap-trail cache note above); the
+                    // teleport seated everyone, so drop any regroup in flight and reset the frozen counter.
                     _regroup = false; _regroupLead = objNull; _allStuck = 0;
                 };
             };
@@ -776,7 +711,7 @@ while {
 };
 
 // Teardown, or hand-off to combat on release: release every hull this loop ever configured back to native AI.
-// Behaviour is the caller's throughout (never forced), so nothing is restored here. The peeling HVT car takes
-// the same release mid-run (see fnc_convoy_release_hull), so both paths undo convoy control identically.
+// Behaviour is the caller's throughout (nothing restored here); a peeling HVT car takes the same release
+// mid-run (fnc_convoy_release_hull), so both paths undo convoy control identically.
 { [_x] call fnc_convoy_release_hull } forEach (values _seen);
 if (!isNull _group) then { _group setVariable ["DUWS_convoy_handled", nil] };
