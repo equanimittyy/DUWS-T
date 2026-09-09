@@ -143,7 +143,7 @@ fnc_furnish_building = {
         private _out = [];
         private _propRows = _rows select { isClass (configFile >> "CfgVehicles" >> (_x select 0)) };
         private _lootRows = _rows select { !(isClass (configFile >> "CfgVehicles" >> (_x select 0))) };
-        if (_propRows isNotEqualTo []) then { _out append ([_propRows, _aObj, _key, true, false, true] call fnc_place_settled) };
+        if (_propRows isNotEqualTo []) then { _out append ([_propRows, _aObj, _key, true, false, true, true] call fnc_place_settled) };
         if (_lootRows isNotEqualTo []) then { _out append ([_lootRows, _aObj, _key, true, true] call fnc_place_settled) };
         _out
     };
@@ -178,8 +178,8 @@ fnc_furnish_building = {
         _c
     };
 
-    // Freeze on placement and leave frozen -- a physics step unseats the piece. Global, not local: the
-    // local form leaves clients simulating it. Filed under _key, so the mission GCs it on teardown.
+    // Freeze each piece as it settles so a later piece's drop cannot knock it (thawed as a whole once the house
+    // is laid out). Global, not local: the local form leaves clients simulating it. Filed under _key for GC.
     private _keepFrozen = {
         { _x enableSimulationGlobal false; _objs pushBack _x } forEach _this;
     };
@@ -239,7 +239,7 @@ fnc_furnish_building = {
                     };
                 } forEach _edges;
                 if (_rows isNotEqualTo []) then {
-                    _out append ([_rows, _aObj, _key, true, false, true] call fnc_place_settled);
+                    _out append ([_rows, _aObj, _key, true, false, true, true] call fnc_place_settled);
                 };
             };
         };
@@ -385,6 +385,10 @@ fnc_furnish_building = {
             };
         };
     } forEach _bySize;
+
+    // Whole-house thaw: each piece rests where it settled, so going live adds no impulse; live, they fall into
+    // rubble when the building is destroyed.
+    { _x enableSimulationGlobal true } forEach _objs;
 
     ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _objs, count _bySize]] call fnc_log;
     _objs
