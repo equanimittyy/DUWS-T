@@ -77,8 +77,8 @@ private _belN = missionNamespace getVariable ["DUWS_dbgOpcomBelN", 0];
 for "_i" from (count _bel) to (_belN - 1) do { deleteMarkerLocal format ["duws_opcom_bel_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomBelN", count _bel];
 
-// OPFOR box per tasking, blue to match the grid's OPFOR-is-blue dots. A live unit stays at its frozen
-// de-virt cell and its tag carries the [*] prefix, so no separate live styling here.
+// OPFOR box per tasking, OPFOR red -- deliberately distinct from the overlay's blue OPFOR force dots so a
+// unit reads as a unit, not force. A live one stays at its frozen de-virt cell, its tag marked [*].
 private _taskN = missionNamespace getVariable ["DUWS_dbgOpcomTaskN", 0];
 {
     _x params ["_tp", "_icon", "_ttxt"];
@@ -90,7 +90,7 @@ private _taskN = missionNamespace getVariable ["DUWS_dbgOpcomTaskN", 0];
         _nm setMarkerPosLocal [_tp select 0, _tp select 1];
     };
     _nm setMarkerTypeLocal _icon;
-    _nm setMarkerColorLocal "#(0.2,0.6,1,1)";
+    _nm setMarkerColorLocal "#(0.9,0.2,0.2,1)";
     _nm setMarkerSizeLocal [0.9, 0.9];
     _nm setMarkerTextLocal _ttxt;
 } forEach _tasks;
