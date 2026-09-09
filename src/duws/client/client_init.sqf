@@ -4,14 +4,11 @@
 #include "..\shared\includes\action_style.hpp"
 
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
-// Shared loadout tally; the arsenal overlay's live-count loop (initPlayerLocal) calls it per edit.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 ["INFO", "BOOT", format ["Client_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
-// Defines DUWS_fnc_arsenal_countFor / _paintCounts (arsenal item-count overlay); the enforcer loop
-// in initPlayerLocal.sqf calls the painter each tick while the arsenal is open.
 [] call compile preprocessFileLineNumbers "duws\client\arsenal\fnc_arsenal_counts.sqf";
 // Per-client beacon builder for the patrol-camp mission; the server remoteExecs it to stand a wood-smoke
 // column on each camp's fire (a #particlesource must be built locally on every machine, see the file).
@@ -23,7 +20,6 @@ waitUntil {sleep 0.1;!isNull player};
 // Exactly one drain loop per client, and only below the wait above -- the function arrives
 // with the registry the server publishes, so starting it any earlier races that. A line
 // posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
-//
 // Guarded against re-entry: a JIP client re-runs INIT.sqf and so client_init, and a second drain
 // would race the first popping the same queue into the one subtitle slot, playing queued lines
 // out of order. Guarded on the loop's own handle, not a bool: uiNamespace outlives a mission
@@ -40,9 +36,9 @@ if (isNull _drain || {scriptDone _drain}) then {
 	uiNamespace setVariable ["DUWS_dialogueQueueNet", []];
 	uiNamespace setVariable ["DUWS_dialogueDrainHandle", [] spawn fnc_duws_dialogue_drain];
 
-	// SUB-NET radio log: drop last mission's lines and pacing cursor, then raise the overlay on
+	// SUB-NET radio log: raise the overlay on
 	// its own layer so nothing else's cutRsc replaces it (or it, theirs). Held up all mission by
-	// its huge duration; fnc_duws_subnet_render redraws it, ageing and fading each line.
+	// its huge duration.
 	uiNamespace setVariable ["DUWS_subnetLines", []];
 	uiNamespace setVariable ["DUWS_subnetNextAt", 0];
 	("DUWS_SubnetLog" call BIS_fnc_rscLayer) cutRsc ["DUWS_SubnetLog", "PLAIN", 0, false];
@@ -51,7 +47,6 @@ if (isNull _drain || {scriptDone _drain}) then {
 	uiNamespace setVariable ["DUWS_subnetRenderHandle", [] spawn fnc_duws_subnet_render];
 };
 player addRating 10000000;
-// KEEP DIPSHITS FROM DROWNING
 [] spawn {
 	while {!WARCOM_init_done} do {
 		player setOxygenRemaining 1;
@@ -72,7 +67,6 @@ if (!isMultiplayer) then {
 // music read as a menu, not this. Replaced at the insertion flight.
 playMusic ["LeadTrack02_F", 0];
 
-// JIP SCREEN, open map
 if (isMultiplayer) then {
 	
 	if (((vehiclevarname player) != "player1" && !WARCOM_init_done) || WARCOM_init_done) then {
@@ -92,10 +86,8 @@ if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 	// by fnc_startup_faction_flow (called at the enviro spawn point below) so the
 	// environment screen's Back button can re-enter them to re-pick faction/HQ.
 
-	//  ZONE SETTINGS DIALOG
 	if (!zones_created) then {
 
-		// SHOW THE STARTUP ENVIRO MENU
 		if (!zones_created) then {
 			sleep 0.1;
 			[] call fnc_startup_faction_flow;
@@ -104,7 +96,6 @@ if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 	};
 };
 
-// Open Map for Gamemaster (Random Zones)
 if ((vehiclevarname player) in game_master && !manually_chosen) then {
 	titleCut ["", "BLACK IN", 10];
 	forceMap true;
@@ -142,9 +133,7 @@ waituntil {sleep 1;WARCOM_init_done;};
 
 if (isMultiplayer) then {
 
-	// change the shown CP for request dialog
 	"commandpointsblu1" addPublicVariableEventHandler {ctrlSetText [1000, format["%1",commandpointsblu1]]; };
-	// same for the AP wallet, so a spend shows on the request dialog's AP box at once, like CP
 	"WARCOM_blufor_ap" addPublicVariableEventHandler {ctrlSetText [1002, format["%1",WARCOM_blufor_ap]]; };
 	
 	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_FactionFile_X]] call fnc_log;
@@ -165,7 +154,6 @@ if (isMultiplayer) then {
 
 };
 
-// CP death-penalty EventHandler (no penalty inside the killhouse).
 player addEventHandler ["killed", {
     private _inKillhouse = false;
     private _khX = missionNamespace getVariable ["killhouse_centerX", nil];
@@ -230,9 +218,7 @@ player setUnitTrait ["Medic",true];
 player setUnitTrait ["Engineer",true];
 player setUnitTrait ["uavHacker",true];
 
-// Squad-lead extras: High Command, and the FOB support row that arrives once BLUFOR holds a zone.
 if ((vehiclevarname player) in Squad_Leaders) then {
-	// wait until blu captures at least one zone
 	[] spawn fnc_fob_unlock_notice;
 	["INFO", "BOOT", "HC init"] call fnc_log;
 	[] spawn fnc_hc_init;
@@ -241,7 +227,6 @@ if ((vehiclevarname player) in Squad_Leaders) then {
 [] spawn fnc_operator_init;
 
 
-// INIT Markers if difficulty < veteran
 _difficulty_setting = difficulty;
 [] call fnc_kndr_unit_markers;
 if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) then { 
@@ -255,7 +240,7 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // onPlayerRespawn.sqf re-adds it.
 player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player && {profileNamespace getVariable ['DUWS_T_showEarplugs', true]}"];
 
-// Body search. Same re-add reason as the earplugs above: it dies with the body.
+// Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
 
 // Developer tools. Two gates, because the parameter is mission config and so reads the same on
@@ -266,21 +251,18 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, [], 20, true, true, "", "_this == player"];
 };
 
-// Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;
 
 // Campaign config readout -- its own Notes subject, spawned after the manual so it lists second.
 [] spawn fnc_duws_config;
 
-// Add HQ actions for REQUEST Players
 [bluHQ_object] spawn fnc_HQaddactions;
 
 hint localize "STR_DUWS_T_zu4bxt24";
 
-// Loadout swap: copy a random base-guard combat unit's gear (whitelisted).
 [] spawn {
     waitUntil { sleep 0.5; !isNil "PosOfBLUHQ" && {count PosOfBLUHQ > 0} };
-    sleep 8;  // wait for base guards and patrols to finish spawning
+    sleep 8;  // let base guards and patrols finish spawning first
 
     // base-guard unit pool, set and broadcast by fnc_BluHQinit
     private _guardTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [
@@ -343,7 +325,6 @@ titleCut ["", "BLACK FADED", 999];
 uiSleep 0.3;
 forceMap false;
 openMap [false, false];
-// Survival modes (RAVAGE/WBK) force client-side fog, identically.
 if (CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     waitUntil {!isNull player};
     // fog: intensity 0.5, decay 0.1, base height 10
@@ -407,7 +388,6 @@ if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && 
 playMusic ["EventTrack01a_F_EPA", 0];
 hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 
-// force a weather update so it renders correctly
 forceWeatherChange;
 
 // Saved_Loadout and DUWS_startupKit are provisional here: the base-guard loadout copy runs in the spawn
@@ -419,7 +399,6 @@ private _startupKit = [];
 player setVariable ["DUWS_startupKit", _startupKit];
 player setdamage 0;
 player allowDamage true;
-// Zeus disconnect fix and Add SITREP to Gamemaster	
 if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 	// Zeus disconnect fix
 	[Curator] remoteExec ["unassignCurator",2];
@@ -452,6 +431,5 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     ];
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
-// disguise feature: set captive state locally
 fnc_disguise_setCaptiveLocal = compile preprocessFileLineNumbers "duws\client\civilian\fnc_disguise_setCaptiveLocal.sqf";
 publicVariable "fnc_disguise_setCaptiveLocal";

@@ -7,9 +7,8 @@ _zonePos = _this select 3;
 _fortified = _this select 4;
 _prefab = _this select 5;
 _zone_num = _this select 6;
-// Named here rather than by the locator that sited it: the manual placer's map-click body runs on
-// the clicking client, and the allocator is server-side. An empty name asks for the next one, which
-// is what both locators pass -- the zone number survives only as an index for the arrays below.
+// Named here, not by the locator that sited it: locators run on different localities (client
+// map-click vs server allocator); an empty name means "give next", so _zone_num stays just an array index.
 if (_name == "") then { _name = [] call fnc_zone_name };
 _visible = true;
 if (hardcore_mode_enable) then {_visible = false};
@@ -25,19 +24,17 @@ if (isNil ("Array_of_OPFOR_zones")) then {Array_of_OPFOR_zones = [];};
 Array_of_OPFOR_zones = Array_of_OPFOR_zones + [_zonePos];
 zone_namePOS_pairs = zone_namePOS_pairs + [[_name,_zonePos,_visible]];
 publicVariable "zone_namePOS_pairs";
-// Everything needed to rebuild this zone through this same function: radius and points reach the
-// triggers only as compiled strings, so nothing outside can read them. Must stay above the prefab
-// block, which reassigns _fortified and _prefab to the chosen decoration. The name is absent
-// deliberately: it is drawn, so a rebuild has to be handed the original back rather than re-roll it.
+// Rebuild inputs for this same function: radius/points reach the triggers only as compiled strings, so nothing
+// outside can read them back. Must stay above the prefab block, which reassigns _fortified/_prefab; the name is
+// omitted deliberately -- it's drawn, so a rebuild must be handed the original back rather than re-rolled.
 zone_meta_array = zone_meta_array + [[_zone_num,_zonePos,_size,_points,_fortified,_prefab]];
 publicVariable "zone_meta_array";
 
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
 
-// Carries the zone's name and nothing else: the size below is an icon scale, so at [0,0] the type
-// draws nothing and only the text lands. It has to stay an icon marker -- an area marker draws its
-// text as part of drawing its shape, so the same marker at zero size renders nothing at all.
+// Size [0,0] below is deliberate: an icon marker at zero size draws only the text; an area marker draws its
+// text as part of its shape, so the same zero size would render nothing at all.
 _markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)];
 _markerstr = createMarker [str(_markername),_zonePos];
 _markerstr setMarkerShape "ICON";
@@ -63,14 +60,8 @@ if (hardcore_mode_enable) then {
 	str(_markername2) setMarkerAlpha 0.3; 
 };
 
-// Buildings included, unlike the base sites: a prefab is dropped whole onto a centre moreUrban
-// picked for being dense, so a house left standing lands inside it. The cost is that a hide is
-// permanent -- a terrain object cannot be deleted, and nothing here puts the town back.
-//
-// Registered once for the whole campaign, on the first zone that clears ground. The engine swaps a
-// hidden building for a fresh, visible one the moment its damage state changes, which is a grenade
-// landing anywhere near the zone. The replacement is hidden in its turn and takes the old one's
-// place in the register, so a house that is damaged twice does not come back on the second hit.
+// Hiding here is permanent (a terrain object can't be deleted), so this BuildingChanged handler is registered once
+// for the whole campaign to re-hide the replacement building the engine spawns whenever a hidden one takes damage.
 if (isNil "DUWS_zone_hidden") then {
     DUWS_zone_hidden = [];
     addMissionEventHandler ["BuildingChanged", {
@@ -112,25 +103,21 @@ if (_prefab) then {
     sleep 0.5;
 };
 
-// Declared out here because both branches below set it and the store at the zone key reads it:
-// a first assignment inside an if-block would be local to that block.
+// Declared out here, not inside the if-blocks below, so both branches' assignment is visible to the store at the zone key.
 private _prefabName = "";
-// The handle of the composition builder, for the opening stow further down to wait on. Same reason
-// as the name above: both branches spawn one.
+// Composition builder handle: the wait further down blocks on scriptDone _prefabScript once either branch spawns it.
 private _prefabScript = scriptNull;
 
 private _zonePrefabs = call fnc_zone_prefab_set;   // [weightedList, simpleEntry], MODERN-floored
 if (_prefab) then {
 	_array_of_prefabs = _zonePrefabs select 0;
-	// Flatten [.,.,.,weight] rows into selectRandomWeighted's [item, weight, ...] form over the whole
-	// list rather than a fixed count, so an era set of any length picks correctly.
+	// Flattened into selectRandomWeighted's [item, weight, ...] form over the whole list (not a fixed count), so an era set of any length picks correctly.
 	private _weighted = [];
 	{ _weighted append [_x, _x select 3] } forEach _array_of_prefabs;
 	_prefab_array = selectRandomWeighted _weighted;
 
-	// The composition's kind, not the zone's name: it stays a map label, on the marker and in the
-	// readout, while radio traffic uses the callsign alone -- a player repeats that back, and
-	// "Comm Station" names a building, not a place.
+	// Composition kind (not the zone name) drives the marker/readout label; radio traffic uses the callsign alone --
+	// a player repeats that back, and "Comm Station" names a building, not a place.
 	_prefabName = _prefab_array select 0;
 	_fortified = _prefab_array select 1;
 	_path = _prefab_array select 2;
@@ -148,138 +135,103 @@ if (_prefab) then {
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 };
 
-// No fortification ring. Three or four towers were scattered on a random bearing and distance, sited
-// and facing by luck -- but the emplacements that make a zone worth taking need to be sited
-// deliberately, against terrain, the roads and the approach the player will actually use. That is the
-// hardpoint system's job, and the plan for it is docs/info/gameplay/hardpoints.md; the prefab composition
-// above still stands, so a zone keeps its built centre.
+// No fortification ring: random-sited towers here couldn't aim at terrain/roads/approach. Replaced by the
+// hardpoint system (docs/info/gameplay/hardpoints.md); the prefab composition above is unaffected.
 
-// No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired
-// anywhere in the zone spawned up to four infantry waves at a distant OPFOR zone and walked them in
-// -- reinforcement the player could neither see coming nor interdict. Tasking OPFOR reserves is the
-// commander's job, and the plan for it is docs/plans/opcom_plan.md.
+// No QRF listener: a FiredNear handler here used to spawn distant OPFOR waves the player couldn't see or interdict.
+// Reserve tasking is the commander's job now (docs/plans/opcom_plan.md).
 
 _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];
 _trg2 setTriggerActivation["ANYPLAYER","PRESENT",true];
 _trg2 setTriggerStatements["this", format["['%1',%2,'%3','%4',thislist] spawn fnc_enterlocation;",_name,_zonePos,_markername,_markername2], ""];
-// The handle is not filed anywhere. Nothing deletes this trigger -- a zone lives for the
-// campaign and its notification fires whoever owns the ground -- so there is no reader to keep
-// one for. The capture trigger beside it is filed, under trigger_<x>_<y>, because fnc_captured
-// and fnc_blufor_cap rewrite it on every ownership change.
+// Handle not filed: nothing ever deletes this trigger, so there's no reader to keep one for -- unlike the capture
+// trigger beside it, filed under trigger_<x>_<y> because fnc_captured/fnc_blufor_cap rewrite it on ownership change.
 
-// Enemy contact on ground the player holds, the same report the HQ and every FOB already make.
-// Only that direction: walking into enemy ground is something the player chose and can see, so it
-// announces nothing, while a counter-attack on a zone they took is news they cannot be present for.
-// Server-local, so the dialogue is raised once no matter how the engine treats a global trigger's
-// statement -- a question fnc_captured.sqf:15 records as unproven rather than answered.
+// Only the enemy-contact direction reports: walking into enemy ground is visible to the player already, but a
+// counter-attack on zone they hold isn't. Server-local per fnc_captured.sqf:15's unproven trigger-locality question.
 private _trgEnemy = createTrigger ["EmptyDetector", _zonePos, false];
 _trgEnemy setTriggerArea [_size, _size, 0, false];
 _trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
-// Carried on the trigger, not formatted into the statement string, so this position never becomes
-// text and back.
+// Carried on the trigger, not formatted into the statement string, so this position never becomes text and back.
 _trgEnemy setVariable ["DUWS_zonePos", _zonePos];
 _trgEnemy setVariable ["DUWS_zoneName", _name];
 // Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet.
-//
-// The distance test below is an identity lookup -- "which zone is this" -- not a proximity check. Whether
-// enemies are here is already answered by the trigger area above; this only asks whether the entry in the
-// ownership list is *this* zone. It cannot use `==` or `in`, because the entry on the other side has been
-// through text: the capture trigger formats its position into a statement string (`%5` below), so what
-// fnc_zone_control_set files was parsed back out of characters and need not equal the array this zone was
-// built from. The metre is float slop, not a game distance -- it could be 0.5 or 5 and mean the same thing,
-// and it must not be folded in with the real radii the streaming checks use.
+// The <1m distance2D check here is identity ("is this the zone"), not proximity -- it can't use == because the
+// far side round-tripped through a formatted statement string; the epsilon is arbitrary slop, unrelated to streaming radii.
 _trgEnemy setTriggerStatements [
     "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
         (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
     "[thisTrigger getVariable ['DUWS_zoneName', ''], thisList] call fnc_enemy_contact;",
     ""
 ];
-// Same debounce as the HQ's: OPFOR crossing the boundary on patrol would otherwise re-report on
-// every pass.
+// Same debounce as the HQ's: OPFOR patrolling across the boundary would otherwise re-report on every pass.
 _trgEnemy setTriggerTimeout [10, 10, 10, true];
 
 _spawnPos = _zonePos;
 
-// The key everything about this zone files under: its stowed composition, its streaming thread, its
-// garrison peak and the flag on every unit it spawns. Derived once here through the shared helper
-// rather than spelled out per caller, so the readers cannot drift apart.
+// The key everything about this zone files under (stow, stream thread, garrison peak, spawn flag). Derived once
+// via the shared helper rather than spelled out per caller, so readers can't drift apart.
 private _zoneKey = [_zonePos] call fnc_zone_key;
 
-// Filed under the zone key like the garrison state rather than read back off the marker text: the
-// readout would otherwise have to unpick "%1 (%2)" to recover the kind, and a zone whose name ever
-// contains a bracket would take the parse with it.
+// Filed under the zone key, not read back off the marker text: unpicking "%1 (%2)" would break if a zone name
+// ever contained a bracket.
 missionNamespace setVariable [format ["DUWS_zoneKind_%1", _zoneKey], _prefabName];
 
-// Rolled before anything spawns, because both spawn paths read it to size themselves. A rebuild
-// through this same function keeps the tier it already has -- the roll refuses to run twice.
+// Rolled before anything spawns, since both spawn paths size off it; idempotent -- a rebuild through this same
+// function keeps the tier it already has, because the roll refuses to run twice.
 private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
 ["INFO", "ZONES", format ["%1 is tier %2, fielding %3", _zoneKey, _zoneTier,
 	DUWS_zoneSpawnTiers select (_zoneTier - 1)]] call fnc_log;
 
-// OPCOM's force grid reads a stowed zone's ledger, but nothing stamps it until the zone first raises --
-// so an unvisited zone reads as zero force. SetFull not Derive: the reserve pool belongs to the raise.
+// Nothing stamps OPCOM's force-grid ledger until a zone first raises, so an unvisited zone reads as zero force.
+// SetFull, not Derive: the reserve pool belongs to the raise.
 private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 [_zoneKey, [[_zoneTier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
 
-// Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
-// follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
-// at which this function can report completion -- it never returns.
+// Last point this function can report completion: what follows (OPFOR spawn, then a permanent despawn monitor)
+// never returns.
 zones_buildout_done = zones_buildout_done + 1;
 publicVariable "zones_buildout_done";
 
-// Registered with the shared poller, which owns the streaming clock from here. Two permanent threads
-// per zone -- a streaming loop and a tail loop polling the array slot it set -- go with the
-// handshake between them; the tick raises directly and adopts what it raised.
-//
-// Two AI to raise a zone and one to hold it: that hysteresis stops a zone flickering off around the
-// edges of the force that just took it.
+// Registered with the shared poller (owns the streaming clock): a streaming loop and a tail loop handshake per
+// zone, and raise needs 2 AI but hold only 1 -- hysteresis against a zone flickering at the edge of the force that took it.
 [_zoneKey, _spawnPos, _size] call fnc_site_register;
 private _occ = [_zoneKey, "garrison", EAST, "zone"] call fnc_site_occupant_register_profile;
 _occ set ["minAIHold", 1];
-// A committing aircraft -- a player-crewed heli inbound, a UAV on-station -- wakes the garrison the
-// ground ring discounts as airborne (fnc_duws_bluforNear). airRingCommitted picks the poller's
-// player-crewed, speed-gated air list, so an AI transit, an AI support heli, or a jet at cruise is
-// not a wake. DUWS_zoneAirRing at 0 leaves the air answer off: a ground-only wake, as before.
+// airRingCommitted wakes the garrison for a committing aircraft (inbound heli, UAV on-station) that the
+// ground-only check (fnc_duws_bluforNear) discounts -- gated to the player-crewed, speed-gated air list, so
+// AI transit/support or cruising jets don't wake it; DUWS_zoneAirRing=0 keeps the ground-only default.
 _occ set ["airRing", DUWS_zoneAirRing];
 _occ set ["airRingCommitted", true];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
-// The zone's other two occupants: the prefab it stands on and the guns bolted to it. Driven by the
-// garrison's cycle rather than polled, because the order between the three is the whole contract --
-// the prefab has to exist before anyone is placed on it, and the guns have to be empty before the
-// prefab can be stowed.
+// Driven by the garrison's cycle, not polled: the three occupants have a strict order -- the prefab must exist
+// before anything is placed on it, and the guns must be empty before the prefab can be stowed.
 {
 	_x params ["_kind", "_hooks"];
 	([_zoneKey, _kind] call fnc_site_occupant_register) set ["driven", true];
 	[_zoneKey, _kind, _hooks] call fnc_site_hooks_set;
 } forEach [["structure", DUWS_zoneStructureHooks], ["emplacement", DUWS_zoneEmplacementHooks]];
 
-// Zones are built deployed and the prefab mans their turrets at build time, so without this a fresh
-// campaign carries every zone's props and gunners for the whole session -- the exact cost streaming
-// exists to remove. The tick cannot do it: its despawn branch is only reachable once a zone has been
-// raised, and a zone nobody has visited never has been. One AI is enough here, because stowing a zone
-// somebody is already standing in would deploy it again on the next pass.
-//
-// Held until the builder has finished, and that wait is the whole point of it. The prefab is a
-// spawned script that places its props, sleeps, places its weapons, sleeps again and only then crews
-// them, so a stow racing it finds nothing filed under the key yet and returns false without a word --
-// leaving the composition and its gunners standing for the campaign. The markers and triggers above
-// are deliberately not behind this: only the stow needs the composition to exist.
+// Zones build deployed (prefab crews turrets at build time), so without this initial stow a fresh campaign carries
+// every zone's props/gunners all session -- exactly the cost streaming exists to cut. The tick can't do it: its
+// despawn branch only fires once a zone has raised, and an unvisited zone never has. One AI is enough here, since
+// stowing an occupied zone would just deploy it again next pass.
+// Waits for the builder because the prefab script places props, sleeps, places weapons, sleeps, then crews --
+// a stow racing it finds nothing filed yet and returns false silently, leaving the composition and gunners
+// standing for the campaign. Markers/triggers above aren't gated on this: only the stow needs the composition.
 waitUntil { scriptDone _prefabScript };
 
-// Zone flag: one red pole just off centre, pinned to the zone composition (third fnc_duws_keep arg) and
-// hidden, not deleted, while the zone streams out -- pinning keeps it the same object across stream
-// cycles so its namespace ref, texture, Zeus-lock and carry wiring survive, and hiding spares an
-// inactive zone a lone flag in open country. Placed after the prefab so its clear pass cannot take it.
-// Idempotent: createzone is re-entrant, so reuse the standing flag rather than orphaning it with a second.
+// Pinned (3rd fnc_duws_keep arg) and hidden, not deleted, while the zone streams out: pinning keeps it the same
+// object across stream cycles so its namespace ref, texture, Zeus-lock and carry wiring survive; hiding spares an
+// inactive zone a lone flag in open country. Placed after the prefab so its clear pass can't take it, and reused
+// (not recreated) on a re-entrant call, since createzone can run again for the same zone.
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
 	private _flagVarName = format ["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 	if (isNull (missionNamespace getVariable [_flagVarName, objNull])) then {
-		// Near the zone centre and clear of anything solid, so it does not spawn inside a prefab wall or a
-		// map building. Not BIS_fnc_findSafePos: its 3 m search failed on any slope and returned a random
-		// map position, flinging the flag off its zone (the [0,0,0] guard never caught that far fallback).
-		// Try offsets on a ring; take the first clear of props and structures, else fall back to the first.
+		// Not BIS_fnc_findSafePos: its 3 m search failed on any slope and returned a random map position, flinging the
+		// flag off its zone (the [0,0,0] guard never caught that far fallback).
 		private _cands = [];
 		for "_i" from 1 to 16 do { private _t = _zonePos getPos [8 + random 18, random 360]; _t set [2, 0]; _cands pushBack _t; };
 		private _idx = _cands findIf {
@@ -303,35 +255,27 @@ if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) 
 	[_zoneKey] call DUWS_fnc_zoneStow;
 };
 
-// The deliberate emplacements that replace the fortification ring removed above are sited in their own
-// generation phase after every zone is built (fnc_init_OPFOR_WARCOM.sqf), not here per zone, so the
-// player watches a Hard Point Generation pass between zones and civilians. Siting still keys off this
-// zone's centre, so its cap guard and streaming coupling are unchanged.
+// Hardpoints (replacing the ring removed above) are sited in their own pass after every zone is built
+// (fnc_init_OPFOR_WARCOM.sqf), not per-zone here -- but they still key off this zone's centre, so its cap guard and streaming coupling are unaffected.
 
-// Server-local, unlike the notification trigger above it: the capture condition reads the zone's
-// garrison peak, which is a server-side global, so a client evaluating it would answer for state it
-// cannot see. It also settles the locality question fnc_captured.sqf records as unproven.
+// Server-local, unlike the notification trigger above: the capture condition reads the garrison peak, a
+// server-side global a client can't see -- settling the locality question fnc_captured.sqf records as unproven.
 _trg = createTrigger ["EmptyDetector", _zonePos, false];
 _trg setTriggerArea [_size, _size, 0, false];
-// PRESENT rather than SEIZED on the BLUFOR direction. SEIZED demands the whole area be empty of
-// OPFOR, which made a capture a sweep of every last patrol out to the zone radius; the condition
-// asks instead whether the garrison is beaten and whether BLUFOR outnumber what is still standing.
-// What is left in the outer streaming ring is walked off once the zone flips (fnc_zone_stream_init.sqf).
+// PRESENT, not SEIZED: SEIZED demands the whole area empty of OPFOR, turning capture into a sweep of every last
+// patrol; this instead asks whether the garrison is beaten and BLUFOR outnumber what's left. The outer streaming
+// ring is walked off once the zone flips (fnc_zone_stream_init.sqf).
 _trg setTriggerActivation ["WEST", "PRESENT", true];
-// Carried on the trigger rather than formatted into the condition, so this position never becomes
-// text and back -- the same reason the enemy-contact trigger above carries its own. Both ride the
-// trigger through every ownership change, so the handlers that re-arm it move only the activation
-// and the statement.
+// Carried on the trigger, not formatted into the condition -- same reason as the enemy-contact trigger above.
+// Both ride the trigger through every ownership change, so re-arm handlers only touch activation and statement.
 _trg setVariable ["DUWS_zonePos", _zonePos];
 _trg setVariable ["DUWS_zoneKey", _zoneKey];
-// Seventh argument is the retired CP-bounty slot, now always 0: the first capture pays a flat
-// liberation bonus (fnc_captured) rather than a worth-scaled bounty, and no CP rides a recapture.
-// _points stays the zone's permanent worth and drives the AP swings. The slot is kept so the 7-arg
-// signature is unchanged across the capture handlers.
+// 7th arg is the retired CP-bounty slot, always 0 now: liberation pays a flat bonus (fnc_captured), not a
+// worth-scaled one, and no CP rides a recapture. _points here is separate -- the zone's permanent worth,
+// driving AP swings -- kept only so the 7-arg signature matches across capture handlers.
 _trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, 0], ""];
-// Flat, not the usual min/mid/max spread: the hold is a rule the player learns, and a capture that
-// sometimes lands at 30 s and sometimes at 50 reads as the mechanic being unreliable. Interruptable,
-// so stepping off the objective restarts it.
+// Flat, not the usual min/mid/max spread: the hold time is a rule the player learns, and a capture that lands
+// anywhere from 30-50 s reads as unreliable. Interruptable, so stepping off the objective restarts it.
 _trg setTriggerTimeout [30, 30, 30, true];
 
 // floor abs so the key carries no minus sign (the capture handlers rebuild the same name)

@@ -5,7 +5,6 @@
 ["INFO", "BOOT", format ["Server_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["server_init start, player %1", profileName]] call fnc_log;
 
-// DEFINE SERVER VARIABLES and FUNCTIONS
 [] call compile preprocessFileLineNumbers "duws\server\server_var_init.sqf";
 ["INFO", "BOOT", "server_var_init done"] call fnc_log;
 [] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
@@ -36,11 +35,9 @@ sleep 1;
 serverinit_complete = true;
 publicVariable "serverinit_complete";
 
-// Game Master watchdog: only player1 drives setup (faction pick + HQ placement); if that slot
-// holds no human, the gates below never clear and the campaign hangs with nothing on screen to
-// say why -- warn every machine to restart with the slot filled. Spawned, not inline: the main
-// thread is about to block on those very gates, so an inline check would never run. MP only --
-// SP forces the local player into game_master, so the slot is never empty there.
+// MP only: SP always fills game_master locally. If player1's slot sits empty here, the setup
+// gates below never clear and the campaign hangs with nothing on screen to say why. Spawned,
+// not inline: the main thread is about to block on those same gates.
 if (isMultiplayer) then {
 	[] spawn {
 		sleep 5;
@@ -48,27 +45,23 @@ if (isMultiplayer) then {
 		if (isNull _gm || {!isPlayer _gm}) then {
 			["ERROR", "BOOT", "Game Master slot (player1) empty -- setup cannot run, campaign will hang"] call fnc_log;
 			["no_gamemaster", []] remoteExec ["BIS_fnc_showNotification", 0];
-			// The card warns; this gives them the way out, since the setup screens leave no menu to
-			// reach. Interface machines only guard themselves inside fnc_no_gm_prompt.
+			// The card warns; this gives the way out, since the setup screens offer no menu to reach it.
 			remoteExec ["fnc_no_gm_prompt", 0];
 		};
 	};
 };
 
-// Faction resolution answers the confirmation screen (classname per role per side) and is the
-// last point the player can change one, so it cannot wait for the commit. Served in a loop, not
-// once: stepping back from the environment screen re-enters faction selection and asks again with
-// the new pick -- both faction inits and all three AutoDetect wrappers survive being re-called.
-// The condition below reads globals only: fnc_waitLogged calls the block in its own scope, so a
-// private captured here would be undefined by the time it runs. duws_faction_preview_ready doubles
-// as the served marker, which is what the screen waits on anyway.
+// Answers the confirmation screen and can't wait for the commit, since it's the last point the
+// player can change a pick. Loop, not once: stepping back re-enters faction selection and asks
+// again -- faction inits and all three AutoDetect wrappers tolerate being re-called.
+// Condition reads globals only: fnc_waitLogged runs the block in its own scope, so a private
+// captured here would be undefined by the time it runs.
 while {!createzone_server} do {
 	while {!(["BOOT", "duws_faction_preview_request (confirmation screen opened)",
 		{duws_faction_preview_request > duws_faction_preview_ready || createzone_server}, 600] call fnc_waitLogged)} do {};
 	if (createzone_server) exitWith {};
 	private _serving = duws_faction_preview_request;
 
-	// wait for CUSTOM FACTIONS to be pasted
 	["INFO", "BOOT", "Server waiting for BLU faction Data Temp"] call fnc_log;
 	if (BLUFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 	if (OPFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
@@ -84,8 +77,8 @@ while {!createzone_server} do {
 	["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
 	["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", (["VEHICLE"] call fnc_faction_rqst_list) param [0, "none"]]] call fnc_log;
 
-	// OPFOR. Unguarded: an "opfor already resolved" guard would pin the first resolution, which is
-	// wrong once stepping back can re-pick the faction.
+	// Unguarded: an "opfor already resolved" check would pin the first resolution, which breaks
+	// once stepping back can re-pick the faction.
 	["INFO", "BOOT", format ["OPFOR Faction init on server: %1", OPFOR_FactionFile_X]] call fnc_log;
 
 	if (OPFOR_FactionFile_X == "CUSTOM") then {
@@ -102,21 +95,21 @@ while {!createzone_server} do {
 	// looking at a blank row the mission then quietly fills behind them.
 	{ [_x] call fnc_faction_backfill; } forEach ["blufor", "opfor"];
 
-	// After the same-side borrow, drop the schema's vanilla stand-in into any key a hand-written or
-	// pasted faction still left empty (or pointing at a class this install lacks). AutoDetect resolves
-	// its own; this keeps a preset that omits a role from reaching a spawner as MISSING.
+	// Drops the schema's vanilla stand-in into any key a hand-written or pasted faction left empty
+	// (or pointing at a class this install lacks); AutoDetect resolves its own. Keeps an omitted
+	// role from reaching a spawner as MISSING.
 	{ [_x] call fnc_faction_vanilla_fill; } forEach ["blufor", "opfor"];
 
-	// Expand each role's representative into its faction's pool here, not only at the commit, so the
-	// confirmation screen can show the pool a spawn will draw from -- for a hand-written faction as
-	// much as an auto-detected one, since a static file assigns one class per role and only this pass
-	// widens it. Idempotent, and re-run over the player's edits at the commit (fnc_faction_augment).
+	// Expands each role's representative into its faction's pool here, not only at the commit, so
+	// the confirmation screen can show the pool a spawn will draw from -- a static file assigns
+	// one class per role and only this pass widens it. Idempotent, and re-run over the player's
+	// edits at the commit.
 	[] call fnc_faction_augment;
 
-	// Publish every role global the screen will show. AutoDetect broadcasts its own and a CUSTOM
-	// paste ships its assignment list, but a static faction file only assigns server-side, and the
-	// OPFOR file never runs on a client at all -- so without this the screen would paint whatever
-	// that machine happened to hold, not what the server just resolved.
+	// AutoDetect broadcasts its own and a CUSTOM paste ships its assignment list, but a static
+	// faction file only assigns server-side, and the OPFOR file never runs on a client at all --
+	// without this the screen would paint whatever that machine happened to hold, not what the
+	// server just resolved.
 	{
 		private _side = _x;
 		{ missionNamespace setVariable [_x select 0, missionNamespace getVariable [_x select 0, ""], true]; }
@@ -133,11 +126,10 @@ while {!createzone_server} do {
 	} forEach ["blufor", "opfor"];
 	publicVariable "DUWS_factionTiers";
 
-	// The pools themselves, for the confirmation screen. The per-role globals above carry only the
-	// representative, so without this the screen shows one class where a faction fields several. Kept
-	// in a structure of its own rather than the globals, which must stay single-valued: the spawn
-	// paths and the many direct readers of opfor_SOLDIER_X expect a classname, not a pool. A role with
-	// no pool -- a static, or a single-class faction -- rides its representative.
+	// The pools themselves, for the confirmation screen: the per-role globals above carry only the
+	// representative, so without this the screen shows one class where a faction fields several. A
+	// structure of its own, not the globals -- those must stay single-valued, since the spawn paths
+	// and direct readers like opfor_SOLDIER_X expect a classname, not a pool.
 	DUWS_factionPreviewPools = [];
 	{
 		private _side = _x;
@@ -155,27 +147,24 @@ while {!createzone_server} do {
 };
 
 // HQ build stays behind the commit so Back navigation still finds nothing built to unwind.
-// Everything below consumes only PosOfBLUHQ (set at placement) until this gate -- no HQ-object
-// read sits before it.
+// Everything below consumes only PosOfBLUHQ (set at placement) until this gate.
 while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
 
 // HQ placement runs after the confirmation screen now, so this cannot gate the resolution loop
-// above: the screen waits on a resolution that would be waiting on a placement the player has not
-// been offered yet. Kept as a guard here, where PosOfBLUHQ is about to be read for real.
+// above: the screen would be waiting on a placement the player has not been offered yet. Kept as
+// a guard here, where PosOfBLUHQ is about to be read for real.
 while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
 
-// The player's edits from the confirmation screen, laid over what resolution produced.
 [] call fnc_faction_apply_locked;
 
-// Pools live and are read only on the server, so the confirmation screen (a client) never saw them
-// and locked one class per un-edited role; a hand-written faction defines one class to begin with.
-// Expand each role's final representative back into its faction's bucket here, after the edits
-// land, so both kinds of faction get per-spawn variety and no edit is overridden. See fnc_faction_augment.
+// Pools live and are read only on the server, so the confirmation screen (a client) locked one
+// class per un-edited role. Re-expands each role's final representative back into its faction's
+// bucket here, after the edits land, so both kinds of faction get per-spawn variety and no edit
+// is overridden.
 [] call fnc_faction_augment;
 
-// fnc_static_resolve stands a faction's own MG nest in for any static role it never fields, so a
-// side with no static MG leaves each composition's vanilla placeholder standing instead -- the one
-// case where a zone garrisons itself with the wrong side's gun. Checked here, not at each
+// A side with no static MG leaves each composition's vanilla placeholder standing instead -- the
+// one case where a zone garrisons itself with the wrong side's gun. Checked here, not at each
 // placement: this is the first point the keys are final, and it is one line per campaign.
 {
 	if (([format ["%1_TURRET_HMG", _x]] call fnc_faction_pick) isEqualTo "") then {
@@ -183,8 +172,8 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 	};
 } forEach ["blufor", "opfor"];
 
-// Squads compose from the role globals, so they are built after the edits land rather than
-// beside the resolution that produced them.
+// Squads compose from the role globals, so they're built after the edits land, not beside
+// the resolution that produced them.
 [] call fnc_BLUFOR_squad_init;
 ["INFO", "BOOT", format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X]] call fnc_log;
 
@@ -199,7 +188,7 @@ enableSaving [false, false];
 
 while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call fnc_waitLogged)} do {};
 
-// use weapons instead items, some factions bork on items
+// Weapons list, not items: some factions bork on items.
 while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) > 0}, 180] call fnc_waitLogged)} do {};
 
 
@@ -221,7 +210,6 @@ if (dynamic_weather_enable) then {
 // is floored, not off). The default lives in the parameter, not here, so the two cannot drift apart.
 [["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
-// Cleanup unused players slots.
 for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {
     _thePlayer = missionNamespace getVariable format["player%1", _x];
     if(!isNil("_thePlayer")) then {
@@ -234,7 +222,6 @@ for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {
 waituntil {sleep 1;WARCOM_init_done;};
 [] spawn fnc_missionLocator;
 
-// OPFOR AI aim set to 0.2; OPFOR/BLUFOR vehicles and units rearm/refuel every 10 min.
 [] spawn fnc_AI_Master_Control;
 
 if (ZeusStatus != 0) then {
@@ -255,15 +242,13 @@ VCM_ADVANCEDMOVEMENT = false;
 publicVariable "VCM_ADVANCEDMOVEMENT";
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
-    // CP owed for kills by players who have already left, banked until the next sweep.
     departedKillCP = 0;
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
-        // Killhouse bodies never pay: the drill spawns hostile OPFOR on demand and already awards
-        // a fixed sum per completed run, so counting kills here would turn an unlimited training
-        // course into an unlimited CP source. Plain (non-public) setVariable is enough: the tag
-        // is written and read on the server.
+        // Killhouse bodies never pay: the drill already awards a fixed sum per completed run, so
+        // counting kills here would turn an unlimited training course into an unlimited CP source.
+        // Plain (non-public) setVariable is enough: the tag is written and read on the server.
         if (_killed getVariable ["killhouse_enemy", false]) exitWith {};
 
         private _shooter = objNull;
@@ -282,14 +267,13 @@ if (isServer) then {
         };
         if (isNull _shooter) exitWith {};
 
-        // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty vehicles too,
-        // and paying for civilian kills rewards exactly what the town reputation charge penalises.
-        // 0.6 is the engine's hostile/friendly cutoff; the mission sets every playable side pair to
-        // 0, so INDEPENDENT zombies still count.
+        // Only hostiles pay: EntityKilled also fires for civilians, friendlies and empty vehicles,
+        // and paying for civilian kills would reward exactly what the town reputation charge
+        // penalises. 0.6 is the engine's hostile/friendly cutoff; every playable side pair is set
+        // to 0, so INDEPENDENT zombies still count.
         if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
 
-        // Every kill attributed to this player counts the same; the tally converts to CP
-        // on the periodic sweep below, not here.
+        // The tally converts to CP on the periodic sweep below, not here.
         private _uid = getPlayerUID _shooter;
         playerKillCount set [_uid, (playerKillCount getOrDefault [_uid, 0]) + 1];
     }];
@@ -310,12 +294,11 @@ if (isServer) then {
         playerKillCount deleteAt _uid;
     }];
 
-    // Kill income is paid in one periodic sweep rather than per kill: a tally the player watches
-    // build reads as campaign economy, where a payout per body reads as a score feed. Each player
-    // is told only about their own award, so the credit stays personal. Defined here beside the
+    // Paid in one periodic sweep rather than per kill: a tally the player watches build reads as
+    // campaign economy, where a payout per body reads as a score feed. Defined here beside the
     // handlers that fill the tally, but driven by the campaign economy tick in
-    // server/warcom/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period still
-    // accrues its own scheduler slop and walks out of phase.
+    // server/warcom/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period would
+    // accrue its own scheduler slop and walk out of phase.
     fnc_kill_income_sweep = {
         {
             private _uid = getPlayerUID _x;
@@ -327,11 +310,9 @@ if (isServer) then {
                 [_award, "kill_income"] call fnc_cp_adjust;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
                 // A card, not a hint -- deliberately the exception to the one-player-to-hint rule in
-                // docs/info/gameplay/player_text_style_guide.md: CP arriving speaks the card vocabulary its
-                // siblings cpaddedmission and apaddedmission already own, so moving it would make
-                // kill income the only income that reads as a refusal. It is also the payoff for
-                // half an hour of fighting, and it fires on the economy tick -- frequent enough to
-                // matter, infrequent enough not to bury in the corner.
+                // docs/info/gameplay/player_text_style_guide.md: CP arriving speaks the card vocabulary
+                // its siblings cpaddedmission and apaddedmission already own, so moving it would make
+                // kill income the only income that reads as a refusal.
                 ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
             };
         } forEach allPlayers;
@@ -385,14 +366,12 @@ if (isServer) then {
     while{true} do {
         
         {
-            // Sets whether or not cargo or turret units should get out of vehicle when in combat. If true, vehicle will stop and units will dismount.
             _x setUnloadInCombat [true, false];        // vehicle setUnloadInCombat [allowCargo, allowTurrets]
-            // If true, units will remain in a vehicle with broken tracks/wheels; they will still eject if the vehicle is drowning, about to explode or upside down for a while.
             _x allowCrewInImmobile [true, true];            // vehicle allowCrewInImmobile allow / vehicle allowCrewInImmobile [brokenWheels, upsideDown]
             _x setVariable ["vehAiLockInit",true];
         }forEach  ( vehicles select { !(_x getVariable ["vehAiLockInit",false]) } );
         
-        sleep 300.00;    // every 5 minutes
+        sleep 300.00;
     };
 };
 waitUntil { sleep 1.0; chosen_settings };
@@ -401,15 +380,15 @@ waitUntil { sleep 1.0; HQ_pos_found_generated };
 // in while the campaign is still being built around them.
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
-// Paced, not idle: generation signs off by typing MISSION INITIALIZATION COMPLETE across every
-// screen and hinting the settings summary (warcom/fnc_init_OPFOR_WARCOM.sqf), both fired the instant
-// mission_init_complete goes up, and the intro's first act is to black the screen over them. Flying
-// as soon as clients were ready cut the six-second typing off a second in; 12s still clipped it.
+// Paced, not idle: generation signs off by typing across every screen and hinting the settings
+// summary (warcom/fnc_init_OPFOR_WARCOM.sqf) the instant mission_init_complete goes up, and the
+// intro's first act is to black the screen over them. Flying as soon as clients were ready cut the
+// six-second typing off a second in; 12s still clipped it.
 sleep 15;
 
-// The pause above does not replace this: the intro remoteExecs a seat onto each client, so every
-// player must be holding client_init's fnc_remoteBoard before it flies. Bounded and not retried --
-// one client stuck short of that line must not hold the flight for everybody else. The count test is
+// Does not replace the pause above: the intro remoteExecs a seat onto each client, so every player
+// must be holding client_init's fnc_remoteBoard before it flies. Bounded, not retried -- one client
+// stuck short of that line must not hold the flight for everybody else. The count test is
 // load-bearing: findIf over an empty allPlayers returns -1, so an empty list would pass on sight.
 ["BOOT", "duws_intro_ready on every player",
     {count allPlayers > 0
@@ -419,11 +398,10 @@ sleep 15;
 if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     [] spawn fnc_scanCivilianGear;
 };
-// These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission
-// start. Resuming an autosave in a fresh Arma session restarts that clock, so every stamp
-// then sits in the future and wedges its action for as long as the old session had run.
-// A stamp ahead of the clock has no other cause, so drop it and let each function's own
-// "never used" default apply. Stamps far in the past are just unused actions -- not faults.
+// These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission start.
+// Resuming an autosave in a fresh Arma session restarts that clock, so every stamp sits in the
+// future and wedges its action for as long as the old session ran. A stamp ahead of the clock has
+// no other cause, so drop it; stamps in the past are just unused actions, not faults.
 if (isNil "DUWS_cooldownMonitor_running") then {
     DUWS_cooldownMonitor_running = true;
     publicVariable "DUWS_cooldownMonitor_running";

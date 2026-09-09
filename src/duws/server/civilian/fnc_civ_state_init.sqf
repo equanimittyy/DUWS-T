@@ -1,12 +1,8 @@
-// Town lookup, reputation, income and the civilian reaction weighting.
-//
-// Executed by the registry rather than stored as one function: this file defines several.
-// Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
-// place to see what reaches clients.
+// Executed by the registry rather than stored as one function: this file defines several. Broadcasts stay
+// in server_fnc_init.sqf beside the load, so the manifest remains the one place to see what reaches clients.
 
-// Position to town index, -1 when outside every civilian radius (open country, civilians-off,
-// RAVAGE/WBK). Every caller degrades on that rather than treating it as an error: a reputation
-// charge is dropped, a reputation read comes back neutral.
+// -1 when outside every civilian radius (open country, civilians-off, RAVAGE/WBK); every caller
+// degrades on that rather than treating it as an error -- a charge is dropped, a read comes back neutral.
 fnc_civ_townAt = {
 	if (!isServer) exitWith { -1 };
 	params [["_pos", [0,0,0]]];
@@ -21,10 +17,8 @@ fnc_civ_townAt = {
 	_found
 };
 
-// Nearest town whose centre lies within _range of _pos, or -1 when none is that close. Distinct from
-// fnc_civ_townAt, which answers "inside which town" off each town's own radius: an event worked from a
-// town's approach measures against a flat threshold, and wants the closest in range rather than
-// whichever radius happens to contain the point.
+// Distinct from fnc_civ_townAt: that answers "inside which town" off each town's own radius, while an
+// event working from a town's approach wants the closest town within a flat threshold instead.
 fnc_civ_townNear = {
 	if (!isServer) exitWith { -1 };
 	params [["_pos", [0,0,0]], ["_range", 800]];
@@ -38,21 +32,16 @@ fnc_civ_townNear = {
 	_best
 };
 
-// A player within _radius of a position. Shared by the civilian-death charge and the building
-// destruction charge rather than each carrying its own sweep, so the two cannot drift: presence
-// is the proxy for the player having been involved and both must mean the same thing by it.
+// Shared by the civilian-death and building-destruction charges rather than each carrying its own
+// sweep, so presence-as-involvement can't drift between what the two consumers mean by it.
 fnc_civ_playerNear = {
 	if (!isServer) exitWith { false };
 	params ["_pos", ["_radius", 200]];
 	((call BIS_fnc_ListPlayers) findIf { (_x distance _pos) < _radius }) >= 0
 };
 
-// The reputation a town-local consumer acts on: that town's if it has one, neutral otherwise.
-// Every civilian gate degrades this way -- rather than refusing to act -- because civilians can
-// be switched off and RAVAGE/WBK register no town reputation at all. Neutral, not a stored
-// figure: reputation is territory, so there is nothing to be liked or hated by on ground no town
-// owns. A caller needing to tell "neutral" from "not modelled" reads civ_town_rep directly, the
-// way fnc_map_readout_query does.
+// Neutral is territory, not a stored figure -- there is nothing to be liked or hated by on ground no
+// town owns. A caller needing "neutral" from "not modelled" reads civ_town_rep directly, as fnc_map_readout_query does.
 fnc_civ_repAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -64,12 +53,8 @@ fnc_civ_repAt = {
 	}
 };
 
-// What each garrison tier fields in a town, as tokens DUWS_fnc_zoneSpawnOne understands (posture + team,
-// one entry per group). Absolute like the zone set -- a row is the whole garrison for that tier, and a
-// tier bought while it stands raises DUWS_fnc_spawnDiff of the two rows (reinforcement, not a second
-// garrison). A town's own set, not radius-multiplied: it carries a zone tier's infantry weight but drops
-// the heavy end (no tanks/attack helis, armour capped to a lone IFV at IV), so a large town stays a
-// garrison, not a zone with civilians -- and IV digs into buildings rather than fielding zone armour.
+// posture:team tokens DUWS_fnc_zoneSpawnOne reads. Each row is the whole garrison for that tier (absolute,
+// like the zone set), so a tier buy raises DUWS_fnc_spawnDiff of the rows rather than stacking a second garrison; armour caps at one IFV so a town stays a garrison, not a zone.
 // --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
 	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
@@ -79,10 +64,8 @@ DUWS_townSpawnTiers = [
 ];
 // --DUWS-UNITCOMP END--
 
-// A town's garrison tier: 0 for ground OPFOR does not hold, 1 to 4 for ground it does. Reputation
-// only ever writes tier 1 -- see fnc_civ_garrison -- and every step above it is bought by the
-// OPFOR commander, so the tier is stored state rather than a figure derived from reputation.
-// Neutral by default for the same reason fnc_civ_repAt is: ground no town owns has no garrison.
+// Reputation only ever writes tier 1 (see fnc_civ_garrison); every step above is bought by the OPFOR
+// commander, so tier is stored state, not derived from reputation. 0 by default like fnc_civ_repAt: no owner, no garrison.
 fnc_town_garrison_tierAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -94,24 +77,13 @@ fnc_town_garrison_tierAt = {
 	}
 };
 
-// A town raises no garrison while holding: the two things that start a hold are also the two
-// moments a garrison arriving would land on top of the player who caused it.
-//
-// MOBILISING: the town has just crossed into the OPFOR band. Reputation is spent inside a town --
-// by killing civilians or wrecking buildings -- so at the instant one flips, the player is
-// standing in it by definition.
-//
-// REGROUPING: its garrison has just been cleared, by the player who is still standing in it.
-// Longer, because the window is a mechanic rather than a courtesy: an undefended enemy town is
-// the one stretch of a campaign where its civilians can be worked with nobody in the way.
+// Both are moments a garrison arriving would land on the player who caused them: MOBILISING flips while
+// the player is still spending reputation in town; REGROUPING is longer on purpose, the one stretch a cleared town's civilians can be worked with nobody in the way.
 #define TOWN_HOLD_MOBILISING 1800
 #define TOWN_HOLD_REGROUPING 10800
 
-// Seconds left on a town's hold, or 0 for a town free to garrison.
-// The stored figure is a diag_tickTime deadline (from process start), so it is NOT restored by a savegame
-// -- a hold written last session reads as further out than this session could set, and this lives in the
-// mission namespace (the save file), so left alone it would pin a town for the run. Bounded by the longest
-// hold there is, to catch a stale value of either kind.
+// Stored as a diag_tickTime deadline (process uptime, not wall clock), so it does NOT restore across a
+// savegame -- left alone it would pin a town for the run; bounded to the longest hold, to catch a stale value.
 fnc_town_garrison_holdAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -125,9 +97,8 @@ fnc_town_garrison_holdAt = {
 	(_deadline - diag_tickTime) max 0
 };
 
-// Which kind of hold is live, or "" for none. Load-bearing rather than cosmetic: the tier setter
-// refuses a purchase under REGROUPING and allows one under MOBILISING, and the map readout words the two
-// differently.
+// Load-bearing, not cosmetic: the tier setter refuses a purchase under REGROUPING but allows one under
+// MOBILISING, and the map readout words the two differently.
 fnc_town_garrison_holdKindAt = {
 	if (!isServer) exitWith { "" };
 	params [["_townIndex", -1]];
@@ -146,11 +117,8 @@ fnc_town_garrison_setHold = {
 	_secs
 };
 
-// A hold describes OPFOR's intention for ground OPFOR hold, so it dies with the claim rather than
-// running out on its own. Two things go wrong if it outlives the band:
-// the readout keeps telling the player a town they have redeemed to neutral is regrouping, and --
-// worse, because it is silent -- a REGROUPING hold refuses tier *raises*, so a town that left the band
-// and was later ruined again could not garrison at all until the three hours were up.
+// Dies with the claim rather than expiring on its own: a stale REGROUPING hold would both mislabel a
+// redeemed town on the readout and silently block tier raises until the three hours ran out.
 fnc_town_garrison_clearHold = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1]];
@@ -160,10 +128,8 @@ fnc_town_garrison_clearHold = {
 	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, ""];
 };
 
-// What fraction of its tier composition a town actually fields: the shared attrition ledger's
-// projection, keyed by the town's key -- a zone reads the very same function. There is no setter; the
-// ledger is written by losses (recorded live as groups fall), by a seed (a clear), and by an un-lose (a
-// reinforcement purchase, below).
+// Shared attrition-ledger projection keyed by the town's key -- a zone reads the same function. No setter
+// here: the ledger is written by losses, a seed (clear), or an un-lose (reinforcement, below).
 fnc_town_garrison_strengthAt = {
 	if (!isServer) exitWith { 1 };
 	params [["_townIndex", -1]];
@@ -175,11 +141,8 @@ fnc_town_garrison_strengthAt = {
 // the BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
 #define REINFORCE_STEP 0.3
 
-// Reinforcement buys strength; a tier buys composition -- two independent sinks. Tier says what the town
-// would field, strength how much of it stands, so the commander pays either or both. Under the ledger,
-// buying strength un-loses destroyed tokens -- a paid replacement, not a heal (it costs, and the men still
-// walk in on the next refill wave). Refused under REGROUPING (the men already gone, spending would erase
-// what clearing the town bought), allowed under MOBILISING. Returns the new strength, or -1 when refused.
+// Reinforcement buys strength, a tier buys composition -- independent sinks, so the commander pays either or
+// both; un-losing ledger tokens is a paid replacement, not a heal. Refused under REGROUPING (would erase what clearing bought), allowed under MOBILISING.
 fnc_town_garrison_reinforce = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
@@ -192,9 +155,8 @@ fnc_town_garrison_reinforce = {
 	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
 	private _old = [_key] call DUWS_fnc_garrisonStrength;
 	[_key, _old + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
-	// A standing garrison re-seeds its reserve pool from the recovered survivors, so the refill pass walks
-	// them in as hunt waves; a stowed one needs nothing more -- its next raise fields the recovered
-	// strength straight off the ledger.
+	// A standing garrison re-seeds its reserve pool from survivors so the refill pass walks them in as hunt
+	// waves; a stowed one needs nothing more -- its next raise fields the recovered strength off the ledger.
 	if ([_key] call DUWS_fnc_garrisonHeld) then {
 		private _tier = [_townIndex] call fnc_town_garrison_tierAt;
 		if (_tier > 0) then {
@@ -209,12 +171,8 @@ fnc_town_garrison_reinforce = {
 	_new
 };
 
-// The sole writer of the owned tier, the OPFOR commander's purchase hook. Clamped, not trusted -- an
-// out-of-range tier is a fatal table lookup, not a weak garrison. A tier written here is what the town
-// owes, not what stands (the garrison thread picks it up on its cycle, only when a player is there to see
-// it). A raise is refused outright under REGROUPING (else the commander could rebuild a beaten town to IV
-// during the hours it is left alone); lowering is always allowed (the clear files it back to I), and a
-// MOBILISING hold does not refuse -- the men have not arrived, so a buy is folded into the first spawn.
+// Clamped, not trusted -- an out-of-range tier is a fatal table lookup, not a weak garrison. Writes what
+// the town owes, not what stands (the garrison thread picks it up); REGROUPING refuses a raise (else a beaten town could rebuild unchallenged), MOBILISING allows one since it folds into the first spawn.
 fnc_town_garrison_setTier = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_tier", 0], ["_reason", ""]];
@@ -231,15 +189,8 @@ fnc_town_garrison_setTier = {
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
 
-// How a town reacts to a request: [accept, bribe, refuse], summing to 1. Split out of the roll
-// that consumes it so the curve is unit-testable -- the rest of the request path needs the
-// engine, this needs nothing.
-//
-// Piecewise linear with a kink at zero: accept climbs faster above neutral than below it. Bribe
-// is the remainder, a symmetric tent peaking at neutral -- a town that neither likes nor hates
-// the player is where money talks loudest, and at both extremes standing decides instead of
-// money. Neither end is a wall: a town at -20 still takes a bribe one time in ten, so ground the
-// player has ruined is expensive rather than closed.
+// Split out of the roll that consumes it so the curve is unit-testable without the engine. Neither end is
+// a wall -- a town at -20 still takes a bribe one time in ten, so ruined ground is expensive, not closed.
 fnc_civ_reaction_weights = {
 	params [["_rep", 0]];
 	private _t = ((_rep / 20) max -1) min 1;
@@ -247,20 +198,13 @@ fnc_civ_reaction_weights = {
 		if (_this <= 0) then { (1 + _this) / 3 } else { (1/3) + _this * (0.9 - 1/3) }
 	};
 	private _accept = _t call _fnc_accept;
-	// Refuse is accept's exact mirror, so the curve cannot drift out of symmetry by being
-	// written twice.
+	// Mirrors _accept exactly so the curve can't drift out of symmetry by being written twice.
 	private _refuse = (-_t) call _fnc_accept;
 	[_accept, 1 - _accept - _refuse, _refuse]
 };
 
-// What a menu row costs if the reaction roll comes back bribe. One table rather than a switch in
-// each consumer: the request roll, the serve and the bribe answer all have to agree on the price,
-// and three copies would drift. Prices are anchored on the black market the player already reads
-// (goggles 1, pistol and optic 5) and are placeholders for balancing, not measured figures.
-//
-// An unrecognised row returns a negative price. Callers must treat that as a reject: rows only
-// come off the wire, so this is the fail-closed edge for a client sending one the menu never
-// offered.
+// One table rather than a switch per consumer, so the request roll, serve and bribe answers can't drift
+// apart on price; prices anchor on the black market the player already reads (placeholders, not measured). An unrecognised row returns negative, a fail-closed reject since rows only ever come off the wire.
 fnc_civ_rowPrice = {
 	params [["_row", ""]];
 	switch (toUpper _row) do {
@@ -272,13 +216,9 @@ fnc_civ_rowPrice = {
 	};
 };
 
-// A town's band colours as [ellipse, icon], keyed on reputation. One table rather than a literal
-// at each paint site: the two markers must never disagree about which side a town is on, and
-// marker creation needs the neutral pair before any reputation array exists. Blue/red rather than
-// green, because the engine reads green as Independent, which this mission sets hostile to west.
-// The icon is the deeper of each pair -- the ellipse is washed out on purpose so it does not
-// compete with a zone marker at map zoom-out, and an icon drawn at full alpha in that same wash
-// is unreadable against Altis terrain.
+// One table rather than a literal per paint site, so the two markers can't disagree on which side a town
+// is on, and there's a neutral pair before any reputation array exists. Blue/red, not green -- the engine
+// reads green as Independent, which this mission sets hostile to west; the icon is deeper than the washed-out ellipse so it stays readable without fighting a zone marker at zoom-out.
 fnc_civ_townBand = {
 	params [["_rep", 0]];
 	if (_rep >= 10) exitWith { ["#(0.45,0.62,1.0,1)", "#(0.15,0.38,0.95,1)"] };
@@ -286,10 +226,8 @@ fnc_civ_townBand = {
 	["#(0.6,0.35,0.7,1)", "#(0.42,0.15,0.58,1)"]
 };
 
-// What a town pays an economy tick, as [amount, side]. A town inside the neutral band pays
-// nobody, so its worth is not its income. Derived here rather than at each consumer because
-// the map readout and the tick that actually pays must not be able to disagree: a readout
-// promising AP the tick never credits is worse than no readout.
+// Derived here rather than at each consumer, so the map readout and the tick that actually pays can't
+// disagree -- a readout promising AP the tick never credits would be worse than no readout.
 fnc_civ_townIncome = {
 	params [["_rep", 0], ["_ap", 0]];
 	if (_rep >= 10) exitWith { [_ap, "BLU"] };
@@ -297,12 +235,9 @@ fnc_civ_townIncome = {
 	[0, ""]
 };
 
-// Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of both
-// colours, so nothing races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a
-// CfgMarkerColors class name; alpha is set explicitly because a marker created without it sits at 1.
-// With no
-// civ_town_rep (RAVAGE, WBK) both markers keep the neutral pair creation gave them, since no
-// band will ever repaint them.
+// The band is the sole writer of both colours, so nothing races this repaint. setMarkerColor takes an
+// inline #(r,g,b,a) string as well as a CfgMarkerColors name; alpha is set explicitly since a marker
+// created without one sits at 1. With no civ_town_rep (RAVAGE, WBK) both markers keep the neutral pair from creation, since no band will ever repaint them.
 fnc_civ_townRender = {
 	if (!isServer) exitWith {};
 	params ["_townIndex"];
@@ -313,15 +248,13 @@ fnc_civ_townRender = {
 	private _area = format ["civ_area_%1", _townIndex];
 	_area setMarkerColor _areaColour;
 	(format ["civ_icon_%1", _townIndex]) setMarkerColor _iconColour;
-	// Alpha comes from the reveal flag, not from the band: a hardcore town the player has not
-	// found yet is repainted every time its reputation moves, and a flat 0.3 here would put it
-	// on the map the first time a civilian was harmed in it.
+	// Alpha comes from the reveal flag, not the band: a hardcore town not yet found is repainted every time
+	// its reputation moves, and a flat alpha here would put it on the map the first time a civilian was harmed.
 	private _shown = (missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true];
 	_area setMarkerAlpha ([0, 0.3] select _shown);
 };
 
-// Seconds a call-over holds before it lapses and the civilian is handed back their routine. Matched
-// to the panic calm-down (fnc_civ_panic CALM_DELAY) so the two civilian timers read the same.
+// Matched to the panic calm-down (fnc_civ_panic CALM_DELAY) so the two civilian timers read the same.
 #define HALT_LAPSE 60
 
 fnc_civ_moveToPlayerServer = {
@@ -329,14 +262,12 @@ fnc_civ_moveToPlayerServer = {
     if (!isServer) exitWith {};
     if (isNull _unit || isNull _caller) exitWith {};
 
-    // Broadcast: the interaction menu's condition is evaluated on every machine that carries the
-    // action, and the call-over is what unlocks it. Set here rather than in the client-side action
-    // body so a client cannot open the menu on a local it never actually stopped.
+    // Broadcast: the call-over unlocks the interaction menu's condition on every machine that carries the
+    // action; set here rather than client-side so a client can't open the menu on a local it never stopped.
     _unit setVariable ["DUWS_civ_stopped", true, true];
 
-    // Back to front: deleteWaypoint shifts every later index down, so a forward pass over the
-    // list deletes every other waypoint and leaves the rest to pull the civilian away mid-walk.
-    // `reverse` cannot be inlined into the forEach -- it reverses in place and returns Nothing.
+    // Back to front: deleteWaypoint shifts every later index down, so a forward pass would leave half the
+    // waypoints to pull the civilian away mid-walk; `reverse` can't inline into the forEach since it reverses in place and returns Nothing.
     private _wps = waypoints (group _unit);
     reverse _wps;
     { deleteWaypoint _x } forEach _wps;
@@ -346,12 +277,9 @@ fnc_civ_moveToPlayerServer = {
     sleep 5;
     doStop _unit;
 
-    // The halt is not permanent. A local called over and then left alone drifts back to their
-    // routine after this, and the call-over action -- hidden by its DUWS_civ_stopped clause while
-    // the flag is up -- reappears, so the same person can be hailed again. Counted flat from the
-    // call-over and never extended, like the panic calm-down. A completed exchange, an arrest, a
-    // surrender or a panic each own the civilian's next move, so the guard leaves those to it and
-    // lapses only a halt that went nowhere; the re-test guards against a flag flipping mid-sleep.
+    // Not permanent: a local left alone drifts back to routine and the call-over action, hidden by
+    // DUWS_civ_stopped meanwhile, reappears for a re-hail. Flat from the call-over like the panic calm-down;
+    // exchange, arrest, surrender and panic each own the civilian's next move, so this only lapses a halt that went nowhere, and the re-test guards against the flag flipping mid-sleep.
     [_unit] spawn {
         params ["_unit"];
         sleep HALT_LAPSE;
