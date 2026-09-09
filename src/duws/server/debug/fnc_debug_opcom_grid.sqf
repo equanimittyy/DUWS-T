@@ -48,8 +48,10 @@ private _bel = [];
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
-// Taskings -> [pos, OPFOR box icon, "CODE:ORDER" tag]. [*] prefix = a live unit (pos frozen at its de-virt
-// point); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for a free one.
+// Taskings -> [pos, OPFOR box icon, "TOKEN-ID:ORDER" tag]. TOKEN is the composition's unit token (APC, IFV,
+// TANK, SQUAD, RECON...), not the movement bucket, so units sharing a bucket read apart; the icon still gives
+// the domain silhouette. ID is the tasking id, keeping two of one token apart. [*] = a live unit (pos frozen
+// at its de-virt cell); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for one.
 private _tasks = [];
 {
     private _mt = _x get "moveType";
@@ -58,12 +60,8 @@ private _tasks = [];
         case "boat": {"o_naval"}; case "rotary": {"o_air"}; case "fixed": {"o_air"};
         default {"o_inf"};
     };
-    private _code = switch (_mt) do {
-        case "tracked": {"ARM"}; case "wheeled": {"MOT"};
-        case "boat": {"BOAT"}; case "rotary": {"HELI"}; case "fixed": {"JET"};
-        default {"INF"};
-    };
-    if ("transport" in (_x get "flags")) then { _code = "T" + _code };
+    private _tok = toUpper ([(_x get "comp") param [0, ""]] call DUWS_fnc_tokenName);
+    private _code = format ["%1-%2", _tok, _x get "id"];
     private _flag = switch (true) do {
         case ((_x get "carrying") >= 0): {" [F]"};
         case ((_x get "ridingOn") >= 0 || {(_x getOrDefault ["strandTicks", 0]) > 0}): {" [R]"};
