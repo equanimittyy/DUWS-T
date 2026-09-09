@@ -631,11 +631,12 @@ ring), tuned then.
 K per move type is `DUWS_opcom_streamK`
 ([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)).
 
-**Hysteresis.** A live group stows back to a cell once it has held `> K + 1` cells from every player **and
-no live contact** for `OPCOM_REVIRT_GRACE` consecutive ticks
-([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)). The cell of margin alone cannot stop a fast
-flyover crossing the band in a single tick, so the stow waits out a debounce that any re-entry or contact
-resets. A group in a firefight stays live until it resolves, whether or not a player is near.
+**Hysteresis is temporal, not spatial.** A live group stows back to a cell once it has held `> K` cells from
+every player **and no live contact** for `OPCOM_REVIRT_GRACE` consecutive ticks
+([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)). It stows across the same K ring it
+spawned across — no cell of spatial margin — because the debounce alone prevents thrash: any re-entry or
+contact resets the count, so a unit loitering at the edge or a fast flyover cannot spawn then stow in a
+single pass. A group in a firefight stays live until it resolves, whether or not a player is near.
 
 The boundary is a square ring in cell space, so a tasking on the diagonal streams in ~1.4x further than
 orthogonally — acceptable for spawn-before-contact.

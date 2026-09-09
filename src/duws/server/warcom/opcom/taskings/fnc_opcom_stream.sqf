@@ -29,10 +29,8 @@ DUWS_fnc_opcom_applyOrder = {
     };
 };
 
-// OPCOM's own de-virt spawn, landing every domain on the tasking's exact world point. Air is why it is
-// bespoke rather than the zone spawner: that flies air in from off-map (right for a patrol arriving, wrong
-// for a stowed unit resuming), so air here spawns flying at the point. grpNull, and no orphan hull, when the
-// faction cannot field the token or the engine cannot raise it -- the caller then keeps the tasking virtual.
+// OPCOM's own de-virt spawn, so air spawns flying at the tasking's point: the zone spawner flies air in from
+// off-map, wrong for a stowed unit resuming where it stood. grpNull leaves no orphan hull.
 DUWS_fnc_opcom_spawnComp = {
     params ["_token", "_pos"];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
@@ -59,7 +57,7 @@ DUWS_fnc_opcom_spawnComp = {
     private _skill = missionNamespace getVariable ["opfor_ai_skill_random", opfor_ai_skill_random];
     {
         [_x] call fnc_addRandomLoot;
-        // Coveralls fix the crew's body-search faction identity (as the zone air path does); skip the BLUFOR files that dress their own pilots.
+        // Crew's body-search faction identity; skip the BLUFOR files that dress their own pilots.
         if (!(("OPTRE" in BLUFOR_FactionFile_X) || {"HL2ECR" in BLUFOR_FactionFile_X} || {"TIOW" in BLUFOR_FactionFile_X})) then {
             _x forceAddUniform "U_I_pilotCoveralls";
         };

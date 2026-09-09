@@ -57,7 +57,7 @@ DUWS_opcom_speed = createHashMapFromArray [
 // Per-type streaming reach in cells (Chebyshev): a tasking de-virtualises when its cell closes within K of
 // any player's cell. Wider for faster types so a spawn still beats contact at the fixed tick rate.
 DUWS_opcom_streamK = createHashMapFromArray [
-    ["inf", 1], ["wheeled", 2], ["tracked", 2], ["rotary", 4], ["fixed", 8], ["boat", 2]
+    ["inf", 1], ["wheeled", 2], ["tracked", 2], ["rotary", 3], ["fixed", 4], ["boat", 2]
 ];
 
 // Per-type water rule for routing: "land" routes over land cells only (water impassable), "air" treats

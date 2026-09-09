@@ -63,7 +63,7 @@ private _nearestPlayerCells = {
                 private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
                 // Reset on re-entry/engagement below, so the stow needs an unbroken absence, not one
                 // far sample (OPCOM_REVIRT_GRACE).
-                if (!_engaged && {([getPosASL _ldr] call _nearestPlayerCells) > (_k + 1)}) then {
+                if (!_engaged && {([getPosASL _ldr] call _nearestPlayerCells) > _k}) then {
                     private _far = (_t getOrDefault ["farTicks", 0]) + 1;
                     _t set ["farTicks", _far];
                     if (_far >= OPCOM_REVIRT_GRACE) then { [_t] call DUWS_fnc_opcom_reVirt };
