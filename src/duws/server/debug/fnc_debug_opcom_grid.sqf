@@ -48,8 +48,8 @@ private _bel = [];
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
-// Taskings -> [pos, OPFOR box icon, "CODE:ORDER" tag]. Label is derived, not a stored order: FERRY while
-// carrying a rider, RIDING while carried. A [*] prefix marks a live unit (pos frozen at its de-virt point).
+// Taskings -> [pos, OPFOR box icon, "CODE:ORDER" tag]. [*] prefix = a live unit (pos frozen at its de-virt
+// point); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for a free one.
 private _tasks = [];
 {
     private _mt = _x get "moveType";
@@ -64,12 +64,12 @@ private _tasks = [];
         default {"INF"};
     };
     if ("transport" in (_x get "flags")) then { _code = "T" + _code };
-    private _label = switch (true) do {
-        case ((_x get "carrying") >= 0): {"FERRY"};
-        case ((_x get "ridingOn") >= 0): {"RIDING"};
-        default { toUpper (_x get "order") };
+    private _flag = switch (true) do {
+        case ((_x get "carrying") >= 0): {" [F]"};
+        case ((_x get "ridingOn") >= 0 || {(_x getOrDefault ["strandTicks", 0]) > 0}): {" [R]"};
+        default {""};
     };
-    private _tag = format ["%1%2:%3", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code, _label];
+    private _tag = format ["%1%2:%3%4", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code, toUpper (_x get "order"), _flag];
     private _p = _x get "pos";
     _tasks pushBack [[_p select 0, _p select 1], _icon, _tag];
 } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
