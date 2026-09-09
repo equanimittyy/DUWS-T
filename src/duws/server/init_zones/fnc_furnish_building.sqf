@@ -246,7 +246,8 @@ fnc_furnish_building = {
             private _th = _nearB - _heading;
             private _depth = _hx * abs (sin _th) + _hy * abs (cos _th);
             private _shift = _clear - _depth;
-            _o setPosASL ((getPosASL _o) vectorAdd [_shift * sin _nearB, _shift * cos _nearB, 0]);
+            // setPosWorld, not setPosASL: the piece came back frozen and a frozen body ignores setPosASL.
+            _o setPosWorld ((getPosWorld _o) vectorAdd [_shift * sin _nearB, _shift * cos _nearB, 0]);
         };
         // Reject if the seated footprint overlaps an already-placed piece (or the push-out drove it into
         // one); otherwise reserve the true oriented footprint.
@@ -351,7 +352,7 @@ fnc_furnish_building = {
                 if (_cls == "") exitWith {};
                 private _cell = selectRandom _free;
                 private _frame = [_cell select 0, 0] call _frameAt;
-                private _rugObj = ([[_cls, 0, 0, 0, 0], _frame, _key, true, false, true] call fnc_place_settled) select 0;
+                private _rugObj = ([[[_cls, 0, 0, 0, 0]], _frame, _key, true, false, true] call fnc_place_settled) select 0;
                 deleteVehicle _frame;
                 [_rugObj] call _keepFrozen;
                 [_cell select 0, 0.5] call _reserve;

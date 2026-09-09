@@ -21,8 +21,9 @@
 //   _key     composition key the objects are filed under for teardown (fnc_duws_keep).
 //   _invuln  allowDamage false on each placed object (default true). Stops stray fire; independent of _asLoot.
 //   _asLoot  each class is a pickup-able inventory item, seated in a GroundWeaponHolder (default false).
-//   _freeze  props only: enableSimulationGlobal false on the create frame, before a physics tick can eject a
-//            flush-seated body off the floor (default false). Leaves it frozen; loot has no PhysX to freeze.
+//   _freeze  props only: leave the piece frozen (enableSimulationGlobal false) once seated, so no physics
+//            tick unseats a flush body (default false). Seated live then frozen; loot has no PhysX to freeze.
+//            A caller that repositions the returned frozen piece must use setPosWorld, not setPosASL.
 fnc_place_settled = {
     params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false]];
     private _up = vectorUp _anchor;
@@ -34,8 +35,10 @@ fnc_place_settled = {
         // ASL, not ATL: the seat is measured against the anchor's own surface, and setPosASL commits it there
         // without the roof/terrain ambiguity ATL carries over a body.
         private _pos = AGLToASL (_anchor modelToWorld [_ox, _oy, _oz]);
+        private _dirDeg = _baseDir + _dir;
 
-        private _obj = if (_asLoot) then {
+        private _obj = objNull;
+        if (_asLoot) then {
             private _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
             // Cargo slot is class-dependent; an empty holder self-deletes within a second, so fill it now.
             if (isClass (configFile >> "CfgMagazines" >> _class)) then {
@@ -43,34 +46,32 @@ fnc_place_settled = {
             } else {
                 _holder addItemCargoGlobal [_class, 1];
             };
-            _holder
-        } else {
-            private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
-            // Freeze pre-tick: a CAN_COLLIDE body seated flush on the floor reads as interpenetration and the
-            // first physics tick ejects it upward; a caller that freezes it right after locks in that float.
-            if (_freeze) then { _o enableSimulationGlobal false };
-            _o
-        };
-        if (_invuln) then { _obj allowDamage false };
-
-        // Orient first (setVectorDirAndUp does not move the object, so no position to re-assert after it),
-        // then place.
-        private _dirDeg = _baseDir + _dir;
-        _obj setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
-        if (_asLoot) then {
+            if (_invuln) then { _holder allowDamage false };
+            _holder setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
             // Holder origin sits at its base, so seat a hair above the surface. No PhysX, so it holds unfrozen
             // -- and unfrozen is what keeps its inventory openable.
-            _obj setPosASL (_pos vectorAdd (_up vectorMultiply 0.02));
+            _holder setPosASL (_pos vectorAdd (_up vectorMultiply 0.02));
+            _holder setVelocity [0, 0, 0];
+            _obj = _holder;
         } else {
-            // Seat the object's base, not its origin: _pos is the surface point, but setPosASL positions the
-            // model origin, so a prop whose lowest point sits below its origin (a laptop, a crate) would sink
-            // by that gap. Back the gap out along the anchor's up axis (boundingBoxReal is orientation-free).
-            private _baseZ = (boundingBoxReal _obj select 0) select 2;
-            _obj setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
+            // Create, seat, then freeze in one unscheduled pass. A CAN_COLLIDE body seated flush on the floor
+            // is thrown up by the first physics tick, so it must be frozen before any tick -- but freezing
+            // before the seat drops the setPos onto a dead body. isNil runs the block unscheduled, so no tick
+            // interleaves: the seat lands on a live body, then the freeze holds it at rest.
+            isNil {
+                private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+                if (_invuln) then { _o allowDamage false };
+                _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
+                // Seat the base, not the origin: _pos is the surface point but setPosASL positions the model
+                // origin, so a prop whose lowest point sits below its origin sinks by that gap. Back it out
+                // along the up axis (boundingBoxReal is orientation-free).
+                private _baseZ = (boundingBoxReal _o select 0) select 2;
+                _o setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
+                _o setVelocity [0, 0, 0];
+                if (_freeze) then { _o enableSimulationGlobal false };
+                _obj = _o;
+            };
         };
-        // A freshly created ground object spawns with physics live and would drift off the seat otherwise. No
-        // sleep precedes this, so no simulation step ejects it first.
-        _obj setVelocity [0, 0, 0];
 
         [_obj, _key] call fnc_duws_keep;
         _objs pushBack _obj;
