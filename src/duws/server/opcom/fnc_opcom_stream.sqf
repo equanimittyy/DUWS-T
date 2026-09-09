@@ -50,6 +50,7 @@ DUWS_fnc_opcom_deVirt = {
     if (_full > 0) then { [_grp, (_t get "effForce") / _full] call DUWS_fnc_opcom_matchStrength };
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
+    _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
     [_grp, _t get "order", _t get "target"] call DUWS_fnc_opcom_applyOrder;
     true
 };

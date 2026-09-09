@@ -643,6 +643,11 @@ OPCOM_BELIEF_EXPIRE_S = 960;
 OPCOM_BELIEF_FRESH  = OPCOM_BELIEF_FRESH_S  / OPCOM_TICK_PERIOD;
 OPCOM_BELIEF_EXPIRE = OPCOM_BELIEF_EXPIRE_S / OPCOM_TICK_PERIOD;
 
+// Ticks a live tasking must stay clear of every player before it re-virtualises -- a run, not one far
+// sample, so a fast flyover cannot spawn then stow a group in a single pass.
+OPCOM_REVIRT_GRACE_S     = 60;
+OPCOM_REVIRT_GRACE_TICKS = ceil (OPCOM_REVIRT_GRACE_S / OPCOM_TICK_PERIOD);
+
 // Additive firepower premium per human in a sighted BLUFOR group: the group's hardware is priced in full
 // (fnc_opcom_sense), then each human aboard adds this on top -- a player is more dangerous than the same
 // vehicle or rifle in AI hands, so a crewed or carried player weighs heavier on the grid. Tune.
