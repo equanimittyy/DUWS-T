@@ -112,6 +112,12 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
                     } else { selectRandom _cands };
                     if !(_w isEqualTo "") then {
                         if (vest _u == "" && {_tok != "pistol"}) then { _u addVest "V_TacVest_blk" };  // hold rifle mags
+                        // Belts and rockets are too bulky for a vest -- a bag carries the spares.
+                        if (_tok in ["machinegun", "launcher"] && {backpack _u == ""}) then {
+                            private _b = [_sideBags, _bagScore] call _lowPick;
+                            if (_b isEqualTo "") then { _b = [_civBags, _bagScore] call _lowPick };
+                            if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
+                        };
                         _u addWeapon _w;
                         private _magList = getArray (configFile >> "CfgWeapons" >> _w >> "magazines");
                         if !(_magList isEqualTo []) then {
