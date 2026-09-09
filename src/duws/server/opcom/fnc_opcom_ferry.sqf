@@ -36,7 +36,8 @@ DUWS_fnc_opcom_zoneContested = {
 };
 
 // Shared by the borrow and the debug inspector so the two can never drift. _excludeId drops one id (a rider
-// never borrows itself); -1 drops none.
+// never borrows itself); -1 drops none. Idle-only: a hull on a directed order is a role unit off the pool, so
+// a ferry never breaks a standing order (transport_ferry.md).
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1]];
     DUWS_opcom_taskings select {
@@ -45,6 +46,7 @@ DUWS_fnc_opcom_ferryPool = {
         && {(_x getOrDefault ["carrying", -1]) < 0}
         && {(_x get "id") != _excludeId}
         && {(_x get "moveType") in ["boat", "rotary"]}
+        && {(_x get "order") in ["guard", "garrison"]}
         && {!(((_x get "order") isEqualTo "garrison") && {[_x get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
     }
 };

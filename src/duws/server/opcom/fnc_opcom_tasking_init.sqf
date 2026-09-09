@@ -15,8 +15,9 @@ DUWS_opcom_taskSeq  = 0;
 // The one place a buyable unit is priced and flagged (docs/plans/opcom/opcom_plan.md). Row -> [composition,
 // flags]. Bare tokens resolve to the "none" posture, so the unit takes OPCOM's order, not a standing
 // circuit. No price column: a hire costs ceil(force * OPCOM_AP_PER_FORCE), so no price can drift from worth.
-// `noncombat` marks the unarmed rows: excluded from the garrison reserve wave (never spawns to defend, dies
-// with a captured zone), a separate axis from `transport` lift -- an apc/ifv is transport-flagged yet combat.
+// `noncombat` marks the non-defender rows: kept out of the garrison reserve wave (never spawns to defend,
+// dies with a captured zone), regardless of armament -- a boat is an armed gunboat. A separate axis from
+// `transport` lift: an apc/ifv is transport-flagged yet a defender.
 DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["rifles",       [["squad"],     []]],
     ["weapons_team", [["wp_team"],   []]],

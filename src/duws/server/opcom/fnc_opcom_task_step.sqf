@@ -102,9 +102,22 @@ private _nearestPlayerCells = {
                         };
                     } else {
                         private _adv = [_t] call DUWS_fnc_opcom_advance;
-                        // A land type stopped at a water leg fetches a ferry. On a bind it now rides (ridingOn
-                        // set) and its turn is skipped hereafter; nil means none free -- it holds and retries.
-                        if (_adv isEqualTo "water") then { [_t] call DUWS_fnc_opcom_borrowFerry };
+                        // No lift free strands the rider at the shore: it holds, retries, and WARNs every
+                        // OPCOM_FERRY_STRAND_TICKS so a true island gap (no transport recruited) is not silent.
+                        if (_adv isEqualTo "water") then {
+                            private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
+                            if (isNil "_tr") then {
+                                private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
+                                _t set ["strandTicks", _s];
+                                if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
+                                    ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
+                                };
+                            } else {
+                                _t set ["strandTicks", 0];
+                            };
+                        } else {
+                            _t set ["strandTicks", 0];
+                        };
                         if (_adv isEqualTo "arrived" && {_order isEqualTo "supply"}) then {
                             // A supply run that reaches its drop with no player near still completes.
                             ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;

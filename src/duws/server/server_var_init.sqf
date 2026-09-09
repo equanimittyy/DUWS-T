@@ -695,6 +695,10 @@ OPCOM_ROUTE_LAMBDA = 1;
 // only when no land route exists, and among water routes A* still picks the shortest (transport_ferry.md).
 OPCOM_ROUTE_LIFT_PENALTY = 1e6;
 
+// Throttle for the stranded-rider WARN: with no lift free a rider retries every tick, so it logs only once
+// per this many -- an island-gap deadlock surfaces in the RPT without flooding it (transport_ferry.md).
+OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
+
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both
