@@ -646,6 +646,10 @@ OPCOM_BELIEF_EXPIRE = 192;   // 960s @ 5s tick
 // sample, so a fast flyover cannot spawn then stow a group in a single pass.
 OPCOM_REVIRT_GRACE = 12;     // 60s @ 5s tick
 
+// Height a de-virtualised air tasking enters at, flying, above its world point -- a fixed height rather
+// than the stored z, so a helicopter neither creeps up nor sinks across stow/spawn cycles.
+OPCOM_AIR_SPAWN_ALT = 150;
+
 // Additive firepower premium per human in a sighted BLUFOR group: the group's hardware is priced in full
 // (fnc_opcom_sense), then each human aboard adds this on top -- a player is more dangerous than the same
 // vehicle or rifle in AI hands, so a crewed or carried player weighs heavier on the grid. Tune.

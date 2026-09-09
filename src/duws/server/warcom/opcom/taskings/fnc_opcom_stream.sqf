@@ -29,14 +29,52 @@ DUWS_fnc_opcom_applyOrder = {
     };
 };
 
-// Spawn the composition at its world point, matched to stored strength, and give it its order; true on a
-// live group. One hull/team per tasking, never a column. Air enters from off-map by engine design
-// (fnc_spawn_vehicle), so its drop point is nominal.
+// OPCOM's own de-virt spawn, landing every domain on the tasking's exact world point. Air is why it is
+// bespoke rather than the zone spawner: that flies air in from off-map (right for a patrol arriving, wrong
+// for a stowed unit resuming), so air here spawns flying at the point. grpNull, and no orphan hull, when the
+// faction cannot field the token or the engine cannot raise it -- the caller then keeps the tasking virtual.
+DUWS_fnc_opcom_spawnComp = {
+    params ["_token", "_pos"];
+    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
+        [_token, _pos, 100, "none", _pos] call fnc_spawn_team
+    };
+    private _class = [_token] call DUWS_fnc_tokenClass;
+    if (_class isEqualTo "") exitWith {
+        ["WARN", "OPCOM", format ["spawn: token %1 resolves to no class for this faction", _token]] call fnc_log;
+        grpNull
+    };
+    if !(_class isKindOf "Air") exitWith {
+        [_class, _pos, 100, "none", _pos] call fnc_spawn_vehicle
+    };
+    private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
+    _created params ["_veh", "_crew", "_grp"];
+    if (isNull _grp || {_crew isEqualTo []}) exitWith {
+        if (!isNull _veh) then { deleteVehicle _veh };
+        ["ERROR", "OPCOM", format ["air spawn failed for token %1 (%2)", _token, _class]] call fnc_log;
+        grpNull
+    };
+    _grp deleteGroupWhenEmpty true;
+    _veh engineOn true;
+    _veh flyInHeight OPCOM_AIR_SPAWN_ALT;
+    private _skill = missionNamespace getVariable ["opfor_ai_skill_random", opfor_ai_skill_random];
+    {
+        [_x] call fnc_addRandomLoot;
+        // Coveralls fix the crew's body-search faction identity (as the zone air path does); skip the BLUFOR files that dress their own pilots.
+        if (!(("OPTRE" in BLUFOR_FactionFile_X) || {"HL2ECR" in BLUFOR_FactionFile_X} || {"TIOW" in BLUFOR_FactionFile_X})) then {
+            _x forceAddUniform "U_I_pilotCoveralls";
+        };
+        _x setSkill _skill;
+    } forEach _crew;
+    _grp
+};
+
+// Spawn the composition at its world point (DUWS_fnc_opcom_spawnComp), matched to stored strength, and give
+// it its order; true on a live group. One hull/team per tasking, never a column.
 DUWS_fnc_opcom_deVirt = {
     params ["_t"];
     private _token = (_t get "comp") param [0, ""];
     private _pos = _t get "pos";
-    private _grp = [_token, _pos, 100, "none", _pos] call DUWS_fnc_zoneSpawnOne;
+    private _grp = [_token, _pos] call DUWS_fnc_opcom_spawnComp;
     if (isNull _grp) exitWith {
         ["ERROR", "OPCOM", format ["de-virt spawn failed for tasking %1 token %2", _t get "id", _token]] call fnc_log;
         false
