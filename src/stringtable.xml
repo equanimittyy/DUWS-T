@@ -3964,6 +3964,38 @@
                 <Original>You are not your group's leader.</Original>
                 <English>You are not your group's leader.</English>
             </Key>
+            <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_READY">
+                <Original>Rescue Hostage</Original>
+                <English>Rescue Hostage</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_DESC">
+                <Original>OPFOR is holding a hostage in a building cluster in this area. Reach him unseen, kill his guards, and get him to HQ. Detection starts a one-minute clock; run it out and they execute him.</Original>
+                <English>OPFOR is holding a hostage in a building cluster in this area. Reach him unseen, kill his guards, and get him to HQ. Detection starts a one-minute clock; run it out and they execute him.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_brief">
+                <Original>Alpha 1-1, OPFOR is holding a hostage near %1. Move in quiet. If they make you, they execute him inside a minute, so kill his guards and bring him home.</Original>
+                <English>Alpha 1-1, OPFOR is holding a hostage near %1. Move in quiet. If they make you, they execute him inside a minute, so kill his guards and bring him home.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_copy">
+                <Original>Copy Overlord. Going in dark.</Original>
+                <English>Copy Overlord. Going in dark.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_detected">
+                <Original>You've been spotted. The guards are moving to execute the hostage. Kill them now.</Original>
+                <English>You've been spotted. The guards are moving to execute the hostage. Kill them now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_freed">
+                <Original>Hostage free. Get him to HQ.</Original>
+                <English>Hostage free. Get him to HQ.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_lost">
+                <Original>Alpha 1-1, the hostage is dead. Nothing more we can do. RTB.</Original>
+                <English>Alpha 1-1, the hostage is dead. Nothing more we can do. RTB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_home">
+                <Original>Good work Alpha 1-1. The hostage is safe and on his way in.</Original>
+                <English>Good work Alpha 1-1. The hostage is safe and on his way in.</English>
+            </Key>
             <Key ID="STR_DUWS_T_c21">
                 <Original>Deliver Supplies</Original>
                 <English>Deliver Supplies</English>

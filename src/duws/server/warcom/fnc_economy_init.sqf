@@ -185,8 +185,8 @@ fnc_town_rep_adjust = {
 	if (abs _new < 0.01) then { _new = 0 };
 	_reps set [_townIndex, _new];
 	[_townIndex] call fnc_civ_townRender;
-	// A town crossing the OPFOR band (in either direction) changes the placement keep-out list.
-	if ((_old <= -10) != (_new <= -10)) then { [] call fnc_enemy_towns_refresh };
+	// A town crossing either faction band (in either direction) changes the broadcast town-centre lists.
+	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then { [] call fnc_enemy_towns_refresh };
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 
 	if (_new == _old || _silent) exitWith {};
@@ -199,17 +199,23 @@ fnc_town_rep_adjust = {
 	if (!_queued) then { [_townIndex, _reason] spawn fnc_town_rep_announce };
 };
 
-// The keep-out list the placement gate (shared/functions/fnc_pos_near_enemy.sqf) reads for towns.
-// Broadcast as positions because the gate runs on clients, where civ_town_rep does not exist. Rebuilt
-// whole rather than patched: towns number in the tens and a band crossing is rare, so the cost is
-// noise and the whole-list form cannot drift out of step with civ_town_rep the way an add/remove can.
+// The town-centre lists client-side gates read, since civ_town_rep is server-only: the OPFOR band feeds
+// the placement keep-out (shared/functions/fnc_pos_near_enemy.sqf); both bands feed the rescue-hostage
+// site rule, which bars a covert site in a side-held town. Rebuilt whole rather than patched: towns number
+// in the tens and a band crossing is rare, so the cost is noise and the whole-list form cannot drift out
+// of step with civ_town_rep the way an add/remove can.
 fnc_enemy_towns_refresh = {
 	if (!isServer) exitWith {};
 	private _reps = missionNamespace getVariable ["civ_town_rep", []];
 	private _locs = missionNamespace getVariable ["civ_locations", []];
 	DUWS_enemy_town_pos = [];
-	{ if (_x <= -10) then { DUWS_enemy_town_pos pushBack (getPos (_locs select _forEachIndex)) } } forEach _reps;
+	DUWS_blufor_town_pos = [];
+	{
+		if (_x <= -10) then { DUWS_enemy_town_pos pushBack (getPos (_locs select _forEachIndex)) };
+		if (_x >= 10) then { DUWS_blufor_town_pos pushBack (getPos (_locs select _forEachIndex)) };
+	} forEach _reps;
 	publicVariable "DUWS_enemy_town_pos";
+	publicVariable "DUWS_blufor_town_pos";
 };
 
 // A cost with escalation applied, rounded up so a scaled price is never cheaper than the base

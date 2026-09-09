@@ -251,6 +251,10 @@ fnc_raid_safehouse_ask_addAction = compile preprocessFileLineNumbers "duws\serve
 fnc_raid_safehouse_ask_request = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_ask_request.sqf";
 fnc_raid_safehouse_ask_reveal = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_ask_reveal.sqf";
 fnc_raid_safehouse_breach = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_breach.sqf";
+fnc_rescue_hostage_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_hostage\fnc_rescue_hostage_mission.sqf";
+// Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap); undefined there, findSite
+// falls back to the accept-all generic and the cluster / zone-standoff / side-held-town gate is silently lost.
+fnc_rescue_hostage_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_hostage\fnc_rescue_hostage_site.sqf";publicVariable "fnc_rescue_hostage_site";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_setup_array.sqf";

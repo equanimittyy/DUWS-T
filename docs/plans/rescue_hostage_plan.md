@@ -177,12 +177,11 @@ the catalogue's effort ladder before landing.
 
 ## Open decisions
 
-- **Town-ownership signal for the finder.** The finder may read only broadcast state. `duws_town_circles`
-  gives town centres/radii, but whether a town's BLUFOR/OPFOR lean is broadcast (vs a server-local
-  `setVariable` in the `fnc_civ_*` layer) needs checking. If it is not broadcast, either `publicVariable`
-  the ownership array or drop the town exclusion and rely on the ≥300 m zone-distance rule alone.
-  **Recommend:** verify first; the zone-distance rule already keeps the site out of the main fight, so the
-  town exclusion is a refinement, not a blocker.
+- **Town-ownership signal for the finder.** *Resolved.* Only the OPFOR band was broadcast
+  (`DUWS_enemy_town_pos`); BLUFOR lean lived in the server-only `civ_town_rep`. `fnc_enemy_towns_refresh`
+  (`fnc_economy_init.sqf`) now also publishes `DUWS_blufor_town_pos` (rep ≥ +10 town centres) on the same
+  band-crossing rebuild, so the finder rejects a candidate sitting inside either faction's town via those two
+  lists matched against `duws_town_circles` for the radii. `civ_town_rep` itself stays server-local.
 - **One-way alarm vs re-hide-to-cancel.** **Recommend one-way** per the brief; revisit only if playtest
   finds the death clock too punishing, in which case allow the clock to pause while no mission guard has
   fresh `nearTargets` knowledge of any player.
