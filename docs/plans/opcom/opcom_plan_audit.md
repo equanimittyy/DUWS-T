@@ -1,7 +1,7 @@
 # Audit: opcom_plan.md
 
 A full-document review of [`opcom_plan.md`](opcom_plan.md), cross-checked against the shipped Phase 1
-code under `src/duws/server/opcom/`. The plan-doc gates it raised — which block the decision-loop and
+code under `src/duws/server/warcom/opcom/`. The plan-doc gates it raised — which block the decision-loop and
 orchestration phases, not the force-weighting phase next in line — are now closed in the plan; this doc is
 kept as the tracker for the items deferred to the phase or code change that owns them.
 

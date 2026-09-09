@@ -596,7 +596,7 @@ then pulling them together for an attack ([§Commitment](#commitment-intents-are
 
 **Combatant and non-combatant.** A recruited unit is a *combatant* by default. Four rows — `boat`,
 `trans_heli`, `truck`, `recon_heli` — are *non-combatants*, marked by a `noncombat` flag on their recruit-menu rows
-([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/opcom/fnc_opcom_tasking_init.sqf)). Non-combatant is a
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)). Non-combatant is a
 garrison-defence classification, not a claim about armament: it means the unit never joins a zone's defence, not
 that it has no gun — a `boat` is an armed gunboat yet a non-combatant. This is a separate
 axis from the `transport` flag, which marks lift capacity — an `apc`/`ifv` is transport-flagged yet a
@@ -1396,13 +1396,13 @@ later phases, since the tuning constants and the engine-contact behaviours (stre
 virtual combat) only settle by running the core. The rest of this plan is the design spec those phase
 docs draw on.
 
-- Phase 1 — Perception: **shipped**; the code is `src/duws/server/opcom/` and its debug overlay under
+- Phase 1 — Perception: **shipped**; the code is `src/duws/server/warcom/opcom/belief/` and its debug overlay under
   `client/debug/` (the phase doc is retired now the phase is built).
-- Phase 2 — Force weighting: **shipped**; the force model is `src/duws/server/opcom/fnc_opcom_force.sqf`
+- Phase 2 — Force weighting: **shipped**; the force model is `src/duws/server/warcom/opcom/belief/fnc_opcom_force.sqf`
   with the single-class classifier in `shared/factions/MODERN/fn_factionAutoDetect.sqf` (the phase doc is
   retired now the phase is built).
 - Phase 3 — Recruitment & tasking wiring: **shipped** (live playtest verification pending); code under
-  `src/duws/server/opcom/` — Recruit and the tasking store (`fnc_opcom_recruit`, `fnc_opcom_tasking_init`),
+  `src/duws/server/warcom/opcom/` (split `belief/` and `taskings/`) — Recruit and the tasking store (`fnc_opcom_recruit`, `fnc_opcom_tasking_init`),
   movement with A\* routing and cell streaming (`fnc_opcom_task`, `fnc_opcom_task_step`, `fnc_opcom_route`,
   `fnc_opcom_stream`), the transport ferry ([`transport_ferry.md`](transport_ferry.md)) and the
   recon-detection sensor (`fnc_opcom_recon_sense`) — all hand-driven through the debug harness

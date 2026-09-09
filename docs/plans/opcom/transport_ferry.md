@@ -38,7 +38,7 @@ ceiling entry to decrement. It is a plain re-task.
 
 ## The route crosses water
 
-The mechanic starts in the router ([`fnc_opcom_route.sqf`](../../../src/duws/server/opcom/fnc_opcom_route.sqf)).
+The mechanic starts in the router ([`fnc_opcom_route.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_route.sqf)).
 A land move type may **cross navigable water at a lift penalty**: water cells are passable in the A\* search at a
 high added cost (`OPCOM_ROUTE_LIFT_PENALTY`), so the planner still prefers a land path wherever one exists and
 routes over water only when it must. A contiguous run of water cells in the returned chain is one **ferry leg**.
@@ -93,7 +93,7 @@ depends on a mod fielding a roomy carrier. Seats bind only when the pair goes li
 ## State machine
 
 The carry reuses `DUWS_fnc_opcom_ferryStep` (server,
-[`fnc_opcom_ferry.sqf`](../../../src/duws/server/opcom/fnc_opcom_ferry.sqf)), run each tick on the transport,
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)), run each tick on the transport,
 with the drop point the **far shore of the water leg**:
 
 1. **Rendezvous** — not yet embarked: the transport marches to the waiting rider's near-shore position on its

@@ -347,31 +347,31 @@ publicVariable "fnc_recruitSuccessServer";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
-// OPCOM (the opposing commander): server-only, so not broadcast; compiled to names the perception loop
-// calls. Force model -- the category power table and its resolvers, executed to define them. Belief layer
-// -- store init, sighting sweep, decay. Grid layer -- substrate init, per-tick rebuild.
-[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_force.sqf";
-fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_belief_init.sqf";
-fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_sense.sqf";
-fnc_opcom_recon_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_recon_sense.sqf";
-fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_decay.sqf";
-fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_belief_prune.sqf";
-fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_init.sqf";
-fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_rebuild.sqf";
-fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_perception_run.sqf";
-// Tasking layer (Phase 3): the strength and streaming helpers are executed to define them (like the force
-// model); the store init, router, recruit/task primitives, per-tick step and hand-drive harness compile to
-// names the loop and the harness call. strength before stream (deVirt uses matchStrength).
-[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_strength.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_stream.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_ferry.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_garrison.sqf";
-fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_tasking_init.sqf";
-fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_route.sqf";
-fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_recruit.sqf";
-fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_task.sqf";
-fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_task_step.sqf";
-fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_debug_task.sqf";
+// OPCOM (the opposing commander): server-only, so not broadcast. Two subsystems, one folder each under
+// warcom\opcom\. belief\ -- the force model and strength helpers (executed to define their tables and
+// resolvers), the belief store, sighting sweep, decay, and the perception grid with its per-tick run.
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_force.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_strength.sqf";
+fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
+fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_sense.sqf";
+fnc_opcom_recon_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_recon_sense.sqf";
+fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_decay.sqf";
+fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_prune.sqf";
+fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_init.sqf";
+fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_rebuild.sqf";
+fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
+// taskings\ (Phase 3): streaming, ferry and garrison executed to define them; the store init, router,
+// recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
+// strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_garrison.sqf";
+fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";
+fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_route.sqf";
+fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_recruit.sqf";
+fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_task.sqf";
+fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_task_step.sqf";
+fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_debug_task.sqf";
 
 // Random-event runner and its two seams (rep-banded table, kind dispatch). Server-side only, so left
 // un-broadcast like the other directors.

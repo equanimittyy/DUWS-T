@@ -32,9 +32,10 @@ swap point a later step replaces:
 
 ## Files
 
-Flat under `src/duws/server/opcom/`, one function per file, each registered by a compile-path string in
-`server_fnc_init.sqf` beside the Phase 1 functions (the misc-loader convention — callers use the variable
-name, not `CfgFunctions`).
+Under `src/duws/server/warcom/opcom/`, split into `belief/` and `taskings/` by subsystem, one function per
+file, each registered by a compile-path string in `server_fnc_init.sqf` beside the Phase 1–3 functions (the
+misc-loader convention — callers use the variable name, not `CfgFunctions`). A new Phase 4 file lands in
+whichever subsystem folder it reads.
 
 | File | Responsibility |
 |---|---|
