@@ -194,7 +194,7 @@ fnc_furnish_building = {
         // Anchors sit in the open, no wall backing, so a fixed heading; a desk's single seat still lands
         // on its real front via the frontYaw offset in the seat block below.
         private _frame = [_cpos, 0] call _frameAt;
-        private _aObj = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true] call fnc_place_settled) select 0;
+        private _aObj = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
         deleteVehicle _frame;
 
         private _bb = boundingBoxReal _aObj;
@@ -259,7 +259,7 @@ fnc_furnish_building = {
         _cell params ["_cpos", "", "_nearB", "_clear"];
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _frame = [_cpos, _heading] call _frameAt;
-        private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true] call fnc_place_settled) select 0;
+        private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
         deleteVehicle _frame;
         private _bb = boundingBoxReal _o;
         private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
@@ -378,7 +378,7 @@ fnc_furnish_building = {
                 if (_cls == "") exitWith {};
                 private _cell = selectRandom _free;
                 private _frame = [_cell select 0, 0] call _frameAt;
-                private _rugObj = ([[[_cls, 0, 0, 0, 0]], _frame, _key, true, false, true] call fnc_place_settled) select 0;
+                private _rugObj = ([[[_cls, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
                 deleteVehicle _frame;
                 [_rugObj] call _keepFrozen;
                 [_cell select 0, 0.5] call _reserve;

@@ -12,7 +12,7 @@
 // top) and it rotates and travels with the anchor. The anchor should already be settled/frozen: the seats
 // are read off it once, so a seat that moves afterwards leaves its object behind.
 //
-// Contract: [_rows, _anchor, _key, _invuln, _asLoot, _freeze] -> [_objs]
+// Contract: [_rows, _anchor, _key, _invuln, _asLoot, _freeze, _settle] -> [_objs]
 //   _rows    [class, offX, offY, offZ, dir] in the anchor's model frame. offZ is where the object's resting
 //            base sits above the anchor origin (the caller places a table-top row at the table's
 //            boundingBoxReal top); dir adds to the anchor heading. offZ and dir default to 0. When _asLoot,
@@ -24,8 +24,11 @@
 //   _freeze  props only: leave the piece frozen (enableSimulationGlobal false) once seated, so no physics
 //            tick unseats a flush body (default false). Seated live then frozen; loot has no PhysX to freeze.
 //            A caller that repositions the returned frozen piece must use setPosWorld, not setPosASL.
+//   _settle  props only: drop the piece just above its point and let physics seat it on the real floor (a
+//            wrong seat Z self-corrects), confirm it lands upright and in place, jitter-retry up to 3, then
+//            freeze (default false). Overrides _freeze; costs a ~1.5 s wait per piece, so the caller runs scheduled.
 fnc_place_settled = {
-    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false]];
+    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false], ["_settle", false]];
     private _up = vectorUp _anchor;
     private _baseDir = getDir _anchor;
 
@@ -54,20 +57,54 @@ fnc_place_settled = {
             _holder setVelocity [0, 0, 0];
             _obj = _holder;
         } else {
-            // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
-            // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
-            // create-seat-freeze completes before any tick can land.
-            isNil {
-                private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
-                if (_invuln) then { _o allowDamage false };
-                _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
-                // Seat the base, not the origin: setPosASL places the model origin, so a prop whose lowest
-                // point is below its origin sinks by that gap unless backed out (boundingBoxReal is orientation-free).
-                private _baseZ = (boundingBoxReal _o select 0) select 2;
-                _o setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
+            if (_settle) then {
+                // Physics-settle, not seat-and-freeze: gravity finds the real floor even when the seat Z is
+                // wrong, and a bad landing (tipped or flung) retries rather than freezing in.
+                private _o = objNull;
+                private _tries = 0;
+                private _settled = false;
+                while { !_settled && _tries < 3 } do {
+                    if (!isNull _o) then { deleteVehicle _o };
+                    private _jx = 0; private _jy = 0;
+                    if (_tries > 0) then { _jx = (random 0.4) - 0.2; _jy = (random 0.4) - 0.2 };
+                    _o = createVehicle [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
+                    if (_invuln) then { _o allowDamage false };
+                    _o setVectorUp [0, 0, 1];
+                    _o setDir _dirDeg;
+                    _o setPosASL (_pos vectorAdd [_jx, _jy, 0.15]);
+                    _o setVelocity [0, 0, 0];
+                    sleep 1.5;
+                    // Base-on-floor Z gate: distance2D alone passes a piece that fell to a lower storey or
+                    // perched on another at the same XY. Band kept extremely tight -- but above PhysX rest
+                    // contact (~few cm), or every try fails and the piece freezes mis-seated.
+                    private _restBaseZ = (getPosASL _o select 2) + ((boundingBoxReal _o select 0) select 2);
+                    _settled = alive _o
+                        && {(vectorUp _o select 2) > 0.985}
+                        && {(_o distance2D (ASLToAGL _pos)) < 0.6}
+                        && {abs (_restBaseZ - (_pos select 2)) < 0.03};
+                    _tries = _tries + 1;
+                };
+                // Freeze the settled (or last) attempt from rest: re-level a small tilt, kill drop residual.
+                _o setVectorUp [0, 0, 1];
                 _o setVelocity [0, 0, 0];
-                if (_freeze) then { _o enableSimulationGlobal false };
+                _o enableSimulationGlobal false;
                 _obj = _o;
+            } else {
+                // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
+                // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
+                // create-seat-freeze completes before any tick can land.
+                isNil {
+                    private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+                    if (_invuln) then { _o allowDamage false };
+                    _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
+                    // Seat the base, not the origin: setPosASL places the model origin, so a prop whose lowest
+                    // point is below its origin sinks by that gap unless backed out (boundingBoxReal is orientation-free).
+                    private _baseZ = (boundingBoxReal _o select 0) select 2;
+                    _o setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
+                    _o setVelocity [0, 0, 0];
+                    if (_freeze) then { _o enableSimulationGlobal false };
+                    _obj = _o;
+                };
             };
         };
 
