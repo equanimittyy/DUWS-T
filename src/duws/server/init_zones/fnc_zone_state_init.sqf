@@ -225,6 +225,9 @@ fnc_zone_control_set = {
 			// generation index, and the prefab name it does carry is not unique.
 			["INFO", "ZONES", format ["captured by BLUFOR at %1, now holding %2",
 				_zonePos, zoneundercontrolblu]] call fnc_log;
+			// A captured zone's resting OPCOM non-combatants die with it. Guarded: this transition is the
+			// critical path and OPCOM lives in a separate subsystem (docs/plans/opcom/opcom_plan.md).
+			if (!isNil "DUWS_fnc_opcom_zoneCaptured") then { [[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_zoneCaptured };
 		};
 		case "OPF": {
 			[WARCOM_zones_controled_by_BLUFOR, _zonePos] call _fnc_dropFrom;

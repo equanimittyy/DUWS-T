@@ -687,6 +687,11 @@ OPCOM_WATER_MIN_CELLS = 10;
 // P3 routes direct; the cost-field knob ships wired to the router. Tune.
 OPCOM_ROUTE_LAMBDA = 1;
 
+// Ferry lift penalty (metres): the cost a land move type pays to step into a navigable-water cell, set far
+// above any land detour the play box can hold -- so a target across water is reachable, but water is taken
+// only when no land route exists, and among water routes A* still picks the shortest (transport_ferry.md).
+OPCOM_ROUTE_LIFT_PENALTY = 1e6;
+
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both

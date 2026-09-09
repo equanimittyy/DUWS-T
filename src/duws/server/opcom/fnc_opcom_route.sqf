@@ -39,17 +39,18 @@ private _n    = _w * _w;
 // rejected as impassable. Start and target are already box-clamped by w2c.
 (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _land = DUWS_opcom_grid_land;
-private _comp = DUWS_opcom_grid_comp;
 private _gwater = DUWS_opcom_grid_water;
 private _ene  = DUWS_opcom_grid_ene;
 private _water = DUWS_opcom_moveWater getOrDefault [_moveType, "land"];
 
+// A land type may cross navigable water at the lift penalty in the cost below, so its chain can include water
+// cells (a ferry leg the executor lifts over).
 private _passable = {
     params ["_i"];
     switch (_water) do {
         case "air":   { true };
         case "water": { (_gwater select _i) >= 0 };   // navigable water only, sub-threshold pools excluded
-        default       { _land select _i };
+        default       { (_land select _i) || {(_gwater select _i) >= 0} };
     };
 };
 
@@ -57,12 +58,8 @@ private _s = [_startPos] call DUWS_fnc_opcom_w2c;
 private _d = [_destPos]  call DUWS_fnc_opcom_w2c;
 if (_s == _d) exitWith { [[_destPos], "grid"] };
 
-// A land route needs source and target in the one connected land component, or the search cannot join them
-// -- reject up front rather than exhaust A*. Air/water skip this (land components do not describe them).
-if (_water isEqualTo "land" && {!((_land select _s) && {(_land select _d)} && {(_comp select _s) == (_comp select _d)})}) exitWith {
-    ["WARN", "OPCOM", format ["no land route %1->%2 (disconnected/water); holding straight", _s, _d]] call fnc_log;
-    [[_destPos], "grid"]
-};
+// No land-component pre-check: a land type can cross navigable water, so ends on different land masses may
+// still join over a strait; a truly unreachable target falls through to the A* no-route WARN and holds straight.
 
 // A boat needs source and target in the one navigable water component (grid_water >= 0 and equal), or it
 // cannot join them -- a boat cannot cross land between two seas.
@@ -109,7 +106,10 @@ while {count _open > 0 && {_guard < _n}} do {
                     private _j = _ny * _w + _nx;
                     if ([_j] call _passable) then {
                         private _step = [_cell, _diag] select (_dx != 0 && _dy != 0);
-                        private _tentative = (_g select _cur) + _step + _lw * (_ene select _j);
+                        // Lift penalty: a land type crossing into navigable water pays the ferry cost, so a
+                        // land path is preferred wherever one exists and water is taken only when it must.
+                        private _lift = [0, OPCOM_ROUTE_LIFT_PENALTY] select (_water isEqualTo "land" && {(_gwater select _j) >= 0});
+                        private _tentative = (_g select _cur) + _step + _lw * (_ene select _j) + _lift;
                         if ((_g select _j) < 0 || {_tentative < (_g select _j)}) then {
                             _g set [_j, _tentative];
                             _from set [_j, _cur];

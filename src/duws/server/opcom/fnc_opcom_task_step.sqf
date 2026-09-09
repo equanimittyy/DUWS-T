@@ -93,13 +93,17 @@ private _nearestPlayerCells = {
                             };
                         };
                     } else {
-                        private _arrived = [_t] call DUWS_fnc_opcom_advance;
-                        if (_arrived && {_order isEqualTo "supply"}) then {
+                        private _adv = [_t] call DUWS_fnc_opcom_advance;
+                        // A land type stopped at a water leg fetches a ferry. On a bind it now rides (ridingOn
+                        // set) and its turn is skipped hereafter; nil means none free -- it holds and retries.
+                        if (_adv isEqualTo "water") then { [_t] call DUWS_fnc_opcom_borrowFerry };
+                        if (_adv isEqualTo "arrived" && {_order isEqualTo "supply"}) then {
                             // A supply run that reaches its drop with no player near still completes.
                             ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
                             _t set ["status", "done"];
                         } else {
-                            if (([_t get "pos"] call _nearestPlayerCells) <= _k) then { [_t] call DUWS_fnc_opcom_deVirt };
+                            // A rider that just bound a ferry now rides -- the transport streams the pair in, so skip.
+                            if ((_t getOrDefault ["ridingOn", -1]) < 0 && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
                         };
                     };
                 };

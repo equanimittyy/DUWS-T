@@ -709,33 +709,14 @@ one of the rows above.
 
 ### Transport: carrying a unit to the fight
 
-A `transport`-flagged unit ([§What the commander spends on](#what-the-commander-spends-on)) carries one
-other tasking unit to speed its march or cross water it could not. The carry is an explicit **boarding
-order** OPCOM issues — it names the transport and the rider and binds the pair — never an automatic embark of
-any two units that happen to share a cell. The binding rides on the transport's intent; the ride itself is
-best-effort in the A3 sim.
-
-- **Capacity is one unit, any size — seats are not checked to carry.** A transport carries at most one
-  infantry tasking unit whatever its headcount, and its hull's cargo seats do not gate the load. This is
-  deliberate: a detected faction whose only transport seats two men can still ferry a whole squad
-  *virtually*, so the mechanic never depends on a mod fielding a roomy carrier. Seats bind only when the
-  pair goes live.
-- **Load and transit, virtualised.** Once the boarding order binds them, the pair converges on a shared cell
-  and embarks there: the carried unit gives
-  up its own cell and route and rides the transport's, stepping at the transport's speed and **ignoring its
-  own water-impassability** — so a foot squad crosses a strait it could never walk. Position, force deposit
-  and routing all follow the transport's cell while embarked.
-- **De-virtualisation is best-effort.** When the pair streams in ([§The virtualisation
-  boundary](#the-virtualisation-boundary)) the transport spawns, and the carried unit is `moveInCargo`'d
-  into it only if the hull's seats fit the whole load.
-  - **Fits** — the unit spawns aboard and is, in the ledger, immediately unloaded onto the transport's cell
-    as an independent unit. Its life is no longer tied to the transport: it stays physically seated until
-    its AI or an order disembarks it, but if the hull is destroyed with it still aboard, A3 kills the live
-    men and the ordinary per-unit status read records the loss — there is no bookkeeping death cascade.
-  - **Does not fit** — the carried unit's de-virtualisation is aborted; it stays virtual and tied to the
-    transport. If the transport is destroyed while live, the tied unit dies with it, having never got out.
-- **Unload at the destination.** At its drop cell the carried unit disembarks, reclaims its own cell at that
-  position, and resumes its own tasking and speed.
+A tasking unit owns its whole journey, including water it cannot walk. Its route may cross a navigable body at
+a lift penalty ([§Routing](#routing-a-cost-field-over-the-grid)); at the near shore of a water span it borrows
+a transport, is ferried to the far shore, and foots on. The carrier is fetched by the route, not commanded —
+there is no boarding order and no drop cell. The full mechanic — the borrow pool (staged or garrisoned
+transports, never a contested garrison), the far-shore drop, de-virtualisation of a carrying pair, and the
+combatant/non-combatant split ([§Unit strength](#unit-strength)) that keeps unarmed lift out of the reserve
+wave — is specified in [transport_ferry.md](transport_ferry.md). Capacity stays one rider of any headcount;
+seats bind only when the pair goes live.
 
 A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
 its routes are water-only. It is **armed by default** — the detected `*_BOAT_ARMED_*` gunboat class — so it
@@ -966,10 +947,10 @@ OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-t
 | attack helicopter | `["attackheli"]` | — |
 | recon (foot) | `["recon"]` | `recon` |
 | recon (car) | `["car"]` | `recon` |
-| recon (heli) | `["transheli"]` | `recon` |
-| truck | `["truck"]` | `supply`, `transport` |
-| transport helicopter | `["transheli"]` | `transport` |
-| boat | `["boat"]` | `transport` |
+| recon (heli) | `["transheli"]` | `recon`, `noncombat` |
+| truck | `["truck"]` | `supply`, `transport`, `noncombat` |
+| transport helicopter | `["transheli"]` | `transport`, `noncombat` |
+| boat | `["boat"]` | `transport`, `noncombat` |
 
 The three `recon` rows differ only by platform, which sets the Scout reveal radius
 ([§Value](#value-the-worth-of-the-ground-in-play)) — OPCOM buys the reach it needs. The vocabulary has no
@@ -987,6 +968,8 @@ hired to win a fight and nothing more; a flagged row also unlocks an action. `re
 to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)), `supply` to Rapport,
 `transport` to carry another unit ([§Transport](#transport-carrying-a-unit-to-the-fight)); a row may carry
 several, as the truck both couriers and ferries and a carrier (APC or IFV) fights while ferrying a section.
+`noncombat` marks the unarmed rows (boat, both helis, truck) — kept out of a zone's reserve wave so they never
+spawn to defend, and cleared when the zone falls ([§Unit strength](#unit-strength)).
 Recruit scores one candidate per demand group — force,
 `recon`, `supply`, `transport` — so a specialist enters the roster only when the action it enables is worth
 its hire.

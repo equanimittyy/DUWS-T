@@ -12,7 +12,8 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_zoneReserveSync = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
-    private _units = DUWS_opcom_taskings select { (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} };
+    // Only combatants feed the wave: an unarmed hull (`noncombat`) rests attached but is never spawned to defend.
+    private _units = DUWS_opcom_taskings select { (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} && {!("noncombat" in (_x get "flags"))} };
     private _pool = [_key] call DUWS_fnc_garrisonReserve;
     private _mine = _pool select { (_x select [0, 8]) == "opcomdef" };
     if (_units isEqualTo [] && {_mine isEqualTo []}) exitWith {};        // nothing OPCOM here -- base untouched
@@ -30,4 +31,22 @@ DUWS_fnc_opcom_zoneReserveSync = {
 DUWS_fnc_opcom_reserveToken = {
     params ["_t"];
     format ["opcomdef%1:%2", _t get "id", [(_t get "comp") select 0] call DUWS_fnc_tokenName]
+};
+
+// A zone fell to BLUFOR: its resting non-combatants die with it (they were attached, never defenders). Only
+// the ones still garrisoned there are cleared -- one already borrowed onto ferry duty has left and survives.
+// Combatants are left to the capture mechanic that fought them; cleaning those up is a Phase 4 concern.
+DUWS_fnc_opcom_zoneCaptured = {
+    params ["_key"];
+    if (isNil "DUWS_opcom_taskings") exitWith {};
+    private _doomed = DUWS_opcom_taskings select {
+        (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} && {"noncombat" in (_x get "flags")}
+    };
+    {
+        if ((_x get "grp") isNotEqualTo "") then {
+            private _grp = groupFromNetId (_x get "grp");
+            if (!isNull _grp) then { { deleteVehicle _x } forEach units _grp; deleteGroup _grp };
+        };
+    } forEach _doomed;
+    DUWS_opcom_taskings = DUWS_opcom_taskings - _doomed;
 };

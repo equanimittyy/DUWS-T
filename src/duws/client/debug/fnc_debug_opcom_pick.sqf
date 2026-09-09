@@ -1,6 +1,6 @@
 // Locality: client -- remoteExec'd back to the caller by fnc_debug_opcom with a freshly-read list. Opens the
 // row picker; a pick runs the mode's next step (recruit chains row then OPFOR zone, task chains order then a
-// map-picked target cell, ferry chains transport then rider). State that outlives the click is threaded through
+// map-picked target cell). State that outlives the click is threaded through
 // args, never an enclosing local -- SQF blocks are not closures (docs/info/architecture/arma_engine_gotchas.md).
 if (!hasInterface) exitWith {};
 params ["_title", "_rows", "_mode", ["_ctx", ""]];
@@ -30,8 +30,6 @@ private _entries = _rows apply {
                 };
                 [format ["Tasking %1: order", _key], _orders] call fnc_open_action_menu;
             };
-            case "board_t": { ["riderlist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
-            case "board_r": { ["board", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
             default {};
         };
     }, [_key, _mode, _ctx], _c]

@@ -110,5 +110,5 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     ["AoI view: toggle emitter reaches", fnc_debug_aoi_view, [], [1,0.667,0,1]],
     ["OPCOM grid: toggle threat lattice", fnc_debug_opcom_view, [], [1,0.667,0,1]],
 
-    ["OPCOM: recruit / task / ferry", fnc_debug_opcom_menu, [], [1,0.667,0,1]]
+    ["OPCOM: recruit / task", fnc_debug_opcom_menu, [], [1,0.667,0,1]]
 ]] call fnc_open_action_menu;

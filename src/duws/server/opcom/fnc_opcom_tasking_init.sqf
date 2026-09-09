@@ -15,6 +15,8 @@ DUWS_opcom_taskSeq  = 0;
 // The one place a buyable unit is priced and flagged (docs/plans/opcom/opcom_plan.md). Row -> [composition,
 // flags]. Bare tokens resolve to the "none" posture, so the unit takes OPCOM's order, not a standing
 // circuit. No price column: a hire costs ceil(force * OPCOM_AP_PER_FORCE), so no price can drift from worth.
+// `noncombat` marks the unarmed rows: excluded from the garrison reserve wave (never spawns to defend, dies
+// with a captured zone), a separate axis from `transport` lift -- an apc/ifv is transport-flagged yet combat.
 DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["rifles",       [["squad"],     []]],
     ["weapons_team", [["wp_team"],   []]],
@@ -24,10 +26,10 @@ DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["attack_heli",  [["attackheli"], []]],
     ["recon_foot",   [["recon"],      ["recon"]]],
     ["recon_car",    [["car"],       ["recon"]]],
-    ["recon_heli",   [["transheli"], ["recon"]]],
-    ["truck",        [["truck"],     ["supply", "transport"]]],
-    ["trans_heli",   [["transheli"], ["transport"]]],
-    ["boat",         [["boat"],      ["transport"]]]
+    ["recon_heli",   [["transheli"], ["recon", "noncombat"]]],
+    ["truck",        [["truck"],     ["supply", "transport", "noncombat"]]],
+    ["trans_heli",   [["transheli"], ["transport", "noncombat"]]],
+    ["boat",         [["boat"],      ["transport", "noncombat"]]]
 ];
 
 // Composition token -> movement type. The first token of a composition decides (P3 rows are single-token).

@@ -35,23 +35,6 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { "No virtual taskings to order (recruit one; a live unit cannot be re-tasked)." remoteExec ["hint", _caller] };
         ["Task a tasking", _rows, "task", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
-    case "boardlist": {
-        private _rows = (DUWS_opcom_taskings select { (_x get "grp") isEqualTo "" && {"transport" in (_x get "flags")} }) apply {
-            [_x get "id", format ["id %1  %2  %3", _x get "id", _x get "order", _x get "moveType"]]
-        };
-        if (_rows isEqualTo []) exitWith { "No virtual transport unit. Recruit a transport-flagged row first." remoteExec ["hint", _caller] };
-        ["Ferry: pick the transport", _rows, "board_t", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
-    };
-    case "riderlist": {
-        // _a is the transport. A rider is any other virtual unit already given an active order + target.
-        private _rows = (DUWS_opcom_taskings select {
-            (_x get "grp") isEqualTo "" && {(_x get "id") isNotEqualTo _a} && {(_x get "order") isNotEqualTo "garrison"} && {(_x get "target") isNotEqualTo []}
-        }) apply {
-            [_x get "id", format ["id %1  %2 -> %3", _x get "id", _x get "order", (_x get "target") apply { round _x }]]
-        };
-        if (_rows isEqualTo []) exitWith { "No tasked rider. Give a unit an active order + target first." remoteExec ["hint", _caller] };
-        ["Ferry: pick the rider", _rows, "board_r", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
-    };
     case "recruit": {
         // _a = row, _b = zone key. Site at the zone centre and home the unit there, so homeZone drives the
         // garrison-reserve coupling.
@@ -63,10 +46,6 @@ switch (_verb) do {
     case "task": {
         private _ok = ["task", _a, _b, _c] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Tasking %1 -> %2.", _a, _b] } else { format ["Task refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
-    };
-    case "board": {
-        private _ok = ["board", _a, _b] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Transport %1 will ferry rider %2.", _a, _b] } else { format ["Board refused (%1 / %2). See the log.", _a, _b] }) remoteExec ["hint", _caller];
     };
     case "list": {
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };

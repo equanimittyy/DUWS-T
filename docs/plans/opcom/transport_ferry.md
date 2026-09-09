@@ -4,13 +4,8 @@ A tasking unit owns its whole journey. When its route crosses water it cannot wa
 transport to lift it over that leg, then dismounts on the far shore and foots on. The commander never binds a
 carrier to a rider by hand — ferrying is a consequence of the route, not a separate order. This document is the
 authoritative design for that mechanic; it supersedes the detail in
-[`opcom_plan.md` §Transport](opcom_plan.md#transport-carrying-a-unit-to-the-fight), which is to become a
-summary pointing here (see [Migration](#migration)).
-
-The shipped Phase 3 ferry was a hand-driven boarding order: OPCOM named a transport and a rider, bound the
-pair with a `board` verb, and the transport carried the rider to the rider's own target. That put the carrier
-in the commander's head as a unit to command per crossing. This rework moves the whole mechanic under the
-rider's route: the rider plans across water, and the lift is fetched automatically for the water leg.
+[`opcom_plan.md` §Transport](opcom_plan.md#transport-carrying-a-unit-to-the-fight), which is a summary
+pointing here.
 
 ## What the commander decides
 
@@ -118,43 +113,12 @@ waits for the next. P4 (or the P3 operator) decides when to recruit more lift an
 auto-returns a hull to base or auto-recruits one under demand. A transport is only ever removed from play by
 loss, or by being re-tasked back into a zone garrison (un-staging it).
 
-## Migration
-
-From the shipped Phase 3 `board` model. Code:
-
-- [`fnc_opcom_route.sqf`](../../../src/duws/server/opcom/fnc_opcom_route.sqf): land types cross navigable water
-  at a lift penalty; relax the land-component pre-check for that case; tag water spans in the emitted route.
-- [`fnc_opcom_task_step.sqf`](../../../src/duws/server/opcom/fnc_opcom_task_step.sqf): in the rider's advance
-  branch, on reaching a water leg, borrow the nearest free compatible transport — staged or garrisoned, but
-  never from a contested garrison (or hold and retry). When the pick is garrisoned, set its order off
-  `garrison` (else the `garrison` heal-case swallows its ferry turn); no reserve draw-out is needed, since a
-  ferry-capable hull (boat or transport heli) is a non-combatant, never enrolled in the reserve wave.
-- [`fnc_opcom_ferry.sqf`](../../../src/duws/server/opcom/fnc_opcom_ferry.sqf): `ferryStep` carries to the far
-  shore, not the rider's target; on arrival the transport reverts to a free `guard` transport (back in the
-  pool) instead of `done`; the rider replans far-shore → target.
-- [`fnc_opcom_debug_task.sqf`](../../../src/duws/server/opcom/fnc_opcom_debug_task.sqf) and the in-game menu
-  ([`fnc_debug_opcom.sqf`](../../../src/duws/server/debug/fnc_debug_opcom.sqf),
-  [`fnc_debug_opcom_pick.sqf`](../../../src/duws/client/debug/fnc_debug_opcom_pick.sqf)): the manual `board`
-  verb and the menu's Ferry flow are removed — ferrying is automatic. Staging is just an ordinary `move`/`guard`
-  on a transport, which the Task flow already covers.
-- The tasking record ([`fnc_opcom_recruit.sqf`](../../../src/duws/server/opcom/fnc_opcom_recruit.sqf)) keeps
-  its `carrying`/`ridingOn`/`embarked` fields; no drop-cell field is added (the drop is computed).
-
-Docs, same change (per the plan-consistency rule): rewrite
-[`opcom_plan.md` §Transport](opcom_plan.md#transport-carrying-a-unit-to-the-fight) to a summary that points
-here and drops the boarding-order / "unload at the destination" detail; keep its boat-as-movement-type
-paragraph (the boat unit and its detection are unchanged). Note in the Transport valuation
-([`opcom_plan.md` §Value](opcom_plan.md#value-the-worth-of-the-ground-in-play)) that P4 values recruiting and
-staging lift, not per-crossing boarding. Note in
-[`opcom_plan.md` §Commitment](opcom_plan.md#commitment-intents-are-sticky) that a rider holds at the near shore
-while it waits for lift.
-
 ## Out of scope
 
 - **Air-lift to speed a land leg** — deferred. Ferrying is triggered only by a water leg a land type cannot
   walk. Lifting a walkable leg just to go faster is a cost-versus-time judgment, which is P4 valuation, not a
   routing necessity — the P3 mechanic does not attempt it.
-- **The manual `board` verb and a deliberate drop cell** — removed; both were the shipped model this replaces.
+- **A manual board verb or a deliberate drop cell** — not part of the mechanic; the route fetches the lift and the drop is computed (the far shore).
 - **Multi-rider transports** — capacity stays one virtual rider of any size.
 - **Auto return-to-base or auto-recruit of lift** — the pool is what the commander has recruited, staged or
   garrisoned, nothing more.
