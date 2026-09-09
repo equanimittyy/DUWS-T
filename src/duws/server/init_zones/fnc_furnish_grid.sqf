@@ -9,8 +9,8 @@
 // ring. Surviving cells flood-fill into rooms; a room too small to use is dropped. Cached, built once.
 //
 // Cell: [posASL, state, nearBearing, clearance, roomId, occupied, i, j, storey]
-//   state       "open" (nothing in reach) | "near" (wall to back onto) | "door" (a wall gap, kept clear) |
-//               "blocked" (too tight to hold)
+//   state       "open" (nothing in reach) | "near" (wall to back onto) | "blocked" (too tight to hold, a
+//               wall, or a doorway blocked off so furniture cannot bridge the gap)
 //   nearBearing bearing of the nearest wall, or -1 if none within reach
 //   clearance   nearest-wall distance in metres (a full miss reads as the ray length)
 //   roomId      flood-fill room label; a blocked or dropped-room cell stays -1
@@ -52,8 +52,8 @@ fnc_furnish_grid = {
     private _lseeds = _seeds apply { _building worldToModel _x };
 
     // Floor levels by Z density, not gaps: a stairway bridges two floors, so a gap-since-last-point split
-    // fuses them. The fullest bin in each dense run wins the storey height, so a sparse step or landing does
-    // not anchor the plane below the real floor.
+    // fuses them. Anchor each dense run at its lowest bin -- the floor down-ray starts just above the level,
+    // so a higher anchor lifts that start onto a sill.
     private _zs = _lseeds apply { _x select 2 };
     private _z0 = selectMin _zs;
     private _binN = 1 + floor ((selectMax _zs - _z0) / STOREY_BIN);
@@ -65,23 +65,21 @@ fnc_furnish_grid = {
     private _thr = 3 max ceil ((count _zs) / _binN * 0.75);
 
     private _dense = [];
-    { if (_x >= _thr) then { _dense pushBack [_z0 + (_forEachIndex + 0.5) * STOREY_BIN, _x] } } forEach _hist;
+    { if (_x >= _thr) then { _dense pushBack (_z0 + (_forEachIndex + 0.5) * STOREY_BIN) } } forEach _hist;
 
     private _levels = [];
     if (_dense isNotEqualTo []) then {
-        (_dense select 0) params ["_bandZ", "_bandN"];
-        private _lastZ = _bandZ;   // break on the gap to the previous bin, not to the chosen _bandZ
+        private _floorZ = _dense select 0;
+        private _lastZ = _floorZ;
         for "_k" from 1 to (count _dense - 1) do {
-            (_dense select _k) params ["_z", "_n"];
+            private _z = _dense select _k;
             if (_z - _lastZ >= STOREY_GAP) then {
-                _levels pushBack _bandZ;
-                _bandZ = _z; _bandN = _n;
-            } else {
-                if (_n > _bandN) then { _bandZ = _z; _bandN = _n };
+                _levels pushBack _floorZ;
+                _floorZ = _z;
             };
             _lastZ = _z;
         };
-        _levels pushBack _bandZ;
+        _levels pushBack _floorZ;
     };
     if (_levels isEqualTo []) then { _levels = [(_z0 + selectMax _zs) / 2] };
 
@@ -175,9 +173,27 @@ fnc_furnish_grid = {
         };
     } forEach _storeys;
 
-    // Flood-fill non-blocked cells into rooms. A wall between two areas holds a run of blocked cells the
-    // fill cannot cross, so it splits them; a doorway (a gap in the wall) leaves them one room, which reads
-    // fine. 4-neighbour adjacency within a storey, keyed by storey/i/j.
+    // Doorways blocked, not skipped: a bare "door" cell still let a piece in an adjacent open cell overhang
+    // the opening. Blocking splits the rooms at the gap; reserving the neighbours keeps a piece off the mouth.
+    private _ij = createHashMap;
+    { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
+    private _doors = [];
+    { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
+    {
+        private _d = _cells select _x;
+        _d set [1, "blocked"];
+        _d set [5, true];
+        _d params ["", "", "", "", "", "", "_i", "_j", "_s"];
+        {
+            _x params ["_dx", "_dy"];
+            private _ni = _ij getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], -1];
+            if (_ni >= 0) then { (_cells select _ni) set [5, true] };
+        } forEach [[1,0],[-1,0],[0,1],[0,-1]];
+    } forEach _doors;
+
+    // Flood-fill non-blocked cells into rooms. Blocked cells -- walls, and the doorways blocked above -- hold
+    // runs the fill cannot cross, so each enclosed area becomes its own room. 4-neighbour adjacency within a
+    // storey, keyed by storey/i/j.
     private _idx = createHashMap;
     {
         _x params ["", "_st", "", "", "", "", "_i", "_j", "_sIdx"];
