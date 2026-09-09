@@ -621,6 +621,13 @@ OPCOM_AP_TOPUP = 8;
 OPCOM_GRID_CELL   = 500;
 OPCOM_GRID_SPREAD = 1000;
 
+// The grid is built, rebuilt, routed and drawn only inside a box around the play area (every zone, town and
+// the HQ grown by its radius plus this buffer) -- OPCOM never calculates the empty rest of the map. Counted
+// in cells, not metres, so it holds if the cell size changes. Must exceed the largest deposit reach in cells
+// (max zone radius + OPCOM_GRID_SPREAD, ~4 cells) so a source's falloff never reaches the box edge, which
+// lets the rebuild clamp its deposits to the box safely.
+OPCOM_GRID_BOX_BUFFER_CELLS = 10;
+
 // The single loop cadence in seconds: one tick senses, ages belief and rebuilds the grid (the decision
 // loop scores and commits one action on the same tick; the tasking phase steps movement here too). Kept
 // fast on purpose -- a

@@ -35,6 +35,9 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
 // Grid: A* over the cost field, passability by the type's water rule.
 private _w    = DUWS_opcom_grid_w;
 private _n    = _w * _w;
+// The search stays inside the play box -- out-of-box cells are never built, so a neighbour outside it is
+// rejected as impassable. Start and target are already box-clamped by w2c.
+(missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _land = DUWS_opcom_grid_land;
 private _comp = DUWS_opcom_grid_comp;
 private _gwater = DUWS_opcom_grid_water;
@@ -102,7 +105,7 @@ while {count _open > 0 && {_guard < _n}} do {
             if (_dx != 0 || _dy != 0) then {
                 private _nx = _cx + _dx;
                 private _ny = _cy + _dy;
-                if (_nx >= 0 && {_nx < _w} && {_ny >= 0} && {_ny < _w}) then {
+                if (_nx >= _bMinCx && {_nx <= _bMaxCx} && {_ny >= _bMinCy} && {_ny <= _bMaxCy}) then {
                     private _j = _ny * _w + _nx;
                     if ([_j] call _passable) then {
                         private _step = [_cell, _diag] select (_dx != 0 && _dy != 0);

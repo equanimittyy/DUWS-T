@@ -15,28 +15,31 @@ private _ene = DUWS_opcom_grid_ene;
 private _land = DUWS_opcom_grid_land;
 private _eps = 0.05;
 
-// [centre, fri, ene, isFront, isLand] per cell. Front = the balance's sign differs from an orthogonal
-// neighbour's: the zero-crossing band between friendly and enemy ground.
+// [centre, fri, ene, isFront, isLand] per cell, only for the play box (the rest of the lattice is never
+// built). Front = the balance's sign differs from an orthogonal neighbour's: the zero-crossing band between
+// friendly and enemy ground.
+(missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _cells = [];
-for "_i" from 0 to (_w * _w - 1) do {
-    private _f = _fri select _i;
-    private _e = _ene select _i;
-    private _ix = _i mod _w;
-    private _iy = floor (_i / _w);
-    private _bal = _f - _e;
-    private _front = false;
-    if (abs _bal > _eps) then {
-        {
-            _x params ["_dx", "_dy"];
-            private _nx = _ix + _dx;
-            private _ny = _iy + _dy;
-            if (_nx >= 0 && {_nx < _w} && {_ny >= 0} && {_ny < _w}) then {
-                private _nbal = (_fri select (_ny * _w + _nx)) - (_ene select (_ny * _w + _nx));
-                if (_nbal * _bal < 0) then { _front = true };
-            };
-        } forEach [[1, 0], [-1, 0], [0, 1], [0, -1]];
+for "_iy" from _bMinCy to _bMaxCy do {
+    for "_ix" from _bMinCx to _bMaxCx do {
+        private _i = _iy * _w + _ix;
+        private _f = _fri select _i;
+        private _e = _ene select _i;
+        private _bal = _f - _e;
+        private _front = false;
+        if (abs _bal > _eps) then {
+            {
+                _x params ["_dx", "_dy"];
+                private _nx = _ix + _dx;
+                private _ny = _iy + _dy;
+                if (_nx >= _bMinCx && {_nx <= _bMaxCx} && {_ny >= _bMinCy} && {_ny <= _bMaxCy}) then {
+                    private _nbal = (_fri select (_ny * _w + _nx)) - (_ene select (_ny * _w + _nx));
+                    if (_nbal * _bal < 0) then { _front = true };
+                };
+            } forEach [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        };
+        _cells pushBack [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i];
     };
-    _cells pushBack [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i];
 };
 
 // Belief stamps: position, age in ticks, and the stamped threat (headcount with humans weighted).

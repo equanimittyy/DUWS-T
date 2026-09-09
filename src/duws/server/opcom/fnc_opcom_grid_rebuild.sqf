@@ -10,8 +10,12 @@ private _cell = OPCOM_GRID_CELL;
 private _w = DUWS_opcom_grid_w;
 private _fri = DUWS_opcom_grid_fri;
 private _ene = DUWS_opcom_grid_ene;
-private _n = _w * _w;
-for "_i" from 0 to (_n - 1) do { _fri set [_i, 0]; _ene set [_i, 0] };
+// Only the box is touched: out-of-box cells are zeroed once at init and never deposited into (the buffer
+// exceeds every source's reach), so both zeroing and deposits stay inside it.
+(DUWS_opcom_box) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
+for "_cy" from _bMinCy to _bMaxCy do {
+    for "_cx" from _bMinCx to _bMaxCx do { private _i = _cy * _w + _cx; _fri set [_i, 0]; _ene set [_i, 0] };
+};
 
 private _deposit = {
     params ["_layer", "_pos", "_weight", "_reach"];
@@ -19,8 +23,8 @@ private _deposit = {
     private _scx = (floor ((_pos select 0) / _cell)) min (_w - 1) max 0;
     private _scy = (floor ((_pos select 1) / _cell)) min (_w - 1) max 0;
     private _k = ceil (_reach / _cell);
-    for "_cy" from (_scy - _k) max 0 to (_scy + _k) min (_w - 1) do {
-        for "_cx" from (_scx - _k) max 0 to (_scx + _k) min (_w - 1) do {
+    for "_cy" from (_scy - _k) max _bMinCy to (_scy + _k) min _bMaxCy do {
+        for "_cx" from (_scx - _k) max _bMinCx to (_scx + _k) min _bMaxCx do {
             private _d = _pos distance2D [(_cx + 0.5) * _cell, (_cy + 0.5) * _cell];
             if (_d <= _reach) then {
                 private _ci = _cy * _w + _cx;

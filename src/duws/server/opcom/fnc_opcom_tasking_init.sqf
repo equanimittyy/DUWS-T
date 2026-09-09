@@ -72,8 +72,11 @@ DUWS_fnc_opcom_moveType = {
 DUWS_fnc_opcom_w2c = {
     params ["_pos"];
     private _w = DUWS_opcom_grid_w;
-    private _cx = (floor ((_pos select 0) / OPCOM_GRID_CELL)) max 0 min (_w - 1);
-    private _cy = (floor ((_pos select 1) / OPCOM_GRID_CELL)) max 0 min (_w - 1);
+    // Clamp to the play box, not the full lattice: a point outside it (a roaming player) resolves to the
+    // nearest edge cell, keeping every routed/streamed cell inside the calculated area.
+    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    private _cx = (floor ((_pos select 0) / OPCOM_GRID_CELL)) max _minCx min _maxCx;
+    private _cy = (floor ((_pos select 1) / OPCOM_GRID_CELL)) max _minCy min _maxCy;
     _cy * _w + _cx
 };
 
