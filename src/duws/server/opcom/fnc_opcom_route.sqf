@@ -12,6 +12,11 @@ if (!isServer) exitWith { [[], "grid"] };
 
 // Roads: hand the convoy router the two ends, flatten its segments into one polyline. Each segment is
 // [points, "road"|"gap"]; a "gap" carries only its two endpoints (a native bridge the hull drives itself).
+//
+// REVISIT (P5 threat routing): fnc_convoy_path is a pure road-graph search, so this branch is threat-blind --
+// OPCOM_ROUTE_LAMBDA steers only the cost-field cell chain below, never which road a hull takes. To route a
+// column off a hot road, cost each road segment by the grid cost-field it crosses. Inert until P5: P3 routes
+// direct (lambda 0), where every branch is shortest-path anyway.
 if (_moveType in ["wheeled", "tracked"]) exitWith {
     private _segs = [_startPos, _destPos] call fnc_convoy_path;
     private _pts = [];
