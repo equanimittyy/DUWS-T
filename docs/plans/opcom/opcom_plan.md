@@ -588,11 +588,21 @@ reinforce path. `guard` does not heal; it only holds ground. The rate is the sol
 A zone's effective strength is its base garrison (the tier composition, which Fortify raises and Reinforce
 refills) plus its `garrison`ed tasking units. OPCOM may recruit **more than one** into a zone; each is
 OPCOM-tracked — its own `effForce`, drawable for an offensive — but distinct from the base tier garrison, so
-tasking one out subtracts its `effForce` cleanly and Fortify never touches it. A recruited unit **feeds the
+tasking one out subtracts its `effForce` cleanly and Fortify never touches it. A recruited combatant **feeds the
 zone's garrison reserve** ([§Actions](#actions-sinks-and-taskings)): while it rests there it spawns to defend
 through the existing garrison-reserve wave (`fnc_garrison_reserve`) when the zone is contested, and OPCOM
 draws it back out of the pool to task it offensively. Massing force is stacking recruits on a valuable zone,
 then pulling them together for an attack ([§Commitment](#commitment-intents-are-sticky)).
+
+**Combatant and non-combatant.** A recruited unit is a *combatant* by default. The unarmed rows — `boat`,
+`trans_heli`, `truck`, `recon_heli` — are *non-combatants*, marked by a `noncombat` flag on their recruit-menu rows
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/opcom/fnc_opcom_tasking_init.sqf)). This is a separate
+axis from the `transport` flag, which marks lift capacity — an `apc`/`ifv` is transport-flagged yet a
+combatant. Only combatants feed the reserve wave. A non-combatant garrisoned in a zone rests **attached** to it
+— it still deposits its `effForce` to the grid, so force weighting is unchanged — but never enters the reserve
+pool, so the wave never spawns an unarmed hull to drive into a defence. When the zone or town is captured, its
+attached non-combatants die with it (their tasking records are dropped). A non-combatant only ever goes live by
+being tasked out — a ferry borrow ([`transport_ferry.md`](transport_ferry.md)) or a hand order.
 
 A zone **under attack** locks its recruited garrison units. While its garrison holds live contact with a
 BLUFOR force, none of its `garrison`ed units is one any offensive may draw — a contested zone's reserve can
@@ -692,8 +702,8 @@ whole intent on its own.
 | Move / reposition | move to the cell in `SAFE` / `AWARE` |
 | Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
 
-`garrison` and Recruit issue no standing order: a recruited unit joins its zone's garrison reserve
-([§Unit strength](#unit-strength)) virtually, and takes an order only when the zone is contested and it
+`garrison` and Recruit issue no standing order: a recruited combatant joins its zone's garrison reserve
+(a non-combatant rests attached, [§Unit strength](#unit-strength)) virtually, and takes an order only when the zone is contested and it
 spawns to defend through the existing garrison-reserve wave, or when OPCOM draws it back out to task it for
 one of the rows above.
 
@@ -892,7 +902,7 @@ Three levels, not one:
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
 | Rapport | offensive | a town in reach (needs a `supply` unit) | tasking-spawn | 1 (`supply` courier) |
-| Recruit | buildup | the highest-value unmet unit need; raises a `garrison` unit into an OPFOR zone's garrison reserve (several may stack on one zone) | tasking-spawn | 1 (`garrison`, resting — no active order) |
+| Recruit | buildup | the highest-value unmet unit need; raises a `garrison` unit into an OPFOR zone (a combatant joins its reserve wave; several may stack) | tasking-spawn | 1 (`garrison`, resting — no active order) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 for a zone; 1 (`supply` truck) for a town |
 | Scout | recon | a `recon` unit's route sweeping stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
@@ -904,9 +914,10 @@ Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and te
 [§Templates](#templates-the-execution-forms).
 
 **Recruit fills the roster; every other unit-dispatching action drains it.** Recruit is the RTS "hire a
-unit": it raises a group into an OPFOR zone's garrison reserve — OPCOM-tracked and distinct from the base
-garrison the town/zone Reinforce refills, but feeding the same reserve wave that spawns it to defend when the
-zone is contested ([§Unit strength](#unit-strength)). Several may stack on one zone. The unit rests with no
+unit": it raises a group homed to an OPFOR zone — OPCOM-tracked and distinct from the base
+garrison the town/zone Reinforce refills. A combatant feeds the same reserve wave that spawns it to defend
+when the zone is contested; a non-combatant rests attached and never joins the wave
+([§Unit strength](#unit-strength)). Several may stack on one zone. The unit rests with no
 standing order; OPCOM draws it back out for an Attack, Intercept, Rapport or Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
 
 **Recruit chooses by demand.** It is scored once per demand group — generic force, `recon`, `supply`,
@@ -1324,7 +1335,7 @@ below is the campaign snapshot's responsibility, not an OPCOM build phase.
 | State | Kind | Contract |
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs, never re-rolls ([§The commander has an archetype](#the-commander-has-an-archetype)) |
-| Standing units & orders | outcome | One row per unit — its tasking, target, current world position, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at that position (chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's garrison reserve |
+| Standing units & orders | outcome | One row per unit — its tasking, target, current world position, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at that position (chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` combatant restores onto its zone's reserve; a non-combatant restores attached |
 | Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](../economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
 Every persisted field is a number, a string, or an array of those. Time-based fields — intent expiries

@@ -14,20 +14,25 @@ rider's route: the rider plans across water, and the lift is fetched automatical
 
 ## What the commander decides
 
-The commander makes exactly two decisions; the crossing itself is mechanical.
+The commander decides only how much lift exists; the crossing itself is mechanical.
 
 | Decision | Deliberate? | Picked by |
 | --- | --- | --- |
 | Recruit transports (boats, helis) — how much lift exists at all | yes | P4 valuation; P3 by hand |
-| Stage a transport — `move`/`guard` it out onto ferry duty | yes — staging *is* assigning it to lift | P4; P3 by hand |
+| Where a transport waits — staged on ferry duty (`move`/`guard`) or resting in a zone garrison | yes | P4; P3 by hand |
 | Which transport lifts which rider, where they meet, where the rider dismounts | **no** — all mechanical | the sim |
 
-There is no boarding order and no drop-cell choice. Once a transport is staged and a rider's route crosses
-water, the pair is found, bound, carried and dismounted without a command. Staging is the only lever over an
-individual hull: a transport left resting in its zone garrison **defends that zone** and is never borrowed; a
-transport moved or guarded out is **idle on ferry duty** and joins the borrow pool. That split keeps the
-garrison-reserve coupling ([`fnc_opcom_task.sqf`](../../../src/duws/server/opcom/fnc_opcom_task.sqf) lines
-41-45) out of the ferry path entirely — a borrow never draws a unit out of a zone's defence.
+There is no boarding order and no drop-cell choice. Once a rider's route crosses water, the nearest compatible
+transport is found, bound, carried and dismounted without a command. Any recruited transport is borrowable,
+whether staged on ferry duty or resting in a zone garrison — staging decides where a hull waits, not whether it
+can be borrowed. The one exclusion is a **contested (locked) garrison**: while a zone is under assault its
+garrison is locked and nothing is drawn from it (the contested state the reserve wave already keys on,
+[`fnc_garrison_reserve.sqf`](../../../src/duws/server/init_zones/fnc_garrison_reserve.sqf)).
+
+Borrowing a garrisoned hull costs the zone no defender. A ferry-capable transport — a boat or transport heli — is a **non-combatant** (the combatant
+garrison model, `opcom_plan.md`) — never enrolled in the zone's reserve wave — so the borrow needs no
+garrison-reserve draw-out: there is no reserve-spawned defender to delete, and no reserve pool or ceiling entry
+to decrement. It is a plain re-task.
 
 ## The route crosses water
 
@@ -53,10 +58,14 @@ takes on the water-crossing logic the hand `board` order used to stand in for.
 
 ## The borrow
 
-The **pool** of borrowable lift is every tasking that is virtual, `transport`-flagged, staged (idle — order
-`guard` or `move`, not `garrison`), not already carrying, and of a move type that can cross the leg's water
-(a boat, or — where no boat is available — a rotary transport; a wheeled or tracked transport is never
-compatible with a water leg).
+The **pool** of borrowable lift is every tasking that is virtual, `transport`-flagged, not already carrying,
+of a move type that can cross the leg's water (a boat, or — where no boat is available — a rotary transport; a
+wheeled or tracked transport is never compatible with a water leg), and **not garrisoned in a contested zone**.
+Order does not otherwise gate the pool: an idle garrisoned transport is as borrowable as a staged one. When the
+pick is a garrisoned hull the executor flips its order off `garrison` — the step loop's `garrison` case only
+heals and never runs a ferry turn, so an un-flipped hull would mend in place instead of lifting. No reserve
+draw-out is ever needed: a ferry-capable hull (boat or transport heli) is a non-combatant, so it never sits
+in the reserve wave.
 
 The **trigger** is execution, not planning: a rider advances along its route on foot until the next waypoint
 is a water cell. There it stops at the near shore and requests lift. Deferring to execution means contention
@@ -88,7 +97,8 @@ with the drop point now the **far shore of the water leg** rather than a command
    a further body simply triggers another borrow at the next water leg.
 4. **Transport freed** — the transport clears `carrying`/`embarked` and reverts to a **free staged transport
    holding at the far shore** (a `guard` there), back in the pool. It is not consumed: one hull shuttles rider
-   after rider across a strait, and there is no hardcoded return-to-base.
+   after rider across a strait, and there is no hardcoded return-to-base. A hull borrowed from a garrison does
+   not return to it — it stays a staged ferry asset near the front.
 
 The **far shore** is the first land cell after the water span in the rider's route chain, so the drop always
 lands the rider on the target side and its replan stays on land.
@@ -115,7 +125,10 @@ From the shipped Phase 3 `board` model. Code:
 - [`fnc_opcom_route.sqf`](../../../src/duws/server/opcom/fnc_opcom_route.sqf): land types cross navigable water
   at a lift penalty; relax the land-component pre-check for that case; tag water spans in the emitted route.
 - [`fnc_opcom_task_step.sqf`](../../../src/duws/server/opcom/fnc_opcom_task_step.sqf): in the rider's advance
-  branch, on reaching a water leg, borrow the nearest free compatible staged transport (or hold and retry).
+  branch, on reaching a water leg, borrow the nearest free compatible transport — staged or garrisoned, but
+  never from a contested garrison (or hold and retry). When the pick is garrisoned, set its order off
+  `garrison` (else the `garrison` heal-case swallows its ferry turn); no reserve draw-out is needed, since a
+  ferry-capable hull (boat or transport heli) is a non-combatant, never enrolled in the reserve wave.
 - [`fnc_opcom_ferry.sqf`](../../../src/duws/server/opcom/fnc_opcom_ferry.sqf): `ferryStep` carries to the far
   shore, not the rider's target; on arrival the transport reverts to a free `guard` transport (back in the
   pool) instead of `done`; the rider replans far-shore → target.
@@ -143,11 +156,12 @@ while it waits for lift.
   routing necessity — the P3 mechanic does not attempt it.
 - **The manual `board` verb and a deliberate drop cell** — removed; both were the shipped model this replaces.
 - **Multi-rider transports** — capacity stays one virtual rider of any size.
-- **Auto return-to-base or auto-recruit of lift** — the pool is what the commander has staged, nothing more.
+- **Auto return-to-base or auto-recruit of lift** — the pool is what the commander has recruited, staged or
+  garrisoned, nothing more.
 
 ## Phase 4 hooks
 
 The decision loop's only ferry-related work is upstream of the mechanic: value **how much lift to recruit** and
 **where to stage it**, given the water the front sits across. Everything below that — which hull lifts which
 rider, the rendezvous, the crossing, the dismount — is mechanical and needs no appraisal. Phase 3 exposes the
-staged-pool borrow and the far-shore dismount for the hand harness to exercise.
+pool borrow and the far-shore dismount for the hand harness to exercise.
