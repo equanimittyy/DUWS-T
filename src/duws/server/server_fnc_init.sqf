@@ -485,6 +485,9 @@ fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\debug\fnc
 fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_intel.sqf";
 fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_garrison_query.sqf";
 fnc_debug_force_emission = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_force_emission.sqf";
+// Server-only: remoteExec'd to 2 by the OPCOM debug menu; runs the hand-drive verbs and reads the store the
+// menu's remote pickers cannot.
+fnc_debug_opcom = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_opcom.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
@@ -655,6 +658,9 @@ fnc_debug_opcom_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_
 fnc_debug_aoi_view = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_view.sqf";publicVariable "fnc_debug_aoi_view";
 fnc_debug_aoi_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_aoi_draw.sqf";publicVariable "fnc_debug_aoi_draw";
 fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_grid_draw.sqf";publicVariable "fnc_debug_opcom_grid_draw";
+// The OPCOM hand-drive menu and its picker; broadcast so a client can open them, then remoteExec fnc_debug_opcom back.
+fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_menu.sqf";publicVariable "fnc_debug_opcom_menu";
+fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
 // Furnishing grid overlay and front-calibration tool. The view/draw/calibrate handlers are broadcast
