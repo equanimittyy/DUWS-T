@@ -130,9 +130,6 @@ given a directed order (which takes it off the pool), or by being re-tasked into
 
 ## Out of scope
 
-- **Air-lift to speed a land leg** — deferred. Ferrying is triggered only by a water leg a land type cannot
-  walk. Lifting a walkable leg just to go faster is a cost-versus-time judgment, which is Phase 4 valuation, not
-  a routing necessity.
 - **A manual board verb or a deliberate drop cell** — not part of the mechanic; the route fetches the lift and
   the drop is computed (the far shore).
 - **Multi-rider transports** — capacity stays one virtual rider of any size.
@@ -141,12 +138,22 @@ given a directed order (which takes it off the pool), or by being re-tasked into
 
 ## Phase 4 hooks
 
-Two valuations sit on top of the Phase 3 mechanic, both deliberately deferred to the decision loop:
+These valuations sit on top of the Phase 3 mechanic, all deferred to the decision loop:
 
 - **Whether an idle hull leaves its post to ferry.** Phase 3 marks a guard/garrison hull available and
   auto-takes the nearest; Phase 4 weighs the crossing's worth against vacating that post, and may decline.
 - **Whether a rider waits for lift or walks a longer land route.** This bites only once Phase 4 tunes the lift
   penalty so water is a real shortcut; then wait-versus-walk is a time/cost weigh.
+- **Land-taxi — lifting a foot unit over open ground to save time.** No terrain forces this: the leg is
+  walkable, so it is a pure cost/benefit — the time a foot unit loses to the march against the cost of a hull
+  driving out to it, carrying it, and being spent on the trip. The virtual speed table makes the saving
+  concrete (`inf` at 30 ticks per cell against `wheeled` 15, `tracked` 20, `rotary` 5), so the loop nets
+  drive-plus-carry against the direct walk and taxis only where the lift wins. It reuses the whole carry engine
+  — the idle-only borrow, the rendezvous, the drop, the revert to a free `guard` — differing from the water
+  ferry in two ways: the trigger is distance, not a shore (weighed when a foot tasking takes a directed order
+  whose route is long), and a dry leg's pool admits the land transports the water gate excludes (`wheeled` and
+  `tracked`, with `rotary` serving either domain). Phase 3 drives none of it; the water ferry stays the only
+  lift it exercises.
 
 Everything below those — which idle hull lifts which rider, the rendezvous, the crossing, the dismount — is
 mechanical and needs no appraisal. Phase 3 exposes the idle-pool borrow and the far-shore dismount for the hand
