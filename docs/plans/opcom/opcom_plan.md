@@ -714,7 +714,9 @@ OPCOM can also send a drawn-out unit **back** into a garrison: a `move` carrying
 `garrison` on arrival instead of to `guard`, adopting that zone as its home and rejoining its reserve wave — the
 mirror of the draw-out, and it may re-garrison any OPFOR-held zone, not only the one it left. Because a garrison
 defends through the wave and never OPCOM's de-virtualisation, a unit that just re-garrisoned does not stream in
-on player proximity the way an arriving `guard` does.
+on player proximity the way an arriving `guard` does. A boat cannot garrison inland, so it re-garrisons onto the
+nearest navigable water of a coastal zone (mirroring its recruit launch); a landlocked zone — no water within
+the zone footprint — is refused.
 
 ### Transport: carrying a unit to the fight
 

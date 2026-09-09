@@ -38,11 +38,23 @@ switch (_verb) do {
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            private _pos = ([_b] call fnc_site_at) getOrDefault ["pos", []];
+            private _t = DUWS_opcom_taskings select _i;
+            private _site = [_b] call fnc_site_at;
+            private _pos = _site getOrDefault ["pos", []];
             if (_pos isEqualTo []) then {
                 ["WARN", "OPCOMDBG", format ["regarrison: no zone %1", _b]] call fnc_log; false
             } else {
-                [DUWS_opcom_taskings select _i, "move", _pos, _b] call fnc_opcom_task
+                // A boat cannot rest inland: home it on nearest navigable water, refusing a zone with none in reach.
+                private _target = _pos;
+                private _ok = true;
+                if ((_t get "moveType") isEqualTo "boat") then {
+                    _target = [_pos] call DUWS_fnc_opcom_nearestWater;
+                    if ((_target distance2D _pos) > ((_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin)) then {
+                        ["WARN", "OPCOMDBG", format ["regarrison: zone %1 is landlocked -- no water to home a boat", _b]] call fnc_log;
+                        _ok = false;
+                    };
+                };
+                if (_ok) then { [_t, "move", _target, _b] call fnc_opcom_task } else { false }
             };
         };
     };
