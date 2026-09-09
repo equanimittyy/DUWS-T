@@ -100,9 +100,8 @@ fnc_furnish_building = {
     private _ijCell = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ijCell set [format ["%1_%2_%3", _s, _i, _j], _x] } forEach _grid;
 
-    // Anchor breathing room: every cell of the (2*ANCHOR_RINGS+1) square centred on the anchor cell must be
-    // present, non-blocked and unreserved, so a table lands with space to walk round it, clear of walls, the
-    // nav corridor and pieces already placed.
+    // Anchor breathing room: the (2*ANCHOR_RINGS+1) square centred on the cell must be clear floor, so a table
+    // lands with room to walk round it and off the walls, nav corridor and placed pieces.
     private _ringsClear = {
         params ["_cell"];
         _cell params ["", "", "", "", "", "", "_i", "_j", "_s"];
@@ -153,6 +152,10 @@ fnc_furnish_building = {
     // cell with the wanted heading; deleted by the caller after the piece is measured off it.
     private _frameAt = {
         params ["_posASL", "_heading"];
+        // Snap to the floor at the piece's own XY: the cell's stored Z is a grid-centre raycast and can sit
+        // proud there, and a frozen piece locks that hover in.
+        private _hit = lineIntersectsSurfaces [_posASL vectorAdd [0, 0, 0.3], _posASL vectorAdd [0, 0, -0.8], objNull, objNull, true, 1, "GEOM"];
+        if (_hit isNotEqualTo []) then { _posASL = (_hit select 0) select 0 };
         private _f = createVehicle ["Land_HelipadEmpty_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
         _f setPosASL _posASL;
         _f setVectorDirAndUp [[sin _heading, cos _heading, 0], [0, 0, 1]];

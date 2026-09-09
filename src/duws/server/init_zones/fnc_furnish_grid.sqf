@@ -237,8 +237,7 @@ fnc_furnish_grid = {
         };
     } forEach _cells;
 
-    // A room holds a square when some cell is the low corner of a MIN_ROOM_SQUARE block whose every cell shares
-    // its room; stop testing a room once one square is found.
+    // A room holds a square if some cell is the low corner of a full MIN_ROOM_SQUARE block in the same room.
     private _hasSquare = createHashMap;
     {
         private _r = _x select 4;

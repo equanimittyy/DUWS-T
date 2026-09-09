@@ -54,17 +54,15 @@ fnc_place_settled = {
             _holder setVelocity [0, 0, 0];
             _obj = _holder;
         } else {
-            // Create, seat, then freeze in one unscheduled pass. A CAN_COLLIDE body seated flush on the floor
-            // is thrown up by the first physics tick, so it must be frozen before any tick -- but freezing
-            // before the seat drops the setPos onto a dead body. isNil runs the block unscheduled, so no tick
-            // interleaves: the seat lands on a live body, then the freeze holds it at rest.
+            // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
+            // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
+            // create-seat-freeze completes before any tick can land.
             isNil {
                 private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
                 if (_invuln) then { _o allowDamage false };
                 _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], _up];
-                // Seat the base, not the origin: _pos is the surface point but setPosASL positions the model
-                // origin, so a prop whose lowest point sits below its origin sinks by that gap. Back it out
-                // along the up axis (boundingBoxReal is orientation-free).
+                // Seat the base, not the origin: setPosASL places the model origin, so a prop whose lowest
+                // point is below its origin sinks by that gap unless backed out (boundingBoxReal is orientation-free).
                 private _baseZ = (boundingBoxReal _o select 0) select 2;
                 _o setPosASL (_pos vectorAdd (_up vectorMultiply (- _baseZ)));
                 _o setVelocity [0, 0, 0];
