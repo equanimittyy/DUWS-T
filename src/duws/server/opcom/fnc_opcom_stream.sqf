@@ -14,11 +14,6 @@ DUWS_fnc_opcom_applyOrder = {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
         };
-        case "scout": {
-            // Stealth, hold fire, return fire only -- never initiates.
-            _grp setBehaviour "STEALTH"; _grp setCombatMode "GREEN";
-            (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
-        };
         case "supply": {
             // Drive to the drop in SAFE; arrival (deletion + success) is handled by the tasking step.
             _grp setBehaviour "SAFE"; _grp setCombatMode "BLUE";

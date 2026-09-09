@@ -12,6 +12,7 @@ call fnc_opcom_tasking_init;
 while {true} do {
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
     call fnc_opcom_sense;
+    call fnc_opcom_recon_sense;
     call fnc_opcom_decay;
     call fnc_opcom_belief_prune;
     call fnc_opcom_grid_rebuild;

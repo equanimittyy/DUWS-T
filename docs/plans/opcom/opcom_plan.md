@@ -58,10 +58,10 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 |---|---|---|
 | Direct sighting | each live OPFOR observer's `nearTargets` is swept; a BLUFOR group with a *fresh* position time (sensed this tick) has its leader position, threat (each AI one, each human `OPCOM_PLAYER_WORTH`) and the tick stamped. A group nobody senses this tick is untouched — its stamp holds at last-seen and decays. `knowsAbout` cannot serve here: it lingers side-wide while any unit merely remembers a target, so it reads the same watching a mover as remembering a ghost ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)) | one `nearTargets` per live OPFOR group per tick |
 | Absence | a group whose belief row resolves (`groupFromNetId`) to a dead, drained or deleted group is dropped, so a confirmed-gone force stops depositing; server-polled, never a `Killed` handler | one resolve per group-keyed row per tick |
-| Observation post | an OP hardpoint covering ground stamps what it sees | [§Observation is the trigger](#observation-is-the-trigger) |
+| Observation post | on its own beat (denominated in OPCOM ticks), at a per-wake chance, an OP hardpoint stamps every BLUFOR group within `OP_OBSERVE_RADIUS` into belief for certain — a guaranteed bubble like recon detection, not A3's fallible last-seen — keyed by group on the one sighting scale, and reports whether the post is deployed or stowed; killing the post ends the screen | one belief write per caught group per wake |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
-| Intel patrol tasking | a purchased sensor ([§What the commander spends on](#what-the-commander-spends-on)) | the tasking's own cost |
+| Recon detection | a `recon`-flagged tasking detects every BLUFOR group within `OPCOM_RECON_K` grid cells of it (Chebyshev, by platform — foot 1, car 2, heli 3) for certain and stamps it like a direct sighting, virtual or live. Unlike the sweep this is a true sensor bubble, not A3's fallible last-seen: no line-of-sight, nothing to blind it. Deploying one where belief is stale is the P4 Scout action ([§What the commander spends on](#what-the-commander-spends-on)) | a cell test per BLUFOR group per recon tasking per tick, over `allGroups` |
 
 The sighting sweep is one `nearTargets` per live OPFOR group (on its leader), bounded by `OPCOM_SENSE_RANGE`
 — no `nearEntities`, no scan over `allUnits`
@@ -70,9 +70,9 @@ Observers are the OPFOR groups actually spawned near the fight, so a stowed garr
 costs. The artillery observation gate keeps its own `knowsAbout > 1.5` test — a separate, position-free
 trigger — so no shared constant is owed here.
 
-Only direct sighting and its absence check are live today. The observation-post, area-of-influence,
-zone-flip and intel-patrol sensors each attach with the system that fires them — hardpoints, the AOI
-field, the zone-capture event, a purchased tasking — in the phase that lands that system, not before.
+Direct sighting, its absence check, recon detection and the observation post are live today. The
+area-of-influence and zone-flip sensors each attach with the system that fires them — the AOI field, the
+zone-capture event — in the phase that lands that system, not before.
 
 ### Decay
 
@@ -249,7 +249,7 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
   steps. Passability is by domain ([§Geometry](#geometry)): **infantry** routes over land cells only (water
   impassable); a **boat** routes over navigable-water cells only, staying inside one water component; **air**
   treats every cell passable, over all three domains.
-- `_lambda` is **0 for a direct route** (rapport, scout, the Assault template — distance only,
+- `_lambda` is **0 for a direct route** (rapport and the Assault template — distance only,
   ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
   believed enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
   scoring block** — run it scheduled or on its own bounded pass.
@@ -413,11 +413,11 @@ reachable — across water, or nearer in transit time than a foot unit could man
 for an out-of-reach zone, buying eyes when it needs to Scout, a courier when a town is worth turning, a
 carrier when the fight is across water — and stops when nothing is short.
 
-**Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout, and its reveal footprint is a
-Chebyshev radius set by platform — `recon (foot)` its own cell (radius 0), `recon (car)` the 3×3 around it
-(radius 1), `recon (heli)` the 5×5 (radius 2). The reveal is abstract and continuous: each tick along its
-one-shot route the unit stamps fresh belief for every BLUFOR within that radius of its current cell, no
-line-of-sight — buying perception where OPCOM has no observer. A route's Value is `Σ` over the cells its
+**Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout. The reveal is not a Scout-only
+phase but the recon flag's standing detection ([§Sensors](#sensors)): a guaranteed bubble set by platform
+(`OPCOM_RECON_K` Chebyshev cells — foot 1, car 2, heli 3) that each tick stamps fresh belief for every
+BLUFOR inside it, no line-of-sight, virtual or live. Scout adds no sensor — it routes that standing bubble
+through stale valuable ground, buying perception where OPCOM has no observer. A route's Value is `Σ` over the cells its
 footprint sweeps of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`: offensive is
 attackable enemy ground worth in the cell, defensive is own ground worth exposed through it. A wider-range
 unit sweeps more cells (higher Value) at a higher reacquisition Cost, so range trades against unit price on
@@ -534,7 +534,7 @@ Recruit — rather than committing understrength.
 Each unit carries two orthogonal fields:
 
 - **Tasking** — its standing order: `garrison` (default on spawn — zone-bound reinforcement),
-  `guard` (idle hold-anywhere, takes up space), `assault`, `rapport`, `scout`, `move`,
+  `guard` (idle hold-anywhere, takes up space), `assault`, `rapport`, `move`,
   or a template role. `garrison` and `guard` are the two resting taskings; the rest are active.
 - **Status** — how the current tasking is going, read per live group each tick:
 
@@ -701,9 +701,12 @@ whole intent on its own.
 |---|---|
 | Assault (Attack / Intercept) | Seek & Destroy on the target point, `AWARE` |
 | Supply (Rapport, and a Build / town Reinforce / town Fortify truck) | move to the target cell in `SAFE`; on arrival delete the unit and fire the tasking's success |
-| Scout | move to the point in stealth, combat mode `GREEN` — hold fire, return fire only, never initiates |
 | Move / reposition | move to the cell in `SAFE` / `AWARE`; on arrival settle to `guard` and hold the point |
 | Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
+
+A `recon`-flagged unit needs no scout order: its detection is a standing sensor ([§Sensors](#sensors)) that
+fires whatever the unit's order, so OPCOM points it at stale ground with a plain **Move** and the reveal
+happens as it travels.
 
 `garrison` and Recruit issue no standing order: a recruited combatant joins its zone's garrison reserve
 (a non-combatant rests attached, [§Unit strength](#unit-strength)) virtually, and takes an order only when the zone is contested and it
@@ -789,7 +792,7 @@ The band picks one for an Attack or Intercept; the rest are the fixed form of th
 | `encircle` | band 1–2, target pocketed (few escape cells), ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | deploy (blockers → corridor cells) → *(blockers in position)* seal → crush (crushers assault inward) → resolve |
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour, air or recon) | approach → make contact → resolve (survives ⇒ belief was soft, escalate; dies fast ⇒ belief confirmed, mass or re-target) |
 | `rapport` | a `supply`-flagged unit, a town in reach | `courier` ×1 | move (to the town) → deliver (step rep 3 toward −10) → resolve |
-| `scout` | a `recon`-flagged unit, a stale valuable area | `scout` ×1 | move (along the route) → reveal (stamp belief within the platform radius each tick) → resolve |
+| `scout` | a `recon`-flagged unit, a stale valuable area | `recon` ×1 | move along the route (plain `move`) → reveal (its standing recon detection stamps belief as it goes — no order phase, [§Sensors](#sensors)) → resolve |
 | `arty` | an observed belief point in range of an owned gun off cooldown, not the HQ circle | owned `guns` ×1–3 (resident hardpoints, not roster — 0 roster taskings), `spotter` ×0–1 | mark (spotter or OP holds observation) → salvo (rounds × saturation on the belief point) → assess (force dropped? re-fire : done) |
 
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points
@@ -964,8 +967,8 @@ OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-t
 | transport helicopter | `["transheli"]` | `transport`, `noncombat` |
 | boat | `["boat"]` | `transport`, `noncombat` |
 
-The three `recon` rows differ only by platform, which sets the Scout reveal radius
-([§Value](#value-the-worth-of-the-ground-in-play)) — OPCOM buys the reach it needs. The vocabulary has no
+The three `recon` rows differ only by platform, which sets its recon detection reach (`OPCOM_RECON_K` grid
+cells, [§Sensors](#sensors)) — OPCOM buys the reach it needs. The vocabulary has no
 dedicated scout helicopter, so `recon (heli)` and the transport helicopter share the one `transheli`
 platform, told apart by their flag.
 
@@ -1369,7 +1372,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 |---|---|---|
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
-| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
+| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), the recon-flagged tasking's standing detection sensor ([§Sensors](#sensors)), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
 | **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with the absolute hold; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |

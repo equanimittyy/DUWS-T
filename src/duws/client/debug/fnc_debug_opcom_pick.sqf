@@ -16,7 +16,7 @@ private _entries = _rows apply {
             case "recruit_zone": { ["recruit", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
             case "task": {
                 private _oc = [1, 0.667, 0, 1];
-                private _orders = ["assault", "scout", "supply", "move", "guard"] apply {
+                private _orders = ["assault", "supply", "move", "guard"] apply {
                     [_x, {
                         params ["_id", "_o"];
                         if (_o isEqualTo "guard") exitWith { ["task", _id, "guard", [], player] remoteExec ["fnc_debug_opcom", 2] };

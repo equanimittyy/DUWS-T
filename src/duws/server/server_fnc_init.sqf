@@ -353,6 +353,7 @@ fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warco
 [] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_force.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_belief_init.sqf";
 fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_sense.sqf";
+fnc_opcom_recon_sense = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_recon_sense.sqf";
 fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_decay.sqf";
 fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_belief_prune.sqf";
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_grid_init.sqf";

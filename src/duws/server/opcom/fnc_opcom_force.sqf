@@ -49,6 +49,29 @@ DUWS_fnc_classPower = {
     OPCOM_FORCE getOrDefault [[_class] call fnc_classifyVehicle, 0]
 };
 
+// A sighted enemy group -> the strength a belief stamp carries: firepower (a dismounted man 1, each crewed
+// hull its class power once, crew not re-counted) plus a premium per human aboard. No damage scaling -- a
+// sighting reads firepower and intent, not condition; decay is the fog, not battle damage. Shared by both
+// belief sensors (the A3 last-seen sweep and the recon bubble) so belief is stamped on one scale.
+DUWS_fnc_opcom_sightStr = {
+    params ["_grp"];
+    private _gu = units _grp;
+    private _seenVeh = [];
+    private _fp = 0;
+    {
+        private _veh = vehicle _x;
+        if (_veh isEqualTo _x) then {
+            _fp = _fp + 1;
+        } else {
+            if !(_veh in _seenVeh) then {
+                _seenVeh pushBack _veh;
+                _fp = _fp + ([typeOf _veh] call DUWS_fnc_classPower);
+            };
+        };
+    } forEach _gu;
+    _fp + OPCOM_PLAYER_WORTH * ({isPlayer _x} count _gu)
+};
+
 // A token list -> total force. The stowed path for a garrison's surviving-token ledger and for a
 // hardpoint's loose garrison alike, at full condition (no live objects to scale by).
 DUWS_fnc_tokenListForce = {

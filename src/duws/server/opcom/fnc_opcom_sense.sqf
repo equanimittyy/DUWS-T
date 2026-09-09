@@ -46,25 +46,7 @@ private _seen = createHashMap;
                     if (_age < ((_seen getOrDefault [_k, [[], 0, 1e9]]) select 2)) then {
                         private _pos = +(_x select _NT_POS);
                         _pos set [2, 0];
-                        private _gu = units _g;
-                        private _players = {isPlayer _x} count _gu;
-                        // Firepower, not headcount: dismounted men 1 each, each crewed vehicle its class
-                        // power once (crew not re-counted), +premium per human. Decay is the fog, not damage.
-                        private _seenVeh = [];
-                        private _fp = 0;
-                        {
-                            private _veh = vehicle _x;
-                            if (_veh isEqualTo _x) then {
-                                _fp = _fp + 1;
-                            } else {
-                                if !(_veh in _seenVeh) then {
-                                    _seenVeh pushBack _veh;
-                                    _fp = _fp + ([typeOf _veh] call DUWS_fnc_classPower);
-                                };
-                            };
-                        } forEach _gu;
-                        private _str = _fp + OPCOM_PLAYER_WORTH * _players;
-                        _seen set [_k, [_pos, _str, _age]];
+                        _seen set [_k, [_pos, [_g] call DUWS_fnc_opcom_sightStr, _age]];
                     };
                 };
             };

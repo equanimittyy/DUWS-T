@@ -2,13 +2,13 @@
 // arm the commit hold. Returns true if the order took. OPCOM cannot re-order a de-virtualised (live) unit --
 // control returns only when it re-virtualises -- nor re-issue before the hold passes; both are refused here
 // so the one primitive enforces the commitment rules the decision loop (Phase 4) relies on.
-//   _order: "assault" "scout" "supply" "move" "guard".
+//   _order: "assault" "supply" "move" "guard".
 //   _target: objective world position; ignored for guard (holds where it stands).
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival, else it settles to guard.
 params ["_t", "_order", ["_target", []], ["_returnZone", ""]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["assault", "scout", "supply", "move", "guard"])) exitWith {
+if (!(_order in ["assault", "supply", "move", "guard"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {

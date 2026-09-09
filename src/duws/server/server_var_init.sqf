@@ -656,6 +656,14 @@ OPCOM_PLAYER_WORTH = 3;
 // caps the scan cost. Generous, so a genuinely-spotted distant vehicle is not clipped.
 OPCOM_SENSE_RANGE = 5000;
 
+// A recon-flagged tasking's guaranteed detection reach in Chebyshev grid cells by platform
+// (fnc_opcom_recon_sense), the same cell measure as DUWS_opcom_streamK. Unlike OPCOM_SENSE_RANGE above this
+// is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual
+// or live. Foot < car < heli -- a heavier recon platform buys reach. Tune.
+OPCOM_RECON_K = createHashMapFromArray [
+    ["inf", 1], ["wheeled", 2], ["rotary", 3]
+];
+
 // The force a BLU-held zone deposits to the enemy layer: the player's garrison strength is not modelled,
 // so the commander knows the ground is held but not how strongly and reads a fixed nominal. A standing
 // OPFOR hardpoint has no such nominal -- its force composes from its static and garrison (DUWS_fnc_hpForce).
