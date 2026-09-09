@@ -23,7 +23,7 @@ if (!isServer) exitWith {};
 // cells as OPCOM_RECON_K/streamK -- kept wider than the garrison stream so a player cannot sit just outside
 // the garrison ring unseen. It reports on a beat, not continuously, so a player can break out; the per-wake
 // chance keeps the fix uncertain. The period is in OPCOM ticks, so its belief-stamping beat rides OPCOM's clock.
-#define OP_OBSERVE_K 3             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=3 ~ 1500 m on axis
+#define OP_OBSERVE_K 2             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=2 ~ 1000 m on axis
 #define OP_OBSERVE_PERIOD 12       // OPCOM ticks between wakes; x OPCOM_TICK_PERIOD for the real interval
 #define OP_OBSERVE_CHANCE 0.2
 

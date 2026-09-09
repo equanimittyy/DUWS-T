@@ -61,7 +61,7 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 | Observation post | on its own beat (denominated in OPCOM ticks), at a per-wake chance, an OP hardpoint stamps every BLUFOR group within `OP_OBSERVE_K` Chebyshev grid cells into belief for certain — a guaranteed bubble like recon detection, not A3's fallible last-seen — keyed by group on the one sighting scale, and reports whether the post is deployed or stowed; killing the post ends the screen | one belief write per caught group per wake |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
-| Recon detection | a `recon`-flagged tasking detects every BLUFOR group within `OPCOM_RECON_K` grid cells of it (Chebyshev, by platform — foot 1, car 2, heli 3) for certain and stamps it like a direct sighting, virtual or live. Unlike the sweep this is a true sensor bubble, not A3's fallible last-seen: no line-of-sight, nothing to blind it. Deploying one where belief is stale is the P4 Scout action ([§What the commander spends on](#what-the-commander-spends-on)) | a cell test per BLUFOR group per recon tasking per tick, over `allGroups` |
+| Recon detection | a `recon`-flagged tasking detects every BLUFOR group within `OPCOM_RECON_K` grid cells of it (Chebyshev, by platform — foot 0, car 1, heli 3) for certain and stamps it like a direct sighting, virtual or live. Unlike the sweep this is a true sensor bubble, not A3's fallible last-seen: no line-of-sight, nothing to blind it. Deploying one where belief is stale is the P4 Scout action ([§What the commander spends on](#what-the-commander-spends-on)) | a cell test per BLUFOR group per recon tasking per tick, over `allGroups` |
 
 The sighting sweep is one `nearTargets` per live OPFOR group (on its leader), bounded by `OPCOM_SENSE_RANGE`
 — no `nearEntities`, no scan over `allUnits`
@@ -415,7 +415,7 @@ carrier when the fight is across water — and stops when nothing is short.
 
 **Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout. The reveal is not a Scout-only
 phase but the recon flag's standing detection ([§Sensors](#sensors)): a guaranteed bubble set by platform
-(`OPCOM_RECON_K` Chebyshev cells — foot 1, car 2, heli 3) that each tick stamps fresh belief for every
+(`OPCOM_RECON_K` Chebyshev cells — foot 0, car 1, heli 3) that each tick stamps fresh belief for every
 BLUFOR inside it, no line-of-sight, virtual or live. Scout adds no sensor — it routes that standing bubble
 through stale valuable ground, buying perception where OPCOM has no observer. A route's Value is `Σ` over the cells its
 footprint sweeps of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`: offensive is

@@ -661,7 +661,7 @@ OPCOM_SENSE_RANGE = 5000;
 // is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual
 // or live. Foot < car < heli -- a heavier recon platform buys reach. Tune.
 OPCOM_RECON_K = createHashMapFromArray [
-    ["inf", 1], ["wheeled", 2], ["rotary", 3]
+    ["inf", 0], ["wheeled", 1], ["rotary", 3]
 ];
 
 // The force a BLU-held zone deposits to the enemy layer: the player's garrison strength is not modelled,
