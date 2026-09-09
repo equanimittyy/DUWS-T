@@ -89,11 +89,11 @@ missionNamespace setVariable ["DUWS_vbied_cars",
 	missionNamespace setVariable ["DUWS_vbied_cars",
 		(missionNamespace getVariable ["DUWS_vbied_cars", []]) - [_veh], true];
 	if (!isNull _veh) then {
-		// Spawned above the hull and shoved down: a shell created at rest never fuzes (arma_engine_gotchas.md).
-		// 155mm, the artillery-support shell (supports_radio_modern.hpp), up from the 82mm mortar.
+		// Spawned above the hull and shoved down: a munition created at rest never fuzes (arma_engine_gotchas.md).
+		// Mk82, the laser-guided bomb support round, up from the 82mm mortar.
 		private _p = getPosATL _veh;
-		private _bomb = createVehicle ["Sh_155mm_AMOS", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+		private _bomb = createVehicle ["Bo_Mk82", [_p select 0, _p select 1, (_p select 2) + 0.5], [], 0, "CAN_COLLIDE"];
 		_bomb setVelocity [0, 0, -30];
-		_veh setDamage 1;   // car cooks off itself, not just shredded by the shell
+		_veh setDamage 1;   // car cooks off itself, not just shredded by the bomb
 	};
 };

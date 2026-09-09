@@ -6,7 +6,7 @@
 // Each is independently, secretly live
 // (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
 // usual outcome: the point is to make the player wary of every pile, not to kill them; a live pile is the
-// exception and all-live is vanishingly rare). A live pile cooks a 155mm artillery shell when a BLUFOR man
+// exception and all-live is vanishingly rare). A live pile cooks a Mk82 bomb when a BLUFOR man
 // stands or crouches, or any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, so a
 // live one is only approached safely by crawling in prone. The disarm (fnc_random_event_ied_defuse) is not
 // stance-gated; every pile, live or decoy, carries that same disarm within reach, so the two cannot be told
@@ -157,9 +157,9 @@ if (_liveCount == 0) exitWith {};
 					[_pile, _pp] spawn {
 						params ["_pile", "_pp"];
 						sleep FUSE;
-						// Spawn the shell above ground and shove it down: a shell created at rest never
-						// fuzes (arma_engine_gotchas.md). 155mm artillery shell, as car_bomb.
-						private _bomb = createVehicle ["Sh_155mm_AMOS", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
+						// Spawn the bomb above ground and shove it down: a munition created at rest never
+						// fuzes (arma_engine_gotchas.md). Mk82, the laser-guided bomb support round, as car_bomb.
+						private _bomb = createVehicle ["Bo_Mk82", [_pp select 0, _pp select 1, (_pp select 2) + 0.5], [], 0, "CAN_COLLIDE"];
 						_bomb setVelocity [0, 0, -30];
 						if (!isNull _pile) then { deleteVehicle _pile };
 					};
