@@ -142,7 +142,8 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     private _hintTgt = [0, -2] select isDedicated;
     private _state = "CALM";
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
-    private _lastLos = -1e9;             // last time a guard held line of sight
+    private _lastSeen = -1e9;            // last time any player was in a guard's sight
+    private _seenPrev = [];              // players seen last tick, so "spotted" fires once per player
     // Called by call, so it reads and writes the loop's own _alarmAt / _state.
     private _arm = {
         _alarmAt = time + CLOCK_BASE;
@@ -181,42 +182,42 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             [_hostage] spawn { params ["_h"]; sleep 5; if (alive _h) then { _h setDamage 1 }; };
         };
 
-        // Garrison LOS within range drives the timers; knowsAbout only grades the sighting suspicion vs confirmed.
+        // Per player, does a garrison guard see him within range, and how well (knowsAbout grades the sighting)?
+        // Suspicion is one mission-wide state; the seen set only steers who the per-player "spotted" hint reaches.
         private _players = allPlayers select { side _x == west && { alive _x } };
         private _garr = units _garrison select { alive _x };
-        private _los = false;
-        private _maxKnows = 0;
+        private _seenNow = [];
+        private _confirmed = false;
         {
-            private _u = _x;
+            private _pl = _x;
+            private _losP = false;
+            private _knowsP = 0;
             {
-                private _pl = _x;
+                private _u = _x;
                 private _k = _u knowsAbout _pl;
-                if (_k > _maxKnows) then { _maxKnows = _k };
-                if (!_los && { _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then { _los = true };
-            } forEach _players;
-        } forEach _garr;
-        if (_los) then { _lastLos = time };
+                if (_k > _knowsP) then { _knowsP = _k };
+                if (!_losP && { _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then { _losP = true };
+            } forEach _garr;
+            if (_losP && { _knowsP > SUS_KNOWS }) then { _seenNow pushBack _pl };
+            if (_losP && { _knowsP > CONFIRM }) then { _confirmed = true };
+        } forEach _players;
+        if (count _seenNow > 0) then { _lastSeen = time };
 
-        if (_state == "CALM") then {
-            if (_los && { _maxKnows > SUS_KNOWS }) then {
-                if (_maxKnows > CONFIRM) then { call _arm } else {
-                    _state = "SUS";
-                    [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", _hintTgt];
-                };
-            };
+        if (_state == "ALARM") then {
+            // Committed. Countdown broadcast until freed (garrison dead) or executed (clock expired).
+            [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
         } else {
-            if (_state == "SUS") then {
-                if (_los && { _maxKnows > CONFIRM }) then { call _arm } else {
-                    if (time - _lastLos > GRACE_SUS) then {
-                        _state = "CALM";
-                        [localize "STR_DUWS_T_rescuehostage_slipped"] remoteExec ["hint", _hintTgt];
-                    };
+            if (_confirmed) then { call _arm } else {
+                if (count _seenNow > 0) then {
+                    _state = "SUS";
+                    // Warn only the players newly in a guard's sight, each on his own machine.
+                    { [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", clientOwner _x] } forEach (_seenNow select { !(_x in _seenPrev) });
+                } else {
+                    if (_state == "SUS" && { time - _lastSeen > GRACE_SUS }) then { _state = "CALM" };
                 };
-            } else {
-                // ALARM: committed. Countdown until freed (garrison dead) or executed (clock expired).
-                [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
             };
         };
+        _seenPrev = _seenNow;
 
         sleep 1;
     };
