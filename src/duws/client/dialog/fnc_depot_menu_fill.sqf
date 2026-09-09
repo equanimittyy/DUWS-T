@@ -10,7 +10,11 @@ if (isNull (uiNamespace getVariable ["DUWS_depotMenu_disp", displayNull])) exitW
 private _trg = objectFromNetId (uiNamespace getVariable ["DUWS_depotMenu_ctx", ""]);
 if (isNull _trg) exitWith {};
 
-private _pad = (vehicles inAreaArray _trg) select { count crew _x == 0 };
+// `vehicles` lists more than driveables (crates, static weapons, thrown junk); keep only storable domains.
+private _pad = (vehicles inAreaArray _trg) select {
+    count crew _x == 0
+    && { _x isKindOf "Car" || {_x isKindOf "Tank"} || {_x isKindOf "Air"} || {_x isKindOf "Ship"} || {_x isKindOf "Motorcycle"} }
+};
 private _caps = [] call DUWS_fnc_garageCaps;
 private _used = [] call DUWS_fnc_garageUsed;
 private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
