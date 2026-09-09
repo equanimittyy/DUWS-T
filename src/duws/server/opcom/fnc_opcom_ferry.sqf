@@ -35,6 +35,20 @@ DUWS_fnc_opcom_zoneContested = {
     [_pos, (_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear
 };
 
+// Shared by the borrow and the debug inspector so the two can never drift. _excludeId drops one id (a rider
+// never borrows itself); -1 drops none.
+DUWS_fnc_opcom_ferryPool = {
+    params [["_excludeId", -1]];
+    DUWS_opcom_taskings select {
+        (_x get "grp") isEqualTo ""
+        && {"transport" in (_x get "flags")}
+        && {(_x getOrDefault ["carrying", -1]) < 0}
+        && {(_x get "id") != _excludeId}
+        && {(_x get "moveType") in ["boat", "rotary"]}
+        && {!(((_x get "order") isEqualTo "garrison") && {[_x get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
+    }
+};
+
 // Borrow the nearest free compatible transport for a rider stopped at a water leg; returns the bound transport,
 // or nil if none is free (the rider holds at the shore and retries next tick). Boats are preferred, a rotary is
 // the fallback lift. A garrisoned pick is flipped off `garrison` to `move` so its ferry turn runs; no reserve
@@ -42,14 +56,7 @@ DUWS_fnc_opcom_zoneContested = {
 DUWS_fnc_opcom_borrowFerry = {
     params ["_rider"];
     private _rpos = _rider get "pos";
-    private _pool = DUWS_opcom_taskings select {
-        (_x get "grp") isEqualTo ""
-        && {"transport" in (_x get "flags")}
-        && {(_x getOrDefault ["carrying", -1]) < 0}
-        && {(_x get "id") != (_rider get "id")}
-        && {(_x get "moveType") in ["boat", "rotary"]}
-        && {!(((_x get "order") isEqualTo "garrison") && {[_x get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
-    };
+    private _pool = [_rider get "id"] call DUWS_fnc_opcom_ferryPool;
     if (_pool isEqualTo []) exitWith { nil };
     private _boats = _pool select { (_x get "moveType") isEqualTo "boat" };
     private _cands = [_boats, _pool] select (_boats isEqualTo []);   // boats first; rotary only when no boat is free
