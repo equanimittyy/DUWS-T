@@ -54,7 +54,8 @@ fnc_furnish_building = {
     #define WALL_DIV 7         // ~1 wall piece per this many near-wall cells
     #define RUG_DIV 40         // ~1 rug per this many open room cells
     #define WALL_MAX 5         // max wall pieces per room
-    #define ANCHOR_MAX 1       // max anchors per room
+    #define ANCHOR_MAX 2       // max anchors per room
+    #define ANCHOR_RINGS 2     // an anchor needs this many clear cell rings around its centre before it lands
     #define RUG_MAX 2          // max rugs per room
     #define PLACE_RETRY 3      // stop a room's pass after this many overlap rejects in a row (saturated)
 
@@ -92,6 +93,28 @@ fnc_furnish_building = {
         params ["_wp"];
         private _c = [_wp] call _cellAt;
         _c isNotEqualTo [] && {!(_c select 5)} && {(_c select 1) != "blocked"} && {(_c select 1) != "door"}
+    };
+
+    // Cell lookup by storey/i/j -- holds references to the grid cells, so a reservation stamped on a cell
+    // during the passes is seen through it.
+    private _ijCell = createHashMap;
+    { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ijCell set [format ["%1_%2_%3", _s, _i, _j], _x] } forEach _grid;
+
+    // Anchor breathing room: every cell of the (2*ANCHOR_RINGS+1) square centred on the anchor cell must be
+    // present, non-blocked and unreserved, so a table lands with space to walk round it, clear of walls, the
+    // nav corridor and pieces already placed.
+    private _ringsClear = {
+        params ["_cell"];
+        _cell params ["", "", "", "", "", "", "_i", "_j", "_s"];
+        private _clear = true;
+        for "_di" from (- ANCHOR_RINGS) to ANCHOR_RINGS do {
+            for "_dj" from (- ANCHOR_RINGS) to ANCHOR_RINGS do {
+                private _c = _ijCell getOrDefault [format ["%1_%2_%3", _s, _i + _di, _j + _dj], []];
+                if (_c isEqualTo [] || {(_c select 1) == "blocked"} || {_c select 5}) exitWith { _clear = false };
+            };
+            if (!_clear) exitWith {};
+        };
+        _clear
     };
 
     // Grid-pack a random subset of a set's clutter across a placed anchor's measured top, seated on the
@@ -324,7 +347,7 @@ fnc_furnish_building = {
             private _nAnch = (1 max floor ((count (_rcells select { (_x select 1) == "open" })) / FILL_DIV)) min ANCHOR_MAX;
             private _placed = 0; private _miss = 0;
             while { _placed < _nAnch && _miss < PLACE_RETRY } do {
-                private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} };
+                private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} && {[_x] call _ringsClear} };
                 if (_free isEqualTo []) exitWith {};
                 private _cls = [_anchorClasses] call _pickCapped;
                 if (_cls == "") exitWith {};

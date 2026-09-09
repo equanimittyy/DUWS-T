@@ -34,6 +34,7 @@ fnc_furnish_grid = {
     #define STOREY_GAP 2.5
     #define STOREY_BIN 0.5     // Z histogram bin for the floor-level split
     #define MIN_ROOM_CELLS 20  // a room below this is a stairwell/sliver: dropped, not furnished
+    #define MIN_ROOM_SQUARE 4  // and it must hold one clear NxN cell block, or a piece has nowhere to sit
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
 
     private _seeds = _building buildingPos -1;
@@ -222,13 +223,46 @@ fnc_furnish_grid = {
         };
     } forEach _cells;
 
-    // Drop a room too small to use -- a stairwell, a balcony sliver, a closet -- so it neither reads as a
-    // room nor takes a piece; its cells stay walkable in the grid but lose their room id.
+    // Drop a room that cannot take a piece: fewer than MIN_ROOM_CELLS cells (a stairwell, a balcony sliver, a
+    // closet), or no clear MIN_ROOM_SQUARE-cell square anywhere in it (a corridor or an L has the area but no
+    // square patch a table sits in). A dropped room's cells stay walkable but lose their room id.
     private _roomSize = createHashMap;
-    { private _r = _x select 4; if (_r >= 0) then { _roomSize set [_r, (_roomSize getOrDefault [_r, 0]) + 1] } } forEach _cells;
-    { if ((_x select 4) >= 0 && {(_roomSize getOrDefault [_x select 4, 0]) < MIN_ROOM_CELLS}) then { _x set [4, -1] } } forEach _cells;
+    private _cellRoom = createHashMap;   // "storey_i_j" -> roomId, over room cells only, for the square test
+    {
+        private _r = _x select 4;
+        if (_r >= 0) then {
+            _roomSize set [_r, (_roomSize getOrDefault [_r, 0]) + 1];
+            _x params ["", "", "", "", "", "", "_i", "_j", "_s"];
+            _cellRoom set [format ["%1_%2_%3", _s, _i, _j], _r];
+        };
+    } forEach _cells;
+
+    // A room holds a square when some cell is the low corner of a MIN_ROOM_SQUARE block whose every cell shares
+    // its room; stop testing a room once one square is found.
+    private _hasSquare = createHashMap;
+    {
+        private _r = _x select 4;
+        if (_r >= 0 && {!(_hasSquare getOrDefault [_r, false])}) then {
+            _x params ["", "", "", "", "", "", "_i", "_j", "_s"];
+            private _ok = true;
+            for "_di" from 0 to (MIN_ROOM_SQUARE - 1) do {
+                for "_dj" from 0 to (MIN_ROOM_SQUARE - 1) do {
+                    if ((_cellRoom getOrDefault [format ["%1_%2_%3", _s, _i + _di, _j + _dj], -1]) != _r) exitWith { _ok = false };
+                };
+                if (!_ok) exitWith {};
+            };
+            if (_ok) then { _hasSquare set [_r, true] };
+        };
+    } forEach _cells;
+
+    {
+        private _r = _x select 4;
+        if (_r >= 0 && {(_roomSize getOrDefault [_r, 0]) < MIN_ROOM_CELLS || {!(_hasSquare getOrDefault [_r, false])}}) then {
+            _x set [4, -1];
+        };
+    } forEach _cells;
     private _keptN = 0;
-    { if (_x >= MIN_ROOM_CELLS) then { _keptN = _keptN + 1 } } forEach _roomSize;
+    { if ((_roomSize get _x) >= MIN_ROOM_CELLS && {_hasSquare getOrDefault [_x, false]}) then { _keptN = _keptN + 1 } } forEach (keys _roomSize);
 
     ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s)",
         typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays]] call fnc_log;
