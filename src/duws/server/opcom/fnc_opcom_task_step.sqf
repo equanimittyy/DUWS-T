@@ -106,7 +106,9 @@ private _nearestPlayerCells = {
             };
         };
     };
-} forEach (+DUWS_opcom_taskings);
+// Iterate the store directly, never a +copy -- + clones the nested hashMaps, so every _t set above would
+// be lost and nothing would move (arma_engine_gotchas.md). Safe: nothing adds/removes elements in the loop.
+} forEach DUWS_opcom_taskings;
 
 // Retire finished and dead records in one sweep.
 DUWS_opcom_taskings = DUWS_opcom_taskings select { !((_x get "status") in ["dead", "done"]) };

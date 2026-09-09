@@ -308,6 +308,12 @@ A terrain object can't be deleted (`deleteVehicle` no-ops silently), so clearing
 
 **Fix:** hide a building only where one must go, and register it. A prefab zone centre takes its buildings with it (`init_zones/fnc_createzone.sqf`) and holds the register plus a `BuildingChanged` handler that re-hides replacements; HQ/FOB clearing goes through `fnc_clear_foliage.sqf` filtered to `TREE`/`SMALL TREE`/`BUSH` (no register needed). A hide is permanent and unrestorable — pay it where a composition must fit, not to stop a tree clipping a tent. `BuildingChanged` is local (only the machine that simulated the damage fires it), so a server-only re-hide misses a distant client's blast (escalation, `fnc_escalation.sqf`, works around this with a per-machine watch; the zone re-hide's exposure is unfixed).
 
+## `+` (copy) deep-copies nested HashMaps, so mutating a `+copy` element updates nothing
+
+Unary `+` (copy) on an array recurses into nested containers, and since Arma 3 v2.02 that includes HashMaps — `+[myHashMap]` yields a clone of the map, not a reference to it. Iterating `forEach (+_store)` and calling `_x set [...]` on each element writes to a throwaway clone discarded at scope end; the stored map is untouched. HashMaps are reference types, so plain assignment, `select`, `apply` and a direct `forEach` all keep the reference — only `+`/`copy` clones. The OPCOM per-tick mover (`fnc_opcom_task_step`) iterated `+DUWS_opcom_taskings`, so every tasking's `pos`/`leg`/`grp` write vanished and no unit ever moved or went live — silent, no error.
+
+**Fix:** iterate a HashMap store directly (`forEach DUWS_opcom_taskings`) whenever the loop mutates elements. Reach for a snapshot only against structural change (adding/removing array elements mid-loop), and make it one that preserves references — `apply {_x}` copies the outer array while keeping the same maps — never `+`. The sqf-vm suite predates HashMaps and cannot catch this.
+
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 
 Every unary command (`sleep`, `count`, `random`, `floor`, `str`) sits above `+`/`-`/`*` and the comparisons, taking only the token to its right. `sleep 2 + random 5` parses as `(sleep 2) + (random 5)` — a flat 2 s, randomised part discarded, `+` handed Nothing, result discarded, no RPT line.
