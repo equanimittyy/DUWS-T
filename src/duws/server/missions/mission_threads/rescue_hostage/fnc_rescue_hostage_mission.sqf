@@ -1,7 +1,8 @@
 // Locality: server; the recruit-action bodies remoteExec fnc_escort_informant_group to target 2.
 //
-// Covert rescue: reach the captive unseen and kill his building garrison. Detection arms a 60 s clock that
-// executes him; killing the garrison first cancels it, frees him and converges the patrols. Win: captive at HQ.
+// Covert rescue: reach the captive unseen and kill his building garrison. Being seen raises suspicion you can
+// still slip away from; a confirmed sighting arms an execution clock that cannot be called off -- only killing
+// the garrison first saves him. Killing it frees him and brings the cordon in. Win: captive at HQ.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([24, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
@@ -109,36 +110,52 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
 private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
 
-// Guard watcher (tail off the main poll). Detection scoped to THIS mission's OPFOR, never side-wide: east
-// knowsAbout reads flat-high off any distant firefight and lingers on a remembered target, so a side-wide
-// gate would execute the hostage over a fight elsewhere (arma_engine_gotchas.md). The COMBAT flip catches a
-// shot heard / body seen that per-unit knowsAbout is slow to show. setCaptive drops on whichever comes
-// first: garrison dead (freed) or clock expired with a guard alive (executed).
+// Guard watcher: a two-stage alarm scoped to the building GARRISON only -- side-wide knowsAbout reads flat-high
+// off any distant firefight (arma_engine_gotchas.md), and letting the outer ring arm the execution would make
+// the cordon an instant-fail tripwire, not a fight. Suspicion is escapable, and its reset keys on LINE OF SIGHT
+// because knowsAbout lingers for minutes after contact is lost; a confirmed sighting arms the clock for good.
 [_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
     params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
-    #define KNOWS_TRIP 1.5      // per-guard knowsAbout for a confirmed sighting (0 unknown .. 4 identified)
-    private _observers = _ring + [_garrison];   // both raise the alarm; only the garrison's death frees
-    private _alarmAt = -1;                       // in-game time the execution clock expires; -1 = unarmed
+    #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
+    #define SUS_KNOWS 0.3
+    #define LOS_RANGE 150
+    #define GRACE_SUS 8
+    #define CLOCK_BASE 60     // armed once and never called off
+
+    // Bring the cordon in to hunt the building. Reused when the hostage is freed.
+    private _convergeRing = {
+        {
+            private _p = _x;
+            if (!isNull _p && { { alive _x } count units _p > 0 }) then {
+                while { count waypoints _p > 0 } do { deleteWaypoint [_p, 0]; };
+                _p setBehaviour "AWARE";
+                _p setCombatMode "RED";
+                _p setSpeedMode "FULL";
+                private _wp = _p addWaypoint [getPosATL _bldg, 0];
+                _wp setWaypointType "SAD";
+                _wp setWaypointSpeed "FULL";
+                (_p addWaypoint [getPosATL _bldg, 30]) setWaypointType "CYCLE";
+            };
+        } forEach _ring;
+    };
+
+    private _hintTgt = [0, -2] select isDedicated;
+    private _state = "CALM";
+    private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
+    private _lastLos = -1e9;             // last time a guard held line of sight
+    // Called by call, so it reads and writes the loop's own _alarmAt / _state.
+    private _arm = {
+        _alarmAt = time + CLOCK_BASE;
+        _state = "ALARM";
+        call _convergeRing;
+    };
 
     while { alive _hostage } do {
-        // Garrison dead -> freed. Checked first each tick so a garrison wiped mid-count cancels the clock (the
-        // two causes stay exclusive). Opens recruitment, converges the patrols (Rescue Pilot retask), reveals him.
+        // Garrison dead -> freed. Checked first so a wipe mid-countdown cancels the clock.
         if ({ alive _x } count units _garrison == 0) exitWith {
             _hostage setCaptive false;
             _hostage setVariable ["DUWS_hostage_freed", true, true];
-            {
-                private _p = _x;
-                if (!isNull _p && { { alive _x } count units _p > 0 }) then {
-                    while { count waypoints _p > 0 } do { deleteWaypoint [_p, 0]; };
-                    _p setBehaviour "AWARE";
-                    _p setCombatMode "RED";
-                    _p setSpeedMode "FULL";
-                    private _wp = _p addWaypoint [getPosATL _bldg, 0];
-                    _wp setWaypointType "SAD";
-                    _wp setWaypointSpeed "FULL";
-                    (_p addWaypoint [getPosATL _bldg, 30]) setWaypointType "CYCLE";
-                };
-            } forEach _ring;
+            call _convergeRing;
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
             DUWS_float_hostage = _hostage; publicVariable "DUWS_float_hostage";
             createMarker [_trk, getPosATL _hostage];
@@ -155,44 +172,53 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             };
         };
 
-        if (_alarmAt < 0) then {
-            // Arm on a confirmed sighting by any mission observer, or any mission group flipped to COMBAT.
-            private _tripped = false;
-            private _players = allPlayers select { side _x == west && { alive _x } };
+        // Clock expired with a guard alive: setCaptive false + reveal + RED so the co-located guards engage at
+        // once; the setDamage backstop covers a stuck-AI edge (scripted damage bypasses his clamp).
+        if (_state == "ALARM" && { time > _alarmAt }) exitWith {
+            _hostage setCaptive false;
+            { _x reveal [_hostage, 4] } forEach units _garrison;
+            _garrison setCombatMode "RED";
+            [_hostage] spawn { params ["_h"]; sleep 5; if (alive _h) then { _h setDamage 1 }; };
+        };
+
+        // Garrison LOS within range drives the timers; knowsAbout only grades the sighting suspicion vs confirmed.
+        private _players = allPlayers select { side _x == west && { alive _x } };
+        private _garr = units _garrison select { alive _x };
+        private _los = false;
+        private _maxKnows = 0;
+        {
+            private _u = _x;
             {
-                private _g = _x;
-                if (!_tripped && { { alive _x } count units _g > 0 }) then {
-                    if (behaviour (leader _g) == "COMBAT") then { _tripped = true };
-                    if (!_tripped) then {
-                        {
-                            private _u = _x;
-                            if (alive _u && { (_players findIf { _u knowsAbout _x > KNOWS_TRIP }) >= 0 }) exitWith { _tripped = true };
-                        } forEach units _g;
-                    };
-                };
-            } forEach _observers;
-            if (_tripped) then {
-                _alarmAt = time + 60;
-                // Countdown in the hintbox, refreshed each second until he is freed, executed, or dies.
-                [_hostage, _alarmAt] spawn {
-                    params ["_hostage", "_alarmAt"];
-                    while { alive _hostage && { !(_hostage getVariable ["DUWS_hostage_freed", false]) } && { time < _alarmAt } } do {
-                        [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", [0, -2] select isDedicated];
-                        sleep 1;
-                    };
+                private _pl = _x;
+                private _k = _u knowsAbout _pl;
+                if (_k > _maxKnows) then { _maxKnows = _k };
+                if (!_los && { _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then { _los = true };
+            } forEach _players;
+        } forEach _garr;
+        if (_los) then { _lastLos = time };
+
+        if (_state == "CALM") then {
+            if (_los && { _maxKnows > SUS_KNOWS }) then {
+                if (_maxKnows > CONFIRM) then { call _arm } else {
+                    _state = "SUS";
+                    [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", _hintTgt];
                 };
             };
         } else {
-            // Clock expired with a guard alive: setCaptive false + reveal + RED so the co-located guards engage
-            // at once; the setDamage backstop covers a stuck-AI edge (scripted damage bypasses his clamp).
-            if (time > _alarmAt) exitWith {
-                _hostage setCaptive false;
-                { _x reveal [_hostage, 4] } forEach units _garrison;
-                _garrison setCombatMode "RED";
-                [_hostage] spawn { params ["_h"]; sleep 5; if (alive _h) then { _h setDamage 1 }; };
+            if (_state == "SUS") then {
+                if (_los && { _maxKnows > CONFIRM }) then { call _arm } else {
+                    if (time - _lastLos > GRACE_SUS) then {
+                        _state = "CALM";
+                        [localize "STR_DUWS_T_rescuehostage_slipped"] remoteExec ["hint", _hintTgt];
+                    };
+                };
+            } else {
+                // ALARM: committed. Countdown until freed (garrison dead) or executed (clock expired).
+                [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
             };
         };
-        sleep 2;
+
+        sleep 1;
     };
 };
 
