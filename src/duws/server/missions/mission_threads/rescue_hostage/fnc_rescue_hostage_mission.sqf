@@ -221,7 +221,10 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                 if (count _seenNow > 0) then {
                     _state = "SUS";
                     // Warn only the players newly in a guard's sight, each on his own machine.
-                    { [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", clientOwner _x] } forEach (_seenNow select { !(_x in _seenPrev) });
+                    {
+                        private _owner = clientOwner _x;
+                        [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", _owner];
+                    } forEach (_seenNow select { !(_x in _seenPrev) });
                 } else {
                     if (_state == "SUS" && { time - _lastSeen > GRACE_SUS }) then { _state = "CALM" };
                 };

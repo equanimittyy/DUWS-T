@@ -2069,3 +2069,21 @@ true` a beat later. Frozen, it takes no impulse; released from rest, a shallow c
 nudge. As a backstop, hold `allowDamage false` across the settle so any residual shove cannot cook it off —
 but set it *after* restoring any stored damage, because `allowDamage false` suppresses `setDamage`. This is
 the same freeze-pose-thaw the HQ hard placement uses (`init_hq/fnc_placeHQUnits.sqf`).
+
+## A command applied to an argument inside a `remoteExec` target trips a spurious `Missing ]`
+
+**Writing `[msg] remoteExec ["hint", clientOwner _x]` — a command applied to an argument (`clientOwner _x`)
+directly in the target slot — makes the in-engine SQF parser reject the whole enclosing function with
+`Missing ]`, its caret on the target token, even though the brackets balance. sqf-vm's parser accepts it, so
+the unit tests pass and the break surfaces only in the game `.rpt` at function-compile time.**
+
+A function that fails to compile is never defined, so the feature calling it silently does nothing — here a
+whole side mission failed to generate, with no runtime error, only the boot-time parse line. It is not that
+computed targets are forbidden: the sibling `remoteExec ["addAction", [0,-2] select isDedicated, _hostage]`
+compiles, so a bracketed or binary target expression is fine; it is the bare command-applied-to-argument in
+that slot that trips it.
+
+**How to apply:** hoist the target to a local first — `private _owner = clientOwner _x; [msg] remoteExec
+["hint", _owner];` — which is what every working call in the codebase already does. More broadly, a green
+sqf-vm run is necessary but not sufficient: read the `.rpt` after a build, because the engine's parser is
+stricter than the test harness's.
