@@ -48,7 +48,7 @@ DUWS_opcom_moveType = createHashMapFromArray [
 // Per-type speed as ticks to cross one grid cell -- gameplay-tuned, not realistic: the true spread (a jet
 // outruns a foot soldier ~80x) is compressed so the virtual layer neither crawls nor teleports.
 DUWS_opcom_speed = createHashMapFromArray [
-    ["inf", 30], ["wheeled", 15], ["tracked", 20], ["rotary", 5], ["fixed", 2], ["boat", 10]
+    ["inf", 15], ["wheeled", 4], ["tracked", 8], ["rotary", 2], ["fixed", 0.5], ["boat", 4]
 ];
 
 // Per-type streaming reach in cells (Chebyshev): a tasking de-virtualises when its cell closes within K of
