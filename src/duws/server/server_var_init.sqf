@@ -644,7 +644,7 @@ OPCOM_BELIEF_EXPIRE = 192;   // 960s @ 5s tick
 
 // Ticks a live tasking must stay clear of every player before it re-virtualises -- a run, not one far
 // sample, so a fast flyover cannot spawn then stow a group in a single pass.
-OPCOM_REVIRT_GRACE = 12;     // 60s @ 5s tick
+OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
 
 // Height a de-virtualised air tasking enters at, flying, above its world point -- a fixed height rather
 // than the stored z, so a helicopter neither creeps up nor sinks across stow/spawn cycles.
