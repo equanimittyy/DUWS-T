@@ -152,10 +152,10 @@ fnc_furnish_building = {
         _c
     };
 
-    // Per-room sim gate: hold each piece frozen from placement until its room is laid out, so none takes a
-    // physics step mid-build. Global, not local -- the local form leaves clients simulating it.
+    // Freeze on placement and leave frozen -- a physics step unseats the piece. Global, not local: the
+    // local form leaves clients simulating it. Filed under _key, so the mission GCs it on teardown.
     private _keepFrozen = {
-        { _x enableSimulationGlobal false; _roomObjs pushBack _x; _objs pushBack _x } forEach _this;
+        { _x enableSimulationGlobal false; _objs pushBack _x } forEach _this;
     };
 
     // Place an anchor with its seats (per the `seats` rule) and clutter, reserving the footprint and each
@@ -288,7 +288,6 @@ fnc_furnish_building = {
         private _rcells = _rooms get _rid;
         private _set = _prio select (_forEachIndex mod (count _prio));
         private _classCount = createHashMap;   // per-room, drives the maxPerRoom caps below
-        private _roomObjs = [];                // this room's pieces, frozen until the room is laid out
 
         // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
         private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
@@ -358,9 +357,6 @@ fnc_furnish_building = {
                 [_cell select 0, 0.5] call _reserve;
             };
         };
-
-        // Room laid out and validated: wake the whole set together.
-        { _x enableSimulationGlobal true } forEach _roomObjs;
     } forEach _bySize;
 
     ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _objs, count _bySize]] call fnc_log;
