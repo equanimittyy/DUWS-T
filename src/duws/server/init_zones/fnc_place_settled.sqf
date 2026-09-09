@@ -75,13 +75,13 @@ fnc_place_settled = {
                     _o setVelocity [0, 0, 0];
                     sleep 1.5;
                     // Base-on-floor Z gate: distance2D alone passes a piece that fell to a lower storey or
-                    // perched on another at the same XY. Band kept extremely tight -- but above PhysX rest
-                    // contact (~few cm), or every try fails and the piece freezes mis-seated.
+                    // perched at the same XY. Band is loose -- a correctly-rested piece sits several cm off the
+                    // median plane (PhysX contact, per-class bbox-LOD) -- but far under a storey drop or a perch.
                     private _restBaseZ = (getPosASL _o select 2) + ((boundingBoxReal _o select 0) select 2);
                     _settled = alive _o
                         && {(vectorUp _o select 2) > 0.985}
                         && {(_o distance2D (ASLToAGL _pos)) < 0.6}
-                        && {abs (_restBaseZ - (_pos select 2)) < 0.03};
+                        && {abs (_restBaseZ - (_pos select 2)) < 0.15};
                     _tries = _tries + 1;
                 };
                 // Freeze the settled (or last) attempt from rest: re-level a small tilt, kill drop residual.
