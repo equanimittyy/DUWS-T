@@ -11,7 +11,7 @@ private _state = _pile getVariable ["DUWS_ied_state", "gone"];
 if (_state == "gone") exitWith {};
 
 _pile setVariable ["DUWS_ied_state", "gone", false];
-_pile setVariable ["DUWS_ied_active", false, true];   // drops the hold action and world icon on every client
+_pile setVariable ["DUWS_ied_active", false, true];   // drops the hold action on every client
 if (_state == "live") then { [1, "ied_defused"] call fnc_cp_adjust };
 // Leave the pile standing as defused junk and hand it to the map cleanup. A raw DUWS_binMe flag would be
 // inert on it -- fnc_repetitive_cleanup only binMe-reaps allUnits + vehicles, and a junk pile is a static

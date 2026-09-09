@@ -1,32 +1,32 @@
 // Locality: server -- roadside IEDs, rolled in the Hostile band (random_event_tables.hpp) so rep has
 // already turned the town against the player.
 //
-// A loose scatter of identical junk piles on the roads ahead of the player, out in open country at least
-// MIN_DIST off and clear of every town. Each is independently, secretly live
+// A loose scatter of identical junk piles on roads across a wide area ahead of the player, at least MIN_DIST
+// off and clear of every town, drawn randomly across the road network rather than strung down one stretch.
+// Each is independently, secretly live
 // (IED_LIVE_CHANCE, kept very low on purpose -- almost every pile is a bluff and a pure-decoy field is the
 // usual outcome: the point is to make the player wary of every pile, not to kill them; a live pile is the
 // exception and all-live is vanishingly rare). A live pile cooks a 155mm artillery shell when a BLUFOR man
 // stands or crouches, or any BLUFOR vehicle rolls, within ARM_RANGE -- but holds for a lone prone man, so a
 // live one is only approached safely by crawling in prone. The disarm (fnc_random_event_ied_defuse) is not
-// stance-gated; every pile, live or decoy, carries that same disarm within reach and a client-side world icon
-// (fnc_random_event_ied_markers), so the two cannot be told apart -- a decoy clears to nothing, a live one to
-// a command point. No emplacer unit exists, so nothing here is marked isHostile and nothing can be shot: the
+// stance-gated; every pile, live or decoy, carries that same disarm within reach, so the two cannot be told
+// apart -- a decoy clears to nothing, a live one to a command point. No emplacer unit exists, so nothing here
+// is marked isHostile and nothing can be shot: the
 // shell has no instigator, so a civilian caught in the blast is charged to no one, and the fire.sqf
 // legal-target invariant has no unit to apply to.
 if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
-#define IED_COUNT_MIN 4
-#define IED_COUNT_MAX 12
+#define IED_COUNT_MIN 5
+#define IED_COUNT_MAX 20
 #define MIN_DIST 300
 #define FWD_SPREAD 200
-#define SCATTER 300
+#define SCATTER 1000
 #define IED_MIN_SEP 50
-#define IED_LIVE_CHANCE 0.06
-#define ARM_RANGE 10
-#define FIELD_WATCH 500
-#define FUSE (0.5 + random 1)
+#define IED_LIVE_CHANCE 0.10
+#define ARM_RANGE 30
+#define FUSE (random 2)
 #define LIFETIME 1200
 #define TICK 0.5
 
@@ -44,11 +44,10 @@ private _towns = [];
 private _fnc_inTown = { params ["_p"]; (_towns findIf { (_p distance2D (_x select 0)) < (_x select 1) }) >= 0 };
 
 // Anchor the field forward of the player -- MIN_DIST..MIN_DIST+FWD_SPREAD ahead of where they face -- so it
-// is come upon down the road rather than dropped on them or pinned to a town.
+// is come upon ahead rather than dropped on them or pinned to a town.
 private _anchor = _player getPos [MIN_DIST + random FWD_SPREAD, getDir _player];
 
-// Roads across the area around that anchor: never in a town, and never inside MIN_DIST of the player (the
-// forward bias alone does not hold the floor once the scatter reaches back toward them).
+// Every road across the wide disc around the anchor: never in a town, never inside MIN_DIST of the player.
 private _roads = (_anchor nearRoads SCATTER) select {
 	!([getPosATL _x] call _fnc_inTown) && { (_x distance2D _player) >= MIN_DIST }
 };
@@ -57,10 +56,9 @@ _roads = _roads call BIS_fnc_arrayShuffle;
 
 private _count = IED_COUNT_MIN + floor (random (IED_COUNT_MAX - IED_COUNT_MIN + 1));
 
-// Scatter the piles across the area -- a loose spread over whatever roads are around, not a row marching down
-// one of them. Greedy: keep each new road IED_MIN_SEP (50 m) off the ones already taken. That is only a floor,
-// so over the wide SCATTER area the gaps come out highly variable -- some piles nearly adjacent, others far
-// across the field.
+// Draw from the shuffled set keeping every pick IED_MIN_SEP (50 m) off the ones already taken: the shuffle
+// spreads the field randomly across the road network, not a row marching down one road, and the separation
+// stops two landing on top of each other.
 private _spots = [];
 {
 	if (count _spots >= _count) exitWith {};
@@ -68,8 +66,8 @@ private _spots = [];
 	if ((_spots findIf { (getPosATL _x distance2D _rp) < IED_MIN_SEP }) < 0) then { _spots pushBack _x };
 } forEach _roads;
 
-// Sit each pile off to one side of the road (perpendicular to how the road runs), out on the verge and
-// flat to the slope, rather than on the crown where traffic would clip it.
+// Sit each pile off to one side of the road (perpendicular to how the road runs), out on the verge and flat to
+// the slope, rather than on the crown where traffic would clip it.
 private _piles = [];
 {
 	private _road = _x;
@@ -83,8 +81,8 @@ private _piles = [];
 		_pile enableSimulation false;   // a live charge must not be nudged off its spot by traffic
 		private _live = random 1 < IED_LIVE_CHANCE;
 		_pile setVariable ["DUWS_ied_state", ["decoy", "live"] select _live, false];
-		// Public so each client's hold-action condition and world icon read the pile; set on every pile so
-		// live and decoy look alike, cleared on defuse or trip to drop both the action and the icon.
+		// Public so each client's hold-action condition reads the pile; set on every pile so live and decoy
+		// look alike, cleared on defuse or trip to drop the action.
 		_pile setVariable ["DUWS_ied_active", true, true];
 		// Live pile: full 6 s defuse. Decoy: no charge, so instant (duration 0) -- the tell comes only once
 		// the player has already committed. Not stance-gated; only the trip ignores a prone man.
@@ -110,33 +108,27 @@ private _piles = [];
 } forEach _spots;
 if (_piles isEqualTo []) exitWith {};
 
-// Field centre = mean pile position. The proximity watch gates on this, not the seed town, because the stretch
-// can run well off the town the seed search was centred on.
+// Field centre = mean pile position. The proximity watch gates on this, not the seed town, because the field
+// can spread well off the town the seed search was centred on.
 private _fieldCenter = [0, 0, 0];
 { _fieldCenter = _fieldCenter vectorAdd (getPosATL _x) } forEach _piles;
 _fieldCenter = _fieldCenter vectorMultiply (1 / count _piles);
 
-// Broadcast the field so each client can draw a world icon over every pile (fnc_random_event_ied_markers).
-// Appended, not overwritten, and subtracted at teardown so overlapping fields do not clobber one another.
-missionNamespace setVariable ["DUWS_ied_piles",
-	(missionNamespace getVariable ["DUWS_ied_piles", []]) + _piles, true];
+// Watch radius follows the field's own reach (furthest pile from centre, plus the arm range): a fixed radius
+// would miss edge piles now the scatter can run a kilometre wide, so a live pile would never trip.
+private _fieldRadius = 0;
+{ _fieldRadius = _fieldRadius max (_x distance2D _fieldCenter) } forEach _piles;
+private _watch = _fieldRadius + ARM_RANGE + 50;
 
 private _liveCount = { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles;
 ["INFO", "CIV", format ["IED event: %1 piles (%2 live) ahead of player, rolled at town %3", count _piles, _liveCount, _townIndex]] call fnc_log;
 
-// Pure-decoy field: no proximity watch to run. Just drop the icons after its life; the piles delete
-// themselves on the disposeAfter clock set at spawn.
-if (_liveCount == 0) exitWith {
-	[_piles] spawn {
-		params ["_piles"];
-		sleep LIFETIME;
-		missionNamespace setVariable ["DUWS_ied_piles",
-			(missionNamespace getVariable ["DUWS_ied_piles", []]) - _piles, true];
-	};
-};
+// Pure-decoy field: no proximity watch to run, nothing to track. The piles delete themselves on the
+// disposeAfter clock set at spawn.
+if (_liveCount == 0) exitWith {};
 
-[_piles, _fieldCenter] spawn {
-	params ["_piles", "_fieldCenter"];
+[_piles, _fieldCenter, _watch] spawn {
+	params ["_piles", "_fieldCenter", "_watch"];
 	private _deadline = time + LIFETIME;
 	// Runs until every live pile has resolved (defused or blown) or the field times out.
 	while {
@@ -144,7 +136,7 @@ if (_liveCount == 0) exitWith {
 		&& { { (_x getVariable ["DUWS_ied_state", "decoy"]) == "live" } count _piles > 0 }
 	} do {
 		// No one near the field: nothing can trip, so skip the per-pile scan until a player returns.
-		if ((allPlayers findIf { alive _x && { (_x distance2D _fieldCenter) < FIELD_WATCH } }) < 0) then {
+		if ((allPlayers findIf { alive _x && { (_x distance2D _fieldCenter) < _watch } }) < 0) then {
 			sleep TICK;
 		} else {
 		{
@@ -177,7 +169,5 @@ if (_liveCount == 0) exitWith {
 		sleep TICK;
 	};
 	};
-	// Only drop the icons; each pile deletes itself on the disposeAfter clock set at spawn.
-	missionNamespace setVariable ["DUWS_ied_piles",
-		(missionNamespace getVariable ["DUWS_ied_piles", []]) - _piles, true];
+	// Each pile deletes itself on the disposeAfter clock set at spawn.
 };
