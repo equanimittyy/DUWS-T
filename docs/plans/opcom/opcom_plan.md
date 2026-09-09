@@ -730,11 +730,11 @@ seats bind only when the pair goes live.
 
 A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
 its routes are water-only. It is **armed by default** — the detected `*_BOAT_ARMED_*` gunboat class — so it
-both fights on the water and ferries (`transport`), not a ferry-only hull. Its class rides on the existing
-faction boat detection (the `_boat` bucket every faction parse fills), which today is exposed only on the
-BLUFOR side (`blufor_BOAT_*`); the OPFOR side needs the same role added (`opfor_BOAT_ARMED_X`, mirroring it)
-plus a `boat` row in the spawn vocabulary — a wiring of existing detection, not a new token backfill. Where
-no boat is detected the sea-ferry falls to a rotary transport. A boat classifies to a small fixed firepower
+both fights on the water and ferries (`transport`), not a ferry-only hull. The role is keyed both sides
+(`blufor_BOAT_*`, `opfor_BOAT_ARMED_X`) off the `_boat` bucket every faction parse fills, and both carry a
+vanilla stand-in in the faction schema, so a faction with no boat of its own still resolves one and OPCOM's
+sea-ferry always has a water lift. A rotary transport lifts a water leg only when no boat is free at
+borrow time, not as a no-boat fallback. A boat classifies to a small fixed firepower
 (`boat` = 2, a light presence on par with an unarmed car), so it deposits a little threat on the grid and its
 hire prices at `2 × rate` — no zero-cost carrier. This adds a `boat` bucket to the force model and a `Ship`
 branch to the classifier (`isKindOf "Ship"`, the predicate detection already uses), built with the transport.

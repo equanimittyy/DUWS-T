@@ -84,9 +84,9 @@ if (_side == "opfor") exitWith {[
     ["opfor_COVERED_TRUCK_X",      "SPECIAL",     "vehicle",    true,    "O_Truck_03_covered_F"],
     ["opfor_AMMO_TRUCK_X",         "SPECIAL",     "vehicle",    true,    "O_Truck_03_ammo_F"],
     ["opfor_REPAIR_TRUCK_X",       "SPECIAL",     "vehicle",    true,    "O_Truck_03_repair_F"],
-    // Empty default, not the CSAT boat: a faction with no detected boat fields none, so OPCOM's sea-ferry
-    // falls to a rotary rather than a stand-in hull forced onto a land force (docs/plans/opcom/opcom_plan.md).
-    ["opfor_BOAT_ARMED_X",         "SPECIAL",     "vehicle",    false,   ""]
+    // Optional so a custom-faction paste that omits it still validates -- no OPFOR file names a boat -- but a
+    // vanilla default fills an empty key, so OPCOM's sea-ferry always resolves a water lift (opcom_plan.md).
+    ["opfor_BOAT_ARMED_X",         "SPECIAL",     "vehicle",    false,   "O_Boat_Armed_01_hmg_F"]
 ]};
 
 [
