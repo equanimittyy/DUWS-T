@@ -20,6 +20,8 @@ if (DUWS_opcom_tick < (_t get "hold")) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 held until tick %2 (now %3)", _t get "id", _t get "hold", DUWS_opcom_tick]] call fnc_log; false
 };
 
+private _wasGarrison = (_t get "order") isEqualTo "garrison";
+private _hz = _t get "homeZone";
 _t set ["order", _order];
 if (_order isEqualTo "guard") then {
     _t set ["target", _t get "pos"];
@@ -33,5 +35,13 @@ if (_order isEqualTo "guard") then {
 };
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
+// Drawing a garrison unit out of its zone reserve: pull any reserve-spawned defender (it is going mobile),
+// then re-sync so the zone's reserve pool + ceiling drop by this unit. (A P4 draw-lock will refuse this while
+// the zone is contested; P3 draws by hand.)
+if (_wasGarrison && {_hz isNotEqualTo ""}) then {
+    private _tok = [_t] call DUWS_fnc_opcom_reserveToken;
+    { if ((_x getVariable ["DUWS_garrisonToken", ""]) isEqualTo _tok) then { { deleteVehicle _x } forEach units _x; deleteGroup _x } } forEach allGroups;
+    [_hz] call DUWS_fnc_opcom_zoneReserveSync;
+};
 ["INFO", "OPCOM", format ["task: tasking %1 -> %2 at %3 (%4, %5 legs)", _t get "id", _order, _t get "target", _t get "routeMode", count (_t get "route")]] call fnc_log;
 true

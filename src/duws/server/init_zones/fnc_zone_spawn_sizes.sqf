@@ -364,6 +364,9 @@ fnc_zone_spawn = {
     // the deployed groups (and any reserve that later joins them) so a deep dip pulls an immediate wave,
     // and records each wiped group's token into the ledger.
     missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _stand];
+    // OPCOM re-injects any garrison units it recruited here, which the re-derive above just wiped from the
+    // pool. A no-op when the commander recruited none, so ordinary reinforcement is unchanged.
+    if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_zoneKey] call DUWS_fnc_opcom_zoneReserveSync };
     [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
 
     // Live and mobilised: men are standing, so the capture test may judge the zone and the reserve pass

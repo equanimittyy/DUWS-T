@@ -41,5 +41,7 @@ private _t = createHashMapFromArray [
     ["carrying", -1], ["ridingOn", -1], ["embarked", false]
 ];
 DUWS_opcom_taskings pushBack _t;
+// A garrison unit joins its zone's reserve so the existing wave spawns it to defend when the zone is contested.
+if (_homeZone isNotEqualTo "") then { [_homeZone] call DUWS_fnc_opcom_zoneReserveSync };
 ["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _spawnPos, _id]] call fnc_log;
 _t

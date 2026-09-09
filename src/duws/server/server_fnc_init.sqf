@@ -360,6 +360,7 @@ fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\opcom\
 [] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_strength.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_stream.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_ferry.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_garrison.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_tasking_init.sqf";
 fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_route.sqf";
 fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\opcom\fnc_opcom_recruit.sqf";
