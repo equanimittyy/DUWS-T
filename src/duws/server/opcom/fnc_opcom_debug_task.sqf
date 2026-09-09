@@ -4,6 +4,7 @@
 //   ["menu"]                              -- list the recruit rows and their live prices
 //   ["recruit", row, pos, zoneKey]        -- hire a row at a world pos; returns the tasking id (or -1)
 //   ["task", id, order, targetPos]        -- give tasking `id` an active order to a target
+//   ["board", transportId, riderId]       -- a transport ferries an already-tasked rider to the rider's target
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
 // Example: private _id = ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
@@ -31,6 +32,20 @@ switch (_verb) do {
         } else {
             [DUWS_opcom_taskings select _i, _b, _c] call fnc_opcom_task
         };
+    };
+    case "board": {
+        private _ti = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        private _ri = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _b };
+        if (_ti < 0 || {_ri < 0}) exitWith { ["WARN", "OPCOMDBG", format ["board: unknown id %1/%2", _a, _b]] call fnc_log; false };
+        private _tr = DUWS_opcom_taskings select _ti;
+        private _rd = DUWS_opcom_taskings select _ri;
+        if (!("transport" in (_tr get "flags"))) exitWith { ["WARN", "OPCOMDBG", format ["board: tasking %1 is not transport-flagged", _a]] call fnc_log; false };
+        if ((_rd get "order") isEqualTo "garrison" || {(_rd get "target") isEqualTo []}) exitWith { ["WARN", "OPCOMDBG", "board: rider needs an active order + target first"] call fnc_log; false };
+        if ((_tr get "grp") isNotEqualTo "" || {(_rd get "grp") isNotEqualTo ""}) exitWith { ["WARN", "OPCOMDBG", "board: both units must be virtual"] call fnc_log; false };
+        _tr set ["order", "move"]; _tr set ["carrying", _b]; _tr set ["embarked", false]; _tr set ["route", []];
+        _rd set ["ridingOn", _a];
+        ["INFO", "OPCOMDBG", format ["board: transport %1 will ferry rider %2 to %3", _a, _b, _rd get "target"]] call fnc_log;
+        true
     };
     case "list": {
         ["INFO", "OPCOMDBG", format ["%1 tasking(s):", count DUWS_opcom_taskings]] call fnc_log;

@@ -83,6 +83,14 @@ DUWS_fnc_opcom_c2w = {
     [((_ci mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_ci / _w)) + 0.5) * OPCOM_GRID_CELL, 0]
 };
 
+// A tasking record by id, or nil. The ferry binds a transport to a rider by id, not by handle.
+DUWS_fnc_opcom_byId = {
+    params ["_id"];
+    private _i = DUWS_opcom_taskings findIf { (_x get "id") == _id };
+    if (_i < 0) exitWith { nil };
+    DUWS_opcom_taskings select _i
+};
+
 // Nearest navigable-water cell centre to a world point -- a boat's launch point, since it cannot rest on the
 // land zone that raised it. Falls back to the point itself on a landlocked map (which fields no boats anyway).
 DUWS_fnc_opcom_nearestWater = {

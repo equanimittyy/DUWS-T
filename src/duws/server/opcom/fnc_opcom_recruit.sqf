@@ -37,7 +37,8 @@ private _t = createHashMapFromArray [
     ["comp", _comp], ["flags", _flags],
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
-    ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone]
+    ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],
+    ["carrying", -1], ["ridingOn", -1], ["embarked", false]
 ];
 DUWS_opcom_taskings pushBack _t;
 ["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _spawnPos, _id]] call fnc_log;
