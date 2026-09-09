@@ -31,12 +31,12 @@ handles ([`info/hardpoints.md`](../../info/gameplay/hardpoints.md#why-hardpoints
 Model on `DUWS_sites` (server-local, handle-free), not `DUWS_hardpoints` (a single mixed-type,
 `publicVariable`d row array). Not broadcast — no client reads belief.
 
-| Array | Holds |
-|---|---|
-| `DUWS_opcom_belief_key` | what is believed about: a BLUFOR group's `netId`, a zone index, a FOB index, the player HQ |
-| `DUWS_opcom_belief_pos` | `[x,y,0]` as last observed, never a live lookup |
-| `DUWS_opcom_belief_time` | the tick counter at the observation |
-| `DUWS_opcom_belief_str` | believed BLUFOR firepower there ([§The quantity](#the-quantity-force-not-coverage)) — each dismounted man 1, each crewed vehicle its class power, plus `OPCOM_PLAYER_WORTH` added per human aboard, so a group carrying players weighs heavier |
+The store is four parallel arrays declared in
+[`fnc_opcom_belief_init.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_belief_init.sqf): the
+subject key (a BLUFOR group's `netId`, a zone / FOB index, or the player HQ), the last-observed position (never
+a live lookup), the observation tick, and the believed BLUFOR firepower there — the sighting strength
+`DUWS_fnc_opcom_sightStr` ([`fnc_opcom_force.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_force.sqf)),
+which weights a human aboard heavier than an AI ([§The quantity](#the-quantity-force-not-coverage)).
 
 One entry per subject, keyed by `DUWS_opcom_belief_key`; a repeat observation overwrites that entry
 rather than appending, and only when an observer is sensing the group *this tick* ([§Sensors](#sensors)),
@@ -61,7 +61,7 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 | Observation post | swept each perception tick beside the other sensors (`DUWS_fnc_hardpointOPSense`), each post rolling a per-tick chance rather than firing every tick, an OP hardpoint stamps every BLUFOR group within `OP_OBSERVE_K` Chebyshev grid cells into belief for certain — a guaranteed bubble like recon detection, not A3's fallible last-seen — keyed by group on the one sighting scale, and reports whether the post is deployed or stowed; killing the post ends the screen | one belief write per caught group per fix |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
 | Zone flip | stamps exactly and free | event-driven |
-| Recon detection | a `recon`-flagged tasking detects every BLUFOR group within `OPCOM_RECON_K` grid cells of it (Chebyshev, by platform — foot 0, car 1, heli 3) for certain and stamps it like a direct sighting, virtual or live. Unlike the sweep this is a true sensor bubble, not A3's fallible last-seen: no line-of-sight, nothing to blind it. Deploying one where belief is stale is the P4 Scout action ([§What the commander spends on](#what-the-commander-spends-on)) | a cell test per BLUFOR group per recon tasking per tick, over `allGroups` |
+| Recon detection | a `recon`-flagged tasking detects every BLUFOR group within `OPCOM_RECON_K` grid cells of it (Chebyshev, by platform) for certain and stamps it like a direct sighting, virtual or live. Unlike the sweep this is a true sensor bubble, not A3's fallible last-seen: no line-of-sight, nothing to blind it. Deploying one where belief is stale is the P4 Scout action ([§What the commander spends on](#what-the-commander-spends-on)) | a cell test per BLUFOR group per recon tasking per tick, over `allGroups` |
 
 The sighting sweep is one `nearTargets` per live OPFOR group (on its leader), bounded by `OPCOM_SENSE_RANGE`
 — no `nearEntities`, no scan over `allUnits`
@@ -83,8 +83,9 @@ strictly "not seen since", never "may already be dead".
 
 Confidence falls with the age of the stamp, counted in **ticks**, not seconds: a stamp holds the tick
 counter at observation, and `_age` is the current counter minus it. Two thresholds, in ticks like every
-OPCOM duration — `OPCOM_BELIEF_FRESH` (48 ticks, 4 min) and `OPCOM_BELIEF_EXPIRE` (192 ticks, 16 min);
-their wall-clock is the tick count times `OPCOM_TICK_PERIOD`, which is not meant to change.
+OPCOM duration — `OPCOM_BELIEF_FRESH` and `OPCOM_BELIEF_EXPIRE`
+([`server_var_init.sqf`](../../../src/duws/server/server_var_init.sqf)); their wall-clock is the tick count
+times `OPCOM_TICK_PERIOD`, which is not meant to change.
 
 | Age of stamp | Treated as |
 |---|---|
@@ -92,9 +93,10 @@ their wall-clock is the tick count times `OPCOM_TICK_PERIOD`, which is not meant
 | `OPCOM_BELIEF_FRESH` to `OPCOM_BELIEF_EXPIRE` ticks | stale — weight falls off linearly to 0, still worth acting on |
 | over `OPCOM_BELIEF_EXPIRE` ticks | expired — dropped from the array |
 
-The decay factor the influence grid scales a belief entry by is
-`((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1`
-([§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)).
+The influence grid scales a belief entry by a FRESH→EXPIRE linear-falloff factor (1 while fresh, falling to 0
+at expiry), applied at deposit
+([`fnc_opcom_grid_rebuild.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_grid_rebuild.sqf),
+[§Rebuild](#rebuild-deposit-each-source-with-a-linear-falloff)).
 
 ### What the enemy knows for free
 
@@ -115,15 +117,9 @@ contributes a combat-power value set by its engine type category (`isKindOf`), s
 rifleman. One table serves both sides — OPFOR (ours, known) and believed BLUFOR (read off a sighting) —
 and a modded faction's units classify the same way, so the metric carries no mod dependency.
 
-| Category (`isKindOf`) | Power (starter, tune) |
-|---|---|
-| Man | 1 |
-| Car — armed | 3 |
-| Car — unarmed / logistics | 0–1 |
-| Armored (APC / IFV) | 6 |
-| Tank (MBT) | 12 |
-| Helicopter | 15 |
-| Plane | 15 |
+The category→power lookup is the `OPCOM_FORCE` table, classified by `isKindOf`
+([`fnc_opcom_force.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_force.sqf)) — a tank outweighs
+a rifleman, and the one table serves both sides.
 
 A unit contributes its power **scaled by its current condition** ([§Unit strength](#unit-strength)), so a
 depleted group weighs less with no extra logic — the grid deposits `effForce` (power × condition), never
@@ -134,27 +130,26 @@ the unit the muster check and the force ratio need; the AOI field's binary cover
 ### Geometry
 
 Two flat numeric arrays, `DUWS_opcom_grid_fri` and `DUWS_opcom_grid_ene`, server-local, numbers only,
-no handles, length `_w * _w`. Never persisted; rebuilt from holdings and belief each tick, so a
+no handles, one entry per grid cell. Never persisted; rebuilt from holdings and belief each tick, so a
 restored campaign fills them on its first tick.
 
-| Quantity | Definition |
-|---|---|
-| Cell edge | `OPCOM_GRID_CELL`, 500 m |
-| Width `_w` | `ceil(worldSize / OPCOM_GRID_CELL)` — 62 against Altis (`worldSize` 30720, 3844 cells) |
-| Cell index | `_cell = _cy * _w + _cx` |
-| World to cell | `_cx = (floor (_x / OPCOM_GRID_CELL)) min (_w - 1) max 0`, same for `_cy` |
-| Cell to world centre | `[(_cx + 0.5) * OPCOM_GRID_CELL, (_cy + 0.5) * OPCOM_GRID_CELL, 0]` |
+Cell size, grid width, the cell index, and the world↔cell conversions (`DUWS_fnc_opcom_w2c` /
+`DUWS_fnc_opcom_c2w`, clamped to the active box `DUWS_opcom_box`) are defined in
+[`server_var_init.sqf`](../../../src/duws/server/server_var_init.sqf) and
+[`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf).
 
-Static per-cell arrays alongside, built once at init and never rebuilt. They classify each cell into the
-three movement domains — land, water, air — that Routing and the transport ferry read:
+Static per-cell arrays alongside, built once at init and never rebuilt
+([`fnc_opcom_grid_init.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_grid_init.sqf)). They
+classify each cell into the three movement domains — land, water, air — that Routing and the transport ferry
+read:
 
-- **Land mask** `DUWS_opcom_grid_land` — one `surfaceIsWater` at each cell centre (3844 calls, one-time). A
-  cell is passable to ground movement only where the mask reads land.
+- **Land mask** `DUWS_opcom_grid_land` — one `surfaceIsWater` per cell centre. A cell is passable to ground
+  movement only where the mask reads land.
 - **Land connectivity** `DUWS_opcom_grid_comp` — a flood-fill of the land mask labelling connected land
   components. A ground tasking is ordered only where source cell and target cell share a component, so
   the director never sends a ground squad at an island it cannot reach ([§Routing](#routing-a-cost-field-over-the-grid)).
 - **Water connectivity** `DUWS_opcom_grid_water` — a flood-fill of the *water* cells (the mask's complement),
-  each component sized. A component of at least `OPCOM_WATER_MIN_CELLS` (~10 cells) is **navigable water**: a
+  each component sized. A component of at least `OPCOM_WATER_MIN_CELLS` is **navigable water**: a
   boat is ordered only where source and target share one navigable water component, and a boat spawns on the
   nearest such body ([§Transport](#transport-carrying-a-unit-to-the-fight)). A water component below that size
   is **too small for water** — no boat works there.
@@ -165,25 +160,13 @@ three movement domains — land, water, air — that Routing and the transport f
 ### Rebuild: deposit each source with a linear falloff
 
 Zero both arrays, then deposit each force source once. A source is `[_pos, _weight, _reach]`; it adds
-to every cell whose centre lies within `_reach`:
+to every cell whose centre lies within `_reach`, discounted linearly by distance and floored at 0 on the reach
+edge. The deposit scans only the `(2k+1)` box around the source cell, clamped to the grid — never the whole
+array, never a pass over `allUnits` (`_deposit`,
+[`fnc_opcom_grid_rebuild.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_grid_rebuild.sqf)).
 
-```
-_k = ceil (_reach / OPCOM_GRID_CELL);
-// scan only the (2_k+1) box around the source cell, clamped to the grid — never the whole array,
-// never a pass over allUnits
-for "_cy" from (_scy - _k) max 0 to (_scy + _k) min (_w - 1) do {
-    for "_cx" from (_scx - _k) max 0 to (_scx + _k) min (_w - 1) do {
-        _d = _pos distance2D <cell centre>;
-        if (_d <= _reach) then {
-            _cell = _cy * _w + _cx;
-            _layer set [_cell, (_layer select _cell) + _weight * (1 - _d / _reach)];
-        };
-    };
-};
-```
-
-Falloff is linear and floors at 0 on the reach edge. Footprints are small — this is a force field, not
-the AOI coverage projection, so a source spreads ~1 km (`OPCOM_GRID_SPREAD`, 2 cells), never the 2–5 km
+Footprints are small — this is a force field, not
+the AOI coverage projection, so a source spreads a little (`OPCOM_GRID_SPREAD`), never the 2–5 km
 AOI reaches. That spread bleeds force across cell boundaries, so a unit just outside a read footprint
 still counts, fading with distance — the read box does not need a hard edge.
 
@@ -193,33 +176,17 @@ weight and neighbours fall off from there; overlapping sources sum, so a cell ca
 weight. Every read is a sum over a block ([§What reads it](#what-reads-it)), never one cell against a
 headcount — so the debug overlay's per-cell figure is the field value at that cell, not the emitter's men.
 
-**Friendly layer** (`DUWS_opcom_grid_fri`) — OPFOR force, known exactly, no belief scaling. Weight is
-category-power ([§The quantity](#the-quantity-force-not-coverage)) summed over the source, condition-scaled
-where the source is a unit:
+The **friendly layer** (`DUWS_opcom_grid_fri`) is OPFOR force, known exactly, no belief scaling: every
+OPFOR-held zone and town garrison, every hardpoint, and each `garrison`/`guard`/tasking unit at its stored or
+live position, weighted by category-power ([§The quantity](#the-quantity-force-not-coverage)) and
+condition-scaled where the source is a unit. Fortify raises a zone's deposit; recruits do not.
 
-| Source | Position | Weight | Reach |
-|---|---|---|---|
-| OPFOR-held zone, base garrison | `zone_meta_array` pos (`select 1`) | base-tier composition force (Fortify raises this; recruits do not) | zone size (`select 2`) + `OPCOM_GRID_SPREAD` |
-| Banded town garrison | `civ_locations` | `DUWS_townGarrisonTier` composition force | `civ_radii` + `OPCOM_GRID_SPREAD` |
-| OPFOR hardpoint | `DUWS_hardpoints` pos (`select 1`) | its crew / weapon power | `OPCOM_GRID_SPREAD` |
-| OPFOR unit (`garrison` / `guard` / tasking) | its world position — stored (virtual) or live | its `effForce` ([§Unit strength](#unit-strength)) | `OPCOM_GRID_SPREAD` |
+The **enemy layer** (`DUWS_opcom_grid_ene`) is believed BLUFOR force: each BLU-held zone (a fixed nominal where
+no garrison force is known) and each belief entry, scaled by its decay factor. A belief entry covers a sighted
+player, a discovered HQ and a discovered FOB alike; an expired entry is already dropped, so it never deposits.
 
-**Enemy layer** (`DUWS_opcom_grid_ene`) — believed BLUFOR force:
-
-| Source | Position | Weight | Reach |
-|---|---|---|---|
-| BLU-held zone | zone pos | its known garrison force, nominal where none exists | zone size + `OPCOM_GRID_SPREAD` |
-| Belief entry | `DUWS_opcom_belief_pos` | `DUWS_opcom_belief_str` × decay factor | `OPCOM_GRID_SPREAD` |
-
-A belief entry covers a sighted player, a discovered HQ and a discovered FOB alike. The decay factor
-is `((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1` with `_age`
-in ticks — 1 under `OPCOM_BELIEF_FRESH`, falling to 0 at `OPCOM_BELIEF_EXPIRE` ([§Decay](#decay)); an
-expired entry is already dropped from the arrays, so it never deposits.
-
-| Constant | Value |
-|---|---|
-| `OPCOM_GRID_CELL` | 500 m |
-| `OPCOM_GRID_SPREAD` | 1 km (2 cells) — force-projection footprint, added to a zone/town radius |
+The source list, per-source reach, and the nominal-BLU-zone deposit all live in
+[`fnc_opcom_grid_rebuild.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_grid_rebuild.sqf).
 
 ### What reads it
 
@@ -238,20 +205,16 @@ expired entry is already dropped from the arrays, so it never deposits.
 
 Routing branches on movement type. A **wheeled or tracked** tasking routes on roads (below); an **infantry,
 air or boat** tasking follows a **cell chain** produced by a shortest-path search over the grid, walking
-its cell centres in world space ([§One nominal speed](#one-nominal-speed-per-unit-type)); search cost
-per step:
+its cell centres in world space ([§One nominal speed](#one-nominal-speed-per-unit-type)). The per-step cost is
+the step length plus `OPCOM_ROUTE_LAMBDA · λ · gridEne` at the cell — distance biased away from believed enemy
+force ([`fnc_opcom_route.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_route.sqf)).
 
-```
-cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne select _cell)
-```
-
-- `stepLen` is `OPCOM_GRID_CELL` orthogonally, `OPCOM_GRID_CELL * sqrt 2` on a diagonal — 8-neighbour
-  steps. Passability is by domain ([§Geometry](#geometry)): **infantry** routes over land cells only (water
-  impassable); a **boat** routes over navigable-water cells only, staying inside one water component; **air**
-  treats every cell passable, over all three domains.
+- Steps are 8-neighbour. Passability is by domain ([§Geometry](#geometry)): **infantry** routes over land cells
+  only (water impassable); a **boat** routes over navigable-water cells only, staying inside one water
+  component; **air** treats every cell passable, over all three domains.
 - `_lambda` is **0 for a direct route** (rapport and the Assault template — distance only,
   ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
-  believed enemy force). The search is A\* (octile heuristic, admissible at any `λ ≥ 0`); at 3844 nodes it is cheap, but **not inside the `isNil`
+  believed enemy force). The search is A\* (octile heuristic, admissible at any `λ ≥ 0`); at grid scale it is cheap, but **not inside the `isNil`
   scoring block** — run it scheduled or on its own bounded pass.
 - **When λ=1 is used**: the band picked the Flank or Encircle template
   ([§Templates](#templates-the-execution-forms)), and a lower-cost detour around believed enemy force
@@ -415,7 +378,7 @@ carrier when the fight is across water — and stops when nothing is short.
 
 **Scout — worth at stake × staleness.** Only a recon-flagged unit can Scout. The reveal is not a Scout-only
 phase but the recon flag's standing detection ([§Sensors](#sensors)): a guaranteed bubble set by platform
-(`OPCOM_RECON_K` Chebyshev cells — foot 0, car 1, heli 3) that each tick stamps fresh belief for every
+(`OPCOM_RECON_K` Chebyshev cells) that each tick stamps fresh belief for every
 BLUFOR inside it, no line-of-sight, virtual or live. Scout adds no sensor — it routes that standing bubble
 through stale valuable ground, buying perception where OPCOM has no observer. A route's Value is `Σ` over the cells its
 footprint sweeps of `cell worth × staleness`, where `cell worth = max(offensive, defensive)`: offensive is
@@ -481,7 +444,7 @@ whenever anything sensible is affordable and winning when everything else has sa
 ## Commitment: intents are sticky
 
 A chosen action becomes an intent record and stays one until it completes, dies, or is re-tasked.
-The commit **hold** — `OPCOM_COMMIT_HOLD`, one global span of **6 ticks (30 s)** before OPCOM may re-issue
+The commit **hold** — `OPCOM_COMMIT_HOLD`, one global span before OPCOM may re-issue
 that unit's order — steadies a commitment against the fast re-score; it is an anti-flap lock, not a deadline
 the tasking must succeed within. The hold is **absolute** (KISS): a committed unit is held the full span no
 matter what, with no early-abandon escape hatch, so a target that dies mid-hold is simply re-evaluated once
@@ -499,7 +462,7 @@ virtual march, never under a spawned group.
 | target | the objective — a registry index (zone, town) or a cell |
 | roles | `[role, unitRef, status]` bindings drawn from the roster: one for a simple tasking, several for a multi-unit template, none for an economic action |
 | phase | index into the template's phase list ([§Templates](#templates-the-execution-forms)) |
-| hold | `DUWS_opcom_tick` at commit plus `OPCOM_COMMIT_HOLD` (6 ticks) — earliest tick OPCOM may re-issue this unit's order; a global anti-flap lock, not a success deadline |
+| hold | `DUWS_opcom_tick` at commit plus `OPCOM_COMMIT_HOLD` — earliest tick OPCOM may re-issue this unit's order; a global anti-flap lock, not a success deadline |
 | state | mustering / ordered / in progress / done |
 
 A released unit is one whose intent has completed; that ownership state is what the reinforcement logic
@@ -533,21 +496,19 @@ Recruit — rather than committing understrength.
 
 Each unit carries two orthogonal fields:
 
-- **Tasking** — its standing order: `garrison` (default on spawn — zone-bound reinforcement),
-  `guard` (idle hold-anywhere, takes up space), `assault`, `rapport`, `move`,
-  or a template role. `garrison` and `guard` are the two resting taskings; the rest are active.
-- **Status** — how the current tasking is going, read per live group each tick:
+- **Tasking** — its standing order (the `order` values in
+  [`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf),
+  applied on spawn by `DUWS_fnc_opcom_applyOrder`,
+  [`fnc_opcom_stream.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_stream.sqf)). `garrison`
+  (zone-bound reinforcement, the spawn default) and `guard` (idle hold-anywhere) are the two resting taskings;
+  the rest are active.
+- **Status** — how the current tasking is going: `virtual` (owns no live group yet — a cell on a route),
+  `moving`, `engaged`, or `dead`, read per live group each tick off `behaviour` / `knowsAbout` / unit count
+  ([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)).
 
-| Status | Read |
-|---|---|
-| `virtual` | intent owns no live group yet — still a cell on a route |
-| `moving` | live, no contact — `behaviour` SAFE/AWARE, low `knowsAbout` |
-| `engaged` | live and in combat — `behaviour leader _g == "COMBAT"`, or `leader _g knowsAbout <nearest player> > 1.5` (the sighting threshold) |
-| `dead` | `count units _g == 0` |
-
-Cheap: a handful of live groups, one `behaviour`/`knowsAbout` read each, alongside the streaming check
-that already runs each tick. A virtualised tasking is `virtual` by definition — no read. Coordinated moves and the
-reinforcement logic key off both fields.
+Cheap: a handful of live groups, one read each, alongside the streaming check that already runs each tick. A
+virtualised tasking is `virtual` by definition — no read. Coordinated moves and the reinforcement logic key off
+both fields.
 
 Numbers and strings only. The hold counts in ticks off the shared `DUWS_opcom_tick` counter — the one
 clock belief also ages on — never `time` or `diag_tickTime`. One clock means the commitment code never
@@ -561,18 +522,9 @@ Each tasking unit carries a strength figure, computed and saved the way a zone's
 helpers (`fnc_zone_strength`, `DUWS_fnc_garrisonStrength`, `DUWS_fnc_garrisonUnlose`), never a parallel
 store.
 
-```
-fullForce = Σ elementPower                     // the hired composition, fixed
-effForce  = Σ elementPower × condition          // current
-strength  = effForce / fullForce                // 0..1
-```
-
-Condition per element:
-
-| Element | Condition |
-|---|---|
-| Infantry | alive (1) or dead (0) — unit count falls out of the sum |
-| Vehicle | `1 − damage`; crew is never counted (a lost crew refills) |
+`fullForce` (the hired composition, fixed), `effForce` (power × current condition — infantry by alive count, a
+vehicle by `1 − damage`, crew never counted) and `strength` (`effForce / fullForce`, 0..1) are computed in
+[`fnc_opcom_strength.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_strength.sqf).
 
 `effForce` is what the grid deposits ([§The quantity](#the-quantity-force-not-coverage)), so a shot-up
 group already weighs less in `r` with no extra logic; `strength` is the normalised figure for display,
@@ -580,9 +532,10 @@ heal targets and persistence. Streaming spawns a group to *match* its stored str
 damaged vehicle), and re-virtualising recomputes `effForce` from the live group before it despawns
 ([§The virtualisation boundary](#the-virtualisation-boundary)).
 
-**`garrison` heals.** A unit in `garrison` regenerates `effForce` toward `fullForce` each tick —
-`effForce = min(fullForce, effForce + OPCOM_GARRISON_HEAL_RATE × fullForce)` — mirroring the zone
-reinforce path. `guard` does not heal; it only holds ground. The rate is the sole knob (start value open,
+**`garrison` heals.** A unit in `garrison` regenerates `effForce` toward `fullForce` each tick at
+`OPCOM_GARRISON_HEAL_RATE`
+([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)),
+mirroring the zone reinforce path. `guard` does not heal; it only holds ground. The rate is the sole knob (start value open,
 [§Open questions](#open-questions)); the per-tick mechanism ships from the start.
 
 A zone's effective strength is its base garrison (the tier composition, which Fortify raises and Reinforce
@@ -594,9 +547,10 @@ through the existing garrison-reserve wave (`fnc_garrison_reserve`) when the zon
 draws it back out of the pool to task it offensively. Massing force is stacking recruits on a valuable zone,
 then pulling them together for an attack ([§Commitment](#commitment-intents-are-sticky)).
 
-**Combatant and non-combatant.** A recruited unit is a *combatant* by default. Four rows — `boat`,
-`trans_heli`, `truck`, `recon_heli` — are *non-combatants*, marked by a `noncombat` flag on their recruit-menu rows
-([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)). Non-combatant is a
+**Combatant and non-combatant.** A recruited unit is a *combatant* by default; the `noncombat`-flagged rows of
+`DUWS_opcom_recruitMenu`
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)) are
+*non-combatants*. Non-combatant is a
 garrison-defence classification, not a claim about armament: it means the unit never joins a zone's defence, not
 that it has no gun — a `boat` is an armed gunboat yet a non-combatant. This is a separate
 axis from the `transport` flag, which marks lift capacity — an `apc`/`ifv` is transport-flagged yet a
@@ -630,17 +584,11 @@ Model arrival only — which cell the squad is in and when it crosses the stream
 road versus open ground unmodelled, given as **ticks per cell** and tuned for play, not realism: the true
 spread (a jet outruns a foot soldier ~80×) is compressed so the virtual layer neither crawls nor teleports.
 
-| Unit type | Water | Ticks per cell | ≈ per cell |
-|---|---|---|---|
-| Infantry | impassable | 15 | 75 s |
-| Wheeled | impassable | 4 | 20 s |
-| Tracked | impassable | 8 | 40 s |
-| Rotary | passable | 2 | 10 s |
-| Fixed wing | passable | 0.5 | 2.5 s |
-| Boat | water only (land impassable) | 4 | 20 s |
+The per-type ticks-per-cell and the per-type water rule are `DUWS_opcom_speed` / `DUWS_opcom_moveWater`
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)).
 
 **World-stepped along the route chain.** Each type's ticks-per-cell is a world rate,
-`stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick (infantry ≈33 m, a fixed-wing 1000 m). Each tick the
+`stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick. Each tick the
 tasking advances its world point that far toward the next **waypoint** on its route chain — a cell centre
 on a grid route, a road node on a convoy route ([§Routing](#routing-a-cost-field-over-the-grid)) — then aims
 at the one after. On a grid route a diagonal needs no special case; the longer world distance to a corner
@@ -680,43 +628,17 @@ blind spot applies to recon detection ([§Sensors](#sensors)). Accepted rather t
 fix, if it bites in play, is a larger K against airborne players (precedent: the AA hardpoint's 5000 m air
 ring), tuned then.
 
-| Unit type | K | ≈ real |
-|---|---|---|
-| Infantry | 1 | 500 m orthogonal, ~700 m diagonal |
-| Wheeled | 2 | ~1–1.4 km |
-| Tracked | 2 | ~1–1.4 km |
-| Rotary | 4 | ~2–2.8 km |
-| Fixed wing | 8 | ~4–5.5 km |
-| Boat | 2 | ~1–1.4 km |
+K per move type is `DUWS_opcom_streamK`
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf)).
 
 **Hysteresis.** A live group stows back to a cell once it has held `> K + 1` cells from every player **and
-no live contact** for `OPCOM_REVIRT_GRACE` consecutive ticks. The cell of margin alone cannot stop a fast
+no live contact** for `OPCOM_REVIRT_GRACE` consecutive ticks
+([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)). The cell of margin alone cannot stop a fast
 flyover crossing the band in a single tick, so the stow waits out a debounce that any re-entry or contact
 resets. A group in a firefight stays live until it resolves, whether or not a player is near.
 
 The boundary is a square ring in cell space, so a tasking on the diagonal streams in ~1.4x further than
 orthogonally — acceptable for spawn-before-contact.
-
-### Streaming spawns at the world point
-
-OPCOM raises its own live groups through a bespoke spawn (`DUWS_fnc_opcom_spawnComp`), not the zone
-spawner. A tasking de-virtualises at its stored world point *exactly* — the point the virtual march
-reached — because a stowed unit has to reappear where it stood, not where a fresh garrison would be
-scattered. A team and a ground vehicle already place on that point; the divergence is air, and it is the
-reason OPCOM owns the spawn rather than borrowing the zone spawner.
-
-**Air spawns flying at the point, never grounded.** It enters at `OPCOM_AIR_SPAWN_ALT` (~150 m) with the
-engine running, at the tasking's world point. It does **not** use the zone spawner's air entry — a random
-2–5 km bearing flying in from off the map. That entry is right for a zone patrol *arriving* from nowhere
-and wrong for a stowed helicopter *resuming* at its tracked point: the off-map entry drops it kilometres
-from where OPCOM believes it is, and the entry point can itself fall off the map, where the engine builds
-the hull but no group and orphans it. Re-virtualisation banks a helicopter's world point (`x,y` only);
-de-virtualisation discards any stored altitude and re-enters at `OPCOM_AIR_SPAWN_ALT`, so a helicopter
-neither creeps up nor sinks across stow/spawn cycles.
-
-**A spawn that cannot be raised leaves nothing behind.** If a composition's class cannot be fielded, the
-spawn raises no half-built group and deletes any hull the engine created before it failed; the tasking
-stays virtual and retries on the next contact, the same as a virtual march with nowhere to stream.
 
 ### Spawn posture follows the order
 
@@ -725,12 +647,10 @@ at spawn, not a tick later. OPCOM does not steer it after that — a spawned gro
 it re-virtualises ([§Commitment](#commitment-intents-are-sticky)), so the spawned order has to carry the
 whole intent on its own.
 
-| Tasking | A3 order |
-|---|---|
-| Assault (Attack / Intercept) | Seek & Destroy on the target point, `AWARE` |
-| Supply (Rapport, and a Build / town Reinforce / town Fortify truck) | move to the target cell in `SAFE`; on arrival delete the unit and fire the tasking's success |
-| Move / reposition | move to the cell in `SAFE` / `AWARE`; on arrival settle to `guard` and hold the point |
-| Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
+The A3 order per tasking — Seek & Destroy for an assault, a `SAFE` move that self-deletes and fires success for
+a supply run, a move-then-settle-to-`guard` for a reposition, a `SAFE` hold for a guard — is set by
+`DUWS_fnc_opcom_applyOrder`
+([`fnc_opcom_stream.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_stream.sqf)).
 
 A `recon`-flagged unit needs no scout order: its detection is a standing sensor ([§Sensors](#sensors)) that
 fires whatever the unit's order, so OPCOM points it at stale ground with a plain **Move** and the reveal
@@ -763,9 +683,10 @@ serve another unit's crossing. A transport running a directed order (a `move`, a
 a target) is a role unit, its order preserved and no rider preempting it. Two further protected states stay
 protected: already `carrying`, or garrisoned in a **contested** (locked) zone.
 
-**The borrow pool** is every tasking that is virtual (not live), `transport`-flagged and of a move type that can
-cross the leg — a boat, or a rotary transport where no boat is free (a wheeled or tracked transport is never
-water-compatible), not already `carrying`, and **idle**: on `guard`, or `garrison` in an uncontested zone. The
+**The borrow pool** is the idle, water-compatible transports — a virtual `transport` hull on `guard` or in an
+uncontested `garrison`, not already `carrying`, preferring a boat and falling back to a rotary
+(`DUWS_fnc_opcom_ferryPool`,
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). The
 idle gate is the commitment this makes: a ferry never breaks a standing order. Borrowing costs a zone no
 defender — a ferry-capable transport is a non-combatant ([§Unit strength](#unit-strength)), never enrolled in a
 zone's reserve wave, so the borrow needs no reserve draw-out and is a plain re-task.
@@ -831,17 +752,16 @@ a dry leg's pool admits the land transports the water gate excludes (`wheeled` a
 serving either domain). Phase 3 drives none of it; the water ferry is the only lift it exercises.
 
 A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
-its routes are water-only. It is **armed by default** — the detected `*_BOAT_ARMED_*` gunboat class — so it
-both fights on the water and ferries (`transport`), not a ferry-only hull. The role is keyed both sides
-(`blufor_BOAT_*`, `opfor_BOAT_ARMED_X`) off the `_boat` bucket every faction parse fills, and both carry a
-vanilla stand-in in the faction schema, so a faction with no boat of its own still resolves one and OPCOM's
-sea-ferry always has a water lift. A rotary transport lifts a water leg only when no boat is free at
-borrow time, not as a no-boat fallback. A boat classifies to a small fixed firepower
-(`boat` = 2, a light presence on par with an unarmed car), so it deposits a little threat on the grid and its
-hire prices at `2 × rate` — no zero-cost carrier. This adds a `boat` bucket to the force model and a `Ship`
-branch to the classifier (`isKindOf "Ship"`, the predicate detection already uses), built with the transport.
-A boat spawns on the nearest **navigable** water body ([§Geometry](#geometry)) — never on a sub-threshold
-puddle or dry ground.
+its routes are water-only. It is **armed by default** — a detected gunboat class — so it both fights on the
+water and ferries (`transport`), not a ferry-only hull. The role is keyed both sides off the `_boat` bucket
+every faction parse fills, and both carry a vanilla stand-in in the faction schema, so a faction with no boat of
+its own still resolves one and OPCOM's sea-ferry always has a water lift. A rotary transport lifts a water leg
+only when no boat is free at borrow time, not as a no-boat fallback. A boat classifies through the `Ship` branch
+of the detector
+([`fn_factionAutoDetect.sqf`](../../../src/duws/shared/factions/MODERN/fn_factionAutoDetect.sqf)) to the `boat`
+bucket of the force model (`OPCOM_FORCE`), a small fixed firepower that also prices its hire like any row — no
+zero-cost carrier. A boat spawns on the nearest **navigable** water body ([§Geometry](#geometry)) — never on a
+sub-threshold puddle or dry ground.
 
 ## Templates: the execution forms
 
@@ -1050,28 +970,17 @@ budget ([§The virtualisation boundary](#the-virtualisation-boundary)).
 — no posture prefix, so each resolves to the `none` posture and the recruited unit takes its orders from
 OPCOM rather than a standing circuit ([§Spawn posture](#spawn-posture-follows-the-order)).
 
-| Row | Composition | Flags |
-|---|---|---|
-| rifles | `["squad"]` | — |
-| weapons team | `["wp_team"]` | — |
-| APC | `["apc"]` | `transport` |
-| IFV | `["ifv"]` | `transport` |
-| MBT | `["tank"]` | — |
-| attack helicopter | `["attackheli"]` | — |
-| recon (foot) | `["recon"]` | `recon` |
-| recon (car) | `["car"]` | `recon` |
-| recon (heli) | `["transheli"]` | `recon`, `noncombat` |
-| truck | `["truck"]` | `supply`, `transport`, `noncombat` |
-| transport helicopter | `["transheli"]` | `transport`, `noncombat` |
-| boat | `["boat"]` | `transport`, `noncombat` |
+The rows — each an id, a bare-token composition, and its capability flags — live in
+[`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf).
 
-The three `recon` rows differ only by platform, which sets its recon detection reach (`OPCOM_RECON_K` grid
+The `recon` rows differ only by platform, which sets its recon detection reach (`OPCOM_RECON_K` grid
 cells, [§Sensors](#sensors)) — OPCOM buys the reach it needs. The vocabulary has no
 dedicated scout helicopter, so `recon (heli)` and the transport helicopter share the one `transheli`
 platform, told apart by their flag.
 
-**Price is force, not a per-row number.** A hire costs `ceil(force × OPCOM_AP_PER_FORCE)` — the
-composition's firepower ([§The quantity](#the-quantity-force-not-coverage)) times the one force→AP rate — so
+**Price is force, not a per-row number.** A hire is priced from the composition's firepower
+([§The quantity](#the-quantity-force-not-coverage)) times the one force→AP rate `OPCOM_AP_PER_FORCE`
+([`fnc_opcom_recruit.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_recruit.sqf)) — so
 a tank costs several times a rifle section and no price can drift out of step with what a unit is worth.
 That rate is the single force↔AP knob and also prices commit `Cost` and Arty's kill Value
 ([§Cost](#cost-what-an-action-stakes)), so the menu carries no price column.
@@ -1081,7 +990,7 @@ hired to win a fight and nothing more; a flagged row also unlocks an action. `re
 to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)), `supply` to Rapport,
 `transport` to carry another unit ([§Transport](#transport-carrying-a-unit-to-the-fight)); a row may carry
 several, as the truck both couriers and ferries and a carrier (APC or IFV) fights while ferrying a section.
-`noncombat` marks the non-defender rows (boat, both helis, truck) — kept out of a zone's reserve wave so they
+`noncombat` marks the non-defender rows — kept out of a zone's reserve wave so they
 never spawn to defend (regardless of armament: the boat is armed), and cleared when the zone falls
 ([§Unit strength](#unit-strength)).
 Recruit scores one candidate per demand group — force,
@@ -1441,9 +1350,9 @@ store, never on `time` or the process-relative `diag_tickTime`
 ([`info/arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
 Whether the belief store persists is open ([§Open questions](#open-questions)); it is shaped to
-serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Either
-way `fnc_opcom_belief_init` declares each array and the tick counter **init-if-nil** — only where unset,
-never unconditionally — so a restore that fed the store back before the loop starts is not wiped, and a
+serialise, so a restored campaign that omits the key rebuilds belief from its first sensor pass. Persisting it
+will require `fnc_opcom_belief_init` to initialise each array and the tick counter **init-if-nil** — only where
+unset, never unconditionally — so a restore that fed the store back before the loop starts is not wiped, and a
 loop restart cannot zero live belief. Belief
 ages in ticks ([§Decay](#decay)), so the tick counter persists with the store when it does —
 omit both and a restore starts the counter at 0 against freshly stamped belief, no stale ages. The
