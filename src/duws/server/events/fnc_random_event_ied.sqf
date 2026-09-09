@@ -94,7 +94,7 @@ private _piles = [];
 			"(_target getVariable ['DUWS_ied_active', false]) && {_target distance player < 4}",
 			"(_target getVariable ['DUWS_ied_active', false])",
 			{}, {},
-			{ params ["_pile"]; [_pile] remoteExec ["fnc_random_event_ied_defuse", 2]; },
+			{ params ["_pile", "_caller"]; [_pile, _caller] remoteExec ["fnc_random_event_ied_defuse", 2]; },
 			{}, [], ([0, 6] select _live), 0, true, false
 		];
 		// Every interface (the SP/listen host included), but not a dedicated server that has none;
