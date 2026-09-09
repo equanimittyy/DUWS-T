@@ -128,8 +128,8 @@ fnc_furnish_grid = {
                 private _ly = _oy + (_j + 0.5) * _pitch;
                 private _guessASL = AGLToASL (_building modelToWorld [_lx, _ly, _floorZ]);
 
-                // Floor down-ray (GEOM, building un-ignored): a hit near the plane is real floor, and its
-                // Z snaps the cell exactly onto the floor. A miss is a hole or outside the room -- drop it.
+                // Floor down-ray (GEOM, building un-ignored): a hit near the plane is real floor and samples
+                // its Z (flattened to one plane per storey below). A miss is a hole or outside the room -- drop it.
                 private _fb = _guessASL vectorAdd [0, 0, 0.5];
                 private _fe = _guessASL vectorAdd [0, 0, -0.8];
                 _rays = _rays + 1;
@@ -173,6 +173,18 @@ fnc_furnish_grid = {
             };
         };
     } forEach _storeys;
+
+    // One floor Z per storey: a floor is level, so collapse the per-cell down-ray Z (wobbles a cm or two,
+    // catches the odd sill) to the storey median -- a single plane is what the settle Z-gate checks against.
+    private _zByStorey = createHashMap;
+    { private _s = _x select 8; _zByStorey set [_s, (_zByStorey getOrDefault [_s, []]) + [(_x select 0) select 2]] } forEach _cells;
+    private _floorZof = createHashMap;
+    {
+        private _zs2 = _zByStorey get _x;
+        _zs2 sort true;
+        _floorZof set [_x, _zs2 select (floor (count _zs2 / 2))];
+    } forEach (keys _zByStorey);
+    { private _p = _x select 0; _x set [0, [_p select 0, _p select 1, _floorZof get (_x select 8)]] } forEach _cells;
 
     // Doorways blocked, not skipped: a bare "door" cell still let a piece in an adjacent open cell overhang
     // the opening. Blocking splits the rooms at the gap; reserving the neighbours keeps a piece off the mouth.
