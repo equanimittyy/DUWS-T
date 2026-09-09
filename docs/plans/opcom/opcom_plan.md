@@ -15,7 +15,7 @@ Three layers, one thread.
 |---|---|---|
 | **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per BLUFOR group |
 | **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
-| **Commitment** | Turns a choice into an intent with a minimum lifetime and an owner. Re-scoring fills free capacity and may abandon a still-virtual intent whose ROI has collapsed, but never one whose units are in contact | Between ticks |
+| **Commitment** | Turns a choice into an intent with an absolute minimum lifetime and an owner. Re-scoring fills free capacity but cannot re-task a unit until its hold expires, and a de-virtualised unit is out of reach until it re-virtualises | Between ticks |
 
 ## Perception: the commander plans against belief, never against truth
 
@@ -145,13 +145,22 @@ restored campaign fills them on its first tick.
 | World to cell | `_cx = (floor (_x / OPCOM_GRID_CELL)) min (_w - 1) max 0`, same for `_cy` |
 | Cell to world centre | `[(_cx + 0.5) * OPCOM_GRID_CELL, (_cy + 0.5) * OPCOM_GRID_CELL, 0]` |
 
-Two static per-cell arrays alongside, built once at init and never rebuilt:
+Static per-cell arrays alongside, built once at init and never rebuilt. They classify each cell into the
+three movement domains — land, water, air — that Routing and the transport ferry read:
 
 - **Land mask** `DUWS_opcom_grid_land` — one `surfaceIsWater` at each cell centre (3844 calls, one-time). A
   cell is passable to ground movement only where the mask reads land.
-- **Connectivity** `DUWS_opcom_grid_comp` — a flood-fill of the land mask labelling connected land
+- **Land connectivity** `DUWS_opcom_grid_comp` — a flood-fill of the land mask labelling connected land
   components. A ground tasking is ordered only where source cell and target cell share a component, so
   the director never sends a ground squad at an island it cannot reach ([§Routing](#routing-a-cost-field-over-the-grid)).
+- **Water connectivity** `DUWS_opcom_grid_water` — a flood-fill of the *water* cells (the mask's complement),
+  each component sized. A component of at least `OPCOM_WATER_MIN_CELLS` (~10 cells) is **navigable water**: a
+  boat is ordered only where source and target share one navigable water component, and a boat spawns on the
+  nearest such body ([§Transport](#transport-carrying-a-unit-to-the-fight)). A water component below that size
+  is **too small for water** — no boat works there.
+- **Air** needs no array. A rotary or fixed-wing tasking treats every cell passable and flies over all three
+  domains alike — land, navigable water, and the sub-threshold water that only air can cross. So a strait too
+  small for a boat is bridged by an air ferry, not a boat.
 
 ### Rebuild: deposit each source with a linear falloff
 
@@ -237,8 +246,9 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
 ```
 
 - `stepLen` is `OPCOM_GRID_CELL` orthogonally, `OPCOM_GRID_CELL * sqrt 2` on a diagonal — 8-neighbour
-  steps. Water cells (land mask false) are impassable to infantry — the only ground type still on the grid
-  field — while air and boat treat every cell passable.
+  steps. Passability is by domain ([§Geometry](#geometry)): **infantry** routes over land cells only (water
+  impassable); a **boat** routes over navigable-water cells only, staying inside one water component; **air**
+  treats every cell passable, over all three domains.
 - `_lambda` is **0 for a direct route** (rapport, scout, the Assault template — distance only,
   ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
   believed enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
@@ -473,13 +483,11 @@ whenever anything sensible is affordable and winning when everything else has sa
 A chosen action becomes an intent record and stays one until it completes, dies, or is re-tasked.
 The commit **hold** — `OPCOM_COMMIT_HOLD`, one global span of **6 ticks (30 s)** before OPCOM may re-issue
 that unit's order — steadies a commitment against the fast re-score; it is an anti-flap lock, not a deadline
-the tasking must succeed within. One number covers every active tasking: per-unit march cost already lives
-in movement speed ([§One nominal speed](#one-nominal-speed-per-unit-type)) and an urgent abandon in the
-hysteresis gap below, so the hold need only damp same-value flapping. Resting `garrison` and `guard`
-taskings are unheld — hold 0, freely drawable. Re-scoring next tick fills free capacity and may re-task a unit whose hold has passed. It may also
-**abandon a still-virtual intent** — recall its units to the roster — before the hold is up, but only when
-the target's ROI has fallen *well below* the commit bar; the hysteresis gap (`OPCOM_COMMIT_HYSTERESIS`,
-[§Open questions](#open-questions)) stops a small wobble sending columns marching back and forth. Once a
+the tasking must succeed within. The hold is **absolute** (KISS): a committed unit is held the full span no
+matter what, with no early-abandon escape hatch, so a target that dies mid-hold is simply re-evaluated once
+the hold expires. One number covers every active tasking. Resting `garrison` and `guard` taskings are unheld
+— hold 0, freely drawable. Re-scoring next tick fills free capacity and may re-task a unit only once its hold
+has passed. Once a
 tasking's units **de-virtualise** — spawn as a live A3 group — OPCOM can no longer steer them: they run
 their spawned order ([§Spawn posture](#spawn-posture-follows-the-order)) and control returns only when they
 re-virtualise ([§The virtualisation boundary](#the-virtualisation-boundary)). The world can shift under a
@@ -578,15 +586,18 @@ reinforce path. `guard` does not heal; it only holds ground. The rate is the sol
 [§Open questions](#open-questions)); the per-tick mechanism ships from the start.
 
 A zone's effective strength is its base garrison (the tier composition, which Fortify raises and Reinforce
-refills) plus **at most one** `garrison`ed tasking unit, held in a **distinct** slot — so tasking that unit
-out subtracts its `effForce` cleanly and Fortify never touches it. The slot caps at one: Recruit targets a
-zone whose slot is *free*, so massing force means one recruit per zone across several zones, then pulling
-them together at a muster ([§Commitment](#commitment-intents-are-sticky)), not stacking a stack on one zone.
+refills) plus its `garrison`ed tasking units. OPCOM may recruit **more than one** into a zone; each is
+OPCOM-tracked — its own `effForce`, drawable for an offensive — but distinct from the base tier garrison, so
+tasking one out subtracts its `effForce` cleanly and Fortify never touches it. A recruited unit **feeds the
+zone's garrison reserve** ([§Actions](#actions-sinks-and-taskings)): while it rests there it spawns to defend
+through the existing garrison-reserve wave (`fnc_garrison_reserve`) when the zone is contested, and OPCOM
+draws it back out of the pool to task it offensively. Massing force is stacking recruits on a valuable zone,
+then pulling them together for an attack ([§Commitment](#commitment-intents-are-sticky)).
 
-A zone **under attack** locks that slot. While its garrison holds live contact with a BLUFOR force, its
-`garrison`ed unit is not a unit any offensive may draw — a contested zone's reserve can only feed its own
-defence, never be stripped to mount an attack elsewhere while the player is pressing it. The lock lifts when
-contact clears and the zone re-virtualises.
+A zone **under attack** locks its recruited garrison units. While its garrison holds live contact with a
+BLUFOR force, none of its `garrison`ed units is one any offensive may draw — a contested zone's reserve can
+only feed its own defence, never be stripped to mount an attack elsewhere while the player is pressing it.
+The lock lifts when contact clears and the zone re-virtualises.
 
 ## Movement: a tasking is virtualised until contact
 
@@ -681,23 +692,26 @@ whole intent on its own.
 | Move / reposition | move to the cell in `SAFE` / `AWARE` |
 | Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
 
-`garrison` and Recruit issue no standing order: a recruited unit joins its zone garrison's reinforcement
-pool ([§Unit strength](#unit-strength)) virtually, and takes an order only when its zone de-virtualises and
-it spawns to defend through the existing posture circuit, or when OPCOM later tasks it for one of the rows
-above.
+`garrison` and Recruit issue no standing order: a recruited unit joins its zone's garrison reserve
+([§Unit strength](#unit-strength)) virtually, and takes an order only when the zone is contested and it
+spawns to defend through the existing garrison-reserve wave, or when OPCOM draws it back out to task it for
+one of the rows above.
 
 ### Transport: carrying a unit to the fight
 
 A `transport`-flagged unit ([§What the commander spends on](#what-the-commander-spends-on)) carries one
-other tasking unit to speed its march or cross water it could not. The carry is a bookkeeping binding on the
-transport's intent; the ride is best-effort in the A3 sim.
+other tasking unit to speed its march or cross water it could not. The carry is an explicit **boarding
+order** OPCOM issues — it names the transport and the rider and binds the pair — never an automatic embark of
+any two units that happen to share a cell. The binding rides on the transport's intent; the ride itself is
+best-effort in the A3 sim.
 
 - **Capacity is one unit, any size — seats are not checked to carry.** A transport carries at most one
   infantry tasking unit whatever its headcount, and its hull's cargo seats do not gate the load. This is
   deliberate: a detected faction whose only transport seats two men can still ferry a whole squad
   *virtually*, so the mechanic never depends on a mod fielding a roomy carrier. Seats bind only when the
   pair goes live.
-- **Load and transit, virtualised.** A transport and a unit on the same cell embark: the carried unit gives
+- **Load and transit, virtualised.** Once the boarding order binds them, the pair converges on a shared cell
+  and embarks there: the carried unit gives
   up its own cell and route and rides the transport's, stepping at the transport's speed and **ignoring its
   own water-impassability** — so a foot squad crosses a strait it could never walk. Position, force deposit
   and routing all follow the transport's cell while embarked.
@@ -714,13 +728,17 @@ transport's intent; the ride is best-effort in the A3 sim.
   position, and resumes its own tasking and speed.
 
 A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
-its routes are water-only and it exists to ferry rather than hold ground. Its class resolves from the
-existing Ship/boat faction key (`fnc_veh_price` maps `isKindOf "Ship"` to the boat band; the `blufor_BOAT_*`
-rows in the faction schema), not a new token backfill; an OPFOR-side boat rides on faction detection, and
-where none is detected the sea-ferry falls to a rotary transport. A boat classifies to a small fixed
-firepower (`boat` = 2, a light presence on par with an unarmed car), so it deposits a little threat on the
-grid and its hire prices at `2 × rate` rather than free — no zero-cost carrier. This adds a `boat` bucket to
-the force model and a `Ship` branch to the classifier, built with the transport.
+its routes are water-only. It is **armed by default** — the detected `*_BOAT_ARMED_*` gunboat class — so it
+both fights on the water and ferries (`transport`), not a ferry-only hull. Its class rides on the existing
+faction boat detection (the `_boat` bucket every faction parse fills), which today is exposed only on the
+BLUFOR side (`blufor_BOAT_*`); the OPFOR side needs the same role added (`opfor_BOAT_ARMED_X`, mirroring it)
+plus a `boat` row in the spawn vocabulary — a wiring of existing detection, not a new token backfill. Where
+no boat is detected the sea-ferry falls to a rotary transport. A boat classifies to a small fixed firepower
+(`boat` = 2, a light presence on par with an unarmed car), so it deposits a little threat on the grid and its
+hire prices at `2 × rate` — no zero-cost carrier. This adds a `boat` bucket to the force model and a `Ship`
+branch to the classifier (`isKindOf "Ship"`, the predicate detection already uses), built with the transport.
+A boat spawns on the nearest **navigable** water body ([§Geometry](#geometry)) — never on a sub-threshold
+puddle or dry ground.
 
 ## Templates: the execution forms
 
@@ -874,7 +892,7 @@ Three levels, not one:
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band picks the template) |
 | Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N (band picks the template) |
 | Rapport | offensive | a town in reach (needs a `supply` unit) | tasking-spawn | 1 (`supply` courier) |
-| Recruit | buildup | the highest-value unmet unit need; raises a `garrison` unit into a free-slot OPFOR zone's reinforcement pool | tasking-spawn | 1 (`garrison`, resting — no active order) |
+| Recruit | buildup | the highest-value unmet unit need; raises a `garrison` unit into an OPFOR zone's garrison reserve (several may stack on one zone) | tasking-spawn | 1 (`garrison`, resting — no active order) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 for a zone; 1 (`supply` truck) for a town |
 | Scout | recon | a `recon` unit's route sweeping stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in range of an owned gun | bought fire mission | 0 |
@@ -886,9 +904,10 @@ Value and Cost are [§Appraisal](#appraisal-expected-ap-return); the band and te
 [§Templates](#templates-the-execution-forms).
 
 **Recruit fills the roster; every other unit-dispatching action drains it.** Recruit is the RTS "hire a
-unit": it raises a group into a free-slot OPFOR zone's garrison reinforcement pool (one tasking unit per
-zone, [§Unit strength](#unit-strength)) — virtual, with no standing order until its zone de-virtualises to
-defend. OPCOM then draws that unit for an Attack, Intercept, Rapport or Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
+unit": it raises a group into an OPFOR zone's garrison reserve — OPCOM-tracked and distinct from the base
+garrison the town/zone Reinforce refills, but feeding the same reserve wave that spawns it to defend when the
+zone is contested ([§Unit strength](#unit-strength)). Several may stack on one zone. The unit rests with no
+standing order; OPCOM draws it back out for an Attack, Intercept, Rapport or Scout, which strips the zone. So OPCOM must build up before it can strike, and a lost unit is lost standing strength.
 
 **Recruit chooses by demand.** It is scored once per demand group — generic force, `recon`, `supply`,
 `transport` — each against the best action that group unlocks ([§Value](#value-the-worth-of-the-ground-in-play)),
@@ -1297,10 +1316,14 @@ The campaign snapshot ([`campaign_persistence_plan.md`](../campaign_persistence_
 shipped — persistence today is the engine's `saveGame`. Live squads, spawned garrisons and in-flight
 fire missions are never saved; they regenerate on player approach.
 
+OPCOM's tasking store is shaped to serialise (numbers and strings only, no object handles — the live group
+is held by netId), but OPCOM does not implement its own save/load: persisting the standing units and orders
+below is the campaign snapshot's responsibility, not an OPCOM build phase.
+
 | State | Kind | Contract |
 |---|---|---|
 | Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs, never re-rolls ([§The commander has an archetype](#the-commander-has-an-archetype)) |
-| Standing units & orders | outcome | One row per unit — its tasking, target, current world position, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at that position (chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's reinforcement store |
+| Standing units & orders | outcome | One row per unit — its tasking, target, current world position, `strength` ([§Unit strength](#unit-strength)), and a moving one's route mode. Persisted as data, never a live squad: restore resumes each unit at that position (chain recomputed [§Routing](#routing-a-cost-field-over-the-grid)) at its saved strength, streaming to a live group on player approach. A `garrison` unit restores onto its zone's garrison reserve |
 | Tiers | outcome | `WARCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](../economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides beside them |
 
 Every persisted field is a number, a string, or an array of those. Time-based fields — intent expiries
@@ -1339,7 +1362,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
 | **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
-| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with minimum lifetimes and hysteresis; flat archetype weights | The P3 mechanism + grid / force |
+| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with the absolute hold; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
 
@@ -1393,9 +1416,6 @@ docs draw on.
   events cannot absorb — they are free and rep-driven.
 - **The `garrison` heal rate** `OPCOM_GARRISON_HEAL_RATE` — the per-tick fraction restored. The mechanism
   ships; only the value tunes ([§Unit strength](#unit-strength)).
-- **The commit hysteresis gap** `OPCOM_COMMIT_HYSTERESIS` — how far below the commit bar a still-virtual
-  intent's ROI must fall before it is abandoned. Wide enough to kill flapping, narrow enough to still drop a
-  dead prize ([§Commitment](#commitment-intents-are-sticky)).
 - **The `AP-per-force` exchange rate** `OPCOM_AP_PER_FORCE` — the single force→AP knob: a hire costs
   `ceil(force × rate)` and the same rate prices commit `Cost` and Arty's kill Value; only the value tunes
   ([§Cost](#cost-what-an-action-stakes)).
