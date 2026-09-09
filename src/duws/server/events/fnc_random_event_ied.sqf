@@ -32,8 +32,7 @@ if (isNull _player) exitWith {};
 
 private _pileClasses = [
 	"Land_GarbageBags_F", "Land_GarbagePallet_F", "Land_GarbageWashingMachine_F",
-	"Land_LuggageHeap_03_F", "Land_LuggageHeap_01_F", "Land_Tyres_F", "Land_JunkPile_F",
-	"Land_WoodenCart_F", "Land_Sacks_heap_F", "Land_Sacks_goods_F", "Land_Pallets_F"
+	"Land_Tyres_F", "Land_JunkPile_F"
 ];
 
 private _locs  = missionNamespace getVariable ["civ_locations", []];
