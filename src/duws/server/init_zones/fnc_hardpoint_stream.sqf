@@ -19,14 +19,12 @@ if (!isServer) exitWith {};
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
-// An observation post's recon ring, how often it wakes to report, and the odds it actually gets a fix
-// off on any given wake. The ring is wider than any garrison stream radius (DUWS_hardpointStreaming) on
-// purpose: the post screens its whole sector whether or not its lookouts have streamed in, so a player
-// cannot sit just outside the garrison's ring unseen. Reporting on a beat, not continuously, gives the
-// player time to break out of the ring; the per-wake chance makes the fix unreliable, so being in the ring
-// is a mounting risk rather than a certainty and a player can slip a sector unseen.
-#define OP_OBSERVE_RADIUS 1000
-#define OP_OBSERVE_PERIOD 60
+// The post's recon screen. Reach is Chebyshev grid cells (OP_OBSERVE_K), OPCOM's own measure -- the same
+// cells as OPCOM_RECON_K/streamK -- kept wider than the garrison stream so a player cannot sit just outside
+// the garrison ring unseen. It reports on a beat, not continuously, so a player can break out; the per-wake
+// chance keeps the fix uncertain. The period is in OPCOM ticks, so its belief-stamping beat rides OPCOM's clock.
+#define OP_OBSERVE_K 3             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=3 ~ 1500 m on axis
+#define OP_OBSERVE_PERIOD 12       // OPCOM ticks between wakes; x OPCOM_TICK_PERIOD for the real interval
 #define OP_OBSERVE_CHANCE 0.2
 
 // The OPFOR radio-tower amplifier is the live count of uncleared "RADIO" rows, capped. Recomputed
@@ -267,20 +265,31 @@ DUWS_fnc_hardpointClear = {
     };
 };
 
-// [_pos] call DUWS_fnc_hardpointOPBurst -- one recon fix from a post at _pos: pin OPFOR's knowledge of
-// every live BLUFOR within OP_OBSERVE_RADIUS to a full identification (reveal 4) and red-card each
-// compromised player. reveal is a knowledge write, hence server-only. Its left operand must be a unit or a
+// [_pos] call DUWS_fnc_hardpointOPBurst -- one recon fix from a post at _pos: pin OPFOR's knowledge of every
+// live BLUFOR within OP_OBSERVE_K grid cells to a full identification (reveal 4), stamp each caught group
+// into OPCOM belief, and red-card each compromised player. reveal is a knowledge write, hence server-only. Its left operand must be a unit or a
 // group, never a side, so an OPFOR-wide fix means revealing each caught BLUFOR to every live EAST group in
 // turn -- allGroups holds only spawned groups, so this reaches the OPFOR actually in play, not the
 // virtualised garrisons still behind the site poller. Convoy groups (DUWS_convoy_handled, set by
 // fnc_convoy_drive) are skipped: they cruise SAFE on a scripted route, and feeding them this reveal would
 // promote the column out of SAFE and false-trip a mission's under-attack test with no real contact. The card
 // is remoteExec'd to each player object, so only the compromised player sees it, on their own machine, in SP
-// and MP alike. Unconditional: the observe loop
-// gates it behind its per-wake roll and the dev map-click tool fires it at 100%, so this holds only the sweep.
+// and MP alike. Reach is grid cells, so the whole fix no-ops until the grid is built (the poller can wake a
+// post first); the per-wake roll lives in the observe loop and the dev map-click fires at 100%, so within
+// the fn the fix is unconditional.
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
-    private _blu = allUnits select { side _x == WEST && {alive _x} && {_x distance2D _pos < OP_OBSERVE_RADIUS} };
+    if (isNil "DUWS_opcom_grid_w") exitWith {};
+    private _w = DUWS_opcom_grid_w;
+    private _oc  = [_pos] call DUWS_fnc_opcom_w2c;
+    private _ocx = _oc mod _w;
+    private _ocy = floor (_oc / _w);
+    private _blu = allUnits select {
+        side _x == WEST && {alive _x} && {
+            private _c = [getPosASL _x] call DUWS_fnc_opcom_w2c;
+            ((abs ((_c mod _w) - _ocx)) max (abs ((floor (_c / _w)) - _ocy))) <= OP_OBSERVE_K
+        }
+    };
     if (_blu isEqualTo []) exitWith {};
     private _opforGroups = allGroups select { side _x == EAST && {!(_x getVariable ["DUWS_convoy_handled", false])} };
     {
@@ -289,6 +298,32 @@ DUWS_fnc_hardpointOPBurst = {
         if (isPlayer _u) then {
             ["critical", [localize "STR_DUWS_T_OP_COMPROMISED_TITLE", localize "STR_DUWS_T_OP_COMPROMISED_MSG"]]
                 remoteExec ["BIS_fnc_showNotification", _u, false];
+        };
+    } forEach _blu;
+
+    // A guaranteed belief write, not just the engine reveal above: a stowed post with no live observer still
+    // feeds the commander what crosses its reach. No separate OPCOM guard -- belief is built before the grid
+    // (fnc_opcom_perception_run), so the grid guard above already means the belief store exists.
+    private _grpsSeen = [];
+    {
+        private _g = group _x;
+        if !(_g in _grpsSeen) then {
+            _grpsSeen pushBack _g;
+            private _key = netId _g;
+            private _bp = getPosASL (leader _g);
+            _bp set [2, 0];
+            private _str = [_g] call DUWS_fnc_opcom_sightStr;
+            private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _key };
+            if (_i < 0) then {
+                DUWS_opcom_belief_key  pushBack _key;
+                DUWS_opcom_belief_pos  pushBack _bp;
+                DUWS_opcom_belief_time pushBack DUWS_opcom_tick;
+                DUWS_opcom_belief_str  pushBack _str;
+            } else {
+                DUWS_opcom_belief_pos  set [_i, _bp];
+                DUWS_opcom_belief_time set [_i, DUWS_opcom_tick];
+                DUWS_opcom_belief_str  set [_i, _str];
+            };
         };
     } forEach _blu;
 };
@@ -304,7 +339,7 @@ DUWS_fnc_hardpointOPObserve = {
     params ["_key", "_pos"];
     while { (DUWS_hardpoints findIf { (_x select 0) isEqualTo _key }) > -1 } do {
         if (random 1 < OP_OBSERVE_CHANCE) then { [_pos] call DUWS_fnc_hardpointOPBurst };
-        sleep OP_OBSERVE_PERIOD;
+        sleep (OP_OBSERVE_PERIOD * OPCOM_TICK_PERIOD);
     };
 };
 

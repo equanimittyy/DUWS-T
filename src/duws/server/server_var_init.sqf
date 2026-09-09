@@ -386,7 +386,7 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
 //   spawnRadius  distance BLUFOR wake the emplacement at (a fight holds it past this; see the tick).
 //                800 for direct-fire nests that must open up before the player closes; 600 for the rest --
-//                an OP screens its sector past this ring anyway (OP_OBSERVE_RADIUS), and a radio mast or a
+//                an OP screens its sector past this ring anyway (OP_OBSERVE_K), and a radio mast or a
 //                battery is destroyed up close, so none of those needs to wake at gun range
 //   grace        seconds empty before it stows
 //   neverStream  built once and kept resident, never stowed. Mortar and artillery hold so OPCOM can

@@ -206,6 +206,12 @@ Everything `spawn`/`execVM`'d runs in the scheduled environment, where the engin
 
 **Fix:** batch the work inside `isNil { ... }`, which runs unscheduled and uninterrupted and shares the calling scope for reads/writes. Bound each batch by a wall-clock deadline, not an iteration count, and yield between batches so the server still services clients. `sleep`/`waitUntil` cannot be used inside. Batching that survey to a 15 ms budget took it ~50 → ~259/second; accumulate time-in-batches vs wall-clock to tell scheduler-bound from genuinely expensive.
 
+## A shared array written from two scheduled scripts is consistent only across a suspension-free section
+
+Scheduled SQF is cooperative: one script runs at a time, and control passes only at a suspension point (`sleep`, `waitUntil`, a yielding `call`). A read-modify-write on a shared array is therefore atomic *only if no suspension falls between the read and the write*. OPCOM belief is written by two scripts — the perception loop (`fnc_opcom_perception_run`) and each observation post's `spawn` (`DUWS_fnc_hardpointOPObserve`, off the hardpoint poller) — and stays consistent only because every belief stamp (`findIf`, then `pushBack`/`set` across the four parallel `DUWS_opcom_belief_*` arrays) runs suspension-free.
+
+**Fix:** keep each belief write one unbroken block. A `sleep`/`waitUntil` between the `findIf` and its writes, or between the four array writes, lets the other script interleave mid-update and tear the index alignment the four arrays depend on.
+
 ## A shared global mutated as `x = x - c; publicVariable "x"` loses concurrent writes
 
 `publicVariable` broadcasts an absolute value with no network lock, and each machine keeps its own copy. Two machines that read-modify-write a shared global both read the stale base, and the later broadcast overwrites the earlier — changes don't add up, and resource can be *created* (two clients spending against a 50 pool both write 30: net −20, not −40). Local `x = x + n` is atomic; the loss is the stale base a second machine read. SP has one machine, so it only surfaces in co-op, and a save persists the corruption.
