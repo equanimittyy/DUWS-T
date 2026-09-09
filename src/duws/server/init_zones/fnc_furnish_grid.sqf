@@ -51,10 +51,9 @@ fnc_furnish_grid = {
     private _ring = _ringBearings apply { _x + _bdir };
     private _lseeds = _seeds apply { _building worldToModel _x };
 
-    // Floor levels by Z density: a floor holds many nav points at one height, a stairway only a sparse ramp
-    // between them, so a plain gap-since-last-point split fuses the floors a stair bridges -- and one grid
-    // plane per (i,j) then drops a floor. Bin the local Z; each dense bin a storey clear of the last is a
-    // level; attach every seed to its nearest level, so each real floor gets its own plane.
+    // Floor levels by Z density, not gaps: a stairway bridges two floors, so a gap-since-last-point split
+    // fuses them. The fullest bin in each dense run wins the storey height, so a sparse step or landing does
+    // not anchor the plane below the real floor.
     private _zs = _lseeds apply { _x select 2 };
     private _z0 = selectMin _zs;
     private _binN = 1 + floor ((selectMax _zs - _z0) / STOREY_BIN);
@@ -64,15 +63,26 @@ fnc_furnish_grid = {
         _hist set [_bi, (_hist select _bi) + 1];
     } forEach _zs;
     private _thr = 3 max ceil ((count _zs) / _binN * 0.75);
+
+    private _dense = [];
+    { if (_x >= _thr) then { _dense pushBack [_z0 + (_forEachIndex + 0.5) * STOREY_BIN, _x] } } forEach _hist;
+
     private _levels = [];
-    {
-        if (_x >= _thr) then {
-            private _z = _z0 + (_forEachIndex + 0.5) * STOREY_BIN;
-            if (_levels isEqualTo [] || {_z - (_levels select (count _levels - 1)) >= STOREY_GAP}) then {
-                _levels pushBack _z;
+    if (_dense isNotEqualTo []) then {
+        (_dense select 0) params ["_bandZ", "_bandN"];
+        private _lastZ = _bandZ;   // break on the gap to the previous bin, not to the chosen _bandZ
+        for "_k" from 1 to (count _dense - 1) do {
+            (_dense select _k) params ["_z", "_n"];
+            if (_z - _lastZ >= STOREY_GAP) then {
+                _levels pushBack _bandZ;
+                _bandZ = _z; _bandN = _n;
+            } else {
+                if (_n > _bandN) then { _bandZ = _z; _bandN = _n };
             };
+            _lastZ = _z;
         };
-    } forEach _hist;
+        _levels pushBack _bandZ;
+    };
     if (_levels isEqualTo []) then { _levels = [(_z0 + selectMax _zs) / 2] };
 
     private _buckets = _levels apply { [] };
