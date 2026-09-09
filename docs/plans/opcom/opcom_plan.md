@@ -697,6 +697,27 @@ resets. A group in a firefight stays live until it resolves, whether or not a pl
 The boundary is a square ring in cell space, so a tasking on the diagonal streams in ~1.4x further than
 orthogonally — acceptable for spawn-before-contact.
 
+### Streaming spawns at the world point
+
+OPCOM raises its own live groups through a bespoke spawn (`DUWS_fnc_opcom_spawnComp`), not the zone
+spawner. A tasking de-virtualises at its stored world point *exactly* — the point the virtual march
+reached — because a stowed unit has to reappear where it stood, not where a fresh garrison would be
+scattered. A team and a ground vehicle already place on that point; the divergence is air, and it is the
+reason OPCOM owns the spawn rather than borrowing the zone spawner.
+
+**Air spawns flying at the point, never grounded.** It enters at `OPCOM_AIR_SPAWN_ALT` (~150 m) with the
+engine running, at the tasking's world point. It does **not** use the zone spawner's air entry — a random
+2–5 km bearing flying in from off the map. That entry is right for a zone patrol *arriving* from nowhere
+and wrong for a stowed helicopter *resuming* at its tracked point: the off-map entry drops it kilometres
+from where OPCOM believes it is, and the entry point can itself fall off the map, where the engine builds
+the hull but no group and orphans it. Re-virtualisation banks a helicopter's world point (`x,y` only);
+de-virtualisation discards any stored altitude and re-enters at `OPCOM_AIR_SPAWN_ALT`, so a helicopter
+neither creeps up nor sinks across stow/spawn cycles.
+
+**A spawn that cannot be raised leaves nothing behind.** If a composition's class cannot be fielded, the
+spawn raises no half-built group and deletes any hull the engine created before it failed; the tasking
+stays virtual and retries on the next contact, the same as a virtual march with nowhere to stream.
+
 ### Spawn posture follows the order
 
 A de-virtualised unit runs a native A3 order that is the **closest engine equivalent of its tasking**, set
