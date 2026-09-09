@@ -9,7 +9,8 @@ DUWS_pcMarker_range = 50;
 DUWS_pcMarker_rows = [
     ["DUWS_float_informant", "\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa", [0.2, 0.6, 1, 0.6], localize "STR_DUWS_T_pc_icon_informant", 2.2],
     ["DUWS_pc_crate",     "\a3\ui_f\data\igui\cfg\simpletasks\types\Container_ca.paa",  [0.2, 1, 0.2, 0.6],   localize "STR_DUWS_T_pc_icon_crate",     1.6],
-    ["DUWS_float_pilot",  "\A3\ui_f\data\IGUI\Cfg\Actions\heal_ca.paa",     [0.2, 0.6, 1, 0.6],   localize "STR_DUWS_T_pc_icon_pilot",     2.2]
+    ["DUWS_float_pilot",  "\A3\ui_f\data\IGUI\Cfg\Actions\heal_ca.paa",     [0.2, 0.6, 1, 0.6],   localize "STR_DUWS_T_pc_icon_pilot",     2.2],
+    ["DUWS_float_hostage", "\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa", [0.2, 0.6, 1, 0.6], localize "STR_DUWS_T_pc_icon_hostage", 2.2]
 ];
 
 addMissionEventHandler ["Draw3D", {

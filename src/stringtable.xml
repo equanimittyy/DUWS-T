@@ -3014,6 +3014,10 @@
                 <Original>Pilot</Original>
                 <English>Pilot</English>
             </Key>
+            <Key ID="STR_DUWS_T_pc_icon_hostage">
+                <Original>Hostage</Original>
+                <English>Hostage</English>
+            </Key>
         </Container>
         <Container name="Intel &amp; Search">
             <Key ID="STR_DUWS_T_TOPSECRET_TITLE">

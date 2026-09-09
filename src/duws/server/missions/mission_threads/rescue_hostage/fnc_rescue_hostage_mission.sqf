@@ -104,6 +104,7 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 // Shared marker name so the watcher (creates on free) and the finish branches (delete) agree without
 // threading a handle; deleteMarker no-ops on an absent one, so an un-freed teardown stays correct.
 private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
+private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
 
 // Guard watcher (tail off the main poll). Detection scoped to THIS mission's OPFOR, never side-wide: east
 // knowsAbout reads flat-high off any distant firefight and lingers on a remembered target, so a side-wide
@@ -136,6 +137,7 @@ private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DU
                 };
             } forEach _ring;
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+            DUWS_float_hostage = _hostage; publicVariable "DUWS_float_hostage";
             createMarker [_trk, getPosATL _hostage];
             _trk setMarkerShape "ICON";
             _trk setMarkerType "mil_warning";
@@ -198,11 +200,11 @@ waitUntil {
 };
 
 if (!alive _hostage) exitWith {
-    deleteMarker _trk;
+    call _clearIcons;
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_lost"], false, "", false, false] call fnc_mission_finish;
 };
 if (time > _deadline) exitWith {
-    deleteMarker _trk;
+    call _clearIcons;
     if (alive _hostage) then { deleteVehicle _hostage };   // unclaimed, so the token sweep never takes him
     // _line empty + _notify true: speak the shared "out of time" call, since a missed deadline is exactly that.
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "", false, true] call fnc_mission_finish;
@@ -210,7 +212,7 @@ if (time > _deadline) exitWith {
 
 // Win: peel the hostage out of the player's group and despawn him after a spell, so a rescued NPC doesn't
 // ride the roster for the rest of the campaign.
-deleteMarker _trk;
+call _clearIcons;
 if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_success"] call fnc_town_rep_adjust };
 [_hostage] spawn {
     params ["_h"];
