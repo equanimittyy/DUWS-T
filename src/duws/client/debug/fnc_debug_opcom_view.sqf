@@ -1,6 +1,6 @@
 // Locality: client -- an fnc_debug_menu row handler, runs on whoever opened the menu. Toggles the OPCOM
-// influence-grid overlay: the commander's own grid (friendly/enemy force per cell, the front line, and
-// each belief stamp), a server-only picture the dev otherwise cannot see. Independent of the AoI toggle
+// threat-grid overlay: the commander's own grid (friendly/enemy force per cell, the front line, each belief
+// stamp and every tasking unit), a server-only picture the dev otherwise cannot see. Independent of the AoI toggle
 // (fnc_debug_aoi_view) -- each owns its own marker set and clears only its own. A second call clears it.
 // While up it re-requests on the OPCOM tick cadence so it tracks the live grid instead of freezing at the
 // moment it opened. Re-checked against game_master because the function is broadcast to every client.
@@ -16,6 +16,7 @@ if (missionNamespace getVariable ["DUWS_dbgOpcomOn", false]) exitWith {
     // Clear the delta state so a reopen rebuilds the lattice from scratch rather than reusing dropped markers.
     missionNamespace setVariable ["DUWS_dbgOpcomSig", []];
     missionNamespace setVariable ["DUWS_dbgOpcomBelN", 0];
+    missionNamespace setVariable ["DUWS_dbgOpcomTaskN", 0];
     hint "OPCOM grid: overlay cleared.";
 };
 

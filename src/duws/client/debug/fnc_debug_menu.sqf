@@ -106,9 +106,9 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     }, [], [1,0.667,0,1]],
 
     // Two independent map overlays. AoI rings every emitter's reach in its side's colour; OPCOM grid
-    // paints the whole-map influence lattice with a per-cell force dot and belief warnings.
+    // paints the whole-map threat lattice with a per-cell force dot, belief warnings and tasking units.
     ["AoI view: toggle emitter reaches", fnc_debug_aoi_view, [], [1,0.667,0,1]],
-    ["OPCOM grid: toggle influence lattice", fnc_debug_opcom_view, [], [1,0.667,0,1]],
+    ["OPCOM grid: toggle threat lattice", fnc_debug_opcom_view, [], [1,0.667,0,1]],
 
     ["OPCOM: recruit / task / ferry (Phase 3)", fnc_debug_opcom_menu, [], [1,0.667,0,1]]
 ]] call fnc_open_action_menu;

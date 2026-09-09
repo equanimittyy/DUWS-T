@@ -1,7 +1,7 @@
-// Locality: server -- remoteExec'd to 2 by fnc_debug_opcom_view. Reads the server-local influence grid
-// and belief store (no client sees them) and hands the whole drawable back to the requesting client, the
-// way fnc_debug_aoi_circles answers for the AoI reaches. Every cell is emitted, not just those carrying
-// force, so the client can paint the full-map lattice; the client drops water cells unless asked.
+// Locality: server -- remoteExec'd to 2 by fnc_debug_opcom_view. Reads the server-local threat grid, belief
+// store and tasking store (no client sees them) and hands the whole drawable back to the requesting client,
+// the way fnc_debug_aoi_circles answers for the AoI reaches. Every cell is emitted, not just those carrying
+// force, so the client can paint the full-map lattice.
 if (!isServer) exitWith {};
 params ["_requester"];
 if (isNil "DUWS_opcom_grid_w") exitWith {
@@ -45,7 +45,33 @@ private _bel = [];
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
-["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief stamps -> %3", count _cells, count _bel, _requester]] call fnc_log;
+// Taskings -> [pos, OPFOR box icon, "CODE:ORDER" tag]. Label is derived, not a stored order: FERRY while
+// carrying a rider, RIDING while carried. A [*] prefix marks a live unit (pos frozen at its de-virt point).
+private _tasks = [];
+{
+    private _mt = _x get "moveType";
+    private _icon = switch (_mt) do {
+        case "tracked": {"o_armor"}; case "wheeled": {"o_motor_inf"};
+        case "boat": {"o_naval"}; case "rotary": {"o_air"}; case "fixed": {"o_air"};
+        default {"o_inf"};
+    };
+    private _code = switch (_mt) do {
+        case "tracked": {"ARM"}; case "wheeled": {"MOT"};
+        case "boat": {"BOAT"}; case "rotary": {"HELI"}; case "fixed": {"JET"};
+        default {"INF"};
+    };
+    if ("transport" in (_x get "flags")) then { _code = "T" + _code };
+    private _label = switch (true) do {
+        case ((_x get "carrying") >= 0): {"FERRY"};
+        case ((_x get "ridingOn") >= 0): {"RIDING"};
+        default { toUpper (_x get "order") };
+    };
+    private _tag = format ["%1%2:%3", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code, _label];
+    private _p = _x get "pos";
+    _tasks pushBack [[_p select 0, _p select 1], _icon, _tag];
+} forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
+
+["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings -> %4", count _cells, count _bel, count _tasks, _requester]] call fnc_log;
 
 // Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
-[_cells, _bel, _cell] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
+[_cells, _bel, _cell, _tasks] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
