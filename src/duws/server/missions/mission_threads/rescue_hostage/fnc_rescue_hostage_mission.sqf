@@ -14,6 +14,17 @@ private _usable = [_MissionPos, 3, _radius] call fnc_usableBuildings;
 if (_usable isEqualTo []) exitWith { [24, _requester, "no_building"] call fnc_mission_abort };
 private _hostageBldg = selectRandom _usable;
 
+// Closest town to the objective takes the REP reward on a win, single-sourced from the reward table.
+// duws_town_circles is index-aligned with civ_locations, so its index is the one fnc_town_rep_adjust takes.
+private _circles = missionNamespace getVariable ["duws_town_circles", []];
+private _townIdx = -1;
+private _bestD = 1e9;
+{
+    _x params ["_c", ""];
+    private _d = _c distance2D _MissionPos;
+    if (_d < _bestD) then { _bestD = _d; _townIdx = _forEachIndex };
+} forEach _circles;
+
 private _VARtaskgeneratedName = format ["hostage%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 sleep 1;
@@ -124,7 +135,7 @@ private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DU
                     (_p addWaypoint [getPosATL _bldg, 30]) setWaypointType "CYCLE";
                 };
             } forEach _ring;
-            [localize "STR_DUWS_T_rescuehostage_freed"] remoteExec ["hint", [0, -2] select isDedicated];
+            [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
             createMarker [_trk, getPosATL _hostage];
             _trk setMarkerShape "ICON";
             _trk setMarkerType "mil_warning";
@@ -157,7 +168,14 @@ private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DU
             } forEach _observers;
             if (_tripped) then {
                 _alarmAt = time + 60;
-                [localize "STR_DUWS_T_rescuehostage_detected"] remoteExec ["hint", [0, -2] select isDedicated];
+                // Countdown in the hintbox, refreshed each second until he is freed, executed, or dies.
+                [_hostage, _alarmAt] spawn {
+                    params ["_hostage", "_alarmAt"];
+                    while { alive _hostage && { !(_hostage getVariable ["DUWS_hostage_freed", false]) } && { time < _alarmAt } } do {
+                        [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", [0, -2] select isDedicated];
+                        sleep 1;
+                    };
+                };
             };
         } else {
             // Clock expired with a guard alive: setCaptive false + reveal + RED so the co-located guards engage
@@ -193,6 +211,7 @@ if (time > _deadline) exitWith {
 // Win: peel the hostage out of the player's group and despawn him after a spell, so a rescued NPC doesn't
 // ride the roster for the rest of the campaign.
 deleteMarker _trk;
+if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_success"] call fnc_town_rep_adjust };
 [_hostage] spawn {
     params ["_h"];
     [_h] joinSilent (createGroup [WEST, true]);

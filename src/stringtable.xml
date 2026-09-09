@@ -3969,8 +3969,12 @@
                 <English>Rescue Hostage</English>
             </Key>
             <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_DESC">
-                <Original>OPFOR is holding a hostage in a building cluster in this area. Reach him unseen, kill his guards, and get him to HQ. Detection starts a one-minute clock; run it out and they execute him.</Original>
-                <English>OPFOR is holding a hostage in a building cluster in this area. Reach him unseen, kill his guards, and get him to HQ. Detection starts a one-minute clock; run it out and they execute him.</English>
+                <Original>OPFOR is holding a civilian reporter hostage in a building in this area. Rescue him and eliminate his captors.</Original>
+                <English>OPFOR is holding a civilian reporter hostage in a building in this area. Rescue him and eliminate his captors.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_NOTE">
+                <Original>The hostage will be executed within 1 minute if BLUFOR is detected within the area. Discretion is advised.</Original>
+                <English>The hostage will be executed within 1 minute if BLUFOR is detected within the area. Discretion is advised.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_brief">
                 <Original>Alpha 1-1, OPFOR is holding a hostage near %1. Move in quiet. If they make you, they execute him inside a minute, so kill his guards and bring him home.</Original>
@@ -3981,12 +3985,12 @@
                 <English>Copy Overlord. Going in dark.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_detected">
-                <Original>You've been spotted. The guards are moving to execute the hostage. Kill them now.</Original>
-                <English>You've been spotted. The guards are moving to execute the hostage. Kill them now.</English>
+                <Original>Alarm raised. The guards will execute the hostage in %1s.</Original>
+                <English>Alarm raised. The guards will execute the hostage in %1s.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_freed">
-                <Original>Hostage free. Get him to HQ.</Original>
-                <English>Hostage free. Get him to HQ.</English>
+                <Original>Good work Alpha 1-1. Now get him back to base.</Original>
+                <English>Good work Alpha 1-1. Now get him back to base.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_lost">
                 <Original>Alpha 1-1, the hostage is dead. Nothing more we can do. RTB.</Original>

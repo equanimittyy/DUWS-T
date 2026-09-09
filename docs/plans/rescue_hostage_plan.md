@@ -169,11 +169,10 @@ plain `addAction`s on the hostage, as Escort Informant does.
 
 ## Reward
 
-Base pay tracks required effort, not the archetype. This is a multi-guard clear *plus* an escort *plus* a
-stealth fail-timer — heavier than Rescue Pilot (25/25) and about level with Sabotage Laptop's reworked
-garrison clear (30/20). Propose **30 CP / 25 AP**, `objective "rescue"`, `category "command"`,
-`surveyKind "map"`, destination fields default (no convoy). Deadline `[0.6667, 1.5]` h. Confirm against
-the catalogue's effort ladder before landing.
+**25 CP / 15 AP / 1 REP**, `objective "rescue"`, `category "command"`, `surveyKind "map"`, destination
+fields default (no convoy), deadline `[0.6667, 1.5]` h. The REP is granted to the town closest to the
+objective on a win, single-sourced from the table's REP column (the thread calls `fnc_town_rep_adjust`, as
+the escort missions do). The `note` line warns that detection executes the hostage on a one-minute clock.
 
 ## Open decisions
 
