@@ -594,13 +594,15 @@ through the existing garrison-reserve wave (`fnc_garrison_reserve`) when the zon
 draws it back out of the pool to task it offensively. Massing force is stacking recruits on a valuable zone,
 then pulling them together for an attack ([§Commitment](#commitment-intents-are-sticky)).
 
-**Combatant and non-combatant.** A recruited unit is a *combatant* by default. The unarmed rows — `boat`,
+**Combatant and non-combatant.** A recruited unit is a *combatant* by default. Four rows — `boat`,
 `trans_heli`, `truck`, `recon_heli` — are *non-combatants*, marked by a `noncombat` flag on their recruit-menu rows
-([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/opcom/fnc_opcom_tasking_init.sqf)). This is a separate
+([`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/opcom/fnc_opcom_tasking_init.sqf)). Non-combatant is a
+garrison-defence classification, not a claim about armament: it means the unit never joins a zone's defence, not
+that it has no gun — a `boat` is an armed gunboat yet a non-combatant. This is a separate
 axis from the `transport` flag, which marks lift capacity — an `apc`/`ifv` is transport-flagged yet a
 combatant. Only combatants feed the reserve wave. A non-combatant garrisoned in a zone rests **attached** to it
 — it still deposits its `effForce` to the grid, so force weighting is unchanged — but never enters the reserve
-pool, so the wave never spawns an unarmed hull to drive into a defence. When the zone or town is captured, its
+pool, so the wave never spawns a non-defender hull to drive into a defence. When the zone or town is captured, its
 attached non-combatants die with it (their tasking records are dropped). A non-combatant only ever goes live by
 being tasked out — a ferry borrow ([`transport_ferry.md`](transport_ferry.md)) or a hand order.
 
@@ -712,8 +714,9 @@ one of the rows above.
 A tasking unit owns its whole journey, including water it cannot walk. Its route may cross a navigable body at
 a lift penalty ([§Routing](#routing-a-cost-field-over-the-grid)); at the near shore of a water span it borrows
 a transport, is ferried to the far shore, and foots on. The carrier is fetched by the route, not commanded —
-there is no boarding order and no drop cell. The full mechanic — the borrow pool (staged or garrisoned
-transports, never a contested garrison), the far-shore drop, de-virtualisation of a carrying pair, and the
+there is no boarding order and no drop cell. The full mechanic — the borrow pool (idle transports only: a hull
+on `guard` or in an uncontested `garrison`, never one running a directed order and never a contested garrison),
+the far-shore drop, de-virtualisation of a carrying pair, and the
 combatant/non-combatant split ([§Unit strength](#unit-strength)) that keeps unarmed lift out of the reserve
 wave — is specified in [transport_ferry.md](transport_ferry.md). Capacity stays one rider of any headcount;
 seats bind only when the pair goes live.
@@ -968,8 +971,9 @@ hired to win a fight and nothing more; a flagged row also unlocks an action. `re
 to Scout (its range rings by type, [§Value](#value-the-worth-of-the-ground-in-play)), `supply` to Rapport,
 `transport` to carry another unit ([§Transport](#transport-carrying-a-unit-to-the-fight)); a row may carry
 several, as the truck both couriers and ferries and a carrier (APC or IFV) fights while ferrying a section.
-`noncombat` marks the unarmed rows (boat, both helis, truck) — kept out of a zone's reserve wave so they never
-spawn to defend, and cleared when the zone falls ([§Unit strength](#unit-strength)).
+`noncombat` marks the non-defender rows (boat, both helis, truck) — kept out of a zone's reserve wave so they
+never spawn to defend (regardless of armament: the boat is armed), and cleared when the zone falls
+([§Unit strength](#unit-strength)).
 Recruit scores one candidate per demand group — force,
 `recon`, `supply`, `transport` — so a specialist enters the roster only when the action it enables is worth
 its hire.
