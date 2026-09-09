@@ -83,7 +83,10 @@ if (_side == "opfor") exitWith {[
     ["opfor_TRANS_TRUCK_X",        "SPECIAL",     "vehicle",    true,    "O_Truck_03_transport_F"],
     ["opfor_COVERED_TRUCK_X",      "SPECIAL",     "vehicle",    true,    "O_Truck_03_covered_F"],
     ["opfor_AMMO_TRUCK_X",         "SPECIAL",     "vehicle",    true,    "O_Truck_03_ammo_F"],
-    ["opfor_REPAIR_TRUCK_X",       "SPECIAL",     "vehicle",    true,    "O_Truck_03_repair_F"]
+    ["opfor_REPAIR_TRUCK_X",       "SPECIAL",     "vehicle",    true,    "O_Truck_03_repair_F"],
+    // Empty default, not the CSAT boat: a faction with no detected boat fields none, so OPCOM's sea-ferry
+    // falls to a rotary rather than a stand-in hull forced onto a land force (docs/plans/opcom/opcom_plan.md).
+    ["opfor_BOAT_ARMED_X",         "SPECIAL",     "vehicle",    false,   ""]
 ]};
 
 [

@@ -81,3 +81,19 @@ DUWS_fnc_opcom_c2w = {
     private _w = DUWS_opcom_grid_w;
     [((_ci mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_ci / _w)) + 0.5) * OPCOM_GRID_CELL, 0]
 };
+
+// Nearest navigable-water cell centre to a world point -- a boat's launch point, since it cannot rest on the
+// land zone that raised it. Falls back to the point itself on a landlocked map (which fields no boats anyway).
+DUWS_fnc_opcom_nearestWater = {
+    params ["_pos"];
+    private _best = _pos;
+    private _bd = 1e12;
+    {
+        if (_x >= 0) then {
+            private _c = [_forEachIndex] call DUWS_fnc_opcom_c2w;
+            private _dd = _pos distance2D _c;
+            if (_dd < _bd) then { _bd = _dd; _best = _c };
+        };
+    } forEach DUWS_opcom_grid_water;
+    _best
+};

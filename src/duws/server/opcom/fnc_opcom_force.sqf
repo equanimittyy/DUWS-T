@@ -17,7 +17,8 @@ OPCOM_FORCE = createHashMapFromArray [
     ["apc",         4],
     ["ifv",         9],
     ["tank",        12],
-    ["air",         15]
+    ["air",         15],
+    ["boat",        2]
 ];
 
 // Our vehicle/static composition-token names (fnc_zone_spawn_sizes) -> a force category. Team tokens are
@@ -26,7 +27,7 @@ OPCOM_FORCE = createHashMapFromArray [
 DUWS_forceTokenCat = createHashMapFromArray [
     ["car", "car_armed"], ["at_car", "car_armed"], ["aa_car", "car_armed"], ["truck", "car_unarmed"],
     ["apc", "apc"], ["ifv", "ifv"], ["tank", "tank"],
-    ["attackheli", "air"], ["transheli", "air"], ["plane", "air"]
+    ["attackheli", "air"], ["transheli", "air"], ["plane", "air"], ["boat", "boat"]
 ];
 
 // One composition token -> its force: a known vehicle token by category power, a team by its men, a bare

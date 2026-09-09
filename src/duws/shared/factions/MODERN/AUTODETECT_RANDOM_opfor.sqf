@@ -58,6 +58,9 @@ fnc_factionGen = {
 	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
 	_turretAny = _turretAny arrayIntersect _turretAny;
 
+	// Armed boats only -- shared hpp resolves opfor_BOAT_ARMED_X from this; must exist in both copies.
+	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
+
 
 // The same ladder table AUTODETECT_opfor resolves: the two files differ in how the faction is
 // chosen, not in what a role means once it is.

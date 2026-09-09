@@ -32,6 +32,7 @@ private _w    = DUWS_opcom_grid_w;
 private _n    = _w * _w;
 private _land = DUWS_opcom_grid_land;
 private _comp = DUWS_opcom_grid_comp;
+private _gwater = DUWS_opcom_grid_water;
 private _ene  = DUWS_opcom_grid_ene;
 private _water = DUWS_opcom_moveWater getOrDefault [_moveType, "land"];
 
@@ -39,7 +40,7 @@ private _passable = {
     params ["_i"];
     switch (_water) do {
         case "air":   { true };
-        case "water": { !(_land select _i) };
+        case "water": { (_gwater select _i) >= 0 };   // navigable water only, sub-threshold pools excluded
         default       { _land select _i };
     };
 };
@@ -52,6 +53,13 @@ if (_s == _d) exitWith { [[_destPos], "grid"] };
 // -- reject up front rather than exhaust A*. Air/water skip this (land components do not describe them).
 if (_water isEqualTo "land" && {!((_land select _s) && {(_land select _d)} && {(_comp select _s) == (_comp select _d)})}) exitWith {
     ["WARN", "OPCOM", format ["no land route %1->%2 (disconnected/water); holding straight", _s, _d]] call fnc_log;
+    [[_destPos], "grid"]
+};
+
+// A boat needs source and target in the one navigable water component (grid_water >= 0 and equal), or it
+// cannot join them -- a boat cannot cross land between two seas.
+if (_water isEqualTo "water" && {!((_gwater select _s) >= 0 && {(_gwater select _d) >= 0} && {(_gwater select _s) == (_gwater select _d)})}) exitWith {
+    ["WARN", "OPCOM", format ["no water route %1->%2 (not one navigable body); holding straight", _s, _d]] call fnc_log;
     [[_destPos], "grid"]
 };
 

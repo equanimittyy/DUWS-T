@@ -51,6 +51,7 @@
     ["opfor_TRANS_HELI_X",      [_heliTransport, _heliArmed]],
     ["opfor_ATTACK_HELI_X",     [_heliArmed, _droneAir, _heliTransport]],
     ["opfor_MISC_AIR_X",        [_planeArmed, _droneAir, _heliArmed]],
+    ["opfor_BOAT_ARMED_X",      [_boatArmed]],
 
     // Derived rather than hardcoded: the HMG was pinned to a guerrilla static, so every faction in
     // the game garrisoned its zones with the same gun. The other four keys are read by

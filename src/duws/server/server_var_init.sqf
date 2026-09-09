@@ -670,6 +670,11 @@ OPCOM_COMMIT_HOLD = 6;
 // reinforce path; guard does not heal. 0.05 restores a unit to full in ~20 ticks (~100 s). Tune.
 OPCOM_GARRISON_HEAL_RATE = 0.05;
 
+// Smallest navigable water body, in grid cells: a connected water component of at least this many cells is a
+// boat's domain; anything smaller is "too small for water" and only air crosses it. ~10 keeps boats off
+// ponds and narrow rivers. Tune.
+OPCOM_WATER_MIN_CELLS = 10;
+
 // Flank-route threat-avoidance weight: how hard a lambda=1 grid route (Flank/Encircle) bends around believed
 // enemy force. A direct route (Attack/Scout/Rapport) runs lambda=0 and ignores it. Templates are Phase 5, so
 // P3 routes direct; the cost-field knob ships wired to the router. Tune.

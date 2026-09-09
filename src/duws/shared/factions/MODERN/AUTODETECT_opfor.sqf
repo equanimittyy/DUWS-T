@@ -39,6 +39,10 @@ fnc_factionGen = {
 	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
 	_turretAny = _turretAny arrayIntersect _turretAny;
 
+	// Armed boats only -- the detection has no armed/unarmed boat split, so filter the boat bucket by
+	// weapons. Fed to the opfor_BOAT_ARMED_X ladder in the shared hpp; empty on a faction with no gunboat.
+	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
+
 
 // One ladder table for every role key, shared with AUTODETECT_RANDOM_opfor so they cannot drift,
 // and gated on the schema kind so a wrong-bucket detection cannot reach a man/vehicle spawner.

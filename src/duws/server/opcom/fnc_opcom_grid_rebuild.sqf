@@ -68,3 +68,11 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
     private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
     [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call _deposit;
 } forEach DUWS_opcom_belief_pos;
+
+// Taskings are mobile OPFOR force sources the grid reads at their world point (docs/plans/opcom/opcom_plan.md).
+// Deposited to the friendly layer from stored effForce, virtual or live -- a tasking's group is in no
+// holdings scan, so this is where its force enters the grid at all.
+{
+    private _ef = _x get "effForce";
+    if (_ef > 0) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call _deposit };
+} forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);

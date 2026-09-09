@@ -212,6 +212,8 @@ fnc_classifyVehicle = compileFinal {
 		"car_unarmed"
 	};
 
+	if (_class isKindOf "Ship") exitWith {"boat"};
+
 	""
 };
 

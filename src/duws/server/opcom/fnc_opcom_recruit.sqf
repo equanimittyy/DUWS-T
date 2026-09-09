@@ -24,18 +24,16 @@ if (WARCOM_opfor_ap < _cost) exitWith { ["INFO", "OPCOM", format ["recruit: %1 c
 private _blocked = _comp findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" };
 if (_blocked >= 0) exitWith { ["INFO", "OPCOM", format ["recruit: faction cannot field %1 yet -- refused", _comp select _blocked]] call fnc_log; nil };
 
-// One garrison slot per zone: Recruit targets a zone whose slot is free.
-if (_homeZone isNotEqualTo "" && {(DUWS_opcom_taskings findIf { (_x get "homeZone") isEqualTo _homeZone && {(_x get "order") isEqualTo "garrison"} }) >= 0}) exitWith {
-    ["INFO", "OPCOM", format ["recruit: zone %1 garrison slot already filled -- refused", _homeZone]] call fnc_log; nil
-};
-
 ["OPF", -_cost, "opcom_recruit"] call fnc_ap_adjust;
 
 private _id = DUWS_opcom_taskSeq;
 DUWS_opcom_taskSeq = _id + 1;
+// A boat cannot rest on the land zone that raised it -- launch it from the nearest navigable water.
+private _moveType = [_comp] call DUWS_fnc_opcom_moveType;
+private _pos = if (_moveType isEqualTo "boat") then { [_spawnPos] call DUWS_fnc_opcom_nearestWater } else { _spawnPos };
 private _t = createHashMapFromArray [
     ["id", _id], ["order", "garrison"], ["target", []],
-    ["pos", _spawnPos], ["moveType", [_comp] call DUWS_fnc_opcom_moveType],
+    ["pos", _pos], ["moveType", _moveType],
     ["comp", _comp], ["flags", _flags],
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
