@@ -31,23 +31,37 @@ fnc_garage_store = {
     [] remoteExec ["fnc_depot_menu_fill", _caller];
 };
 
-// Retrieve: the map-clicked position is re-bounded here against the HQ ring (fnc_in_base_keep) rather
-// than trusted -- beyond it the base cleanup sweep collects vehicles. Placement radius 5 with "NONE"
-// drops the vehicle on the nearest empty gap, so it never stacks on another vehicle or spawns clipping
-// into a solid. No refill: the dialog is closed for the pick.
-fnc_garage_retrieve_map = {
+// Retrieve: spawn the stored vehicle on the pad (inside the base-keep ring), invulnerable so the carry's
+// clips cannot damage it, then hand it to the caller's R3F carry. Radius-5 "NONE" drops it on an empty
+// gap so it never stacks on a pad vehicle.
+fnc_garage_retrieve = {
     if (!isServer) exitWith {};
-    params ["_caller", "_index", "_pos"];
+    params ["_caller", "_index", "_padNet"];
     private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
     if (_index < 0 || _index >= count _stored) exitWith { [localize "STR_DUWS_T_GARAGE_NONE_SELECTED"] remoteExec ["hint", _caller]; };
-    if (!([_pos] call fnc_in_base_keep)) exitWith { [localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE"] remoteExec ["hint", _caller]; };
 
+    private _pad = objectFromNetId _padNet;
+    private _spawnPos = if (isNull _pad) then { PosOfBLUHQ } else { getPosATL _pad };
     private _spec = _stored select _index;
-    private _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];
+    private _veh = createVehicle [_spec select 0, _spawnPos, [], 5, "NONE"];
+    _veh allowDamage false;
     [_veh, _spec] call DUWS_fnc_vehSpecApply;
 
     DUWS_garage_stored deleteAt _index;
     publicVariable "DUWS_garage_stored";
 
-    [format [localize "STR_DUWS_T_GARAGE_RETRIEVED", getText (configFile >> "CfgVehicles" >> (_spec select 0) >> "displayName")]] remoteExec ["hint", _caller];
+    [netId _veh] remoteExec ["fnc_depot_place_r3f", _caller];
+};
+
+// Finalize: reclaim for the server (the carry made the caller owner), restore damage, disable R3F.
+// Every R3F action gates on !R3F_LOG_disabled, so the one flag retires all of them.
+fnc_depot_place_finish = {
+    if (!isServer) exitWith {};
+    params ["_vehNet"];
+    private _veh = objectFromNetId _vehNet;
+    if (isNull _veh) exitWith {};
+
+    _veh setOwner 2;
+    _veh allowDamage true;
+    _veh setVariable ["R3F_LOG_disabled", true, true];
 };

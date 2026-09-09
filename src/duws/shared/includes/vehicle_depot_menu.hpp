@@ -174,9 +174,8 @@ class vehicledepotmenu
         };
 
         // Store reads the selected Landing Pad row; the server routes it to its domain pool. Retrieve
-        // reads whichever garage list is active, closes the dialog and runs the map-placement flow --
-        // which reads that same selection before opening the map, so no argument rides on the action --
-        // to drop the vehicle at a clicked point in base.
+        // reads the active garage list (fnc_depot_retrieve), then the server spawns the vehicle on the
+        // pad for the player to position with the R3F carry.
         class garStore: RscButton
         {
             idc = 2023;
@@ -194,7 +193,7 @@ class vehicledepotmenu
             x = 26.8 * GUI_GRID_W + GUI_GRID_X;
             w = 5.7 * GUI_GRID_W;
             tooltip = "";
-            action = "[] spawn fnc_depot_retrieve_map";
+            action = "call fnc_depot_retrieve";
         };
 
         // Own row under both boxes at the right-hand end, mirroring the REQUESTS exit: neither box owns

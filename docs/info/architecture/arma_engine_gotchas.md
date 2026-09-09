@@ -236,6 +236,8 @@ Scheduled SQF is cooperative: one script runs at a time, and control passes only
 
 **Fix:** decide which machine owns an AI group before writing anything that commands it, spawn it there, route every order back to it (server ownership is the safe default for a mission-steered group). A `remoteExec`'d-by-name function must be in the registry so the receiving machine has it.
 
+`allowDamage` is machine-local and does *not* travel with ownership: a vehicle made invulnerable on the server turns vulnerable the instant a client takes it (R3F's carry `setOwnerTo`s the object to the carrier), because the new owner never ran `allowDamage false`. Re-assert it on whichever machine holds the object at each step. The depot retrieve (`server/supports/fnc_garage_init.sqf` → `client/dialog/fnc_depot_place_r3f.sqf`) sets it server-side at spawn, again on the carrying client, and restores damage only after `setOwner 2` reclaims it.
+
 ## Practice targets ignore damage entirely; `HitPart` fires on the shooter, not the owner
 
 The `TargetP_*` range targets don't process bullet damage — `Hit`/`HandleDamage` never fire whatever `allowDamage` is, so a server-side damage handler waits forever. `HitPart` does fire, but on the machine that fired the round, not where the object is local (the opposite of every other damage handler). An EH added only on the server stays silent for every client shot, and works for a hosting player.

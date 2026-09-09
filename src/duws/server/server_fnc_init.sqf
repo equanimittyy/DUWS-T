@@ -771,8 +771,10 @@ fnc_depot_recycle_confirm = compile preprocessFileLineNumbers "duws\client\dialo
 publicVariable "fnc_depot_recycle_confirm";
 fnc_depot_repair_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_repair_confirm.sqf";
 publicVariable "fnc_depot_repair_confirm";
-fnc_depot_retrieve_map = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_retrieve_map.sqf";
-publicVariable "fnc_depot_retrieve_map";
+fnc_depot_retrieve = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_retrieve.sqf";
+publicVariable "fnc_depot_retrieve";
+fnc_depot_place_r3f = compile preprocessFileLineNumbers "duws\client\dialog\fnc_depot_place_r3f.sqf";
+publicVariable "fnc_depot_place_r3f";
 fnc_veh_appearance_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_appearance_dialog.sqf";
 publicVariable "fnc_veh_appearance_dialog";
 fnc_veh_pylons_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_veh_pylons_dialog.sqf";
@@ -798,7 +800,8 @@ publicVariable "fnc_pylon_hint_success";
 // ever remoteExecs these to the server, but keeping them defined everywhere matches the pattern.
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_garage_init.sqf";
 publicVariable "fnc_garage_store";
-publicVariable "fnc_garage_retrieve_map";
+publicVariable "fnc_garage_retrieve";
+publicVariable "fnc_depot_place_finish";
 
 // Registry self-check. preprocessFile on a path that does not resolve returns "", which
 // compiles to an empty {} and then no-ops at every call site with no error anywhere -- a
