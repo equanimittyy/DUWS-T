@@ -604,7 +604,7 @@ combatant. Only combatants feed the reserve wave. A non-combatant garrisoned in 
 — it still deposits its `effForce` to the grid, so force weighting is unchanged — but never enters the reserve
 pool, so the wave never spawns a non-defender hull to drive into a defence. When the zone or town is captured, its
 attached non-combatants die with it (their tasking records are dropped). A non-combatant only ever goes live by
-being tasked out — a ferry borrow ([`transport_ferry.md`](transport_ferry.md)) or a hand order.
+being tasked out — a ferry borrow ([§Transport](#transport-carrying-a-unit-to-the-fight)) or a hand order.
 
 A zone **under attack** locks its recruited garrison units. While its garrison holds live contact with a
 BLUFOR force, none of its `garrison`ed units is one any offensive may draw — a contested zone's reserve can
@@ -730,15 +730,84 @@ the zone footprint — is refused.
 
 ### Transport: carrying a unit to the fight
 
-A tasking unit owns its whole journey, including water it cannot walk. Its route may cross a navigable body at
-a lift penalty ([§Routing](#routing-a-cost-field-over-the-grid)); at the near shore of a water span it borrows
-a transport, is ferried to the far shore, and foots on. The carrier is fetched by the route, not commanded —
-there is no boarding order and no drop cell. The full mechanic — the borrow pool (idle transports only: a hull
-on `guard` or in an uncontested `garrison`, never one running a directed order and never a contested garrison),
-the far-shore drop, de-virtualisation of a carrying pair, and the
-combatant/non-combatant split ([§Unit strength](#unit-strength)) that keeps unarmed lift out of the reserve
-wave — is specified in [transport_ferry.md](transport_ferry.md). Capacity stays one rider of any headcount;
-seats bind only when the pair goes live.
+A tasking unit owns its whole journey, including water it cannot walk. When its route crosses water it requests
+a lift across that leg, rides to the far shore, and foots on. The carrier is fetched by the route, not
+commanded — there is no boarding order and no drop cell; a ferry is a consequence of a rider's route, not an
+order. What follows is the shipped Phase 3 mechanic; the valuations layered on top are marked Phase 4 at the end.
+
+**A transport is dual-purpose.** The same boat or transport heli is either a *role unit* — given a directed
+order, it executes like any other tasking — or an *idle lift* the ferry pool may draw on. Never both at once: a
+hull on a job is off the pool, only an idle hull is lendable, so a standing order is never silently broken to
+serve another unit's crossing. A transport running a directed order (a `move`, a supply lift, any order aimed at
+a target) is a role unit, its order preserved and no rider preempting it. Two further protected states stay
+protected: already `carrying`, or garrisoned in a **contested** (locked) zone.
+
+**The borrow pool** is every tasking that is virtual (not live), `transport`-flagged and of a move type that can
+cross the leg — a boat, or a rotary transport where no boat is free (a wheeled or tracked transport is never
+water-compatible), not already `carrying`, and **idle**: on `guard`, or `garrison` in an uncontested zone. The
+idle gate is the commitment this makes: a ferry never breaks a standing order. Borrowing costs a zone no
+defender — a ferry-capable transport is a non-combatant ([§Unit strength](#unit-strength)), never enrolled in a
+zone's reserve wave, so the borrow needs no reserve draw-out and is a plain re-task.
+
+**The route crosses water** in the router
+([`fnc_opcom_route.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_route.sqf)): a land move type
+may cross navigable water at a high added A\* cost (`OPCOM_ROUTE_LIFT_PENALTY`), so the planner prefers any land
+path and routes over water only when it must. A contiguous run of water cells is one **ferry leg**. Two
+consequences carry the design. There is no land-mass reachability pre-check — a route whose ends sit on
+different land masses may legitimately join over a navigable body, and only a target reachable by neither land
+nor a navigable crossing falls through to the no-route fallback (hold straight). And the route is not tagged
+with which points are water: the executor re-tests each waypoint at step time (`DUWS_fnc_opcom_isWaterPt`), so a
+leg's lift need is read from the live grid, not a stored flag that could drift.
+
+**Trigger — at execution, not planning.** A rider advances on foot until its next waypoint is a water cell,
+stops at the near shore, and requests a lift; deferring to execution resolves contention when it actually bites.
+When lift is available the nearest free compatible idle hull binds — `carrying` (the rider's id) on the
+transport, `ridingOn` (the transport's id) on the rider; while `ridingOn` is set the rider takes no turn of its
+own, the transport drives it. The nearest-pick is mechanical now; Phase 4 is where the loop may decline to spend
+the hull. When no lift is free the rider waits at the near shore and retries each tick — under the current
+penalty a land path wins wherever one exists, so a rider only holds a water leg at a true island gap. A rider
+that keeps requesting with no lift free is logged **stranded** (a WARN every `OPCOM_FERRY_STRAND_TICKS` ticks),
+so a real deadlock shows in the RPT instead of hanging silently. Capacity is one rider of any headcount; seats
+are not checked in the virtual layer and bind only when the pair goes live, so the mechanic never depends on a
+mod fielding a roomy carrier.
+
+**The carry** reuses `DUWS_fnc_opcom_ferryStep` (server,
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)), run each tick on
+the transport, dropping at the **far shore** — the first land cell past the water span in the rider's chain:
+
+1. **Rendezvous** — not embarked: the transport marches to the rider's near-shore position on its own move type;
+   within one cell (`OPCOM_GRID_CELL`) it embarks and retargets to the far shore.
+2. **Carry** — embarked: the transport marches to the far shore, the rider's position copied onto it each tick
+   so it rides along, ignoring its own water rule.
+3. **Dismount** — on arrival the rider is released (`ridingOn = -1`, route cleared) and replans from the far
+   shore to its own target; since the far shore is the first land past the span, that replan stays on land. A
+   target across a further body simply triggers another request at the next water leg.
+4. **Transport freed** — it clears `carrying`/`embarked` and reverts to a free `guard` in place (a boat backs
+   off to navigable water, unable to rest on land), back in the idle pool. It is not consumed: one hull shuttles
+   rider after rider, and nothing auto-returns it to base. A hull borrowed from a garrison does not return — it
+   stays a staged ferry asset near the front.
+
+**De-virtualisation** is unchanged in spirit
+([§The virtualisation boundary](#the-virtualisation-boundary)): when a carrying pair streams in near a player,
+both spawn and the rider is `moveInCargo`'d into the hull if it fits, else dropped beside it (the current
+simplification, not a tied abort). The water-leg intent is lost once the pair is live — they go independent; a
+transport that survives its live spell re-virtualises as a free `guard`, back in the pool.
+
+**Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
+the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander
+recruited and left idle, nothing more. A transport leaves play only by loss, by being given a directed order
+(which takes it off the pool), or by being re-tasked into a garrison. Out of scope: a manual board verb or
+deliberate drop cell, multi-rider transports, and auto return-to-base or auto-recruit of lift.
+
+**Phase 4 valuations** sit on top of this mechanic, deferred to the decision loop: whether an idle hull leaves
+its post to ferry (weighed against vacating the post; Phase 3 auto-takes the nearest); whether a rider waits for
+lift or walks a longer land route (real only once Phase 4 lowers the penalty so water is a genuine shortcut);
+and **land-taxi** — lifting a foot unit over dry ground to save time, a pure cost/benefit with no terrain
+forcing it. The virtual speed table makes the saving concrete (`inf` at 15 ticks per cell against `wheeled` 4,
+`tracked` 8, `rotary` 2), so the loop nets drive-plus-carry against the direct walk and taxis only where lift
+wins. Land-taxi reuses the whole carry engine, differing in two ways: the trigger is distance, not a shore, and
+a dry leg's pool admits the land transports the water gate excludes (`wheeled` and `tracked`, with `rotary`
+serving either domain). Phase 3 drives none of it; the water ferry is the only lift it exercises.
 
 A **boat** is its own movement type: water-passable and **land-impassable**, the mirror of a ground unit, so
 its routes are water-only. It is **armed by default** — the detected `*_BOAT_ARMED_*` gunboat class — so it
@@ -1404,7 +1473,7 @@ docs draw on.
 - Phase 3 — Recruitment & tasking wiring: **shipped** (live playtest verification pending); code under
   `src/duws/server/warcom/opcom/` (split `belief/` and `taskings/`) — Recruit and the tasking store (`fnc_opcom_recruit`, `fnc_opcom_tasking_init`),
   movement with A\* routing and cell streaming (`fnc_opcom_task`, `fnc_opcom_task_step`, `fnc_opcom_route`,
-  `fnc_opcom_stream`), the transport ferry ([`transport_ferry.md`](transport_ferry.md)) and the
+  `fnc_opcom_stream`), the transport ferry (`fnc_opcom_ferry`, [§Transport](#transport-carrying-a-unit-to-the-fight)) and the
   recon-detection sensor (`fnc_opcom_recon_sense`) — all hand-driven through the debug harness
   (`fnc_opcom_debug_task`, client picker `fnc_debug_opcom_pick`). No automated decisions; those are Phase 4.
 - Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).

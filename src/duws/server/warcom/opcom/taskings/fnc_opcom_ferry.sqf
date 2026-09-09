@@ -3,7 +3,7 @@
 // (fnc_opcom_route lifts it at a penalty), and `advance` stops at the near shore so the tasking phase can borrow
 // a transport there. The transport ferries the rider to the far shore, drops it, and reverts to a free staged
 // guard back in the borrow pool. The rider owns its whole route; the carrier is fetched by the route, never
-// commanded (docs/plans/opcom/transport_ferry.md). A bound rider takes no turn of its own -- task_step skips it.
+// commanded (docs/plans/opcom/opcom_plan.md §Transport). A bound rider takes no turn of its own -- task_step skips it.
 if (!isServer) exitWith {};
 
 // A world point sits in a navigable-water cell -- a ferry leg for a land type.
@@ -37,7 +37,7 @@ DUWS_fnc_opcom_zoneContested = {
 
 // Shared by the borrow and the debug inspector so the two can never drift. _excludeId drops one id (a rider
 // never borrows itself); -1 drops none. Idle-only: a hull on a directed order is a role unit off the pool, so
-// a ferry never breaks a standing order (transport_ferry.md).
+// a ferry never breaks a standing order (opcom_plan.md §Transport).
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1]];
     DUWS_opcom_taskings select {

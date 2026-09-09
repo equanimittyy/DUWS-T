@@ -700,11 +700,11 @@ OPCOM_ROUTE_LAMBDA = 1;
 
 // Ferry lift penalty (metres): the cost a land move type pays to step into a navigable-water cell, set far
 // above any land detour the play box can hold -- so a target across water is reachable, but water is taken
-// only when no land route exists, and among water routes A* still picks the shortest (transport_ferry.md).
+// only when no land route exists, and among water routes A* still picks the shortest (opcom_plan.md §Transport).
 OPCOM_ROUTE_LIFT_PENALTY = 1e6;
 
 // Throttle for the stranded-rider WARN: with no lift free a rider retries every tick, so it logs only once
-// per this many -- an island-gap deadlock surfaces in the RPT without flooding it (transport_ferry.md).
+// per this many -- an island-gap deadlock surfaces in the RPT without flooding it (opcom_plan.md §Transport).
 OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
 
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
