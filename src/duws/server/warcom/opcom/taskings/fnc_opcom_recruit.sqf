@@ -34,7 +34,7 @@ private _pos = if (_moveType isEqualTo "boat") then { [_spawnPos] call DUWS_fnc_
 private _t = createHashMapFromArray [
     ["id", _id], ["order", "garrison"], ["target", []],
     ["pos", _pos], ["moveType", _moveType],
-    ["comp", _comp], ["flags", _flags],
+    ["menu", _row], ["comp", _comp], ["flags", _flags],
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
     ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],

@@ -5,7 +5,8 @@
 // serialisable and holds no object handle: `grp` is a live group's netId string (resolved with
 // groupFromNetId), never the handle (docs/info/architecture/arma_engine_gotchas.md). Fields: id;
 // order (assault/supply/move/guard/garrison); target [x,y]; pos (world point the grid reads force at,
-// never the reverse); moveType; comp (bare tokens); flags; fullForce; effForce (what the grid deposits);
+// never the reverse); moveType; menu (recruit-menu row that raised it); comp (bare tokens); flags;
+// fullForce; effForce (what the grid deposits);
 // route; leg; routeMode; status; grp; hold (earliest tick to re-issue the order); homeZone; returnZone (a
 // move's re-garrison target zone, else "").
 if (!isServer) exitWith {};

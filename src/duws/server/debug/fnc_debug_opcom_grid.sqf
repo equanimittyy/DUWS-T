@@ -48,10 +48,10 @@ private _bel = [];
     _bel pushBack [_x, DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex), DUWS_opcom_belief_str select _forEachIndex];
 } forEach DUWS_opcom_belief_pos;
 
-// Taskings -> [pos, OPFOR box icon, "TOKEN-ID:ORDER" tag]. TOKEN is the composition's unit token (APC, IFV,
-// TANK, SQUAD, RECON...), not the movement bucket, so units sharing a bucket read apart; the icon still gives
-// the domain silhouette. ID is the tasking id, keeping two of one token apart. [*] = a live unit (pos frozen
-// at its de-virt cell); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for one.
+// Taskings -> [pos, OPFOR box icon, "KIND-ID:ORDER" tag]. KIND is the recruit-menu row (RECON_HELI, TRANS_HELI,
+// RIFLES...), so rows sharing a comp token (recon_heli/trans_heli both build ["transheli"]) still read apart;
+// the icon still gives the domain silhouette. ID is the tasking id, keeping two of one kind apart. [*] = a live
+// unit (pos frozen at its de-virt cell); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for one.
 private _tasks = [];
 {
     private _mt = _x get "moveType";
@@ -60,7 +60,7 @@ private _tasks = [];
         case "boat": {"o_naval"}; case "rotary": {"o_air"}; case "fixed": {"o_air"};
         default {"o_inf"};
     };
-    private _tok = toUpper ([(_x get "comp") param [0, ""]] call DUWS_fnc_tokenName);
+    private _tok = toUpper (_x getOrDefault ["menu", [(_x get "comp") param [0, ""]] call DUWS_fnc_tokenName]);
     private _code = format ["%1-%2", _tok, _x get "id"];
     private _flag = switch (true) do {
         case ((_x get "carrying") >= 0): {" [F]"};
