@@ -123,8 +123,22 @@ private _nearestPlayerCells = {
                             ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
                             _t set ["status", "done"];
                         } else {
-                            // A rider that just bound a ferry now rides -- the transport streams the pair in, so skip.
-                            if ((_t getOrDefault ["ridingOn", -1]) < 0 && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
+                            private _reGarrisoned = false;
+                            if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
+                                private _rz = _t getOrDefault ["returnZone", ""];
+                                if (_rz isEqualTo "") then {
+                                    // Unmarked: hold the point rather than re-plan a zero-length march each tick.
+                                    _t set ["order", "guard"]; _t set ["target", _t get "pos"]; _t set ["route", []];
+                                } else {
+                                    // Marked: re-garrison the destination -- adopt it as home, rejoin its reserve wave.
+                                    _t set ["order", "garrison"]; _t set ["homeZone", _rz];
+                                    _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""];
+                                    [_rz] call DUWS_fnc_opcom_zoneReserveSync;
+                                    _reGarrisoned = true;
+                                };
+                            };
+                            // Skip the stream-in for a fresh garrison (defends via the reserve wave) and a mid-ferry rider.
+                            if (!_reGarrisoned && {(_t getOrDefault ["ridingOn", -1]) < 0} && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
                         };
                     };
                 };

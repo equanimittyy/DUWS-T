@@ -4,7 +4,8 @@
 // so the one primitive enforces the commitment rules the decision loop (Phase 4) relies on.
 //   _order: "assault" "scout" "supply" "move" "guard".
 //   _target: objective world position; ignored for guard (holds where it stands).
-params ["_t", "_order", ["_target", []]];
+//   _returnZone: `move` only -- the zone it settles into as a garrison on arrival, else it settles to guard.
+params ["_t", "_order", ["_target", []], ["_returnZone", ""]];
 if (!isServer) exitWith { false };
 
 if (!(_order in ["assault", "scout", "supply", "move", "guard"])) exitWith {
@@ -33,6 +34,8 @@ if (_order isEqualTo "guard") then {
     _t set ["route", _pts];
     _t set ["routeMode", _mode];
 };
+// Cleared off a move so a recycled record never re-garrisons on a stale mark.
+_t set ["returnZone", ["", _returnZone] select (_order isEqualTo "move")];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out of its zone reserve: pull any reserve-spawned defender (it is going mobile),

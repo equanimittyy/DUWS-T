@@ -38,7 +38,7 @@ private _t = createHashMapFromArray [
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
     ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],
-    ["carrying", -1], ["ridingOn", -1], ["embarked", false]
+    ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""]
 ];
 DUWS_opcom_taskings pushBack _t;
 // A garrison unit joins its zone's reserve so the existing wave spawns it to defend when the zone is contested.

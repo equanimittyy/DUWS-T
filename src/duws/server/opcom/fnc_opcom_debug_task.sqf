@@ -4,6 +4,7 @@
 //   ["menu"]                              -- list the recruit rows and their live prices
 //   ["recruit", row, pos, zoneKey]        -- hire a row at a world pos; returns the tasking id (or -1)
 //   ["task", id, order, targetPos]        -- give tasking `id` an active order to a target
+//   ["regarrison", id, zoneKey]           -- send tasking `id` to a zone; it settles into that garrison on arrival
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
 // Example: private _id = ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
@@ -30,6 +31,19 @@ switch (_verb) do {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
             [DUWS_opcom_taskings select _i, _b, _c] call fnc_opcom_task
+        };
+    };
+    case "regarrison": {
+        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        if (_i < 0) then {
+            ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
+        } else {
+            private _pos = ([_b] call fnc_site_at) getOrDefault ["pos", []];
+            if (_pos isEqualTo []) then {
+                ["WARN", "OPCOMDBG", format ["regarrison: no zone %1", _b]] call fnc_log; false
+            } else {
+                [DUWS_opcom_taskings select _i, "move", _pos, _b] call fnc_opcom_task
+            };
         };
     };
     case "list": {

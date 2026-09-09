@@ -702,13 +702,19 @@ whole intent on its own.
 | Assault (Attack / Intercept) | Seek & Destroy on the target point, `AWARE` |
 | Supply (Rapport, and a Build / town Reinforce / town Fortify truck) | move to the target cell in `SAFE`; on arrival delete the unit and fire the tasking's success |
 | Scout | move to the point in stealth, combat mode `GREEN` — hold fire, return fire only, never initiates |
-| Move / reposition | move to the cell in `SAFE` / `AWARE` |
+| Move / reposition | move to the cell in `SAFE` / `AWARE`; on arrival settle to `guard` and hold the point |
 | Guard | hold at its current cell in `SAFE`, defend — takes up a slot, no objective |
 
 `garrison` and Recruit issue no standing order: a recruited combatant joins its zone's garrison reserve
 (a non-combatant rests attached, [§Unit strength](#unit-strength)) virtually, and takes an order only when the zone is contested and it
 spawns to defend through the existing garrison-reserve wave, or when OPCOM draws it back out to task it for
 one of the rows above.
+
+OPCOM can also send a drawn-out unit **back** into a garrison: a `move` carrying a return-zone mark settles to
+`garrison` on arrival instead of to `guard`, adopting that zone as its home and rejoining its reserve wave — the
+mirror of the draw-out, and it may re-garrison any OPFOR-held zone, not only the one it left. Because a garrison
+defends through the wave and never OPCOM's de-virtualisation, a unit that just re-garrisoned does not stream in
+on player proximity the way an arriving `guard` does.
 
 ### Transport: carrying a unit to the fight
 
