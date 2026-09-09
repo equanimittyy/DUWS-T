@@ -147,7 +147,7 @@ These valuations sit on top of the Phase 3 mechanic, all deferred to the decisio
 - **Land-taxi — lifting a foot unit over open ground to save time.** No terrain forces this: the leg is
   walkable, so it is a pure cost/benefit — the time a foot unit loses to the march against the cost of a hull
   driving out to it, carrying it, and being spent on the trip. The virtual speed table makes the saving
-  concrete (`inf` at 30 ticks per cell against `wheeled` 15, `tracked` 20, `rotary` 5), so the loop nets
+  concrete (`inf` at 15 ticks per cell against `wheeled` 4, `tracked` 8, `rotary` 2), so the loop nets
   drive-plus-carry against the direct walk and taxis only where the lift wins. It reuses the whole carry engine
   — the idle-only borrow, the rendezvous, the drop, the revert to a free `guard` — differing from the water
   ferry in two ways: the trigger is distance, not a shore (weighed when a foot tasking takes a directed order

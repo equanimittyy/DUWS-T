@@ -251,7 +251,7 @@ cost(step into _cell) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * (_gridEne selec
   treats every cell passable, over all three domains.
 - `_lambda` is **0 for a direct route** (rapport and the Assault template — distance only,
   ignores the enemy) and **1 for a flank** (the Flank / Encircle templates — the path bends around
-  believed enemy force). The search is Dijkstra; at 3844 nodes it is cheap, but **not inside the `isNil`
+  believed enemy force). The search is A\* (octile heuristic, admissible at any `λ ≥ 0`); at 3844 nodes it is cheap, but **not inside the `isNil`
   scoring block** — run it scheduled or on its own bounded pass.
 - **When λ=1 is used**: the band picked the Flank or Encircle template
   ([§Templates](#templates-the-execution-forms)), and a lower-cost detour around believed enemy force
@@ -632,15 +632,15 @@ spread (a jet outruns a foot soldier ~80×) is compressed so the virtual layer n
 
 | Unit type | Water | Ticks per cell | ≈ per cell |
 |---|---|---|---|
-| Infantry | impassable | 30 | 150 s |
-| Wheeled | impassable | 15 | 75 s |
-| Tracked | impassable | 20 | 100 s |
-| Rotary | passable | 5 | 25 s |
-| Fixed wing | passable | 2 | 10 s |
-| Boat | water only (land impassable) | 10 | 50 s |
+| Infantry | impassable | 15 | 75 s |
+| Wheeled | impassable | 4 | 20 s |
+| Tracked | impassable | 8 | 40 s |
+| Rotary | passable | 2 | 10 s |
+| Fixed wing | passable | 0.5 | 2.5 s |
+| Boat | water only (land impassable) | 4 | 20 s |
 
 **World-stepped along the route chain.** Each type's ticks-per-cell is a world rate,
-`stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick (infantry ≈17 m, a fixed-wing 250 m). Each tick the
+`stepMetres = OPCOM_GRID_CELL / ticksPerCell` per tick (infantry ≈33 m, a fixed-wing 1000 m). Each tick the
 tasking advances its world point that far toward the next **waypoint** on its route chain — a cell centre
 on a grid route, a road node on a convoy route ([§Routing](#routing-a-cost-field-over-the-grid)) — then aims
 at the one after. On a grid route a diagonal needs no special case; the longer world distance to a corner
@@ -673,12 +673,19 @@ check runs each tick against live player cells, so the margin against a fast pla
 rate, not a fat ring: even a 200 km/h player crosses ~half a cell (~280 m at a 5 s tick) between ticks and
 is caught before contact.
 
+**Accepted limitation — a fast airborne player.** The tick-rate margin holds at ground and helicopter
+speeds but not for a jet: at 700+ km/h a fixed-wing player crosses several cells a tick and can overfly an
+infantry ring (K=1) between checks, unstreamed and so invisible to a tasking waiting on it. The same grid-K
+blind spot applies to recon detection ([§Sensors](#sensors)). Accepted rather than widening every ring; the
+fix, if it bites in play, is a larger K against airborne players (precedent: the AA hardpoint's 5000 m air
+ring), tuned then.
+
 | Unit type | K | ≈ real |
 |---|---|---|
 | Infantry | 1 | 500 m orthogonal, ~700 m diagonal |
 | Wheeled | 2 | ~1–1.4 km |
 | Tracked | 2 | ~1–1.4 km |
-| Rotary | 5 | ~2.5–3.5 km |
+| Rotary | 4 | ~2–2.8 km |
 | Fixed wing | 8 | ~4–5.5 km |
 | Boat | 2 | ~1–1.4 km |
 
@@ -867,8 +874,9 @@ faster re-scoring — [§Commitment](#commitment-intents-are-sticky)).
 
 > **Built today: the town-garrison ladder only** — the AP tier rungs and the per-tier garrison each
 > town fields ([§Town garrisons](#town-garrisons-i-through-iv)). A standalone fortification director also
-> shipped but is now disabled ([§What the commander builds](#what-the-commander-builds)). The tasking
-> menu and the appraisal that arbitrates the actions are not yet built.
+> shipped but is now disabled ([§What the commander builds](#what-the-commander-builds)). The tasking /
+> recruit mechanism these will drive shipped in Phase 3 (hand-driven via the debug harness); the appraisal
+> that arbitrates them automatically is not yet built.
 
 The actions Army Power buys, the archetype that weights the split, and the garrison ladders on both
 sides. The director here, the hardpoint director ([§What the commander builds](#what-the-commander-builds)),
@@ -1372,7 +1380,7 @@ Each phase is independently playable; the ordering is forced by what the next ph
 |---|---|---|
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
-| **3 — Recruitment & tasking wiring** | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), the recon-flagged tasking's standing detection sensor ([§Sensors](#sensors)), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
+| **3 — Recruitment & tasking wiring** *(shipped)* | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), the recon-flagged tasking's standing detection sensor ([§Sensors](#sensors)), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
 | **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with the absolute hold; flat archetype weights | The P3 mechanism + grid / force |
 | **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
@@ -1393,6 +1401,12 @@ docs draw on.
 - Phase 2 — Force weighting: **shipped**; the force model is `src/duws/server/opcom/fnc_opcom_force.sqf`
   with the single-class classifier in `shared/factions/MODERN/fn_factionAutoDetect.sqf` (the phase doc is
   retired now the phase is built).
+- Phase 3 — Recruitment & tasking wiring: **shipped** (live playtest verification pending); code under
+  `src/duws/server/opcom/` — Recruit and the tasking store (`fnc_opcom_recruit`, `fnc_opcom_tasking_init`),
+  movement with A\* routing and cell streaming (`fnc_opcom_task`, `fnc_opcom_task_step`, `fnc_opcom_route`,
+  `fnc_opcom_stream`), the transport ferry ([`transport_ferry.md`](transport_ferry.md)) and the
+  recon-detection sensor (`fnc_opcom_recon_sense`) — all hand-driven through the debug harness
+  (`fnc_opcom_debug_task`, client picker `fnc_debug_opcom_pick`). No automated decisions; those are Phase 4.
 - Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).
   Covers only the appraisal + economic-actions slice; the tasking-automation half is added when P4 begins.
 

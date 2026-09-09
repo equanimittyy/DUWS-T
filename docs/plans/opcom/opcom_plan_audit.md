@@ -10,7 +10,8 @@ kept as the tracker for the items deferred to the phase or code change that owns
 **The plan is sound.** Perception is strictly separated from truth, the score is dimensionally consistent
 (AP-return ROI, no ad-hoc normalisation), state is serialisable by construction, locality and no-retreat
 follow documented engine gotchas, and the phase order is forced by read dependencies. Phase 1 as built
-matches its spec.
+matches its spec; Phase 3 as built matches its spec (routing, streaming, recruit / tasking, ferry, recon
+detection), live playtest pending.
 
 The gates that blocked the decision-loop and template work are resolved in `opcom_plan.md`: the
 intent-clock contradiction (now ticks everywhere), Recruit's candidate count (one per hireable type), the
@@ -32,18 +33,23 @@ Not plan defects; correct when next touching these files.
   belief subjects that nothing writes yet — only direct sighting is live. Trim to what ships, or add the
   writer when its sensor lands.
 
+## Resolved — Phase 3 (shipped)
+
+The tasking-wiring phase is built and its plan-doc items are closed:
+
+- **Router** shipped as **A\*** (octile heuristic, early exit on target, one search per tick); the plan now
+  says A\* where it read Dijkstra.
+- **Fast-airborne streaming gap** accepted and documented
+  ([§The virtualisation boundary](opcom_plan.md#the-virtualisation-boundary)) — a jet at 700+ km/h can
+  overfly a K=1 ring between ticks, unstreamed; the fix, if it bites, is a larger K against airborne
+  players (precedent: the AA hardpoint's 5000 m air ring). The same grid-K blind spot applies to recon
+  detection.
+
 ## Remaining — deferred to a later phase
 
-- **Movement (Phase 3 — the tasking-wiring phase):**
-  - The router is specified as Dijkstra; use A* with a distance heuristic, early exit on the target, and
-    a budget of one route search per tick. The connectivity mask already prunes most of the 3844 cells, so
-    the cost is contained — but say A* in the plan before the phase builds it.
-  - The streaming margin is argued against a 200 km/h player; a jet at 700+ km/h overflies an infantry
-    ring (K=1) unstreamed, invisible to CAS. Either raise K against airborne players (precedent: the AA
-    hardpoint's 5000 m air ring) or note the exploit as accepted.
-  - `defenseAbandoned` reads as a counterfactual grid rebuild, which is unaffordable per candidate. State
-    the approximation — read `_gridEne` around the unit's own cell as the threat term — so the decision
-    loop does not implement the literal counterfactual.
+- **`defenseAbandoned` threat term (Phase 4):** reads as a counterfactual grid rebuild, unaffordable per
+  candidate. State the approximation — read `_gridEne` around the unit's own cell as the threat term — so
+  the decision loop does not implement the literal counterfactual.
 - **Orchestration:** the resolve predicate and capture handoff are now specified
   ([§The resolve phase](opcom_plan.md#the-resolve-phase-what-ends-a-template)); the open task is the
   verification the section calls out — confirm the zone-capture trigger fires for an AI-only fight with no
