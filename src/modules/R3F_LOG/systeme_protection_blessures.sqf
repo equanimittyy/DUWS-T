@@ -128,7 +128,7 @@ while {true} do
 		 * Sur un serveur non-dédié, on ne protège que le joueur et son groupe (économie de ressources)
 		 * Les IA non commandées par des joueurs ne seront donc pas protégées, ce qui est un moindre mal.
 		 */
-		if (isServer && !isDedicated) then {if (!isNull player) then {units group player} else {[]}}
+		if (isServer && !isDedicated) then {allUnits} // DUWS: shield ALL local units, not just the player group noted above -- a hand-carried vehicle rams and kills unshielded AI
 		/*
 		 * Chez un joueur (ou un serveur dédié), on protège toutes les unités locales.
 		 * Dans la pratique un serveur dédié n'appelle pas ce script, par choix, pour économiser les ressources.

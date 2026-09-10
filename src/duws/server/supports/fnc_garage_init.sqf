@@ -45,7 +45,7 @@ fnc_garage_retrieve = {
     private _spec = _stored select _index;
     private _veh = createVehicle [_spec select 0, _spawnPos, [], 5, "NONE"];
     _veh allowDamage false;
-    _veh enableSimulationGlobal false; // freeze for the carry: a live hull rams and kills the units R3F's group-only damage filter misses
+    _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
     _veh lock true; // block entry while the player hand-places it; both cleared in fnc_depot_place_finish
     [_veh, _spec] call DUWS_fnc_vehSpecApply;
 
