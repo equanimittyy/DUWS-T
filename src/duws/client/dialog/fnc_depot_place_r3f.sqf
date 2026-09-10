@@ -13,7 +13,9 @@ _veh allowDamage false;
 // A death mid-carry still finalizes below, so the vehicle is never left invulnerable on a dead client.
 private _placed = false;
 while { !_placed && alive player } do {
-    [_veh] call R3F_LOG_FNCT_objet_deplacer;
+    // Unload mode (4th arg): re-anchors the vehicle directly in front of the player. The plain carry
+    // preserves its current offset, which lands it beside the player since it spawns on the fixed pad.
+    [_veh, objNull, objNull, true] call R3F_LOG_FNCT_objet_deplacer;
     if ([getPosATL _veh] call fnc_in_base_keep) then {
         _placed = true;
     } else {
