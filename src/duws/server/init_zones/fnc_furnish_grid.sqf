@@ -36,6 +36,10 @@ fnc_furnish_grid = {
     #define MIN_ROOM_CELLS 20  // a room below this is a stairwell/sliver: dropped, not furnished
     #define MIN_ROOM_SQUARE 4  // and it must hold one clear NxN cell block, or a piece has nowhere to sit
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
+    #define DOOR_PAIR_MIN 1.2  // nav-point pair span that can bracket a doorway
+    #define DOOR_PAIR_MAX 5
+    #define DOOR_STEP 0.25     // sample pitch along a pair's line
+    #define DOOR_SPAN 1.5      // widest both-sides jamb gap still read as a door, not an open pinch
 
     private _seeds = _building buildingPos -1;
     if (_seeds isEqualTo []) exitWith {
@@ -186,12 +190,64 @@ fnc_furnish_grid = {
     } forEach (keys _zByStorey);
     { private _p = _x select 0; _x set [0, [_p select 0, _p select 1, _floorZof get (_x select 8)]] } forEach _cells;
 
+    // Second door source: the ray grid tags a doorway only when its jambs land on two opposite fixed bearings,
+    // so a door angled to the grid slips through. A door is really a pinch on a walk path -- so pair nearby
+    // same-floor buildingPos, and where the clear line between a pair squeezes between two close jambs, mark that
+    // floor cell a door. Model geometry, no door-selection names (modded buildings vary); adds to the ray doors.
+    private _nearestFloorCell = {
+        params ["_p"];
+        private _best = -1; private _bd = 0.8;
+        {
+            if ((_x select 1) != "blocked") then {
+                private _dd = _p distance (_x select 0);
+                if (_dd < _bd) then { _bd = _dd; _best = _forEachIndex };
+            };
+        } forEach _cells;
+        _best
+    };
+    private _pathDoors = [];
+    for "_a" from 0 to (count _seeds - 2) do {
+        private _pa = _seeds select _a;
+        for "_b" from (_a + 1) to (count _seeds - 1) do {
+            private _pb = _seeds select _b;
+            private _len = _pa distance2D _pb;
+            if (_len < DOOR_PAIR_MIN || {_len > DOOR_PAIR_MAX} || {abs ((_pa select 2) - (_pb select 2)) >= 1}) then { continue };
+            // A solid wall between the pair blocks the line: those are two unconnected rooms, not a doorway.
+            _rays = _rays + 1;
+            if (lineIntersectsSurfaces [(AGLToASL _pa) vectorAdd [0, 0, GRID_CHEST], (AGLToASL _pb) vectorAdd [0, 0, GRID_CHEST], objNull, objNull, true, 1, "GEOM"] isNotEqualTo []) then { continue };
+            private _ux = ((_pb select 0) - (_pa select 0)) / _len;
+            private _uy = ((_pb select 1) - (_pa select 1)) / _len;
+            private _px = _uy; private _py = -_ux;
+            private _bestSpan = DOOR_SPAN; private _bestP = [];
+            for "_t" from DOOR_STEP to (_len - DOOR_STEP) step DOOR_STEP do {
+                private _c = (AGLToASL (_pa vectorAdd [_ux * _t, _uy * _t, 0])) vectorAdd [0, 0, GRID_CHEST];
+                private _rL = lineIntersectsSurfaces [_c, _c vectorAdd [_px * WALL_REACH, _py * WALL_REACH, 0], objNull, objNull, true, 1, "GEOM"];
+                private _rR = lineIntersectsSurfaces [_c, _c vectorAdd [-_px * WALL_REACH, -_py * WALL_REACH, 0], objNull, objNull, true, 1, "GEOM"];
+                _rays = _rays + 2;
+                if (_rL isEqualTo [] || {_rR isEqualTo []}) then { continue };
+                private _dL = _c distance ((_rL select 0) select 0);
+                private _dR = _c distance ((_rR select 0) select 0);
+                if (_dL <= WALL_NEAR && {_dR <= WALL_NEAR} && {_dL + _dR < _bestSpan}) then {
+                    _bestSpan = _dL + _dR; _bestP = _pa vectorAdd [_ux * _t, _uy * _t, 0];
+                };
+            };
+            if (_bestP isEqualTo []) then { continue };
+            // Snap on the floor under the pinch, not chest height, so it lands on the cell plane.
+            private _fr = lineIntersectsSurfaces [(AGLToASL _bestP) vectorAdd [0, 0, 0.5], (AGLToASL _bestP) vectorAdd [0, 0, -0.8], objNull, objNull, true, 1, "GEOM"];
+            _rays = _rays + 1;
+            if (_fr isEqualTo []) then { continue };
+            private _ci = [(_fr select 0) select 0] call _nearestFloorCell;
+            if (_ci >= 0 && {_pathDoors find _ci < 0}) then { _pathDoors pushBack _ci };
+        };
+    };
+
     // Doorways blocked, not skipped: a bare "door" cell still let a piece in an adjacent open cell overhang
     // the opening. Blocking splits the rooms at the gap; reserving the neighbours keeps a piece off the mouth.
     private _ij = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
     private _doors = [];
     { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
+    { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
     {
         private _d = _cells select _x;
         _d set [1, "blocked"];
@@ -275,8 +331,8 @@ fnc_furnish_grid = {
     private _keptN = 0;
     { if ((_roomSize get _x) >= MIN_ROOM_CELLS && {_hasSquare getOrDefault [_x, false]}) then { _keptN = _keptN + 1 } } forEach (keys _roomSize);
 
-    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s)",
-        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays]] call fnc_log;
+    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s), %7 nav-door(s)",
+        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays, count _pathDoors]] call fnc_log;
     _building setVariable ["DUWS_furnishGrid", _cells];
     _cells
 };
