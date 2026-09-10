@@ -36,6 +36,8 @@ fnc_furnish_grid = {
     #define MIN_ROOM_CELLS 20  // a room below this is a stairwell/sliver: dropped, not furnished
     #define MIN_ROOM_SQUARE 4  // and it must hold one clear NxN cell block, or a piece has nowhere to sit
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
+    #define GRID_PAD 1.5       // extend the seed box this far past the outer seeds, out toward the walls
+    #define ROOF_UP 15         // interior test: this building's ceiling/roof must be overhead within this
     #define DOOR_PAIR_MIN 1.2  // nav-point pair span that can bracket a doorway
     #define DOOR_PAIR_MAX 5
     #define DOOR_STEP 0.25     // sample pitch along a pair's line
@@ -112,10 +114,10 @@ fnc_furnish_grid = {
             _minY = _minY min (_x select 1); _maxY = _maxY max (_x select 1);
         } forEach _sSeeds;
 
-        // Pad the box half a cell so wall-hugging floor is not clipped, then size the grid; coarsen the
-        // pitch if the cell count would blow the cap on a large building.
-        private _spanX = (_maxX - _minX) + GRID_CELL;
-        private _spanY = (_maxY - _minY) + GRID_CELL;
+        // Pad the box out toward the walls (seeds sit off the wall); the roof gate drops what the overshoot
+        // reaches outside. Coarsen the pitch if the cell count would blow the cap on a large building.
+        private _spanX = (_maxX - _minX) + 2 * GRID_PAD;
+        private _spanY = (_maxY - _minY) + 2 * GRID_PAD;
         private _pitch = GRID_CELL;
         private _nx = ceil (_spanX / _pitch);
         private _ny = ceil (_spanY / _pitch);
@@ -141,6 +143,12 @@ fnc_furnish_grid = {
                 private _fr = lineIntersectsSurfaces [_fb, _fe, objNull, objNull, true, 1, "GEOM"];
                 if (_fr isNotEqualTo []) then {
                     private _floorASL = (_fr select 0) select 0;
+
+                    // Interior gate: the grown box overshoots the walls, where the down-ray still finds terrain --
+                    // keep a cell only if this building is overhead; exterior ground sees sky.
+                    _rays = _rays + 1;
+                    private _roof = lineIntersectsSurfaces [_floorASL vectorAdd [0, 0, 0.3], _floorASL vectorAdd [0, 0, ROOF_UP], objNull, objNull, true, 1, "GEOM"];
+                    if (_roof isEqualTo [] || {!(((_roof select 0) select 2) isEqualTo _building) && {!(((_roof select 0) select 3) isEqualTo _building)}}) then { continue };
 
                     // Wall ring at chest height, not the floor, so a low sill is not read as a wall.
                     private _cb = _floorASL vectorAdd [0, 0, GRID_CHEST];
@@ -191,10 +199,8 @@ fnc_furnish_grid = {
     } forEach (keys _zByStorey);
     { private _p = _x select 0; _x set [0, [_p select 0, _p select 1, _floorZof get (_x select 8)]] } forEach _cells;
 
-    // Second door source: the ray grid catches a doorway only when its jambs fall on two opposite fixed
-    // bearings, missing angled ones. A door is a jamb pinch between rooms, so walk the line between nearby
-    // same-floor buildingPos and, where wall closes to a door-width gap (DOOR_MIN..DOOR_SPAN) on both sides,
-    // mark that floor cell a door. Lateral rays only, so a shut door leaf on the through axis cannot hide it.
+    // Second door source for doorways angled off the grid (the ray test only catches jambs on fixed bearings):
+    // pinch-test the line between nearby buildingPos, lateral rays only so a shut door leaf cannot hide the gap.
     private _nearestFloorCell = {
         params ["_p"];
         private _best = -1; private _bd = 0.8;
