@@ -39,6 +39,7 @@ fnc_furnish_grid = {
     #define DOOR_PAIR_MIN 1.2  // nav-point pair span that can bracket a doorway
     #define DOOR_PAIR_MAX 5
     #define DOOR_STEP 0.25     // sample pitch along a pair's line
+    #define DOOR_MIN 0.5       // narrower both-sides gap is wall thickness, not a doorway
     #define DOOR_SPAN 1.5      // widest both-sides jamb gap still read as a door, not an open pinch
 
     private _seeds = _building buildingPos -1;
@@ -190,10 +191,10 @@ fnc_furnish_grid = {
     } forEach (keys _zByStorey);
     { private _p = _x select 0; _x set [0, [_p select 0, _p select 1, _floorZof get (_x select 8)]] } forEach _cells;
 
-    // Second door source: the ray grid tags a doorway only when its jambs land on two opposite fixed bearings,
-    // so a door angled to the grid slips through. A door is really a pinch on a walk path -- so pair nearby
-    // same-floor buildingPos, and where the clear line between a pair squeezes between two close jambs, mark that
-    // floor cell a door. Model geometry, no door-selection names (modded buildings vary); adds to the ray doors.
+    // Second door source: the ray grid catches a doorway only when its jambs fall on two opposite fixed
+    // bearings, missing angled ones. A door is a jamb pinch between rooms, so walk the line between nearby
+    // same-floor buildingPos and, where wall closes to a door-width gap (DOOR_MIN..DOOR_SPAN) on both sides,
+    // mark that floor cell a door. Lateral rays only, so a shut door leaf on the through axis cannot hide it.
     private _nearestFloorCell = {
         params ["_p"];
         private _best = -1; private _bd = 0.8;
@@ -212,9 +213,6 @@ fnc_furnish_grid = {
             private _pb = _seeds select _b;
             private _len = _pa distance2D _pb;
             if (_len < DOOR_PAIR_MIN || {_len > DOOR_PAIR_MAX} || {abs ((_pa select 2) - (_pb select 2)) >= 1}) then { continue };
-            // A solid wall between the pair blocks the line: those are two unconnected rooms, not a doorway.
-            _rays = _rays + 1;
-            if (lineIntersectsSurfaces [(AGLToASL _pa) vectorAdd [0, 0, GRID_CHEST], (AGLToASL _pb) vectorAdd [0, 0, GRID_CHEST], objNull, objNull, true, 1, "GEOM"] isNotEqualTo []) then { continue };
             private _ux = ((_pb select 0) - (_pa select 0)) / _len;
             private _uy = ((_pb select 1) - (_pa select 1)) / _len;
             private _px = _uy; private _py = -_ux;
@@ -227,8 +225,9 @@ fnc_furnish_grid = {
                 if (_rL isEqualTo [] || {_rR isEqualTo []}) then { continue };
                 private _dL = _c distance ((_rL select 0) select 0);
                 private _dR = _c distance ((_rR select 0) select 0);
-                if (_dL <= WALL_NEAR && {_dR <= WALL_NEAR} && {_dL + _dR < _bestSpan}) then {
-                    _bestSpan = _dL + _dR; _bestP = _pa vectorAdd [_ux * _t, _uy * _t, 0];
+                private _span = _dL + _dR;
+                if (_dL <= WALL_NEAR && {_dR <= WALL_NEAR} && {_span >= DOOR_MIN} && {_span < _bestSpan}) then {
+                    _bestSpan = _span; _bestP = _pa vectorAdd [_ux * _t, _uy * _t, 0];
                 };
             };
             if (_bestP isEqualTo []) then { continue };
