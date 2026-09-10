@@ -246,23 +246,21 @@ fnc_furnish_grid = {
         };
     };
 
-    // Doorways blocked, not skipped: a bare "door" cell still let a piece in an adjacent open cell overhang
-    // the opening. Blocking splits the rooms at the gap; reserving the neighbours keeps a piece off the mouth.
+    // A door cell alone left neighbour cells free to overhang the mouth. Block the ring, don't just reserve it:
+    // only "blocked" stops flood-fill, so the rooms split at a full-width plug and no piece sits in the opening.
     private _ij = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
     private _doors = [];
     { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
     { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
     {
-        private _d = _cells select _x;
-        _d set [1, "blocked"];
-        _d set [5, true];
-        _d params ["", "", "", "", "", "", "_i", "_j", "_s"];
-        {
-            _x params ["_dx", "_dy"];
-            private _ni = _ij getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], -1];
-            if (_ni >= 0) then { (_cells select _ni) set [5, true] };
-        } forEach [[1,0],[-1,0],[0,1],[0,-1]];
+        (_cells select _x) params ["", "", "", "", "", "", "_i", "_j", "_s"];
+        for "_dx" from -1 to 1 do {
+            for "_dy" from -1 to 1 do {
+                private _ni = _ij getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], -1];
+                if (_ni >= 0) then { private _n = _cells select _ni; _n set [1, "blocked"]; _n set [5, true] };
+            };
+        };
     } forEach _doors;
 
     // Flood-fill non-blocked cells into rooms. Blocked cells -- walls, and the doorways blocked above -- hold
