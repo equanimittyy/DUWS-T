@@ -314,7 +314,7 @@ fnc_furnish_building = {
         params ["_cell", "_class"];
         (_catalog get _class) params ["", "_fy"];
         _cell params ["_cpos", "", "_nearB", "_clear"];
-        (_dimsOf _class) params ["_hx", "_hy"];
+        ([_class] call _dimsOf) params ["_hx", "_hy"];
         if (_nearB >= 0) then { _nearB = _bdir + 90 * round ((_nearB - _bdir) / 90) };
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _center = _cpos;
@@ -470,7 +470,7 @@ fnc_furnish_building = {
             while { _placed < _nAnch && _miss < PLACE_RETRY } do {
                 private _cls = [_anchorClasses] call _pickCapped;
                 if (_cls == "") exitWith {};
-                (_dimsOf _cls) params ["_ahx", "_ahy"];
+                ([_cls] call _dimsOf) params ["_ahx", "_ahy"];
                 private _riX = ceil ((_ahx + SEAT_GAP) / _pitch);
                 private _riY = ceil ((_ahy + SEAT_GAP) / _pitch);
                 private _free = _rcells select { (_x select 1) == "open" && {!(_x select 5)} && {[_x, _riX, _riY] call _ringsClear} };
@@ -501,7 +501,7 @@ fnc_furnish_building = {
             while { _placed < _nRug && _miss < PLACE_RETRY } do {
                 private _cls = [_rugClasses] call _pickCapped;
                 if (_cls == "") exitWith {};
-                (_dimsOf _cls) params ["_rhx", "_rhy"];
+                ([_cls] call _dimsOf) params ["_rhx", "_rhy"];
                 private _free = _rcells select { (_x select 1) != "blocked" && {(_x select 1) != "door"} && {!(_x select 5)} && {[_x select 0, _bdir, _rhx, _rhy, 0.1] call _footFree} };
                 if (_free isEqualTo []) then {
                     _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
