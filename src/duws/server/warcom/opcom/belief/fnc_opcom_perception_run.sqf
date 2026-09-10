@@ -10,28 +10,33 @@ call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
 
 while {true} do {
+    // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
+    // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
-    call fnc_opcom_sense;
-    call fnc_opcom_recon_sense;
-    // OP posts' recon screen, driven on OPCOM's tick beside the belief sensors (defined in fnc_hardpoint_stream).
-    call DUWS_fnc_hardpointOPSense;
-    call fnc_opcom_decay;
-    call fnc_opcom_belief_prune;
-    call fnc_opcom_grid_rebuild;
+    private _stage = "";
+    try {
+        _stage = "sense";    call fnc_opcom_sense;
+        _stage = "recon";    call fnc_opcom_recon_sense;
+        // OP posts' recon screen, driven on OPCOM's tick beside the belief sensors (defined in fnc_hardpoint_stream).
+        _stage = "opsense";  call DUWS_fnc_hardpointOPSense;
+        _stage = "decay";    call fnc_opcom_decay;
+        _stage = "prune";    call fnc_opcom_belief_prune;
+        _stage = "grid";     call fnc_opcom_grid_rebuild;
+        // Task step after the rebuild, so it reads the grid this tick just refreshed.
+        _stage = "taskstep"; call fnc_opcom_task_step;
 
-    // Step the taskings after the grid it reads is fresh. Fault-contained so a Phase 3 bug logs and the
-    // perception thread lives -- the grid/belief half must keep running even if the tasking half throws.
-    try { call fnc_opcom_task_step } catch { ["ERROR", "OPCOM", format ["task step threw: %1", _exception]] call fnc_log };
-
-    // A missing line means the tick threw before here and the loop is dead; friCells/eneCells 0
-    // means the grid holds no force this tick; belief is the count of live sighting stamps; fresh is the
-    // groups an observer sensed this tick (0 while belief>0 means everything is being held on last-seen).
-    ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8",
-        DUWS_opcom_tick, DUWS_opcom_grid_w,
-        {_x > 0.05} count DUWS_opcom_grid_fri,
-        {_x > 0.05} count DUWS_opcom_grid_ene,
-        selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
-        count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh]] call fnc_log;
+        // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this
+        // tick (0 while belief>0 means everything held on last-seen).
+        _stage = "debuglog";
+        ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8",
+            DUWS_opcom_tick, DUWS_opcom_grid_w,
+            {_x > 0.05} count DUWS_opcom_grid_fri,
+            {_x > 0.05} count DUWS_opcom_grid_ene,
+            selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
+            count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh]] call fnc_log;
+    } catch {
+        ["ERROR", "OPCOM", format ["tick %1 threw in %2, thread held alive: %3", DUWS_opcom_tick, _stage, _exception]] call fnc_log;
+    };
 
     sleep OPCOM_TICK_PERIOD;
 };
