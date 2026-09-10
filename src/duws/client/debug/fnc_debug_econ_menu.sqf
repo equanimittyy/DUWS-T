@@ -1,23 +1,19 @@
 // Locality: client -- the button handlers below run on whoever opened the menu.
 /*
-    Developer tool: type a signed amount, click what it lands in. The two campaign pools are read
-    and written from here; a town's reputation and worth and the escalation counter are server-only
-    state, so those arrive from fnc_debug_econ_server and their edits go back to it.
-    Reached from fnc_debug_menu.sqf. Strings are English-only for the same reason as that file.
+    Developer tool: type a signed amount, click what it lands in. Campaign pools are client globals
+    edited here directly; town rep/worth and the escalation counter are server-only, so those
+    round-trip through fnc_debug_econ_server. English-only like fnc_debug_menu.
 */
 if (!hasInterface) exitWith {};
 
-// Re-checked rather than trusted to the caller: this function is publicVariable'd, so every
-// client holds a copy it can call, and unlike the request menus nothing here charges for
-// what it hands out.
+// Re-checked, not trusted to the caller: this is publicVariable'd, so every client holds a callable copy.
 if (!((vehiclevarname player) in game_master)) exitWith {};
 
 disableSerialization;
 private _display = createDialog ["RscDisplayEmpty", false];
 if (isNull _display) exitWith {};
 
-// Recorded for fnc_debug_econ_fill, which arrives with the server's snapshot several frames from
-// now and cannot be handed a display it was not open for. Cleared by the close handler.
+// Recorded for fnc_debug_econ_fill: its snapshot arrives frames later and can't be handed this display. Cleared on close.
 uiNamespace setVariable ["DUWS_debug_econ_display", _display];
 
 private _bg = _display ctrlCreate ["RscText", 9510];
@@ -45,9 +41,8 @@ _edit ctrlCommit 0;
 // box by IDC and the target is carried by the clicked button's own IDC.
 private _apply = {
     private _dlg = ctrlParent (_this select 0);
-    // Whole points only: the CP pool is printed raw on the HUD, so a fraction reaching it
-    // renders as "32.05". parseNumber yields 0 for anything unparseable, which is also the
-    // one delta worth refusing -- so a typo reports itself instead of closing silently.
+    // Round: the CP pool prints raw on the HUD, so a fraction would land as "32.05". parseNumber
+    // yields 0 on garbage -- the one delta worth refusing, so a typo reports itself.
     private _delta = round (parseNumber (ctrlText (_dlg displayCtrl 9513)));
     if (_delta == 0) exitWith { hint "Enter a non-zero number."; };
 
@@ -59,25 +54,22 @@ private _apply = {
     if (_i >= 0) exitWith {
         switch (_i) do {
             case 0: { [_delta, "debug menu"] remoteExec ["fnc_cp_adjust", 2]; };
-            // Pass the delta as _earned too so debug AP advances the tier like real income; clamped
-            // at 0 because the earned counter is a one-way ratchet and a negative test delta must not
-            // credit it.
+            // Delta doubles as _earned so debug AP advances the tier like income; clamped at 0 -- the
+            // earned counter is a one-way ratchet a negative test delta must not credit.
             case 1: { ["BLU", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
             case 2: { ["OPF", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
         };
         ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
     };
 
-    // Every remaining button edits server-only state, so it travels and the window then asks for a
-    // fresh snapshot. Both calls go to the same target, which runs them in the order they were sent,
-    // so the snapshot always reflects the edit that preceded it.
+    // Remaining buttons edit server-only state, then request a snapshot. Same target runs them in
+    // send order, so the snapshot always reflects the edit before it.
     if (_idc == 9521) exitWith {
         ["escalation", player, [_delta]] remoteExec ["fnc_debug_econ_server", 2];
         ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
     };
 
-    // Town rep, worth and garrison tier. The row's data carries the town index rather than its list
-    // position.
+    // Row data carries the town index, not its list position.
     private _list = _dlg displayCtrl 9522;
     private _sel = lbCurSel _list;
     if (_sel < 0) exitWith { hint "Pick a town first."; };
@@ -99,7 +91,7 @@ private _apply = {
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
 } forEach [9514, 9515, 9516];
 
-// Escalation. Filled by fnc_debug_econ_fill; until then it says so rather than showing a stale zero.
+// Filled by fnc_debug_econ_fill; until then says so rather than showing a stale zero.
 private _escReadout = _display ctrlCreate ["RscText", 9520];
 _escReadout ctrlSetPosition [0.26, 0.39, 0.48, 0.04];
 _escReadout ctrlSetText "Escalation: asking the server...";
@@ -111,13 +103,11 @@ _escBtn ctrlSetText "Destroyed houses +/- amount";
 _escBtn ctrlCommit 0;
 _escBtn ctrlAddEventHandler ["ButtonClick", _apply];
 
-// Towns. A listbox rather than a map click: the same choice in one control, with the standing and
-// worth of every town readable side by side instead of one per click.
+// Listbox, not a map click: every town's standing and worth readable side by side.
 private _townLabel = _display ctrlCreate ["RscText", 9525];
 _townLabel ctrlSetPosition [0.26, 0.49, 0.48, 0.04];
-// The tier caveat is on the label because it is the one edit here that can appear to do nothing:
-// the band decides whether OPFOR holds a town at all, so the garrison thread zeroes a tier set on a
-// town above -10 on its next cycle.
+// Tier caveat on the label: it's the one edit that can look like a no-op -- the garrison thread
+// zeroes a tier set on a town above -10, since the band decides whether OPFOR holds it at all.
 _townLabel ctrlSetText "Towns (rep clamps to +/-20; tier 0-4, and only holds below -10):";
 _townLabel ctrlCommit 0;
 
@@ -125,8 +115,7 @@ private _list = _display ctrlCreate ["RscListBox", 9522];
 _list ctrlSetPosition [0.26, 0.53, 0.48, 0.14];
 _list ctrlCommit 0;
 
-// Three across on the pool row's spacing rather than two halves, so the tier button fits without
-// growing the window into the close button below it.
+// Three across (pool-row spacing), not two halves, so the tier button fits without growing into Close.
 {
     private _btn = _display ctrlCreate ["RscButton", _x];
     _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.68, 0.115, 0.05];

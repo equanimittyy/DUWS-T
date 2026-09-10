@@ -1,23 +1,16 @@
-// Locality: the client that asked -- fnc_debug_econ_server answers this with its snapshot.
-/*
-    Redraws the debug economy window after a snapshot: the server-only town list and escalation
-    readout, plus the two campaign pools re-read from their now-current globals so a pool edit shows
-    its new total. Arrives asynchronously, so it finds its own controls by IDC rather than being
-    handed them, and does nothing if the window has since been closed.
-    Strings are English-only for the same reason as the rest of the debug tooling.
-*/
+// Locality: the client that asked -- fnc_debug_econ_server answers this with its snapshot. Arrives
+// whole frames after the request, so it finds its controls by IDC and no-ops if the window closed
+// meanwhile. English-only like the rest of the debug tooling.
 if (!hasInterface) exitWith {};
 
 params [["_towns", []], ["_escalation", []]];
 
 disableSerialization;
-// The window records itself in uiNamespace when it opens, because this answer arrives whole frames
-// later and has no other way to find it. Null means the player closed it in the meantime.
+// Recorded in uiNamespace by the menu on open; null = closed since the request.
 private _display = uiNamespace getVariable ["DUWS_debug_econ_display", displayNull];
 if (isNull _display) exitWith {};
 
-// Pools are client globals the server broadcasts; re-read them on each snapshot so a pool edit
-// shows its new total instead of the figure frozen at open time.
+// Client globals the server broadcasts; re-read each snapshot so a pool edit shows its new total.
 {
     private _ctrl = _display displayCtrl (_x select 0);
     if (!isNull _ctrl) then { _ctrl ctrlSetText format [_x select 1, _x select 2] };
@@ -29,10 +22,8 @@ if (isNull _list) exitWith {};
 lbClear _list;
 {
     _x params ["_index", "_name", "_hasRep", "_rep", "_ap", ["_tier", 0], ["_str", 1]];
-    // The row carries the town index as its data, so the buttons act on the town the player picked
-    // rather than on the position it happens to occupy in a list that skips nothing today but might.
-    // Tier is arabic here rather than the roman the map readout prints: this is the figure the +/-
-    // button moves, so a tester reads it in the units they are typing a delta in.
+    // Data = town index, not row position: buttons act on the picked town even if the list order changes.
+    // Tier arabic here, not the map's roman -- it's the figure the +/- button moves.
     private _row = _list lbAdd format ["%1  --  rep %2, worth %3, tier %4, str %5",
         _name, if (_hasRep) then { _rep } else { "n/a" }, _ap, _tier, _str];
     _list lbSetData [_row, str _index];
@@ -46,8 +37,7 @@ _escalation params [["_destroyed", -1], ["_budget", 0], ["_tier", 0], ["_level",
 if (_destroyed < 0) then {
     _readout ctrlSetText "Escalation: not running in this campaign.";
 } else {
-    // Tier size is printed because it is what the level costs: the destroyed count on its own says
-    // nothing about how close the next level is on this particular map.
+    // Print tier size too: the destroyed count alone doesn't say how close the next level is on this map.
     _readout ctrlSetText format
         ["Escalation: %1 of %2 houses destroyed | level %3/11 | %4 per level | prices x%5",
         _destroyed, _budget, _level, round _tier, _mult];
