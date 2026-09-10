@@ -11,11 +11,10 @@
 // engine config); the lint (tests/lint/check_furniture_catalog.py) checks row shape and vocabulary.
 //
 // Columns: [class, role, frontYaw, set[], seats, maxPerRoom?, required?]  (last two optional, default 0)
-//   role       one of five placement categories, each its own placer pass:
+//   role       one of four placement categories, each its own placer pass:
 //                anchor  -- needs open floor; takes seats beside it (a table, a desk).
 //                seat    -- placed at an anchor's edge, facing in; never standalone.
 //                wall    -- placed back-flush and perpendicular to a wall (sofa, bed, cabinet).
-//                rug     -- laid flat on any free floor.
 //                clutter -- seated on an anchor's top.
 //   frontYaw   degrees subtracted from a target bearing so the model's real front lands on it (heading =
 //              target - frontYaw); i.e. the bearing the front points at when placed at heading 0 (+Y due
@@ -24,12 +23,12 @@
 //   seats      anchors only: -1 = a seat on every open side (dining table); N = exactly N on the front
 //              (a desk is 1). 0 (ignored) for every other role.
 //   maxPerRoom optional cap on how many of this class one room gets across the distinct-piece passes
-//              (wall / anchor / rug). Absent or 0 = no limit. Not applied to per-anchor seats or clutter.
+//              (wall / anchor). Absent or 0 = no limit. Not applied to per-anchor seats or clutter.
 //   required   optional. 1 = every room of this class's set attempts one before the random wall fill and
 //              regardless of the wall budget, so a signature piece (a bedroom's bed) is not lost to the
 //              random pick. 0 or absent = random pass only. Wall pieces.
 
-// -- living: dining tables + their chairs, wall seating, floor covers, tabletop clutter --
+// -- living: dining tables + their chairs, wall seating, tabletop clutter --
 ["Land_CampingTable_small_F",       "anchor",  0, ["living"], -1],
 ["Land_CampingTable_F",             "anchor",  0, ["living"], -1],
 ["Land_CampingTable_small_white_F", "anchor",  0, ["living"], -1],
@@ -51,8 +50,6 @@
 ["Land_RattanTable_01_F",           "wall",    0, ["living"],  0],
 ["Fridge_01_closed_F",              "wall",  180, ["living"],  0],
 ["Fridge_01_open_F",                "wall",  180, ["living"],  0],
-["Land_Rug_01_F",                   "rug",     0, ["living"],  0],
-["Land_Rug_01_Traditional_F",       "rug",     0, ["living"],  0],
 ["Land_BakedBeans_F",               "clutter", 0, ["living"],  0],
 ["Land_Can_Dented_F",               "clutter", 0, ["living"],  0],
 ["Land_Can_V2_F",                   "clutter", 0, ["living"],  0],
