@@ -124,6 +124,32 @@ for domain in \
     done < <(echo "$ips")
 done
 
+# Claude Code self-update egress. NON-fatal like the Arma block: updating is optional (the
+# mission only needs api.anthropic.com, above), so a resolve failure must not abort the
+# firewall and kill all networking.
+#   claude.ai              install bootstrap + version redirect
+#   storage.googleapis.com GCS dist bucket serving the native binary
+# storage.googleapis.com is a rotating Google-frontend IP pool; IPs are pinned at container
+# start, so an update may need a firewall re-run if they drift.
+for domain in \
+    "claude.ai" \
+    "storage.googleapis.com"; do
+    echo "Resolving $domain..."
+    ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
+    if [ -z "$ips" ]; then
+        echo "WARNING: Failed to resolve $domain — skipping (Claude update host, non-fatal)"
+        continue
+    fi
+    while read -r ip; do
+        if [[ ! "$ip" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            echo "WARNING: Invalid IP from DNS for $domain: $ip — skipping"
+            continue
+        fi
+        echo "Adding $ip for $domain"
+        ipset add allowed-domains "$ip" -exist
+    done < <(echo "$ips")
+done
+
 # Get host IP from default route
 HOST_IP=$(ip route | grep default | cut -d" " -f3)
 if [ -z "$HOST_IP" ]; then
