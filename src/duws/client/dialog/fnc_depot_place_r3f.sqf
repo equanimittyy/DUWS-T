@@ -13,14 +13,16 @@ _veh allowDamage false;
 // A death mid-carry still finalizes below, so the vehicle is never left invulnerable on a dead client.
 private _placed = false;
 while { !_placed && alive player } do {
-    // Unload mode (4th arg): re-anchors the vehicle directly in front of the player. The plain carry
-    // preserves its current offset, which lands it beside the player since it spawns on the fixed pad.
-    [_veh, objNull, objNull, true] call R3F_LOG_FNCT_objet_deplacer;
-    if ([getPosATL _veh] call fnc_in_base_keep) then {
-        _placed = true;
-    } else {
-        hint localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE";
-        waitUntil { !R3F_LOG_mutex_local_verrou };
+    // R3F's carry lock is global; picking up while it's held no-ops with a hint, so wait it out.
+    waitUntil { !R3F_LOG_mutex_local_verrou || !alive player };
+    if (alive player) then {
+        // 4th arg = unload mode, re-anchoring in front; plain carry keeps the spawn offset, landing it beside.
+        [_veh, objNull, objNull, true] call R3F_LOG_FNCT_objet_deplacer;
+        if ([getPosATL _veh] call fnc_in_base_keep) then {
+            _placed = true;
+        } else {
+            hint localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE";
+        };
     };
 };
 
