@@ -127,13 +127,11 @@ done
 # Claude Code self-update egress. NON-fatal like the Arma block: updating is optional (the
 # mission only needs api.anthropic.com, above), so a resolve failure must not abort the
 # firewall and kill all networking.
-#   claude.ai              install bootstrap + version redirect
-#   storage.googleapis.com GCS dist bucket serving the native binary
-# storage.googleapis.com is a rotating Google-frontend IP pool; IPs are pinned at container
-# start, so an update may need a firewall re-run if they drift.
+# Only downloads.claude.ai: the native updater serves version check, manifest and binary all
+# from there — NOT claude.ai or a GCS bucket, which is what the earlier rule wrongly allowed.
+# Rotating Google-frontend IPs, pinned at container start; may need a re-run if they drift.
 for domain in \
-    "claude.ai" \
-    "storage.googleapis.com"; do
+    "downloads.claude.ai"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
