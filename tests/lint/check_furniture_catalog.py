@@ -7,10 +7,11 @@ furniture_catalog.hpp is the one place class-specific furniture knowledge lives;
 non-numeric frontYaw -- compiles into the array clean and then misplaces or drops a piece
 at runtime with no error. This catches the class before it ships, python-only.
 
-Per row [class, role, frontYaw, set[], seats, maxPerRoom?] it checks:
-  - 5 or 6 columns; class a non-empty string, unique across the file;
+Per row [class, role, frontYaw, set[], seats, maxPerRoom?, required?] it checks:
+  - 5 to 7 columns; class a non-empty string, unique across the file;
   - role in the known set; every set[] entry a known set, list non-empty;
-  - frontYaw numeric; seats an integer; the optional maxPerRoom a non-negative integer.
+  - frontYaw numeric; seats an integer; the optional maxPerRoom a non-negative integer;
+  - the optional required flag 0 or 1.
 
 It does NOT check that a class resolves in CfgVehicles/CfgMagazines/CfgWeapons -- python
 cannot read the engine config, so the runtime loader logs and skips an unresolved class --
@@ -97,8 +98,8 @@ def main():
             fails.append((r[:40], "row is not a [...] literal"))
             continue
         cols = split_top(r[1:-1])
-        if len(cols) not in (5, 6):
-            fails.append((r[:40], f"{len(cols)} columns, expected 5 or 6"))
+        if len(cols) not in (5, 6, 7):
+            fails.append((r[:40], f"{len(cols)} columns, expected 5, 6 or 7"))
             continue
         cls = unquote(cols[0])
         role = unquote(cols[1])
@@ -118,8 +119,10 @@ def main():
             fails.append((tag, f"set[] '{cols[3]}' empty or names an unknown set"))
         if not is_int(cols[4]):
             fails.append((tag, f"seats '{cols[4]}' not an integer"))
-        if len(cols) == 6 and not (is_int(cols[5]) and int(cols[5]) >= 0):
+        if len(cols) >= 6 and not (is_int(cols[5]) and int(cols[5]) >= 0):
             fails.append((tag, f"maxPerRoom '{cols[5]}' not a non-negative integer"))
+        if len(cols) == 7 and not (is_int(cols[6]) and int(cols[6]) in (0, 1)):
+            fails.append((tag, f"required '{cols[6]}' not 0 or 1"))
 
     print(f"[furniture] checked {len(rows)} catalog row(s), {len(seen)} class(es)")
     if fails:

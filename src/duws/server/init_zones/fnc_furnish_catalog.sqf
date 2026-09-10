@@ -3,7 +3,7 @@
 // which consumes it. Server-only, not broadcast.
 //
 // Reads furniture_catalog.hpp into two cached lookups, built once on first call:
-//   DUWS_furnitureCatalog   class -> [role, frontYaw, sets, seats, maxPerRoom]
+//   DUWS_furnitureCatalog   class -> [role, frontYaw, sets, seats, maxPerRoom, required]
 //   DUWS_furnitureRoleIndex role  -> [[class, sets], ...]   (the placer picks a class per role + set)
 // A class resolving in none of CfgVehicles/CfgMagazines/CfgWeapons is logged and skipped -- an
 // unknown furniture class is our own gap, distinct from an unknown building class the grid still handles.
@@ -20,14 +20,14 @@ fnc_furnish_catalog = {
     private _byRole = createHashMap;
     private _dropped = 0;
     {
-        _x params ["_cls", "_role", "_fy", "_sets", "_seats", ["_max", 0]];
+        _x params ["_cls", "_role", "_fy", "_sets", "_seats", ["_max", 0], ["_req", 0]];
         private _resolves = isClass (configFile >> "CfgVehicles" >> _cls)
             || {isClass (configFile >> "CfgMagazines" >> _cls)}
             || {isClass (configFile >> "CfgWeapons" >> _cls)};
         if (!_resolves) then {
             _dropped = _dropped + 1;
         } else {
-            _cat set [_cls, [_role, _fy, _sets, _seats, _max]];
+            _cat set [_cls, [_role, _fy, _sets, _seats, _max, _req]];
             private _lst = _byRole getOrDefault [_role, []];
             _lst pushBack [_cls, _sets];
             _byRole set [_role, _lst];

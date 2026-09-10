@@ -362,6 +362,26 @@ fnc_furnish_building = {
             // resets the run, so a crowded corner does not cut the whole pass short.
             private _nWall = (floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV)) min WALL_MAX;
             private _placed = 0; private _miss = 0;
+
+            // Required pieces first: a wall class flagged required in the catalog (a bedroom's bed) is attempted
+            // before the random fill and regardless of _nWall, so a small room still gets it and a random shelf
+            // pick cannot crowd it out. Cap-counted so the fill below will not re-pick it.
+            {
+                private _reqCls = _x;
+                private _tries = 0; private _got = false;
+                while { !_got && _tries < PLACE_RETRY } do {
+                    private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
+                    if (_free isEqualTo []) exitWith {};
+                    private _res = [selectRandom _free, _reqCls] call _placeWall;
+                    if (_res isEqualTo []) then { _tries = _tries + 1 } else {
+                        _res call _keepFrozen;
+                        _classCount set [_reqCls, (_classCount getOrDefault [_reqCls, 0]) + 1];
+                        _placed = _placed + 1;
+                        _got = true;
+                    };
+                };
+            } forEach (_wallClasses select { ((_catalog get _x) select 5) > 0 });
+
             while { _placed < _nWall && _miss < PLACE_RETRY } do {
                 private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
                 if (_free isEqualTo []) exitWith {};
