@@ -45,6 +45,7 @@ fnc_garage_retrieve = {
     private _spec = _stored select _index;
     private _veh = createVehicle [_spec select 0, _spawnPos, [], 5, "NONE"];
     _veh allowDamage false;
+    _veh lock true; // block entry while the player hand-places it; unlocked in fnc_depot_place_finish
     [_veh, _spec] call DUWS_fnc_vehSpecApply;
 
     DUWS_garage_stored deleteAt _index;
@@ -63,5 +64,6 @@ fnc_depot_place_finish = {
 
     _veh setOwner 2;
     _veh allowDamage true;
+    _veh lock false;
     _veh setVariable ["R3F_LOG_disabled", true, true];
 };

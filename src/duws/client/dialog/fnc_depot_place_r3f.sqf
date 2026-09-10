@@ -9,6 +9,18 @@ private _veh = objectFromNetId _vehNet;
 if (isNull _veh) exitWith {};
 
 _veh allowDamage false;
+_veh setVariable ["DUWS_depot_placing", true];
+
+// R3F's carry returns only after a 5s settle; show progress while a dropped-outside vehicle waits for the re-pickup.
+[_veh] spawn {
+    params ["_veh"];
+    while { alive player && !isNull _veh && (_veh getVariable ["DUWS_depot_placing", false]) } do {
+        if (isNull R3F_LOG_joueur_deplace_objet && !([getPosATL _veh] call fnc_in_base_keep)) then {
+            hint localize "STR_DUWS_T_DEPOT_PLACING";
+        };
+        sleep 0.5;
+    };
+};
 
 // A death mid-carry still finalizes below, so the vehicle is never left invulnerable on a dead client.
 private _placed = false;
@@ -26,6 +38,7 @@ while { !_placed && alive player } do {
     };
 };
 
+_veh setVariable ["DUWS_depot_placing", false];
 _veh allowDamage true;
 [_vehNet] remoteExec ["fnc_depot_place_finish", 2];
 
