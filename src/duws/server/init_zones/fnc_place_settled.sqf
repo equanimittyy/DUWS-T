@@ -25,8 +25,9 @@
 //            tick unseats a flush body (default false). Seated live then frozen; loot has no PhysX to freeze.
 //            A caller that repositions the returned frozen piece must use setPosWorld, not setPosASL.
 //   _settle  props only: drop the piece just above its point and let physics seat it on the real floor (a
-//            wrong seat Z self-corrects), confirm it lands upright and in place, jitter-retry up to 3, then
-//            freeze (default false). Overrides _freeze; costs a ~1.5 s wait per piece, so the caller runs scheduled.
+//            wrong seat Z self-corrects), confirm it lands upright and in place, jitter-retry up to 3, and if it
+//            still will not settle seat it square at the point deterministically, then freeze (default false).
+//            Overrides _freeze; waits per piece until it comes to rest (up to 3 s per try), so the caller runs scheduled.
 fnc_place_settled = {
     params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false], ["_settle", false]];
     private _up = vectorUp _anchor;
@@ -73,19 +74,30 @@ fnc_place_settled = {
                     _o setDir _dirDeg;
                     _o setPosASL (_pos vectorAdd [_jx, _jy, 0.15]);
                     _o setVelocity [0, 0, 0];
-                    sleep 1.5;
+                    // Wait for real rest, not a fixed clock: poll until motion damps, escaping at 3 s so a never-
+                    // settling piece cannot stall. A fixed mark could freeze a piece still sliding, or waste a try.
+                    private _t0 = time;
+                    sleep 0.25;   // gravity not yet engaged: the just-zeroed body reads at-rest on frame 1
+                    waitUntil { vectorMagnitude (velocity _o) < 0.05 || {time - _t0 >= 3} };
                     // Base-on-floor Z gate: distance2D alone passes a piece that fell to a lower storey or
                     // perched at the same XY. Band is loose -- a correctly-rested piece sits several cm off the
                     // median plane (PhysX contact, per-class bbox-LOD) -- but far under a storey drop or a perch.
                     private _restBaseZ = (getPosASL _o select 2) + ((boundingBoxReal _o select 0) select 2);
                     _settled = alive _o
+                        && {vectorMagnitude (velocity _o) < 0.05}
                         && {(vectorUp _o select 2) > 0.985}
                         && {(_o distance2D (ASLToAGL _pos)) < 0.6}
                         && {abs (_restBaseZ - (_pos select 2)) < 0.15};
                     _tries = _tries + 1;
                 };
-                // Freeze the settled (or last) attempt from rest: re-level a small tilt, kill drop residual.
-                _o setVectorUp [0, 0, 1];
+                // Freeze from rest. A settled piece only needs its rest tilt re-levelled; one that never settled
+                // would freeze in broken (tipped, slid, dropped a storey), so seat it square at the point instead.
+                if (_settled) then {
+                    _o setVectorUp [0, 0, 1];
+                } else {
+                    _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], [0, 0, 1]];
+                    _o setPosASL (_pos vectorAdd [0, 0, - ((boundingBoxReal _o select 0) select 2)]);
+                };
                 _o setVelocity [0, 0, 0];
                 _o enableSimulationGlobal false;
                 _obj = _o;
