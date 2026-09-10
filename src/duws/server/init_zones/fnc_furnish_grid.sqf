@@ -36,11 +36,11 @@ fnc_furnish_grid = {
     #define MIN_ROOM_CELLS 20  // a room below this is a stairwell/sliver: dropped, not furnished
     #define MIN_ROOM_SQUARE 4  // and it must hold one clear NxN cell block, or a piece has nowhere to sit
     #define CELL_CAP 1200      // per storey; the pitch coarsens rather than exceed it
-    #define GRID_PAD 1.5       // extend the seed box this far past the outer seeds, out toward the walls
-    #define ROOF_UP 15         // interior test: this building's ceiling/roof must be overhead within this
+    #define GRID_PAD 1.5       // grow the seed box this far toward the walls (seeds sit off them)
+    #define ROOF_UP 15         // interior gate: this building's roof must be within this overhead
     #define DOOR_PAIR_MIN 1.2  // nav-point pair span that can bracket a doorway
     #define DOOR_PAIR_MAX 5
-    #define DOOR_STEP 0.25     // sample pitch along a pair's line
+    #define DOOR_STEP 0.25
     #define DOOR_MIN 0.5       // narrower both-sides gap is wall thickness, not a doorway
     #define DOOR_SPAN 1.5      // widest both-sides jamb gap still read as a door, not an open pinch
 
@@ -114,8 +114,8 @@ fnc_furnish_grid = {
             _minY = _minY min (_x select 1); _maxY = _maxY max (_x select 1);
         } forEach _sSeeds;
 
-        // Pad the box out toward the walls (seeds sit off the wall); the roof gate drops what the overshoot
-        // reaches outside. Coarsen the pitch if the cell count would blow the cap on a large building.
+        // Pad the box out toward the walls (seeds sit off them); the roof gate drops what the overshoot
+        // reaches outside the building.
         private _spanX = (_maxX - _minX) + 2 * GRID_PAD;
         private _spanY = (_maxY - _minY) + 2 * GRID_PAD;
         private _pitch = GRID_CELL;
