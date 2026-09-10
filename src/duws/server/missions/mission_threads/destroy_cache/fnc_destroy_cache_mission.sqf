@@ -126,13 +126,5 @@ private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_geryeddp",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_cachecopy", 0]]
 ] call fnc_mission_present;
 
-sleep 5; // let the guard force finish arriving before the win poll starts
-
-private _deadline = DUWS_curDeadlineAt;
-waitUntil { sleep 2; (_handles call _done) || time > _deadline };
-
-if (!(_handles call _done) && time > _deadline) exitWith {
-    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_destroy_cache"] call fnc_mission_finish;
-};
-
-[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheend"], true, "mission_destroy_cache", false, false, _onWin, _handles] call fnc_mission_finish;
+[_handles, _done, _mission_name, _taskId, _targetpos, _radius, [_marker],
+    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_cacheend"], "mission_destroy_cache", [false, false, _onWin, _handles]] call fnc_mission_watch;

@@ -130,6 +130,7 @@ fnc_missionTaskCreate = compile preprocessFileLineNumbers "duws\server\missions\
 fnc_missionTaskEnd = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTaskEnd.sqf";
 fnc_mission_present = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_present.sqf";
 fnc_mission_finish = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_finish.sqf";
+fnc_mission_watch = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_watch.sqf";
 fnc_spawn_aid_crew = compile preprocessFileLineNumbers "duws\server\missions\fnc_spawn_aid_crew.sqf";
 fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrols.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";

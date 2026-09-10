@@ -185,13 +185,5 @@ private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_PA
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_PATROLCAMP_BRIEF", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_PATROLCAMP_COPY", 0]]
 ] call fnc_mission_present;
 
-sleep 5; // let the camp teams finish arriving before the win poll starts
-
-private _deadline = DUWS_curDeadlineAt;
-waitUntil { sleep 2; (_handles call _done) || time > _deadline };
-
-if (!(_handles call _done) && time > _deadline) exitWith {
-    [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_patrol_camp"] call fnc_mission_finish;
-};
-
-[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_patrolcampend"], true, "mission_patrol_camp"] call fnc_mission_finish;
+[_handles, _done, _mission_name, _taskId, _targetpos, _radius, [_marker],
+    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_patrolcampend"], "mission_patrol_camp"] call fnc_mission_watch;
