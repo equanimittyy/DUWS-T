@@ -50,6 +50,15 @@ fnc_furnish_grid = {
         []
     };
 
+    // A shut door leaf is solid wall in GEOM, so a raycast reads a closed doorway as wall. Open the doors first,
+    // with a frame for the collision to follow, or the jamb-test and seeder below both miss the gap.
+    private _doorAnims = (animationNames _building) select { (toLower _x) find "door" >= 0 };
+    private _doorPhases = _doorAnims apply { _building animationPhase _x };
+    if (_doorAnims isNotEqualTo []) then {
+        { _building animate [_x, 1, true] } forEach _doorAnims;
+        sleep 0.1;
+    };
+
     // Work in the building's own frame: buildingPos are world points, so a world-axis grid sits skewed
     // across a rotated building and straddles its walls. worldToModel drops every seed into local X/Y/Z,
     // the grid is laid on those axes, and modelToWorld projects each cell back -- so the rows run along
@@ -246,12 +255,16 @@ fnc_furnish_grid = {
         };
     };
 
+    // Doorways already captured -- leave the building as players will find it, not hanging open.
+    { _building animate [_x, _doorPhases select _forEachIndex, true] } forEach _doorAnims;
+
     // A door cell alone left neighbour cells free to overhang the mouth. Block the ring, don't just reserve it:
     // only "blocked" stops flood-fill, so the rooms split at a full-width plug and no piece sits in the opening.
     private _ij = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
     private _doors = [];
     { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
+    private _rayDoors = count _doors;
     { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
     {
         (_cells select _x) params ["", "", "", "", "", "", "_i", "_j", "_s"];
@@ -334,8 +347,8 @@ fnc_furnish_grid = {
     private _keptN = 0;
     { if ((_roomSize get _x) >= MIN_ROOM_CELLS && {_hasSquare getOrDefault [_x, false]}) then { _keptN = _keptN + 1 } } forEach (keys _roomSize);
 
-    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s), %7 nav-door(s)",
-        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays, count _pathDoors]] call fnc_log;
+    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s), %7 ray-door(s), %8 nav-door(s)",
+        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays, _rayDoors, count _pathDoors]] call fnc_log;
     _building setVariable ["DUWS_furnishGrid", _cells];
     _cells
 };
