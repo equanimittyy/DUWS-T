@@ -65,6 +65,32 @@ switch (_verb) do {
         { diag_log format ["[OPCOMDBG] %1", _x] } forEach _lines;
         (_lines joinString "\n") remoteExec ["hint", _caller];
     };
+    case "unitstatus": {
+        // Nearest tasking to the map click: a de-virtualised one sits at its live leader, a still-virtual one
+        // at its grid-tracked point. _a carries the clicked [x,y,z].
+        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
+        private _click = _a;
+        private _bestT = DUWS_opcom_taskings select 0;
+        private _bd = 1e12;
+        {
+            private _p = _x get "pos";
+            if ((_x get "grp") isNotEqualTo "") then {
+                private _g = groupFromNetId (_x get "grp");
+                if (!isNull _g && {!isNull (leader _g)}) then { _p = getPosATL (leader _g) };
+            };
+            private _d = _click distance2D _p;
+            if (_d < _bd) then { _bd = _d; _bestT = _x };
+        } forEach DUWS_opcom_taskings;
+        private _flags = _bestT get "flags";
+        private _tgt = _bestT get "target";
+        private _lines = [
+            format ["id %1  (%2 m away, %3)", _bestT get "id", round _bd, ["virtual", "live"] select ((_bestT get "grp") isNotEqualTo "")],
+            format ["type: %1  [%2]  move %3", _bestT get "menu", (_bestT get "comp") joinString "+", _bestT get "moveType"],
+            format ["flags: %1", [_flags joinString ", ", "none"] select (_flags isEqualTo [])],
+            format ["tasking: %1/%2  target %3  leg %4/%5", _bestT get "order", _bestT get "status", [str (_tgt apply { round _x }), "none"] select (_tgt isEqualTo []), _bestT get "leg", count (_bestT get "route")]
+        ];
+        (_lines joinString "\n") remoteExec ["hint", _caller];
+    };
     case "ferry": {
         // The ferry fields "list" omits: live carry bindings and the free-lift pool. No excluded id, so the
         // pool is the exact set borrowFerry would pick from.
