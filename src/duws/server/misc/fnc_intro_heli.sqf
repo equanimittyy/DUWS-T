@@ -14,6 +14,14 @@ private _abandon = {
 if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed, skipping."] call fnc_log; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
 
+// Publishing done with nobody boarded routes every client through client_init's
+// intro_completed==false fallback, which teleports them to base.
+if (missionNamespace getVariable ["DUWS_debug_skip_intro", false]) exitWith {
+    ["INFO", "INTRO", "Debug quickstart: skipping insertion flight."] call fnc_log;
+    missionNamespace setVariable ["intro_heli_done", true, true];
+    publicVariable "intro_heli_done";
+};
+
 // Late joiners are placed by the client, not here: client_init waits on intro_heli_done and
 // teleports any player whose intro_completed is false. That path also clears the black screen,
 // which the server never did.

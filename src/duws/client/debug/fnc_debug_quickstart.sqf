@@ -14,6 +14,11 @@
 duws_gamemode = "duws";
 publicVariable "duws_gamemode";
 
+// fnc_intro_heli reads this and early-outs with no helicopter; client_init's
+// intro_completed==false fallback then drops the player at base on its own.
+DUWS_debug_skip_intro = true;
+publicVariable "DUWS_debug_skip_intro";
+
 // Row 0 of each side's list is its "(Default)" faction (NATO/CSAT arid, or whatever a faction mod
 // seeds first) -- a concrete preset, so neither the paste window nor the AutoDetect picker is
 // reached and no popup interrupts the one click.
