@@ -83,7 +83,7 @@ restricted_arsenal = true;
 // rather than reads: zones_spacing and the per-run skill rolls.
 zones_max_radius = 500;
 zones_min_radius = 350;
-zones_number = 4;
+zones_number = 1;
 zones_max_dist_from_hq = 15000;
 zones_spacing = zones_max_radius * 1.8;
 commandpointsblu1 = 30;
