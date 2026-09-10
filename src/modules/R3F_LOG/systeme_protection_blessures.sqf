@@ -7,6 +7,10 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-11 for DUWS_T: the per-hit injury shield now covers all local
+ * units, not only the host player group, so a hand-carried vehicle cannot ram and
+ * kill unshielded AI. (GPLv3 section 5a modification notice.)
  */
 
 /** Contient la liste de tous les objets en cours de déplacements manuels */

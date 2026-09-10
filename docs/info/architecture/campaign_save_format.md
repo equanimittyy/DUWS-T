@@ -14,15 +14,15 @@ available to a mission with no saves in the wild yet.
 
 Antistasi Community is MIT-licensed (`Copyright (c) 2019 Barbolani & The Official Antistasi
 Community`). MIT carries a single obligation: any distribution that includes a substantial portion
-of their code must ship the copyright and permission notice alongside it. There is no share-alike,
-so DUWS_T's own licence stays unconstrained.
+of their code must ship the copyright and permission notice alongside it. MIT is GPL-compatible and
+has no share-alike, so it adds nothing beyond carrying that notice (in `src/THIRD_PARTY_NOTICES.md`).
 
 Techniques borrowed without their code -- the arsenal count overlay in
 [`fnc_arsenal_counts.sqf`](../../../src/duws/client/arsenal/fnc_arsenal_counts.sqf) -- copy nothing
 copyrightable and need only the courtesy credit already carried in its comment. This save container
 is the one place DUWS_T adopts a substantial portion: when the `Save/` functions land under `src/`,
-carry the Antistasi MIT notice with them -- a `THIRD_PARTY_NOTICES` file at the repo root, or a
-per-file header on each adopted file.
+carry the Antistasi MIT notice with them -- add it to `src/THIRD_PARTY_NOTICES.md` (which ships
+with the packed mission), or a per-file header on each adopted file.
 
 ## Two layers: an index and a payload
 

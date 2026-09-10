@@ -90,3 +90,9 @@ Working rules for contributors and agents (voice, comments, docs) live inline in
 
 Arma engine traps that aren't visible in the SQF (e.g. what may be stored in the mission
 namespace) are collected in [`docs/info/architecture/arma_engine_gotchas.md`](docs/info/architecture/arma_engine_gotchas.md).
+
+## License
+
+DUWS_T is free software under the GNU General Public License, version 3 or later — see
+[`src/LICENSE.md`](src/LICENSE.md). Bundled third-party components keep their own licenses,
+listed in [`src/THIRD_PARTY_NOTICES.md`](src/THIRD_PARTY_NOTICES.md).
