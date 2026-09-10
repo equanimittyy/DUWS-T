@@ -54,11 +54,9 @@ private _apply = {
     private _idc = ctrlIDC (_this select 0);
     private _i = [9514, 9515, 9516] find _idc;
 
-    // The three pools close the window, matching how this tool has always behaved. The town and
-    // escalation buttons leave it open: those are the ones a tester nudges repeatedly, and the
-    // readout they are aiming at is in this window.
+    // Stays open like the town and escalation edits: the pools are client globals the server
+    // broadcasts back, so a trailing snapshot request re-labels these buttons once the new totals land.
     if (_i >= 0) exitWith {
-        closeDialog 0;
         switch (_i) do {
             case 0: { [_delta, "debug menu"] remoteExec ["fnc_cp_adjust", 2]; };
             // Pass the delta as _earned too so debug AP advances the tier like real income; clamped
@@ -67,9 +65,7 @@ private _apply = {
             case 1: { ["BLU", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
             case 2: { ["OPF", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
         };
-        // Reports the delta sent, not the resulting total: the server owns both pools and
-        // broadcasts them back, so the local copies are still the pre-change values here.
-        hint format ["Sent %1 %2.", _delta, ["to BLUFOR CP", "to BLUFOR AP", "to OPFOR AP"] select _i];
+        ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
     };
 
     // Every remaining button edits server-only state, so it travels and the window then asks for a

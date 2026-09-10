@@ -1,8 +1,9 @@
 // Locality: the client that asked -- fnc_debug_econ_server answers this with its snapshot.
 /*
-    Draws the server-only half of the debug economy window: the town list and the escalation
-    readout. Arrives asynchronously, so it finds its own controls by IDC rather than being handed
-    them, and does nothing if the window has since been closed.
+    Redraws the debug economy window after a snapshot: the server-only town list and escalation
+    readout, plus the two campaign pools re-read from their now-current globals so a pool edit shows
+    its new total. Arrives asynchronously, so it finds its own controls by IDC rather than being
+    handed them, and does nothing if the window has since been closed.
     Strings are English-only for the same reason as the rest of the debug tooling.
 */
 if (!hasInterface) exitWith {};
@@ -14,6 +15,13 @@ disableSerialization;
 // later and has no other way to find it. Null means the player closed it in the meantime.
 private _display = uiNamespace getVariable ["DUWS_debug_econ_display", displayNull];
 if (isNull _display) exitWith {};
+
+// Pools are client globals the server broadcasts; re-read them on each snapshot so a pool edit
+// shows its new total instead of the figure frozen at open time.
+{
+    private _ctrl = _display displayCtrl (_x select 0);
+    if (!isNull _ctrl) then { _ctrl ctrlSetText format [_x select 1, _x select 2] };
+} forEach [[9514, "BLU CP (%1)", commandpointsblu1], [9515, "BLU AP (%1)", WARCOM_blufor_ap], [9516, "OPF AP (%1)", WARCOM_opfor_ap]];
 
 private _list = _display displayCtrl 9522;
 if (isNull _list) exitWith {};
