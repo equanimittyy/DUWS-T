@@ -70,23 +70,11 @@ _message1 = localize "STR_DUWS_T_vehdropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vehdropack"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Offset the spawn 1200 m off a random bearing so it flies in rather than appearing overhead.
-private _vec = [random [-1,0,1], random [-1,0,1], 0];
-private _spawnPos = ((vectorNormalized _vec) vectorMultiply 1200) vectorAdd _location;
-_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2) + 400];
 missionNamespace setVariable ["VEHDROP_onStation", false];
 
-private _group = [_spawnPos, WEST, [blufor_TRANS_HELI_X], [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
-private _pilot = units _group select 0;
-private _vehicle = vehicle _pilot;
-_vehicle setVehicleAmmo 0;
-_vehicle allowdamage false;
-// Cosmetic transport: crew hold fire and don't acquire, so it flies the drop run instead of engaging.
-_pilot disableAI "Target";
-_pilot disableAI "AUTOTARGET";
-_group setCombatMode "BLUE";
-_vehicle engineOn true;
+private _delivery = [_location, 1200] call fnc_spawn_delivery_transport;
+private _group = _delivery select 0;
+private _vehicle = _delivery select 1;
 
 private _wp1 = _group addWaypoint [_location, -1];
 _wp1 setWaypointType "MOVE";

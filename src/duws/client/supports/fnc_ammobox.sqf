@@ -13,15 +13,6 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
-_group = "";
-_vehicle = "";
-
-_spawnPos = _location;
-_vec =[random [-1,0,1], random [-1,0,1], 0];
-_dist = 1600;
-_spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
-_grouptype = "";
-// state kept on the vehicle rather than a global onStation
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_courier";
 _message = localize "STR_DUWS_T_supplydropcall";
@@ -29,25 +20,11 @@ _message1 = localize "STR_DUWS_T_supplydropcallend";
 [_speaker, _message, "", name player] remoteExec ["fnc_duws_dialogue", 0];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supplydropack"] remoteExec ["fnc_duws_dialogue", 0];
 
-switch (VERSION_X) do {
-	case "MODERN": {
-		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-		_grouptype = [blufor_TRANS_HELI_X];
-	};
-};
+_delivery = [_location, 1600] call fnc_spawn_delivery_transport;
+_group = _delivery select 0;
+_vehicle = _delivery select 1;
 
-_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
-_pilot = units _group select 0;
-_vehicle = vehicle _pilot;
-_vehicle setVehicleAmmo 0;
-_vehicle allowdamage false;
-// Cosmetic transport: crew hold fire and don't acquire, so it flies the drop run instead of engaging.
-_pilot disableAI "Target";
-_pilot disableAI "AUTOTARGET";
-_group setCombatMode "BLUE";
-_vehicle engineOn true;
-
+// state kept on the vehicle rather than a global onStation
 _vehicle setVariable ["DUWS_onStation", false];
 
 	

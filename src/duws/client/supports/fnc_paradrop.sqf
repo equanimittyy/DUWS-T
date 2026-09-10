@@ -16,42 +16,14 @@ _message = localize "STR_DUWS_T_paradropcall";
 sleep 8;
 [_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
-_group = "";
-_vehicle = "";
-
-_spawnPos = _location;
-_vec =[random [-1,0,1], random [-1,0,1], 0];
-_dist = 3100;
-_spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
-_grouptype = "";
 // mission-namespace variable instead of a global onStation
 missionNamespace setVariable ["PARADROP_onStation", false];
 
-switch (VERSION_X) do {
-	case "MODERN": {
-		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-		_grouptype = [blufor_TRANS_HELI_X];
-	};
-};
+_delivery = [_location, 3100] call fnc_spawn_delivery_transport;
+_group = _delivery select 0;
+_vehicle = _delivery select 1;
+_vehicle flyInHeight 250;
 
-_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
-_pilot = units _group select 0;
-_vehicle = vehicle _pilot;
-_vehicle setVehicleAmmo 0;
-_vehicle allowdamage false;
-// Cosmetic transport: crew hold fire and don't acquire, so it flies the drop run instead of engaging.
-_pilot disableAI "Target";
-_pilot disableAI "AUTOTARGET";
-_group setCombatMode "BLUE";
-_vehicle engineOn true;
-
-switch (VERSION_X) do {
-	case "MODERN": {
-		_vehicle flyInHeight 250;
-	};
-};
-	
 _wp1 = _group addWaypoint [_location, -1];
 _wp1 setWaypointType "MOVE";
 _wp1 setWaypointBehaviour "CARELESS";
