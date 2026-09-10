@@ -12,7 +12,7 @@
 // top) and it rotates and travels with the anchor. The anchor should already be settled/frozen: the seats
 // are read off it once, so a seat that moves afterwards leaves its object behind.
 //
-// Contract: [_rows, _anchor, _key, _invuln, _asLoot, _freeze, _settle] -> [_objs]
+// Contract: [_rows, _anchor, _key, _invuln, _asLoot, _freeze, _settle, _dropOnFail] -> [_objs]
 //   _rows    [class, offX, offY, offZ, dir] in the anchor's model frame. offZ is where the object's resting
 //            base sits above the anchor origin (the caller places a table-top row at the table's
 //            boundingBoxReal top); dir adds to the anchor heading. offZ and dir default to 0. When _asLoot,
@@ -26,10 +26,13 @@
 //            A caller that repositions the returned frozen piece must use setPosWorld, not setPosASL.
 //   _settle  props only: drop the piece just above its point and let physics seat it on the real floor (a
 //            wrong seat Z self-corrects), confirm it lands upright and in place, jitter-retry up to 3, and if it
-//            still will not settle seat it square at the point deterministically, then freeze (default false).
+//            still will not settle seat it square at the point (unless _dropOnFail), then freeze (default false).
 //            Overrides _freeze; waits per piece until it comes to rest (up to 3 s per try), so the caller runs scheduled.
+//   _dropOnFail settle only: a piece that still will not settle after the retries is deleted and its return slot
+//            is objNull, rather than seated square -- a guaranteed piece is better absent than placed broken
+//            (default false).
 fnc_place_settled = {
-    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false], ["_settle", false]];
+    params ["_rows", "_anchor", "_key", ["_invuln", true], ["_asLoot", false], ["_freeze", false], ["_settle", false], ["_dropOnFail", false]];
     private _up = vectorUp _anchor;
     private _baseDir = getDir _anchor;
 
@@ -90,17 +93,24 @@ fnc_place_settled = {
                         && {abs (_restBaseZ - (_pos select 2)) < 0.15};
                     _tries = _tries + 1;
                 };
-                // Freeze from rest. A settled piece only needs its rest tilt re-levelled; one that never settled
-                // would freeze in broken (tipped, slid, dropped a storey), so seat it square at the point instead.
+                // A settled piece only needs its rest tilt re-levelled; one that never settled would freeze in
+                // broken (tipped, slid, dropped a storey), so _dropOnFail deletes it rather than seat it square.
                 if (_settled) then {
                     _o setVectorUp [0, 0, 1];
+                    _o setVelocity [0, 0, 0];
+                    _o enableSimulationGlobal false;
+                    _obj = _o;
                 } else {
-                    _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], [0, 0, 1]];
-                    _o setPosASL (_pos vectorAdd [0, 0, - ((boundingBoxReal _o select 0) select 2)]);
+                    if (_dropOnFail) then {
+                        deleteVehicle _o;
+                    } else {
+                        _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], [0, 0, 1]];
+                        _o setPosASL (_pos vectorAdd [0, 0, - ((boundingBoxReal _o select 0) select 2)]);
+                        _o setVelocity [0, 0, 0];
+                        _o enableSimulationGlobal false;
+                        _obj = _o;
+                    };
                 };
-                _o setVelocity [0, 0, 0];
-                _o enableSimulationGlobal false;
-                _obj = _o;
             } else {
                 // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
                 // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
@@ -120,7 +130,7 @@ fnc_place_settled = {
             };
         };
 
-        [_obj, _key] call fnc_duws_keep;
+        if (!isNull _obj) then { [_obj, _key] call fnc_duws_keep };
         _objs pushBack _obj;
     } forEach _rows;
     _objs

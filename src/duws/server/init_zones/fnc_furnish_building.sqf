@@ -343,7 +343,7 @@ fnc_furnish_building = {
     // Place a single back-to-wall piece (sofa/bed/cabinet) at a near cell, front off the wall; returns [_o],
     // or [] when the seated footprint would overlap a placed piece or stays buried in the wall.
     private _placeWall = {
-        params ["_cell", "_class"];
+        params ["_cell", "_class", ["_dropOnFail", false]];
         (_catalog get _class) params ["", "_fy"];
         _cell params ["_cpos", "", "_nearB", "_clear"];
         // Snap a corner cell's 45-degree ring read to the nearest grid axis so the piece sits square, not
@@ -351,8 +351,9 @@ fnc_furnish_building = {
         if (_nearB >= 0) then { _nearB = _bdir + 90 * round ((_nearB - _bdir) / 90) };
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _frame = [_cpos, _heading] call _frameAt;
-        private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true] call fnc_place_settled) select 0;
+        private _o = ([[[_class, 0, 0, 0, 0]], _frame, _key, true, false, true, true, _dropOnFail] call fnc_place_settled) select 0;
         deleteVehicle _frame;
+        if (isNull _o) exitWith { [] };
         private _bb = boundingBoxReal _o;
         private _hx = (abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0));
         private _hy = (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1));
@@ -417,7 +418,7 @@ fnc_furnish_building = {
                 while { !_got && _tries < PLACE_RETRY } do {
                     private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} && {[_x, _reqCls] call _wallFits} };
                     if (_free isEqualTo []) exitWith {};
-                    private _res = [selectRandom _free, _reqCls] call _placeWall;
+                    private _res = [selectRandom _free, _reqCls, true] call _placeWall;
                     if (_res isEqualTo []) then { _tries = _tries + 1 } else {
                         _res call _keepFrozen;
                         _classCount set [_reqCls, (_classCount getOrDefault [_reqCls, 0]) + 1];
