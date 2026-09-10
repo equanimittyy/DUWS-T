@@ -9,6 +9,7 @@ private _c = [1, 0.667, 0, 1];
 ["OPCOM (Phase 3)", [
     ["Recruit a unit",  { ["recruitlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Task a tasking",  { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Re-garrison a tasking", { ["tasklist", "regarrison", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["List taskings",   { ["list",        "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Ferry status",    { ["ferry",       "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Clear store",     { ["clear",       "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c]

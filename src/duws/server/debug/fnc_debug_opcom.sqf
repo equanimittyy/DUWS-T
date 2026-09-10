@@ -16,8 +16,9 @@ switch (_verb) do {
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "zonelist": {
-        // OPCOM recruits only into an OPFOR-owned zone -- every zone BLUFOR has not captured. _a carries the
-        // chosen recruit row through to the recruit verb.
+        // OPCOM recruits and re-garrisons only into an OPFOR-owned zone -- every zone BLUFOR has not captured.
+        // _a carries context (recruit row or tasking id) to the next step; _b names that step's picker mode.
+        private _next = ["recruit_zone", _b] select (_b isNotEqualTo "");
         private _rows = (zone_meta_array select {
             private _zp = _x select 1;
             (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zp) < 1 }) < 0
@@ -25,15 +26,20 @@ switch (_verb) do {
             private _zp = _x select 1;
             [[_zp] call fnc_zone_key, format ["%1  (%2)", [_zp] call fnc_zone_key, _zp apply { round _x }]]
         };
-        if (_rows isEqualTo []) exitWith { "No OPFOR-owned zone to recruit at (BLUFOR holds them all)." remoteExec ["hint", _caller] };
-        ["Recruit at which zone?", _rows, "recruit_zone", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
+        if (_rows isEqualTo []) exitWith { "No OPFOR-owned zone (BLUFOR holds them all)." remoteExec ["hint", _caller] };
+        private _title = ["Re-garrison to which zone?", "Recruit at which zone?"] select (_next isEqualTo "recruit_zone");
+        [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
+        // _a names the picker mode (default "task"); the re-garrison menu passes "regarrison" to route the same
+        // tasking list into a zone pick instead of an order.
+        private _mode = ["task", _a] select (_a isNotEqualTo "");
         private _rows = (DUWS_opcom_taskings select { (_x get "grp") isEqualTo "" }) apply {
             [_x get "id", format ["id %1  %2/%3  %4", _x get "id", _x get "order", _x get "status", _x get "moveType"]]
         };
-        if (_rows isEqualTo []) exitWith { "No virtual taskings to order (recruit one; a live unit cannot be re-tasked)." remoteExec ["hint", _caller] };
-        ["Task a tasking", _rows, "task", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+        if (_rows isEqualTo []) exitWith { "No virtual taskings (recruit one; a live unit cannot be re-tasked)." remoteExec ["hint", _caller] };
+        private _title = ["Re-garrison which tasking?", "Task a tasking"] select (_mode isEqualTo "task");
+        [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "recruit": {
         // _a = row, _b = zone key. Site at the zone centre and home the unit there, so homeZone drives the
@@ -46,6 +52,10 @@ switch (_verb) do {
     case "task": {
         private _ok = ["task", _a, _b, _c] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Tasking %1 -> %2.", _a, _b] } else { format ["Task refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "regarrison": {
+        private _ok = ["regarrison", _a, _b] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (held / live / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "list": {
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };

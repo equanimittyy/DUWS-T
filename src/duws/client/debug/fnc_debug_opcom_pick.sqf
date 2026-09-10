@@ -1,7 +1,7 @@
 // Locality: client -- remoteExec'd back to the caller by fnc_debug_opcom with a freshly-read list. Opens the
 // row picker; a pick runs the mode's next step (recruit chains row then OPFOR zone, task chains order then a
-// map-picked target cell). State that outlives the click is threaded through
-// args, never an enclosing local -- SQF blocks are not closures (docs/info/architecture/arma_engine_gotchas.md).
+// map-picked target cell, re-garrison chains tasking then OPFOR zone). State that outlives the click is threaded
+// through args, never an enclosing local -- SQF blocks are not closures (docs/info/architecture/arma_engine_gotchas.md).
 if (!hasInterface) exitWith {};
 params ["_title", "_rows", "_mode", ["_ctx", ""]];
 if (_rows isEqualTo []) exitWith {};
@@ -14,6 +14,8 @@ private _entries = _rows apply {
         switch (_mode) do {
             case "recruit": { ["zonelist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
             case "recruit_zone": { ["recruit", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
+            case "regarrison": { ["zonelist", _key, "regarrison_zone", "", player] remoteExec ["fnc_debug_opcom", 2] };
+            case "regarrison_zone": { ["regarrison", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
             case "task": {
                 private _oc = [1, 0.667, 0, 1];
                 private _orders = ["assault", "supply", "move", "guard"] apply {
