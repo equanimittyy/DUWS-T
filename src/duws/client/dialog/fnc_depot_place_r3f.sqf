@@ -11,14 +11,15 @@ if (isNull _veh) exitWith {};
 _veh allowDamage false;
 _veh setVariable ["DUWS_depot_placing", true];
 
-// R3F's carry returns only after a 5s settle; show progress while a dropped-outside vehicle waits for the re-pickup.
+// R3F's carry returns only after a 5s settle; announce each drop once so the wait doesn't read as a failed retrieve.
 [_veh] spawn {
     params ["_veh"];
+    private _wasCarried = false;
     while { alive player && !isNull _veh && (_veh getVariable ["DUWS_depot_placing", false]) } do {
-        if (isNull R3F_LOG_joueur_deplace_objet && !([getPosATL _veh] call fnc_in_base_keep)) then {
-            hint localize "STR_DUWS_T_DEPOT_PLACING";
-        };
-        sleep 0.5;
+        private _carried = !isNull R3F_LOG_joueur_deplace_objet;
+        if (_wasCarried && !_carried) then { hint localize "STR_DUWS_T_DEPOT_PLACING"; };
+        _wasCarried = _carried;
+        sleep 0.25;
     };
 };
 
