@@ -90,9 +90,6 @@ private _fnc_spawnGuard = {
     _u
 };
 
-// TUNABLE. A light vanilla dressing so a decoy reads as lived-in and never gives itself away by being bare.
-#define FURNITURE ["Land_CampingTable_F", "Land_CampingChair_V1_F", "Land_WoodenBox_TarpAll_F"]
-
 private _guards = [];
 private _allUnits = [];
 private _marks = [];
@@ -115,25 +112,9 @@ private _marks = [];
     _bldg setVariable ["DUWS_safehouse_real", _isReal];
     _bldg setVariable ["DUWS_safehouse_townIndex", _townIndex];
 
-    // Furnish: one prop per inner slot, cycling the set, invulnerable and keyed for teardown.
-    {
-        private _fp = _x;
-        private _class = FURNITURE select (_forEachIndex mod (count FURNITURE));
-        private _obj = createVehicle [_class, _fp, [], 0, "CAN_COLLIDE"];
-        _obj setVectorUp [0, 0, 1];
-        _obj setPosATL _fp;
-        _obj setVelocity [0, 0, 0];
-        _obj allowDamage false;
-        [_obj, "mission_raid_safehouse"] call fnc_duws_keep;
-    } forEach (_slots select [0, 3 min count _slots]);
-
-    // Lock every door shut on all machines. bis_disabled_Door_N suppresses the engine open action; the
-    // animate closes the leaves so no house betrays itself with an open door. Only a breach reopens them.
-    for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
-    [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
-
-    // Arm the breach: HitPart on every client, keyed on the house (JIP).
-    [_bldg] remoteExec ["fnc_raid_safehouse_arm", 0, _bldg];
+    // Furnish via the shared furnisher (keyed for teardown): it settles furniture clear of the nav path and
+    // doorways, so occupants still fit and the lock below never seals a door behind a piece.
+    [_bldg, "mission_raid_safehouse", [], 0] call fnc_furnish_building;
 
     // Occupants: 3-5, spread across the slots. Real house = concealed guards; decoys = innocent locals
     // (spawned as town civilians, so killing them bills the town on top of the raid's own rep cost). Both
@@ -162,6 +143,15 @@ private _marks = [];
     };
     _bldg setVariable ["DUWS_safehouse_occupants", _occupants];
     if (_isReal) then { _guards append _occupants };
+
+    // Lock every door shut on all machines, last of all: furnishing opens doors to scan and restores them,
+    // so the lock has the final say. bis_disabled_Door_N suppresses the engine open action; the animate
+    // closes the leaves so no house betrays itself with an open door. Only a breach reopens them.
+    for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
+    [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
+
+    // Arm the breach: HitPart on every client, keyed on the house (JIP).
+    [_bldg] remoteExec ["fnc_raid_safehouse_arm", 0, _bldg];
 } forEach _bldgs;
 
 // The intel crate, in an inner slot of the real house. Cleared of its default cargo, then stuffed with
