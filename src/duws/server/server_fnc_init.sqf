@@ -350,6 +350,8 @@ fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warco
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_force.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_strength.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
+fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
+fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";
 fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_sense.sqf";
 fnc_opcom_recon_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_recon_sense.sqf";
 fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_decay.sqf";

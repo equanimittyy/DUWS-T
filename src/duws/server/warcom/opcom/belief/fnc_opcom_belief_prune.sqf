@@ -20,10 +20,7 @@ for "_i" from (count DUWS_opcom_belief_key - 1) to 0 step -1 do {
     if (_key isEqualType "" && {(_key find ":") >= 1}) then {
         private _g = groupFromNetId _key;
         if (isNull _g || {({alive _x} count units _g) == 0}) then {
-            DUWS_opcom_belief_key  deleteAt _i;
-            DUWS_opcom_belief_pos  deleteAt _i;
-            DUWS_opcom_belief_time deleteAt _i;
-            DUWS_opcom_belief_str  deleteAt _i;
+            [_i] call fnc_opcom_belief_deleteAt;
         };
     };
 };

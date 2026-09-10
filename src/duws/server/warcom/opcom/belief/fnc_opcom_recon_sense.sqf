@@ -49,17 +49,7 @@ if (_wcells isEqualTo []) exitWith {};
                 private _bp = getPosASL (leader _wg);
                 _bp set [2, 0];
                 private _str = [_wg] call DUWS_fnc_opcom_sightStr;
-                private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _key };
-                if (_i < 0) then {
-                    DUWS_opcom_belief_key  pushBack _key;
-                    DUWS_opcom_belief_pos  pushBack _bp;
-                    DUWS_opcom_belief_time pushBack DUWS_opcom_tick;
-                    DUWS_opcom_belief_str  pushBack _str;
-                } else {
-                    DUWS_opcom_belief_pos  set [_i, _bp];
-                    DUWS_opcom_belief_time set [_i, DUWS_opcom_tick];
-                    DUWS_opcom_belief_str  set [_i, _str];
-                };
+                [_key, _bp, _str] call fnc_opcom_belief_upsert;
             };
         } forEach _wcells;
     };
