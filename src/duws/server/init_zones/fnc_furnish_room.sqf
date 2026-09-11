@@ -2,7 +2,7 @@
 // registered in server_fnc_init.sqf after fnc_place_settled/grid/catalog and before fnc_furnish_building,
 // which spawns one instance per room. Server-only, not broadcast.
 //
-// Furnishes one room of the grid: 4-7 wall pieces onto near cells, then a central anchor (40% chance) with its
+// Furnishes one room of the grid: 4-10 wall pieces onto near cells, then a central anchor (80% chance) with its
 // seats and surface clutter, then a wall-backed anchor such as a desk (40% chance). An anchor draws its seats
 // and clutter from its own catalog family, so a desk gets an office chair and a dining table its own. Runs as
 // its own scheduled thread so the per-piece settle waits of every room overlap in wall-clock instead of summing
@@ -334,12 +334,12 @@ fnc_furnish_room = {
         [_o]
     };
 
-    // Wall pass: 4-7 wall pieces onto near cells, perpendicular to the wall, spaced by reservation. Best-effort
+    // Wall pass: 4-10 wall pieces onto near cells, perpendicular to the wall, spaced by reservation. Best-effort
     // -- an overlap reject frees the cap slot and counts a miss; PLACE_RETRY misses in a row reads the room as
     // saturated and stops the pass. A placement resets the run, so a crowded corner does not cut it short.
     private _wallClasses = ["wall"] call fnc_furnish_classesFor;
     if (_wallClasses isNotEqualTo []) then {
-        private _nWall = 4 + floor random 4;
+        private _nWall = 4 + floor random 7;
         private _placed = 0; private _miss = 0;
         while { _placed < _nWall && _miss < PLACE_RETRY } do {
             private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
@@ -366,7 +366,7 @@ fnc_furnish_room = {
 
     // Loop a few anchor classes so a table too big for this room yields to a smaller one.
     private _centerAnchors = ["anchor", "center"] call fnc_furnish_classesFor;
-    if (_centerAnchors isNotEqualTo [] && {random 1 < 0.4}) then {
+    if (_centerAnchors isNotEqualTo [] && {random 1 < 0.8}) then {
         private _cx = 0; private _cy = 0;
         { _cx = _cx + ((_x select 0) select 0); _cy = _cy + ((_x select 0) select 1) } forEach _rcells;
         _cx = _cx / (count _rcells); _cy = _cy / (count _rcells);
