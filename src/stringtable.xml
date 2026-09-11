@@ -4020,6 +4020,10 @@
                 <Original>Detection</Original>
                 <English>Detection</English>
             </Key>
+            <Key ID="STR_DUWS_T_rescuehostage_captors">
+                <Original>Captors eliminated. The hostage will now cooperate.</Original>
+                <English>Captors eliminated. The hostage will now cooperate.</English>
+            </Key>
             <Key ID="STR_DUWS_T_rescuehostage_spotted">
                 <Original>A guard has spotted you. Break line of sight before they raise the alarm.</Original>
                 <English>A guard has spotted you. Break line of sight before they raise the alarm.</English>

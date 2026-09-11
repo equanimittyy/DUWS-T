@@ -195,6 +195,8 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             _hostage setCaptive false;
             _hostage setVariable ["DUWS_hostage_freed", true, true];
             call _convergeRing;
+            // Overwrites the execution countdown: this branch stops the loop, so its last "Ns" would otherwise hang frozen in the box.
+            [localize "STR_DUWS_T_rescuehostage_captors"] remoteExec ["hint", _hintTgt];
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
             DUWS_float_hostage = _hostage; publicVariable "DUWS_float_hostage";
             createMarker [_trk, getPosATL _hostage];
