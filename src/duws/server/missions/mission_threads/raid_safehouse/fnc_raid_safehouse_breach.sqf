@@ -38,6 +38,9 @@ if (_house getVariable ["DUWS_safehouse_breached", false]) exitWith {};
 if (_toOpen isEqualTo [] && {_door != "ALL"}) exitWith {};
 _house setVariable ["DUWS_safehouse_breached", true, true];
 
+// Occupants are PATH-frozen at spawn; release the breached house's so it reacts only once cracked.
+{ _x enableAI "PATH" } forEach (_house getVariable ["DUWS_safehouse_occupants", []]);
+
 { [localize "STR_DUWS_T_RAID_SAFEHOUSE_BREACHED"] remoteExec ["hint", _x] } forEach (allPlayers select { _x distance _house < 50 });
 
 if (_house getVariable ["DUWS_safehouse_real", false]) then {

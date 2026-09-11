@@ -191,6 +191,8 @@ publicVariable "DUWS_safehouse_active";
             };
             if (!isNull _u) then {
                 _occupants pushBack _u; _allUnits pushBack _u;
+                // PATH off keeps them put; the hold loop below still runs but its doMove is inert until breach re-enables PATH.
+                _u disableAI "PATH";
                 [_u, _bldg, _slots, "AUTO"] spawn fnc_holdBuildingPost;
             };
         };
