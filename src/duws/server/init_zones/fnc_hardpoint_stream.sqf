@@ -230,8 +230,6 @@ DUWS_fnc_hardpointClear = {
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
     if (isNil "DUWS_opcom_grid_w") exitWith {};
-    // Before the empty-BLU early-out: a fired burst counts as having looked even if it caught nothing.
-    [_pos, OP_OBSERVE_K] call fnc_opcom_cover_stamp;
     private _w = DUWS_opcom_grid_w;
     private _oc  = [_pos] call DUWS_fnc_opcom_w2c;
     private _ocx = _oc mod _w;
@@ -282,9 +280,16 @@ DUWS_fnc_hardpointOPBurst = {
 // Reads the registry live, so a cleared post drops out with no per-post loop to terminate. OPFOR posts
 // only: a BLUFOR OP (the dev tool can place one) must not report BLUFOR to OPFOR.
 DUWS_fnc_hardpointOPSense = {
+    if (isNil "DUWS_opcom_grid_w") exitWith {};
     {
-        if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"} && {random 1 < OP_OBSERVE_CHANCE}) then {
-            [_x select 1] call DUWS_fnc_hardpointOPBurst;
+        if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"}) then {
+            private _pos = _x select 1;
+            // Coverage stamps every tick, unlike the detection roll: an OP post's radius always reads
+            // swept-clear, so ground a standing post overlooks is never mistaken for never-seen.
+            [_pos, OP_OBSERVE_K] call fnc_opcom_cover_stamp;
+            if (random 1 < OP_OBSERVE_CHANCE) then {
+                [_pos] call DUWS_fnc_hardpointOPBurst;
+            };
         };
     } forEach DUWS_hardpoints;
 };
