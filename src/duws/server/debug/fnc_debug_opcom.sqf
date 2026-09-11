@@ -85,7 +85,7 @@ switch (_verb) do {
         private _tgt = _bestT get "target";
         private _lines = [
             format ["id %1  (%2 m away, %3)", _bestT get "id", round _bd, ["virtual", "live"] select ((_bestT get "grp") isNotEqualTo "")],
-            format ["type: %1  [%2]  move %3", _bestT get "menu", (_bestT get "comp") joinString "+", _bestT get "moveType"],
+            format ["type: %1  [%2]  move %3  hull %4", _bestT get "menu", (_bestT get "comp") joinString "+", _bestT get "moveType", _bestT getOrDefault ["spawnClass", "-"]],
             format ["flags: %1", [_flags joinString ", ", "none"] select (_flags isEqualTo [])],
             format ["tasking: %1/%2  target %3  leg %4/%5", _bestT get "order", _bestT get "status", [str (_tgt apply { round _x }), "none"] select (_tgt isEqualTo []), _bestT get "leg", count (_bestT get "route")]
         ];
