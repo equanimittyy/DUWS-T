@@ -66,14 +66,15 @@ _hostageBldg setVariable ["DUWS_garrisonedBy", _garrison];
 [_garrison] call fnc_mission_claim;
 sleep 1;
 
-// Foot-only patrol ring: no vehicles, so the fight stays a light-infantry stealth problem.
+// Foot-only patrol ring: no vehicles, so the fight stays a light-infantry stealth problem. Centred on the
+// hostage rather than _MissionPos, which the search marker keeps to hide the building.
 private _tokens = [];
 for "_i" from 1 to (floor random 2)     do { _tokens pushBack "closepatrol:team" };
 for "_i" from 1 to (2 + floor random 5) do { _tokens pushBack "widepatrol:patrol" };
 for "_i" from 1 to (floor random 2)     do { _tokens pushBack "widepatrol:recon" };
 private _ring = [];
 {
-    private _grp = [_x, _MissionPos, _radius] call DUWS_fnc_zoneSpawnOne;
+    private _grp = [_x, _hpos, _radius] call DUWS_fnc_zoneSpawnOne;
     if (!isNull _grp) then { _ring pushBack _grp };
 } forEach _tokens;
 [_ring] call fnc_mission_claim;
