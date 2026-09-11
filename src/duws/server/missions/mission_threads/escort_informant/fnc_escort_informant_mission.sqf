@@ -34,7 +34,6 @@ private _civClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_2_F", "C_man_pol
 private _grp = [_spawnPos, WEST, [selectRandom _civClasses]] call BIS_fnc_spawnGroup;
 private _inf = leader _grp;
 _grp deleteGroupWhenEmpty true;
-[_grp] call fnc_mission_claim;
 _inf setCaptive false;
 _inf allowDamage true;
 _inf setBehaviour "CARELESS";
@@ -102,12 +101,18 @@ private _cleanup = {
     deleteMarker _trackMarker;
 };
 
-// Release a live informant (win or deadline, never death): out of the player's group, which the map
-// sweep won't bin from, and captive so nobody guns down a now-harmless civilian before GC takes him.
-private _release = {
-    if (alive _inf) then {
-        [_inf] joinSilent (createGroup [WEST, true]);
-        _inf setCaptive true;
+// Handed-friendly cleanup (like rescue_hostage): peel a live informant out of the player's group and
+// despawn him after a grace. Never claimed -- a player-side unit must not ride the enemy-cleanup sweep --
+// and the grace lets a recruited informant walk off rather than blink out of the squad mid-stride.
+private _despawn = {
+    params ["_u"];
+    [_u] spawn {
+        params ["_h"];
+        [_h] joinSilent (createGroup [WEST, true]);
+        _h setCaptive true;
+        _h setUnitPos "AUTO";
+        sleep 300;
+        if (!isNull _h) then { deleteVehicle _h };
     };
 };
 
@@ -119,12 +124,8 @@ private _place = [_townPos] call fnc_place_name;
 if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
     [_townIdx, DUWS_curReward select 2, "escort_informant_success"] call fnc_town_rep_adjust;
     call _cleanup;
-    // Delivered: he blends into the town on the civilian stroll until GC takes him, never frozen.
-    call _release;
-    moveOut _inf;
-    unassignVehicle _inf;
-    _inf enableAI "MOVE";
-    [[group _inf], []] call fnc_civ_wp_Tomata;
+    // Delivered: hand him off gracefully -- peel from the player's group and despawn after a grace.
+    [_inf] call _despawn;
     [localize "STR_DUWS_T_OVERLORD", [format [localize "STR_DUWS_T_escortinformant_close", _place]] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     [_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], [], true] call fnc_mission_finish;
 };
@@ -133,15 +134,10 @@ if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
 call _cleanup;
 
 if (alive _inf) exitWith {
-    // Timed out but alive: he makes his own way to the town on foot and idles there until GC, not frozen.
-    call _release;
-    moveOut _inf;
-    unassignVehicle _inf;
-    _inf enableAI "MOVE";
-    _inf setBehaviour "CARELESS";
-    _inf doMove _townPos;
+    // Timed out but alive: same graceful hand-off despawn as the win path.
+    [_inf] call _despawn;
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
 };
 
-// Informant dead: the corpse rides the dead-owned census, nothing to hand off here.
+// Informant dead: the corpse rides the general dead-body census (any body, claimed or not), nothing to do.
 [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_escortinformant_fail"]] call fnc_mission_finish;

@@ -271,6 +271,11 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
 
     if (_outcome isEqualTo "GONE") exitWith {};   // slot already recycled elsewhere; do not double-finish
 
+    // Ownership teardown: claim every unit this raid spawned (enemy guards + decoy/crowd civilians) so the
+    // finish below releases them to the map sweep (keep-radius). A dead guard's searchable corpse rides the
+    // same sweep -- held while a player is near, taken once they leave.
+    [_allUnits] call fnc_mission_claim;
+
     { deleteMarker _x } forEach _marks;
     if (_outcome isEqualTo "WIN") then {
         [_mission_name, _taskId, "SUCCEEDED", _tpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_RAID_SAFEHOUSE_DONE"], true, "mission_raid_safehouse", false, false] call fnc_mission_finish;
@@ -278,7 +283,5 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
         [_mission_name, _taskId, "FAILED", _tpos, _radius, [_marker], [], false, "mission_raid_safehouse", false, true] call fnc_mission_finish;
     };
 
-    // Delete the crowd and occupants this raid spawned, once the players have had a moment with the result.
-    // The town's own locals are never in this list.
-    [_allUnits] spawn { params ["_u"]; sleep 15; { if (!isNull _x) then { deleteVehicle _x } } forEach _u };
+    // No manual delete: the units were claimed above, so the finish calls released them to the map sweep.
 };

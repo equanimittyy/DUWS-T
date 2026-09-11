@@ -277,6 +277,11 @@ if (!_enemyTown) then {
 };
 missionNamespace setVariable ["DUWS_informant_crowd", _crowd];
 
+// Ownership teardown: claim every unit and car this hunt spawned so fnc_mission_finish -> cleanup GCs
+// them on the map sweep (keep-radius), not a blind timer. The informant's flagged corpse rides the same
+// sweep -- held while a player is near, taken once they leave.
+[_allUnits + _allCars] call fnc_mission_claim;
+
 // Foot flight when there is no car. Two independent axes: _armed decides breaking cover -- only a gone
 // car drops the disguise, pulls a pistol, fights out (a shot alone never unmasks him); _run decides
 // pace -- FULL hurrying (under fire or car gone), LIMITED walking out blended. Faction-agnostic sidearm.
@@ -425,15 +430,6 @@ if (_outcome isEqualTo "WIN") then {
     [_mission_name, _taskID, "FAILED", _townPos, _radius, [_markername2], [], false, "", false, false] call fnc_mission_finish;
 };
 
-// Cleanup everything the mission put down (informant, four cars, decoy drivers, added crowd), once
-// the players have had a moment with the result.
-[_allCars, _allUnits, _informant, _outcome] spawn {
-    params ["_cars", "_units", "_inf", "_out"];
-    sleep 10;
-    { if (!isNull _x) then { deleteVehicle _x } } forEach _cars;
-    // On a win his corpse is a flagged search target: leave it to the battlefield cleanup, which keeps
-    // it while a player is near and sweeps it once they leave, rather than deleting it out from under them.
-    {
-        if (!isNull _x && {!(_out isEqualTo "WIN") || {!(_x isEqualTo _inf)}}) then { deleteVehicle _x };
-    } forEach _units;
-};
+// Teardown is by ownership: the units and cars were claimed at spawn, so the finish calls above released
+// them to the map sweep. No manual delete here -- a blind timer would blink a searchable corpse out from
+// under a player.
