@@ -97,8 +97,6 @@ private _marks = [];
 {
     private _bldg = _x;
     private _isReal = _bldg isEqualTo _realBldg;
-    private _slots = [_bldg] call _fnc_innerSlots;
-    if (_slots isEqualTo []) then { _slots = [getPosATL _bldg] };
 
     // "?" marker at the house itself: the player sees every possible safehouse but not which is real.
     private _cpos = getPosATL _bldg;
@@ -111,47 +109,6 @@ private _marks = [];
     _bldg setVariable ["DUWS_safehouse_marker", _mk];
     _bldg setVariable ["DUWS_safehouse_real", _isReal];
     _bldg setVariable ["DUWS_safehouse_townIndex", _townIndex];
-
-    // Furnish via the shared furnisher (keyed for teardown): it settles furniture clear of the nav path and
-    // doorways, so occupants still fit and the lock below never seals a door behind a piece.
-    [_bldg, "mission_raid_safehouse", 0] call fnc_furnish_building;
-
-    // Occupants: 3-5, spread across the slots. Real house = concealed guards; decoys = innocent locals
-    // (spawned as town civilians, so killing them bills the town on top of the raid's own rep cost). Both
-    // garrison their house through fnc_holdBuildingPost -- a doMove loop between the building's positions
-    // with pathing left on, so they work the house rather than freeze on one spot and give a decoy away by
-    // standing where a guard would not. The loop keys off the unit, so it survives a guard's flip to EAST:
-    // the same men then hold and fight from the house instead of charging the street.
-    private _n = (3 + floor random 3) min count _slots;
-    private _occupants = [];
-    for "_i" from 0 to (_n - 1) do {
-        private _spos = _slots select (_i mod count _slots);
-        private _u = if (_isReal) then {
-            [_spos] call _fnc_spawnGuard
-        } else {
-            private _c = [_townIndex, _spos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
-            if (!isNull _c) then {
-                _c setVariable ["DUWS_safehouse_occupant", true];   // keep the ask poll off the shut-in locals
-                _c setPosATL _spos;
-            };
-            _c
-        };
-        if (!isNull _u) then {
-            _occupants pushBack _u; _allUnits pushBack _u;
-            [_u, _bldg, _slots, "AUTO"] spawn fnc_holdBuildingPost;
-        };
-    };
-    _bldg setVariable ["DUWS_safehouse_occupants", _occupants];
-    if (_isReal) then { _guards append _occupants };
-
-    // Lock every door shut on all machines, last of all: furnishing opens doors to scan and restores them,
-    // so the lock has the final say. bis_disabled_Door_N suppresses the engine open action; the animate
-    // closes the leaves so no house betrays itself with an open door. Only a breach reopens them.
-    for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
-    [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
-
-    // Arm the breach: HitPart on every client, keyed on the house (JIP).
-    [_bldg] remoteExec ["fnc_raid_safehouse_arm", 0, _bldg];
 } forEach _bldgs;
 
 // The intel crate, in an inner slot of the real house. Cleared of its default cargo, then stuffed with
@@ -171,30 +128,79 @@ for "_i" from 1 to (6 + floor random 5) do {
     _crate addItemCargoGlobal [_pick select [5], 1];
 };
 
-// State the ask helpers and breach read. Real house and decoys stay server-side; the active flag is the
-// broadcast gate the client-side ask action tests.
+// active is broadcast (the client ask action tests it); real/decoys are server-only reads. guards points at
+// the _guards array the background build fills, so breach reads the same reference and sees them once spawned.
 missionNamespace setVariable ["DUWS_safehouse_real", _realBldg];
 missionNamespace setVariable ["DUWS_safehouse_decoys", _decoys];
 missionNamespace setVariable ["DUWS_safehouse_guards", _guards];
 DUWS_safehouse_active = true;
 publicVariable "DUWS_safehouse_active";
 
-// Entry breach: a raider who gets inside a candidate without shooting a door (through a gap, a blown wall)
-// still cracks it. Cheap poll over the not-yet-breached houses for a player stood on an interior position.
-[_bldgs] spawn {
-    params ["_bldgs"];
-    while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
-        {
-            private _h = _x;
-            if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
-                private _slots = _h buildingPos -1;
-                if ((allPlayers findIf { private _p = _x; (_slots findIf { _p distance _x < 2.5 }) >= 0 }) >= 0) then {
-                    [_h, "ALL"] call fnc_raid_safehouse_breach;
+// Build and furnish off the critical path so the ask mechanic and the task reach players now, not after the
+// slow furniture settle. Lock and breach-arm ride here too: a breach flips the live DUWS_safehouse_guards, so
+// no breach vector may go live before the guards spawn.
+[_bldgs, _realBldg, _townIndex, _civBodies, _fnc_innerSlots, _fnc_spawnGuard, _guards, _allUnits] spawn {
+    params ["_bldgs", "_realBldg", "_townIndex", "_civBodies", "_fnc_innerSlots", "_fnc_spawnGuard", "_guards", "_allUnits"];
+
+    // Decoy locals spawn as town civilians, so killing one bills the town. Both sides garrison via
+    // fnc_holdBuildingPost, whose loop keys off the unit: it survives a guard's flip to EAST, so the same men
+    // fight from the house rather than charge the street.
+    {
+        private _bldg = _x;
+        private _isReal = _bldg isEqualTo _realBldg;
+        private _slots = [_bldg] call _fnc_innerSlots;
+        if (_slots isEqualTo []) then { _slots = [getPosATL _bldg] };
+
+        private _n = (3 + floor random 3) min count _slots;
+        private _occupants = [];
+        for "_i" from 0 to (_n - 1) do {
+            private _spos = _slots select (_i mod count _slots);
+            private _u = if (_isReal) then {
+                [_spos] call _fnc_spawnGuard
+            } else {
+                private _c = [_townIndex, _spos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
+                if (!isNull _c) then {
+                    _c setVariable ["DUWS_safehouse_occupant", true];   // keep the ask poll off the shut-in locals
+                    _c setPosATL _spos;
                 };
+                _c
             };
-        } forEach _bldgs;
-        sleep 2;   // TUNABLE
+            if (!isNull _u) then {
+                _occupants pushBack _u; _allUnits pushBack _u;
+                [_u, _bldg, _slots, "AUTO"] spawn fnc_holdBuildingPost;
+            };
+        };
+        _bldg setVariable ["DUWS_safehouse_occupants", _occupants];
+        if (_isReal) then { _guards append _occupants };
+
+        // bis_disabled_Door_N kills the open action; the animate shuts the leaf so no house shows an open door.
+        // The furnish pass below reopens doors to scan, but server-side only, so these client leaves stay shut.
+        for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
+        [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
+    } forEach _bldgs;
+
+    // Guards exist now, so a breach can wake them: arm the door shot, then poll for an entry breach too (a
+    // raider inside through a gap or blown wall, no door shot).
+    { [_x] remoteExec ["fnc_raid_safehouse_arm", 0, _x] } forEach _bldgs;
+    [_bldgs] spawn {
+        params ["_bldgs"];
+        while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
+            {
+                private _h = _x;
+                if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
+                    private _slots = _h buildingPos -1;
+                    if ((allPlayers findIf { private _p = _x; (_slots findIf { _p distance _x < 2.5 }) >= 0 }) >= 0) then {
+                        [_h, "ALL"] call fnc_raid_safehouse_breach;
+                    };
+                };
+            } forEach _bldgs;
+            sleep 2;   // TUNABLE
+        };
     };
+
+    // Furniture last (slow settle), held a full cell clear of every doorway, so no piece is sealed behind a
+    // leaf and it is safe to run after the lock.
+    { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
 };
 
 // Thicken the street crowd so there is always someone to ask, and re-open every local already in town (a
@@ -252,7 +258,9 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
         sleep 3;
         if (Mission_available || DUWS_mission_token != _token) exitWith { _outcome = "GONE"; true };
         if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
-        if ((_realBldg getVariable ["DUWS_safehouse_breached", false]) && {({ alive _x } count _guards) == 0}) exitWith { _outcome = "WIN"; true };
+        // count _guards > 0 guards the build window: an empty list would read as "all guards down" and win on
+        // the first breach.
+        if ((_realBldg getVariable ["DUWS_safehouse_breached", false]) && {count _guards > 0} && {({ alive _x } count _guards) == 0}) exitWith { _outcome = "WIN"; true };
         false
     };
 
