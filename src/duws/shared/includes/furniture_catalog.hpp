@@ -98,6 +98,11 @@
 ["Land_ToolTrolley_01_F",           "wall",   270, "",        0, ""],
 ["Land_ToolTrolley_02_F",           "wall",   270, "",        0, ""],
 ["Land_CanisterPlastic_F",          "wall",     0, "",        0, ""],
+["Land_PlasticBucket_01_closed_F",  "wall",     0, "",        0, ""],
+["Land_PlasticBucket_01_open_F",    "wall",     0, "",        0, ""],
+["Land_Bucket_F",                   "wall",     0, "",        0, ""],
+["Land_Bucket_clean_F",             "wall",     0, "",        0, ""],
+["Land_Bucket_painted_F",           "wall",     0, "",        0, ""],
 
 // -- freestanding floor bulk: crate stacks and sack heaps, stood in the open middle and walked around; no seats, no tabletop --
 ["Land_CratesPlastic_F",            "freestand", 0, "", 0, ""],
@@ -107,11 +112,6 @@
 ["Land_WoodenCrate_01_stack_x5_F",  "freestand", 0, "", 0, ""],
 ["Land_Sacks_goods_F",              "freestand", 0, "", 0, ""],
 ["Land_Sacks_heap_F",               "freestand", 0, "", 0, ""],
-["Land_PlasticBucket_01_closed_F",  "freestand", 0, "", 0, ""],
-["Land_PlasticBucket_01_open_F",    "freestand", 0, "", 0, ""],
-["Land_Bucket_F",                   "freestand", 0, "", 0, ""],
-["Land_Bucket_clean_F",             "freestand", 0, "", 0, ""],
-["Land_Bucket_painted_F",           "freestand", 0, "", 0, ""],
 
 // -- office: wall-backed desks (chair on the front) + office chair + desk clutter (family "office"); office wall pieces (flat) --
 ["OfficeTable_01_new_F",            "anchor", 180, "office",  1, "wall"],
