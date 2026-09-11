@@ -13,7 +13,7 @@ Per row [class, role, frontYaw, family, seats, slot, maxPerRoom?] it checks:
     non-negative integer;
   - family a known family, slot a known slot, and the three agree: an anchor carries a
     family and a center|wall slot; a seat or clutter carries a family and no slot; a wall
-    piece carries neither (family "", slot "").
+    or freestand piece carries neither (family "", slot "").
 
 It does NOT check that a class resolves in CfgVehicles/CfgMagazines/CfgWeapons -- python
 cannot read the engine config, so the runtime loader logs and skips an unresolved class --
@@ -26,7 +26,7 @@ import sys
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 CATALOG = os.path.join(ROOT, "src", "duws", "shared", "includes", "furniture_catalog.hpp")
 
-ROLES = {"anchor", "seat", "wall", "clutter"}
+ROLES = {"anchor", "seat", "wall", "clutter", "freestand"}
 FAMILIES = {"", "dining", "office"}
 SLOTS = {"", "center", "wall"}
 
@@ -129,11 +129,11 @@ def main():
                 fails.append((tag, f"{role} needs a family"))
             if slot:
                 fails.append((tag, f"{role} must not carry a slot"))
-        elif role == "wall":
+        elif role in ("wall", "freestand"):
             if family:
-                fails.append((tag, 'wall piece must have family ""'))
+                fails.append((tag, f'{role} piece must have family ""'))
             if slot:
-                fails.append((tag, 'wall piece must have slot ""'))
+                fails.append((tag, f'{role} piece must have slot ""'))
 
     print(f"[furniture] checked {len(rows)} catalog row(s), {len(seen)} class(es)")
     if fails:

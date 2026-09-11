@@ -11,18 +11,20 @@
 // engine config); the lint (tests/lint/check_furniture_catalog.py) checks row shape and vocabulary.
 //
 // Columns: [class, role, frontYaw, family, seats, slot, maxPerRoom?]  (maxPerRoom optional, default 0)
-//   role       one of four placement categories, each its own placer pass:
-//                anchor  -- needs open floor; takes seats beside it (a table, a desk).
-//                seat    -- placed at an anchor's edge, facing in; never standalone.
-//                wall    -- placed back-flush and perpendicular to a wall (sofa, shelf, cabinet).
-//                clutter -- seated on an anchor's top.
+//   role       one of five placement categories, each its own placer pass:
+//                anchor    -- needs open floor; takes seats beside it (a table, a desk).
+//                seat      -- placed at an anchor's edge, facing in; never standalone.
+//                wall      -- placed back-flush and perpendicular to a wall (sofa, shelf, cabinet).
+//                clutter   -- seated on an anchor's top.
+//                freestand -- stands in the open middle like an anchor but inert: no seats, no tabletop
+//                             clutter (a crate stack, a sack heap). Carries no family (family "", slot "").
 //   frontYaw   degrees subtracted from a target bearing so the model's real front lands on it (heading =
 //              target - frontYaw); i.e. the bearing the front points at when placed at heading 0 (+Y due
 //              north). Hand-read per class with the calibration tool, since no command reports a model's
 //              front. 0 = uncalibrated (front assumed +Y); a mis-face is a playtest fix, not a crash.
 //   family     companion group tying an anchor to its seats and tabletop clutter -- an anchor draws only
 //              chairs and clutter of its own family (a desk takes an office chair, a dining table its own
-//              chairs). "" for wall pieces, which form one flat pool drawn regardless of family.
+//              chairs). "" for wall and freestand pieces, which take no companions.
 //   seats      anchors only: -1 = a seat on every open side (dining table); N = exactly N on the front
 //              (a desk is 1). 0 (ignored) for every other role.
 //   slot       anchors only: "center" fills the mid-room slot, "wall" backs onto a wall (a desk). "" else.
@@ -89,25 +91,27 @@
 ["Land_FlowerPot_01_Flower_F",      "wall",     0, "",        0, ""],
 ["Land_FlowerPot_01_F",             "wall",     0, "",        0, ""],
 
-// -- containers: crates, sacks, buckets, baskets, trolleys; wall-flush, fit any room --
+// -- containers: single crate/sack, buckets, baskets, trolleys; wall-flush, fit any room --
 ["Land_Basket_F",                   "wall",     0, "",        0, ""],
-["Land_CratesPlastic_F",            "wall",     0, "",        0, ""],
-["Land_CratesShabby_F",             "wall",     0, "",        0, ""],
-["Land_CratesWooden_F",             "wall",     0, "",        0, ""],
 ["Land_Sack_F",                     "wall",     0, "",        0, ""],
-["Land_Sacks_goods_F",              "wall",     0, "",        0, ""],
-["Land_Sacks_heap_F",               "wall",     0, "",        0, ""],
 ["Land_WoodenCrate_01_F",           "wall",     0, "",        0, ""],
-["Land_WoodenCrate_01_stack_x3_F",  "wall",     0, "",        0, ""],
-["Land_WoodenCrate_01_stack_x5_F",  "wall",     0, "",        0, ""],
 ["Land_ToolTrolley_01_F",           "wall",     0, "",        0, ""],
 ["Land_ToolTrolley_02_F",           "wall",     0, "",        0, ""],
-["Land_PlasticBucket_01_closed_F",  "wall",     0, "",        0, ""],
-["Land_PlasticBucket_01_open_F",    "wall",     0, "",        0, ""],
 ["Land_CanisterPlastic_F",          "wall",     0, "",        0, ""],
-["Land_Bucket_F",                   "wall",     0, "",        0, ""],
-["Land_Bucket_clean_F",             "wall",     0, "",        0, ""],
-["Land_Bucket_painted_F",           "wall",     0, "",        0, ""],
+
+// -- freestanding floor bulk: crate stacks and sack heaps, stood in the open middle and walked around; no seats, no tabletop --
+["Land_CratesPlastic_F",            "freestand", 0, "", 0, ""],
+["Land_CratesShabby_F",             "freestand", 0, "", 0, ""],
+["Land_CratesWooden_F",             "freestand", 0, "", 0, ""],
+["Land_WoodenCrate_01_stack_x3_F",  "freestand", 0, "", 0, ""],
+["Land_WoodenCrate_01_stack_x5_F",  "freestand", 0, "", 0, ""],
+["Land_Sacks_goods_F",              "freestand", 0, "", 0, ""],
+["Land_Sacks_heap_F",               "freestand", 0, "", 0, ""],
+["Land_PlasticBucket_01_closed_F",  "freestand", 0, "", 0, ""],
+["Land_PlasticBucket_01_open_F",    "freestand", 0, "", 0, ""],
+["Land_Bucket_F",                   "freestand", 0, "", 0, ""],
+["Land_Bucket_clean_F",             "freestand", 0, "", 0, ""],
+["Land_Bucket_painted_F",           "freestand", 0, "", 0, ""],
 
 // -- office: wall-backed desks (chair on the front) + office chair + desk clutter (family "office"); office wall pieces (flat) --
 ["OfficeTable_01_new_F",            "anchor", 180, "office",  1, "wall"],

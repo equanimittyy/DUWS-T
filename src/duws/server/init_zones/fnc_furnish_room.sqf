@@ -3,7 +3,8 @@
 // which spawns one instance per room. Server-only, not broadcast.
 //
 // Furnishes one room of the grid: 4-10 wall pieces onto near cells, then a central anchor (80% chance) with its
-// seats and surface clutter, then a wall-backed anchor such as a desk (40% chance). An anchor draws its seats
+// seats and surface clutter, then a wall-backed anchor such as a desk (40% chance), then (50% chance) 1-3
+// freestanding floor pieces such as a crate stack in the open middle. An anchor draws its seats
 // and clutter from its own catalog family, so a desk gets an office chair and a dining table its own. Runs as
 // its own scheduled thread so the per-piece settle waits of every room overlap in wall-clock instead of summing
 // -- SQF is cooperative, so the win is the overlapped waits, not CPU. Rooms are independent (separated by
@@ -238,7 +239,8 @@ fnc_furnish_room = {
             };
         };
 
-        _out2 append ([_aObj, _hx, _hy, _topZ, _family] call _surfacePack);
+        // Family "" is a freestand piece: skip the tabletop pass, whose "" family key would otherwise draw every clutter class.
+        if (_family != "") then { _out2 append ([_aObj, _hx, _hy, _topZ, _family] call _surfacePack) };
         // Reserve the table plus its seat ring as one oriented footprint so nothing later packs into the chairs.
         { _x set [5, true] } forEach ([getPosASL _aObj, _heading, _hx + SEAT_GAP, _hy + SEAT_GAP, 0.1] call _boxCells);
         _out2
@@ -412,6 +414,41 @@ fnc_furnish_room = {
                 if (_res isEqualTo []) then { _wtries = _wtries + 1 } else { _res call _keepFrozen; _wgot = true };
             };
             if (!_wgot) then { _classCount set [_wcls, ((_classCount getOrDefault [_wcls, 0]) - 1) max 0] };
+        };
+    };
+
+    // Freestanding floor bulk (a crate stack, a sack heap): reuses the central-anchor path, but its catalog
+    // family "" makes _placeAnchor skip seats and (guarded above) the tabletop, so the piece lands inert.
+    private _freeStand = ["freestand"] call fnc_furnish_classesFor;
+    if (_freeStand isNotEqualTo [] && {random 1 < 0.5}) then {
+        private _cx = 0; private _cy = 0;
+        { _cx = _cx + ((_x select 0) select 0); _cy = _cy + ((_x select 0) select 1) } forEach _rcells;
+        _cx = _cx / (count _rcells); _cy = _cy / (count _rcells);
+
+        private _n = 1 + floor random 3;
+        private _placed = 0; private _miss = 0;
+        while { _placed < _n && _miss < PLACE_RETRY } do {
+            private _cls = [_freeStand] call _pickCapped;
+            if (_cls == "") exitWith {};
+            ([_cls] call _dimsOf) params ["_ahx", "_ahy"];
+            private _riX = ceil ((_ahx + SEAT_GAP) / _pitch);
+            private _riY = ceil ((_ahy + SEAT_GAP) / _pitch);
+            private _fit = _rcells select { (_x select 1) == "open" && {!(_x select 5)} && {[_x, _riX, _riY] call _ringsClear} };
+            if (_fit isEqualTo []) then {
+                _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                _miss = _miss + 1;
+            } else {
+                private _cell = ([_fit, [], { private _p = _x select 0; private _dx = (_p select 0) - _cx; private _dy = (_p select 1) - _cy; _dx * _dx + _dy * _dy }, "ASCEND"] call BIS_fnc_sortBy) select 0;
+                private _res = [_cell, _cls] call _placeAnchor;
+                if (_res isEqualTo []) then {
+                    _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
+                    _miss = _miss + 1;
+                } else {
+                    _res call _keepFrozen;
+                    _placed = _placed + 1;
+                    _miss = 0;
+                };
+            };
         };
     };
 
