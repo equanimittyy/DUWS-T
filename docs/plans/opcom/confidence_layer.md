@@ -174,7 +174,7 @@ Extended in place:
 | `fnc_opcom_grid_init` | Allocate `DUWS_opcom_grid_seen` (full-width lattice, all `-OPCOM_COVER_SPAN`) once, beside the static land / component arrays it already builds. Never touched by `fnc_opcom_grid_rebuild` |
 | `fnc_opcom_recon_sense` | After (or within) the box walk it already runs, call `fnc_opcom_cover_stamp` for each recon point's `k` box — unconditional on catching a group — then `fnc_opcom_cover_clear` on the same box to drop stale belief the reach disproved |
 | `DUWS_fnc_hardpointOPSense` | Every tick stamp its `OP_OBSERVE_K` box (cross-subsystem — the OP sensor lives with the hardpoint code); on the tick its `OP_OBSERVE_CHANCE` fires, `fnc_opcom_cover_clear` the same box after the burst |
-| `fnc_opcom_belief_upsert` | After the store write, `k = 0` point-stamp the sighted cell, so every faucet's positive sightings (recon, `nearTargets`, any future sensor) refresh coverage through the one writer |
+| `fnc_opcom_belief_upsert` | After the store write, `k = 0` point-stamp the sighted cell, so every faucet's positive sightings (recon, `nearTargets`, the OP post, any future sensor) refresh coverage through the one writer |
 | `fnc_opcom_route` *(P5)* | Add `OPCOM_ROUTE_MU × (cell call fnc_opcom_cover_stale)` to the per-step cost on the `λ = 1` branch |
 | Scout Value in `fnc_opcom_actions` *(P4b)* | Read `fnc_opcom_cover_stale` per footprint cell as the `staleness` term |
 
