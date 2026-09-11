@@ -20,7 +20,7 @@ if (!hasInterface) exitWith {};
 // Two ways a thing is searchable. Flagged branch: an objective body or a placed object (laptop,
 // armour) a mission marked, or a surrendered detainee -- single-use, and the type test it carries
 // is what lets a laptop and a living-but-surrendered man through where a corpse test could not.
-// Combat branch: any enemy corpse, flag-free, gated only by the per-player search budget -- this is what
+// Combat branch: any enemy corpse, flag-free, gated only by the session-wide search budget -- this is what
 // makes every enemy body searchable without flagging one at spawn. A claimed objective body (done)
 // fails the flagged branch and drops to the combat branch, so it becomes an ordinary corpse rather
 // than going dead under the cursor. Budget read via getVariable with defaults: the broadcast
@@ -42,7 +42,7 @@ private _cond =
   + "       cursorObject isKindOf 'CAManBase'"
   + "       && {!alive cursorObject}"
   + "       && {getNumber (configFile >> 'CfgVehicles' >> typeOf cursorObject >> 'side') == 0}"
-  + "       && {count ((_target getVariable ['DUWS_searchTimes', []]) select {time - _x < (missionNamespace getVariable ['DUWS_searchCooldown', 900])}) < (missionNamespace getVariable ['DUWS_searchAllowance', 3])}"
+  + "       && {count ((missionNamespace getVariable ['DUWS_searchTimes', []]) select {time - _x < (missionNamespace getVariable ['DUWS_searchCooldown', 900])}) < (missionNamespace getVariable ['DUWS_searchAllowance', 3])}"
   + "     }"
   + "   }";
 

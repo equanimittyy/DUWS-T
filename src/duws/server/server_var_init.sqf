@@ -253,10 +253,11 @@ DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITE
     "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
     "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
 
-// A rolling window: up to DUWS_searchAllowance combat-corpse searches per DUWS_searchCooldown seconds
-// per player -- this budget, not troop density, is what bounds intel volume, since any corpse is
-// searchable and the success roll is spent at the search. Deliberately tight. Objective/civ_frisk
-// searches are single-use and bypass it. Broadcast: the prompt's condition runs on the client.
+// A rolling window: up to DUWS_searchAllowance combat-corpse searches per DUWS_searchCooldown seconds,
+// session-wide -- one shared budget for the whole team, not per player. This budget, not troop density,
+// is what bounds intel volume, since any corpse is searchable and the success roll is spent at the
+// search. Deliberately tight. Objective/civ_frisk searches are single-use and bypass it. The tally
+// (DUWS_searchTimes) lives in missionNamespace and is broadcast: the prompt's condition runs on the client.
 DUWS_searchCooldown = 900;   publicVariable "DUWS_searchCooldown";
 DUWS_searchAllowance = 3;    publicVariable "DUWS_searchAllowance";
 

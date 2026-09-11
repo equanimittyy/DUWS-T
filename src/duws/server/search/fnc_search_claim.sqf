@@ -15,7 +15,7 @@ params ["_target", "_caller"];
 if (isNull _target || {isNull _caller}) exitWith {};
 
 // A flagged body not yet claimed pays its objective/frisk table once. Anything else -- an unflagged
-// corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the per-player
+// corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the session-wide
 // search budget and, since combat is not rolled at spawn, rolled here (below). The budget is enforced
 // here rather than only in the action's condition, because the claim is the authoritative point and a
 // condition a client evaluates is a condition a client can be made to skip.
@@ -26,16 +26,17 @@ if (!_flagged) then { _source = "combat" };
 // Budget gated here at the top level, not nested in the else below. exitWith unwinds past a
 // then/else to the whole function (see arma_engine_gotchas), so a guard nested in the else would
 // read as skipping only the stamp while in fact abandoning the payout -- gating here keeps it plain.
-if (!_flagged && {count ((_caller getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown}) >= DUWS_searchAllowance}) exitWith {};
+if (!_flagged && {count ((missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown}) >= DUWS_searchAllowance}) exitWith {};
 
 if (_flagged) then {
     _target setVariable ["DUWS_search_done", true, true];
 } else {
     // The attempt spends a slot whether or not it finds anything -- a dry search is still a search.
-    // Pruned on write so the stamp list stays bounded to the window.
-    private _times = (_caller getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown};
+    // Pruned on write so the stamp list stays bounded to the window. One shared budget for the whole
+    // session, not per player: the stamp lives in missionNamespace and is broadcast.
+    private _times = (missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown};
     _times pushBack time;
-    _caller setVariable ["DUWS_searchTimes", _times, true];
+    missionNamespace setVariable ["DUWS_searchTimes", _times, true];
 };
 
 private _config = DUWS_searchSources getOrDefault [_source, []];
