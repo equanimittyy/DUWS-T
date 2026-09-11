@@ -191,13 +191,28 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             };
         };
 
-        // Clock expired with a guard alive: setCaptive false + reveal + RED so the co-located guards engage at
-        // once; the setDamage backstop covers a stuck-AI edge (scripted damage bypasses his clamp).
+        // Clock expired: hand him to the cordon to be shot. Drop his damage clamp so rounds land full, then
+        // walk the nearest guard onto him and fire -- the garrison roams the house, so the closest may be
+        // rooms away. setDamage is a failsafe for a guard that can't path to him, timed to land after the walk.
         if (_state == "ALARM" && { time > _alarmAt }) exitWith {
+            _hostage removeAllEventHandlers "HandleDamage";
             _hostage setCaptive false;
-            { _x reveal [_hostage, 4] } forEach units _garrison;
+            private _guards = units _garrison select { alive _x };
+            { _x reveal [_hostage, 4] } forEach _guards;
+            _garrison setBehaviour "COMBAT";
             _garrison setCombatMode "RED";
-            [_hostage] spawn { params ["_h"]; sleep 5; if (alive _h) then { _h setDamage 1 }; };
+            private _shooter = objNull;
+            { if (isNull _shooter || { _x distance _hostage < _shooter distance _hostage }) then { _shooter = _x } } forEach _guards;
+            if (!isNull _shooter) then {
+                [_shooter, _hostage] spawn {
+                    params ["_g", "_h"];
+                    private _by = time + 12;
+                    // Re-issue the move each tick so group formation can't pull him off it.
+                    waitUntil { sleep 1; _g doMove getPosATL _h; !alive _h || !alive _g || _g distance _h < 4 || time > _by };
+                    if (alive _h && { alive _g }) then { _g doTarget _h; _g doFire _h };
+                };
+            };
+            [_hostage] spawn { params ["_h"]; sleep 20; if (alive _h) then { _h setDamage 1 }; };
         };
 
         // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm. Each
