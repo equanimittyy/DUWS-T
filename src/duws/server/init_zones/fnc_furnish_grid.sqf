@@ -259,27 +259,33 @@ fnc_furnish_grid = {
     { _building animate [_x, _doorPhases select _forEachIndex, true] } forEach _doorAnims;
     if (_doorAnims isNotEqualTo []) then { sleep 0.1 };
 
-    // Block cells around each door mouth, else a neighbour piece overhangs the opening or its approach.
+    // Blocking only the door cell leaves a neighbour piece free to overhang the opening or its approach.
     private _ij = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
+    private _deniedKeys = createHashMap;
+    private _denyRing = {
+        params ["_ci"];
+        (_cells select _ci) params ["", "", "", "", "", "", "_i", "_j", "_s"];
+        for "_dx" from -2 to 2 do {
+            for "_dy" from -2 to 2 do {
+                private _k = format ["%1_%2_%3", _s, _i + _dx, _j + _dy];
+                private _ni = _ij getOrDefault [_k, -1];
+                if (_ni >= 0) then { private _n = _cells select _ni; _n set [1, "blocked"]; _n set [5, true]; _deniedKeys set [_k, true] };
+            };
+        };
+    };
     private _doors = [];
     { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
     private _rayDoors = count _doors;
     { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
-    {
-        (_cells select _x) params ["", "", "", "", "", "", "_i", "_j", "_s"];
-        for "_dx" from -2 to 2 do {
-            for "_dy" from -2 to 2 do {
-                private _ni = _ij getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], -1];
-                if (_ni >= 0) then { private _n = _cells select _ni; _n set [1, "blocked"]; _n set [5, true] };
-            };
-        };
-    } forEach _doors;
+    { [_x] call _denyRing } forEach _doors;
 
     // An open doorway no longer walls the rooms apart, so the fill would leak across it or out a front door; the
-    // shut leaves give the plug that splits it. Clearance stayed open-door above, so no piece backs onto a leaf.
+    // shut leaves give the plug that splits it. A doorway only the leaf catches (the jamb/pinch test missed it)
+    // gets the same ring as a tagged door, so no piece crowds its mouth.
     private _plugged = 0;
     if (_doorAnims isNotEqualTo []) then {
+        private _plugCells = [];
         {
             private _cell = _x;
             if ((_cell select 1) != "blocked") then {
@@ -290,10 +296,26 @@ fnc_furnish_grid = {
                     private _r = lineIntersectsSurfaces [_cbS, _cbS vectorAdd [WALL_REACH * sin _x, WALL_REACH * cos _x, 0], objNull, objNull, true, 1, "GEOM"];
                     if (_r isNotEqualTo []) then { _minShut = _minShut min (_cbS distance ((_r select 0) select 0)) };
                 } forEach _ring;
-                if (_minShut < BLOCKED_CLEAR) then { _cell set [1, "blocked"]; _cell set [5, true]; _plugged = _plugged + 1 };
+                if (_minShut < BLOCKED_CLEAR) then { _cell set [1, "blocked"]; _cell set [5, true]; _plugged = _plugged + 1; _plugCells pushBack _forEachIndex };
             };
         } forEach _cells;
+        { [_x] call _denyRing } forEach _plugCells;
     };
+
+    // A near cell touching a door plug would back a wall piece onto the shut leaf, into the opening. Demote it to
+    // open (not blocked, so the cell stays in its room); before flood-fill, so the rooms see it.
+    private _deltas = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+    private _demote = [];
+    {
+        private _ci = _forEachIndex;
+        if ((_x select 1) == "near") then {
+            _x params ["", "", "", "", "", "", "_i", "_j", "_s"];
+            if ((_deltas findIf { _x params ["_dx", "_dy"]; _deniedKeys getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], false] }) >= 0) then {
+                _demote pushBack _ci;
+            };
+        };
+    } forEach _cells;
+    { (_cells select _x) set [1, "open"] } forEach _demote;
 
     // Flood-fill non-blocked cells into rooms. Blocked cells -- walls, and the doorways blocked above -- hold
     // runs the fill cannot cross, so each enclosed area becomes its own room. 4-neighbour adjacency within a
