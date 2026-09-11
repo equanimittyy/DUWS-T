@@ -1384,8 +1384,8 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
 | **3 — Recruitment & tasking wiring** *(shipped)* | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), the recon-flagged tasking's standing detection sensor ([§Sensors](#sensors)), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
-| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, every action committed automatically as a single-unit or economic commit (Bank, Reinforce, Fortify, Build, Recruit, Attack, Intercept, Rapport, Scout, and a minimal one-gun `arty`); supply-arrival delivery; the contested draw-lock; single-unit resolve; flat archetype weights | The P3 mechanism + grid / force |
-| **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built — and the `arty` saturation / spotter template over P4's one-gun mission | The loop + movement + templates |
+| **4 — Decision loop** | The scoring pass on the tick, in two cuts. **4a** — the thinking harness (the appraisal spine: enumerate, gate, score, weighted-random pick, commit one, spend) plus the defensive / non-threat actions that spend AP without a fight (Bank, Recruit on supply demand, Build, Reinforce, Fortify, Rapport), supply-arrival delivery (the errand and `fnc_opcom_deliver`, closing the P3 stub), flat archetype weights, `P(win)` a flat 1. **4b** — offensive actions reacting to threats as individual (single-unit) orders: Attack, Intercept, Scout, a minimal one-gun `arty`; real `P(win)` (`r² / (r²+1)`); the contested draw-lock; single-unit resolve | The P3 mechanism + grid / force |
+| **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built — and the `arty` saturation / spotter template over 4b's one-gun mission | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
 
 Random events (turned-town IED / ambush / sabotage, hostile conversion) are out of this roadmap — that
@@ -1410,9 +1410,12 @@ docs draw on.
   `fnc_opcom_stream`), the transport ferry (`fnc_opcom_ferry`, [§Transport](#transport-carrying-a-unit-to-the-fight)) and the
   recon-detection sensor (`fnc_opcom_recon_sense`) — all hand-driven through the debug harness
   (`fnc_opcom_debug_task`, client picker `fnc_debug_opcom_pick`). No automated decisions; those are Phase 4.
-- Phase 4 — Decision loop: the implementation spec is [`phase_4_decision_loop.md`](phase_4_decision_loop.md) —
-  the full loop (appraisal, real `P(win)`, every action single-unit, supply delivery, resolve), single-unit
-  offensives with the multi-unit forms held for Phase 5.
+- Phase 4 — Decision loop: ships in two cuts. **4a** (the thinking harness plus the defensive economy) is
+  specified in [`phase_4_decision_loop.md`](phase_4_decision_loop.md) — the appraisal spine plus Bank, Recruit
+  (supply demand), Build, Reinforce, Fortify, Rapport, with supply-arrival delivery; `P(win)` a flat 1 and
+  nothing drawn out to fight. **4b** (single-unit offensives reacting to threats — Attack, Intercept, Scout,
+  one-gun Arty, real `P(win)`, the draw-lock, single-unit resolve) gets its own spec when picked up. Multi-unit
+  orchestration of those offensives is Phase 5.
 
 ## Open questions
 
