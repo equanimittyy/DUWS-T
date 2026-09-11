@@ -177,6 +177,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         (_d select [floor (_v / 16), 1]) + (_d select [_v mod 16, 1])
     };
     // Scaled to CONFIRM, not the engine's 0..4: the bar tops out exactly as the alarm would arm, so full = last warning.
+    // Returns markup as a STRING, not a parseText object: structured TEXT doesn't survive remoteExec, so the receiver parses it.
     private _fnc_detBar = {
         params ["_knows"];
         private _f = ((_knows / CONFIRM) max 0) min 1;
@@ -184,7 +185,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         private _col = format ["#%1%2%2",
             [linearConversion [0, 1, _f, 127, 255, true]] call _fnc_hex2,
             [linearConversion [0, 1, _f, 127, 48, true]] call _fnc_hex2];
-        parseText format ["<t align='center'>%1<br/><t color='%2'>%3</t><t color='#7f7f7f'>%4</t></t>",
+        format ["<t align='center'>%1<br/><t color='%2'>%3</t><t color='#7f7f7f'>%4</t></t>",
             localize "STR_DUWS_T_rescuehostage_detection",
             _col, [_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes]
     };
@@ -294,7 +295,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             private _justSpotted = _seenNow select { !(_x in _seenPrev) };
             {
                 _x params ["_pl", "_knows"];
-                if !(_pl in _justSpotted) then { [[_knows] call _fnc_detBar] remoteExec ["hintSilent", _pl] };
+                if !(_pl in _justSpotted) then { [[_knows] call _fnc_detBar, { hintSilent parseText _this }] remoteExec ["call", _pl] };
             } forEach _meterVals;
         };
         _seenPrev = _seenNow;

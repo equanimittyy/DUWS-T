@@ -11,6 +11,12 @@ the mission's subsystems live see [`architecture.md`](../architecture.md).
 
 **Fix:** on the server, `call` a server-side function to run inline; reserve `remoteExec [..., 2]` for genuinely remote callers. Send a verdict back to a client by `remoteExec`ing a reply function at the player, not by returning a value (`fnc_pool_try_spend`/`fnc_pool_spend`, `src/duws/server/warcom/fnc_economy_init.sqf`).
 
+## `remoteExec` drops a structured-text (`parseText`) argument
+
+A `TEXT` object (the result of `parseText`) does not serialize across `remoteExec`, so `parsedText remoteExec ["hintSilent", _pl]` arrives empty and the hint draws nothing — with no error logged, even to a local target (the argument still round-trips through the network layer, [§`remoteExec` to your own machine still runs a frame later](#remoteexec-to-your-own-machine-still-runs-a-frame-later)). A plain `STRING` argument crosses fine, which is why the same call site's string hints work and only the `parseText` one is blank.
+
+**Fix:** send the markup as a `STRING` and `parseText` it on the receiver: `[_markup, { hintSilent parseText _this }] remoteExec ["call", _pl]`. The detection meter (`fnc_rescue_hostage_mission.sqf`) builds its bar string server-side and parses per-player on arrival.
+
 ## The JIP queue is append-only unless the message carries an ID you choose
 
 `remoteExec`'s third parameter decides what a *later*-joining machine receives:
