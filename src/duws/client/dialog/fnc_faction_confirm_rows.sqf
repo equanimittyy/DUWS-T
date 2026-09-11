@@ -3,10 +3,9 @@
 // Fills the confirmation screen's scroll group with one row per role key, both sides side by side.
 //
 // The four shared sections hold the same keys in the same order on both sides, so a role reads
-// across one line. SPECIAL is the exception by design -- what only one army fields, filed there
-// rather than into a shared section precisely so it cannot push the other column out of step.
-// The padding below is what serves it: a section is as tall as the longer side's share of it and
-// the shorter side leaves the tail blank.
+// across one line. SPECIAL mostly holds what only one army fields and so won't line up that way:
+// its keys are reordered below so roles both sides share (same key suffix) pair across the columns,
+// with each side's one-sided keys padded in beneath.
 //
 // Everything is created into the one group (idc 8606) so its single scrollbar carries both columns
 // at once. Two groups would need their scroll positions synchronised every frame.
@@ -41,6 +40,22 @@ private _y = 0;
 {
     private _section = _x;
     private _perSide = _schemas apply { _x select {(_x select 1) isEqualTo _section} };
+
+    if (_section isEqualTo "SPECIAL") then {
+        private _suffixes = _perSide apply {
+            _x apply { private _k = _x select 0; _k select [(_k find "_") + 1] }
+        };
+        private _couples = (_suffixes select 0) select { _x in (_suffixes select 1) };
+        for "_s" from 0 to 1 do {
+            private _entries = _perSide select _s;
+            private _sfx = _suffixes select _s;
+            private _ordered = _couples apply { _entries select (_sfx find _x) };
+            {
+                if (!((_sfx select _forEachIndex) in _couples)) then { _ordered pushBack _x };
+            } forEach _entries;
+            _perSide set [_s, _ordered];
+        };
+    };
 
     // Section caption, drawn on both columns at the same height. It is what the alignment above
     // exists to preserve, so it is emitted before the rows rather than inferred from them.
