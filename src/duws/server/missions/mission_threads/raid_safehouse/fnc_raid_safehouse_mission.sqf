@@ -154,7 +154,10 @@ publicVariable "DUWS_safehouse_active";
     // Furnish empty: a piece thaws live, and one waking with its box over a unit flings it -- lethally -- so the
     // houses must furnish and settle before anyone is inside. Held a full cell clear of every doorway, so no
     // piece is sealed behind a leaf.
-    { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
+    // One thread per house so their settle waits overlap instead of summing; the join holds the settle-first
+    // invariant before occupants spawn below.
+    private _furnishing = _bldgs apply { [_x, "mission_raid_safehouse", 0] spawn fnc_furnish_building };
+    { waitUntil { scriptDone _x } } forEach _furnishing;
     // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
     // A house whose door sources won't resolve falls back to the grid doorways unnamed, opening the first shut door.
     {
