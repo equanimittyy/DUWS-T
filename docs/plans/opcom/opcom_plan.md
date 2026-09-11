@@ -345,8 +345,8 @@ its economy and never chases a lone scout across empty terrain.
 | buys information (Scout) | Σ over its recon footprint of `cell worth × staleness` (below) |
 | attrits force (Arty) | AP-worth of enemy force expected killed — `effForce hit × AP-per-force` (below) |
 
-Enemy ground worth needs `_points` readable at scoring time — currently passed into the capture triggers
-only, so stash it in `zone_meta_array` ([§Open questions](#open-questions)).
+Enemy ground worth needs `_points` readable at scoring time — stamped into `zone_meta_array`
+(`fnc_createzone.sqf:30`, row index 3), so the score reads it there.
 
 **Rapport — progress toward the turn.** Rapport delivers a `supply`-flagged unit to a town, stepping its
 reputation 3 toward the −10 OPFOR turn threshold; the town only garrisons once it crosses. So a step's Value
@@ -1384,8 +1384,8 @@ Each phase is independently playable; the ordering is forced by what the next ph
 | **1 — Perception** *(shipped)* | The four belief arrays, the sighting sweep (with its absence check), decay, the influence grid stamped from belief and holdings, the land mask + connectivity, the debug overlay | Nothing prior |
 | **2 — Force weighting** | First a standalone single-class classifier (`fnc_classifyVehicle`, reusing the faction detector's per-class leaf predicates, so a sighted enemy class classifies on the fly without touching detection), then replace the men-count metric with firepower: one power table keyed on that category, deposited by **both** grid layers — friendly holdings (via their tokens) and enemy belief (via the classifier) — so the two share one metric. `fnc_opcom_sense` stamps enemy firepower, not headcount | The grid + belief it re-weights |
 | **3 — Recruitment & tasking wiring** *(shipped)* | The Recruit / spawn mechanism, the roster / force-pool, the intent record and unit strength, movement (world-point stepping, cost-field routing, cell streaming + hysteresis, tasking / status reads), the recon-flagged tasking's standing detection sensor ([§Sensors](#sensors)), and simple single-unit orders — driven **by hand** through a debug harness (spawn a unit, order it, watch it). No automated decisions | Force weighting + grid |
-| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, the economic actions (Fortify, Build, Bank) and the tasking actions (Recruit, simple orders) committed automatically; the commitment record with the absolute hold; flat archetype weights | The P3 mechanism + grid / force |
-| **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe / arty), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built, and the indirect-fire missions (`arty`) | The loop + movement + templates |
+| **4 — Decision loop** | The scoring pass on the tick: the AP-return score, the force ratio and `P(win)`, every action committed automatically as a single-unit or economic commit (Bank, Reinforce, Fortify, Build, Recruit, Attack, Intercept, Rapport, Scout, and a minimal one-gun `arty`); supply-arrival delivery; the contested draw-lock; single-unit resolve; flat archetype weights | The P3 mechanism + grid / force |
+| **5 — Orchestration** | Multi-unit templates (assault / flank / encircle / probe), mustering to fill roles, the band → template pick, the generic runner — coordinated AI over the single-unit orders P3/P4 built — and the `arty` saturation / spotter template over P4's one-gun mission | The loop + movement + templates |
 | **6 — Archetype** | The per-class weight sets from [§The commander has an archetype](#the-commander-has-an-archetype), replacing the flat stub | The loop it modifies |
 
 Random events (turned-town IED / ambush / sabotage, hostile conversion) are out of this roadmap — that
@@ -1410,8 +1410,9 @@ docs draw on.
   `fnc_opcom_stream`), the transport ferry (`fnc_opcom_ferry`, [§Transport](#transport-carrying-a-unit-to-the-fight)) and the
   recon-detection sensor (`fnc_opcom_recon_sense`) — all hand-driven through the debug harness
   (`fnc_opcom_debug_task`, client picker `fnc_debug_opcom_pick`). No automated decisions; those are Phase 4.
-- Phase 4 — Decision loop: an early draft written ahead of its phase — [`phase_4_decision_loop.md`](phase_4_decision_loop.md).
-  Covers only the appraisal + economic-actions slice; the tasking-automation half is added when P4 begins.
+- Phase 4 — Decision loop: the implementation spec is [`phase_4_decision_loop.md`](phase_4_decision_loop.md) —
+  the full loop (appraisal, real `P(win)`, every action single-unit, supply delivery, resolve), single-unit
+  offensives with the multi-unit forms held for Phase 5.
 
 ## Open questions
 
