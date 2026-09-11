@@ -3195,6 +3195,18 @@
                 <Original>Well done Alpha 1-1. Secure the intel and RTB for analysis.</Original>
                 <English>Well done Alpha 1-1. Secure the intel and RTB for analysis.</English>
             </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_OPEN">
+                <Original>Open door</Original>
+                <English>Open door</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_LOCKED">
+                <Original>The building is locked. Try shooting the door to breach it.</Original>
+                <English>The building is locked. Try shooting the door to breach it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_BREACHED">
+                <Original>Building breached.</Original>
+                <English>Building breached.</English>
+            </Key>
             <Key ID="STR_DUWS_T_RANDOM_STRANDED_ASK">
                 <Original>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</Original>
                 <English>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</English>

@@ -102,7 +102,7 @@ private _marks = [];
     private _cpos = getPosATL _bldg;
     private _mk = format ["raidsh_%1_%2_%3", round (_cpos select 0), round (_cpos select 1), _forEachIndex];
     createMarker [_mk, _cpos];
-    _mk setMarkerType "mil_unknown";
+    _mk setMarkerType "hd_unknown_noShadow";
     _mk setMarkerColor "ColorYellow";
     _mk setMarkerText "";
     _marks pushBack _mk;

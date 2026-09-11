@@ -5,9 +5,24 @@
 // cannot be cracked from across the street -- the raider has to be at the door. The struck door is resolved
 // from the hit and handed to the server breach, which opens that one door and, first time, wakes the house.
 // The handler stays (no self-removal): each door is a separate shot, and the server debounces re-hits.
+//
+// Also carries the locked-door action: bis_disabled_Door_N suppresses the engine open action, so a locked
+// house would otherwise give the player no feedback at all.
 params ["_house"];
 if (isNull _house) exitWith {};
 #define REACH 5   // TUNABLE, metres from the impact to the shooter
+
+// Guard a re-raid on a reused building from stacking a duplicate action.
+if (!(_house getVariable ["DUWS_safehouse_lockAction", false])) then {
+    _house setVariable ["DUWS_safehouse_lockAction", true];
+    _house addAction [
+        localize "STR_DUWS_T_RAID_SAFEHOUSE_OPEN",
+        { hint (localize "STR_DUWS_T_RAID_SAFEHOUSE_LOCKED") },
+        nil, 6, true, false, "",
+        "(missionNamespace getVariable ['DUWS_safehouse_active', false]) && {!(_target getVariable ['DUWS_safehouse_breached', false])}",
+        3
+    ];
+};
 
 _house addEventHandler ["HitPart", {
     private _hit = _this select 0;

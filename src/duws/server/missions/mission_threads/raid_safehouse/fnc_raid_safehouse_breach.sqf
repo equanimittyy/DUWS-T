@@ -38,6 +38,8 @@ if (_house getVariable ["DUWS_safehouse_breached", false]) exitWith {};
 if (_toOpen isEqualTo [] && {_door != "ALL"}) exitWith {};
 _house setVariable ["DUWS_safehouse_breached", true, true];
 
+{ [localize "STR_DUWS_T_RAID_SAFEHOUSE_BREACHED"] remoteExec ["hint", _x] } forEach (allPlayers select { _x distance _house < 50 });
+
 if (_house getVariable ["DUWS_safehouse_real", false]) then {
     // Guards do not turn the instant the door goes: a 0-12 s fuse lets the cell read as reacting to the
     // raid rather than tripping a switch. They wake to EAST, elite, carrying OPFOR-armory automatics.
