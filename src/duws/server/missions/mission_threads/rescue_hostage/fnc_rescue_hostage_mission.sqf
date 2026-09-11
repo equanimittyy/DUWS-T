@@ -259,7 +259,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                 private _u = _x;
                 private _k = _u knowsAbout _pl;
                 if (_k > _knowsP) then { _knowsP = _k };
-                if ({ _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then {
+                if (_u distance _pl < LOS_RANGE && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then {
                     _losP = true;
                     if (_k > _knowsLos) then { _knowsLos = _k };
                 };
