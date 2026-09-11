@@ -22,7 +22,7 @@ sleep 4;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 };
 
-if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};
+if (!((vehiclevarname player) in game_master)) exitWith {hint format [localize "STR_DUWS_T_eck4xh9m", call fnc_gm_occupant]};
 
 // Gates the whole list, not each type -- one gate per mission would leave the player browsing
 // offers none of which can start. Same three-in-game-hour wait fnc_mission_begin enforces
