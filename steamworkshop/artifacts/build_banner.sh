@@ -59,7 +59,7 @@ CUT=$(py "round($OX+($(xof "$PRE")+$(wof "$PRE")+$(xof "$FUL")+$IW-$(wof "$TEE")
 # Empty tag collapses the block back to the wordmark alone, recovering the
 # original (H+CAP)/2 centre.
 if [ -n "$SUB" ]; then
-  SPS=$(py "round($PS*0.18)"); SK=$(py "round($SPS*0.15)")
+  SPS=$(py "round($PS*0.36)"); SK=$(py "round($SPS*0.15)")
   SCAP=$(py "0.7035*$SPS"); GAP=$(py "round($SPS*0.55)")
 else
   SPS=0; SK=0; SCAP=0; GAP=0
