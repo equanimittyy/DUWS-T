@@ -558,13 +558,13 @@ OPCOM_TICK_PERIOD = 5;
 
 // Belief horizon in ticks. Ages are stored as tick stamps, not diag_tickTime, so a savegame gap does not
 // silently age belief (diag_tickTime is not restored -- docs/info/architecture/arma_engine_gotchas.md).
-OPCOM_BELIEF_FRESH  = 48;    // 240s @ 5s tick
-OPCOM_BELIEF_EXPIRE = 192;   // 960s @ 5s tick
+OPCOM_BELIEF_FRESH  = 60;    // 300s @ 5s tick
+OPCOM_BELIEF_EXPIRE = 240;   // 1200s @ 5s tick
 
 // Coverage trust horizon in ticks: how long a guaranteed sweep keeps a cell "recently looked at" before its
 // staleness climbs back to max. Separate from belief's horizons -- a clear sweep, not a sighting -- so its
 // own knob. Cells init a full span in the past (fnc_opcom_grid_init), so never-seen reads max, no sentinel. Tune.
-OPCOM_COVER_SPAN = 96;       // 480s @ 5s tick
+OPCOM_COVER_SPAN = 120;      // 600s @ 5s tick
 
 // Ticks a live tasking must stay clear of every player before it re-virtualises -- a run, not one far
 // sample, so a fast flyover cannot spawn then stow a group in a single pass.
