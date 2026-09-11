@@ -3,7 +3,7 @@
 // The push is horizontal -- a vertical component would launch the piece.
 params ["_obj"];
 if (isNull _obj) exitWith {};
-#define NUDGE 1.5   // TUNABLE, m/s
+#define NUDGE 5   // TUNABLE, m/s
 
 _obj addAction [
     localize "STR_DUWS_T_FURNISH_PUSH",
