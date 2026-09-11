@@ -32,11 +32,12 @@ DUWS_fnc_opcom_applyOrder = {
 // OPCOM's own de-virt spawn, so air spawns flying at the tasking's point: the zone spawner flies air in from
 // off-map, wrong for a stowed unit resuming where it stood. grpNull leaves no orphan hull.
 DUWS_fnc_opcom_spawnComp = {
-    params ["_token", "_pos"];
+    params ["_token", "_pos", ["_class", ""]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
         [_token, _pos, 100, "none", _pos] call fnc_spawn_team
     };
-    private _class = [_token] call DUWS_fnc_tokenClass;
+    // Empty only for a record raised before spawnClass existed (hot-reloaded campaign): draw fresh.
+    if (_class isEqualTo "") then { _class = [_token] call DUWS_fnc_tokenClass };
     if (_class isEqualTo "") exitWith {
         ["WARN", "OPCOM", format ["spawn: token %1 resolves to no class for this faction", _token]] call fnc_log;
         grpNull
@@ -72,7 +73,7 @@ DUWS_fnc_opcom_deVirt = {
     params ["_t"];
     private _token = (_t get "comp") param [0, ""];
     private _pos = _t get "pos";
-    private _grp = [_token, _pos] call DUWS_fnc_opcom_spawnComp;
+    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""]] call DUWS_fnc_opcom_spawnComp;
     if (isNull _grp) exitWith {
         ["ERROR", "OPCOM", format ["de-virt spawn failed for tasking %1 token %2", _t get "id", _token]] call fnc_log;
         false

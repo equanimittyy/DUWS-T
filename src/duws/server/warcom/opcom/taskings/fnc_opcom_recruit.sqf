@@ -31,10 +31,12 @@ DUWS_opcom_taskSeq = _id + 1;
 // A boat cannot rest on the land zone that raised it -- launch it from the nearest navigable water.
 private _moveType = [_comp] call DUWS_fnc_opcom_moveType;
 private _pos = if (_moveType isEqualTo "boat") then { [_spawnPos] call DUWS_fnc_opcom_nearestWater } else { _spawnPos };
+// tokenClass redraws a random model per spawn, so a stow/re-spawn cycle would otherwise swap the hull.
+private _spawnClass = [_comp select 0, "OPF"] call DUWS_fnc_tokenClass;
 private _t = createHashMapFromArray [
     ["id", _id], ["order", "garrison"], ["target", []],
     ["pos", _pos], ["moveType", _moveType],
-    ["menu", _row], ["comp", _comp], ["flags", _flags],
+    ["menu", _row], ["comp", _comp], ["spawnClass", _spawnClass], ["flags", _flags],
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
     ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],

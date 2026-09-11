@@ -530,7 +530,9 @@ vehicle by `1 − damage`, crew never counted) and `strength` (`effForce / fullF
 group already weighs less in `r` with no extra logic; `strength` is the normalised figure for display,
 heal targets and persistence. Streaming spawns a group to *match* its stored strength (fewer bodies, a
 damaged vehicle), and re-virtualising recomputes `effForce` from the live group before it despawns
-([§The virtualisation boundary](#the-virtualisation-boundary)).
+([§The virtualisation boundary](#the-virtualisation-boundary)). The hull's class is drawn once at hire and
+stored on the tasking, so a unit keeps the same model across every stow/re-spawn cycle rather than redrawing a
+random one from the faction each time it streams in.
 
 **`garrison` heals.** A unit in `garrison` regenerates `effForce` toward `fullForce` each tick at
 `OPCOM_GARRISON_HEAL_RATE`
