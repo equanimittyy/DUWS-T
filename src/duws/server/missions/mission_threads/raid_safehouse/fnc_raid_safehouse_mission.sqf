@@ -142,9 +142,25 @@ publicVariable "DUWS_safehouse_active";
 [_bldgs, _realBldg, _townIndex, _civBodies, _fnc_innerSlots, _fnc_spawnGuard, _guards, _allUnits] spawn {
     params ["_bldgs", "_realBldg", "_townIndex", "_civBodies", "_fnc_innerSlots", "_fnc_spawnGuard", "_guards", "_allUnits"];
 
-    // Decoy locals spawn as town civilians, so killing one bills the town. Both sides garrison via
-    // fnc_holdBuildingPost, whose loop keys off the unit: it survives a guard's flip to EAST, so the same men
-    // fight from the house rather than charge the street.
+    // Lock the candidates first so they read shut the instant the raid stands, ahead of the slow furnish below.
+    // bis_disabled_Door_N kills the open action; the animate shuts the leaf so no house shows an open door.
+    // The furnish pass below reopens doors to scan, but server-side only, so these client leaves stay shut.
+    {
+        private _bldg = _x;
+        for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
+        [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
+    } forEach _bldgs;
+
+    // Furnish empty: a piece thaws live, and one waking with its box over a unit flings it -- lethally -- so the
+    // houses must furnish and settle before anyone is inside. Held a full cell clear of every doorway, so no
+    // piece is sealed behind a leaf.
+    { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
+    // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
+    { _x setVariable ["DUWS_safehouse_doorPts", _x getVariable ["DUWS_furnishDoors", []], true] } forEach _bldgs;
+
+    // Occupants into the settled houses. Decoy locals spawn as town civilians, so killing one bills the town.
+    // Both sides garrison via fnc_holdBuildingPost, whose loop keys off the unit: it survives a guard's flip to
+    // EAST, so the same men fight from the house rather than charge the street.
     {
         private _bldg = _x;
         private _isReal = _bldg isEqualTo _realBldg;
@@ -172,11 +188,6 @@ publicVariable "DUWS_safehouse_active";
         };
         _bldg setVariable ["DUWS_safehouse_occupants", _occupants];
         if (_isReal) then { _guards append _occupants };
-
-        // bis_disabled_Door_N kills the open action; the animate shuts the leaf so no house shows an open door.
-        // The furnish pass below reopens doors to scan, but server-side only, so these client leaves stay shut.
-        for "_i" from 1 to 10 do { _bldg setVariable [format ["bis_disabled_Door_%1", _i], 1, true] };
-        [[_bldg], { params ["_h"]; for "_i" from 1 to 10 do { _h animateDoor [format ["Door_%1_rot", _i], 0] } }] remoteExec ["BIS_fnc_call", 0];
     } forEach _bldgs;
 
     // Guards exist now, so a breach can wake them: arm the door shot, then poll for an entry breach too (a
@@ -204,13 +215,6 @@ publicVariable "DUWS_safehouse_active";
             sleep 2;   // TUNABLE
         };
     };
-
-    // Furniture last (slow settle), held a full cell clear of every doorway, so no piece is sealed behind a
-    // leaf and it is safe to run after the lock.
-    { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
-
-    // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
-    { _x setVariable ["DUWS_safehouse_doorPts", _x getVariable ["DUWS_furnishDoors", []], true] } forEach _bldgs;
 };
 
 // Thicken the street crowd so there is always someone to ask, and re-open every local already in town (a
