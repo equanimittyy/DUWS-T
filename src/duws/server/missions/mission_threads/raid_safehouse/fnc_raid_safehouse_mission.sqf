@@ -181,6 +181,8 @@ publicVariable "DUWS_safehouse_active";
 
     // Guards exist now, so a breach can wake them: arm the door shot, then poll for an entry breach too (a
     // raider inside through a gap or blown wall, no door shot).
+    DUWS_safehouse_candidates = _bldgs;
+    publicVariable "DUWS_safehouse_candidates";
     { [_x] remoteExec ["fnc_raid_safehouse_arm", 0, _x] } forEach _bldgs;
     [_bldgs] spawn {
         params ["_bldgs"];
@@ -206,6 +208,9 @@ publicVariable "DUWS_safehouse_active";
     // Furniture last (slow settle), held a full cell clear of every doorway, so no piece is sealed behind a
     // leaf and it is safe to run after the lock.
     { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
+
+    // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
+    { _x setVariable ["DUWS_safehouse_doorPts", _x getVariable ["DUWS_furnishDoors", []], true] } forEach _bldgs;
 };
 
 // Thicken the street crowd so there is always someone to ask, and re-open every local already in town (a
@@ -271,6 +276,8 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
 
     DUWS_safehouse_active = false;
     publicVariable "DUWS_safehouse_active";
+    DUWS_safehouse_candidates = [];
+    publicVariable "DUWS_safehouse_candidates";
     // Lift the lock off every candidate so the town returns to normal; a breached house is already open.
     { private _h = _x; for "_i" from 1 to 10 do { _h setVariable [format ["bis_disabled_Door_%1", _i], 0, true] } } forEach _bldgs;
 

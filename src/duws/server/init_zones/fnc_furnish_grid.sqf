@@ -278,6 +278,8 @@ fnc_furnish_grid = {
     { if ((_x select 1) == "door") then { _doors pushBack _forEachIndex } } forEach _cells;
     private _rayDoors = count _doors;
     { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
+    // Keep the doorway positions before the deny-ring blocks these cells and their tag is lost; the safehouse breach reads them back.
+    _building setVariable ["DUWS_furnishDoors", _doors apply { (_cells select _x) select 0 }];
     { [_x] call _denyRing } forEach _doors;
 
     // An open doorway no longer walls the rooms apart, so the fill would leak across it or out a front door; the

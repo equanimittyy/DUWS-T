@@ -1,16 +1,17 @@
-// Locality: each client -- the thread remoteExecs it (JIP, keyed on the house) so a shot fired on any
-// machine registers. A server-only HitPart would miss every round a client fires.
+// Locality: each client with a player (the thread remoteExecs it JIP, keyed on the house).
 //
-// Point-blank breach: a hit only counts when the shooter is within REACH of the impact, so a locked house
-// cannot be cracked from across the street -- the raider has to be at the door. The struck door is resolved
-// from the hit and handed to the server breach, which opens that one door and, first time, wakes the house.
-// The handler stays (no self-removal): each door is a separate shot, and the server debounces re-hits.
+// Breach is shot-tracked off the furnish grid's door points, not a HitPart: a building door is often
+// collision-only geometry that fires no HitPart, so a round into it registered nothing. A Fired event within
+// REACH of a door point and aimed at it breaches -- reliable, and the grid's interior points let a shot pick
+// the nearest door (an internal one, or one a big house sets far from its centre) rather than the house.
 //
-// Also carries the locked-door action: bis_disabled_Door_N suppresses the engine open action, so a locked
-// house would otherwise give the player no feedback at all.
+// The locked-door action exists because bis_disabled_Door_N suppresses the engine open action, so a locked
+// house would give no feedback without it.
 params ["_house"];
-if (isNull _house) exitWith {};
-#define REACH 5   // TUNABLE, metres from the impact to the shooter
+if (isNull _house || {!hasInterface}) exitWith {};
+#define REACH 10       // TUNABLE, metres from the shooter to a door point
+#define POINT_BLANK 1.5 // TUNABLE, at this range the aim check is waived -- the shooter is on the door
+#define TOWARD 0.5     // TUNABLE, cos of the half-angle the shot must fall within to count as aimed at the door
 
 // Guard a re-raid on a reused building from stacking a duplicate action.
 if (!(_house getVariable ["DUWS_safehouse_lockAction", false])) then {
@@ -24,25 +25,26 @@ if (!(_house getVariable ["DUWS_safehouse_lockAction", false])) then {
     ];
 };
 
-_house addEventHandler ["HitPart", {
-    private _hit = _this select 0;
-    _hit params ["_target", "_shooter", "", "_pos", "", "_sels"];
-    if (isNull _target || {!(missionNamespace getVariable ["DUWS_safehouse_active", false])}) exitWith {};
-    if (_shooter distance _pos > REACH) exitWith {};   // not point-blank: no breach
-
-    // Which door: a door's fire-geometry component carries the same index as its door_<n>_rot animation
-    // source, so match the number in a hit selection to a door source. No match (an odd model, or a wall
-    // hit) -> "" and the server opens the next still-shut door instead, so a point-blank shot always bites.
-    private _firstInt = {
-        private _r = "";
-        { if (_x >= 48 && {_x <= 57}) then { _r = _r + toString [_x] } else { if (_r != "") exitWith {} } } forEach (toArray _this);
-        if (_r == "") then { -1 } else { parseNumber _r }
-    };
-    private _door = "";
-    {
-        private _n = parseNumber (_x select [5]);
-        if ((_sels findIf { (_x call _firstInt) == _n }) >= 0) exitWith { _door = _x };
-    } forEach ([_target] call fnc_house_doors);
-
-    [_target, _door] remoteExec ["fnc_raid_safehouse_breach", 2];
-}];
+// One watcher for the whole raid, reading the server-broadcast candidate list.
+if (isNil "DUWS_safehouse_firedEH") then {
+    DUWS_safehouse_firedEH = player addEventHandler ["Fired", {
+        params ["_shooter", "", "", "", "", "", "_proj"];
+        if (!(missionNamespace getVariable ["DUWS_safehouse_active", false])) exitWith {};
+        private _v = velocity _proj; _v set [2, 0];
+        if (vectorMagnitude _v < 0.1) exitWith {};
+        _v = vectorNormalized _v;
+        private _sp = getPosASL _shooter;
+        {
+            private _hs = _x;
+            if (!isNull _hs && {!(_hs getVariable ["DUWS_safehouse_breached", false])}) then {
+                {
+                    private _to = _x vectorDiff _sp; _to set [2, 0];
+                    private _d = vectorMagnitude _to;
+                    if (_d <= REACH && {_d < POINT_BLANK || {(_v vectorDotProduct (vectorNormalized _to)) > TOWARD}}) exitWith {
+                        [_hs, ""] remoteExec ["fnc_raid_safehouse_breach", 2];
+                    };
+                } forEach (_hs getVariable ["DUWS_safehouse_doorPts", []]);
+            };
+        } forEach (missionNamespace getVariable ["DUWS_safehouse_candidates", []]);
+    }];
+};
