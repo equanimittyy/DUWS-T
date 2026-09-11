@@ -83,14 +83,34 @@
 ["Land_VitaminBottle_F",            "clutter", 0, ["living"],  0],
 
 // -- storage: racks + shelves, wall-flush, fit any room --
-["Land_Metal_rack_F",               "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Metal_rack_F",               "wall",  180, ["living", "sleeping", "work"], 0],
 ["Land_Metal_rack_Tall_F",          "wall",    0, ["living", "sleeping", "work"], 0],
-["Land_Metal_wooden_rack_F",        "wall",    0, ["living", "sleeping", "work"], 0],
 ["Land_Rack_F",                     "wall",   90, ["living", "sleeping", "work"], 0],
 ["Land_ShelvesWooden_F",            "wall",   90, ["living", "sleeping", "work"], 0],
 ["Land_ShelvesWooden_blue_F",       "wall",   90, ["living", "sleeping", "work"], 0],
 ["Land_ShelvesWooden_khaki_F",      "wall",   90, ["living", "sleeping", "work"], 0],
 ["Land_FlowerPot_01_Flower_F",      "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_FlowerPot_01_F",             "wall",    0, ["living", "sleeping", "work"], 0],
+
+// -- containers: crates, sacks, buckets, baskets, trolleys; wall-flush, fit any room --
+["Land_Basket_F",                   "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_CratesPlastic_F",            "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_CratesShabby_F",             "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_CratesWooden_F",             "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Sack_F",                     "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Sacks_goods_F",              "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Sacks_heap_F",               "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_WoodenCrate_01_F",           "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_WoodenCrate_01_stack_x3_F",  "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_WoodenCrate_01_stack_x5_F",  "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_ToolTrolley_01_F",           "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_ToolTrolley_02_F",           "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_PlasticBucket_01_closed_F",  "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_PlasticBucket_01_open_F",    "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_CanisterPlastic_F",          "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Bucket_F",                   "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Bucket_clean_F",             "wall",    0, ["living", "sleeping", "work"], 0],
+["Land_Bucket_painted_F",           "wall",    0, ["living", "sleeping", "work"], 0],
 
 // -- sleeping --
 ["Land_WoodenBed_01_F",             "wall",  180, ["sleeping"], 0, 1, 1],   // guaranteed one bed per bedroom
@@ -98,6 +118,7 @@
 // -- work: desks (one seat, on the front) + office chair + desk clutter --
 ["OfficeTable_01_new_F",            "anchor",180, ["work"],     1],
 ["OfficeTable_01_old_F",            "anchor",180, ["work"],     1],
+["Land_TableDesk_F",                "anchor",  0, ["work"],     1],
 ["Land_OfficeChair_01_F",           "seat",  180, ["work"],     0],
 ["Land_Workbench_01_F",             "wall",  180, ["work"],     0],
 ["Land_OfficeCabinet_01_F",         "wall",  180, ["work"],     0],
