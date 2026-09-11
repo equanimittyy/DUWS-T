@@ -255,20 +255,20 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             private _pl = _x;
             private _losP = false;
             private _knowsP = 0;
-            private _knowsLos = 0;
             {
                 private _u = _x;
                 private _k = _u knowsAbout _pl;
                 if (_k > _knowsP) then { _knowsP = _k };
                 if (_u distance _pl < LOS_RANGE && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then {
                     _losP = true;
-                    if (_k > _knowsLos) then { _knowsLos = _k };
                 };
             } forEach _obs;
             if (_losP && { _knowsP > SUS_KNOWS }) then { _seenNow pushBack _pl };
             if (_losP && { _knowsP > CONFIRM }) then { _confirmed = true };
-            // LOS-gated, so a broken sightline drains the bar instead of pinning a stale knowsAbout the alarm has already forgiven.
-            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, _knowsLos] };
+            // Bar = the cordon's best knowsAbout while ANY guard holds a sightline, else drained: confidence and LOS
+            // come from different guards, so requiring one guard to hold both under-reads it to empty (the guard who
+            // has ID'd you is usually not the one still exposed). Same inputs as the alarm, so full == alarm arming.
+            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, [0, _knowsP] select _losP] };
         } forEach _players;
         if (count _seenNow > 0) then { _lastSeen = time };
 
