@@ -12,15 +12,13 @@ if (isNull _real) exitWith {};
 private _decoys = (missionNamespace getVariable ["DUWS_safehouse_decoys", []]) select { !isNull _x };
 private _uncleared = _decoys select { !(_x getVariable ["DUWS_safehouse_cleared", false]) };
 
-// remaining = the real house + every decoy not yet ruled out. Cross off only while above the floor.
-#define CLUE_FLOOR 3
-private _canCross = !(_uncleared isEqualTo []) && {(1 + count _uncleared) > CLUE_FLOOR};
+private _canCross = !(_uncleared isEqualTo []);
 
 // Both help types are a successful ask, so the local always acknowledges out loud; the specific help
 // lands in the hint box. A ruled-out house flips its own map marker from "?" to a crossed-off glyph -- no line of its own.
 [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RAID_SAFEHOUSE_ASK_HIT"] remoteExec ["fnc_duws_dialogue", _caller];
 
-if (_canCross && {random 1 < 0.5}) exitWith {
+if (_canCross && {random 1 < 0.7}) exitWith {
     private _d = selectRandom _uncleared;
     _d setVariable ["DUWS_safehouse_cleared", true, true];
     private _mk = _d getVariable ["DUWS_safehouse_marker", ""];
