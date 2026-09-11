@@ -148,6 +148,7 @@ fnc_mission_gate_time = compile preprocessFileLineNumbers "duws\shared\functions
 fnc_pos_claimed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_claimed.sqf";publicVariable "fnc_pos_claimed";
 fnc_in_base_keep = compile preprocessFileLineNumbers "duws\shared\functions\fnc_in_base_keep.sqf";publicVariable "fnc_in_base_keep";
 fnc_house_doors = compile preprocessFileLineNumbers "duws\shared\functions\fnc_house_doors.sqf";publicVariable "fnc_house_doors";
+fnc_house_door_pts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_house_door_pts.sqf";publicVariable "fnc_house_door_pts";
 fnc_time_roll = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_roll.sqf";
 fnc_time_remaining = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_remaining.sqf";
 fnc_time_deadline = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_deadline.sqf";

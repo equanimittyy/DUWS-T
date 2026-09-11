@@ -1,9 +1,8 @@
 // Locality: each client with a player (the thread remoteExecs it JIP, keyed on the house).
 //
-// Breach is shot-tracked off the furnish grid's door points, not a HitPart: a building door is often
-// collision-only geometry that fires no HitPart, so a round into it registered nothing. A Fired event within
-// REACH of a door point and aimed at it breaches -- reliable, and the grid's interior points let a shot pick
-// the nearest door (an internal one, or one a big house sets far from its centre) rather than the house.
+// Breach is shot-tracked off per-door points, not a HitPart: a building door is often collision-only geometry
+// that fires no HitPart, so a round into it never registered. Each point carries its door source, so the shot
+// opens only the door it hit, not the house's first shut one.
 //
 // The locked-door action exists because bis_disabled_Door_N suppresses the engine open action, so a locked
 // house would give no feedback without it.
@@ -34,17 +33,23 @@ if (isNil "DUWS_safehouse_firedEH") then {
         if (vectorMagnitude _v < 0.1) exitWith {};
         _v = vectorNormalized _v;
         private _sp = getPosASL _shooter;
+        // Nearest, not first: two adjacent doors in reach otherwise open whichever the list yields, not the aimed one.
+        private _best = [1e10, objNull, ""];
         {
             private _hs = _x;
             if (!isNull _hs && {!(_hs getVariable ["DUWS_safehouse_breached", false])}) then {
                 {
-                    private _to = _x vectorDiff _sp; _to set [2, 0];
+                    _x params ["_dp", "_src"];
+                    private _to = _dp vectorDiff _sp; _to set [2, 0];
                     private _d = vectorMagnitude _to;
-                    if (_d <= REACH && {_d < POINT_BLANK || {(_v vectorDotProduct (vectorNormalized _to)) > TOWARD}}) exitWith {
-                        [_hs, ""] remoteExec ["fnc_raid_safehouse_breach", 2];
+                    if (_d <= REACH && {_d < (_best select 0)} && {_d < POINT_BLANK || {(_v vectorDotProduct (vectorNormalized _to)) > TOWARD}}) then {
+                        _best = [_d, _hs, _src];
                     };
                 } forEach (_hs getVariable ["DUWS_safehouse_doorPts", []]);
             };
         } forEach (missionNamespace getVariable ["DUWS_safehouse_candidates", []]);
+        if (!isNull (_best select 1)) then {
+            [_best select 1, _best select 2] remoteExec ["fnc_raid_safehouse_breach", 2];
+        };
     }];
 };

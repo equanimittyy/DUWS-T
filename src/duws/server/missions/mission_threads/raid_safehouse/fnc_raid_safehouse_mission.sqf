@@ -156,7 +156,12 @@ publicVariable "DUWS_safehouse_active";
     // piece is sealed behind a leaf.
     { [_x, "mission_raid_safehouse", 0] call fnc_furnish_building } forEach _bldgs;
     // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
-    { _x setVariable ["DUWS_safehouse_doorPts", _x getVariable ["DUWS_furnishDoors", []], true] } forEach _bldgs;
+    // A house whose door sources won't resolve falls back to the grid doorways unnamed, opening the first shut door.
+    {
+        private _pts = [_x] call fnc_house_door_pts;
+        if (_pts isEqualTo []) then { _pts = (_x getVariable ["DUWS_furnishDoors", []]) apply { [_x, ""] } };
+        _x setVariable ["DUWS_safehouse_doorPts", _pts, true];
+    } forEach _bldgs;
 
     // Occupants into the settled houses. Decoy locals spawn as town civilians, so killing one bills the town.
     // Both sides garrison via fnc_holdBuildingPost, whose loop keys off the unit: it survives a guard's flip to
