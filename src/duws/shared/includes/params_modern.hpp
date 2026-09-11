@@ -47,6 +47,15 @@ class Params {
         default = 0;
     };
 
+    // Gates the Rest/Heal weather box: Off replaces it with a notice and skips the weather change on
+    // rest (read in fnc_rest_menu.sqf, enforced in fnc_rest_heal.sqf). Rest and time-skip still work.
+    class DUWS_RestWeather {
+        title = "Rest Weather Config";
+        values[] = {0,1};
+        texts[] = {"Off","On"};
+        default = 1;
+    };
+
     // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
     // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
     // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime

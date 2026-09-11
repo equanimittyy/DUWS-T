@@ -48,16 +48,22 @@ waitUntil { dialog };
 sliderSetRange [8703, 3, 24];
 sliderSetPosition [8703, 3];
 
-// Default to the current sky, so leaving the weather sliders put is a no-op rather than a jump.
-sliderSetRange [8712, 0, 1];
-sliderSetPosition [8712, overcast];
-sliderSetRange [8714, 0, 1];
-sliderSetPosition [8714, rain];
-
-sliderSetRange [8716, 0, 1];
-sliderSetPosition [8716, fog];
-sliderSetRange [8718, 0, 1];
-sliderSetPosition [8718, lightnings];
+private _disp = uiNamespace getVariable ["DUWS_rest_disp", displayNull];
+if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
+    (_disp displayCtrl 8719) ctrlShow false;
+    // Default to the current sky, so leaving the weather sliders put is a no-op rather than a jump.
+    sliderSetRange [8712, 0, 1];
+    sliderSetPosition [8712, overcast];
+    sliderSetRange [8714, 0, 1];
+    sliderSetPosition [8714, rain];
+    sliderSetRange [8716, 0, 1];
+    sliderSetPosition [8716, fog];
+    sliderSetRange [8718, 0, 1];
+    sliderSetPosition [8718, lightnings];
+} else {
+    { (_disp displayCtrl _x) ctrlShow false } forEach [8711, 8712, 8713, 8714, 8715, 8716, 8717, 8718];
+    (_disp displayCtrl 8719) ctrlShow true;
+};
 
 call fnc_rest_labels;
 

@@ -33,15 +33,18 @@ sleep 1.7;
 
 skiptime _hours;
 
-// Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call
-// that skips the menu's slider coupling). Rain is set after the forced overcast, not before.
-if (_rain > 0) then { _overcast = _overcast max 0.5 };
-0 setOvercast _overcast;
-forceWeatherChange;
-0 setRain _rain;
-0 setFog [_fog, 0.05, 20];
-// setLightnings shows only during a storm; a value here does nothing visible unless rain is up.
-0 setLightnings _lightning;
+// Gated server-side too, so the parameter holds even if a client sent weather values anyway.
+if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
+    // Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call
+    // that skips the menu's slider coupling). Rain is set after the forced overcast, not before.
+    if (_rain > 0) then { _overcast = _overcast max 0.5 };
+    0 setOvercast _overcast;
+    forceWeatherChange;
+    0 setRain _rain;
+    0 setFog [_fog, 0.05, 20];
+    // setLightnings shows only during a storm; a value here does nothing visible unless rain is up.
+    0 setLightnings _lightning;
+};
 
 [["", "BLACK IN", 1.5]] remoteExec ["titleCut", 0];
 sleep 0.3;

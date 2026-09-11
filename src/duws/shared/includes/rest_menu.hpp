@@ -132,6 +132,17 @@ class rest_dialog
             w = 18 * GUI_GRID_W;
             h = 0.8 * GUI_GRID_H;
         };
+        // Shown in place of the sliders when the Rest Weather Config parameter is Off; fnc_rest_menu
+        // toggles it against the eight slider/label controls.
+        class rm_weather_off: RscStructuredText
+        {
+            idc = 8719;
+            text = "$STR_DUWS_T_rest_weather_off";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 13 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 4 * GUI_GRID_H;
+        };
 
         class rm_confirm: RscButton
         {

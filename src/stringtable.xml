@@ -5033,6 +5033,13 @@
                 <Original>Lightning %1</Original>
                 <English>Lightning %1</English>
             </Key>
+            <Key ID="STR_DUWS_T_rest_weather_off">
+                <German>Weather effects are disabled in mission parameters.</German>
+                <Spanish>Weather effects are disabled in mission parameters.</Spanish>
+                <Chinesesimp>Weather effects are disabled in mission parameters.</Chinesesimp>
+                <Original>Weather effects are disabled in mission parameters.</Original>
+                <English>Weather effects are disabled in mission parameters.</English>
+            </Key>
             <Key ID="STR_DUWS_T_rest_confirm">
                 <German>Rest</German>
                 <Spanish>Rest</Spanish>
