@@ -94,6 +94,10 @@ publicVariable "currentMissionPilot";
 
 [_pilot] call DUWS_fnc_addCarryAction;
 
+// Claimed so a living leftover rides the keep-radius sweep instead of leaking a WEST unit; the win path
+// releases the claim so his despawn tail owns him.
+[_pilot] call fnc_mission_claim;
+
 // Enemy patrols ringed around the crash so no patrol's circuit reaches the 300 m exclusion: a sub-centre sits
 // _footRing/_vehRing out from the heli and fnc_apply_posture walks widepatrol within radius*0.9 of it, so the
 // nearest a leg comes to the pilot is (ring - 0.9*_patrolArgR). Collected as _enemyGroups so the whole set can
@@ -257,6 +261,10 @@ _pilot setHitPointDamage ["HitLegs", 0.6];
 [_pilot, ""] remoteExec ["switchMove", 0];
 _pilot enableAI "ALL";
 _pilot enableAI "PATH";
+
+// Win exception: he despawns on his own tail below, so release the claim before finish -> cleanup, or the
+// sweep would delete him mid-limp.
+_pilot setVariable ["DUWS_missionOwner", nil];
 
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 
