@@ -11,12 +11,12 @@
 //    the diary ignores <t> (a parseText/ctrlSetStructuredText tag), so its
 //    colour/size drop silently. <font color=...>, <br/> and <img .../> render;
 //    <font size> is absolute px, not the <t> multiplier.
-//  - Banner path uses format, not "...image\"+leaf: a backslash right before a
+//  - Banner path uses format, not "...images\"+leaf: a backslash right before a
 //    string's closing quote can be mis-read by the CfgFunctions preprocessor.
 
 // Heading banner for a page: the topic strip, then a gap before the body.
 private _bnr = {
-    format ["<img image='image\%1' width='350' height='40'/><br/><br/>", _this]
+    format ["<img image='duws\shared\media\images\%1' width='350' height='40'/><br/><br/>", _this]
 };
 // Sub-header + body, for topics folded into a page as one section.
 private _sec = {
@@ -48,7 +48,7 @@ private _supportsList =
     + (["CONS", "#4da6ff"] call _supportRows);
 
 private _coverBody =
-    "<img image='image\duws_t_man_cover.jpg' width='456' height='257'/><br/><br/>"
+    "<img image='duws\shared\media\images\duws_t_man_cover.jpg' width='456' height='257'/><br/><br/>"
     + (localize "STR_DUWS_T_MAN_COVER_BODY");
 
 private _howToBody = ("duws_t_man_how_to_play.jpg" call _bnr) + ([
