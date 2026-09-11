@@ -7734,8 +7734,8 @@
                 <Spanish>Unido al juego, bienvenido a %1, %2</Spanish>
                 <German>Spielbeitritt, willkommen in %1, %2</German>
                 <Chinesesimp>加入游戏，欢迎来到%1, %2</Chinesesimp>
-                <Original>Joined game, welcome to %1, %2.</Original>
-                <English>Joined game, welcome to %1, %2.</English>
+                <Original>Joined game.&lt;br/&gt;&lt;br/&gt;Welcome to %1, %2.</Original>
+                <English>Joined game.&lt;br/&gt;&lt;br/&gt;Welcome to %1, %2.</English>
             </Key>
         </Container>
     </Package>
