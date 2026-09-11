@@ -8,7 +8,7 @@ params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []]];
 
 private _half = _cell / 2;
 private _eps = 0.05;
-private _coverOn = missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", false];
+private _coverOn = missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true];
 
 // Fixed grid width means the cell count only changes on a first draw or a name-clash guard.
 private _sig = [count _cells];
@@ -58,8 +58,10 @@ private _sample = "";
     };
 
     // "Empty" is a text-only marker type; if a build renders no text on it, use a transparent-icon type.
+    // A never-/long-unseen cell (age -1) shows "N/A" rather than nothing, so the layer is legibly alive
+    // before any sweep -- a blank map would read as broken, not as "no coverage yet".
     private _sm = format ["duws_opcom_stale_%1", _i];
-    if (_coverOn && {_stale >= 0}) then {
+    if (_coverOn) then {
         if ((getMarkerType _sm) isEqualTo "") then {
             createMarkerLocal [_sm, [_c select 0, (_c select 1) + _cell * 0.3]];
             _sm setMarkerShapeLocal "ICON";
@@ -68,7 +70,7 @@ private _sample = "";
             _sm setMarkerSizeLocal [1, 1];
             _sm setMarkerAlphaLocal 0.5;
         };
-        _sm setMarkerTextLocal format ["%1t", _stale];
+        _sm setMarkerTextLocal ([format ["%1t", _stale], "N/A"] select (_stale < 0));
     } else {
         if ((getMarkerType _sm) isNotEqualTo "") then { deleteMarkerLocal _sm };
     };

@@ -172,27 +172,25 @@ Coverage rides as a second per-cell label floating just **above** the force dot 
 centre, not overlapping it — the cell's staleness age in ticks at 50% opacity:
 
 - **`{n}t`** — swept `n` ticks ago, `n` under the span (`0t` the tick it is stamped, climbing each tick).
-- **Blank** — no live coverage: never swept, or last swept a full `OPCOM_COVER_SPAN` ago. No label drawn.
+- **`N/A`** — no live coverage: never swept, or last swept a full `OPCOM_COVER_SPAN` ago.
 
 Raw tick age, not the clamped staleness: the debug view wants the true age up to the span. Past the span a cell
-is worthless to Scout and the flank alike, so it drops to blank — the overlay paints exactly the cells that
-still carry coverage weight, matching what the readers act on, and never-seen and long-expired both read blank
-because the readers treat them the same.
-
-The layer is therefore sparse — a label only where recon or an OP post looked within the last span, the same
-skip-the-empty-majority discipline the force dots use
-([`fnc_debug_opcom_grid_draw.sqf:40`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)). Keep it
-behind its own sub-toggle so the coverage labels read apart from the force dots.
+is worthless to Scout and the flank alike, so it reads `N/A` — never-seen and long-expired both, since the
+readers treat them the same. A label on **every** box cell, not only the swept ones: a fresh map has stamped
+nothing, and a blank overlay reads as broken rather than as "no coverage yet", so the layer paints `N/A`
+across the grid until sweeps flip cells to `{n}t`. This is a dev view, so the full lattice of labels is worth
+the markers; **on by default** (`DUWS_dbgOpcomCoverOn`, its own menu sub-toggle).
 
 | Layer | Change |
 |---|---|
-| Server gather `fnc_debug_opcom_grid` | Emit each cell's age in the `_cells` payload — a sixth tuple element: `DUWS_opcom_tick - (DUWS_opcom_grid_seen select _i)`, or `-1` once that reaches `OPCOM_COVER_SPAN` (blank), so the client needs no span |
-| Client draw `fnc_debug_opcom_grid_draw` | For a swept cell (age ≥ 0) a `duws_opcom_stale_%1` marker: text `{n}t`, `setMarkerAlphaLocal 0.5`, icon hidden (size `[0, 0]`) so only the text paints, positioned north of the cell centre so it sits above the dot. Age `-1` draws no marker (delete a standing one). Reconciled and torn down by the `duws_opcom_` prefix like the other layers |
+| Server gather `fnc_debug_opcom_grid` | Emit each cell's age in the `_cells` payload — a sixth tuple element: `DUWS_opcom_tick - (DUWS_opcom_grid_seen select _i)`, or `-1` once that reaches `OPCOM_COVER_SPAN`, so the client needs no span |
+| Client draw `fnc_debug_opcom_grid_draw` | A `duws_opcom_stale_%1` marker per box cell: text `{n}t` (age ≥ 0) or `N/A` (age `-1`), `setMarkerAlphaLocal 0.5`, a text-only marker type, positioned north of the cell centre so it sits above the dot. Reconciled and torn down by the `duws_opcom_` prefix like the other layers; the toggle off deletes the set |
 
 Markers fail silently on a bad create
 ([`fnc_debug_opcom_grid_draw.sqf:104-108`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)),
-and text-only-via-size-0 is unverified in the engine — confirm the label renders on the rebuild sample check;
-if size 0 also hides the text, fall back to a transparent-icon marker type.
+and the `"Empty"` text-only marker type is unverified in the engine — confirm the labels render by the
+rebuild sample check's `registered=` count jumping by the box-cell count; if `"Empty"` draws no text, fall
+back to a transparent-icon marker type.
 
 ## Verification
 

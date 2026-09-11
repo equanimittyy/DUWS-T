@@ -22,7 +22,7 @@ private _c = [1, 0.667, 0, 1];
     }, [], _c],
     ["Ferry status",    { ["ferry",       "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Staleness labels (on/off)", {
-        DUWS_dbgOpcomCoverOn = !(missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", false]);
+        DUWS_dbgOpcomCoverOn = !(missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true]);
         hint format ["OPCOM grid: staleness labels %1.", ["off", "on"] select DUWS_dbgOpcomCoverOn];
     }, [], _c],
     ["Clear store",     { ["clear",       "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c]
