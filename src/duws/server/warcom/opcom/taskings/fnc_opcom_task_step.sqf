@@ -41,6 +41,10 @@ private _nearestPlayerCells = {
             _t set ["grp", ""];
         } else {
             private _ldr = leader _grp;
+            // grid_rebuild deposits this tasking's force at pos/effForce even while live; refresh both each
+            // live tick or the friendly layer reads the stale de-virt cell and spawn-time strength.
+            _t set ["pos", getPosASL _ldr];
+            _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
             private _engaged = behaviour _ldr isEqualTo "COMBAT";
             if (!_engaged && {count allPlayers > 0}) then {
                 private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
