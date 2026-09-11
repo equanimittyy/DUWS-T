@@ -188,8 +188,13 @@ publicVariable "DUWS_safehouse_active";
             {
                 private _h = _x;
                 if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
-                    private _slots = _h buildingPos -1;
-                    if ((allPlayers findIf { private _p = _x; (_slots findIf { _p distance _x < 2.5 }) >= 0 }) >= 0) then {
+                    // Inside a reconstructed room, not just within the footprint: the furnish grid's floor cells
+                    // stop at the walls, so a player in an L-shaped notch or against an outside wall has none near.
+                    private _cells = _h getVariable ["DUWS_furnishGrid", []];
+                    if ((allPlayers findIf {
+                        private _pa = getPosASL _x;
+                        (_cells findIf { _pa distance (_x select 0) < 0.6 }) >= 0
+                    }) >= 0) then {
                         [_h, "ALL"] call fnc_raid_safehouse_breach;
                     };
                 };
