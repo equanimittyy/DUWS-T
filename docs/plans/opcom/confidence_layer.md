@@ -64,27 +64,34 @@ constant rather than borrowing either belief threshold.
 Counted in ticks off `DUWS_opcom_tick`, the one clock belief also ages on — never `time` or `diag_tickTime`
 ([§Decay](opcom_plan.md#decay)).
 
-## Stamping: only the guaranteed bubbles write
+## Stamping: guaranteed bubbles clear, sightings point-stamp
 
-A cell is stamped swept only by a sensor that detects *for certain* within a defined cell footprint, because
-only there does "found nothing" truly mean "clear". The two qualifying sensors both already sweep a Chebyshev
-cell box each perception tick; each now also stamps that box, **whether or not it caught a group**:
+Two things stamp a cell, for two different reasons.
+
+A **clear sweep** stamps its whole footprint *whether or not it caught a group* — only a sensor that detects
+*for certain* within a defined cell box can make "found nothing" mean "clear". Both qualifying sensors already
+sweep a Chebyshev box each perception tick and now stamp it unconditionally:
 
 | Sensor | Stamps | Where |
 |---|---|---|
 | Recon detection | every cell within `OPCOM_RECON_K` (by platform) of each recon tasking's point | [`fnc_opcom_recon_sense.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_recon_sense.sqf) — the box it already walks to test group cells |
 | Observation post | every cell within `OP_OBSERVE_K` of a post, on each tick the post's chance fires | `DUWS_fnc_hardpointOPSense` ([`fnc_hardpoint_stream.sqf:282`](../../../src/duws/server/init_zones/fnc_hardpoint_stream.sqf)) |
 
-The direct `nearTargets` sighting sweep does **not** stamp coverage: it rides A3's fallible last-seen (line of
-sight, defeatable by stealth) and has no clean cell footprint, so its "saw nothing" is not a clear
-([§Sensors](opcom_plan.md#sensors)). The area-of-influence and zone-flip sensors stamp presence, not a sweep,
-so they are irrelevant here too.
+A **positive sighting** stamps the one cell it was seen in. A belief write is itself proof the commander
+observed that ground, so `fnc_opcom_belief_upsert` — the single writer every sensor records a sighting through
+— stamps a `k = 0` point at the sighted cell. This is what lets the fallible `nearTargets` sweep contribute:
+its "saw nothing" is still not a clear (line of sight, defeatable by stealth, no clean footprint —
+[§Sensors](opcom_plan.md#sensors)), but its "saw *this*" is proof of a look, so a detection stamps its cell
+even though a miss stamps nothing. The point stamp never widens to a bubble: seeing an enemy at a cell proves
+that cell was looked at, never that the sector around a known threat is clear. The area-of-influence and
+zone-flip sensors stamp presence, not a sweep, so they add no clear; routing a sighting through the writer
+would point-stamp it like any other.
 
-Stamping is a write of `DUWS_opcom_tick` into each in-box cell of the `(2k+1)` box around the sensor point,
-clamped to the grid — the same bounded box scan the force-grid deposit uses
+Both are a write of `DUWS_opcom_tick` into each in-box cell of the `(2k+1)` box around the point, clamped to
+the grid — the same bounded box scan the force-grid deposit uses
 ([§Rebuild](opcom_plan.md#rebuild-deposit-each-source-with-a-linear-falloff)), never a pass over the whole
-array. For recon `k` is small (a few cells), so the cost is tens of writes per recon tasking per tick,
-alongside the group test the sweep already runs.
+array. A clear bubble's `k` is small (a few cells) and a sighting's is 0, so the cost is tens of writes per
+recon tasking per tick plus one per sighting.
 
 ## Reading: two consumers
 
@@ -134,7 +141,7 @@ New, in `belief/`:
 
 | File | Responsibility |
 |---|---|
-| `fnc_opcom_cover_stamp` | `[point, k]` → stamp `DUWS_opcom_tick` into each in-box cell of the `k` box around `point`, clamped to the grid. One shared writer so both sensors stamp identically |
+| `fnc_opcom_cover_stamp` | `[point, k]` → stamp `DUWS_opcom_tick` into each in-box cell of the `k` box around `point`, clamped to the grid. One shared writer so every faucet — clear bubble and sighting point — stamps identically |
 | `fnc_opcom_cover_stale` | `[cell]` → the staleness read above, single-sourcing the formula both consumers call |
 
 Extended in place:
@@ -144,6 +151,7 @@ Extended in place:
 | `fnc_opcom_grid_init` | Allocate `DUWS_opcom_grid_seen` (full-width lattice, all `-OPCOM_COVER_SPAN`) once, beside the static land / component arrays it already builds. Never touched by `fnc_opcom_grid_rebuild` |
 | `fnc_opcom_recon_sense` | After (or within) the box walk it already runs, call `fnc_opcom_cover_stamp` for each recon point's `k` box — unconditional on catching a group |
 | `DUWS_fnc_hardpointOPSense` | On each tick a post's chance fires, stamp its `OP_OBSERVE_K` box (cross-subsystem — the OP sensor lives with the hardpoint code) |
+| `fnc_opcom_belief_upsert` | After the store write, `k = 0` point-stamp the sighted cell, so every faucet's positive sightings (recon, `nearTargets`, any future sensor) refresh coverage through the one writer |
 | `fnc_opcom_route` *(P5)* | Add `OPCOM_ROUTE_MU × (cell call fnc_opcom_cover_stale)` to the per-step cost on the `λ = 1` branch |
 | Scout Value in `fnc_opcom_actions` *(P4b)* | Read `fnc_opcom_cover_stale` per footprint cell as the `staleness` term |
 
@@ -169,22 +177,23 @@ concern while the box is init-fixed; noted so a future box change does not silen
 The Phase 1 overlay draws one force dot per non-empty cell, its text the `f/e` force balance
 ([`fnc_debug_opcom_grid_draw.sqf:39-54`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)).
 Coverage rides as a second per-cell label floating just **above** the force dot — offset north of the cell
-centre, not overlapping it — the cell's staleness age in ticks at 50% opacity:
+centre, not overlapping it — the cell's staleness age in ticks at 30% opacity:
 
 - **`{n}t`** — swept `n` ticks ago, `n` under the span (`0t` the tick it is stamped, climbing each tick).
-- **`N/A`** — no live coverage: never swept, or last swept a full `OPCOM_COVER_SPAN` ago.
+- **`-1t`** — no live coverage: never swept, or last swept a full `OPCOM_COVER_SPAN` ago.
 
 Raw tick age, not the clamped staleness: the debug view wants the true age up to the span. Past the span a cell
-is worthless to Scout and the flank alike, so it reads `N/A` — never-seen and long-expired both, since the
-readers treat them the same. A label on **every** box cell, not only the swept ones: a fresh map has stamped
-nothing, and a blank overlay reads as broken rather than as "no coverage yet", so the layer paints `N/A`
-across the grid until sweeps flip cells to `{n}t`. This is a dev view, so the full lattice of labels is worth
-the markers; **on by default** (`DUWS_dbgOpcomCoverOn`, its own menu sub-toggle).
+is worthless to Scout and the flank alike, so it reads `-1t` — never-seen and long-expired both, since the
+readers treat them the same. The sentinel labels `-1t`, uniform with the real ages, rather than a special
+`N/A` string. A label on **every** box cell, not only the swept ones: a fresh map has stamped nothing, and a
+blank overlay reads as broken rather than as "no coverage yet", so the layer paints `-1t` across the grid
+until sweeps flip cells to `{n}t`. This is a dev view, so the full lattice of labels is worth the markers;
+**on by default** (`DUWS_dbgOpcomCoverOn`, its own menu sub-toggle).
 
 | Layer | Change |
 |---|---|
 | Server gather `fnc_debug_opcom_grid` | Emit each cell's age in the `_cells` payload — a sixth tuple element: `DUWS_opcom_tick - (DUWS_opcom_grid_seen select _i)`, or `-1` once that reaches `OPCOM_COVER_SPAN`, so the client needs no span |
-| Client draw `fnc_debug_opcom_grid_draw` | A `duws_opcom_stale_%1` marker per box cell: text `{n}t` (age ≥ 0) or `N/A` (age `-1`), `setMarkerAlphaLocal 0.5`, the `mil_triangle_noShadow` icon type, positioned north of the cell centre so it sits above the dot. Reconciled and torn down by the `duws_opcom_` prefix like the other layers; the toggle off deletes the set |
+| Client draw `fnc_debug_opcom_grid_draw` | A `duws_opcom_stale_%1` marker per box cell: text `{n}t` (the sentinel `-1` prints `-1t` like any age), `setMarkerAlphaLocal 0.3`, the `loc_search` icon type at `[0.5, 0.5]`, positioned north of the cell centre so it sits above the dot. A stale draw that lands after the overlay is toggled off is dropped (it re-checks `DUWS_dbgOpcomOn`), else it would rebuild the torn-down lattice. Reconciled and torn down by the `duws_opcom_` prefix like the other layers; the toggle off deletes the set |
 
 The label carries a visible icon: the invisible `"Empty"` marker type paints no text, so a real icon type is
 required ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-label-needs-a-real-icon-marker-type-the-invisible-empty-type-paints-no-text)).
