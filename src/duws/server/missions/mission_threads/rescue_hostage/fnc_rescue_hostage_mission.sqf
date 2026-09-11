@@ -129,8 +129,8 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
 // never side-wide east knowsAbout, which reads flat-high off any distant firefight (arma_engine_gotchas.md).
 // Suspicion is escapable and its reset keys on LINE OF SIGHT (knowsAbout lingers for minutes after contact is
 // lost); a confirmed sighting arms the clock for good, and killing the garrison is what frees the hostage.
-[_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
-    params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
+[_hostage, _garrison, _ring, _hostageBldg, _trk, _MissionPos, _radius] spawn {
+    params ["_hostage", "_garrison", "_ring", "_bldg", "_trk", "_MissionPos", "_radius"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define SUS_KNOWS 0.3
     #define LOS_RANGE 150
@@ -167,6 +167,26 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         _alarmAt = time + CLOCK_BASE;
         _state = "ALARM";
         call _convergeRing;
+    };
+
+    private _fnc_pipes = { params ["_n"]; private _s = ""; for "_i" from 1 to _n do { _s = _s + "|" }; _s };
+    private _fnc_hex2 = {
+        params ["_n"];
+        private _d = "0123456789abcdef";
+        private _v = (round _n) max 0 min 255;
+        (_d select [floor (_v / 16), 1]) + (_d select [_v mod 16, 1])
+    };
+    // Scaled to CONFIRM, not the engine's 0..4: the bar tops out exactly as the alarm would arm, so full = last warning.
+    private _fnc_detBar = {
+        params ["_knows"];
+        private _f = ((_knows / CONFIRM) max 0) min 1;
+        private _seg = floor (_f * 20);
+        private _col = format ["#%1%2%2",
+            [linearConversion [0, 1, _f, 127, 255, true]] call _fnc_hex2,
+            [linearConversion [0, 1, _f, 127, 48, true]] call _fnc_hex2];
+        parseText format ["<t align='center'>%1<br/><t color='%2'>%3</t><t color='#7f7f7f'>%4</t></t>",
+            localize "STR_DUWS_T_rescuehostage_detection",
+            _col, [_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes]
     };
 
     while { alive _hostage } do {
@@ -227,18 +247,25 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         _prevObsAlive = _obsAlive;
         private _seenNow = [];
         private _confirmed = false;
+        private _meterVals = [];
         {
             private _pl = _x;
             private _losP = false;
             private _knowsP = 0;
+            private _knowsLos = 0;
             {
                 private _u = _x;
                 private _k = _u knowsAbout _pl;
                 if (_k > _knowsP) then { _knowsP = _k };
-                if (!_losP && { _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then { _losP = true };
+                if ({ _u distance _pl < LOS_RANGE } && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then {
+                    _losP = true;
+                    if (_k > _knowsLos) then { _knowsLos = _k };
+                };
             } forEach _obs;
             if (_losP && { _knowsP > SUS_KNOWS }) then { _seenNow pushBack _pl };
             if (_losP && { _knowsP > CONFIRM }) then { _confirmed = true };
+            // LOS-gated, so a broken sightline drains the bar instead of pinning a stale knowsAbout the alarm has already forgiven.
+            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, _knowsLos] };
         } forEach _players;
         if (count _seenNow > 0) then { _lastSeen = time };
 
@@ -257,6 +284,16 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                     if (_state == "SUS" && { time - _lastSeen > GRACE_SUS }) then { _state = "CALM" };
                 };
             };
+        };
+
+        // Held back under ALARM (the countdown owns the box) and for a player warned this tick they were spotted,
+        // so neither is overwritten.
+        if (_state != "ALARM") then {
+            private _justSpotted = _seenNow select { !(_x in _seenPrev) };
+            {
+                _x params ["_pl", "_knows"];
+                if !(_pl in _justSpotted) then { [[_knows] call _fnc_detBar] remoteExec ["hintSilent", _pl] };
+            } forEach _meterVals;
         };
         _seenPrev = _seenNow;
 
