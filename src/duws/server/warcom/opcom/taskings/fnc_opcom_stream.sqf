@@ -31,7 +31,11 @@ DUWS_fnc_opcom_applyOrder = {
 DUWS_fnc_opcom_spawnComp = {
     params ["_token", "_pos", ["_class", ""]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        [_token, _pos, 100, "none", _pos] call fnc_spawn_team
+        private _g = [_token, _pos, 100, "none", _pos] call fnc_spawn_team;
+        // Posture "none" drops the whole team on the one spawn point; loosen the clump. Kept under 20 m so
+        // the squad still reads as one group inside the stream radius (mirrors the rescue_squad cordon).
+        { _x setPos (_pos getPos [4 + random 12, random 360]) } forEach units _g;
+        _g
     };
     // Empty only for a record raised before spawnClass existed (hot-reloaded campaign): draw fresh.
     if (_class isEqualTo "") then { _class = [_token] call DUWS_fnc_tokenClass };
