@@ -16,23 +16,26 @@ if (isNull _target || {isNull _caller}) exitWith {};
 
 // A flagged body not yet claimed pays its objective/frisk table once. Anything else -- an unflagged
 // corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the per-player
-// clock and, since combat is not rolled at spawn, rolled here (below). The clock is enforced here
-// rather than only in the action's condition, because the claim is the authoritative point and a
+// search budget and, since combat is not rolled at spawn, rolled here (below). The budget is enforced
+// here rather than only in the action's condition, because the claim is the authoritative point and a
 // condition a client evaluates is a condition a client can be made to skip.
 private _source = _target getVariable ["DUWS_search_src", ""];
 private _flagged = (_source != "") && {!(_target getVariable ["DUWS_search_done", false])};
 if (!_flagged) then { _source = "combat" };
 
-// Cooldown gated here at the top level, not nested in the else below. exitWith unwinds past a
+// Budget gated here at the top level, not nested in the else below. exitWith unwinds past a
 // then/else to the whole function (see arma_engine_gotchas), so a guard nested in the else would
 // read as skipping only the stamp while in fact abandoning the payout -- gating here keeps it plain.
-if (!_flagged && {time - (_caller getVariable ["DUWS_lastSearch", -1e10]) < DUWS_searchCooldown}) exitWith {};
+if (!_flagged && {count ((_caller getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown}) >= DUWS_searchAllowance}) exitWith {};
 
 if (_flagged) then {
     _target setVariable ["DUWS_search_done", true, true];
 } else {
-    // The attempt spends the clock whether or not it finds anything -- a dry search is still a search.
-    _caller setVariable ["DUWS_lastSearch", time, true];
+    // The attempt spends a slot whether or not it finds anything -- a dry search is still a search.
+    // Pruned on write so the stamp list stays bounded to the window.
+    private _times = (_caller getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown};
+    _times pushBack time;
+    _caller setVariable ["DUWS_searchTimes", _times, true];
 };
 
 private _config = DUWS_searchSources getOrDefault [_source, []];

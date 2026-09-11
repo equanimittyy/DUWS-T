@@ -227,14 +227,16 @@ MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
 // [successChance, [[payoutKind, weight], ...], nothingKey] per search source.
-// combat rolls at the search, not spawn (any corpse is searchable); its chance is high because
-// DUWS_searchCooldown, not this roll, is what bounds intel volume. objective/civ_frisk are flagged
-// at spawn with chance 1 (never miss, single-use) and read this table only for kinds.
+// combat rolls at the search, not spawn (any corpse is searchable). Its gate is per-search, and
+// DUWS_searchAllowance searches are allowed per DUWS_searchCooldown window: gate * allowance is the
+// expected payouts per window (0.60 * 3 = 1.80), so raising the allowance without dropping the gate
+// multiplies intel volume. objective/civ_frisk are flagged at spawn with chance 1 (never miss,
+// single-use) and read this table only for kinds.
 // Weights, not a cumulative ladder: adding a kind is one row instead of re-deriving every band below it.
 // Kinds draw without replacement; an exhausted kind drops out and the remainder re-draw, so a dry pool
 // never turns a search into silence.
 DUWS_searchSources = createHashMapFromArray [
-    ["combat",    [0.80, [["intel", 2], ["money", 11], ["document", 7]],           "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["combat",    [0.60, [["intel", 1], ["money", 7], ["document", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
     ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
@@ -251,10 +253,12 @@ DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITE
     "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
     "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
 
-// Seconds between combat-corpse searches -- this clock, not troop density, is what bounds intel volume,
-// since any corpse is searchable and the success roll is spent at the search. Deliberately long.
-// Objective/civ_frisk searches are single-use and bypass it. Broadcast: the prompt's condition runs on the client.
-DUWS_searchCooldown = 300; publicVariable "DUWS_searchCooldown";
+// A rolling window: up to DUWS_searchAllowance combat-corpse searches per DUWS_searchCooldown seconds
+// per player -- this budget, not troop density, is what bounds intel volume, since any corpse is
+// searchable and the success roll is spent at the search. Deliberately tight. Objective/civ_frisk
+// searches are single-use and bypass it. Broadcast: the prompt's condition runs on the client.
+DUWS_searchCooldown = 900;   publicVariable "DUWS_searchCooldown";
+DUWS_searchAllowance = 3;    publicVariable "DUWS_searchAllowance";
 
 manually_chosen = false;publicVariable "manually_chosen";
 
