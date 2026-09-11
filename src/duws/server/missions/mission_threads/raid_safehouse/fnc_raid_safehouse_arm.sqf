@@ -12,16 +12,25 @@ if (isNull _house || {!hasInterface}) exitWith {};
 #define POINT_BLANK 1.5 // TUNABLE, at this range the aim check is waived -- the shooter is on the door
 #define TOWARD 0.5     // TUNABLE, cos of the half-angle the shot must fall within to count as aimed at the door
 
-// Guard a re-raid on a reused building from stacking a duplicate action.
+// Guard a re-raid on a reused building from stacking duplicate actions.
 if (!(_house getVariable ["DUWS_safehouse_lockAction", false])) then {
     _house setVariable ["DUWS_safehouse_lockAction", true];
-    _house addAction [
-        localize "STR_DUWS_T_RAID_SAFEHOUSE_OPEN",
-        { hint (localize "STR_DUWS_T_RAID_SAFEHOUSE_LOCKED") },
-        nil, 6, true, false, "",
-        "(missionNamespace getVariable ['DUWS_safehouse_active', false]) && {!(_target getVariable ['DUWS_safehouse_breached', false])}",
-        3
-    ];
+    // One locked-door action per door, anchored to that door's selection so it shows only when the player aims
+    // at it -- a radius off the building origin never reached a perimeter door. Gated on that door still shut
+    // (its source not yet in openedDoors), not the whole-house breach, so each door reads locked until its own
+    // shot opens it. A door whose selection did not resolve carries no anchor and gets no action.
+    {
+        _x params ["", "_src", ["_sel", ""]];
+        if (_sel != "") then {
+            _house addAction [
+                localize "STR_DUWS_T_RAID_SAFEHOUSE_OPEN",
+                { hint (localize "STR_DUWS_T_RAID_SAFEHOUSE_LOCKED") },
+                nil, 6, true, false, "",
+                format ["(missionNamespace getVariable ['DUWS_safehouse_active', false]) && {!('%1' in (_target getVariable ['DUWS_safehouse_openedDoors', []]))}", _src],
+                2.5, false, _sel
+            ];
+        };
+    } forEach (_house getVariable ["DUWS_safehouse_doorPts", []]);
 };
 
 // One watcher for the whole raid, reading the server-broadcast candidate list.
