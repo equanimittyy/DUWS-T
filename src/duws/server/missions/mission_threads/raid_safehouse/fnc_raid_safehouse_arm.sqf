@@ -37,7 +37,9 @@ if (isNil "DUWS_safehouse_firedEH") then {
         private _best = [1e10, objNull, ""];
         {
             private _hs = _x;
-            if (!isNull _hs && {!(_hs getVariable ["DUWS_safehouse_breached", false])}) then {
+            // No breached-gate: every door is shot open on its own, before and after entry; the breach fires the
+            // raid outcome only on the first, so interior doors keep opening once the house is cracked.
+            if (!isNull _hs) then {
                 {
                     _x params ["_dp", "_src"];
                     private _to = _dp vectorDiff _sp; _to set [2, 0];
