@@ -43,7 +43,9 @@ DUWS_fnc_opcom_spawnComp = {
         grpNull
     };
     if !(_class isKindOf "Air") exitWith {
-        [_class, _pos, 100, "none", _pos] call fnc_spawn_vehicle
+        // pos is banked ASL (grid frame); spawnVehicle reads a 3D z as ATL, so pass 2D or the hull floats.
+        private _g = [_pos select 0, _pos select 1];
+        [_class, _g, 100, "none", _g] call fnc_spawn_vehicle
     };
     private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
     _created params ["_veh", "_crew", "_grp"];
