@@ -386,7 +386,7 @@ if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && 
 };
 
 playMusic ["EventTrack01a_F_EPA", 0];
-hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
+hintsilent parseText format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 
 forceWeatherChange;
 
