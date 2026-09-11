@@ -13,9 +13,14 @@
 # one reads as a stroke around the glyphs and fails to reach the bright contours
 # sitting further out. Glyph edges stay hard - the halo is strictly behind.
 #
+# A version tag (DUWS_SUB) sits under the wordmark, folded into the mark layer
+# before the halo is cut so it gets the same backing against the contours the
+# wordmark relies on.
+#
 # Inputs default to the copies beside this script; override by env:
 #   DUWS_FONT   fonts/Jost-var.ttf, or another Futura-class face
 #   DUWS_TOPO   topo_background.jpg
+#   DUWS_SUB    version tag under the wordmark (default v2.0; empty to omit)
 #
 # Shipped duws_t_banner.png was:  build_banner.sh out.png 0.60 55 ticks 32 35
 #
@@ -32,6 +37,7 @@ for p in "$F" "$BG"; do
 done
 
 OUT=$1; FRAC=${2:-0.60}; DARK=${3:-55}; BORDER=${4:-ticks}; GSIG=${5:-32}; GLVL=${6:-35}
+SUB=${DUWS_SUB-v2.0}
 W=952; H=322
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 py () { python3 -c "print($1)"; }
@@ -48,9 +54,25 @@ wof () { echo "$1" | sed 's/x.*//'; }
 FUL=$(bbox 'DUWS-T'); PRE=$(bbox 'DUWS-'); TEE=$(bbox 'T')
 IW=$(wof "$FUL")
 OX=$(py "round(($W-$IW)/2-$(xof "$FUL"))")
-BY=$(py "round(($H+$CAP)/2)")
 CUT=$(py "round($OX+($(xof "$PRE")+$(wof "$PRE")+$(xof "$FUL")+$IW-$(wof "$TEE"))/2)")
-echo "banner ${W}x${H} ps=$PS ink_w=$IW x=$OX base=$BY"
+
+# Empty tag collapses the block back to the wordmark alone, recovering the
+# original (H+CAP)/2 centre.
+if [ -n "$SUB" ]; then
+  SPS=$(py "round($PS*0.18)"); SK=$(py "round($SPS*0.15)")
+  SCAP=$(py "0.7035*$SPS"); GAP=$(py "round($SPS*0.55)")
+else
+  SPS=0; SK=0; SCAP=0; GAP=0
+fi
+CTOP=$(py "($H-($CAP+$GAP+$SCAP))/2")
+BY=$(py "round($CTOP+$CAP)")
+SBASE=$(py "round($CTOP+$CAP+$GAP+$SCAP)")
+if [ -n "$SUB" ]; then
+  SBB=$(convert -size ${W}x${H} xc:none -font "$F" -pointsize "$SPS" -kerning "$SK" \
+        -fill white -annotate +0+200 "$SUB" -format "%@" info:)
+  SOX=$(py "round(($W-$(wof "$SBB"))/2-$(xof "$SBB"))")
+fi
+echo "banner ${W}x${H} ps=$PS ink_w=$IW x=$OX base=$BY tag='$SUB' tag_base=$SBASE"
 
 convert -size ${W}x${H} xc:none -font "$F" -pointsize "$PS" -kerning "$K" \
         -fill white     -annotate +"${OX}"+"${BY}" "DUWS-T" "$T/white.png"
@@ -58,6 +80,10 @@ convert -size ${W}x${H} xc:none -font "$F" -pointsize "$PS" -kerning "$K" \
         -fill "#EE4027" -annotate +"${OX}"+"${BY}" "DUWS-T" "$T/red.png"
 convert -size ${W}x${H} xc:black -fill white -draw "rectangle $CUT,0 ${W},${H}" "$T/cut.png"
 convert "$T/white.png" "$T/red.png" "$T/cut.png" -composite "$T/mark.png"
+if [ -n "$SUB" ]; then
+  convert "$T/mark.png" -font "$F" -pointsize "$SPS" -kerning "$SK" \
+          -fill "#E2E8EE" -annotate +"${SOX}"+"${SBASE}" "$SUB" "$T/mark.png"
+fi
 
 if [ "$GSIG" != "0" ]; then
   convert "$T/mark.png" -alpha extract -blur 0x"${GSIG}" -level 0%,"${GLVL}"% "$T/halo_a.png"
