@@ -134,8 +134,8 @@ if (alive _inf && _inf distance2D _townPos < _deliverDist) exitWith {
 call _cleanup;
 
 if (alive _inf) exitWith {
-    // Timed out but alive: same graceful hand-off despawn as the win path.
-    [_inf] call _despawn;
+    // Timed out but alive: a failed escort earns no graceful walk-off, unlike the win path.
+    deleteVehicle _inf;
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
 };
 

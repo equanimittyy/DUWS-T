@@ -13,4 +13,5 @@ if (_join) then {
 } else {
     [_inf] joinSilent (createGroup [WEST, true]);
     _inf disableAI "MOVE";
+    _inf setUnitPos "MIDDLE";
 };

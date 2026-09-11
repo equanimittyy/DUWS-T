@@ -265,15 +265,20 @@ if (time > _deadline) exitWith {
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "", false, true] call fnc_mission_finish;
 };
 
-// Win: peel the hostage out of the player's group and despawn him after a spell, so a rescued NPC doesn't
-// ride the roster for the rest of the campaign.
+// Win: peel him off the player's group so a rescued NPC never rides the roster; the walk-to-tent despawn is
+// rescue_pilot's tail, where the 300s is only a blocked-path cap, not the despawn trigger.
 call _clearIcons;
 if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_success"] call fnc_town_rep_adjust };
 [_hostage] spawn {
     params ["_h"];
     [_h] joinSilent (createGroup [WEST, true]);
     _h setUnitPos "AUTO";
-    sleep 300;
+    private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
+    if (!isNull _tent) then {
+        _h doMove (getPosATL _tent);
+        private _walkTimeout = time + 300;
+        waitUntil { sleep 1; !(alive _h) || (_h distance _tent < 5) || time > _walkTimeout };
+    };
     if (!isNull _h) then { deleteVehicle _h };
 };
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_home"], true, "", false, false] call fnc_mission_finish;
