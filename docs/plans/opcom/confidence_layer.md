@@ -42,22 +42,22 @@ It differs from the two force layers in one way that governs everything else: **
 stateful memory, like belief, that happens to be cell-indexed. It is therefore allocated once at init and
 never touched by the rebuild.
 
-Cells are never individually cleared. A cell reads `OPCOM_COVER_NEVER` (a sentinel below any real tick) until
-first swept, which the staleness read maps to maximum. No coarser resolution: it reuses the one force-grid
-cell size, so the sweep footprints and the box are exactly the grid's, and there is no second world↔cell map to
-keep aligned.
+Cells are never individually cleared. No never-seen sentinel is needed: every cell inits to `seen =
+-OPCOM_COVER_SPAN`, an age past the span, so an unswept cell reads maximum staleness through the same formula a
+long-expired one does — the readers cannot tell never-seen from expired and never need to, since both mean "go
+look". No coarser resolution either: it reuses the one force-grid cell size, so the sweep footprints and the
+box are exactly the grid's, and there is no second world↔cell map to keep aligned.
 
 ### Staleness: linear over one span
 
-The read the two consumers share:
+The read the two consumers share — one clamped line, no sentinel branch:
 
 ```
-staleness(cell) = if (seen == OPCOM_COVER_NEVER) then { 1 }
-                  else { (0 max ((DUWS_opcom_tick - seen) / OPCOM_COVER_SPAN)) min 1 }
+staleness(cell) = (0 max ((DUWS_opcom_tick - seen) / OPCOM_COVER_SPAN)) min 1
 ```
 
-0 the tick a cell is swept, rising linearly to 1 over `OPCOM_COVER_SPAN` ticks, then held at 1. Never-seen
-reads 1. `OPCOM_COVER_SPAN` is a **separate** trust horizon from belief's `FRESH` / `EXPIRE` — how long a
+0 the tick a cell is swept, rising linearly to 1 over `OPCOM_COVER_SPAN` ticks, then held at 1 — and an unswept
+cell, inited a full span in the past, is already at 1. `OPCOM_COVER_SPAN` is a **separate** trust horizon from belief's `FRESH` / `EXPIRE` — how long a
 *clear* sweep stays trusted is a different question from how long a *force* sighting does, so it takes its own
 constant rather than borrowing either belief threshold.
 
@@ -124,8 +124,6 @@ play:
 | `OPCOM_COVER_SPAN` | ticks a clear sweep stays trusted — staleness runs 0 → 1 over this span |
 | `OPCOM_ROUTE_MU` | flank route uncertainty weight; the risk-tolerance knob, scaled by prize at the route call (Phase 5) |
 
-`OPCOM_COVER_NEVER` is the never-seen sentinel — any value below 0 works, since a real tick is never negative.
-
 ## Files
 
 Under `src/duws/server/warcom/opcom/`, one function per file, each registered by a compile-path string in
@@ -143,7 +141,7 @@ Extended in place:
 
 | File | Change |
 |---|---|
-| `fnc_opcom_grid_init` | Allocate `DUWS_opcom_grid_seen` (full-width lattice, all `OPCOM_COVER_NEVER`) once, beside the static land / component arrays it already builds. Never touched by `fnc_opcom_grid_rebuild` |
+| `fnc_opcom_grid_init` | Allocate `DUWS_opcom_grid_seen` (full-width lattice, all `-OPCOM_COVER_SPAN`) once, beside the static land / component arrays it already builds. Never touched by `fnc_opcom_grid_rebuild` |
 | `fnc_opcom_recon_sense` | After (or within) the box walk it already runs, call `fnc_opcom_cover_stamp` for each recon point's `k` box — unconditional on catching a group |
 | `DUWS_fnc_hardpointOPSense` | On each tick a post's chance fires, stamp its `OP_OBSERVE_K` box (cross-subsystem — the OP sensor lives with the hardpoint code) |
 | `fnc_opcom_route` *(P5)* | Add `OPCOM_ROUTE_MU × (cell call fnc_opcom_cover_stale)` to the per-step cost on the `λ = 1` branch |
@@ -155,7 +153,7 @@ Do not persist `_seen`. It is cell-keyed, so unlike the netId-keyed belief store
 ([`opcom_plan_audit.md`](opcom_plan_audit.md)), but a cold rebuild on restore is the correct behaviour, not a
 loss: after a reload the commander genuinely does not know the current picture, so treating all ground as
 unknown for the first `OPCOM_COVER_SPAN` — re-scouting and routing cautiously until it re-observes — is right.
-`fnc_opcom_grid_init` refills the sentinel array on the first tick like the live force layers.
+`fnc_opcom_grid_init` refills the array to all-`-OPCOM_COVER_SPAN` on the first tick like the live force layers.
 
 ## The one trap
 
@@ -163,16 +161,46 @@ unknown for the first `OPCOM_COVER_SPAN` — re-scouting and routing cautiously 
 ([`fnc_opcom_grid_init.sqf`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_grid_init.sqf)), so a
 stamp's cell index means the same ground for the life of the mission and there is nothing to reindex. Should
 the box ever be made to recenter or resize at runtime, `_seen` — which the rebuild does not refresh — would
-then point stamps at the wrong cells, and must be reset to all-`OPCOM_COVER_NEVER` on the change. Not a
+then point stamps at the wrong cells, and must be reset to all-`-OPCOM_COVER_SPAN` on the change. Not a
 concern while the box is init-fixed; noted so a future box change does not silently corrupt coverage.
+
+## Debug overlay: staleness as text over the dot
+
+The Phase 1 overlay draws one force dot per non-empty cell, its text the `f/e` force balance
+([`fnc_debug_opcom_grid_draw.sqf:39-54`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)).
+Coverage rides as a second per-cell label floating just **above** the force dot — offset north of the cell
+centre, not overlapping it — the cell's staleness age in ticks at 50% opacity:
+
+- **`{n}t`** — swept `n` ticks ago, `n` under the span (`0t` the tick it is stamped, climbing each tick).
+- **Blank** — no live coverage: never swept, or last swept a full `OPCOM_COVER_SPAN` ago. No label drawn.
+
+Raw tick age, not the clamped staleness: the debug view wants the true age up to the span. Past the span a cell
+is worthless to Scout and the flank alike, so it drops to blank — the overlay paints exactly the cells that
+still carry coverage weight, matching what the readers act on, and never-seen and long-expired both read blank
+because the readers treat them the same.
+
+The layer is therefore sparse — a label only where recon or an OP post looked within the last span, the same
+skip-the-empty-majority discipline the force dots use
+([`fnc_debug_opcom_grid_draw.sqf:40`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)). Keep it
+behind its own sub-toggle so the coverage labels read apart from the force dots.
+
+| Layer | Change |
+|---|---|
+| Server gather `fnc_debug_opcom_grid` | Emit each cell's age in the `_cells` payload — a sixth tuple element: `DUWS_opcom_tick - (DUWS_opcom_grid_seen select _i)`, or `-1` once that reaches `OPCOM_COVER_SPAN` (blank), so the client needs no span |
+| Client draw `fnc_debug_opcom_grid_draw` | For a swept cell (age ≥ 0) a `duws_opcom_stale_%1` marker: text `{n}t`, `setMarkerAlphaLocal 0.5`, icon hidden (size `[0, 0]`) so only the text paints, positioned north of the cell centre so it sits above the dot. Age `-1` draws no marker (delete a standing one). Reconciled and torn down by the `duws_opcom_` prefix like the other layers |
+
+Markers fail silently on a bad create
+([`fnc_debug_opcom_grid_draw.sqf:104-108`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)),
+and text-only-via-size-0 is unverified in the engine — confirm the label renders on the rebuild sample check;
+if size 0 also hides the text, fall back to a transparent-icon marker type.
 
 ## Verification
 
-Checkable against a live player with the Phase 1 grid overlay, extended to render staleness as a third heat
-layer beside `_fri` / `_ene` (`fnc_debug_opcom_view`, `fnc_debug_opcom_grid_draw`):
+Checkable against a live player with the Phase 1 grid overlay, its staleness text layer up
+([§Debug overlay](#debug-overlay-staleness-as-text-over-the-dot)):
 
-- Deploy a recon unit by hand (the Phase 3 debug harness) and watch its footprint cells drop to staleness 0,
-  then re-climb over `OPCOM_COVER_SPAN`.
+- Deploy a recon unit by hand (the Phase 3 debug harness) and watch its footprint cells' labels reset to
+  `0t`, then climb tick by tick.
 - With Scout live (4b), OPCOM stops re-committing a scout to a corridor a recon just swept, and re-commits only
   once the span has aged it.
 - With the flank template live (P5), an equal-force route bends toward recently-swept cells over never-seen
