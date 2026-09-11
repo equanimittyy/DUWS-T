@@ -255,8 +255,9 @@ fnc_furnish_grid = {
         };
     };
 
-    // Doorways already captured -- leave the building as players will find it, not hanging open.
+    // Shut the doors back to how players find them; GEOM follows on a sim step, not the instant anim, so let it settle.
     { _building animate [_x, _doorPhases select _forEachIndex, true] } forEach _doorAnims;
+    if (_doorAnims isNotEqualTo []) then { sleep 0.1 };
 
     // A door cell alone left neighbour cells free to overhang the mouth. Block the ring, don't just reserve it:
     // only "blocked" stops flood-fill, so the rooms split at a full-width plug and no piece sits in the opening.
@@ -275,6 +276,25 @@ fnc_furnish_grid = {
             };
         };
     } forEach _doors;
+
+    // An open doorway no longer walls the rooms apart, so the fill would leak across it or out a front door; the
+    // shut leaves give the plug that splits it. Clearance stayed open-door above, so no piece backs onto a leaf.
+    private _plugged = 0;
+    if (_doorAnims isNotEqualTo []) then {
+        {
+            private _cell = _x;
+            if ((_cell select 1) != "blocked") then {
+                private _cbS = (_cell select 0) vectorAdd [0, 0, GRID_CHEST];
+                private _minShut = WALL_REACH;
+                {
+                    _rays = _rays + 1;
+                    private _r = lineIntersectsSurfaces [_cbS, _cbS vectorAdd [WALL_REACH * sin _x, WALL_REACH * cos _x, 0], objNull, objNull, true, 1, "GEOM"];
+                    if (_r isNotEqualTo []) then { _minShut = _minShut min (_cbS distance ((_r select 0) select 0)) };
+                } forEach _ring;
+                if (_minShut < BLOCKED_CLEAR) then { _cell set [1, "blocked"]; _cell set [5, true]; _plugged = _plugged + 1 };
+            };
+        } forEach _cells;
+    };
 
     // Flood-fill non-blocked cells into rooms. Blocked cells -- walls, and the doorways blocked above -- hold
     // runs the fill cannot cross, so each enclosed area becomes its own room. 4-neighbour adjacency within a
@@ -347,8 +367,8 @@ fnc_furnish_grid = {
     private _keptN = 0;
     { if ((_roomSize get _x) >= MIN_ROOM_CELLS && {_hasSquare getOrDefault [_x, false]}) then { _keptN = _keptN + 1 } } forEach (keys _roomSize);
 
-    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s), %7 ray-door(s), %8 nav-door(s)",
-        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays, _rayDoors, count _pathDoors]] call fnc_log;
+    ["INFO", "FURNISH", format ["%1: grid %2 cell(s), %3 room(s) (%4 dropped), %5 storey(s), %6 ray(s), %7 ray-door(s), %8 nav-door(s), %9 shut-plug(s)",
+        typeOf _building, count _cells, _keptN, _room - _keptN, count _storeys, _rays, _rayDoors, count _pathDoors, _plugged]] call fnc_log;
     _building setVariable ["DUWS_furnishGrid", _cells];
     _cells
 };
