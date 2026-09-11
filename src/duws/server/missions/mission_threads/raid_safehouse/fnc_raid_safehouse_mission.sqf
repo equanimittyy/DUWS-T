@@ -111,14 +111,11 @@ private _marks = [];
     _bldg setVariable ["DUWS_safehouse_townIndex", _townIndex];
 } forEach _bldgs;
 
-// The intel crate, in an inner slot of the real house. Cleared of its default cargo, then stuffed with
-// documents (bare classes the analysis terminal reads -- strip the Item_ ground-holder prefix), one
-// guaranteed FilesSecret for a certain reveal. Turned in at HQ, not paid here.
-private _realSlots = [_realBldg] call _fnc_innerSlots;
-private _cratePos = _realSlots select ((count _realSlots) - 1);   // a back slot, away from the door
-private _crate = createVehicle ["Land_PlasticCase_01_medium_F", _cratePos, [], 0, "CAN_COLLIDE"];   // TUNABLE class
+// The intel crate. Default cargo cleared, then filled with documents (bare classes the analysis terminal reads,
+// so strip the Item_ ground-holder prefix) plus one guaranteed FilesSecret for a certain reveal. Turned in at HQ,
+// not paid here. Parked at the building origin now; seated on an interior furnish cell once furnished (below).
+private _crate = createVehicle ["Land_PlasticCase_01_medium_F", getPosATL _realBldg, [], 0, "CAN_COLLIDE"];   // TUNABLE class
 clearItemCargoGlobal _crate; clearMagazineCargoGlobal _crate; clearWeaponCargoGlobal _crate; clearBackpackCargoGlobal _crate;
-_crate setPosATL _cratePos;
 _crate setVelocity [0, 0, 0];
 _crate allowDamage false;
 [_crate, "mission_raid_safehouse"] call fnc_duws_keep;
@@ -139,8 +136,8 @@ publicVariable "DUWS_safehouse_active";
 // Build and furnish off the critical path so the ask mechanic and the task reach players now, not after the
 // slow furniture settle. Lock and breach-arm ride here too: a breach flips the live DUWS_safehouse_guards, so
 // no breach vector may go live before the guards spawn.
-[_bldgs, _realBldg, _townIndex, _civBodies, _fnc_innerSlots, _fnc_spawnGuard, _guards, _allUnits] spawn {
-    params ["_bldgs", "_realBldg", "_townIndex", "_civBodies", "_fnc_innerSlots", "_fnc_spawnGuard", "_guards", "_allUnits"];
+[_bldgs, _realBldg, _townIndex, _civBodies, _fnc_innerSlots, _fnc_spawnGuard, _guards, _allUnits, _crate] spawn {
+    params ["_bldgs", "_realBldg", "_townIndex", "_civBodies", "_fnc_innerSlots", "_fnc_spawnGuard", "_guards", "_allUnits", "_crate"];
 
     // Lock the candidates first so they read shut the instant the raid stands, ahead of the slow furnish below.
     // bis_disabled_Door_N kills the open action; the animate shuts the leaf so no house shows an open door.
@@ -158,6 +155,35 @@ publicVariable "DUWS_safehouse_active";
     // invariant before occupants spawn below.
     private _furnishing = _bldgs apply { [_x, "mission_raid_safehouse", 0] spawn fnc_furnish_building };
     { waitUntil { scriptDone _x } } forEach _furnishing;
+
+    // Seat the crate inside on a furnish cell, not the outermost building slot (a porch/wall spot). Prefer an
+    // "open" centre-floor cell farthest from a door: a back-room hide, and the cached grid predates the room
+    // pass's furniture, so a centre cell is the safest bet against clipping a piece.
+    private _seat = [];
+    private _rooms = (_realBldg getVariable ["DUWS_furnishGrid", []]) select {
+        (_x select 4) >= 0 && {(_x select 1) != "blocked"} && {(_x select 1) != "door"}
+    };
+    private _room = _rooms select { (_x select 1) == "open" };
+    if (_room isEqualTo []) then { _room = _rooms };
+    if (_room isNotEqualTo []) then {
+        private _dp = _realBldg getVariable ["DUWS_furnishDoors", []];
+        private _best = -1;
+        {
+            private _cell = _x;
+            private _s = if (_dp isEqualTo []) then { 0 } else { selectMin (_dp apply { (_cell select 0) distance2D _x }) };
+            if (_s > _best) then { _best = _s; _seat = _cell select 0 };
+        } forEach _room;
+    } else {
+        private _inner = [_realBldg] call _fnc_innerSlots;
+        if (_inner isNotEqualTo []) then { _seat = AGLToASL (_inner select 0) };
+    };
+    if (_seat isNotEqualTo []) then {
+        private _hit = lineIntersectsSurfaces [_seat vectorAdd [0, 0, 0.3], _seat vectorAdd [0, 0, -0.8], objNull, objNull, true, 1, "GEOM"];
+        if (_hit isNotEqualTo []) then { _seat = (_hit select 0) select 0 };
+        _crate setPosASL _seat;
+        _crate setVelocity [0, 0, 0];
+    };
+
     // Broadcast only the candidates' door points, not the grid's map-wide DUWS_furnishDoors on every building.
     // A house whose door sources won't resolve falls back to the grid doorways unnamed, opening the first shut door.
     {
