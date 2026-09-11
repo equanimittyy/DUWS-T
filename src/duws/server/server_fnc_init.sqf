@@ -23,6 +23,8 @@ publicVariable "fnc_support_claim";
 publicVariable "fnc_hcair_claim_request";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
+fnc_gm_occupant = compile preprocessFileLineNumbers "duws\shared\functions\fnc_gm_occupant.sqf";
+publicVariable "fnc_gm_occupant";
 fnc_duws_dialogue_channel = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue_channel.sqf";
 publicVariable "fnc_duws_dialogue_channel";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_composition_stream_init.sqf";
@@ -682,6 +684,7 @@ fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";
 fnc_groupReset = compile preprocessFileLineNumbers "duws\client\dialog\fnc_groupReset.sqf";publicVariable "fnc_groupReset";
 fnc_rest_heal = compile preprocessFileLineNumbers "duws\server\dialog\fnc_rest_heal.sqf";publicVariable "fnc_rest_heal";
+fnc_rest_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_rest_menu.sqf";publicVariable "fnc_rest_menu";
 fnc_FOBmanager = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOBmanager.sqf";publicVariable "fnc_FOBmanager";
 fnc_FOB_remove = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_remove.sqf";publicVariable "fnc_FOB_remove";
 fnc_FOB_cleanup = compile preprocessFileLineNumbers "duws\server\dialog\fnc_FOB_cleanup.sqf";publicVariable "fnc_FOB_cleanup";

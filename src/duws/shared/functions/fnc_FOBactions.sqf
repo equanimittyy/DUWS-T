@@ -26,10 +26,8 @@ if (support_halo_available) then {
 
 _fob addaction [ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 12"];
 
-// Run on the server, not the pressing client: fnc_rest_heal deletes and heals server-local AI.
-if ((vehiclevarname player) in game_master) then {
-    _fob addAction [ACT_AID("STR_DUWS_T_9eiwr3bt"), {
-        params ["_target"];
-        [player, _target] remoteExec ["fnc_restHealServer", 2];
-    }, [], 55, false, false, "", "_this distance _target < 12"];
-};
+// No gate here: the row shows to all so a non-GM learns why; fnc_rest_menu gates host-only.
+_fob addAction [ACT_AID("STR_DUWS_T_9eiwr3bt"), {
+    params ["_target"];
+    [_target] spawn fnc_rest_menu;
+}, [], 55, false, false, "", "_this distance _target < 12"];

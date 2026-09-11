@@ -2,7 +2,7 @@
 
 // _restSite: the object the rest was called on (HQ satellite phone or FOB). Only troops
 // standing near it are treated, so resting can't patch up a player mid-firefight elsewhere.
-params ["_restSite"];
+params ["_restSite", "_hours", "_overcast", "_rain", "_fog"];
 
 private _healRadius = 100;
 private _restedPlayers = (call BIS_fnc_ListPlayers) select {_x distance _restSite < _healRadius};
@@ -31,7 +31,14 @@ sleep 1.7;
 	}] remoteExec ["BIS_fnc_Spawn", _x];
 } forEach _restedPlayers;
 
-skiptime 3;
+skiptime _hours;
+
+// Overcast forced before rain: setRain only shows over a high overcast, and forceWeatherChange
+// re-derives rain from overcast, so rain set before the force is wiped. Behind black: the snap is unseen.
+0 setOvercast _overcast;
+forceWeatherChange;
+0 setRain _rain;
+if (_fog) then { 0 setFog [0.4, 0.05, 20]; } else { 0 setFog [0, 0, 0]; };
 
 [["", "BLACK IN", 1.5]] remoteExec ["titleCut", 0];
 sleep 0.3;

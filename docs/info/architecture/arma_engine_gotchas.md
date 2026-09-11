@@ -666,3 +666,9 @@ SQF arrays are reference types — `setVariable`, `pushBack` and plain assignmen
 `[msg] remoteExec ["hint", clientOwner _x]` — a command applied to an argument (`clientOwner _x`) directly in the target slot — makes the in-engine SQF parser reject the whole enclosing function with `Missing ]`, its caret on the target token, though the brackets balance. sqf-vm's parser accepts it, so the unit tests pass and the break surfaces only in the game `.rpt` at function-compile time — and a function that fails to compile is never defined, so the feature silently does nothing (a whole side mission failed to generate, no runtime error). It's not that computed targets are forbidden: `remoteExec ["addAction", [0,-2] select isDedicated, _hostage]` compiles (a bracketed/binary target is fine) — it's the bare command-applied-to-argument in that slot.
 
 **Fix:** hoist the target to a local first — `private _owner = clientOwner _x; [msg] remoteExec ["hint", _owner];` — as every working call in the codebase does. More broadly, a green sqf-vm run is necessary but not sufficient: read the `.rpt` after a build.
+
+## `setRain` only shows over a high overcast, and `forceWeatherChange` re-derives rain from overcast
+
+Rain is not independent of overcast. `setRain` above a low overcast produces no visible rain, and `forceWeatherChange` overwrites whatever rain was set with the value its overcast implies. So a naive `setRain 1; forceWeatherChange` ends dry, and `setRain 1` alone under clear skies shows nothing.
+
+**Fix:** set and force the overcast first, then set rain last: `0 setOvercast _o; forceWeatherChange; 0 setRain _r;` (fnc_rest_heal.sqf). Do it behind a black screen — the `0`-time force snaps the sky in one frame, which reads as a glitch if seen. A rain slider that is decoupled from overcast in the UI can still come out dry in game when the paired overcast is low; that is the engine, not a bug.

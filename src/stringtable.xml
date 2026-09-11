@@ -2139,6 +2139,14 @@
                 <Original>Rest / Heal</Original>
                 <English>Rest / Heal</English>
             </Key>
+            <Key ID="STR_DUWS_T_RESTHEAL_HOSTONLY">
+                <Original>Only the host (GM, seat 1) can order rest and heal.\n\nCurrently occupied by: %1.</Original>
+                <English>Only the host (GM, seat 1) can order rest and heal.\n\nCurrently occupied by: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GM_SEAT_NOONE">
+                <Original>no-one</Original>
+                <English>no-one</English>
+            </Key>
             <Key ID="STR_DUWS_T_USEROPT_TITLE">
                 <Original>USER OPTIONS</Original>
                 <English>USER OPTIONS</English>
@@ -4976,6 +4984,69 @@
                 <Original>Select a vehicle first.</Original>
                 <English>Select a vehicle first.</English>
             </Key>
+            <Key ID="STR_DUWS_T_rest_title">
+                <German>Rest / Heal</German>
+                <Spanish>Rest / Heal</Spanish>
+                <Chinesesimp>Rest / Heal</Chinesesimp>
+                <Original>Rest / Heal</Original>
+                <English>Rest / Heal</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_weather_title">
+                <German>Weather</German>
+                <Spanish>Weather</Spanish>
+                <Chinesesimp>Weather</Chinesesimp>
+                <Original>Weather</Original>
+                <English>Weather</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_dur">
+                <German>Rest %1h, wake at %2</German>
+                <Spanish>Rest %1h, wake at %2</Spanish>
+                <Chinesesimp>Rest %1h, wake at %2</Chinesesimp>
+                <Original>Rest %1h, wake at %2</Original>
+                <English>Rest %1h, wake at %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_overcast">
+                <German>Overcast %1</German>
+                <Spanish>Overcast %1</Spanish>
+                <Chinesesimp>Overcast %1</Chinesesimp>
+                <Original>Overcast %1</Original>
+                <English>Overcast %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_rain">
+                <German>Rain %1</German>
+                <Spanish>Rain %1</Spanish>
+                <Chinesesimp>Rain %1</Chinesesimp>
+                <Original>Rain %1</Original>
+                <English>Rain %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_fog">
+                <German>Fog</German>
+                <Spanish>Fog</Spanish>
+                <Chinesesimp>Fog</Chinesesimp>
+                <Original>Fog</Original>
+                <English>Fog</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_fog_off">
+                <German>Off</German>
+                <Spanish>Off</Spanish>
+                <Chinesesimp>Off</Chinesesimp>
+                <Original>Off</Original>
+                <English>Off</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_fog_on">
+                <German>On</German>
+                <Spanish>On</Spanish>
+                <Chinesesimp>On</Chinesesimp>
+                <Original>On</Original>
+                <English>On</English>
+            </Key>
+            <Key ID="STR_DUWS_T_rest_confirm">
+                <German>Rest</German>
+                <Spanish>Rest</Spanish>
+                <Chinesesimp>Rest</Chinesesimp>
+                <Original>Rest</Original>
+                <English>Rest</English>
+            </Key>
             <Key ID="STR_DUWS_T_h3uo0102">
                 <German>FOB errichten (10 CP)</German>
                 <Spanish>Establecer puesto de avanzada (10 CP)</Spanish>
@@ -7702,8 +7773,8 @@
                 <German>Nur der Host (Alpha1-1) can aktuell sekundäre Missionen anfordern</German>
                 <Spanish>por ahora solo el anfitrión (Alfa 1-1) puede solicitar misiones secundarias.</Spanish>
                 <Chinesesimp>目前只有主机(Alpha1-1)可以请求支线任务</Chinesesimp>
-                <Original>Only the host (Alpha 1-1) can request side missions for now.</Original>
-                <English>Only the host (Alpha 1-1) can request side missions for now.</English>
+                <Original>Only the host (GM, seat 1) can request side missions.\n\nCurrently occupied by: %1.</Original>
+                <English>Only the host (GM, seat 1) can request side missions.\n\nCurrently occupied by: %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_qkkva9tk">
                 <Spanish>REPSIT</Spanish>
