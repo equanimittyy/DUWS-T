@@ -50,21 +50,20 @@ DUWS_fnc_classPower = {
 };
 
 // A sighted enemy group -> the strength a belief stamp carries: firepower (a dismounted man 1, each crewed
-// hull its class power once, crew not re-counted) plus a premium per human aboard. No damage scaling -- a
-// sighting reads firepower and intent, not condition; decay is the fog, not battle damage. Shared by both
-// belief sensors (the A3 last-seen sweep and the recon bubble) so belief is stamped on one scale.
+// hull its class power once, crew not re-counted) plus a premium per human aboard. The hull is banked only by
+// the group commanding it, so a co-op vehicle shared across separate groups is not counted once per group --
+// belief is per-group, so without this each rider's group would re-bank the same hull. No damage scaling: a
+// sighting reads firepower and intent, not condition; decay is the fog. Shared by both belief sensors.
 DUWS_fnc_opcom_sightStr = {
     params ["_grp"];
     private _gu = units _grp;
-    private _seenVeh = [];
     private _fp = 0;
     {
         private _veh = vehicle _x;
         if (_veh isEqualTo _x) then {
             _fp = _fp + 1;
         } else {
-            if !(_veh in _seenVeh) then {
-                _seenVeh pushBack _veh;
+            if (_x isEqualTo (effectiveCommander _veh)) then {
                 _fp = _fp + ([typeOf _veh] call DUWS_fnc_classPower);
             };
         };
