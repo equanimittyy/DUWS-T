@@ -253,28 +253,14 @@ DUWS_fnc_hardpointOPBurst = {
 
     // A guaranteed belief write, not just the reveal above: a stowed post with no live observer still feeds
     // the commander. No separate OPCOM guard needed -- belief is built before the grid, so it already exists.
-    private _grpsSeen = [];
+    // Unique groups first: sightStr walks a whole group, so price once per group, not once per unit aboard.
+    private _seenG = [];
+    { _seenG pushBackUnique (group _x) } forEach _blu;
     {
-        private _g = group _x;
-        if !(_g in _grpsSeen) then {
-            _grpsSeen pushBack _g;
-            private _key = netId _g;
-            private _bp = getPosASL (leader _g);
-            _bp set [2, 0];
-            private _str = [_g] call DUWS_fnc_opcom_sightStr;
-            private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _key };
-            if (_i < 0) then {
-                DUWS_opcom_belief_key  pushBack _key;
-                DUWS_opcom_belief_pos  pushBack _bp;
-                DUWS_opcom_belief_time pushBack DUWS_opcom_tick;
-                DUWS_opcom_belief_str  pushBack _str;
-            } else {
-                DUWS_opcom_belief_pos  set [_i, _bp];
-                DUWS_opcom_belief_time set [_i, DUWS_opcom_tick];
-                DUWS_opcom_belief_str  set [_i, _str];
-            };
-        };
-    } forEach _blu;
+        private _bp = getPosASL (leader _x);
+        _bp set [2, 0];
+        [netId _x, _bp, [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
+    } forEach _seenG;
 };
 
 // Reads the registry live, so a cleared post drops out with no per-post loop to terminate. OPFOR posts
