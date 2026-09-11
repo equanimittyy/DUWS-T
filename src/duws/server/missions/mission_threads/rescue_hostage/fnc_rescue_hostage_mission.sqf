@@ -125,15 +125,18 @@ private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DU
 private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
 
 // Guard watcher: a two-stage alarm. The whole cordon spots you -- a garrison OR patrol sighting raises the one
-// global alarm -- but detection reads each observer's OWN knowsAbout plus a line-of-sight check within range,
-// never side-wide east knowsAbout, which reads flat-high off any distant firefight (arma_engine_gotchas.md).
-// Suspicion is escapable and its reset keys on LINE OF SIGHT (knowsAbout lingers for minutes after contact is
-// lost); a confirmed sighting arms the clock for good, and killing the garrison is what frees the hostage.
+// global alarm. "Sensing now" is the engine's own nearTargets fix (age ~0 while watched), NOT knowsAbout, which
+// is a decaying, side-wide memory scalar: it reads flat-high off any distant firefight and can't tell a watched
+// mover from a guard who merely remembers you, and an ad-hoc lineIntersectsSurfaces ray is no substitute
+// (arma_engine_gotchas.md). knowsAbout still grades a live sighting (suspicion vs confirmed), but only for a guard
+// with a current fix -- so breaking contact drains it. A confirmed sighting arms the clock for good, and killing
+// the garrison is what frees the hostage.
 [_hostage, _garrison, _ring, _hostageBldg, _trk, _MissionPos, _radius] spawn {
     params ["_hostage", "_garrison", "_ring", "_bldg", "_trk", "_MissionPos", "_radius"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define SUS_KNOWS 0.3
-    #define LOS_RANGE 150
+    #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
+    #define DET_FRESH 2       // max nearTargets age (s) still counted as "sensing now"; the loop ticks every 1s
     #define GRACE_SUS 8
     #define CLOCK_BASE 60     // armed once and never called off
     #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
@@ -238,8 +241,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             [_hostage] spawn { params ["_h"]; sleep 20; if (alive _h) then { _h setDamage 1 }; };
         };
 
-        // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm. Each
-        // reads its OWN knowsAbout (graded suspicion vs confirmed) plus a line-of-sight check within range.
+        // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm.
         private _players = allPlayers select { side _x == west && { alive _x } };
         private _obs = units _garrison select { alive _x };
         { _obs append (units _x select { alive _x }) } forEach _ring;
@@ -253,22 +255,21 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         private _meterVals = [];
         {
             private _pl = _x;
-            private _losP = false;
-            private _knowsP = 0;
+            // Best knowsAbout among guards with a CURRENT nearTargets fix on this player: the engine's own live
+            // sighting decides who counts, knowsAbout grades how sure they are. A guard who only remembers you
+            // (age > DET_FRESH) is excluded, so the bar and the alarm both drain when the cordon loses contact.
+            private _knowsCur = 0;
             {
                 private _u = _x;
-                private _k = _u knowsAbout _pl;
-                if (_k > _knowsP) then { _knowsP = _k };
-                if (_u distance _pl < LOS_RANGE && { (lineIntersectsSurfaces [eyePos _u, eyePos _pl, _u, _pl]) isEqualTo [] }) then {
-                    _losP = true;
+                if (((_u nearTargets DET_RANGE) findIf { ((_x select 4) isEqualTo _pl) && { (_x select 5) <= DET_FRESH } }) >= 0) then {
+                    private _k = _u knowsAbout _pl;
+                    if (_k > _knowsCur) then { _knowsCur = _k };
                 };
             } forEach _obs;
-            if (_losP && { _knowsP > SUS_KNOWS }) then { _seenNow pushBack _pl };
-            if (_losP && { _knowsP > CONFIRM }) then { _confirmed = true };
-            // Bar = the cordon's best knowsAbout while ANY guard holds a sightline, else drained: confidence and LOS
-            // come from different guards, so requiring one guard to hold both under-reads it to empty (the guard who
-            // has ID'd you is usually not the one still exposed). Same inputs as the alarm, so full == alarm arming.
-            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, [0, _knowsP] select _losP] };
+            if (_knowsCur > SUS_KNOWS) then { _seenNow pushBack _pl };
+            if (_knowsCur > CONFIRM) then { _confirmed = true };
+            // Bar and alarm share _knowsCur, so full == alarm arming.
+            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, _knowsCur] };
         } forEach _players;
         if (count _seenNow > 0) then { _lastSeen = time };
 
