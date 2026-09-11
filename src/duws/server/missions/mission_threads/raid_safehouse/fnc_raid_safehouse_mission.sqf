@@ -114,7 +114,7 @@ private _marks = [];
 
     // Furnish via the shared furnisher (keyed for teardown): it settles furniture clear of the nav path and
     // doorways, so occupants still fit and the lock below never seals a door behind a piece.
-    [_bldg, "mission_raid_safehouse", [], 0] call fnc_furnish_building;
+    [_bldg, "mission_raid_safehouse", 0] call fnc_furnish_building;
 
     // Occupants: 3-5, spread across the slots. Real house = concealed guards; decoys = innocent locals
     // (spawned as town civilians, so killing them bills the town on top of the raid's own rep cost). Both

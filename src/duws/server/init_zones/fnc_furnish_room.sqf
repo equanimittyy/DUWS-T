@@ -2,23 +2,23 @@
 // registered in server_fnc_init.sqf after fnc_place_settled/grid/catalog and before fnc_furnish_building,
 // which spawns one instance per room. Server-only, not broadcast.
 //
-// Furnishes one room of the grid: wall pieces onto near cells, then a central anchor (table) with its seats
-// and surface clutter, then an optional wall-backed desk. Runs as its own scheduled thread so the per-piece
-// settle waits of every room overlap in wall-clock instead of summing -- SQF is cooperative, so the win is the
-// overlapped waits, not CPU. Rooms are independent (separated by blocked doorway cells), so each works on its
-// own cell list with no shared occupancy across a wall; placed frozen objects are appended to the caller's
-// shared _out, which the caller thaws once the whole house is laid out.
+// Furnishes one room of the grid: 4-7 wall pieces onto near cells, then a central anchor (40% chance) with its
+// seats and surface clutter, then a wall-backed anchor such as a desk (40% chance). An anchor draws its seats
+// and clutter from its own catalog family, so a desk gets an office chair and a dining table its own. Runs as
+// its own scheduled thread so the per-piece settle waits of every room overlap in wall-clock instead of summing
+// -- SQF is cooperative, so the win is the overlapped waits, not CPU. Rooms are independent (separated by
+// blocked doorway cells), so each works on its own cell list with no shared occupancy across a wall; placed
+// frozen objects are appended to the caller's shared _out, which the caller thaws once the house is laid out.
 //
-// Contract: [_rcells, _set, _catalog, _bdir, _key, _out] -> appends placed frozen objects to _out
+// Contract: [_rcells, _catalog, _bdir, _key, _out] -> appends placed frozen objects to _out
 //   _rcells  this room's grid cells (the only cells this thread reads or reserves)
-//   _set     furniture set for the room (living/work/sleeping)
 //   _catalog catalog hashmap from fnc_furnish_catalog
 //   _bdir    building heading; floor pieces face it to sit square to the room
 //   _key     teardown key filed through fnc_place_settled / fnc_duws_keep
 //   _out     shared results array; the room's frozen objects are appended at the end
 fnc_furnish_room = {
     if (!isServer) exitWith {};
-    params ["_rcells", "_set", "_catalog", "_bdir", "_key", "_out"];
+    params ["_rcells", "_catalog", "_bdir", "_key", "_out"];
     if (_rcells isEqualTo []) exitWith {};
     private _grid = _rcells;
 
@@ -26,8 +26,6 @@ fnc_furnish_room = {
     #define TOP_CELL 0.4       // tabletop clutter grid pitch and min gap
     #define TOP_MARGIN 0.12    // keep clutter off the table lip
     #define CLUTTER_CAP 8      // max clutter items on one table
-    #define WALL_DIV 7         // ~1 wall piece per this many near-wall cells
-    #define WALL_MAX 5         // max wall pieces per room
     #define PLACE_RETRY 3      // stop a room's pass after this many overlap rejects in a row (saturated)
 
     private _objs = [];
@@ -120,8 +118,8 @@ fnc_furnish_room = {
     // anchor object so it travels and turns with the table. One class per cell, jittered and randomly
     // turned, split prop vs inventory item (they seat differently in fnc_place_settled).
     private _surfacePack = {
-        params ["_aObj", "_hx", "_hy", "_topZ", "_pset"];
-        private _surf = ["clutter", _pset] call fnc_furnish_classesFor;
+        params ["_aObj", "_hx", "_hy", "_topZ", "_family"];
+        private _surf = ["clutter", _family] call fnc_furnish_classesFor;
         if (_surf isEqualTo []) exitWith { [] };
         private _uhx = (_hx - TOP_MARGIN) max 0;
         private _uhy = (_hy - TOP_MARGIN) max 0;
@@ -168,7 +166,7 @@ fnc_furnish_room = {
     private _pickCapped = {
         params ["_pool"];
         private _avail = _pool select {
-            private _m = (_catalog get _x) select 4;
+            private _m = (_catalog get _x) select 5;
             _m <= 0 || {(_classCount getOrDefault [_x, 0]) < _m}
         };
         if (_avail isEqualTo []) exitWith { "" };
@@ -186,8 +184,8 @@ fnc_furnish_room = {
     // _nearB < 0 seats the anchor central, facing the grid axis; _nearB >= 0 backs it onto that wall bearing
     // front-inward (a desk), so its wall-side seat slots fall on blocked cells and _seatOK drops them.
     private _placeAnchor = {
-        params ["_cell", "_class", "_pset", ["_nearB", -1]];
-        (_catalog get _class) params ["", "_fy", "", "_seats"];
+        params ["_cell", "_class", ["_nearB", -1]];
+        (_catalog get _class) params ["", "_fy", "_family", "_seats"];
         _cell params ["_cpos", "", "", "_clear"];
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { _bdir };
         private _frame = [_cpos, _heading] call _frameAt;
@@ -208,7 +206,7 @@ fnc_furnish_room = {
         private _out2 = [_aObj];
 
         if (_seats != 0) then {
-            private _chairs = ["seat", _pset] call fnc_furnish_classesFor;
+            private _chairs = ["seat", _family] call fnc_furnish_classesFor;
             if (_chairs isNotEqualTo []) then {
                 private _edges = if (_seats < 0) then {
                     [[0, _hy + SEAT_GAP], [0, -(_hy + SEAT_GAP)], [_hx + SEAT_GAP, 0], [-(_hx + SEAT_GAP), 0]]
@@ -240,7 +238,7 @@ fnc_furnish_room = {
             };
         };
 
-        _out2 append ([_aObj, _hx, _hy, _topZ, _pset] call _surfacePack);
+        _out2 append ([_aObj, _hx, _hy, _topZ, _family] call _surfacePack);
         // Reserve the table plus its seat ring as one oriented footprint so nothing later packs into the chairs.
         { _x set [5, true] } forEach ([getPosASL _aObj, _heading, _hx + SEAT_GAP, _hy + SEAT_GAP, 0.1] call _boxCells);
         _out2
@@ -336,34 +334,13 @@ fnc_furnish_room = {
         [_o]
     };
 
-    // Wall pass: wall pieces onto near cells, perpendicular to the wall, spaced by reservation.
-    private _wallClasses = ["wall", _set] call fnc_furnish_classesFor;
+    // Wall pass: 4-7 wall pieces onto near cells, perpendicular to the wall, spaced by reservation. Best-effort
+    // -- an overlap reject frees the cap slot and counts a miss; PLACE_RETRY misses in a row reads the room as
+    // saturated and stops the pass. A placement resets the run, so a crowded corner does not cut it short.
+    private _wallClasses = ["wall"] call fnc_furnish_classesFor;
     if (_wallClasses isNotEqualTo []) then {
-        // Fill up to _nWall pieces; an overlap reject frees its cap slot and counts a miss, and
-        // PLACE_RETRY misses in a row means the room is saturated, so stop rather than spin. A placement
-        // resets the run, so a crowded corner does not cut the whole pass short.
-        private _nWall = (floor ((count (_rcells select { (_x select 1) == "near" })) / WALL_DIV)) min WALL_MAX;
+        private _nWall = 4 + floor random 4;
         private _placed = 0; private _miss = 0;
-
-        // Required pieces first: a wall class flagged required in the catalog (a bedroom's bed) is attempted
-        // before the random fill and regardless of _nWall, so a small room still gets it and a random shelf
-        // pick cannot crowd it out. Cap-counted so the fill below will not re-pick it.
-        {
-            private _reqCls = _x;
-            private _tries = 0; private _got = false;
-            while { !_got && _tries < PLACE_RETRY } do {
-                private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} && {[_x, _reqCls] call _wallFits} };
-                if (_free isEqualTo []) exitWith {};
-                private _res = [selectRandom _free, _reqCls, true] call _placeWall;
-                if (_res isEqualTo []) then { _tries = _tries + 1 } else {
-                    _res call _keepFrozen;
-                    _classCount set [_reqCls, (_classCount getOrDefault [_reqCls, 0]) + 1];
-                    _placed = _placed + 1;
-                    _got = true;
-                };
-            };
-        } forEach (_wallClasses select { ((_catalog get _x) select 5) > 0 });
-
         while { _placed < _nWall && _miss < PLACE_RETRY } do {
             private _free = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
             if (_free isEqualTo []) exitWith {};
@@ -387,16 +364,16 @@ fnc_furnish_room = {
         };
     };
 
-    private _anchorClasses = ["anchor", _set] call fnc_furnish_classesFor;
-    if (_anchorClasses isNotEqualTo []) then {
+    // Loop a few anchor classes so a table too big for this room yields to a smaller one.
+    private _centerAnchors = ["anchor", "center"] call fnc_furnish_classesFor;
+    if (_centerAnchors isNotEqualTo [] && {random 1 < 0.4}) then {
         private _cx = 0; private _cy = 0;
         { _cx = _cx + ((_x select 0) select 0); _cy = _cy + ((_x select 0) select 1) } forEach _rcells;
         _cx = _cx / (count _rcells); _cy = _cy / (count _rcells);
 
-        // One central anchor only; loop a few classes so a table too big for the room yields to a smaller one.
         private _got = false; private _tries = 0;
         while { !_got && _tries < PLACE_RETRY } do {
-            private _cls = [_anchorClasses] call _pickCapped;
+            private _cls = [_centerAnchors] call _pickCapped;
             if (_cls == "") exitWith {};
             ([_cls] call _dimsOf) params ["_ahx", "_ahy"];
             private _riX = ceil ((_ahx + SEAT_GAP) / _pitch);
@@ -407,7 +384,7 @@ fnc_furnish_room = {
                 _tries = _tries + 1;
             } else {
                 private _cell = ([_fit, [], { private _p = _x select 0; private _dx = (_p select 0) - _cx; private _dy = (_p select 1) - _cy; _dx * _dx + _dy * _dy }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-                private _res = [_cell, _cls, _set] call _placeAnchor;
+                private _res = [_cell, _cls] call _placeAnchor;
                 if (_res isEqualTo []) then {
                     _classCount set [_cls, ((_classCount getOrDefault [_cls, 0]) - 1) max 0];
                     _tries = _tries + 1;
@@ -417,9 +394,12 @@ fnc_furnish_room = {
                 };
             };
         };
+    };
 
-        // Optional: one wall-backed desk, half the rooms for variety, if a near cell takes it.
-        private _wcls = if (random 1 < 0.5) then { [_anchorClasses] call _pickCapped } else { "" };
+    // Independent second roll, not gated on the central slot above: a wall-backed anchor (a desk).
+    private _wallAnchors = ["anchor", "wall"] call fnc_furnish_classesFor;
+    if (_wallAnchors isNotEqualTo [] && {random 1 < 0.4}) then {
+        private _wcls = [_wallAnchors] call _pickCapped;
         if (_wcls != "") then {
             private _wfree = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
             private _wgot = false; private _wtries = 0;
@@ -428,7 +408,7 @@ fnc_furnish_room = {
                 _wfree = _wfree - [_cell];
                 private _nb = _cell select 2;
                 if (_nb >= 0) then { _nb = _bdir + 90 * round ((_nb - _bdir) / 90) };
-                private _res = [_cell, _wcls, _set, _nb] call _placeAnchor;
+                private _res = [_cell, _wcls, _nb] call _placeAnchor;
                 if (_res isEqualTo []) then { _wtries = _wtries + 1 } else { _res call _keepFrozen; _wgot = true };
             };
             if (!_wgot) then { _classCount set [_wcls, ((_classCount getOrDefault [_wcls, 0]) - 1) max 0] };

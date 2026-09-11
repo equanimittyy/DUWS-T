@@ -10,14 +10,13 @@
 // no door is blocked. Pieces settle frozen and the whole house thaws once every room is done. An empty grid
 // (a ruin, a view-only prop) degrades to the seed nav points, flat, logged.
 //
-// Contract: [_building, _key, _sets, _quota] -> [_objs placed]
+// Contract: [_building, _key, _quota] -> [_objs placed]
 //   _building  OBJECT to furnish
 //   _key       teardown key filed through fnc_place_settled / fnc_duws_keep
-//   _sets      eligible furniture sets (e.g. ["living"]); [] = all of living/sleeping/work
 //   _quota     retained for the caller contract; placement density is grid-derived, so <= 0 = default
 fnc_furnish_building = {
     if (!isServer) exitWith { [] };
-    params ["_building", ["_key", "furnish"], ["_sets", []], ["_quota", 0]];
+    params ["_building", ["_key", "furnish"], ["_quota", 0]];
     if (isNull _building) exitWith { [] };
 
     private _catalog = call fnc_furnish_catalog;
@@ -38,12 +37,6 @@ fnc_furnish_building = {
     // flag on each -- mutating the cache would leave a re-furnish seeing last run's reservations.
     _grid = +_grid;
 
-    // Priority order for assigning a set to a room by size (biggest -> living), narrowed to the request.
-    private _prio = ["living", "work", "sleeping"] select { _sets isEqualTo [] || {_x in _sets} };
-    if (_prio isEqualTo []) exitWith {
-        ["WARN", "FURNISH", format ["no furniture set matched %1", _sets]] call fnc_log; []
-    };
-
     // Grid axis. Floor pieces face this to sit square to the room; a world-north heading skews them diagonally
     // across the grid on a rotated building.
     private _bdir = getDir _building;
@@ -54,13 +47,11 @@ fnc_furnish_building = {
         { if ((_p distance2D (_x select 0)) <= _r) then { _x set [5, true] } } forEach _grid;
     };
 
-    // Group cells by room, largest first, so the main room reads as the living set.
     private _rooms = createHashMap;
     {
         private _rid = _x select 4;
         if (_rid >= 0) then { private _l = _rooms getOrDefault [_rid, []]; _l pushBack _x; _rooms set [_rid, _l] };
     } forEach _grid;
-    private _bySize = [keys _rooms, [], { -(count (_rooms get _x)) }, "ASCEND"] call BIS_fnc_sortBy;
 
     // Path preservation: reserve a thin corridor along the segments linking consecutive nav points, so a
     // walk path stays clear -- the garrison-conflict fix, leaving the nav lattice open rather than sealing
@@ -87,15 +78,14 @@ fnc_furnish_building = {
     private _placed = [];
     private _handles = [];
     {
-        private _set = _prio select (_forEachIndex mod (count _prio));
-        _handles pushBack ([_rooms get _x, _set, _catalog, _bdir, _key, _placed] spawn fnc_furnish_room);
-    } forEach _bySize;
+        _handles pushBack ([_rooms get _x, _catalog, _bdir, _key, _placed] spawn fnc_furnish_room);
+    } forEach (keys _rooms);
     { waitUntil { scriptDone _x } } forEach _handles;
 
     // Whole-house thaw: each piece rests where it settled, so going live adds no impulse; live, they fall into
     // rubble when the building is destroyed.
     { _x enableSimulationGlobal true } forEach _placed;
 
-    ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _placed, count _bySize]] call fnc_log;
+    ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _placed, count _rooms]] call fnc_log;
     _placed
 };

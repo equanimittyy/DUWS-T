@@ -3,15 +3,17 @@
 
 furniture_catalog.hpp is the one place class-specific furniture knowledge lives; it is
 `#include`d as the body of an SQF array literal and read into a class->entry map at load
-(fnc_furnish_catalog). A malformed row -- wrong column count, an unknown role or set, a
-non-numeric frontYaw -- compiles into the array clean and then misplaces or drops a piece
-at runtime with no error. This catches the class before it ships, python-only.
+(fnc_furnish_catalog). A malformed row -- wrong column count, an unknown role, family or
+slot, a non-numeric frontYaw -- compiles into the array clean and then misplaces or drops
+a piece at runtime with no error. This catches the class before it ships, python-only.
 
-Per row [class, role, frontYaw, set[], seats, maxPerRoom?, required?] it checks:
-  - 5 to 7 columns; class a non-empty string, unique across the file;
-  - role in the known set; every set[] entry a known set, list non-empty;
-  - frontYaw numeric; seats an integer; the optional maxPerRoom a non-negative integer;
-  - the optional required flag 0 or 1.
+Per row [class, role, frontYaw, family, seats, slot, maxPerRoom?] it checks:
+  - 6 or 7 columns; class a non-empty string, unique across the file;
+  - role a known role; frontYaw numeric; seats an integer; the optional maxPerRoom a
+    non-negative integer;
+  - family a known family, slot a known slot, and the three agree: an anchor carries a
+    family and a center|wall slot; a seat or clutter carries a family and no slot; a wall
+    piece carries neither (family "", slot "").
 
 It does NOT check that a class resolves in CfgVehicles/CfgMagazines/CfgWeapons -- python
 cannot read the engine config, so the runtime loader logs and skips an unresolved class --
@@ -25,7 +27,8 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 CATALOG = os.path.join(ROOT, "src", "duws", "shared", "includes", "furniture_catalog.hpp")
 
 ROLES = {"anchor", "seat", "wall", "clutter"}
-SETS = {"living", "sleeping", "work"}
+FAMILIES = {"", "dining", "office"}
+SLOTS = {"", "center", "wall"}
 
 
 def strip_comments(s):
@@ -72,14 +75,6 @@ def unquote(s):
     return None  # not a quoted string
 
 
-def parse_list(val):
-    """Interior entries of a [...] literal, unquoted, or None if not a bracketed list."""
-    val = val.strip()
-    if not (val.startswith('[') and val.endswith(']')):
-        return None
-    return [unquote(e) for e in split_top(val[1:-1])]
-
-
 def is_int(s):
     return re.fullmatch(r'-?\d+', s.strip()) is not None
 
@@ -98,12 +93,13 @@ def main():
             fails.append((r[:40], "row is not a [...] literal"))
             continue
         cols = split_top(r[1:-1])
-        if len(cols) not in (5, 6, 7):
-            fails.append((r[:40], f"{len(cols)} columns, expected 5, 6 or 7"))
+        if len(cols) not in (6, 7):
+            fails.append((r[:40], f"{len(cols)} columns, expected 6 or 7"))
             continue
         cls = unquote(cols[0])
         role = unquote(cols[1])
-        sets = parse_list(cols[3])
+        family = unquote(cols[3])
+        slot = unquote(cols[5])
         tag = cls or r[:40]
         if not cls:
             fails.append((tag, "class is not a quoted string"))
@@ -115,14 +111,29 @@ def main():
             fails.append((tag, f"role '{role}' unknown"))
         if not is_num(cols[2]):
             fails.append((tag, f"frontYaw '{cols[2]}' not numeric"))
-        if sets is None or not sets or any(s not in SETS for s in sets):
-            fails.append((tag, f"set[] '{cols[3]}' empty or names an unknown set"))
+        if family not in FAMILIES:
+            fails.append((tag, f"family '{cols[3]}' unknown"))
         if not is_int(cols[4]):
             fails.append((tag, f"seats '{cols[4]}' not an integer"))
-        if len(cols) >= 6 and not (is_int(cols[5]) and int(cols[5]) >= 0):
-            fails.append((tag, f"maxPerRoom '{cols[5]}' not a non-negative integer"))
-        if len(cols) == 7 and not (is_int(cols[6]) and int(cols[6]) in (0, 1)):
-            fails.append((tag, f"required '{cols[6]}' not 0 or 1"))
+        if slot not in SLOTS:
+            fails.append((tag, f"slot '{cols[5]}' unknown"))
+        if len(cols) == 7 and not (is_int(cols[6]) and int(cols[6]) >= 0):
+            fails.append((tag, f"maxPerRoom '{cols[6]}' not a non-negative integer"))
+        if role == "anchor":
+            if not family:
+                fails.append((tag, "anchor needs a family"))
+            if slot not in ("center", "wall"):
+                fails.append((tag, "anchor needs slot 'center' or 'wall'"))
+        elif role in ("seat", "clutter"):
+            if not family:
+                fails.append((tag, f"{role} needs a family"))
+            if slot:
+                fails.append((tag, f"{role} must not carry a slot"))
+        elif role == "wall":
+            if family:
+                fails.append((tag, 'wall piece must have family ""'))
+            if slot:
+                fails.append((tag, 'wall piece must have slot ""'))
 
     print(f"[furniture] checked {len(rows)} catalog row(s), {len(seen)} class(es)")
     if fails:

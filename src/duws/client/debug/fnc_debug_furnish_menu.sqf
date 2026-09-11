@@ -12,16 +12,9 @@ if (isNull _target) exitWith {
     hint "Furnish (debug)\n\nNothing was under the cursor when the Debug menu\nopened. Look at a building first, then open Debug.";
 };
 
-private _sets = ["living", "sleeping", "work"];
 private _rows = [];
-{
-    _rows pushBack [_x, {
-        _this params ["_t", "_s"];
-        [_t, "debug_furnish", [_s], 0] remoteExec ["fnc_furnish_building", 2];
-    }, [_target, _x], [1, 0.667, 0, 1]];
-} forEach _sets;
-_rows pushBack ["all (living + sleeping + work)", {
-    [_this, "debug_furnish", [], 0] remoteExec ["fnc_furnish_building", 2];
+_rows pushBack ["furnish", {
+    [_this, "debug_furnish", 0] remoteExec ["fnc_furnish_building", 2];
 }, _target, [1, 0.667, 0, 1]];
 
 // Geometry overlays (no furniture): the floor-plan grid, coloured by cell state or by room id.
