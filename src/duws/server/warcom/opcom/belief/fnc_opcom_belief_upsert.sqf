@@ -16,3 +16,8 @@ if (_i < 0) then {
     DUWS_opcom_belief_time set [_i, DUWS_opcom_tick];
     DUWS_opcom_belief_str  set [_i, _str];
 };
+
+// A sighting is also an observation, so refresh coverage at the sighted cell -- else seeing a threat leaves
+// the ground reading unobserved, a contradiction the router would re-scout into. Point stamp (k 0): proves
+// this one cell was looked at, not that the sector around a known enemy is clear (the recon/OP sweep's bubble).
+[_pos, 0] call fnc_opcom_cover_stamp;
