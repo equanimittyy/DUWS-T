@@ -81,11 +81,6 @@ private _build = {
     // has driven to.
     [_grp] call fnc_mission_claim;
 
-    [leader _grp] spawn { params ["_u"]; sleep 5; _u addMagazineGlobal "FileTopSecret" };
-    if (hardcore_mode_enable) then {
-        [units _grp, "objective"] call fnc_search_flag_group;
-    };
-
     // Two ambient foot patrols, deliberately NOT in the win census (that stays the vehicle crews). Centres
     // offset to opposite half-ring axes so the two roam wide yet keep apart rather than converging.
     private _teamAxis = random 360;

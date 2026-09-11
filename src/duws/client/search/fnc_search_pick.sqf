@@ -2,9 +2,9 @@
 // should target right now, or objNull. Called from the hold-action's show condition (every eval)
 // and again from its exec a frame later; the server re-validates whatever it hands back.
 //
-// Two kinds of target. A flagged interactable -- an objective body, a placed laptop/armour, a
-// surrendered detainee -- stays cursor-precise: it is a deliberate, unambiguous pick, and some are
-// not corpses, so "look at it" is right. An ordinary enemy corpse is taken by nearest-in-view-cone
+// Two kinds of target. A flagged body -- a manhunt HVT's corpse, or a surrendered civilian being
+// frisked -- stays cursor-precise: a deliberate, unambiguous pick, and a living detainee is not a
+// corpse the cone scan would ever find. An ordinary enemy corpse is taken by nearest-in-view-cone
 // within reach instead, so a ragdoll need only be faced, not have the cursor land on it. A body
 // already searched (DUWS_search_done) is excluded from both, so every corpse is offered once.
 //

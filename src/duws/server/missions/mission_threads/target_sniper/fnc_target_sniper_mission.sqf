@@ -87,13 +87,6 @@ private _build = {
         } forEach [_target1, _target2];
         _group setBehaviour "COMBAT";
 
-        [_target1] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
-        [_target2] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
-
-        if (hardcore_mode_enable) then {
-            [[_target1, _target2], "objective"] call fnc_search_flag_group;
-        };
-
         if (VERSION_X == "MODERN") then {
             if !(("OPTRE" in BLUFOR_FactionFile_X)
                 or ("HL2ECR" in BLUFOR_FactionFile_X)

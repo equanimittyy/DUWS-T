@@ -155,11 +155,19 @@ _informant setBehaviour "SAFE";
 _informant setUnitPos "UP";
 _allUnits pushBack _informant;
 
+// Flagged HVT: his corpse pays the objective intel pool on a search -- the manhunt's own reward, where
+// an ordinary enemy pays the combat pool. Flagged while alive is safe: the search gate admits a flagged
+// body only once dead (or a living detainee), so the blended, breathing informant is never a tell.
+[[_informant], "objective"] call fnc_search_flag_group;
+
 // Killed handler here so the rep cost is charged off his death position: a clean kill on the road is
 // free, one in the crowd is not. Nearest town within edge + 300 m pays -1. TUNABLE.
 _informant addEventHandler ["Killed", {
     params ["_unit", "_killer", "_instigator"];
     _unit setVariable ["DUWS_informant_dead", true];
+    // His top-secret intel lands on death, never while he breathes: a living body carrying FileTopSecret
+    // is outed the instant a player (or an inventory-access mod like ACE) opens his gear.
+    _unit addMagazineGlobal "FileTopSecret";
     // CIVILIAN death triggers the engine's civ-kill rating penalty -- a global rating tank that can turn
     // the player's own AI hostile. Cancel it (the -1 town rep below is the whole intended cost); only on a
     // civilian death, since an EAST flip (car gone) was neutral.
@@ -419,9 +427,13 @@ if (_outcome isEqualTo "WIN") then {
 
 // Cleanup everything the mission put down (informant, four cars, decoy drivers, added crowd), once
 // the players have had a moment with the result.
-[_allCars, _allUnits] spawn {
-    params ["_cars", "_units"];
+[_allCars, _allUnits, _informant, _outcome] spawn {
+    params ["_cars", "_units", "_inf", "_out"];
     sleep 10;
     { if (!isNull _x) then { deleteVehicle _x } } forEach _cars;
-    { if (!isNull _x) then { deleteVehicle _x } } forEach _units;
+    // On a win his corpse is a flagged search target: leave it to the battlefield cleanup, which keeps
+    // it while a player is near and sweeps it once they leave, rather than deleting it out from under them.
+    {
+        if (!isNull _x && {!(_out isEqualTo "WIN") || {!(_x isEqualTo _inf)}}) then { deleteVehicle _x };
+    } forEach _units;
 };

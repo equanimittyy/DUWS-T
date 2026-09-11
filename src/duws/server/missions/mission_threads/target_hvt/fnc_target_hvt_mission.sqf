@@ -206,7 +206,6 @@ for "_i" from 0 to 2 do {
             if (alive _unit && {alive _veh}) then { _unit moveInCargo _veh };
         }];
         _hvt addHeadgear "H_Beret_blk";
-        _hvt addMagazineGlobal "FileTopSecret";
         // SAFE so the column cruises relaxed; the engine promotes it to COMBAT natively on contact, which is
         // what the monitor's peel reads (behaviour == COMBAT) to break the car away and send it running.
         _hvtColGrp setBehaviour "SAFE";
