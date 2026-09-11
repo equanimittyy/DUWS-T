@@ -14,13 +14,15 @@ if (!isServer) exitWith {};
 params ["_target", "_caller"];
 if (isNull _target || {isNull _caller}) exitWith {};
 
-// A flagged body not yet claimed pays its objective/frisk table once. Anything else -- an unflagged
-// corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the session-wide
-// search budget and, since combat is not rolled at spawn, rolled here (below). The budget is enforced
-// here rather than only in the action's condition, because the claim is the authoritative point and a
-// condition a client evaluates is a condition a client can be made to skip.
+// Every body is single-use. A flagged body -- an objective corpse, a placed laptop/armour, a
+// frisked civilian -- pays its own table; any other corpse is an ordinary combat search, gated by
+// the session-wide budget and rolled here (combat is not rolled at spawn). Both stamp
+// DUWS_search_done when searched, and a searched body is refused here -- the authoritative point,
+// since a condition a client evaluates is a condition a client can be made to skip.
+if (_target getVariable ["DUWS_search_done", false]) exitWith {};
+
 private _source = _target getVariable ["DUWS_search_src", ""];
-private _flagged = (_source != "") && {!(_target getVariable ["DUWS_search_done", false])};
+private _flagged = _source != "";
 if (!_flagged) then { _source = "combat" };
 
 // Budget gated here at the top level, not nested in the else below. exitWith unwinds past a
@@ -28,12 +30,11 @@ if (!_flagged) then { _source = "combat" };
 // read as skipping only the stamp while in fact abandoning the payout -- gating here keeps it plain.
 if (!_flagged && {count ((missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown}) >= DUWS_searchAllowance}) exitWith {};
 
-if (_flagged) then {
-    _target setVariable ["DUWS_search_done", true, true];
-} else {
-    // The attempt spends a slot whether or not it finds anything -- a dry search is still a search.
-    // Pruned on write so the stamp list stays bounded to the window. One shared budget for the whole
-    // session, not per player: the stamp lives in missionNamespace and is broadcast.
+// Stamped before the payout resolves so a second searcher through the claim race finds it done.
+_target setVariable ["DUWS_search_done", true, true];
+if (!_flagged) then {
+    // Combat spends a budget slot too -- a dry search is still a search. Pruned on write to stay
+    // bounded to the window; one shared session budget in missionNamespace, broadcast.
     private _times = (missionNamespace getVariable ["DUWS_searchTimes", []]) select {time - _x < DUWS_searchCooldown};
     _times pushBack time;
     missionNamespace setVariable ["DUWS_searchTimes", _times, true];

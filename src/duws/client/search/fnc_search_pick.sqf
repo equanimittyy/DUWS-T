@@ -5,8 +5,8 @@
 // Two kinds of target. A flagged interactable -- an objective body, a placed laptop/armour, a
 // surrendered detainee -- stays cursor-precise: it is a deliberate, unambiguous pick, and some are
 // not corpses, so "look at it" is right. An ordinary enemy corpse is taken by nearest-in-view-cone
-// within reach instead, so a ragdoll need only be faced, not have the cursor land on it. A claimed
-// objective body (done) fails the flagged test and falls through to the corpse scan as ordinary.
+// within reach instead, so a ragdoll need only be faced, not have the cursor land on it. A body
+// already searched (DUWS_search_done) is excluded from both, so every corpse is offered once.
 //
 // Flagged targets are single-use and bypass the budget; the combat corpse is gated by it here for
 // the prompt, and again on the server for authority. Budget read with defaults: the broadcast
@@ -37,6 +37,7 @@ private _bestDist = _reach;
 {
     if (
         !alive _x
+        && {!(_x getVariable ["DUWS_search_done", false])}
         && {_x distance _who < _bestDist}
         && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") == 0}
     ) then {
