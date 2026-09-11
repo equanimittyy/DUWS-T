@@ -64,6 +64,17 @@ for "_cy" from _minCy to _maxCy do {
     };
 };
 
+// The 500 m centre-sample marks a coastal origin's cell water when its centre falls offshore, so the router
+// (source and target must share a land component) can never reach a garrison site that is really on land.
+private _forceLand = {
+    params ["_p"];
+    private _fx = (floor ((_p select 0) / _cell)) min (_w - 1) max 0;
+    private _fy = (floor ((_p select 1) / _cell)) min (_w - 1) max 0;
+    _land set [_fy * _w + _fx, true];
+};
+{ [_x select 1] call _forceLand } forEach zone_meta_array;
+{ [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
+
 // 8-neighbour flood fill: label each connected land region, matching the router's diagonal steps. An
 // explicit stack, not recursion (SQF has no tail call); a cell can be pushed twice before it is labelled,
 // so the pop re-checks. Water cells keep -1 and share a component with nothing. Start and expansion are

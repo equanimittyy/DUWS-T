@@ -144,7 +144,8 @@ classify each cell into the three movement domains — land, water, air — that
 read:
 
 - **Land mask** `DUWS_opcom_grid_land` — one `surfaceIsWater` per cell centre. A cell is passable to ground
-  movement only where the mask reads land.
+  movement only where the mask reads land. Every zone and town origin cell is then forced land regardless of
+  its sample: a 500 m centre can fall offshore of a coastal garrison site the router must still reach.
 - **Land connectivity** `DUWS_opcom_grid_comp` — a flood-fill of the land mask labelling connected land
   components. A ground tasking is ordered only where source cell and target cell share a component, so
   the director never sends a ground squad at an island it cannot reach ([§Routing](#routing-a-cost-field-over-the-grid)).
