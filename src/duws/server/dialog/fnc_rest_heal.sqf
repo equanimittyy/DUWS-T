@@ -33,8 +33,9 @@ sleep 1.7;
 
 skiptime _hours;
 
-// Overcast forced before rain: setRain only shows over a high overcast, and forceWeatherChange
-// re-derives rain from overcast, so rain set before the force is wiped. Behind black: the snap is unseen.
+// Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call
+// that skips the menu's slider coupling). Rain is set after the forced overcast, not before.
+if (_rain > 0) then { _overcast = _overcast max 0.5 };
 0 setOvercast _overcast;
 forceWeatherChange;
 0 setRain _rain;

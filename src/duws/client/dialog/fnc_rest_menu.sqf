@@ -27,6 +27,19 @@ fnc_rest_labels = {
     (_disp displayCtrl 8713) ctrlSetText format [localize "STR_DUWS_T_rest_rain", (sliderPosition 8714) toFixed 2];
 };
 
+// Rain renders only over overcast >= 0.5 (engine floor). The re-set retriggers this handler, but
+// the clamped value fails the condition, so it settles in one bounce rather than looping.
+fnc_rest_couple = {
+    params ["_ctrl"];
+    private _o = sliderPosition 8712;
+    private _r = sliderPosition 8714;
+    if (_r > 0 && _o < 0.5) then {
+        if (ctrlIDC _ctrl == 8714) then { sliderSetPosition [8712, 0.5]; }
+        else { sliderSetPosition [8714, 0]; };
+    };
+    call fnc_rest_labels;
+};
+
 if (!createDialog "rest_dialog") exitWith {};
 waitUntil { dialog };
 

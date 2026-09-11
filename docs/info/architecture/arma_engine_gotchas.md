@@ -667,8 +667,8 @@ SQF arrays are reference types — `setVariable`, `pushBack` and plain assignmen
 
 **Fix:** hoist the target to a local first — `private _owner = clientOwner _x; [msg] remoteExec ["hint", _owner];` — as every working call in the codebase does. More broadly, a green sqf-vm run is necessary but not sufficient: read the `.rpt` after a build.
 
-## `setRain` only shows over a high overcast, and `forceWeatherChange` re-derives rain from overcast
+## `setRain` shows nothing unless overcast is at least 0.5
 
-Rain is not independent of overcast. `setRain` above a low overcast produces no visible rain, and `forceWeatherChange` overwrites whatever rain was set with the value its overcast implies. So a naive `setRain 1; forceWeatherChange` ends dry, and `setRain 1` alone under clear skies shows nothing.
+Rain only renders over an overcast of 0.5 or higher; `setRain 1` under a clear sky shows nothing. `setRain` is otherwise independent of the overcast transition and can be set alongside it, but the 0.5 floor is hard, so a rain control decoupled from overcast in a UI can still come out dry — that is the engine, not a bug.
 
-**Fix:** set and force the overcast first, then set rain last: `0 setOvercast _o; forceWeatherChange; 0 setRain _r;` (fnc_rest_heal.sqf). Do it behind a black screen — the `0`-time force snaps the sky in one frame, which reads as a glitch if seen. A rain slider that is decoupled from overcast in the UI can still come out dry in game when the paired overcast is low; that is the engine, not a bug.
+**Fix:** floor the overcast at 0.5 whenever rain is wanted, then set and force the overcast before setting rain: `if (_rain > 0) then { _overcast = _overcast max 0.5 }; 0 setOvercast _o; forceWeatherChange; 0 setRain _r;` (fnc_rest_heal.sqf). Setting rain after the forced overcast puts the sky in place first. Do it behind a black screen — the `0`-time force snaps the sky in one frame, which reads as a glitch if seen. The rest menu couples its overcast and rain sliders on the same 0.5 floor so the player never sets a dry combo.

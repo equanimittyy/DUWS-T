@@ -72,7 +72,7 @@ class rest_dialog
         class rm_overcast_slider: RscSlider
         {
             idc = 8712;
-            onSliderPosChanged = "call fnc_rest_labels";
+            onSliderPosChanged = "_this call fnc_rest_couple";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
             y = 11.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 18 * GUI_GRID_W;
@@ -90,7 +90,7 @@ class rest_dialog
         class rm_rain_slider: RscSlider
         {
             idc = 8714;
-            onSliderPosChanged = "call fnc_rest_labels";
+            onSliderPosChanged = "_this call fnc_rest_couple";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
             y = 14 * GUI_GRID_H + GUI_GRID_Y;
             w = 18 * GUI_GRID_W;
