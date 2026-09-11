@@ -4,6 +4,9 @@
 // skipping the empty majority of the map is the bulk of the cost saved. Marker names are stable (cell index
 // or running slot) so teardown clears the whole set by the duws_opcom_ prefix.
 if (!hasInterface) exitWith {};
+// A draw lands a round-trip after its request, so one queued before toggle-off arrives past teardown and
+// would rebuild the whole lattice -- the overlay reappears after being cleared.
+if (!(missionNamespace getVariable ["DUWS_dbgOpcomOn", false])) exitWith {};
 params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []]];
 
 private _half = _cell / 2;
@@ -58,8 +61,8 @@ private _sample = "";
     };
 
     // A real icon type (arma3_markers.md #224), not text-only: the invisible "Empty" type renders no text.
-    // A never-/long-unseen cell (age -1) shows "N/A" rather than nothing, so the layer is legibly alive
-    // before any sweep -- a blank map would read as broken, not as "no coverage yet".
+    // A never-/long-unseen cell reads -1 (age past the span, collapsed server-side), so the layer is legibly
+    // alive before any sweep -- a blank map would read as broken, not as "no coverage yet".
     private _sm = format ["duws_opcom_stale_%1", _i];
     if (_coverOn) then {
         if ((getMarkerType _sm) isEqualTo "") then {
@@ -70,7 +73,7 @@ private _sample = "";
             _sm setMarkerSizeLocal [0.5, 0.5];
             _sm setMarkerAlphaLocal 0.3;
         };
-        _sm setMarkerTextLocal ([format ["%1t", _stale], "N/A"] select (_stale < 0));
+        _sm setMarkerTextLocal format ["%1t", _stale];
     } else {
         if ((getMarkerType _sm) isNotEqualTo "") then { deleteMarkerLocal _sm };
     };
