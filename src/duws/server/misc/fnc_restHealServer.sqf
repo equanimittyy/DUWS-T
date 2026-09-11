@@ -3,7 +3,7 @@ if (!isServer) exitWith {};
 params ["_caller", "_restSite"];
 
 private _coolDownVar = "GM_Heal_LastUsedTime";
-private _coolDownSeconds = 30;
+private _coolDownSeconds = 10;
 private _currentTime = time;
 private _lastUsedTime = missionNamespace getVariable [_coolDownVar, 0];
 
