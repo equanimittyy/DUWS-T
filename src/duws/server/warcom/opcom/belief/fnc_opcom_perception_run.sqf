@@ -28,12 +28,16 @@ while {true} do {
         // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this
         // tick (0 while belief>0 means everything held on last-seen).
         _stage = "debuglog";
-        ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8",
-            DUWS_opcom_tick, DUWS_opcom_grid_w,
-            {_x > 0.05} count DUWS_opcom_grid_fri,
-            {_x > 0.05} count DUWS_opcom_grid_ene,
-            selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
-            count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh]] call fnc_log;
+        // format eats its args before fnc_log can drop the line, so these whole-grid count/selectMax scans
+        // would run every tick even at the default level; gate them so they cost nothing unless DEBUG is on.
+        if (duws_log_level >= 4) then {
+            ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8",
+                DUWS_opcom_tick, DUWS_opcom_grid_w,
+                {_x > 0.05} count DUWS_opcom_grid_fri,
+                {_x > 0.05} count DUWS_opcom_grid_ene,
+                selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
+                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh]] call fnc_log;
+        };
     } catch {
         ["ERROR", "OPCOM", format ["tick %1 threw in %2, thread held alive: %3", DUWS_opcom_tick, _stage, _exception]] call fnc_log;
     };
