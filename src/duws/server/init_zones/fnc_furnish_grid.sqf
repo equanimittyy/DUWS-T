@@ -259,8 +259,7 @@ fnc_furnish_grid = {
     { _building animate [_x, _doorPhases select _forEachIndex, true] } forEach _doorAnims;
     if (_doorAnims isNotEqualTo []) then { sleep 0.1 };
 
-    // A door cell alone left neighbour cells free to overhang the mouth. Block the ring, don't just reserve it:
-    // only "blocked" stops flood-fill, so the rooms split at a full-width plug and no piece sits in the opening.
+    // Block cells around each door mouth, else a neighbour piece overhangs the opening or its approach.
     private _ij = createHashMap;
     { _x params ["", "", "", "", "", "", "_i", "_j", "_s"]; _ij set [format ["%1_%2_%3", _s, _i, _j], _forEachIndex] } forEach _cells;
     private _doors = [];
@@ -269,8 +268,8 @@ fnc_furnish_grid = {
     { if (_doors find _x < 0) then { _doors pushBack _x } } forEach _pathDoors;
     {
         (_cells select _x) params ["", "", "", "", "", "", "_i", "_j", "_s"];
-        for "_dx" from -1 to 1 do {
-            for "_dy" from -1 to 1 do {
+        for "_dx" from -2 to 2 do {
+            for "_dy" from -2 to 2 do {
                 private _ni = _ij getOrDefault [format ["%1_%2_%3", _s, _i + _dx, _j + _dy], -1];
                 if (_ni >= 0) then { private _n = _cells select _ni; _n set [1, "blocked"]; _n set [5, true] };
             };
