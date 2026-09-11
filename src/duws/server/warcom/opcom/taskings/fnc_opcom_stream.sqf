@@ -7,20 +7,17 @@ if (!isServer) exitWith {};
 // The closest native order to a tasking, set at spawn. Cleared first so a re-spawn inherits no stale
 // waypoint. (Waypoints/behaviour take only on a server-local group, which every spawn here is.)
 DUWS_fnc_opcom_applyOrder = {
-    params ["_grp", "_order", "_target"];
+    params ["_grp", "_order", "_target", ["_supplyDrop", false]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
     switch (_order) do {
         case "assault": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
         };
-        case "supply": {
-            // Drive to the drop in SAFE; arrival (deletion + success) is handled by the tasking step.
-            _grp setBehaviour "SAFE"; _grp setCombatMode "BLUE";
-            (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
-        };
         case "move": {
             _grp setBehaviour "SAFE";
+            // Arrival (delete + complete) is the tasking step's job; BLUE just keeps the courier out of fights.
+            if (_supplyDrop) then { _grp setCombatMode "BLUE" };
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
         default {   // guard, and any resting unit forced live: hold ground where it stands
@@ -85,7 +82,7 @@ DUWS_fnc_opcom_deVirt = {
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
-    [_grp, _t get "order", _t get "target"] call DUWS_fnc_opcom_applyOrder;
+    [_grp, _t get "order", _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
     true
 };
 

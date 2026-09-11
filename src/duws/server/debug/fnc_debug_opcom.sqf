@@ -31,14 +31,18 @@ switch (_verb) do {
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
-        // _a names the picker mode (default "task"); the re-garrison menu passes "regarrison" to route the same
-        // tasking list into a zone pick instead of an order.
+        // _a names the picker mode (default "task"); re-garrison passes "regarrison" (routes to a zone pick) and
+        // supply passes "supply" (routes to a drop map-pick), reusing the one tasking list for all three.
         private _mode = ["task", _a] select (_a isNotEqualTo "");
         private _rows = (DUWS_opcom_taskings select { (_x get "grp") isEqualTo "" }) apply {
             [_x get "id", format ["id %1  %2/%3  %4", _x get "id", _x get "order", _x get "status", _x get "moveType"]]
         };
         if (_rows isEqualTo []) exitWith { "No virtual taskings (recruit one; a live unit cannot be re-tasked)." remoteExec ["hint", _caller] };
-        private _title = ["Re-garrison which tasking?", "Task a tasking"] select (_mode isEqualTo "task");
+        private _title = switch (_mode) do {
+            case "supply": { "Supply-run which tasking?" };
+            case "regarrison": { "Re-garrison which tasking?" };
+            default { "Task a tasking" };
+        };
         [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "recruit": {
@@ -56,6 +60,10 @@ switch (_verb) do {
     case "regarrison": {
         private _ok = ["regarrison", _a, _b] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (held / live / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "supply": {
+        private _ok = ["supply", _a, _b] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Supply-run %1 -> %2.", _a, _b apply { round _x }] } else { format ["Supply-run refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "list": {
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };

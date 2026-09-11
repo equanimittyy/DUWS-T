@@ -53,7 +53,7 @@ private _nearestPlayerCells = {
 
             // Supply drops on arrival: delete the courier and fire its success (logged; mission plumbing
             // lands with the actions that consume it in Phase 4).
-            if (_order isEqualTo "supply" && {(_ldr distance2D (_t get "target")) < 40}) then {
+            if ((_t getOrDefault ["supplyDrop", false]) && {(_ldr distance2D (_t get "target")) < 40}) then {
                 ["INFO", "OPCOM", format ["supply delivered by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
                 { deleteVehicle _x } forEach (units _grp);
                 deleteGroup _grp;
@@ -118,28 +118,32 @@ private _nearestPlayerCells = {
                         } else {
                             _t set ["strandTicks", 0];
                         };
-                        if (_adv isEqualTo "arrived" && {_order isEqualTo "supply"}) then {
-                            // A supply run that reaches its drop with no player near still completes.
-                            ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
-                            _t set ["status", "done"];
-                        } else {
-                            private _reGarrisoned = false;
-                            if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
-                                private _rz = _t getOrDefault ["returnZone", ""];
-                                if (_rz isEqualTo "") then {
-                                    // Unmarked: hold the point rather than re-plan a zero-length march each tick.
-                                    _t set ["order", "guard"]; _t set ["target", _t get "pos"]; _t set ["route", []];
-                                } else {
-                                    // Marked: re-garrison the destination -- adopt it as home, rejoin its reserve wave.
+                        // supplyDrop / returnZone are exclusive, set upstream in fnc_opcom_task, so the case
+                        // order below cannot double-fire.
+                        private _settled = false;
+                        if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
+                            private _rz = _t getOrDefault ["returnZone", ""];
+                            switch true do {
+                                case (_t getOrDefault ["supplyDrop", false]): {
+                                    // A supply run that reaches its drop with no player near still completes.
+                                    ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
+                                    _t set ["status", "done"]; _settled = true;
+                                };
+                                case (_rz isNotEqualTo ""): {
+                                    // Re-garrison the destination -- adopt it as home, rejoin its reserve wave.
                                     _t set ["order", "garrison"]; _t set ["homeZone", _rz];
                                     _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""];
                                     [_rz] call DUWS_fnc_opcom_zoneReserveSync;
-                                    _reGarrisoned = true;
+                                    _settled = true;
+                                };
+                                default {
+                                    // Hold the point rather than re-plan a zero-length march each tick.
+                                    _t set ["order", "guard"]; _t set ["target", _t get "pos"]; _t set ["route", []];
                                 };
                             };
-                            // Skip the stream-in for a fresh garrison (defends via the reserve wave) and a mid-ferry rider.
-                            if (!_reGarrisoned && {(_t getOrDefault ["ridingOn", -1]) < 0} && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
                         };
+                        // Skip the stream-in for a completed supply / fresh garrison (defends via the reserve wave) and a mid-ferry rider.
+                        if (!_settled && {(_t getOrDefault ["ridingOn", -1]) < 0} && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
                     };
                 };
             };

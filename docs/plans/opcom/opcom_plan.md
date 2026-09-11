@@ -650,10 +650,11 @@ at spawn, not a tick later. OPCOM does not steer it after that — a spawned gro
 it re-virtualises ([§Commitment](#commitment-intents-are-sticky)), so the spawned order has to carry the
 whole intent on its own.
 
-The A3 order per tasking — Seek & Destroy for an assault, a `SAFE` move that self-deletes and fires success for
-a supply run, a move-then-settle-to-`guard` for a reposition, a `SAFE` hold for a guard — is set by
-`DUWS_fnc_opcom_applyOrder`
-([`fnc_opcom_stream.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_stream.sqf)).
+The A3 order per tasking — Seek & Destroy for an assault, a `SAFE` move for a reposition (holding fire, `BLUE`,
+when the move is a supply run), a `SAFE` hold for a guard — is set by `DUWS_fnc_opcom_applyOrder`
+([`fnc_opcom_stream.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_stream.sqf)). Supply is not a
+separate order: it is a `move` carrying a `supplyDrop` mark, and its arrival disposition — delete the courier and
+fire success, in place of settling — is resolved by the tasking step, the same shape as the re-garrison mark below.
 
 A `recon`-flagged unit needs no scout order: its detection is a standing sensor ([§Sensors](#sensors)) that
 fires whatever the unit's order, so OPCOM points it at stale ground with a plain **Move** and the reveal

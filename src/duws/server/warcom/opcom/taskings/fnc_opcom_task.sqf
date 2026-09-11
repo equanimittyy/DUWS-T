@@ -2,13 +2,15 @@
 // arm the commit hold. Returns true if the order took. OPCOM cannot re-order a de-virtualised (live) unit --
 // control returns only when it re-virtualises -- nor re-issue before the hold passes; both are refused here
 // so the one primitive enforces the commitment rules the decision loop (Phase 4) relies on.
-//   _order: "assault" "supply" "move" "guard".
+//   _order: "assault" "move" "guard".
 //   _target: objective world position; ignored for guard (holds where it stands).
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival, else it settles to guard.
-params ["_t", "_order", ["_target", []], ["_returnZone", ""]];
+//   _supplyDrop: `move` only -- deleted and its delivery completed on arrival, in place of a settle.
+//   Exclusive with _returnZone.
+params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_supplyDrop", false]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["assault", "supply", "move", "guard"])) exitWith {
+if (!(_order in ["assault", "move", "guard"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
@@ -34,8 +36,11 @@ if (_order isEqualTo "guard") then {
     _t set ["route", _pts];
     _t set ["routeMode", _mode];
 };
-// Cleared off a move so a recycled record never re-garrisons on a stale mark.
-_t set ["returnZone", ["", _returnZone] select (_order isEqualTo "move")];
+// Cleared off a non-move so a recycled record never re-garrisons or self-deletes on a stale mark; exclusive
+// on a move.
+private _isMove = _order isEqualTo "move";
+_t set ["supplyDrop", _isMove && _supplyDrop];
+_t set ["returnZone", ["", _returnZone] select (_isMove && {!_supplyDrop})];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out of its zone reserve: pull any reserve-spawned defender (it is going mobile),
