@@ -8,6 +8,7 @@ params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []]];
 
 private _half = _cell / 2;
 private _eps = 0.05;
+private _coverOn = missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", false];
 
 // Fixed grid width means the cell count only changes on a first draw or a name-clash guard.
 private _sig = [count _cells];
@@ -21,7 +22,7 @@ if (_rebuild) then {
 
 private _sample = "";
 {
-    _x params ["_c", "_f", "_e", "_front", "_land"];
+    _x params ["_c", "_f", "_e", "_front", "_land", "_stale"];
     private _i = _forEachIndex;
 
     if (_rebuild) then {
@@ -54,6 +55,22 @@ private _sample = "";
         _dm setMarkerTextLocal (format ["%1/%2", _f toFixed 1, _e toFixed 1]);
     } else {
         if ((getMarkerType _dm) isNotEqualTo "") then { deleteMarkerLocal _dm };
+    };
+
+    // "Empty" is a text-only marker type; if a build renders no text on it, use a transparent-icon type.
+    private _sm = format ["duws_opcom_stale_%1", _i];
+    if (_coverOn && {_stale >= 0}) then {
+        if ((getMarkerType _sm) isEqualTo "") then {
+            createMarkerLocal [_sm, [_c select 0, (_c select 1) + _cell * 0.3]];
+            _sm setMarkerShapeLocal "ICON";
+            _sm setMarkerTypeLocal "Empty";
+            _sm setMarkerColorLocal "#(1,1,1,1)";
+            _sm setMarkerSizeLocal [1, 1];
+            _sm setMarkerAlphaLocal 0.5;
+        };
+        _sm setMarkerTextLocal format ["%1t", _stale];
+    } else {
+        if ((getMarkerType _sm) isNotEqualTo "") then { deleteMarkerLocal _sm };
     };
 } forEach _cells;
 

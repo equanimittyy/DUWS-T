@@ -230,6 +230,8 @@ DUWS_fnc_hardpointClear = {
 DUWS_fnc_hardpointOPBurst = {
     params ["_pos"];
     if (isNil "DUWS_opcom_grid_w") exitWith {};
+    // Before the empty-BLU early-out: a fired burst counts as having looked even if it caught nothing.
+    [_pos, OP_OBSERVE_K] call fnc_opcom_cover_stamp;
     private _w = DUWS_opcom_grid_w;
     private _oc  = [_pos] call DUWS_fnc_opcom_w2c;
     private _ocx = _oc mod _w;

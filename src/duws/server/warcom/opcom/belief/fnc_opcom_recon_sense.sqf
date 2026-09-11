@@ -9,6 +9,9 @@
 // platform since the three recon rows differ only there (opcom_plan.md). Belief is the same store
 // fnc_opcom_sense writes, keyed by BLUFOR group netId on the one sighting scale (DUWS_fnc_opcom_sightStr);
 // running after that sweep, a recon fix is the authoritative overwrite for a group both sensors saw.
+//
+// It also stamps the coverage layer over that reach every tick, catch or not, so ground a recon looked at
+// reads swept-clear rather than never-seen (fnc_opcom_cover_stamp).
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_grid_w") exitWith {};
 
@@ -25,8 +28,8 @@ private _wcells = [];
         _wcells pushBack [_x, _ci mod _w, floor (_ci / _w)];
     };
 } forEach (allGroups select { side _x == west });
-if (_wcells isEqualTo []) exitWith {};
 
+// No empty-_wcells early exit: a recon still stamps coverage with no BLUFOR in play (looked, found nothing).
 {
     if ("recon" in (_x getOrDefault ["flags", []])) then {
         // Live unit senses from where it stands; a virtual one from its stepped grid point.
@@ -38,6 +41,7 @@ if (_wcells isEqualTo []) exitWith {};
             _x get "pos"
         };
         private _k = OPCOM_RECON_K getOrDefault [_x get "moveType", 1];
+        [_pos, _k] call fnc_opcom_cover_stamp;
         private _rc = [_pos] call DUWS_fnc_opcom_w2c;
         private _rcx = _rc mod _w;
         private _rcy = floor (_rc / _w);

@@ -1,9 +1,10 @@
 // Locality: server. Builds the influence-grid substrate once, at OPCOM init: the two live force layers
-// (zeroed, the rebuild fills them each tick) and the two static per-cell arrays it never rebuilds -- a
-// land mask and a flood-fill labelling connected land components. A ground tasking is ordered only where
+// (zeroed, the rebuild fills them each tick), the static per-cell arrays it never rebuilds -- a land mask,
+// land/water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the
+// rebuild never touches (accumulating memory, not a live layer). A ground tasking is ordered only where
 // source and target cell share a component, so the director never routes a squad at an island it cannot
 // reach. Server-local, numbers only, never persisted; a restored campaign refills the live layers on its
-// first tick.
+// first tick and re-learns coverage from cold.
 //
 // Only the play box is calculated. The full-width lattice is allocated so every reader keeps the absolute
 // _cy * _w + _cx index, but surfaceIsWater and both flood fills run only inside the box (DUWS_opcom_box, a
@@ -44,15 +45,18 @@ DUWS_opcom_box = [_minCx, _minCy, _maxCx, _maxCy];
 
 DUWS_opcom_grid_fri = []; DUWS_opcom_grid_fri resize _n;
 DUWS_opcom_grid_ene = []; DUWS_opcom_grid_ene resize _n;
+DUWS_opcom_grid_seen = []; DUWS_opcom_grid_seen resize _n;   // last-swept tick per cell
 private _land = []; _land resize _n;          // true = land, passable to ground
 private _comp = []; _comp resize _n;          // component id per land cell; -1 on water and out-of-box
 
 // Cheap default for every slot so none is left nil; the costly surfaceIsWater runs only inside the box.
+// seen inits a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
 for "_i" from 0 to (_n - 1) do {
     _land set [_i, false];
     _comp set [_i, -1];
     DUWS_opcom_grid_fri set [_i, 0];
     DUWS_opcom_grid_ene set [_i, 0];
+    DUWS_opcom_grid_seen set [_i, -OPCOM_COVER_SPAN];
 };
 for "_cy" from _minCy to _maxCy do {
     for "_cx" from _minCx to _maxCx do {

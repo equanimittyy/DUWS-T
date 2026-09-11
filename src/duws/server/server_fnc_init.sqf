@@ -364,6 +364,7 @@ fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\warcom\opcom\be
 fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_prune.sqf";
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_init.sqf";
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_rebuild.sqf";
+fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
 // taskings\: streaming, ferry and garrison executed to define them; the store init, router,
 // recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
