@@ -27,7 +27,8 @@
 //   _settle  props only: drop the piece just above its point and let physics seat it on the real floor (a
 //            wrong seat Z self-corrects), confirm it lands upright and in place, jitter-retry up to 3, and if it
 //            still will not settle seat it square at the point (unless _dropOnFail), then freeze (default false).
-//            Overrides _freeze; waits per piece until it comes to rest (up to 3 s per try), so the caller runs scheduled.
+//            Overrides _freeze. Pieces settle two at a time, each pair the farthest-apart still pending, so two
+//            live bodies never shove each other and both damp on one shared wait -- the caller runs scheduled.
 //   _dropOnFail settle only: a piece that still will not settle after the retries is deleted and its return slot
 //            is objNull, rather than seated square -- a guaranteed piece is better absent than placed broken
 //            (default false).
@@ -37,15 +38,14 @@ fnc_place_settled = {
     private _baseDir = getDir _anchor;
 
     private _objs = [];
-    {
-        _x params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0]];
-        // ASL, not ATL: the seat is measured against the anchor's own surface, and setPosASL commits it there
-        // without the roof/terrain ambiguity ATL carries over a body.
-        private _pos = AGLToASL (_anchor modelToWorld [_ox, _oy, _oz]);
-        private _dirDeg = _baseDir + _dir;
 
-        private _obj = objNull;
-        if (_asLoot) then {
+    if (_asLoot) then {
+        {
+            _x params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0]];
+            // ASL, not ATL: the seat is measured against the anchor's own surface, and setPosASL commits it
+            // there without the roof/terrain ambiguity ATL carries over a body.
+            private _pos = AGLToASL (_anchor modelToWorld [_ox, _oy, _oz]);
+            private _dirDeg = _baseDir + _dir;
             private _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
             // Cargo slot is class-dependent; an empty holder self-deletes within a second, so fill it now.
             if (isClass (configFile >> "CfgMagazines" >> _class)) then {
@@ -59,62 +59,19 @@ fnc_place_settled = {
             // -- and unfrozen is what keeps its inventory openable.
             _holder setPosASL (_pos vectorAdd (_up vectorMultiply 0.02));
             _holder setVelocity [0, 0, 0];
-            _obj = _holder;
-        } else {
-            if (_settle) then {
-                // Physics-settle, not seat-and-freeze: gravity finds the real floor even when the seat Z is
-                // wrong, and a bad landing (tipped or flung) retries rather than freezing in.
-                private _o = objNull;
-                private _tries = 0;
-                private _settled = false;
-                while { !_settled && _tries < 3 } do {
-                    if (!isNull _o) then { deleteVehicle _o };
-                    private _jx = 0; private _jy = 0;
-                    if (_tries > 0) then { _jx = (random 0.4) - 0.2; _jy = (random 0.4) - 0.2 };
-                    _o = createVehicle [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
-                    if (_invuln) then { _o allowDamage false };
-                    _o setVectorUp [0, 0, 1];
-                    _o setDir _dirDeg;
-                    _o setPosASL (_pos vectorAdd [_jx, _jy, 0.15]);
-                    _o setVelocity [0, 0, 0];
-                    // Wait for real rest, not a fixed clock: poll until motion damps, escaping at 3 s so a never-
-                    // settling piece cannot stall. A fixed mark could freeze a piece still sliding, or waste a try.
-                    private _t0 = time;
-                    sleep 0.25;   // gravity not yet engaged: the just-zeroed body reads at-rest on frame 1
-                    waitUntil { vectorMagnitude (velocity _o) < 0.05 || {time - _t0 >= 3} };
-                    // Base-on-floor Z gate: distance2D alone passes a piece that fell to a lower storey or
-                    // perched at the same XY. Band is loose -- a correctly-rested piece sits several cm off the
-                    // median plane (PhysX contact, per-class bbox-LOD) -- but far under a storey drop or a perch.
-                    private _restBaseZ = (getPosASL _o select 2) + ((boundingBoxReal _o select 0) select 2);
-                    _settled = alive _o
-                        && {vectorMagnitude (velocity _o) < 0.05}
-                        && {(vectorUp _o select 2) > 0.985}
-                        && {(_o distance2D (ASLToAGL _pos)) < 0.6}
-                        && {abs (_restBaseZ - (_pos select 2)) < 0.15};
-                    _tries = _tries + 1;
-                };
-                // A settled piece only needs its rest tilt re-levelled; one that never settled would freeze in
-                // broken (tipped, slid, dropped a storey), so _dropOnFail deletes it rather than seat it square.
-                if (_settled) then {
-                    _o setVectorUp [0, 0, 1];
-                    _o setVelocity [0, 0, 0];
-                    _o enableSimulationGlobal false;
-                    _obj = _o;
-                } else {
-                    if (_dropOnFail) then {
-                        deleteVehicle _o;
-                    } else {
-                        _o setVectorDirAndUp [[sin _dirDeg, cos _dirDeg, 0], [0, 0, 1]];
-                        _o setPosASL (_pos vectorAdd [0, 0, - ((boundingBoxReal _o select 0) select 2)]);
-                        _o setVelocity [0, 0, 0];
-                        _o enableSimulationGlobal false;
-                        _obj = _o;
-                    };
-                };
-            } else {
-                // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
-                // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
-                // create-seat-freeze completes before any tick can land.
+            [_holder, _key] call fnc_duws_keep;
+            _objs pushBack _holder;
+        } forEach _rows;
+    } else {
+        if (!_settle) then {
+            // Seat live then freeze: a frozen body ignores setPosASL (freeze-first strands the piece), and a
+            // live flush CAN_COLLIDE body is ejected by the next physics tick. isNil runs unscheduled, so
+            // create-seat-freeze completes before any tick can land.
+            {
+                _x params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0]];
+                private _pos = AGLToASL (_anchor modelToWorld [_ox, _oy, _oz]);
+                private _dirDeg = _baseDir + _dir;
+                private _obj = objNull;
                 isNil {
                     private _o = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
                     if (_invuln) then { _o allowDamage false };
@@ -127,11 +84,117 @@ fnc_place_settled = {
                     if (_freeze) then { _o enableSimulationGlobal false };
                     _obj = _o;
                 };
+                if (!isNull _obj) then { [_obj, _key] call fnc_duws_keep };
+                _objs pushBack _obj;
+            } forEach _rows;
+        } else {
+            // Physics-settle, not seat-and-freeze: gravity finds the real floor even when the seat Z is wrong,
+            // and a bad landing (tipped or flung) retries rather than freezing in. Settled in farthest-apart
+            // pairs so two live bodies never interfere and both damp on one wait.
+            private _n = count _rows;
+            private _jobs = _rows apply {
+                _x params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0]];
+                [_class, AGLToASL (_anchor modelToWorld [_ox, _oy, _oz]), _baseDir + _dir]
             };
-        };
+            private _slot = []; for "_k" from 0 to (_n - 1) do { _slot pushBack objNull };
+            private _pending = []; for "_k" from 0 to (_n - 1) do { _pending pushBack _k };
 
-        if (!isNull _obj) then { [_obj, _key] call fnc_duws_keep };
-        _objs pushBack _obj;
-    } forEach _rows;
+            private _dropOne = {
+                params ["_idx", "_jx", "_jy"];
+                (_jobs select _idx) params ["_class", "_pos", "_dir"];
+                private _o = createVehicle [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
+                if (_invuln) then { _o allowDamage false };
+                _o setVectorUp [0, 0, 1];
+                _o setDir _dir;
+                _o setPosASL (_pos vectorAdd [_jx, _jy, 0.15]);
+                _o setVelocity [0, 0, 0];
+                _o
+            };
+            // Base-on-floor Z gate: distance2D alone passes a piece that fell to a lower storey or perched at
+            // the same XY. Band is loose -- a correctly-rested piece sits several cm off the median plane (PhysX
+            // contact, per-class bbox-LOD) -- but far under a storey drop or a perch.
+            private _restOK = {
+                params ["_o", "_pos"];
+                private _restBaseZ = (getPosASL _o select 2) + ((boundingBoxReal _o select 0) select 2);
+                alive _o
+                    && {vectorMagnitude (velocity _o) < 0.05}
+                    && {(vectorUp _o select 2) > 0.985}
+                    && {(_o distance2D (ASLToAGL _pos)) < 0.6}
+                    && {abs (_restBaseZ - (_pos select 2)) < 0.15}
+            };
+
+            while { count _pending > 0 } do {
+                // This wave: the two farthest-apart still-pending points (or the lone last one), so the pair
+                // cannot touch while both settle.
+                private _wave = [];
+                if (count _pending == 1) then { _wave = [_pending select 0] } else {
+                    private _bestD = -1; private _bi = 0; private _bj = 1;
+                    for "_a" from 0 to (count _pending - 2) do {
+                        for "_b" from (_a + 1) to (count _pending - 1) do {
+                            private _d = ((_jobs select (_pending select _a)) select 1) distance ((_jobs select (_pending select _b)) select 1);
+                            if (_d > _bestD) then { _bestD = _d; _bi = _a; _bj = _b };
+                        };
+                    };
+                    _wave = [_pending select _bi, _pending select _bj];
+                };
+                _pending = _pending - _wave;
+
+                // Drop the wave, one shared wait for both to come to rest (escape at 3 s so a never-settling
+                // piece cannot stall), validate each, jitter-retry the unsettled -- up to 3 tries.
+                private _todo = +_wave;
+                private _tries = 0;
+                while { count _todo > 0 && {_tries < 3} } do {
+                    private _live = _todo apply {
+                        private _jx = 0; private _jy = 0;
+                        if (_tries > 0) then { _jx = (random 0.4) - 0.2; _jy = (random 0.4) - 0.2 };
+                        [_x, [_x, _jx, _jy] call _dropOne]
+                    };
+                    private _t0 = time;
+                    sleep 0.25;   // gravity not yet engaged: the just-zeroed bodies read at-rest on frame 1
+                    waitUntil { (_live findIf { vectorMagnitude (velocity (_x select 1)) >= 0.05 }) < 0 || {time - _t0 >= 3} };
+                    private _stillTodo = [];
+                    {
+                        _x params ["_idx", "_o"];
+                        if ([_o, (_jobs select _idx) select 1] call _restOK) then {
+                            // A settled piece only needs its rest tilt re-levelled, then freeze so no later tick unseats it.
+                            _o setVectorUp [0, 0, 1];
+                            _o setVelocity [0, 0, 0];
+                            _o enableSimulationGlobal false;
+                            _slot set [_idx, _o];
+                        } else {
+                            deleteVehicle _o;
+                            _stillTodo pushBack _idx;
+                        };
+                    } forEach _live;
+                    _todo = _stillTodo;
+                    _tries = _tries + 1;
+                };
+
+                // Never settled (tipped, slid, dropped a storey): _dropOnFail leaves the slot null rather than
+                // freeze a broken piece; otherwise seat it square at the point and freeze.
+                {
+                    private _idx = _x;
+                    (_jobs select _idx) params ["_class", "_pos", "_dir"];
+                    if (_dropOnFail) then {
+                        _slot set [_idx, objNull];
+                    } else {
+                        private _o = createVehicle [_class, ASLToAGL _pos, [], 0, "CAN_COLLIDE"];
+                        if (_invuln) then { _o allowDamage false };
+                        _o setVectorDirAndUp [[sin _dir, cos _dir, 0], [0, 0, 1]];
+                        _o setPosASL (_pos vectorAdd [0, 0, - ((boundingBoxReal _o select 0) select 2)]);
+                        _o setVelocity [0, 0, 0];
+                        _o enableSimulationGlobal false;
+                        _slot set [_idx, _o];
+                    };
+                } forEach _todo;
+            };
+
+            {
+                if (!isNull _x) then { [_x, _key] call fnc_duws_keep };
+                _objs pushBack _x;
+            } forEach _slot;
+        };
+    };
+
     _objs
 };

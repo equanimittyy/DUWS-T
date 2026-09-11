@@ -50,7 +50,10 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_catalog.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_grid.sqf";
 
-// Loaded after place_settled, the grid and the catalog, which it calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
+// One furnished room, spawned per room by the placer below; loaded after place_settled/grid/catalog it calls.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_room.sqf";
+
+// Loaded after place_settled, the grid, the catalog and the room pass, which it calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_building.sqf";
 
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
