@@ -95,8 +95,8 @@
 ["Land_Basket_F",                   "wall",     0, "",        0, ""],
 ["Land_Sack_F",                     "wall",     0, "",        0, ""],
 ["Land_WoodenCrate_01_F",           "wall",     0, "",        0, ""],
-["Land_ToolTrolley_01_F",           "wall",     0, "",        0, ""],
-["Land_ToolTrolley_02_F",           "wall",     0, "",        0, ""],
+["Land_ToolTrolley_01_F",           "wall",   270, "",        0, ""],
+["Land_ToolTrolley_02_F",           "wall",   270, "",        0, ""],
 ["Land_CanisterPlastic_F",          "wall",     0, "",        0, ""],
 
 // -- freestanding floor bulk: crate stacks and sack heaps, stood in the open middle and walked around; no seats, no tabletop --
