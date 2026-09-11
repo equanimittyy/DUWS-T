@@ -70,12 +70,25 @@ sleep 1;
 private _tokens = [];
 for "_i" from 1 to (floor random 2)     do { _tokens pushBack "closepatrol:team" };
 for "_i" from 1 to (2 + floor random 5) do { _tokens pushBack "widepatrol:patrol" };
+for "_i" from 1 to (floor random 2)     do { _tokens pushBack "widepatrol:recon" };
 private _ring = [];
 {
     private _grp = [_x, _MissionPos, _radius] call DUWS_fnc_zoneSpawnOne;
     if (!isNull _grp) then { _ring pushBack _grp };
 } forEach _tokens;
 [_ring] call fnc_mission_claim;
+
+// Night-blind everyone but the recon squad, so a night approach is a stealth problem against recon and a
+// blackout gamble against the rest. srcToken (set in DUWS_fnc_zoneSpawnOne) marks the exempt groups.
+private _blind = +(units _garrison);
+{ if (((_x getVariable ["DUWS_srcToken", ""]) find "recon") < 0) then { _blind append units _x }; } forEach _ring;
+{
+    private _nvg = hmd _x;
+    if (_nvg != "") then { _x unlinkItem _nvg };
+    private _ptr = (primaryWeaponItems _x) param [1, ""];
+    if (_ptr != "") then { _x removePrimaryWeaponItem _ptr };
+    _x addPrimaryWeaponItem "acc_flashlight";
+} forEach _blind;
 
 // Search circle points at the cluster, not the building; the hostage track marker appears only once he is
 // freed (below), so his hiding place is never given away.
