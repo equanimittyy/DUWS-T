@@ -97,6 +97,17 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // A bonus map reveal fires its own infosearch card, so this one only ever reports the CP.
+    class intel_analysis
+    {
+        title = "$STR_DUWS_T_INTEL_ANALYSIS_TITLE";
+        iconText = "+%1";
+        description = "$STR_DUWS_T_INTEL_ANALYSIS_AWARD";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class CPaddedattrition
     {
         title = "$STR_DUWS_T_CPATTRITION_TITLE";

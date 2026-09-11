@@ -70,17 +70,14 @@ sleep 5;
 // reads as work being done rather than an instant payout.
 sleep (random 60);
 
-private _title = localize "STR_DUWS_T_INTEL_ANALYSIS_TITLE";
-
 private _finalCP = floor _totalCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 
-// The reveal is a bonus on top of the guaranteed CP, armed by the per-item rolls above and gated on
-// pool stock; at most one per delivery, so a hoarded batch cannot dump the map. Resolve it here --
-// fnc_intel_payout does the reveal as its side effect -- so a hit folds into the single award line
-// below rather than firing a second card.
-private _gotIntel = _revealTriggered && {[getPos _caller, _caller] call fnc_intel_payout};
+// Silenced so the reveal's own Overlord line does not double the reveal card fired below.
+private _gotIntel = _revealTriggered && {[getPos _caller, _caller, true] call fnc_intel_payout};
 
-private _awardKey = ["STR_DUWS_T_INTEL_ANALYSIS_AWARD", "STR_DUWS_T_INTEL_ANALYSIS_AWARD_INTEL"] select _gotIntel;
-private _line = format [localize _awardKey, _finalCP];
-["info", [_title, _line]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+private _target = [0,-2] select isDedicated;
+["intel_analysis", [_finalCP]] remoteExec ["BIS_fnc_showNotification", _target];
+if (_gotIntel) then {
+    ["infosearch", [localize "STR_DUWS_T_INTEL_MAP_TITLE", localize "STR_DUWS_T_INTEL_MAP_DESC"]] remoteExec ["BIS_fnc_showNotification", _target];
+};

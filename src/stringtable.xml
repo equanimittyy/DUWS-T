@@ -3289,12 +3289,8 @@
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_AWARD">
-                <Original>Intel awarded: %1 CP</Original>
-                <English>Intel awarded: %1 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_AWARD_INTEL">
-                <Original>Intel awarded: %1 CP and intel</Original>
-                <English>Intel awarded: %1 CP and intel</English>
+                <Original>Intel converted to CP</Original>
+                <English>Intel converted to CP</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
                 <Original>Search</Original>
