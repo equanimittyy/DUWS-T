@@ -5020,25 +5020,18 @@
                 <English>Rain %1</English>
             </Key>
             <Key ID="STR_DUWS_T_rest_fog">
-                <German>Fog</German>
-                <Spanish>Fog</Spanish>
-                <Chinesesimp>Fog</Chinesesimp>
-                <Original>Fog</Original>
-                <English>Fog</English>
+                <German>Fog %1</German>
+                <Spanish>Fog %1</Spanish>
+                <Chinesesimp>Fog %1</Chinesesimp>
+                <Original>Fog %1</Original>
+                <English>Fog %1</English>
             </Key>
-            <Key ID="STR_DUWS_T_rest_fog_off">
-                <German>Off</German>
-                <Spanish>Off</Spanish>
-                <Chinesesimp>Off</Chinesesimp>
-                <Original>Off</Original>
-                <English>Off</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rest_fog_on">
-                <German>On</German>
-                <Spanish>On</Spanish>
-                <Chinesesimp>On</Chinesesimp>
-                <Original>On</Original>
-                <English>On</English>
+            <Key ID="STR_DUWS_T_rest_lightning">
+                <German>Lightning %1</German>
+                <Spanish>Lightning %1</Spanish>
+                <Chinesesimp>Lightning %1</Chinesesimp>
+                <Original>Lightning %1</Original>
+                <English>Lightning %1</English>
             </Key>
             <Key ID="STR_DUWS_T_rest_confirm">
                 <German>Rest</German>

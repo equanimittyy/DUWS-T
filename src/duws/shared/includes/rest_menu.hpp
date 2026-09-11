@@ -19,7 +19,7 @@ class rest_dialog
             x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 3.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 17 * GUI_GRID_H;
+            h = 19.5 * GUI_GRID_H;
             colorBackground[] = {0, 0, 0, 0.7};
         };
 
@@ -58,7 +58,7 @@ class rest_dialog
             x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 9 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 9.5 * GUI_GRID_H;
+            h = 11.5 * GUI_GRID_H;
         };
         class rm_overcast_label: RscText
         {
@@ -99,19 +99,38 @@ class rest_dialog
         class rm_fog_label: RscText
         {
             idc = 8715;
-            text = "$STR_DUWS_T_rest_fog";
+            style = ST_CENTER;
             x = 11 * GUI_GRID_W + GUI_GRID_X;
-            y = 15.7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7 * GUI_GRID_W;
+            y = 15.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
-        class rm_fog_combo: RscCombo
+        class rm_fog_slider: RscSlider
         {
             idc = 8716;
-            x = 18 * GUI_GRID_W + GUI_GRID_X;
-            y = 15.7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11 * GUI_GRID_W;
+            onSliderPosChanged = "call fnc_rest_labels";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 16.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 0.8 * GUI_GRID_H;
+        };
+        class rm_lightning_label: RscText
+        {
+            idc = 8717;
+            style = ST_CENTER;
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 17.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
+        };
+        class rm_lightning_slider: RscSlider
+        {
+            idc = 8718;
+            onSliderPosChanged = "call fnc_rest_labels";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 18.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 0.8 * GUI_GRID_H;
         };
 
         class rm_confirm: RscButton
@@ -119,18 +138,18 @@ class rest_dialog
             idc = 8720;
             text = "$STR_DUWS_T_rest_confirm";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 21 * GUI_GRID_H + GUI_GRID_Y;
             w = 11 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
-            action = "DUWS_rest_hours = sliderPosition 8703; DUWS_rest_overcast = sliderPosition 8712; DUWS_rest_rain = sliderPosition 8714; DUWS_rest_fog = (lbCurSel 8716) == 1; DUWS_rest_confirmed = true; closeDialog 0;";
+            action = "DUWS_rest_hours = sliderPosition 8703; DUWS_rest_overcast = sliderPosition 8712; DUWS_rest_rain = sliderPosition 8714; DUWS_rest_fog = sliderPosition 8716; DUWS_rest_lightning = sliderPosition 8718; DUWS_rest_confirmed = true; closeDialog 0;";
         };
         class rm_close: RscButton
         {
             idc = 8721;
             text = "$STR_DUWS_T_MENU_CLOSE";
             x = 23 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 21 * GUI_GRID_H + GUI_GRID_Y;
             w = 6 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};

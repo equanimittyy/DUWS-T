@@ -1,6 +1,6 @@
 if (!isServer) exitWith {};
 
-params ["_caller", "_restSite", "_hours", "_overcast", "_rain", "_fog"];
+params ["_caller", "_restSite", "_hours", "_overcast", "_rain", "_fog", "_lightning"];
 
 private _coolDownVar = "GM_Heal_LastUsedTime";
 private _coolDownSeconds = 10;
@@ -11,7 +11,7 @@ if (_currentTime - _lastUsedTime >= _coolDownSeconds) then {
     // The confirmation belongs to fnc_rest_heal, after its fade to black has finished. Sent from
     // here it reached the players' screens while they were still watching daylight, so the line
     // announcing the rest arrived before the rest visibly began.
-    [_restSite, _hours, _overcast, _rain, _fog] remoteExec ["fnc_rest_heal", 2];
+    [_restSite, _hours, _overcast, _rain, _fog, _lightning] remoteExec ["fnc_rest_heal", 2];
     missionNamespace setVariable [_coolDownVar, _currentTime];
     publicVariable _coolDownVar;
 } else {

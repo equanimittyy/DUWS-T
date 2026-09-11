@@ -25,6 +25,8 @@ fnc_rest_labels = {
 
     (_disp displayCtrl 8711) ctrlSetText format [localize "STR_DUWS_T_rest_overcast", (sliderPosition 8712) toFixed 2];
     (_disp displayCtrl 8713) ctrlSetText format [localize "STR_DUWS_T_rest_rain", (sliderPosition 8714) toFixed 2];
+    (_disp displayCtrl 8715) ctrlSetText format [localize "STR_DUWS_T_rest_fog", (sliderPosition 8716) toFixed 2];
+    (_disp displayCtrl 8717) ctrlSetText format [localize "STR_DUWS_T_rest_lightning", (sliderPosition 8718) toFixed 2];
 };
 
 // Rain renders only over overcast >= 0.5 (engine floor). The re-set retriggers this handler, but
@@ -52,10 +54,10 @@ sliderSetPosition [8712, overcast];
 sliderSetRange [8714, 0, 1];
 sliderSetPosition [8714, rain];
 
-lbClear 8716;
-lbAdd [8716, localize "STR_DUWS_T_rest_fog_off"];
-lbAdd [8716, localize "STR_DUWS_T_rest_fog_on"];
-lbSetCurSel [8716, [0, 1] select (fog > 0.05)];
+sliderSetRange [8716, 0, 1];
+sliderSetPosition [8716, fog];
+sliderSetRange [8718, 0, 1];
+sliderSetPosition [8718, lightnings];
 
 call fnc_rest_labels;
 
@@ -64,5 +66,5 @@ waitUntil { !dialog };
 if !(missionNamespace getVariable ["DUWS_rest_confirmed", false]) exitWith {};
 DUWS_rest_confirmed = false;
 
-[player, _restSite, DUWS_rest_hours, DUWS_rest_overcast, DUWS_rest_rain, DUWS_rest_fog]
+[player, _restSite, DUWS_rest_hours, DUWS_rest_overcast, DUWS_rest_rain, DUWS_rest_fog, DUWS_rest_lightning]
     remoteExec ["fnc_restHealServer", 2];
