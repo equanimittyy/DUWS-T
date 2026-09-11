@@ -86,6 +86,8 @@ fnc_furnish_building = {
     // rubble when the building is destroyed.
     { _x enableSimulationGlobal true } forEach _placed;
 
+    { [_x] remoteExec ["fnc_furnish_push_addAction", 0, _x] } forEach _placed;
+
     ["INFO", "FURNISH", format ["%1: placed %2 object(s) across %3 room(s)", typeOf _building, count _placed, count _rooms]] call fnc_log;
     _placed
 };

@@ -56,6 +56,9 @@ publicVariable "fnc_duws_deploy";
 // Loaded after place_settled, the grid, the catalog and the room pass, which it calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_building.sqf";
 
+// The furnisher remoteExecs this to clients per piece, so it must reach them.
+fnc_furnish_push_addAction = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_push_addAction.sqf";publicVariable "fnc_furnish_push_addAction";
+
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is

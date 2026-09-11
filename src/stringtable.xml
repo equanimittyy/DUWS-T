@@ -3207,6 +3207,10 @@
                 <Original>Building breached.</Original>
                 <English>Building breached.</English>
             </Key>
+            <Key ID="STR_DUWS_T_FURNISH_PUSH">
+                <Original>Push object</Original>
+                <English>Push object</English>
+            </Key>
             <Key ID="STR_DUWS_T_RANDOM_STRANDED_ASK">
                 <Original>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</Original>
                 <English>Hey, I don't want any trouble. But I was wondering if you could fix up my vehicle?</English>
