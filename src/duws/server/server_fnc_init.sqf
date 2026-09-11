@@ -491,6 +491,7 @@ fnc_debug_force_emission = compile preprocessFileLineNumbers "duws\server\debug\
 // menu's remote pickers cannot.
 fnc_debug_opcom = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_opcom.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
+fnc_search_pick = compile preprocessFileLineNumbers "duws\client\search\fnc_search_pick.sqf";publicVariable "fnc_search_pick";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 

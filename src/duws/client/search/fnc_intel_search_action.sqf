@@ -11,40 +11,11 @@
 // the campaign.
 if (!hasInterface) exitWith {};
 
-// Clause order is load-bearing: an action on the player is evaluated constantly, because the
-// player is never out of range of themselves. Each && takes a code block, so evaluation
-// short-circuits, and the cheapest, most-often-false clauses come first -- only a body under the
-// cursor and within reach reaches the branch below. Everything is read off cursorObject (the thing
-// looked at), not _target (the player).
-//
-// Two ways a thing is searchable. Flagged branch: an objective body or a placed object (laptop,
-// armour) a mission marked, or a surrendered detainee -- single-use, and the type test it carries
-// is what lets a laptop and a living-but-surrendered man through where a corpse test could not.
-// Combat branch: any enemy corpse, flag-free, gated only by the session-wide search budget -- this is what
-// makes every enemy body searchable without flagging one at spawn. A claimed objective body (done)
-// fails the flagged branch and drops to the combat branch, so it becomes an ordinary corpse rather
-// than going dead under the cursor. Budget read via getVariable with defaults: the broadcast
-// DUWS_searchCooldown/DUWS_searchAllowance may not have landed when this first evaluates.
-//
-// Enemy is read from the class config side (0 = east), not `side cursorObject`: the engine reports
-// every corpse as civilian, so a live `side` test matches no body at all. The config lookup is
-// death-stable and survives the AGC corpse-swap the flag-free combat branch exists to sidestep.
-private _cond =
-    "!isNull cursorObject"
-  + " && {cursorObject distance _target < 3}"
-  + " && {"
-  + "     ("
-  + "       (cursorObject getVariable ['DUWS_search_src', '']) != ''"
-  + "       && {!(cursorObject getVariable ['DUWS_search_done', false])}"
-  + "       && {!(cursorObject isKindOf 'CAManBase') || {!alive cursorObject} || {cursorObject getVariable ['isSurrendered', false]}}"
-  + "     )"
-  + "     || {"
-  + "       cursorObject isKindOf 'CAManBase'"
-  + "       && {!alive cursorObject}"
-  + "       && {getNumber (configFile >> 'CfgVehicles' >> typeOf cursorObject >> 'side') == 0}"
-  + "       && {count ((missionNamespace getVariable ['DUWS_searchTimes', []]) select {time - _x < (missionNamespace getVariable ['DUWS_searchCooldown', 900])}) < (missionNamespace getVariable ['DUWS_searchAllowance', 3])}"
-  + "     }"
-  + "   }";
+// The gate -- what is searchable, within reach, in view, and inside budget -- lives in
+// fnc_search_pick, so the show condition and the exec resolve the same target. The condition runs
+// constantly (an action on the player is never out of range of itself), so the pick keeps its work
+// small: a cursor test first, and a nearestObjects scan only when an ordinary corpse is the target.
+private _cond = "!isNull ([_target] call fnc_search_pick)";
 
 private _id = [
     player,
@@ -55,10 +26,9 @@ private _id = [
     _cond,
     {},
     {},
-    // cursorObject is re-read here rather than captured at condition time: the two are a frame
-    // apart, and the server re-checks the flag anyway, so a body that moved out from under the
-    // cursor is refused there rather than paid for here.
-    { [cursorObject, player] remoteExec ["fnc_search_claim", 2]; },
+    // Re-picked here rather than captured at condition time: the two are a frame apart, and the
+    // server re-checks anyway, so a target that moved out of reach is refused there, not paid here.
+    { private _tgt = [player] call fnc_search_pick; if (!isNull _tgt) then { [_tgt, player] remoteExec ["fnc_search_claim", 2]; }; },
     {},
     [],
     6,
