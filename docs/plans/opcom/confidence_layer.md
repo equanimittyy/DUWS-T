@@ -93,6 +93,28 @@ the grid — the same bounded box scan the force-grid deposit uses
 array. A clear bubble's `k` is small (a few cells) and a sighting's is 0, so the cost is tens of writes per
 recon tasking per tick plus one per sighting.
 
+## Clearing: a guaranteed empty sweep drops disproved belief
+
+The coverage stamp records that ground was looked at; the same guaranteed look also settles the *force* belief
+over that ground. A recon reach and a fired OP post detect every in-box group for certain, so a belief whose
+remembered cell sits in the swept box but that the sweep did **not** re-observe is disproved — the group has
+left, died, or was never there — and is deleted (`fnc_opcom_cover_clear`), rather than left to age out over the
+full belief `EXPIRE`. This is what lets OPCOM *un-know* a threat: without it a squad sighted once haunts a
+sector for the whole expiry even after a recon flies through and finds it gone.
+
+It runs after detection in the same pass, gated on `time < DUWS_opcom_tick`: any subject a sensor re-stamped
+this tick — including the fallible `nearTargets` sweep, which runs first — is at the current tick and survives,
+so only a stamp the sweep actually disproved is dropped. The fallible sweep never clears on its own: its "saw
+nothing" is not proof, the same reason its miss never stamps coverage.
+
+- **Recon** clears its `OPCOM_RECON_K` box every tick (guaranteed, no roll).
+- **OP post** clears its `OP_OBSERVE_K` box only on the tick its `OP_OBSERVE_CHANCE` fires — the burst is the
+  post's detection event, so it is also its clear.
+
+Only mobile-group beliefs are cleared. A static discovered subject — the zone / FOB / HQ keys the belief store
+reserves — would be wrongly un-discovered by an overflight, so it must be excluded here before any faucet
+writes one ([`fnc_opcom_belief_init`](../../../src/duws/server/warcom/opcom/belief/fnc_opcom_belief_init.sqf)).
+
 ## Reading: two consumers
 
 | Reader | Uses staleness as | Phase |
@@ -142,6 +164,7 @@ New, in `belief/`:
 | File | Responsibility |
 |---|---|
 | `fnc_opcom_cover_stamp` | `[point, k]` → stamp `DUWS_opcom_tick` into each in-box cell of the `k` box around `point`, clamped to the grid. One shared writer so every faucet — clear bubble and sighting point — stamps identically |
+| `fnc_opcom_cover_clear` | `[point, k]` → delete every belief whose remembered cell is in the `k` box and whose `time < DUWS_opcom_tick`. The guaranteed-sweep counterpart to `cover_stamp`; run after detection so a re-observed subject survives |
 | `fnc_opcom_cover_stale` | `[cell]` → the staleness read above, single-sourcing the formula both consumers call |
 
 Extended in place:
@@ -149,8 +172,8 @@ Extended in place:
 | File | Change |
 |---|---|
 | `fnc_opcom_grid_init` | Allocate `DUWS_opcom_grid_seen` (full-width lattice, all `-OPCOM_COVER_SPAN`) once, beside the static land / component arrays it already builds. Never touched by `fnc_opcom_grid_rebuild` |
-| `fnc_opcom_recon_sense` | After (or within) the box walk it already runs, call `fnc_opcom_cover_stamp` for each recon point's `k` box — unconditional on catching a group |
-| `DUWS_fnc_hardpointOPSense` | On each tick a post's chance fires, stamp its `OP_OBSERVE_K` box (cross-subsystem — the OP sensor lives with the hardpoint code) |
+| `fnc_opcom_recon_sense` | After (or within) the box walk it already runs, call `fnc_opcom_cover_stamp` for each recon point's `k` box — unconditional on catching a group — then `fnc_opcom_cover_clear` on the same box to drop stale belief the reach disproved |
+| `DUWS_fnc_hardpointOPSense` | Every tick stamp its `OP_OBSERVE_K` box (cross-subsystem — the OP sensor lives with the hardpoint code); on the tick its `OP_OBSERVE_CHANCE` fires, `fnc_opcom_cover_clear` the same box after the burst |
 | `fnc_opcom_belief_upsert` | After the store write, `k = 0` point-stamp the sighted cell, so every faucet's positive sightings (recon, `nearTargets`, any future sensor) refresh coverage through the one writer |
 | `fnc_opcom_route` *(P5)* | Add `OPCOM_ROUTE_MU × (cell call fnc_opcom_cover_stale)` to the per-step cost on the `λ = 1` branch |
 | Scout Value in `fnc_opcom_actions` *(P4b)* | Read `fnc_opcom_cover_stale` per footprint cell as the `staleness` term |

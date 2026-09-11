@@ -289,6 +289,8 @@ DUWS_fnc_hardpointOPSense = {
             [_pos, OP_OBSERVE_K] call fnc_opcom_cover_stamp;
             if (random 1 < OP_OBSERVE_CHANCE) then {
                 [_pos] call DUWS_fnc_hardpointOPBurst;
+                // After the burst, not gated on it finding anyone: a fired post that turned up nobody is the strongest clear.
+                [_pos, OP_OBSERVE_K] call fnc_opcom_cover_clear;
             };
         };
     } forEach DUWS_hardpoints;

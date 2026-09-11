@@ -11,7 +11,8 @@
 // running after that sweep, a recon fix is the authoritative overwrite for a group both sensors saw.
 //
 // It also stamps the coverage layer over that reach every tick, catch or not, so ground a recon looked at
-// reads swept-clear rather than never-seen (fnc_opcom_cover_stamp).
+// reads swept-clear rather than never-seen (fnc_opcom_cover_stamp), and clears any stale belief the reach
+// disproves (fnc_opcom_cover_clear).
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_grid_w") exitWith {};
 
@@ -56,5 +57,7 @@ private _wcells = [];
                 [_key, _bp, _str] call fnc_opcom_belief_upsert;
             };
         } forEach _wcells;
+
+        [_pos, _k] call fnc_opcom_cover_clear;
     };
 } forEach DUWS_opcom_taskings;
