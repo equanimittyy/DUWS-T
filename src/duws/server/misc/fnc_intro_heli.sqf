@@ -249,20 +249,21 @@ waitUntil {sleep 0.5; (_dropThreads findIf {!scriptDone _x}) isEqualTo -1};
 missionNamespace setVariable ["intro_heli_done", true, true];
 publicVariable "intro_heli_done";
 
-sleep 6;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_roger"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vzjqx5tp"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["fnc_duws_dialogue", 0];
-
+// Flyaway issued before the Overlord lines, so the aircraft leaves as the stick lands, not after the whole exchange.
+sleep 2;
 _heli flyInHeight 100;
 private _flyAwayPos = _hqPos getPos [15000, random 360];
 _flyAwayPos set [2, 100];
 private _wp2 = _heliGroup addWaypoint [_flyAwayPos, 0];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
-sleep 10;
+
+sleep 4;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_roger"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vzjqx5tp"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 8;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Despawn on distance plus a hard cap, like the helo taxi -- never on the flyaway waypoint
 // completing. The exit point is 15 km out and routinely off-map, so the group can orbit the
