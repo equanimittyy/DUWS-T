@@ -482,8 +482,8 @@ fnc_furnish_building = {
                 };
             };
 
-            // Optional: one wall-backed desk, if a near cell takes it.
-            private _wcls = [_anchorClasses] call _pickCapped;
+            // Optional: one wall-backed desk, half the rooms for variety, if a near cell takes it.
+            private _wcls = if (random 1 < 0.5) then { [_anchorClasses] call _pickCapped } else { "" };
             if (_wcls != "") then {
                 private _wfree = _rcells select { (_x select 1) == "near" && {!(_x select 5)} };
                 private _wgot = false; private _wtries = 0;
