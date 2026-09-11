@@ -184,13 +184,10 @@ the markers; **on by default** (`DUWS_dbgOpcomCoverOn`, its own menu sub-toggle)
 | Layer | Change |
 |---|---|
 | Server gather `fnc_debug_opcom_grid` | Emit each cell's age in the `_cells` payload — a sixth tuple element: `DUWS_opcom_tick - (DUWS_opcom_grid_seen select _i)`, or `-1` once that reaches `OPCOM_COVER_SPAN`, so the client needs no span |
-| Client draw `fnc_debug_opcom_grid_draw` | A `duws_opcom_stale_%1` marker per box cell: text `{n}t` (age ≥ 0) or `N/A` (age `-1`), `setMarkerAlphaLocal 0.5`, a text-only marker type, positioned north of the cell centre so it sits above the dot. Reconciled and torn down by the `duws_opcom_` prefix like the other layers; the toggle off deletes the set |
+| Client draw `fnc_debug_opcom_grid_draw` | A `duws_opcom_stale_%1` marker per box cell: text `{n}t` (age ≥ 0) or `N/A` (age `-1`), `setMarkerAlphaLocal 0.5`, the `mil_triangle_noShadow` icon type, positioned north of the cell centre so it sits above the dot. Reconciled and torn down by the `duws_opcom_` prefix like the other layers; the toggle off deletes the set |
 
-Markers fail silently on a bad create
-([`fnc_debug_opcom_grid_draw.sqf:104-108`](../../../src/duws/client/debug/fnc_debug_opcom_grid_draw.sqf)),
-and the `"Empty"` text-only marker type is unverified in the engine — confirm the labels render by the
-rebuild sample check's `registered=` count jumping by the box-cell count; if `"Empty"` draws no text, fall
-back to a transparent-icon marker type.
+The label carries a visible icon: the invisible `"Empty"` marker type paints no text, so a real icon type is
+required ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-label-needs-a-real-icon-marker-type-the-invisible-empty-type-paints-no-text)).
 
 ## Verification
 

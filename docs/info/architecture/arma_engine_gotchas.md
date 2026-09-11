@@ -250,6 +250,12 @@ A marker colour need not be a class name — a literal `"#(0.5,0,0.5,0.3)"` rend
 
 **Fix:** use the inline form for one-off shades; keep `CfgMarkerColors` for editor-picked colours. Set translucency with `setMarkerAlpha` (a marker created without explicit alpha sits at 1).
 
+## A label needs a real icon marker type; the invisible `"Empty"` type paints no text
+
+`setMarkerType "Empty"` (Eden's invisible/system marker) was meant to carry text with no icon — a text-only cell label — but the map draws nothing for it, silently: no icon and no text either. There is no icon-less marker that still renders its `setMarkerText`. So a labelled marker must use a real icon type from the marker table ([`external/arma3_markers.md`](../external/arma3_markers.md)) and accept the icon beside the text (the OPCOM coverage overlay uses `mil_triangle_noShadow`, `fnc_debug_opcom_grid_draw.sqf`).
+
+**Fix:** for a text label on the map, pick a listed icon type and let the icon show; if a bare label is essential, draw it through the map control's `Draw` event handler (`drawText`) instead of a marker.
+
 ## `str` on a string adds literal quote characters, and this mission's marker names carry them
 
 `str "12345678"` returns the source representation — eight digits wrapped in `"` characters. Zone markers are created as `createMarker [str(_markername), _zonePos]`, so the real name *includes those quotes*, and every later `setMarkerAlpha`/`setMarkerColor`/`setMarkerPos` must spell it the same way. `_markername` is already a `String` from `format`, so the `str` looks redundant, but dropping it on one side addresses a marker that doesn't exist (no error, zone stays invisible).

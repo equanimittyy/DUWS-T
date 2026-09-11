@@ -57,7 +57,7 @@ private _sample = "";
         if ((getMarkerType _dm) isNotEqualTo "") then { deleteMarkerLocal _dm };
     };
 
-    // "Empty" is a text-only marker type; if a build renders no text on it, use a transparent-icon type.
+    // A real icon type (arma3_markers.md #265), not text-only: the invisible "Empty" type renders no text.
     // A never-/long-unseen cell (age -1) shows "N/A" rather than nothing, so the layer is legibly alive
     // before any sweep -- a blank map would read as broken, not as "no coverage yet".
     private _sm = format ["duws_opcom_stale_%1", _i];
@@ -65,7 +65,7 @@ private _sample = "";
         if ((getMarkerType _sm) isEqualTo "") then {
             createMarkerLocal [_sm, [_c select 0, (_c select 1) + _cell * 0.3]];
             _sm setMarkerShapeLocal "ICON";
-            _sm setMarkerTypeLocal "Empty";
+            _sm setMarkerTypeLocal "mil_triangle_noShadow";
             _sm setMarkerColorLocal "#(1,1,1,1)";
             _sm setMarkerSizeLocal [1, 1];
             _sm setMarkerAlphaLocal 0.5;
