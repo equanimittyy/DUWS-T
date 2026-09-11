@@ -116,7 +116,7 @@ private _marks = [];
 // guaranteed FilesSecret for a certain reveal. Turned in at HQ, not paid here.
 private _realSlots = [_realBldg] call _fnc_innerSlots;
 private _cratePos = _realSlots select ((count _realSlots) - 1);   // a back slot, away from the door
-private _crate = createVehicle ["Box_NATO_Wps_F", _cratePos, [], 0, "CAN_COLLIDE"];   // TUNABLE class
+private _crate = createVehicle ["Land_PlasticCase_01_medium_F", _cratePos, [], 0, "CAN_COLLIDE"];   // TUNABLE class
 clearItemCargoGlobal _crate; clearMagazineCargoGlobal _crate; clearWeaponCargoGlobal _crate; clearBackpackCargoGlobal _crate;
 _crate setPosATL _cratePos;
 _crate setVelocity [0, 0, 0];
