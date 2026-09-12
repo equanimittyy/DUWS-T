@@ -1,7 +1,8 @@
 // Locality: server, [] call'd at load to define the streaming helpers. The mobile analogue of hardpoint
 // streaming: a virtualised tasking de-virtualises into a live A3 group near a player and stows back to a
-// world point once it leaves. OPCOM cannot steer a live group -- it runs the order set at spawn until it
-// re-virtualises (docs/plans/opcom/opcom_plan.md) -- so that order carries the whole intent on its own.
+// world point once it leaves. OPCOM steers a live group by re-issuing its order (fnc_opcom_task pushes it
+// through DUWS_fnc_opcom_reOrderLive); a water crossing is the exception -- a live land unit only walks to the
+// near shore, the ferry leg waiting for re-virtualisation (docs/plans/opcom/opcom_plan.md).
 if (!isServer) exitWith {};
 
 // The closest native order to a tasking, set at spawn. Cleared first so a re-spawn inherits no stale
@@ -24,6 +25,28 @@ DUWS_fnc_opcom_applyOrder = {
             _grp setBehaviour "SAFE"; _grp setCombatMode "YELLOW";
         };
     };
+};
+
+// Push a re-order onto an already-live group (fnc_opcom_task set the record; this enacts it). A land type
+// cannot foot over water and the ferry is never borrowed while live (opcom_plan.md), so a route that crosses
+// water only drives the group to the last land point before the ferry leg, to idle there until it stows and
+// the virtual mover ferries it across. Boat/air, guard, and all-land routes get the real order and target.
+DUWS_fnc_opcom_reOrderLive = {
+    params ["_t"];
+    private _grp = groupFromNetId (_t get "grp");
+    if (isNull _grp) exitWith {};
+    private _order = _t get "order";
+    private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
+    if (_landRule && {_order isNotEqualTo "guard"}) then {
+        private _stage = getPosASL (leader _grp);
+        private _crossesWater = false;
+        {
+            if ([_x] call DUWS_fnc_opcom_isWaterPt) exitWith { _crossesWater = true };
+            _stage = _x;
+        } forEach (_t get "route");
+        if (_crossesWater) exitWith { [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder };
+    };
+    [_grp, _order, _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
 };
 
 // OPCOM's own de-virt spawn, so air spawns flying at the tasking's point: the zone spawner flies air in from

@@ -15,7 +15,7 @@ Three layers, one thread.
 |---|---|---|
 | **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per BLUFOR group |
 | **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
-| **Commitment** | Turns a choice into an intent with an absolute minimum lifetime and an owner. Re-scoring fills free capacity but cannot re-task a unit until its hold expires, and a de-virtualised unit is out of reach until it re-virtualises | Between ticks |
+| **Commitment** | Turns a choice into an intent with an absolute minimum lifetime and an owner. Re-scoring fills free capacity but cannot re-task a unit until its hold expires; a de-virtualised unit can still be re-ordered live, except across water — that leg waits for re-virtualisation | Between ticks |
 
 ## Perception: the commander plans against belief, never against truth
 
@@ -455,10 +455,10 @@ matter what, with no early-abandon escape hatch, so a target that dies mid-hold 
 the hold expires. One number covers every active tasking. Resting `garrison` and `guard` taskings are unheld
 — hold 0, freely drawable. Re-scoring next tick fills free capacity and may re-task a unit only once its hold
 has passed. Once a
-tasking's units **de-virtualise** — spawn as a live A3 group — OPCOM can no longer steer them: they run
-their spawned order ([§Spawn posture](#spawn-posture-follows-the-order)) and control returns only when they
-re-virtualise ([§The virtualisation boundary](#the-virtualisation-boundary)). The world can shift under a
-virtual march, never under a spawned group.
+tasking's units **de-virtualise** — spawn as a live A3 group — OPCOM still re-orders them: a new order is
+pushed onto the live group ([§Spawn posture](#spawn-posture-follows-the-order)), so a march can be redirected
+without waiting for it to stow. The one thing it cannot do live is cross water — a land unit only walks to the
+near shore, the ferry leg waiting for re-virtualisation ([§The virtualisation boundary](#the-virtualisation-boundary)) — and a bound ferry carry is off-limits, owned by the transport step.
 
 | Field | Holds |
 |---|---|
@@ -652,9 +652,9 @@ orthogonally — acceptable for spawn-before-contact.
 ### Spawn posture follows the order
 
 A de-virtualised unit runs a native A3 order that is the **closest engine equivalent of its tasking**, set
-at spawn, not a tick later. OPCOM does not steer it after that — a spawned group is out of its hands until
-it re-virtualises ([§Commitment](#commitment-intents-are-sticky)), so the spawned order has to carry the
-whole intent on its own.
+at spawn, not a tick later. OPCOM can re-issue that order to the live group later — the same
+`DUWS_fnc_opcom_applyOrder` push ([§Commitment](#commitment-intents-are-sticky)) — so the spawned order is the
+starting intent, not a life sentence; only a water crossing must wait for re-virtualisation.
 
 The A3 order per tasking — Seek & Destroy for an assault, a `SAFE` move for a reposition (holding fire, `BLUE`,
 when the move is a supply run), a `SAFE` hold for a guard — is set by `DUWS_fnc_opcom_applyOrder`
