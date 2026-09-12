@@ -507,7 +507,9 @@ Each unit carries two orthogonal fields:
   (zone-bound reinforcement, the spawn default) and `guard` (idle hold-anywhere) are the two resting taskings;
   the rest are active.
 - **Status** — how the current tasking is going: `virtual` (owns no live group yet — a cell on a route),
-  `moving`, `engaged`, or `dead`, read per live group each tick off `behaviour` / `knowsAbout` / unit count
+  `moving`, `engaged`, or `dead`, read per live group each tick off `behaviour` / `knowsAbout` / alive-unit
+  count — a wiped group reads `dead` at once (not when its corpses clear), so its record retires without
+  waiting for the player to leave
   ([`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf)).
 
 Cheap: a handful of live groups, one read each, alongside the streaming check that already runs each tick. A

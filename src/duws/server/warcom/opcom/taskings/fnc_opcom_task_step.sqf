@@ -36,7 +36,10 @@ private _nearestPlayerCells = {
 
     if (_live) then {
         private _grp = groupFromNetId (_t get "grp");
-        if (isNull _grp || {count units _grp == 0}) then {
+        // Alive-count, not count units: a wiped group keeps its corpses in `units` until the mission GC clears
+        // them (when the player leaves), so a body-count gate would leave the record live and depositing stale
+        // force until then.
+        if (isNull _grp || {(units _grp) findIf {alive _x} < 0}) then {
             _t set ["status", "dead"];
             _t set ["grp", ""];
         } else {
