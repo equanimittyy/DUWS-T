@@ -141,7 +141,9 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     #define CLOCK_BASE 60     // armed once and never called off
     #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
 
-    // Bring the cordon in to hunt the building. Reused when the hostage is freed.
+    // Held off the alarm and fired only on the freed branch: the execution clock is a race to wipe the
+    // garrison, and pulling the outer ring onto the house mid-countdown swamped that fight before the player
+    // could win it.
     private _convergeRing = {
         {
             private _p = _x;
@@ -169,7 +171,6 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     private _arm = {
         _alarmAt = time + CLOCK_BASE;
         _state = "ALARM";
-        call _convergeRing;
     };
 
     private _fnc_pipes = { params ["_n"]; private _s = ""; for "_i" from 1 to _n do { _s = _s + "|" }; _s };
