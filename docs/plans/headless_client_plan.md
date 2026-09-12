@@ -74,14 +74,14 @@ The OPFOR half of this table is empty on purpose: the enemy patrol, assault and 
 deleted, so until OPCOM replaces them nothing mobile spawns on that side. Whatever it
 turns out to spawn is what this plan will hand off, and it is the reason the plan is worth keeping.
 
-Zone garrisons — `server/init_zones/fnc_spawn_team.sqf` and the garrison placers in
+Zone garrisons — `server/placement/fnc_spawn_team.sqf` and the garrison placers in
 `server/misc/fnc_garrison*.sqf` — stay on the server. See the trade-off below.
 
 ### Routing waypoint calls
 
 Waypoint logic is already factored into its own files, which is the seam that makes this
 tractable: `fnc_WARCOM_wp_blu_patrol.sqf:7,17,25` and the `bis_fnc_taskPatrol` call at
-`server/init_zones/fnc_spawn_team.sqf:64`.
+`server/placement/fnc_spawn_team.sqf:64`.
 
 Each call becomes `remoteExec [..., groupOwner _grp]` rather than a direct call. Where the group
 is server-owned that resolves to the server and behaves exactly as it does today, so the change

@@ -89,7 +89,7 @@ The top level is execution locality, the level below it is subsystem:
 ```text
 src/duws/
   server/   server_init.sqf  server_var_init.sqf  server_fnc_init.sqf
-            init_zones/ warcom/ missions/ misc/ init_hq/ dialog/ supports/
+            init_zones/ placement/ warcom/ missions/ misc/ init_hq/ dialog/ supports/
   client/   client_init.sqf
             dialog/ supports/ misc/ init_hq/ operative/ missions/ warcom/ sounds/ includes/
   shared/   functions/ factions/ includes/ sounds_npics/
@@ -112,7 +112,8 @@ does not imply server-only.
 
 | Subsystem | Role |
 |---|---|
-| `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Siting (the "More Urban" town detection) and the civilian town system are in [`zones_and_civilians.md`](gameplay/zones_and_civilians.md) |
+| `init_zones/` | Procedural zone lifecycle: siting, generation, capture logic, streaming, hardpoints, reinforcement. It decides what a zone holds and calls `placement/` to build it. Siting (the "More Urban" town detection) and the civilian town system are in [`zones_and_civilians.md`](gameplay/zones_and_civilians.md) |
+| `placement/` | Shared primitives that put objects and units in the world, called by zones, hardpoints, HQ and missions alike: team/vehicle spawners and standing-orders posture, composition placement and its era sets, at-rest prop/loot seating, and building interior furnishing |
 | `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. The Main Base layout, the tool that edits it and the spawn tables are in [`composition_tooling.md`](architecture/composition_tooling.md) (HQ specifics: [§Editing the HQ layout](architecture/composition_tooling.md#editing-the-hq-layout)) |
 | `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type. How to add a type, and the design bar it must clear, in [`side_mission_authoring.md`](gameplay/side_mission_authoring.md) |
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
@@ -130,7 +131,7 @@ does not imply server-only.
 |---|---|---|
 | Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions, plus per-town reputation. Writers, faucets and sinks in [`economy.md`](gameplay/economy.md) |
 | Persistence | `server/persistence/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
-| Unit spawning | `server/init_zones/fnc_spawn_team.sqf`, `fnc_spawn_vehicle.sqf`, `shared/functions/fnc_spawn_vocab.sqf` | Three systems, chosen by what is raised: the token spawner (rosters as data, one call for side/skill/loot/posture) for teams that patrol or garrison; static crewing for a gunner on an emplaced weapon; direct `BIS_fnc_spawnGroup` for bespoke one-offs that share no team shape. Which is which, and why they are not interchangeable, are in [`unit_spawning.md`](architecture/unit_spawning.md) |
+| Unit spawning | `server/placement/fnc_spawn_team.sqf`, `fnc_spawn_vehicle.sqf`, `shared/functions/fnc_spawn_vocab.sqf` | Three systems, chosen by what is raised: the token spawner (rosters as data, one call for side/skill/loot/posture) for teams that patrol or garrison; static crewing for a gunner on an emplaced weapon; direct `BIS_fnc_spawnGroup` for bespoke one-offs that share no team shape. Which is which, and why they are not interchangeable, are in [`unit_spawning.md`](architecture/unit_spawning.md) |
 | Faction detection | `shared/faction_lib/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](gameplay/faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
 | Scroll-menu actions | `addAction` / `BIS_fnc_holdActionAdd` / `fnc_open_action_menu` call sites across `client/`, `server/` and `shared/` | Every entry DUWS adds, its priority/colour bucket (`shared/includes/action_style.hpp`) and the broadcast rules, in [`player_text_style_guide.md`](gameplay/player_text_style_guide.md) |

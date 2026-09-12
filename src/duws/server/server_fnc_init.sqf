@@ -42,24 +42,24 @@ publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
 // After fnc_duws_keep, which it calls; server-only, so not broadcast.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_place.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_composition_place.sqf";
 
 // Settled-object counterpart to fnc_composition_place: seats simulated pieces (loot, live props) at rest
 // instead of freezing them. After fnc_duws_keep, which it calls; server-only, so not broadcast.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_place_settled.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_place_settled.sqf";
 
 // Both feed the placer below, so loaded ahead of it; server-only, not broadcast.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_catalog.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_grid.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_catalog.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_grid.sqf";
 
 // One furnished room, spawned per room by the placer below; loaded after place_settled/grid/catalog it calls.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_room.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_room.sqf";
 
 // Loaded after place_settled, the grid, the catalog and the room pass, which it calls; server-only, so not broadcast (the debug menu remoteExecs it to the server).
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_building.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_building.sqf";
 
 // The furnisher remoteExecs this to clients per piece, so it must reach them.
-fnc_furnish_push_addAction = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_furnish_push_addAction.sqf";publicVariable "fnc_furnish_push_addAction";
+fnc_furnish_push_addAction = compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_push_addAction.sqf";publicVariable "fnc_furnish_push_addAction";
 
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
@@ -427,9 +427,9 @@ fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enem
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";
 // The standing orders half of every spawner below, and of the base guards: a group is raised by one
 // of them and ordered by this.
-fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_apply_posture.sqf";
-fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
-fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
+fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\placement\fnc_apply_posture.sqf";
+fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_team.sqf";
+fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_vehicle.sqf";
 // Straight-line water probe the convoy threads and the client-side HVT offer picker use to reject an
 // approach bearing that crosses the sea. Broadcast for that picker call site (fnc_hvt_dest_pick).
 fnc_route_has_water = compile preprocessFileLineNumbers "duws\server\misc\fnc_route_has_water.sqf";publicVariable "fnc_route_has_water";
@@ -455,7 +455,7 @@ fnc_modern_vehfittingstation = compile preprocessFileLineNumbers "duws\server\in
 fnc_modern_FieldHospital = compile preprocessFileLineNumbers "duws\server\init_zones\prefabs\modern\fnc_modern_FieldHospital.sqf";
 // After the builders
 // above so the zone set can reference them; the hardpoint resolver is read later by the placer.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_sets.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_composition_sets.sqf";
 
 // The engine keeps exactly one onMapSingleClick handler per machine and offers no way to read back
 // what is installed, so two features that each install one silently disarm each other and the

@@ -151,7 +151,7 @@ demanding a fully-hidden one keeps the cost constant and never blocks a spawn.
 ## Hunt posture
 
 Reserves are ordered with a dedicated `"hunt"` case in
-`src/duws/server/init_zones/fnc_apply_posture.sqf:219`: `AWARE` behaviour, `YELLOW` combat mode,
+`src/duws/server/placement/fnc_apply_posture.sqf:219`: `AWARE` behaviour, `YELLOW` combat mode,
 `FULL` speed, a `SAD` waypoint, then a cycle. Speed is deliberate — a reinforcement runs, it does
 not patrol; the wave has to arrive as pressure, not a slow trickle. It applies unchanged to a
 mounted group or aircraft, each hunting at its own pace.

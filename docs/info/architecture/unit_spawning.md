@@ -7,7 +7,7 @@ style choice. This records the split and the rule for choosing.
 
 ## 1. Token spawner — teams that patrol or garrison
 
-`server/init_zones/fnc_spawn_team.sqf` and `fnc_spawn_vehicle.sqf` raise a team from a composition
+`server/placement/fnc_spawn_team.sqf` and `fnc_spawn_vehicle.sqf` raise a team from a composition
 *token* — a row on `DUWS_teamRosters` (`shared/functions/fnc_spawn_vocab.sqf`) that names bare roles,
 drawn from the detected faction's pools. One call resolves the side, the AI skill, random loot, the
 spawn position and the patrol orders. Use it for any team that patrols or garrisons a zone, a base or a
