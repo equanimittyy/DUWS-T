@@ -6,6 +6,7 @@
 //   ["task", id, order, targetPos]        -- give tasking `id` an active order to a target
 //   ["regarrison", id, zoneKey]           -- send tasking `id` to a zone; it settles into that garrison on arrival
 //   ["supply", id, targetPos]             -- send tasking `id` on a supply run; deleted and completed on arrival
+//   ["teleport", id, pos]                 -- snap tasking `id` to a world pos (its stored point, and the live group if spawned)
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
 // The order verbs zero the commit hold first: hand-driving re-tasks on demand, including a de-virtualised
@@ -75,6 +76,27 @@ switch (_verb) do {
             _t set ["hold", 0];
             [_t, "move", _b, "", true] call fnc_opcom_task
         };
+    };
+    case "teleport": {
+        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        if (_i < 0) exitWith { ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false };
+        private _t = DUWS_opcom_taskings select _i;
+        // A live carry binds transport and rider by position; snapping one half alone strands the pair.
+        if ((_t getOrDefault ["carrying", -1]) >= 0 || {(_t getOrDefault ["ridingOn", -1]) >= 0}) exitWith {
+            ["WARN", "OPCOMDBG", format ["teleport: tasking %1 is mid-ferry -- release it first", _a]] call fnc_log; false
+        };
+        private _dest = [_b select 0, _b select 1, getTerrainHeightASL _b];
+        _t set ["pos", _dest];
+        _t set ["route", []];   // stale from the old pos
+        private _grp = groupFromNetId (_t get "grp");   // grpNull when virtual, so the live snap is skipped
+        if (!isNull _grp) then {
+            private _hulls = [];
+            { private _v = vehicle _x; if (_v != _x && {!(_v in _hulls)}) then { _hulls pushBack _v } } forEach units _grp;
+            { _x setPos [_b select 0, _b select 1, (getPosATL _x) select 2] } forEach _hulls;   // keep altitude: a grounded air hull explodes
+            { if (vehicle _x == _x) then { _x setPos [(_b select 0) + (random 8 - 4), (_b select 1) + (random 8 - 4), 0] } } forEach units _grp;
+        };
+        ["INFO", "OPCOMDBG", format ["teleported tasking %1 to %2", _a, _dest apply { round _x }]] call fnc_log;
+        true
     };
     case "list": {
         ["INFO", "OPCOMDBG", format ["%1 tasking(s):", count DUWS_opcom_taskings]] call fnc_log;

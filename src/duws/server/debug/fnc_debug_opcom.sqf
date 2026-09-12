@@ -45,6 +45,14 @@ switch (_verb) do {
         };
         [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
+    case "teleportlist": {
+        // Every tasking, live included -- unlike the re-task lists, a teleport snaps the group in place too.
+        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
+        private _rows = DUWS_opcom_taskings apply {
+            [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
+        };
+        ["Teleport which tasking?", _rows, "teleport", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
     case "recruit": {
         // _a = row, _b = zone key. Site at the zone centre and home the unit there, so homeZone drives the
         // garrison-reserve coupling.
@@ -64,6 +72,10 @@ switch (_verb) do {
     case "supply": {
         private _ok = ["supply", _a, _b] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Supply-run %1 -> %2.", _a, _b apply { round _x }] } else { format ["Supply-run refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "teleport": {
+        private _ok = ["teleport", _a, _b] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Teleported %1 -> %2.", _a, _b apply { round _x }] } else { format ["Teleport refused for %1 (gone / mid-ferry). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "list": {
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
