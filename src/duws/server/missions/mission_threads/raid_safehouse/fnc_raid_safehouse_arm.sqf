@@ -8,7 +8,7 @@
 // house would give no feedback without it.
 params ["_house"];
 if (isNull _house || {!hasInterface}) exitWith {};
-#define REACH 10       // TUNABLE, metres from the shooter to a door point
+#define REACH 3        // TUNABLE, metres from the shooter to a door point
 #define POINT_BLANK 1.5 // TUNABLE, at this range the aim check is waived -- the shooter is on the door
 #define TOWARD 0.5     // TUNABLE, cos of the half-angle the shot must fall within to count as aimed at the door
 
