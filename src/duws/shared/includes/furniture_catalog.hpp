@@ -17,7 +17,7 @@
 //                wall      -- placed back-flush and perpendicular to a wall (sofa, shelf, cabinet).
 //                clutter   -- seated on an anchor's top.
 //                freestand -- stands in the open middle like an anchor but inert: no seats, no tabletop
-//                             clutter (a crate stack, a sack heap). Carries no family (family "", slot "").
+//                             clutter (a crate stack). Carries no family (family "", slot "").
 //   frontYaw   degrees subtracted from a target bearing so the model's real front lands on it (heading =
 //              target - frontYaw); i.e. the bearing the front points at when placed at heading 0 (+Y due
 //              north). Hand-read per class with the calibration tool, since no command reports a model's
@@ -91,9 +91,8 @@
 ["Land_FlowerPot_01_Flower_F",      "wall",     0, "",        0, ""],
 ["Land_FlowerPot_01_F",             "wall",     0, "",        0, ""],
 
-// -- containers: single crate/sack, buckets, baskets, trolleys; wall-flush, fit any room --
+// -- containers: single crate, buckets, baskets, trolleys; wall-flush, fit any room --
 ["Land_Basket_F",                   "wall",     0, "",        0, ""],
-["Land_Sack_F",                     "wall",     0, "",        0, ""],
 ["Land_WoodenCrate_01_F",           "wall",     0, "",        0, ""],
 ["Land_ToolTrolley_01_F",           "wall",   270, "",        0, ""],
 ["Land_ToolTrolley_02_F",           "wall",   270, "",        0, ""],
@@ -104,14 +103,11 @@
 ["Land_Bucket_clean_F",             "wall",     0, "",        0, ""],
 ["Land_Bucket_painted_F",           "wall",     0, "",        0, ""],
 
-// -- freestanding floor bulk: crate stacks and sack heaps, stood in the open middle and walked around; no seats, no tabletop --
+// -- freestanding floor bulk: crate stacks, stood in the open middle and walked around; no seats, no tabletop --
 ["Land_CratesPlastic_F",            "freestand", 0, "", 0, ""],
-["Land_CratesShabby_F",             "freestand", 0, "", 0, ""],
 ["Land_CratesWooden_F",             "freestand", 0, "", 0, ""],
 ["Land_WoodenCrate_01_stack_x3_F",  "freestand", 0, "", 0, ""],
 ["Land_WoodenCrate_01_stack_x5_F",  "freestand", 0, "", 0, ""],
-["Land_Sacks_goods_F",              "freestand", 0, "", 0, ""],
-["Land_Sacks_heap_F",               "freestand", 0, "", 0, ""],
 
 // -- office: wall-backed desks (chair on the front) + office chair + desk clutter (family "office"); office wall pieces (flat) --
 ["OfficeTable_01_new_F",            "anchor", 180, "office",  1, "wall"],

@@ -417,7 +417,7 @@ fnc_furnish_room = {
         };
     };
 
-    // Freestanding floor bulk (a crate stack, a sack heap): reuses the central-anchor path, but its catalog
+    // Freestanding floor bulk (a crate stack): reuses the central-anchor path, but its catalog
     // family "" makes _placeAnchor skip seats and (guarded above) the tabletop, so the piece lands inert.
     private _freeStand = ["freestand"] call fnc_furnish_classesFor;
     if (_freeStand isNotEqualTo [] && {random 1 < 0.5}) then {
