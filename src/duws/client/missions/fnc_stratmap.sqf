@@ -50,11 +50,6 @@ if !(_cachedOffers isEqualTo []) exitWith {
 array_of_missions = [];
 
 failsafe_not_found = true;
-failsafe_not_found2 = false;
-[] spawn {
-	uiSleep 20;
-	failsafe_not_found2 = true;
-};
 
 _handle = [] spawn {
 
@@ -121,14 +116,12 @@ _handle = [] spawn {
 	_bag = _bag select { (_x select 0) != _idx };
 
 	private _threadName = (_missionDefs select _idx) select 0;
-	// "More Urban" seats offers in named locations; drop it once its 20s failsafe has fired.
-	private _allowUrban = (moreUrban == 1) && !failsafe_not_found2;
 
 	// Same siting the debug force tool uses. _kibot_pos_array_missionPos is the keep-apart list, seeded
 	// with a sentinel at the top of this thread. The rule (column 13) makes siting vet and hand back a
 	// convoy destination zone; a [] result means no fit -> draw a different type for this slot.
 	private _rule = (_missionDefs select _idx) select 13;
-	private _found = [_threadName, _wantHard, getPos player, _kibot_pos_array_missionPos, _allowUrban, _rule] call fnc_mission_findSite;
+	private _found = [_threadName, _wantHard, getPos player, _kibot_pos_array_missionPos, _rule] call fnc_mission_findSite;
 
 	if (_found isEqualTo []) then {
 		["INFO", "MISSION", format ["site: type %1 found no fit, drawing another", _idx]] call fnc_log;

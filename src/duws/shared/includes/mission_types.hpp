@@ -77,7 +77,9 @@
 // is the one surveyKind exempt from findSite's zone-interior claimed gate. The deny-armor convoy uses "map" too: its spawn is free
 // but needDest still ties the haven it drives to a zone. The HVT convoy stays "zone" -- its finder anchors
 // the eject on a discovered held zone, not a dot. The front-vs-deep bias is separate -- it is the offer's
-// hard/easy dial, not the survey source.
+// hard/easy dial, not the survey source. The "More Urban" setup toggle shapes only zone placement, never the
+// mission survey: with zones seated on building clusters, the zone-anchored weighting already pulls offers
+// toward those urban zones, so forcing the survey itself into towns on top would only double-count.
 //
 // The launcher is a literal block per row rather than something built from the thread column:
 // BIS_fnc_strategicMapOpen runs it with no arguments and an SQF block captures no locals, so the

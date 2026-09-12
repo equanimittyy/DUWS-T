@@ -24,18 +24,16 @@
 //   _hard        the placement dial: true favours deep enemy ground, false the frontline seam
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
-//   _allowUrban  the "More Urban" global override: true forces the town survey for every type
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
 //                routeAvoidBlufor, hardEligible, weight, surveyKind]. Reads the destination fields (1-3)
 //                and surveyKind (6); the draw (fnc_stratmap) reads hardEligible/weight.
 //
-// Contract: [_threadName, _hard, _origin, _avoid, _allowUrban, _spawnRule] -> [_pos, _dest] | [].
+// Contract: [_threadName, _hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
 params [
     "_threadName",
     ["_hard", false],
     ["_origin", PosOfBLUHQ],
     ["_avoid", []],
-    ["_allowUrban", ((missionNamespace getVariable ["moreUrban", 0]) == 1)],
     ["_spawnRule", [false, 0, false, false, 1, "zone"]]
 ];
 _spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"]];
@@ -177,11 +175,11 @@ private _fnZoneWeight = {
     1 / _dFri
 };
 
-// Town survey samples MissionLocations; with none present (a server may not carry them) it cannot run,
-// so a town-survey type -- or the "More Urban" override -- falls back to the zone survey. "More Urban"
-// wins over a map-survey type too, so its override still routes every type through towns.
+// Town survey samples MissionLocations; with none present (a server may not carry them) it falls back to the
+// zone survey. The "More Urban" toggle stays out of the mission survey -- it already urbanises offers by
+// seating the zones this survey anchors on, so town-forcing here would only double-count.
 private _mLocs = missionNamespace getVariable ["MissionLocations", []];
-private _useTown = ((_surveyKind isEqualTo "town") || _allowUrban) && {!(_mLocs isEqualTo [])};
+private _useTown = (_surveyKind isEqualTo "town") && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
 private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
 // Capture-zone enumerates OPFOR zones as hardpoint enumerates emplacements, but anchors ON the target
