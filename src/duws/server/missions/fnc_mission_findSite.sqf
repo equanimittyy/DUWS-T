@@ -307,8 +307,9 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
 
     // Off every zone/town by 400 m -- the drift a thread's objective takes before fnc_missionTargetPos
     // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
-    // The capture type is exempt: it deliberately anchors on a zone, which this ownership-blind gate rejects.
-    if (!_useCapture && {[_cand, 400] call fnc_pos_claimed}) then { continue };
+    // Capture and town types are exempt: both deliberately anchor on claimed ground -- a zone, a town --
+    // which this gate rejects, and a town survey's every candidate sits on the town its finder works.
+    if (!_useCapture && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
 
     private _clear = true;
     { if (_cand distance _x < 250) exitWith { _clear = false } } forEach _avoid;
