@@ -11,21 +11,12 @@ private _radius = 50;
 private _deliverDist = 50;
 private _deadline = DUWS_curDeadlineAt;
 
-// duws_town_circles is index-aligned with civ_locations, so a circle's index is the one
-// fnc_town_rep_adjust takes.
-private _enemyTowns = missionNamespace getVariable ["DUWS_enemy_town_pos", []];
+// Finder already put the dot on the delivery town centre, so resolve the index by position, not a re-pick.
+// duws_town_circles is index-aligned with civ_locations, so that index is the one fnc_town_rep_adjust takes.
 private _circles = missionNamespace getVariable ["duws_town_circles", []];
-private _townIdx = -1;
-private _townPos = [];
-private _bestD = 1e9;
-{
-    _x params ["_c", ""];
-    if ((_enemyTowns findIf { _x distance2D _c < 5 }) < 0) then {
-        private _d = _c distance2D _MissionPos;
-        if (_d < _bestD) then { _bestD = _d; _townPos = _c; _townIdx = _forEachIndex };
-    };
-} forEach _circles;
+private _townIdx = _circles findIf { (_x select 0) distance2D _MissionPos < 5 };
 if (_townIdx < 0) exitWith { [21, _requester, "no_delivery_town"] call fnc_mission_abort };
+private _townPos = (_circles select _townIdx) select 0;
 
 // The aid crew's thanks names the delivery town: the location's own name, nearest-location fallback, then
 // a generic if the map left it unnamed.
