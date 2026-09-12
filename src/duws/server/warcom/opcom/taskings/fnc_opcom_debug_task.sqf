@@ -8,6 +8,9 @@
 //   ["supply", id, targetPos]             -- send tasking `id` on a supply run; deleted and completed on arrival
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
+// The order verbs zero the commit hold first: hand-driving re-tasks on demand, including a de-virtualised
+// (live) unit, which is re-ordered in place. A land unit re-ordered across water walks to the near shore and
+// idles until it re-virtualises. The hold is the automated loop's anti-flap lock, not a hand-drive limit.
 // Example: private _id = ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
 //          [_id, "assault", getPosASL player] call fnc_opcom_debug_task;
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""]];
@@ -31,7 +34,9 @@ switch (_verb) do {
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            [DUWS_opcom_taskings select _i, _b, _c] call fnc_opcom_task
+            private _t = DUWS_opcom_taskings select _i;
+            _t set ["hold", 0];
+            [_t, _b, _c] call fnc_opcom_task
         };
     };
     case "regarrison": {
@@ -55,6 +60,7 @@ switch (_verb) do {
                         _ok = false;
                     };
                 };
+                _t set ["hold", 0];
                 if (_ok) then { [_t, "move", _target, _b] call fnc_opcom_task } else { false }
             };
         };
@@ -64,7 +70,9 @@ switch (_verb) do {
         if (_i < 0) then {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
-            [DUWS_opcom_taskings select _i, "move", _b, "", true] call fnc_opcom_task
+            private _t = DUWS_opcom_taskings select _i;
+            _t set ["hold", 0];
+            [_t, "move", _b, "", true] call fnc_opcom_task
         };
     };
     case "list": {
