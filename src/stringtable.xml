@@ -3168,8 +3168,8 @@
                 <English>An OPFOR informant safehouse is hidden amongst the local populace here. Work with the locals for a lead, find the right one, breach it, and seize the intel cache inside.</English>
             </Key>
             <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_NOTE">
-                <Original>Breaching the wrong house will incur a rep penalty.</Original>
-                <English>Breaching the wrong house will incur a rep penalty.</English>
+                <Original>Shoot a door to breach a locked house. Breaching the wrong house will incur a rep penalty.</Original>
+                <English>Shoot a door to breach a locked house. Breaching the wrong house will incur a rep penalty.</English>
             </Key>
             <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_BRIEF">
                 <Original>Alpha 1-1, Allseer has located an enemy safehouse full of intel amongst the population of %1. Find it, breach it, and retrieve the cache.</Original>
