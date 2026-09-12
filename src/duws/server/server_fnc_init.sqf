@@ -177,6 +177,8 @@ fnc_convoy_fit = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convo
 fnc_mission_safepos = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_safepos.sqf";
 
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
+// Broadcast: the finder runs client-side in the picker; else the squad-seating gate is lost to the generic.
+fnc_rescue_squad_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_site.sqf";publicVariable "fnc_rescue_squad_site";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
 fnc_steal_supply_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_supply\fnc_steal_supply_mission.sqf";
 fnc_transport_IDAP_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\transport_idap\fnc_transport_IDAP_mission.sqf";
