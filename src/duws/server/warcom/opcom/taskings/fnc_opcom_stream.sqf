@@ -3,7 +3,7 @@
 // world point once it leaves. OPCOM steers a live group by re-issuing its order (fnc_opcom_task pushes it
 // through DUWS_fnc_opcom_reOrderLive). A water crossing is not steered on foot: the live land unit walks to
 // the near shore and a borrowed transport ferries it across in view (fnc_opcom_ferry,
-// docs/plans/opcom/ferry_live_render.md).
+// docs/plans/opcom/opcom_plan.md §Transport).
 if (!isServer) exitWith {};
 
 // The closest native order to a tasking, set at spawn. Cleared first so a re-spawn inherits no stale

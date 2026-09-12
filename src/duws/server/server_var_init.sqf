@@ -638,7 +638,7 @@ OPCOM_ROUTE_LIFT_PENALTY = 1e6;
 // per this many -- an island-gap deadlock surfaces in the RPT without flooding it (opcom_plan.md §Transport).
 OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
 
-// Live ferry rendering tunables (docs/plans/opcom/ferry_live_render.md). The wait cap is the load-bearing one:
+// Live ferry rendering tunables (docs/plans/opcom/opcom_plan.md §Transport). The wait cap is the load-bearing one:
 // a board or landing that never settles (a bad LZ, stuck AI) forces through at it rather than hang bound.
 OPCOM_FERRY_BOARD_BOAT = 100;    // m
 OPCOM_FERRY_BOARD_LAND = 20;     // m

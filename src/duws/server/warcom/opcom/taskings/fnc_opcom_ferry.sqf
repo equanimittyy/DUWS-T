@@ -193,7 +193,7 @@ DUWS_fnc_opcom_ferryRelease = {
 };
 
 // Drive a carrying transport for one tick, choosing live or virtual by the transport's OWN streaming and
-// keeping the rider bound across it (docs/plans/opcom/ferry_live_render.md). Far, it stows -- reVirt keeps
+// keeping the rider bound across it (docs/plans/opcom/opcom_plan.md §Transport). Far, it stows -- reVirt keeps
 // carrying/embarked, so the virtual step resumes the carry; it holds live through a board/unload in progress.
 DUWS_fnc_opcom_ferryTick = {
     params ["_t", "_near"];

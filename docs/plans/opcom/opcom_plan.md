@@ -751,10 +751,13 @@ the transport, dropping at the **far shore** — the first land cell past the wa
 a watched crossing plays out live — the transport closes on the rider, the rider board-despawns to a bound
 virtual record that rides the transport's position, and it re-spawns disembarking at the far shore — while an
 unwatched one steps across virtually exactly as above. Neither end forces the other live: a player over a rider
-waiting for a lift does not pull a transport still kilometres off. The full live model — per-hull load and
-unload (a rotary lands, a boat closes to `OPCOM_FERRY_BOARD_BOAT`), the seamless virtual↔live handoff, and the
-fallbacks — is [live ferry rendering](ferry_live_render.md). A freed transport, live or virtual, reverts to a
-`guard` in place, back in the pool.
+waiting for a lift does not pull a transport still kilometres off. Per hull: a rotary finds an LZ, lands, and
+board-despawns each rider through a `GetIn` handler as it enters (the seat frees instantly, so one hull loads a
+whole squad); a boat closes to `OPCOM_FERRY_BOARD_BOAT` and takes the whole group; unload mirrors it, with a
+stall cap forcing a board or landing through if it never settles. It all lives in `DUWS_fnc_opcom_ferryTick` /
+`DUWS_fnc_opcom_ferryStepLive`
+([`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). A freed
+transport, live or virtual, reverts to a `guard` in place, back in the pool.
 
 **Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
 the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander
