@@ -2,35 +2,37 @@
 //
 // Breach is shot-tracked off per-door points, not a HitPart: a building door is often collision-only geometry
 // that fires no HitPart, so a round into it never registered. Each point carries its door source, so the shot
-// opens only the door it hit, not the house's first shut one.
+// unlocks only the door it hit, not the house's first locked one.
 //
-// The locked-door action exists because bis_disabled_Door_N suppresses the engine open action, so a locked
-// house would give no feedback without it.
+// No breach action of our own: bis_disabled_Door_N leaves the engine's "Open door" in place -- it wiggles the
+// locked leaf rather than suppressing the action -- so a second addAction would only double it. The shoot-to-
+// breach instruction comes from a proximity hint instead, fired once per house per player on approach.
 params ["_house"];
 if (isNull _house || {!hasInterface}) exitWith {};
 #define REACH 3        // TUNABLE, metres from the shooter to a door point
 #define POINT_BLANK 1.5 // TUNABLE, at this range the aim check is waived -- the shooter is on the door
 #define TOWARD 0.5     // TUNABLE, cos of the half-angle the shot must fall within to count as aimed at the door
+#define HINT_RANGE 30  // TUNABLE, metres -- a player this close to a still-locked candidate gets the breach hint
 
-// Guard a re-raid on a reused building from stacking duplicate actions.
-if (!(_house getVariable ["DUWS_safehouse_lockAction", false])) then {
-    _house setVariable ["DUWS_safehouse_lockAction", true];
-    // One locked-door action per door, anchored to that door's selection so it shows only when the player aims
-    // at it -- a radius off the building origin never reached a perimeter door. Gated on that door still shut
-    // (its source not yet in openedDoors), not the whole-house breach, so each door reads locked until its own
-    // shot opens it. A door whose selection did not resolve carries no anchor and gets no action.
-    {
-        _x params ["", "_src", ["_sel", ""]];
-        if (_sel != "") then {
-            _house addAction [
-                localize "STR_DUWS_T_RAID_SAFEHOUSE_OPEN",
-                { hint (localize "STR_DUWS_T_RAID_SAFEHOUSE_LOCKED") },
-                nil, 6, true, false, "",
-                format ["(missionNamespace getVariable ['DUWS_safehouse_active', false]) && {!('%1' in (_target getVariable ['DUWS_safehouse_openedDoors', []]))}", _src],
-                2.5, false, _sel
-            ];
+// Teach the breach on approach. One hint per house per player, the first time they close within HINT_RANGE of a
+// still-locked candidate; reads the server-broadcast candidate list, so one loop covers every house.
+if (isNil "DUWS_safehouse_proxHint") then {
+    DUWS_safehouse_proxHint = true;
+    [] spawn {
+        private _hinted = [];
+        while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
+            {
+                if (!isNull _x
+                    && {!(_x in _hinted)}
+                    && {!(_x getVariable ["DUWS_safehouse_breached", false])}
+                    && {player distance _x < HINT_RANGE}) then {
+                    _hinted pushBack _x;
+                    hint (localize "STR_DUWS_T_RAID_SAFEHOUSE_LOCKED");
+                };
+            } forEach (missionNamespace getVariable ["DUWS_safehouse_candidates", []]);
+            sleep 2;   // TUNABLE
         };
-    } forEach (_house getVariable ["DUWS_safehouse_doorPts", []]);
+    };
 };
 
 // One watcher for the whole raid, reading the server-broadcast candidate list.
@@ -42,12 +44,12 @@ if (isNil "DUWS_safehouse_firedEH") then {
         if (vectorMagnitude _v < 0.1) exitWith {};
         _v = vectorNormalized _v;
         private _sp = getPosASL _shooter;
-        // Nearest, not first: two adjacent doors in reach otherwise open whichever the list yields, not the aimed one.
+        // Nearest, not first: two adjacent doors in reach otherwise unlock whichever the list yields, not the aimed one.
         private _best = [1e10, objNull, ""];
         {
             private _hs = _x;
-            // No breached-gate: every door is shot open on its own, before and after entry; the breach fires the
-            // raid outcome only on the first, so interior doors keep opening once the house is cracked.
+            // No breached-gate: every door is unlocked by its own shot, before and after entry; the breach fires the
+            // raid outcome only on the first, so interior doors keep unlocking once the house is cracked.
             if (!isNull _hs) then {
                 {
                     _x params ["_dp", "_src"];

@@ -3203,10 +3203,6 @@
                 <Original>Well done Alpha 1-1. Secure the intel and RTB for analysis.</Original>
                 <English>Well done Alpha 1-1. Secure the intel and RTB for analysis.</English>
             </Key>
-            <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_OPEN">
-                <Original>Open door</Original>
-                <English>Open door</English>
-            </Key>
             <Key ID="STR_DUWS_T_RAID_SAFEHOUSE_LOCKED">
                 <Original>The building is locked. Try shooting the door to breach it.</Original>
                 <English>The building is locked. Try shooting the door to breach it.</English>

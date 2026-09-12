@@ -1,41 +1,43 @@
 // Locality: server -- fnc_raid_safehouse_arm (a shot) and the thread's entry watcher (a raider inside)
-// route here. It owns what a breach means: open the door and, the first time the house is cracked, wake
+// route here. It owns what a breach means: unlock the door and, the first time the house is cracked, wake
 // the cache guards (real) or bill the raid on an innocent home (decoy).
 //
-// _door: a door_<n>_rot source to open, "ALL" for an entry breach (open the lot), or "" when the shot hit
-// no resolvable door (open the next still-shut one). Door opening is idempotent -- a re-hit on an open door
-// opens nothing and does not re-fire the outcome, which lands once.
+// A breach only unlocks the door; the player then opens it with the engine action. A scripted animateDoor
+// broadcast to every machine swung unreliably, so the leaf is left to the engine, which the unlock re-enables.
+//
+// _door: a door_<n>_rot source to unlock, "ALL" for an entry breach (unlock the lot), or "" when the shot
+// hit no resolvable door (unlock the next still-locked one). Unlocking is idempotent -- a re-hit on an
+// unlocked door does nothing and does not re-fire the outcome, which lands once.
 if (!isServer) exitWith {};
 params ["_house", ["_door", ""]];
 if (isNull _house) exitWith {};
 if (!(missionNamespace getVariable ["DUWS_safehouse_active", false])) exitWith {};
 
-private _doors  = [_house] call fnc_house_doors;
-private _opened = _house getVariable ["DUWS_safehouse_openedDoors", []];
-private _shut   = _doors select { !(_x in _opened) };
+private _doors    = [_house] call fnc_house_doors;
+private _unlocked = _house getVariable ["DUWS_safehouse_unlockedDoors", []];
+private _locked   = _doors select { !(_x in _unlocked) };
 
-// The door(s) this call opens. A specific still-shut door opens alone; "ALL" or an unresolved hit opens the
-// next shut door (entry opens the lot) -- never a second door on one shot, so each stays a separate breach.
-private _toOpen = switch (true) do {
-    case (_door == "ALL"): { _shut };
-    case (_door != "" && {_door in _shut}): { [_door] };
-    case (_door == ""): { [_shut param [0, ""]] - [""] };
+// The door(s) this call unlocks. A specific still-locked door unlocks alone; "ALL" or an unresolved hit
+// unlocks the next locked door (entry unlocks the lot) -- never a second door on one shot, so each stays a
+// separate breach.
+private _toUnlock = switch (true) do {
+    case (_door == "ALL"): { _locked };
+    case (_door != "" && {_door in _locked}): { [_door] };
+    case (_door == ""): { [_locked param [0, ""]] - [""] };
     default { [] };
 };
 
 {
-    _house setVariable [format ["bis_disabled_Door_%1", parseNumber (_x select [5])], 0, true];   // lift the lock
-    _opened pushBackUnique _x;
-} forEach _toOpen;
-if !(_toOpen isEqualTo []) then {
-    _house setVariable ["DUWS_safehouse_openedDoors", _opened, true];
-    // animateDoor is local-effect: swing the leaves on every machine the house is drawn on.
-    [[_house, _toOpen], { params ["_h", "_d"]; { _h animateDoor [_x, 1] } forEach _d }] remoteExec ["BIS_fnc_call", 0];
+    _house setVariable [format ["bis_disabled_Door_%1", parseNumber (_x select [5])], 0, true];   // lift the lock; the engine open action returns
+    _unlocked pushBackUnique _x;
+} forEach _toUnlock;
+if !(_toUnlock isEqualTo []) then {
+    _house setVariable ["DUWS_safehouse_unlockedDoors", _unlocked, true];
 };
 
-// Outcome once, on the first crack -- a door opened, or an entry breach with the doors already down.
+// Outcome once, on the first crack -- a door unlocked, or an entry breach with the doors already unlocked.
 if (_house getVariable ["DUWS_safehouse_breached", false]) exitWith {};
-if (_toOpen isEqualTo [] && {_door != "ALL"}) exitWith {};
+if (_toUnlock isEqualTo [] && {_door != "ALL"}) exitWith {};
 _house setVariable ["DUWS_safehouse_breached", true, true];
 
 // Occupants are PATH-frozen at spawn; release the breached house's so it reacts only once cracked.
