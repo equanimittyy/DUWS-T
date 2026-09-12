@@ -269,7 +269,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             if (_knowsCur > SUS_KNOWS) then { _seenNow pushBack _pl };
             if (_knowsCur > CONFIRM) then { _confirmed = true };
             // Bar and alarm share _knowsCur, so full == alarm arming.
-            if (_pl distance2D _MissionPos < _radius + 100) then { _meterVals pushBack [_pl, _knowsCur] };
+            if (_pl distance2D _MissionPos < _radius + 200) then { _meterVals pushBack [_pl, _knowsCur] };
         } forEach _players;
         if (count _seenNow > 0) then { _lastSeen = time };
 
