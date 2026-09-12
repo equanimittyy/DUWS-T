@@ -584,6 +584,10 @@ OPCOM_PLAYER_WORTH = 3;
 // caps the scan cost. Generous, so a genuinely-spotted distant vehicle is not clipped.
 OPCOM_SENSE_RANGE = 5000;
 
+// Live OPFOR observers sensed per tick. Above this many, the sighting sweep spreads them across ticks
+// (fnc_opcom_sense) so a mass battle does not sense all at once; the defer stays inside OPCOM_BELIEF_FRESH.
+OPCOM_SENSE_BATCH = 8;
+
 // A recon-flagged tasking's guaranteed detection reach in Chebyshev grid cells by platform
 // (fnc_opcom_recon_sense), the same cell measure as DUWS_opcom_streamK. Unlike OPCOM_SENSE_RANGE above this
 // is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual

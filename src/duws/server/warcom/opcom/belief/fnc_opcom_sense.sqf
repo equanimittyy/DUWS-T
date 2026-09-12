@@ -23,8 +23,13 @@ private _NT_POSAGE = 5;   // seconds since the observer last fixed the target's 
 // Freshest sighting this tick per BLUFOR group netId: [rememberedPos, men-count, age]. Age within a tick =
 // seen now (vs still-remembered); lowest-age observer wins when several see the same group.
 private _seen = createHashMap;
-{
-    private _obs = leader _x;
+// Past OPCOM_SENSE_BATCH observers, sense a slice per tick, not all: a mass de-virt would else multiply
+// nearTargets by group count with clustered observers re-fixing the same groups. Lossless -- the stride
+// stays far inside OPCOM_BELIEF_FRESH, so a sighting is deferred a tick or two, never dropped.
+private _east = allGroups select {side _x == east};
+private _stride = 1 max (ceil ((count _east) / OPCOM_SENSE_BATCH));
+for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride do {
+    private _obs = leader (_east select _gi);
     if (alive _obs) then {
         private _known = _obs nearTargets OPCOM_SENSE_RANGE;
         if (isNil "DUWS_opcom_ntProbed" && {_known isNotEqualTo []}) then {
@@ -52,7 +57,7 @@ private _seen = createHashMap;
             };
         } forEach _known;
     };
-} forEach (allGroups select {side _x == east});
+};
 
 {
     private _key = _x;

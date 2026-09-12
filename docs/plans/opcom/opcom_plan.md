@@ -56,7 +56,7 @@ player through respawn, taxi and fast travel. Same latching rule as the artiller
 
 | Sensor | Writes | Cost |
 |---|---|---|
-| Direct sighting | each live OPFOR observer's `nearTargets` is swept; a BLUFOR group with a *fresh* position time (sensed this tick) has its leader position, threat (each AI one, each human `OPCOM_PLAYER_WORTH`) and the tick stamped. A group nobody senses this tick is untouched — its stamp holds at last-seen and decays. `knowsAbout` cannot serve here: it lingers side-wide while any unit merely remembers a target, so it reads the same watching a mover as remembering a ghost ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)) | one `nearTargets` per live OPFOR group per tick |
+| Direct sighting | each live OPFOR observer's `nearTargets` is swept; a BLUFOR group with a *fresh* position time (sensed this tick) has its leader position, threat (each AI one, each human `OPCOM_PLAYER_WORTH`) and the tick stamped. A group nobody senses this tick is untouched — its stamp holds at last-seen and decays. `knowsAbout` cannot serve here: it lingers side-wide while any unit merely remembers a target, so it reads the same watching a mover as remembering a ghost ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)) | one `nearTargets` per live OPFOR observer sensed this tick |
 | Absence | a group whose belief row resolves (`groupFromNetId`) to a dead, drained or deleted group is dropped, so a confirmed-gone force stops depositing; server-polled, never a `Killed` handler | one resolve per group-keyed row per tick |
 | Observation post | swept each perception tick beside the other sensors (`DUWS_fnc_hardpointOPSense`), each post rolling a per-tick chance rather than firing every tick, an OP hardpoint stamps every BLUFOR group within `OP_OBSERVE_K` Chebyshev grid cells into belief for certain — a guaranteed bubble like recon detection, not A3's fallible last-seen — keyed by group on the one sighting scale, and reports whether the post is deployed or stowed; killing the post ends the screen | one belief write per caught group per fix |
 | Area of influence | a BLUFOR group inside OPFOR area of influence (`fnc_aoi_opfor_covers`) stamps a low-strength, delayed entry | one coverage read per group per tick |
@@ -67,7 +67,10 @@ The sighting sweep is one `nearTargets` per live OPFOR group (on its leader), bo
 — no `nearEntities`, no scan over `allUnits`
 ([`info/performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)).
 Observers are the OPFOR groups actually spawned near the fight, so a stowed garrison neither senses nor
-costs. The artillery observation gate keeps its own `knowsAbout > 1.5` test — a separate, position-free
+costs. Beyond `OPCOM_SENSE_BATCH` live observers the sweep spreads them across `ceil(count / OPCOM_SENSE_BATCH)`
+ticks rather than sensing all each tick, so a mass de-virt (a big zone raid, both sides live) does not
+multiply `nearTargets` by group count; the spread stays far inside `OPCOM_BELIEF_FRESH`, deferring a sighting
+a tick or two, never dropping one. The artillery observation gate keeps its own `knowsAbout > 1.5` test — a separate, position-free
 trigger — so no shared constant is owed here.
 
 Direct sighting, its absence check, recon detection and the observation post are live today. The
