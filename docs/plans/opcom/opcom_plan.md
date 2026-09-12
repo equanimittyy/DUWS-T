@@ -703,7 +703,9 @@ uncontested `garrison`, not already `carrying` and not fighting, preferring a bo
 Idle is judged by order, not by streaming: a hull already live near a player is lendable too — it flies off to
 ferry and lands or re-virtualises elsewhere — so the pool is not starved wherever a player happens to be
 (`DUWS_fnc_opcom_ferryPool`,
-[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). The
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). Fighting is the
+one live exclusion: the borrow binds the rider with no approach timeout to release it, so a hull that may die or
+stall before delivering is passed over for one likely to survive the trip. The
 idle gate is the commitment this makes: a ferry never breaks a standing order. Borrowing costs a zone no
 defender — a ferry-capable transport is a non-combatant ([§Unit strength](#unit-strength)), never enrolled in a
 zone's reserve wave, so the borrow needs no reserve draw-out and is a plain re-task.

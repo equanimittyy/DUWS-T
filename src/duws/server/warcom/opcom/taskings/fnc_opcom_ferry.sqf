@@ -44,7 +44,9 @@ DUWS_fnc_opcom_zoneContested = {
 // Shared by the borrow and the debug inspector so the two can never drift. _excludeId drops one id (a rider
 // never borrows itself); -1 drops none. Idle-only by order, not by streaming: a hull on a directed order is a
 // role unit off the pool, but a *live* idle hull is lendable too -- it flies off to ferry and lands or
-// re-virtualises elsewhere, which is fine. Excluded only if fighting (opcom_plan.md §Transport).
+// re-virtualises elsewhere, which is fine. A fighting hull is skipped: the borrow binds the rider with no
+// approach timeout to release it, so a hull likely to die or stall before delivering would strand the rider --
+// lend one that will survive the trip (opcom_plan.md §Transport).
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1]];
     DUWS_opcom_taskings select {
