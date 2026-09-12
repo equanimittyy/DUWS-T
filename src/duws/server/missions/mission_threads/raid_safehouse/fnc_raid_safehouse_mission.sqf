@@ -237,9 +237,10 @@ publicVariable "DUWS_safehouse_active";
             {
                 private _h = _x;
                 if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
-                    // Inside a reconstructed room, not just within the footprint: the furnish grid's floor cells
-                    // stop at the walls, so a player in an L-shaped notch or against an outside wall has none near.
-                    private _cells = _h getVariable ["DUWS_furnishGrid", []];
+                    // "open" room-floor cells only, not door/near/blocked ones: a player straddling a doorway sits
+                    // on a door cell, and counting those would let them breach by walking to the threshold rather
+                    // than shooting it open -- the shot on the door is meant to be the way in.
+                    private _cells = (_h getVariable ["DUWS_furnishGrid", []]) select { (_x select 1) == "open" };
                     if ((allPlayers findIf {
                         private _pa = getPosASL _x;
                         (_cells findIf { _pa distance (_x select 0) < 0.6 }) >= 0
