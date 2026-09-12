@@ -7,12 +7,10 @@ transfer when nobody does. Extends the virtual ferry in
 ## Why
 
 The virtual ferry (`borrowFerry` → `ferryStep`) carries a land unit over water off-screen: it stops at the
-near shore, borrows a hull, and is teleported across in cell steps. Correct, and invisible, which is fine
-until a player is at the shore. Today a live land unit reaching a crossing walks to the near shore and idles
-there until it re-virtualises — which needs the player to leave — so under a watching player the squad just
-stands at the beach, and a carrying pair that streams in unbinds and goes independent, its crossing abandoned.
-This plan renders the whole crossing live when observed: a real pickup, carry, and drop, with no seam against
-the virtual path.
+near shore, borrows a hull, and is teleported across in cell steps. Correct, and invisible, which is fine until
+a player is at the shore — where an idle squad standing on the beach, or a carrying pair popping in and going
+independent, would read as broken. So the crossing renders live when a player watches it — a real pickup,
+carry, and drop — and stays the cheap virtual transfer when nobody does, with no seam between the two.
 
 ## Model — the ferry streams like every other tasking
 
@@ -53,12 +51,20 @@ by type.
 
 | Type | Approach | Board |
 |---|---|---|
-| Helicopter | LZ found by the rider (`BIS_fnc_findSafePos`), fly in, `land "GET IN"`, poll grounded (`getPosATL` z under a low threshold, near the LZ) | rider units deleted **one by one** as they board — a seat is always free |
-| Land vehicle | drive to within a short distance of the rider | rider units deleted **one by one** as they board |
+| Helicopter | LZ found by the rider (`BIS_fnc_findSafePos`), fly in, `land "GET IN"`, poll grounded (`getPosATL` z under a low threshold, near the LZ) | order the group aboard; a one-shot `GetIn` handler **board-despawns each rider as it enters** — real-time (not tick-paced), and the seat frees instantly so one hull loads the whole squad |
+| Land vehicle | drive to within a short distance of the rider | same `GetIn` board-despawn |
 | Boat | close to within **100 m** of the rider | **whole rider group** deleted at once — boarding a boat is finnicky, so it is skipped |
 
-Fallback for the per-unit path: once the group is at the hull, delete the group outright rather than wait on
-stragglers. On the last unit's despawn the rider record goes virtual, `ridingOn` set, `embarked` true.
+The `GetIn` handler is tagged to the rider's group so it never despawns the transport's own crew, and it is
+torn down at embark so a hull that later ferries a second rider re-arms cleanly. A board that never settles (a
+bad LZ, a hull with no cargo seat) forces through at `OPCOM_FERRY_WAIT_MAX` ticks — the whole group is deleted
+at the hull rather than hang. On the last rider's despawn the record goes virtual and `embarked` is set
+(`ridingOn` was set back at the borrow).
+
+The ferry pool admits only boats and rotary lifts ([`opcom_plan.md` §Transport](opcom_plan.md#transport-carrying-a-unit-to-the-fight)),
+so those are the two hulls the water ferry ever renders; the land-vehicle row is the Phase-4 land-taxi, which
+reuses the same surface approach. An idle hull is lendable whether it is virtual or already live — a live one
+simply flies off to ferry and lands or re-virtualises elsewhere; only a hull that is fighting is held back.
 
 ## Carry
 
@@ -75,8 +81,8 @@ the rider's chain). If it is still de-virt on arrival, the rider disembarks live
 | Type | Disembark |
 |---|---|
 | Boat | snap the rider group to the shore and spawn the **whole group** at once (mirror of the whole-group board) |
-| Helicopter | land, then spawn rider units in cargo **one by one** and turn each out (`getOut`) |
-| Land vehicle | spawn rider units in cargo **one by one** and turn each out — same as the helo, no landing |
+| Helicopter | land, spawn the rider into the cargo hold, and let its onward order turn them out — a one-by-one `getOut` disembark |
+| Land vehicle | spawn the rider into the hold and let the onward order turn them out — same as the helo, no landing |
 
 The rider becomes live and independent and replans from the far shore to its own target; since the drop is the
 first land past the span, that replan stays on land (a target across a further body simply triggers another
@@ -92,26 +98,26 @@ its `try`/`catch` fault boundary, which a blocking spawn would break.
 
 **The helo land pattern is borrowed, not the function.** `fnc_helotaxi.sqf`
 ([`src/duws/client/supports/taxi/fnc_helotaxi.sqf`](../../../src/duws/client/supports/taxi/fnc_helotaxi.sqf))
-is client, player-facing — markers, dialogue, music, `addAction`, spawns. Only the pattern transfers:
-`land "GET IN"` / `land "GET OUT"`, poll for grounded, animate doors.
+is client, player-facing — markers, dialogue, music, `addAction`, spawns, and blocking `waitUntil`s. Only the
+pattern transfers, polled across ticks instead of waited on: `land "GET IN"` / `land "GET OUT"`, poll
+`getPosATL` z for grounded, then `land "NONE"` to lift. Door animation is dropped — its source names are
+airframe-specific and no-op on many mods ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#land-get-inget-out-is-a-sticky-mode-with-no-completion-event)).
 
-**This replaces `deVirtFerry`'s unbind.** Today a mid-carry pair that streams in near a player unbinds —
-`carrying`/`ridingOn` cleared, the two go independent, the water-leg intent lost. Under this model the binding
-survives de-virt and the phase renders live instead.
+**The binding survives de-virt** (in place of the old unbind). A mid-carry pair that streams in used to
+unbind — `carrying`/`ridingOn` cleared, the two going independent, the water-leg intent lost. Now the binding
+holds across the boundary and the phase renders live instead; `DUWS_fnc_opcom_ferryTick` chooses live or
+virtual by the transport's own streaming each tick.
 
 **Re-spawn matches stored strength.** Disembarking rebuilds the rider through `DUWS_fnc_opcom_matchStrength`,
 as a normal de-virt does, so attrition banked before the crossing is preserved.
 
 Touch points:
-[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf) (`borrowFerry`,
-`ferryStep`, `advance`),
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf) (`ferryTick`,
+`ferryStepLive`, `ferryRelease`, and the virtual `ferryStep`/`borrowFerry`/`advance`),
 [`fnc_opcom_stream.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_stream.sqf) (`deVirt`,
-`reVirt`, `reOrderLive`, `spawnComp`),
-[`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf) (the
-per-tick phase driver).
+`reVirt`, `reOrderLive`, `shoreStage`),
+[`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf) (routes a
+carrying transport to `ferryTick`, and the live rider's ferry request at its near shore).
 
-## Build order
-
-Three reviewable stages, each tested before the next: **Load** (live pickup + board-despawn + bind),
-**Carry** (live drive with re-virt on leaving the ring), **Unload** (live disembark + re-spawn). The virtual
-path stays intact throughout, so a half-built feature still ferries correctly off-screen.
+The virtual path stays fully intact, so an unwatched crossing ferries exactly as before; only a watched one
+runs the live render.

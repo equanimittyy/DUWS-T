@@ -1,8 +1,9 @@
 // Locality: server, [] call'd at load to define the streaming helpers. The mobile analogue of hardpoint
 // streaming: a virtualised tasking de-virtualises into a live A3 group near a player and stows back to a
 // world point once it leaves. OPCOM steers a live group by re-issuing its order (fnc_opcom_task pushes it
-// through DUWS_fnc_opcom_reOrderLive); a water crossing is the exception -- a live land unit only walks to the
-// near shore, the ferry leg waiting for re-virtualisation (docs/plans/opcom/opcom_plan.md).
+// through DUWS_fnc_opcom_reOrderLive). A water crossing is not steered on foot: the live land unit walks to
+// the near shore and a borrowed transport ferries it across in view (fnc_opcom_ferry,
+// docs/plans/opcom/ferry_live_render.md).
 if (!isServer) exitWith {};
 
 // The closest native order to a tasking, set at spawn. Cleared first so a re-spawn inherits no stale
@@ -27,10 +28,22 @@ DUWS_fnc_opcom_applyOrder = {
     };
 };
 
+// The near-shore staging point of a land tasking whose route crosses water: [_crosses, _stage], _stage the
+// last land point before the first water leg (_from itself if the first leg is already water). The live
+// re-order (walk here, wait for a lift) and the tasking step's live ferry request both read it, so the two
+// never disagree on where the shore is.
+DUWS_fnc_opcom_shoreStage = {
+    params ["_t", "_from"];
+    private _stage = _from;
+    private _crosses = false;
+    { if ([_x] call DUWS_fnc_opcom_isWaterPt) exitWith { _crosses = true }; _stage = _x } forEach (_t get "route");
+    [_crosses, _stage]
+};
+
 // Push a re-order onto an already-live group (fnc_opcom_task set the record; this enacts it). A land type
-// cannot foot over water and the ferry is never borrowed while live (opcom_plan.md), so a route that crosses
-// water only drives the group to the last land point before the ferry leg, to idle there until it stows and
-// the virtual mover ferries it across. Boat/air, guard, and all-land routes get the real order and target.
+// cannot foot over water, so a route that crosses water only drives the group to the near shore; the tasking
+// step then borrows a transport and renders the ferry live (fnc_opcom_ferry). Boat/air, guard, and all-land
+// routes get the real order and target.
 DUWS_fnc_opcom_reOrderLive = {
     params ["_t"];
     private _grp = groupFromNetId (_t get "grp");
@@ -38,13 +51,8 @@ DUWS_fnc_opcom_reOrderLive = {
     private _order = _t get "order";
     private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
     if (_landRule && {_order isNotEqualTo "guard"}) then {
-        private _stage = getPosASL (leader _grp);
-        private _crossesWater = false;
-        {
-            if ([_x] call DUWS_fnc_opcom_isWaterPt) exitWith { _crossesWater = true };
-            _stage = _x;
-        } forEach (_t get "route");
-        if (_crossesWater) exitWith { [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder };
+        ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
+        if (_crosses) exitWith { [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder };
     };
     [_grp, _order, _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
 };
@@ -109,7 +117,9 @@ DUWS_fnc_opcom_deVirt = {
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
-    [_grp, _t get "order", _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
+    // reOrderLive, not applyOrder direct: a land unit spawning mid-crossing walks only to the near shore (the
+    // tasking step then ferries it), instead of marching a live group into water it cannot foot.
+    [_t] call DUWS_fnc_opcom_reOrderLive;
     true
 };
 

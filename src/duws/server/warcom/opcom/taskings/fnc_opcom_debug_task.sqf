@@ -9,8 +9,9 @@
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
 // The order verbs zero the commit hold first: hand-driving re-tasks on demand, including a de-virtualised
-// (live) unit, which is re-ordered in place. A land unit re-ordered across water walks to the near shore and
-// idles until it re-virtualises. The hold is the automated loop's anti-flap lock, not a hand-drive limit.
+// (live) unit, which is re-ordered in place. A land unit re-ordered across water walks to the near shore and,
+// if an idle transport (boat/trans_heli) is in the pool, borrows one and the crossing renders live (pickup,
+// carry, drop). The hold is the automated loop's anti-flap lock, not a hand-drive limit.
 // Example: private _id = ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
 //          [_id, "assault", getPosASL player] call fnc_opcom_debug_task;
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""]];

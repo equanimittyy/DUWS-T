@@ -15,7 +15,7 @@ Three layers, one thread.
 |---|---|---|
 | **Perception** | Maintains the enemy's *belief* about BLUFOR. Never reads live player state | Every tick, one engine call per BLUFOR group |
 | **Appraisal** | Scores each candidate `[action, target]` pair as an expected AP return, picks by weighted random over the top few | Every tick, one unscheduled batch |
-| **Commitment** | Turns a choice into an intent with an absolute minimum lifetime and an owner. Re-scoring fills free capacity but cannot re-task a unit until its hold expires; a de-virtualised unit can still be re-ordered live, except across water — that leg waits for re-virtualisation | Between ticks |
+| **Commitment** | Turns a choice into an intent with an absolute minimum lifetime and an owner. Re-scoring fills free capacity but cannot re-task a unit until its hold expires; a de-virtualised unit can still be re-ordered live, a water crossing included — the crossing renders live (pickup, carry, drop) | Between ticks |
 
 ## Perception: the commander plans against belief, never against truth
 
@@ -457,8 +457,10 @@ the hold expires. One number covers every active tasking. Resting `garrison` and
 has passed. Once a
 tasking's units **de-virtualise** — spawn as a live A3 group — OPCOM still re-orders them: a new order is
 pushed onto the live group ([§Spawn posture](#spawn-posture-follows-the-order)), so a march can be redirected
-without waiting for it to stow. The one thing it cannot do live is cross water — a land unit only walks to the
-near shore, the ferry leg waiting for re-virtualisation ([§The virtualisation boundary](#the-virtualisation-boundary)) — and a bound ferry carry is off-limits, owned by the transport step.
+without waiting for it to stow. A water crossing is re-ordered live too: the land unit walks to the near shore
+and a borrowed transport ferries it across in view — pickup, carry and drop all render
+([§Transport](#transport-carrying-a-unit-to-the-fight)). Only a bound ferry carry is off-limits to a re-order,
+owned by the transport step.
 
 | Field | Holds |
 |---|---|
@@ -654,7 +656,10 @@ orthogonally — acceptable for spawn-before-contact.
 A de-virtualised unit runs a native A3 order that is the **closest engine equivalent of its tasking**, set
 at spawn, not a tick later. OPCOM can re-issue that order to the live group later — the same
 `DUWS_fnc_opcom_applyOrder` push ([§Commitment](#commitment-intents-are-sticky)) — so the spawned order is the
-starting intent, not a life sentence; only a water crossing must wait for re-virtualisation.
+starting intent, not a life sentence. A land unit spawning onto a route that crosses water is walked only to
+the near shore (`DUWS_fnc_opcom_reOrderLive`, `DUWS_fnc_opcom_shoreStage`), where the transport ferry takes
+the crossing ([§Transport](#transport-carrying-a-unit-to-the-fight)) — never marched live into water it cannot
+foot.
 
 The A3 order per tasking — Seek & Destroy for an assault, a `SAFE` move for a reposition (holding fire, `BLUE`,
 when the move is a supply run), a `SAFE` hold for a guard — is set by `DUWS_fnc_opcom_applyOrder`
@@ -693,8 +698,10 @@ serve another unit's crossing. A transport running a directed order (a `move`, a
 a target) is a role unit, its order preserved and no rider preempting it. Two further protected states stay
 protected: already `carrying`, or garrisoned in a **contested** (locked) zone.
 
-**The borrow pool** is the idle, water-compatible transports — a virtual `transport` hull on `guard` or in an
-uncontested `garrison`, not already `carrying`, preferring a boat and falling back to a rotary
+**The borrow pool** is the idle, water-compatible transports — a `transport` hull on `guard` or in an
+uncontested `garrison`, not already `carrying` and not fighting, preferring a boat and falling back to a rotary.
+Idle is judged by order, not by streaming: a hull already live near a player is lendable too — it flies off to
+ferry and lands or re-virtualises elsewhere — so the pool is not starved wherever a player happens to be
 (`DUWS_fnc_opcom_ferryPool`,
 [`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). The
 idle gate is the commitment this makes: a ferry never breaks a standing order. Borrowing costs a zone no
@@ -739,15 +746,15 @@ the transport, dropping at the **far shore** — the first land cell past the wa
    rider after rider, and nothing auto-returns it to base. A hull borrowed from a garrison does not return — it
    stays a staged ferry asset near the front.
 
-**De-virtualisation** is unchanged in spirit
-([§The virtualisation boundary](#the-virtualisation-boundary)): when a carrying pair streams in near a player,
-both spawn and the rider is `moveInCargo`'d into the hull if it fits, else dropped beside it (the current
-simplification, not a tied abort). The water-leg intent is lost once the pair is live — they go independent; a
-transport that survives its live spell re-virtualises as a free `guard`, back in the pool.
-
-Rendering the whole crossing live when a player watches it — a real pickup, carry, and drop that keeps the
-binding across every stream cycle, instead of dropping the pair to fend for itself — is planned in [live ferry
-rendering](ferry_live_render.md).
+**De-virtualisation renders the crossing.** The rider and the transport stream on their **own** radii
+([§The virtualisation boundary](#the-virtualisation-boundary)); the ferry binding survives every transition, so
+a watched crossing plays out live — the transport closes on the rider, the rider board-despawns to a bound
+virtual record that rides the transport's position, and it re-spawns disembarking at the far shore — while an
+unwatched one steps across virtually exactly as above. Neither end forces the other live: a player over a rider
+waiting for a lift does not pull a transport still kilometres off. The full live model — per-hull load and
+unload (a rotary lands, a boat closes to `OPCOM_FERRY_BOARD_BOAT`), the seamless virtual↔live handoff, and the
+fallbacks — is [live ferry rendering](ferry_live_render.md). A freed transport, live or virtual, reverts to a
+`guard` in place, back in the pool.
 
 **Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
 the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander

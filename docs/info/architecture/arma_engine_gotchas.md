@@ -396,6 +396,12 @@ An AI group whose behaviour has gone `COMBAT` owns its movement through the dang
 
 **Fix:** to keep an AI in a vehicle, don't rely on `lock` alone — stop the combat bail with `setUnloadInCombat [false, false]` and enforce with a `GetOutMan` reseat, reseating only while the vehicle is alive.
 
+## `land "GET IN"`/`"GET OUT"` is a sticky mode with no completion event
+
+`aircraft land "GET IN"` (or `"GET OUT"`) makes an AI helicopter descend and *stay* grounded — the mode persists until explicitly cancelled, and the engine fires no "landed" callback, so nothing tells you it touched down and a fresh move waypoint may be deprioritised while the land order still stands. Two consequences for a poll-driven caller (a server tick loop, where a `waitUntil` spawn is not allowed): detect grounding by reading `getPosATL _heli select 2` under a small threshold (~4 m, as `fnc_helotaxi` does), not an event; and lift the aircraft again with `_heli land "NONE"` **before** issuing the next waypoint, or it can sit on the pad. Door animation is model-specific — the `door_L`/`door_R` sources `fnc_helotaxi` animates exist only on some airframes, so `animateDoor` silently no-ops on others; never depend on it across the faction mods DUWS auto-detects.
+
+**Fix:** drive a landing across ticks, not in a blocking `waitUntil` — issue `land` once within range, poll `getPosATL` z for grounded, act, then `land "NONE"` and re-task. OPCOM's live ferry pickup/drop (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry.sqf`) does exactly this, and gates a stall timer to the landing phase so a long approach never times the crossing out mid-air.
+
 ## `cmd [...] remoteExec ["call", 0]` broadcasts the return value, not the command
 
 A unary command binds tighter than binary `remoteExec`, so `titleText [...] remoteExec ["call", 0]` runs `titleText` on the calling machine and broadcasts what it evaluated to (Nothing) — every other machine gets an empty payload. The missing piece is braces: `{titleText [...]} remoteExec ["call", 0]`. Without them the statement still reads as a broadcast and runs locally, so it survives review and host/SP testing; only a dedicated server or a second client exposes it.

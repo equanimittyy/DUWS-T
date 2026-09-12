@@ -3,9 +3,11 @@
 // block, since the route search may yield.
 //
 // A virtual active tasking steps along its route (replanning if a re-virtualise cleared the chain), then
-// de-virtualises if a player is within its reach; a live one reads status, resolves a supply arrival, and
-// stows once the player leaves with no contact; a resting garrison heals. De-virtualisation triggers on
-// player proximity only -- off-screen opposing-force contact waits on the BLUFOR virtualisation (not built).
+// de-virtualises if a player is within its reach; a live one reads status, resolves a supply arrival, requests
+// a ferry once it reaches a water leg, and stows once the player leaves with no contact; a resting garrison
+// heals. A transport driving a carry owns its own streaming (DUWS_fnc_opcom_ferryTick), keeping the rider
+// bound across the boundary. De-virtualisation triggers on player proximity only -- off-screen opposing-force
+// contact waits on the BLUFOR virtualisation (not built).
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_taskings") exitWith {};
 
@@ -34,80 +36,103 @@ private _nearestPlayerCells = {
     private _order = _t get "order";
     private _live = (_t get "grp") isNotEqualTo "";
 
-    if (_live) then {
-        private _grp = groupFromNetId (_t get "grp");
-        // Alive-count, not count units: a wiped group keeps its corpses in `units` until the mission GC clears
-        // them (when the player leaves), so a body-count gate would leave the record live and depositing stale
-        // force until then.
-        if (isNull _grp || {(units _grp) findIf {alive _x} < 0}) then {
-            _t set ["status", "dead"];
-            _t set ["grp", ""];
-        } else {
-            private _ldr = leader _grp;
-            // grid_rebuild deposits this tasking's force at pos/effForce even while live; refresh both each
-            // live tick or the friendly layer reads the stale de-virt cell and spawn-time strength.
-            _t set ["pos", getPosASL _ldr];
-            _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
-            private _engaged = behaviour _ldr isEqualTo "COMBAT";
-            if (!_engaged && {count allPlayers > 0}) then {
-                private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
-                if (_pl isNotEqualTo []) then {
-                    _pl sort true;
-                    _engaged = _ldr knowsAbout ((_pl select 0) select 1) > 1.5;
-                };
-            };
-            _t set ["status", ["moving", "engaged"] select _engaged];
-
-            // Supply drops on arrival: delete the courier and fire its success (logged; mission plumbing
-            // lands with the actions that consume it in Phase 4).
-            if ((_t getOrDefault ["supplyDrop", false]) && {(_ldr distance2D (_t get "target")) < 40}) then {
-                ["INFO", "OPCOM", format ["supply delivered by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
-                { deleteVehicle _x } forEach (units _grp);
-                deleteGroup _grp;
-                _t set ["status", "done"];
+    if ((_t getOrDefault ["carrying", -1]) >= 0) then {
+        // A carrying transport streams on its own radius, rendered when watched and virtual when not, the
+        // binding kept across the boundary (fnc_opcom_ferry). Handled before the generic branches -- it is
+        // neither a plain live group nor a plain virtual mover.
+        private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
+        [_t, ([_t get "pos"] call _nearestPlayerCells) <= _k] call DUWS_fnc_opcom_ferryTick;
+    } else {
+        if (_live) then {
+            private _grp = groupFromNetId (_t get "grp");
+            // Alive-count, not count units: a wiped group keeps its corpses in `units` until the mission GC
+            // clears them (when the player leaves), so a body-count gate would leave the record live and
+            // depositing stale force until then.
+            if (isNull _grp || {(units _grp) findIf {alive _x} < 0}) then {
+                _t set ["status", "dead"];
                 _t set ["grp", ""];
             } else {
-                private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-                // Reset on re-entry/engagement below, so the stow needs an unbroken absence, not one
-                // far sample (OPCOM_REVIRT_GRACE).
-                if (!_engaged && {([getPosASL _ldr] call _nearestPlayerCells) > _k}) then {
-                    private _far = (_t getOrDefault ["farTicks", 0]) + 1;
-                    _t set ["farTicks", _far];
-                    if (_far >= OPCOM_REVIRT_GRACE) then { [_t] call DUWS_fnc_opcom_reVirt };
+                private _ldr = leader _grp;
+                // grid_rebuild deposits this tasking's force at pos/effForce even while live; refresh both each
+                // live tick or the friendly layer reads the stale de-virt cell and spawn-time strength.
+                _t set ["pos", getPosASL _ldr];
+                _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
+                if ((_t getOrDefault ["ridingOn", -1]) >= 0) then {
+                    // A live rider bound at the shore: its transport drives the pickup and crossing (ferryTick).
+                    // It takes no order and must not stow out from under the carry.
+                    _t set ["status", "moving"];
                 } else {
-                    _t set ["farTicks", 0];
-                };
-            };
-        };
-    } else {
-        // A bound rider is driven by its transport (the ferry branch below); it takes no turn of its own.
-        if ((_t getOrDefault ["ridingOn", -1]) < 0) then {
-            switch (_order) do {
-                case "garrison": {
-                    private _full = _t get "fullForce";
-                    _t set ["effForce", (_full) min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
-                };
-                case "guard": {
-                    // Holds its point -- no march, no heal -- but still streams in to defend it on approach.
-                    private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-                    if (([_t get "pos"] call _nearestPlayerCells) <= _k) then { [_t] call DUWS_fnc_opcom_deVirt };
-                };
-                default {
-                    private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-                    if ((_t getOrDefault ["carrying", -1]) >= 0) then {
-                        // Ferry: advance the carry, then stream the pair in near a player. Mid-rendezvous
-                        // (not embarked), only the transport spawns -- the rider is not teleported onto it.
-                        private _rider = [_t] call DUWS_fnc_opcom_ferryStep;
-                        // The step may have dropped or completed the carry this tick; only stream in while bound.
-                        if ((_t getOrDefault ["carrying", -1]) >= 0 && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then {
-                            if ((_t get "embarked") && {!isNil "_rider"}) then {
-                                [_t, _rider] call DUWS_fnc_opcom_deVirtFerry;
-                            } else {
-                                [_t] call DUWS_fnc_opcom_deVirt;
-                                if (!isNil "_rider") then { _rider set ["ridingOn", -1] };
+                    private _engaged = behaviour _ldr isEqualTo "COMBAT";
+                    if (!_engaged && {count allPlayers > 0}) then {
+                        private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
+                        if (_pl isNotEqualTo []) then {
+                            _pl sort true;
+                            _engaged = _ldr knowsAbout ((_pl select 0) select 1) > 1.5;
+                        };
+                    };
+                    _t set ["status", ["moving", "engaged"] select _engaged];
+
+                    // Supply drops on arrival: delete the courier and fire its success (logged; mission plumbing
+                    // lands with the actions that consume it in Phase 4).
+                    if ((_t getOrDefault ["supplyDrop", false]) && {(_ldr distance2D (_t get "target")) < 40}) then {
+                        ["INFO", "OPCOM", format ["supply delivered by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
+                        { deleteVehicle _x } forEach (units _grp);
+                        deleteGroup _grp;
+                        _t set ["status", "done"];
+                        _t set ["grp", ""];
+                    } else {
+                        // A land unit that has reached its near shore with a water leg ahead borrows a transport,
+                        // which then renders the crossing live (fnc_opcom_ferry). It binds (ridingOn) and holds;
+                        // no lift free, it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS -- the same
+                        // stranded path as a virtual rider.
+                        private _bound = false;
+                        if (!_engaged && {_order isNotEqualTo "guard"}
+                            && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
+                            ([_t, getPosASL _ldr] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
+                            if (_crosses && {(_ldr distance2D _stage) < DUWS_streamArrivalMargin}) then {
+                                private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
+                                if (isNil "_tr") then {
+                                    private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
+                                    _t set ["strandTicks", _s];
+                                    if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
+                                        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
+                                    };
+                                } else {
+                                    _t set ["strandTicks", 0]; _bound = true;
+                                };
                             };
                         };
-                    } else {
+                        // Skip the stow for a rider that just bound to a ferry this tick -- the transport owns it now.
+                        if (!_bound) then {
+                            private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
+                            // Reset on re-entry/engagement below, so the stow needs an unbroken absence, not one
+                            // far sample (OPCOM_REVIRT_GRACE).
+                            if (!_engaged && {([getPosASL _ldr] call _nearestPlayerCells) > _k}) then {
+                                private _far = (_t getOrDefault ["farTicks", 0]) + 1;
+                                _t set ["farTicks", _far];
+                                if (_far >= OPCOM_REVIRT_GRACE) then { [_t] call DUWS_fnc_opcom_reVirt };
+                            } else {
+                                _t set ["farTicks", 0];
+                            };
+                        };
+                    };
+                };
+            };
+        } else {
+            // A bound rider is driven by its transport (the ferry branch above); it takes no turn of its own.
+            if ((_t getOrDefault ["ridingOn", -1]) < 0) then {
+                switch (_order) do {
+                    case "garrison": {
+                        private _full = _t get "fullForce";
+                        _t set ["effForce", (_full) min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
+                    };
+                    case "guard": {
+                        // Holds its point -- no march, no heal -- but still streams in to defend it on approach.
+                        private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
+                        if (([_t get "pos"] call _nearestPlayerCells) <= _k) then { [_t] call DUWS_fnc_opcom_deVirt };
+                    };
+                    default {
+                        private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
                         private _adv = [_t] call DUWS_fnc_opcom_advance;
                         // No lift free strands the rider at the shore: it holds, retries, and WARNs every
                         // OPCOM_FERRY_STRAND_TICKS so a true island gap (no transport recruited) is not silent.
@@ -149,7 +174,7 @@ private _nearestPlayerCells = {
                                 };
                             };
                         };
-                        // Skip the stream-in for a completed supply / fresh garrison (defends via the reserve wave) and a mid-ferry rider.
+                        // Skip the stream-in for a completed supply / fresh garrison (defends via the reserve wave) and a rider that bound to a ferry this tick.
                         if (!_settled && {(_t getOrDefault ["ridingOn", -1]) < 0} && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then { [_t] call DUWS_fnc_opcom_deVirt };
                     };
                 };
