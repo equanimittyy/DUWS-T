@@ -44,9 +44,9 @@ The tasking layer is live and hand-driven. Phase 4a adds the economic decision; 
 |---|---|
 | The tasking record (a serialisable hashMap), the recruit menu, the speed / streamK / water tables | [`fnc_opcom_tasking_init.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf) |
 | Hire a menu row into a resting `garrison` unit, priced `ceil(force × OPCOM_AP_PER_FORCE)`, paid from the wallet | [`fnc_opcom_recruit.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_recruit.sqf) |
-| Issue `move` / `guard` to a resting unit, plan its route, arm the commit hold | [`fnc_opcom_task.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task.sqf) |
+| Issue `move` / `guard` to a resting or live unit (a live one is re-ordered in place), plan its route, arm the commit hold | [`fnc_opcom_task.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task.sqf) |
 | The per-tick step: movement along the route, streaming in/out, ferry carry, garrison heal, status read | [`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf) |
-| The commit **hold** — `fnc_opcom_task` sets `hold = tick + OPCOM_COMMIT_HOLD` and refuses to re-issue a held or live unit's order | `fnc_opcom_task.sqf:22,45` |
+| The commit **hold** — `fnc_opcom_task` sets `hold = tick + OPCOM_COMMIT_HOLD` and refuses to re-issue a held unit's order (a live unit is re-ordered; a bound ferry carry refused) | `fnc_opcom_task.sqf:25,48` |
 | The tick **fault-wrap** — the loop body is already in a `try`/`catch` naming `_stage` | `fnc_opcom_perception_run.sqf:16-39` |
 | Enemy-ground worth `_points` for Value — already stamped into `zone_meta_array` | `fnc_createzone.sqf:30` |
 
@@ -218,8 +218,9 @@ Fortify.
 Phase 4a needs **no separate intent store**: the Phase-3 tasking record *is* the intent for a supplied
 action, and an economic action (Bank, zone Reinforce / Fortify) resolves the same tick it commits and needs
 no record at all ([§Commitment](opcom_plan.md#commitment-intents-are-sticky)). The commit **hold** is already
-enforced in `fnc_opcom_task` — the appraisal simply never re-commits a held or live unit, because
-`fnc_opcom_task` refuses it.
+enforced in `fnc_opcom_task` — the appraisal need not re-check it, because `fnc_opcom_task` refuses a held
+unit (and a bound ferry carry). A live unit is no longer refused: it is re-ordered in place, the new order
+pushed onto its group.
 
 The contested **draw-lock** and the offensive **P(win) gate** are Phase 4b. Phase 4a never draws a garrison
 unit out (its only unit-producing action is Recruit, a fresh hire) and fights nothing, so neither guard is
