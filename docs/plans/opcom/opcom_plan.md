@@ -745,6 +745,10 @@ both spawn and the rider is `moveInCargo`'d into the hull if it fits, else dropp
 simplification, not a tied abort). The water-leg intent is lost once the pair is live — they go independent; a
 transport that survives its live spell re-virtualises as a free `guard`, back in the pool.
 
+Rendering the whole crossing live when a player watches it — a real pickup, carry, and drop that keeps the
+binding across every stream cycle, instead of dropping the pair to fend for itself — is planned in [live ferry
+rendering](ferry_live_render.md).
+
 **Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
 the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander
 recruited and left idle, nothing more. A transport leaves play only by loss, by being given a directed order
