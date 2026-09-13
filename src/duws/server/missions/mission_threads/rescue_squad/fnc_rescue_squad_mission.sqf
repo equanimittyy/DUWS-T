@@ -6,9 +6,9 @@ if (!([0, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitW
 #define SEARCH_R        400
 #define ZONE_MARGIN     150
 #define DRY_RADIUS      100     // reject a building with water this close: a shoreline site drowns the fight
-#define UNCAPTIVE_RANGE 50
+#define UNCAPTIVE_RANGE 100
 #define CORDON_RING     120
-#define SUPPRESS_RANGE  300     // suppression plays only while a player is this close to the building
+#define SUPPRESS_RANGE  400     // suppression plays only while a player is this close to the building
 #define SUPPRESS_MAX    150     // seconds of suppression from the first burst before it lapses on its own
 
 private _compKey = "mission_rescue_squad";
@@ -229,6 +229,22 @@ DUWS_rsq_holdBroken = false;
         } forEach _sq;
         _grp setCombatMode "RED";
         [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_lyjjiteq"] remoteExec ["fnc_duws_dialogue", 0];
+
+        // Player is at the wire: the ring collapses onto the building so the fight converges on the hostages,
+        // not a static cordon picked apart from outside. LIMITED to close as a line, not a race. PATH re-enabled
+        // in case hold-break never fired -- a player who reached the wire without drawing a shot.
+        private _opforGroups = [];
+        { if (alive _x) then { _opforGroups pushBackUnique (group _x) } } forEach _cordon;
+        {
+            private _g = _x;
+            { _x enableAI "PATH" } forEach units _g;
+            for "_i" from (count (waypoints _g)) - 1 to 0 step -1 do { deleteWaypoint [_g, _i] };
+            _g setBehaviour "COMBAT";
+            private _wp = _g addWaypoint [_bld, 0];
+            _wp setWaypointType "MOVE";
+            _wp setWaypointSpeed "LIMITED";
+            _wp setWaypointBehaviour "COMBAT";
+        } forEach _opforGroups;
 
         // Hold in the building until the tide turns, then release movement so they can manoeuvre and, once
         // the cordon is fully broken, walk to the evac. Standing them up lets the crouch drop as they move.
