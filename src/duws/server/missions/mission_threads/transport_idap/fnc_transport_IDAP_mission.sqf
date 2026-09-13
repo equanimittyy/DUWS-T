@@ -126,7 +126,7 @@ _markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T
 [_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 5;
+sleep 6;
 [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 
 sleep 5; // let the patrols finish spawning

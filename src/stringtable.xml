@@ -3965,8 +3965,8 @@
                 <English>Alpha 1-1, an informant needs escort to %1. Get them there safely.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_copy">
-                <Original>We copy Overlord.</Original>
-                <English>We copy Overlord.</English>
+                <Original>We copy Overlord. We'll keep the informant safe.</Original>
+                <English>We copy Overlord. We'll keep the informant safe.</English>
             </Key>
             <Key ID="STR_DUWS_T_escortinformant_close">
                 <Original>Good work Alpha 1-1. The informant is safely back to %1.</Original>
@@ -4005,8 +4005,8 @@
                 <English>Alpha 1-1, OPFOR is holding a hostage near %1. Move in and rescue him. Discretion is advised.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_copy">
-                <Original>We copy Overlord.</Original>
-                <English>We copy Overlord.</English>
+                <Original>Alpha 1-1 copies. We'll move in and exfil the hostage.</Original>
+                <English>Alpha 1-1 copies. We'll move in and exfil the hostage.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_detected">
                 <Original>Alarm raised. The guards will execute the hostage in %1s.</Original>
@@ -4716,8 +4716,8 @@
                 <English>To Alpha 1-1, the radio tower is down and enemy comms with it. Good work. Overlord out.</English>
             </Key>
             <Key ID="STR_DUWS_T_towercopy">
-                <Original>Alpha 1-1 copies, Overlord.</Original>
-                <English>Alpha 1-1 copies, Overlord.</English>
+                <Original>Alpha 1-1 copies, Overlord. We'll destroy the target.</Original>
+                <English>Alpha 1-1 copies, Overlord. We'll destroy the target.</English>
             </Key>
             <Key ID="STR_DUWS_T_toweroverlord">
                 <German>Dies ist „Oberherr 1-1“. „Cobra 1-3“ (Funkturm-Verteidigung) bestätigt tot. Feinde dürfen unsere Signale nicht abfangen. Funkturm mit allen Mitteln unbrauchbar machen!</German>
@@ -4757,8 +4757,8 @@
                 <English>Copy. Moving out.</English>
             </Key>
             <Key ID="STR_DUWS_T_laptopcopy">
-                <Original>Copy, Overlord.</Original>
-                <English>Copy, Overlord.</English>
+                <Original>Copy, Overlord. We'll sabotage the laptop and recover intel.</Original>
+                <English>Copy, Overlord. We'll sabotage the laptop and recover intel.</English>
             </Key>
             <Key ID="STR_DUWS_T_laptopletsdothis">
                 <German>Dies ist "Overlord 1-1". Wir haben die Position der feindlichen elektronischen Kampfgeräte ermittelt. Ihre Einheit soll sich zum Standort begeben und alle verfügbaren Informationen beschaffen. Falls keine gefunden werden, lade das kürzlich an Ihre Terminals übermittelte Hacking-Programm hoch. Nach Abschluss der Mission können Sie sich sofort abziehen.</German>

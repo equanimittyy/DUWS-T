@@ -74,7 +74,7 @@ _cycle setWaypointSpeed "FULL";
 _cycle setWaypointStatements ["true", format ["(vehicle this) flyInHeight %1", (_altitude + (200 - random 400)) max 100]];
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_AIR_DESC", _mission_name, "kill",
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_destroyair_letsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_destroyair_copy", 0]]
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_destroyair_letsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_destroyair_copy", 0]]
 ] call fnc_mission_present;
 
 private _deadline = DUWS_curDeadlineAt;

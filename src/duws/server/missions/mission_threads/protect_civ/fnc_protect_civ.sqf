@@ -118,7 +118,7 @@ private _crateJip = format ["DUWS_pcFactory_%1", netId _crate];
 };
 
 private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _mission_name, "defend",
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_directive", 7], ["STR_DUWS_T_actionteam", "STR_DUWS_T_pc_copy", 0]]
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pc_directive", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_pc_copy", 0]]
 ] call fnc_mission_present;
 
 // Skip Prep Phase action, 10 s in, reach-gated by the condition, JIP-keyed to the informant.

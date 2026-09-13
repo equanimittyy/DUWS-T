@@ -146,7 +146,7 @@ private _handles = [_targetpos, _randomPos, _radius] call _build;
 if (isNil "_handles") then { _handles = [] };
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_y7z1cx6j", _mission_name, "kill",
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8], ["STR_DUWS_T_actionteam", "STR_DUWS_T_armorcopy", 0]]
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_armorcopy", 0]]
 ] call fnc_mission_present;
 
 [_handles, _done, _mission_name, _taskId, _targetpos, _radius, [_marker],
