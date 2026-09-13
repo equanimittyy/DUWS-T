@@ -131,6 +131,7 @@ fnc_site_generic = compile preprocessFileLineNumbers "duws\server\missions\fnc_s
 // Broadcast: per-type finders defer to these in the client-side picker, so the shared bodies must exist there too.
 fnc_site_cluster = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_cluster.sqf";publicVariable "fnc_site_cluster";
 fnc_site_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_town.sqf";publicVariable "fnc_site_town";
+fnc_site_terrain = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_terrain.sqf";publicVariable "fnc_site_terrain";
 fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_findSite.sqf";publicVariable "fnc_mission_findSite";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_timeout_notice = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_timeout_notice.sqf";
@@ -228,10 +229,10 @@ fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\server\mis
 fnc_sabotage_laptop_decoy = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_decoy.sqf";
 fnc_sabotage_laptop_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_site.sqf";publicVariable "fnc_sabotage_laptop_site";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
-// Broadcast: finder runs client-side in the picker; else the cluster snap is lost to the generic and the garrison lands on open ground.
-fnc_destroy_cache_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_site.sqf";publicVariable "fnc_destroy_cache_site";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
-fnc_destroy_radar_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_site.sqf";publicVariable "fnc_destroy_radar_site";
+// cache and radar drop a fenced composition, so the offer only needs level ground, not a building cluster.
+fnc_destroy_cache_site = fnc_site_terrain; publicVariable "fnc_destroy_cache_site";
+fnc_destroy_radar_site = fnc_site_terrain; publicVariable "fnc_destroy_radar_site";
 fnc_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_mission.sqf";
 publicVariable "fnc_informant_mission";
 fnc_informant_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_site.sqf";publicVariable "fnc_informant_site";
