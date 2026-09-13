@@ -69,10 +69,7 @@ private _settleMove = {
                 _t set ["grp", ""];
             } else {
                 private _ldr = leader _grp;
-                // grid_rebuild deposits this tasking's force at pos/effForce even while live; refresh both each
-                // live tick or the friendly layer reads the stale de-virt cell and spawn-time strength.
-                _t set ["pos", getPosASL _ldr];
-                _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
+                // pos/effForce are refreshed by the bookkeep pass ahead of grid_rebuild (fnc_opcom_perception_run).
                 if ((_t getOrDefault ["ridingOn", -1]) >= 0) then {
                     // A live rider bound at the shore: its transport drives the pickup and crossing (ferryTick).
                     // It takes no order and must not stow out from under the carry.
