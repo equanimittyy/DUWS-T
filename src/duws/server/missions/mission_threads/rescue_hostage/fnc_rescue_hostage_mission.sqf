@@ -144,7 +144,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define SUS_KNOWS 0.3
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
-    #define DET_FRESH 2       // max nearTargets age (s) still counted as "sensing now"; the loop ticks every 1s
+    #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
     #define GRACE_SUS 8
     #define CLOCK_BASE 60     // armed once and never called off
     #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
