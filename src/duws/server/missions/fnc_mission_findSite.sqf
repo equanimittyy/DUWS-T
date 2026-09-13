@@ -226,10 +226,6 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
     // which this gate rejects, and a town survey's every candidate sits on the town its finder works.
     if (!_useCapture && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
 
-    private _clear = true;
-    { if (_cand distance _x < 250) exitWith { _clear = false } } forEach _avoid;
-    if (!_clear) then { continue };
-
     if (!(_cand distance _origin > 1500 && {_cand distance PosOfBLUHQ < (zones_max_dist_from_hq*1.5)})) then { continue };
 
     // The type's finder gets the last word: reject -> drop this feature and draw the next; accept -> its
@@ -241,6 +237,13 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
     // A 3D offer position offsets its strategic-map icon's clickable hotspot, so match the flat [x,y].
     private _p = _site select 0;
     private _pos2d = [_p select 0, _p select 1];
+
+    // Keep-apart on the settled position, not the pre-finder candidate: a relocating finder (town-centre
+    // snap, HVT eject) pulls the offer onto a co-offer the raw candidate cleared -- stacked two town offers.
+    private _clear = true;
+    { if (_pos2d distance _x < 250) exitWith { _clear = false } } forEach _avoid;
+    if (!_clear) then { continue };
+
     if (_needDest) then {
         // Destination = the nearest OPFOR zone at least _minCorridor out with a BLUFOR-clear corridor from
         // the settled position. None -> this feature cannot run a convoy; drop it and draw the next.
