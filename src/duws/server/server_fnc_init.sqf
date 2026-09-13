@@ -209,6 +209,10 @@ fnc_capture_zone_site = compile preprocessFileLineNumbers "duws\server\missions\
 fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_mission.sqf";
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_target_recon_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_recon\fnc_target_recon_mission.sqf";
+// No mandatory dot constraint: both site their units by a relative in-thread search (perch, cover), so the
+// offer accepts any dot. Pinned to the null finder explicitly so this reads as chosen, not a missed registration.
+fnc_target_sniper_site = fnc_site_generic; publicVariable "fnc_target_sniper_site";
+fnc_target_recon_site  = fnc_site_generic; publicVariable "fnc_target_recon_site";
 fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ.sqf";
 // Broadcast: the finder runs client-side in the picker; else the building gate is lost to the generic.
 fnc_protect_civ_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_site.sqf";publicVariable "fnc_protect_civ_site";
