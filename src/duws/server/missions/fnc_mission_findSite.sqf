@@ -100,11 +100,12 @@ private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = (_surveyKind isEqualTo "town") && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
 private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
-// Capture-zone enumerates OPFOR zones as hardpoint enumerates emplacements, but anchors ON the target
-// zone -- so it alone skips the zone-interior claimed gate below.
-private _useCapture = !_useTown && {_surveyKind isEqualTo "capturezone"};
+// The "onzone" kind enumerates enemy sites whose objective anchors on claimed ground -- capture on the
+// OPFOR zone it takes, recon on the zone or emplacement it scouts -- so it alone skips the zone-interior
+// claimed gate below, unlike "hardpoint" whose targets are always standalone.
+private _useOnZone = !_useTown && {_surveyKind isEqualTo "onzone"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
-private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useCapture) then { "urban" } else { "zone" };
+private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useOnZone) then { "urban" } else { "zone" };
 
 // The features phase 2 surveys: town centres, the live target hardpoints, a whole-map sample, or OPFOR zones
 // as [centre, bandMin, bandMax] the realise step feeds straight to findSafePos. Hardpoint, map and zone
@@ -112,11 +113,12 @@ private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useCapture) th
 private _features = if (_useTown) then {
     +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
-    if (_useHardpoint || _useCapture) then {
-        // Enumerate: one candidate per discrete target -- a live hardpoint, or an OPFOR zone for the capture
-        // type -- via the type's finder in ["ALL"] mode, so an enumerate type MUST define a finder answering
-        // ["ALL"]. Listing directly gives every target an even shot where a random-dot survey would cluster
-        // onto whichever sits nearest a zone. Tiny realise band -- the vet snaps back exactly.
+    if (_useHardpoint || _useOnZone) then {
+        // Enumerate: one candidate per discrete target -- a live hardpoint, an OPFOR zone (capture), or an
+        // unrevealed enemy position to scout (recon) -- via the type's finder in ["ALL"] mode, so an
+        // enumerate type MUST define a finder answering ["ALL"]. Listing directly gives every target an even
+        // shot where a random-dot survey would cluster onto whichever sits nearest a zone. Tiny realise band
+        // -- the vet snaps back exactly.
         (["ALL"] call _finder) apply { [_x, 0, 50] }
     } else {
         if (_useMap) then {
@@ -222,9 +224,9 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
 
     // Off every zone/town by 400 m, leaving headroom for a thread's own tight local settle so an anchor a
     // metre outside a boundary does not seat the objective back inside it.
-    // Capture and town types are exempt: both deliberately anchor on claimed ground -- a zone, a town --
-    // which this gate rejects, and a town survey's every candidate sits on the town its finder works.
-    if (!_useCapture && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
+    // The onzone kind is exempt like town: both deliberately anchor on claimed ground -- an OPFOR zone, a
+    // town -- which this gate rejects, and a town survey's every candidate sits on the town its finder works.
+    if (!_useOnZone && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
 
     if (!(_cand distance _origin > 1500 && {_cand distance PosOfBLUHQ < (zones_max_dist_from_hq*1.5)})) then { continue };
 

@@ -55,7 +55,8 @@
 //
 // surveyKind is the placement survey's candidate source (fnc_mission_findSite): "zone" scans the countryside
 // off OPFOR zones, "town" scans populated towns, "map" samples the whole HQ-reach area, "hardpoint"
-// enumerates the live target hardpoints directly, "capturezone" enumerates the OPFOR-held zones directly.
+// enumerates the live target hardpoints directly, "onzone" enumerates enemy sites whose objective anchors on
+// claimed ground (the zones capture takes, the zones/emplacements recon scouts).
 // Set "town" for a type that belongs in a built-up area
 // (informant, CQB, the civilian pair). Set "map" for a type not tied to a zone, placed straight on the
 // sampled dot: the hard/easy dial (not a zone anchor) pulls it toward meaningful ground (hard scores 0 with
@@ -63,9 +64,10 @@
 // type that destroys an existing emplacement (tower, hardpoint): the survey lists those emplacements one per
 // candidate via the type's finder in ["ALL"] mode -- so a "hardpoint" type MUST define a finder that answers
 // ["ALL"] -- giving a sparse, scattered target set even coverage where a random-dot survey would collapse
-// onto whichever target sits nearest a zone cluster. "capturezone" shares that enumerate path (its finder
-// must answer ["ALL"] too) but sources revealed OPFOR-held zones, and its objective sits ON the zone, so it
-// is the one surveyKind exempt from findSite's zone-interior claimed gate. The deny-armor convoy uses "map" too: its spawn is free
+// onto whichever target sits nearest a zone cluster. "onzone" shares that enumerate path (its finder must
+// answer ["ALL"] too) but its objective sits ON claimed ground -- the OPFOR-held zone capture takes, or the
+// zone/emplacement recon scouts -- so it is the surveyKind exempt from findSite's zone-interior claimed gate.
+// The deny-armor convoy uses "map" too: its spawn is free
 // but needDest still ties the haven it drives to a zone. The HVT convoy stays "zone" -- its finder anchors
 // the eject on a discovered held zone, not a dot. The front-vs-deep bias is separate -- it is the offer's
 // hard/easy dial, not the survey source. The "More Urban" setup toggle shapes only zone placement, never the
@@ -77,7 +79,7 @@
 // is appended after the candidate on every call, so one finder body serves several types on different settings
 // -- the terrain gate fnc_site_terrain runs flat for a parked truck, road-require for the deny-armor tank,
 // treeline for a patrol camp, all from args here rather than a wrapper file per type. An enumerate finder
-// ("hardpoint"/"capturezone") is named here too and is additionally called in ["ALL"] mode by the survey.
+// ("hardpoint"/"onzone") is named here too and is additionally called in ["ALL"] mode by the survey.
 //
 // The launcher is a literal block per row rather than something built from the thread column:
 // BIS_fnc_strategicMapOpen runs it with no arguments and an SQF block captures no locals, so the
@@ -98,7 +100,7 @@
 ["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Ammo Cache",            { [9]  call fnc_mission_launch }, 25, 15, 0, [0.6667,1.5], "command", "sabotage", "", [false, 0, false, "map", "fnc_site_terrain", []]],
 ["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Radar",            { [10] call fnc_mission_launch }, 15, 25, 0, [0.6667,1.5], "command", "sabotage", "", [false, 0, false, "map", "fnc_site_terrain", []]],
 ["fnc_deny_armor_mission",       "STR_DUWS_T_c11", "STR_DUWS_T_destroyarmour_desc",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Deny Enemy Armor",         { [11] call fnc_mission_launch }, 20, 20, 0, [1.5,2], "command", "elimination", "STR_DUWS_T_destroyarmour_note", [true, 1500, true, "map", "fnc_site_terrain", [0, 0, "require", 100]]],
-["fnc_recon_observe_mission",    "STR_DUWS_T_c12", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon Enemy Position",       { [12] call fnc_mission_launch }, 10, 5,  0, [0.3333,1], "command", "recon", "", [false, 0, false, "zone", "fnc_recon_observe_site", []]],
+["fnc_recon_observe_mission",    "STR_DUWS_T_c12", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon Enemy Position",       { [12] call fnc_mission_launch }, 10, 5,  0, [0.3333,1], "command", "recon", "", [false, 0, false, "onzone", "fnc_recon_observe_site", []]],
 ["fnc_protect_civ_mission",      "STR_DUWS_T_c13", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect Informant",         { [13] call fnc_mission_launch }, 40, 30, 3, [1.5,2], "civilian", "defend", "STR_DUWS_T_protectciv_note", [false, 0, false, "map", "fnc_protect_civ_site", []]],
 ["fnc_transport_IDAP_mission",   "STR_DUWS_T_c14", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Recover Humanitarian Supply Truck",           { [14] call fnc_mission_launch }, 25, 10, 3, [0.3333,1], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, "map", "fnc_transport_IDAP_site", []]],
 ["fnc_informant_mission",        "STR_DUWS_T_c15", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Informant Manhunt", { [15] call fnc_mission_launch }, 10, 25, 0, [1.5,2], "command", "elimination", "STR_DUWS_T_INTEL_INFORMANT_NOTE", [false, 0, false, "town", "fnc_informant_site", []]],
@@ -108,7 +110,7 @@
 ["fnc_destroy_air_mission",      "STR_DUWS_T_c19", "STR_DUWS_T_DESTROY_AIR_DESC",     "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Air Asset",         { [19] call fnc_mission_launch }, 25, 25, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, "map", "fnc_destroy_air_site", []]],
 ["fnc_escort_informant_mission", "STR_DUWS_T_c20", "STR_DUWS_T_ESCORT_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Escort Informant",          { [20] call fnc_mission_launch }, 5, 15, 1, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, "town", "fnc_site_civ_town", []]],
 ["fnc_deliver_supplies_mission", "STR_DUWS_T_c21", "STR_DUWS_T_DELIVER_SUPPLIES_DESC", "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Deliver Supplies",          { [21] call fnc_mission_launch }, 15, 5, 3, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, "town", "fnc_site_civ_town", []]],
-["fnc_capture_zone_mission",     "STR_DUWS_T_c22", "STR_DUWS_T_CAPTURE_ZONE_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Capture Zone",             { [22] call fnc_mission_launch }, 20, 20, 0, [1.5,2], "command", "assault", "", [false, 0, false, "capturezone", "fnc_capture_zone_site", []]],
+["fnc_capture_zone_mission",     "STR_DUWS_T_c22", "STR_DUWS_T_CAPTURE_ZONE_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Capture Zone",             { [22] call fnc_mission_launch }, 20, 20, 0, [1.5,2], "command", "assault", "", [false, 0, false, "onzone", "fnc_capture_zone_site", []]],
 // CP/AP kept modest: the cache is turned in at HQ analysis for its own CP + reveals, so a rich base payout on top would double-dip.
 ["fnc_raid_safehouse_mission",   "STR_DUWS_T_RAID_SAFEHOUSE_READY", "STR_DUWS_T_RAID_SAFEHOUSE_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Raid Informant Safehouse", { [23] call fnc_mission_launch }, 10, 10, 0, [1.5,2], "command", "requisition", "STR_DUWS_T_RAID_SAFEHOUSE_NOTE", [false, 0, false, "town", "fnc_raid_safehouse_site", []]],
 ["fnc_rescue_hostage_mission",   "STR_DUWS_T_RESCUE_HOSTAGE_READY", "STR_DUWS_T_RESCUE_HOSTAGE_DESC", "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", "Rescue Hostage", { [24] call fnc_mission_launch }, 25, 15, 1, [0.6667,1.5], "command", "rescue", "STR_DUWS_T_RESCUE_HOSTAGE_NOTE", [false, 0, false, "map", "fnc_rescue_hostage_site", []]]

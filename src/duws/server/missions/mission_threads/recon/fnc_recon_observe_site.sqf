@@ -1,8 +1,8 @@
-// Site-finder for the recon-observe mission. Accepts a picker candidate only where an unrevealed OPFOR
-// position -- a zone or a standalone hardpoint -- sits within reach and at least one standoff overwatch
-// with clear terrain line-of-sight to it exists, and returns that position. The mission is about scouting
-// a position the player has not seen yet, so one already on the strategic map is no target -- the reveal
-// is the whole payoff.
+// Site-finder for the recon-observe mission (surveyKind "onzone"). In ["ALL"] mode it lists every unrevealed
+// OPFOR position -- a zone or a standalone hardpoint -- for the enumerate survey to draw from. In [_pos] mode
+// it vets the target the survey settled on: accepted only where at least one standoff overwatch with clear
+// terrain line-of-sight to it exists, and returns that position. The mission scouts a position the player has
+// not seen yet, so one already on the strategic map is no target -- the reveal is the whole payoff.
 //
 // It returns the TARGET, not the overwatch, on purpose: fnc_mission_findSite keeps only `select 0` of a
 // finder's result, and re-deriving the target from an overwatch ("nearest unrevealed OPFOR position") is
@@ -15,26 +15,27 @@
 // (terrainIntersectASL, a single cheap query); the thread adds object occlusion once for the launched
 // mission rather than for all seven drawn offers.
 //
-// Contract: [_candidatePos] -> [] reject, or [_targetPos] accept.
+// Contract: ["ALL"] -> [pos, ...] every target | [_candidatePos] -> [_targetPos] accept | [] reject.
 params ["_pos"];
 
-// TUNABLE. Standoff band the overwatch must exist within, and how far the target may sit from where the
-// picker wanted the offer before it drags the mission across the map. Kept in step with the thread.
+if (_pos isEqualTo "ALL") exitWith { ["ALL"] call fnc_recon_observe_pick };
+
+// TUNABLE. Standoff band the overwatch must exist within, and clearance from other enemy sites. Kept in
+// step with the thread.
 #define OBS_MIN_DIST   600
 #define OBS_MAX_DIST   800
-#define ACCEPT_RADIUS  2500
 #define ZONE_CLEAR     250
 #define HP_CLEAR       300
 
-// Nearest unrevealed OPFOR target to the candidate -- a zone or a standalone hardpoint -- through the
-// shared picker the thread re-derives with, so both agree on what is scouted. Out of reach, or nothing
-// left to scout, drops the offer.
+// The target the survey settled on -- the enumerate realise step snaps onto a target, so the nearest
+// eligible position to _pos is that target, re-derived through the shared picker the thread reuses so both
+// agree on what is scouted. Captured or revealed since the survey -> the next nearest, or none left drops
+// the offer.
 private _pick = [_pos] call fnc_recon_observe_pick;
 if (_pick isEqualTo []) exitWith { [] };
 private _kind   = _pick select 0;
 private _target = _pick select 1;
 private _hpKey  = if (_kind isEqualTo "hp") then { _pick select 2 } else { "" };
-if (_target distance2D _pos > ACCEPT_RADIUS) exitWith { [] };
 
 // Feasibility: at least one standoff bearing has clear terrain LOS onto the target AND stands clear of
 // every other enemy zone and hardpoint. None qualifying rejects, so a target whose overwatches are all
