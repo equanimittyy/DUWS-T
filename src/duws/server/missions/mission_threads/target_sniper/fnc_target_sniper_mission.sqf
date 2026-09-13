@@ -140,13 +140,13 @@ private _done = { (_this findIf { alive _x }) < 0 };
 if (!([5, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 1000;
-private _site = [_MissionPos, _radius, 5, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the perch search anchors on the offered near-enemy dot.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _taskId = format ["sniperhunt%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+private _handles = [_targetpos, _randomPos, _radius] call _build;
 if (isNil "_handles") then { _handles = [] };
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_16dh939j", _mission_name, "kill",

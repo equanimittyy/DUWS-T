@@ -3,7 +3,7 @@ params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
 private _build = {
-    params ["_targetpos", "_randomPos", "_radius", "_Building"];
+    params ["_targetpos", "_randomPos", "_radius"];
 
     // Kept for the mission's duration so the abandoned-vehicle sweep cannot collect the prize while a
     // player takes their time.
@@ -68,13 +68,13 @@ private _lost = [[{ !alive (_this select 0) }, ["STR_DUWS_T_OVERLORD", "STR_DUWS
 if (!([1, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 600;
-private _site = [_MissionPos, _radius, 1, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the terrain gate vetted this dot as level ground for the parked truck.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _taskId = format ["rescue%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+private _handles = [_targetpos, _randomPos, _radius] call _build;
 if (isNil "_handles") then { _handles = [] };
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_p7qawzl4", _mission_name, "getin",

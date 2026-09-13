@@ -5,9 +5,9 @@ private _requester = remoteExecutedOwner;
 if (!([19, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 5000;
-private _site = [_MissionPos, _radius, 19, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the loiter circuit is drawn around it; the aircraft flies in from off-map anyway.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 // The aircraft is whatever the side can field: a jet once it has reached the Air tier (AP 600), else the
 // attack helicopter it earned at Armor. Both tokens carry their own AP and AttackHeli gates, so tokenClass

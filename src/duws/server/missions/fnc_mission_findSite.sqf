@@ -303,8 +303,8 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
     // HQ well inside the 1.5x reach), so unguarded it would be offered and started. Drop the feature.
     if (((_cand select 0) == 0) && {(_cand select 1) == 0}) then { _shortlist = _shortlist select {!((_x select 0) isEqualTo _fData)}; continue };
 
-    // Off every zone/town by 400 m -- the drift a thread's objective takes before fnc_missionTargetPos
-    // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
+    // Off every zone/town by 400 m, leaving headroom for a thread's own tight local settle so an anchor a
+    // metre outside a boundary does not seat the objective back inside it.
     // Capture and town types are exempt: both deliberately anchor on claimed ground -- a zone, a town --
     // which this gate rejects, and a town survey's every candidate sits on the town its finder works.
     if (!_useCapture && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };

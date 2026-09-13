@@ -22,9 +22,9 @@ private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-private _site = [_MissionPos, DA_RADIUS, 11, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the finder vetted a road within reach; the tank snaps onto it below.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 // The tank's ground: flat, hull-clear, within ~100 m of a road so the convoy rides the network in and the
 // repaired tank drives home on it, yet off the carriageway so it reads as a derelict. No road near the

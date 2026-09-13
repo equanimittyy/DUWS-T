@@ -12,17 +12,7 @@ private _requester = remoteExecutedOwner;
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
 
-    // Site the patrol in the deepest cover: sample bearings across the ring, keep the most-treed spot
-    // (terrain-object count, engine-cheap); centre is the fallback for a bare ring.
-    private _treeKinds = ["TREE", "SMALL TREE", "BUSH"];
-    private _spawnPos = _targetpos;
-    private _bestTrees = -1;
-    for "_i" from 0 to 39 do {
-        private _cand = _targetpos getPos [80 + random (_radius - 80), random 360];
-        if (surfaceIsWater _cand) then { continue };
-        private _n = count (nearestTerrainObjects [_cand, _treeKinds, 25, false]);
-        if (_n > _bestTrees) then { _bestTrees = _n; _spawnPos = _cand };
-    };
+    private _spawnPos = [_targetpos, _radius, [["forest", 1]]] call fnc_score_placement;
 
     // Centre and leash are the spawn, not the objective ring, so the team holds the wood it hides in;
     // the 300 m here is the posture radius, not the mission radius.
@@ -66,13 +56,13 @@ private _done = { (_this findIf { alive _x }) < 0 };
 if (!([17, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 600;
-private _site = [_MissionPos, _radius, 17, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the cover search anchors on the offered near-enemy dot.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _taskId = format ["reconpatrol%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+private _handles = [_targetpos, _randomPos, _radius] call _build;
 if (isNil "_handles") then { _handles = [] };
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_RECON_PATROL_DESC", _mission_name, "kill",

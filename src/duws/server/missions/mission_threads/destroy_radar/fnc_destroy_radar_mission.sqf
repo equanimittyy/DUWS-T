@@ -3,7 +3,7 @@ params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
 private _build = {
-    params ["_targetpos", "_randomPos", "_radius", "_Building"];
+    params ["_targetpos", "_randomPos", "_radius"];
     private _cx = _targetpos select 0;
     private _cy = _targetpos select 1;
 
@@ -77,8 +77,10 @@ private _build = {
     // composition, released by fnc_mission_end's compKey; this covers only the men.
     [_groupBunker1] call fnc_mission_claim;
 
+    // Open ground: no buildings to garrison, so field a close guard on the radar instead.
     sleep 1;
-    [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
+    private _guard = ["team", _targetpos, 100, "closepatrol"] call fnc_spawn_team;
+    if (!isNull _guard) then { [_guard] call fnc_mission_claim };
     sleep 1;
     [_targetpos, _radius, 3] spawn fnc_missionPatrols;
 
@@ -90,13 +92,13 @@ private _done = { !alive _this || (damage _this) == 1 };
 if (!([10, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 400;
-private _site = [_MissionPos, _radius, 10, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the terrain gate vetted this dot as level ground for the composition.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _taskId = format ["cache%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+private _handles = [_targetpos, _randomPos, _radius] call _build;
 if (isNil "_handles") then { _handles = [] };
 
 private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_n4uc7t2x", _mission_name, "destroy",

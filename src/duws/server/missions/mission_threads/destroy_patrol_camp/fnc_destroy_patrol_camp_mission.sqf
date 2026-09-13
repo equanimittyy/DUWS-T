@@ -4,7 +4,7 @@ params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
 private _build = {
-    params ["_targetpos", "_randomPos", "_radius", "_Building"];
+    params ["_targetpos", "_randomPos", "_radius"];
 
     // Camp centres: 1-3, min-separated so the smoke columns read as distinct objectives. Each is biased
     // into forest -- a candidate seats only where enough trees stand around it (findSafePos still holds the
@@ -166,13 +166,13 @@ private _done = { ({alive _x} count _this) == 0 };
 if (!([18, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 1000;
-private _site = [_MissionPos, _radius, 18, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the finder vetted this dot as treeline, so the camp spread anchors on it.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _taskId = format ["patrolcamp%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
-private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
+private _handles = [_targetpos, _randomPos, _radius] call _build;
 // Build-time abort: no camp team stood up (a broken-faction edge), so nothing could be killed to win.
 // Caught before the mission is presented, so release the slot and cooldown for a fresh pick and hand the
 // placed camp composition to the sweep -- better than fielding a task that would win on the first poll.

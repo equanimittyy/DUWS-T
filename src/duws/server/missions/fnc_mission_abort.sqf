@@ -1,4 +1,4 @@
-// Locality: server -- mission threads and fnc_mission_site call it, and all of them run server-side.
+// Locality: server -- mission threads call it, and all of them run server-side.
 //
 // Releases everything fnc_mission_begin claimed, for a thread that cannot build its mission.
 // The caller must exit itself afterwards: neither exitWith nor breakOut inside a called function

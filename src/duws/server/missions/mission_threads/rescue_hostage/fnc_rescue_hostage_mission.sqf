@@ -10,14 +10,22 @@ if (!([24, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exit
 _radius = 350;
 private _deadline = DUWS_curDeadlineAt;
 
-// Same test the finder used (fnc_usableBuildings), so the cluster is one the offer vetted; abort if it evaporated.
-private _usable = [_MissionPos, 3, _radius] call fnc_usableBuildings;
+// Re-derive the vetted building, re-applying the finder's covert filters (fnc_site_cluster, allow-neutral +
+// 300 m zone standoff): a seat-count-only re-pick could seat the hostage in a side-held town or a zone the
+// offer was built to keep him clear of. Abort if the cluster evaporated.
+private _zones = missionNamespace getVariable ["zone_meta_array", []];
+private _circles = missionNamespace getVariable ["duws_town_circles", []];
+private _held = (missionNamespace getVariable ["DUWS_enemy_town_pos", []]) + (missionNamespace getVariable ["DUWS_blufor_town_pos", []]);
+private _usable = ([_MissionPos, 3, _radius] call fnc_usableBuildings) select {
+    private _bp = getPos _x;
+    ((_circles findIf { _x params ["_tc", "_r"]; (_bp distance2D _tc < _r) && {(_held findIf { _x distance2D _tc < 5 }) >= 0} }) < 0)
+    && {(_zones findIf { _x params ["", "_zp", "_zs"]; (_bp distance2D _zp) < (_zs + 300) }) < 0}
+};
 if (_usable isEqualTo []) exitWith { [24, _requester, "no_building"] call fnc_mission_abort };
 private _hostageBldg = selectRandom _usable;
 
 // Closest town to the objective takes the REP reward on a win, single-sourced from the reward table.
 // duws_town_circles is index-aligned with civ_locations, so its index is the one fnc_town_rep_adjust takes.
-private _circles = missionNamespace getVariable ["duws_town_circles", []];
 private _townIdx = -1;
 private _bestD = 1e9;
 {

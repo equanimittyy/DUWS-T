@@ -45,14 +45,16 @@ if (_townName == "") then { _townName = text (nearestLocation [_townPos, ""]) };
 if (_townName == "") then { _townName = localize "STR_DUWS_T_idap_town_generic" };
 private _message3 = format [localize "STR_DUWS_T_idapend", _townName];
 
-private _site = [_MissionPos, _radius, 14, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the finder put the truck on the town-reach ring, so the delivery town stays in reach.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
 private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
-_vehPos = _targetpos;
+// Tight-settle the truck onto clear ground so it does not spawn on a slope or in the sea; the offer is the fallback.
+_vehPos = [_targetpos, 0, 60, 8, 0, 0.3, 0] call BIS_fnc_findSafePos;
+if (_vehPos isEqualTo [] || {surfaceIsWater _vehPos} || {(_vehPos select 0) == 0}) then { _vehPos = _targetpos };
 
 // The objective itself: kept for the mission's duration so the abandoned-vehicle sweep cannot collect it.
 _truck1 = "C_Truck_02_transport_F" createVehicle _vehPos;

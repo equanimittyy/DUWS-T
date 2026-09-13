@@ -24,22 +24,21 @@ _speaker1 = localize "STR_DUWS_T_pilot_downed";
 _message1 = localize "STR_DUWS_T_pilotfound";
 _message2 = localize "STR_DUWS_T_pilotend";
 
-private _site = [_MissionPos, _radius, 4, _requester] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+// Trust the offer: the finder vetted this dot as wild ground clear of roads, so the crash sits on it.
+private _randomPos = _MissionPos;
+private _targetpos = _MissionPos;
 
-// Heli sits in a random spot inside the zone, kept >300 m from any road so the crash reads as gone-down-in-
-// the-wild rather than parked on a verge. Rejection sample; fall back to the zone centre if no clear spot is
-// found, rather than fail the mission over terrain.
-private _heliPos = _targetpos;
-private _tries = 0;
-while { _tries < 80 } do {
-    _tries = _tries + 1;
-    private _p = [_randomPos, 0, _radius, 10, 0, 0.3, 0] call BIS_fnc_findSafePos;
-    if (_p isEqualTo [] || {surfaceIsWater _p}) then { continue };
-    if (count (_p nearRoads 300) > 0) then { continue };
-    _heliPos = _p;
-    _tries = 80;
+// Tight settle for a clear crash patch within 80 m of the vetted spot, still off any road; the offer is the
+// fallback so terrain never fails the mission.
+private _heliPos = _MissionPos;
+private _found = false;
+for "_i" from 1 to 20 do {
+    if (!_found) then {
+        private _p = [_MissionPos, 0, 80, 10, 0, 0.3, 0] call BIS_fnc_findSafePos;
+        if (!(_p isEqualTo []) && {!surfaceIsWater _p} && {(_p nearRoads 150) isEqualTo []}) then {
+            _heliPos = _p; _found = true;
+        };
+    };
 };
 
 // The task name finish reads back; the marker follows the pilot once the bleedout timer starts (below).

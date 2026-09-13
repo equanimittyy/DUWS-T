@@ -124,14 +124,13 @@ publicVariable "fnc_protect_civ_markers";
 fnc_random_event_ied_markers = compile preprocessFileLineNumbers "duws\client\events\fnc_random_event_ied_markers.sqf";
 publicVariable "fnc_random_event_ied_markers";
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
-fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
-fnc_mission_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_site.sqf";
 fnc_site_generic = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_generic.sqf";publicVariable "fnc_site_generic";
 // Broadcast: per-type finders defer to these in the client-side picker, so the shared bodies must exist there too.
 fnc_site_cluster = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_cluster.sqf";publicVariable "fnc_site_cluster";
 fnc_site_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_town.sqf";publicVariable "fnc_site_town";
 fnc_site_terrain = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_terrain.sqf";publicVariable "fnc_site_terrain";
+fnc_score_placement = compile preprocessFileLineNumbers "duws\server\missions\fnc_score_placement.sqf";
 fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_findSite.sqf";publicVariable "fnc_mission_findSite";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_timeout_notice = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_timeout_notice.sqf";
@@ -233,6 +232,11 @@ fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missi
 // cache and radar drop a fenced composition, so the offer only needs level ground, not a building cluster.
 fnc_destroy_cache_site = fnc_site_terrain; publicVariable "fnc_destroy_cache_site";
 fnc_destroy_radar_site = fnc_site_terrain; publicVariable "fnc_destroy_radar_site";
+// steal_supply and steal_builder park a truck, so they too want only level ground; the defaults suit them.
+fnc_steal_supply_site = fnc_site_terrain; publicVariable "fnc_steal_supply_site";
+fnc_steal_builder_site = fnc_site_terrain; publicVariable "fnc_steal_builder_site";
+fnc_rescue_pilot_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_site.sqf";publicVariable "fnc_rescue_pilot_site";
+fnc_deny_armor_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deny_armor\fnc_deny_armor_site.sqf";publicVariable "fnc_deny_armor_site";
 fnc_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_mission.sqf";
 publicVariable "fnc_informant_mission";
 fnc_informant_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_site.sqf";publicVariable "fnc_informant_site";
