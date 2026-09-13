@@ -166,7 +166,7 @@ private _done = { ({alive _x} count _this) == 0 };
 if (!([18, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 private _radius = 1000;
-// Trust the offer: the finder vetted this dot as treeline, so the camp spread anchors on it.
+// Offer only fires where the mission radius (1000 m) holds forest; each camp finds its own treed seat in it.
 private _randomPos = _MissionPos;
 private _targetpos = _MissionPos;
 
