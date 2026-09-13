@@ -130,9 +130,9 @@ DUWS_rsq_relieved = false;
 // back to the ring. Separate from _relieved: the hold can break before the squad is out.
 DUWS_rsq_holdBroken = false;
 
-// The cordon hoses the building on full auto to sell the squad being pinned. Fires only while a player is
-// in SUPPRESS_RANGE and the squad is still holed up; stops on hold-break, relief, SUPPRESS_MAX seconds,
-// every shooter down, or the deadline (timed from the first burst, so a slow approach still gets the show).
+// The cordon hoses the building on full auto to sell the squad being pinned. Armed by the first player
+// inside SUPPRESS_RANGE, then fires to completion regardless of range -- fire-and-forget, so backing out
+// past the edge does not cut it short. Stops on hold-break, relief, SUPPRESS_MAX, all shooters down, or deadline.
 //
 // forceWeaponFire, not doSuppressiveFire: the latter fires nothing without a sightline and may pick the
 // heaviest weapon (a rifleman levels the building with his launcher). forceWeaponFire discharges the named
@@ -165,13 +165,17 @@ DUWS_rsq_holdBroken = false;
         && {!DUWS_rsq_holdBroken}
         && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
     } do {
-        if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
-            if (_startedAt < 0) then {
+        if (_startedAt < 0) then {
+            if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
                 _startedAt = time;
                 // Stagger the opening: seed each shooter due within the first 0.6s so the ring does not all
                 // fire on the same instant it starts up.
                 { _x set [3, time + random 0.6] } forEach _plan;
+            } else {
+                sleep 1;
             };
+        };
+        if (_startedAt >= 0) then {
             {
                 _x params ["_u", "_w", "_mode", "_next"];
                 if (alive _u && {time >= _next}) then {
@@ -181,8 +185,6 @@ DUWS_rsq_holdBroken = false;
                 };
             } forEach _plan;
             sleep 0.15;   // fine master tick so each shooter fires close to its scheduled time
-        } else {
-            sleep 1;
         };
     };
 };
