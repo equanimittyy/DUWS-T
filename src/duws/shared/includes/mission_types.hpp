@@ -11,7 +11,8 @@
 // Columns: [thread, cooldown-ready name, strategic-map description, map icon, debug label, launcher,
 //           CP, AP, REP, deadline, category, objective, note, spawnRule]
 //
-// spawnRule column: [needDestZone, minCorridor, routeAvoidBlufor, surveyKind, finderName, finderArgs]
+// spawnRule column: [needDestZone, minCorridor, routeAvoidBlufor, surveyKind, finderName, finderArgs, constraintName]
+// constraintName is optional (defaults "") -- only the two campaign-gated types carry it.
 //
 // CP/AP/REP are the mission's base payout, the single source for both the reward the thread pays
 // (via fnc_mission_begin -> DUWS_curReward) and the figures the strategic map prints -- edit the
@@ -79,6 +80,12 @@
 // treeline for a patrol camp, all from args here rather than a wrapper file per type. An enumerate finder
 // ("hardpoint"/"capturezone") is named here too and is additionally called in ["ALL"] mode by the survey.
 //
+// constraintName is an optional position-independent eligibility gate (a fnc_*_constraint, "[] -> bool"),
+// or "" for none. findSite calls it ONCE before the survey, not per candidate: a mission that cannot run
+// under current campaign state (destroy_air needs OPFOR air; target_armor needs the Motorised tier) is
+// dropped whole before any siting work. Distinct from finderName, which vets a specific position -- an
+// eligibility gate ignores position, so it belongs here, not folded into a finder run on every candidate.
+//
 // The launcher is a literal block per row rather than something built from the thread column:
 // BIS_fnc_strategicMapOpen runs it with no arguments and an SQF block captures no locals, so the
 // only thing it can carry is its own index, written out. fnc_mission_launch turns that index back
@@ -93,7 +100,7 @@
 ["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue Pilot",             { [4]  call fnc_mission_launch }, 25, 25, 0, [0.3333,1], "command", "rescue", "STR_DUWS_T_rescuepilot_note", [false, 0, false, "map", "fnc_site_terrain", [12, 3, "avoid", 150]]],
 ["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt Sniper Team",             { [5]  call fnc_mission_launch }, 15, 15, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, "map", "", []]],
 ["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal Builder Vehicle",{ [6]  call fnc_mission_launch }, 20, 30, 0, [0.3333,1], "command", "requisition", "", [false, 0, false, "map", "fnc_site_terrain", []]],
-["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Vehicle Patrol",  { [7]  call fnc_mission_launch }, 15, 20, 0, [0.6667,1.5], "command", "elimination", "STR_DUWS_T_armornote", [false, 0, false, "map", "fnc_target_armor_site", []]],
+["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Vehicle Patrol",  { [7]  call fnc_mission_launch }, 15, 20, 0, [0.6667,1.5], "command", "elimination", "STR_DUWS_T_armornote", [false, 0, false, "map", "", [], "fnc_target_armor_constraint"]],
 ["fnc_sabotage_laptop_mission",  "STR_DUWS_T_c8",  "STR_DUWS_T_j97ecrsh",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Sabotage Laptop",         { [8]  call fnc_mission_launch }, 30, 20, 0, [0.6667,1.5], "command", "sabotage", "", [false, 0, false, "map", "fnc_sabotage_laptop_site", []]],
 ["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Ammo Cache",            { [9]  call fnc_mission_launch }, 25, 15, 0, [0.6667,1.5], "command", "sabotage", "", [false, 0, false, "map", "fnc_site_terrain", []]],
 ["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Radar",            { [10] call fnc_mission_launch }, 15, 25, 0, [0.6667,1.5], "command", "sabotage", "", [false, 0, false, "map", "fnc_site_terrain", []]],
@@ -105,7 +112,7 @@
 ["fnc_destroy_hardpoint_mission", "STR_DUWS_T_c16", "STR_DUWS_T_DESTROY_HARDPOINT_DESC", "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy Hardpoint",            { [16] call fnc_mission_launch }, 10, 10, 0, [0.3333,1], "command", "sabotage", "", [false, 0, false, "hardpoint", "fnc_destroy_hardpoint_site", []]],
 ["fnc_target_recon_mission",      "STR_DUWS_T_c17", "STR_DUWS_T_RECON_PATROL_DESC",       "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Eliminate Recon Patrol",       { [17] call fnc_mission_launch }, 10, 10, 0, [0.3333,1], "command", "elimination", "", [false, 0, false, "map", "", []]],
 ["fnc_destroy_patrol_camp_mission", "STR_DUWS_T_c18", "STR_DUWS_T_DESTROY_PATROL_CAMP_DESC", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Patrol Camp",       { [18] call fnc_mission_launch }, 20, 15, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, "map", "fnc_site_terrain", [0, 0, "ignore", 0, 15, 70]]],
-["fnc_destroy_air_mission",      "STR_DUWS_T_c19", "STR_DUWS_T_DESTROY_AIR_DESC",     "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Air Asset",         { [19] call fnc_mission_launch }, 25, 25, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, "map", "fnc_destroy_air_site", []]],
+["fnc_destroy_air_mission",      "STR_DUWS_T_c19", "STR_DUWS_T_DESTROY_AIR_DESC",     "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy Air Asset",         { [19] call fnc_mission_launch }, 25, 25, 0, [0.6667,1.5], "command", "elimination", "", [false, 0, false, "map", "", [], "fnc_destroy_air_constraint"]],
 ["fnc_escort_informant_mission", "STR_DUWS_T_c20", "STR_DUWS_T_ESCORT_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Escort Informant",          { [20] call fnc_mission_launch }, 5, 15, 1, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, "town", "fnc_site_civ_town", []]],
 ["fnc_deliver_supplies_mission", "STR_DUWS_T_c21", "STR_DUWS_T_DELIVER_SUPPLIES_DESC", "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Deliver Supplies",          { [21] call fnc_mission_launch }, 15, 5, 3, [0.6667,1.5], "civilian", "escort", "STR_DUWS_T_townrep_note", [false, 0, false, "town", "fnc_site_civ_town", []]],
 ["fnc_capture_zone_mission",     "STR_DUWS_T_c22", "STR_DUWS_T_CAPTURE_ZONE_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Capture Zone",             { [22] call fnc_mission_launch }, 20, 20, 0, [1.5,2], "command", "assault", "", [false, 0, false, "capturezone", "fnc_capture_zone_site", []]],
