@@ -1,6 +1,6 @@
 // Shared finder for the civilian delivery pair (Escort Informant, Deliver Supplies): both hand cargo to the
 // nearest non-enemy town, so the offer must sit on that same town. Defers to fnc_site_town at the pair's 2500 m
-// reach. Registered as both fnc_escort_informant_site and fnc_deliver_supplies_site.
+// reach.
 //
 // Contract: [_candidatePos] -> [] reject, or [_townCentre] accept.
 params ["_pos"];

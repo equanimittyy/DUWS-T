@@ -115,13 +115,11 @@ _handle = [] spawn {
 	};
 	_bag = _bag select { (_x select 0) != _idx };
 
-	private _threadName = (_missionDefs select _idx) select 0;
-
 	// Same siting the debug force tool uses. _kibot_pos_array_missionPos is the keep-apart list, seeded
 	// with a sentinel at the top of this thread. The rule (column 13) makes siting vet and hand back a
 	// convoy destination zone; a [] result means no fit -> draw a different type for this slot.
 	private _rule = (_missionDefs select _idx) select 13;
-	private _found = [_threadName, _wantHard, getPos player, _kibot_pos_array_missionPos, _rule] call fnc_mission_findSite;
+	private _found = [_wantHard, getPos player, _kibot_pos_array_missionPos, _rule] call fnc_mission_findSite;
 
 	if (_found isEqualTo []) then {
 		["INFO", "MISSION", format ["site: type %1 found no fit, drawing another", _idx]] call fnc_log;

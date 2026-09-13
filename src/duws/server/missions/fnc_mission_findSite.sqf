@@ -20,29 +20,27 @@
 // draws a different type; debug tool logs and aborts). _dest is the vetted OPFOR destination zone when the
 // rule asks for one, else []; a convoy thread runs to it instead of recomputing its own.
 //
-//   _threadName  the mission thread's global name; its finder is fnc_<name>_site, else the accept-all generic
 //   _hard        the placement dial: true favours deep enemy ground, false the frontline seam
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor, hardEligible, weight, surveyKind]. Reads the destination fields (1-3)
-//                and surveyKind (6); the draw (fnc_stratmap) reads hardEligible/weight.
+//                routeAvoidBlufor, hardEligible, weight, surveyKind, finderName, finderArgs]. Reads the
+//                destination fields (1-3), surveyKind (6) and the finder (7-8); the draw (fnc_stratmap)
+//                reads hardEligible/weight.
 //
-// Contract: [_threadName, _hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
+// Contract: [_hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
 params [
-    "_threadName",
     ["_hard", false],
     ["_origin", PosOfBLUHQ],
     ["_avoid", []],
-    ["_spawnRule", [false, 0, false, false, 1, "zone"]]
+    ["_spawnRule", [false, 0, false, false, 1, "zone", "", []]]
 ];
-_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"]];
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []]];
 
-// The type's site-finder: fnc_<name>_site if the mission defines one, else the accept-all generic.
-// Stripping "_mission" (8 chars) off the thread name matches the rule the picker used inline; keeping
-// it here alone keeps the picker and the debug tool from drifting on it.
-private _finder = missionNamespace getVariable [
-    (_threadName select [0, (count _threadName) - 8]) + "_site", fnc_site_generic];
+// The type's site-finder, named in its mission_types.hpp row; "" is the sentinel for no per-type finder,
+// so the accept-all generic. Client-safe: the row is #included into the picker and every named finder is
+// broadcast, so this resolves off the host too.
+private _finder = if (_finderName isEqualTo "") then { fnc_site_generic } else { missionNamespace getVariable [_finderName, fnc_site_generic] };
 
 private _frontWidth   = 0.3;    // frontline spread: half-weight this fraction either side of the seam
 private _zoneRepel     = 1200;  // zone-edge standoff the easy weight fights for, metres -- aggressive
@@ -317,7 +315,7 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
 
     // The type's finder gets the last word: reject -> drop this feature and draw the next; accept -> its
     // precise position (a town centre for intel, the candidate unchanged for the generic) wins.
-    private _site = [_cand] call _finder;
+    private _site = ([_cand] + _finderArgs) call _finder;
     if (_site isEqualTo []) then { _shortlist = _shortlist select {!((_x select 0) isEqualTo _fData)}; continue };
 
     // Flatten to 2D: a snapping finder can return a getPos-derived centre whose Z sits below the surface.

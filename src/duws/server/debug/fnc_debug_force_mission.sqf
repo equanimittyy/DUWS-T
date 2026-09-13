@@ -29,7 +29,7 @@ if (_thread isEqualTo {}) exitWith {
 // and offered as an easy (frontline-seam) mission. A finder that never accepts -- intel with no
 // town-plus-enemy-zone in reach -- returns [] and the force fails cleanly.
 private _rule = (_defs select _type) select 13;
-private _found = [_threadName, false, PosOfBLUHQ, [], _rule] call fnc_mission_findSite;
+private _found = [false, PosOfBLUHQ, [], _rule] call fnc_mission_findSite;
 if (_found isEqualTo []) exitWith {
 	["ERROR", "MISSION", format ["debug force: %1 found no site its finder accepts", _threadName]] call fnc_log;
 };

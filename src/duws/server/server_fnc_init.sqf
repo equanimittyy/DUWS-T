@@ -130,6 +130,7 @@ fnc_site_generic = compile preprocessFileLineNumbers "duws\server\missions\fnc_s
 fnc_site_cluster = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_cluster.sqf";publicVariable "fnc_site_cluster";
 fnc_site_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_town.sqf";publicVariable "fnc_site_town";
 fnc_site_terrain = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_terrain.sqf";publicVariable "fnc_site_terrain";
+fnc_site_civ_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_civ_town.sqf";publicVariable "fnc_site_civ_town";
 fnc_score_placement = compile preprocessFileLineNumbers "duws\server\missions\fnc_score_placement.sqf";
 fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_findSite.sqf";publicVariable "fnc_mission_findSite";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
@@ -209,10 +210,6 @@ fnc_capture_zone_site = compile preprocessFileLineNumbers "duws\server\missions\
 fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_mission.sqf";
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
 fnc_target_recon_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_recon\fnc_target_recon_mission.sqf";
-// No mandatory dot constraint: both site their units by a relative in-thread search (perch, cover), so the
-// offer accepts any dot. Pinned to the null finder explicitly so this reads as chosen, not a missed registration.
-fnc_target_sniper_site = fnc_site_generic; publicVariable "fnc_target_sniper_site";
-fnc_target_recon_site  = fnc_site_generic; publicVariable "fnc_target_recon_site";
 fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ.sqf";
 // Broadcast: the finder runs client-side in the picker; else the building gate is lost to the generic.
 fnc_protect_civ_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_site.sqf";publicVariable "fnc_protect_civ_site";
@@ -233,14 +230,6 @@ fnc_sabotage_laptop_decoy = compile preprocessFileLineNumbers "duws\server\missi
 fnc_sabotage_laptop_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_site.sqf";publicVariable "fnc_sabotage_laptop_site";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
-// cache and radar drop a fenced composition, so the offer only needs level ground, not a building cluster.
-fnc_destroy_cache_site = fnc_site_terrain; publicVariable "fnc_destroy_cache_site";
-fnc_destroy_radar_site = fnc_site_terrain; publicVariable "fnc_destroy_radar_site";
-// steal_supply and steal_builder park a truck, so they too want only level ground; the defaults suit them.
-fnc_steal_supply_site = fnc_site_terrain; publicVariable "fnc_steal_supply_site";
-fnc_steal_builder_site = fnc_site_terrain; publicVariable "fnc_steal_builder_site";
-fnc_rescue_pilot_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_site.sqf";publicVariable "fnc_rescue_pilot_site";
-fnc_deny_armor_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deny_armor\fnc_deny_armor_site.sqf";publicVariable "fnc_deny_armor_site";
 fnc_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_mission.sqf";
 publicVariable "fnc_informant_mission";
 fnc_informant_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_site.sqf";publicVariable "fnc_informant_site";
@@ -253,17 +242,12 @@ fnc_recon_observe_site = compile preprocessFileLineNumbers "duws\server\missions
 fnc_recon_observe_foliageClear = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_foliageClear.sqf";publicVariable "fnc_recon_observe_foliageClear";
 fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
 fnc_destroy_patrol_camp_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_patrol_camp\fnc_destroy_patrol_camp_mission.sqf";
-fnc_destroy_patrol_camp_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_patrol_camp\fnc_destroy_patrol_camp_site.sqf";publicVariable "fnc_destroy_patrol_camp_site";
 fnc_destroy_air_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_mission.sqf";
 fnc_destroy_air_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_site.sqf";publicVariable "fnc_destroy_air_site";
 fnc_escort_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_mission.sqf";
 // Broadcast: the informant's Join/Leave Group actions remoteExec this from clients.
 fnc_escort_informant_group = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_group.sqf";publicVariable "fnc_escort_informant_group";
 fnc_deliver_supplies_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deliver_supplies\fnc_deliver_supplies_mission.sqf";
-// One town-snap finder for both delivery threads; broadcast, as the picker calls it client-side.
-fnc_escort_informant_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_civ_town.sqf";
-fnc_deliver_supplies_site = fnc_escort_informant_site;
-publicVariable "fnc_escort_informant_site"; publicVariable "fnc_deliver_supplies_site";
 fnc_raid_safehouse_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\raid_safehouse\fnc_raid_safehouse_mission.sqf";
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap); undefined there, findSite
 // falls back to the accept-all generic and the door/cluster gate is silently lost.
