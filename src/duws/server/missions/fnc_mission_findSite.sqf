@@ -24,33 +24,25 @@
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor, hardEligible, weight, surveyKind, finderName, finderArgs]. Reads the
-//                destination fields (1-3), surveyKind (6) and the finder (7-8); the draw (fnc_stratmap)
-//                reads hardEligible/weight.
+//                routeAvoidBlufor, surveyKind, finderName, finderArgs]. Reads the destination fields
+//                (1-3), surveyKind (4) and the finder (5-6).
 //
 // Contract: [_hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
 params [
     ["_hard", false],
     ["_origin", PosOfBLUHQ],
     ["_avoid", []],
-    ["_spawnRule", [false, 0, false, false, 1, "zone", "", []]]
+    ["_spawnRule", [false, 0, false, "zone", "", []]]
 ];
-_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []]];
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []]];
 
 // The type's site-finder, named in its mission_types.hpp row; "" is the sentinel for no per-type finder,
 // so the accept-all generic. Client-safe: the row is #included into the picker and every named finder is
 // broadcast, so this resolves off the host too.
 private _finder = if (_finderName isEqualTo "") then { fnc_site_generic } else { missionNamespace getVariable [_finderName, fnc_site_generic] };
 
-private _frontWidth   = 0.3;    // frontline spread: half-weight this fraction either side of the seam
-private _zoneRepel     = 1200;  // zone-edge standoff the easy weight fights for, metres -- aggressive
-private _hpRepel       = 300;   // hardpoint standoff the easy weight fights for, metres -- soft
-private _frontierBand  = 2000;  // metres past an OPFOR zone edge the easy countryside search spans
-private _depthScale    = 1500;  // hard: depth half-weight distance from friendly-held ground, metres
-private _densRadius     = 1500; // hard: only enemy features within this feed the "surrounded" score; none -> dropped
-private _gauntCorr      = 400;  // hard: approach-corridor half-width, metres
+private _frontierBand   = 2000; // metres past an OPFOR zone edge the easy countryside search spans
 private _hardBand       = 800;  // hard: metres past a chosen zone edge the objective may drift -- tight, to hug the cluster
-private _peakEnemyness  = 0.5;  // seam target for the easy urban bell; hard offers ignore it
 private _routeClearReach = 1200; // convoy corridor: metres a route sample must keep from BLUFOR ground
 private _mapTheaterReach = 3000; // map survey: a sample is valid only within this of an enemy zone/hardpoint
                                  // edge -- keeps offers in contested ground without gluing them to a zone,
@@ -97,81 +89,9 @@ private _opforCenters = _opforZoneCands apply {_x select 1};
 
 private _enemyPts = (_opforZoneCands apply {[_x select 1, (_x select 0) select 1]}) + _hpFoot;
 
-// Soft repulsion from a footprint set: 0 on the nearest feature's edge, 0.5 at _scale beyond it,
-// approaching 1 far out. Empty set -> 1 (no push).
-private _fnRepel = {
-    params ["_pos", "_feats", "_scale"];
-    if (_feats isEqualTo []) exitWith {1};
-    private _d = 0 max (selectMin (_feats apply {(_pos distance2D (_x select 0)) - (_x select 1)}));
-    _d / (_d + _scale)
-};
-
-// Perpendicular distance from feature _f to the approach segment _a->_p, plus the projection
-// parameter _t (0 at _a, 1 at _p).
-private _fnSegDist = {
-    params ["_a", "_p", "_f"];
-    private _dx = (_p select 0) - (_a select 0);
-    private _dy = (_p select 1) - (_a select 1);
-    private _len2 = _dx*_dx + _dy*_dy;
-    if (_len2 < 1) exitWith {[_f distance2D _a, 0]};   // _a ~ _p: no meaningful approach line
-    private _t = (((_f select 0) - (_a select 0))*_dx + ((_f select 1) - (_a select 1))*_dy) / _len2;
-    private _tc = 0 max (_t min 1);
-    private _cx = (_a select 0) + _tc*_dx;
-    private _cy = (_a select 1) + _tc*_dy;
-    [sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2)), _t]
-};
-
-// Hard-offer score. Density of nearby enemy placements leads and gates: a spot with no enemy zone or
-// hardpoint within _densRadius scores 0 and is never offered. Depth behind friendly lines and an
-// approach gauntlet only rank the survivors. selectRandomWeighted normalises, so magnitudes only rank.
-private _fnHardScore = {
-    private _pos = _this;
-
-    private _dens = 0;
-    {
-        private _de = 0 max ((_pos distance2D (_x select 0)) - (_x select 1));
-        if (_de < _densRadius) then { _dens = _dens + (1 - _de / _densRadius) };
-    } forEach _enemyPts;
-    if (_dens <= 0) exitWith {0};
-
-    private _fDists = if (_friendlyAnchors isEqualTo []) then {[]} else {_friendlyAnchors apply {_pos distance2D _x}};
-    private _dFri = if (_fDists isEqualTo []) then {_depthScale} else {selectMin _fDists};
-    private _fDepth = _dFri / (_dFri + _depthScale);
-
-    private _fGaunt = 0.2;
-    if !(_fDists isEqualTo []) then {
-        private _a = _friendlyAnchors select (_fDists find _dFri);
-        {
-            ([_a, _pos, _x select 0] call _fnSegDist) params ["_perp", "_t"];
-            if (_perp < _gauntCorr && _t > 0.15 && _t < 0.95) then {
-                _fGaunt = _fGaunt + (1 - _perp / _gauntCorr);
-            };
-        } forEach _enemyPts;
-    };
-
-    (_dens ^ 2) * (0.15 + _fDepth) * _fGaunt
-};
-
-// Urban weight (easy offers): a bell peaked on the seam. Hard offers exit early to _fnHardScore.
-private _fnUrbanWeight = {
-    private _pos = _this;
-    if (_hard) exitWith { _pos call _fnHardScore };
-    private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
-    private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
-    private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
-    private _front = 1 / (1 + (((_enemyness - _peakEnemyness) / _frontWidth) ^ 2));
-    _front
-      * ([_pos, _zoneFoot, _zoneRepel] call _fnRepel)
-      * ([_pos, _hpFoot, _hpRepel] call _fnRepel)
-};
-
-// Countryside weight: easy offers favour front OPFOR zones (nearest friendly ground); hard offers
-// score each zone centre by _fnHardScore.
-private _fnZoneWeight = {
-    if (_hard) exitWith { _this call _fnHardScore };
-    private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_this distance2D _x}))};
-    1 / _dFri
-};
+// fnc_offer_weight is pure, so siting hands it this world snapshot rather than have it query engine state
+// -- which would also break the client-side picker.
+private _world = [_friendlyAnchors, _enemyPts, _opforCenters, _zoneFoot, _hpFoot];
 
 // Town survey samples MissionLocations; with none present (a server may not carry them) it falls back to the
 // zone survey. The "More Urban" toggle stays out of the mission survey -- it already urbanises offers by
@@ -184,6 +104,7 @@ private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
 // zone -- so it alone skips the zone-interior claimed gate below.
 private _useCapture = !_useTown && {_surveyKind isEqualTo "capturezone"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
+private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useCapture) then { "urban" } else { "zone" };
 
 // The features phase 2 surveys: town centres, the live target hardpoints, a whole-map sample, or OPFOR zones
 // as [centre, bandMin, bandMax] the realise step feeds straight to findSafePos. Hardpoint, map and zone
@@ -241,9 +162,7 @@ private _valid = [];
         _ok = (_enemyPts findIf { ((_fCenter distance2D (_x select 0)) - (_x select 1)) < _mapTheaterReach }) >= 0;
     };
     if (_ok) then {
-        // _fnUrbanWeight scores an arbitrary position (frontline bell for easy, _fnHardScore for hard), so it
-        // serves the town, map and hardpoint surveys; _fnZoneWeight is zone-list-specific and stays for zones.
-        private _score = if (_useTown || _useMap || _useHardpoint || _useCapture) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
+        private _score = [_fCenter, _hard, _scoreMode, _world] call fnc_offer_weight;
         _valid pushBack [_fData, _fCenter, _score];
     };
 } forEach _features;

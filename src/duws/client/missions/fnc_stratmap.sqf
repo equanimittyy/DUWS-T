@@ -64,19 +64,16 @@ _handle = [] spawn {
   DUWS_missionSlots = [];
   { DUWS_missionSlots pushBack [] } forEach _missionDefs;
 
-  // Weighted draw bag: [index, weight, hardEligible] per type, drawn WITHOUT replacement so the offer
-  // set holds distinct types; a type that fails to site is dropped and another drawn for the slot, so
-  // the slot is never left empty on a no-fit. weight is rule field 4
-  // (draw bias); hardEligible is rule field 3 (whether the type may take a deep hard slot).
+  // Drawn WITHOUT replacement so the offer set holds distinct types; a type that fails to site is
+  // dropped and another drawn, so a slot is never left empty on a no-fit.
   private _bag = [];
-  { private _r = _x select 13; _bag pushBack [_forEachIndex, _r select 4, _r select 3] } forEach _missionDefs;
+  { _bag pushBack _forEachIndex } forEach _missionDefs;
 
   private _missionDraw = 7 min (count _bag);
 
   // Two offers push deep into enemy ground (hard, a difficulty-scaled bonus); the rest seat on the
-  // frontline (easy, base pay). Hard slots draw only from hardEligible types placed deep; once
-  // filled -- or the hardEligible pool empties -- the draw opens to the whole bag as easy, so a
-  // short or all-easy pool degrades to fewer hard rather than stalling.
+  // frontline (easy, base pay). Any type may fill a hard slot: findSite scores a deep placement 0 where
+  // no enemy is near, so a type with no enemy-dense fit yields no hard site and that slot redraws.
   private _hardWant = 2 min _missionDraw;
   private _filled = 0;
   private _hardFilled = 0;
@@ -96,24 +93,20 @@ _handle = [] spawn {
 
 	progressLoadingScreen (_filled / _missionDraw);
 
-	// Fill the hard slots first, from hardEligible types only. If that pool empties before they're
-	// filled, _hardWant collapses to _hardFilled, so the remaining slots draw easy from the whole bag.
 	private _wantHard = _hardFilled < _hardWant;
 	private _idx = -1;
 
 	// Debug one-shot: force a chosen type into this draw, still through the normal site finder so a
 	// no-fit drops it as a random draw would -- placement is never faked. Set by the re-roll picker.
 	private _forced = missionNamespace getVariable ["DUWS_dbgForceDrawType", -1];
-	if (_forced >= 0 && {(_bag findIf {(_x select 0) == _forced}) >= 0}) then {
+	if (_forced >= 0 && {(_bag findIf {_x == _forced}) >= 0}) then {
 		_idx = _forced;
 		_wantHard = false;
 		DUWS_dbgForceDrawType = -1;
 	} else {
-		private _pool = if (_wantHard) then { _bag select { _x select 2 } } else { _bag };
-		if (_pool isEqualTo []) then { _wantHard = false; _hardWant = _hardFilled; _pool = _bag };
-		_idx = (_pool apply {_x select 0}) selectRandomWeighted (_pool apply {_x select 1});
+		_idx = selectRandom _bag;
 	};
-	_bag = _bag select { (_x select 0) != _idx };
+	_bag = _bag select { _x != _idx };
 
 	// Same siting the debug force tool uses. _kibot_pos_array_missionPos is the keep-apart list, seeded
 	// with a sentinel at the top of this thread. The rule (column 13) makes siting vet and hand back a

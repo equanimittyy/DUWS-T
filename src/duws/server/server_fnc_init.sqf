@@ -132,6 +132,8 @@ fnc_site_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site
 fnc_site_terrain = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_terrain.sqf";publicVariable "fnc_site_terrain";
 fnc_site_civ_town = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_civ_town.sqf";publicVariable "fnc_site_civ_town";
 fnc_score_placement = compile preprocessFileLineNumbers "duws\server\missions\fnc_score_placement.sqf";
+// Broadcast: fnc_mission_findSite scores candidates through this inside the client-side picker.
+fnc_offer_weight = compile preprocessFileLineNumbers "duws\server\missions\fnc_offer_weight.sqf";publicVariable "fnc_offer_weight";
 fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_findSite.sqf";publicVariable "fnc_mission_findSite";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_timeout_notice = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_timeout_notice.sqf";
