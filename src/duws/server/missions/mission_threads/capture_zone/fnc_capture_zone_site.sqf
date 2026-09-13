@@ -1,4 +1,4 @@
-// Site-finder for the capture-zone mission (surveyKind "onzone"). ["ALL"] enumerates one candidate
+// Site-finder for the capture-zone mission (surveyKind "enumerate"). ["ALL"] enumerates one candidate
 // per OPFOR-held zone; [_pos] snap-vets one to the nearest still-OPFOR zone, in case the picked one was
 // taken between offer and launch. One per zone, so every held zone gets an even shot.
 //

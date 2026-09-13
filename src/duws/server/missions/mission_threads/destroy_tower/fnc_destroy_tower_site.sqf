@@ -1,4 +1,4 @@
-// Site-finder for the destroy-tower mission (surveyKind "hardpoint"). ["ALL"] enumerates candidates,
+// Site-finder for the destroy-tower mission (surveyKind "enumerate"). ["ALL"] enumerates candidates,
 // [_pos] vets one, re-resolving to a still-live tower if the picked one fell since the offer. Listed
 // directly, one per tower, so two far apart both get offered rather than a random-dot survey clustering
 // onto whichever sits nearest a zone.

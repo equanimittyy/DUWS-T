@@ -99,11 +99,9 @@ private _world = [_friendlyAnchors, _enemyPts, _opforCenters, _zoneFoot, _hpFoot
 private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = (_surveyKind isEqualTo "town") && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
-private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
-private _useOnZone = !_useTown && {_surveyKind isEqualTo "onzone"};
-// Enumerate kinds point at targets that already exist (a hardpoint, an OPFOR zone, a position to scout), so
-// the claimed-ground gate below -- which guards against seating a fresh objective on owned ground -- skips them.
-private _useEnumerate = _useHardpoint || _useOnZone;
+// Enumerate points at targets that already exist (a hardpoint, an OPFOR zone, a position to scout), so the
+// claimed-ground gate below -- which guards against seating a fresh objective on owned ground -- skips it.
+private _useEnumerate = !_useTown && {_surveyKind isEqualTo "enumerate"};
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
 private _scoreMode = if (_useTown || _useMap || _useEnumerate) then { "urban" } else { "zone" };
 

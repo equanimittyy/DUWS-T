@@ -1,5 +1,5 @@
 // Shared target-picker for the recon-observe mission. ["ALL"] lists every eligible target position for the
-// enumerate survey (fnc_mission_findSite, surveyKind "onzone"); [_pos] returns the nearest eligible target,
+// enumerate survey (fnc_mission_findSite, surveyKind "enumerate"); [_pos] returns the nearest eligible target,
 // tagged by kind. Called by BOTH the site-finder (client-side, in the strategic-map picker) and the thread
 // (server) so the two agree on WHICH position is scouted. A disagreement leaves the overwatch verified
 // against one target and the hold judged against another, and the hold never completes -- the one bug the

@@ -1,4 +1,4 @@
-// Site-finder for the recon-observe mission (surveyKind "onzone"). In ["ALL"] mode it lists every unrevealed
+// Site-finder for the recon-observe mission (surveyKind "enumerate"). In ["ALL"] mode it lists every unrevealed
 // OPFOR position -- a zone or a standalone hardpoint -- for the enumerate survey to draw from. In [_pos] mode
 // it vets the target the survey settled on: accepted only where at least one standoff overwatch with clear
 // terrain line-of-sight to it exists, and returns that position. The mission scouts a position the player has

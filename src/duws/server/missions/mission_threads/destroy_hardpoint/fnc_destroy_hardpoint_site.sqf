@@ -1,4 +1,4 @@
-// Site-finder for the destroy-hardpoint mission (surveyKind "hardpoint"). ["ALL"] enumerates candidates,
+// Site-finder for the destroy-hardpoint mission (surveyKind "enumerate"). ["ALL"] enumerates candidates,
 // [_pos] vets one, re-resolving to a still-live emplacement if the picked one fell since the offer. Listed
 // directly, one per emplacement, so scattered hardpoints each get offered rather than a random-dot survey
 // clustering onto whichever sits nearest a zone.
