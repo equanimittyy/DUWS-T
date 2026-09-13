@@ -16,7 +16,7 @@ _message = ([localize "STR_DUWS_T_missioncooldown"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_missioncooldown2";
 // Stays on the opener's machine: spawned by the request-menu action, which already runs there.
 // Previously addressed to player1, which in co-op showed one player the refusal for another's click.
-hint localize "STR_DUWS_T_b68ftbvf";
+hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", [] call fnc_mission_gate_time];
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
