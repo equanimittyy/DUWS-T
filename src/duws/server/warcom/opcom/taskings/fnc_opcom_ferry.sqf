@@ -297,6 +297,8 @@ DUWS_fnc_opcom_ferryStepLive = {
                             if (group _u isEqualTo (_v getVariable ["DUWS_ferryRiderGrp", grpNull])) then { deleteVehicle _u };
                         }];
                         _veh setVariable ["DUWS_ferryBoardEH", _eh];
+                        // Ferry owns the rider's movement now; drop the shore HOLD so nothing competes with the board order.
+                        while {count waypoints _rg > 0} do { deleteWaypoint ((waypoints _rg) select 0) };
                         _rg orderGetIn true;
                         { _x assignAsCargo _veh } forEach units _rg;
                     };

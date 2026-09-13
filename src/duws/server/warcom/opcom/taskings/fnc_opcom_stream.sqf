@@ -52,7 +52,11 @@ DUWS_fnc_opcom_reOrderLive = {
     private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
     if (_landRule && {_order isNotEqualTo "guard"}) then {
         ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
-        if (_crosses) exitWith { [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder };
+        if (_crosses) exitWith {
+            [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder;
+            // A lone MOVE completes on arrival and the group drifts off in SAFE; the HOLD leg pins it at the shore until the ferry's pickup clears it.
+            (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
+        };
     };
     [_grp, _order, _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
 };
