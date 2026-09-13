@@ -28,7 +28,7 @@ private _entries = _rows apply {
             case "teleport": {
                 [_key] spawn {
                     params ["_id"];
-                    private _pos = [format ["<t size='2' color='#00ffff'>Click where to teleport tasking %1.</t><br/>Close the map to cancel.", _id]] call fnc_map_pick_pos;
+                    private _pos = [format ["<t size='2' color='#00ffff'>Click where to teleport tasking %1.</t><br/>Close the map to cancel.", _id], {true}, "", true] call fnc_map_pick_pos;
                     if (_pos isEqualTo []) exitWith {};
                     ["teleport", _id, _pos, "", player] remoteExec ["fnc_debug_opcom", 2];
                 };

@@ -5,11 +5,12 @@
 //   _validate   code taking the clicked position as _this, returning bool; false rejects the click and
 //               re-prompts. Default accepts any click.
 //   _rejectLine text appended to the banner in red on a rejected click.
+//   _keepOpen   leave the map open on a successful pick so the player watches the result land; default closes.
 //
 // _validate must read globals only, never caller locals: SQF blocks are not closures and scope is
 // dynamic (docs/info/architecture/arma_engine_gotchas.md, "SQF blocks are not closures"), so a spawn
 // anywhere in the call chain would strip the caller's privates from the predicate.
-params ["_prompt", ["_validate", {true}], ["_rejectLine", ""]];
+params ["_prompt", ["_validate", {true}], ["_rejectLine", ""], ["_keepOpen", false]];
 if (!hasInterface) exitWith {[]};
 
 // onMapSingleClick runs in missionNamespace and can only write globals, so the clicked position lands
@@ -41,6 +42,6 @@ while {visibleMap && {!_done}} do {
 onMapSingleClick "";
 [""] call fnc_map_prompt;
 if (!_done) exitWith {[]};  // player closed the map to cancel
-openMap [false, false];
+if (!_keepOpen) then { openMap [false, false] };
 
 DUWS_mapPickPos

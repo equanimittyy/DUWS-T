@@ -16,7 +16,7 @@ private _c = [1, 0.667, 0, 1];
     ["Tasking unit status", {
         // Map pick waitUntils, so it must run scheduled (fnc_map_pick_pos.sqf).
         [] spawn {
-            private _pos = ["<t size='2' color='#00ffff'>Select a tasking unit.</t><br/>Close the map to cancel."] call fnc_map_pick_pos;
+            private _pos = ["<t size='2' color='#00ffff'>Select a tasking unit.</t><br/>Close the map to cancel.", {true}, "", true] call fnc_map_pick_pos;
             if (_pos isEqualTo []) exitWith {};
             ["unitstatus", _pos, "", "", player] remoteExec ["fnc_debug_opcom", 2];
         };
