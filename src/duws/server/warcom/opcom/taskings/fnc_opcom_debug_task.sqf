@@ -6,7 +6,7 @@
 //   ["task", id, order, targetPos]        -- give tasking `id` an active order to a target
 //   ["regarrison", id, zoneKey]           -- send tasking `id` to a zone; it settles into that garrison on arrival
 //   ["supply", id, targetPos]             -- send tasking `id` on a supply run; deleted and completed on arrival
-//   ["teleport", id, pos]                 -- snap tasking `id` to a world pos (its stored point, and the live group if spawned)
+//   ["teleport", id, pos]                 -- snap tasking `id` to a world pos (stored point + live group), then hold it on guard there
 //   ["list"]                              -- dump every live tasking's state
 //   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
 // The order verbs zero the commit hold first: hand-driving re-tasks on demand, including a de-virtualised
@@ -95,7 +95,11 @@ switch (_verb) do {
             { _x setPos [_b select 0, _b select 1, (getPosATL _x) select 2] } forEach _hulls;   // keep altitude: a grounded air hull explodes
             { if (vehicle _x == _x) then { _x setPos [(_b select 0) + (random 8 - 4), (_b select 1) + (random 8 - 4), 0] } } forEach units _grp;
         };
-        ["INFO", "OPCOMDBG", format ["teleported tasking %1 to %2", _a, _dest apply { round _x }]] call fnc_log;
+        // Snapping the point alone leaves the stale order/target: the unit re-routes back. Re-hold on guard at
+        // the drop, dropping the commit lock first as the other order verbs do so the re-task is not refused.
+        _t set ["hold", 0];
+        [_t, "guard"] call fnc_opcom_task;
+        ["INFO", "OPCOMDBG", format ["teleported tasking %1 to %2, holding on guard", _a, _dest apply { round _x }]] call fnc_log;
         true
     };
     case "list": {

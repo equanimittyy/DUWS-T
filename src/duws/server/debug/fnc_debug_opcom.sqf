@@ -34,10 +34,12 @@ switch (_verb) do {
         // _a names the picker mode (default "task"); re-garrison passes "regarrison" (routes to a zone pick) and
         // supply passes "supply" (routes to a drop map-pick), reusing the one tasking list for all three.
         private _mode = ["task", _a] select (_a isNotEqualTo "");
-        private _rows = (DUWS_opcom_taskings select { (_x get "grp") isEqualTo "" }) apply {
-            [_x get "id", format ["id %1  %2/%3  %4", _x get "id", _x get "order", _x get "status", _x get "moveType"]]
+        // Live taskings included: fnc_opcom_task re-orders a de-virtualised group in place (reOrderLive), the
+        // same primitive OPCOM's loop drives -- only a bound ferry carry is refused, and by the primitive.
+        private _rows = DUWS_opcom_taskings apply {
+            [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
         };
-        if (_rows isEqualTo []) exitWith { "No virtual taskings (recruit one; a live unit cannot be re-tasked)." remoteExec ["hint", _caller] };
+        if (_rows isEqualTo []) exitWith { "No taskings (recruit one first)." remoteExec ["hint", _caller] };
         private _title = switch (_mode) do {
             case "supply": { "Supply-run which tasking?" };
             case "regarrison": { "Re-garrison which tasking?" };
@@ -46,7 +48,7 @@ switch (_verb) do {
         [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "teleportlist": {
-        // Every tasking, live included -- unlike the re-task lists, a teleport snaps the group in place too.
+        // Every tasking, live included; a teleport also snaps the live group's hulls, not just the stored point.
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
         private _rows = DUWS_opcom_taskings apply {
             [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
@@ -63,15 +65,15 @@ switch (_verb) do {
     };
     case "task": {
         private _ok = ["task", _a, _b, _c] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Tasking %1 -> %2.", _a, _b] } else { format ["Task refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+        (if (_ok) then { format ["Tasking %1 -> %2.", _a, _b] } else { format ["Task refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "regarrison": {
         private _ok = ["regarrison", _a, _b] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (held / live / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
+        (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (mid-ferry carry / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "supply": {
         private _ok = ["supply", _a, _b] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Supply-run %1 -> %2.", _a, _b apply { round _x }] } else { format ["Supply-run refused for %1 (held / live / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+        (if (_ok) then { format ["Supply-run %1 -> %2.", _a, _b apply { round _x }] } else { format ["Supply-run refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "teleport": {
         private _ok = ["teleport", _a, _b] call fnc_opcom_debug_task;
