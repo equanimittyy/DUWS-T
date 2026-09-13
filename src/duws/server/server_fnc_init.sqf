@@ -220,15 +220,10 @@ fnc_protect_civ_skip = compile preprocessFileLineNumbers "duws\server\missions\m
 fnc_protect_civ_skip_assault = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_skip_assault.sqf";publicVariable "fnc_protect_civ_skip_assault";
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
-// Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap), which gates the offer
-// on OPFOR having reached the Motorised tier. Undefined on a non-host client, findSite falls back to the
-// accept-all generic and the tier gate is silently lost.
-fnc_target_armor_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_site.sqf";publicVariable "fnc_target_armor_site";
 fnc_deny_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deny_armor\fnc_deny_armor_mission.sqf";
 fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_mission.sqf";
 fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
 fnc_sabotage_laptop_decoy = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_decoy.sqf";
-fnc_sabotage_laptop_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_site.sqf";publicVariable "fnc_sabotage_laptop_site";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
 fnc_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_mission.sqf";
@@ -244,7 +239,6 @@ fnc_recon_observe_foliageClear = compile preprocessFileLineNumbers "duws\server\
 fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
 fnc_destroy_patrol_camp_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_patrol_camp\fnc_destroy_patrol_camp_mission.sqf";
 fnc_destroy_air_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_mission.sqf";
-fnc_destroy_air_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_site.sqf";publicVariable "fnc_destroy_air_site";
 fnc_escort_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_mission.sqf";
 // Broadcast: the informant's Join/Leave Group actions remoteExec this from clients.
 fnc_escort_informant_group = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\escort_informant\fnc_escort_informant_group.sqf";publicVariable "fnc_escort_informant_group";

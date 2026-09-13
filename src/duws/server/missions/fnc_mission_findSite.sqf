@@ -24,8 +24,8 @@
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor, surveyKind, finderName, finderArgs]. Reads the destination fields
-//                (1-3), surveyKind (4) and the finder (5-6).
+//                routeAvoidBlufor, surveyKind, finderName, finderArgs, surveyGate]. Reads the destination
+//                fields (1-3), surveyKind (4), the finder (5-6) and the survey gates (7).
 //
 // Contract: [_hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
 params [
@@ -34,12 +34,39 @@ params [
     ["_avoid", []],
     ["_spawnRule", [false, 0, false, "zone", "", []]]
 ];
-_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []]];
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []], ["_surveyGate", []]];
 
 // The type's site-finder, named in its mission_types.hpp row; "" is the sentinel for no per-type finder,
 // so the accept-all generic. Client-safe: the row is #included into the picker and every named finder is
 // broadcast, so this resolves off the host too.
 private _finder = if (_finderName isEqualTo "") then { fnc_site_generic } else { missionNamespace getVariable [_finderName, fnc_site_generic] };
+
+// Position-independent survey gates (campaign state) settle the whole type, not a spot, so check them once
+// here and drop the type before the survey on a fail. Rejecting this late instead -- in the realise-phase
+// finder -- thrashed the shortlist and could exhaust the realise cap on a viable type.
+private _blockedByState = _surveyGate findIf {
+    _x params ["_gKind"];
+    switch (_gKind) do {
+        case "tier": { _x params ["", "_gSide", "_gRung"]; !([_gSide, _gRung] call DUWS_fnc_ap_unlocked) };
+        case "flag": { _x params ["", "_gVar", ["_gWant", 1]]; !((missionNamespace getVariable [_gVar, _gWant]) isEqualTo _gWant) };
+        default { false };
+    }
+};
+if (_blockedByState >= 0) exitWith { [] };
+
+// Per-feature region gates run in the survey below, on the feature centre: the radius dwarfs the realise
+// findSafePos drift, so the centre verdict holds for the settled dot, and the thread fine-places itself.
+private _fnRegionGate = {
+    params ["_c"];
+    (_surveyGate findIf {
+        _x params ["_gKind"];
+        switch (_gKind) do {
+            case "trees": { _x params ["", "_gMin", "_gRad"]; (count nearestTerrainObjects [_c, ["TREE", "SMALL TREE"], _gRad, false, true]) < _gMin };
+            case "houses": { _x params ["", "_gMin", "_gRad"]; (count ((nearestTerrainObjects [_c, ["House"], _gRad, true]) select { !(((_x buildingPos 3) select 0) == 0) })) < _gMin };
+            default { false };
+        }
+    }) < 0
+};
 
 private _frontierBand   = 2000; // metres past an OPFOR zone edge the easy countryside search spans
 private _hardBand       = 800;  // hard: metres past a chosen zone edge the objective may drift -- tight, to hug the cluster
@@ -161,6 +188,8 @@ private _valid = [];
     if (_ok && _useMap) then {
         _ok = (_enemyPts findIf { ((_fCenter distance2D (_x select 0)) - (_x select 1)) < _mapTheaterReach }) >= 0;
     };
+    // Region gate last -- a terrain-object count, heaviest of the cheap checks -- so only features past the earlier gates pay it.
+    if (_ok && {!(_surveyGate isEqualTo [])}) then { _ok = [_fCenter] call _fnRegionGate; };
     if (_ok) then {
         private _score = [_fCenter, _hard, _scoreMode, _world] call fnc_offer_weight;
         _valid pushBack [_fData, _fCenter, _score];
