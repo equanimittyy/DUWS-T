@@ -1152,3 +1152,64 @@ DUWS_base_keep_radius = 500;
 PosOfBLUHQ = [];
 ["in_base_keep: an empty HQ position is never inside",
     ([[1000, 1000, 0]] call fnc_in_base_keep), false] call fnc_assertEq;
+
+// --- fnc_offer_weight: offer-placement weight [_pos, _hard, _mode, _world] -> number ---
+// _world = [friendlyAnchors, enemyPts, opforCenters, zoneFoot, hpFoot]: anchors and centres are [x,y],
+// enemyPts/zoneFoot/hpFoot are [[x,y], radius]. Expected numbers follow the baked constants -- densRadius
+// and depthScale 1500, gauntCorr 400, peakEnemyness 0.5, frontWidth 0.3, zoneRepel 1200, hpRepel 300 --
+// so a retune that moves a constant is meant to move the matching value here. Scores rank relatively
+// (selectRandomWeighted normalises), so only ratios between these matter, not their scale.
+
+// Hard gate: enemy density both leads and vetoes -- nothing within densRadius scores 0.
+["offer_weight: hard with no enemy is vetoed",
+    ([[0,0], true, "urban", [[],[],[],[],[]]] call fnc_offer_weight), 0] call fnc_assertEq;
+["offer_weight: hard with the only enemy beyond densRadius is vetoed",
+    ([[0,0], true, "urban", [[], [[[1600,0],0]], [],[],[]]] call fnc_offer_weight), 0] call fnc_assertEq;
+
+// Hard score with no friendly anchors: gauntlet stays at its 0.2 floor and depth at 1500/(1500+1500)=0.5,
+// so the score is dens^2 * (0.15 + 0.5) * 0.2. Enemy on the spot -> dens 1 -> 0.13.
+["offer_weight: hard, enemy on the spot, no anchors",
+    ([[0,0], true, "urban", [[], [[[0,0],0]], [],[],[]]] call fnc_offer_weight), 0.13] call fnc_assertClose;
+// Enemy at 750 m -> dens 0.5 -> dens^2 0.25 -> a quarter of the score (density leads squared).
+["offer_weight: hard score falls with enemy distance, squared",
+    ([[0,0], true, "urban", [[], [[[750,0],0]], [],[],[]]] call fnc_offer_weight), 0.0325] call fnc_assertClose;
+// Two enemies sum density: 1 + 0.5 = 1.5 -> 1.5^2 * 0.65 * 0.2.
+["offer_weight: hard density sums across enemies",
+    ([[0,0], true, "urban", [[], [[[0,0],0], [[750,0],0]], [],[],[]]] call fnc_offer_weight), 0.2925] call fnc_assertClose;
+
+// Gauntlet: an enemy on the approach line from the nearest anchor adds (1 - perp/400). Anchor at -1000,
+// enemy at -300 on that line: dens 0.8 (300 m in), depth 1000/2500 = 0.4, gaunt 0.2 + 1 = 1.2, so
+// 0.8^2 * (0.15 + 0.4) * 1.2 = 0.4224.
+["offer_weight: hard rewards an enemy in the approach corridor",
+    ([[0,0], true, "urban", [[[-1000,0]], [[[-300,0],0]], [],[],[]]] call fnc_offer_weight), 0.4224] call fnc_assertClose;
+
+// _mode is read only on the easy branch, so a hard call ignores it: same value as the urban case above.
+["offer_weight: hard ignores _mode",
+    ([[0,0], true, "zone", [[], [[[0,0],0]], [],[],[]]] call fnc_offer_weight), 0.13] call fnc_assertClose;
+
+// Easy zone: 1 / max(1, nearest-friendly distance) -- the OPFOR zone nearest friendly ground scores highest.
+["offer_weight: easy zone with no anchors is 1",
+    ([[0,0], false, "zone", [[],[],[],[],[]]] call fnc_offer_weight), 1] call fnc_assertClose;
+["offer_weight: easy zone weight is 1 over nearest-friendly distance",
+    ([[0,0], false, "zone", [[[100,0]],[],[],[],[]]] call fnc_offer_weight), 0.01] call fnc_assertClose;
+["offer_weight: easy zone takes the nearest of several anchors",
+    ([[0,0], false, "zone", [[[100,0],[50,0]],[],[],[],[]]] call fnc_offer_weight), 0.02] call fnc_assertClose;
+["offer_weight: easy zone floors the distance at 1 m",
+    ([[0,0], false, "zone", [[[0.5,0]],[],[],[],[]]] call fnc_offer_weight), 1] call fnc_assertClose;
+
+// Easy urban: a bell in enemyness = dFri/(dFri+dOpf), peaked at 0.5 (the seam), times footprint repulsion.
+// Friendly at -100 and OPFOR at +100 put the spot on the seam -> front 1; empty footprints -> repel 1.
+["offer_weight: easy urban peaks on the seam",
+    ([[0,0], false, "urban", [[[-100,0]],[],[[100,0]],[],[]]] call fnc_offer_weight), 1] call fnc_assertClose;
+// Off the seam (dFri 100, dOpf 300 -> enemyness 0.25): 1 / (1 + ((0.25 - 0.5) / 0.3)^2).
+["offer_weight: easy urban falls off the seam",
+    ([[0,0], false, "urban", [[[-100,0]],[],[[300,0]],[],[]]] call fnc_offer_weight), 0.59016393] call fnc_assertClose;
+// Repulsion off a footprint is d/(d+scale): a zone centre 1200 m off (scale 1200) halves the weight.
+["offer_weight: easy urban is repelled by a zone footprint",
+    ([[0,0], false, "urban", [[[-100,0]],[],[[100,0]], [[[0,1200],0]], []]] call fnc_offer_weight), 0.5] call fnc_assertClose;
+// A hardpoint 300 m off (scale 300) halves it the same way.
+["offer_weight: easy urban is repelled by a hardpoint footprint",
+    ([[0,0], false, "urban", [[[-100,0]],[],[[100,0]], [], [[[0,300],0]]]] call fnc_offer_weight), 0.5] call fnc_assertClose;
+// Degenerate empty world: no anchors and no centres collapse enemyness to 0.5, so a neutral 1.
+["offer_weight: easy urban on an empty world is neutral",
+    ([[0,0], false, "urban", [[],[],[],[],[]]] call fnc_offer_weight), 1] call fnc_assertClose;

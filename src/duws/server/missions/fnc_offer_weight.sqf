@@ -30,28 +30,24 @@ private _densRadius    = 1500;  // hard: only enemy features within this feed th
 private _gauntCorr     = 400;   // hard: approach-corridor half-width, metres
 private _peakEnemyness = 0.5;   // seam target for the easy urban bell; hard offers ignore it
 
+// Caller guards the empty set. A reduce, not selectMin, so the scorer stays runnable in the pure-SQF
+// unit VM, which has no working selectMin.
+private _fnMinDist = {
+    params ["_p", "_pts"];
+    private _m = 1e12;
+    { _m = _m min (_p distance2D _x) } forEach _pts;
+    _m
+};
+
 // Soft repulsion from a footprint set: 0 on the nearest feature's edge, 0.5 at _scale beyond it,
 // approaching 1 far out. Empty set -> 1 (no push).
 private _fnRepel = {
     params ["_p", "_feats", "_scale"];
     if (_feats isEqualTo []) exitWith {1};
-    private _d = 0 max (selectMin (_feats apply {(_p distance2D (_x select 0)) - (_x select 1)}));
+    private _d = 1e12;
+    { _d = _d min ((_p distance2D (_x select 0)) - (_x select 1)) } forEach _feats;
+    _d = 0 max _d;
     _d / (_d + _scale)
-};
-
-// Perpendicular distance from feature _f to the approach segment _a->_b, plus the projection parameter
-// _t (0 at _a, 1 at _b).
-private _fnSegDist = {
-    params ["_a", "_b", "_f"];
-    private _dx = (_b select 0) - (_a select 0);
-    private _dy = (_b select 1) - (_a select 1);
-    private _len2 = _dx*_dx + _dy*_dy;
-    if (_len2 < 1) exitWith {[_f distance2D _a, 0]};   // _a ~ _b: no meaningful approach line
-    private _t = (((_f select 0) - (_a select 0))*_dx + ((_f select 1) - (_a select 1))*_dy) / _len2;
-    private _tc = 0 max (_t min 1);
-    private _cx = (_a select 0) + _tc*_dx;
-    private _cy = (_a select 1) + _tc*_dy;
-    [sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2)), _t]
 };
 
 // Hard-offer score. Density of nearby enemy placements leads and gates: a spot with no enemy zone or
@@ -67,15 +63,30 @@ private _fnHardScore = {
     } forEach _enemyPts;
     if (_dens <= 0) exitWith {0};
 
-    private _fDists = if (_friendlyAnchors isEqualTo []) then {[]} else {_friendlyAnchors apply {_at distance2D _x}};
-    private _dFri = if (_fDists isEqualTo []) then {_depthScale} else {selectMin _fDists};
+    // Nearest friendly anchor and its distance in one pass -- selectMin + find on the distance would
+    // reject a legitimate min to floating-point inequality. No anchor -> depth-scale distance, no gauntlet.
+    private _dFri = _depthScale;
+    private _a = [];
+    {
+        private _d = _at distance2D _x;
+        if (_a isEqualTo [] || {_d < _dFri}) then { _dFri = _d; _a = _x };
+    } forEach _friendlyAnchors;
     private _fDepth = _dFri / (_dFri + _depthScale);
 
     private _fGaunt = 0.2;
-    if !(_fDists isEqualTo []) then {
-        private _a = _friendlyAnchors select (_fDists find _dFri);
+    if !(_a isEqualTo []) then {
+        private _dx = (_at select 0) - (_a select 0);
+        private _dy = (_at select 1) - (_a select 1);
+        private _len2 = _dx*_dx + _dy*_dy;   // _a ~ _at (< 1) -> _t 0, so no enemy passes the corridor test
         {
-            ([_a, _at, _x select 0] call _fnSegDist) params ["_perp", "_t"];
+            private _f = _x select 0;
+            private _t = if (_len2 < 1) then { 0 } else {
+                (((_f select 0) - (_a select 0))*_dx + ((_f select 1) - (_a select 1))*_dy) / _len2
+            };
+            private _tc = 0 max (_t min 1);
+            private _cx = (_a select 0) + _tc*_dx;
+            private _cy = (_a select 1) + _tc*_dy;
+            private _perp = sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2));
             if (_perp < _gauntCorr && _t > 0.15 && _t < 0.95) then {
                 _fGaunt = _fGaunt + (1 - _perp / _gauntCorr);
             };
@@ -89,13 +100,13 @@ if (_hard) exitWith { _pos call _fnHardScore };
 
 if (_mode isEqualTo "zone") exitWith {
     // Easy countryside: favour the OPFOR zone nearest friendly-held ground (the frontline zone).
-    private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_pos distance2D _x}))};
+    private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max ([_pos, _friendlyAnchors] call _fnMinDist)};
     1 / _dFri
 };
 
 // Easy urban: a bell peaked on the seam, damped by repulsion off zone and hardpoint footprints.
-private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
-private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
+private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {[_pos, _friendlyAnchors] call _fnMinDist};
+private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {[_pos, _opforCenters] call _fnMinDist};
 private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
 private _front = 1 / (1 + (((_enemyness - _peakEnemyness) / _frontWidth) ^ 2));
 _front
