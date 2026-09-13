@@ -31,6 +31,22 @@ private _nearestPlayerCells = {
     _best
 };
 
+// Settle an arrived move: re-garrison a returnZone (rejoining its reserve wave) or hold as guard. Mutates the
+// record only -- a live caller re-orders the group itself. Returns true when it garrisoned, so the caller can
+// skip a stream-in the reserve wave covers. Supply drops finish on their own path, never here.
+private _settleMove = {
+    params ["_t", "_pos"];
+    private _rz = _t getOrDefault ["returnZone", ""];
+    if (_rz isNotEqualTo "") exitWith {
+        _t set ["order", "garrison"]; _t set ["homeZone", _rz];
+        _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""];
+        [_rz] call DUWS_fnc_opcom_zoneReserveSync;
+        true
+    };
+    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
+    false
+};
+
 {
     private _t = _x;
     private _order = _t get "order";
@@ -81,12 +97,20 @@ private _nearestPlayerCells = {
                         _t set ["status", "done"];
                         _t set ["grp", ""];
                     } else {
+                        // Live arrival: settle in place the same tick so the OPCOM map flips MOVE->GUARD (or
+                        // re-garrisons) now, not only after a later stow re-virtualises. Same settle as the
+                        // virtual path below; re-order the group so map and group agree.
+                        private _arrived = _order isEqualTo "move" && {!_engaged} && {(_ldr distance2D (_t get "target")) < OPCOM_MOVE_ARRIVE};
+                        if (_arrived) then {
+                            [_t, getPosASL _ldr] call _settleMove;
+                            [_grp, "guard", getPosASL _ldr] call DUWS_fnc_opcom_applyOrder;
+                        };
                         // A land unit that has reached its near shore with a water leg ahead borrows a transport,
                         // which then renders the crossing live (fnc_opcom_ferry). It binds (ridingOn) and holds;
                         // no lift free, it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS -- the same
                         // stranded path as a virtual rider.
                         private _bound = false;
-                        if (!_engaged && {_order isNotEqualTo "guard"}
+                        if (!_arrived && {!_engaged} && {_order isNotEqualTo "guard"}
                             && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
                             ([_t, getPosASL _ldr] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
                             if (_crosses && {(_ldr distance2D _stage) < OPCOM_FERRY_SHORE_ARRIVE}) then {
@@ -103,7 +127,7 @@ private _nearestPlayerCells = {
                             };
                         };
                         // Skip the stow for a rider that just bound to a ferry this tick -- the transport owns it now.
-                        if (!_bound) then {
+                        if (!_arrived && {!_bound}) then {
                             private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
                             // Reset on re-entry/engagement below, so the stow needs an unbroken absence, not one
                             // far sample (OPCOM_REVIRT_GRACE).
@@ -150,28 +174,16 @@ private _nearestPlayerCells = {
                         } else {
                             _t set ["strandTicks", 0];
                         };
-                        // supplyDrop / returnZone are exclusive, set upstream in fnc_opcom_task, so the case
-                        // order below cannot double-fire.
+                        // supplyDrop / returnZone are exclusive, set upstream in fnc_opcom_task, so checking
+                        // supplyDrop first cannot double-settle.
                         private _settled = false;
                         if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
-                            private _rz = _t getOrDefault ["returnZone", ""];
-                            switch true do {
-                                case (_t getOrDefault ["supplyDrop", false]): {
-                                    // A supply run that reaches its drop with no player near still completes.
-                                    ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
-                                    _t set ["status", "done"]; _settled = true;
-                                };
-                                case (_rz isNotEqualTo ""): {
-                                    // Re-garrison the destination -- adopt it as home, rejoin its reserve wave.
-                                    _t set ["order", "garrison"]; _t set ["homeZone", _rz];
-                                    _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""];
-                                    [_rz] call DUWS_fnc_opcom_zoneReserveSync;
-                                    _settled = true;
-                                };
-                                default {
-                                    // Hold the point rather than re-plan a zero-length march each tick.
-                                    _t set ["order", "guard"]; _t set ["target", _t get "pos"]; _t set ["route", []];
-                                };
+                            if (_t getOrDefault ["supplyDrop", false]) then {
+                                // A supply run that reaches its drop with no player near still completes.
+                                ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
+                                _t set ["status", "done"]; _settled = true;
+                            } else {
+                                _settled = [_t, _t get "pos"] call _settleMove;
                             };
                         };
                         // Skip the stream-in for a completed supply / fresh garrison (defends via the reserve wave) and a rider that bound to a ferry this tick.

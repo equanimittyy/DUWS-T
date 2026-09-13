@@ -570,6 +570,10 @@ OPCOM_COVER_SPAN = 120;      // 600s @ 5s tick
 // sample, so a fast flyover cannot spawn then stow a group in a single pass.
 OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
 
+// Leader within this of a move target counts as arrived, so a live tasking settles to guard/garrison the same
+// tick instead of holding a stale MOVE on the OPCOM map until a later stow re-virtualises it.
+OPCOM_MOVE_ARRIVE = 50;      // m
+
 // Height a de-virtualised air tasking enters at, flying, above its world point -- a fixed height rather
 // than the stored z, so a helicopter neither creeps up nor sinks across stow/spawn cycles.
 OPCOM_AIR_SPAWN_ALT = 150;
