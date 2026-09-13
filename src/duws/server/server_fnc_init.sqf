@@ -87,7 +87,6 @@ fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\garrison\f
 fnc_spreadIntoBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_spreadIntoBuildings.sqf";
 fnc_search_drawKind = compile preprocessFileLineNumbers "duws\server\search\fnc_search_drawKind.sqf";
 fnc_search_flag_group = compile preprocessFileLineNumbers "duws\server\search\fnc_search_flag_group.sqf";
-fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\search\fnc_search_dropItems.sqf";
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\search\fnc_search_claim.sqf";
 fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\garrison\fnc_garrisonBuildings.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fob_destroyed.sqf";

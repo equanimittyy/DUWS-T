@@ -258,9 +258,8 @@ fnc_money_spend = {
 
 // Drops [class, count] pairs into one ground holder at a position. Server-only: createVehicle is
 // global. Used for money/intel that will not fit back into a full inventory when the arsenal closes.
-// A holder with addItemCargo/addMagazineCargo takes raw inventory classes directly, so it handles the
-// intel items too, which have no "Item_" ground variant to hand to fnc_search_dropItems. Untagged, so
-// the map cleanup -- which keys off composition membership -- leaves the player's cash where it fell.
+// Untagged, so the map cleanup -- which keys off composition membership -- leaves the player's cash
+// where it fell.
 fnc_money_drop = {
 	if (!isServer) exitWith {};
 	params [["_pairs", []], ["_pos", [0,0,0]]];

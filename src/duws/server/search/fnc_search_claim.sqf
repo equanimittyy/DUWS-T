@@ -50,11 +50,9 @@ private _nothingLine = localize (_config param [2, "STR_DUWS_T_INTEL_FOUND_n"]);
 // miss, so this only ever thins the combat source.
 if (random 1 >= (_config select 0)) exitWith { [_nothingLine] remoteExec ["hint", _caller] };
 
-// Two positions from one search. The intel reveal keys off _origin, the body -- a revealed marker
-// should point at where the enemy fell. The physical drops (money, documents) go to the searcher's
-// feet instead: a corpse often ragdolls half into a wall or onto a roof, and loot written to the
-// body drops through the surface or lands somewhere the player cannot reach. getPosATL throughout --
-// fnc_search_dropItems places with setPosATL, and a base position that disagrees drops through it.
+// Loot seats in a holder at the corpse, not the searcher's feet: a GroundWeaponHolder has no PhysX
+// (fnc_money_drop, arma_engine_gotchas), so it stays put and openable even where a body ragdolled into
+// a wall or onto a roof would drop a loose ground item through the surface, out of reach.
 private _origin = getPosATL _target;
 private _remaining = +(_config select 1);
 private _paid = false;
@@ -86,7 +84,8 @@ private _documentLabels = DUWS_intelDocumentLabels;
 // single search. The hint names which one, so the player knows its worth before the terminal.
 private _payDocument = {
     private _class = _documents selectRandomWeighted _documentWeights;
-    [[_class], getPosATL _caller] call fnc_search_dropItems;
+    // Holder cargo needs the bare class, but DUWS_intelDocuments lists Item_* ground bodies -- strip it.
+    [[[_class select [5], 1]], _origin] call fnc_money_drop;
     private _label = localize (_documentLabels select (_documents find _class));
     [format [localize "STR_DUWS_T_LOOT2", _label]] call _fnc_hint;
 };
@@ -112,9 +111,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
         case "money": {
             private _count = 1 + floor random 3;
-            private _items = [];
-            for "_i" from 1 to _count do { _items pushBack "Item_Money_roll" };
-            [_items, getPosATL _caller] call fnc_search_dropItems;
+            [[["Money_roll", _count]], _origin] call fnc_money_drop;
             [format [localize "STR_DUWS_T_LOOT4", _count]] call _fnc_hint;
             _paid = true;
         };
