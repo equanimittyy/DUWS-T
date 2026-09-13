@@ -83,8 +83,14 @@ fnc_furnish_building = {
     { waitUntil { scriptDone _x } } forEach _handles;
 
     // Whole-house thaw: each piece rests where it settled, so going live adds no impulse; live, they fall into
-    // rubble when the building is destroyed.
-    { _x enableSimulationGlobal true } forEach _placed;
+    // rubble when the building is destroyed. setMass 1 first -- collision damage scales with mass, else a bumped
+    // or falling piece kills the unit. Broadcast JIP-keyed because setMass is machine-local (arma_engine_gotchas.md):
+    // a remote or late client collides against config mass otherwise.
+    {
+        _x setMass 1;
+        [_x, 1] remoteExec ["setMass", 0, _x];
+        _x enableSimulationGlobal true;
+    } forEach _placed;
 
     { [_x] remoteExec ["fnc_furnish_push_addAction", 0, _x] } forEach _placed;
 
