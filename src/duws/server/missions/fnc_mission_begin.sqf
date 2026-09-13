@@ -67,9 +67,9 @@ DUWS_curDeadlineBand = [_dlMinH, _dlMaxH];
 // and holds the deadline in in-game time.
 DUWS_curDeadlineAt = [round (_dlMinH * 12), round (_dlMaxH * 12)] call fnc_time_deadline;
 
-// The thread now locates and builds the objective before it presents anything, so this survey line
-// stands in for the search marker the player used to get the instant they clicked. On the requester's
-// machine only; fnc_mission_notice falls back to the host when the mission was forced locally.
+// The thread locates and builds the objective before presenting, so this survey notice fills the gap
+// until the objective marker appears. On the requester's machine only; fnc_mission_notice falls back to
+// the host when the mission was forced locally.
 [_requester, "STR_DUWS_T_MISSION_GEN_SURVEY"] call fnc_mission_notice;
 
 true

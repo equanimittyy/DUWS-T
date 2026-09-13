@@ -68,10 +68,10 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 		[_key] call fnc_zone_strength
 	};
 
-	// Twenty segments, one per five per cent of the garrison's full potential, floored to the nearest --
-	// a real fraction now, so a bar shows only once its five per cent is actually held and a full garrison
-	// reads solid. A deployed zone counts live men over the full potential; a stowed one reads the ledger
-	// projection. Capped, since a full cycle can place a few vehicle crew over the infantry-slot denominator.
+	// Twenty segments, one per five per cent of the garrison's full potential, floored to the nearest, so a
+	// bar shows only once its five per cent is actually held and a full garrison reads solid. A deployed zone
+	// counts live men over the full potential; a stowed one reads the ledger projection. Capped, since a full
+	// cycle can place a few vehicle crew over the infantry-slot denominator.
 	private _seg = floor (_frac * 20);
 	_seg = (_seg max 0) min 20;
 

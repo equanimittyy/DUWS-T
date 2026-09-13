@@ -20,6 +20,6 @@ Mission_available = true;
 publicVariable "Mission_available";
 ["INFO", "MISSION", "mission slot released, a new side mission can generate"] call fnc_log;
 
-// Called inline now that cleanup no longer sleeps -- it only releases the composition and flags the
+// Called inline; cleanup doesn't sleep -- it only releases the composition and flags the
 // mission's units for the map sweep, which does the timed deletion on its own clock.
 [_targetpos, _radius, _compKey, _sweepFriendly, _token] call fnc_mission_cleanup;

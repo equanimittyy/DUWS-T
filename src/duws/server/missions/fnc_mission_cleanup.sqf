@@ -13,9 +13,8 @@
     _token    which mission instance this is tearing down, from fnc_mission_begin.
 
     _targetpos, _radius and _sweepFriendly are retained for signature stability across the 27 callers
-    but no longer read: the blunt radius pass is gone -- ownership (fnc_mission_claim) reaches every
-    mission's units wherever they wandered -- and the keep-radius the sweep already applies is strictly
-    more protective than the old announce-and-countdown was.
+    but not read: ownership (fnc_mission_claim) reaches every mission's units wherever they wandered, and
+    the keep-radius the sweep already applies covers their deletion.
 */
 
 if (!isServer) exitWith {};
