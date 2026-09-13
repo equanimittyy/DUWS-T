@@ -346,7 +346,7 @@ DUWS_fnc_opcom_ferryStepLive = {
                     // Rotary/land: hold the group hidden, feed them out of the hold one at a time (a GetOut handler
                     // refills the seat). Keep the rope bound (ridingOn) until the last is out, else ferryTick frees
                     // the hull mid-disembark.
-                    { _x hideObjectGlobal true; _x disableSimulation true } forEach units _rg;
+                    { _x hideObjectGlobal true; _x enableSimulation false } forEach units _rg;
                     _veh setVariable ["DUWS_ferryUnloadGrp", _rg];
                     _veh setVariable ["DUWS_ferryUnloadQ", units _rg];
                     private _eh = _veh addEventHandler ["GetOut", {

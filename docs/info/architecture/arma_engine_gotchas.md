@@ -685,6 +685,12 @@ SQF arrays are reference types — `setVariable`, `pushBack` and plain assignmen
 
 **Fix:** hoist the target to a local first — `private _owner = clientOwner _x; [msg] remoteExec ["hint", _owner];` — as every working call in the codebase does. More broadly, a green sqf-vm run is necessary but not sufficient: read the `.rpt` after a build.
 
+## A non-existent command reads as two adjacent values and reports `Missing ;`, not "unknown command"
+
+`_x disableSimulation true` — `disableSimulation` is not a command (the freeze is `enableSimulation false`), so the parser sees a value (`_x`), an unknown identifier, then another value with no operator between them, and reports `Missing ;` on the token after the phantom command. The error names a syntax fault, never the wrong name, so a plausible-looking typo'd or misremembered command sends you hunting for a missing semicolon that isn't the real problem. As with any compile-time break, a file that fails to parse never runs its body — and when that body's top level assigns a `DUWS_fnc_*` (this file defines `DUWS_fnc_opcom_advance` at its head), the function is silently left undefined, so every unrelated caller throws `Undefined variable` and the whole subsystem stalls with no hint at the true file.
+
+**Fix:** when the RPT points `Missing ;` at a command call, first check the command exists and is spelled right, before trusting the semicolon story. sqf-vm accepts the bad token as an identifier, so this too clears the unit tests and surfaces only in the game `.rpt`. Read the RPT after a build.
+
 ## `setRain` shows nothing unless overcast is at least 0.5
 
 Rain only renders over an overcast of 0.5 or higher; `setRain 1` under a clear sky shows nothing. `setRain` is otherwise independent of the overcast transition and can be set alongside it, but the 0.5 floor is hard, so a rain control decoupled from overcast in a UI can still come out dry — that is the engine, not a bug.
