@@ -24,8 +24,8 @@
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor, surveyKind, finderName, finderArgs, constraintName]. Reads the
-//                destination fields (1-3), surveyKind (4), the finder (5-6) and the eligibility gate (7).
+//                routeAvoidBlufor, surveyKind, finderName, finderArgs]. Reads the destination fields
+//                (1-3), surveyKind (4) and the finder (5-6).
 //
 // Contract: [_hard, _origin, _avoid, _spawnRule] -> [_pos, _dest] | [].
 params [
@@ -34,12 +34,7 @@ params [
     ["_avoid", []],
     ["_spawnRule", [false, 0, false, "zone", "", []]]
 ];
-_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []], ["_constraintName", ""]];
-
-// Position-independent eligibility (campaign state) gates the whole mission, so it is checked once here
-// rather than per candidate: ineligible -> no site, the picker draws another type. Unbroadcast on a
-// non-host client defaults to eligible, matching the finder fallback below.
-if (_constraintName != "" && {!([] call (missionNamespace getVariable [_constraintName, {true}]))}) exitWith { [] };
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", ["_surveyKind", "zone"], ["_finderName", ""], ["_finderArgs", []]];
 
 // The type's site-finder, named in its mission_types.hpp row; "" is the sentinel for no per-type finder,
 // so the accept-all generic. Client-safe: the row is #included into the picker and every named finder is
