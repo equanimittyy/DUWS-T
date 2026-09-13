@@ -72,5 +72,9 @@ waitUntil { !dialog };
 if !(missionNamespace getVariable ["DUWS_rest_confirmed", false]) exitWith {};
 DUWS_rest_confirmed = false;
 
+// A rest skips >= 3 in-game hours and a side mission's deadline is 3 h, so resting fails a live one; confirm, don't forbid.
+if (!(missionNamespace getVariable ["Mission_available", true])
+    && {!([localize "STR_DUWS_T_rest_mission_warn", localize "STR_DUWS_T_rest_title", true, true] call BIS_fnc_guiMessage)}) exitWith {};
+
 [player, _restSite, DUWS_rest_hours, DUWS_rest_overcast, DUWS_rest_rain, DUWS_rest_fog, DUWS_rest_lightning]
     remoteExec ["fnc_restHealServer", 2];

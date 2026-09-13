@@ -5051,6 +5051,13 @@
                 <Original>Rest</Original>
                 <English>Rest</English>
             </Key>
+            <Key ID="STR_DUWS_T_rest_mission_warn">
+                <German>A side mission is in progress. Resting advances time and will fail it. Rest anyway?</German>
+                <Spanish>A side mission is in progress. Resting advances time and will fail it. Rest anyway?</Spanish>
+                <Chinesesimp>A side mission is in progress. Resting advances time and will fail it. Rest anyway?</Chinesesimp>
+                <Original>A side mission is in progress. Resting advances time and will fail it. Rest anyway?</Original>
+                <English>A side mission is in progress. Resting advances time and will fail it. Rest anyway?</English>
+            </Key>
             <Key ID="STR_DUWS_T_h3uo0102">
                 <German>FOB errichten (10 CP)</German>
                 <Spanish>Establecer puesto de avanzada (10 CP)</Spanish>
