@@ -642,6 +642,7 @@ OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
 // a board or landing that never settles (a bad LZ, stuck AI) forces through at it rather than hang bound.
 OPCOM_FERRY_BOARD_BOAT = 100;    // m
 OPCOM_FERRY_BOARD_LAND = 20;     // m
+OPCOM_FERRY_SHORE_ARRIVE = 100;  // m; leader within this of the shore stage calls the ferry (own tunable, not the streaming margin)
 OPCOM_FERRY_GROUND_ALT = 4;      // m ATL under which a landing rotary counts as grounded (mirrors fnc_helotaxi)
 OPCOM_FERRY_WAIT_MAX = 20;       // ticks a live board/landing may stall before the fallback forces it through
 

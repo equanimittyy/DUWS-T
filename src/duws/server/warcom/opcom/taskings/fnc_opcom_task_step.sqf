@@ -89,7 +89,7 @@ private _nearestPlayerCells = {
                         if (!_engaged && {_order isNotEqualTo "guard"}
                             && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
                             ([_t, getPosASL _ldr] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
-                            if (_crosses && {(_ldr distance2D _stage) < DUWS_streamArrivalMargin}) then {
+                            if (_crosses && {(_ldr distance2D _stage) < OPCOM_FERRY_SHORE_ARRIVE}) then {
                                 private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
                                 if (isNil "_tr") then {
                                     private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
