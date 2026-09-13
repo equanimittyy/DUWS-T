@@ -112,16 +112,19 @@ if (time > _deadline) exitWith {
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;
 };
 
-// Delivered: the transport_IDAP hand-over. The aid crew thanks the player in person (VOICE, in the room),
-// Overlord signs off over the net, then the sacks come off the bed and the emptied truck pulls away. The
-// close line is spoken here, mid-theatre, so finish's _line is left empty.
+// Mission completes on Overlord's sign-off -- reward paid, task set, slot released -- so finish moves up
+// here and the sacks coming off and truck pulling away below are cosmetic aftermath. The close line is
+// spoken inline mid-theatre, so finish's _line is left empty.
 deleteMarker _delivMarker;
 if (!isNull _marshaller) then { _marshaller setVariable ["DUWS_holdAnim", false]; _marshaller switchMove "" };
 [localize "STR_DUWS_T_IDAP", format [localize "STR_DUWS_T_idapend", _townName], "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_deliversupplies_close"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 4;
+
+// Rep read before finish reopens the slot and the next mission can overwrite DUWS_curReward.
 [_townIdx, DUWS_curReward select 2, "deliver_supplies_success"] call fnc_town_rep_adjust;
+[_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], [], true] call fnc_mission_finish;
+
 sleep 2;
 if (_box2 isEqualType objNull && { !isNull _box2 }) then { deleteVehicle _box2 };
 sleep 2;
@@ -129,4 +132,3 @@ if (_box1 isEqualType objNull && { !isNull _box1 }) then { deleteVehicle _box1 }
 sleep 8;
 if (!isNull _truck) then { deleteVehicle _truck };
 call _cleanup;
-[_mission_name, _taskId, "SUCCEEDED", _townPos, _radius, [_marker], [], true] call fnc_mission_finish;

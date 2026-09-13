@@ -41,6 +41,9 @@ if (_dl > time) then {
 // _destination is the mission centre, handed straight in as the task's map pin. visibleIn3D stays
 // off: a strategic side mission wants the map diamond, not a world-space icon. _type names a
 // CfgTaskTypes class and only picks the icon; an unrecognised one falls back to the default.
+// Flattened to 2D: a getPos-derived centre carries a below-surface Z on coastal towns
+// (docs/info/architecture/arma_engine_gotchas.md), which sinks the task diamond underground.
+_destination = _destination select [0, 2];
 [west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, false] call BIS_fnc_taskCreate;
 
 // The card rides with the task create, not with the thread's entry gate: a thread that fails to find
