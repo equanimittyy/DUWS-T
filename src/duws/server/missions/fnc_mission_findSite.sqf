@@ -100,12 +100,12 @@ private _mLocs = missionNamespace getVariable ["MissionLocations", []];
 private _useTown = (_surveyKind isEqualTo "town") && {!(_mLocs isEqualTo [])};
 private _useMap = !_useTown && {_surveyKind isEqualTo "map"};
 private _useHardpoint = !_useTown && {_surveyKind isEqualTo "hardpoint"};
-// The "onzone" kind enumerates enemy sites whose objective anchors on claimed ground -- capture on the
-// OPFOR zone it takes, recon on the zone or emplacement it scouts -- so it alone skips the zone-interior
-// claimed gate below, unlike "hardpoint" whose targets are always standalone.
 private _useOnZone = !_useTown && {_surveyKind isEqualTo "onzone"};
+// Enumerate kinds point at targets that already exist (a hardpoint, an OPFOR zone, a position to scout), so
+// the claimed-ground gate below -- which guards against seating a fresh objective on owned ground -- skips them.
+private _useEnumerate = _useHardpoint || _useOnZone;
 private _band = if (_hard) then {_hardBand} else {_frontierBand};
-private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useOnZone) then { "urban" } else { "zone" };
+private _scoreMode = if (_useTown || _useMap || _useEnumerate) then { "urban" } else { "zone" };
 
 // The features phase 2 surveys: town centres, the live target hardpoints, a whole-map sample, or OPFOR zones
 // as [centre, bandMin, bandMax] the realise step feeds straight to findSafePos. Hardpoint, map and zone
@@ -113,7 +113,7 @@ private _scoreMode = if (_useTown || _useMap || _useHardpoint || _useOnZone) the
 private _features = if (_useTown) then {
     +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
-    if (_useHardpoint || _useOnZone) then {
+    if (_useEnumerate) then {
         // Enumerate: one candidate per discrete target -- a live hardpoint, an OPFOR zone (capture), or an
         // unrevealed enemy position to scout (recon) -- via the type's finder in ["ALL"] mode, so an
         // enumerate type MUST define a finder answering ["ALL"]. Listing directly gives every target an even
@@ -224,9 +224,7 @@ while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < 
 
     // Off every zone/town by 400 m, leaving headroom for a thread's own tight local settle so an anchor a
     // metre outside a boundary does not seat the objective back inside it.
-    // The onzone kind is exempt like town: both deliberately anchor on claimed ground -- an OPFOR zone, a
-    // town -- which this gate rejects, and a town survey's every candidate sits on the town its finder works.
-    if (!_useOnZone && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
+    if (!_useEnumerate && !_useTown && {[_cand, 400] call fnc_pos_claimed}) then { continue };
 
     if (!(_cand distance _origin > 1500 && {_cand distance PosOfBLUHQ < (zones_max_dist_from_hq*1.5)})) then { continue };
 
