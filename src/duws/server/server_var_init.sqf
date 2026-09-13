@@ -243,15 +243,15 @@ DUWS_searchSources = createHashMapFromArray [
 
 // The physical items a "document" find drops, and a patrol camp's table may hold. Only base-game Item_
 // ground holders belong here (each has an Item_ ground variant, so a dropped copy survives rather than
-// vanishing). Weighted so cheap items dominate and the guaranteed-reveal FilesSecret is rare; labels are
-// the mission's own since these holders carry generic/empty displayNames. Shared by the search payout and
-// the camp draw so the two lists cannot drift apart.
+// vanishing). FilesSecret is off the roll -- only the raid crate grants one, so a 100%-reveal document
+// never falls out of a random search or patrol-camp draw. Labels are the mission's own since these holders
+// carry generic/empty displayNames. Shared by the search payout and the camp draw so the lists cannot drift.
 DUWS_intelDocuments = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
-    "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
-DUWS_intelDocumentWeights = [30, 30, 20, 10, 6, 4];
+    "Item_FlashDisk", "Item_Files"];
+DUWS_intelDocumentWeights = [32, 32, 22, 10, 4];
 DUWS_intelDocumentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITEM_wallet",
     "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
-    "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
+    "STR_DUWS_T_INTEL_ITEM_files"];
 
 // A rolling window: up to DUWS_searchAllowance combat-corpse searches per DUWS_searchCooldown seconds,
 // session-wide -- one shared budget for the whole team, not per player. This budget, not troop density,
