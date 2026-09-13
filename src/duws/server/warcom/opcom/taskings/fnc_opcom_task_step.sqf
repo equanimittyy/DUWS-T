@@ -143,8 +143,17 @@ private _settleMove = {
                 };
             };
         } else {
-            // A bound rider is driven by its transport (the ferry branch above); it takes no turn of its own.
-            if ((_t getOrDefault ["ridingOn", -1]) < 0) then {
+            private _riding = _t getOrDefault ["ridingOn", -1];
+            if (_riding >= 0) then {
+                // A bound rider is driven by its transport, but while it still awaits pickup it streams in like
+                // any tasking, so a player at the shore sees the squad standing and its board rendered. Once the
+                // transport has it (embarked) it stays virtual: its pos then tracks the hull, out on the water.
+                private _tr = [_riding] call DUWS_fnc_opcom_byId;
+                private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
+                if (!isNil "_tr" && {!(_tr getOrDefault ["embarked", false])} && {([_t get "pos"] call _nearestPlayerCells) <= _k}) then {
+                    [_t] call DUWS_fnc_opcom_deVirt;
+                };
+            } else {
                 switch (_order) do {
                     case "garrison": {
                         private _full = _t get "fullForce";
