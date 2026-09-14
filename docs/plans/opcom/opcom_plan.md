@@ -734,8 +734,7 @@ so a real deadlock shows in the RPT instead of hanging silently. Capacity is one
 are not checked in the virtual layer and bind only when the pair goes live, so the mechanic never depends on a
 mod fielding a roomy carrier.
 
-**The carry** reuses `DUWS_fnc_opcom_ferryStep` (server,
-[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)), run each tick on
+**The carry** reuses `DUWS_fnc_opcom_ferryStep` (server, `fnc_opcom_ferry_virt.sqf`), run each tick on
 the transport, dropping at the **far shore** — the first land cell past the water span in the rider's chain:
 
 1. **Rendezvous** — not embarked: the transport marches to the rider's near-shore position on its own move type;
@@ -782,10 +781,27 @@ The two lift types differ only in mechanics inside the shared phases: a rotary l
 and boards/dismounts man by man; a boat cannot land, so each pickup/drop phase closes to `OPCOM_FERRY_BOARD_BOAT`
 of the shore and board-despawns / de-virtualises the whole group at once — no seat-by-seat load or unload. This is
 why the boat's board and disembark phases usually clear in a single tick, but they are still timed, so a hull stuck
-short of its shore (a reef, a blocked inlet) forces the group to the destination at expiry instead of hanging. It
-all lives in `DUWS_fnc_opcom_ferryTick` / `DUWS_fnc_opcom_ferryStepLive`
-([`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). A freed transport,
-live or virtual, reverts to a `guard` in place, back in the pool.
+short of its shore (a reef, a blocked inlet) forces the group to the destination at expiry instead of hanging. A
+freed transport, live or virtual, reverts to a `guard` in place, back in the pool.
+
+**Module layout.** The subsystem splits four ways along the virtualisation boundary, one responsibility to a file,
+so the store binding and the two render modes never tangle:
+
+- `fnc_opcom_move.sqf` — the shared movement core: the per-tick world-point mover (`DUWS_fnc_opcom_advance`) and the
+  grid-geometry tests (`..._isWaterPt`, `..._cellDist`). Every tasking's march uses it, not the ferry alone, so it
+  sits below the ferry rather than inside it.
+- `fnc_opcom_ferry.sqf` — the orchestrator and borrow lifecycle: `..._ferryTick` (the per-tick dispatcher that
+  picks live or virtual by the transport's own streaming and holds the binding across the switch), the
+  pool/borrow/release calls (`..._ferryPool`, `..._borrowFerry`, `..._ferryRelease`, `..._zoneContested`) and the
+  route helpers (`..._ferryDrop`, `..._ferryApproach`).
+- `fnc_opcom_ferry_virt.sqf` — the virtual crossing (`..._ferryStep`): the whole carry stepped as store math while
+  unwatched.
+- `fnc_opcom_ferry_devirt.sqf` — the live crossing (`..._ferryStepLive` with its `GetIn` / `GetOut` handlers
+  `..._ferryClearEH`, `..._ferryUnloadNext`): the shared six-phase machine rendered for a watched crossing.
+
+`ferryTick` is the only code that reaches across the seam — it dispatches to the virtual or live step per tick as
+the pair streams in and out, so neither step depends on the other. The live machine stays a single shared switch
+for both lift types: the boat/rotary variance lives in `_boat` branches inside it, never a per-type file.
 
 **Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
 the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander
