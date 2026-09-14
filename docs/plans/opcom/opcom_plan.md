@@ -703,10 +703,12 @@ uncontested `garrison`, not already `carrying` and not fighting, preferring a bo
 Idle is judged by order, not by streaming: a hull already live near a player is lendable too — it flies off to
 ferry and lands or re-virtualises elsewhere — so the pool is not starved wherever a player happens to be
 (`DUWS_fnc_opcom_ferryPool`,
-[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). Fighting is the
-one live exclusion: the borrow binds the rider with no approach timeout to release it, so a hull that may die or
-stall before delivering is passed over for one likely to survive the trip. The
-idle gate is the commitment this makes: a ferry never breaks a standing order. Borrowing costs a zone no
+[`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). Combat gates the
+borrow, never the crossing. A fighting hull is not lendable, and a *live* rider will not start a borrow while
+engaged — it fights first and asks for lift once clear (a virtual rider has no contact state, so it always
+requests). But once the pair is bound the sequence is **unescapable**: board, carry and unload run regardless of
+contact, and the rider, held by `ridingOn`, takes no turn of its own. Order is the borrow's other gate: a ferry
+never draws a hull off a standing order. Borrowing costs a zone no
 defender — a ferry-capable transport is a non-combatant ([§Unit strength](#unit-strength)), never enrolled in a
 zone's reserve wave, so the borrow needs no reserve draw-out and is a plain re-task.
 
@@ -753,15 +755,34 @@ the transport, dropping at the **far shore** — the first land cell past the wa
 a watched crossing plays out live — the transport closes on the rider, the rider board-despawns to a bound
 virtual record that rides the transport's position, and it re-spawns disembarking at the far shore — while an
 unwatched one steps across virtually exactly as above. Neither end forces the other live: a player over a rider
-waiting for a lift does not pull a transport still kilometres off. Per hull: a rotary finds an LZ, lands, and
-board-despawns each rider through a `GetIn` handler as it enters (the seat frees instantly, so one hull loads a
-whole squad); a boat closes to `OPCOM_FERRY_BOARD_BOAT` and takes the whole group. Unload mirrors the board:
-the boat spawns its whole group on the shore, while a rotary or land hull spawns the rider, holds it hidden,
-and feeds one man at a time into a cargo seat that a `GetOut` handler refills as each climbs out — so a man pops
-into the hold and disembarks in turn, one seat sufficing for any squad. A stall cap forces a board, landing or
-disembark through if it never settles. It all lives in `DUWS_fnc_opcom_ferryTick` / `DUWS_fnc_opcom_ferryStepLive`
-([`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). A freed
-transport, live or virtual, reverts to a `guard` in place, back in the pool.
+waiting for a lift does not pull a transport still kilometres off.
+
+**The live crossing runs as a phase harness** on the transport — the store binding is agnostic to how the hull
+moves the rider, so the timing lives here, not scattered per step. A rotary steps six phases, each entered off an
+engine signal and, where it can fail, timed `OPCOM_FERRY_WAIT_MAX` ticks (reset on entry). The two transit legs —
+closing on the pickup, carrying to the drop — are **untimed**: a flying hull does not stick mid-leg. Distances
+that gate a transit→land transition are read in **grid cells** (`DUWS_fnc_opcom_cellDist`), not metres and
+independent of the streaming radius — a rotor issues its land order within `k = 1` cell of the LZ, and of the drop.
+
+1. **to-pickup** (transit, untimed) — fly to the LZ; within `k` the land order issues.
+2. **pickup-land** (timed) — descend to the LZ; grounded → board. Expiry: board-despawn the riders and skip to the carry.
+3. **pickup-board** (timed) — force the current lead into a cargo seat one per tick (`moveInCargo`, combat- and range-blind) so the rest keep fighting while the front man boards; a `GetIn` handler board-despawns each, promoting the next. Group empty → embark. Expiry: board-despawn the remainder and carry.
+4. **carry** (transit, untimed) — fly to the drop; within `k` the land order issues.
+5. **drop-land** (timed) — descend to the drop; grounded → unload. Expiry: spawn the riders at the destination and release.
+6. **drop-unload** (timed) — hold the group hidden and feed one man at a time into a seat a `GetOut` handler refills as each climbs out. All out → release. Expiry: spawn the whole group at the destination and release.
+
+**Strength freezes on pickup, not on drop.** From the board commitment (2–3) the rider's effForce is snapshotted
+and belief book-keeping stops reading its live count, so board-despawning it man by man never reads as casualties
+— a loss taken earlier, at the shore or on the run-in, is already banked. The freeze **thaws the instant the
+riders spawn at the destination** (5–6), so egress losses **do** count: a man killed climbing out drops the
+force, a wiped disembark reads dead. The rider detaches from the hull (`ridingOn = -1`) at that same spawn — the
+store treats it as landed the moment its leader exists, its men streaming out behind as cosmetics.
+
+A **boat** stays outside the timed harness for now: it closes to `OPCOM_FERRY_BOARD_BOAT` and board-despawns the
+whole group in one tick, then spawns it whole on the far shore in one tick — no descent, board or unload sub-phase
+to time. It all lives in `DUWS_fnc_opcom_ferryTick` / `DUWS_fnc_opcom_ferryStepLive`
+([`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). A freed transport,
+live or virtual, reverts to a `guard` in place, back in the pool.
 
 **Lifecycle.** An idle transport is a durable lift asset: ferry a rider, revert to `guard` in place, wait for
 the next. Nothing auto-returns a hull to base or auto-recruits one under demand — the pool is what the commander
