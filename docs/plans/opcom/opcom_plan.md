@@ -758,29 +758,32 @@ unwatched one steps across virtually exactly as above. Neither end forces the ot
 waiting for a lift does not pull a transport still kilometres off.
 
 **The live crossing runs as a phase harness** on the transport — the store binding is agnostic to how the hull
-moves the rider, so the timing lives here, not scattered per step. A rotary steps six phases, each entered off an
-engine signal and, where it can fail, timed `OPCOM_FERRY_WAIT_MAX` ticks (reset on entry). The two transit legs —
-closing on the pickup, carrying to the drop — are **untimed**: a flying hull does not stick mid-leg. Distances
-that gate a transit→land transition are read in **grid cells** (`DUWS_fnc_opcom_cellDist`), not metres and
-independent of the streaming radius — a rotor issues its land order within `k = 1` cell of the LZ, and of the drop.
+moves the rider, so the timing lives here, not scattered per step. Both lift types step the same six phases, each
+entered off an engine signal and, where it can fail, timed `OPCOM_FERRY_WAIT_MAX` ticks (reset on entry). The two
+transit legs — closing on the pickup, carrying to the drop — are **untimed**: a moving hull does not stick mid-leg.
+Distances that gate a transit→arrival transition are read in **grid cells** (`DUWS_fnc_opcom_cellDist`), not metres
+and independent of the streaming radius — the hull triggers its next phase within `k = 1` cell of the LZ, and of the drop.
 
-1. **to-pickup** (transit, untimed) — fly to the LZ; within `k` the land order issues.
-2. **pickup-land** (timed) — descend to the LZ; grounded → board. Expiry: board-despawn the riders and skip to the carry.
-3. **pickup-board** (timed) — force the current lead into a cargo seat one per tick (`moveInCargo`, combat- and range-blind) so the rest keep fighting while the front man boards; a `GetIn` handler board-despawns each, promoting the next. Group empty → embark. Expiry: board-despawn the remainder and carry.
-4. **carry** (transit, untimed) — fly to the drop; within `k` the land order issues.
-5. **drop-land** (timed) — descend to the drop; grounded → unload. Expiry: spawn the riders at the destination and release.
-6. **drop-unload** (timed) — hold the group hidden and feed one man at a time into a seat a `GetOut` handler refills as each climbs out. All out → release. Expiry: spawn the whole group at the destination and release.
+1. **to-pickup** (transit, untimed) — a rotary flies to a safe LZ by the rider, a boat runs to the nearest navigable water off the shore; within `k` the next phase triggers (the rotary issues its land order, the boat has none).
+2. **pickup-land** (timed) — a rotary descends to the LZ, a boat closes to within `OPCOM_FERRY_BOARD_BOAT` of its shore point → board. Expiry: board-despawn the riders and skip to the carry.
+3. **pickup-board** (timed) — a rotary forces the current lead into a cargo seat one per tick (`moveInCargo`, combat- and range-blind) so the rest keep fighting while the front man boards, a `GetIn` handler board-despawning each and promoting the next; a boat walks the shore party to the hull and board-despawns the whole group at once. Group aboard → embark. Expiry: board-despawn the remainder and carry.
+4. **carry** (transit, untimed) — cross to the drop; within `k` the next phase triggers (the rotary issues its land order, the boat has none).
+5. **drop-land** (timed) — a rotary descends to the drop, a boat closes to within `OPCOM_FERRY_BOARD_BOAT` of its far shore point → unload. Expiry: spawn the riders at the destination and release.
+6. **drop-unload** (timed) — a rotary holds the group hidden and feeds one man at a time into a seat a `GetOut` handler refills as each climbs out; a boat de-virtualises the whole group ashore in one tick. All out → release. Expiry: spawn the whole group at the destination and release.
 
 **Strength freezes on pickup, not on drop.** From the board commitment (2–3) the rider's effForce is snapshotted
-and belief book-keeping stops reading its live count, so board-despawning it man by man never reads as casualties
-— a loss taken earlier, at the shore or on the run-in, is already banked. The freeze **thaws the instant the
+and belief book-keeping stops reading its live count, so board-despawning it — man by man for a rotary, whole for a
+boat — never reads as casualties; a loss taken earlier, at the shore or on the run-in, is already banked. The freeze **thaws the instant the
 riders spawn at the destination** (5–6), so egress losses **do** count: a man killed climbing out drops the
 force, a wiped disembark reads dead. The rider detaches from the hull (`ridingOn = -1`) at that same spawn — the
 store treats it as landed the moment its leader exists, its men streaming out behind as cosmetics.
 
-A **boat** stays outside the timed harness for now: it closes to `OPCOM_FERRY_BOARD_BOAT` and board-despawns the
-whole group in one tick, then spawns it whole on the far shore in one tick — no descent, board or unload sub-phase
-to time. It all lives in `DUWS_fnc_opcom_ferryTick` / `DUWS_fnc_opcom_ferryStepLive`
+The two lift types differ only in mechanics inside the shared phases: a rotary lands (`land "GET IN"` / `"GET OUT"`)
+and boards/dismounts man by man; a boat cannot land, so each pickup/drop phase closes to `OPCOM_FERRY_BOARD_BOAT`
+of the shore and board-despawns / de-virtualises the whole group at once — no seat-by-seat load or unload. This is
+why the boat's board and disembark phases usually clear in a single tick, but they are still timed, so a hull stuck
+short of its shore (a reef, a blocked inlet) forces the group to the destination at expiry instead of hanging. It
+all lives in `DUWS_fnc_opcom_ferryTick` / `DUWS_fnc_opcom_ferryStepLive`
 ([`fnc_opcom_ferry.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_ferry.sqf)). A freed transport,
 live or virtual, reverts to a `guard` in place, back in the pool.
 
