@@ -71,10 +71,10 @@ private _settleMove = {
             } else {
                 private _ldr = leader _grp;
                 // pos/effForce are refreshed by the bookkeep pass ahead of grid_rebuild (fnc_opcom_perception_run).
-                if ((_t getOrDefault ["ridingOn", -1]) >= 0 || {_t getOrDefault ["ferryFrozen", false]}) then {
-                    // A live rider the ferry owns: bound at the shore awaiting pickup (ridingOn), or dismounting
-                    // man by man at the far shore already detached but still frozen (ferryFrozen). The transport
-                    // drives the sequence; it takes no order and must not stow or replan out from under it.
+                if ((_t getOrDefault ["ridingOn", -1]) >= 0 || {_t getOrDefault ["ferryFrozen", false]} || {_t getOrDefault ["unloading", false]}) then {
+                    // A live rider the ferry owns: bound at the shore awaiting pickup (ridingOn), frozen aboard the
+                    // hull, or dismounting man by man at the far shore (unloading -- detached and thawed so egress
+                    // losses count). The transport drives the sequence; it must not stow or replan out from under it.
                     _t set ["status", "moving"];
                 } else {
                     private _engaged = behaviour _ldr isEqualTo "COMBAT";
