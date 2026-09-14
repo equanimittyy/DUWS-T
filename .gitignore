@@ -39,8 +39,8 @@ texHeaders.bin
 !.env.example
 *.local
 
-# ── Claude Code (local tooling, not shared) ──────────────────────────────────
-.claude/
+# ── Claude Code (keep shared agents/skills; drop per-user overrides) ──────────
+.claude/settings.local.json
 
 # ── Editor / IDE ─────────────────────────────────────────────────────────────
 .vscode/
