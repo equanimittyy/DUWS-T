@@ -10,12 +10,10 @@ DUWS_fnc_opcom_ferryStep = {
     if (isNil "_rider" || {((_rider get "status") in ["dead", "done"]) || {(_rider get "ridingOn") != (_t get "id")}}) exitWith {
         _t set ["carrying", -1]; _t set ["embarked", false]; nil
     };
-    // Rendezvous: steer to the waiting rider; embark once within a cell, then retarget to the far shore.
     if (!(_t get "embarked")) then {
         _t set ["target", [_t, _rider get "pos"] call DUWS_fnc_opcom_ferryApproach];
         if (((_t get "pos") distance2D (_t get "target")) <= OPCOM_GRID_CELL) then {
-            // A rider still live at the near shore board-despawns as it embarks: with nobody watching the
-            // virtual carry there is no boarding to render (the live path deletes them one by one instead).
+            // Nobody watches the virtual carry, so board-despawn the rider as it embarks (the live path renders boarding).
             private _rg = groupFromNetId (_rider get "grp");
             if (!isNull _rg) then {
                 { deleteVehicle _x } forEach units _rg; deleteGroup _rg;
@@ -30,14 +28,12 @@ DUWS_fnc_opcom_ferryStep = {
             [_t] call DUWS_fnc_opcom_advance;
         };
     };
-    // Carry: ferry to the far shore, the rider riding along, then drop it to resume its own route on foot.
     if (_t get "embarked") then {
         private _arrived = ([_t] call DUWS_fnc_opcom_advance) isEqualTo "arrived";
         _rider set ["pos", _t get "pos"];
         if (_arrived) exitWith {
             _rider set ["pos", _rider getOrDefault ["ferryLand", _t get "pos"]];
-            // Off-screen drop skips ferryRelease, so thaw the freeze here (a live board may have set it before the
-            // carry went virtual); the rider re-streams and tracks live from its drop.
+            // Off-screen drop skips ferryRelease, so thaw the freeze here (a live board may have set it).
             _rider set ["ridingOn", -1]; _rider set ["route", []]; _rider set ["ferryFrozen", false];
             // A boat backs off to navigable water so a reverted guard never rests (or de-virt spawns) on land.
             private _tpos = _t get "pos";

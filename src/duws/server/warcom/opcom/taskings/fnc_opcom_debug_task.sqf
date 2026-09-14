@@ -1,20 +1,14 @@
-// Locality: server. The Phase 3 hand-drive harness: spawn a unit, order it, watch it -- the manual stand-in
-// for the decision loop until Phase 4 automates the calls. Run on the server (directly in the server console,
-// or remoteExec'd to 2). Every verb logs to the RPT under "OPCOMDBG" so a play-test leaves a trace.
-//   ["menu"]                              -- list the recruit rows and their live prices
-//   ["recruit", row, pos, zoneKey]        -- hire a row at a world pos; returns the tasking id (or -1)
-//   ["task", id, order, targetPos]        -- give tasking `id` an active order to a target
-//   ["regarrison", id, zoneKey]           -- send tasking `id` to a zone; it settles into that garrison on arrival
-//   ["supply", id, targetPos]             -- send tasking `id` on a supply run; deleted and completed on arrival
-//   ["teleport", id, pos]                 -- snap tasking `id` to a world pos (stored point + live group), then hold it on guard there
-//   ["list"]                              -- dump every live tasking's state
-//   ["clear"]                             -- re-virtualise and delete every tasking, empty the store
-// The order verbs zero the commit hold first: hand-driving re-tasks on demand, including a de-virtualised
-// (live) unit, which is re-ordered in place. A land unit re-ordered across water walks to the near shore and,
-// if an idle transport (boat/trans_heli) is in the pool, borrows one and the crossing renders live (pickup,
-// carry, drop). The hold is the automated loop's anti-flap lock, not a hand-drive limit.
-// Example: private _id = ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
-//          [_id, "assault", getPosASL player] call fnc_opcom_debug_task;
+// Locality: server. Phase 3 hand-drive harness: recruit, order and inspect taskings from the server console (the
+// manual stand-in for the decision loop). Logs every verb under "OPCOMDBG". The order verbs zero the commit hold
+// first, so hand-driving re-tasks on demand where the automated loop would wait it out.
+//   ["menu"]                        -- list the recruit rows and their live prices
+//   ["recruit", row, pos, zoneKey]  -- hire a row; returns the tasking id (or -1)
+//   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target
+//   ["regarrison", id, zoneKey]     -- send `id` to a zone; it settles into that garrison on arrival
+//   ["supply", id, targetPos]       -- send `id` on a supply run; deleted and completed on arrival
+//   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
+//   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
+// e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
 params ["_verb", ["_a", ""], ["_b", ""], ["_c", ""]];
 if (!isServer) exitWith { ["WARN", "OPCOMDBG", "must run on the server"] call fnc_log; -1 };
 
@@ -52,7 +46,7 @@ switch (_verb) do {
             if (_pos isEqualTo []) then {
                 ["WARN", "OPCOMDBG", format ["regarrison: no zone %1", _b]] call fnc_log; false
             } else {
-                // A boat cannot rest inland: home it on nearest navigable water, refusing a zone with none in reach.
+                // A boat cannot rest inland: home it on nearest navigable water, refusing a landlocked zone.
                 private _target = _pos;
                 private _ok = true;
                 if ((_t get "moveType") isEqualTo "boat") then {
@@ -95,8 +89,7 @@ switch (_verb) do {
             { _x setPos [_b select 0, _b select 1, (getPosATL _x) select 2] } forEach _hulls;   // keep altitude: a grounded air hull explodes
             { if (vehicle _x == _x) then { _x setPos [(_b select 0) + (random 8 - 4), (_b select 1) + (random 8 - 4), 0] } } forEach units _grp;
         };
-        // Snapping the point alone leaves the stale order/target: the unit re-routes back. Re-hold on guard at
-        // the drop, dropping the commit lock first as the other order verbs do so the re-task is not refused.
+        // The stale order/target would re-route it back; re-hold on guard (hold zeroed, as the other verbs do).
         _t set ["hold", 0];
         [_t, "guard"] call fnc_opcom_task;
         ["INFO", "OPCOMDBG", format ["teleported tasking %1 to %2, holding on guard", _a, _dest apply { round _x }]] call fnc_log;

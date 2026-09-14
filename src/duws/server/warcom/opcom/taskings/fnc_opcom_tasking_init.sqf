@@ -1,27 +1,17 @@
-// Locality: server. Builds the tasking store and its data tables once at OPCOM init. Server-local, never
-// broadcast -- OPCOM orders only server-local groups. Read by fnc_opcom_task_step.
-//
-// A tasking is a hashMap keyed by field name, values kept to numbers/strings/arrays so a record stays
-// serialisable and holds no object handle: `grp` is a live group's netId string (resolved with
-// groupFromNetId), never the handle (docs/info/architecture/arma_engine_gotchas.md). Fields: id;
-// order (assault/move/guard/garrison); target [x,y]; pos (world point the grid reads force at,
-// never the reverse); moveType; menu (recruit-menu row that raised it); comp (bare tokens); spawnClass
-// (comp[0]'s class, pinned at hire so a re-spawn keeps the same hull); flags;
-// fullForce; effForce (what the grid deposits);
-// route; leg; routeMode; status; grp; hold (earliest tick to re-issue the order); homeZone; returnZone (a
-// move's re-garrison target zone, else ""); supplyDrop (a move that self-deletes and completes on arrival,
-// else false; exclusive with returnZone).
+// Locality: server. Builds the tasking store and its data tables once at init. Server-local, never broadcast --
+// OPCOM orders only server-local groups. A tasking is a field-keyed hashMap of numbers/strings/arrays only, so a
+// record stays serialisable and holds no object handle: `grp` is a live group's netId, resolved with
+// groupFromNetId, never the handle (docs/info/architecture/arma_engine_gotchas.md). `pos` is the world point the
+// grid samples force at, never a cell the tasking is bound to.
 if (!isServer) exitWith {};
 
 DUWS_opcom_taskings = [];
 DUWS_opcom_taskSeq  = 0;
 
-// The one place a buyable unit is priced and flagged (docs/plans/opcom/opcom_plan.md). Row -> [composition,
-// flags]. Bare tokens resolve to the "none" posture, so the unit takes OPCOM's order, not a standing
-// circuit. No price column: a hire costs ceil(force * OPCOM_AP_PER_FORCE), so no price can drift from worth.
-// `noncombat` marks the non-defender rows: kept out of the garrison reserve wave (never spawns to defend,
-// dies with a captured zone), regardless of armament -- a boat is an armed gunboat. A separate axis from
-// `transport` lift: an apc/ifv is transport-flagged yet a defender.
+// The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
+// to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- a hire costs
+// ceil(force * OPCOM_AP_PER_FORCE). `noncombat` keeps a row out of the garrison reserve wave (never spawns to
+// defend, dies with a captured zone) regardless of armament -- a boat is armed; a separate axis from `transport`.
 DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["rifles",       [["squad"],     []]],
     ["weapons_team", [["wp_team"],   []]],
@@ -37,8 +27,7 @@ DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["boat",         [["boat"],      ["transport", "noncombat"]]]
 ];
 
-// Composition token -> movement type. The first token of a composition decides (P3 rows are single-token).
-// A token absent here defaults to "inf" -- the safe floor, since only ground types are gated to land.
+// Composition's first token -> movement type; a token absent here defaults to "inf".
 DUWS_opcom_moveType = createHashMapFromArray [
     ["squad", "inf"], ["wp_team", "inf"], ["recon", "inf"], ["team", "inf"],
     ["patrol", "inf"], ["sniper_element", "inf"], ["garrison_element", "inf"],
@@ -50,27 +39,21 @@ DUWS_opcom_moveType = createHashMapFromArray [
     ["boat", "boat"]
 ];
 
-// Per-type speed as ticks to cross one grid cell -- gameplay-tuned, not realistic: the true spread (a jet
-// outruns a foot soldier ~80x) is compressed so the virtual layer neither crawls nor teleports.
+// Ticks to cross one grid cell, gameplay-tuned not realistic (the ~80x real spread compressed).
 DUWS_opcom_speed = createHashMapFromArray [
     ["inf", 15], ["wheeled", 4], ["tracked", 8], ["rotary", 2], ["fixed", 0.5], ["boat", 4]
 ];
 
-// Per-type streaming reach in cells (Chebyshev): a tasking de-virtualises when its cell closes within K of
-// any player's cell. Wider for faster types so a spawn still beats contact at the fixed tick rate.
+// Streaming reach in cells (Chebyshev): de-virt within K of a player. Wider for faster types so a spawn beats contact.
 DUWS_opcom_streamK = createHashMapFromArray [
     ["inf", 1], ["wheeled", 2], ["tracked", 2], ["rotary", 3], ["fixed", 4], ["boat", 2]
 ];
 
-// Per-type water rule for routing: "land" routes over land cells only (water impassable), "air" treats
-// every cell passable, "water" is the mirror -- water only, land impassable.
 DUWS_opcom_moveWater = createHashMapFromArray [
     ["inf", "land"], ["wheeled", "land"], ["tracked", "land"],
     ["rotary", "air"], ["fixed", "air"], ["boat", "water"]
 ];
 
-// Grid<->world helpers. A tasking's position is a world point the grid only samples, never a bound cell, so
-// both directions convert on demand.
 DUWS_fnc_opcom_moveType = {
     params ["_comp"];
     DUWS_opcom_moveType getOrDefault [[_comp param [0, ""]] call DUWS_fnc_tokenName, "inf"]
@@ -79,8 +62,7 @@ DUWS_fnc_opcom_moveType = {
 DUWS_fnc_opcom_w2c = {
     params ["_pos"];
     private _w = DUWS_opcom_grid_w;
-    // Clamp to the play box, not the full lattice: a point outside it (a roaming player) resolves to the
-    // nearest edge cell, keeping every routed/streamed cell inside the calculated area.
+    // Clamp to the play box: a point outside it resolves to the nearest edge cell, keeping routed/streamed cells inside.
     (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _cx = (floor ((_pos select 0) / OPCOM_GRID_CELL)) max _minCx min _maxCx;
     private _cy = (floor ((_pos select 1) / OPCOM_GRID_CELL)) max _minCy min _maxCy;
@@ -93,7 +75,7 @@ DUWS_fnc_opcom_c2w = {
     [((_ci mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_ci / _w)) + 0.5) * OPCOM_GRID_CELL, 0]
 };
 
-// A tasking record by id, or nil. The ferry binds a transport to a rider by id, not by handle.
+// A tasking record by id, or nil (the ferry binds transport<->rider by id, not handle).
 DUWS_fnc_opcom_byId = {
     params ["_id"];
     private _i = DUWS_opcom_taskings findIf { (_x get "id") == _id };
@@ -101,8 +83,7 @@ DUWS_fnc_opcom_byId = {
     DUWS_opcom_taskings select _i
 };
 
-// Nearest navigable-water cell centre to a world point -- a boat's launch point, since it cannot rest on the
-// land zone that raised it. Falls back to the point itself on a landlocked map (which fields no boats anyway).
+// Nearest navigable-water cell centre -- a boat's launch point (it cannot rest on the land zone that raised it).
 DUWS_fnc_opcom_nearestWater = {
     params ["_pos"];
     private _best = _pos;

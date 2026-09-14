@@ -3,8 +3,7 @@
 // the virtual mirror is fnc_opcom_ferry_virt (docs/plans/opcom/opcom_plan.md §Transport).
 if (!isServer) exitWith {};
 
-// Clear both ferry handlers (load GetIn, unload GetOut) so a hull that later ferries a second rider re-arms
-// cleanly -- a stale handler would make the re-arm skip on the "already armed" check.
+// Clear both ferry handlers so a hull that ferries a second rider re-arms cleanly (a stale handler skips the re-arm).
 DUWS_fnc_opcom_ferryClearEH = {
     params ["_veh"];
     private _b = _veh getVariable ["DUWS_ferryBoardEH", -1];
@@ -16,9 +15,8 @@ DUWS_fnc_opcom_ferryClearEH = {
     _veh setVariable ["DUWS_ferryUnloadQ", []];
 };
 
-// Feed the next held rider into a cargo seat and order it out. Only one rider is ever in the hold (the GetOut
-// handler calls this as each climbs out), so seat capacity never binds; held riders wait hidden + sim-off so
-// they never show on the ground.
+// Feed the next held rider into a seat and order it out. One at a time (the GetOut handler re-calls this), so seat
+// capacity never binds; the rest wait hidden + sim-off so none shows on the ground.
 DUWS_fnc_opcom_ferryUnloadNext = {
     params ["_veh"];
     private _q = (_veh getVariable ["DUWS_ferryUnloadQ", []]) select { !isNull _x && {alive _x} };
@@ -33,12 +31,11 @@ DUWS_fnc_opcom_ferryUnloadNext = {
     _u action ["GetOut", _veh];
 };
 
-// Render a live transport's crossing for one tick as a timed phase machine shared by both lift types (topickup ->
-// pickupland -> pickupboard -> carry -> dropland -> dropunload): the two transit legs are untimed, each
-// land/board/unload phase is capped at OPCOM_FERRY_WAIT_MAX ticks (reset on entry) and forces through on expiry.
-// A rotary lands ("GET IN"/"GET OUT") and boards/dismounts man by man; a boat cannot land, so it navigates to
-// within OPCOM_FERRY_BOARD_BOAT of the shore and board-despawns / de-virtualises the whole group at once. Strength
-// freezes at the board commit and thaws when the riders spawn at the drop.
+// One tick of the live crossing, a timed phase machine shared by both lift types (topickup -> pickupland ->
+// pickupboard -> carry -> dropland -> dropunload). The two transit legs are untimed; each land/board/unload phase
+// caps at OPCOM_FERRY_WAIT_MAX ticks and forces through on expiry. A rotary lands and boards/dismounts man by man;
+// a boat cannot land, so it closes to OPCOM_FERRY_BOARD_BOAT of the shore and moves the whole group at once.
+// Strength freezes at the board commit and thaws when the riders spawn at the drop.
 DUWS_fnc_opcom_ferryStepLive = {
     params ["_t", "_rider"];
     private _grp = groupFromNetId (_t get "grp");
@@ -51,14 +48,13 @@ DUWS_fnc_opcom_ferryStepLive = {
 
     private _phase = _t getOrDefault ["ferryPhase", "topickup"];
     private _setPhase = { params ["_p"]; _t set ["ferryPhase", _p]; _t set ["ferryWait", 0] };
-    // Spawn the rider at the drop, detach it from the hull, and thaw its strength -- egress losses now count.
+    // Spawn the rider at the drop, detach it, thaw its strength -- egress losses now count.
     private _dropDeliver = {
         private _land = _rider getOrDefault ["ferryLand", _t get "target"];
         _rider set ["pos", _land]; _rider set ["route", []]; _rider set ["leg", 0];
         [_rider] call DUWS_fnc_opcom_deVirt;
         _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false];
     };
-    // All riders aboard (or force-cleared): stow the rider virtual, retarget the drop, and start the carry.
     private _embark = {
         private _rg = groupFromNetId (_rider get "grp");
         if (!isNull _rg) then { { deleteVehicle _x } forEach ((units _rg) select { alive _x }); deleteGroup _rg };
@@ -71,8 +67,6 @@ DUWS_fnc_opcom_ferryStepLive = {
     };
 
     switch (_phase) do {
-        // Transit to the pickup (untimed): a rotary flies to a safe LZ by the rider, a boat runs to the nearest
-        // navigable water off its shore; both trigger the next phase within k cells (a boat issues no land order).
         case "topickup": {
             private _lz = _t getOrDefault ["ferryLZ", []];
             if (_lz isEqualTo []) then {
@@ -86,8 +80,6 @@ DUWS_fnc_opcom_ferryStepLive = {
                 ["pickupland"] call _setPhase;
             };
         };
-        // Arrive at the pickup (timed): a rotary descends to the ground, a boat closes to within a boat-length of
-        // its shore point; either way expiry board-despawns the riders and skips to the carry.
         case "pickupland": {
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             if (_boat) then {
@@ -104,14 +96,11 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (_wait >= OPCOM_FERRY_WAIT_MAX) then { _rider set ["ferryFrozen", true]; call _embark };
             };
         };
-        // Board (timed): a boat waits for the shore party to close, then board-despawns the whole group at once; a
-        // rotary forces the current lead into a seat one per tick. Group empty/aboard or expiry -> carry.
         case "pickupboard": {
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             private _rg = groupFromNetId (_rider get "grp");
             if (_boat) then {
-                // Walk the shore party to the hull so the vanish reads as a board, then freeze + despawn the whole
-                // group once its lead is within a boat-length (the board commit) or the wait expires.
+                // Walk the shore party to the hull so the vanish reads as a board; freeze + despawn on close or expiry.
                 if (!isNull _rg && {count waypoints _rg == 0}) then { [_rg, "move", getPosASL _veh] call DUWS_fnc_opcom_applyOrder };
                 private _here = !isNull _rg && {((leader _rg) distance2D _veh) < OPCOM_FERRY_BOARD_BOAT};
                 if (isNull _rg || _here || {_wait >= OPCOM_FERRY_WAIT_MAX}) exitWith { _rider set ["ferryFrozen", true]; call _embark };
@@ -136,8 +125,6 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (alive _lead && {vehicle _lead isEqualTo _lead}) then { _lead moveInCargo _veh };
             };
         };
-        // Transit to the drop (untimed): the rider rides bound + virtual; trigger the next phase within k cells (a
-        // rotary issues the land order, a boat just closes on its shore point).
         case "carry": {
             _rider set ["pos", _tpos];
             private _nav = _t get "target";
@@ -147,8 +134,6 @@ DUWS_fnc_opcom_ferryStepLive = {
                 ["dropland"] call _setPhase;
             };
         };
-        // Arrive at the drop (timed): a boat closes on its shore point and hands to the disembark; a rotary descends,
-        // then spawns + arms the man-by-man dismount. Expiry drops the group at the destination regardless.
         case "dropland": {
             _rider set ["pos", _tpos];
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
@@ -181,8 +166,6 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (_wait >= OPCOM_FERRY_WAIT_MAX) exitWith { call _dropDeliver; [_t] call DUWS_fnc_opcom_ferryRelease };
             };
         };
-        // Disembark (timed): a boat de-virtualises the whole group ashore and releases in one tick; a rotary drains
-        // the GetOut chain, ejecting any stragglers at the cap, then releases (freeing the hull, clearing unloading).
         case "dropunload": {
             if (_boat) exitWith { call _dropDeliver; [_t] call DUWS_fnc_opcom_ferryRelease };
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];

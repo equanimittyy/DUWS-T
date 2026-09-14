@@ -43,12 +43,9 @@ DUWS_fnc_opcom_zoneContested = {
     [_pos, (_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear
 };
 
-// Shared by the borrow and the debug inspector so the two can never drift. _excludeId drops one id (a rider
-// never borrows itself); -1 drops none. Idle-only by order, not by streaming: a hull on a directed order is a
-// role unit off the pool, but a *live* idle hull is lendable too -- it flies off to ferry and lands or
-// re-virtualises elsewhere, which is fine. A fighting hull is skipped: the phase harness forces a stalled crossing
-// through, but a hull lost mid-trip still strands its bound rider with nothing to free it -- lend one likely to
-// survive the trip (opcom_plan.md §Transport).
+// Shared by the borrow and the debug inspector so the two never drift. _excludeId drops one id (a rider never
+// borrows itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
+// re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1]];
     DUWS_opcom_taskings select {
@@ -62,10 +59,9 @@ DUWS_fnc_opcom_ferryPool = {
     }
 };
 
-// Borrow the nearest free compatible transport for a rider stopped at a water leg; returns the bound transport,
-// or nil if none is free (the rider holds at the shore and retries next tick). Boats are preferred, a rotary is
-// the fallback lift. A garrisoned pick is flipped off `garrison` to `move` so its ferry turn runs; no reserve
-// draw-out -- a ferry-capable transport is a non-combatant, never enrolled in the reserve wave.
+// Borrow the nearest free compatible transport for a rider at a water leg; returns it, or nil if none is free.
+// Boats preferred, rotary the fallback. A garrisoned pick is flipped to `move` so its ferry turn runs; no reserve
+// draw-out, since a ferry-capable transport is a non-combatant never in the wave.
 DUWS_fnc_opcom_borrowFerry = {
     params ["_rider"];
     private _rpos = _rider get "pos";

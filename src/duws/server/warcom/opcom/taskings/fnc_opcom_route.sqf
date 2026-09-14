@@ -1,29 +1,18 @@
-// Locality: server. Plans a tasking's route to its target: [_pts, _mode], _pts an [x,y,z] chain ending at
-// the target ([] = no route), _mode "road"/"grid". Runs on the loop thread (scheduled), never in the scoring
-// isNil block, since the road branch may yield. Branches on movement type: wheeled/tracked route on roads
-// (borrow fnc_convoy_path's polyline only -- OPCOM steps it and spawns one hull, so no convoy driver);
-// infantry/air/boat take a cost-field cell chain.
-//
-// The cell search is A*, not the plan's nominal Dijkstra: same optimum (octile heuristic, admissible even at
-// lambda=1 since threat cost >= 0) but far cheaper than a linear-min Dijkstra over the lattice each recompute.
-// cost(step) = stepLen + OPCOM_ROUTE_LAMBDA * _lambda * gridEne(into-cell).
+// Locality: server. Plans a tasking's route: [_pts, _mode] -- _pts an [x,y,z] chain ending at the target
+// ([] = none), _mode "road"/"grid". Runs scheduled (the road branch may yield), never in the scoring isNil
+// block. Wheeled/tracked route on roads (fnc_convoy_path's polyline, stepped as one hull -- no convoy driver);
+// infantry/air/boat take an A* cost-field cell chain, cost = stepLen + OPCOM_ROUTE_LAMBDA*_lambda*gridEne.
+// Road routing is threat-blind: the lambda term steers only the cell chain, never which road a hull takes.
 params ["_startPos", "_destPos", "_moveType", ["_lambda", 0]];
 if (!isServer) exitWith { [[], "grid"] };
 
-// Roads: hand the convoy router the two ends, flatten its segments into one polyline. Each segment is
-// [points, "road"|"gap"]; a "gap" carries only its two endpoints (a native bridge the hull drives itself).
-//
-// REVISIT (P5 threat routing): fnc_convoy_path is a pure road-graph search, so this branch is threat-blind --
-// OPCOM_ROUTE_LAMBDA steers only the cost-field cell chain below, never which road a hull takes. To route a
-// column off a hot road, cost each road segment by the grid cost-field it crosses. Inert until P5: P3 routes
-// direct (lambda 0), where every branch is shortest-path anyway.
+// A segment is [points, "road"|"gap"]; a "gap" carries only its two endpoints (a bridge the hull drives itself).
 if (_moveType in ["wheeled", "tracked"]) exitWith {
     private _segs = [_startPos, _destPos] call fnc_convoy_path;
     private _pts = [];
     {
         _x params ["_p", "_tag"];
-        // A gap that crosses water would run a ground hull into the sea; the router already avoids this
-        // where it can, so only log it -- the route still stands, best-effort, for native AI to bridge.
+        // A water-crossing gap would beach a ground hull; the router avoids it where it can, so log and bridge.
         if (_tag isEqualTo "gap" && {[_p select 0, _p select (count _p - 1)] call fnc_route_has_water}) then {
             ["WARN", "OPCOM", format ["road route gap crosses water %1->%2", _p select 0, _p select (count _p - 1)]] call fnc_log;
         };
@@ -32,19 +21,16 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
     [_pts, "road"]
 };
 
-// Grid: A* over the cost field, passability by the type's water rule.
 private _w    = DUWS_opcom_grid_w;
 private _n    = _w * _w;
-// The search stays inside the play box -- out-of-box cells are never built, so a neighbour outside it is
-// rejected as impassable. Start and target are already box-clamped by w2c.
+// Out-of-box cells are never built, so a neighbour outside the play box is impassable; ends are box-clamped by w2c.
 (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _land = DUWS_opcom_grid_land;
 private _gwater = DUWS_opcom_grid_water;
 private _ene  = DUWS_opcom_grid_ene;
 private _water = DUWS_opcom_moveWater getOrDefault [_moveType, "land"];
 
-// A land type may cross navigable water at the lift penalty in the cost below, so its chain can include water
-// cells (a ferry leg the executor lifts over).
+// A land type may cross navigable water (at the lift penalty below), so its passable set includes water cells.
 private _passable = {
     params ["_i"];
     switch (_water) do {
@@ -58,11 +44,9 @@ private _s = [_startPos] call DUWS_fnc_opcom_w2c;
 private _d = [_destPos]  call DUWS_fnc_opcom_w2c;
 if (_s == _d) exitWith { [[_destPos], "grid"] };
 
-// No land-component pre-check: a land type can cross navigable water, so ends on different land masses may
-// still join over a strait; a truly unreachable target falls through to the A* no-route WARN and holds straight.
+// No land-component pre-check: a land type can cross navigable water, so ends on different masses may still join.
 
-// A boat needs source and target in the one navigable water component (grid_water >= 0 and equal), or it
-// cannot join them -- a boat cannot cross land between two seas.
+// A boat needs source and target in one navigable water component, or it cannot join them across land.
 if (_water isEqualTo "water" && {!((_gwater select _s) >= 0 && {(_gwater select _d) >= 0} && {(_gwater select _s) == (_gwater select _d)})}) exitWith {
     ["WARN", "OPCOM", format ["no water route %1->%2 (not one navigable body); holding straight", _s, _d]] call fnc_log;
     [[_destPos], "grid"]
@@ -106,8 +90,7 @@ while {count _open > 0 && {_guard < _n}} do {
                     private _j = _ny * _w + _nx;
                     if ([_j] call _passable) then {
                         private _step = [_cell, _diag] select (_dx != 0 && _dy != 0);
-                        // Lift penalty: a land type crossing into navigable water pays the ferry cost, so a
-                        // land path is preferred wherever one exists and water is taken only when it must.
+                        // A land type entering navigable water pays the ferry cost, so water is taken only when forced.
                         private _lift = [0, OPCOM_ROUTE_LIFT_PENALTY] select (_water isEqualTo "land" && {(_gwater select _j) >= 0});
                         private _tentative = (_g select _cur) + _step + _lw * (_ene select _j) + _lift;
                         if ((_g select _j) < 0 || {_tentative < (_g select _j)}) then {
@@ -129,8 +112,7 @@ if (!_found) exitWith {
     [[_destPos], "grid"]
 };
 
-// Walk predecessors back to the start, drop the start cell (the unit is already there), emit cell centres
-// for the intermediate hops and the exact target as the final waypoint.
+// Intermediate hops as cell centres, the exact target as the final waypoint; the start cell is dropped.
 private _chain = [];
 private _c = _d;
 while {_c != _s && {_c >= 0}} do { _chain pushBack _c; _c = _from select _c };

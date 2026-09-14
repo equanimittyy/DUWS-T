@@ -1,13 +1,9 @@
-// Locality: server, [] call'd at load to define the streaming helpers. The mobile analogue of hardpoint
-// streaming: a virtualised tasking de-virtualises into a live A3 group near a player and stows back to a
-// world point once it leaves. OPCOM steers a live group by re-issuing its order (fnc_opcom_task pushes it
-// through DUWS_fnc_opcom_reOrderLive). A water crossing is not steered on foot: the live land unit walks to
-// the near shore and a borrowed transport ferries it across in view (fnc_opcom_ferry,
-// docs/plans/opcom/opcom_plan.md §Transport).
+// Locality: server, [] call'd at load. Streaming helpers: de-virtualise a tasking into a live A3 group near a
+// player, stow it back to a world point when it leaves. A live group is steered by re-issuing its order; a land
+// unit whose route crosses water is walked only to the near shore, where the ferry takes over (fnc_opcom_ferry).
 if (!isServer) exitWith {};
 
-// The closest native order to a tasking, set at spawn. Cleared first so a re-spawn inherits no stale
-// waypoint. (Waypoints/behaviour take only on a server-local group, which every spawn here is.)
+// Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.)
 DUWS_fnc_opcom_applyOrder = {
     params ["_grp", "_order", "_target", ["_supplyDrop", false]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
@@ -18,20 +14,18 @@ DUWS_fnc_opcom_applyOrder = {
         };
         case "move": {
             _grp setBehaviour "SAFE";
-            // Arrival (delete + complete) is the tasking step's job; BLUE just keeps the courier out of fights.
+            // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
             if (_supplyDrop) then { _grp setCombatMode "BLUE" };
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
-        default {   // guard, and any resting unit forced live: hold ground where it stands
+        default {
             _grp setBehaviour "SAFE"; _grp setCombatMode "YELLOW";
         };
     };
 };
 
-// The near-shore staging point of a land tasking whose route crosses water: [_crosses, _stage], _stage the
-// last land point before the first water leg (_from itself if the first leg is already water). The live
-// re-order (walk here, wait for a lift) and the tasking step's live ferry request both read it, so the two
-// never disagree on where the shore is.
+// Near-shore staging point of a route that crosses water: [_crosses, _stage], _stage the last land point before
+// the first water leg. Shared by the live re-order and the ferry request so the two agree on where the shore is.
 DUWS_fnc_opcom_shoreStage = {
     params ["_t", "_from"];
     private _stage = _from;
@@ -40,10 +34,8 @@ DUWS_fnc_opcom_shoreStage = {
     [_crosses, _stage]
 };
 
-// Push a re-order onto an already-live group (fnc_opcom_task set the record; this enacts it). A land type
-// cannot foot over water, so a route that crosses water only drives the group to the near shore; the tasking
-// step then borrows a transport and renders the ferry live (fnc_opcom_ferry). Boat/air, guard, and all-land
-// routes get the real order and target.
+// Push a re-order onto a live group. A land route that crosses water drives only to the near shore (the tasking
+// step then borrows a ferry); boat/air, guard, and all-land routes get the real order and target.
 DUWS_fnc_opcom_reOrderLive = {
     params ["_t"];
     private _grp = groupFromNetId (_t get "grp");
@@ -54,21 +46,19 @@ DUWS_fnc_opcom_reOrderLive = {
         ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
         if (_crosses) exitWith {
             [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder;
-            // A lone MOVE completes on arrival and the group drifts off in SAFE; the HOLD leg pins it at the shore until the ferry's pickup clears it.
+            // A lone MOVE completes and the group drifts off in SAFE; HOLD pins it at the shore until the ferry clears it.
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
     [_grp, _order, _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
 };
 
-// OPCOM's own de-virt spawn, so air spawns flying at the tasking's point: the zone spawner flies air in from
-// off-map, wrong for a stowed unit resuming where it stood. grpNull leaves no orphan hull.
+// OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
 DUWS_fnc_opcom_spawnComp = {
     params ["_token", "_pos", ["_class", ""]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
         private _g = [_token, _pos, 100, "none", _pos] call fnc_spawn_team;
-        // Posture "none" drops the whole team on the one spawn point; loosen the clump. Kept under 20 m so
-        // the squad still reads as one group inside the stream radius (mirrors the rescue_squad cordon).
+        // Posture "none" drops the team on one point; scatter <20 m so it still reads as one group in the stream radius.
         { _x setPos (_pos getPos [4 + random 12, random 360]) } forEach units _g;
         _g
     };
@@ -105,8 +95,7 @@ DUWS_fnc_opcom_spawnComp = {
     _grp
 };
 
-// Spawn the composition at its world point (DUWS_fnc_opcom_spawnComp), matched to stored strength, and give
-// it its order; true on a live group. One hull/team per tasking, never a column.
+// Spawn the composition at its world point, matched to stored strength, and order it. One hull/team, never a column.
 DUWS_fnc_opcom_deVirt = {
     params ["_t"];
     private _token = (_t get "comp") param [0, ""];
@@ -121,15 +110,12 @@ DUWS_fnc_opcom_deVirt = {
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
-    // reOrderLive, not applyOrder direct: a land unit spawning mid-crossing walks only to the near shore (the
-    // tasking step then ferries it), instead of marching a live group into water it cannot foot.
+    // reOrderLive (not applyOrder): a land unit spawning mid-crossing walks only to the near shore, not into water.
     [_t] call DUWS_fnc_opcom_reOrderLive;
     true
 };
 
-// Stow a live group back to a world point: bank surviving strength, take the leader's position, delete the
-// group and any hulls. Route is cleared so the next step replans from there. A dead group is the status
-// read's job, not here.
+// Bank surviving strength, take the leader's position, delete the group and its hulls; clear the route to replan.
 DUWS_fnc_opcom_reVirt = {
     params ["_t"];
     private _grp = groupFromNetId (_t get "grp");

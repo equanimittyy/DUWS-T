@@ -1,16 +1,13 @@
-// Locality: server, [] call'd at load. The OPCOM movement core: the shared per-tick world-point mover (`advance`)
-// and the grid-geometry tests it leans on. Every tasking's march uses these, ferry or not, so they sit below the
-// ferry, not inside it (docs/plans/opcom/opcom_plan.md §Transport).
+// Locality: server, [] call'd at load. Shared OPCOM movement core: the per-tick world-point mover and the
+// grid-geometry tests every tasking's march uses, ferry or not.
 if (!isServer) exitWith {};
 
-// A world point sits in a navigable-water cell -- a ferry leg for a land type.
+// grid_water >= 0 is a navigable-water component; -1 is land or a sub-threshold pool.
 DUWS_fnc_opcom_isWaterPt = {
     params ["_pt"];
     (DUWS_opcom_grid_water select ([_pt] call DUWS_fnc_opcom_w2c)) >= 0
 };
 
-// Chebyshev distance in grid cells between two world points -- the ferry's "measure by k", decoupled from any
-// streaming radius. A rotor issues its land order a fixed cell count (OPCOM_FERRY_LAND_K) from its LZ/drop.
 DUWS_fnc_opcom_cellDist = {
     params ["_a", "_b"];
     private _w = DUWS_opcom_grid_w;
@@ -19,9 +16,8 @@ DUWS_fnc_opcom_cellDist = {
     (abs ((_ca mod _w) - (_cb mod _w))) max (abs (floor (_ca / _w) - floor (_cb / _w)))
 };
 
-// Step a tasking one tick along its route. Returns "arrived" (route end reached), "water" (a land type stopped
-// at the near shore of a ferry leg), or "moving". Replans from the current position when the chain is empty (a
-// fresh order, or a re-virtualise cleared it).
+// Returns "arrived", "water" (a land type stopped at a ferry leg's near shore), or "moving". Replans when the
+// route chain is empty.
 DUWS_fnc_opcom_advance = {
     params ["_t"];
     if ((_t get "route") isEqualTo [] && {(_t get "target") isNotEqualTo []}) then {
@@ -37,7 +33,7 @@ DUWS_fnc_opcom_advance = {
     while {_remain > 0 && {_leg < count _route} && {!_water}} do {
         private _wp = _route select _leg;
         if (_landRule && {[_wp] call DUWS_fnc_opcom_isWaterPt}) then {
-            _water = true;                          // near shore: a land type cannot foot on, task_step fetches a ferry
+            _water = true;
         } else {
             private _d = _pos distance2D _wp;
             if (_d <= _remain) then {
