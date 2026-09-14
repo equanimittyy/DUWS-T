@@ -1,8 +1,10 @@
 #!/bin/sh
 # PreToolUse(Bash) gate on git commit: denies once -- listing the comment lines the commit
-# adds -- then allows the retry, so each commit gets one forced review (a prompt to look,
-# not a verdict; a script cannot grade a comment). Keyed on HEAD, not the diff, so trimming
-# comments during the sweep does not re-trigger it. Comment syntax is per file type, not
+# adds -- then allows an identical retry, so each distinct batch of added comments gets one
+# forced review (a prompt to look, not a verdict; a script cannot grade a comment). Keyed on
+# HEAD + a hash of the flagged lines: a re-run of the same set passes, but a changed or fresh
+# batch at the same HEAD re-triggers, so trimming during the sweep costs one more prompt and a
+# different commit cannot ride a spent marker through. Comment syntax is per file type, not
 # guessed from text, so a Markdown heading, CSS colour, or shell parameter expansion is not
 # mistaken for a comment; unknown extensions are skipped.
 
@@ -86,14 +88,15 @@ done)
 gitdir=$(git rev-parse --absolute-git-dir 2>/dev/null)
 head=$(git rev-parse HEAD 2>/dev/null)
 marker="$gitdir/comment_review_denied_head"
+key="$head:$(printf '%s' "$lines" | cksum | awk '{print $1}')"
 
-if [ -n "$head" ] && [ "$(cat "$marker" 2>/dev/null)" = "$head" ]; then
+if [ -n "$head" ] && [ "$(cat "$marker" 2>/dev/null)" = "$key" ]; then
   exit 0
 fi
 
-printf '%s' "$head" > "$marker" 2>/dev/null
+printf '%s' "$key" > "$marker" 2>/dev/null
 
-reason="Comment-review gate: this commit ADDS the comment lines below. CLAUDE.md defaults to NO comment -- one earns its line only by carrying a why the code cannot show (never what it does or how it got there). Sweep these; drop any that restate the code, narrate a branch, or recount history, and keep only a load-bearing why. Then re-run the SAME commit -- the retry at this HEAD is allowed.
+reason="Comment-review gate: this commit ADDS the comment lines below. Default is NO comment -- most of these should be deleted, not kept. A line survives only if it carries a why the code cannot show (a load-bearing invariant, rejected alternative, security/concurrency rationale, non-obvious encoding, or a bug's failure mode) AND a clearer name or smaller function could not replace it. Cut everything that restates code, narrates a branch, or recounts history, then re-run the commit. Changing which comments you add re-triggers this once; an identical re-run passes.
 
 $lines"
 
