@@ -40,6 +40,13 @@ DUWS_fnc_opcom_reOrderLive = {
     params ["_t"];
     private _grp = groupFromNetId (_t get "grp");
     if (isNull _grp) exitWith {};
+    // A bound ferry rider never marches -- the transport owns it. Pin it where it stands (its shore pickup) with a
+    // HOLD, or it walks its destination route on past the shore while the lift comes in.
+    if ((_t getOrDefault ["ridingOn", -1]) >= 0) exitWith {
+        private _here = getPosASL (leader _grp);
+        [_grp, "move", _here] call DUWS_fnc_opcom_applyOrder;
+        (_grp addWaypoint [_here, 0]) setWaypointType "HOLD";
+    };
     private _order = _t get "order";
     private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
     if (_landRule && {_order isNotEqualTo "guard"}) then {

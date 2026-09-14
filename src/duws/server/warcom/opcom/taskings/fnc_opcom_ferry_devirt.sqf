@@ -75,7 +75,7 @@ DUWS_fnc_opcom_ferryStepLive = {
                 _t set ["ferryLZ", _lz];
             };
             if (count waypoints _grp == 0) then { [_grp, "move", _lz] call DUWS_fnc_opcom_applyOrder };
-            if (([_veh, _lz] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
+            if (([getPosASL _veh, _lz] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
                 if (!_boat) then { _veh land "GET IN" };
                 ["pickupland"] call _setPhase;
             };
@@ -129,7 +129,7 @@ DUWS_fnc_opcom_ferryStepLive = {
             _rider set ["pos", _tpos];
             private _nav = _t get "target";
             if (count waypoints _grp == 0) then { [_grp, "move", _nav] call DUWS_fnc_opcom_applyOrder };
-            if (([_veh, _nav] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
+            if (([getPosASL _veh, _nav] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
                 if (!_boat) then { _veh land "GET OUT" };
                 ["dropland"] call _setPhase;
             };

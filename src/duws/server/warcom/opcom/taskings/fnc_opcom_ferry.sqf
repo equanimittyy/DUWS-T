@@ -75,6 +75,8 @@ DUWS_fnc_opcom_borrowFerry = {
     _tr set ["order", "move"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
     _tr set ["ferryPhase", "topickup"]; _tr set ["ferryWait", 0]; _tr set ["ferryLZ", []];
     _rider set ["ridingOn", _tr get "id"];
+    // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.
+    if ((_rider get "grp") isNotEqualTo "") then { [_rider] call DUWS_fnc_opcom_reOrderLive };
     ["INFO", "OPCOM", format ["ferry: tasking %1 borrows transport %2 for a water leg", _rider get "id", _tr get "id"]] call fnc_log;
     _tr
 };
