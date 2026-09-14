@@ -116,6 +116,16 @@ DUWS_fnc_opcom_ferryTick = {
         [_t] call DUWS_fnc_opcom_ferryRelease;
     };
     if ((_t get "grp") isNotEqualTo "") then {
+        private _tg = groupFromNetId (_t get "grp");
+        // A downed transport is driven only here and never reaches the generic dead-sweep, so clear it here or it
+        // lingers carrying forever. An embarked rider (no group) dies with the hull; one still ashore keeps its
+        // group and is cut loose to re-ferry.
+        if (isNull _tg || {(units _tg) findIf {alive _x} < 0}) exitWith {
+            if ((_rider get "grp") isEqualTo "") then { _rider set ["status", "dead"] };
+            _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false]; _rider set ["unloading", false];
+            if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearEH };
+            _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
+        };
         if (_near || {(_rider get "grp") isNotEqualTo ""}) then {
             _t set ["farTicks", 0];
             [_t, _rider] call DUWS_fnc_opcom_ferryStepLive;
