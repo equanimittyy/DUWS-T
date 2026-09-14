@@ -91,7 +91,7 @@ private _cleanup = {
 // Trigger on the crew's spot, not the town centre -- else the delivery ticks up to 40 m short of the drop.
 waitUntil {
     sleep 2;
-    (getDammage _truck > 0.95) || (_truck distance _crewPos < _deliverDist) || (({ alive _x } count units _crew) == 0) || (time > _deadline)
+    (getDammage _truck > 0.95) || (_truck distance _crewPos < _deliverDist) || (({ alive _x } count units _crew) == 0) || ([_deadline] call fnc_time_expired)
 };
 
 if (getDammage _truck > 0.95) exitWith {
@@ -106,7 +106,7 @@ if (({ alive _x } count units _crew) == 0) exitWith {
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_idapcrewdead"]] call fnc_mission_finish;
 };
 
-if (time > _deadline) exitWith {
+if ([_deadline] call fnc_time_expired) exitWith {
     [_townIdx, -(DUWS_curReward select 2), "deliver_supplies_deadline"] call fnc_town_rep_adjust;
     call _cleanup;
     [_mission_name, _taskId, "FAILED", _townPos, _radius, [_marker]] call fnc_mission_finish;

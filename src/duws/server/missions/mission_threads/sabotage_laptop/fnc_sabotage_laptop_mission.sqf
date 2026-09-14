@@ -198,12 +198,12 @@ sleep 5; // let the patrols finish spawning
 [DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius, _crossMarkers, _mission_name, _lapObjs] spawn {
     params ["_deadline", "_taskId", "_marker", "_tpos", "_radius", "_crosses", "_mission_name", "_lapObjs"];
     private _token = DUWS_mission_token;
-    waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
+    waitUntil { sleep 5; [_deadline] call fnc_time_expired || Mission_available || DUWS_mission_token != _token };
     // Wakes for every end path (win, timeout, slot recycle): drop these from the marker list so the icons
     // clear now, not when the props finally leave on the keep-radius clock.
     missionNamespace setVariable ["DUWS_sabotage_laptops",
         (missionNamespace getVariable ["DUWS_sabotage_laptops", []]) - _lapObjs, true];
-    if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
+    if ([_deadline] call fnc_time_expired && !Mission_available && DUWS_mission_token == _token) then {
         // Cross markers are raw createMarker names, cleared by hand; the ellipse and the timeout notice
         // route through finish (line [], FAILED, notify true).
         { deleteMarker _x } forEach _crosses;

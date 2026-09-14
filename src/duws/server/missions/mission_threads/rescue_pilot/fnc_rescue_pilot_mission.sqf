@@ -146,7 +146,7 @@ _markername2 = [_randomPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T
 waitUntil {
     sleep 1;
     ({ side _x == west && { alive _x } && { _x distance _pilot < 30 } } count allPlayers > 0)
-    || !(alive _pilot) || time > _deadline
+    || !(alive _pilot) || [_deadline] call fnc_time_expired
 };
 
 if (!(alive _pilot)) exitWith {
@@ -154,7 +154,7 @@ if (!(alive _pilot)) exitWith {
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_pilotkilled"], false, "mission_rescue_pilot", false, false] call fnc_mission_finish;
 };
-if (time > _deadline) exitWith {
+if ([_deadline] call fnc_time_expired) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     _pilot setDamage 1;

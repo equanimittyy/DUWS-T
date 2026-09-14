@@ -292,7 +292,7 @@ while { true } do {
         ["SUCCEEDED"] call _finish;
     };
 
-    if (time > _deadline) exitWith {
+    if ([_deadline] call fnc_time_expired) exitWith {
         ["FAILED"] call _finish;
         call fnc_mission_timeout_notice;
     };

@@ -1,4 +1,4 @@
-// Formats an absolute engine-time target (the form DUWS_curDeadlineAt holds) as the in-game wall clock
+// Formats an absolute campaign-clock target (the form DUWS_curDeadlineAt holds, via fnc_campaign_now) as the in-game wall clock
 // "HH:MM" it falls on. The gap to the target is in-game seconds (fnc_time_remaining scales it by the
 // day/night multiplier), so the clock is correct at any multiplier, not just 1x.
 //

@@ -1213,3 +1213,19 @@ PosOfBLUHQ = [];
 // Degenerate empty world: no anchors and no centres collapse enemyness to 0.5, so a neutral 1.
 ["offer_weight: easy urban on an empty world is neutral",
     ([[0,0], false, "urban", [[],[],[],[],[]]] call fnc_offer_weight), 1] call fnc_assertClose;
+
+// --- fnc_campaign_now / fnc_time_expired: a rest's skiptime skew advances the mission clock ---
+// campaign_now = time + DUWS_timeSkew; the skew is what a rest bumps. Differencing two reads across a
+// skew change isolates the skew from time's own micro-advance in the VM.
+DUWS_timeSkew = 0; private _n0 = call fnc_campaign_now;
+DUWS_timeSkew = 1000; private _n1 = call fnc_campaign_now;
+["campaign_now: skew adds to the clock", floor (_n1 - _n0), 1000] call fnc_assertEq;
+
+// A deadline built now is live; a rest that skips past it trips fnc_time_expired, a shorter one does not.
+DUWS_timeSkew = 0;
+private _dl = (call fnc_campaign_now) + 100;
+["time_expired: fresh deadline is live", ([_dl] call fnc_time_expired), false] call fnc_assertEq;
+DUWS_timeSkew = 50;
+["time_expired: a shorter rest leaves it live", ([_dl] call fnc_time_expired), false] call fnc_assertEq;
+DUWS_timeSkew = 150;
+["time_expired: a rest past the deadline expires it", ([_dl] call fnc_time_expired), true] call fnc_assertEq;

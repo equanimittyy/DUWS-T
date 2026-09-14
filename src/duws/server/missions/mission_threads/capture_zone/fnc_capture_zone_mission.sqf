@@ -35,10 +35,10 @@ sleep 6;
 // on a sub-metre distance -- float identity. Deadline covers it left OPFOR-held.
 waitUntil {
     sleep 5;
-    (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zonePos) < 1 }) >= 0 || time > _deadline
+    (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zonePos) < 1 }) >= 0 || [_deadline] call fnc_time_expired
 };
 
-if ((WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zonePos) < 1 }) < 0 && time > _deadline) exitWith {
+if ((WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zonePos) < 1 }) < 0 && [_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _taskId, "FAILED", _zonePos, _radius, [_marker]] call fnc_mission_finish;
 };
 

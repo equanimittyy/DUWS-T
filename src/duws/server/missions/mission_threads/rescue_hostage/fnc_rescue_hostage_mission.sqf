@@ -317,14 +317,14 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
 // Main poll: only the hostage at HQ alive (win), his death (executed or crossfire), or the deadline ends it now.
 waitUntil {
     sleep 1;
-    (!alive _hostage) || { (_hostage distance PosOfBLUHQ) < 20 } || { time > _deadline }
+    (!alive _hostage) || { (_hostage distance PosOfBLUHQ) < 20 } || { [_deadline] call fnc_time_expired }
 };
 
 if (!alive _hostage) exitWith {
     call _clearIcons;
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_lost"], false, "", false, false] call fnc_mission_finish;
 };
-if (time > _deadline) exitWith {
+if ([_deadline] call fnc_time_expired) exitWith {
     call _clearIcons;
     if (alive _hostage) then { deleteVehicle _hostage };   // unclaimed, so the token sweep never takes him
     // _line empty + _notify true: speak the shared "out of time" call, since a missed deadline is exactly that.

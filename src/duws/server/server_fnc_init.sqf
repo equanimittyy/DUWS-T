@@ -154,10 +154,12 @@ fnc_pos_claimed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_p
 fnc_in_base_keep = compile preprocessFileLineNumbers "duws\shared\functions\fnc_in_base_keep.sqf";publicVariable "fnc_in_base_keep";
 fnc_house_doors = compile preprocessFileLineNumbers "duws\shared\functions\fnc_house_doors.sqf";publicVariable "fnc_house_doors";
 fnc_house_door_pts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_house_door_pts.sqf";publicVariable "fnc_house_door_pts";
+fnc_campaign_now = compile preprocessFileLineNumbers "duws\server\missions\fnc_campaign_now.sqf";
 fnc_time_roll = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_roll.sqf";
 fnc_time_remaining = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_remaining.sqf";
 fnc_time_deadline = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_deadline.sqf";
 fnc_time_clock = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_clock.sqf";
+fnc_time_expired = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_expired.sqf";
 // Broadcast: the offer picker (fnc_stratmap) renders the band client-side; the journal task renders it server-side.
 fnc_time_band = compile preprocessFileLineNumbers "duws\server\missions\fnc_time_band.sqf";publicVariable "fnc_time_band";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";

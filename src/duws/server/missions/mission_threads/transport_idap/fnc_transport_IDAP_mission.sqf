@@ -134,7 +134,7 @@ sleep 5; // let the patrols finish spawning
 
 waitUntil {
     sleep 2;
-    (getDammage _truck1 > 0.95) || (_truck1 distance _targetDeliveryPos < _deliverDist) || (({ alive _x } count units _groupDelivery) == 0) || (time > _deadline)
+    (getDammage _truck1 > 0.95) || (_truck1 distance _targetDeliveryPos < _deliverDist) || (({ alive _x } count units _groupDelivery) == 0) || ([_deadline] call fnc_time_expired)
 };
 
 if (getDammage _truck1 > 0.95) exitWith {
@@ -153,7 +153,7 @@ if (({ alive _x } count units _groupDelivery) == 0) exitWith {
     [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, false] call fnc_mission_finish;
 };
 
-if (time > _deadline) exitWith {
+if ([_deadline] call fnc_time_expired) exitWith {
     call _cleanupDelivery;
     [_townIdx, _repFail, "idap_deadline"] call fnc_town_rep_adjust;
     [_mission_name, _VARtaskgeneratedName, "FAILED", _targetpos, _radius, [_markername2], [], false, "mission_transport_idap", false, true] call fnc_mission_finish;

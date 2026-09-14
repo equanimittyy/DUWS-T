@@ -367,7 +367,7 @@ must not have a snapshot put the old list back.
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
 | Civilians | input | town positions, names, radii and populations |
-| Clock | outcome | `date` |
+| Clock | outcome | `date`, `DUWS_timeSkew` |
 
 **The campaign clock is stored because boot sets it unconditionally.**
 `server/server_init.sqf:154` calls `setDate [2035, 8, 3, time_of_day, 0]`, so without this every
@@ -375,7 +375,10 @@ restore snaps back to the third day at the hour the campaign was configured with
 operation resumes at noon. It is gameplay state rather than presentation:
 `server/events/fnc_night_horde_event.sqf:33` counts days off `date`, and the load screen labels each
 row with one. It is an outcome because it has to be re-applied after `setTimeMultiplier` (`:159`)
-rather than before the builders — the boot line would overwrite it.
+rather than before the builders — the boot line would overwrite it. `DUWS_timeSkew` (seconds a rest
+has skipped, the campaign clock's offset over engine `time` — see `fnc_campaign_now`) rides in the
+same group: a plain serializable scalar, stored and re-applied beside `date`, exempt from the
+remaining-duration rule because it is not derived from `time`/`diag_tickTime`.
 
 **Zone names have to be stored.** They are drawn, not derived: `fnc_zone_name` hands out a
 phonetic-alphabet word at random and records which are spent, so nothing about a zone's index or

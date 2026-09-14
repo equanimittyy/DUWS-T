@@ -143,10 +143,10 @@ private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _
 private _fnArrived = { (call BIS_fnc_listPlayers) findIf { _x distance _inf < ARRIVE_DIST } >= 0 };
 waitUntil {
     sleep 1;
-    (call _fnArrived) || { missionNamespace getVariable [_skipVar, false] } || { time > _deadline }
+    (call _fnArrived) || { missionNamespace getVariable [_skipVar, false] } || { [_deadline] call fnc_time_expired }
 };
 
-if (time > _deadline && !(call _fnArrived) && !(missionNamespace getVariable [_skipVar, false])) exitWith {
+if ([_deadline] call fnc_time_expired && !(call _fnArrived) && !(missionNamespace getVariable [_skipVar, false])) exitWith {
     // Never engaged -> shared timeout notice, no death asserted.
     missionNamespace setVariable [_liveVar, false];
     missionNamespace setVariable [_prepActiveVar, false, true];

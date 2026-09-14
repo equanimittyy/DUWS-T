@@ -15,9 +15,9 @@ params [
 if (_settle > 0) then { sleep _settle };
 
 private _deadline = DUWS_curDeadlineAt;
-waitUntil { sleep 2; (_handles call _done) || time > _deadline };
+waitUntil { sleep 2; (_handles call _done) || [_deadline] call fnc_time_expired };
 
-if (!(_handles call _done) && time > _deadline) exitWith {
+if (!(_handles call _done) && [_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _taskId, "FAILED", _targetpos, _radius, _markers, [], false, _compKey] call fnc_mission_finish;
 };
 

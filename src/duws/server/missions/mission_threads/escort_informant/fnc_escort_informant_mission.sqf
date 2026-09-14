@@ -83,7 +83,7 @@ private _marker = [_townPos, _radius, _taskId, localize "STR_DUWS_T_ESCORT_INFOR
 
 waitUntil {
     sleep 2;
-    (!alive _inf) || (_inf distance2D _townPos < _deliverDist) || (time > _deadline)
+    (!alive _inf) || (_inf distance2D _townPos < _deliverDist) || ([_deadline] call fnc_time_expired)
 };
 
 // Common teardown; each outcome adds its own informant send-off below.

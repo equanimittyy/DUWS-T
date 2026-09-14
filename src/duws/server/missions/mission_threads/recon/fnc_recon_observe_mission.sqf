@@ -133,7 +133,7 @@ private _outcome = "";
 waitUntil {
     sleep 2;
     if (DUWS_recon_done) exitWith { _outcome = "WIN"; true };
-    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
 

@@ -159,7 +159,7 @@ DUWS_rsq_holdBroken = false;
     { _plan pushBack [_x, primaryWeapon _x, [primaryWeapon _x] call _autoMode, 0] } forEach _shooters;
     private _startedAt = -1;
     while {
-        (time < _dl)
+        ((call fnc_campaign_now) < _dl)
         && {(_shooters findIf {alive _x}) >= 0}
         && {!DUWS_rsq_relieved}
         && {!DUWS_rsq_holdBroken}
@@ -196,7 +196,7 @@ DUWS_rsq_holdBroken = false;
     params ["_cordon", "_dl"];
     waitUntil {
         sleep 1;
-        (time > _dl)
+        ([_dl] call fnc_time_expired)
         || {DUWS_rsq_relieved}
         || {(_cordon findIf {alive _x && {(damage _x) > 0}}) >= 0}
         || {(_cordon findIf {!alive _x}) >= 0}
@@ -215,11 +215,11 @@ DUWS_rsq_holdBroken = false;
     waitUntil {
         sleep 1;
         DUWS_rsq_relieved
-        || {time > _dl}
+        || {[_dl] call fnc_time_expired}
         || {(_cordon findIf {alive _x}) < 0}
         || {((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < UNCAPTIVE_RANGE} }) >= 0}
     };
-    if (!DUWS_rsq_relieved && {time <= _dl}) then {
+    if (!DUWS_rsq_relieved && {(call fnc_campaign_now) <= _dl}) then {
         DUWS_rsq_relieved = true;
         // Now active and killable, and cleared to fire back (autotarget on, combat mode RED), but still
         // pinned in the building -- PATH stays off, so they defend from cover instead of charging out.
@@ -253,7 +253,7 @@ DUWS_rsq_holdBroken = false;
         private _half = (count _cordon) / 2;
         waitUntil {
             sleep 2;
-            time > _dl
+            [_dl] call fnc_time_expired
             || {(_cordon findIf {alive _x}) < 0}
             || { (({alive _x} count _cordon) <= _half) && {isNull _carv || {!alive _carv}} }
         };
@@ -274,7 +274,7 @@ sleep 6;
 waitUntil {
     sleep 2;
     ((_cordonUnits findIf {alive _x}) < 0)
-    || {time > _deadline}
+    || {[_deadline] call fnc_time_expired}
     || {(_squadUnits findIf {alive _x}) < 0}
 };
 

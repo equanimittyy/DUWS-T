@@ -285,7 +285,7 @@ private _outcome = "";
 waitUntil {
     sleep 1;
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
-    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     (time > _holdUntil) || {[_MissionPos, _radius] call fnc_duws_bluforNear}
 };
 // Skipped when the hold already resolved the mission (HVT killed in his parked car, or the deadline passed):
@@ -404,7 +404,7 @@ waitUntil {
     };
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };
-    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
 

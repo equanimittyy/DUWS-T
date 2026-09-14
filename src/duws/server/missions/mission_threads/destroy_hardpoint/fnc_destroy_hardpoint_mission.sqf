@@ -28,10 +28,10 @@ private _marker = [_hpPos, _radius, _taskId, localize "STR_DUWS_T_DESTROY_HARDPO
 // bounty; the deadline covers it left standing.
 waitUntil {
     sleep 5;
-    (DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) < 0 || time > _deadline
+    (DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) < 0 || [_deadline] call fnc_time_expired
 };
 
-if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && time > _deadline) exitWith {
+if ((DUWS_hardpoints findIf { (_x select 0) isEqualTo _hpKey }) >= 0 && [_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _taskId, "FAILED", _hpPos, _radius, [_marker]] call fnc_mission_finish;
 };
 

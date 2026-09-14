@@ -8,7 +8,7 @@ if (!isServer) exitWith {};
 // engine-time and daytime advances 1:1 with it, so seconds-left converts straight to a clock. Name, type
 // and note are single-sourced from mission_types.hpp via fnc_mission_begin's globals.
 private _dl = missionNamespace getVariable ["DUWS_curDeadlineAt", -1];
-if (_dl > time) then {
+if (_dl > (call fnc_campaign_now)) then {
 	// A blank line opens each section: the line strings carry one leading break, so a second one here
 	// leaves an empty line between the body, the deadline, the note and the divider.
 	_description = _description + "<br />" + format [localize "STR_DUWS_T_mission_deadline_desc", [_dl] call fnc_time_clock];

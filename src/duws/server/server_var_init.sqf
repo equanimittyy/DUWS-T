@@ -275,6 +275,10 @@ mission_gate_hours = 3;publicVariable "mission_gate_hours";
 // first mission, which reads as long past and so opens the gate.
 DUWS_lastMissionStartDate = 0;publicVariable "DUWS_lastMissionStartDate";
 
+// Seconds of in-game time a rest has skipped past engine `time`. The campaign clock (fnc_campaign_now)
+// adds it so a rest expires live mission deadlines; bumped by skiptime in fnc_rest_heal.
+DUWS_timeSkew = 0;publicVariable "DUWS_timeSkew";
+
 MissionLocations = [];publicVariable "MissionLocations";
 
 moreUrban = 1;publicVariable "moreUrban";

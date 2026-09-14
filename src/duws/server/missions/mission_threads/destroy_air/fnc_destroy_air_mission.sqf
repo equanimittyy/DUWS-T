@@ -100,7 +100,7 @@ private _outcome = "";
 waitUntil {
     sleep 5;
     if (!alive _veh) exitWith { _outcome = "WIN"; true };
-    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
 
     if (!_engaging && {behaviour (leader _grp) == "COMBAT"}) then {
         private _tgt = _veh findNearestEnemy _veh;

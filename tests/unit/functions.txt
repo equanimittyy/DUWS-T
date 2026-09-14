@@ -54,3 +54,5 @@ duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_zone_cap
 duws/shared/faction_lib/fnc_faction_backfill.sqf::fnc_faction_backfill
 duws/shared/faction_lib/fnc_faction_vanilla_fill.sqf::fnc_faction_vanilla_fill
 duws/server/missions/fnc_offer_weight.sqf::*fnc_offer_weight
+duws/server/missions/fnc_campaign_now.sqf::*fnc_campaign_now
+duws/server/missions/fnc_time_expired.sqf::*fnc_time_expired

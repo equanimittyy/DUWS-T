@@ -87,7 +87,7 @@ private _marker = [_randomPos, _radius, _taskId, localize "STR_DUWS_T_czpvn5z1",
 sleep 5; // let the guard force finish arriving before the win poll starts
 
 private _deadline = DUWS_curDeadlineAt;
-waitUntil { sleep 2; (_handles call _done) || (_lost findIf { _handles call (_x select 0) } >= 0) || time > _deadline };
+waitUntil { sleep 2; (_handles call _done) || (_lost findIf { _handles call (_x select 0) } >= 0) || [_deadline] call fnc_time_expired };
 
 // Loss ranked ahead of the timeout so a builder destroyed as the clock runs out reads as destroyed.
 private _lostIdx = _lost findIf { _handles call (_x select 0) };
@@ -95,7 +95,7 @@ if (!(_handles call _done) && _lostIdx >= 0) exitWith {
     [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], (_lost select _lostIdx) select 1, false, "mission_steal_builder", false, false] call fnc_mission_finish;
 };
 
-if (!(_handles call _done) && time > _deadline) exitWith {
+if (!(_handles call _done) && [_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_steal_builder"] call fnc_mission_finish;
 };
 

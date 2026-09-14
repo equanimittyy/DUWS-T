@@ -33,6 +33,11 @@ sleep 1.7;
 
 skiptime _hours;
 
+// skiptime advances the calendar and daytime but not engine `time`; carry the jump into the campaign
+// clock so live mission deadlines advance with the rest instead of ignoring it (fnc_campaign_now).
+DUWS_timeSkew = DUWS_timeSkew + _hours * 3600;
+publicVariable "DUWS_timeSkew";
+
 // Gated server-side too, so the parameter holds even if a client sent weather values anyway.
 if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
     // Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call

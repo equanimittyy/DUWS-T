@@ -1,4 +1,4 @@
-// Seconds still to run before an engine-time (`time`) target. Negative once the target has passed;
-// callers guard on a live target.
+// Seconds still to run before a campaign-clock (fnc_campaign_now) target. Negative once the target has
+// passed; callers guard on a live target.
 params ["_target"];
-_target - time
+_target - (call fnc_campaign_now)

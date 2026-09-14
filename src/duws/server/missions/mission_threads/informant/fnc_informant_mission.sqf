@@ -324,7 +324,7 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         // Across the town, not one alarm hop: the panic chain thins where the crowd does, so read a
         // town-wide radius off his position rather than trust a panicked civ to stand within 150 m.
         if (((_inf nearEntities ["CAManBase", (_townRadius max 200) + 150]) findIf { _x getVariable ["DUWS_civ_panicked", false] }) >= 0) exitWith { _loud = true; true };
-        time > _leaveAt
+        [_leaveAt] call fnc_time_expired
     };
     if (!alive _inf) exitWith {};
 
@@ -411,7 +411,7 @@ waitUntil {
     sleep 2;
     if ((_informant getVariable ["DUWS_informant_dead", false]) || !alive _informant) exitWith { _outcome = "WIN"; true };
     if (!isNull _informant && {(_informant distance2D _zx) < 60}) exitWith { _outcome = "ESCAPED"; true };
-    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    if ([_deadline] call fnc_time_expired) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
 
