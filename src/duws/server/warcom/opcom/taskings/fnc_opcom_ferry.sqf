@@ -311,8 +311,10 @@ DUWS_fnc_opcom_ferryStepLive = {
                         _veh setVariable ["DUWS_ferryBoardEH", _eh];
                         // Ferry owns the rider's movement now; drop the shore HOLD so nothing competes with the board order.
                         while {count waypoints _rg > 0} do { deleteWaypoint ((waypoints _rg) select 0) };
-                        _rg orderGetIn true;
-                        { _x assignAsCargo _veh } forEach units _rg;
+                        // Assign before ordering: orderGetIn only sends a unit to a seat it is already assigned to,
+                        // so the reverse silently no-ops and the squad never boards (fnc_rescue_squad_success shape).
+                        { _x assignAsCargo _veh } forEach ((units _rg) select { alive _x });
+                        ((units _rg) select { alive _x }) orderGetIn true;
                     };
                 };
             };

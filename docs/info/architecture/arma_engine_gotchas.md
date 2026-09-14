@@ -410,6 +410,10 @@ An AI group whose behaviour has gone `COMBAT` owns its movement through the dang
 
 **Fix:** drive a landing across ticks, not in a blocking `waitUntil` — issue `land` once within range, poll `getPosATL` z for grounded, act, then `land "NONE"` and re-task. OPCOM's live ferry pickup/drop (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry.sqf`) does exactly this, and gates a stall timer to the landing phase so a long approach never times the crossing out mid-air.
 
+## `orderGetIn` only moves units already assigned to a seat
+
+`units orderGetIn true` sends each unit to the vehicle it is *assigned* to (`assignAsDriver`/`assignAsGunner`/`assignAsCargo`); a unit with no assignment has nowhere to go, so the order silently does nothing — no error, no board. Ordering *before* assigning is therefore a no-op that leaves the squad standing while the transport waits, and if that transport is holding a sticky `land "GET IN"` it never lifts (no board → no completion). The left operand is an `Array of Object`, not a group — passing a group can also no-op. **Fix:** assign as cargo first, then order the units array in (`{ _x assignAsCargo _veh } forEach _units; _units orderGetIn true`), the shape `fnc_rescue_squad_success` and the ferry board (`fnc_opcom_ferry.sqf`) use.
+
 ## `cmd [...] remoteExec ["call", 0]` broadcasts the return value, not the command
 
 A unary command binds tighter than binary `remoteExec`, so `titleText [...] remoteExec ["call", 0]` runs `titleText` on the calling machine and broadcasts what it evaluated to (Nothing) — every other machine gets an empty payload. The missing piece is braces: `{titleText [...]} remoteExec ["call", 0]`. Without them the statement still reads as a broadcast and runs locally, so it survives review and host/SP testing; only a dedicated server or a second client exposes it.
