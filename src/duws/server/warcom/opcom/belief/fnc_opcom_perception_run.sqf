@@ -27,7 +27,9 @@ while {true} do {
         _stage = "bookkeep";
         {
             private _grp = groupFromNetId (_x get "grp");
-            if !(isNull _grp) then {
+            // A ferry rider is strength-frozen from board order to full dismount: its live count is falling only
+            // because it board-despawns man by man, so a live read here would bleed the snapshot toward zero.
+            if (!isNull _grp && {!(_x getOrDefault ["ferryFrozen", false])}) then {
                 _x set ["pos", getPosASL (leader _grp)];
                 _x set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
             };

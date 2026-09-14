@@ -61,18 +61,20 @@ private _settleMove = {
     } else {
         if (_live) then {
             private _grp = groupFromNetId (_t get "grp");
-            // Alive-count, not count units: a wiped group keeps its corpses in `units` until the mission GC
-            // clears them (when the player leaves), so a body-count gate would leave the record live and
-            // depositing stale force until then.
-            if (isNull _grp || {(units _grp) findIf {alive _x} < 0}) then {
+            // Alive-count, not count units: a wiped group keeps its corpses in `units` until the mission GC clears
+            // them (when the player leaves), so a body-count gate would leave the record live and depositing stale
+            // force. Never on a frozen rider -- an empty/lifeless group there is a finished board or a dismount in
+            // progress (the transport owns that transition), not a casualty; board order committed its strength.
+            if ((isNull _grp || {(units _grp) findIf {alive _x} < 0}) && {!(_t getOrDefault ["ferryFrozen", false])}) then {
                 _t set ["status", "dead"];
                 _t set ["grp", ""];
             } else {
                 private _ldr = leader _grp;
                 // pos/effForce are refreshed by the bookkeep pass ahead of grid_rebuild (fnc_opcom_perception_run).
-                if ((_t getOrDefault ["ridingOn", -1]) >= 0) then {
-                    // A live rider bound at the shore: its transport drives the pickup and crossing (ferryTick).
-                    // It takes no order and must not stow out from under the carry.
+                if ((_t getOrDefault ["ridingOn", -1]) >= 0 || {_t getOrDefault ["ferryFrozen", false]}) then {
+                    // A live rider the ferry owns: bound at the shore awaiting pickup (ridingOn), or dismounting
+                    // man by man at the far shore already detached but still frozen (ferryFrozen). The transport
+                    // drives the sequence; it takes no order and must not stow or replan out from under it.
                     _t set ["status", "moving"];
                 } else {
                     private _engaged = behaviour _ldr isEqualTo "COMBAT";
