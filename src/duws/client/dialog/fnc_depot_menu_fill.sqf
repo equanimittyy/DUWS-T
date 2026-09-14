@@ -12,7 +12,8 @@ if (isNull _trg) exitWith {};
 
 // `vehicles` lists more than driveables (crates, static weapons, thrown junk); keep only storable domains.
 private _pad = (vehicles inAreaArray _trg) select {
-    count crew _x == 0
+    alive _x
+    && { count crew _x == 0 }
     && { _x isKindOf "Car" || {_x isKindOf "Tank"} || {_x isKindOf "Air"} || {_x isKindOf "Ship"} || {_x isKindOf "Motorcycle"} }
 };
 private _caps = [] call DUWS_fnc_garageCaps;
