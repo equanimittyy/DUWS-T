@@ -202,7 +202,7 @@ optimisation here; without it a dedicated server loses the campaign every time t
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
 spawning waves, the side-mission generator keeps rolling and expiring missions, and — once the
-[OPCOM](opcom/opcom_plan.md#what-the-commander-spends-on) lands — the enemy keeps
+[OPCOM](opcom/opcom_plan.md#what-ap-buys) lands — the enemy keeps
 buying garrisons and hardpoints against a player who is asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
@@ -758,7 +758,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
 the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
 a campaign of restarts that is a slow leak out of both economies, and it gets worse once the
-[OPCOM](opcom/opcom_plan.md#what-the-commander-spends-on) is buying continuously.
+[OPCOM](opcom/opcom_plan.md#what-ap-buys) is buying continuously.
 
 Antistasi reconciles this at save time rather than living with it: before writing, it walks live
 vehicles and units and folds their value back into the pools it is about to save — a full refund

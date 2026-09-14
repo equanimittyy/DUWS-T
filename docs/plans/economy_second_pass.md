@@ -610,7 +610,7 @@ alongside it is.
 OPFOR Army Power is spent by one server-side actor — the commander. Its sinks (town and zone
 garrisons, taskings, hardpoint construction), the archetype that weights how it splits income
 across them, and the two-sided garrison ladders are designed in
-[`opcom_plan.md`](opcom/opcom_plan.md#what-the-commander-spends-on); the wallet and the faucets that
+[`opcom_plan.md`](opcom/opcom_plan.md#what-ap-buys); the wallet and the faucets that
 fill it stay here ([§Army Power](#army-power)). Spend authority is [below](#spending-authority).
 
 ## Spending authority

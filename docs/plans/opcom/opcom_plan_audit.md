@@ -40,7 +40,7 @@ The tasking-wiring phase is built and its plan-doc items are closed:
 - **Router** shipped as **A\*** (octile heuristic, early exit on target, one search per tick); the plan now
   says A\* where it read Dijkstra.
 - **Fast-airborne streaming gap** accepted and documented
-  ([§The virtualisation boundary](opcom_plan.md#the-virtualisation-boundary)) — a jet at 700+ km/h can
+  ([§Open questions](opcom_plan.md#open-questions)) — a jet at 700+ km/h can
   overfly a K=1 ring between ticks, unstreamed; the fix, if it bites, is a larger K against airborne
   players (precedent: the AA hardpoint's 5000 m air ring). The same grid-K blind spot applies to recon
   detection.
@@ -51,7 +51,7 @@ The tasking-wiring phase is built and its plan-doc items are closed:
   candidate. State the approximation — read `_gridEne` around the unit's own cell as the threat term — so
   the decision loop does not implement the literal counterfactual.
 - **Orchestration:** the resolve predicate and capture handoff are now specified
-  ([§The resolve phase](opcom_plan.md#the-resolve-phase-what-ends-a-template)); the open task is the
+  ([§Templates](opcom_plan.md#templates-phase-5)); the open task is the
   verification the section calls out — confirm the zone-capture trigger fires for an AI-only fight with no
   player near, else have OPCOM's resolve call the capture functions itself.
 - **Belief persistence (open question):** belief is keyed by group `netId` (`fnc_opcom_sense.sqf`), which

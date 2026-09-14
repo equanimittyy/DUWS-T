@@ -1,6 +1,6 @@
 # OPCOM Phase 4a — the decision loop: thinking harness and defensive economy
 
-Phase 4 of [`opcom_plan.md`](opcom_plan.md), in that plan's [§Build order](opcom_plan.md#build-order).
+Phase 4 of [`opcom_plan.md`](opcom_plan.md), in that plan's [§Build order](opcom_plan.md#status).
 Phase 1 shipped perception; Phase 2 made force real (firepower weighting); Phase 3 wired recruitment,
 tasking, movement and the ferry under manual control (the debug harness).
 
@@ -25,15 +25,15 @@ Phase 5.
 
 | In Phase 4a | Deferred (4b = single-unit offensive, P5 = orchestration) |
 |---|---|
-| The appraisal spine: enumerate, gate, score, weighted-random pick, commit one, spend ([§Appraisal](opcom_plan.md#appraisal-expected-ap-return)) | **Attack** and **Intercept** *(4b)* — drawing a unit out to fight as an individual order; the multi-unit templates over them are P5 ([§Templates](opcom_plan.md#templates-the-execution-forms)) |
+| The appraisal spine: enumerate, gate, score, weighted-random pick, commit one, spend ([§Appraisal](opcom_plan.md#appraisal-phase-4)) | **Attack** and **Intercept** *(4b)* — drawing a unit out to fight as an individual order; the multi-unit templates over them are P5 ([§Templates](opcom_plan.md#templates-phase-5)) |
 | Bank, Recruit (supply demand only), Build, Reinforce, Fortify, Rapport | **Scout** and **Arty** *(4b)* — the recon draw and the one-gun fire mission; the arty saturation / spotter template is P5 |
-| `P(win)` a flat **1** — every action here is uncontested economics, no combat outcome to weigh | Real `P(win)` *(4b)* — the force ratio `r² / (r²+1)` driving the offensive gate ([§The score](opcom_plan.md#the-score)), and `OPCOM_PWIN_FLOOR` |
-| Supply-arrival **delivery** — the errand and `fnc_opcom_deliver`, closing the Phase-3 stub | The contested **draw-lock** and single-unit **resolve** *(4b)* — both exist only once a unit is drawn out to fight ([§Unit strength](opcom_plan.md#unit-strength)) |
-| Recruit scored on **supply demand** alone — hire a truck when a delivery is gated for want of one | Recruit's **force / recon / transport** demand groups *(4b)* — the offensives in 4b give their units a job ([§Value](opcom_plan.md#value-the-worth-of-the-ground-in-play)) |
+| `P(win)` a flat **1** — every action here is uncontested economics, no combat outcome to weigh | Real `P(win)` *(4b)* — the force ratio `r² / (r²+1)` driving the offensive gate ([§The score](opcom_plan.md#appraisal-phase-4)), and `OPCOM_PWIN_FLOOR` |
+| Supply-arrival **delivery** — the errand and `fnc_opcom_deliver`, closing the Phase-3 stub | The contested **draw-lock** and single-unit **resolve** *(4b)* — both exist only once a unit is drawn out to fight ([§Unit strength](opcom_plan.md#shipped-the-substrate-the-loop-drives)) |
+| Recruit scored on **supply demand** alone — hire a truck when a delivery is gated for want of one | Recruit's **force / recon / transport** demand groups *(4b)* — the offensives in 4b give their units a job ([§Value](opcom_plan.md#appraisal-phase-4)) |
 
 `archWeight` stays a **flat stub** (1 for every class) through Phase 4 and Phase 5; the real per-class,
-per-archetype table is **Phase 6** ([§Build order](opcom_plan.md#build-order),
-[§The commander has an archetype](opcom_plan.md#the-commander-has-an-archetype)). Isolated in one file so
+per-archetype table is **Phase 6** ([§Build order](opcom_plan.md#status),
+[§The commander has an archetype](opcom_plan.md#archetype-phase-6)). Isolated in one file so
 Phase 6 replaces it alone.
 
 ## What Phase 3 already ships (build on it, do not rebuild)
@@ -76,9 +76,9 @@ New:
 
 | File | Subsystem | Responsibility |
 |---|---|---|
-| `fnc_opcom_grid_read` | belief | The read API the score is defined on, in the shape Phase 4a needs: point balance (`fri − ene`) and threat (Σ enemy over a 3×3 cell block) over the live `DUWS_opcom_grid_fri` / `_ene` arrays ([§What reads it](opcom_plan.md#what-reads-it)). The force ratio `r` and real `P(win)` land in Phase 4b with the offensives that weigh them; this cut reads `P(win)` as a flat 1 |
+| `fnc_opcom_grid_read` | belief | The read API the score is defined on, in the shape Phase 4a needs: point balance (`fri − ene`) and threat (Σ enemy over a 3×3 cell block) over the live `DUWS_opcom_grid_fri` / `_ene` arrays ([§What reads it](opcom_plan.md#shipped-the-substrate-the-loop-drives)). The force ratio `r` and real `P(win)` land in Phase 4b with the offensives that weigh them; this cut reads `P(win)` as a flat 1 |
 | `fnc_opcom_actions` | taskings | The flat action list — each row its own gate, Value, Cost and *execute* closure. The extension point every later cut adds to (Phase 4b appends Attack / Intercept / Scout / Arty) |
-| `fnc_opcom_appraise` | taskings | The scoring pass: enumerate `[action, target]` pairs, drop what the gate rejects, score the survivors, weighted-random over the top `OPCOM_PICK_TOP`, hand the one pick back for execution ([§Appraisal](opcom_plan.md#appraisal-expected-ap-return)) |
+| `fnc_opcom_appraise` | taskings | The scoring pass: enumerate `[action, target]` pairs, drop what the gate rejects, score the survivors, weighted-random over the top `OPCOM_PICK_TOP`, hand the one pick back for execution ([§Appraisal](opcom_plan.md#appraisal-phase-4)) |
 | `fnc_opcom_deliver` | taskings | Runs one courier's **errand** on arrival — build a hardpoint, step a town's rep, refill or upgrade a town garrison — then the truck is spent. Lives and dies with its truck: a truck killed en route delivers nothing, no AP refund |
 | `fnc_opcom_archweight` | taskings | The flat stub — `[archetype, actionClass] → 1`. Isolated so Phase 6 replaces one file |
 
@@ -110,7 +110,7 @@ Phase 1 constants). Reuse the existing prices — `OPCOM_AP_TOWER` 30, `OPCOM_AP
 - `OPCOM_SCORE_DEADLINE` — wall-clock budget for the `isNil` scoring pass (worked example:
   `server/init_zones/fnc_moreUrban_locations.sqf`). Small; the candidate set is tens–low-hundreds of pairs.
 - `OPCOM_PICK_TOP` — how many top-scored candidates the weighted random draws from
-  ([§Weighted random](opcom_plan.md#weighted-random-over-the-top-few-not-the-best)).
+  ([§Weighted random](opcom_plan.md#appraisal-phase-4)).
 
 `OPCOM_PWIN_FLOOR` and `OPCOM_ARTY_*` are Phase 4b — they gate offensives and the fire mission, neither in
 this cut.
@@ -120,7 +120,7 @@ this cut.
 Slots into the loop after the task step, before the debug log. The score/pick runs inside `isNil { }`
 (unscheduled, uninterruptible, **no `sleep`**); the *execute* runs after it, in scheduled space, because a
 tasking action plans a route (A\*, may yield) — the same split the plan draws
-([§The loop](opcom_plan.md#the-loop-against-the-engine)).
+([§The loop](opcom_plan.md#status)).
 
 ```
 _stage = "appraise";
@@ -131,7 +131,7 @@ if (!(_pick isEqualTo [])) then { _pick call (<the action's execute closure>) };
 
 One pass:
 
-1. **Enumerate** every action against its valid targets ([§Candidate enumeration](opcom_plan.md#candidate-enumeration-gate-then-score)) — the sweep table there.
+1. **Enumerate** every action against its valid targets ([§Candidate enumeration](opcom_plan.md#appraisal-phase-4)) — the sweep table there.
 2. **Gate** — spend actions drop when `Cost > WARCOM_opfor_ap`; a supply-gated action (Build, town Reinforce,
    town Fortify, Rapport) also drops when no `supply` truck is on hand to carry it. Bank never drops.
 3. **Score** each survivor `archWeight × P(win) × Value / Cost` — with `archWeight = 1` and `P(win) = 1` this
@@ -139,7 +139,7 @@ One pass:
 4. **Pick** by weighted random over the top `OPCOM_PICK_TOP`; hand back the one pick.
 5. **Execute** the pick — at most one commit per tick.
 
-`Value` and `Cost` are the plan's ([§The score](opcom_plan.md#the-score) onward), read through
+`Value` and `Cost` are the plan's ([§The score](opcom_plan.md#appraisal-phase-4) onward), read through
 `fnc_opcom_grid_read`. **Cost** for every Phase-4a action is a plain AP price — the hire cost for Recruit, the
 build / tier / refill price for the spends. The `defenseAbandoned` term the plan adds to a commit's cost is
 offensive-only (it prices the hole a drawn-out garrison leaves), so it lands in Phase 4b with the draws.
@@ -154,7 +154,7 @@ The null action — no target, no Cost, a low flat score. Wins when nothing else
 above it; the surplus stays in `WARCOM_opfor_ap`. Execute: nothing.
 
 ### Recruit
-Fill the roster. Phase 4a scores **one demand group — supply** ([§Recruit fills the roster](opcom_plan.md#actions-sinks-and-taskings)):
+Fill the roster. Phase 4a scores **one demand group — supply** ([§Recruit fills the roster](opcom_plan.md#what-ap-buys)):
 a delivery worth doing (a Rapport, or a Build / town Fortify / town Reinforce) is gated for want of a truck,
 so Recruit hires one. Value is the best such gated delivery's Value; the loop is self-terminating — once a
 truck exists the delivery itself becomes the live commit and the supply demand falls back to the next gated
@@ -206,7 +206,7 @@ Fortify.
   `fnc_opcom_task_step` calls `fnc_opcom_deliver`, which switches on the errand kind and calls the reused
   writer, then the truck is deleted. Kill the truck en route and the order fails outright — no build, and the
   AP paid at commit is **not** refunded. This is the interdiction counterplay
-  ([§Supply gates the town-side builds](opcom_plan.md#supply-gates-the-town-side-builds)).
+  ([§Supply gates the town-side builds](opcom_plan.md#what-ap-buys)).
 - **AP is paid at commit, effect lands on arrival.** A spend action still debits its price when the appraisal
   commits it; only the *result* waits on the truck.
 - **`fnc_opcom_deliver` is the one dispatch site.** Both the live-arrival branch (`task_step:56`) and the
