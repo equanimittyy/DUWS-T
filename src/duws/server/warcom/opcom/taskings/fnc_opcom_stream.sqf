@@ -7,19 +7,20 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_applyOrder = {
     params ["_grp", "_order", "_target", ["_supplyDrop", false]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
+    _grp setSpeedMode (["FULL", "LIMITED"] select _supplyDrop);
     switch (_order) do {
         case "assault": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
         };
         case "move": {
-            _grp setBehaviour "SAFE";
+            _grp setBehaviour "AWARE";
             // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
-            if (_supplyDrop) then { _grp setCombatMode "BLUE" };
+            _grp setCombatMode (["YELLOW", "BLUE"] select _supplyDrop);
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
         default {
-            _grp setBehaviour "SAFE"; _grp setCombatMode "YELLOW";
+            _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW";
         };
     };
 };
@@ -53,7 +54,7 @@ DUWS_fnc_opcom_reOrderLive = {
         ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
         if (_crosses) exitWith {
             [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder;
-            // A lone MOVE completes and the group drifts off in SAFE; HOLD pins it at the shore until the ferry clears it.
+            // A lone MOVE completes and the group drifts off; HOLD pins it at the shore until the ferry clears it.
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
