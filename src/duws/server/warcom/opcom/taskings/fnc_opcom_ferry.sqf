@@ -128,12 +128,16 @@ DUWS_fnc_opcom_ferryTick = {
         // lingers carrying forever. An embarked rider (no group) dies with the hull; one still ashore keeps its
         // group and is cut loose to re-ferry.
         if (isNull _tg || {(units _tg) findIf {alive _x} < 0}) exitWith {
-            ["WARN", "OPCOM", format ["ferry: transport %1 (%2) down at %3 -- rider %4 %5", _t get "id", _t get "moveType",
-                _t getOrDefault ["ferryPhase", "topickup"], _rider get "id", ["cut loose", "lost aboard"] select ((_rider get "grp") isEqualTo "")]] call fnc_log;
+            private _rg = groupFromNetId (_rider get "grp");
+            // Men still hidden in a rotor drop's unload queue go down with the hull: a loss, not frozen ghosts at the pad.
+            private _lost = (units _rg) select { isObjectHidden _x };
+            { deleteVehicle _x } forEach _lost;
+            ["WARN", "OPCOM", format ["ferry: transport %1 (%2) down at %3 -- rider %4 %5, %6 lost unrevealed", _t get "id", _t get "moveType",
+                _t getOrDefault ["ferryPhase", "topickup"], _rider get "id", ["cut loose", "lost aboard"] select ((_rider get "grp") isEqualTo ""),
+                count _lost]] call fnc_log;
             if ((_rider get "grp") isEqualTo "") then { _rider set ["status", "dead"] };
             _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false]; _rider set ["unloading", false];
-            // Its pickup orders outlive the hull (a shore HOLD, a seat on the wreck), so re-stage it to re-ferry.
-            private _rg = groupFromNetId (_rider get "grp");
+            // Its ferry orders outlive the hull (a shore HOLD, a seat on the wreck, a pin at the drop pad); re-order it.
             if (!isNull _rg) then { { unassignVehicle _x } forEach units _rg; [_rider] call DUWS_fnc_opcom_reOrderLive };
             if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull };
             _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
