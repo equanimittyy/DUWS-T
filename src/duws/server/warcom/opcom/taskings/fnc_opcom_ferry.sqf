@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The ferry orchestrator and borrow lifecycle: a land unit stopped at a water
-// leg borrows the nearest free compatible transport, which carries it across and reverts to a staged guard in the
-// pool. `ferryTick` dispatches the bound crossing to fnc_opcom_ferry_virt (unwatched) or fnc_opcom_ferry_devirt
+// leg borrows the nearest free compatible transport, which carries it across and then garrisons the nearest held
+// zone. `ferryTick` dispatches the bound crossing to fnc_opcom_ferry_virt (unwatched) or fnc_opcom_ferry_devirt
 // (watched) by the transport's own streaming, holding the binding across the boundary. The rider owns its route;
 // the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own -- task_step skips it
 // (docs/plans/opcom/opcom_plan.md §Transport).
@@ -77,9 +77,30 @@ DUWS_fnc_opcom_ferryUnbind = {
     [_r] call DUWS_fnc_opcom_reOrderLive;
 };
 
-// Free a transport from a carry -- the rider is gone, or the crossing is done. Reverts it to a free staged
-// guard back in the pool (a boat backs off to navigable water, unable to rest on land); if live it takes the
-// guard order in place, else it just banks the reverted state.
+// Send a freed hull to garrison the nearest held, uncontested zone, else hold guard where it stands. It is off the
+// pool until it settles. A boat measures to ports and skips a portless zone, which fnc_opcom_task would refuse.
+DUWS_fnc_opcom_ferryHome = {
+    params ["_t"];
+    private _from = _t get "pos";
+    private _boat = (_t get "moveType") isEqualTo "boat";
+    private _best = 1e12; private _key = ""; private _zpos = [];
+    {
+        private _k = [_x] call fnc_zone_key;
+        private _dest = _x;
+        if (_boat) then {
+            private _port = [_k] call DUWS_fnc_opcom_portOf;
+            _dest = if (_port < 0) then { [] } else { [_port] call DUWS_fnc_opcom_c2w };
+        };
+        if (_dest isNotEqualTo [] && {!([_k] call DUWS_fnc_opcom_zoneContested)} && {(_dest distance2D _from) < _best}) then {
+            _best = _dest distance2D _from; _key = _k; _zpos = _x;
+        };
+    } forEach WARCOM_zones_controled_by_OPFOR;
+    _t set ["hold", 0];   // a release is no OPCOM commit: a hold left from before the borrow must not refuse it
+    if (_key isEqualTo "" || {!([_t, "move", _zpos, _key] call fnc_opcom_task)}) then { [_t, "guard"] call fnc_opcom_task };
+};
+
+// Free a transport from a carry -- the rider is gone, or the crossing is done -- and send it home. A boat backs off
+// to navigable water first, unable to rest or route from land.
 DUWS_fnc_opcom_ferryRelease = {
     params ["_t"];
     // Crossing over: thaw the rider's strength freeze and clear its unload guard so live tracking + tasking resume;
@@ -99,14 +120,13 @@ DUWS_fnc_opcom_ferryRelease = {
     _t set ["pos", _pos];
     _t set ["carrying", -1]; _t set ["embarked", false];
     _t set ["ferryWait", 0]; _t set ["ferryLZ", []]; _t set ["ferryPhase", "topickup"];
-    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
     if (!isNull _grp) then {
         private _veh = vehicle (leader _grp);
         [_veh] call DUWS_fnc_opcom_ferryClearHull;
-        (currentPilot _veh) enableAI "Target";              // undo the pickup's pilot pin: a guard must engage
+        (currentPilot _veh) enableAI "Target";              // undo the pickup's pilot pin: off ferry duty it must engage
         if (_veh isKindOf "Air") then { _veh land "NONE" };   // the drop's LAND holds it on the pad until cancelled
-        [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
     };
+    [_t] call DUWS_fnc_opcom_ferryHome;
 };
 
 // Drive a carrying transport for one tick, choosing live or virtual by the transport's OWN streaming and

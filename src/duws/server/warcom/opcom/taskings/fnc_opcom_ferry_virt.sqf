@@ -36,12 +36,12 @@ DUWS_fnc_opcom_ferryStep = {
             _rider set ["pos", _rider getOrDefault ["ferryLand", _t get "pos"]];
             // Off-screen drop skips ferryRelease, so thaw the freeze here (a live board may have set it).
             _rider set ["ridingOn", -1]; _rider set ["route", []]; _rider set ["ferryFrozen", false];
-            // A boat backs off to navigable water so a reverted guard never rests (or de-virt spawns) on land.
+            // A boat backs off to navigable water so it never routes, rests or de-virt spawns from land.
             private _tpos = _t get "pos";
             if ((_t get "moveType") isEqualTo "boat") then { _tpos = [_tpos] call DUWS_fnc_opcom_nearestWater };
             _t set ["pos", _tpos]; _t set ["carrying", -1]; _t set ["embarked", false];
-            _t set ["order", "guard"]; _t set ["target", _tpos]; _t set ["route", []];
             ["INFO", "OPCOM", format ["ferry: transport %1 (%2) drops rider %3 at %4 (virtual)", _t get "id", _t get "moveType", _rider get "id", (_rider get "pos") apply { round _x }]] call fnc_log;
+            [_t] call DUWS_fnc_opcom_ferryHome;
             nil
         };
     };
