@@ -18,7 +18,7 @@ private _out = [];
         {
             private _q = _building selectionPosition [_sel, _x];
             if !(_q isEqualTo [0, 0, 0]) exitWith { _p = _q };
-        } forEach ["Memory", "GeometryFire", "Geometry"];
+        } forEach ["Memory", "Geometry", "FireGeometry"];
         if !(_p isEqualTo [0, 0, 0]) exitWith { _hitSel = _sel };
     } forEach _names;
     if !(_p isEqualTo [0, 0, 0]) then { _out pushBack [_building modelToWorld _p, _src, _hitSel] };
