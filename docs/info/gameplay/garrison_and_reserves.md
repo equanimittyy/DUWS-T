@@ -99,8 +99,9 @@ still count against this wall.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:547`) walks
-every site on `DUWS_garrisonSites` that is held, has a non-empty pool, and has BLUFOR nearby;
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:484`) walks
+every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
+gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns
 `DUWS_fnc_garrisonReserveRefillOne` per site. That worker pops random fieldable tokens from the
 pool and delivers them until the site's group count reaches its ceiling, the pool empties, or the

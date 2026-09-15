@@ -32,8 +32,7 @@ DUWS_fnc_opcom_ferryApproach = {
     if ((_t get "moveType") isEqualTo "boat") then { [_landPt] call DUWS_fnc_opcom_nearestWater } else { _landPt }
 };
 
-// A zone garrison is locked while BLUFOR stands on it -- its transports cannot be borrowed. The same presence
-// test the reserve wave raises a defence by (fnc_garrisonReservePass), so lock and defence agree.
+// A zone garrison is locked while BLUFOR stands on it -- its transports cannot be borrowed.
 DUWS_fnc_opcom_zoneContested = {
     params ["_key"];
     if (_key isEqualTo "") exitWith { false };

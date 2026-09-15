@@ -477,10 +477,10 @@ DUWS_fnc_garrisonReserveRefillOne = {
     };
 };
 
-// Skips a quiet site -- its pool waits until it's being fought, by the same presence test that raises a
-// garrison. Most-crowded fight resupplies first; refills are spawned per site so waves stagger
-// independently and one site's sleep never holds the next. Iterates the live-garrison registry, so a
-// zone and a town are candidates by the same rule -- the one place the two site kinds meet.
+// Most-crowded fight resupplies first; refills are spawned per site so waves stagger independently and one
+// site's sleep never holds the next. Iterates the live-garrison registry, so a zone and a town are candidates
+// by the same rule -- the one place the two site kinds meet. No BLUFOR-presence gate, matching the kill-event
+// path (DUWS_fnc_garrisonReserveOnKill): a held site below its ceiling refills whether or not it is fought.
 DUWS_fnc_garrisonReservePass = {
     if (!isServer) exitWith {};
     private _players = (call BIS_fnc_listPlayers) select { alive _x };
@@ -493,9 +493,7 @@ DUWS_fnc_garrisonReservePass = {
             && {[_key] call DUWS_fnc_garrisonHeld}
             && {([_key] call DUWS_fnc_garrisonReserve) isNotEqualTo []}) then {
             private _reach = (_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin;
-            if ([_pos, _reach, 1] call fnc_duws_bluforNear) then {
-                _cand pushBack [count (_players select { (_x distance2D _pos) < _reach }), _key];
-            };
+            _cand pushBack [count (_players select { (_x distance2D _pos) < _reach }), _key];
         };
     } forEach (missionNamespace getVariable ["DUWS_garrisonSites", []]);
 
