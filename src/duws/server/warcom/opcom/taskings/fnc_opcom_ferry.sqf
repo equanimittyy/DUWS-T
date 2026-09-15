@@ -60,15 +60,14 @@ DUWS_fnc_opcom_ferryPool = {
 };
 
 // Borrow the nearest free compatible transport for a rider at a water leg; returns it, or nil if none is free.
-// Boats preferred, rotary the fallback. A garrisoned pick is flipped to `move` so its ferry turn runs; no reserve
-// draw-out, since a ferry-capable transport is a non-combatant never in the wave.
+// A garrisoned pick is flipped to `move` so its ferry turn runs; no reserve draw-out, since a ferry-capable
+// transport is a non-combatant never in the wave.
 DUWS_fnc_opcom_borrowFerry = {
     params ["_rider"];
     private _rpos = _rider get "pos";
     private _pool = [_rider get "id"] call DUWS_fnc_opcom_ferryPool;
     if (_pool isEqualTo []) exitWith { nil };
-    private _boats = _pool select { (_x get "moveType") isEqualTo "boat" };
-    private _cands = [_boats, _pool] select (_boats isEqualTo []);   // boats first; rotary only when no boat is free
+    private _cands = _pool;
     private _best = 1e12; private _pick = -1;
     { private _dd = (_x get "pos") distance2D _rpos; if (_dd < _best) then { _best = _dd; _pick = _forEachIndex } } forEach _cands;
     private _tr = _cands select _pick;

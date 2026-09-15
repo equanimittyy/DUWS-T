@@ -75,7 +75,7 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   spawn at the destination, so egress losses count. The rider detaches (`ridingOn = -1`) the moment its leader
   spawns.
 - **A boat** is its own move type (water-passable, land-impassable), armed by default, spawning on the nearest
-  navigable water. A rotary lifts a water leg only when no boat is free at borrow time.
+  navigable water. The borrow has no lift-type preference — the closest free hull wins, boat or rotary alike.
 
 Not built (Phase 4 valuations on the shipped mechanic): whether an idle hull leaves its post to ferry; whether a
 rider waits for lift or walks a longer route (real only once P4 lowers `OPCOM_ROUTE_LIFT_PENALTY` so water is a
