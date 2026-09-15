@@ -75,10 +75,10 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   spawn at the destination, so egress losses count. The rider detaches (`ridingOn = -1`) the moment its leader
   spawns.
 - **A boat** is its own move type (water-passable, land-impassable), armed by default, spawning and garrisoning
-  on its zone's **port** — the one navigable-water cell within 3 grid steps that zone owns (a cell two zones
-  claim goes to the nearer; the loser takes its nearest unclaimed land-adjacent cell). A portless zone refuses
-  boats outright, as a hire target and as a return-to-garrison pick. The borrow has no lift-type preference —
-  the closest free hull wins, boat or rotary alike.
+  on its zone's **port** (`taskings/fnc_opcom_ports.sqf`) — the one navigable-water cell within 3 grid steps
+  that zone owns (a cell two zones claim goes to the nearer; the loser takes its nearest unclaimed land-adjacent
+  cell). A portless zone refuses boats outright, as a hire target and as a return-to-garrison pick. The borrow
+  has no lift-type preference — the closest free hull wins, boat or rotary alike.
 
 Not built (Phase 4 valuations on the shipped mechanic): whether an idle hull leaves its post to ferry; whether a
 rider waits for lift or walks a longer route (real only once P4 lowers `OPCOM_ROUTE_LIFT_PENALTY` so water is a
