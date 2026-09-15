@@ -59,43 +59,12 @@ DUWS_fnc_opcom_moveType = {
     DUWS_opcom_moveType getOrDefault [[_comp param [0, ""]] call DUWS_fnc_tokenName, "inf"]
 };
 
-DUWS_fnc_opcom_w2c = {
-    params ["_pos"];
-    private _w = DUWS_opcom_grid_w;
-    // Clamp to the play box: a point outside it resolves to the nearest edge cell, keeping routed/streamed cells inside.
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
-    private _cx = (floor ((_pos select 0) / OPCOM_GRID_CELL)) max _minCx min _maxCx;
-    private _cy = (floor ((_pos select 1) / OPCOM_GRID_CELL)) max _minCy min _maxCy;
-    _cy * _w + _cx
-};
-
-DUWS_fnc_opcom_c2w = {
-    params ["_ci"];
-    private _w = DUWS_opcom_grid_w;
-    [((_ci mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_ci / _w)) + 0.5) * OPCOM_GRID_CELL, 0]
-};
-
 // A tasking record by id, or nil (the ferry binds transport<->rider by id, not handle).
 DUWS_fnc_opcom_byId = {
     params ["_id"];
     private _i = DUWS_opcom_taskings findIf { (_x get "id") == _id };
     if (_i < 0) exitWith { nil };
     DUWS_opcom_taskings select _i
-};
-
-// Nearest navigable-water cell centre -- a boat's launch point (it cannot rest on the land zone that raised it).
-DUWS_fnc_opcom_nearestWater = {
-    params ["_pos"];
-    private _best = _pos;
-    private _bd = 1e12;
-    {
-        if (_x >= 0) then {
-            private _c = [_forEachIndex] call DUWS_fnc_opcom_c2w;
-            private _dd = _pos distance2D _c;
-            if (_dd < _bd) then { _bd = _dd; _best = _c };
-        };
-    } forEach DUWS_opcom_grid_water;
-    _best
 };
 
 // Ports: the water cell each coastal zone owns for its boats (recruit spawn point, garrison anchor).
