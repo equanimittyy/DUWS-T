@@ -1,7 +1,8 @@
 // Locality: server. The tasking phase of the perception loop, one pass per tick after the grid rebuild:
 // movement, streaming, status and healing (no scoring -- Phase 4 adds what to commit). Off the isNil scoring
 // block, since a route search may yield. A carrying transport owns its own streaming (DUWS_fnc_opcom_ferryTick),
-// keeping the rider bound across the boundary. De-virtualisation triggers on player proximity only.
+// keeping the rider bound across the boundary. De-virtualisation triggers on player proximity only, and never for a
+// `garrison`: it rests virtual, a combatant defending through the zone's reserve wave.
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_taskings") exitWith {};
 
@@ -24,8 +25,7 @@ private _nearestPlayerCells = {
     _best
 };
 
-// Settle an arrived move: re-garrison a returnZone or hold as guard. Mutates the record only; returns true when
-// it garrisoned, so the caller skips a stream-in the reserve wave covers.
+// Settle an arrived move: re-garrison a returnZone or hold as guard. Mutates the record only; true if it garrisoned.
 private _settleMove = {
     params ["_t", "_pos"];
     private _rz = _t getOrDefault ["returnZone", ""];
@@ -84,12 +84,17 @@ private _settleMove = {
                         _t set ["status", "done"];
                         _t set ["grp", ""];
                     } else {
-                        // Settle in place the same tick so the map flips MOVE->GUARD now, not only after a later
-                        // stow; re-order the group so map and group agree.
-                        private _arrived = _order isEqualTo "move" && {!_engaged} && {(_ldr distance2D (_t get "target")) < OPCOM_MOVE_ARRIVE};
+                        // Settle the same tick, not after a later stow; a guard settle re-orders the group so map and
+                        // group agree. A garrison settle despawns (a combatant's token now sits in the reserve wave, so
+                        // a live copy would fight twice) and so waits out combat and a contested home zone first.
+                        private _arrived = _order isEqualTo "move" && {!_engaged} && {(_ldr distance2D (_t get "target")) < OPCOM_MOVE_ARRIVE}
+                            && {!([_t getOrDefault ["returnZone", ""]] call DUWS_fnc_opcom_zoneContested)};
                         if (_arrived) then {
-                            [_t, getPosASL _ldr] call _settleMove;
-                            [_grp, "guard", getPosASL _ldr] call DUWS_fnc_opcom_applyOrder;
+                            if ([_t, getPosASL _ldr] call _settleMove) then {
+                                [_t] call DUWS_fnc_opcom_reVirt;
+                            } else {
+                                [_grp, "guard", getPosASL _ldr] call DUWS_fnc_opcom_applyOrder;
+                            };
                         };
                         // A land unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry);
                         // no lift free, it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS.
