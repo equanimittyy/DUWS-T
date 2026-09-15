@@ -7,6 +7,7 @@ DUWS_opcom_belief_key  = [];   // subject: a BLUFOR group netId, a zone index, a
 DUWS_opcom_belief_pos  = [];   // [x,y,0] as last observed, never a live lookup (the sense edge gate enforces it)
 DUWS_opcom_belief_time = [];   // DUWS_opcom_tick at the observation
 DUWS_opcom_belief_str  = [];   // believed BLUFOR force there
+DUWS_opcom_contested   = createHashMap;   // zone key -> true while contested, rebuilt each tick (fnc_opcom_contested)
 
 DUWS_opcom_tick = 0;
 DUWS_opcom_dbg_fresh = 0;   // groups the sense sweep found freshly-sensed last tick, for the debug line

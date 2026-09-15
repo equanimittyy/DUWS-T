@@ -32,16 +32,6 @@ DUWS_fnc_opcom_ferryApproach = {
     if ((_t get "moveType") isEqualTo "boat") then { [_landPt] call DUWS_fnc_opcom_nearestWater } else { _landPt }
 };
 
-// A zone garrison is locked while BLUFOR stands on it -- its transports cannot be borrowed.
-DUWS_fnc_opcom_zoneContested = {
-    params ["_key"];
-    if (_key isEqualTo "") exitWith { false };
-    private _site = [_key] call fnc_site_at;
-    private _pos = _site getOrDefault ["pos", []];
-    if (_pos isEqualTo []) exitWith { false };
-    [_pos, (_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear
-};
-
 // Shared by the borrow and the debug inspector so the two never drift. _excludeId drops one id (a rider never
 // borrows itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
 // re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.

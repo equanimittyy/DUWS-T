@@ -21,6 +21,7 @@ while {true} do {
         _stage = "opsense";  call DUWS_fnc_hardpointOPSense;
         _stage = "decay";    call fnc_opcom_decay;
         _stage = "prune";    call fnc_opcom_belief_prune;
+        _stage = "contested"; call DUWS_fnc_opcom_contestedUpdate;
         // Refresh live taskings' strength/position before the grid reads them: grid_rebuild runs ahead of
         // task_step (which needs the fresh grid), so a kill would otherwise reach the grid a tick late.
         // effForceLive counts only the living, so a wiped group weighs 0 and drops out the same tick.

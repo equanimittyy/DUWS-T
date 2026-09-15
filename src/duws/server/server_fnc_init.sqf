@@ -352,11 +352,13 @@ fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARC
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
 // OPCOM (the opposing commander): server-only, so not broadcast. Two subsystems, one folder each under
-// warcom\opcom\. belief\ -- the force model, strength and grid-coordinate helpers (executed to define their
-// tables and resolvers), the belief store, sighting sweep, decay, and the perception grid with its per-tick run.
+// warcom\opcom\. belief\ -- the force model, strength, grid-coordinate and zone-contest helpers (executed to
+// define their tables and resolvers), the belief store, sighting sweep, decay, and the perception grid with its
+// per-tick run.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_force.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_strength.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_coords.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
 fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
 fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";

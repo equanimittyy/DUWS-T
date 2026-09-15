@@ -46,7 +46,7 @@ private _t = createHashMapFromArray [
     ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""]
 ];
 DUWS_opcom_taskings pushBack _t;
-// Join the zone's reserve so the defence wave spawns it when the zone is contested.
+// A garrison never streams; a combatant is fielded only through its zone's reserve wave.
 if (_homeZone isNotEqualTo "") then { [_homeZone] call DUWS_fnc_opcom_zoneReserveSync };
 ["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _pos, _id]] call fnc_log;
 _t
