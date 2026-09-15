@@ -65,15 +65,17 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   legs untimed, each land/board/unload phase capped at `OPCOM_FERRY_WAIT_MAX` ticks so a hull stuck short of shore
   forces the group to its destination at expiry rather than hanging. The two lifts board and dismount on purpose
   different shapes: a **rotary** lands and the squad walks aboard man by man — the riders are assigned and
-  `orderGetIn`'d onto the parked hull (with nothing assigned the landing hold is vacuous and the hull lifts at
-  once), despawning as each enters, the current leader forced aboard per tick so an engaged board still drains.
-  A **boat** never boards or dismounts men: it parks at `OPCOM_FERRY_BOARD_BOAT` off the shore and the whole
-  group vanishes into it, then spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do
-  not unify the two shapes.
-- **Strength freezes on pickup, thaws on drop.** From the board commit the rider's `effForce` is snapshotted and
-  belief stops reading its live count (board-despawn is not a casualty); the freeze thaws the instant the riders
-  spawn at the destination, so egress losses count. The rider detaches (`ridingOn = -1`) the moment its leader
-  spawns.
+  `orderGetIn`'d as the landing order goes out (with nothing assigned the landing hold is vacuous and the hull
+  touches down and lifts between ticks), despawning as each enters, the current leader forced aboard per tick so
+  an engaged board still drains. A **boat** never boards or dismounts men: it parks `OPCOM_FERRY_BOAT_PARK` out
+  from the shoreline nearest the riders (a water-cell centre can sit ~350 m out) while they walk to that shore,
+  and the whole group vanishes into it once its leader is within `OPCOM_FERRY_BOARD_BOAT` of the shore, then
+  spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do not unify the two shapes.
+  Each live leg's move order goes out once, as the leg starts.
+- **Strength freezes on pickup, thaws on drop.** From the board commit (a rotor's landing order, a boat's vanish)
+  the rider's `effForce` is snapshotted and belief stops reading its live count (board-despawn is not a casualty);
+  the freeze thaws the instant the riders spawn at the destination, so egress losses count. The rider detaches
+  (`ridingOn = -1`) the moment its leader spawns.
 - **A boat** is its own move type (water-passable, land-impassable), armed by default, spawning and garrisoning
   on its zone's **port** (`taskings/fnc_opcom_ports.sqf`) — the one navigable-water cell within 3 grid steps
   that zone owns (a cell two zones claim goes to the nearer; the loser takes its nearest unclaimed land-adjacent

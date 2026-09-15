@@ -117,6 +117,9 @@ DUWS_fnc_opcom_ferryTick = {
                 _t getOrDefault ["ferryPhase", "topickup"], _rider get "id", ["cut loose", "lost aboard"] select ((_rider get "grp") isEqualTo "")]] call fnc_log;
             if ((_rider get "grp") isEqualTo "") then { _rider set ["status", "dead"] };
             _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false]; _rider set ["unloading", false];
+            // Its pickup orders outlive the hull (a shore HOLD, a seat on the wreck), so re-stage it to re-ferry.
+            private _rg = groupFromNetId (_rider get "grp");
+            if (!isNull _rg) then { { unassignVehicle _x } forEach units _rg; [_rider] call DUWS_fnc_opcom_reOrderLive };
             if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearEH };
             _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
         };
@@ -125,7 +128,7 @@ DUWS_fnc_opcom_ferryTick = {
             if (duws_log_level >= 4) then {
                 private _veh = vehicle (leader _tg);
                 private _ph = _t getOrDefault ["ferryPhase", "topickup"];
-                private _nav = if (_ph in ["carry", "dropland", "dropunload"]) then { _t get "target" } else { _t getOrDefault ["ferryLZ", []] };
+                private _nav = _t getOrDefault ["ferryLZ", []];
                 private _navM = if (_nav isEqualTo []) then { -1 } else { round (_veh distance2D _nav) };
                 ["DEBUG", "OPCOM", format ["ferry: transport %1 (%2) %3 wait %4 nav %5 m alt %6 m %7 km/h wps %8, rider %9 men %10 queue %11",
                     _t get "id", _t get "moveType", _ph, _t getOrDefault ["ferryWait", 0], _navM,

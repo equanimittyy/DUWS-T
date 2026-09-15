@@ -266,7 +266,11 @@ A unit under `doStop` ignores its group's waypoints until given a move order of 
 
 ## A lone MOVE waypoint is not a wait: the group completes it on arrival and drifts, so each leg of a staged journey needs its own waypoint
 
-A single MOVE waypoint is reached, marked complete, and — with nothing queued behind it — the group reverts to idle/formation and drifts off the spot, so a journey that stages through a wait cannot be one MOVE to the far end: every leg needs its own waypoint, and the waiting leg must be a type that holds, not one that completes. Fix: give the wait point a `"HOLD"` waypoint after the MOVE leg (`(_grp addWaypoint [_pos, 0]) setWaypointType "HOLD"`) — HOLD never auto-completes, so release it explicitly when the next leg begins (it won't clear itself). `DUWS_fnc_opcom_reOrderLive` stages a live rider at its near shore this way, and the ferry pickup drops the HOLD before `orderGetIn` (`server/warcom/opcom/taskings/fnc_opcom_stream.sqf`, `fnc_opcom_ferry.sqf`).
+A single MOVE waypoint is reached, marked complete, and — with nothing queued behind it — the group reverts to idle/formation and drifts off the spot, so a journey that stages through a wait cannot be one MOVE to the far end: every leg needs its own waypoint, and the waiting leg must be a type that holds, not one that completes. Fix: give the wait point a `"HOLD"` waypoint after the MOVE leg (`(_grp addWaypoint [_pos, 0]) setWaypointType "HOLD"`) — HOLD never auto-completes, so release it explicitly when the next leg begins (it won't clear itself). `DUWS_fnc_opcom_reOrderLive` stages a live rider at its near shore this way, a boat pickup re-stages it at the shore it boards from, and a rotor pickup drops the HOLD before `orderGetIn` (`server/warcom/opcom/taskings/fnc_opcom_stream.sqf`, `fnc_opcom_ferry_devirt.sqf`).
+
+## `waypoints` keeps finished waypoints, so an empty list never means the group is idle
+
+`waypoints _grp` lists every waypoint the group holds, finished ones included — completing one only advances `currentWaypoint`, so `count waypoints _grp == 0` is true right after a clear and never after an arrival. OPCOM's live ferry gated each leg's move on that test, so no leg after the pickup got its order: the rotor hovered and the boat idled at the pickup for good, the carry leg being untimed. Fix: issue a leg's order once, as the leg starts; to test "done", compare `currentWaypoint _grp >= count waypoints _grp` (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry_devirt.sqf`).
 
 ## A group in COMBAT behaviour ignores a commanded move order
 
@@ -278,7 +282,7 @@ An AI group whose behaviour has gone `COMBAT` owns its movement through the dang
 
 ## `land "GET IN"`/`"GET OUT"` is a sticky mode with no completion event
 
-`aircraft land "GET IN"` (or `"GET OUT"`) makes an AI helicopter descend and *stay* grounded until explicitly cancelled, with no "landed" callback, so a fresh move waypoint may be deprioritised while the order stands. Door animation is model-specific — the `door_L`/`door_R` sources `fnc_helotaxi` animates exist only on some airframes, so `animateDoor` silently no-ops on others. Fix: drive a landing across ticks, not a blocking `waitUntil` — issue `land` once within range, poll `getPosATL _heli select 2` under ~4 m for grounded, act, then `_heli land "NONE"` **before** the next waypoint (or it can sit on the pad) and re-task; OPCOM's live ferry pickup/drop (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry.sqf`) does this and gates a stall timer to the landing phase.
+`aircraft land "GET IN"` (or `"GET OUT"`) makes an AI helicopter descend and *stay* grounded until explicitly cancelled, with no "landed" callback, so a fresh move waypoint may be deprioritised while the order stands. Door animation is model-specific — the `door_L`/`door_R` sources `fnc_helotaxi` animates exist only on some airframes, so `animateDoor` silently no-ops on others. Fix: drive a landing across ticks, not a blocking `waitUntil` — issue `land` once within range, poll `getPosATL _heli select 2` under ~4 m for grounded, act, then `_heli land "NONE"` **before** the next waypoint (or it can sit on the pad) and re-task; OPCOM's live ferry pickup/drop (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry_devirt.sqf`) does this and gates a stall timer to the landing phase.
 
 ## `orderGetIn` only moves units already assigned to a seat
 
