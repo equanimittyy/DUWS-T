@@ -10,8 +10,10 @@
 
 input=$(cat 2>/dev/null)
 cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null)
+# Loose match on purpose: `git -C <dir> commit` and friends must gate too. A false match (a
+# command that merely mentions git ... commit) costs one diff check that finds no comments.
 case "$cmd" in
-  *"git commit"*) ;;
+  *git*commit*) ;;
   *) exit 0 ;;
 esac
 
