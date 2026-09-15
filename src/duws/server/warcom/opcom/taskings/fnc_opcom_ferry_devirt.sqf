@@ -33,9 +33,11 @@ DUWS_fnc_opcom_ferryUnloadNext = {
 
 // One tick of the live crossing, a timed phase machine shared by both lift types (topickup -> pickupland ->
 // pickupboard -> carry -> dropland -> dropunload). The two transit legs are untimed; each land/board/unload phase
-// caps at OPCOM_FERRY_WAIT_MAX ticks and forces through on expiry. A rotary lands and boards/dismounts man by man;
-// a boat cannot land, so it closes to OPCOM_FERRY_BOARD_BOAT of the shore and moves the whole group at once.
-// Strength freezes at the board commit and thaws when the riders spawn at the drop.
+// caps at OPCOM_FERRY_WAIT_MAX ticks and forces through on expiry. The lifts board and dismount on purpose
+// different shapes -- do NOT unify them: a rotor lands and the squad walks aboard man by man (an assigned
+// orderGetIn board that the landing hold waits on, the leader forced past engagement), while a boat parks off the
+// shore and the whole group vanishes into it and later spawns ashore at once, because boats are finnicky and
+// never walk men seat by seat. Strength freezes at the board commit and thaws when the riders spawn at the drop.
 DUWS_fnc_opcom_ferryStepLive = {
     params ["_t", "_rider"];
     private _grp = groupFromNetId (_t get "grp");
@@ -100,14 +102,19 @@ DUWS_fnc_opcom_ferryStepLive = {
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             private _rg = groupFromNetId (_rider get "grp");
             if (_boat) then {
-                // Walk the shore party to the hull so the vanish reads as a board; freeze + despawn on close or expiry.
+                // Intentional divergence from the rotor (see the step comment): the boat never boards men in, the
+                // whole group vanishes at once. Walk the shore party to the hull so the vanish reads as a board;
+                // freeze + despawn on close or expiry.
                 if (!isNull _rg && {count waypoints _rg == 0}) then { [_rg, "move", getPosASL _veh] call DUWS_fnc_opcom_applyOrder };
                 private _here = !isNull _rg && {((leader _rg) distance2D _veh) < OPCOM_FERRY_BOARD_BOAT};
                 if (isNull _rg || _here || {_wait >= OPCOM_FERRY_WAIT_MAX}) exitWith { _rider set ["ferryFrozen", true]; call _embark };
             } else {
                 _veh land "GET IN";
                 // Arm a one-shot GetIn handler that board-despawns each rider as he enters (a seat frees instantly, so
-                // one hull loads any squad; the rider-group tag keeps it off the crew), and drop the shore HOLD.
+                // one hull loads any squad; the rider-group tag keeps it off the crew), and drop the shore HOLD. The
+                // assign + orderGetIn (the fnc_rescue_squad_success shape) is what gives the landing hold a boarding to
+                // wait on -- with nothing assigned the hold is vacuous, completes at once, and the hull lifts while the
+                // squad stands ashore. Native boarding walks the men in; the behaviour stays untouched.
                 if (!isNull _rg && {(_veh getVariable ["DUWS_ferryBoardEH", -1]) < 0}) then {
                     _veh setVariable ["DUWS_ferryRiderGrp", _rg];
                     private _eh = _veh addEventHandler ["GetIn", {
@@ -116,11 +123,13 @@ DUWS_fnc_opcom_ferryStepLive = {
                     }];
                     _veh setVariable ["DUWS_ferryBoardEH", _eh];
                     while {count waypoints _rg > 0} do { deleteWaypoint ((waypoints _rg) select 0) };
+                    { _x assignAsCargo _veh } forEach ((units _rg) select {alive _x});
+                    ((units _rg) select {alive _x}) orderGetIn true;
                 };
                 if (isNull _rg || {((units _rg) findIf {alive _x}) < 0} || {_wait >= OPCOM_FERRY_WAIT_MAX}) exitWith { call _embark };
-                // Force the current lead aboard, one per tick, whatever its combat state -- the rest keep fighting.
-                // moveInCargo ignores combat, range and seat waits; the GetIn handler board-despawns him, promoting the
-                // next man. An ordered board would instead stall under fire (combat AI refuses it) and pull the squad off the fight.
+                // Force the current lead aboard, one per tick, whatever its combat state -- a man in COMBAT refuses the
+                // boarding order, so without this the engaged case never drains. moveInCargo ignores combat, range and
+                // seat waits; the GetIn handler board-despawns him, promoting the next man.
                 private _lead = leader _rg;
                 if (alive _lead && {vehicle _lead isEqualTo _lead}) then { _lead moveInCargo _veh };
             };
@@ -140,6 +149,7 @@ DUWS_fnc_opcom_ferryStepLive = {
             if (_boat) then {
                 private _nav = _t get "target";
                 if (count waypoints _grp == 0) then { [_grp, "move", _nav] call DUWS_fnc_opcom_applyOrder };
+                // Same intentional divergence as the board: the boat spawns the whole group ashore at once.
                 if (((_veh distance2D _nav) < OPCOM_FERRY_BOARD_BOAT) || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { ["dropunload"] call _setPhase };
             } else {
                 _veh land "GET OUT";

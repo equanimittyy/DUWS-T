@@ -63,9 +63,13 @@ The design rules the code encodes, kept because P4 layers valuations on them:
 - **The carry** drops at the far shore (first land past the water span). Virtual = store math; **watched = a timed
   six-phase machine** (`to-pickup → pickup-land → pickup-board → carry → drop-land → drop-unload`), the two transit
   legs untimed, each land/board/unload phase capped at `OPCOM_FERRY_WAIT_MAX` ticks so a hull stuck short of shore
-  forces the group to its destination at expiry rather than hanging. Rotary lands and loads man by man; a boat has
-  no landing, so it closes to `OPCOM_FERRY_BOARD_BOAT` of the shore and board-despawns / de-virtualises the whole
-  group at once.
+  forces the group to its destination at expiry rather than hanging. The two lifts board and dismount on purpose
+  different shapes: a **rotary** lands and the squad walks aboard man by man — the riders are assigned and
+  `orderGetIn`'d onto the parked hull (with nothing assigned the landing hold is vacuous and the hull lifts at
+  once), despawning as each enters, the current leader forced aboard per tick so an engaged board still drains.
+  A **boat** never boards or dismounts men: it parks at `OPCOM_FERRY_BOARD_BOAT` off the shore and the whole
+  group vanishes into it, then spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do
+  not unify the two shapes.
 - **Strength freezes on pickup, thaws on drop.** From the board commit the rider's `effForce` is snapshotted and
   belief stops reading its live count (board-despawn is not a casualty); the freeze thaws the instant the riders
   spawn at the destination, so egress losses count. The rider detaches (`ridingOn = -1`) the moment its leader
