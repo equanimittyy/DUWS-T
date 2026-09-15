@@ -7,7 +7,7 @@ if (!hasInterface) exitWith {};
 // A draw lands a round-trip after its request, so one queued before toggle-off arrives past teardown and
 // would rebuild the whole lattice -- the overlay reappears after being cleared.
 if (!(missionNamespace getVariable ["DUWS_dbgOpcomOn", false])) exitWith {};
-params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []]];
+params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []], ["_ports", []]];
 
 private _half = _cell / 2;
 private _eps = 0.05;
@@ -78,6 +78,20 @@ private _sample = "";
         if ((getMarkerType _sm) isNotEqualTo "") then { deleteMarkerLocal _sm };
     };
 } forEach _cells;
+
+// Ports are static for the session, so they draw on rebuild only; one port per cell by construction,
+// so the cell-index name is unique.
+if (_rebuild) then {
+    {
+        _x params ["_pp", "_ci"];
+        private _pm = format ["duws_opcom_port_%1", _ci];
+        createMarkerLocal [_pm, [(_pp select 0) + _cell * 0.3, (_pp select 1) + _cell * 0.3]];
+        _pm setMarkerShapeLocal "ICON";
+        _pm setMarkerTypeLocal "loc_Quay";
+        _pm setMarkerColorLocal "#(0.9,0.2,0.2,1)";
+        _pm setMarkerSizeLocal [0.5, 0.5];
+    } forEach _ports;
+};
 
 // Belief is a small, shifting set: reuse the markers still standing, spawn any extra, delete last tick's
 // surplus. A reused slot holds a different stamp, so its position and text are always reset.

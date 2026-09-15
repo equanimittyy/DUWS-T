@@ -77,7 +77,13 @@ private _tasks = [];
     _tasks pushBack [[_p select 0, _p select 1], _icon, _tag];
 } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
 
-["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings -> %4", count _cells, count _bel, count _tasks, _requester]] call fnc_log;
+private _ports = [];
+{
+    private _ci = _y;
+    _ports pushBack [[_ci] call DUWS_fnc_opcom_c2w, _ci];
+} forEach DUWS_opcom_zonePort;
+
+["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings, %4 ports -> %5", count _cells, count _bel, count _tasks, count _ports, _requester]] call fnc_log;
 
 // Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
-[_cells, _bel, _cell, _tasks] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
+[_cells, _bel, _cell, _tasks, _ports] remoteExec ["fnc_debug_opcom_grid_draw", _requester];

@@ -46,14 +46,16 @@ switch (_verb) do {
             if (_pos isEqualTo []) then {
                 ["WARN", "OPCOMDBG", format ["regarrison: no zone %1", _b]] call fnc_log; false
             } else {
-                // A boat cannot rest inland: home it on nearest navigable water, refusing a landlocked zone.
+                // A boat cannot rest inland: home it on the zone's port.
                 private _target = _pos;
                 private _ok = true;
                 if ((_t get "moveType") isEqualTo "boat") then {
-                    _target = [_pos] call DUWS_fnc_opcom_nearestWater;
-                    if ((_target distance2D _pos) > ((_site getOrDefault ["radius", 0]) + DUWS_streamArrivalMargin)) then {
-                        ["WARN", "OPCOMDBG", format ["regarrison: zone %1 is landlocked -- no water to home a boat", _b]] call fnc_log;
+                    private _pi = [_b] call DUWS_fnc_opcom_portOf;
+                    if (_pi < 0) then {
+                        ["WARN", "OPCOMDBG", format ["regarrison: zone %1 has no port -- boat refused", _b]] call fnc_log;
                         _ok = false;
+                    } else {
+                        _target = [_pi] call DUWS_fnc_opcom_c2w;
                     };
                 };
                 _t set ["hold", 0];

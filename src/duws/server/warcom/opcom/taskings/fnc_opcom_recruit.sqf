@@ -19,13 +19,21 @@ if (WARCOM_opfor_ap < _cost) exitWith { ["INFO", "OPCOM", format ["recruit: %1 c
 private _blocked = _comp findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" };
 if (_blocked >= 0) exitWith { ["INFO", "OPCOM", format ["recruit: faction cannot field %1 yet -- refused", _comp select _blocked]] call fnc_log; nil };
 
+// A boat cannot rest on the land zone that raised it -- launch it from the zone's port. The port gate
+// runs ahead of the AP charge, so a refusal needs no refund path.
+private _moveType = [_comp] call DUWS_fnc_opcom_moveType;
+if (_moveType isEqualTo "boat" && {[_homeZone] call DUWS_fnc_opcom_portOf < 0}) exitWith {
+    ["INFO", "OPCOM", format ["recruit: zone %1 has no port -- boat refused", _homeZone]] call fnc_log; nil
+};
+
 ["OPF", -_cost, "opcom_recruit"] call fnc_ap_adjust;
 
 private _id = DUWS_opcom_taskSeq;
 DUWS_opcom_taskSeq = _id + 1;
-// A boat cannot rest on the land zone that raised it -- launch it from the nearest navigable water.
-private _moveType = [_comp] call DUWS_fnc_opcom_moveType;
-private _pos = if (_moveType isEqualTo "boat") then { [_spawnPos] call DUWS_fnc_opcom_nearestWater } else { _spawnPos };
+private _pos = _spawnPos;
+if (_moveType isEqualTo "boat") then {
+    _pos = [[_homeZone] call DUWS_fnc_opcom_portOf] call DUWS_fnc_opcom_c2w;
+};
 // tokenClass redraws a random model per spawn, so a stow/re-spawn cycle would otherwise swap the hull.
 private _spawnClass = [_comp select 0, "OPF"] call DUWS_fnc_tokenClass;
 private _t = createHashMapFromArray [
@@ -40,5 +48,5 @@ private _t = createHashMapFromArray [
 DUWS_opcom_taskings pushBack _t;
 // Join the zone's reserve so the defence wave spawns it when the zone is contested.
 if (_homeZone isNotEqualTo "") then { [_homeZone] call DUWS_fnc_opcom_zoneReserveSync };
-["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _spawnPos, _id]] call fnc_log;
+["INFO", "OPCOM", format ["recruit: hired %1 (force %2, %3 AP) at %4 as tasking %5", _row, _force, _cost, _pos, _id]] call fnc_log;
 _t
