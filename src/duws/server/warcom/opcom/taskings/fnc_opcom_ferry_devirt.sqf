@@ -4,7 +4,7 @@
 if (!isServer) exitWith {};
 
 // Clear a hull's ferry state so one that ferries a second rider re-arms cleanly (a stale handler skips the re-arm)
-// and no pickup helipad outlives its landing.
+// and no helipad outlives its landing.
 DUWS_fnc_opcom_ferryClearHull = {
     params ["_veh"];
     private _b = _veh getVariable ["DUWS_ferryBoardEH", -1];
@@ -13,13 +13,14 @@ DUWS_fnc_opcom_ferryClearHull = {
     if (_u >= 0) then { _veh removeEventHandler ["GetOut", _u]; _veh setVariable ["DUWS_ferryUnloadEH", -1] };
     _veh setVariable ["DUWS_ferryRiderGrp", grpNull];
     _veh setVariable ["DUWS_ferryUnloadGrp", grpNull];
+    _veh setVariable ["DUWS_ferryUnloadRider", -1];
     _veh setVariable ["DUWS_ferryUnloadQ", []];
     deleteVehicle (_veh getVariable ["DUWS_ferryPad", objNull]);
     _veh setVariable ["DUWS_ferryPad", objNull];
 };
 
-// Feed the next held rider into a seat and order it out. One at a time (the GetOut handler re-calls this), so seat
-// capacity never binds; the rest wait hidden + sim-off so none shows on the ground.
+// Feed the next held rider into a seat and order it out; the rotor drop's paced loop calls this once a second. A man
+// who finds no free seat just shows beside the hull, at the helipad he spawned on.
 DUWS_fnc_opcom_ferryUnloadNext = {
     params ["_veh"];
     private _q = (_veh getVariable ["DUWS_ferryUnloadQ", []]) select { !isNull _x && {alive _x} };
@@ -51,10 +52,10 @@ DUWS_fnc_opcom_ferryBoatPark = {
 // pickupboard -> carry -> dropland -> dropunload; a rotor boards inside pickupland and skips pickupboard). The two
 // transit legs are untimed; each land/board/unload phase caps at OPCOM_FERRY_WAIT_MAX ticks and forces through on
 // expiry. The lifts board and dismount on purpose different shapes -- do NOT unify them: a rotor lands on a helipad
-// and the squad walks aboard (the fnc_rescue_squad_success shape: all assigned and orderGetIn'd with the land call,
-// so the landing hold has boarders to wait on), while a boat parks off the shore and the whole group vanishes into
-// it and later spawns ashore at once, because boats are finnicky and never walk men seat by seat. Strength freezes
-// at the board commit and thaws when the riders spawn at the drop.
+// at both ends, the squad walking aboard (the fnc_rescue_squad_success shape: all assigned and orderGetIn'd with the
+// land call, so the landing hold has boarders to wait on) and out a man a second, while a boat parks off the shore
+// and the whole group vanishes into it and later spawns ashore at once, because boats are finnicky and never walk men
+// seat by seat. Strength freezes at the board commit and thaws when the rider is back on the ground.
 DUWS_fnc_opcom_ferryStepLive = {
     params ["_t", "_rider"];
     private _grp = groupFromNetId (_t get "grp");
@@ -75,10 +76,22 @@ DUWS_fnc_opcom_ferryStepLive = {
     };
     // A leg's move goes out once, as the leg starts: finished waypoints stay in `waypoints`, so no count gate re-fires.
     private _legTo = { params ["_pt"]; _t set ["ferryLZ", _pt]; [_grp, "move", _pt] call DUWS_fnc_opcom_applyOrder };
+    // fnc_rescue_squad_success's put-down: the helipad makes `land` settle on the spot rather than hover over a pick of
+    // its own, a pinned pilot neither flees nor breaks off to engage, and Vcm_Disable keeps VCOM, when loaded, off the
+    // scripted waypoints. The pin follows the move, whose applyOrder resets behaviour.
+    private _rotorLeg = {
+        params ["_near"];
+        private _p = [_near, 0, 80, 8, 0, 0.3, 0] call BIS_fnc_findSafePos; _p set [2, 0];
+        _veh setVariable ["DUWS_ferryPad", createVehicle ["Land_HelipadEmpty_F", _p, [], 0, "NONE"]];
+        [_p] call _legTo;
+        _grp setBehaviour "CARELESS"; _grp setCombatMode "BLUE";
+        { _x setVariable ["Vcm_Disable", true] } forEach units _grp;
+        private _pilot = currentPilot _veh;
+        _pilot allowFleeing 0; _pilot disableAI "Target";
+    };
     private _dropLeg = {
-        private _nav = _t get "target";
-        if (_boat) then { _nav = ([_rider get "ferryLand", _nav] call DUWS_fnc_opcom_ferryBoatPark) select 1 };
-        [_nav] call _legTo;
+        if (_boat) exitWith { [([_rider get "ferryLand", _t get "target"] call DUWS_fnc_opcom_ferryBoatPark) select 1] call _legTo };
+        [_t get "target"] call _rotorLeg;
     };
     // Once per rider group: one streamed in mid-pickup is a new group. The GetIn handler reads the group tag live, so
     // one handler serves any rider group and stays off the crew; board-despawn frees each seat at once, so one hull
@@ -103,12 +116,11 @@ DUWS_fnc_opcom_ferryStepLive = {
         { _x assignAsCargo _veh } forEach _men;
         _men orderGetIn true;
     };
-    // Spawn the rider at the drop, detach it, thaw its strength -- egress losses now count.
-    private _dropDeliver = {
-        private _land = _rider getOrDefault ["ferryLand", _t get "target"];
-        _rider set ["pos", _land]; _rider set ["route", []]; _rider set ["leg", 0];
+    // Spawns the rider still bound; ferryRelease, or a rotor's first man out, unbinds it.
+    private _dropSpawn = {
+        _rider set ["pos", if (_boat) then { _rider getOrDefault ["ferryLand", _t get "target"] } else { _t get "ferryLZ" }];
+        _rider set ["route", []]; _rider set ["leg", 0];
         [_rider] call DUWS_fnc_opcom_deVirt;
-        _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false];
     };
     private _embark = {
         private _rg = groupFromNetId (_rider get "grp");
@@ -131,16 +143,7 @@ DUWS_fnc_opcom_ferryStepLive = {
                     _t set ["ferryShore", _shore];
                     [_park] call _legTo;
                 } else {
-                    private _p = [_rpos, 0, 80, 8, 0, 0.3, 0] call BIS_fnc_findSafePos; _p set [2, 0];
-                    [_p] call _legTo;
-                    // fnc_rescue_squad_success's put-down: the helipad makes `land` settle on this spot rather than hover
-                    // over a pick of its own, a pinned pilot neither flees nor breaks off to engage, and Vcm_Disable
-                    // keeps VCOM, when loaded, off the scripted waypoints.
-                    _veh setVariable ["DUWS_ferryPad", createVehicle ["Land_HelipadEmpty_F", _p, [], 0, "NONE"]];
-                    _grp setBehaviour "CARELESS"; _grp setCombatMode "BLUE";
-                    { _x setVariable ["Vcm_Disable", true] } forEach units _grp;
-                    private _pilot = currentPilot _veh;
-                    _pilot allowFleeing 0; _pilot disableAI "Target";
+                    [_rpos] call _rotorLeg;
                 };
             };
             if (_boat) then { call _orderRiders };
@@ -180,7 +183,8 @@ DUWS_fnc_opcom_ferryStepLive = {
             _rider set ["pos", _tpos];
             if ((_t getOrDefault ["ferryLZ", []]) isEqualTo []) then { call _dropLeg };   // live spell resumed mid-carry
             if (([getPosASL _veh, _t get "ferryLZ"] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
-                if (!_boat) then { _veh land "GET OUT" };
+                // LAND sets down and holds until cancelled; GET OUT only hovers low for someone to get out.
+                if (!_boat) then { _veh land "LAND" };
                 ["dropland"] call _setPhase;
             };
         };
@@ -191,32 +195,37 @@ DUWS_fnc_opcom_ferryStepLive = {
                 // Same intentional divergence as the board: the boat spawns the whole group ashore at once.
                 if (((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { ["dropunload"] call _setPhase };
             } else {
-                _veh land "GET OUT";
                 if (((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT) exitWith {
-                    call _dropDeliver;
+                    call _dropSpawn;
                     private _rg = groupFromNetId (_rider get "grp");
                     if (isNull _rg) exitWith { [_t] call DUWS_fnc_opcom_ferryRelease };
-                    // Hold the group hidden and feed one man at a time into a seat a GetOut handler refills as each climbs
-                    // out. `unloading` keeps task_step from stowing or re-tasking the now-detached rider mid-dismount.
+                    // Leader first so the rest follow him off. `unloading` keeps task_step from stowing or re-tasking
+                    // the rider mid-dismount; the first man out thaws and unbinds it.
                     { _x hideObjectGlobal true; _x enableSimulation false } forEach units _rg;
                     _veh setVariable ["DUWS_ferryUnloadGrp", _rg];
-                    _veh setVariable ["DUWS_ferryUnloadQ", units _rg];
-                    private _eh = _veh addEventHandler ["GetOut", {
+                    _veh setVariable ["DUWS_ferryUnloadRider", _rider get "id"];
+                    _veh setVariable ["DUWS_ferryUnloadQ", [leader _rg] + ((units _rg) - [leader _rg])];
+                    _veh setVariable ["DUWS_ferryUnloadEH", _veh addEventHandler ["GetOut", {
                         params ["_v", "", "_u"];
-                        if (group _u isEqualTo (_v getVariable ["DUWS_ferryUnloadGrp", grpNull])) then {
-                            [_v] call DUWS_fnc_opcom_ferryUnloadNext;
-                        };
-                    }];
-                    _veh setVariable ["DUWS_ferryUnloadEH", _eh];
+                        if (group _u isNotEqualTo (_v getVariable ["DUWS_ferryUnloadGrp", grpNull])) exitWith {};
+                        private _r = [_v getVariable ["DUWS_ferryUnloadRider", -1]] call DUWS_fnc_opcom_byId;
+                        if (!isNil "_r" && {(_r getOrDefault ["ridingOn", -1]) >= 0}) then { [_r] call DUWS_fnc_opcom_ferryUnbind };
+                    }]];
                     _rider set ["unloading", true];
                     ["dropunload"] call _setPhase;
-                    [_veh] call DUWS_fnc_opcom_ferryUnloadNext;
+                    [_veh] spawn {
+                        params ["_veh"];
+                        while {alive _veh && {(_veh getVariable ["DUWS_ferryUnloadQ", []]) isNotEqualTo []}} do {
+                            [_veh] call DUWS_fnc_opcom_ferryUnloadNext;
+                            sleep 1;
+                        };
+                    };
                 };
-                if (_wait >= OPCOM_FERRY_WAIT_MAX) exitWith { call _dropDeliver; [_t] call DUWS_fnc_opcom_ferryRelease };
+                if (_wait >= OPCOM_FERRY_WAIT_MAX) exitWith { call _dropSpawn; [_t] call DUWS_fnc_opcom_ferryRelease };
             };
         };
         case "dropunload": {
-            if (_boat) exitWith { call _dropDeliver; [_t] call DUWS_fnc_opcom_ferryRelease };
+            if (_boat) exitWith { call _dropSpawn; [_t] call DUWS_fnc_opcom_ferryRelease };
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             private _rg = groupFromNetId (_rider get "grp");
             private _q = (_veh getVariable ["DUWS_ferryUnloadQ", []]) select { !isNull _x && {alive _x} };

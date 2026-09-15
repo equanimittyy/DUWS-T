@@ -69,14 +69,26 @@ DUWS_fnc_opcom_borrowFerry = {
     _tr
 };
 
+// Detach a rider from its lift and put it back on its own route: a drop spawn runs deVirt's reOrderLive while the
+// rider is still bound, which pins it with a HOLD, so without the re-order it would stand at the drop.
+DUWS_fnc_opcom_ferryUnbind = {
+    params ["_r"];
+    _r set ["ridingOn", -1]; _r set ["ferryFrozen", false];
+    [_r] call DUWS_fnc_opcom_reOrderLive;
+};
+
 // Free a transport from a carry -- the rider is gone, or the crossing is done. Reverts it to a free staged
 // guard back in the pool (a boat backs off to navigable water, unable to rest on land); if live it takes the
 // guard order in place, else it just banks the reverted state.
 DUWS_fnc_opcom_ferryRelease = {
     params ["_t"];
-    // Crossing over: thaw the rider's strength freeze and clear its unload guard so live tracking + tasking resume.
+    // Crossing over: thaw the rider's strength freeze and clear its unload guard so live tracking + tasking resume;
+    // a rider still bound here (a boat drop, or a rotor drop nobody got out of) unbinds now.
     private _r = [_t get "carrying"] call DUWS_fnc_opcom_byId;
-    if (!isNil "_r") then { _r set ["ferryFrozen", false]; _r set ["unloading", false] };
+    if (!isNil "_r") then {
+        _r set ["ferryFrozen", false]; _r set ["unloading", false];
+        if ((_r getOrDefault ["ridingOn", -1]) == (_t get "id")) then { [_r] call DUWS_fnc_opcom_ferryUnbind };
+    };
     private _status = if (isNil "_r") then { "gone" } else { _r get "status" };
     private _wait = _t getOrDefault ["ferryWait", 0];
     [["INFO", "WARN"] select (_wait >= OPCOM_FERRY_WAIT_MAX), "OPCOM", format ["ferry: transport %1 (%2) releases rider %3 (%4) at %5, wait %6/%7",
@@ -92,6 +104,7 @@ DUWS_fnc_opcom_ferryRelease = {
         private _veh = vehicle (leader _grp);
         [_veh] call DUWS_fnc_opcom_ferryClearHull;
         (currentPilot _veh) enableAI "Target";              // undo the pickup's pilot pin: a guard must engage
+        if (_veh isKindOf "Air") then { _veh land "NONE" };   // the drop's LAND holds it on the pad until cancelled
         [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
     };
 };
