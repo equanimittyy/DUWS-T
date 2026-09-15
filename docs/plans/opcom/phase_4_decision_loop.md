@@ -46,7 +46,7 @@ The tasking layer is live and hand-driven. Phase 4a adds the economic decision; 
 | Hire a menu row into a resting `garrison` unit, priced `ceil(force × OPCOM_AP_PER_FORCE)`, paid from the wallet | [`fnc_opcom_recruit.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_recruit.sqf) |
 | Issue `move` / `guard` to a resting or live unit (a live one is re-ordered in place), plan its route, arm the commit hold | [`fnc_opcom_task.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task.sqf) |
 | The per-tick step: movement along the route, streaming in/out, ferry carry, garrison heal, status read | [`fnc_opcom_task_step.sqf`](../../../src/duws/server/warcom/opcom/taskings/fnc_opcom_task_step.sqf) |
-| The commit **hold** — `fnc_opcom_task` sets `hold = tick + OPCOM_COMMIT_HOLD` and refuses to re-issue a held unit's order (a live unit is re-ordered; a bound ferry carry refused) | `fnc_opcom_task.sqf:25,48` |
+| The commit **hold** — `fnc_opcom_task` sets `hold = tick + OPCOM_COMMIT_HOLD` and refuses to re-issue a held unit's order (a live unit is re-ordered; a bound ferry carry refused) | `fnc_opcom_task.sqf:22,51` |
 | The tick **fault-wrap** — the loop body is already in a `try`/`catch` naming `_stage` | `fnc_opcom_perception_run.sqf:16-39` |
 | Enemy-ground worth `_points` for Value — already stamped into `zone_meta_array` | `fnc_createzone.sqf:30` |
 
@@ -57,7 +57,7 @@ The one Phase-3 gap Phase 4a must close (flagged in the P3 code):
   *which* errand. See `fnc_opcom_task_step.sqf:56-60,124-131` ("mission plumbing lands with the actions that
   consume it in Phase 4"). Closed by [§Supply delivery](#supply-delivery-the-errand-and-fnc_opcom_deliver).
 
-The other P3 note — the contested draw-lock (`fnc_opcom_task.sqf:47-48`) — stays open. It gates drawing a
+The other P3 note — the contested draw-lock (`fnc_opcom_task.sqf:52-58`) — stays open. It gates drawing a
 `garrison` unit out for an offensive, and Phase 4a draws no unit out to fight, so it lands with the
 offensives in Phase 4b. Phase 4a only ever *recruits* (a fresh supply truck), never draws a garrison.
 

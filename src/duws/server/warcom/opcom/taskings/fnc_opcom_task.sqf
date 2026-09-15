@@ -3,6 +3,7 @@
 // a re-issue before the commit hold expires is refused.
 //   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target).
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _supplyDrop.
+//     A boat goes to the zone's port instead of _target (never a land point); a portless zone refuses it.
 //   _supplyDrop: `move` only -- deleted and its delivery completed on arrival, in place of a settle.
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_supplyDrop", false]];
 if (!isServer) exitWith { false };
@@ -21,6 +22,14 @@ if (_live && {((_t getOrDefault ["carrying", -1]) >= 0) || {(_t getOrDefault ["r
 if (DUWS_opcom_tick < (_t get "hold")) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 held until tick %2 (now %3)", _t get "id", _t get "hold", DUWS_opcom_tick]] call fnc_log; false
 };
+private _isMove = _order isEqualTo "move";
+private _rz = ["", _returnZone] select (_isMove && {!_supplyDrop});
+private _boatHome = _rz isNotEqualTo "" && {(_t get "moveType") isEqualTo "boat"};
+private _port = [_rz] call DUWS_fnc_opcom_portOf;
+if (_boatHome && {_port < 0}) exitWith {
+    ["INFO", "OPCOM", format ["task: zone %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
+};
+if (_boatHome) then { _target = [_port] call DUWS_fnc_opcom_c2w };
 
 private _wasGarrison = (_t get "order") isEqualTo "garrison";
 private _hz = _t get "homeZone";
@@ -36,9 +45,8 @@ if (_order isEqualTo "guard") then {
     _t set ["routeMode", _mode];
 };
 // Cleared off a non-move so a recycled record carries no stale re-garrison / supply mark; exclusive on a move.
-private _isMove = _order isEqualTo "move";
 _t set ["supplyDrop", _isMove && _supplyDrop];
-_t set ["returnZone", ["", _returnZone] select (_isMove && {!_supplyDrop})];
+_t set ["returnZone", _rz];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out: delete its reserve-spawned defender (going mobile), then re-sync so the zone's
