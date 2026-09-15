@@ -105,9 +105,15 @@ switch (_verb) do {
         } forEach DUWS_opcom_taskings;
         private _flags = _bestT get "flags";
         private _tgt = _bestT get "target";
+        private _men = "-";
+        if ((_bestT get "grp") isNotEqualTo "") then {
+            private _g = groupFromNetId (_bestT get "grp");
+            if (!isNull _g) then { _men = { alive _x } count (units _g) };
+        };
         private _lines = [
             format ["id %1  (%2 m away, %3)", _bestT get "id", round _bd, ["virtual", "live"] select ((_bestT get "grp") isNotEqualTo "")],
             format ["type: %1  [%2]  move %3  hull %4", _bestT get "menu", (_bestT get "comp") joinString "+", _bestT get "moveType", _bestT getOrDefault ["spawnClass", "-"]],
+            format ["strength: eff %1/%2  men %3", round (_bestT get "effForce"), round (_bestT get "fullForce"), _men],
             format ["flags: %1", [_flags joinString ", ", "none"] select (_flags isEqualTo [])],
             format ["tasking: %1/%2  target %3  leg %4/%5", _bestT get "order", _bestT get "status", [str (_tgt apply { round _x }), "none"] select (_tgt isEqualTo []), _bestT get "leg", count (_bestT get "route")]
         ];
