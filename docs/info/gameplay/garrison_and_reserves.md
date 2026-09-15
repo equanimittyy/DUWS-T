@@ -11,8 +11,8 @@ A garrison is a **site**: the shared `fnc_site_*` store (key, pos, radius, roste
 towns both register in. A site raises a composition, gets ground down by the same player, and
 comes back at what was left, not what it started with — one model, whichever kind of ground holds
 it. The only differences are which tier table it draws from (`DUWS_zoneSpawnTiers`,
-`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:32`, vs `DUWS_townSpawnTiers`,
-`src/duws/server/civilian/fnc_civ_state_init.sqf:63`) and what happens once it's beaten: a zone flips
+`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:24`, vs `DUWS_townSpawnTiers`,
+`src/duws/server/civilian/fnc_civ_state_init.sqf:59`) and what happens once it's beaten: a zone flips
 to BLUFOR, a town is cleared back toward neutral and bought up again by the commander.
 
 ## The ledger
@@ -35,7 +35,7 @@ casualties but keeps a survivor is not recorded: it streams out and comes back w
 Chip damage does not persist; only a wipe does.
 
 Both the raise and a town's tier buy call one shared derivation, `DUWS_fnc_garrisonDerive {key,
-x1, mult, stand}` (`src/duws/server/garrison/fnc_garrison_strength_init.sqf:62`): it stamps `full`,
+x1, mult, stand}` (`src/duws/server/garrison/fnc_garrison_strength_init.sqf:77`): it stamps `full`,
 computes `surviving`, and splits it against `_stand` (the density-thinned standing template) into
 `[garrison, pool]`. Losses come out of the pool before they ever thin the standing garrison.
 
@@ -70,9 +70,9 @@ an upgrade starts every garrison fresh.
 ## Recording a loss
 
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:192`) tags each unit with its group's source
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:158`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
-(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:251`) — and hangs a `Killed` handler on it.
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:257`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
 before calling `DUWS_fnc_garrisonRecordLoss`; a unit dying with squadmates still up records
 nothing. The tag rides the *unit*, not the group, since a dead man can outlive it. The same
@@ -92,7 +92,7 @@ as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garrisonGroupCount {key}`
 (`src/duws/server/init_zones/fnc_zone_state_init.sqf:164`) counts distinct alive groups the
 streaming garrison raised; a prefab's manned static weapons sit on the same roster but are
 excluded, so a site with guns doesn't read as already at its ceiling. Globally,
-`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:505`) pauses all garrison
+`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:457`) pauses all garrison
 spawns and refills once every OPFOR group on the map (`DUWS_fnc_opforGroupCount`) reaches it —
 slack for hardpoints and town garrisons, which raise their own groups outside any per-site cap but
 still count against this wall.
@@ -123,7 +123,7 @@ wave moves men from pool to alive without changing that total; only a kill does.
 ## Placement: keeping a wave off the player's back
 
 `DUWS_fnc_garrisonReservePos {center, radius}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:36`) chooses where a wave stands up, in
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:25`) chooses where a wave stands up, in
 priority order over a flat distance floor, so a player never watches a squad appear and never gets
 flanked from their own approach direction:
 
@@ -139,7 +139,7 @@ flanked from their own approach direction:
    a far side facing open water).
 
 Distance is a flat floor, `DUWS_zoneReserveSpawnDist` (400 m,
-`src/duws/server/server_var_init.sqf:515`), measured from the nearest player rather than scaled to
+`src/duws/server/server_var_init.sqf:467`), measured from the nearest player rather than scaled to
 the site radius — a radius-relative distance would drop a wave a kilometre off a small island and
 on top of the player at a large base.
 
@@ -152,7 +152,7 @@ demanding a fully-hidden one keeps the cost constant and never blocks a spawn.
 ## Hunt posture
 
 Reserves are ordered with a dedicated `"hunt"` case in
-`src/duws/server/placement/fnc_apply_posture.sqf:219`: `AWARE` behaviour, `YELLOW` combat mode,
+`src/duws/server/placement/fnc_apply_posture.sqf:188`: `AWARE` behaviour, `YELLOW` combat mode,
 `FULL` speed, a `SAD` waypoint, then a cycle. Speed is deliberate — a reinforcement runs, it does
 not patrol; the wave has to arrive as pressure, not a slow trickle. It applies unchanged to a
 mounted group or aircraft, each hunting at its own pace.
@@ -187,7 +187,7 @@ range, a SAM denying the airspace over the zone.
 
 ## The break test
 
-`DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:17`) is the
+`DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:8`) is the
 one capture/clear line for both site kinds: live men plus reserve-owed men, worn to **a tenth of
 full fighting potential** (`fullMen`, the ledger's denominator). A site with an unspent pool
 cannot fall on an empty perimeter — the owed men hold `remaining` above the line until the waves
@@ -198,7 +198,7 @@ site was ever worth, not just what happened to be standing when they arrived.
   requires BLUFOR outnumber whatever OPFOR is still present in the trigger area — `garrisonBeaten`
   alone isn't enough, the player also has to hold the ground.
 - **Town clear** fires on `garrisonBeaten` alone, checked on the poller tick
-  (`src/duws/server/civilian/fnc_civ_garrison.sqf:303`) rather than an `EmptyDetector`, so a town can
+  (`src/duws/server/civilian/fnc_civ_garrison.sqf:192`) rather than an `EmptyDetector`, so a town can
   no longer be cleared by OPFOR merely withdrawing. Clearing pays a reputation credit and a
   `REGROUPING` hold, drops the tier to I — not 0; ownership survives, only the purchase was beaten
   — and reseeds the garrison to a scratch `0.3` rather than clearing it outright.

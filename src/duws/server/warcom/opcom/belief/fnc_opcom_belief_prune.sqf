@@ -7,7 +7,7 @@
 // is a server-authoritative read for a group local to any machine.
 //
 // Test alive-count, not units-empty: dead bodies linger in `units` until the engine clears them
-// (fnc_garrison_reserve.sqf:205 filters `alive` for the same reason), so units-empty alone would miss a
+// (fnc_garrison_reserve.sqf:171 filters `alive` for the same reason), so units-empty alone would miss a
 // fresh wipe. Zero-alive also covers a merge-drain and a deleted group -- one test, three cases.
 if (!isServer) exitWith {};
 
