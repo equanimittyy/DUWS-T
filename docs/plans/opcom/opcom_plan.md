@@ -64,10 +64,12 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   six-phase machine** (`to-pickup → pickup-land → pickup-board → carry → drop-land → drop-unload`), the two transit
   legs untimed, each land/board/unload phase capped at `OPCOM_FERRY_WAIT_MAX` ticks so a hull stuck short of shore
   forces the group to its destination at expiry rather than hanging. The two lifts board and dismount on purpose
-  different shapes: a **rotary** lands and the squad walks aboard man by man — the riders are assigned and
-  `orderGetIn`'d as the landing order goes out (with nothing assigned the landing hold is vacuous and the hull
-  touches down and lifts between ticks), despawning as each enters, the current leader forced aboard per tick so
-  an engaged board still drains. A **boat** never boards or dismounts men: it parks `OPCOM_FERRY_BOAT_PARK` out
+  different shapes: a **rotary** takes the rescue-squad pickup (`fnc_rescue_squad_success.sqf`) — a helipad marks
+  its LZ so `land` settles on the spot, its pilot is pinned (no fleeing, no targeting) and its crew CARELESS/BLUE;
+  within `OPCOM_FERRY_LAND_K` grid cells of the LZ it calls the landing and assigns and `orderGetIn`s the whole
+  squad in the same breath (with nothing assigned the landing hold is vacuous and the hull lifts at once), each man
+  despawning as he enters. It boards inside pickup-land and skips pickup-board; a board unfinished at the cap
+  despawns the men still ashore. A **boat** never boards or dismounts men: it parks `OPCOM_FERRY_BOAT_PARK` out
   from the shoreline nearest the riders (a water-cell centre can sit ~350 m out) while they walk to that shore,
   and the whole group vanishes into it once its leader is within `OPCOM_FERRY_BOARD_BOAT` of the shore, then
   spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do not unify the two shapes.

@@ -89,7 +89,9 @@ DUWS_fnc_opcom_ferryRelease = {
     _t set ["ferryWait", 0]; _t set ["ferryLZ", []]; _t set ["ferryPhase", "topickup"];
     _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
     if (!isNull _grp) then {
-        [vehicle (leader _grp)] call DUWS_fnc_opcom_ferryClearEH;
+        private _veh = vehicle (leader _grp);
+        [_veh] call DUWS_fnc_opcom_ferryClearHull;
+        (currentPilot _veh) enableAI "Target";              // undo the pickup's pilot pin: a guard must engage
         [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
     };
 };
@@ -120,7 +122,7 @@ DUWS_fnc_opcom_ferryTick = {
             // Its pickup orders outlive the hull (a shore HOLD, a seat on the wreck), so re-stage it to re-ferry.
             private _rg = groupFromNetId (_rider get "grp");
             if (!isNull _rg) then { { unassignVehicle _x } forEach units _rg; [_rider] call DUWS_fnc_opcom_reOrderLive };
-            if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearEH };
+            if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull };
             _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
         };
         if (_near || {(_rider get "grp") isNotEqualTo ""}) then {
@@ -143,6 +145,7 @@ DUWS_fnc_opcom_ferryTick = {
             if (_far >= OPCOM_REVIRT_GRACE) then {
                 ["INFO", "OPCOM", format ["ferry: transport %1 (%2) stows at %3, embarked %4", _t get "id", _t get "moveType",
                     _t getOrDefault ["ferryPhase", "topickup"], _t getOrDefault ["embarked", false]]] call fnc_log;
+                [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull;
                 [_t] call DUWS_fnc_opcom_reVirt;
             };
         };

@@ -653,7 +653,7 @@ OPCOM_FERRY_BOAT_PARK = 100;     // m; a live boat parks this far out from the s
 OPCOM_FERRY_SHORE_ARRIVE = 100;  // m; leader within this of the shore stage calls the ferry (own tunable, not the streaming margin)
 OPCOM_FERRY_GROUND_ALT = 4;      // m ATL under which a landing rotary counts as grounded (mirrors fnc_helotaxi)
 OPCOM_FERRY_WAIT_MAX = 20;       // ticks a timed ferry phase (land/board/unload) may stall before the fallback forces it through
-OPCOM_FERRY_LAND_K = 1;          // grid cells: a rotor issues its land order this many cells from the LZ/drop (measured by k, not metres)
+OPCOM_FERRY_LAND_K = 1;          // grid cells: a lift enters its landing phase this close to its pickup or drop (k, not metres)
 
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
