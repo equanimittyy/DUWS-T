@@ -286,7 +286,7 @@ moreUrban = 1;publicVariable "moreUrban";
 // Share of a zone's mobile garrison fielded at once (1 = all). Below 1, the remainder seeds the
 // reserve pool so even a x1 zone reinforces. Default here covers the pre-commit window and a campaign
 // that predates the setting; the campaign screen overwrites it (fnc_process_campaign_menu).
-garrison_density = 1;publicVariable "garrison_density";
+garrison_density = 0.8;publicVariable "garrison_density";
 
 opfor_ai_skill = [0.55,0.75];publicVariable "opfor_ai_skill";
 
