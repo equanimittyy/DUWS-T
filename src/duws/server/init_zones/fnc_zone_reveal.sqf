@@ -22,8 +22,11 @@ private _fnc_paint = {
     params ["_pos"];
     private _icon = format ["%1%2", round (_pos select 0), round (_pos select 1)];
     private _ellipse = format ["%1%2ellipse", round (_pos select 0), round (_pos select 1)];
+    // A landlocked zone owns no port, so that name addresses nothing -- a no-op, not an error.
+    private _port = format ["%1%2port", round (_pos select 0), round (_pos select 1)];
     str(_icon) setMarkerAlpha 1;
     str(_ellipse) setMarkerAlpha 0.3;
+    str(_port) setMarkerAlpha 1;
 };
 
 private _revealed = false;

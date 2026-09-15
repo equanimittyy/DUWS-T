@@ -81,6 +81,18 @@ DUWS_fnc_opcom_ports_init = {
         } forEach _list;
     } forEach _cands;
 
+    // Named off the zone's position, like fnc_createzone's pair, so fnc_zone_reveal's paint reaches it.
+    {
+        private _zpos = ([_x] call fnc_site_at) get "pos";
+        private _pm = format ["%1%2port", round (_zpos select 0), round (_zpos select 1)];
+        createMarker [str(_pm), [_y] call DUWS_fnc_opcom_c2w];
+        str(_pm) setMarkerShape "ICON";
+        str(_pm) setMarkerType "loc_Quay";
+        str(_pm) setMarkerColor "ColorRed";
+        str(_pm) setMarkerSize [0.7, 0.7];
+        str(_pm) setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
+    } forEach _ports;
+
     // Published whole and last: the overlay gather takes its presence as OPCOM init done.
     DUWS_opcom_zonePort = _ports;
 };

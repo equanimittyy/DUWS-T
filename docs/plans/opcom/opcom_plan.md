@@ -87,7 +87,8 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   on its zone's **port** (`taskings/fnc_opcom_ports.sqf`) — the one navigable-water cell within 3 grid steps
   that zone owns (a cell two zones claim goes to the nearer; the loser takes its nearest unclaimed land-adjacent
   cell). A portless zone refuses boats outright, as a hire target and as a return-to-garrison pick. The borrow
-  has no lift-type preference — the closest free hull wins, boat or rotary alike.
+  has no lift-type preference — the closest free hull wins, boat or rotary alike. A port draws on every player's
+  map as a `loc_Quay` marker at its cell centre, hidden under hardcore fog until `fnc_zone_reveal` finds its zone.
 
 Not built (Phase 4 valuations on the shipped mechanic): whether an idle hull leaves its post to ferry; whether a
 rider waits for lift or walks a longer route (real only once P4 lowers `OPCOM_ROUTE_LIFT_PENALTY` so water is a
