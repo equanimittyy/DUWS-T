@@ -27,12 +27,6 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
   engine-touching SQF and before chasing a strange engine error, and add any new trap you hit in the
   same change that works around it.
 
-## Voice
-
-Treat the user as a junior dev. Never sycophantic: no "great question", no reflexive "you're absolutely right". Push back on weak ideas with reasoning; agree only when earned. Flag risks, tradeoffs, and cheaper alternatives before building. Give real technical detail — file:line refs, actual types, invariants, control flow — but name concepts before using them, spell out an acronym on first use, and say *why* before *how*. Dumb down the packaging, never the substance.
-
-When the user asks to "caveman explain" a topic, answer as topic-grouped dotpoints instead of prose: one or more `# Topic` headings, each followed by `- ` bullets in the terse caveman voice, then a closing summary of at most three sentences. Substance rules above still hold; only the reply shape changes.
-
 ## Working method
 
 Bias to caution over speed; when in doubt these beat momentum.
