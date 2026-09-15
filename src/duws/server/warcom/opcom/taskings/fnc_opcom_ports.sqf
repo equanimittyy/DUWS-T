@@ -9,7 +9,7 @@ DUWS_fnc_opcom_portOf = {
 };
 
 DUWS_fnc_opcom_ports_init = {
-    DUWS_opcom_zonePort = createHashMap;
+    private _ports = createHashMap;
     private _w = DUWS_opcom_grid_w;
     (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
 
@@ -73,11 +73,14 @@ DUWS_fnc_opcom_ports_init = {
             if (!_done && {!(_claimed getOrDefault [_ni, false])}) then {
                 // A zone's own nearest cell needs no land check; a fallback must reach land.
                 if (_forEachIndex == 0 || { [_ni] call _fnc_landAdj }) then {
-                    DUWS_opcom_zonePort set [_key, _ni];
+                    _ports set [_key, _ni];
                     _claimed set [_ni, true];
                     _done = true;
                 };
             };
         } forEach _list;
     } forEach _cands;
+
+    // Published whole and last: the overlay gather takes its presence as OPCOM init done.
+    DUWS_opcom_zonePort = _ports;
 };

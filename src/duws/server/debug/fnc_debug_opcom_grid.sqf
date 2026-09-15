@@ -4,8 +4,9 @@
 // force, so the client can paint the full-map lattice.
 if (!isServer) exitWith {};
 params ["_requester"];
-if (isNil "DUWS_opcom_grid_w") exitWith {
-    ["DEBUG", "OPCOM", "overlay gather: grid not built yet, nothing sent"] call fnc_log;
+// The zone-port map is OPCOM init's last store, published whole; ports draw only on the client's first build.
+if (isNil "DUWS_opcom_zonePort") exitWith {
+    ["DEBUG", "OPCOM", "overlay gather: OPCOM init not finished, nothing sent"] call fnc_log;
 };
 
 private _w = DUWS_opcom_grid_w;
