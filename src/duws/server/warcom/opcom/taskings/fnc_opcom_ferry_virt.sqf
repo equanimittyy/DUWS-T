@@ -24,6 +24,7 @@ DUWS_fnc_opcom_ferryStep = {
             _rider set ["ferryLand", _drop];
             _t set ["target", [_t, _drop] call DUWS_fnc_opcom_ferryApproach];
             _t set ["route", []];
+            ["INFO", "OPCOM", format ["ferry: transport %1 (%2) boards rider %3 (virtual)", _t get "id", _t get "moveType", _rider get "id"]] call fnc_log;
         } else {
             [_t] call DUWS_fnc_opcom_advance;
         };
@@ -40,6 +41,7 @@ DUWS_fnc_opcom_ferryStep = {
             if ((_t get "moveType") isEqualTo "boat") then { _tpos = [_tpos] call DUWS_fnc_opcom_nearestWater };
             _t set ["pos", _tpos]; _t set ["carrying", -1]; _t set ["embarked", false];
             _t set ["order", "guard"]; _t set ["target", _tpos]; _t set ["route", []];
+            ["INFO", "OPCOM", format ["ferry: transport %1 (%2) drops rider %3 at %4 (virtual)", _t get "id", _t get "moveType", _rider get "id", (_rider get "pos") apply { round _x }]] call fnc_log;
             nil
         };
     };

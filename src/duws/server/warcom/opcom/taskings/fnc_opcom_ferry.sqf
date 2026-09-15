@@ -65,7 +65,7 @@ DUWS_fnc_opcom_borrowFerry = {
     _rider set ["ridingOn", _tr get "id"];
     // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.
     if ((_rider get "grp") isNotEqualTo "") then { [_rider] call DUWS_fnc_opcom_reOrderLive };
-    ["INFO", "OPCOM", format ["ferry: tasking %1 borrows transport %2 for a water leg", _rider get "id", _tr get "id"]] call fnc_log;
+    ["INFO", "OPCOM", format ["ferry: tasking %1 borrows %2 transport %3 for a water leg", _rider get "id", _tr get "moveType", _tr get "id"]] call fnc_log;
     _tr
 };
 
@@ -77,6 +77,10 @@ DUWS_fnc_opcom_ferryRelease = {
     // Crossing over: thaw the rider's strength freeze and clear its unload guard so live tracking + tasking resume.
     private _r = [_t get "carrying"] call DUWS_fnc_opcom_byId;
     if (!isNil "_r") then { _r set ["ferryFrozen", false]; _r set ["unloading", false] };
+    private _status = if (isNil "_r") then { "gone" } else { _r get "status" };
+    private _wait = _t getOrDefault ["ferryWait", 0];
+    [["INFO", "WARN"] select (_wait >= OPCOM_FERRY_WAIT_MAX), "OPCOM", format ["ferry: transport %1 (%2) releases rider %3 (%4) at %5, wait %6/%7",
+        _t get "id", _t get "moveType", _t get "carrying", _status, _t getOrDefault ["ferryPhase", "topickup"], _wait, OPCOM_FERRY_WAIT_MAX]] call fnc_log;
     private _grp = groupFromNetId (_t get "grp");
     private _pos = if (!isNull _grp) then { getPosASL (leader _grp) } else { _t get "pos" };
     if ((_t get "moveType") isEqualTo "boat") then { _pos = [_pos] call DUWS_fnc_opcom_nearestWater };
@@ -109,6 +113,8 @@ DUWS_fnc_opcom_ferryTick = {
         // lingers carrying forever. An embarked rider (no group) dies with the hull; one still ashore keeps its
         // group and is cut loose to re-ferry.
         if (isNull _tg || {(units _tg) findIf {alive _x} < 0}) exitWith {
+            ["WARN", "OPCOM", format ["ferry: transport %1 (%2) down at %3 -- rider %4 %5", _t get "id", _t get "moveType",
+                _t getOrDefault ["ferryPhase", "topickup"], _rider get "id", ["cut loose", "lost aboard"] select ((_rider get "grp") isEqualTo "")]] call fnc_log;
             if ((_rider get "grp") isEqualTo "") then { _rider set ["status", "dead"] };
             _rider set ["ridingOn", -1]; _rider set ["ferryFrozen", false]; _rider set ["unloading", false];
             if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearEH };
@@ -116,19 +122,34 @@ DUWS_fnc_opcom_ferryTick = {
         };
         if (_near || {(_rider get "grp") isNotEqualTo ""}) then {
             _t set ["farTicks", 0];
+            if (duws_log_level >= 4) then {
+                private _veh = vehicle (leader _tg);
+                private _ph = _t getOrDefault ["ferryPhase", "topickup"];
+                private _nav = if (_ph in ["carry", "dropland", "dropunload"]) then { _t get "target" } else { _t getOrDefault ["ferryLZ", []] };
+                private _navM = if (_nav isEqualTo []) then { -1 } else { round (_veh distance2D _nav) };
+                ["DEBUG", "OPCOM", format ["ferry: transport %1 (%2) %3 wait %4 nav %5 m alt %6 m %7 km/h wps %8, rider %9 men %10 queue %11",
+                    _t get "id", _t get "moveType", _ph, _t getOrDefault ["ferryWait", 0], _navM,
+                    round ((getPosATL _veh) select 2), round (speed _veh), count waypoints _tg,
+                    _rider get "id", {alive _x} count units groupFromNetId (_rider get "grp"),
+                    count (_veh getVariable ["DUWS_ferryUnloadQ", []])]] call fnc_log;
+            };
             [_t, _rider] call DUWS_fnc_opcom_ferryStepLive;
         } else {
             private _far = (_t getOrDefault ["farTicks", 0]) + 1;
             _t set ["farTicks", _far];
-            if (_far >= OPCOM_REVIRT_GRACE) then { [_t] call DUWS_fnc_opcom_reVirt };
+            if (_far >= OPCOM_REVIRT_GRACE) then {
+                ["INFO", "OPCOM", format ["ferry: transport %1 (%2) stows at %3, embarked %4", _t get "id", _t get "moveType",
+                    _t getOrDefault ["ferryPhase", "topickup"], _t getOrDefault ["embarked", false]]] call fnc_log;
+                [_t] call DUWS_fnc_opcom_reVirt;
+            };
         };
     } else {
         [_t] call DUWS_fnc_opcom_ferryStep;
-        if ((_t getOrDefault ["carrying", -1]) >= 0 && _near) then {
-            [_t] call DUWS_fnc_opcom_deVirt;
+        if ((_t getOrDefault ["carrying", -1]) >= 0 && _near && {[_t] call DUWS_fnc_opcom_deVirt}) then {
             // Fresh live spell: resume the phase by embarked (pickup before the board, carry after), timer reset.
             _t set ["ferryPhase", ["topickup", "carry"] select (_t getOrDefault ["embarked", false])];
             _t set ["ferryWait", 0]; _t set ["ferryLZ", []];
+            ["INFO", "OPCOM", format ["ferry: transport %1 (%2) streams live at %3", _t get "id", _t get "moveType", _t get "ferryPhase"]] call fnc_log;
         };
     };
 };

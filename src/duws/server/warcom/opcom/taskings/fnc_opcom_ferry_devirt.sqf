@@ -49,7 +49,13 @@ DUWS_fnc_opcom_ferryStepLive = {
     private _boat = (_t get "moveType") isEqualTo "boat";
 
     private _phase = _t getOrDefault ["ferryPhase", "topickup"];
-    private _setPhase = { params ["_p"]; _t set ["ferryPhase", _p]; _t set ["ferryWait", 0] };
+    private _setPhase = {
+        params ["_p"];
+        private _wait = _t getOrDefault ["ferryWait", 0];
+        [["INFO", "WARN"] select (_wait >= OPCOM_FERRY_WAIT_MAX), "OPCOM", format ["ferry: transport %1 (%2) rider %3 %4 -> %5, wait %6/%7",
+            _t get "id", _t get "moveType", _rider get "id", _phase, _p, _wait, OPCOM_FERRY_WAIT_MAX]] call fnc_log;
+        _t set ["ferryPhase", _p]; _t set ["ferryWait", 0];
+    };
     // Spawn the rider at the drop, detach it, thaw its strength -- egress losses now count.
     private _dropDeliver = {
         private _land = _rider getOrDefault ["ferryLand", _t get "target"];
