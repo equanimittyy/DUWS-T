@@ -353,7 +353,7 @@ is disc-against-disc, and it reads radii out of `zone_meta_array` (entry index 2
 `serv_zones_array`, which stores positions only. A town whose disc reaches into an enemy zone opens at
 `-20` — the enemy already holds that ground and the civilians there start with them. Worth is a rank
 within the campaign's own kept set rather than an absolute building count, so Altis cities and a
-sparse map's hamlets both span 1 to 3.
+sparse map's hamlets both span 1 to 5.
 
 In hardcore it also decides what starts on the map: the towns the HQ anchor claimed in selection's
 first wave are visible, and every other one is hidden until it is walked into or bought with intel,
