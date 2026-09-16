@@ -4012,10 +4012,6 @@
                 <Original>Alarm raised. The guards will execute the hostage in %1s.</Original>
                 <English>Alarm raised. The guards will execute the hostage in %1s.</English>
             </Key>
-            <Key ID="STR_DUWS_T_rescuehostage_detection">
-                <Original>Detection</Original>
-                <English>Detection</English>
-            </Key>
             <Key ID="STR_DUWS_T_rescuehostage_captors">
                 <Original>Captors eliminated. The hostage will now cooperate.</Original>
                 <English>Captors eliminated. The hostage will now cooperate.</English>

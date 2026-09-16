@@ -1,8 +1,8 @@
 // Locality: server; the recruit-action bodies remoteExec fnc_escort_informant_group to target 2.
 //
-// Covert rescue: reach the captive unseen and kill his building garrison. A partial sighting drains once you
-// break contact; a confirmed one arms an execution clock that cannot be called off -- only killing the garrison
-// first saves him. Killing it frees him and brings the cordon in. Win: captive at HQ.
+// Covert rescue: reach the captive unseen and kill his building garrison. A confirmed sighting arms an execution
+// clock that cannot be called off -- only killing the garrison first saves him. Killing it frees him and brings
+// the cordon in. Win: captive at HQ.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([24, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
@@ -139,8 +139,8 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
 // (arma_engine_gotchas.md). knowsAbout still grades a live sighting, but only for a guard
 // with a current fix -- so breaking contact drains it. A confirmed sighting arms the clock for good, and killing
 // the garrison is what frees the hostage.
-[_hostage, _garrison, _ring, _hostageBldg, _trk, _MissionPos, _radius] spawn {
-    params ["_hostage", "_garrison", "_ring", "_bldg", "_trk", "_MissionPos", "_radius"];
+[_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
+    params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
@@ -170,27 +170,6 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
     private _lastKill = -1e9;            // time of the last cordon death; opens the takedown grace
     private _prevObsAlive = -1;          // cordon alive count last tick; a drop stamps _lastKill
-
-    private _fnc_pipes = { params ["_n"]; private _s = ""; for "_i" from 1 to _n do { _s = _s + "|" }; _s };
-    private _fnc_hex2 = {
-        params ["_n"];
-        private _d = "0123456789abcdef";
-        private _v = (round _n) max 0 min 255;
-        (_d select [floor (_v / 16), 1]) + (_d select [_v mod 16, 1])
-    };
-    // Scaled to CONFIRM, not the engine's 0..4: the bar tops out exactly as the alarm would arm, so full = last warning.
-    // Returns markup as a STRING, not a parseText object: structured TEXT doesn't survive remoteExec, so the receiver parses it.
-    private _fnc_detBar = {
-        params ["_knows"];
-        private _f = ((_knows / CONFIRM) max 0) min 1;
-        private _seg = floor (_f * 20);
-        private _col = format ["#%1%2%2",
-            [linearConversion [0, 1, _f, 127, 255, true]] call _fnc_hex2,
-            [linearConversion [0, 1, _f, 127, 48, true]] call _fnc_hex2];
-        format ["<t align='center'>%1<br/><t color='%2'>%3</t><t color='#7f7f7f'>%4</t></t>",
-            localize "STR_DUWS_T_rescuehostage_detection",
-            _col, [_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes]
-    };
 
     while { alive _hostage } do {
         // Garrison dead -> freed. Checked first so a wipe mid-countdown cancels the clock.
@@ -250,12 +229,11 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         if (_obsAlive < _prevObsAlive) then { _lastKill = time };
         _prevObsAlive = _obsAlive;
         private _confirmed = false;
-        private _meterVals = [];
         {
             private _pl = _x;
             // Best knowsAbout among guards with a CURRENT nearTargets fix on this player: the engine's own live
             // sighting decides who counts, knowsAbout grades how sure they are. A guard who only remembers you
-            // (age > DET_FRESH) is excluded, so the bar and the alarm both drain when the cordon loses contact.
+            // (age > DET_FRESH) is excluded, so the alarm drains when the cordon loses contact.
             private _knowsCur = 0;
             {
                 private _u = _x;
@@ -265,7 +243,6 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                 };
             } forEach _obs;
             if (_knowsCur > CONFIRM) then { _confirmed = true };
-            if (_pl distance2D _MissionPos < _radius + 200) then { _meterVals pushBack [_pl, _knowsCur] };
         } forEach _players;
 
         if (_alarmAt < 0 && { _confirmed } && { time - _lastKill > GRACE_KILL }) then { _alarmAt = time + CLOCK_BASE };
@@ -273,11 +250,6 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         if (_alarmAt >= 0) then {
             // Committed. Countdown broadcast until freed (garrison dead) or executed (clock expired).
             [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
-        } else {
-            {
-                _x params ["_pl", "_knows"];
-                [[_knows] call _fnc_detBar, { hintSilent parseText _this }] remoteExec ["call", _pl];
-            } forEach _meterVals;
         };
 
         sleep 1;
