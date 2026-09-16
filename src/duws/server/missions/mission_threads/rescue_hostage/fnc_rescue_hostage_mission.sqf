@@ -1,8 +1,8 @@
 // Locality: server; the recruit-action bodies remoteExec fnc_escort_informant_group to target 2.
 //
-// Covert rescue: reach the captive unseen and kill his building garrison. Being seen raises suspicion you can
-// still slip away from; a confirmed sighting arms an execution clock that cannot be called off -- only killing
-// the garrison first saves him. Killing it frees him and brings the cordon in. Win: captive at HQ.
+// Covert rescue: reach the captive unseen and kill his building garrison. A partial sighting drains once you
+// break contact; a confirmed one arms an execution clock that cannot be called off -- only killing the garrison
+// first saves him. Killing it frees him and brings the cordon in. Win: captive at HQ.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([24, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
@@ -132,20 +132,18 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
 private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
 
-// Guard watcher: a two-stage alarm. The whole cordon spots you -- a garrison OR patrol sighting raises the one
+// Guard watcher: one alarm threshold. The whole cordon spots you -- a garrison OR patrol sighting raises the one
 // global alarm. "Sensing now" is the engine's own nearTargets fix (age ~0 while watched), NOT knowsAbout, which
 // is a decaying, side-wide memory scalar: it reads flat-high off any distant firefight and can't tell a watched
 // mover from a guard who merely remembers you, and an ad-hoc lineIntersectsSurfaces ray is no substitute
-// (arma_engine_gotchas.md). knowsAbout still grades a live sighting (suspicion vs confirmed), but only for a guard
+// (arma_engine_gotchas.md). knowsAbout still grades a live sighting, but only for a guard
 // with a current fix -- so breaking contact drains it. A confirmed sighting arms the clock for good, and killing
 // the garrison is what frees the hostage.
 [_hostage, _garrison, _ring, _hostageBldg, _trk, _MissionPos, _radius] spawn {
     params ["_hostage", "_garrison", "_ring", "_bldg", "_trk", "_MissionPos", "_radius"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
-    #define SUS_KNOWS 0.3
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
-    #define GRACE_SUS 8
     #define CLOCK_BASE 60     // armed once and never called off
     #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
 
@@ -169,17 +167,9 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
     };
 
     private _hintTgt = [0, -2] select isDedicated;
-    private _state = "CALM";
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
-    private _lastSeen = -1e9;            // last time any player was in a guard's sight
-    private _seenPrev = [];              // players seen last tick, so "spotted" fires once per player
     private _lastKill = -1e9;            // time of the last cordon death; opens the takedown grace
     private _prevObsAlive = -1;          // cordon alive count last tick; a drop stamps _lastKill
-    // Called by call, so it reads and writes the loop's own _alarmAt / _state.
-    private _arm = {
-        _alarmAt = time + CLOCK_BASE;
-        _state = "ALARM";
-    };
 
     private _fnc_pipes = { params ["_n"]; private _s = ""; for "_i" from 1 to _n do { _s = _s + "|" }; _s };
     private _fnc_hex2 = {
@@ -229,7 +219,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         // Clock expired: hand him to the cordon to be shot. Drop his damage clamp so rounds land full, then
         // walk the nearest guard onto him and fire -- the garrison roams the house, so the closest may be
         // rooms away. setDamage is a failsafe for a guard that can't path to him, timed to land after the walk.
-        if (_state == "ALARM" && { time > _alarmAt }) exitWith {
+        if (_alarmAt >= 0 && { time > _alarmAt }) exitWith {
             _hostage removeAllEventHandlers "HandleDamage";
             _hostage setCaptive false;
             private _guards = units _garrison select { alive _x };
@@ -259,7 +249,6 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         private _obsAlive = count _obs;
         if (_obsAlive < _prevObsAlive) then { _lastKill = time };
         _prevObsAlive = _obsAlive;
-        private _seenNow = [];
         private _confirmed = false;
         private _meterVals = [];
         {
@@ -275,40 +264,21 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
                     if (_k > _knowsCur) then { _knowsCur = _k };
                 };
             } forEach _obs;
-            if (_knowsCur > SUS_KNOWS) then { _seenNow pushBack _pl };
             if (_knowsCur > CONFIRM) then { _confirmed = true };
-            // Bar and alarm share _knowsCur, so full == alarm arming.
             if (_pl distance2D _MissionPos < _radius + 200) then { _meterVals pushBack [_pl, _knowsCur] };
         } forEach _players;
-        if (count _seenNow > 0) then { _lastSeen = time };
 
-        if (_state == "ALARM") then {
+        if (_alarmAt < 0 && { _confirmed } && { time - _lastKill > GRACE_KILL }) then { _alarmAt = time + CLOCK_BASE };
+
+        if (_alarmAt >= 0) then {
             // Committed. Countdown broadcast until freed (garrison dead) or executed (clock expired).
             [format [localize "STR_DUWS_T_rescuehostage_detected", ceil (_alarmAt - time)]] remoteExec ["hint", _hintTgt];
         } else {
-            if (_confirmed && { time - _lastKill > GRACE_KILL }) then { call _arm } else {
-                if (count _seenNow > 0) then {
-                    _state = "SUS";
-                    // Warn only the players newly in a guard's sight, each on his own machine.
-                    {
-                        [localize "STR_DUWS_T_rescuehostage_spotted"] remoteExec ["hint", _x];
-                    } forEach (_seenNow select { !(_x in _seenPrev) });
-                } else {
-                    if (_state == "SUS" && { time - _lastSeen > GRACE_SUS }) then { _state = "CALM" };
-                };
-            };
-        };
-
-        // Held back under ALARM (the countdown owns the box) and for a player warned this tick they were spotted,
-        // so neither is overwritten.
-        if (_state != "ALARM") then {
-            private _justSpotted = _seenNow select { !(_x in _seenPrev) };
             {
                 _x params ["_pl", "_knows"];
-                if !(_pl in _justSpotted) then { [[_knows] call _fnc_detBar, { hintSilent parseText _this }] remoteExec ["call", _pl] };
+                [[_knows] call _fnc_detBar, { hintSilent parseText _this }] remoteExec ["call", _pl];
             } forEach _meterVals;
         };
-        _seenPrev = _seenNow;
 
         sleep 1;
     };
