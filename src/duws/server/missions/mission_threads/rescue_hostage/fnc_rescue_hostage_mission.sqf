@@ -1,8 +1,8 @@
 // Locality: server; the recruit-action bodies remoteExec fnc_escort_informant_group to target 2.
 //
-// Covert rescue: reach the captive unseen and kill his building garrison. A confirmed sighting arms an execution
-// clock that cannot be called off -- only killing the garrison first saves him. Killing it frees him and brings
-// the cordon in. Win: captive at HQ.
+// Covert rescue: reach the captive unseen and kill his building garrison. A sighting held a few seconds arms an
+// execution clock that cannot be called off -- only killing the garrison first saves him. Killing it frees him and
+// brings the cordon in. Win: captive at HQ.
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 if (!([24, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
@@ -148,7 +148,7 @@ private _clearIcons = {
 // is a decaying, side-wide memory scalar: it reads flat-high off any distant firefight and can't tell a watched
 // mover from a guard who merely remembers you, and an ad-hoc lineIntersectsSurfaces ray is no substitute
 // (arma_engine_gotchas.md). knowsAbout still grades a live sighting, but only for a guard
-// with a current fix -- so breaking contact drains it. A confirmed sighting arms the clock for good, and killing
+// with a current fix -- so breaking contact drains it. A sighting that holds arms the clock for good, and killing
 // the garrison is what frees the hostage.
 [_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
     params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
@@ -156,7 +156,7 @@ private _clearIcons = {
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
     #define CLOCK_BASE 60     // armed once and never called off
-    #define GRACE_KILL 1      // seconds after a cordon death the alarm can't arm, for chained takedowns
+    #define CONFIRM_HOLD 3    // seconds a sighting must hold unbroken before arming -- short, so the guard's knowsAbout cannot drain out from under the hold
 
     // Held off the alarm and fired only on the freed branch: the execution clock is a race to wipe the
     // garrison, and pulling the outer ring onto the house mid-countdown swamped that fight before the player
@@ -187,8 +187,7 @@ private _clearIcons = {
 
     private _hintTgt = [0, -2] select isDedicated;
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
-    private _lastKill = -1e9;            // time of the last cordon death; opens the takedown grace
-    private _prevObsAlive = -1;          // cordon alive count last tick; a drop stamps _lastKill
+    private _confirmSince = -1;          // time the current unbroken sighting began; -1 = no contact
 
     while { alive _hostage } do {
         // Garrison dead -> freed. Checked first so a wipe mid-countdown cancels the clock.
@@ -243,11 +242,6 @@ private _clearIcons = {
         private _players = allPlayers select { side _x == west && { alive _x } };
         private _obs = units _garrison select { alive _x };
         { _obs append (units _x select { alive _x }) } forEach _ring;
-        // A cordon death opens a brief grace where the alarm can't arm, so a coordinated team can drop the
-        // spotters in one burst before a survivor radios it in.
-        private _obsAlive = count _obs;
-        if (_obsAlive < _prevObsAlive) then { _lastKill = time };
-        _prevObsAlive = _obsAlive;
         private _confirmed = false;
         {
             private _pl = _x;
@@ -265,7 +259,13 @@ private _clearIcons = {
             if (_knowsCur > CONFIRM) then { _confirmed = true };
         } forEach _players;
 
-        if (_alarmAt < 0 && { _confirmed } && { time - _lastKill > GRACE_KILL }) then {
+        if (_confirmed) then {
+            if (_confirmSince < 0) then { _confirmSince = time };
+        } else {
+            _confirmSince = -1;
+        };
+
+        if (_alarmAt < 0 && { _confirmSince >= 0 } && { time - _confirmSince >= CONFIRM_HOLD }) then {
             _alarmAt = time + CLOCK_BASE;
             call _endStealth;
         };
