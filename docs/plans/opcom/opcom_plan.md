@@ -74,13 +74,14 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   straight off again. The board order is re-issued each tick to whoever is still outside, and at half the cap the
   hold-outs are teleported into the cabin — a man left holding a seat assignment from when the cabin was full never
   re-paths himself. Descent and board hold a cap each, so a slow approach cannot eat the walk-aboard; a board
-  unfinished at its cap despawns the men still ashore. At the drop it
-  sets down on a second helipad with `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down.
-  That hold lasts only while the hull has cargo, so the squad boards before the descent and rides it down seated;
-  whoever the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group raised on the pad
-  flashes there) and rides in as seats free. On the ground it turns one man out every two seconds, leader first,
-  refilling the cabin before each — the pilot is pinned (`disableAI "MOVE"`) because the cabin still empties for a
-  beat between two men — and lifts off once the queue and the seats are empty. A hull that never settles, or a
+  unfinished at its cap despawns the men still ashore. At the drop it sets down on a second helipad with
+  `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down. That hold lasts only while men
+  are *assigned* to the cabin, so the squad is assigned and seated before the descent and rides it down; whoever
+  the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group raised on the pad flashes
+  there) and rides in as seats free. On the ground it turns one man out every two seconds, leader first, refilling
+  the cabin before each and unassigning him only once he is out, so the men behind him hold the hull down; it
+  lifts off once the queue and the seats are empty. The pilot is not pinned — `disableAI "MOVE"` takes away the
+  control that keeps a hull on the ground and crashed one with its riders aboard. A hull that never settles, or a
   dismount out of time, sets the men down at the LZ instead of showing them where they wait, which would drop them
   from that height; men still aboard when the hull goes down are lost with it. A **boat** never boards or dismounts
   men: it parks `OPCOM_FERRY_BOAT_PARK` out from the shoreline nearest the riders (a water-cell centre can sit

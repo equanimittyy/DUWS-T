@@ -125,7 +125,7 @@ DUWS_fnc_opcom_ferryRelease = {
         private _veh = vehicle (leader _grp);
         [_veh] call DUWS_fnc_opcom_ferryClearHull;
         private _pilot = currentPilot _veh;
-        _pilot enableAI "Target"; _pilot enableAI "MOVE";    // undo the pickup and dismount pins
+        _pilot enableAI "Target";                            // undo the pickup pin
         if (_veh isKindOf "Air") then { _veh land "NONE" };   // LAND is sticky: it would sit on the pad
     };
     [_t] call DUWS_fnc_opcom_ferryHome;

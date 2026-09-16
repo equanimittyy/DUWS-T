@@ -34,6 +34,9 @@ DUWS_fnc_opcom_ferrySeatFill = {
         private _u = _q deleteAt 0;
         _u enableSimulation true;
         _u hideObjectGlobal false;
+        // Assigned, not merely seated: "GET OUT" works off the assignment list, and a cabin filled by moveInCargo
+        // alone reads as empty, so the hold ends the moment the skids touch.
+        _u assignAsCargo _veh;
         _u moveInCargo _veh;
     };
     _veh setVariable ["DUWS_ferryUnloadQ", _q];
@@ -49,8 +52,10 @@ DUWS_fnc_opcom_ferryUnloadNext = {
     private _aboard = (units _grp) select { alive _x && {vehicle _x isEqualTo _veh} };
     if (_aboard isEqualTo []) exitWith {};
     private _u = _aboard select 0;
+    // moveOut, the way fnc_helotaxi turns its passengers out and keeps its hull down: an ordered dismount left the
+    // ferry's men aboard as the hull lifted. Unassign after he is out, so the men behind him keep the hold alive.
+    moveOut _u;
     unassignVehicle _u;
-    _u action ["GetOut", _veh];
 };
 
 DUWS_fnc_opcom_ferryUnloadPending = {
@@ -281,8 +286,6 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { ["dropunload"] call _setPhase };
             } else {
                 if (((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT) exitWith {
-                    // The cabin still empties for a beat between two men, ending the hold.
-                    (currentPilot _veh) disableAI "MOVE";
                     ["dropunload"] call _setPhase;
                     [_veh] spawn {
                         params ["_veh"];
