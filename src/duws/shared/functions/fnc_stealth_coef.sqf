@@ -21,13 +21,13 @@ _row params ["_stanceMult", "_bSlow", "_bWalk", "_bCombat"];
 
 private _spd = abs _speed;
 private _speedMult = 1;
-if (_spd < _bCombat) then { _speedMult = 0.9 };
-if (_spd < _bWalk)   then { _speedMult = 0.8 };
-if (_spd < _bSlow)   then { _speedMult = 0.65 };
-if (_spd < 1)        then { _speedMult = 0.5 };
+if (_spd < _bCombat) then { _speedMult = 0.85 };
+if (_spd < _bWalk)   then { _speedMult = 0.7 };
+if (_spd < _bSlow)   then { _speedMult = 0.55 };
+if (_spd < 1)        then { _speedMult = 0.4 };
 
 // Firing costs position for a moment without branding the shooter for the rest of the approach.
-private _firedMult = 0.8 + (0.2 * (1 - (((_firedAgo / 5) max 0) min 1)));
+private _firedMult = 0.5 + (0.2 * (1 - (((_firedAgo / 5) max 0) min 1)));
 
-// Every factor is a discount from vanilla, so the worst case is 1.0: this can only ever help.
-((_stanceMult * _speedMult * _firedMult) max 0.2) min 1
+// Even the worst case sits at 0.7, so this is always a buff and never merely neutral.
+((_stanceMult * _speedMult * _firedMult) max 0.1) min 0.7
