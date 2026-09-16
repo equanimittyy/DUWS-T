@@ -67,13 +67,14 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   different shapes: a **rotary** takes the rescue-squad pickup (`fnc_rescue_squad_success.sqf`) — a helipad marks
   its LZ so `land` settles on the spot, its pilot is pinned (no fleeing, no targeting) and its crew CARELESS/BLUE;
   within `OPCOM_FERRY_LAND_K` grid cells of the LZ — a gate one cell wide that reads no altitude — it assigns the
-  squad their seats and sets down with `land "GET IN"`, which keeps the engine turning where `"LAND"` shuts it down.
-  That hold waits on the assignment, not on the walk, so the `orderGetIn` goes out only from pickup-board with the
-  skids down, each man despawning as he enters. Assigned to nobody, `"GET IN"` completes at once and lifts the hull
-  straight off again. The board order is re-issued each tick to
-  whoever is still outside, and at half the cap the hold-outs are teleported into the cabin — a man left holding a
-  seat assignment from when the cabin was full never re-paths himself. Descent and board hold a cap each, so a slow
-  approach cannot eat the walk-aboard; a board unfinished at its cap despawns the men still ashore. At the drop it
+  squad their seats, walks them to the nearest point `OPCOM_FERRY_STAGE` off the LZ so it does not set down on its
+  own riders, and lands with `land "GET IN"`, which keeps the engine turning where `"LAND"` shuts it down. That
+  hold waits on the assignment, not on the walk, so the `orderGetIn` goes out only from pickup-board with the skids
+  down, each man despawning as he enters. Assigned to nobody, `"GET IN"` completes at once and lifts the hull
+  straight off again. The board order is re-issued each tick to whoever is still outside, and at half the cap the
+  hold-outs are teleported into the cabin — a man left holding a seat assignment from when the cabin was full never
+  re-paths himself. Descent and board hold a cap each, so a slow approach cannot eat the walk-aboard; a board
+  unfinished at its cap despawns the men still ashore. At the drop it
   sets down on a second helipad with `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down.
   That hold lasts only while the hull has cargo, so the squad boards before the descent and rides it down seated;
   whoever the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group raised on the pad

@@ -136,9 +136,10 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (group _u isEqualTo (_v getVariable ["DUWS_ferryRiderGrp", grpNull])) then { deleteVehicle _u };
             }]];
         };
-        while {count waypoints _rg > 0} do { deleteWaypoint ((waypoints _rg) select 0) };
-        // Seats only. Assignment is what the "GET IN" hold waits on and it moves nobody; the walk order goes out at
-        // the skids, from pickupboard.
+        // Off the LZ, not onto it: the hull sets down where these men stand. Assignment is what the "GET IN" hold
+        // waits on and it moves nobody, so the walk-aboard order waits for the skids, in pickupboard.
+        private _lz = _t get "ferryLZ";
+        [_rg, "move", _lz getPos [OPCOM_FERRY_STAGE, _lz getDir (leader _rg)]] call DUWS_fnc_opcom_applyOrder;
         { _x assignAsCargo _veh } forEach ((units _rg) select {alive _x});
     };
     // Seats bind once, against what was free then: a man the full cabin left over is never re-paired to a
