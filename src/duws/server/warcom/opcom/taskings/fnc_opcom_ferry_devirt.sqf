@@ -228,6 +228,9 @@ DUWS_fnc_opcom_ferryStepLive = {
                     [10000] call _dropSpawn;
                     private _rg = groupFromNetId (_rider get "grp");
                     if (isNull _rg) exitWith { [_t] call DUWS_fnc_opcom_ferryRelease };
+                    // "LAND" does not survive the dismount: men leave unassigned, so the engine calls the unload
+                    // done and flies on, ejecting whoever is still queued into the air.
+                    (currentPilot _veh) disableAI "MOVE";
                     // Leader first so the rest follow him off. `unloading` keeps task_step from stowing or re-tasking
                     // the rider mid-dismount; the first man out thaws and unbinds it.
                     { _x hideObjectGlobal true; _x enableSimulation false } forEach units _rg;

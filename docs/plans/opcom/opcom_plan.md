@@ -74,10 +74,12 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   seat assignment from when the cabin was full never re-paths himself. Descent and board hold a cap each, so a slow
   approach cannot eat the walk-aboard; a board unfinished at its cap despawns the men still ashore. At the drop it
   sets down on a second helipad and holds (`land "LAND"`), raises the squad 10 km up (hiding lands a frame late, so
-  a group raised on the pad flashes there), walks them out one man every two seconds, leader first, and lifts off
-  once the last is out; men still waiting to get out when the hull goes down are lost with it. A **boat** never
-  boards or dismounts men: it parks `OPCOM_FERRY_BOAT_PARK`
-  out from the shoreline nearest the riders (a water-cell centre can sit ~350 m out) while they walk to that shore,
+  a group raised on the pad flashes there) and walks them out one man every two seconds, leader first. Its pilot is
+  pinned (`disableAI "MOVE"`) for the whole dismount — a hull whose cargo leaves unassigned reads the unload as
+  finished and flies on with men still aboard — and lifts off only once the queue and the seats are empty; men still
+  waiting to get out when the hull goes down are lost with it. A **boat** never boards or dismounts men: it parks
+  `OPCOM_FERRY_BOAT_PARK` out from the shoreline nearest the riders (a water-cell centre can sit ~350 m out) while
+  they walk to that shore,
   and the whole group vanishes into it once its leader is within `OPCOM_FERRY_BOARD_BOAT` of the shore, then
   spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do not unify the two shapes.
   Each live leg's move order goes out once, as the leg starts.
