@@ -18,6 +18,10 @@ DUWS_stealth_radius  = _radius;
 DUWS_stealth_firedAt = -1e9;
 if (isNil "DUWS_stealth_firedUnit") then { DUWS_stealth_firedUnit = objNull };
 if (isNil "DUWS_stealth_firedEH")   then { DUWS_stealth_firedEH = -1 };
+// Seeded from the debug param, then left alone so a console toggle outlives the next mission.
+if (isNil "DUWS_dbgStealthCoef") then {
+    DUWS_dbgStealthCoef = (["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1;
+};
 
 [] spawn {
     // A trait persists until overwritten, so a missed restore rides the unit for the rest of the campaign.
@@ -32,6 +36,7 @@ if (isNil "DUWS_stealth_firedEH")   then { DUWS_stealth_firedEH = -1 };
     };
 
     private _touched = [];
+    private _nextHint = 0;
 
     while { missionNamespace getVariable ["DUWS_stealth_active", false] } do {
         // A respawn hands out a new unit, so the handler is re-armed against it. Removed by index, never
@@ -45,6 +50,22 @@ if (isNil "DUWS_stealth_firedEH")   then { DUWS_stealth_firedEH = -1 };
         };
 
         private _coef = [stance player, speed player, time - DUWS_stealth_firedAt] call fnc_stealth_coef;
+
+        // hintSilent, not hint, because this repeats and hint clicks every time.
+        if ((missionNamespace getVariable ["DUWS_dbgStealthCoef", false]) && { time > _nextHint }) then {
+            _nextHint = time + 1;
+            private _inRing = (player distance2D DUWS_stealth_centre) <= DUWS_stealth_radius;
+            private _ago = time - DUWS_stealth_firedAt;
+            hintSilent parseText format [
+                "<t size='1.4'>Stealth %1</t><br/>%2 | %3 km/h | fired %4<br/><t color='%5'>%6</t>",
+                _coef toFixed 2,
+                toLower (stance player),
+                (abs (speed player)) toFixed 1,
+                if (_ago > 5) then { "--" } else { (_ago toFixed 1) + "s" },
+                ["#ff8080", "#80ff80"] select _inRing,
+                ["outside circle, not applied", "inside circle"] select _inRing
+            ];
+        };
 
         {
             private _u = _x;
