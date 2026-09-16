@@ -3,8 +3,8 @@ onLoadName = "DUWS_T v1.6";
 dev = "dev";
 author = "5U5, equanimity";
 overviewText = "DUWS_T is a spiritual successor to DUWS_X, created by Killa Tomata. A long-term, persistent scenario: players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones, achieving total victory.";
-overviewPicture = "duws\shared\media\images\DUWS_T.jpg";
-LoadScreen = "duws\shared\media\images\DUWS_T.jpg";
+overviewPicture = "duws\shared\media\images\duws_t.jpg";
+LoadScreen = "duws\shared\media\images\duws_t.jpg";
 
 // AIS INJURY
 respawn = 3;
@@ -77,7 +77,7 @@ class RscTitles {
             class splash: RscPicture
 		    {
 			idc = 1002;
-			text = "duws\shared\media\images\DUWS_T.paa";
+			text = "duws\shared\media\images\duws_t.paa";
 			x = 0.15 * safezoneW + safezoneX;
 			y = 0.0 * safezoneH + safezoneY;
 			w = 0.7 * safezoneW;

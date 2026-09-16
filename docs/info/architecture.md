@@ -17,7 +17,7 @@ style.
 |---|---|---|
 | `src/modules/` | `AIS`, `R3F_LOG`, `taw_vd`, `zbe_cache` | Vendored third-party — **frozen** |
 | `src/duws/` | `server`, `client`, `shared` | DUWS_T (Kibot/Tomata/5U5 lineage) |
-| `src/` (root) | `mission.sqm`, `description.ext`, `stringtable.xml`, root event scripts, `DUWS_T.jpg` | Engine-pinned |
+| `src/` (root) | `mission.sqm`, `description.ext`, `stringtable.xml`, root event scripts, `duws_t.jpg` | Engine-pinned |
 
 The engine loads a fixed set of scripts by name from the mission root and they cannot move: `INIT.sqf`,
 `initPlayerLocal.sqf`, `onPlayerKilled.sqf`, `onPlayerRespawn.sqf`. Note the root `INIT.sqf` (an entry
