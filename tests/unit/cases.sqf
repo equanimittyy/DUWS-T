@@ -1233,17 +1233,26 @@ DUWS_timeSkew = 150;
 // --- fnc_stealth_coef: the movement-scored camouflageCoef for a covert approach ---
 ["stealth_coef: prone and still is the quietest approach, and the floor exactly",
     (["PRONE", 0, 999] call fnc_stealth_coef), 0.5] call fnc_assertClose;
-["stealth_coef: crouched at a walk",
-    (["CROUCH", 4, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;
+["stealth_coef: crouched at its walk",
+    (["CROUCH", 8.6, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;
 // Standing at a walk is vanilla visibility: the mechanic neither helps nor hurts a unit moving normally.
 ["stealth_coef: standing at a walk is the untouched baseline",
-    (["STAND", 4, 999] call fnc_stealth_coef), 1] call fnc_assertClose;
+    (["STAND", 11, 999] call fnc_stealth_coef), 1] call fnc_assertClose;
 ["stealth_coef: standing still",
     (["STAND", 0, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;
+["stealth_coef: a standing slow-walk",
+    (["STAND", 5, 999] call fnc_stealth_coef), 0.9] call fnc_assertClose;
 ["stealth_coef: a standing sprint is the worst case without a shot",
     (["STAND", 20, 999] call fnc_stealth_coef), 1.12] call fnc_assertClose;
-["stealth_coef: a run sits between a walk and a sprint",
-    (["STAND", 12, 999] call fnc_stealth_coef), 1.05] call fnc_assertClose;
+["stealth_coef: combat pace sits between a walk and a sprint",
+    (["STAND", 12.9, 999] call fnc_stealth_coef), 1.05] call fnc_assertClose;
+
+["stealth_coef: 4.5 km/h is a sprint while prone",
+    (["PRONE", 4.5, 999] call fnc_stealth_coef), 0.7] call fnc_assertClose;
+["stealth_coef: the same 4.5 km/h is only a slow-walk standing",
+    (["STAND", 4.5, 999] call fnc_stealth_coef), 0.9] call fnc_assertClose;
+["stealth_coef: a prone crawl scores slow-walk, never walk",
+    (["PRONE", 2.2, 999] call fnc_stealth_coef), 0.5625] call fnc_assertClose;
 
 ["stealth_coef: speed is read as a magnitude",
     (["STAND", -12, 999] call fnc_stealth_coef), 1.05] call fnc_assertClose;

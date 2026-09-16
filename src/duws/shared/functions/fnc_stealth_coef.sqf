@@ -9,18 +9,22 @@
 // _firedAgo is seconds since the unit last fired; one that never fired passes any value past the window.
 params ["_stance", "_speed", "_firedAgo"];
 
-private _stanceMult = switch (toUpper _stance) do {
-    case "PRONE":  { 0.625 };
-    case "CROUCH": { 0.8 };
-    default        { 1 };
+// A prone sprint is 4.8 km/h, slower than a standing slow-walk at 5.1, so global speed bands would read
+// every prone unit as barely moving however fast it crawled. Boundaries sit midway between the game's own
+// forward speeds for that stance, primary weapon. Prone slow-walk and walk are one speed: no walk band.
+private _row = switch (toUpper _stance) do {
+    case "PRONE":  { [0.625, 2.5, 2.5, 3.8] };
+    case "CROUCH": { [0.8, 6.3, 9.8, 13.9] };
+    default        { [1, 8.1, 12, 15.5] };
 };
+_row params ["_stanceMult", "_bSlow", "_bWalk", "_bCombat"];
 
-// A man walks at about 5 km/h, runs at about 12, and sprints past 14.
 private _spd = abs _speed;
 private _speedMult = 1.12;
-if (_spd < 14) then { _speedMult = 1.05 };
-if (_spd < 6)  then { _speedMult = 1 };
-if (_spd < 1)  then { _speedMult = 0.8 };
+if (_spd < _bCombat) then { _speedMult = 1.05 };
+if (_spd < _bWalk)   then { _speedMult = 1 };
+if (_spd < _bSlow)   then { _speedMult = 0.9 };
+if (_spd < 1)        then { _speedMult = 0.8 };
 
 // Firing costs position for a moment without branding the shooter for the rest of the approach.
 private _firedMult = 1 + (0.1 * (1 - (((_firedAgo / 5) max 0) min 1)));
