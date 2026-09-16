@@ -3,8 +3,7 @@
 // the virtual mirror is fnc_opcom_ferry_virt (docs/plans/opcom/opcom_plan.md §Transport).
 if (!isServer) exitWith {};
 
-// Clear a hull's ferry state so one that ferries a second rider re-arms cleanly (a stale handler skips the re-arm)
-// and no helipad outlives its landing.
+// Clear a hull's ferry state so one that ferries a second rider re-arms cleanly (a stale handler skips the re-arm).
 DUWS_fnc_opcom_ferryClearHull = {
     params ["_veh"];
     private _b = _veh getVariable ["DUWS_ferryBoardEH", -1];
@@ -15,8 +14,16 @@ DUWS_fnc_opcom_ferryClearHull = {
     _veh setVariable ["DUWS_ferryUnloadGrp", grpNull];
     _veh setVariable ["DUWS_ferryUnloadRider", -1];
     _veh setVariable ["DUWS_ferryUnloadQ", []];
-    deleteVehicle (_veh getVariable ["DUWS_ferryPad", objNull]);
-    _veh setVariable ["DUWS_ferryPad", objNull];
+};
+
+// The pad hangs off the tasking, not the hull: a hull shot down on its approach can lose its group and leave its
+// crew dead outside the wreck, so a pad reachable only through it outlives the ferry. netId because a tasking holds
+// no object handle; the class check refuses one a reload has recycled onto another object.
+DUWS_fnc_opcom_ferryClearPad = {
+    params ["_t"];
+    private _pad = objectFromNetId (_t getOrDefault ["ferryPad", ""]);
+    if (_pad isKindOf "Land_HelipadEmpty_F") then { deleteVehicle _pad };
+    _t set ["ferryPad", ""];
 };
 
 // Feed the next held rider into a seat and order it out; the rotor drop's paced loop calls this every two seconds. A man
@@ -80,7 +87,8 @@ DUWS_fnc_opcom_ferryStepLive = {
     private _rotorLeg = {
         params ["_near"];
         private _p = [_near, 0, 80, 8, 0, 0.3, 0] call BIS_fnc_findSafePos; _p set [2, 0];
-        _veh setVariable ["DUWS_ferryPad", createVehicle ["Land_HelipadEmpty_F", _p, [], 0, "NONE"]];
+        [_t] call DUWS_fnc_opcom_ferryClearPad;
+        _t set ["ferryPad", netId (createVehicle ["Land_HelipadEmpty_F", _p, [], 0, "NONE"])];
         [_p] call _legTo;
         _grp setBehaviour "CARELESS"; _grp setCombatMode "BLUE";
         { _x setVariable ["Vcm_Disable", true] } forEach units _grp;

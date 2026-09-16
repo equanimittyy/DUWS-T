@@ -120,6 +120,7 @@ DUWS_fnc_opcom_ferryRelease = {
     _t set ["pos", _pos];
     _t set ["carrying", -1]; _t set ["embarked", false];
     _t set ["ferryWait", 0]; _t set ["ferryLZ", []]; _t set ["ferryPhase", "topickup"];
+    [_t] call DUWS_fnc_opcom_ferryClearPad;
     if (!isNull _grp) then {
         private _veh = vehicle (leader _grp);
         [_veh] call DUWS_fnc_opcom_ferryClearHull;
@@ -160,6 +161,7 @@ DUWS_fnc_opcom_ferryTick = {
             // Its ferry orders outlive the hull (a shore HOLD, a seat on the wreck, a pin at the drop pad); re-order it.
             if (!isNull _rg) then { { unassignVehicle _x } forEach units _rg; [_rider] call DUWS_fnc_opcom_reOrderLive };
             if (!isNull _tg) then { [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull };
+            [_t] call DUWS_fnc_opcom_ferryClearPad;
             _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
         };
         if (_near || {(_rider get "grp") isNotEqualTo ""}) then {
@@ -183,6 +185,7 @@ DUWS_fnc_opcom_ferryTick = {
                 ["INFO", "OPCOM", format ["ferry: transport %1 (%2) stows at %3, embarked %4", _t get "id", _t get "moveType",
                     _t getOrDefault ["ferryPhase", "topickup"], _t getOrDefault ["embarked", false]]] call fnc_log;
                 [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull;
+                [_t] call DUWS_fnc_opcom_ferryClearPad;
                 [_t] call DUWS_fnc_opcom_reVirt;
             };
         };
