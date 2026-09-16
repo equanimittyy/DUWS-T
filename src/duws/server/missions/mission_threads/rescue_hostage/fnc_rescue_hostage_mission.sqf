@@ -109,7 +109,7 @@ private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "ST
 // does not gate the alarm.
 DUWS_stealth_active = true;
 publicVariable "DUWS_stealth_active";
-[_MissionPos, _radius + 200] remoteExec ["fnc_stealth_layer", 0, "DUWS_stealth_layer_jip"];
+[_MissionPos, _radius + 300] remoteExec ["fnc_stealth_layer", 0, "DUWS_stealth_layer_jip"];
 
 // Recruit gated on DUWS_hostage_freed (stamped when the garrison dies), so it can't be used through a wall
 // while the guards are up. Leader check sits in the body, not the condition, so a non-leader is told why it
