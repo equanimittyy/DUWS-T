@@ -105,6 +105,12 @@ private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "ST
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_brief", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_rescuehostage_copy", 0]]
 ] call fnc_mission_present;
 
+// Additive to the cordon's own detection: this slows how fast the guards acquire a careful approach, it
+// does not gate the alarm.
+DUWS_stealth_active = true;
+publicVariable "DUWS_stealth_active";
+[_MissionPos, _radius + 200] remoteExec ["fnc_stealth_layer", 0, "DUWS_stealth_layer_jip"];
+
 // Recruit gated on DUWS_hostage_freed (stamped when the garrison dies), so it can't be used through a wall
 // while the guards are up. Leader check sits in the body, not the condition, so a non-leader is told why it
 // did nothing. Reuses the Escort Informant handler -- it carries no informant-only side effects.
@@ -130,7 +136,12 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
 // Shared marker name so the watcher (creates on free) and the finish branches (delete) agree without
 // threading a handle; deleteMarker no-ops on an absent one, so an un-freed teardown stays correct.
 private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
-private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage"; };
+private _clearIcons = {
+    deleteMarker _trk;
+    DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage";
+    DUWS_stealth_active = false; publicVariable "DUWS_stealth_active";
+    remoteExec ["", "DUWS_stealth_layer_jip"];
+};
 
 // Guard watcher: one alarm threshold. The whole cordon spots you -- a garrison OR patrol sighting raises the one
 // global alarm. "Sensing now" is the engine's own nearTargets fix (age ~0 while watched), NOT knowsAbout, which
@@ -166,6 +177,14 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
         } forEach _ring;
     };
 
+    // The approach ends the moment the cordon reacts or the captive is loose, so the coef is handed back
+    // rather than riding units through the firefight. Idempotent: the thread's teardown calls it again.
+    private _endStealth = {
+        DUWS_stealth_active = false;
+        publicVariable "DUWS_stealth_active";
+        remoteExec ["", "DUWS_stealth_layer_jip"];
+    };
+
     private _hintTgt = [0, -2] select isDedicated;
     private _alarmAt = -1;               // in-game time the execution clock expires; -1 = disarmed
     private _lastKill = -1e9;            // time of the last cordon death; opens the takedown grace
@@ -177,6 +196,7 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             _hostage setCaptive false;
             _hostage setVariable ["DUWS_hostage_freed", true, true];
             call _convergeRing;
+            call _endStealth;
             // Overwrites the execution countdown: this branch stops the loop, so its last "Ns" would otherwise hang frozen in the box.
             [localize "STR_DUWS_T_rescuehostage_captors"] remoteExec ["hint", _hintTgt];
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
@@ -245,7 +265,10 @@ private _clearIcons = { deleteMarker _trk; DUWS_float_hostage = objNull; publicV
             if (_knowsCur > CONFIRM) then { _confirmed = true };
         } forEach _players;
 
-        if (_alarmAt < 0 && { _confirmed } && { time - _lastKill > GRACE_KILL }) then { _alarmAt = time + CLOCK_BASE };
+        if (_alarmAt < 0 && { _confirmed } && { time - _lastKill > GRACE_KILL }) then {
+            _alarmAt = time + CLOCK_BASE;
+            call _endStealth;
+        };
 
         if (_alarmAt >= 0) then {
             // Committed. Countdown broadcast until freed (garrison dead) or executed (clock expired).
