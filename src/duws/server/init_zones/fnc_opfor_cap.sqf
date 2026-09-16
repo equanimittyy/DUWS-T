@@ -50,6 +50,7 @@ _apswing = round(_points * zone_ap_swing);
 
 str(_markername) setMarkerColor "ColorRed";
 str(_markername2) setMarkerColor "ColorRed";
+str(_markername + "port") setMarkerColor "ColorRed";
 
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flagVarName = format["flag_%1_%2", floor abs (_flagPos select 0), floor abs (_flagPos select 1)];

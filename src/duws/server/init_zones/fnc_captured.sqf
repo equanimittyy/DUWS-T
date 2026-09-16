@@ -62,6 +62,7 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 // OPFOR-held zone carries.
 str(_markername) setMarkerColor "ColorBlue";
 str(_markername2) setMarkerColor "ColorBlue";
+str(_markername + "port") setMarkerColor "ColorBlue";
 
 sleep 2;
 

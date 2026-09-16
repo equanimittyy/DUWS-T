@@ -81,14 +81,16 @@ DUWS_fnc_opcom_ports_init = {
         } forEach _list;
     } forEach _cands;
 
-    // Named off the zone's position, like fnc_createzone's pair, so fnc_zone_reveal's paint reaches it.
+    // Named off the zone's position, like fnc_createzone's pair, so the reveal paint and the capture
+    // recolours reach it by name; the colour is read off the zone icon, never fixed, so it reads for whoever holds it.
     {
         private _zpos = ([_x] call fnc_site_at) get "pos";
-        private _pm = format ["%1%2port", round (_zpos select 0), round (_zpos select 1)];
+        private _zi = format ["%1%2", round (_zpos select 0), round (_zpos select 1)];
+        private _pm = _zi + "port";
         createMarker [str(_pm), [_y] call DUWS_fnc_opcom_c2w];
         str(_pm) setMarkerShape "ICON";
         str(_pm) setMarkerType "loc_Quay";
-        str(_pm) setMarkerColor "ColorRed";
+        str(_pm) setMarkerColor (getMarkerColor str(_zi));
         str(_pm) setMarkerSize [0.7, 0.7];
         str(_pm) setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
     } forEach _ports;

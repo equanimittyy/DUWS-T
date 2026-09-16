@@ -35,6 +35,7 @@ if (_opfreward > 0) then {
 // Blue for the same reason as the first capture: green is Independent, not friendly.
 str(_markername) setMarkerColor "ColorBlue";
 str(_markername2) setMarkerColor "ColorBlue";
+str(_markername + "port") setMarkerColor "ColorBlue";
 
 // No CP on a recapture: passive CP now comes from towns, and a zone's one-time reward was paid
 // at its first liberation. A zone traded back and forth is therefore not a CP faucet.
