@@ -1229,3 +1229,36 @@ DUWS_timeSkew = 50;
 ["time_expired: a shorter rest leaves it live", ([_dl] call fnc_time_expired), false] call fnc_assertEq;
 DUWS_timeSkew = 150;
 ["time_expired: a rest past the deadline expires it", ([_dl] call fnc_time_expired), true] call fnc_assertEq;
+
+// --- fnc_stealth_coef: the movement-scored camouflageCoef for a covert approach ---
+["stealth_coef: prone and still is the quietest approach, and the floor exactly",
+    (["PRONE", 0, 999] call fnc_stealth_coef), 0.5] call fnc_assertClose;
+["stealth_coef: crouched at a walk",
+    (["CROUCH", 4, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;
+// Standing at a walk is vanilla visibility: the mechanic neither helps nor hurts a unit moving normally.
+["stealth_coef: standing at a walk is the untouched baseline",
+    (["STAND", 4, 999] call fnc_stealth_coef), 1] call fnc_assertClose;
+["stealth_coef: standing still",
+    (["STAND", 0, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;
+["stealth_coef: a standing sprint is the worst case without a shot",
+    (["STAND", 20, 999] call fnc_stealth_coef), 1.12] call fnc_assertClose;
+["stealth_coef: a run sits between a walk and a sprint",
+    (["STAND", 12, 999] call fnc_stealth_coef), 1.05] call fnc_assertClose;
+
+["stealth_coef: speed is read as a magnitude",
+    (["STAND", -12, 999] call fnc_stealth_coef), 1.05] call fnc_assertClose;
+
+["stealth_coef: the shot itself carries the full spike",
+    (["PRONE", 0, 0] call fnc_stealth_coef), 0.55] call fnc_assertClose;
+["stealth_coef: half the window is half the spike",
+    (["PRONE", 0, 2.5] call fnc_stealth_coef), 0.525] call fnc_assertClose;
+["stealth_coef: the spike is spent by the end of the window",
+    (["PRONE", 0, 5] call fnc_stealth_coef), 0.5] call fnc_assertClose;
+
+// The one cell that overruns: a standing sprinter who just fired scores 1.232 before the clamp.
+["stealth_coef: the ceiling binds",
+    (["STAND", 20, 0] call fnc_stealth_coef), 1.2] call fnc_assertClose;
+
+// stance answers UNDEFINED for a mounted unit, which the layer skips.
+["stealth_coef: an unrecognised stance scores as standing",
+    (["UNDEFINED", 0, 999] call fnc_stealth_coef), 0.8] call fnc_assertClose;

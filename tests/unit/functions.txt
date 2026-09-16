@@ -56,3 +56,4 @@ duws/shared/faction_lib/fnc_faction_vanilla_fill.sqf::fnc_faction_vanilla_fill
 duws/server/missions/fnc_offer_weight.sqf::*fnc_offer_weight
 duws/server/missions/fnc_campaign_now.sqf::*fnc_campaign_now
 duws/server/missions/fnc_time_expired.sqf::*fnc_time_expired
+duws/shared/functions/fnc_stealth_coef.sqf::*fnc_stealth_coef
