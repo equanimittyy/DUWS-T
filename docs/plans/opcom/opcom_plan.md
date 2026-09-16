@@ -43,7 +43,7 @@ cross-cutting invariants a P4/P5 author must respect and that no single file sta
 |---|---|---|
 | **Belief store** | `belief/fnc_opcom_belief_init.sqf`, `fnc_opcom_force.sqf`, `fnc_opcom_contested.sqf`, sensors in `fnc_opcom_perception_run.sqf` | The commander plans against belief, never truth: only the sensors read live player state (`allPlayers`/`getPos`/`knowsAbout`). Belief tracks groups, not players; a human weighs `OPCOM_PLAYER_WORTH`. Store a position, never a handle |
 | **Influence grid** | `belief/fnc_opcom_grid_init.sqf`, `fnc_opcom_grid_rebuild.sqf`, `fnc_opcom_grid_coords.sqf` | Two force layers (`_fri` known OPFOR, `_ene` believed BLUFOR), firepower-weighted and condition-scaled, rebuilt each tick. Exposes what scoring reads: **`r`** = Σ`_fri`/(Σ`_ene`+1) over a 3×3 block, **threat** = `_ene` on own ground, the **front line** (sign-change band), and **route-around** (lowest-`_ene` neighbour). Static per-cell masks classify land / navigable-water / air domains for routing and the ferry |
-| **Movement & streaming** | `taskings/fnc_opcom_move.sqf`, `fnc_opcom_route.sqf`, `fnc_opcom_stream.sqf`, `fnc_opcom_task_step.sqf` | A tasking is a virtual world-point stepping a route (A\* cost field foot/air/boat, `fnc_convoy_path` road for wheeled/tracked) until a player closes within **K cells** (per move type) or it reaches contact, then it spawns live. Stow is temporal hysteresis (`OPCOM_REVIRT_GRACE` clear ticks). Streaming is side-symmetric and the **engine resolves combat** — `P(win)` never dices one. Spawn posture is the closest A3 order to the tasking, re-issuable live |
+| **Movement & streaming** | `taskings/fnc_opcom_move.sqf`, `fnc_opcom_route.sqf`, `fnc_opcom_stream.sqf`, `fnc_opcom_task_step.sqf` | A tasking is a virtual world-point stepping a route (A\* cost field foot/air/boat, `fnc_convoy_path` road for wheeled/tracked) until a player closes within **K cells** (per move type) or it reaches contact, then it spawns live. Spawn takes a one-tick entry buffer — a player within K on two consecutive ticks — so a fast flyover never streams (not built: spawn fires on the first tick in range). Stow is temporal hysteresis (`OPCOM_REVIRT_GRACE` clear ticks). Streaming is side-symmetric and the **engine resolves combat** — `P(win)` never dices one. Spawn posture is the closest A3 order to the tasking, re-issuable live |
 | **Tasking, status & strength** | `taskings/fnc_opcom_tasking_init.sqf`, `fnc_opcom_strength.sqf`, `fnc_opcom_task_step.sqf` | Each unit has a standing **tasking** (`garrison`/`guard` rest; the rest active) and a **status** (`virtual`/`moving`/`engaged`/`dead`). `effForce` (power × condition) is what the grid deposits, so a shot-up group weighs less automatically; `strength` (0..1) is persisted and heal-targeted; `garrison` heals at `OPCOM_GARRISON_HEAL_RATE`, `guard` does not. A `garrison` never streams live: a live unit reaching its return zone despawns into it, settling only once it is not engaged and the zone is not contested (OPFOR belief holds no BLUFOR sighting within one grid cell of its edge). A recruited combatant feeds its zone's reserve wave; a contested zone locks its garrison units off any offensive draw |
 | **Transport ferry** | `taskings/fnc_opcom_ferry.sqf` (+ `_virt` / `_devirt`), [§Transport](#transport-shipped) | A land unit stopped at a water leg borrows the nearest idle water-compatible hull, which carries it across and then garrisons the nearest held zone. The ferry is a *consequence of the rider's route*, never an order. Combat gates the borrow, never a bound crossing |
 
@@ -311,9 +311,9 @@ the player's own arty support does (`client/supports/fnc_arty.sqf`), the gun bec
   respawn into the circle), and re-checked against the circle immediately before firing.
 - **Scatter** is deliberate (`doArtilleryFire` converges): base by type, +25 m per km range, −30 m with direct OP
   observation. Telegraph: Allseer line + a temporary marker ~20 s before impact.
-- **Capped campaign-wide** — one battery and two mortar pits alive at once across the map, spanning both flavours (a
-  zone that rolls a mortar consumes one). These are the only permanent-crew hardpoints (~6 units that never
-  despawn); making AA resident would add a fourth and needs its own cap.
+- **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
+  permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
+  cap.
 
 ## Archetype (Phase 6)
 
@@ -396,5 +396,5 @@ keeps `DUWS_` with an `opcom_` owner tag.
 - **Tuning knobs** (mechanism ships, value tunes): `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_AP_PER_FORCE` (the force↔AP
   rate); `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; `OPCOM_COMMIT_HOLD`; the P(win) / band
   thresholds; the route λ weights and recompute cadence.
-- **Accepted limitation — a fast airborne player** overflies a K=1 ring between ticks, unstreamed (same blind spot
-  for recon detection). The fix, if it bites, is a larger K against airborne players, tuned then.
+- **Accepted limitation — recon detection samples once per tick**, so a fast airborne player can cross a recon's
+  K reach between ticks unsensed. The fix, if it bites, is a larger K against airborne players, tuned then.
