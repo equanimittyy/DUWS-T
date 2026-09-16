@@ -66,21 +66,25 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   forces the group to its destination at expiry rather than hanging. The two lifts board and dismount on purpose
   different shapes: a **rotary** takes the rescue-squad pickup (`fnc_rescue_squad_success.sqf`) — a helipad marks
   its LZ so `land` settles on the spot, its pilot is pinned (no fleeing, no targeting) and its crew CARELESS/BLUE;
-  within `OPCOM_FERRY_LAND_K` grid cells of the LZ — a gate one cell wide that reads no altitude — it sets down with
-  `land "LAND"` and waits out pickup-land, then assigns and `orderGetIn`s the squad from pickup-board, with the
-  skids down, each man despawning as he enters. `"GET IN"` is the wrong hold to call at the gate: no seat is
-  assigned yet, so it completes at once and the hull lifts off again. The board order is re-issued each tick to
+  within `OPCOM_FERRY_LAND_K` grid cells of the LZ — a gate one cell wide that reads no altitude — it assigns the
+  squad their seats and sets down with `land "GET IN"`, which keeps the engine turning where `"LAND"` shuts it down.
+  That hold waits on the assignment, not on the walk, so the `orderGetIn` goes out only from pickup-board with the
+  skids down, each man despawning as he enters. Assigned to nobody, `"GET IN"` completes at once and lifts the hull
+  straight off again. The board order is re-issued each tick to
   whoever is still outside, and at half the cap the hold-outs are teleported into the cabin — a man left holding a
   seat assignment from when the cabin was full never re-paths himself. Descent and board hold a cap each, so a slow
   approach cannot eat the walk-aboard; a board unfinished at its cap despawns the men still ashore. At the drop it
-  sets down on a second helipad and holds (`land "LAND"`), raises the squad 10 km up (hiding lands a frame late, so
-  a group raised on the pad flashes there) and walks them out one man every two seconds, leader first. Its pilot is
-  pinned (`disableAI "MOVE"`) for the whole dismount — a hull whose cargo leaves unassigned reads the unload as
-  finished and flies on with men still aboard — and lifts off only once the queue and the seats are empty; men still
-  waiting to get out when the hull goes down are lost with it. A **boat** never boards or dismounts men: it parks
-  `OPCOM_FERRY_BOAT_PARK` out from the shoreline nearest the riders (a water-cell centre can sit ~350 m out) while
-  they walk to that shore,
-  and the whole group vanishes into it once its leader is within `OPCOM_FERRY_BOARD_BOAT` of the shore, then
+  sets down on a second helipad with `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down.
+  That hold lasts only while the hull has cargo, so the squad boards before the descent and rides it down seated;
+  whoever the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group raised on the pad
+  flashes there) and rides in as seats free. On the ground it turns one man out every two seconds, leader first,
+  refilling the cabin before each — the pilot is pinned (`disableAI "MOVE"`) because the cabin still empties for a
+  beat between two men — and lifts off once the queue and the seats are empty. A hull that never settles, or a
+  dismount out of time, sets the men down at the LZ instead of showing them where they wait, which would drop them
+  from that height; men still aboard when the hull goes down are lost with it. A **boat** never boards or dismounts
+  men: it parks `OPCOM_FERRY_BOAT_PARK` out from the shoreline nearest the riders (a water-cell centre can sit
+  ~350 m out) while they walk to that shore, and the whole group vanishes into it once its leader is within
+  `OPCOM_FERRY_BOARD_BOAT` of the shore, then
   spawns ashore at once — boats are finnicky, so this mass swap is deliberate, do not unify the two shapes.
   Each live leg's move order goes out once, as the leg starts.
 - **Strength freezes on pickup, thaws on drop.** From the board commit (a rotor's landing order, a boat's vanish)
