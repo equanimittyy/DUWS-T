@@ -48,14 +48,12 @@ DUWS_fnc_opcom_ferryBoatPark = {
     [_landPt getPos [_shore, _dir], _landPt getPos [(_shore + OPCOM_FERRY_BOAT_PARK) min _len, _dir]]
 };
 
-// One tick of the live crossing, a timed phase machine shared by both lift types (topickup -> pickupland ->
-// pickupboard -> carry -> dropland -> dropunload; a rotor boards inside pickupland and skips pickupboard). The two
-// transit legs are untimed; each land/board/unload phase caps at OPCOM_FERRY_WAIT_MAX ticks and forces through on
-// expiry. The lifts board and dismount on purpose different shapes -- do NOT unify them: a rotor lands on a helipad
-// at both ends, the squad walking aboard (the fnc_rescue_squad_success shape: all assigned and orderGetIn'd with the
-// land call, so the landing hold has boarders to wait on) and out a man every two seconds, while a boat parks off the shore
-// and the whole group vanishes into it and later spawns ashore at once, because boats are finnicky and never walk men
-// seat by seat. Strength freezes at the board commit and thaws when the rider is back on the ground.
+// One tick of the live crossing: a timed phase machine for both lift types (topickup -> pickupland -> pickupboard
+// -> carry -> dropland -> dropunload). Transit legs are untimed; each land/board/unload phase caps at
+// OPCOM_FERRY_WAIT_MAX ticks and forces through on expiry, so a rotor's descent and its walk-aboard hold a budget
+// each. Do NOT unify the lifts' board/dismount shapes: a rotor lands on a helipad at both ends, walking the squad
+// aboard with the skids down and out a man every two seconds; a boat parks off the shore and swaps the whole group
+// at once, because boats are finnicky. Strength freezes at the board commit, thaws when the rider is on the ground.
 DUWS_fnc_opcom_ferryStepLive = {
     params ["_t", "_rider"];
     private _grp = groupFromNetId (_t get "grp");
@@ -165,36 +163,42 @@ DUWS_fnc_opcom_ferryStepLive = {
             if (_boat) then { call _orderRiders };
             if (([getPosASL _veh, _t get "ferryLZ"] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
                 if (!_boat) then {
-                    _veh land "GET IN";
+                    // "LAND", not "GET IN": no seat is assigned yet, and an empty GET IN hold completes at once,
+                    // touching the hull down and lifting it straight off again.
+                    _veh land "LAND";
                     _rider set ["ferryFrozen", true];       // board commit
-                    call _orderRiders;
                 };
                 ["pickupland"] call _setPhase;
             };
         };
+        // The gate above is one grid cell wide and reads no altitude, so a rotor's men are ordered in from
+        // pickupboard: ordered here they walk out to a hull still hundreds of metres up, on the board's clock.
         case "pickupland": {
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
-            call _orderRiders;
             if (_boat) then {
+                call _orderRiders;
                 if ((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) exitWith { ["pickupboard"] call _setPhase };
                 if (_wait >= OPCOM_FERRY_WAIT_MAX) then { _rider set ["ferryFrozen", true]; call _embark };
             } else {
-                [_wait >= (OPCOM_FERRY_WAIT_MAX / 2)] call _boardPush;
-                // Boarders despawn on entry, so an empty group is a finished board. A virtual rider has no one to walk
-                // in and boards on touchdown; at the cap the men still ashore despawn with the embark.
-                if ((({alive _x} count units groupFromNetId (_rider get "grp")) == 0)
-                    && {(_rider get "grp") isNotEqualTo "" || {((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT}}) exitWith { call _embark };
+                if (((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT) exitWith {
+                    // A virtual rider has no one to walk in and boards on touchdown.
+                    if ((_rider get "grp") isEqualTo "") then { call _embark } else { ["pickupboard"] call _setPhase };
+                };
                 if (_wait >= OPCOM_FERRY_WAIT_MAX) then { call _embark };
             };
         };
         case "pickupboard": {
-            // Boat only, the intentional divergence from the rotor (see the step comment): the boat never boards men
-            // in, the whole group vanishes at once from the shore it walked to; freeze + despawn on arrival or expiry.
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             call _orderRiders;
-            private _rg = groupFromNetId (_rider get "grp");
-            private _here = !isNull _rg && {((leader _rg) distance2D (_t get "ferryShore")) < OPCOM_FERRY_BOARD_BOAT};
-            if (isNull _rg || _here || {_wait >= OPCOM_FERRY_WAIT_MAX}) exitWith { _rider set ["ferryFrozen", true]; call _embark };
+            if (_boat) exitWith {
+                private _rg = groupFromNetId (_rider get "grp");
+                private _here = !isNull _rg && {((leader _rg) distance2D (_t get "ferryShore")) < OPCOM_FERRY_BOARD_BOAT};
+                if (isNull _rg || _here || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { _rider set ["ferryFrozen", true]; call _embark };
+            };
+            [_wait >= (OPCOM_FERRY_WAIT_MAX / 2)] call _boardPush;
+            // Boarders despawn on entry, so an empty group is a finished board.
+            if (({alive _x} count units groupFromNetId (_rider get "grp")) == 0) exitWith { call _embark };
+            if (_wait >= OPCOM_FERRY_WAIT_MAX) then { call _embark };
         };
         case "carry": {
             _rider set ["pos", _tpos];
