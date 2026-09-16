@@ -56,9 +56,11 @@ if (isNil "DUWS_dbgStealthCoef") then {
             _nextHint = time + 1;
             private _inRing = (player distance2D DUWS_stealth_centre) <= DUWS_stealth_radius;
             private _ago = time - DUWS_stealth_firedAt;
+            // Score and live trait both: they part company whenever the unit does not qualify for a write.
             hintSilent parseText format [
-                "<t size='1.4'>Stealth %1</t><br/>%2 | %3 km/h | fired %4<br/><t color='%5'>%6</t>",
+                "<t size='1.4'>Stealth %1   live %2</t><br/>%3 | %4 km/h | fired %5<br/><t color='%6'>%7</t>",
                 _coef toFixed 2,
+                (player getUnitTrait "camouflageCoef") toFixed 2,
                 toLower (stance player),
                 (abs (speed player)) toFixed 1,
                 if (_ago > 5) then { "--" } else { (_ago toFixed 1) + "s" },
