@@ -34,16 +34,12 @@ DUWS_fnc_opcom_ferrySeatFill = {
         private _u = _q deleteAt 0;
         _u enableSimulation true;
         _u hideObjectGlobal false;
-        // Assigned, not merely seated: "GET OUT" works off the assignment list, and a cabin filled by moveInCargo
-        // alone reads as empty, so the hold ends the moment the skids touch.
-        _u assignAsCargo _veh;
         _u moveInCargo _veh;
     };
     _veh setVariable ["DUWS_ferryUnloadQ", _q];
 };
 
-// Refill before turning anyone out: land "GET OUT" holds only while the hull has cargo to put down, so a cabin that
-// empties between two men ends the hold and flies the rest away.
+// Refill first: the men the cabin could not take wait hidden 10 km up, and a freed seat is how they reach the LZ.
 DUWS_fnc_opcom_ferryUnloadNext = {
     params ["_veh"];
     [_veh] call DUWS_fnc_opcom_ferrySeatFill;
@@ -52,8 +48,7 @@ DUWS_fnc_opcom_ferryUnloadNext = {
     private _aboard = (units _grp) select { alive _x && {vehicle _x isEqualTo _veh} };
     if (_aboard isEqualTo []) exitWith {};
     private _u = _aboard select 0;
-    // moveOut, the way fnc_helotaxi turns its passengers out and keeps its hull down: an ordered dismount left the
-    // ferry's men aboard as the hull lifted. Unassign after he is out, so the men behind him keep the hold alive.
+    // moveOut, not an ordered dismount: the order left men aboard as the hull lifted. Unassign so nobody re-boards.
     moveOut _u;
     unassignVehicle _u;
 };
@@ -286,10 +281,15 @@ DUWS_fnc_opcom_ferryStepLive = {
                 if (((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_BOAT) || {_wait >= OPCOM_FERRY_WAIT_MAX}) then { ["dropunload"] call _setPhase };
             } else {
                 if (((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT) exitWith {
+                    // No land mode holds a hull for a whole dismount: its waypoint reached and its hold spent, the
+                    // pilot climbs back to flyInHeight and hovers over the pad. Take away the height it wants.
+                    _veh flyInHeight 0;
                     ["dropunload"] call _setPhase;
                     [_veh] spawn {
                         params ["_veh"];
-                        while {alive _veh && {[_veh] call DUWS_fnc_opcom_ferryUnloadPending}} do {
+                        // A hull off the deck must not be turning men out: the tick puts the rest down instead.
+                        while {alive _veh && {((getPosATL _veh) select 2) < OPCOM_FERRY_GROUND_ALT}
+                               && {[_veh] call DUWS_fnc_opcom_ferryUnloadPending}} do {
                             [_veh] call DUWS_fnc_opcom_ferryUnloadNext;
                             sleep 2;
                         };
@@ -302,6 +302,11 @@ DUWS_fnc_opcom_ferryStepLive = {
             if (_boat) exitWith { [] call _dropSpawn; [_t] call DUWS_fnc_opcom_ferryRelease };
             private _wait = (_t getOrDefault ["ferryWait", 0]) + 1; _t set ["ferryWait", _wait];
             private _rg = groupFromNetId (_rider get "grp");
+            // The pin failed and men are still to come out: set them down rather than let the drop finish at height.
+            if (((getPosATL _veh) select 2) >= OPCOM_FERRY_GROUND_ALT && {[_veh] call DUWS_fnc_opcom_ferryUnloadPending}) exitWith {
+                call _dropGround;
+                [_t] call DUWS_fnc_opcom_ferryRelease;
+            };
             if ((isNull _rg) || {!([_veh] call DUWS_fnc_opcom_ferryUnloadPending)} || {_wait >= OPCOM_FERRY_WAIT_MAX}) then {
                 if (_wait >= OPCOM_FERRY_WAIT_MAX) then { call _dropGround };
                 [_t] call DUWS_fnc_opcom_ferryRelease;

@@ -126,7 +126,10 @@ DUWS_fnc_opcom_ferryRelease = {
         [_veh] call DUWS_fnc_opcom_ferryClearHull;
         private _pilot = currentPilot _veh;
         _pilot enableAI "Target";                            // undo the pickup pin
-        if (_veh isKindOf "Air") then { _veh land "NONE" };   // LAND is sticky: it would sit on the pad
+        if (_veh isKindOf "Air") then {
+            _veh flyInHeight OPCOM_AIR_SPAWN_ALT;            // undo the dismount pin, at the spawner's own value
+            _veh land "NONE";                                // LAND is sticky: it would sit on the pad
+        };
     };
     [_t] call DUWS_fnc_opcom_ferryHome;
 };

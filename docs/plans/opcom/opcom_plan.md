@@ -75,15 +75,17 @@ The design rules the code encodes, kept because P4 layers valuations on them:
   hold-outs are teleported into the cabin — a man left holding a seat assignment from when the cabin was full never
   re-paths himself. Descent and board hold a cap each, so a slow approach cannot eat the walk-aboard; a board
   unfinished at its cap despawns the men still ashore. At the drop it sets down on a second helipad with
-  `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down. That hold lasts only while men
-  are *assigned* to the cabin, so the squad is assigned and seated before the descent and rides it down; whoever
-  the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group raised on the pad flashes
-  there) and rides in as seats free. On the ground it turns one man out every two seconds, leader first, refilling
-  the cabin before each and unassigning him only once he is out, so the men behind him hold the hull down; it
-  lifts off once the queue and the seats are empty. The pilot is not pinned — `disableAI "MOVE"` takes away the
-  control that keeps a hull on the ground and crashed one with its riders aboard. A hull that never settles, or a
-  dismount out of time, sets the men down at the LZ instead of showing them where they wait, which would drop them
-  from that height; men still aboard when the hull goes down are lost with it. A **boat** never boards or dismounts
+  `land "GET OUT"`, which keeps the engine turning where `"LAND"` shuts it down. No landing hold lasts a whole
+  dismount, so the squad is seated before the descent and rides it down, and the grounded hull is pinned with
+  `flyInHeight 0` — its waypoint reached and its hold spent, a pilot otherwise climbs back to cruise and hovers
+  over the pad. Whoever the cabin cannot take waits 10 km above the LZ (hiding lands a frame late, so a group
+  raised on the pad flashes there) and rides in as seats free. On the ground it turns one man out every two
+  seconds, leader first, refilling the cabin before each, and lifts off once the queue and the seats are empty,
+  the pin undone at release. Every exit is gated on the hull still being grounded, because the pin is all that
+  holds it: a hull that lifts with men still to come out, one that never settles, or a dismount out of time sets
+  them down at the LZ rather than turning them out at height. The pilot itself is never pinned —
+  `disableAI "MOVE"` takes away the control that keeps a hull on the ground and crashed one with its riders
+  aboard. Men still aboard when the hull goes down are lost with it. A **boat** never boards or dismounts
   men: it parks `OPCOM_FERRY_BOAT_PARK` out from the shoreline nearest the riders (a water-cell centre can sit
   ~350 m out) while they walk to that shore, and the whole group vanishes into it once its leader is within
   `OPCOM_FERRY_BOARD_BOAT` of the shore, then
