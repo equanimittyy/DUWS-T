@@ -3997,8 +3997,8 @@
                 <English>OPFOR is holding a civilian reporter hostage in a building in this area. Rescue him and eliminate his captors.</English>
             </Key>
             <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_NOTE">
-                <Original>The hostage will be executed within 1 minute if BLUFOR is detected within the area. Discretion is advised.</Original>
-                <English>The hostage will be executed within 1 minute if BLUFOR is detected within the area. Discretion is advised.</English>
+                <Original>The hostage will be executed within 3 minutes if BLUFOR is detected within the area. Discretion is advised.</Original>
+                <English>The hostage will be executed within 3 minutes if BLUFOR is detected within the area. Discretion is advised.</English>
             </Key>
             <Key ID="STR_DUWS_T_rescuehostage_brief">
                 <Original>Alpha 1-1, OPFOR is holding a hostage near %1. Move in and rescue him. Discretion is advised.</Original>
