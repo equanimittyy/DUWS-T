@@ -606,9 +606,9 @@ OPCOM_SENSE_BATCH = 8;
 // A recon-flagged tasking's guaranteed detection reach in Chebyshev grid cells by platform
 // (fnc_opcom_recon_sense), the same cell measure as DUWS_opcom_streamK. Unlike OPCOM_SENSE_RANGE above this
 // is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual
-// or live. Foot < car < heli -- a heavier recon platform buys reach. Tune.
+// or live. Foot and car both sweep the 3x3 around them; a heli buys real reach. Tune.
 OPCOM_RECON_K = createHashMapFromArray [
-    ["inf", 0], ["wheeled", 1], ["rotary", 3]
+    ["inf", 1], ["wheeled", 1], ["rotary", 3]
 ];
 
 // The force a BLU-held zone deposits to the enemy layer: the player's garrison strength is not modelled,
