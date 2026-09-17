@@ -1,7 +1,8 @@
 // Locality: server. Give a tasking an active order and target: plan the route, arm the commit hold. Returns
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
-//   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target).
+//   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target). An assault takes the BLUFOR-held
+//     zone at _target and aims at its centre; it ends when the zone is OPFOR's (fnc_opcom_task_step).
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _errand.
 //     A boat goes to the zone's port instead of _target (never a land point); a portless zone refuses it.
 //   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex] or ["build", pos, type],
@@ -18,6 +19,17 @@ if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
 if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
+private _zk = "";
+if (_order isEqualTo "assault") then {
+    private _i = WARCOM_zones_controled_by_BLUFOR findIf {
+        (_x distance2D _target) <= (([[_x] call fnc_zone_key] call fnc_site_at) getOrDefault ["radius", 0])
+    };
+    if (_i >= 0) then { _zk = [WARCOM_zones_controled_by_BLUFOR select _i] call fnc_zone_key };
+};
+if (_order isEqualTo "assault" && {_zk isEqualTo ""}) exitWith {
+    ["WARN", "OPCOM", format ["task: no BLUFOR-held zone at assault target %1", _target]] call fnc_log; false
+};
+if (_zk isNotEqualTo "") then { _target = ([_zk] call fnc_site_at) get "pos" };
 private _live = (_t get "grp") isNotEqualTo "";
 // A bound ferry carry is driven by the transport step, not steerable; refuse rather than fight it.
 if (_live && {((_t getOrDefault ["carrying", -1]) >= 0) || {(_t getOrDefault ["ridingOn", -1]) >= 0}}) exitWith {
@@ -52,6 +64,7 @@ if (_order isEqualTo "guard") then {
 // Cleared off a non-move so a recycled record carries no stale re-garrison / supply mark; exclusive on a move.
 _t set ["errand", [[], _errand] select _errandSet];
 _t set ["returnZone", _rz];
+_t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out: delete its reserve-spawned defender (going mobile), then re-sync so the zone's

@@ -341,11 +341,11 @@ fnc_site_poller = {
                 // A frozen site must wake on either side too: a garrison the shared BLUFOR test can't
                 // rouse (its AI arm watches for BLUFOR on OPFOR ground) would sit in the middle of the
                 // radius unable to ever sleep, and lose its base while nobody's looking.
-                // Gated by the cheap list first: fnc_opfor_count_at still decides (it resolves crew
+                // Gated by the cheap list first: fnc_side_count_at still decides (it resolves crew
                 // and filters the dead, which the bare _east list does neither), reached only once
                 // somebody is actually within range.
                 if (_frozen && {!_here} && {(_east findIf { _x distance _pos < _ring }) >= 0}) then {
-                    _here = ([_pos, _ring] call fnc_opfor_count_at) > 0;
+                    _here = ([_pos, _ring, EAST] call fnc_side_count_at) > 0;
                 };
 
                 // Latch-clear and wake happen on different passes: the arrival test can't distinguish

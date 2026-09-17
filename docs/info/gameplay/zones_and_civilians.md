@@ -233,10 +233,10 @@ forth cannot converge on full strength. It used to reset to full on the BLUFOR c
 the reasoning that a retaken zone is manned by a fresh garrison; that handed the player's grinding
 straight back the moment they lost the ground again.
 
-**No hold beside it, unlike a town's.** `EAST SEIZED` cannot fire while any BLUFOR stand in the zone
-radius, so a retake already cannot happen under the player's feet — presence is the whole gate, and a
-timer on top would only delay a garrison that was never going to appear in front of anyone. The
-garrison then arrives on the ordinary streaming rule, when a player next approaches.
+**No hold beside it, unlike a town's.** A retake can land with players still inside the radius
+(`fnc_zone_retake_ready`): the ground changes hands under a live fight. The presence latch the retake
+re-arms keeps the seeded garrison from raising around them; it arrives on the ordinary streaming rule once
+the ring has been empty.
 
 **Where the player reads it.** The request menu's View Map mode answers zones as well as towns. A click
 goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the
@@ -275,9 +275,11 @@ trigger still can — could be held indefinitely by anything the engine counts a
 both sides instead means a lone survivor delays a capture only while BLUFOR do not outnumber him,
 and what is left in the outer ring when the zone flips is deleted by roster.
 
-The OPFOR-takes-it-back direction still uses `EAST SEIZED`: there is no BLUFOR garrison figure to
-judge a retake against, and retakes are driven by WARCOM assault waves rather than by a force being
-ground down. Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
+The OPFOR-takes-it-back direction mirrors it: `fnc_zone_retake_ready` gates an `EAST PRESENT` trigger on
+OPFOR outnumbering BLUFOR over the same circle. BLUFOR garrisons are not built, so the garrison half always
+reads beaten. A virtual OPCOM attacker has no units to trip the trigger, so OPCOM runs the zone's retake
+statement itself when one stands inside the radius
+([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
 `fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the condition lives in four places and has to move
 in all of them at once.
 
@@ -499,12 +501,10 @@ single poll for the ordinary zone or town nobody is near and is the whole guard 
 matters: a campaign generated under a player, or a town seeded into the band at start with one
 already inside.
 
-A stream-out needs no latch, because it only happens once the player has left. **A zone retake does**,
-and it is the case most likely to be mistaken for safe: `EAST SEIZED` promises only that BLUFOR are
-outside the *trigger* radius, while the arrival test reaches 400 m further. A player who has backed
-off the objective but is still on the approach counts as near by that reckoning, and so does anyone
-who walks back in during the ten seconds before the next poll — so the zone tick re-latches when the
-zone returns to OPFOR hands and holds until the whole ring is empty, exactly as at campaign start.
+A stream-out needs no latch, because it only happens once the player has left. **A zone retake does**:
+it can land with players still inside the radius, and the arrival test reaches 400 m further, so anyone
+on the approach counts as near too — so the zone tick re-latches when the zone returns to OPFOR hands and
+holds until the whole ring is empty, exactly as at campaign start.
 
 The town side latches on the same flag whenever a hold is armed, which covers both the crossing and
 the clear.
@@ -576,19 +576,18 @@ a zone is ground with an owner, a town is ground with an opinion.
 | "OPFOR holds it" means | it is in `WARCOM_zones_controled_by_OPFOR` | its reputation is `<= -10` |
 | How OPFOR come to hold it | generated that way, or retaken | the player ruined it — killed civilians, wrecked buildings |
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
-| How OPFOR get it back | `EAST SEIZED`: walk in while no BLUFOR is inside the radius | reputation falls back below `-10` |
+| How OPFOR get it back | outnumber BLUFOR inside the radius, players there or not (`fnc_zone_retake_ready`) | reputation falls back below `-10` |
 | Strength after being beaten | floored to `0.3` on the retake (`fnc_opfor_cap`) | floored to `0.3` on the clear |
 | Time gate | none | `MOBILISING` 30 min, `REGROUPING` 3 h |
 | Presence latch | thread start, and every retake | thread start, and every hold armed |
 | Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
 | Regrouping | never — a beaten zone is BLUFOR's | after a clear that leaves it in the band |
 
-**Why the zone needs no time gate and the town does.** A zone flip is itself gated on absence —
-`EAST SEIZED` cannot fire while a single BLUFOR stands in the radius — so by the time OPFOR own it
-again the player has already left, and a timer would only defer a garrison that was never going to
-appear in front of anyone. A town's flip has no such gate: reputation is spent *inside* the town, so
-the player is standing in it at the exact moment it crosses, and again at the moment its garrison
-dies. The hold is what buys the distance the zone gets for free.
+**Why the zone needs no time gate and the town does.** A zone is retaken by force on the ground — the
+attackers who won it already stand there — and the latch the retake re-arms holds the seeded garrison
+until the ring has been empty once. A town's flip has no such force: reputation is spent *inside* the
+town, so the player is standing in it at the exact moment it crosses, and again at the moment its
+garrison dies. The hold is what buys that garrison its distance.
 
 **Why the strength floor is symmetric anyway.** Both sides of that difference converge on the same
 rule, because both answer the same question — what does a beaten garrison come back as. A zone
@@ -610,7 +609,7 @@ about.
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: the tier composition, thinned by strength. Peak published | tier + bar |
 | You leave for 2 min | Survivors counted, strength recorded (never upward), the zone's own men deleted by roster, props stowed, peak cleared | tier + the bar it will return at |
 | You beat it to 20 % **and** outnumber the OPFOR left in the zone | Ownership flips. CP bounty, AP swings. Survivors are sent off and then collected once no player is within 500 m — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
-| OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
+| OPFOR retake (`fnc_zone_retake_ready`) | OPFOR outnumber BLUFOR in the radius, players inside or not. Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
 | The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground: a zone has no `Regrouping` state to protect | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at, peak published | tier + bar |
 

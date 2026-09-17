@@ -103,10 +103,11 @@ fnc_escalation = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escal
 // building a client razed still reaches the server-side counter.
 fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";
-fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
+fnc_side_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_side_count_at.sqf";
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created
-// server-local precisely because this reads server-side zone state.
+// server-local precisely because these read server-side zone state.
 fnc_zone_capture_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_capture_ready.sqf";
+fnc_zone_retake_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_retake_ready.sqf";
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\arsenal\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\search\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";

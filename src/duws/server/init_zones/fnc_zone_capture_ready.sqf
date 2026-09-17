@@ -6,11 +6,7 @@
 // Replaces `WEST SEIZED` on the BLUFOR-takes-it direction. SEIZED demands the whole trigger area be
 // empty of OPFOR, which made a capture a sweep of every last patrol out to the zone radius; this
 // asks the two questions that actually describe taking ground -- is the garrison beaten, and does
-// BLUFOR outnumber what is still standing on the ground.
-//
-// The OPFOR-takes-it-back direction still uses `EAST SEIZED`. There is no BLUFOR garrison figure to
-// judge a retake against, and OPFOR retakes are driven by WARCOM assault waves rather than by a
-// force being ground down.
+// BLUFOR outnumber what is still standing on the ground. The retake direction is fnc_zone_retake_ready.
 
 if (!isServer) exitWith { false };
 
@@ -38,4 +34,4 @@ if !([_key] call DUWS_fnc_garrisonBeaten) exitWith { false };
 // `list` is the engine's own record of what activates this trigger, which is WEST PRESENT -- the
 // same set the `this` beside this call is true for, so the two cannot disagree about who is here.
 private _radius = (triggerArea _trg) select 0;
-(count (list _trg)) > ([_pos, _radius] call fnc_opfor_count_at)
+(count (list _trg)) > ([_pos, _radius, EAST] call fnc_side_count_at)

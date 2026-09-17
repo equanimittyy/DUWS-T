@@ -24,9 +24,8 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 // generated with. The loss ledger is seeded to 0.3 survival -- a thin single garrison with no reserve
 // depth, since the seed spends the pool copies before it thins the garrison -- so every retake costs
 // them the same and a zone traded back and forth does not converge on full strength.
-// No hold beside it, unlike a town's: EAST SEIZED cannot fire while any BLUFOR stand in the radius, so a
-// retake already cannot happen under the player's feet, and the garrison arrives on the ordinary
-// streaming rule once they are clear.
+// No hold beside it, unlike a town's: the ground changes hands back and forth under a live fight, and the
+// garrison arrives on the ordinary streaming rule.
 private _retakenKey = [_triggerPos] call fnc_zone_key;
 [_retakenKey, 0.3] call DUWS_fnc_garrisonSeed;
 

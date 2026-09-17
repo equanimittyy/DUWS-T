@@ -1,41 +1,46 @@
 // Locality: server. The tasking phase of the perception loop, one pass per tick after the grid rebuild:
 // movement, streaming, status and healing (no scoring -- Phase 4 adds what to commit). Off the isNil scoring
 // block, since a route search may yield. Every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry
-// included: fnc_opcom_ferry scripts the carry, never when it streams. De-virtualisation triggers on player proximity
-// only, and never for a `garrison`: it rests virtual, a combatant defending through the zone's reserve wave.
+// included: fnc_opcom_ferry scripts the carry, never when it streams. A unit renders only when it has something to
+// engage -- a player or a live BLUFOR group within K -- and never as a `garrison`: it rests virtual, a combatant
+// defending through the zone's reserve wave.
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_taskings") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
 
-private _pcells = (allPlayers select { alive _x }) apply {
-    private _ci = [getPosASL _x] call DUWS_fnc_opcom_w2c;
-    [_ci mod _w, floor (_ci / _w)]
-};
+// A streaming read of true positions, never belief: a player's AI squad or a headless client's group draws a fight too.
+private _blufor = allPlayers select { alive _x };
+{ private _l = leader _x; if (alive _l) then { _blufor pushBackUnique _l } } forEach (allGroups select { side _x == west });
+private _bcells = [];
+{ private _ci = [getPosASL _x] call DUWS_fnc_opcom_w2c; _bcells pushBackUnique [_ci mod _w, floor (_ci / _w)] } forEach _blufor;
 
-// Least Chebyshev cell distance from a point to any player; 1e9 with no player on the map.
-private _nearestPlayerCells = {
+// Least Chebyshev cell distance from a point to any BLUFOR; 1e9 with none on the map.
+private _nearestBluforCells = {
     params ["_pos"];
-    if (_pcells isEqualTo []) exitWith { 1e9 };
+    if (_bcells isEqualTo []) exitWith { 1e9 };
     private _ci = [_pos] call DUWS_fnc_opcom_w2c;
     private _cx = _ci mod _w;
     private _cy = floor (_ci / _w);
     private _best = 1e9;
-    { _best = _best min ((abs (_cx - (_x select 0))) max (abs (_cy - (_x select 1)))) } forEach _pcells;
+    { _best = _best min ((abs (_cx - (_x select 0))) max (abs (_cy - (_x select 1)))) } forEach _bcells;
     _best
 };
 
 private _deVirtIfNear = {
     params ["_t"];
     private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-    (([_t get "pos"] call _nearestPlayerCells) <= _k) && {[_t] call DUWS_fnc_opcom_deVirt}
+    if (([_t get "pos"] call _nearestBluforCells) > _k) exitWith { _t set ["nearTicks", 0]; false };
+    private _near = (_t getOrDefault ["nearTicks", 0]) + 1;
+    _t set ["nearTicks", _near];
+    (_near >= OPCOM_DEVIRT_BUFFER) && {[_t] call DUWS_fnc_opcom_deVirt}
 };
 
 // A stow needs OPCOM_REVIRT_GRACE unbroken far ticks; a near or _hold tick resets the count.
 private _stowIfFar = {
     params ["_t", "_ldr", "_hold"];
     private _k = DUWS_opcom_streamK getOrDefault [_t get "moveType", 1];
-    if (_hold || {([getPosASL _ldr] call _nearestPlayerCells) <= _k}) exitWith { _t set ["farTicks", 0]; false };
+    if (_hold || {([getPosASL _ldr] call _nearestBluforCells) <= _k}) exitWith { _t set ["farTicks", 0]; false };
     private _far = (_t getOrDefault ["farTicks", 0]) + 1;
     _t set ["farTicks", _far];
     if (_far < OPCOM_REVIRT_GRACE) exitWith { false };
@@ -43,17 +48,48 @@ private _stowIfFar = {
     true
 };
 
+private _garrisonInto = {
+    params ["_t", "_zk"];
+    _t set ["order", "garrison"]; _t set ["homeZone", _zk];
+    _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""]; _t set ["settleZone", ""];
+    [_zk] call DUWS_fnc_opcom_zoneReserveSync;
+};
+
 // Settle an arrived move: re-garrison a returnZone or hold as guard. Mutates the record only; true if it garrisoned.
 private _settleMove = {
     params ["_t", "_pos"];
     private _rz = _t getOrDefault ["returnZone", ""];
-    if (_rz isNotEqualTo "") exitWith {
-        _t set ["order", "garrison"]; _t set ["homeZone", _rz];
-        _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""];
-        [_rz] call DUWS_fnc_opcom_zoneReserveSync;
-        true
-    };
+    if (_rz isNotEqualTo "") exitWith { [_t, _rz] call _garrisonInto; true };
     _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
+    false
+};
+
+// -> true the tick an attacker enters its target zone's radius. A live one tracks it too, or a later stow re-reports.
+private _assaultEnters = {
+    params ["_t", "_pos"];
+    private _site = [_t get "targetZone"] call fnc_site_at;
+    private _in = (_pos distance2D (_site get "pos")) <= (_site get "radius");
+    private _entered = _in && {!(_t getOrDefault ["inZone", false])};
+    _t set ["inZone", _in];
+    _entered
+};
+
+// -> true if it garrisoned. A live attacker inside the zone guards until it stows, so it never vanishes in front of a
+// player; one still on the road re-garrisons there.
+private _assaultEnd = {
+    params ["_t", "_pos", "_grp"];
+    private _zk = _t get "targetZone";
+    private _site = [_zk] call fnc_site_at;
+    _t set ["targetZone", ""];
+    if ((_pos distance2D (_site get "pos")) > (_site get "radius")) exitWith {
+        _t set ["hold", 0];
+        if !([_t, "move", _site get "pos", _zk] call fnc_opcom_task) then { [_t, "guard"] call fnc_opcom_task };
+        false
+    };
+    if (isNull _grp) exitWith { [_t, _zk] call _garrisonInto; true };
+    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []]; _t set ["settleZone", _zk];
+    [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
+    ["INFO", "OPCOM", format ["assault: tasking %1 holds %2, garrisoning when it stows", _t get "id", _zk]] call fnc_log;
     false
 };
 
@@ -98,6 +134,14 @@ private _settleMove = {
                         };
                     };
                     _t set ["status", ["moving", "engaged"] select _engaged];
+                    if (_order isEqualTo "assault") then {
+                        if ([_t get "targetZone"] call fnc_zone_bluforHeld) then {
+                            [_t, getPosASL _ldr] call _assaultEnters;
+                        } else {
+                            [_t, getPosASL _ldr, _grp] call _assaultEnd;
+                            _order = _t get "order";
+                        };
+                    };
 
                     if (((_t getOrDefault ["errand", []]) isNotEqualTo []) && {(_ldr distance2D (_t get "target")) < 40}) then {
                         [_t] call DUWS_fnc_opcom_deliver;
@@ -137,7 +181,10 @@ private _settleMove = {
                             };
                         };
                         // Skip the stow for a rider that just bound to a ferry this tick -- the transport owns it now.
-                        if (!_arrived && {!_bound}) then { [_t, _ldr, _engaged] call _stowIfFar };
+                        if (!_arrived && {!_bound} && {[_t, _ldr, _engaged] call _stowIfFar}
+                            && {(_t getOrDefault ["settleZone", ""]) isNotEqualTo ""}) then {
+                            [_t, _t get "settleZone"] call _garrisonInto;
+                        };
                     };
                 };
             };
@@ -183,6 +230,24 @@ private _settleMove = {
                                 _t set ["status", "done"]; _settled = true;
                             } else {
                                 _settled = [_t, _t get "pos"] call _settleMove;
+                            };
+                        };
+                        if (_order isEqualTo "assault") then {
+                            private _zk = _t get "targetZone";
+                            if ([_zk] call fnc_zone_bluforHeld) then {
+                                private _zpos = ([_zk] call fnc_site_at) get "pos";
+                                if ([_t, _t get "pos"] call _assaultEnters) then {
+                                    private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
+                                    if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
+                                };
+                                // The zone's own retake statement, so a virtual capture passes what the trigger would. No BLUFOR
+                                // count: any within K would have rendered the attacker, so its stored force outnumbers nobody.
+                                if ((_t get "inZone") && {(_t get "effForce") > 0}) then {
+                                    private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_zpos select 0), floor abs (_zpos select 1)], objNull];
+                                    if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };
+                                };
+                            } else {
+                                _settled = [_t, _t get "pos", grpNull] call _assaultEnd;
                             };
                         };
                         // Skip the stream-in for a settled record or a rider that just bound to a ferry.

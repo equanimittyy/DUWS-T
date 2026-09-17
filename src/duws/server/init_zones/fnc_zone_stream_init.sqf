@@ -152,7 +152,7 @@ DUWS_fnc_zoneManStatics = {
     };
 
     // A gun still carrying the prefab's crew is garrison as much as a spawned one, so its gunner joins
-    // the roster. Unrostered, he'd deny capture through fnc_opfor_count_at while counting toward neither the peak nor the break line -- killing him would be progress the zone never registers.
+    // the roster. Unrostered, he'd deny capture through fnc_side_count_at while counting toward neither the peak nor the break line -- killing him would be progress the zone never registers.
     { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};

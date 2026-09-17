@@ -570,9 +570,12 @@ OPCOM_BELIEF_EXPIRE = 240;   // 1200s @ 5s tick
 // own knob. Cells init a full span in the past (fnc_opcom_grid_init), so never-seen reads max, no sentinel. Tune.
 OPCOM_COVER_SPAN = 120;      // 600s @ 5s tick
 
-// Ticks a live tasking must stay clear of every player before it re-virtualises -- a run, not one far
-// sample, so a fast flyover cannot spawn then stow a group in a single pass.
+// Ticks a live tasking must stay clear of every player and live BLUFOR group before it re-virtualises -- a run,
+// not one far sample, so a fast flyover cannot spawn then stow a group in a single pass.
 OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
+
+// Unbroken ticks with BLUFOR within K before a virtual tasking spawns, so a jet crossing the ring on one tick spawns nothing.
+OPCOM_DEVIRT_BUFFER = 2;
 
 // Leader within this of a move target counts as arrived, so a live tasking settles to guard/garrison the same
 // tick instead of holding a stale MOVE on the OPCOM map until a later stow re-virtualises it.

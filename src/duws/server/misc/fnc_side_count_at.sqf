@@ -1,4 +1,4 @@
-// Locality: server -- OPFOR physically standing on a piece of ground, whoever spawned them.
+// Locality: server -- one side's men physically standing on a piece of ground, whoever spawned them.
 // Deliberately owner-blind, unlike fnc_zone_garrison_count: this answers "is this ground held",
 // which anyone standing on it denies whether they are the local garrison, a side mission's guards,
 // or a patrol passing through.
@@ -9,13 +9,13 @@
 //
 if (!isServer) exitWith { 0 };
 
-params ["_pos", ["_radius", 100]];
+params ["_pos", "_radius", "_side"];
 
 private _n = 0;
 {
     private _members = if (_x isKindOf "CAManBase") then { [_x] } else { crew _x };
     {
-        if (alive _x && {side _x == EAST}) then {
+        if (alive _x && {side _x == _side}) then {
             _n = _n + 1;
         };
     } forEach _members;

@@ -389,7 +389,7 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     // reliable primitive that stops bullets, blasts and setDamage alike while the ring is clear,
     // which a per-hit HandleDamage veto could not. Killable only while OPFOR hold the ring.
     while { alive hq_blu1 } do {
-        hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS] call fnc_opfor_count_at) > 0);
+        hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0);
         sleep 1;
     };
     campaign_lost = true;

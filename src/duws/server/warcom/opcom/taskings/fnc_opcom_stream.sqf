@@ -118,6 +118,7 @@ DUWS_fnc_opcom_deVirt = {
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
+    _t set ["nearTicks", 0];
     // reOrderLive (not applyOrder): a land unit spawning mid-crossing walks only to the near shore, not into water.
     [_t] call DUWS_fnc_opcom_reOrderLive;
     true
