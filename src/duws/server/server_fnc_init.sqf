@@ -682,6 +682,7 @@ fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug
 // Broadcast so a client can open them, then remoteExec fnc_debug_opcom back.
 fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_menu.sqf";publicVariable "fnc_debug_opcom_menu";
 fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
+fnc_debug_opcom_step = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_step.sqf";publicVariable "fnc_debug_opcom_step";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
 // The view/draw/calibrate handlers are broadcast

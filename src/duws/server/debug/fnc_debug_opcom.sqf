@@ -35,21 +35,14 @@ switch (_verb) do {
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
-        // _a names the picker mode (default "task"), so every verb that starts from a tasking shares this list.
-        private _mode = ["task", _a] select (_a isNotEqualTo "");
+        // One list for every order, teleport included; the picked tasking branches client-side (fnc_debug_opcom_step).
         // Live taskings included: fnc_opcom_task re-orders a de-virtualised group in place (reOrderLive), the
         // same primitive OPCOM's loop drives -- only a bound ferry carry is refused, and by the primitive.
         private _rows = DUWS_opcom_taskings apply {
             [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
         };
         if (_rows isEqualTo []) exitWith { "No taskings (recruit one first)." remoteExec ["hint", _caller] };
-        private _title = switch (_mode) do {
-            case "supply": { "Supply-run which tasking?" };
-            case "intercept": { "Intercept with which tasking?" };
-            case "regarrison": { "Re-garrison which tasking?" };
-            default { "Task a tasking" };
-        };
-        [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+        ["Order which tasking?", _rows, "order", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "townlist": {
         // _a = tasking id, _b = errand kind. Nearest first; reinforce and fortify list only towns with a garrison.
@@ -88,14 +81,6 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { "No BLUFOR sightings in OPCOM belief." remoteExec ["hint", _caller] };
         _rows sort true;
         ["Intercept which sighting?", _rows apply { [_x select 1, _x select 2] }, "intercept_row", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
-    };
-    case "teleportlist": {
-        // Every tasking, live included; a teleport also snaps the live group's hulls, not just the stored point.
-        if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
-        private _rows = DUWS_opcom_taskings apply {
-            [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
-        };
-        ["Teleport which tasking?", _rows, "teleport", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "recruit": {
         // _a = row, _b = zone key. Site at the zone centre and home the unit there, so homeZone drives the

@@ -6,15 +6,11 @@ if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 
 private _c = [1, 0.667, 0, 1];
-["OPCOM (Phase 3)", [
+["OPCOM", [
     ["Recruit a unit",  { ["recruitlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Task a tasking",  { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Re-garrison a tasking", { ["tasklist", "regarrison", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Supply-run a tasking", { ["tasklist", "supply", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Intercept a sighting", { ["tasklist", "intercept", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Fire mission", { ["batterylist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Order a tasking", { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Buy for a zone", { ["zonelist", "", "zonebuy", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Teleport a tasking", { ["teleportlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Fire mission", { ["batterylist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["List taskings",   { ["list",        "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Tasking unit status", {
         // Map pick waitUntils, so it must run scheduled (fnc_map_pick_pos.sqf).
