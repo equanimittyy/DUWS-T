@@ -96,11 +96,11 @@ private _captureEnd = {
 // Re-plans only once the row's believed position moves past one cell: each re-plan is an A* search. A decayed row
 // leaves the last position read.
 private _interceptFollow = {
-    params ["_t", "_live"];
+    params ["_t", "_live", ["_force", false]];
     private _i = DUWS_opcom_belief_key findIf { _x isEqualTo (_t get "interceptKey") };
     if (_i < 0) exitWith {};
     private _bp = DUWS_opcom_belief_pos select _i;
-    if (([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1) exitWith {};
+    if (!_force && {([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1}) exitWith {};
     _t set ["target", +_bp];
     ([_t get "pos", _bp, _t get "moveType", 0] call fnc_opcom_route) params ["_pts", "_mode"];
     _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
@@ -109,9 +109,44 @@ private _interceptFollow = {
 
 private _interceptGuard = {
     params ["_t", "_pos", "_grp"];
-    ["INFO", "OPCOM", format ["intercept: tasking %1 guards at %2 (row %3, contact %4)", _t get "id", _pos apply { round _x }, _t get "interceptKey", _t get "contact"]] call fnc_log;
+    ["INFO", "OPCOM", format ["intercept: tasking %1 guards at %2, nothing within %3 cells", _t get "id", _pos apply { round _x }, OPCOM_INTERCEPT_K]] call fnc_log;
     _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []]; _t set ["interceptKey", ""];
     if (!isNull _grp) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
+};
+
+// The interceptor's reveal, taken standing in the cell it was sent to: every BLUFOR group within OPCOM_INTERCEPT_K is
+// stamped for certain, and rows the look disproves clear. -> the netId of the closest group, or "".
+private _interceptLook = {
+    params ["_pos"];
+    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_stamp;
+    private _best = "";
+    private _bd = 1e12;
+    {
+        private _l = leader _x;
+        if (alive _l) then {
+            private _lp = getPosASL _l;
+            if (([_lp, _pos] call DUWS_fnc_opcom_cellDist) <= OPCOM_INTERCEPT_K) then {
+                [netId _x, [_lp select 0, _lp select 1, 0], [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
+                private _d = _pos distance2D _lp;
+                if (_d < _bd) then { _bd = _d; _best = netId _x };
+            };
+        };
+    } forEach (allGroups select { side _x == west });
+    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_clear;
+    _best
+};
+
+// Arrived where it was sent: it hunts the closest group the look found, or guards. -> true if it guarded.
+private _interceptArrive = {
+    params ["_t", "_pos", "_grp"];
+    private _next = [_pos] call _interceptLook;
+    if (_next isEqualTo "") exitWith { [_t, _pos, _grp] call _interceptGuard; true };
+    if (_next isNotEqualTo (_t get "interceptKey")) then {
+        ["INFO", "OPCOM", format ["intercept: tasking %1 switches to %2", _t get "id", _next]] call fnc_log;
+        _t set ["interceptKey", _next];
+        [_t, !isNull _grp, true] call _interceptFollow;
+    };
+    false
 };
 
 {
@@ -157,12 +192,8 @@ private _interceptGuard = {
                     _t set ["status", ["moving", "engaged"] select _engaged];
                     if (_order isEqualTo "intercept") then {
                         [_t, true] call _interceptFollow;
-                        private _near = ([getPosASL _ldr] call _nearestBluforCells) <= (DUWS_opcom_streamK getOrDefault [_t get "moveType", 1]);
-                        if (_near) then { _t set ["contact", true] };
-                        if (!_near && {(_t get "contact") || {([getPosASL _ldr, _t get "target"] call DUWS_fnc_opcom_cellDist) == 0}}) then {
-                            [_t, getPosASL _ldr, _grp] call _interceptGuard;
-                            _order = "guard";
-                        };
+                        if (([getPosASL _ldr, _t get "target"] call DUWS_fnc_opcom_cellDist) == 0
+                            && {[_t, getPosASL _ldr, _grp] call _interceptArrive}) then { _order = "guard" };
                     };
                     if (_order isEqualTo "capture") then {
                         if ([_t get "targetZone"] call fnc_zone_bluforHeld) then {
@@ -263,10 +294,8 @@ private _interceptGuard = {
                                 _settled = [_t, _t get "pos"] call _settleMove;
                             };
                         };
-                        // BLUFOR within K render the unit instead, so it fights them live.
-                        if (_order isEqualTo "intercept" && {_adv isEqualTo "arrived"}
-                            && {([_t get "pos"] call _nearestBluforCells) > (DUWS_opcom_streamK getOrDefault [_t get "moveType", 1])}) then {
-                            [_t, _t get "pos", grpNull] call _interceptGuard;
+                        if (_order isEqualTo "intercept" && {([_t get "pos", _t get "target"] call DUWS_fnc_opcom_cellDist) == 0}) then {
+                            [_t, _t get "pos", grpNull] call _interceptArrive;
                         };
                         if (_order isEqualTo "capture") then {
                             private _zk = _t get "targetZone";

@@ -577,6 +577,10 @@ OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
 // Unbroken ticks with BLUFOR within K before a virtual tasking spawns, so a jet crossing the ring on one tick spawns nothing.
 OPCOM_DEVIRT_BUFFER = 2;
 
+// An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
+// look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.
+OPCOM_INTERCEPT_K = 1;
+
 // Leader within this of a move target counts as arrived, so a live tasking settles to guard/garrison the same
 // tick instead of holding a stale MOVE on the OPCOM map until a later stow re-virtualises it.
 OPCOM_MOVE_ARRIVE = 50;      // m

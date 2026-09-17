@@ -51,9 +51,9 @@ The code is the source of truth. What new work must hold to:
   holding `guard` until it stows, and one still on the road re-garrisons there.
 - **Intercept.** An `intercept` targets a belief row key, a BLUFOR group's `netId` (`fnc_opcom_task`). It follows
   the row's believed position, re-planning only once that moves past one cell, and keeps the last position read if
-  the row decays. Within its streaming K it reads true BLUFOR positions as a sensor (`fnc_opcom_recon_sense`): groups
-  found refresh their rows, and rows in an empty block clear. It drops to `guard` once no BLUFOR remain within K,
-  after a fight or at the last known position, and never returns to garrison.
+  the row decays. Standing in the cell it was sent to, it takes one guaranteed look `OPCOM_INTERCEPT_K` cells wide:
+  every BLUFOR group inside is stamped for certain, rows the look disproves clear, and it hunts the closest group
+  found. Nothing inside drops it to `guard` there; an interceptor never returns to garrison.
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
   `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
   nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index

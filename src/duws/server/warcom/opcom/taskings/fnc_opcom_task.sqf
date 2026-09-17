@@ -75,7 +75,7 @@ if (_order isEqualTo "guard") then {
 _t set ["errand", [[], _errand] select _errandSet];
 _t set ["returnZone", _rz];
 _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
-_t set ["interceptKey", _ik]; _t set ["contact", false];
+_t set ["interceptKey", _ik];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out: delete its reserve-spawned defender (going mobile), then re-sync so the zone's
