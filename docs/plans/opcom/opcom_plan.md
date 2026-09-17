@@ -17,14 +17,14 @@ The sections marked **WIP** (Stage B onward) are first-pass decisions whose shap
 
 | Phase | State |
 |---|---|
-| 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** (live-playtest verification of P3 pending) |
+| 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** |
 | 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order | [§Orders](#orders-phase-4-stage-a) |
 | 4, Stage B — The decision loop: 4.4 spine + zone economy, 4.5 trucks + towns + Rapport, 4.6 need and cover fields + standalone hardpoints, 4.7 QRF + Attack decisions, 4.8 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
 
-Each phase ships runnable and verifiable before the next; the ordering is forced by what the next reads. Do not
-pre-build later phases — the tuning constants and engine-contact behaviours only settle by running the core.
+The ordering is forced by what the next phase reads. Do not pre-build later phases: the tuning constants and
+engine-contact behaviours only settle by running the core.
 
 ## Shipped: the substrate the loop drives
 
