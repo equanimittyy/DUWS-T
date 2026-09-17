@@ -55,9 +55,11 @@ The code is the source of truth. What new work must hold to:
   every BLUFOR group inside is stamped for certain, rows the look disproves clear, and it hunts the closest group
   found. Nothing inside drops it to `guard` there; an interceptor never returns to garrison.
 - **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds on a point from one mortar pit
-  or battery: every piece of it that has artillery ammo, a crew and the target in range fires. Those two types never
-  stream, so their guns and crews always stand. It fires what it is handed — what is worth shelling, the cooldown,
-  the scatter and the HQ exclusion are the scored Arty action's.
+  or battery: every crewed piece of it that bears on the target fires. Those two types never stream, so their guns
+  and crews always stand. A standing battery holds **no ammunition** — its guns are emptied at register, loaded for
+  the mission they are given, topped up as they fire and emptied again once the rounds are away or
+  `OPCOM_ARTY_ROUND_SECS` per round has passed, so a crew never shells anything on its own. It fires what it is
+  handed — what is worth shelling, the cooldown, the scatter and the HQ exclusion are the scored Arty action's.
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
   `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
   nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index
@@ -429,7 +431,8 @@ before; if it does not, the fallback is spawning shells directly as the player's
 
 - **A fire mission is the Arty action** — scored and committed like any other, `Cost` scaling with rounds ×
   saturation; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
-  range is the availability gate, nothing more. **AP is the ammunition** — no finite store, the wallet limits.
+  range is the availability gate, nothing more. **AP is the ammunition** — the guns rest empty and are loaded per
+  mission, so there is no finite store and the wallet is the only limit.
 - **Observation is the trigger** — nothing is shelled the enemy has not seen. A player above `east knowsAbout ~1.5`
   (shared with the sighting sweep); a BLU zone/FOB an OP covers or an OPFOR element was within ~500 m of in 15 min.
   OPs are the artillery's eyes; killing them blinds guns.

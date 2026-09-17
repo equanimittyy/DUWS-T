@@ -479,6 +479,9 @@ fnc_hardpoint_register = {
         };
         _occ set ["awake", true];
         missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key, "crew"] call fnc_site_alive];
+        // A standing battery holds no ammunition: OPCOM loads its guns for the mission it gives them and empties
+        // them after (fnc_opcom_fires), so a crew never shells anything on its own. Guarded: OPCOM is its own subsystem.
+        if (!isNil "DUWS_fnc_opcom_batteryUnload") then { [_key] call DUWS_fnc_opcom_batteryUnload };
         // Loose garrison: stood up now only if BLUFOR are already near, cycled by the tick thereafter.
         private _up = [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir;
         _occ set ["looseUp", _up];
