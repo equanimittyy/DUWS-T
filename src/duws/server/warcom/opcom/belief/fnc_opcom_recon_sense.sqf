@@ -13,6 +13,9 @@
 // It also stamps the coverage layer over that reach every tick, catch or not, so ground a recon looked at
 // reads swept-clear rather than never-seen (fnc_opcom_cover_stamp), and clears any stale belief the reach
 // disproves (fnc_opcom_cover_clear).
+//
+// An intercepting tasking, whatever it is, senses the same way within its streaming K: it reads the truth where it
+// hunts, so a sighting whose squad has left clears as the interceptor arrives.
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_grid_w") exitWith {};
 
@@ -32,7 +35,9 @@ private _wcells = [];
 
 // No empty-_wcells early exit: a recon still stamps coverage with no BLUFOR in play (looked, found nothing).
 {
-    if ("recon" in (_x getOrDefault ["flags", []])) then {
+    private _recon = "recon" in (_x getOrDefault ["flags", []]);
+    private _intercept = (_x get "order") isEqualTo "intercept";
+    if (_recon || _intercept) then {
         // Live unit senses from where it stands; a virtual one from its stepped grid point.
         private _grp = _x get "grp";
         private _pos = if (_grp isNotEqualTo "") then {
@@ -41,7 +46,8 @@ private _wcells = [];
         } else {
             _x get "pos"
         };
-        private _k = OPCOM_RECON_K getOrDefault [_x get "moveType", 1];
+        private _k = [-1, OPCOM_RECON_K getOrDefault [_x get "moveType", 1]] select _recon;
+        if (_intercept) then { _k = _k max (DUWS_opcom_streamK getOrDefault [_x get "moveType", 1]) };
         [_pos, _k] call fnc_opcom_cover_stamp;
         private _rc = [_pos] call DUWS_fnc_opcom_w2c;
         private _rcx = _rc mod _w;

@@ -7,6 +7,7 @@
 //   ["regarrison", id, zoneKey]     -- send `id` to a zone; it settles into that garrison on arrival
 //   ["supply", id, targetPos, errand] -- send `id` on a supply run; its errand lands on arrival (fnc_opcom_task)
 //   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
+//   ["intercept", id, rowKey]       -- send `id` after a belief row (a BLUFOR group's netId)
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
 //   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
 // e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
@@ -64,6 +65,13 @@ switch (_verb) do {
             _t set ["hold", 0];
             [_t, "move", _b, "", _c] call fnc_opcom_task
         };
+    };
+    case "intercept": {
+        private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
+        if (_i < 0) exitWith { ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false };
+        private _t = DUWS_opcom_taskings select _i;
+        _t set ["hold", 0];
+        [_t, "intercept", _b] call fnc_opcom_task
     };
     case "zone": {
         if ((([_b] call fnc_site_at) getOrDefault ["pos", []]) isEqualTo []) exitWith {

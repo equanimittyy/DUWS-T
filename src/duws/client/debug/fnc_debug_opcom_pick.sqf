@@ -1,9 +1,6 @@
 // Locality: client -- remoteExec'd back to the caller by fnc_debug_opcom with a freshly-read list. Opens the
-// row picker; a pick runs the mode's next step (recruit chains row then OPFOR zone, task chains order then a
-// map-picked target cell, re-garrison chains tasking then OPFOR zone, supply chains tasking, errand, then a town
-// or a hardpoint type and map-picked point, zone buy chains OPFOR zone then the buy, teleport chains tasking then a
-// map-picked point). State that outlives the click is threaded
-// through args, never an enclosing local -- SQF blocks are not closures (docs/info/architecture/arma_engine_gotchas.md).
+// row picker; a pick runs the mode's next step. State that outlives the click is threaded through args, never an
+// enclosing local -- SQF blocks are not closures (docs/info/architecture/arma_engine_gotchas.md).
 if (!hasInterface) exitWith {};
 params ["_title", "_rows", "_mode", ["_ctx", ""]];
 if (_rows isEqualTo []) exitWith {};
@@ -41,6 +38,8 @@ private _entries = _rows apply {
                 [format ["Tasking %1: errand", _key], _errands] call fnc_open_action_menu;
             };
             case "supply_town": { ["supply", _ctx select 0, [], [_ctx select 1, _key], player] remoteExec ["fnc_debug_opcom", 2] };
+            case "intercept": { ["sightinglist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
+            case "intercept_row": { ["intercept", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
             case "zonebuy": {
                 private _buys = ["reinforce", "fortify"] apply {
                     [_x, { params ["_zk", "_kind"]; ["zone", _kind, _zk, "", player] remoteExec ["fnc_debug_opcom", 2] }, [_key, _x], _oc]

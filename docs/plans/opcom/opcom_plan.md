@@ -9,16 +9,16 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** scores candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3 and chunks 4.1–4.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This
-doc specifies what remains. Everything from Phase 4 on is preliminary: it changes as each chunk is built and played.
-The sections marked **WIP** (Stage B onward) are first-pass decisions whose shape will move most as Stage A lands.
+Phases 1–3 and Phase 4 Stage A are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth
+for them. This doc specifies what remains. The sections marked **WIP** (Stage B onward) are first-pass decisions: they
+change as each chunk is built and played.
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** |
-| 4, Stage A — Orders, driven by hand: 4.1 supply errands and 4.2 live engagement + the Attack order (**shipped**), 4.3 the Intercept order | [§Orders](#orders-phase-4-stage-a) |
+| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order | **shipped** |
 | 4, Stage B — The decision loop: 4.4 spine + zone economy, 4.5 trucks + towns + Rapport, 4.6 need and cover fields + standalone hardpoints, 4.7 QRF + Attack decisions, 4.8 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
@@ -49,6 +49,11 @@ The code is the source of truth. What new work must hold to:
   hold. A virtual attacker inside the radius posts the contact report as it enters and runs the zone's retake
   statement itself. The order ends when the zone is OPFOR's: an attacker inside the radius garrisons there, a live one
   holding `guard` until it stows, and one still on the road re-garrisons there.
+- **Intercept.** An `intercept` targets a belief row key, a BLUFOR group's `netId` (`fnc_opcom_task`). It follows
+  the row's believed position, re-planning only once that moves past one cell, and keeps the last position read if
+  the row decays. Within its streaming K it reads true BLUFOR positions as a sensor (`fnc_opcom_recon_sense`): groups
+  found refresh their rows, and rows in an empty block clear. It drops to `guard` once no BLUFOR remain within K,
+  after a fight or at the last known position, and never returns to garrison.
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
   `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
   nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index
@@ -57,6 +62,9 @@ The code is the source of truth. What new work must hold to:
   buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`, `fnc_zone_garrison_fortify`
   (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each refused on BLUFOR ground.
   The harness drives both (`supply` with an errand, `zone`).
+- **Orders run by hand** through the debug harness (`fnc_opcom_debug_task.sqf`, and the OPCOM debug menu over it)
+  and spend no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the
+  shared contested draw-lock filter it brings, Recruit, and the need and cover fields.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 
 Two terms carry one meaning each throughout:
@@ -66,35 +74,10 @@ Two terms carry one meaning each throughout:
 | **Contested** | a zone or a town | BLUFOR are assaulting the site: OPFOR belief holds a BLUFOR sighting within one grid cell of its edge (`fnc_opcom_contested.sqf`). Built for zones only |
 | **Engaged** | a unit | The unit is live and fighting BLUFOR. A virtual unit, a zone and a town are never engaged |
 
-## Orders (Phase 4, Stage A)
-
-Stage A finishes the orders the decision loop will issue, so each one runs to its outcome when driven by hand
-through the debug harness (`taskings/fnc_opcom_debug_task.sqf`). Nothing scores or picks yet, and a harness order
-spends no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the shared
-contested draw-lock filter it brings, Recruit, and the need and cover fields.
-
-### 4.3 The Intercept order
-
-- **The order.** `fnc_opcom_task` takes a new order, `intercept`, whose target is a belief row key (a BLUFOR
-  group's `netId`), not a position.
-- **Following.** Each tick the destination is the row's latest believed position. The route is re-planned only
-  when that position moves more than one cell, because the router runs one A\* search per tick. If the row decays
-  on the way, the unit keeps the last position it read.
-- **Truth read.** Within its own K (`DUWS_opcom_streamK` for its move type), an intercepting unit reads true
-  BLUFOR positions, whatever the unit is. The read is a sensor: BLUFOR found refresh their rows through
-  `fnc_opcom_belief_upsert`, and an empty block clears the rows in it through `fnc_opcom_cover_clear`.
-- **Resolve.** At the last known position with no BLUFOR within K, the order drops to `guard` in place, where the
-  unit waits for its next order. BLUFOR within K have already rendered the unit ([§Shipped](#shipped-the-substrate-the-loop-drives)); it fights them live and
-  drops to `guard` once none remain within K. An interceptor never returns to garrison.
-- **Harness.** A new `["intercept", id, rowKey]` verb.
-
-Done when a unit sent at a sighting whose squad has left arrives, clears the row and guards; one sent at a squad
-still there renders, fights and guards after; and one sent at a moving squad re-routes as the sighting updates.
-
 ## Appraisal (Phase 4)
 
-**WIP.** Stage B is decided as a first pass: its Values, prices and constants will change as Stage A lands and each
-chunk is built and played.
+**WIP.** Stage B is decided as a first pass: its Values, prices and constants will change as each chunk is built and
+played.
 
 Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, score the survivors, and pick one by
 weighted random over the top `OPCOM_PICK_TOP` (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No
@@ -313,7 +296,7 @@ launches as a flank.
   stake, the inverse of every other commit, which gathers force toward the odds it launches at.
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points outward.
 - **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action
-  ([§Orders](#orders-phase-4-stage-a)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
+  ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`fnc_zone_retake_ready`): the zone's BLUFOR garrison beaten, none bought counting as beaten, and OPFOR
   outnumbering BLUFOR in the radius. A live fight flips through the retake trigger; a virtual attacker at an empty
   zone flips it on the OPCOM tick against stored state, and OPCOM sends that attack's contact report itself. The

@@ -35,8 +35,7 @@ switch (_verb) do {
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
-        // _a names the picker mode (default "task"); re-garrison passes "regarrison" (routes to a zone pick) and
-        // supply passes "supply" (routes to a drop map-pick), reusing the one tasking list for all three.
+        // _a names the picker mode (default "task"), so every verb that starts from a tasking shares this list.
         private _mode = ["task", _a] select (_a isNotEqualTo "");
         // Live taskings included: fnc_opcom_task re-orders a de-virtualised group in place (reOrderLive), the
         // same primitive OPCOM's loop drives -- only a bound ferry carry is refused, and by the primitive.
@@ -46,6 +45,7 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { "No taskings (recruit one first)." remoteExec ["hint", _caller] };
         private _title = switch (_mode) do {
             case "supply": { "Supply-run which tasking?" };
+            case "intercept": { "Intercept with which tasking?" };
             case "regarrison": { "Re-garrison which tasking?" };
             default { "Task a tasking" };
         };
@@ -66,6 +66,20 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { format ["No town to %1.", _b] remoteExec ["hint", _caller] };
         _rows sort true;
         [format ["%1 which town?", _b], _rows apply { [_x select 1, _x select 2] }, "supply_town", [_a, _b]] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
+    case "sightinglist": {
+        // _a = tasking id. A row is where OPCOM believes the group is, not where it stands.
+        private _rows = [];
+        {
+            if ([_x] call DUWS_fnc_opcom_beliefIsSighting) then {
+                private _bp = DUWS_opcom_belief_pos select _forEachIndex;
+                _rows pushBack [_caller distance2D _bp, _x, format ["%1  (%2 m away, force %3, %4 ticks old)", _x, round (_caller distance2D _bp),
+                    round (DUWS_opcom_belief_str select _forEachIndex), DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex)]];
+            };
+        } forEach DUWS_opcom_belief_key;
+        if (_rows isEqualTo []) exitWith { "No BLUFOR sightings in OPCOM belief." remoteExec ["hint", _caller] };
+        _rows sort true;
+        ["Intercept which sighting?", _rows apply { [_x select 1, _x select 2] }, "intercept_row", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "teleportlist": {
         // Every tasking, live included; a teleport also snaps the live group's hulls, not just the stored point.
@@ -97,6 +111,10 @@ switch (_verb) do {
         if (_pos isEqualTo []) then { _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select (_c select 1)) };
         private _ok = ["supply", _a, _pos, _c] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Supply-run %1: %2 at %3.", _a, _c select 0, _pos apply { round _x }] } else { format ["Supply-run refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "intercept": {
+        private _ok = ["intercept", _a, _b] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Tasking %1 intercepts %2.", _a, _b] } else { format ["Intercept refused for %1 (mid-ferry carry / row gone). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "zone": {
         private _ok = ["zone", _a, _b, _c] call fnc_opcom_debug_task;

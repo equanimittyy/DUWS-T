@@ -2,7 +2,8 @@
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
 //   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target). An assault takes the BLUFOR-held
-//     zone at _target and aims at its centre; it ends when the zone is OPFOR's (fnc_opcom_task_step).
+//     zone at _target and aims at its centre; it ends when the zone is OPFOR's (fnc_opcom_task_step). An intercept's
+//     _target is a belief row key (a BLUFOR group's netId); it follows the row's believed position.
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _errand.
 //     A boat goes to the zone's port instead of _target (never a land point); a portless zone refuses it.
 //   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex] or ["build", pos, type],
@@ -10,7 +11,7 @@
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["assault", "move", "guard"])) exitWith {
+if (!(_order in ["assault", "move", "guard", "intercept"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
@@ -18,6 +19,15 @@ if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
 };
 if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
+};
+private _ik = "";
+if (_order isEqualTo "intercept") then {
+    _ik = _target;
+    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _ik };
+    _target = if (_i < 0) then { [] } else { +(DUWS_opcom_belief_pos select _i) };
+};
+if (_order isEqualTo "intercept" && {_target isEqualTo []}) exitWith {
+    ["WARN", "OPCOM", format ["task: no belief row %1 to intercept", _ik]] call fnc_log; false
 };
 private _zk = "";
 if (_order isEqualTo "assault") then {
@@ -65,6 +75,7 @@ if (_order isEqualTo "guard") then {
 _t set ["errand", [[], _errand] select _errandSet];
 _t set ["returnZone", _rz];
 _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
+_t set ["interceptKey", _ik]; _t set ["contact", false];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 // Drawing a garrison unit out: delete its reserve-spawned defender (going mobile), then re-sync so the zone's
