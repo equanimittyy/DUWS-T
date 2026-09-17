@@ -11,6 +11,7 @@ private _c = [1, 0.667, 0, 1];
     ["Task a tasking",  { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Re-garrison a tasking", { ["tasklist", "regarrison", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Supply-run a tasking", { ["tasklist", "supply", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Buy for a zone", { ["zonelist", "", "zonebuy", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Teleport a tasking", { ["teleportlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["List taskings",   { ["list",        "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Tasking unit status", {

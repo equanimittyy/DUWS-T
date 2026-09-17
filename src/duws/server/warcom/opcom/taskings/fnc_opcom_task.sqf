@@ -2,10 +2,11 @@
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
 //   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target).
-//   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _supplyDrop.
+//   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _errand.
 //     A boat goes to the zone's port instead of _target (never a land point); a portless zone refuses it.
-//   _supplyDrop: `move` only -- deleted and its delivery completed on arrival, in place of a settle.
-params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_supplyDrop", false]];
+//   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex] or ["build", pos, type],
+//     delivered on arrival (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent.
+params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
 if (!isServer) exitWith { false };
 
 if (!(_order in ["assault", "move", "guard"])) exitWith {
@@ -13,6 +14,9 @@ if (!(_order in ["assault", "move", "guard"])) exitWith {
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: order %1 needs a target", _order]] call fnc_log; false
+};
+if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build"])}) exitWith {
+    ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
 private _live = (_t get "grp") isNotEqualTo "";
 // A bound ferry carry is driven by the transport step, not steerable; refuse rather than fight it.
@@ -23,7 +27,8 @@ if (DUWS_opcom_tick < (_t get "hold")) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 held until tick %2 (now %3)", _t get "id", _t get "hold", DUWS_opcom_tick]] call fnc_log; false
 };
 private _isMove = _order isEqualTo "move";
-private _rz = ["", _returnZone] select (_isMove && {!_supplyDrop});
+private _errandSet = _isMove && {_errand isNotEqualTo []};
+private _rz = ["", _returnZone] select (_isMove && {!_errandSet});
 private _boatHome = _rz isNotEqualTo "" && {(_t get "moveType") isEqualTo "boat"};
 private _port = [_rz] call DUWS_fnc_opcom_portOf;
 if (_boatHome && {_port < 0}) exitWith {
@@ -45,7 +50,7 @@ if (_order isEqualTo "guard") then {
     _t set ["routeMode", _mode];
 };
 // Cleared off a non-move so a recycled record carries no stale re-garrison / supply mark; exclusive on a move.
-_t set ["supplyDrop", _isMove && _supplyDrop];
+_t set ["errand", [[], _errand] select _errandSet];
 _t set ["returnZone", _rz];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];

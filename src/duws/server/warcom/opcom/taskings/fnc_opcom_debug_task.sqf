@@ -5,7 +5,8 @@
 //   ["recruit", row, pos, zoneKey]  -- hire a row; returns the tasking id (or -1)
 //   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target
 //   ["regarrison", id, zoneKey]     -- send `id` to a zone; it settles into that garrison on arrival
-//   ["supply", id, targetPos]       -- send `id` on a supply run; deleted and completed on arrival
+//   ["supply", id, targetPos, errand] -- send `id` on a supply run; its errand lands on arrival (fnc_opcom_task)
+//   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
 //   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
 // e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
@@ -57,8 +58,22 @@ switch (_verb) do {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
             private _t = DUWS_opcom_taskings select _i;
+            if !(_c isEqualType [] && {_c isNotEqualTo []}) exitWith {
+                ["WARN", "OPCOMDBG", format ["supply: tasking %1 needs an errand", _a]] call fnc_log; false
+            };
             _t set ["hold", 0];
-            [_t, "move", _b, "", true] call fnc_opcom_task
+            [_t, "move", _b, "", _c] call fnc_opcom_task
+        };
+    };
+    case "zone": {
+        if ((([_b] call fnc_site_at) getOrDefault ["pos", []]) isEqualTo []) exitWith {
+            ["WARN", "OPCOMDBG", format ["zone: no zone %1", _b]] call fnc_log; false
+        };
+        switch (_a) do {
+            case "reinforce": { ([_b, "opcom_debug"] call fnc_zone_garrison_reinforce) >= 0 };
+            case "fortify": { ([_b, "opcom_debug"] call fnc_zone_garrison_fortify) >= 0 };
+            case "build": { [_c, _b] call DUWS_fnc_opcom_build };
+            default { ["WARN", "OPCOMDBG", format ["zone: unknown buy %1", _a]] call fnc_log; false };
         };
     };
     case "teleport": {
@@ -99,7 +114,7 @@ switch (_verb) do {
     case "clear": {
         { if ((_x get "grp") isNotEqualTo "") then {
             private _grp = groupFromNetId (_x get "grp");
-            if (!isNull _grp) then { { deleteVehicle _x } forEach units _grp; deleteGroup _grp };
+            if (!isNull _grp) then { [_grp] call DUWS_fnc_opcom_despawn };
         } } forEach DUWS_opcom_taskings;
         DUWS_opcom_taskings = [];
         ["INFO", "OPCOMDBG", "store cleared"] call fnc_log;

@@ -137,10 +137,6 @@ fnc_town_garrison_strengthAt = {
 	[[_townIndex] call DUWS_fnc_townStrengthKey] call DUWS_fnc_garrisonStrength
 };
 
-// What one reinforcement buys back. Three from the floor to full, four from nothing -- and the same step
-// the BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
-#define REINFORCE_STEP 0.3
-
 // Reinforcement buys strength, a tier buys composition -- independent sinks, so the commander pays either or
 // both; un-losing ledger tokens is a paid replacement, not a heal. Refused under REGROUPING (would erase what clearing bought), allowed under MOBILISING.
 fnc_town_garrison_reinforce = {
@@ -154,7 +150,7 @@ fnc_town_garrison_reinforce = {
 	};
 	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
 	private _old = [_key] call DUWS_fnc_garrisonStrength;
-	[_key, _old + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
+	[_key] call DUWS_fnc_garrisonReinforce;
 	// A standing garrison re-seeds its reserve pool from survivors so the refill pass walks them in as hunt
 	// waves; a stowed one needs nothing more -- its next raise fields the recovered strength off the ledger.
 	if ([_key] call DUWS_fnc_garrisonHeld) then {

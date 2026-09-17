@@ -79,14 +79,14 @@ fnc_zone_garrison_dropped = {
 // How much of its garrison a zone still has, as a fraction. Read by the map readout and by anything
 // deciding what to place. Names the zone's key to the shared attrition ledger, which a town reads the
 // same way -- a live projection of surviving tokens over full potential, so there is nothing to record
-// or refresh: it is always current, and it only falls (the ledger only grows). A wiped group records
+// or refresh: it is always current, and it rises only by a bought reinforcement. A wiped group records
 // its own loss; recapture reseeds it through DUWS_fnc_garrisonSeed.
 fnc_zone_strength = {
 	params ["_zoneKey"];
 	[_zoneKey] call DUWS_fnc_garrisonStrength
 };
 
-// A zone's inherent size, rolled once when it is generated and fixed for the campaign. Distinct from
+// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it. Distinct from
 // fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says
 // how much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a
 // full bar -- small, but not yet fought over.
@@ -115,6 +115,60 @@ fnc_zone_tier_roll = {
 	private _tier = selectRandomWeighted [1, 1, 2, 2, 3, 3, 4, 4];
 	missionNamespace setVariable [_var, _tier];
 	_tier
+};
+
+// OPCOM's zone buys, the zone side of fnc_town_garrison_reinforce / _setTier. Refused on BLUFOR ground: captured
+// ground carries no tier or strength. Tested by key, since a held position may have round-tripped through a string.
+fnc_zone_bluforHeld = {
+	params ["_zoneKey"];
+	(WARCOM_zones_controled_by_BLUFOR findIf { ([_x] call fnc_zone_key) isEqualTo _zoneKey }) >= 0
+};
+
+// A standing garrison re-derives its pool so the refill walks bought men in; a stowed one fields them at its next raise.
+fnc_zone_garrison_rederive = {
+	params ["_zoneKey"];
+	if !([_zoneKey] call DUWS_fnc_garrisonHeld) exitWith {};
+	private _x1 = [[_zoneKey] call fnc_zone_tier] call DUWS_fnc_zoneSpawnList;
+	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
+	[_zoneKey, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
+	// The derive wiped OPCOM's recruits from the pool: reset the ceiling as a raise does, or the re-sync counts them twice.
+	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _stand];
+	[_zoneKey] call DUWS_fnc_opcom_zoneReserveSync;
+};
+
+// -> the new strength, or -1 if refused.
+fnc_zone_garrison_reinforce = {
+	params ["_zoneKey", ["_reason", ""]];
+	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
+		["INFO", "ZONES", format ["%1 reinforcement refused (%2): held by BLUFOR", _zoneKey, _reason]] call fnc_log;
+		-1
+	};
+	private _old = [_zoneKey] call DUWS_fnc_garrisonStrength;
+	[_zoneKey] call DUWS_fnc_garrisonReinforce;
+	[_zoneKey] call fnc_zone_garrison_rederive;
+	private _new = [_zoneKey] call DUWS_fnc_garrisonStrength;
+	["INFO", "ZONES", format ["%1 reinforced %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
+	_new
+};
+
+// -> the tier it now stands at, or -1 if refused. Full potential is re-stamped now, not at the next raise, so the grid
+// and the readout count the new tier's men at once.
+fnc_zone_garrison_fortify = {
+	params ["_zoneKey", ["_reason", ""]];
+	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
+		["INFO", "ZONES", format ["%1 tier raise refused (%2): held by BLUFOR", _zoneKey, _reason]] call fnc_log;
+		-1
+	};
+	private _old = [_zoneKey] call fnc_zone_tier;
+	private _new = (_old + 1) min (count DUWS_zoneSpawnTiers);
+	if (_new == _old) exitWith { _old };
+	missionNamespace setVariable [format ["DUWS_zoneTier_%1", _zoneKey], _new];
+	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	[_zoneKey, [[_new] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
+	[_zoneKey] call fnc_zone_garrison_rederive;
+	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
+	_new
 };
 
 // The enemy multiplier is reserve depth, not a live-force multiplier: a zone always stands up its x1

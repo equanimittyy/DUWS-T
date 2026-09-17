@@ -374,7 +374,7 @@ fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\o
 fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
-// taskings\: streaming, movement, the ferry trio (orchestrator, virtual, live), garrison and ports executed to define them; the store init, router,
+// taskings\: streaming, movement, the ferry trio (orchestrator, virtual, live), garrison, ports and delivery executed to define them; the store init, router,
 // recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
@@ -384,6 +384,7 @@ fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_devirt.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_garrison.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ports.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_deliver.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";
 fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_route.sqf";
 fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_recruit.sqf";

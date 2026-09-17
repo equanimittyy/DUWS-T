@@ -16,7 +16,7 @@ switch (_verb) do {
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "zonelist": {
-        // OPCOM recruits and re-garrisons only into an OPFOR-owned zone -- every zone BLUFOR has not captured.
+        // OPCOM recruits, re-garrisons and buys only in an OPFOR-owned zone -- every zone BLUFOR has not captured.
         // _a carries context (recruit row or tasking id) to the next step; _b names that step's picker mode.
         private _next = ["recruit_zone", _b] select (_b isNotEqualTo "");
         private _rows = (zone_meta_array select {
@@ -27,7 +27,11 @@ switch (_verb) do {
             [[_zp] call fnc_zone_key, format ["%1  (%2)", [_zp] call fnc_zone_key, _zp apply { round _x }]]
         };
         if (_rows isEqualTo []) exitWith { "No OPFOR-owned zone (BLUFOR holds them all)." remoteExec ["hint", _caller] };
-        private _title = ["Re-garrison to which zone?", "Recruit at which zone?"] select (_next isEqualTo "recruit_zone");
+        private _title = switch (_next) do {
+            case "recruit_zone": { "Recruit at which zone?" };
+            case "zonebuy": { "Buy for which zone?" };
+            default { "Re-garrison to which zone?" };
+        };
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
@@ -46,6 +50,22 @@ switch (_verb) do {
             default { "Task a tasking" };
         };
         [_title, _rows, _mode, ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
+    case "townlist": {
+        // _a = tasking id, _b = errand kind. Nearest first; reinforce and fortify list only towns with a garrison.
+        private _locs = missionNamespace getVariable ["civ_locations", []];
+        private _reps = missionNamespace getVariable ["civ_town_rep", []];
+        private _rows = [];
+        {
+            private _tier = [_forEachIndex] call fnc_town_garrison_tierAt;
+            if (_b isEqualTo "rapport" || {_tier >= 1}) then {
+                _rows pushBack [_caller distance2D (getPos _x), _forEachIndex, format ["%1  (rep %2, tier %3, strength %4)", text _x, _reps param [_forEachIndex, 0], _tier,
+                    ([_forEachIndex] call fnc_town_garrison_strengthAt) toFixed 2]];
+            };
+        } forEach _locs;
+        if (_rows isEqualTo []) exitWith { format ["No town to %1.", _b] remoteExec ["hint", _caller] };
+        _rows sort true;
+        [format ["%1 which town?", _b], _rows apply { [_x select 1, _x select 2] }, "supply_town", [_a, _b]] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "teleportlist": {
         // Every tasking, live included; a teleport also snaps the live group's hulls, not just the stored point.
@@ -72,8 +92,15 @@ switch (_verb) do {
         (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (mid-ferry carry / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "supply": {
-        private _ok = ["supply", _a, _b] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Supply-run %1 -> %2.", _a, _b apply { round _x }] } else { format ["Supply-run refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+        // _b = drop point, or [] for a town errand, which drives to the town centre.
+        private _pos = _b;
+        if (_pos isEqualTo []) then { _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select (_c select 1)) };
+        private _ok = ["supply", _a, _pos, _c] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Supply-run %1: %2 at %3.", _a, _c select 0, _pos apply { round _x }] } else { format ["Supply-run refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "zone": {
+        private _ok = ["zone", _a, _b, _c] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Zone %1: %2 %3 done. See the log.", _b, _a, _c] } else { format ["Zone %1: %2 refused. See the log.", _b, _a] }) remoteExec ["hint", _caller];
     };
     case "teleport": {
         private _ok = ["teleport", _a, _b] call fnc_opcom_debug_task;

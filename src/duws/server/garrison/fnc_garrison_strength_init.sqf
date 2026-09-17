@@ -103,9 +103,8 @@ DUWS_fnc_garrisonRecordLoss = {
 
 // The strength a garrison redeploys at, as a fraction: surviving men over full men. Full for ground
 // nobody has fought over (no full stamped yet). The map bar reads this; the raise reads the surviving
-// tokens directly. Falls only for a zone -- the ledger only grows -- and rises for a town only when the
-// commander buys reserves back (Unlose). No quantisation or floor here: those were the scalar model's,
-// and the break test's own tenth is the one number that gates capture.
+// tokens directly. Rises only when the commander buys reserves back (Unlose). No quantisation or floor
+// here: those were the scalar model's, and the break test's own tenth is the one number that gates capture.
 DUWS_fnc_garrisonStrength = {
 	params ["_key"];
 	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
@@ -131,7 +130,7 @@ DUWS_fnc_garrisonSeed = {
 };
 
 // Buys destroyed tokens back: removes random lost entries until survival reaches the target fraction.
-// The town reinforce purchase's hook -- a paid replacement, the one thing that raises strength, and
+// The reinforce purchase's hook -- a paid replacement, the one thing that raises strength, and
 // deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).
 DUWS_fnc_garrisonUnlose = {
 	params ["_key", "_target"];
@@ -144,6 +143,13 @@ DUWS_fnc_garrisonUnlose = {
 		_lost deleteAt (floor random count _lost);
 	};
 	missionNamespace setVariable [_var, _lost];
+};
+
+// Shared by town and zone, so both climb by one rule: three steps from the floor to full, four from nothing.
+#define REINFORCE_STEP 0.3
+DUWS_fnc_garrisonReinforce = {
+	params ["_key"];
+	[_key, ([_key] call DUWS_fnc_garrisonStrength) + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
 };
 
 // Forgets a site's garrison entirely: full potential and loss ledger both cleared. For a site that

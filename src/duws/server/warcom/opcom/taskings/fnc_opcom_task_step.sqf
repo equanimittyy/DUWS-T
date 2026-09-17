@@ -99,11 +99,9 @@ private _settleMove = {
                     };
                     _t set ["status", ["moving", "engaged"] select _engaged];
 
-                    // Supply drop arrived: delete the courier and fire its success.
-                    if ((_t getOrDefault ["supplyDrop", false]) && {(_ldr distance2D (_t get "target")) < 40}) then {
-                        ["INFO", "OPCOM", format ["supply delivered by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
-                        { deleteVehicle _x } forEach (units _grp);
-                        deleteGroup _grp;
+                    if (((_t getOrDefault ["errand", []]) isNotEqualTo []) && {(_ldr distance2D (_t get "target")) < 40}) then {
+                        [_t] call DUWS_fnc_opcom_deliver;
+                        [_grp] call DUWS_fnc_opcom_despawn;
                         _t set ["status", "done"];
                         _t set ["grp", ""];
                     } else {
@@ -177,12 +175,11 @@ private _settleMove = {
                         } else {
                             _t set ["strandTicks", 0];
                         };
-                        // supplyDrop and returnZone are exclusive (set upstream), so supplyDrop-first cannot double-settle.
+                        // errand and returnZone are exclusive (set upstream), so errand-first cannot double-settle.
                         private _settled = false;
                         if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
-                            if (_t getOrDefault ["supplyDrop", false]) then {
-                                // A supply run that reaches its drop with no player near still completes.
-                                ["INFO", "OPCOM", format ["supply delivered (virtual) by tasking %1 at %2", _t get "id", _t get "target"]] call fnc_log;
+                            if ((_t getOrDefault ["errand", []]) isNotEqualTo []) then {
+                                [_t] call DUWS_fnc_opcom_deliver;
                                 _t set ["status", "done"]; _settled = true;
                             } else {
                                 _settled = [_t, _t get "pos"] call _settleMove;

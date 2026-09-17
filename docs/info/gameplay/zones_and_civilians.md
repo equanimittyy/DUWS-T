@@ -127,36 +127,18 @@ is worth behind the player's back and disagree with the garrison peak already me
 tier. A zone with no tier recorded reads as IV, so a save written before tiers existed comes back at
 the strength it had rather than silently halving.
 
-**A zone's tier is fixed because nothing can yet move it, not because it must never move.** The
-OPCOM will upgrade *and* reinforce zones exactly as it does towns — both sinks reach both
-kinds of ground, and the roll only decides where a zone starts. It is fixed today because the
-commander does not exist, and the town side is merely further along: it has the hooks written
-([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)).
+**The commander buys a zone's tier and strength as it does a town's.** `fnc_zone_garrison_fortify`
+raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential so the
+new tier's men count as owed; the zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`).
+`fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
+(`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-derive the reserve
+pool, so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM lands them with no truck
+([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)).
 
-**The machinery is already most of the way there**, which is the point of the shared attrition store:
-a zone's tier is stored per zone, the composition table is indexed by it, and `fnc_zone_strength_set`
-already names the zone's key to the same store `fnc_town_garrison_reinforce` steps. What zones lack
-is the pair of wrappers a town has — one applying `REINFORCE_STEP` to a zone key, one writing a tier
-with a clamp — not a mechanism.
-
-**Nothing in the current code would overwrite either purchase**, which is worth stating because it is
-the question a reader would otherwise have to re-derive from every writer:
-
-- `fnc_zone_tier_roll` is the **only** writer of `DUWS_zoneTier_<key>`, and it already declines a
-  second roll — so a tier written by a setter survives a rebuild through `fnc_createzone`.
-- A zone's strength has three writers: the retake floor, the teardown record and the map-readout
-  refresh. The last two are lower-only by construction, so **nothing raises strength except a
-  deliberate call** — which is exactly what a reinforcement is.
-
-They are not written yet on purpose: they would have no caller, since neither the game nor the debug
-menu reaches them, and an uncalled hook is a guess about an interface that does not exist. The town's
-equivalents earn their place because the reputation band gate writes tier I through `setTier` whether
-or not a commander ever exists.
-
-What is *not* provisional is the re-roll refusal: `fnc_zone_tier_roll` must keep declining a second
-roll however the tier later comes to change, because a rebuild through `fnc_createzone` would
-otherwise reshuffle ground the player has already fought over. **A commander raising a tier writes it
-deliberately; nothing should ever draw one again by accident.**
+**Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
+survives a rebuild through `fnc_createzone`, which would otherwise reshuffle ground the player has already
+fought over. A zone's strength rises only through a reinforcement: the loss record lowers it, and a
+retake reseeds it to `0.3`.
 
 One thing a zone will not need is a purchase refusal. A town's `REGROUPING` hold blocks both sinks
 because OPFOR can hold a town whose garrison was just destroyed; there is no equivalent zone state to
@@ -244,13 +226,12 @@ time the zone streamed out — the refund the mechanic exists to stop.
 The `0.3` floor is what keeps that from becoming a walk-in, and it is also structural: a zone allowed
 to redeploy empty would be uncapturable outright, because a zero peak refuses capture.
 
-**Strength only ever falls, and a retake floors it.** Nothing restores a zone. `fnc_opfor_cap` writes
+**Strength falls unless the commander pays, and a retake floors it.** Only a bought reinforcement restores a zone. `fnc_opfor_cap` writes
 `0.3` when OPFOR take a zone back, so what they put on ground they had to retake is a scratch force —
 floored rather than merely reduced, so every retake costs them the same and a zone traded back and
 forth cannot converge on full strength. It used to reset to full on the BLUFOR capture instead, on
 the reasoning that a retaken zone is manned by a fresh garrison; that handed the player's grinding
-straight back the moment they lost the ground again. `fnc_zone_strength_set` is the only writer, so a
-mechanic that lets OPFOR rebuild a mauled zone still has one place to go through.
+straight back the moment they lost the ground again.
 
 **No hold beside it, unlike a town's.** `EAST SEIZED` cannot fire while any BLUFOR stand in the zone
 radius, so a retake already cannot happen under the player's feet — presence is the whole gate, and a
@@ -611,8 +592,8 @@ dies. The hold is what buys the distance the zone gets for free.
 
 **Why the strength floor is symmetric anyway.** Both sides of that difference converge on the same
 rule, because both answer the same question — what does a beaten garrison come back as. A zone
-retaken and a town cleared each return at `0.3`, and neither climbs back on its own — a town only by
-purchased reinforcement, a zone not at all, since nothing yet reinforces a zone. Grinding either one
+retaken and a town cleared each return at `0.3`, and neither climbs back on its own — each only by a
+purchased reinforcement. Grinding either one
 down is worth something that outlasts the visit.
 
 ### The life of a zone, and the life of a town
@@ -630,7 +611,7 @@ about.
 | You leave for 2 min | Survivors counted, strength recorded (never upward), the zone's own men deleted by roster, props stowed, peak cleared | tier + the bar it will return at |
 | You beat it to 20 % **and** outnumber the OPFOR left in the zone | Ownership flips. CP bounty, AP swings. Survivors are sent off and then collected once no player is within 500 m — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
-| The commander spends *(planned)* | Upgrade buys composition, reinforce buys strength — the same two sinks a town has, on the same ground rules. No purchase refusal is needed: a zone has no `Regrouping` state to protect | tier + bar |
+| The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground: a zone has no `Regrouping` state to protect | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at, peak published | tier + bar |
 
 **A town.**
@@ -705,7 +686,7 @@ more usefully — **which of them cannot be moved alone.**
 |---|---|---|
 | `TOWN_HOLD_MOBILISING` `1800` | `fnc_civ_state_init` | how long after falling a town stays empty |
 | `TOWN_HOLD_REGROUPING` `10800` | `fnc_civ_state_init` | the undefended window a clear buys |
-| `REINFORCE_STEP` `0.3` | `fnc_civ_state_init` | what one reinforcement buys |
+| `REINFORCE_STEP` `0.3` | `fnc_garrison_strength_init` | what one reinforcement buys, town or zone |
 | `CLEAR_REP` `5` | `fnc_civ_garrison` | what one clear repays |
 | `OPFOR_BAND` `-10` | `fnc_civ_garrison` | where a town changes sides |
 | `grace` `120` | the occupant record, for both zones and town garrisons | how long empty ground waits before streaming out |

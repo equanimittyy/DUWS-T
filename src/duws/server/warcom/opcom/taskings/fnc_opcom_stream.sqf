@@ -5,9 +5,9 @@ if (!isServer) exitWith {};
 
 // Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.)
 DUWS_fnc_opcom_applyOrder = {
-    params ["_grp", "_order", "_target", ["_supplyDrop", false]];
+    params ["_grp", "_order", "_target", ["_supply", false]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
-    _grp setSpeedMode (["FULL", "LIMITED"] select _supplyDrop);
+    _grp setSpeedMode (["FULL", "LIMITED"] select _supply);
     switch (_order) do {
         case "assault": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
@@ -16,7 +16,7 @@ DUWS_fnc_opcom_applyOrder = {
         case "move": {
             _grp setBehaviour "AWARE";
             // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
-            _grp setCombatMode (["YELLOW", "BLUE"] select _supplyDrop);
+            _grp setCombatMode (["YELLOW", "BLUE"] select _supply);
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
         default {
@@ -58,7 +58,7 @@ DUWS_fnc_opcom_reOrderLive = {
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
-    [_grp, _order, _t get "target", _t getOrDefault ["supplyDrop", false]] call DUWS_fnc_opcom_applyOrder;
+    [_grp, _order, _t get "target", (_t getOrDefault ["errand", []]) isNotEqualTo []] call DUWS_fnc_opcom_applyOrder;
 };
 
 // OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
@@ -123,6 +123,16 @@ DUWS_fnc_opcom_deVirt = {
     true
 };
 
+// Deletes the hulls the men sit in too: deleting only the crew leaves an empty vehicle standing.
+DUWS_fnc_opcom_despawn = {
+    params ["_grp"];
+    private _hulls = [];
+    { private _v = vehicle _x; if (_v != _x && {!(_v in _hulls)}) then { _hulls pushBack _v } } forEach (units _grp);
+    { deleteVehicle _x } forEach (units _grp);
+    { deleteVehicle _x } forEach _hulls;
+    deleteGroup _grp;
+};
+
 // Bank surviving strength, take the leader's position, delete the group and its hulls; clear the route to replan.
 DUWS_fnc_opcom_reVirt = {
     params ["_t"];
@@ -132,11 +142,7 @@ DUWS_fnc_opcom_reVirt = {
     };
     _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
     _t set ["pos", getPosASL (leader _grp)];
-    private _hulls = [];
-    { private _v = vehicle _x; if (_v != _x && {!(_v in _hulls)}) then { _hulls pushBack _v } } forEach (units _grp);
-    { deleteVehicle _x } forEach (units _grp);
-    { deleteVehicle _x } forEach _hulls;
-    deleteGroup _grp;
+    [_grp] call DUWS_fnc_opcom_despawn;
     _t set ["grp", ""];
     _t set ["route", []];
     _t set ["status", "virtual"];

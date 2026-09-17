@@ -256,6 +256,13 @@ fnc_hardpoint_zone_cap = {
     _radiusCap + (0 max (([_zoneKey] call fnc_zone_tier) - 1))
 };
 
+// [_zonePos, _radius] call fnc_hardpoint_zone_cand -> [_pos, _radialDir]: a draw anywhere in the zone, faced out.
+fnc_hardpoint_zone_cand = {
+    params ["_zonePos", "_radius"];
+    private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    [_c, _zonePos getDir _c]
+};
+
 // [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
 // A zone's own fortification ring, drawn from anywhere in the zone and faced radially out; layered defence
@@ -276,10 +283,7 @@ fnc_hardpoint_site_zone = {
 
     private _placed = 0;
     if (_count > 0) then {
-        _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, {
-            private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-            [_c, _zonePos getDir _c]
-        }, _fnTick] call fnc_hardpoint_lay;
+        _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, fnc_hardpoint_zone_cand, _fnTick, { [_zonePos, _radius] }] call fnc_hardpoint_lay;
     };
 
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;

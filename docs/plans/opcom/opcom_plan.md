@@ -9,7 +9,7 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** scores candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This
+Phases 1–3 and chunk 4.1 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This
 doc specifies what remains. Everything from Phase 4 on is preliminary: it changes as each chunk is built and played.
 The sections marked **WIP** (Stage B onward) are first-pass decisions whose shape will move most as Stage A lands.
 
@@ -18,7 +18,7 @@ The sections marked **WIP** (Stage B onward) are first-pass decisions whose shap
 | Phase | State |
 |---|---|
 | 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** |
-| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order | [§Orders](#orders-phase-4-stage-a) |
+| 4, Stage A — Orders, driven by hand: 4.1 supply errands (**shipped**), 4.2 live engagement + the Attack order, 4.3 the Intercept order | [§Orders](#orders-phase-4-stage-a) |
 | 4, Stage B — The decision loop: 4.4 spine + zone economy, 4.5 trucks + towns + Rapport, 4.6 need and cover fields + standalone hardpoints, 4.7 QRF + Attack decisions, 4.8 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
@@ -41,6 +41,14 @@ The code is the source of truth. What new work must hold to:
 - **The ferry** is a consequence of a unit's route, never an order. A freed hull garrisons the nearest held,
   uncontested zone. Not built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or
   walks, and land-taxi — lifting a foot unit over dry ground with the same carry.
+- **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
+  `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
+  nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index
+  (`fnc_town_garrison_reinforce`; `fnc_town_garrison_setTier` one tier up, never from tier 0; `fnc_town_rep_adjust`
+  −3). `["build", pos, type]` sites a standalone hardpoint in the band near `pos` (`DUWS_fnc_opcom_build`). A zone
+  buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`, `fnc_zone_garrison_fortify`
+  (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each refused on BLUFOR ground.
+  The harness drives both (`supply` with an errand, `zone`).
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 
 Two terms carry one meaning each throughout:
@@ -56,44 +64,6 @@ Stage A finishes the orders the decision loop will issue, so each one runs to it
 through the debug harness (`taskings/fnc_opcom_debug_task.sqf`). Nothing scores or picks yet, and a harness order
 spends no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the shared
 contested draw-lock filter it brings, Recruit, and the need and cover fields.
-
-### 4.1 Supply errands
-
-Today a `move` with `supplyDrop` set deletes its truck on arrival and only logs "supply delivered"
-(`fnc_opcom_task_step.sqf:103` live, `:183` virtual).
-
-- **The errand.** The tasking record takes an `errand` field, set with the order, in place of the `supplyDrop`
-  flag: a set errand is what marks a supply run. Each kind maps to one writer:
-
-  | Errand | Effect | Writer |
-  |---|---|---|
-  | `["reinforce", townIndex]` | +0.3 strength | `fnc_town_garrison_reinforce` (`fnc_civ_state_init.sqf:146`) |
-  | `["fortify", townIndex]` | tier +1, clamped at IV | `fnc_town_garrison_setTier` (`fnc_civ_state_init.sqf:176`) |
-  | `["rapport", townIndex]` | reputation −3 | `fnc_town_rep_adjust` (`fnc_economy_init.sqf:165`) |
-  | `["build", pos, type]` | a standalone hardpoint of that type near `pos` | `fnc_hardpoint_spawn_sited` (`fnc_hardpoint_place.sqf:184`), drawing with `fnc_hardpoint_band_cand` around `pos` |
-
-- **`fnc_opcom_deliver`** (new, `taskings/`) replaces the log in both arrival branches: it reads the errand kind
-  and calls the writer. A build runs with `spawn`, because the builder sleeps in its crew drop
-  (`fnc_hardpoint_place.sqf:182-183`) and the tick must never sleep.
-- **The truck is spent** — it despawns once its errand lands. A killed truck delivers nothing: the dead-unit sweep
-  removes it (`fnc_opcom_task_step.sqf:82`, `:202`) and its errand goes with it.
-- **A refused errand is lost.** Both town garrison writers refuse a raise while the town is `REGROUPING`; the truck
-  is still spent. Stage B's candidate sweep skips a regrouping town, so only a town that starts regrouping while
-  the truck is on the road loses the delivery.
-- **The zone writers** ([§Town & zone garrisons](#town--zone-garrisons)). A zone buy needs no truck and resolves
-  the tick it is ordered, so these are called directly, not through an errand. *Zone reinforce* applies the town
-  step to a zone's garrison key through `DUWS_fnc_garrisonUnlose`, re-deriving the reserve pool when the garrison
-  stands. *Zone tier* raises `DUWS_zoneTier_<key>` (read by `fnc_zone_tier`) by one, clamped at IV whatever tier
-  the zone rolled, and re-stamps the new tier's full potential with `DUWS_fnc_garrisonSetFull` so the new men count
-  as owed; the tier also raises the zone's hardpoint cap (`fnc_hardpoint_zone_cap`). *Zone build* calls
-  `fnc_hardpoint_spawn_sited` with the zone key and the in-zone draw `fnc_hardpoint_site_zone` uses, the type given,
-  under a fresh hardpoint key, with `spawn`.
-- **Harness.** The `supply` verb takes the errand as a fourth argument; a new
-  `["zone", "reinforce" | "fortify" | "build", zoneKey, type]` verb calls the zone writers.
-
-Done when a truck sent by hand to a town raises its strength or tier, or steps its reputation, and despawns; a
-truck sent to a band position builds the type it carries; a killed truck changes nothing; and each zone verb
-changes its zone the same tick.
 
 ### 4.2 Live engagement and the Attack order
 
@@ -450,7 +420,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
-([§4.1](#41-supply-errands)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
+([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
 whichever source costs less. The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). A town buy whose
 truck arrives while the town is contested still lands through the garrison's existing hold — owed at once, the men
@@ -553,12 +523,6 @@ tier I (no refund, three-hour regroup lock) and pins it to the `0.3` strength fl
 
 Not built:
 
-- **Zone-side spend wiring (4.1).** Both sinks should reach zones as they reach towns, but a zone strength setter
-  is missing — a pair of wrappers, one applying the reinforcement step to a zone key, one raising a zone's tier
-  clamped at IV whatever tier it rolled at generation and re-stamping its full potential (zone read is
-  `fnc_zone_strength` → `DUWS_fnc_garrisonStrength`; town write is `fnc_town_garrison_reinforce` →
-  `DUWS_fnc_garrisonUnlose`). A zone buy is priced by the force it adds, so a zone's larger garrison costs more
-  than a town's ([§What AP buys](#what-ap-buys)).
 - **BLUFOR garrisons.** BLUFOR buy garrisons for zones and towns as OPFOR do. The BLUFOR band (`>= 10`) has no
   garrison; buying tier I at a held town *creates* one at zero strength (each reinforcement +30 %), never inherits
   OPFOR's — captured ground carries no tier or strength. The presence latch is still wanted (a BLUFOR garrison
