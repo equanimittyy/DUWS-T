@@ -6,7 +6,7 @@ params ["_title", "_rows", "_mode", ["_ctx", ""]];
 if (_rows isEqualTo []) exitWith {};
 
 private _c = [1, 0.667, 0, 1];
-private _hpTypes = ["MG", "GMG", "AT", "AA", "ROADBLOCK", "OP", "MORTAR", "ARTY", "MINEFIELD"];
+private _hpTypes = ["MG", "GMG", "AT", "AA", "ROADBLOCK", "OP", "MORTAR", "ARTY", "RADIO", "MINEFIELD"];
 private _entries = _rows apply {
     _x params ["_key", "_label"];
     [_label, {
