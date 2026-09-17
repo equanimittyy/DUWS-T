@@ -61,7 +61,7 @@ private _entries = _rows apply {
                 };
             };
             case "task": {
-                private _orders = ["assault", "move", "guard"] apply {
+                private _orders = ["capture", "move", "guard"] apply {
                     [_x, {
                         params ["_id", "_o"];
                         if (_o isEqualTo "guard") exitWith { ["task", _id, "guard", [], player] remoteExec ["fnc_debug_opcom", 2] };

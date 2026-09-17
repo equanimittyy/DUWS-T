@@ -65,7 +65,7 @@ private _settleMove = {
 };
 
 // -> true the tick an attacker enters its target zone's radius. A live one tracks it too, or a later stow re-reports.
-private _assaultEnters = {
+private _captureEnters = {
     params ["_t", "_pos"];
     private _site = [_t get "targetZone"] call fnc_site_at;
     private _in = (_pos distance2D (_site get "pos")) <= (_site get "radius");
@@ -76,7 +76,7 @@ private _assaultEnters = {
 
 // -> true if it garrisoned. A live attacker inside the zone guards until it stows, so it never vanishes in front of a
 // player; one still on the road re-garrisons there.
-private _assaultEnd = {
+private _captureEnd = {
     params ["_t", "_pos", "_grp"];
     private _zk = _t get "targetZone";
     private _site = [_zk] call fnc_site_at;
@@ -89,7 +89,7 @@ private _assaultEnd = {
     if (isNull _grp) exitWith { [_t, _zk] call _garrisonInto; true };
     _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []]; _t set ["settleZone", _zk];
     [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
-    ["INFO", "OPCOM", format ["assault: tasking %1 holds %2, garrisoning when it stows", _t get "id", _zk]] call fnc_log;
+    ["INFO", "OPCOM", format ["capture: tasking %1 holds %2, garrisoning when it stows", _t get "id", _zk]] call fnc_log;
     false
 };
 
@@ -164,11 +164,11 @@ private _interceptGuard = {
                             _order = "guard";
                         };
                     };
-                    if (_order isEqualTo "assault") then {
+                    if (_order isEqualTo "capture") then {
                         if ([_t get "targetZone"] call fnc_zone_bluforHeld) then {
-                            [_t, getPosASL _ldr] call _assaultEnters;
+                            [_t, getPosASL _ldr] call _captureEnters;
                         } else {
-                            [_t, getPosASL _ldr, _grp] call _assaultEnd;
+                            [_t, getPosASL _ldr, _grp] call _captureEnd;
                             _order = _t get "order";
                         };
                     };
@@ -268,11 +268,11 @@ private _interceptGuard = {
                             && {([_t get "pos"] call _nearestBluforCells) > (DUWS_opcom_streamK getOrDefault [_t get "moveType", 1])}) then {
                             [_t, _t get "pos", grpNull] call _interceptGuard;
                         };
-                        if (_order isEqualTo "assault") then {
+                        if (_order isEqualTo "capture") then {
                             private _zk = _t get "targetZone";
                             if ([_zk] call fnc_zone_bluforHeld) then {
                                 private _zpos = ([_zk] call fnc_site_at) get "pos";
-                                if ([_t, _t get "pos"] call _assaultEnters) then {
+                                if ([_t, _t get "pos"] call _captureEnters) then {
                                     private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
                                     if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
                                 };
@@ -283,7 +283,7 @@ private _interceptGuard = {
                                     if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };
                                 };
                             } else {
-                                _settled = [_t, _t get "pos", grpNull] call _assaultEnd;
+                                _settled = [_t, _t get "pos", grpNull] call _captureEnd;
                             };
                         };
                         // Skip the stream-in for a settled record or a rider that just bound to a ferry.

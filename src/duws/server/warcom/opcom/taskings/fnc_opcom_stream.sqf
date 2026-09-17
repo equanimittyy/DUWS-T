@@ -9,7 +9,7 @@ DUWS_fnc_opcom_applyOrder = {
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
     _grp setSpeedMode (["FULL", "LIMITED"] select _supply);
     switch (_order) do {
-        case "assault";
+        case "capture";
         case "intercept": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";

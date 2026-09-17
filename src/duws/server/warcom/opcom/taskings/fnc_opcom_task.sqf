@@ -1,7 +1,7 @@
 // Locality: server. Give a tasking an active order and target: plan the route, arm the commit hold. Returns
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
-//   _order: "assault"/"move"/"guard" (guard holds where it stands, ignores _target). An assault takes the BLUFOR-held
+//   _order: "capture"/"move"/"guard" (guard holds where it stands, ignores _target). A capture takes the BLUFOR-held
 //     zone at _target and aims at its centre; it ends when the zone is OPFOR's (fnc_opcom_task_step). An intercept's
 //     _target is a belief row key (a BLUFOR group's netId); it follows the row's believed position.
 //   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _errand.
@@ -11,7 +11,7 @@
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["assault", "move", "guard", "intercept"])) exitWith {
+if (!(_order in ["capture", "move", "guard", "intercept"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
@@ -30,14 +30,14 @@ if (_order isEqualTo "intercept" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: no belief row %1 to intercept", _ik]] call fnc_log; false
 };
 private _zk = "";
-if (_order isEqualTo "assault") then {
+if (_order isEqualTo "capture") then {
     private _i = WARCOM_zones_controled_by_BLUFOR findIf {
         (_x distance2D _target) <= (([[_x] call fnc_zone_key] call fnc_site_at) getOrDefault ["radius", 0])
     };
     if (_i >= 0) then { _zk = [WARCOM_zones_controled_by_BLUFOR select _i] call fnc_zone_key };
 };
-if (_order isEqualTo "assault" && {_zk isEqualTo ""}) exitWith {
-    ["WARN", "OPCOM", format ["task: no BLUFOR-held zone at assault target %1", _target]] call fnc_log; false
+if (_order isEqualTo "capture" && {_zk isEqualTo ""}) exitWith {
+    ["WARN", "OPCOM", format ["task: no BLUFOR-held zone at capture target %1", _target]] call fnc_log; false
 };
 if (_zk isNotEqualTo "") then { _target = ([_zk] call fnc_site_at) get "pos" };
 private _live = (_t get "grp") isNotEqualTo "";
