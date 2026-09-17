@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The live ferry crossing -- a watched carry rendered as the timed six-phase
 // machine plus its GetIn/GetOut board/dismount handlers. The orchestrator (fnc_opcom_ferry) drives it each tick;
-// the virtual mirror is fnc_opcom_ferry_virt (docs/plans/opcom/opcom_plan.md §Transport).
+// the virtual mirror is fnc_opcom_ferry_virt (docs/plans/opcom/opcom_plan.md §Shipped).
 if (!isServer) exitWith {};
 
 // Clear a hull's ferry state so one that ferries a second rider re-arms cleanly (a stale handler skips the re-arm).

@@ -1,9 +1,9 @@
 // Locality: server, [] call'd at load. The ferry orchestrator and borrow lifecycle: a land unit stopped at a water
 // leg borrows the nearest free compatible transport, which carries it across and then garrisons the nearest held
-// zone. `ferryTick` dispatches the bound crossing to fnc_opcom_ferry_virt (unwatched) or fnc_opcom_ferry_devirt
-// (watched) by the transport's own streaming, holding the binding across the boundary. The rider owns its route;
-// the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own -- task_step skips it
-// (docs/plans/opcom/opcom_plan.md §Transport).
+// zone. `ferryTick` steps the bound crossing through fnc_opcom_ferry_virt or fnc_opcom_ferry_devirt as the hull
+// streams, holding the binding across the boundary; task_step decides the streaming, as for every tasking. The rider
+// owns its route; the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own --
+// task_step skips it (docs/plans/opcom/opcom_plan.md §Shipped).
 if (!isServer) exitWith {};
 
 // The far shore a stopped rider faces: the first land past the next water span at or after its leg, scanning
@@ -134,11 +134,9 @@ DUWS_fnc_opcom_ferryRelease = {
     [_t] call DUWS_fnc_opcom_ferryHome;
 };
 
-// Drive a carrying transport for one tick, choosing live or virtual by the transport's OWN streaming and
-// keeping the rider bound across it (docs/plans/opcom/opcom_plan.md §Transport). Far, it stows -- reVirt keeps
-// carrying/embarked, so the virtual step resumes the carry; it holds live through a board/unload in progress.
+// reVirt keeps carrying/embarked, so a stowed hull's virtual step resumes the carry.
 DUWS_fnc_opcom_ferryTick = {
-    params ["_t", "_near"];
+    params ["_t"];
     private _rider = [_t get "carrying"] call DUWS_fnc_opcom_byId;
     // Once embarked the transport owns the crossing and dismount to completion: the rider detaches (ridingOn -1)
     // at the drop the moment its leader spawns, so past embark only a lost or dead rider aborts, never the detach.
@@ -168,38 +166,35 @@ DUWS_fnc_opcom_ferryTick = {
             [_t] call DUWS_fnc_opcom_ferryClearPad;
             _t set ["status", "dead"]; _t set ["grp", ""]; _t set ["carrying", -1]; _t set ["embarked", false];
         };
-        if (_near || {(_rider get "grp") isNotEqualTo ""}) then {
-            _t set ["farTicks", 0];
-            if (duws_log_level >= 4) then {
-                private _veh = vehicle (leader _tg);
-                private _ph = _t getOrDefault ["ferryPhase", "topickup"];
-                private _nav = _t getOrDefault ["ferryLZ", []];
-                private _navM = if (_nav isEqualTo []) then { -1 } else { round (_veh distance2D _nav) };
-                ["DEBUG", "OPCOM", format ["ferry: transport %1 (%2) %3 wait %4 nav %5 m alt %6 m %7 km/h wps %8, rider %9 men %10 queue %11",
-                    _t get "id", _t get "moveType", _ph, _t getOrDefault ["ferryWait", 0], _navM,
-                    round ((getPosATL _veh) select 2), round (speed _veh), count waypoints _tg,
-                    _rider get "id", {alive _x} count units groupFromNetId (_rider get "grp"),
-                    count (_veh getVariable ["DUWS_ferryUnloadQ", []])]] call fnc_log;
-            };
-            [_t, _rider] call DUWS_fnc_opcom_ferryStepLive;
-        } else {
-            private _far = (_t getOrDefault ["farTicks", 0]) + 1;
-            _t set ["farTicks", _far];
-            if (_far >= OPCOM_REVIRT_GRACE) then {
-                ["INFO", "OPCOM", format ["ferry: transport %1 (%2) stows at %3, embarked %4", _t get "id", _t get "moveType",
-                    _t getOrDefault ["ferryPhase", "topickup"], _t getOrDefault ["embarked", false]]] call fnc_log;
-                [vehicle (leader _tg)] call DUWS_fnc_opcom_ferryClearHull;
-                [_t] call DUWS_fnc_opcom_ferryClearPad;
-                [_t] call DUWS_fnc_opcom_reVirt;
-            };
+        if (duws_log_level >= 4) then {
+            private _veh = vehicle (leader _tg);
+            private _ph = _t getOrDefault ["ferryPhase", "topickup"];
+            private _nav = _t getOrDefault ["ferryLZ", []];
+            private _navM = if (_nav isEqualTo []) then { -1 } else { round (_veh distance2D _nav) };
+            ["DEBUG", "OPCOM", format ["ferry: transport %1 (%2) %3 wait %4 nav %5 m alt %6 m %7 km/h wps %8, rider %9 men %10 queue %11",
+                _t get "id", _t get "moveType", _ph, _t getOrDefault ["ferryWait", 0], _navM,
+                round ((getPosATL _veh) select 2), round (speed _veh), count waypoints _tg,
+                _rider get "id", {alive _x} count units groupFromNetId (_rider get "grp"),
+                count (_veh getVariable ["DUWS_ferryUnloadQ", []])]] call fnc_log;
         };
+        [_t, _rider] call DUWS_fnc_opcom_ferryStepLive;
     } else {
         [_t] call DUWS_fnc_opcom_ferryStep;
-        if ((_t getOrDefault ["carrying", -1]) >= 0 && _near && {[_t] call DUWS_fnc_opcom_deVirt}) then {
-            // Fresh live spell: resume the phase by embarked (pickup before the board, carry after), timer reset.
-            _t set ["ferryPhase", ["topickup", "carry"] select (_t getOrDefault ["embarked", false])];
-            _t set ["ferryWait", 0]; _t set ["ferryLZ", []];
-            ["INFO", "OPCOM", format ["ferry: transport %1 (%2) streams live at %3", _t get "id", _t get "moveType", _t get "ferryPhase"]] call fnc_log;
-        };
     };
+};
+
+// A hull just stowed: its pad hangs off the tasking, so reVirt's hull delete leaves it standing.
+DUWS_fnc_opcom_ferryStowed = {
+    params ["_t"];
+    ["INFO", "OPCOM", format ["ferry: transport %1 (%2) stows at %3, embarked %4", _t get "id", _t get "moveType",
+        _t getOrDefault ["ferryPhase", "topickup"], _t getOrDefault ["embarked", false]]] call fnc_log;
+    [_t] call DUWS_fnc_opcom_ferryClearPad;
+};
+
+// A hull just streamed live: resume the phase by embarked (pickup before the board, carry after), timer reset.
+DUWS_fnc_opcom_ferryResume = {
+    params ["_t"];
+    _t set ["ferryPhase", ["topickup", "carry"] select (_t getOrDefault ["embarked", false])];
+    _t set ["ferryWait", 0]; _t set ["ferryLZ", []];
+    ["INFO", "OPCOM", format ["ferry: transport %1 (%2) streams live at %3", _t get "id", _t get "moveType", _t get "ferryPhase"]] call fnc_log;
 };

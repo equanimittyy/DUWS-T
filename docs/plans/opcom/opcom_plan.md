@@ -36,7 +36,8 @@ The code is the source of truth. What new work must hold to:
   `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over a 3×3 block, and threat as `_ene`.
 - **Streaming.** A tasking is a virtual point on a route until a player comes within K cells, then it spawns live;
   the engine resolves every fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited
-  combatant feeds its zone's reserve wave.
+  combatant feeds its zone's reserve wave. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream
+  every tasking, a ferry carry included; the ferry scripts a live carry but never decides when a unit streams.
 - **The ferry** is a consequence of a unit's route, never an order. A freed hull garrisons the nearest held,
   uncontested zone. Not built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or
   walks, and land-taxi — lifting a foot unit over dry ground with the same carry.
@@ -59,7 +60,7 @@ contested draw-lock filter it brings, Recruit, and the need and cover fields.
 ### 4.1 Supply errands
 
 Today a `move` with `supplyDrop` set deletes its truck on arrival and only logs "supply delivered"
-(`fnc_opcom_task_step.sqf:80` live, `:175` virtual).
+(`fnc_opcom_task_step.sqf:103` live, `:183` virtual).
 
 - **The errand.** The tasking record takes an `errand` field, set with the order, in place of the `supplyDrop`
   flag: a set errand is what marks a supply run. Each kind maps to one writer:
@@ -75,7 +76,7 @@ Today a `move` with `supplyDrop` set deletes its truck on arrival and only logs 
   and calls the writer. A build runs with `spawn`, because the builder sleeps in its crew drop
   (`fnc_hardpoint_place.sqf:182-183`) and the tick must never sleep.
 - **The truck is spent** — it despawns once its errand lands. A killed truck delivers nothing: the dead-unit sweep
-  removes it (`fnc_opcom_task_step.sqf:59`, `:194`) and its errand goes with it.
+  removes it (`fnc_opcom_task_step.sqf:82`, `:202`) and its errand goes with it.
 - **A refused errand is lost.** Both town garrison writers refuse a raise while the town is `REGROUPING`; the truck
   is still spent. Stage B's candidate sweep skips a regrouping town, so only a town that starts regrouping while
   the truck is on the road loses the delivery.
@@ -96,16 +97,16 @@ changes its zone the same tick.
 
 ### 4.2 Live engagement and the Attack order
 
-Today a virtual tasking spawns only when a player is within K (`fnc_opcom_task_step.sqf:141`, `:152`, `:184`) and
-stows after `OPCOM_REVIRT_GRACE` ticks with no player near (`:120-127`). An OPFOR retake runs through an
+Today a virtual tasking spawns only when a player is within K (`_deVirtIfNear`, `fnc_opcom_task_step.sqf:28`) and
+stows after `OPCOM_REVIRT_GRACE` ticks with no player near (`_stowIfFar`, `:35`). An OPFOR retake runs through an
 `EAST SEIZED` trigger (`fnc_captured.sqf:72`, `fnc_blufor_cap.sqf:56`) that sees live units only, so a virtual
 attacker with no player near never takes the zone. The rule 4.2 builds: **a unit renders only when it has
 something to engage, and every engagement runs live.**
 
-- **Entry buffer.** A `nearTicks` counter, the mirror of `farTicks`, gates every de-virt site: a unit spawns only
+- **Entry buffer.** A `nearTicks` counter, the mirror of `farTicks`, gates `_deVirtIfNear`: a unit spawns only
   after two consecutive ticks with a player or a live BLUFOR group within its K, so a jet crossing the ring on one
   tick spawns nothing.
-- **Render on live BLUFOR.** Every de-virt site counts a live BLUFOR group within K as it counts a player, so a
+- **Render on live BLUFOR.** Both checks count a live BLUFOR group within K as they count a player, so a
   player's AI squad or a headless client's group draws a real fight. It is a streaming read of true positions,
   like the existing `allPlayers` read, and never reaches belief or scoring. A unit with nothing within K stays
   virtual, even at its target.

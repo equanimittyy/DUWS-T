@@ -639,14 +639,14 @@ OPCOM_ROUTE_LAMBDA = 1;
 
 // Ferry lift penalty (metres): the cost a land move type pays to step into a navigable-water cell, set far
 // above any land detour the play box can hold -- so a target across water is reachable, but water is taken
-// only when no land route exists, and among water routes A* still picks the shortest (opcom_plan.md §Transport).
+// only when no land route exists, and among water routes A* still picks the shortest (opcom_plan.md §Shipped).
 OPCOM_ROUTE_LIFT_PENALTY = 1e6;
 
 // Throttle for the stranded-rider WARN: with no lift free a rider retries every tick, so it logs only once
-// per this many -- an island-gap deadlock surfaces in the RPT without flooding it (opcom_plan.md §Transport).
+// per this many -- an island-gap deadlock surfaces in the RPT without flooding it (opcom_plan.md §Shipped).
 OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
 
-// Live ferry rendering tunables (docs/plans/opcom/opcom_plan.md §Transport). The wait cap is the load-bearing one:
+// Live ferry rendering tunables (docs/plans/opcom/opcom_plan.md §Shipped). The wait cap is the load-bearing one:
 // a board or landing that never settles (a bad LZ, stuck AI) forces through at it rather than hang bound.
 OPCOM_FERRY_BOARD_BOAT = 100;    // m; a boat reaches its park, and its riders their shore, within this
 OPCOM_FERRY_BOAT_PARK = 100;     // m; a live boat parks this far out from the shoreline, clear of the shallows

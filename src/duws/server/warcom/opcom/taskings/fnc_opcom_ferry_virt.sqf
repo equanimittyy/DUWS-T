@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The virtual ferry crossing -- the whole carry stepped as store math while
 // nobody watches, driven each tick by the orchestrator (fnc_opcom_ferry). The live mirror is fnc_opcom_ferry_devirt
-// (docs/plans/opcom/opcom_plan.md §Transport).
+// (docs/plans/opcom/opcom_plan.md §Shipped).
 if (!isServer) exitWith {};
 
 // One tick of the virtual carry. Returns the bound rider record while it stands, else nil (rider gone, or ferry done).
