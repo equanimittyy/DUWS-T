@@ -40,6 +40,19 @@ private _entries = _rows apply {
             case "supply_town": { ["supply", _ctx select 0, [], [_ctx select 1, _key], player] remoteExec ["fnc_debug_opcom", 2] };
             case "intercept": { ["sightinglist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
             case "intercept_row": { ["intercept", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
+            case "firemission": {
+                [format ["%1: how many rounds a gun?", _key], [2, 4, 6, 8] apply {
+                    [str _x, {
+                        params ["_hp", "_rounds"];
+                        [_hp, _rounds] spawn {
+                            params ["_hp", "_rounds"];
+                            private _pos = [format ["<t size='2' color='#00ffff'>Click the target for %1 (%2 rounds a gun).</t><br/>Close the map to cancel.", _hp, _rounds]] call fnc_map_pick_pos;
+                            if (_pos isEqualTo []) exitWith {};
+                            ["fire", _hp, _pos, _rounds, player] remoteExec ["fnc_debug_opcom", 2];
+                        };
+                    }, [_key, _x], _oc]
+                }] call fnc_open_action_menu;
+            };
             case "zonebuy": {
                 private _buys = ["reinforce", "fortify"] apply {
                     [_x, { params ["_zk", "_kind"]; ["zone", _kind, _zk, "", player] remoteExec ["fnc_debug_opcom", 2] }, [_key, _x], _oc]

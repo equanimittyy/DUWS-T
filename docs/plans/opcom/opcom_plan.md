@@ -18,8 +18,8 @@ change as each chunk is built and played.
 | Phase | State |
 |---|---|
 | 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** |
-| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order | **shipped** |
-| 4, Stage B — The decision loop: 4.4 spine + zone economy, 4.5 trucks + towns + Rapport, 4.6 need and cover fields + standalone hardpoints, 4.7 QRF + Attack decisions, 4.8 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
+| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order, 4.4 fire missions | **shipped** |
+| 4, Stage B — The decision loop: 4.5 spine + zone economy, 4.6 trucks + towns + Rapport, 4.7 need and cover fields + standalone hardpoints, 4.8 QRF + Attack decisions, 4.9 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
 
@@ -54,6 +54,10 @@ The code is the source of truth. What new work must hold to:
   the row decays. Standing in the cell it was sent to, it takes one guaranteed look `OPCOM_INTERCEPT_K` cells wide:
   every BLUFOR group inside is stamped for certain, rows the look disproves clear, and it hunts the closest group
   found. Nothing inside drops it to `guard` there; an interceptor never returns to garrison.
+- **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds on a point from one mortar pit
+  or battery: every piece of it that has artillery ammo, a crew and the target in range fires. Those two types never
+  stream, so their guns and crews always stand. It fires what it is handed — what is worth shelling, the cooldown,
+  the scatter and the HQ exclusion are the scored Arty action's.
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
   `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
   nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index
@@ -85,15 +89,15 @@ search or lookahead. The scoring pass runs inside `isNil { }` (unscheduled, no `
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
 may yield. One commit per tick. The action list (`fnc_opcom_actions`) holds each action's gate, Value, Cost and
 execute. `archWeight` stays a flat 1 until Phase 6, isolated in one file so Phase 6 replaces it alone. Measure the
-grid rebuild once under a full map before 4.4 stacks scoring on the same tick.
+grid rebuild once under a full map before 4.5 stacks scoring on the same tick.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
-| **4.4** Spine + zone economy | The action list and scoring pass, Bank, exposure and the hidden HQ flag, zone Reinforce / Fortify / hardpoint Build, force pricing, the savings goal | `OPCOM_AP_PER_FORCE`; the zone prices; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON` |
-| **4.5** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount | The town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE` |
-| **4.6** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types | The need field's base ratio (2–3); the asset prices; what a radio's reach and an OP's eyes are worth, in place of the build-price stand-in; where a mortar pit or artillery battery sites; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air) |
-| **4.7** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost | `OPCOM_PWIN_FLOOR`; `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering) |
-| **4.8** Scout, then one-gun Arty | The staleness Value and recon Recruit; Arty only after the `doArtilleryFire` console test ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
+| **4.5** Spine + zone economy | The action list and scoring pass, Bank, exposure and the hidden HQ flag, zone Reinforce / Fortify / hardpoint Build, force pricing, the savings goal | `OPCOM_AP_PER_FORCE`; the zone prices; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON` |
+| **4.6** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount | The town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE` |
+| **4.7** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types | The need field's base ratio (2–3); the asset prices; what a radio's reach and an OP's eyes are worth, in place of the build-price stand-in; where a mortar pit or artillery battery sites; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air) |
+| **4.8** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost | `OPCOM_PWIN_FLOOR`; `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering) |
+| **4.9** Scout, then one-gun Arty | The staleness Value and recon Recruit; the Arty action over the shipped fire mission — what is worth shelling, the cooldown, the scatter and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 
 The score is one number — expected AP returned per AP spent:
 
@@ -105,7 +109,7 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 ([§Archetype](#archetype-phase-6)); `P(win)` scales to the expected return.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)` over the target's 3×3 `r`. Parity is a coin-flip, a
-  2:1 edge ≈ 0.8, a hopeless ratio floors near 0. It is a flat 1 until 4.7.
+  2:1 edge ≈ 0.8, a hopeless ratio floors near 0. It is a flat 1 until 4.8.
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
   once, at commit ([§Templates](#templates-phase-5)).
@@ -114,19 +118,19 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 
 | Action | Targets swept | Chunk |
 |---|---|---|
-| Bank | one null | 4.4 |
-| Zone Reinforce | each uncontested OPFOR zone below full strength | 4.4 |
-| Zone Fortify | each uncontested OPFOR zone below tier IV | 4.4 |
-| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4.4 |
-| Town Reinforce | each OPFOR-band town below full strength and not regrouping | 4.5 |
-| Town Fortify | each OPFOR-band town below tier IV and not regrouping | 4.5 |
-| Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4.5 |
-| Recruit | once per demand group | 4.5 supply, 4.7 combatant, 4.8 recon |
-| Standalone hardpoint Build | the band cells with the highest coverage Value; each asset type unlocked | 4.6 |
-| Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4.7 |
-| Attack | each BLUFOR-held zone | 4.7 |
-| Scout | each `recon` unit's route over stale, valuable cells | 4.8 |
-| Arty | each observed belief point in range of an owned gun off cooldown | 4.8 |
+| Bank | one null | 4.5 |
+| Zone Reinforce | each uncontested OPFOR zone below full strength | 4.5 |
+| Zone Fortify | each uncontested OPFOR zone below tier IV | 4.5 |
+| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4.5 |
+| Town Reinforce | each OPFOR-band town below full strength and not regrouping | 4.6 |
+| Town Fortify | each OPFOR-band town below tier IV and not regrouping | 4.6 |
+| Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4.6 |
+| Recruit | once per demand group | 4.6 supply, 4.8 combatant, 4.9 recon |
+| Standalone hardpoint Build | the band cells with the highest coverage Value; each asset type unlocked | 4.7 |
+| Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4.8 |
+| Attack | each BLUFOR-held zone | 4.8 |
+| Scout | each `recon` unit's route over stale, valuable cells | 4.9 |
+| Arty | each observed belief point in range of an owned gun off cooldown | 4.9 |
 
 ### Value
 
@@ -171,8 +175,8 @@ threat drives only the fast actions — the QRF and attack staging.
 - **Scout staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷
   `OPCOM_BELIEF_EXPIRE`). The share holds Scout below the ground it reveals, since scouting takes and protects
   nothing itself.
-- **An asset's Value is a stand-in** that favours frontline assets until 4.6 settles what a radio's reach and an
-  OP's eyes are worth, and 4.8 what a gun's fire missions are worth ([§Appraisal](#appraisal-phase-4)).
+- **An asset's Value is a stand-in** that favours frontline assets until 4.7 settles what a radio's reach and an
+  OP's eyes are worth, and 4.9 what a gun's fire missions are worth ([§Appraisal](#appraisal-phase-4)).
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`), with ETA in
   ticks from the route length and the unit's per-cell speed (`DUWS_opcom_speed`). A zone action's ETA is 0.
 - **No route-risk discount, no emergency reserve.** A truck's odds en route would read threat, so the risk stays
@@ -389,7 +393,7 @@ site, the type is rolled from the existing weight table — `DUWS_hardpointWeigh
 ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
 still rolls the full list. An asset hardpoint is its own candidate and never stands in a zone's ring: radios and OPs
 site by their own logic. A build cannot be a *typed* counter (AT under armour) until belief carries threat
-category, which 4.6 settles ([§Appraisal](#appraisal-phase-4)).
+category, which 4.7 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; no build refund (clearing pays the player CP only). Unlocks key off
 `WARCOM_opfor_tier`, which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet:
@@ -407,14 +411,14 @@ live cap (bounded by player proximity).
 
 ### Indirect-fire hardpoints
 
-Persistent enemy assets, two tiers sharing one fire-mission implementation. **None of the fire missions ships** —
-the mortar and artillery cores exist as clearable emplacements but run no missions. A zone's own mortar is separate
-and stays autonomous (`fnc_static_resolve`), uncapped here.
+Persistent enemy assets, two tiers sharing one fire-mission implementation. The order ships
+([§Shipped](#shipped-the-substrate-the-loop-drives)); **nothing decides to use it** — no cooldown, scatter,
+observation gate or HQ exclusion. A zone's own mortar is separate and stays autonomous (`fnc_static_resolve`),
+uncapped here.
 
-`doArtilleryFire` must issue from the machine where the gun is local; both are server-spawned, so the server issues
-it (the locality rule that broke `fnc_helolift`). **Verify first** that an AI gunner reliably executes
-`doArtilleryFire` — nothing in the mission has ever issued it; if not, the fallback is spawning shells directly as
-the player's own arty support does (`client/supports/fnc_arty.sqf`), the gun becoming scenery.
+Whether an AI gunner reliably executes `doArtilleryFire` settles in play, nothing in the mission having issued it
+before; if it does not, the fallback is spawning shells directly as the player's own arty support does
+(`client/supports/fnc_arty.sqf`), the gun becoming scenery.
 
 | | Mortar pit | Artillery battery |
 |---|---|---|

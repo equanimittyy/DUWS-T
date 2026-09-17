@@ -67,6 +67,14 @@ switch (_verb) do {
         _rows sort true;
         [format ["%1 which town?", _b], _rows apply { [_x select 1, _x select 2] }, "supply_town", [_a, _b]] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
+    case "batterylist": {
+        private _rows = ([getPosASL _caller] call DUWS_fnc_opcom_batteries) apply {
+            _x params ["_key", "_pos", "_type"];
+            [_key, format ["%1  %2  (%3 m away)", _type, _key, round (_caller distance2D _pos)]]
+        };
+        if (_rows isEqualTo []) exitWith { "No OPFOR mortar pit or battery standing." remoteExec ["hint", _caller] };
+        ["Fire from which emplacement?", _rows, "firemission", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
     case "sightinglist": {
         // _a = tasking id. A row is where OPCOM believes the group is, not where it stands.
         private _rows = [];
@@ -111,6 +119,10 @@ switch (_verb) do {
         if (_pos isEqualTo []) then { _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select (_c select 1)) };
         private _ok = ["supply", _a, _pos, _c] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Supply-run %1: %2 at %3.", _a, _c select 0, _pos apply { round _x }] } else { format ["Supply-run refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "fire": {
+        private _n = ["fire", _a, _b, _c] call fnc_opcom_debug_task;
+        (if (_n > 0) then { format ["%1 fires %2 rounds at %3.", _a, _n, _b apply { round _x }] } else { format ["%1 has no gun bearing on that. See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "intercept": {
         private _ok = ["intercept", _a, _b] call fnc_opcom_debug_task;
