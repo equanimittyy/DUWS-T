@@ -18,33 +18,40 @@ This doc is the forward design spec. **Perception (P1), force weighting (P2), an
 mechanism (P3) are shipped** — the code under `src/duws/server/warcom/opcom/` (`belief/` and `taskings/`) is the
 source of truth for how they work; [§Shipped](#shipped-the-substrate-the-loop-drives) maps them and records only
 the invariants new work must respect. What remains — the decision loop, its orchestration, and the assets it buys
-— is specified below.
+— is specified below. Everything from Phase 4 on is preliminary: it changes as each chunk is built and played.
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** (live-playtest verification of P3 pending) |
-| 4a — Decision loop: thinking harness + defensive economy | specified in [`phase_4_decision_loop.md`](phase_4_decision_loop.md) |
-| 4b — Single-unit offensives (Attack, Intercept, Scout, one-gun Arty; real `P(win)`; draw-lock) | [§Appraisal](#appraisal-phase-4) — own spec when picked up |
+| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order | [§Orders](#orders-phase-4-stage-a) |
+| 4, Stage B — The decision loop: 4.4 spine + zone economy, 4.5 trucks + towns + Rapport, 4.6 need and cover fields + standalone hardpoints, 4.7 QRF + Attack decisions, 4.8 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) |
 | 6 — Archetype: per-class weight sets | [§Archetype](#archetype-phase-6) |
 
 Each phase ships runnable and verifiable before the next; the ordering is forced by what the next reads. Do not
-pre-build later phases — the tuning constants and engine-contact behaviours (streaming, `doArtilleryFire`, virtual
-combat) only settle by running the core.
+pre-build later phases — the tuning constants and engine-contact behaviours (streaming, `doArtilleryFire`, AI-only
+live fights) only settle by running the core. Stage A builds each order and its outcome under the debug harness
+before Stage B scores them, so a wrong decision is never debugged together with a broken order.
 
 ## Shipped: the substrate the loop drives
 
 The mechanism P4 scores against. Each row's code file is the SSOT for its behaviour; the notes are the
-cross-cutting invariants a P4/P5 author must respect and that no single file states.
+cross-cutting invariants a P4/P5 author must respect and that no single file states. Two terms carry one meaning
+each throughout:
+
+| Term | Applies to | Meaning |
+|---|---|---|
+| **Contested** | a zone or a town | BLUFOR are assaulting the site: OPFOR belief holds a BLUFOR sighting within one grid cell of its edge, rebuilt once per tick (`fnc_opcom_contested.sqf`). Built for zones only: the rebuild skips the `town_` sites |
+| **Engaged** | a unit | The unit is live and fighting BLUFOR: its leader is in `COMBAT`, or knows the nearest player above 1.5 (`fnc_opcom_task_step.sqf:69-77`). A virtual unit, a zone and a town are never engaged |
 
 | Subsystem | Code | Invariant that still binds new work |
 |---|---|---|
 | **Belief store** | `belief/fnc_opcom_belief_init.sqf`, `fnc_opcom_force.sqf`, `fnc_opcom_contested.sqf`, sensors in `fnc_opcom_perception_run.sqf` | The commander plans against belief, never truth: only the sensors read live player state (`allPlayers`/`getPos`/`knowsAbout`). Belief tracks groups, not players; a human weighs `OPCOM_PLAYER_WORTH`. Store a position, never a handle |
 | **Influence grid** | `belief/fnc_opcom_grid_init.sqf`, `fnc_opcom_grid_rebuild.sqf`, `fnc_opcom_grid_coords.sqf` | Two force layers (`_fri` known OPFOR, `_ene` believed BLUFOR), firepower-weighted and condition-scaled, rebuilt each tick. Exposes what scoring reads: **`r`** = Σ`_fri`/(Σ`_ene`+1) over a 3×3 block, **threat** = `_ene` on own ground, the **front line** (sign-change band), and **route-around** (lowest-`_ene` neighbour). Static per-cell masks classify land / navigable-water / air domains for routing and the ferry |
-| **Movement & streaming** | `taskings/fnc_opcom_move.sqf`, `fnc_opcom_route.sqf`, `fnc_opcom_stream.sqf`, `fnc_opcom_task_step.sqf` | A tasking is a virtual world-point stepping a route (A\* cost field foot/air/boat, `fnc_convoy_path` road for wheeled/tracked) until a player closes within **K cells** (per move type) or it reaches contact, then it spawns live. Spawn takes a one-tick entry buffer — a player within K on two consecutive ticks — so a fast flyover never streams (not built: spawn fires on the first tick in range). Stow is temporal hysteresis (`OPCOM_REVIRT_GRACE` clear ticks). Streaming is side-symmetric and the **engine resolves combat** — `P(win)` never dices one. Spawn posture is the closest A3 order to the tasking, re-issuable live |
-| **Tasking, status & strength** | `taskings/fnc_opcom_tasking_init.sqf`, `fnc_opcom_strength.sqf`, `fnc_opcom_task_step.sqf` | Each unit has a standing **tasking** (`garrison`/`guard` rest; the rest active) and a **status** (`virtual`/`moving`/`engaged`/`dead`). `effForce` (power × condition) is what the grid deposits, so a shot-up group weighs less automatically; `strength` (0..1) is persisted and heal-targeted; `garrison` heals at `OPCOM_GARRISON_HEAL_RATE`, `guard` does not. A `garrison` never streams live: a live unit reaching its return zone despawns into it, settling only once it is not engaged and the zone is not contested (OPFOR belief holds no BLUFOR sighting within one grid cell of its edge). A recruited combatant feeds its zone's reserve wave; a contested zone locks its garrison units off any offensive draw |
+| **Movement & streaming** | `taskings/fnc_opcom_move.sqf`, `fnc_opcom_route.sqf`, `fnc_opcom_stream.sqf`, `fnc_opcom_task_step.sqf` | A tasking is a virtual world-point stepping a route (A\* cost field foot/air/boat, `fnc_convoy_path` road for wheeled/tracked) until a player closes within **K cells** (per move type), then it spawns live. Stow is temporal hysteresis (`OPCOM_REVIRT_GRACE` clear ticks). Not built (4.2): a unit renders only when it has something to engage — a live BLUFOR group within K spawns it as a player does, spawn takes a one-tick entry buffer (within K on two consecutive ticks, so a fast flyover never streams), and stow waits until neither is within K — so every engagement, AI-only included, runs live. Streaming is side-symmetric and the **engine resolves combat** — `P(win)` never dices one. Spawn posture is the closest A3 order to the tasking, re-issuable live |
+| **Tasking, status & strength** | `taskings/fnc_opcom_tasking_init.sqf`, `fnc_opcom_strength.sqf`, `fnc_opcom_task_step.sqf` | Each unit has a standing **tasking** (`garrison`/`guard` rest; the rest active) and a **status** (`virtual`/`moving`/`engaged`/`dead`). `effForce` (power × condition) is what the grid deposits, so a shot-up group weighs less automatically; `strength` (0..1) is persisted and heal-targeted; `garrison` heals at `OPCOM_GARRISON_HEAL_RATE`, `guard` does not. A `garrison` never streams live: a live unit reaching its return zone despawns into it, settling only once it is not engaged and the zone is not contested. A recruited combatant feeds its zone's reserve wave. A unit garrisoned in a contested zone is off every draw — built inline in the ferry pool only; the shared filter lands with the truck-source pick (4.5) |
 | **Transport ferry** | `taskings/fnc_opcom_ferry.sqf` (+ `_virt` / `_devirt`), [§Transport](#transport-shipped) | A land unit stopped at a water leg borrows the nearest idle water-compatible hull, which carries it across and then garrisons the nearest held zone. The ferry is a *consequence of the rider's route*, never an order. Combat gates the borrow, never a bound crossing |
 
 State is numbers / strings / arrays only — no handles near the mission namespace (a live group is held by netId).
@@ -111,14 +118,120 @@ rider waits for lift or walks a longer route (real only once P4 lowers `OPCOM_RO
 genuine shortcut); and **land-taxi** — lifting a foot unit over dry ground to save time, reusing the whole carry
 engine with a distance trigger and a land-transport pool.
 
+## Orders (Phase 4, Stage A)
+
+Stage A finishes the orders the decision loop will issue, so each one runs to its outcome when driven by hand
+through the debug harness (`taskings/fnc_opcom_debug_task.sqf`). Nothing scores or picks yet, and a harness order
+spends no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the shared
+contested draw-lock filter it brings, Recruit, and the need and cover fields.
+
+### 4.1 Supply errands
+
+Today a `move` with `supplyDrop` set deletes its truck on arrival and only logs "supply delivered"
+(`fnc_opcom_task_step.sqf:80` live, `:175` virtual).
+
+- **The errand.** The tasking record takes an `errand` field, set with the order, in place of the `supplyDrop`
+  flag: a set errand is what marks a supply run. Each kind maps to one writer:
+
+  | Errand | Effect | Writer |
+  |---|---|---|
+  | `["reinforce", townIndex]` | +0.3 strength | `fnc_town_garrison_reinforce` (`fnc_civ_state_init.sqf:146`) |
+  | `["fortify", townIndex]` | tier +1, clamped at IV | `fnc_town_garrison_setTier` (`fnc_civ_state_init.sqf:176`) |
+  | `["rapport", townIndex]` | reputation −3 | `fnc_town_rep_adjust` (`fnc_economy_init.sqf:165`) |
+  | `["build", pos, type]` | a standalone hardpoint of that type near `pos` | `fnc_hardpoint_spawn_sited` (`fnc_hardpoint_place.sqf:184`), drawing with `fnc_hardpoint_band_cand` around `pos` |
+
+- **`fnc_opcom_deliver`** (new, `taskings/`) replaces the log in both arrival branches: it reads the errand kind
+  and calls the writer. A build runs with `spawn`, because the builder sleeps in its crew drop
+  (`fnc_hardpoint_place.sqf:182-183`) and the tick must never sleep.
+- **The truck is spent** — it despawns once its errand lands. A killed truck delivers nothing: the dead-unit sweep
+  removes it (`fnc_opcom_task_step.sqf:59`, `:194`) and its errand goes with it.
+- **A refused errand is lost.** Both town garrison writers refuse a raise while the town is `REGROUPING`; the truck
+  is still spent. Stage B's candidate sweep skips a regrouping town, so only a town that starts regrouping while
+  the truck is on the road loses the delivery.
+- **The zone writers** ([§Town & zone garrisons](#town--zone-garrisons)). A zone buy needs no truck and resolves
+  the tick it is ordered, so these are called directly, not through an errand. *Zone reinforce* applies the town
+  step to a zone's garrison key through `DUWS_fnc_garrisonUnlose`, re-deriving the reserve pool when the garrison
+  stands. *Zone tier* raises `DUWS_zoneTier_<key>` (read by `fnc_zone_tier`) by one, clamped at IV whatever tier
+  the zone rolled, and re-stamps the new tier's full potential with `DUWS_fnc_garrisonSetFull` so the new men count
+  as owed; the tier also raises the zone's hardpoint cap (`fnc_hardpoint_zone_cap`). *Zone build* calls
+  `fnc_hardpoint_spawn_sited` with the zone key and the in-zone draw `fnc_hardpoint_site_zone` uses, the type given,
+  under a fresh hardpoint key, with `spawn`.
+- **Harness.** The `supply` verb takes the errand as a fourth argument; a new
+  `["zone", "reinforce" | "fortify" | "build", zoneKey, type]` verb calls the zone writers.
+
+Done when a truck sent by hand to a town raises its strength or tier, or steps its reputation, and despawns; a
+truck sent to a band position builds the type it carries; a killed truck changes nothing; and each zone verb
+changes its zone the same tick.
+
+### 4.2 Live engagement and the Attack order
+
+Today a virtual tasking spawns only when a player is within K (`fnc_opcom_task_step.sqf:141`, `:152`, `:184`) and
+stows after `OPCOM_REVIRT_GRACE` ticks with no player near (`:120-127`). An OPFOR retake runs through an
+`EAST SEIZED` trigger (`fnc_captured.sqf:72`, `fnc_blufor_cap.sqf:56`) that sees live units only, so a virtual
+attacker with no player near never takes the zone. The rule 4.2 builds: **a unit renders only when it has
+something to engage, and every engagement runs live.**
+
+- **Entry buffer.** A `nearTicks` counter, the mirror of `farTicks`, gates every de-virt site: a unit spawns only
+  after two consecutive ticks with a player or a live BLUFOR group within its K, so a jet crossing the ring on one
+  tick spawns nothing.
+- **Render on live BLUFOR.** Every de-virt site counts a live BLUFOR group within K as it counts a player, so a
+  player's AI squad or a headless client's group draws a real fight. It is a streaming read of true positions,
+  like the existing `allPlayers` read, and never reaches belief or scoring. A unit with nothing within K stays
+  virtual, even at its target.
+- **Stow rule.** A live unit counts far ticks only while no player and no live BLUFOR group is within K, so it
+  cannot flap between live and virtual beside an AI squad.
+- **Assault resolve.** `assault` already exists as an order (`fnc_opcom_task.sqf:4`); its target is a BLUFOR-held
+  zone. The order ends when the zone flips to OPFOR, or when the attacker dies. A live attacker then drops to
+  `guard` in the zone and settles into its garrison only once it stows back to virtual, so it never vanishes in
+  front of a player; a virtual attacker settles at once. Either way it joins the zone's reserve wave, since a
+  retaken zone restarts on a thin 0.3 garrison (`fnc_opfor_cap.sqf`).
+- **Capture mirror.** A new `fnc_zone_retake_ready` mirrors `fnc_zone_capture_ready`: the zone's BLUFOR garrison
+  is beaten (none exists yet, and a zone with none bought always counts as beaten), and OPFOR in the trigger area
+  outnumber BLUFOR. It replaces `EAST SEIZED` at the two re-arm sites with an `EAST PRESENT` trigger gated on the
+  check. A zone can now flip with players still inside it, and the retake takes no hold: ground changes hands back
+  and forth under a live fight.
+- **Virtual capture.** An empty BLUFOR zone renders nothing, so a virtual attacker there trips neither the trigger
+  nor the contact report. Each tick, for a virtual `assault` tasking inside its target zone's radius, OPCOM runs
+  the same check on stored state — the attacker's stored force is the OPFOR present, and BLUFOR present is nil,
+  since any BLUFOR within K would have rendered the attacker — and calls `fnc_opfor_cap` when it holds.
+- **Contact report.** A live attacker inside the radius trips the zone's existing `EAST PRESENT` trigger
+  (`fnc_createzone.sqf:153-167`) and `fnc_enemy_contact`. A virtual attacker has no units to trip it, so OPCOM
+  calls `fnc_enemy_contact` itself when the attacker enters the radius, with no map marks, since there is no live
+  leader to mark.
+- **Docs that change with the code.** `zones_and_civilians.md:297-299`, the header of `fnc_zone_capture_ready.sqf`
+  and the comment at `fnc_opfor_cap.sqf:27-29` all describe the `EAST SEIZED` retake, and the last claims a retake
+  cannot happen under a player's feet.
+- **Harness.** The existing `task` verb issues `assault`.
+
+Done when a player flying through a virtual unit's K on a single tick spawns nothing; an assault on an empty
+BLUFOR zone with every player far away takes it the tick the virtual attacker enters the radius, posts the contact
+notification and garrisons the attacker there; and, with a player's AI squad in that zone, the attacker renders
+once the squad is within K and the zone flips only if OPFOR win and outnumber BLUFOR.
+
+### 4.3 The Intercept order
+
+- **The order.** `fnc_opcom_task` takes a new order, `intercept`, whose target is a belief row key (a BLUFOR
+  group's `netId`), not a position.
+- **Following.** Each tick the destination is the row's latest believed position. The route is re-planned only
+  when that position moves more than one cell, because the router runs one A\* search per tick. If the row decays
+  on the way, the unit keeps the last position it read.
+- **Truth read.** Within its own K (`DUWS_opcom_streamK` for its move type), an intercepting unit reads true
+  BLUFOR positions, whatever the unit is. The read is a sensor: BLUFOR found refresh their rows through
+  `fnc_opcom_belief_upsert`, and an empty block clears the rows in it through `fnc_opcom_cover_clear`.
+- **Resolve.** At the last known position with no BLUFOR within K, the order drops to `guard` in place, where the
+  unit waits for its next order. BLUFOR within K have already rendered the unit (4.2); it fights them live and
+  drops to `guard` once none remain within K. An interceptor never returns to garrison.
+- **Harness.** A new `["intercept", id, rowKey]` verb.
+
+Done when a unit sent at a sighting whose squad has left arrives, clears the row and guards; one sent at a squad
+still there renders, fights and guards after; and one sent at a moving squad re-routes as the sighting updates.
+
 ## Appraisal (Phase 4)
 
 Each tick, enumerate candidate `[action, target]` pairs, gate cheaply, score the survivors, pick by weighted
 random over the top few (`selectRandomWeighted` over the top three, the `fnc_createzone.sqf:129` idiom). No search
-or lookahead. **Phase 4a — the thinking spine plus the defensive economy — is specified in
-[`phase_4_decision_loop.md`](phase_4_decision_loop.md)** (Bank, Recruit on demand, Build, Reinforce, Fortify,
-Rapport, supply delivery; `P(win)` a flat 1). What follows is the enduring model both cuts share; 4b (offensive
-single-unit orders) gets its own spec.
+or lookahead. Scoring is Phase 4 Stage B, built on the orders Stage A ships ([§Status](#status)); what follows is
+the model it builds.
 
 The score is one number — expected AP returned per AP spent:
 
@@ -130,7 +243,8 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 ([§Archetype](#archetype-phase-6)); `P(win)` scales to the expected return.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)` over the target's 3×3 `r`. Parity is a coin-flip, a
-  2:1 edge ≈ 0.8, a hopeless ratio floors near 0. 4a stubs it at 1; 4b uses the real formula.
+  2:1 edge ≈ 0.8, a hopeless ratio floors near 0. The economy chunks stub it at 1; the real formula lands with the
+  QRF and Attack decisions (4.7).
 - **`Value` — the worth of ground in play.** A player has no worth of its own; it earns Value only through the
   ground it threatens. Attack = enemy zone `_points`; Intercept/Build = own worth × threat; Reinforce = own worth
   × threat × deficit `1−strength`; Fortify = own worth × threat × force the next tier adds; Rapport = town worth ×
@@ -205,11 +319,14 @@ only when its band fits, enough roles fill, and the geometry holds; short a role
   into observed defender strength by drawing fire, reaching what recon cannot (a dug-in town garrison). It minimises
   stake, the inverse of every other commit's ROI sizing.
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points outward.
-- **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action: **Attack** —
-  no live BLUFOR in the zone radius (direct count, not belief), then **reuse the capture path**
-  (`fnc_createzone.sqf` trigger → `fnc_captured.sqf`/`fnc_blufor_cap.sqf`); **verify that trigger fires for an
-  AI-only fight with no player near** before this ships, else call the capture functions directly. **Intercept** —
-  threatened ground clear, units release to `garrison` there. **Rapport** — courier delivers or dies.
+- **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action
+  ([§Orders](#orders-phase-4-stage-a)): **Attack** — OPFOR take the zone by the mirror of
+  BLUFOR's capture rule (`fnc_zone_capture_ready`): the zone's BLUFOR garrison beaten, none bought counting as
+  beaten, and OPFOR outnumbering BLUFOR in the radius. A live fight flips through the retake trigger; a virtual
+  attacker at an empty zone flips it on the OPCOM tick against stored state, and OPCOM sends that attack's contact
+  report itself. The attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the
+  unit reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live
+  and guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
 
 ## What AP buys
 
@@ -221,14 +338,14 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Action | Class | Target | Sink | Taskings |
 |---|---|---|---|---|
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band → template) |
-| Intercept (QRF) | defensive | a sighted player near own ground | tasking-spawn | 1–N |
+| Intercept (QRF) | defensive | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1–N |
 | Rapport | offensive | a town in reach (needs `supply`) | tasking-spawn | 1 courier |
 | Recruit | buildup | the highest-value unmet unit need | tasking-spawn | 1 (`garrison`, resting) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed belief point in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
-| Build | defensive | an own threatened cell | hardpoint build | 1 truck |
+| Build | defensive | an own zone ring or band cell | hardpoint build | 0 zone / 1 truck standalone |
 | Bank | — | — | none | 0 |
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
@@ -247,11 +364,11 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
   defender's spawn elsewhere, and co-op localities each keep their own budget.
 
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to a target cell and is spent on
-arrival, behind four actions: Rapport, Build, and *town* Reinforce / Fortify. The AP is paid at commit but the
+arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify. The AP is paid at commit but the
 result lands only when the *specific* bound truck arrives — **kill it en route and the order fails, no refund**
 (interdiction is the counterplay). No truck on hand (idle or affordable this tick) → the action drops from scoring.
-**Zones need no supply** — reinforcing/fortifying a zone resolves on AP alone, reading as OPFOR trucking matériel
-outward from its zones to the contested towns.
+**Zones need no supply** — zone Reinforce, Fortify and hardpoint Build resolve on AP alone, reading as OPFOR
+trucking matériel outward from its zones to the towns.
 
 ## What the commander builds
 
@@ -338,15 +455,17 @@ tier I (no refund, three-hour regroup lock) and pins it to the `0.3` strength fl
 
 Not built:
 
-- **Zone-side spend wiring.** Both sinks should reach zones as they reach towns, but a zone strength setter is
-  missing — a pair of wrappers, one applying the reinforcement step to a zone key, one writing a zone tier with a
-  clamp (zone read is `fnc_zone_strength` → `DUWS_fnc_garrisonStrength`; town write is
-  `fnc_town_garrison_reinforce` → `DUWS_fnc_garrisonUnlose`). Open: whether a zone costs a town's price or more,
-  and whether zone tiers are capped by the generation roll.
-- **BLUFOR garrisons.** The BLUFOR band (`>= 10`) has no garrison; buying tier I at a held town *creates* one at
-  zero strength (each reinforcement +30 %), never inherits OPFOR's — captured ground carries no tier or strength.
-  The presence latch is still wanted (a BLUFOR town garrison streams), but the `Mobilising`/`Regrouping` holds are
-  not (a BLUFOR garrison never arrives on ground it owns).
+- **Zone-side spend wiring (4.1).** Both sinks should reach zones as they reach towns, but a zone strength setter
+  is missing — a pair of wrappers, one applying the reinforcement step to a zone key, one raising a zone's tier
+  clamped at IV whatever tier it rolled at generation and re-stamping its full potential (zone read is
+  `fnc_zone_strength` → `DUWS_fnc_garrisonStrength`; town write is `fnc_town_garrison_reinforce` →
+  `DUWS_fnc_garrisonUnlose`). Open: whether a zone costs a town's price or more.
+- **BLUFOR garrisons.** BLUFOR buy garrisons for zones and towns as OPFOR do. The BLUFOR band (`>= 10`) has no
+  garrison; buying tier I at a held town *creates* one at zero strength (each reinforcement +30 %), never inherits
+  OPFOR's — captured ground carries no tier or strength. The presence latch is still wanted (a BLUFOR garrison
+  streams), but the `Mobilising`/`Regrouping` holds are not (a BLUFOR garrison never arrives on ground it owns). A
+  BLUFOR-held site also wakes when an OPCOM attacker, live or virtual, closes within K, so its garrison renders and
+  renders the attacker in turn.
 
 ## Random events: what a turned town does
 
