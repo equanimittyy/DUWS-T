@@ -170,13 +170,13 @@ may yield. One commit per tick. The action list (`fnc_opcom_actions`) holds each
 execute. `archWeight` stays a flat 1 until Phase 6, isolated in one file so Phase 6 replaces it alone. Measure the
 grid rebuild once under a full map before 4.4 stacks scoring on the same tick.
 
-| Chunk | Builds |
-|---|---|
-| **4.4** Spine + zone economy | The action list and scoring pass, Bank, exposure and the hidden HQ flag, zone Reinforce / Fortify / hardpoint Build, force pricing, the savings goal |
-| **4.5** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount |
-| **4.6** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types |
-| **4.7** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost |
-| **4.8** Scout, then one-gun Arty | The staleness Value and recon Recruit; Arty only after the `doArtilleryFire` console test ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) |
+| Chunk | Builds | Settles in play |
+|---|---|---|
+| **4.4** Spine + zone economy | The action list and scoring pass, Bank, exposure and the hidden HQ flag, zone Reinforce / Fortify / hardpoint Build, force pricing, the savings goal | `OPCOM_AP_PER_FORCE`; the zone prices; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON` |
+| **4.5** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount | The town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE` |
+| **4.6** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types | The need field's base ratio (2–3); the asset prices; what a radio's reach and an OP's eyes are worth, in place of the build-price stand-in; where a mortar pit or artillery battery sites; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air) |
+| **4.7** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost | `OPCOM_PWIN_FLOOR`; `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering) |
+| **4.8** Scout, then one-gun Arty | The staleness Value and recon Recruit; Arty only after the `doArtilleryFire` console test ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 
 The score is one number — expected AP returned per AP spent:
 
@@ -254,8 +254,8 @@ threat drives only the fast actions — the QRF and attack staging.
 - **Scout staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷
   `OPCOM_BELIEF_EXPIRE`). The share holds Scout below the ground it reveals, since scouting takes and protects
   nothing itself.
-- **An asset's Value is a stand-in** that favours frontline assets until what a radio's reach, an OP's eyes and a
-  gun's fire missions are worth is designed ([§Open questions](#open-questions)).
+- **An asset's Value is a stand-in** that favours frontline assets until 4.6 settles what a radio's reach and an
+  OP's eyes are worth, and 4.8 what a gun's fire missions are worth ([§Appraisal](#appraisal-phase-4)).
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`), with ETA in
   ticks from the route length and the unit's per-cell speed (`DUWS_opcom_speed`). A zone action's ETA is 0.
 - **No route-risk discount, no emergency reserve.** A truck's odds en route would read threat, so the risk stays
@@ -387,6 +387,9 @@ launches as a flank.
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
 
+Phase 5 settles in play the band thresholds, the route λ weights and their recompute cadence, and
+`OPCOM_MUSTER_EXPIRY`.
+
 ## What AP buys
 
 **WIP.**
@@ -469,7 +472,7 @@ site, the type is rolled from the existing weight table — `DUWS_hardpointWeigh
 ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
 still rolls the full list. An asset hardpoint is its own candidate and never stands in a zone's ring: radios and OPs
 site by their own logic. A build cannot be a *typed* counter (AT under armour) until belief carries threat
-category ([§Open questions](#open-questions)).
+category, which 4.6 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; no build refund (clearing pays the player CP only). Unlocks key off
 `WARCOM_opfor_tier`, which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet:
@@ -536,7 +539,8 @@ cannot override the ladder (an Aggressive commander with no armour tier fields n
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
 properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a 3:1
-muster ideal, a 1:1 minimum) applies until Phase 6. The set of archetypes itself is not final.
+muster ideal, a 1:1 minimum) applies until Phase 6. Phase 6 settles the set of archetypes, which is not final, and
+whether the player can learn the commander's archetype through the intel system.
 
 ## Town & zone garrisons
 
@@ -605,25 +609,3 @@ persisting its state is the snapshot's responsibility. Every field is a number, 
 OPCOM is a component of WARCOM, not a replacement; prefixes split by ownership, nothing mass-renamed. Shared
 war-economy state stays `WARCOM_` (`WARCOM_opfor_ap`/`_tier`); OPCOM's own state takes `OPCOM_`; the belief store
 keeps `DUWS_` with an `opcom_` owner tag.
-
-## Open questions
-
-- **Typed belief for counter-building.** The grid is force magnitude only, so Build cannot site a typed counter (AT
-  under armour, AA under air) until belief carries a threat category.
-- **What an asset hardpoint is worth** — a radio's reach, an OP's eyes, a gun's fire missions — in place of the
-  build-price stand-in, and **where a mortar pit or artillery battery sites**.
-- **Whether the player can perceive the enemy is acting on stale information**, and whether it is worth surfacing
-  (the intel system is the route). Same for **learning the commander's archetype**.
-- **Whether an AI gunner reliably executes `doArtilleryFire`** — verify with a throwaway console test before writing
-  the fire missions; if no, the shell-spawn fallback becomes the implementation.
-- **What the commander does with a surplus**, and **whether it should be required to spend** rather than merely able
-  to. Absorbers: Recruit (only while a locked prize exists), reinforcing over upgrading, mustering.
-- **Tuning knobs** (mechanism ships, value tunes): `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_AP_PER_FORCE` (the force↔AP
-  rate); `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; `OPCOM_COMMIT_HOLD`; the P(win) / band
-  thresholds; the route λ weights and recompute cadence; the exposure distances (5 / 10 km, 0.2 floor), the town
-  worth factor (5) and the need field's base ratio (2–3); every price in [§What AP buys](#what-ap-buys);
-  `OPCOM_SAVE_HORIZON`, `OPCOM_VALUE_HALFLIFE`, `OPCOM_SCOUT_SHARE` and `OPCOM_MUSTER_EXPIRY`;
-  `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline
-  caution.
-- **Accepted limitation — recon detection samples once per tick**, so a fast airborne player can cross a recon's
-  K reach between ticks unsensed. The fix, if it bites, is a larger K against airborne players, tuned then.
