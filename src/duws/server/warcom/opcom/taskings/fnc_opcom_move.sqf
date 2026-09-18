@@ -27,7 +27,7 @@ DUWS_fnc_opcom_stepMove = {
     };
     if (!_arrived) exitWith { false };
     // A guard settle re-orders the group so map and group agree. A garrison settle despawns -- a combatant's token
-    // now sits in the reserve wave, so a live copy would fight twice.
+    // now sits in the reserve pool, so a live copy would fight twice.
     if ([_t, _pos] call DUWS_fnc_opcom_settleMove) then {
         if (_live) then { [_t] call DUWS_fnc_opcom_reVirt };
     } else {

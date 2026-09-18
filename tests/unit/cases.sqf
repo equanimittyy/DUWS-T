@@ -677,6 +677,27 @@ enemyunitMultiplier = nil;
 ["garrisonBuyTier: the tenth is taken of every multiplier copy the tier adds",
     (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
 
+DUWS_zoneGroupCeiling = 130;
+DUWS_fnc_opforGroupCount = { 0 };
+missionNamespace setVariable ["DUWS_zoneCeiling_sfk", 4];
+["sfk", ["patrol", "opcomdef7:team", "absent"]] call DUWS_fnc_garrisonReserveSet;
+["garrisonStandFill: a raise stands to its ceiling, base tokens before OPCOM's",
+    (["sfk", ["team", "team"]] call DUWS_fnc_garrisonStandFill), ["team", "team", "patrol", "opcomdef7:team"]] call fnc_assertEq;
+["garrisonStandFill: what it draws leaves the pool, and an unfieldable token stays",
+    (["sfk"] call DUWS_fnc_garrisonReserve), ["absent"]] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_zoneCeiling_sfk", 3];
+["sfk", ["patrol", "patrol", "opcomdef7:team"]] call DUWS_fnc_garrisonReserveSet;
+["garrisonStandFill: base tokens take the room before an OPCOM token",
+    (["sfk", ["team"]] call DUWS_fnc_garrisonStandFill), ["team", "patrol", "patrol"]] call fnc_assertEq;
+["garrisonStandFill: an OPCOM token left without room stays pooled",
+    (["sfk"] call DUWS_fnc_garrisonReserve), ["opcomdef7:team"]] call fnc_assertEq;
+["garrisonStandFill: a garrison already at its ceiling draws nothing",
+    (["sfk", ["team", "team", "team"]] call DUWS_fnc_garrisonStandFill), ["team", "team", "team"]] call fnc_assertEq;
+DUWS_fnc_opforGroupCount = { 128 };
+["sfk", ["patrol", "patrol"]] call DUWS_fnc_garrisonReserveSet;
+["garrisonStandFill: the global group wall caps the draw",
+    (["sfk", ["team"]] call DUWS_fnc_garrisonStandFill), ["team", "patrol"]] call fnc_assertEq;
+
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
 // campaign setting and a squad's leader is not outnumbered by his own automatic riflemen.

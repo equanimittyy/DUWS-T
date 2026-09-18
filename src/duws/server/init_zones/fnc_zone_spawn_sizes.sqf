@@ -239,6 +239,8 @@ DUWS_fnc_classAA = { (_this call DUWS_fnc_classArms) params ["_g", "_m", "_a"]; 
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []]];
     private _posture = [_token] call DUWS_fnc_tokenPosture;
+    // An OPCOM reserve token's prefix is its tasking id, not a posture.
+    if ((_token select [0, 8]) == "opcomdef") then { _posture = "closepatrol" };
     if (_postureOverride != "") then { _posture = _postureOverride };
     private _grp = grpNull;
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) then {
@@ -306,7 +308,7 @@ fnc_zone_spawn = {
     // by the standing template -- its worth stands as the garrison, the surplus waits as reserve, so a
     // lost token comes out of the pool before it thins the garrison. Reseeded every raise from the
     // ledger: the pool is per-awake-session, the losses behind it persist.
-    ([_zoneKey, _x1] call DUWS_fnc_garrisonRestand) params ["_spawns", "_pool"];
+    private _spawns = [_zoneKey, [_zoneKey, _x1] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
 
     private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
@@ -320,5 +322,5 @@ fnc_zone_spawn = {
     missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _zoneKey], nil];
     private _placed = [_zoneKey] call fnc_zone_garrison_count;
     ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; full %6 men, reserve pool %7",
-        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, [_zoneKey] call DUWS_fnc_garrisonFullMen, count _pool]] call fnc_log;
+        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, [_zoneKey] call DUWS_fnc_garrisonFullMen, count ([_zoneKey] call DUWS_fnc_garrisonReserve)]] call fnc_log;
 };

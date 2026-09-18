@@ -6,7 +6,7 @@
 // the stages here are the liveness-bound half, and the step context is the one place liveness is read.
 // Every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry included: fnc_opcom_ferry scripts the
 // carry, never when it streams. A unit renders only when it has something to engage -- a player or a live BLUFOR
-// group within K -- and never as a `garrison`: it rests virtual, defending through the zone's reserve wave.
+// group within K -- and never as a `garrison`: it rests virtual, defending through the zone's reserve pool.
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_taskings") exitWith {};
 

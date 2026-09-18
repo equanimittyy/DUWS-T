@@ -27,8 +27,10 @@ duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonRecordLoss
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSeed
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonUnlose
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonBuyTier
+duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStandFill
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength
 duws/server/init_zones/fnc_zone_state_init.sqf::DUWS_fnc_garrisonReserveSet
+duws/server/init_zones/fnc_zone_state_init.sqf::DUWS_fnc_garrisonReserve
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_tier
 duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_tokenMenCount
 duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_tokenListMen

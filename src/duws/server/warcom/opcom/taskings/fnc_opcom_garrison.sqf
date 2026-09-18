@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load (before any zone raises) so the raise hook can resolve it. Reconciles a
-// site's reserve pool + ceiling -- a zone's or a town's, one key either way -- with OPCOM's recruited `garrison` units, so a recruit reinforces through the
-// existing garrison-reserve wave. The base re-seeds pool + ceiling on every raise, so the raise hook re-runs this
+// site's reserve pool + ceiling -- a zone's or a town's, one key either way -- with OPCOM's recruited `garrison` units, so a recruit stands or reinforces from the
+// garrison's reserve pool. The base re-seeds pool + ceiling on every raise, so the raise hook re-runs this
 // to re-inject from the OPCOM store.
 //
 // Each unit contributes one marked token "opcomdef<id>:<name>": kept out of DUWS_garrisonFull so a loss is ignored
@@ -11,7 +11,7 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_zoneReserveSync = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
-    // Only combatants feed the wave; a noncombat unit rests attached, never spawned to defend.
+    // Only combatants feed the pool; a noncombat unit rests attached, never spawned to defend.
     private _units = DUWS_opcom_taskings select { (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} && {!("noncombat" in (_x get "flags"))} };
     private _pool = [_key] call DUWS_fnc_garrisonReserve;
     private _mine = _pool select { (_x select [0, 8]) == "opcomdef" };

@@ -37,7 +37,7 @@ private _fnc_raise = {
     };
 
     // Zone's reserve model: filtered x1 tier thins to garrison_density on stand, surplus + mult-1 copies wait in the pool, less the loss ledger.
-    ([_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand) params ["_garrison", "_pool"];
+    private _garrison = [_key, [_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
     private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
     private _men = [_grps] call fnc_site_men_of;
 

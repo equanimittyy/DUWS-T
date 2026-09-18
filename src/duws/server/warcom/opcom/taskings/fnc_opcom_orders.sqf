@@ -33,7 +33,7 @@ DUWS_fnc_opcom_stepGarrison = {
     params ["_t"];
     private _full = _t get "fullForce";
     _t set ["effForce", _full min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
-    // True, not false: a garrison rests virtual and defends through its zone's reserve wave, so it never streams.
+    // True, not false: a garrison rests virtual and defends through its zone's reserve pool, so it never streams.
     true
 };
 

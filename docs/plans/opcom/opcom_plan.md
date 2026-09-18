@@ -38,7 +38,8 @@ The code is the source of truth. What new work must hold to:
   for `OPCOM_DEVIRT_BUFFER` ticks, then it spawns live; it stows after `OPCOM_REVIRT_GRACE` ticks with neither
   within K. The BLUFOR read is of true positions and never reaches belief or scoring. The engine resolves every
   fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds the reserve
-  wave of the zone or town it is homed at. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
+  pool of the zone or town it is homed at: it stands with the garrison at a raise when the base pool leaves room,
+  and otherwise arrives by refill wave. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
   included; the ferry scripts a live carry but never decides when a unit streams.
 - **The ferry** is a consequence of a unit's route, never an order. Only a `transportable` unit, the infantry
   rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle drives its road route and
@@ -177,7 +178,7 @@ threat drives only the fast actions — the QRF and attack staging.
 - **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
   step barely moves one near +10. The skew is 1 at 0, 0.5 at ±5 and 0.1 from ±9 out, so a town between −15 and −10
   scores at the floor; a town at +10 or more is BLUFOR-held and no target.
-- **A combatant counts once.** It joins its zone's reserve wave on hire, so it defends at once; its Value is the
+- **A combatant counts once.** It joins its zone's reserve pool on hire, so it defends at once; its Value is the
   larger of demand and defense, not the sum, because one unit serves one role at a time. Its gain shrinks as the
   zone stacks up, so combatants gather where exposure is high and a QRF pool forms there with no roster table. A
   truck is also cheap infantry transport; its transport demand lands with land-taxi ([§Shipped](#shipped-the-substrate-the-loop-drives)).
@@ -355,7 +356,7 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
   price column.
 - **Capability flags decide what a unit unlocks; there is no unit "type".** `recon` → Scout (range by platform,
   `OPCOM_RECON_K` cells), `supply` → a delivery run, `transport` → carry another unit, `transportable` → ride a
-  ferry across water; `noncombat` keeps a row out of a zone's reserve wave (regardless of armament — the boat is
+  ferry across water; `noncombat` keeps a row out of a zone's reserve pool (regardless of armament — the boat is
   armed). A row may carry several.
 - **The live-group cap is per active locality, not global.** Virtual taskings are cheap and uncapped;
   `OPCOM_MAX_TASKINGS` (start 10) budgets spawned AI per player-bubble / contact point, so one flank cannot starve a

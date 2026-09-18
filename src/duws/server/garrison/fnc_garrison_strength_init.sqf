@@ -88,7 +88,7 @@ DUWS_fnc_garrisonDerive = {
 
 // The ceiling is the standing template's count, not what deployed: a mauled garrison stands fewer groups, and reserves
 // bring it back up to this. It is reset before the OPCOM sync, or the sync counts the units the derive wiped from the
-// pool twice. -> [garrison, pool]
+// pool twice. -> garrison
 DUWS_fnc_garrisonRestand = {
 	params ["_key", "_x1"];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
@@ -96,7 +96,23 @@ DUWS_fnc_garrisonRestand = {
 	private _split = [_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
 	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
 	if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
-	_split
+	_split select 0
+};
+
+// A raise stands its gap now, not on the refill's next wave, which can be five minutes off. -> garrison plus the draw
+DUWS_fnc_garrisonStandFill = {
+	params ["_key", "_garrison"];
+	private _room = ((missionNamespace getVariable [format ["DUWS_zoneCeiling_%1", _key], 0]) - count _garrison)
+		min (DUWS_zoneGroupCeiling - (call DUWS_fnc_opforGroupCount) - count _garrison);
+	if (_room <= 0) exitWith { _garrison };
+	private _pool = [_key] call DUWS_fnc_garrisonReserve;
+	private _fieldable = _pool select { ([_x] call DUWS_fnc_tokenClass) != "" };
+	private _base = _fieldable select { (_x select [0, 8]) != "opcomdef" };
+	private _drawn = [];
+	while { count _drawn < _room && {count _base > 0} } do { _drawn pushBack (_base deleteAt (floor random count _base)) };
+	_drawn append ((_fieldable select { (_x select [0, 8]) == "opcomdef" }) select [0, _room - count _drawn]);
+	[_key, [_drawn, _pool] call DUWS_fnc_spawnDiff] call DUWS_fnc_garrisonReserveSet;
+	_garrison + _drawn
 };
 
 // Records one destroyed token. Bounded at its count in full: a garrison cannot lose more tanks than it

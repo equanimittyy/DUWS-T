@@ -42,6 +42,14 @@ x1}`. It calls the shared derivation `DUWS_fnc_garrisonDerive {key, x1, mult, st
 then resets the refill ceiling to the standing template's count and re-syncs OPCOM's homed units into
 the pool, in that order, so the sync does not count them twice.
 
+A raise then fills to the ceiling through `DUWS_fnc_garrisonStandFill {key, garrison}`
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:103`). It draws random fieldable base tokens
+from the pool first, and OPCOM's homed units take only the room that is left. The drawn tokens leave
+the pool and stand with the garrison, so the players meet the whole force on arrival, not a short or
+empty site that waits up to five minutes for its first refill wave. The draw stops at the global
+group wall. A re-stand on a standing garrison (a reinforce or a fortify) does not fill, because its
+men are already on the ground and the refill tops it up.
+
 The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`:
 
 | Function | Does |
@@ -77,7 +85,7 @@ an upgrade starts every garrison fresh.
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
 (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:158`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
-(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:257`) — and hangs a `Killed` handler on it.
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:259`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
 before calling `DUWS_fnc_garrisonRecordLoss`; a unit dying with squadmates still up records
 nothing. The tag rides the *unit*, not the group, since a dead man can outlive it. The same
@@ -92,8 +100,8 @@ silently drops any `createGroup`/`BIS_fnc_spawnGroup` call once a side passes **
 (`docs/info/architecture/arma_engine_gotchas.md`) — scaling the live composition wholesale at x3 could ask for
 triple a tier's groups on one site alone, and two hot sites at once would blow the wall.
 
-Per-site, the live *composition* group count is capped at the standing template's count, stored
-as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garrisonGroupCount {key}`
+Per-site, the live *composition* group count is capped at the standing template's count plus the
+OPCOM combatants homed there, stored as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garrisonGroupCount {key}`
 (`src/duws/server/init_zones/fnc_zone_state_init.sqf:204`) counts distinct alive groups the
 streaming garrison raised; a prefab's manned static weapons sit on the same roster but are
 excluded, so a site with guns doesn't read as already at its ceiling. Globally,
