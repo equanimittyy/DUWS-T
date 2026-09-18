@@ -60,6 +60,10 @@ The code is the source of truth. What new work must hold to:
   the mission they are given, topped up as they fire and emptied again once the rounds are away or
   `OPCOM_ARTY_ROUND_SECS` per round has passed, so a crew never shells anything on its own. It fires what it is
   handed — what is worth shelling, the cooldown, the scatter and the HQ exclusion are the scored Arty action's.
+- **A flipped site frees its orders.** When a zone is captured, or a town's garrison is cleared or works its way out
+  of the band, every tasking tied to that site drops to `guard` where it stands (`DUWS_fnc_opcom_siteLost`): the
+  garrison homed there, the unit still walking in to settle, the errand carrying goods to it. Its resting
+  non-combatants are deleted with the garrison they were attached to; combatants are left to the fight that beat them.
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). On arrival, live or virtual,
   `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck despawns; a killed truck delivers
   nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a town index

@@ -32,15 +32,40 @@ DUWS_fnc_opcom_reserveToken = {
     format ["opcomdef%1:%2", _t get "id", [(_t get "comp") select 0] call DUWS_fnc_tokenName]
 };
 
-// A site was lost -- a zone captured, or a town's garrison cleared. Its resting non-combatants die with it (attached,
-// never defenders). Only the ones still garrisoned there are cleared -- one borrowed onto ferry duty has left and
-// survives. Combatants are left to the mechanic that fought them.
+// A site flipped -- a zone captured, a town's garrison cleared or worked back out of the band. Its resting
+// non-combatants die with it (attached, never defenders; one borrowed onto ferry duty has left and survives), and
+// every other order tied to the site drops to guard where it stands: a garrison homed there, a unit still walking in
+// to settle, an errand carrying goods to it. Combatants are left to the mechanic that fought them.
 DUWS_fnc_opcom_siteLost = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
-    private _doomed = DUWS_opcom_taskings select {
-        (_x get "homeZone") isEqualTo _key && {(_x get "order") isEqualTo "garrison"} && {"noncombat" in (_x get "flags")}
-    };
+    private _town = [-1, parseNumber (_key select [5])] select ((_key select [0, 5]) isEqualTo "town_");
+    private _doomed = [];
+    {
+        private _t = _x;
+        private _homed = (_t get "homeZone") isEqualTo _key && {(_t get "order") isEqualTo "garrison"};
+        if (_homed && {"noncombat" in (_t get "flags")}) then {
+            _doomed pushBack _t;
+        } else {
+            private _errand = _t getOrDefault ["errand", []];
+            private _bound = _homed
+                || {(_t getOrDefault ["returnZone", ""]) isEqualTo _key}
+                || {(_t getOrDefault ["settleZone", ""]) isEqualTo _key}
+                || {_town >= 0 && {(_errand param [0, ""]) in ["reinforce", "fortify", "rapport"]} && {(_errand param [1, -1]) isEqualTo _town}};
+            if (_bound) then {
+                _t set ["order", "guard"]; _t set ["route", []];
+                _t set ["homeZone", ""]; _t set ["returnZone", ""]; _t set ["settleZone", ""]; _t set ["errand", []];
+                private _grp = groupFromNetId (_t get "grp");
+                if (!isNull _grp) then { _t set ["pos", getPosASL (leader _grp)] };
+                _t set ["target", _t get "pos"];
+                // A bound ferry carry keeps its waypoints: the transport owns them, and the release re-orders it.
+                if (!isNull _grp && {(_t getOrDefault ["carrying", -1]) < 0} && {(_t getOrDefault ["ridingOn", -1]) < 0}) then {
+                    [_grp, "guard", _t get "pos"] call DUWS_fnc_opcom_applyOrder;
+                };
+                ["INFO", "OPCOM", format ["tasking %1 guards where it stands -- %2 is no longer OPFOR ground", _t get "id", _key]] call fnc_log;
+            };
+        };
+    } forEach DUWS_opcom_taskings;
     {
         if ((_x get "grp") isNotEqualTo "") then {
             private _grp = groupFromNetId (_x get "grp");
@@ -48,4 +73,5 @@ DUWS_fnc_opcom_siteLost = {
         };
     } forEach _doomed;
     DUWS_opcom_taskings = DUWS_opcom_taskings - _doomed;
+    [_key] call DUWS_fnc_opcom_zoneReserveSync;
 };
