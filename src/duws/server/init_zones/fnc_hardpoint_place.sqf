@@ -172,27 +172,34 @@ fnc_hardpoint_best_ground = {
     selectRandomWeighted _pool
 };
 
-// [_type, _fnCand, _key, _regZoneKey, _anchor, _side] call fnc_hardpoint_spawn_sited -> [_objs, []] | []
+// [_type, _pos, _key, _regZoneKey, _radialDir, _side, _facts] call fnc_hardpoint_spawn_at -> [_objs, []] | []
 //
-// The tail fnc_hardpoint_lay runs per rolled type; a caller that already knows the type it wants (OPCOM
-// reinforcing a gap with a specific weapon) calls here directly instead of rolling a slate. _regZoneKey
-// files the row under a parent zone ("" = standalone, which also gates the roadblock snap out of zones).
+// _facts skips the survey when the caller already ran one; a "" _regZoneKey is standalone.
 //
 // Register decides whether to crew now or stow -- an emplacement out of a player's reach stays uncrewed
 // until approached, so campaign start never pays the drop-and-settle for nobody. Runs spawned: register
 // sleeps in the crew drop when it crews inline.
+fnc_hardpoint_spawn_at = {
+    params ["_type", "_pos", "_key", ["_regZoneKey", ""], ["_radialDir", 0], ["_side", "opfor"], ["_facts", []]];
+    if (_facts isEqualTo []) then { _facts = [_pos] call fnc_hardpoint_survey };
+    private _dir = [_type, _facts select 10, _facts select 11, _radialDir, _facts select 12] call fnc_hardpoint_facing;
+    private _objs = [_type, _pos, _dir, _side, _key] call fnc_hardpoint_build;
+    if (_objs isEqualTo []) exitWith { [] };
+    [_key, _type, _pos, _side, _regZoneKey, _dir] call fnc_hardpoint_register;
+    [_objs, []]
+};
+
+// [_type, _fnCand, _key, _regZoneKey, _anchor, _side] call fnc_hardpoint_spawn_sited -> [_objs, []] | []
+//
+// The tail fnc_hardpoint_lay runs per rolled type; a caller that already knows the type it wants (OPCOM
+// reinforcing a zone with a specific weapon) calls here directly instead of rolling a slate. A "" _regZoneKey
+// also gates the roadblock snap out of zones.
 fnc_hardpoint_spawn_sited = {
     params ["_type", "_fnCand", "_key", ["_regZoneKey", ""], ["_anchor", []], ["_side", "opfor"]];
     private _best = [_type, _fnCand, _anchor, _regZoneKey isEqualTo ""] call fnc_hardpoint_best_ground;
     if (_best isEqualTo []) exitWith { [] };
     _best params ["_cand", "_facts", "_radialDir"];
-    // A roadblock faces along its road; overwatch nests face down the slope they overlook; the rest keep
-    // the radial the draw carried.
-    private _dir = [_type, _facts select 10, _facts select 11, _radialDir, _facts select 12] call fnc_hardpoint_facing;
-    private _objs = [_type, _cand, _dir, _side, _key] call fnc_hardpoint_build;
-    if (_objs isEqualTo []) exitWith { [] };  // no composition for the type -- nothing sited
-    [_key, _type, _cand, _side, _regZoneKey, _dir] call fnc_hardpoint_register;
-    [_objs, []]
+    [_type, _cand, _key, _regZoneKey, _radialDir, _side, _facts] call fnc_hardpoint_spawn_at
 };
 
 // [_count, _keyPrefix, _regZoneKey, _fnCand, _fnTick, _fnReset, _weights] call fnc_hardpoint_lay -> hardpoints placed.
@@ -289,8 +296,8 @@ fnc_hardpoint_site_zone = {
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
 };
 
-// Shared local-search sampler for the band pass (campaign-start and OPCOM's band build): one fixed anchor
-// per emplacement, then draws confined to its neighbourhood rather than scattered across every zone's band.
+// Shared local-search sampler for the band passes: one fixed anchor per emplacement, then draws confined to its
+// neighbourhood rather than scattered across every zone's band.
 //
 // [] call fnc_hardpoint_band_anchor -> [_pos, _radialDir, _zoneCentre] or []. Retries a handful of times on a
 // missed draw (DUWS_fnc_aoi_bandPos can return []) rather than dropping the whole hardpoint to one unlucky roll.
@@ -307,11 +314,11 @@ fnc_hardpoint_band_cand = {
     // and hand back only its first element, so take it whole.
     private _anchor = _this;
     if (_anchor isEqualTo []) exitWith { [] };
-    _anchor params ["_apos", "", ["_azone", []]];
+    _anchor params ["_apos", "", "_azone"];
     private _c = [_apos, 0, HP_AOI_LOCAL_R, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
     if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
     if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
-    [_c, if (_azone isEqualTo []) then { random 360 } else { _azone getDir _c }]
+    [_c, _azone getDir _c]
 };
 
 // The band anchors a flank emplacement samples before keeping the one the flank wants; a lean toward HQ,

@@ -2,18 +2,16 @@
 // truck whatever a writer answers, so a refused errand is lost (docs/plans/opcom/opcom_plan.md §Shipped).
 if (!isServer) exitWith {};
 
-// One hardpoint of _type: in _zoneKey's ring, or standalone in the band near _pos when _zoneKey is "". -> false if
-// refused. The siting runs spawned: the builder sleeps in its crew drop, and the tick must never sleep.
+// One hardpoint of _type: drawn in _zoneKey's ring, or standalone exactly at _pos when _zoneKey is "". -> false if
+// refused. The build runs spawned: the builder sleeps in its crew drop, and the tick must never sleep.
 DUWS_fnc_opcom_build = {
     params ["_type", ["_zoneKey", ""], ["_pos", []]];
     if (([_type] call fnc_hardpoint_comp) isEqualTo [] && {_type isNotEqualTo "MINEFIELD"}) exitWith {
         ["WARN", "OPCOM", format ["build: no composition for hardpoint type %1", _type]] call fnc_log; false
     };
-    private _cand = fnc_hardpoint_band_cand;
-    private _anchor = [_pos, 0, []];
+    private _anchor = [_pos];
     if (_zoneKey isNotEqualTo "") then {
         private _site = [_zoneKey] call fnc_site_at;
-        _cand = fnc_hardpoint_zone_cand;
         _anchor = [_site getOrDefault ["pos", []], _site getOrDefault ["radius", 0]];
     };
     if ((_anchor select 0) isEqualTo []) exitWith {
@@ -21,11 +19,18 @@ DUWS_fnc_opcom_build = {
     };
     private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
     missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
-    [_type, _cand, format ["hpopcom_%1", _seq], _zoneKey, _anchor] spawn {
-        params ["_type", "_cand", "_key", "_zoneKey", "_anchor"];
-        private _res = [_type, _cand, _key, _zoneKey, _anchor] call fnc_hardpoint_spawn_sited;
+    [_type, format ["hpopcom_%1", _seq], _zoneKey, _anchor] spawn {
+        params ["_type", "_key", "_zoneKey", "_anchor"];
+        private _at = _anchor select 0;
+        private _res = if (_zoneKey isEqualTo "") then {
+            // No terrain bearing: face where BLUFOR comes from, as a frontline nest does.
+            private _radial = if (PosOfBLUHQ isEqualTo []) then { random 360 } else { _at getDir PosOfBLUHQ };
+            [_type, _at, _key, "", _radial] call fnc_hardpoint_spawn_at
+        } else {
+            [_type, fnc_hardpoint_zone_cand, _key, _zoneKey, _anchor] call fnc_hardpoint_spawn_sited
+        };
         [["INFO", "WARN"] select (_res isEqualTo []), "OPCOM", format ["build: %1 %2 as %3 (zone %4 near %5)",
-            _type, ["sited", "found no ground"] select (_res isEqualTo []), _key, _zoneKey, (_anchor select 0) apply { round _x }]] call fnc_log;
+            _type, ["sited", "found no ground"] select (_res isEqualTo []), _key, _zoneKey, _at apply { round _x }]] call fnc_log;
     };
     true
 };

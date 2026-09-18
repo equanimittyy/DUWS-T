@@ -96,7 +96,8 @@ base weights, and terrain decides only *where* a type lands, never *whether* it 
 **Facing has no separate registry field.** `fnc_hardpoint_facing [_type, _aspectDir, _aspectMag,
 _radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:246-255`) picks a heading per type — a roadblock stays
 square across its road and takes whichever of its two headings faces the approach (`_radialDir`: outward
-for a zone ring, toward BLU HQ for the corridor pass), MG/AT/GMG face down the fall line when one is
+for a zone ring, toward BLU HQ for the corridor pass and for an OPCOM truck build, which stands exactly
+where it is delivered through `fnc_hardpoint_spawn_at`), MG/AT/GMG face down the fall line when one is
 pronounced enough to trust, everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
 (`fnc_hardpoint_place.sqf:25-73`) then rotates every composition offset around that heading
 (`fnc_hardpoint_rotate`, `:13-16`) before placing each object, so the heading is baked into each

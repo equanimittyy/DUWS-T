@@ -68,8 +68,9 @@ The code is the source of truth. What new work must hold to:
   (100 m) of its target, live or virtual, `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck
   despawns; a killed truck delivers nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a
   town index (`fnc_town_garrison_reinforce`; `fnc_town_garrison_setTier` one tier up, never from tier 0;
-  `fnc_town_rep_adjust` −3). `["build", pos, type]` sites a standalone hardpoint in the band near `pos`
-  (`DUWS_fnc_opcom_build`). A zone buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`,
+  `fnc_town_rep_adjust` −3). `["build", pos, type]` stands a standalone hardpoint exactly at `pos`, with no ground
+  hunt, faced by the terrain and toward BLU HQ where the ground gives no bearing (`DUWS_fnc_opcom_build`). A zone
+  buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`,
   `fnc_zone_garrison_fortify` (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each
   refused on BLUFOR ground. The harness drives both (`supply` with an errand, `zone`).
 - **Orders run by hand** through the debug harness (`fnc_opcom_debug_task.sqf`, and the OPCOM debug menu over it)
@@ -394,7 +395,8 @@ with no appraisal; its spawn is cut (file/compile stay), to be re-driven through
 for the wallet. Hardpoints otherwise generate at scenario init only.
 
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
-existing in-zone draw; a standalone one sites at its chosen band cell through `fnc_hardpoint_spawn_sited`. Given the
+existing in-zone draw; a standalone one stands where its truck delivers it, at the chosen band cell
+(`fnc_hardpoint_spawn_at`). Given the
 site, the type is rolled from the existing weight table — `DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a
 ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
 still rolls the full list. An asset hardpoint is its own candidate and never stands in a zone's ring: radios and OPs
