@@ -1,9 +1,12 @@
 // Locality: server. The tasking phase of the perception loop, one pass per tick after the grid rebuild:
 // movement, streaming, status and healing (no scoring -- Phase 4 adds what to commit). Off the isNil scoring
-// block, since a route search may yield. Every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry
-// included: fnc_opcom_ferry scripts the carry, never when it streams. A unit renders only when it has something to
-// engage -- a player or a live BLUFOR group within K -- and never as a `garrison`: it rests virtual, a combatant
-// defending through the zone's reserve wave.
+// block, since a route search may yield.
+//
+// Per tasking: refresh -> step -> ferry -> stream. The first two come from DUWS_opcom_orders (fnc_opcom_orders.sqf);
+// the stages here are the liveness-bound half, and the step context is the one place liveness is read.
+// Every tasking streams through _deVirtIfNear / _stowIfFar, a ferry carry included: fnc_opcom_ferry scripts the
+// carry, never when it streams. A unit renders only when it has something to engage -- a player or a live BLUFOR
+// group within K -- and never as a `garrison`: it rests virtual, defending through the zone's reserve wave.
 if (!isServer) exitWith {};
 if (isNil "DUWS_opcom_taskings") exitWith {};
 
@@ -48,115 +51,88 @@ private _stowIfFar = {
     true
 };
 
-private _garrisonInto = {
-    params ["_t", "_zk"];
-    _t set ["order", "garrison"]; _t set ["homeZone", _zk];
-    _t set ["target", []]; _t set ["route", []]; _t set ["returnZone", ""]; _t set ["settleZone", ""];
-    [_zk] call DUWS_fnc_opcom_zoneReserveSync;
-};
-
-// Settle an arrived move: re-garrison a returnZone or hold as guard. Mutates the record only; true if it garrisoned.
-private _settleMove = {
-    params ["_t", "_pos"];
-    private _rz = _t getOrDefault ["returnZone", ""];
-    if (_rz isNotEqualTo "") exitWith { [_t, _rz] call _garrisonInto; true };
-    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
-    false
-};
-
-// -> true the tick an attacker enters its target zone's radius. A live one tracks it too, or a later stow re-reports.
-private _captureEnters = {
-    params ["_t", "_pos"];
-    private _site = [_t get "targetZone"] call fnc_site_at;
-    private _in = (_pos distance2D (_site get "pos")) <= (_site get "radius");
-    private _entered = _in && {!(_t getOrDefault ["inZone", false])};
-    _t set ["inZone", _in];
-    _entered
-};
-
-// -> true if it garrisoned. A live attacker inside the zone guards until it stows, so it never vanishes in front of a
-// player; one still on the road re-garrisons there.
-private _captureEnd = {
-    params ["_t", "_pos", "_grp"];
-    private _zk = _t get "targetZone";
-    private _site = [_zk] call fnc_site_at;
-    _t set ["targetZone", ""];
-    if ((_pos distance2D (_site get "pos")) > (_site get "radius")) exitWith {
-        _t set ["hold", 0];
-        if !([_t, "move", _site get "pos", _zk] call fnc_opcom_task) then { [_t, "guard"] call fnc_opcom_task };
-        false
-    };
-    if (isNull _grp) exitWith { [_t, _zk] call _garrisonInto; true };
-    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []]; _t set ["settleZone", _zk];
-    [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder;
-    ["INFO", "OPCOM", format ["capture: tasking %1 holds %2, garrisoning when it stows", _t get "id", _zk]] call fnc_log;
-    false
-};
-
-// Re-plans only once the row's believed position moves past one cell: each re-plan is an A* search. A decayed row
-// leaves the last position read.
-private _interceptFollow = {
-    params ["_t", "_live", ["_force", false]];
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo (_t get "interceptKey") };
-    if (_i < 0) exitWith {};
-    private _bp = DUWS_opcom_belief_pos select _i;
-    if (!_force && {([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1}) exitWith {};
-    _t set ["target", +_bp];
-    ([_t get "pos", _bp, _t get "moveType", 0] call fnc_opcom_route) params ["_pts", "_mode"];
-    _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
-    if (_live) then { [_t] call DUWS_fnc_opcom_reOrderLive };
-};
-
-private _interceptGuard = {
-    params ["_t", "_pos", "_grp"];
-    ["INFO", "OPCOM", format ["intercept: tasking %1 guards at %2, nothing within %3 cells", _t get "id", _pos apply { round _x }, OPCOM_INTERCEPT_K]] call fnc_log;
-    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []]; _t set ["interceptKey", ""];
-    if (!isNull _grp) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
-};
-
-// The interceptor's reveal, taken standing in the cell it was sent to: every BLUFOR group within OPCOM_INTERCEPT_K is
-// stamped for certain, and rows the look disproves clear. -> the netId of the closest group, or "".
-private _interceptLook = {
-    params ["_pos"];
-    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_stamp;
-    private _best = "";
-    private _bd = 1e12;
-    {
-        private _l = leader _x;
-        if (alive _l) then {
-            private _lp = getPosASL _l;
-            if (([_lp, _pos] call DUWS_fnc_opcom_cellDist) <= OPCOM_INTERCEPT_K) then {
-                [netId _x, [_lp select 0, _lp select 1, 0], [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
-                private _d = _pos distance2D _lp;
-                if (_d < _bd) then { _bd = _d; _best = netId _x };
+// [_t, _live, _grp, _adv] -> [_pos, _grp, _live, _engaged, _arrived, _adv]. Writes the live record's status too,
+// beside the engagement test that decides it.
+private _stepContext = {
+    params ["_t", "_live", "_grp", "_adv"];
+    // pos/effForce are refreshed by the bookkeep pass ahead of grid_rebuild (fnc_opcom_perception_run).
+    private _pos = _t get "pos";
+    private _engaged = false;
+    if (_live) then {
+        private _ldr = leader _grp;
+        _pos = getPosASL _ldr;
+        _engaged = behaviour _ldr isEqualTo "COMBAT";
+        if (!_engaged && {count allPlayers > 0}) then {
+            private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
+            if (_pl isNotEqualTo []) then {
+                _pl sort true;
+                _engaged = _ldr knowsAbout ((_pl select 0) select 1) > 1.5;
             };
         };
-    } forEach (allGroups select { side _x == west });
-    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_clear;
-    _best
+        _t set ["status", ["moving", "engaged"] select _engaged];
+    };
+    // A live tasking is walked by its waypoints, so arrival is a distance read; a virtual one by the refresh above.
+    private _arrived = if (_live) then {
+        !_engaged && {(_pos distance2D (_t get "target")) < OPCOM_MOVE_ARRIVE}
+    } else {
+        _adv isEqualTo "arrived"
+    };
+    // A garrison settle must not walk men into a zone BLUFOR is still fighting over.
+    if (_arrived && {[_t getOrDefault ["returnZone", ""]] call DUWS_fnc_opcom_zoneContested}) then { _arrived = false };
+    [_pos, _grp, _live, _engaged, _arrived, _adv]
 };
 
-// Arrived where it was sent: it hunts the closest group the look found, or guards. -> true if it guarded.
-private _interceptArrive = {
-    params ["_t", "_pos", "_grp"];
-    private _next = [_pos] call _interceptLook;
-    if (_next isEqualTo "") exitWith { [_t, _pos, _grp] call _interceptGuard; true };
-    private _switched = _next isNotEqualTo (_t get "interceptKey");
-    if (_switched) then {
-        ["INFO", "OPCOM", format ["intercept: tasking %1 switches to %2", _t get "id", _next]] call fnc_log;
-        _t set ["interceptKey", _next];
+// A land unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry); no lift free, it
+// waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS. -> true if it bound to a lift this tick.
+// Reads the order off the record, never a copy taken before the step: an intercept that gave up is a guard now.
+private _ferryStage = {
+    params ["_t", "_ctx"];
+    _ctx params ["_pos", "", "_live", "_engaged", "_arrived", "_adv"];
+    private _need = if (!_live) then { _adv isEqualTo "water" } else {
+        private _n = false;
+        if (!_arrived && {!_engaged} && {(_t get "order") isNotEqualTo "guard"}
+            && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
+            ([_t, _pos] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
+            _n = _crosses && {(_pos distance2D _stage) < OPCOM_FERRY_SHORE_ARRIVE};
+        };
+        _n
     };
-    // _interceptFollow's one-cell tolerance leaves the waypoint up to 1 km off a fix taken at arm's length.
-    // Movement-gated: re-issuing the SAD waypoint every tick restarts the AI's search.
-    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _next };
-    private _moved = _i >= 0 && {((DUWS_opcom_belief_pos select _i) distance2D (_t get "target")) > OPCOM_MOVE_ARRIVE};
-    if (_switched || _moved) then { [_t, !isNull _grp, true] call _interceptFollow };
+    if (!_need) exitWith { _t set ["strandTicks", 0]; false };
+    private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
+    if (!isNil "_tr") exitWith { _t set ["strandTicks", 0]; true };
+    private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
+    _t set ["strandTicks", _s];
+    if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
+        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
+    };
     false
+};
+
+private _streamStage = {
+    params ["_t", "_ctx", "_bound"];
+    _ctx params ["", "_grp", "_live", "_engaged"];
+    if (!_live) exitWith {
+        // Skip the stream-in for a rider that just bound to a ferry -- the transport owns it now.
+        if ((_t getOrDefault ["ridingOn", -1]) < 0) then { [_t] call _deVirtIfNear };
+    };
+    if (_bound) exitWith {};
+    if (([_t, leader _grp, _engaged] call _stowIfFar) && {(_t getOrDefault ["settleZone", ""]) isNotEqualTo ""}) then {
+        [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto;
+    };
+};
+
+private _stepOne = {
+    params ["_t", "_grp", "_live"];
+    private _row = DUWS_opcom_orders getOrDefault [_t get "order", DUWS_opcom_orderHold];
+    private _adv = [_t, _live] call (_row select 0);
+    private _ctx = [_t, _live, _grp, _adv] call _stepContext;
+    if ([_t, _ctx] call (_row select 1)) exitWith {};
+    private _bound = [_t, _ctx] call _ferryStage;
+    [_t, _ctx, _bound] call _streamStage;
 };
 
 {
     private _t = _x;
-    private _order = _t get "order";
     private _live = (_t get "grp") isNotEqualTo "";
 
     if ((_t getOrDefault ["carrying", -1]) >= 0) then {
@@ -179,79 +155,12 @@ private _interceptArrive = {
                 _t set ["status", "dead"];
                 _t set ["grp", ""];
             } else {
-                private _ldr = leader _grp;
-                // pos/effForce are refreshed by the bookkeep pass ahead of grid_rebuild (fnc_opcom_perception_run).
                 if ((_t getOrDefault ["ridingOn", -1]) >= 0 || {_t getOrDefault ["ferryFrozen", false]} || {_t getOrDefault ["unloading", false]}) then {
                     // A live rider the ferry owns (awaiting pickup, frozen aboard, or dismounting): the transport
                     // drives the sequence, so it must not stow or replan out from under it.
                     _t set ["status", "moving"];
                 } else {
-                    private _engaged = behaviour _ldr isEqualTo "COMBAT";
-                    if (!_engaged && {count allPlayers > 0}) then {
-                        private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
-                        if (_pl isNotEqualTo []) then {
-                            _pl sort true;
-                            _engaged = _ldr knowsAbout ((_pl select 0) select 1) > 1.5;
-                        };
-                    };
-                    _t set ["status", ["moving", "engaged"] select _engaged];
-                    if (_order isEqualTo "intercept") then {
-                        [_t, true] call _interceptFollow;
-                        if (([getPosASL _ldr, _t get "target"] call DUWS_fnc_opcom_cellDist) == 0
-                            && {[_t, getPosASL _ldr, _grp] call _interceptArrive}) then { _order = "guard" };
-                    };
-                    if (_order isEqualTo "capture") then {
-                        if ([_t get "targetZone"] call fnc_zone_bluforHeld) then {
-                            [_t, getPosASL _ldr] call _captureEnters;
-                        } else {
-                            [_t, getPosASL _ldr, _grp] call _captureEnd;
-                            _order = _t get "order";
-                        };
-                    };
-
-                    if (((_t getOrDefault ["errand", []]) isNotEqualTo []) && {(_ldr distance2D (_t get "target")) < OPCOM_DELIVER_ARRIVE}) then {
-                        [_t] call DUWS_fnc_opcom_deliver;
-                        [_grp] call DUWS_fnc_opcom_despawn;
-                        _t set ["status", "done"];
-                        _t set ["grp", ""];
-                    } else {
-                        // Settle the same tick, not after a later stow; a guard settle re-orders the group so map and
-                        // group agree. A garrison settle despawns (a combatant's token now sits in the reserve wave, so
-                        // a live copy would fight twice) and so waits out combat and a contested home zone first.
-                        private _arrived = _order isEqualTo "move" && {!_engaged} && {(_ldr distance2D (_t get "target")) < OPCOM_MOVE_ARRIVE}
-                            && {!([_t getOrDefault ["returnZone", ""]] call DUWS_fnc_opcom_zoneContested)};
-                        if (_arrived) then {
-                            if ([_t, getPosASL _ldr] call _settleMove) then {
-                                [_t] call DUWS_fnc_opcom_reVirt;
-                            } else {
-                                [_grp, "guard", getPosASL _ldr] call DUWS_fnc_opcom_applyOrder;
-                            };
-                        };
-                        // A land unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry);
-                        // no lift free, it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS.
-                        private _bound = false;
-                        if (!_arrived && {!_engaged} && {_order isNotEqualTo "guard"}
-                            && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
-                            ([_t, getPosASL _ldr] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
-                            if (_crosses && {(_ldr distance2D _stage) < OPCOM_FERRY_SHORE_ARRIVE}) then {
-                                private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
-                                if (isNil "_tr") then {
-                                    private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
-                                    _t set ["strandTicks", _s];
-                                    if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
-                                        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
-                                    };
-                                } else {
-                                    _t set ["strandTicks", 0]; _bound = true;
-                                };
-                            };
-                        };
-                        // Skip the stow for a rider that just bound to a ferry this tick -- the transport owns it now.
-                        if (!_arrived && {!_bound} && {[_t, _ldr, _engaged] call _stowIfFar}
-                            && {(_t getOrDefault ["settleZone", ""]) isNotEqualTo ""}) then {
-                            [_t, _t get "settleZone"] call _garrisonInto;
-                        };
-                    };
+                    [_t, _grp, true] call _stepOne;
                 };
             };
         } else {
@@ -262,70 +171,7 @@ private _interceptArrive = {
                 private _tr = [_riding] call DUWS_fnc_opcom_byId;
                 if (!isNil "_tr" && {!(_tr getOrDefault ["embarked", false])}) then { [_t] call _deVirtIfNear };
             } else {
-                switch (_order) do {
-                    case "garrison": {
-                        private _full = _t get "fullForce";
-                        _t set ["effForce", (_full) min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
-                    };
-                    case "guard": {
-                        // Holds its point -- no march, no heal -- but still streams in to defend it on approach.
-                        [_t] call _deVirtIfNear;
-                    };
-                    default {
-                        if (_order isEqualTo "intercept") then { [_t, false] call _interceptFollow };
-                        private _adv = [_t] call DUWS_fnc_opcom_advance;
-                        // No lift free: hold, retry, and WARN every OPCOM_FERRY_STRAND_TICKS so an island gap is not silent.
-                        if (_adv isEqualTo "water") then {
-                            private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
-                            if (isNil "_tr") then {
-                                private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
-                                _t set ["strandTicks", _s];
-                                if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
-                                    ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
-                                };
-                            } else {
-                                _t set ["strandTicks", 0];
-                            };
-                        } else {
-                            _t set ["strandTicks", 0];
-                        };
-                        // errand and returnZone are exclusive (set upstream), so errand-first cannot double-settle.
-                        private _settled = false;
-                        if (_order isEqualTo "move") then {
-                            if ((_t getOrDefault ["errand", []]) isNotEqualTo []) then {
-                                if (((_t get "pos") distance2D (_t get "target")) < OPCOM_DELIVER_ARRIVE) then {
-                                    [_t] call DUWS_fnc_opcom_deliver;
-                                    _t set ["status", "done"]; _settled = true;
-                                };
-                            } else {
-                                if (_adv isEqualTo "arrived") then { _settled = [_t, _t get "pos"] call _settleMove };
-                            };
-                        };
-                        if (_order isEqualTo "intercept" && {([_t get "pos", _t get "target"] call DUWS_fnc_opcom_cellDist) == 0}) then {
-                            [_t, _t get "pos", grpNull] call _interceptArrive;
-                        };
-                        if (_order isEqualTo "capture") then {
-                            private _zk = _t get "targetZone";
-                            if ([_zk] call fnc_zone_bluforHeld) then {
-                                private _zpos = ([_zk] call fnc_site_at) get "pos";
-                                if ([_t, _t get "pos"] call _captureEnters) then {
-                                    private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
-                                    if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
-                                };
-                                // The zone's own retake statement, so a virtual capture passes what the trigger would. No BLUFOR
-                                // count: any within K would have rendered the attacker, so its stored force outnumbers nobody.
-                                if ((_t get "inZone") && {(_t get "effForce") > 0}) then {
-                                    private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_zpos select 0), floor abs (_zpos select 1)], objNull];
-                                    if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };
-                                };
-                            } else {
-                                _settled = [_t, _t get "pos", grpNull] call _captureEnd;
-                            };
-                        };
-                        // Skip the stream-in for a settled record or a rider that just bound to a ferry.
-                        if (!_settled && {(_t getOrDefault ["ridingOn", -1]) < 0}) then { [_t] call _deVirtIfNear };
-                    };
-                };
+                [_t, grpNull, false] call _stepOne;
             };
         };
     };
