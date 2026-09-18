@@ -18,7 +18,6 @@ duws/server/search/fnc_search_drawKind.sqf::*fnc_search_drawKind
 duws/shared/faction_lib/fnc_factionRoles.sqf::*fnc_factionRoles
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrength
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonFull
-duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonFullMen
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSetFull
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonLost
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSurviving
@@ -26,6 +25,7 @@ duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonDerive
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonRecordLoss
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSeed
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonUnlose
+duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSeedOpforCap
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonBuyTier
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStandFill
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength

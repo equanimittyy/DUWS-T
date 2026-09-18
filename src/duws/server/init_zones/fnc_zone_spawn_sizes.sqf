@@ -316,11 +316,11 @@ fnc_zone_spawn = {
 
     // Live/mobilised flags let the capture test judge the zone and the reserve pass top it up; cleared
     // by the stow or capture that walks the garrison off (fnc_zone_garrison_dropped). The capture test
-    // measures against the ledger's full potential (DUWS_fnc_garrisonFullMen, stamped above), fixed
-    // across visits, so a garrison that comes back mauled is still judged against the whole.
+    // measures against the ledger's full potential, fixed across visits, so a garrison that comes back
+    // mauled is still judged against the whole.
     [_zoneKey, true] call DUWS_fnc_garrisonSetLive;
     missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _zoneKey], nil];
-    private _placed = [_zoneKey] call fnc_zone_garrison_count;
-    ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; full %6 men, reserve pool %7",
-        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, [_zoneKey] call DUWS_fnc_garrisonFullMen, count ([_zoneKey] call DUWS_fnc_garrisonReserve)]] call fnc_log;
+    private _placed = [_zoneKey] call fnc_site_alive;
+    ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; full %6 tokens, reserve pool %7",
+        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, count ([_zoneKey] call DUWS_fnc_garrisonFull), count ([_zoneKey] call DUWS_fnc_garrisonReserve)]] call fnc_log;
 };

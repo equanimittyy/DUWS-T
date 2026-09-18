@@ -56,24 +56,10 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// through a formatted statement string.
 	private _held = (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zPos) < 1}) >= 0;
 
-	// A zone that is streamed in reports what is alive right now; a stowed one reports what it will
-	// come back at, which the ledger projection gives live off the tokens still surviving. Both answer
-	// "how strong is this zone", so the readout never has to tell the player which side of the streaming
-	// boundary they are on.
-	private _live = [_key] call DUWS_fnc_garrisonHeld;
-	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
-	private _frac = if (_live && {_fullMen > 0}) then {
-		([_key] call fnc_zone_garrison_count) / _fullMen
-	} else {
-		[_key] call fnc_zone_strength
-	};
-
 	// Twenty segments, one per five per cent of the garrison's full potential, floored to the nearest, so a
-	// bar shows only once its five per cent is actually held and a full garrison reads solid. A deployed zone
-	// counts live men over the full potential; a stowed one reads the ledger projection. Capped, since a full
-	// cycle can place a few vehicle crew over the infantry-slot denominator.
-	private _seg = floor (_frac * 20);
-	_seg = (_seg max 0) min 20;
+	// bar shows only once its five per cent is actually held and a full garrison reads solid. The ledger loses a
+	// token the moment its group is wiped, so one figure serves a streamed-in zone and a stowed one alike.
+	private _seg = floor (([_key] call fnc_zone_strength) * 20);
 
 	// Rolled when the zone was generated, raised by a fortify and reset to I by a retake, so this is
 	// what the ground is worth taking rather than how much of it is left -- which is what the bar under

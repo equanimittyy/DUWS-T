@@ -8,23 +8,16 @@
 // missing specifically what it lost (destroy one tank, lose one tank). Model:
 // docs/info/gameplay/garrison_and_reserves.md.
 
-// The full fighting potential, stamped once at raise (and re-stamped on a town tier buy, which grows
-// it). Stored as the token list and its men count both: the list drives surviving/seed/loss, the men
-// count is the projection's and the break test's denominator and is read often enough to keep hot.
+// The full fighting potential, stamped at raise and re-stamped by a tier buy or an OPFOR cap. Every strength
+// measure counts tokens, not men: a tank weighs the same as a patrol.
 DUWS_fnc_garrisonFull = {
 	params ["_key"];
 	missionNamespace getVariable [format ["DUWS_garrisonFull_%1", _key], []]
 };
 
-DUWS_fnc_garrisonFullMen = {
-	params ["_key"];
-	missionNamespace getVariable [format ["DUWS_garrisonFullMen_%1", _key], 0]
-};
-
 DUWS_fnc_garrisonSetFull = {
 	params ["_key", "_full"];
 	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], _full];
-	missionNamespace setVariable [format ["DUWS_garrisonFullMen_%1", _key], [_full] call DUWS_fnc_tokenListMen];
 };
 
 // The lost ledger: a flat token list, a multiset by value. Persists across a stow -- attrition is what
@@ -133,66 +126,51 @@ DUWS_fnc_garrisonRecordLoss = {
 	missionNamespace setVariable [_var, _lost];
 };
 
-// The strength a garrison redeploys at, as a fraction: surviving men over full men. Full for ground
-// nobody has fought over (no full stamped yet). The map bar reads this; the raise reads the surviving
-// tokens directly. Rises only when the commander buys reserves back (Unlose). No quantisation or floor
-// here: those were the scalar model's, and the break test's own tenth is the one number that gates capture.
+// The strength a garrison redeploys at, as a fraction: surviving tokens over full tokens. Full for ground
+// nobody has fought over (no full stamped yet). Counted off the surviving multiset rather than the lost count,
+// because a town cleared at a high tier keeps that tier's losses on file after its full is restamped at tier I.
 DUWS_fnc_garrisonStrength = {
 	params ["_key"];
-	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
-	if (_fullMen <= 0) exitWith { 1 };
-	private _lostMen = [[_key] call DUWS_fnc_garrisonLost] call DUWS_fnc_tokenListMen;
-	(((_fullMen - _lostMen) / _fullMen) max 0) min 1
+	private _full = count ([_key] call DUWS_fnc_garrisonFull);
+	if (_full <= 0) exitWith { 1 };
+	(count ([_key] call DUWS_fnc_garrisonSurviving)) / _full
 };
 
-// Seeds the ledger to a target survival fraction by marking random tokens lost until survival is at or
-// under it. The reserve/garrison split at raise fills the garrison before the pool, so dropping to a
-// low fraction empties the pool first and leaves a thin single garrison -- which is what a recaptured
-// zone or a cleared town should redeploy as. Vehicles owe no men, so a low seed sheds them freely,
-// leaving a thin infantry force with no armour.
+// Keeps _keep random tokens of full and files the rest lost; the caller picks the rounding. The raise fills the
+// garrison before the pool, so a thin seed leaves a thin single garrison with no reserve depth.
 DUWS_fnc_garrisonSeed = {
-	params ["_key", "_frac"];
-	private _target = _frac * ([_key] call DUWS_fnc_garrisonFullMen);
-	private _surv = +([_key] call DUWS_fnc_garrisonFull);
-	private _lost = [];
-	while { count _surv > 0 && {([_surv] call DUWS_fnc_tokenListMen) > _target} } do {
-		_lost pushBack (_surv deleteAt (floor random count _surv));
-	};
+	params ["_key", "_keep"];
+	private _lost = +([_key] call DUWS_fnc_garrisonFull);
+	for "_i" from 1 to (_keep min count _lost) do { _lost deleteAt (floor random count _lost) };
 	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost];
 };
 
 // Full is stamped here, not left to the raise, because the seed thins against it: a retaken zone still carries its
-// old tier's full, and a town just back in the band has none.
+// old tier's full, and a town just back in the band has none. Rounded up so a small tier I still stands one token.
 DUWS_fnc_garrisonSeedOpforCap = {
 	params ["_key", "_x1"];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-	[_key, [_x1, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
-	[_key, 0.1] call DUWS_fnc_garrisonSeed;
+	private _full = [_x1, _mult] call DUWS_fnc_scaleComposition;
+	[_key, _full] call DUWS_fnc_garrisonSetFull;
+	[_key, ceil (0.1 * count _full)] call DUWS_fnc_garrisonSeed;
 };
 
-// Buys destroyed tokens back: removes random lost entries until survival reaches the target fraction.
-// The reinforce purchase's hook -- a paid replacement, the one thing that raises strength, and
-// deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).
+// Buys _n random destroyed tokens back. The reinforce purchase's hook -- a paid replacement, the one thing that raises
+// strength, and deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).
 DUWS_fnc_garrisonUnlose = {
-	params ["_key", "_target"];
-	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
-	if (_fullMen <= 0) exitWith {};
+	params ["_key", "_n"];
 	private _var = format ["DUWS_garrisonLost_%1", _key];
 	private _lost = +(missionNamespace getVariable [_var, []]);
-	private _targetMen = _target * _fullMen;
-	while { count _lost > 0 && {(_fullMen - ([_lost] call DUWS_fnc_tokenListMen)) < _targetMen} } do {
-		_lost deleteAt (floor random count _lost);
-	};
+	for "_i" from 1 to (_n min count _lost) do { _lost deleteAt (floor random count _lost) };
 	missionNamespace setVariable [_var, _lost];
 };
 
-// Shared by town and zone, so both climb by one rule: three steps from the floor to full, four from nothing. An empty
-// _x1 skips the re-stand, since deriving from it would stamp full to nothing: a town dropped to tier 0 stays live until
-// its next tick collects it.
+// Shared by town and zone, so both climb by one rule. An empty _x1 skips the re-stand, since deriving from it would
+// stamp full to nothing: a town dropped to tier 0 stays live until its next tick collects it.
 #define REINFORCE_STEP 0.3
 DUWS_fnc_garrisonReinforce = {
 	params ["_key", "_x1"];
-	[_key, ([_key] call DUWS_fnc_garrisonStrength) + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
+	[_key, floor (REINFORCE_STEP * count ([_key] call DUWS_fnc_garrisonFull))] call DUWS_fnc_garrisonUnlose;
 	if (([_key] call DUWS_fnc_garrisonHeld) && {_x1 isNotEqualTo []}) then { [_key, _x1] call DUWS_fnc_garrisonRestand };
 };
 
@@ -204,7 +182,7 @@ DUWS_fnc_garrisonBuyTier = {
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 	private _full = [_newX1, _mult] call DUWS_fnc_scaleComposition;
 	private _owed = [[_oldX1, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_spawnDiff;
-	for "_i" from 1 to floor (0.1 * count _owed) do { _owed deleteAt (floor random count _owed) };
+	for "_i" from 1 to ceil (0.1 * count _owed) do { _owed deleteAt (floor random count _owed) };
 	private _var = format ["DUWS_garrisonLost_%1", _key];
 	private _lost = missionNamespace getVariable [_var, []];
 	{
@@ -222,7 +200,6 @@ DUWS_fnc_garrisonBuyTier = {
 DUWS_fnc_garrisonForget = {
 	params ["_key"];
 	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], nil];
-	missionNamespace setVariable [format ["DUWS_garrisonFullMen_%1", _key], nil];
 	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], nil];
 };
 
@@ -230,8 +207,7 @@ DUWS_fnc_garrisonForget = {
 // that tears it down. The capture and clear tests refuse on a garrison that is not live -- stowed,
 // mid-raise, or gone -- so empty ground cannot be taken before its men have arrived, and the reserve
 // pass has nothing to top up. Per awake session; the ledger and the full potential outlive it. Both a
-// zone and a town set and clear it, the one signal that the garrison on the ground is real. It replaces
-// the peak's old double duty: the men denominator is DUWS_fnc_garrisonFullMen now, this is the liveness.
+// zone and a town set and clear it, the one signal that the garrison on the ground is real.
 // Zones and towns only. A hardpoint's liveness is its own broadcast DUWS_hardpoints row (latched on
 // clear, read client-side by the strat-map pickers), which this server-only graded ledger cannot model.
 DUWS_fnc_garrisonHeld = {
@@ -270,9 +246,6 @@ DUWS_fnc_garrisonDebug = {
 	private _full = [_key] call DUWS_fnc_garrisonFull;
 	private _lost = [_key] call DUWS_fnc_garrisonLost;
 	private _surv = [_key] call DUWS_fnc_garrisonSurviving;
-	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
-	private _lostMen = [_lost] call DUWS_fnc_tokenListMen;
-	private _survMen = [_surv] call DUWS_fnc_tokenListMen;
 
 	// Awake-session fielding: the x1 group ceiling (the most that stands on the ground at once), what is
 	// on it right now, and the reserve pool waiting to backfill. All three are nil/empty once the site
@@ -280,7 +253,6 @@ DUWS_fnc_garrisonDebug = {
 	private _ceiling = missionNamespace getVariable [format ["DUWS_zoneCeiling_%1", _key], 0];
 	private _onGround = [_key] call DUWS_fnc_garrisonGroupCount;
 	private _pool = [_key] call DUWS_fnc_garrisonReserve;
-	private _poolMen = [_key] call DUWS_fnc_garrisonReserveMen;
 
 	// Tallied, not listed flat, which runs off the hint box at x3.
 	private _tally = {
@@ -299,11 +271,11 @@ DUWS_fnc_garrisonDebug = {
 	[
 		"Garrison",
 		["Live on ground", ["no", "yes"] select ([_key] call DUWS_fnc_garrisonHeld)],
-		["Strength", ([_key] call DUWS_fnc_garrisonStrength) toFixed 2, format ["(%1 full - %2 dead) / %1 men", _fullMen, _lostMen]],
-		["Max tokens", format ["%1 (%2 men)", count _full, _fullMen], [_full] call _tally],
-		["Available", format ["%1 (%2 men)", count _surv, _survMen], [_surv] call _tally],
+		["Strength", ([_key] call DUWS_fnc_garrisonStrength) toFixed 2, format ["%1 available / %2 full tokens", count _surv, count _full]],
+		["Max tokens", format ["%1 (%2 men)", count _full, [_full] call DUWS_fnc_tokenListMen], [_full] call _tally],
+		["Available", format ["%1 (%2 men)", count _surv, [_surv] call DUWS_fnc_tokenListMen], [_surv] call _tally],
 		["On ground", format ["%1 / %2 groups (x1 cap)", _onGround, _ceiling]],
-		["Reserve", format ["%1 (%2 men)", count _pool, _poolMen], [_pool] call _tally],
-		["Dead", format ["%1 (%2 men)", count _lost, _lostMen], [_lost] call _tally]
+		["Reserve", format ["%1 (%2 men)", count _pool, [_pool] call DUWS_fnc_tokenListMen], [_pool] call _tally],
+		["Dead", format ["%1 (%2 men)", count _lost, [_lost] call DUWS_fnc_tokenListMen], [_lost] call _tally]
 	]
 };

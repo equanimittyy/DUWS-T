@@ -630,31 +630,44 @@ missionNamespace setVariable ["DUWS_garrisonLost_rk", []];
 ["recordLoss: a token not in the full potential is ignored",
     (count (["rk"] call DUWS_fnc_garrisonLost)), 2] call fnc_assertEq;
 
-// The projection the map bar reads: surviving men over full men. Full for ground with no full stamped.
+// The projection the map bar reads: surviving tokens over full tokens. Full for ground with no full stamped.
 missionNamespace setVariable ["DUWS_garrisonLost_pk", []];
-["pk", ["patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
+["pk", ["patrol", "team"]] call DUWS_fnc_garrisonSetFull;
 ["garrisonStrength: a fresh ledger is full strength",
     (["pk"] call DUWS_fnc_garrisonStrength), 1] call fnc_assertClose;
-missionNamespace setVariable ["DUWS_garrisonLost_pk", ["patrol"]];
-["garrisonStrength: surviving men over full men",
+missionNamespace setVariable ["DUWS_garrisonLost_pk", ["team"]];
+["garrisonStrength: counts tokens, so a lost 6-man team weighs the same as a 2-man patrol",
     (["pk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
 ["garrisonStrength: a site with no full stamped reads full",
     (["untouched_key"] call DUWS_fnc_garrisonStrength), 1] call fnc_assertClose;
+missionNamespace setVariable ["DUWS_garrisonLost_pk", ["patrol", "patrol", "team"]];
+["garrisonStrength: losses filed against an older, larger full never read below empty",
+    (["pk"] call DUWS_fnc_garrisonStrength), 0] call fnc_assertClose;
 
-// seed: mark tokens lost until survival meets a target fraction -- a recaptured zone, a cleared town.
+// seed: keep a set number of tokens and file the rest lost -- a recaptured zone, a cleared town.
 missionNamespace setVariable ["DUWS_garrisonLost_seedk", []];
 ["seedk", ["patrol", "patrol", "patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
-["seedk", 0.5] call DUWS_fnc_garrisonSeed;
-["garrisonSeed: drops tokens until survival meets the target fraction",
+["seedk", 2] call DUWS_fnc_garrisonSeed;
+["garrisonSeed: keeps the given number of tokens",
     (["seedk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
 
-// unlose: a paid reinforcement buys destroyed tokens back up to a target -- the one thing that raises
-// strength.
+// An OPFOR cap stands a tenth of the tier I list, rounded up, against a full restamped to that list.
+missionNamespace setVariable ["DUWS_garrisonLost_capk", ["tank", "tank"]];
+["capk", ["a", "b", "c", "d", "e", "f", "g"]] call DUWS_fnc_garrisonSeedOpforCap;
+["garrisonSeedOpforCap: full is restamped at the tier I list",
+    (count (["capk"] call DUWS_fnc_garrisonFull)), 7] call fnc_assertEq;
+["garrisonSeedOpforCap: a tenth of seven rounds up to one token kept",
+    (count (["capk"] call DUWS_fnc_garrisonSurviving)), 1] call fnc_assertEq;
+
+// unlose: a paid reinforcement buys destroyed tokens back -- the one thing that raises strength.
 missionNamespace setVariable ["DUWS_garrisonLost_uk", ["patrol", "patrol", "patrol"]];
 ["uk", ["patrol", "patrol", "patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
-["uk", 0.5] call DUWS_fnc_garrisonUnlose;
-["garrisonUnlose: buys survival back up to the target",
+["uk", 1] call DUWS_fnc_garrisonUnlose;
+["garrisonUnlose: buys back the given number of tokens",
     (["uk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
+["uk", 5] call DUWS_fnc_garrisonUnlose;
+["garrisonUnlose: never buys back more than was lost",
+    (["uk"] call DUWS_fnc_garrisonLost), []] call fnc_assertEq;
 
 missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
 ["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
@@ -664,8 +677,8 @@ missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
     (["gk"] call DUWS_fnc_garrisonFull), ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call fnc_assertEq;
 missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
 ["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
-["garrisonBuyTier: under ten added tokens, a tenth rounds down to none fielded",
-    (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
+["garrisonBuyTier: under ten added tokens, a tenth rounds up to one fielded",
+    (count (["gk"] call DUWS_fnc_garrisonLost)), 8] call fnc_assertEq;
 missionNamespace setVariable ["DUWS_garrisonLost_gk", ["b", "b"]];
 ["gk", [], ["b", "b"]] call DUWS_fnc_garrisonBuyTier;
 ["garrisonBuyTier: a token already lost up to its count in the new full is not filed again",

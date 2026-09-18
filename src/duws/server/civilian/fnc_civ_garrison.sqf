@@ -197,7 +197,7 @@ private _fnc_tick = {
             [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
             // Seeded to a scratch 0.3: a thin garrison with no reserve depth (spends the pool copies first) and left there -- nothing restores it but a paid reinforcement.
             // That shell is the lasting half of what clearing buys, against the reputation step which is only an instalment.
-            [_key, 0.3] call DUWS_fnc_garrisonSeed;
+            [_key, floor (0.3 * count ([_key] call DUWS_fnc_garrisonFull))] call DUWS_fnc_garrisonSeed;
             // Read by others: fnc_town_garrison_fortify and _reinforce refuse a purchase through it (no buying up a beaten town unseen), and the map readout prints it regrouping.
             [_i, "REGROUPING"] call fnc_town_garrison_setHold;
             if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };

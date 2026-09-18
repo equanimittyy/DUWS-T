@@ -3,13 +3,14 @@
 // Reinforcement half of the garrison model: accounting lives in fnc_zone_state_init, the strength ledger
 // in fnc_garrison_strength_init. Model: docs/info/gameplay/garrison_and_reserves.md.
 
-// Counts reserve-owed men with live men so a site can't fall on an empty perimeter while waves are still
-// owed; no full-potential stamp yet reads as not-beaten, never as beaten.
+// Standing groups plus the pool, not the ledger's surviving count: a token whose raise placed nobody is neither lost
+// nor pooled, and would hold the site forever. The pool keeps a site from falling on an empty perimeter while waves
+// are still owed, and OPCOM's defenders count through both halves. No full stamped yet reads as not-beaten.
 DUWS_fnc_garrisonBeaten = {
     params ["_key"];
-    private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
-    if (_fullMen <= 0) exitWith { false };
-    (([_key] call fnc_zone_garrison_count) + ([_key] call DUWS_fnc_garrisonReserveMen)) <= (0.1 * _fullMen)
+    private _full = count ([_key] call DUWS_fnc_garrisonFull);
+    if (_full <= 0) exitWith { false };
+    (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.1 * _full)
 };
 
 // eyePos is ASL, so the target is lifted to standing head height and converted to match. VIEW and GEOM

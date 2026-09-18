@@ -56,16 +56,6 @@ fnc_zone_roster = {
 	[_zoneKey] call fnc_site_roster
 };
 
-// What "this zone's garrison" is worth, wherever it happens to be standing. Deliberately not bounded
-// by the zone radius: a patrol that has wandered out is still the zone's, and reinforcements that
-// walk in are not, which is the whole reason the roster exists. Shared by the peak and the capture
-// test so the strength a zone is measured against cannot be counted differently from the strength
-// it is judged by.
-fnc_zone_garrison_count = {
-	params ["_zoneKey"];
-	[_zoneKey] call fnc_site_alive
-};
-
 // CONTRACT: every path that removes a zone's garrison calls this, and nothing else clears the live flag.
 // A garrison left marked live over empty ground reads as a garrison beaten, so the zone falls to whoever
 // walks in next -- silently, with nothing wrong in the SQF to find. The full-potential denominator and
@@ -185,15 +175,6 @@ DUWS_fnc_garrisonReserveClear = {
 	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], nil];
 	missionNamespace setVariable [format ["DUWS_zoneReserveOpcom_%1", _key], nil];
 	missionNamespace setVariable [format ["DUWS_zoneReserveEventAt_%1", _key], nil];
-};
-
-// The men the pool still owes. Counted whole -- attrition is a ledger of lost whole tokens now, so a
-// pooled token owes its full men until it is delivered or the zone stows. Feeds the "remaining" half of
-// the capture and attrition contract: a reserve is deferred force, not lost. tokenMenCount/tokenListMen
-// are the shared vocabulary's (fnc_spawn_vocab), beside the token grammar they count.
-DUWS_fnc_garrisonReserveMen = {
-	params ["_key"];
-	[[_key] call DUWS_fnc_garrisonReserve] call DUWS_fnc_tokenListMen
 };
 
 // The zone's live *composition* group count: distinct groups, with a man still standing, that the

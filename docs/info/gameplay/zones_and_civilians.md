@@ -131,9 +131,9 @@ the strength it had rather than silently halving.
 **The commander buys a zone's tier and strength as it does a town's.** `fnc_zone_garrison_fortify`
 raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential; the
 zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`). The buy fields only a tenth of the tokens
-the new tier adds, rounded down, and files the rest as lost (`DUWS_fnc_garrisonBuyTier`), so the commander
+the new tier adds, rounded up, and files the rest as lost (`DUWS_fnc_garrisonBuyTier`), so the commander
 must reinforce to field the whole tier. At multiplier 1 a step adds at most seven tokens, so a fortify
-fields none of them until a reinforcement buys them back.
+fields one of them until a reinforcement buys the rest back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
 (`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM
@@ -232,7 +232,7 @@ The `0.3` floor is what keeps that from becoming a walk-in, and it is also struc
 to redeploy empty would be uncapturable outright, because a zero peak refuses capture.
 
 **Strength falls unless the commander pays, and a retake resets it.** Only a bought reinforcement restores a zone. `fnc_opfor_cap`
-resets the tier to I and seeds strength to `0.1` when OPFOR take a zone back
+resets the tier to I and keeps a tenth of the tier I tokens, rounded up, when OPFOR take a zone back
 (`DUWS_fnc_garrisonSeedOpforCap`), so what they put on ground they had to retake is a scratch force.
 Every retake costs them the same, and a zone traded back and forth cannot converge on full strength. It used to reset to full on the BLUFOR capture instead, on
 the reasoning that a retaken zone is manned by a fresh garrison; that handed the player's grinding
@@ -385,10 +385,10 @@ appraise them as neutral.
 | IV | The above, plus a lone IFV and more building-occupying units | purchase |
 
 A purchased tier arrives mostly owed. `fnc_town_garrison_fortify` raises the tier by one, never from
-tier 0, and files all but a tenth of the tokens the raise adds, rounded down, as lost
+tier 0, and files all but a tenth of the tokens the raise adds, rounded up, as lost
 (`DUWS_fnc_garrisonBuyTier`), exactly as a zone fortify does. A town step adds at most five tokens per
-multiplier copy, so below multiplier 2 a town buy fields nothing new until
-`fnc_town_garrison_reinforce` buys the tokens back. The step from 0 to I is the reputation band's,
+multiplier copy, so below multiplier 2 a town buy fields one new token until
+`fnc_town_garrison_reinforce` buys the rest back. The step from 0 to I is the reputation band's,
 written through `fnc_town_garrison_setTier`, and fields whole. On a standing garrison the garrison
 thread re-stands the town at the new tier on its next tick.
 

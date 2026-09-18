@@ -1,5 +1,5 @@
 // Locality: server -- one side's men physically standing on a piece of ground, whoever spawned them.
-// Deliberately owner-blind, unlike fnc_zone_garrison_count: this answers "is this ground held",
+// Deliberately owner-blind, unlike a site's roster: this answers "is this ground held",
 // which anyone standing on it denies whether they are the local garrison, a side mission's guards,
 // or a patrol passing through.
 //

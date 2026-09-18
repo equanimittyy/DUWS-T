@@ -81,7 +81,7 @@ The code is the source of truth. What new work must hold to:
   hunt, faced by the terrain and toward BLU HQ where the ground gives no bearing (`DUWS_fnc_opcom_build`). A zone
   buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`,
   `fnc_zone_garrison_fortify` (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each
-  refused on BLUFOR ground. A zone or town fortify fields a tenth of the tokens its tier adds, rounded down, and files
+  refused on BLUFOR ground. A zone or town fortify fields a tenth of the tokens its tier adds, rounded up, and files
   the rest lost (`DUWS_fnc_garrisonBuyTier`) for a reinforcement to buy back. The harness drives both (`supply` with an
   errand, `zone`).
 - **Orders run by hand** through the debug harness (`fnc_opcom_debug_task.sqf`, and the OPCOM debug menu over it)

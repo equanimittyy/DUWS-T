@@ -27,8 +27,12 @@ lost      = flat token list, persists across a stow
 surviving = full minus lost, by value                    (DUWS_fnc_garrisonSurviving)
 pool      = surviving beyond the standing template        (the reserve)
 garrison  = surviving capped to the standing template     (what deploys)
-strength  = (fullMen - lostMen) / fullMen, clamped [0,1]   (DUWS_fnc_garrisonStrength)
+strength  = count surviving / count full                 (DUWS_fnc_garrisonStrength)
 ```
+
+Every strength measure counts tokens, not men: a tank, a 2-man patrol and a 6-man team each weigh one
+token. The one exception is `DUWS_fnc_garrisonForce`, the OPCOM force grid's firepower figure, which
+still counts men and vehicle power.
 
 A token is lost when its **group is wiped** — destroy one tank, lose one tank. A squad that takes
 casualties but keeps a survivor is not recorded: it streams out and comes back whole next raise.
@@ -62,16 +66,16 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 
 | Function | Does |
 |---|---|
-| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full` and its man count. Called by the derivation and by a tier buy. |
+| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy and an OPFOR cap. |
 | `DUWS_fnc_garrisonLost {key}` | The lost token list. |
 | `DUWS_fnc_garrisonSurviving {key}` | `full` minus `lost`, by value. |
 | `DUWS_fnc_garrisonRecordLoss {key, token}` | Push one lost token, bounded at its count in `full` — a double-fire of the killed handler is a no-op. |
 | `DUWS_fnc_garrisonStrength {key}` | The live `[0,1]` projection the map bar reads. |
-| `DUWS_fnc_garrisonSeed {key, frac}` | Mark random tokens lost until survival is at or under `frac`, spending the pool before the garrison. A town clear calls it with `0.3`. |
-| `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then seed it to `0.1`. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
-| `DUWS_fnc_garrisonUnlose {key, target}` | Remove random lost entries until survival reaches `target` — a paid replacement, not a heal. |
-| `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose one `REINFORCE_STEP` (`0.3`) above current strength, then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
-| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded down) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
+| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, which spends the pool before the garrison. The caller picks the rounding: a town clear keeps `floor(0.3 × full)`. |
+| `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then keep `ceil(0.1 × full)` tokens. Rounded up, so a tier I site at multiplier 1 still stands one token. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
+| `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
+| `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
+| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
 | `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
 | `DUWS_fnc_garrisonHeld {key}` | Liveness: true from the moment a raise finishes placing men to the stow or capture that tears it down. Gates the capture test and the refill pass. |
 
@@ -142,10 +146,9 @@ Two triggers fire the pass: a 5-minute heartbeat (`DUWS_fnc_garrisonReserveLoop`
 `DUWS_zoneReinforceFrac` (0.5) of its ceiling pulls an immediate wave rather than waiting for the
 beat, so reinforcement reads as waves, not one-in-one-out whack-a-mole.
 
-A reserve counts as still-owed force for every measure of the site's strength until it either
-arrives-and-dies or the site stows: `DUWS_fnc_garrisonReserveMen {key}` sums the men still in the
-pool, and both the break test and the strength readouts add it to what's standing. Delivering a
-wave moves men from pool to alive without changing that total; only a kill does.
+A reserve counts as still-owed force until it either arrives-and-dies or the site stows: the break
+test adds the tokens still in the pool to the groups standing. Delivering a wave moves a token from
+the pool to the ground without changing that total; only a wipe does.
 
 ## Placement: keeping a wave off the player's back
 
@@ -215,11 +218,16 @@ range, a SAM denying the airspace over the zone.
 ## The break test
 
 `DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:8`) is the
-one capture/clear line for both site kinds: live men plus reserve-owed men, worn to **a tenth of
-full fighting potential** (`fullMen`, the ledger's denominator). A site with an unspent pool
-cannot fall on an empty perimeter — the owed men hold `remaining` above the line until the waves
-have spawned and been killed, so a player has to draw out and beat nine tenths of everything the
+one capture/clear line for both site kinds: standing groups plus pooled tokens, worn to **a tenth
+of `full`'s token count**. A group counts as one whole token while any of its men stands. A site with
+an unspent pool cannot fall on an empty perimeter — the pooled tokens hold it above the line until the
+waves have spawned and been killed, so a player has to draw out and beat nine tenths of everything the
 site was ever worth, not just what happened to be standing when they arrived.
+
+The test counts standing groups, not the ledger's `surviving`, because a token whose raise placed
+nobody is neither lost nor pooled and would hold the site forever. OPCOM's homed defenders sit outside
+`full` but count through both halves: standing, they are tagged groups on the roster; pooled, they are
+tokens in the pool. A prefab's turret crews carry no reserve tag, so they do not count.
 
 - **Zone capture** (`src/duws/server/init_zones/fnc_zone_capture_ready.sqf:32`) additionally
   requires BLUFOR outnumber whatever OPFOR is still present in the trigger area — `garrisonBeaten`
@@ -228,4 +236,4 @@ site was ever worth, not just what happened to be standing when they arrived.
   (`src/duws/server/civilian/fnc_civ_garrison.sqf:185`) rather than an `EmptyDetector`, so a town can
   no longer be cleared by OPFOR merely withdrawing. Clearing pays a reputation credit and a
   `REGROUPING` hold, drops the tier to I — not 0; ownership survives, only the purchase was beaten
-  — and reseeds the garrison to a scratch `0.3` rather than clearing it outright.
+  — and reseeds the garrison to `floor(0.3 × full)` tokens rather than clearing it outright.
