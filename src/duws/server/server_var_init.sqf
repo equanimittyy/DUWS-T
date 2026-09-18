@@ -577,6 +577,9 @@ OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
 // Unbroken ticks with BLUFOR within K before a virtual tasking spawns, so a jet crossing the ring on one tick spawns nothing.
 OPCOM_DEVIRT_BUFFER = 2;
 
+// How far a de-virtualising hull may shift onto ground it fits on (fnc_opcom_stream); tight, so it stands near the leg it reached.
+OPCOM_DEVIRT_CLEAR_R = 60;
+
 // Seconds a gun is allowed per ordered round before a fire mission is written off and the gun emptied again
 // (fnc_opcom_fires): a dead crew, or a gun that never fires, must not be left loaded. Generous -- a mortar puts a
 // round down every few seconds.

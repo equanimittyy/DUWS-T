@@ -80,7 +80,16 @@ DUWS_fnc_opcom_spawnComp = {
     if !(_class isKindOf "Air") exitWith {
         // pos is banked ASL (grid frame); spawnVehicle reads a 3D z as ATL, so pass 2D or the hull floats.
         private _g = [_pos select 0, _pos select 1];
-        [_class, _g, 100, "none", _g] call fnc_spawn_vehicle
+        private _grp = [_class, _g, 100, "none", _g] call fnc_spawn_vehicle;
+        // A supplied spawn point skips the clearance search, so a leg ending in a building or on water builds no hull.
+        // findEmptyPosition, not BIS_fnc_findSafePos: it answers [] on failure rather than a far random point.
+        if (isNull _grp) then {
+            private _clear = _g findEmptyPosition [0, OPCOM_DEVIRT_CLEAR_R, _class];
+            if (_clear isNotEqualTo []) then {
+                _grp = [_class, _g, 100, "none", [_clear select 0, _clear select 1]] call fnc_spawn_vehicle;
+            };
+        };
+        _grp
     };
     private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
     _created params ["_veh", "_crew", "_grp"];
