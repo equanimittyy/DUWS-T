@@ -11,8 +11,10 @@ private _c = [1, 0.667, 0, 1];
 private _hpTypes = ["MG", "GMG", "AT", "AA", "ROADBLOCK", "OP", "MORTAR", "ARTY", "RADIO", "MINEFIELD"];
 
 switch (_mode) do {
-    // Every order starts from one tasking, so they share its list and branch here.
+    // Everything orderable shares one list, so the order it offers is chosen here. A string key is an emplacement,
+    // whose only order is the fire mission; a number is a tasking.
     case "order": {
+        if (_key isEqualType "") exitWith { [_key, "firemission"] call fnc_debug_opcom_step };
         [format ["Tasking %1: order", _key], ["capture", "move", "guard", "regarrison", "supply", "intercept", "teleport"] apply {
             [_x, { params ["_id", "_next"]; [_id, _next] call fnc_debug_opcom_step }, [_key, _x], _c]
         }] call fnc_open_action_menu;

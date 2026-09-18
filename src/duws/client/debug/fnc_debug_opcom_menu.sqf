@@ -8,9 +8,8 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 private _c = [1, 0.667, 0, 1];
 ["OPCOM", [
     ["Recruit a unit",  { ["recruitlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Order a tasking", { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Order a unit or gun", { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Defensive taskings", { ["zonelist", "", "zonebuy", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Fire mission", { ["batterylist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["List taskings",   { ["list",        "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Tasking unit status", {
         // Map pick waitUntils, so it must run scheduled (fnc_map_pick_pos.sqf).

@@ -35,14 +35,19 @@ switch (_verb) do {
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
-        // One list for every order, teleport included; the picked tasking branches client-side (fnc_debug_opcom_step).
+        // Everything OPCOM can be given an order is one list: taskings keyed by their numeric id, emplacements by
+        // their string key, which is how the picked row tells the step which orders it has (fnc_debug_opcom_step).
         // Live taskings included: fnc_opcom_task re-orders a de-virtualised group in place (reOrderLive), the
         // same primitive OPCOM's loop drives -- only a bound ferry carry is refused, and by the primitive.
         private _rows = DUWS_opcom_taskings apply {
             [_x get "id", format ["id %1  %2/%3  %4  (%5)", _x get "id", _x get "order", _x get "status", _x get "moveType", ["virtual", "live"] select ((_x get "grp") isNotEqualTo "")]]
         };
-        if (_rows isEqualTo []) exitWith { "No taskings (recruit one first)." remoteExec ["hint", _caller] };
-        ["Order which tasking?", _rows, "order", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+        {
+            _x params ["_key", "_pos", "_type"];
+            _rows pushBack [_key, format ["%1  %2  (%3 m away)", _type, _key, round (_caller distance2D _pos)]];
+        } forEach ([getPosASL _caller] call DUWS_fnc_opcom_batteries);
+        if (_rows isEqualTo []) exitWith { "Nothing to order (recruit a unit first)." remoteExec ["hint", _caller] };
+        ["Order which unit or gun?", _rows, "order", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "townlist": {
         // _a = tasking id, _b = errand kind. Nearest first; reinforce and fortify list only towns with a garrison.
@@ -59,14 +64,6 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { format ["No town to %1.", _b] remoteExec ["hint", _caller] };
         _rows sort true;
         [format ["%1 which town?", _b], _rows apply { [_x select 1, _x select 2] }, "supply_town", [_a, _b]] remoteExec ["fnc_debug_opcom_pick", _caller];
-    };
-    case "batterylist": {
-        private _rows = ([getPosASL _caller] call DUWS_fnc_opcom_batteries) apply {
-            _x params ["_key", "_pos", "_type"];
-            [_key, format ["%1  %2  (%3 m away)", _type, _key, round (_caller distance2D _pos)]]
-        };
-        if (_rows isEqualTo []) exitWith { "No OPFOR mortar pit or battery standing." remoteExec ["hint", _caller] };
-        ["Fire from which emplacement?", _rows, "firemission", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "sightinglist": {
         // _a = tasking id. A row is where OPCOM believes the group is, not where it stands.
