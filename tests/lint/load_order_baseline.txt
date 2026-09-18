@@ -1,0 +1,6 @@
+# Function names read at load by an entry in server_fnc_init.sqf but defined by a different
+# init path -- server_var_init.sqf, a client init, or a file the registry does not list.
+# Listing a name here tells the load-order lint to treat it as already present rather than
+# teaching the parser to walk every other init file. One name per line.
+#
+# The registry resolves cleanly today, so this starts empty and gates regressions from here.
