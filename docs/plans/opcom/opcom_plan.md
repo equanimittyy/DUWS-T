@@ -59,12 +59,16 @@ The code is the source of truth. What new work must hold to:
   the row decays. Standing in the cell it was sent to, it takes one guaranteed look `OPCOM_INTERCEPT_K` cells wide:
   every BLUFOR group inside is stamped for certain, rows the look disproves clear, and it hunts the closest group
   found. Nothing inside drops it to `guard` there; an interceptor never returns to garrison.
-- **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds on a point from one mortar pit
-  or battery: every crewed piece of it that bears on the target fires. Those two types never stream, so their guns
-  and crews always stand. A standing battery holds **no ammunition** — its guns are emptied at register, loaded for
-  the mission they are given, topped up as they fire and emptied again once the rounds are away or
-  `OPCOM_ARTY_ROUND_SECS` per round has passed, so a crew never shells anything on its own. It fires what it is
-  handed — what is worth shelling, the cooldown, the scatter and the HQ exclusion are the scored Arty action's.
+- **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds down from one mortar pit or
+  battery in a shape: `saturate` spreads them over a disc of a given radius about the target, and `creep` walks a
+  line of a given width forward from the target over a given length and bearing, each gun in its own lane across
+  the width. Radius, width and length never close below `OPCOM_ARTY_MIN_SPREAD` (50 m), so no mission converges on
+  one point. Every crewed piece that bears on the target fires, each opening `OPCOM_ARTY_STAGGER` (1 s) after the
+  last, and every round is its own order at its own aim point. Those two types never stream, so their guns and
+  crews always stand. A standing battery holds **no ammunition** — its guns are emptied at register, loaded for the
+  mission they are given, topped up as they fire and emptied again once the rounds are away; a round not away in
+  `OPCOM_ARTY_ROUND_SECS` is written off, so a crew never shells anything on its own. It fires what it is handed —
+  what is worth shelling, the shape and its size, the cooldown and the HQ exclusion are the scored Arty action's.
 - **A flipped site frees its orders.** When a zone is captured, or a town's garrison is cleared or works its way out
   of the band, every tasking tied to that site drops to `guard` where it stands (`DUWS_fnc_opcom_siteLost`): the
   garrison homed there, the unit still walking in to settle, the errand carrying goods to it. Its resting
@@ -111,7 +115,7 @@ grid rebuild once under a full map before 4.5 stacks scoring on the same tick.
 | **4.6** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount | The town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE` |
 | **4.7** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types | The need field's base ratio (2–3); the asset prices; what a radio's reach and an OP's eyes are worth, in place of the build-price stand-in; where a mortar pit or artillery battery sites; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air) |
 | **4.8** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost | `OPCOM_PWIN_FLOOR`; `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering) |
-| **4.9** Scout, then one-gun Arty | The staleness Value and recon Recruit; the Arty action over the shipped fire mission — what is worth shelling, the cooldown, the scatter and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
+| **4.9** Scout, then one-gun Arty | The staleness Value and recon Recruit; the Arty action over the shipped fire mission — what is worth shelling, the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; when the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 
 The score is one number — expected AP returned per AP spent:
 
@@ -428,7 +432,7 @@ live cap (bounded by player proximity).
 ### Indirect-fire hardpoints
 
 Persistent enemy assets, two tiers sharing one fire-mission implementation. The order ships
-([§Shipped](#shipped-the-substrate-the-loop-drives)); **nothing decides to use it** — no cooldown, scatter,
+([§Shipped](#shipped-the-substrate-the-loop-drives)); **nothing decides to use it** — no cooldown, shape choice,
 observation gate or HQ exclusion. A zone's own mortar is separate and stays autonomous (`fnc_static_resolve`),
 uncapped here.
 
@@ -441,7 +445,7 @@ before; if it does not, the fallback is spawning shells directly as the player's
 | Core | static `opfor_TURRET_MORTAR` | self-propelled `opfor_ARTY_X` |
 | Unlocks at | tier 3 (150 earned AP) | tier 4 (350 earned AP) |
 | Cooldown | 4–8 rounds, then 25–40 min | 6–10 rounds, then 40–60 min |
-| Scatter | tighter (base 50 m) | wider (base 100 m) |
+| Spread | tighter (base 50 m) | wider (base 100 m) |
 
 - **A fire mission is the Arty action** — scored and committed like any other, `Cost` scaling with rounds ×
   saturation; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
@@ -453,8 +457,9 @@ before; if it does not, the fallback is spawning shells directly as the player's
 - **HQ exclusion** — no mission *aimed* inside 100 m of `PosOfBLUHQ` (rounds may still stray there from a barrage
   aimed elsewhere). The target grid is latched `[x,y,0]` at order time (never an object ref that would follow a
   respawn into the circle), and re-checked against the circle immediately before firing.
-- **Scatter** is deliberate (`doArtilleryFire` converges): base by type, +25 m per km range, −30 m with direct OP
-  observation. Telegraph: Allseer line + a temporary marker ~20 s before impact.
+- **Spread** is the size the action hands the shipped shape — a saturate's radius, a creep's width: base by type,
+  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. Telegraph: Allseer
+  line + a temporary marker ~20 s before impact.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
   permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
   cap.

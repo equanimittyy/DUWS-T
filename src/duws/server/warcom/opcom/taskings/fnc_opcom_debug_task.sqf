@@ -8,7 +8,8 @@
 //   ["supply", id, targetPos, errand] -- send `id` on a supply run; its errand lands on arrival (fnc_opcom_task)
 //   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
 //   ["intercept", id, rowKey]       -- send `id` after a belief row (a BLUFOR group's netId)
-//   ["fire", hpKey, targetPos, rounds] -- a fire mission from a mortar pit or battery; returns rounds ordered
+//   ["fire", hpKey, targetPos, [rounds, shape]] -- a fire mission from a mortar pit or battery; returns rounds ordered
+//                                   (shape ["saturate", radius] | ["creep", width, length, bearing])
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
 //   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
 // e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;
@@ -75,7 +76,8 @@ switch (_verb) do {
         [_t, "intercept", _b] call fnc_opcom_task
     };
     case "fire": {
-        [_a, _b, _c] call DUWS_fnc_opcom_fireMission
+        _c params ["_rounds", "_shape"];
+        [_a, _b, _rounds, _shape] call DUWS_fnc_opcom_fireMission
     };
     case "zone": {
         if ((([_b] call fnc_site_at) getOrDefault ["pos", []]) isEqualTo []) exitWith {

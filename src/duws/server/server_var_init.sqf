@@ -580,10 +580,14 @@ OPCOM_DEVIRT_BUFFER = 2;
 // How far a de-virtualising hull may shift onto ground it fits on (fnc_opcom_stream); tight, so it stands near the leg it reached.
 OPCOM_DEVIRT_CLEAR_R = 60;
 
-// Seconds a gun is allowed per ordered round before a fire mission is written off and the gun emptied again
-// (fnc_opcom_fires): a dead crew, or a gun that never fires, must not be left loaded. Generous -- a mortar puts a
-// round down every few seconds.
-OPCOM_ARTY_ROUND_SECS = 15;
+// Seconds one round may take before it is written off (fnc_opcom_fires); generous, as the first carries the traverse.
+OPCOM_ARTY_ROUND_SECS = 60;
+
+// A fire mission's tightest spread: a saturate radius, a creep's width and its length never close below it.
+OPCOM_ARTY_MIN_SPREAD = 50;
+
+// Seconds between one gun of a battery opening fire and the next, so a battery ripples rather than volleys.
+OPCOM_ARTY_STAGGER = 1;
 
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
 // look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.

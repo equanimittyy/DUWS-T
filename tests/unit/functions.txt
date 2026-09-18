@@ -60,3 +60,5 @@ duws/server/missions/fnc_offer_weight.sqf::*fnc_offer_weight
 duws/server/missions/fnc_campaign_now.sqf::*fnc_campaign_now
 duws/server/missions/fnc_time_expired.sqf::*fnc_time_expired
 duws/shared/functions/fnc_stealth_coef.sqf::*fnc_stealth_coef
+duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_rotate
+duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim

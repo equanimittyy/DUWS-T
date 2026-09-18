@@ -1311,3 +1311,32 @@ DUWS_timeSkew = 150;
 // stance answers UNDEFINED for a mounted unit, which the layer skips.
 ["stealth_coef: an unrecognised stance scores as standing",
     (["UNDEFINED", 0, 999] call fnc_stealth_coef), 0.2] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_fireAim: where each round of a shaped fire mission lands ---
+// Every aim is random, so each case samples 200 rounds and asserts the bound holds for all of them.
+OPCOM_ARTY_MIN_SPREAD = 50;
+fnc_test_aimAll = {
+    params ["_args", "_pred"];
+    private _ok = true;
+    for "_i" from 1 to 200 do {
+        if !((_args call DUWS_fnc_opcom_fireAim) call _pred) exitWith { _ok = false };
+    };
+    _ok
+};
+fnc_test_aimDist = { sqrt (((_this select 0) - 1000) ^ 2 + ((_this select 1) - 1000) ^ 2) };
+
+["fire_aim: a saturate lands inside its radius",
+    [[[1000, 1000, 0], ["saturate", 120], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 120 }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a saturate under the floor still spreads to it, never past it",
+    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 50 }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a saturate under the floor does not stay inside the radius it was given",
+    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 10 }] call fnc_test_aimAll, false] call fnc_assertEq;
+// Bearing 0 only, as sqf-vm's sin and cos take radians; creeping north, the first gun's lane (the left half) lies west.
+["fire_aim: a creep's first gun holds the left lane and each round its own band",
+    [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 2, 1, 4],
+        { (_this select 0) >= 950 - 1e-6 && {(_this select 0) <= 1000 + 1e-6} && {(_this select 1) >= 1075 - 1e-6} && {(_this select 1) <= 1150 + 1e-6} }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a creep's second gun holds the right lane",
+    [[[1000, 1000, 0], ["creep", 100, 300, 0], 1, 2, 1, 4],
+        { (_this select 0) >= 1000 - 1e-6 && {(_this select 0) <= 1050 + 1e-6} }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a creep given no length still crawls the floor's depth",
+    [[[1000, 1000, 0], ["creep", 100, 0, 0], 0, 1, 0, 1], { ((_this select 1) - 1000) <= 1 }] call fnc_test_aimAll, false] call fnc_assertEq;
