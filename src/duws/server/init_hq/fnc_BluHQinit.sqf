@@ -146,9 +146,9 @@ private _allObjectsData = [
     ["Land_GarbageBarrel_02_F", 30.2847, -20.1657, 0.593351, 215.175, false],
     ["Land_GarbageBarrel_02_F", 31.0533, -19.9143, 0.594543, 3.47507, false],
     ["Land_GarbageBarrel_02_buried_F", 30.9098, 26.7942, 0.406921, 317.275, false],
-    ["ModuleEffectsFire_F", 30.8903, 26.8639, 0.0231838, 346.075, false],
+    ["test_EmptyObjectForFireBig", 30.8903, 26.8639, 0.0231838, 346.075, false],
     ["Land_GarbageBarrel_02_buried_F", 40.9711, 4.03607, 0.406921, 317.275, false],
-    ["ModuleEffectsFire_F", 40.9512, 4.10774, 0.0231838, 346.075, false],
+    ["test_EmptyObjectForFireBig", 40.9512, 4.10774, 0.0231838, 346.075, false],
     ["Land_WoodenCrate_01_F", 9.907725, -2.705, 0.336653, 346.075, false],
     ["Land_WoodenCrate_01_stack_x3_F", 15.71863, 21.18984, 0.721056, 346.075, false],
     ["Land_WoodenCrate_01_F", 17.28733, 21.5078, 0.362463, 166.075, false],
@@ -246,6 +246,13 @@ private _invulnerableTypes = [
     
     private _newX = _spawnBaseX + (_origX - _compCenterX);
     private _newY = _spawnBaseY + (_origY - _compCenterY);
+
+    // A config fire lights only from the command form -- the array form below creates it dark.
+    if (_class isEqualTo "test_EmptyObjectForFireBig") then {
+        [_class createVehicle [_newX, _newY, 0], "HQ"] call fnc_duws_keep;
+        continue;
+    };
+
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
     [_obj, "HQ"] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
