@@ -121,7 +121,7 @@ switch (_verb) do {
         private _pos = _b;
         if (_pos isEqualTo []) then { _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select (_c select 1)) };
         private _ok = ["supply", _a, _pos, _c] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Tasking %1 runs %2 to %3.", _a, _c select 0, _pos apply { round _x }] } else { format ["Errand refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
+        (if (_ok) then { format ["Tasking %1 runs %2 to %3.", _a, _c select 0, _pos apply { round _x }] } else { format ["Errand refused for %1 (not a supply unit / mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "fire": {
         private _n = ["fire", _a, _b, _c] call fnc_opcom_debug_task;
