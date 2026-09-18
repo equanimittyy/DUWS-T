@@ -590,6 +590,9 @@ OPCOM_INTERCEPT_K = 1;
 // tick instead of holding a stale MOVE on the OPCOM map until a later stow re-virtualises it.
 OPCOM_MOVE_ARRIVE = 50;      // m
 
+// A town errand targets the town centre, often deep in streets a truck never threads.
+OPCOM_DELIVER_ARRIVE = 100;  // m
+
 // Height a de-virtualised air tasking enters at, flying, above its world point -- a fixed height rather
 // than the stored z, so a helicopter neither creeps up nor sinks across stow/spawn cycles.
 OPCOM_AIR_SPAWN_ALT = 150;

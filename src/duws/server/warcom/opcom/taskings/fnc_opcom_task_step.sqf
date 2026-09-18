@@ -209,7 +209,7 @@ private _interceptArrive = {
                         };
                     };
 
-                    if (((_t getOrDefault ["errand", []]) isNotEqualTo []) && {(_ldr distance2D (_t get "target")) < 40}) then {
+                    if (((_t getOrDefault ["errand", []]) isNotEqualTo []) && {(_ldr distance2D (_t get "target")) < OPCOM_DELIVER_ARRIVE}) then {
                         [_t] call DUWS_fnc_opcom_deliver;
                         [_grp] call DUWS_fnc_opcom_despawn;
                         _t set ["status", "done"];
@@ -291,12 +291,14 @@ private _interceptArrive = {
                         };
                         // errand and returnZone are exclusive (set upstream), so errand-first cannot double-settle.
                         private _settled = false;
-                        if (_adv isEqualTo "arrived" && {_order isEqualTo "move"}) then {
+                        if (_order isEqualTo "move") then {
                             if ((_t getOrDefault ["errand", []]) isNotEqualTo []) then {
-                                [_t] call DUWS_fnc_opcom_deliver;
-                                _t set ["status", "done"]; _settled = true;
+                                if (((_t get "pos") distance2D (_t get "target")) < OPCOM_DELIVER_ARRIVE) then {
+                                    [_t] call DUWS_fnc_opcom_deliver;
+                                    _t set ["status", "done"]; _settled = true;
+                                };
                             } else {
-                                _settled = [_t, _t get "pos"] call _settleMove;
+                                if (_adv isEqualTo "arrived") then { _settled = [_t, _t get "pos"] call _settleMove };
                             };
                         };
                         if (_order isEqualTo "intercept" && {([_t get "pos", _t get "target"] call DUWS_fnc_opcom_cellDist) == 0}) then {
