@@ -141,11 +141,16 @@ private _interceptArrive = {
     params ["_t", "_pos", "_grp"];
     private _next = [_pos] call _interceptLook;
     if (_next isEqualTo "") exitWith { [_t, _pos, _grp] call _interceptGuard; true };
-    if (_next isNotEqualTo (_t get "interceptKey")) then {
+    private _switched = _next isNotEqualTo (_t get "interceptKey");
+    if (_switched) then {
         ["INFO", "OPCOM", format ["intercept: tasking %1 switches to %2", _t get "id", _next]] call fnc_log;
         _t set ["interceptKey", _next];
-        [_t, !isNull _grp, true] call _interceptFollow;
     };
+    // _interceptFollow's one-cell tolerance leaves the waypoint up to 1 km off a fix taken at arm's length.
+    // Movement-gated: re-issuing the SAD waypoint every tick restarts the AI's search.
+    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo _next };
+    private _moved = _i >= 0 && {((DUWS_opcom_belief_pos select _i) distance2D (_t get "target")) > OPCOM_MOVE_ARRIVE};
+    if (_switched || _moved) then { [_t, !isNull _grp, true] call _interceptFollow };
     false
 };
 
