@@ -12,6 +12,8 @@ if (isNull _caller) exitWith {};
 private _key = "";
 private _what = "";
 private _radius = 0;
+private _tier = 0;
+private _tierMax = 0;
 private _best = 1e11;
 
 {
@@ -21,6 +23,8 @@ private _best = 1e11;
 		_key = [_zPos] call fnc_zone_key;
 		_what = "zone";
 		_radius = _zSize;
+		_tier = [_key] call fnc_zone_tier;
+		_tierMax = count DUWS_zoneSpawnTiers;
 		_best = _d;
 	};
 } forEach zone_meta_array;
@@ -32,6 +36,8 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 	if (_d < (_radii param [_forEachIndex, 0]) && {_d < _best}) then {
 		_key = [_forEachIndex] call fnc_town_site_key;
 		_what = format ["town %1", _forEachIndex];
+		_tier = [_forEachIndex] call fnc_town_garrison_tierAt;
+		_tierMax = count DUWS_townSpawnTiers;
 		_best = _d;
 	};
 } forEach _locations;
@@ -40,11 +46,35 @@ if (_key isEqualTo "") exitWith {
 	["No zone or town under the marked spot."] remoteExec ["hint", _caller];
 };
 
-private _lines = [_key] call DUWS_fnc_garrisonDebug;
+private _rows = [_key] call DUWS_fnc_garrisonDebug;
+_rows insert [1, [["Tier", format ["%1 / %2", _tier, _tierMax]]]];
 // A zone also carries a hardpoint ring; a town raises none, so its readout is the ledger alone.
-if (_what isEqualTo "zone") then { _lines append ([_key, _radius] call fnc_hardpoint_debug) };
-// To the log for the .rpt trail and to the caller's hint box. The map is closed by the time this
-// returns, so the hint is visible; the lines join with \n, which hint renders as line breaks.
+if (_what isEqualTo "zone") then { _rows append ([_key, _radius] call fnc_hardpoint_debug) };
+
+// The map is closed by the time this returns, so the hint is not drawn under it.
 diag_log format ["[DUWS garrison debug] %1", _what];
-{ diag_log _x } forEach _lines;
-(_lines joinString "\n") remoteExec ["hint", _caller];
+private _markup = format ["<t size='1.3' color='#00ffff'>Garrison ledger</t><br/><t size='0.85' color='#b0b0b0'>%1</t><br/>", _key];
+{
+	if (_x isEqualType "") then {
+		diag_log format ["[%1 %2]", toUpper _x, _key];
+		_markup = _markup + format ["<br/><t color='#ffcc66'>%1</t><br/>", toUpper _x];
+	} else {
+		_x params ["_label", "_value", ["_detail", ""]];
+		diag_log format ["  %1: %2  %3", _label, _value, _detail];
+		_markup = _markup + format ["<t align='left'>%1</t><t align='right'>%2</t><br/>", _label, _value];
+		if (_detail isNotEqualTo "") then {
+			_markup = _markup + format ["<t align='left' size='0.8' color='#b0b0b0'>%1</t><br/>", _detail];
+		};
+	};
+} forEach _rows;
+
+// hint takes no duration; each re-issue restarts its fade. Stops on a newer readout, which it would paint over.
+[_markup, {
+	DUWS_debugLedgerHint = _this;
+	hint parseText _this;
+	for "_i" from 1 to 3 do {
+		sleep 10;
+		if (DUWS_debugLedgerHint isNotEqualTo _this) exitWith {};
+		hintSilent parseText _this;
+	};
+}] remoteExec ["spawn", _caller];

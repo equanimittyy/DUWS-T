@@ -85,11 +85,9 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         };
     }, [], [1,0.667,0,1]],
 
-    // Read one site's garrison ledger -- max, available and dead tokens with the strength maths -- from
-    // the server, which owns it.
     ["Garrison ledger: click a site", {
         [] spawn {
-            private _pos = [format ["<t size='2' color='#00ffff'>Click a zone or town to read its garrison ledger. </t><br/>Dev tool: max, available and dead tokens with the strength maths. Close the map to cancel."]] call fnc_map_pick_pos;
+            private _pos = [format ["<t size='2' color='#00ffff'>Click a zone or town to read its garrison ledger. </t><br/>Dev tool: tier, max, available and dead tokens with the strength maths. Close the map to cancel."]] call fnc_map_pick_pos;
             if (_pos isEqualTo []) exitWith {};
             [[_pos select 0, _pos select 1, 0], player] remoteExec ["fnc_debug_garrison_query", 2];
         };

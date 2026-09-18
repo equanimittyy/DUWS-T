@@ -254,10 +254,8 @@ DUWS_fnc_townStrengthKey = {
 	[_townIndex] call fnc_town_site_key
 };
 
-// The dev readout for one site's ledger: the four numbers the model turns on -- full potential, what
-// still stands, what is dead, and the strength maths tying them. Read-only, and every value comes from
-// the accessors above rather than being recomputed, so what it prints is what the model acts on. The
-// Debug menu's garrison row and its server query are the only callers.
+// Built from the accessors above, not recomputed, so it prints what the model acts on. A string row opens a section;
+// a [label, value, detail] row fills it.
 DUWS_fnc_garrisonDebug = {
 	params ["_key"];
 	private _full = [_key] call DUWS_fnc_garrisonFull;
@@ -269,17 +267,16 @@ DUWS_fnc_garrisonDebug = {
 
 	// Awake-session fielding: the x1 group ceiling (the most that stands on the ground at once), what is
 	// on it right now, and the reserve pool waiting to backfill. All three are nil/empty once the site
-	// stows, so they read as 0 unless the site is live -- the "live on ground" line below says which.
+	// stows, so they read as 0 unless the site is live.
 	private _ceiling = missionNamespace getVariable [format ["DUWS_zoneCeiling_%1", _key], 0];
 	private _onGround = [_key] call DUWS_fnc_garrisonGroupCount;
 	private _pool = [_key] call DUWS_fnc_garrisonReserve;
 	private _poolMen = [_key] call DUWS_fnc_garrisonReserveMen;
 
-	// Multiset tally: "2x closepatrol:team, 1x armour:tank" rather than a raw flat list, which for a x3
-	// garrison runs off the hint box. First-seen order, so full/available/dead columns read alike.
+	// Tallied, not listed flat, which runs off the hint box at x3.
 	private _tally = {
 		params ["_tokens"];
-		if (_tokens isEqualTo []) exitWith { "(none)" };
+		if (_tokens isEqualTo []) exitWith { "" };
 		private _seen = [];
 		private _num = [];
 		{
@@ -291,13 +288,13 @@ DUWS_fnc_garrisonDebug = {
 	};
 
 	[
-		format ["[GARRISON %1]", _key],
-		format ["  live on ground: %1", [_key] call DUWS_fnc_garrisonHeld],
-		format ["  max tokens: %1 (%2 men)  %3", count _full, _fullMen, [_full] call _tally],
-		format ["  available:  %1 (%2 men)  %3", count _surv, _survMen, [_surv] call _tally],
-		format ["    on ground: %1 / %2 groups (x1 cap)", _onGround, _ceiling],
-		format ["    reserve:   %1 (%2 men)  %3", count _pool, _poolMen, [_pool] call _tally],
-		format ["  dead:       %1 (%2 men)  %3", count _lost, _lostMen, [_lost] call _tally],
-		format ["  strength: (%1 full - %2 dead) / %1 = %3", _fullMen, _lostMen, [_key] call DUWS_fnc_garrisonStrength]
+		"Garrison",
+		["Live on ground", ["no", "yes"] select ([_key] call DUWS_fnc_garrisonHeld)],
+		["Strength", ([_key] call DUWS_fnc_garrisonStrength) toFixed 2, format ["(%1 full - %2 dead) / %1 men", _fullMen, _lostMen]],
+		["Max tokens", format ["%1 (%2 men)", count _full, _fullMen], [_full] call _tally],
+		["Available", format ["%1 (%2 men)", count _surv, _survMen], [_surv] call _tally],
+		["On ground", format ["%1 / %2 groups (x1 cap)", _onGround, _ceiling]],
+		["Reserve", format ["%1 (%2 men)", count _pool, _poolMen], [_pool] call _tally],
+		["Dead", format ["%1 (%2 men)", count _lost, _lostMen], [_lost] call _tally]
 	]
 };

@@ -122,6 +122,10 @@ SQF blocks are not closures — a block sees the privates of whatever `call`ed i
 
 A `hint`/`hintSilent` issued while the map is open (`forceMap`/`openMap`) draws into the hint box, *under* `findDisplay 12` — it fires but is never seen, so a "click on the map" instruction before `onMapSingleClick` looks broken. `titleText`/`cutText` share the problem. Fix: draw the prompt on the map display itself — a static `RscStructuredText` control on `findDisplay 12` set with `ctrlSetStructuredText` (static controls are click-transparent, so `onMapSingleClick` still fires): `src/duws/client/dialog/fnc_map_prompt.sqf`; pass `""` to clear before `openMap [false, false]`.
 
+## `hint` takes no duration, so a longer readout must be re-issued
+
+`hint` and `hintSilent` have no duration argument, and no command reads or sets the time before the engine fades the box. A long readout can fade before the reader finishes it. Fix: hold it with `hintSilent` re-issues of the same text inside the fade window, because each re-issue restarts the fade. Stop the re-issues when a newer readout replaces the text, or an old readout paints over the new one (`src/duws/server/debug/fnc_debug_garrison_query.sqf`).
+
 ## `onMapSingleClick` is one global slot: the next installer steals the previous one's click
 
 There is exactly one map-click handler per machine; a second `onMapSingleClick` overwrites the first with no error — two features that each open the map and wait on a click collide, and only the second ever fires. Fix: arbitrate the slot by one owner name in `uiNamespace` — claim with `["MODE", _handler] call fnc_mapclick_claim`, release with `["MODE"] call fnc_mapclick_release` (`server/misc/fnc_mapclick_init.sqf:25,68`); claiming while another holds is refused and said to the player, release restores the background listener. Spawn `waitUntil { !visibleMap }` to release on the player closing the map (`client/missions/fnc_map_readout_open.sqf:27-35`) — the engine gives no callback.

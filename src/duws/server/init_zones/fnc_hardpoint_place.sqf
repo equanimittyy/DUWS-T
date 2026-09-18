@@ -415,8 +415,8 @@ fnc_hardpoint_debug = {
     private _radiusCap = _cap - _tierBonus;
     private _live = { (_x select 4) isEqualTo _zoneKey } count DUWS_hardpoints;
     [
-        format ["[HARDPOINTS %1]", _zoneKey],
-        format ["  ring cap = %1 (radius %2m) + %3 (tier %4) = %5 max", _radiusCap, round _radius, _tierBonus, _tier, _cap],
-        format ["  on ground: %1 / %2", _live, _cap]
+        "Hardpoints",
+        ["Ring cap", str _cap, format ["%1 (radius %2 m) + %3 (tier %4)", _radiusCap, round _radius, _tierBonus, _tier]],
+        ["On ground", format ["%1 / %2", _live, _cap]]
     ]
 };
