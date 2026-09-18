@@ -96,7 +96,7 @@ an upgrade starts every garrison fresh.
 ## Recording a loss
 
 `DUWS_fnc_garrisonReserveWatch {key, grps}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:158`) tags each unit with its group's source
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:206`) tags each unit with its group's source
 token — stamped on the group at raise by `DUWS_fnc_zoneSpawnOne`
 (`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:259`) — and hangs a `Killed` handler on it.
 The handler checks that the whole group is down (`{alive _x} count units (group _unit) == 0`)
@@ -130,7 +130,7 @@ still count against this wall.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:487`) walks
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:535`) walks
 every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
 gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns
@@ -153,7 +153,7 @@ the pool to the ground without changing that total; only a wipe does.
 ## Placement: keeping a wave off the player's back
 
 `DUWS_fnc_garrisonReservePos {center, radius}`
-(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:25`) chooses where a wave stands up, in
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:73`) chooses where a wave stands up, in
 priority order over a flat distance floor, so a player never watches a squad appear and never gets
 flanked from their own approach direction:
 
@@ -217,23 +217,33 @@ range, a SAM denying the airspace over the zone.
 
 ## The break test
 
-`DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:8`) is the
-one capture/clear line for both site kinds: standing groups plus pooled tokens, worn to **a tenth
-of `full`'s token count**. A group counts as one whole token while any of its men stands. A site with
-an unspent pool cannot fall on an empty perimeter — the pooled tokens hold it above the line until the
-waves have spawned and been killed, so a player has to draw out and beat nine tenths of everything the
-site was ever worth, not just what happened to be standing when they arrived.
+`DUWS_fnc_garrisonBeaten {key}` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:10`) is the
+one capture/clear line for both site kinds: standing groups plus pooled tokens, worn to **15 % of
+`full`'s token count**. A group counts as one whole token while any of its men stands, which is why
+the line sits above a tenth. A site with an unspent pool cannot fall on an empty perimeter — the pooled
+tokens hold it above the line until the waves have spawned and been killed, so a player has to draw out
+and beat most of everything the site was ever worth, not just what happened to be standing when they
+arrived.
 
 The test counts standing groups, not the ledger's `surviving`, because a token whose raise placed
 nobody is neither lost nor pooled and would hold the site forever. OPCOM's homed defenders sit outside
 `full` but count through both halves: standing, they are tagged groups on the roster; pooled, they are
 tokens in the pool. A prefab's turret crews carry no reserve tag, so they do not count.
 
-- **Zone capture** (`src/duws/server/init_zones/fnc_zone_capture_ready.sqf:32`) additionally
-  requires BLUFOR outnumber whatever OPFOR is still present in the trigger area — `garrisonBeaten`
-  alone isn't enough, the player also has to hold the ground.
-- **Town clear** fires on `garrisonBeaten` alone, checked on the poller tick
-  (`src/duws/server/civilian/fnc_civ_garrison.sqf:185`) rather than an `EmptyDetector`, so a town can
-  no longer be cleared by OPFOR merely withdrawing. Clearing pays a reputation credit and a
-  `REGROUPING` hold, drops the tier to I — not 0; ownership survives, only the purchase was beaten
-  — and reseeds the garrison to `floor(0.3 × full)` tokens rather than clearing it outright.
+`garrisonBeaten` alone never takes ground. Both a zone capture and a town clear also need the
+attacker to outnumber the defender over the site's streaming ring (radius + 400 m), ground units only,
+counted owner-blind by `DUWS_fnc_siteOutnumbers`. Both conditions must hold unbroken for
+`DUWS_captureHold` (20 s, `src/duws/server/server_var_init.sqf`).
+
+- **Zone capture** (`src/duws/server/init_zones/fnc_zone_capture_ready.sqf`) runs as the capture
+  trigger's condition every 2 s, and the trigger's interruptible timeout is the hold.
+- **Town clear** is checked on the 10 s poller tick
+  (`src/duws/server/civilian/fnc_civ_garrison.sqf:192`), which stamps when both conditions first hold,
+  so the hold lands between 20 and 30 s. Clearing pays a reputation credit and a `REGROUPING` hold,
+  drops the tier to I — not 0; ownership survives, only the purchase was beaten — and reseeds the
+  garrison to `floor(0.3 × full)` tokens rather than clearing it outright.
+
+Survivors of a flipped zone or a cleared town are not ordered off. `DUWS_fnc_garrisonRelease` moves
+them to the site's `leftover` roster and clears their garrison key, so a later wipe records nothing
+against the reseeded ledger. They fight on where they stand, and `DUWS_fnc_garrisonLeftoverSweep`
+deletes each one once no player is within 500 m.

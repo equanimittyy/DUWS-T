@@ -1,37 +1,28 @@
 // Locality: server -- called from the zone capture trigger's condition, which is created
-// server-local for exactly this reason: the garrison peak below is a server-side global, and a
+// server-local for exactly this reason: the garrison ledger below is server-side, and a
 // client evaluating this would read nil and answer for a zone whose state it cannot see.
 // usage: [thisTrigger] call fnc_zone_capture_ready
 //
-// Replaces `WEST SEIZED` on the BLUFOR-takes-it direction. SEIZED demands the whole trigger area be
-// empty of OPFOR, which made a capture a sweep of every last patrol out to the zone radius; this
-// asks the two questions that actually describe taking ground -- is the garrison beaten, and does
-// BLUFOR outnumber what is still standing on the ground. The retake direction is fnc_zone_retake_ready.
+// The two conditions of taking ground, held for DUWS_captureHold by the trigger's timeout: the garrison
+// beaten, and BLUFOR outnumbering OPFOR over the streaming ring. The retake direction is fnc_zone_retake_ready.
 
 if (!isServer) exitWith { false };
 
 params ["_trg"];
-private _pos = _trg getVariable ["DUWS_zonePos", []];
 private _key = _trg getVariable ["DUWS_zoneKey", ""];
-if (_pos isEqualTo [] || {_key == ""}) exitWith { false };
+if (_key == "") exitWith { false };
 
 // Not live means the zone is stowed, mid-spawn, or not OPFOR's. Refusing here stops a player walking
 // onto empty ground and taking it before its garrison has been placed -- and it only holds while every
-// teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated.
+// teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated. Also the cheap
+// gate: the trigger has no activation, so this runs on every zone whether or not anyone is near.
 if !([_key] call DUWS_fnc_garrisonHeld) exitWith { false };
 
-// The garrison beaten: this zone's own roster men -- wherever they are standing, a wandered patrol still
-// counts, a neighbour's garrison never does -- plus the men its reserve pool still owes, worn to a tenth
-// of the zone's full fighting potential (DUWS_fnc_garrisonBeaten). The owed reserves hold the zone above
-// the line until the waves have spawned and been beaten, so it cannot fall on an empty perimeter; at
-// multiplier 1 the pool is empty and this is the garrison alone, the one break line across the campaign.
+// This zone's own groups -- wherever they stand, a wandered patrol still counts, a neighbour's garrison never
+// does -- plus the tokens its pool still owes (DUWS_fnc_garrisonBeaten). The owed reserves hold the zone
+// above the line until the waves have spawned and been beaten, so it cannot fall on an empty perimeter.
 if !([_key] call DUWS_fnc_garrisonBeaten) exitWith { false };
 
-// Who holds the ground, over the trigger's own area so both sides are counted across the same
-// circle. Deliberately unkeyed, unlike the test above: anyone standing here counts for their side
-// whoever spawned them, so a side mission's guards defend the zone and a passing patrol contests it.
-//
-// `list` is the engine's own record of what activates this trigger, which is WEST PRESENT -- the
-// same set the `this` beside this call is true for, so the two cannot disagree about who is here.
-private _radius = (triggerArea _trg) select 0;
-(count (list _trg)) > ([_pos, _radius, EAST] call fnc_side_count_at)
+// Deliberately unkeyed, unlike the test above: anyone standing in the ring counts for their side whoever
+// spawned them, so a side mission's guards defend the zone and a passing patrol contests it.
+[_key, "zone", WEST, EAST] call DUWS_fnc_siteOutnumbers

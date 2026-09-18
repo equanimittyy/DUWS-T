@@ -9,6 +9,9 @@ DUWS_fnc_opcom_captureEnters = {
     private _in = (_pos distance2D (_site get "pos")) <= (_site get "radius");
     private _entered = _in && {!(_t getOrDefault ["inZone", false])};
     _t set ["inZone", _in];
+    // Stamped on any tick inside that has none rather than only on entry, so a tasking already inside without a
+    // stamp starts its hold instead of never finishing it.
+    if (_in) then { if !("inZoneAt" in _t) then { _t set ["inZoneAt", time] } } else { _t deleteAt "inZoneAt" };
     _entered
 };
 
@@ -19,6 +22,7 @@ DUWS_fnc_opcom_captureEnd = {
     private _zk = _t get "targetZone";
     private _site = [_zk] call fnc_site_at;
     _t set ["targetZone", ""];
+    _t deleteAt "inZoneAt";
     if ((_pos distance2D (_site get "pos")) > (_site get "radius")) exitWith {
         _t set ["hold", 0];
         if !([_t, "move", _site get "pos", _zk] call fnc_opcom_task) then { [_t, "guard"] call fnc_opcom_task };
@@ -43,8 +47,9 @@ DUWS_fnc_opcom_stepCapture = {
         private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
         if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
     };
-    // No BLUFOR count: any within K would have rendered the attacker, so its stored force outnumbers nobody.
-    if ((_t get "inZone") && {(_t get "effForce") > 0}) then {
+    // No BLUFOR count: any within K would have rendered the attacker, so its stored force outnumbers nobody. It still
+    // holds for DUWS_captureHold, the rule a live attacker meets through the trigger's timeout.
+    if ((_t get "inZone") && {(_t get "effForce") > 0} && {time - (_t get "inZoneAt") >= DUWS_captureHold}) then {
         private _zpos = ([_zk] call fnc_site_at) get "pos";
         private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_zpos select 0), floor abs (_zpos select 1)], objNull];
         if (!isNull _trg) then { call compile ((triggerStatements _trg) select 1) };

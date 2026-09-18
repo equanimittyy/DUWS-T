@@ -59,7 +59,7 @@ fnc_site_occupant_register = {
         ["aiAware", _aiAware], ["minAI", _minAI],
         ["awake", _frozen], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["deployedList", []], ["deployedStrength", 0],
-        ["trg", objNull], ["raising", false], ["withdrawing", false]
+        ["trg", objNull], ["raising", false]
     ];
     _list pushBack _o;
     DUWS_occupants set [_key, _list];

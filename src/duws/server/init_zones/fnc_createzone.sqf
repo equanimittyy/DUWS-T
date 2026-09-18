@@ -258,25 +258,26 @@ if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) 
 // Hardpoints (replacing the ring removed above) are sited in their own pass after every zone is built
 // (fnc_init_OPFOR_WARCOM.sqf), not per-zone here -- but they still key off this zone's centre, so its cap guard and streaming coupling are unaffected.
 
-// Server-local, unlike the notification trigger above: the capture condition reads the garrison peak, a
-// server-side global a client can't see -- settling the locality question fnc_captured.sqf records as unproven.
+// Server-local, unlike the notification trigger above: the capture condition reads the garrison ledger, which is
+// server-side state a client can't see -- settling the locality question fnc_captured.sqf records as unproven.
 _trg = createTrigger ["EmptyDetector", _zonePos, false];
 _trg setTriggerArea [_size, _size, 0, false];
-// PRESENT, not SEIZED: SEIZED demands the whole area empty of OPFOR, turning capture into a sweep of every last
-// patrol; this instead asks whether the garrison is beaten and BLUFOR outnumber what's left. The outer streaming
-// ring is walked off once the zone flips (fnc_zone_stream_init.sqf).
-_trg setTriggerActivation ["WEST", "PRESENT", true];
+// No activation: nobody has to stand inside the zone radius, only win the count over the streaming ring
+// (fnc_zone_capture_ready, fnc_zone_retake_ready), so the condition alone decides in both directions.
+_trg setTriggerActivation ["NONE", "PRESENT", true];
+// With no activation to gate it, the condition runs on every zone all campaign; a 2 s check is still ten looks
+// inside the hold.
+_trg setTriggerInterval 2;
 // Carried on the trigger, not formatted into the condition -- same reason as the enemy-contact trigger above.
-// Both ride the trigger through every ownership change, so re-arm handlers only touch activation and statement.
-_trg setVariable ["DUWS_zonePos", _zonePos];
+// Rides the trigger through every ownership change, so re-arm handlers only touch the statement.
 _trg setVariable ["DUWS_zoneKey", _zoneKey];
 // 7th arg is the retired CP-bounty slot, always 0 now: liberation pays a flat bonus (fnc_captured), not a
 // worth-scaled one, and no CP rides a recapture. _points here is separate -- the zone's permanent worth,
 // driving AP swings -- kept only so the 7-arg signature matches across capture handlers.
-_trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, 0], ""];
-// Flat, not the usual min/mid/max spread: the hold time is a rule the player learns, and a capture that lands
-// anywhere from 30-50 s reads as unreliable. Interruptable, so stepping off the objective restarts it.
-_trg setTriggerTimeout [30, 30, 30, true];
+_trg setTriggerStatements ["[thisTrigger] call fnc_zone_capture_ready", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, 0], ""];
+// Flat, not the usual min/mid/max spread: the hold time is a rule the player learns. Interruptible, so losing
+// either condition restarts it.
+_trg setTriggerTimeout [DUWS_captureHold, DUWS_captureHold, DUWS_captureHold, true];
 
 // floor abs so the key carries no minus sign (the capture handlers rebuild the same name)
 private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];

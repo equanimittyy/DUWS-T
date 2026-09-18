@@ -282,7 +282,7 @@ DUWS_fnc_hardpointOPSense = {
     } forEach DUWS_hardpoints;
 };
 
-// The zone poller's hook shape stripped of withdraw/retake: a hardpoint is only present or not, standing or cleared.
+// The zone poller's hook shape stripped of leftovers and retake: a hardpoint is only present or not, standing or cleared.
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
     if (_o getOrDefault ["cleared", false]) exitWith {};

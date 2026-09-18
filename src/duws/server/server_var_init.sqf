@@ -114,6 +114,10 @@ DUWS_streamProfiles = createHashMapFromArray [
     ["base",       [  0,  10, false, false, 2]]
 ];
 
+// Seconds a capture's conditions must hold unbroken before the ground changes hands. One number for the zone
+// trigger's timeout, the town clear and OPCOM's virtual retake, so the rule a player learns is the same everywhere.
+DUWS_captureHold = 20;
+
 // support_max_slots caps one-use items carried at once; support_death_refund is the share (both
 // currencies) refunded on death holding unused ones -- half, so walking an item back still beats
 // dying with it. Both read on clients, so both broadcast.

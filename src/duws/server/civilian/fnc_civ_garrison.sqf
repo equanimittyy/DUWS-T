@@ -38,6 +38,8 @@ private _fnc_raise = {
 
     // Zone's reserve model: filtered x1 tier thins to garrison_density on stand, surplus + mult-1 copies wait in the pool, less the loss ledger.
     private _garrison = [_key, [_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
+    // Nothing to stand is still adopted, as a zone's empty raise is: a town that never goes live can never be cleared.
+    if (_garrison isEqualTo []) exitWith { missionNamespace setVariable [RAISE_SLOT(_i), [[], _tier]] };
     private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
     private _men = [_grps] call fnc_site_men_of;
 
@@ -105,6 +107,9 @@ private _fnc_tick = {
     };
 
     // Presence/empty-clock/vacate-latch are computed once by the poller and passed in, so the arrival test, latch and streaming teardown can't disagree on "somebody is here" a few seconds apart.
+
+    // Not a garrison state, so it ends nothing: a cleared town's survivors are collected while its next garrison raises.
+    [_key] call DUWS_fnc_garrisonLeftoverSweep;
 
     // Raise in flight owns the town until it reports -- otherwise the reinforcement test would read the still-empty roster as owing the whole composition and raise it a second time.
     if (_t get "raising") exitWith {
@@ -181,12 +186,18 @@ private _fnc_tick = {
         ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
             _i, _rep]] call fnc_log;
     } else {
-        // Cleared at a tenth of full potential (garrison + owed reserves), the same break test a zone uses, so a town isn't finished while its waves are still inbound.
+        // A zone capture's two conditions, the break test and the count over the streaming ring, held unbroken for
+        // DUWS_captureHold. The tick is 10 s, so the hold lands between 20 and 30 s.
         // What clearing does differs from a zone: a reputation credit, garrison reseeded to 0.3, and a REGROUPING hold -- never a change of owner.
-        if (_t get "awake" && {[_key] call DUWS_fnc_garrisonBeaten}) then {
+        private _won = _t get "awake" && {[_key] call DUWS_fnc_garrisonBeaten} && {[_key, "town_gar", WEST, EAST] call DUWS_fnc_siteOutnumbers};
+        if (!_won) then { _t set ["clearSince", -1] } else {
+            if ((_t getOrDefault ["clearSince", -1]) < 0) then { _t set ["clearSince", _now] };
+        };
+        if (_won && {_now - (_t get "clearSince") >= DUWS_captureHold}) then {
+            _t set ["clearSince", -1];
             [_key, false] call DUWS_fnc_garrisonSetLive;
             [_key] call DUWS_fnc_garrisonReserveClear;
-            [_key] call fnc_site_roster_clear;
+            [_key] call DUWS_fnc_garrisonRelease;
             _t set ["awake", false];
             _t set ["tier", 0];
             // Clearing destroys the purchase, not the ownership -- tier files back to I, not 0: the commander's spending was beaten, not the enemy's claim to the ground.

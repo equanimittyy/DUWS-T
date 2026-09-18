@@ -153,11 +153,10 @@ switch (_posture) do {
             private _building = _candidates select _i;
             _building setVariable ["DUWS_garrisonedBy", _group];
             // Holds via a doMove loop between the building's positions with pathing left on, so it
-            // works the post and fights -- disabling pathing froze the squad mid-firefight. Withdrawal
-            // releases the loop (DUWS_fnc_zoneSendOff clears it, re-enables PATH) so a hold never
-            // outlives a later order. Stance splits by structure: a post stands (UP), a house takes
-            // what the fight calls for (AUTO); a tower guard can occasionally strand itself walking
-            // between platform slots -- accepted cost of not freezing it.
+            // works the post and fights -- disabling pathing froze the squad mid-firefight. Stance splits
+            // by structure: a post stands (UP), a house takes what the fight calls for (AUTO); a tower
+            // guard can occasionally strand itself walking between platform slots -- accepted cost of
+            // not freezing it.
             private _isPost = _building in _posts;
             [_group, [_building], count units _group, ["AUTO", "UP"] select _isPost]
                 call fnc_spreadIntoBuildings;

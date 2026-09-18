@@ -9,7 +9,8 @@
 //
 if (!isServer) exitWith { 0 };
 
-params ["_pos", "_radius", "_side"];
+// _ground drops aircraft: a capture counts who holds the ground, and a loaded transport crossing the ring holds none.
+params ["_pos", "_radius", "_side", ["_ground", false]];
 
 private _n = 0;
 {
@@ -19,5 +20,5 @@ private _n = 0;
             _n = _n + 1;
         };
     } forEach _members;
-} forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
+} forEach (_pos nearEntities [["CAManBase", "LandVehicle"] + ([["Air"], []] select _ground), _radius]);
 _n

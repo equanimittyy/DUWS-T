@@ -49,10 +49,10 @@ The code is the source of truth. What new work must hold to:
   built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or walks, and land-taxi —
   lifting a foot unit over dry ground with the same carry.
 - **Capture.** A `capture` takes the BLUFOR-held zone at its target and aims at the zone's centre
-  (`fnc_opcom_task`). A retake is an `EAST PRESENT` trigger gated on `fnc_zone_retake_ready` — OPFOR outnumber
-  BLUFOR, a BLUFOR garrison counting as beaten until one is built — so a zone flips with players inside and takes no
-  hold. A virtual attacker inside the radius posts the contact report as it enters and runs the zone's retake
-  statement itself. The order ends when the zone is OPFOR's: an attacker inside the radius garrisons there, a live one
+  (`fnc_opcom_task`). A retake is the zone trigger's condition `fnc_zone_retake_ready` — OPFOR outnumber BLUFOR over
+  the streaming ring, a BLUFOR garrison counting as beaten until one is built — held for `DUWS_captureHold`, so a
+  zone flips with players inside. A virtual attacker inside the radius posts the contact report as it enters and
+  runs the zone's retake statement itself once it has stood inside for `DUWS_captureHold`. The order ends when the zone is OPFOR's: an attacker inside the radius garrisons there, a live one
   holding `guard` until it stows, and one still on the road re-garrisons there.
 - **Intercept.** An `intercept` targets a belief row key, a BLUFOR group's `netId` (`fnc_opcom_task`). It follows
   the row's believed position, re-planning only once that moves past one cell, and keeps the last position read if
@@ -320,8 +320,9 @@ launches as a flank.
 - **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action
   ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`fnc_zone_retake_ready`): the zone's BLUFOR garrison beaten, none bought counting as beaten, and OPFOR
-  outnumbering BLUFOR in the radius. A live fight flips through the retake trigger; a virtual attacker at an empty
-  zone flips it on the OPCOM tick against stored state, and OPCOM sends that attack's contact report itself. The
+  outnumbering BLUFOR over the streaming ring, both for `DUWS_captureHold`. A live fight flips through the retake
+  trigger; a virtual attacker at an empty zone flips it on the OPCOM tick against stored state once it has held
+  the radius for `DUWS_captureHold`, and OPCOM sends that attack's contact report itself. The
   attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.

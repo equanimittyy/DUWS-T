@@ -3,12 +3,6 @@
 // per zone -- the streaming loop and fnc_createzone's tail poll; the raise flag is their handshake, kept.
 if (!isServer) exitWith {};
 
-// Past the streaming ring, so a group that walks it ends up outside the radius the capturing player is likely still in.
-#define WITHDRAW_DISTANCE 800
-
-// Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a soldier doing it does not.
-#define WITHDRAW_KEEP_RADIUS 500
-
 // Where a raise files its result for the tick to adopt. Unset while the worker is in flight.
 #define ZONE_RAISE_SLOT(K) format ["DUWS_zoneRaise_%1", K]
 
@@ -152,7 +146,7 @@ DUWS_fnc_zoneManStatics = {
     };
 
     // A gun still carrying the prefab's crew is garrison as much as a spawned one, so its gunner joins
-    // the roster. Unrostered, he'd deny capture through fnc_side_count_at while counting toward neither the peak nor the break line -- killing him would be progress the zone never registers.
+    // the roster: that is what collects him when the zone streams out or falls.
     { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
@@ -215,44 +209,6 @@ DUWS_fnc_zoneStow = {
     [_key] call DUWS_fnc_garrisonReserveClear;
 };
 
-// Order makes the collection quiet rather than performing it -- a group that can't path is still
-// collected on distance, so nothing is left standing either way.
-// Roster-scoped, so only this zone's own garrison goes: a neighbouring town's or a side mission's
-// guards aren't this zone's to take.
-// Locality: addWaypoint and setBehaviour are ignored unless the group is local to the machine issuing them
-// (docs/info/architecture/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
-DUWS_fnc_zoneSendOff = {
-    params ["_key", "_pos"];
-    private _men = ([_key] call fnc_zone_roster) select { alive _x };
-    private _grps = [];
-    { _grps pushBackUnique (group _x) } forEach _men;
-    // Released before any order is issued: a garrison man is held two ways, and withdrawal must undo
-    // both -- PATH disabled so he can't walk out of his building, and the shared house pass can have him on a loop that reissues doMove, which beats a waypoint added afterwards. Without this, men stayed in their houses.
-    {
-        _x setVariable ["DUWS_postReleased", true];
-        _x enableAI "PATH";
-    } forEach _men;
-    {
-        private _grp = _x;
-        // The defend/patrol waypoints the spawners gave them would pull them straight back onto the
-        // objective. Deleted back to front: deleteWaypoint shifts every later index down, so a forward pass would delete every other one.
-        private _wps = waypoints _grp;
-        reverse _wps;
-        { deleteWaypoint _x } forEach _wps;
-        // Outward on the bearing they already stand on, so a group on the far side of the zone doesn't cross it to leave.
-        private _dest = _pos getPos [WITHDRAW_DISTANCE, _pos getDir (leader _grp)];
-        private _wp = _grp addWaypoint [_dest, 50];
-        _wp setWaypointType "MOVE";
-        _wp setWaypointSpeed "FULL";
-        _grp setBehaviour "AWARE";
-        _grp setSpeedMode "FULL";
-        // Saves the collection tidying up after itself: the engine drops the group on the last man,
-        // whether collected or shot.
-        _grp deleteGroupWhenEmpty true;
-    } forEach _grps;
-    _men
-};
-
 // Dispatched, not run inline: a full composition takes up to a couple of minutes to place, and the
 // poller holds the clock of every other site.
 DUWS_fnc_zoneRaiseWorker = {
@@ -275,8 +231,7 @@ DUWS_fnc_zoneRaiseWorker = {
     missionNamespace setVariable [ZONE_RAISE_SLOT(_key), true];
 };
 
-// Each branch below ends the pass for this zone: they're mutually exclusive states of one garrison,
-// and the raise must never see a zone mid-withdrawal.
+// Each branch below ends the pass for this zone: they're mutually exclusive states of one garrison.
 DUWS_zoneHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
     private _site = [_key] call fnc_site_at;
@@ -284,32 +239,8 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     private _size = _site get "radius";
     private _opforHolds = _pos in WARCOM_zones_controled_by_OPFOR;
 
-    // Retried every pass rather than timed out, so a man someone is standing over is eventually
-    // collected rather than never. Nothing else would collect him -- fnc_repetitive_cleanup takes bodies, wrecks and empty vehicles, never living men.
-    if (_o get "withdrawing") exitWith {
-        // Kept on a roster of its own, not in the record: a record holds plain values so it can
-        // survive a save, and these are object references.
-        private _left = ([_key, "withdrawing"] call fnc_site_roster) select { alive _x };
-        // BIS_fnc_ListPlayers, not allPlayers: this is the streaming system's own answer to "is a
-        // player here", and the whole collection turns on it. A list that came back empty when it shouldn't would delete every survivor on the first pass -- the exact vanishing act the walk-off exists to avoid.
-        private _players = call BIS_fnc_ListPlayers;
-        {
-            private _man = _x;
-            if ((_players findIf { _x distance _man < WITHDRAW_KEEP_RADIUS }) < 0) then {
-                deleteVehicle _man;
-            };
-        } forEach _left;
-        private _roster = [_key, "withdrawing"] call fnc_site_roster;
-        _roster resize 0;
-        _roster append (_left select { alive _x });
-        // Deleted on retake rather than left: they've left the zone, nobody's watching, and the
-        // arriving garrison files its own roster these men aren't on -- nothing else would collect them.
-        if (_opforHolds) then {
-            { deleteVehicle _x } forEach _roster;
-            [_key, "withdrawing"] call fnc_site_roster_clear;
-            _o set ["withdrawing", false];
-        };
-    };
+    // Not a garrison state, so it ends nothing: a retake raises the new garrison beside the old one's survivors.
+    [_key] call DUWS_fnc_garrisonLeftoverSweep;
 
     // A raise in flight owns this zone until it reports.
     if (_o get "raising") exitWith {
@@ -328,29 +259,22 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
         };
     };
 
-    // Composition isn't despawned -- the emplacements are the player's now -- but surviving OPFOR are
-    // a separate question: the capture trigger tests over the zone radius while streaming reaches 400 m further, so the zone can flip with units in that ring still alive, never inside the test.
-    // Bounded, not open-ended: fnc_zone_capture_ready refuses while more than its break fraction of the
-    // peak is alive anywhere, so this is a tenth of a garrison at worst.
+    // Composition isn't despawned -- the emplacements are the player's now.
     if !(_opforHolds) exitWith {
-        // Called before the send-off: the zone has changed hands, and a live flag surviving past this
+        // Called before the release: the zone has changed hands, and a live flag surviving past this
         // reads a pack-up as a garrison beaten.
         [_key] call fnc_zone_garrison_dropped;
         // OPFOR no longer own this ground, so there's nothing to reinforce.
         [_key] call DUWS_fnc_garrisonReserveClear;
-        private _leftovers = [_key, _pos] call DUWS_fnc_zoneSendOff;
-        [_key, "withdrawing"] call fnc_site_roster_clear;
-        ([_key, "withdrawing"] call fnc_site_roster) append _leftovers;
-        _o set ["withdrawing", true];
+        private _left = [_key] call DUWS_fnc_garrisonRelease;
         _o set ["awake", false];
         // Re-latched because a retake isn't a clean start: a player backed off the objective but still
         // on approach can be within the wider arrival test and would see the new garrison raise in front of them.
         _o set ["awaitVacate", true];
         // Attrition is left as-is, not reset: resetting it here would hand the player's grinding
         // straight back the moment they lose the ground again -- fnc_opfor_cap floors it when the flip actually happens.
-        if (count _leftovers > 0) then {
-            ["INFO", "STREAM", format ["%1 lost; %2 surviving garrison man/men ordered off",
-                _key, count _leftovers]] call fnc_log;
+        if (_left > 0) then {
+            ["INFO", "STREAM", format ["%1 lost; %2 surviving garrison man/men fight on", _key, _left]] call fnc_log;
         };
     };
 

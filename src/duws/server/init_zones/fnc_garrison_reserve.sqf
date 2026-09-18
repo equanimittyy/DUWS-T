@@ -6,11 +6,58 @@
 // Standing groups plus the pool, not the ledger's surviving count: a token whose raise placed nobody is neither lost
 // nor pooled, and would hold the site forever. The pool keeps a site from falling on an empty perimeter while waves
 // are still owed, and OPCOM's defenders count through both halves. No full stamped yet reads as not-beaten.
+// 0.15, not a tenth: a group with one man standing counts as a whole token.
 DUWS_fnc_garrisonBeaten = {
     params ["_key"];
     private _full = count ([_key] call DUWS_fnc_garrisonFull);
     if (_full <= 0) exitWith { false };
-    (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.1 * _full)
+    (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.15 * _full)
+};
+
+// The numbers half of taking ground, counted over the whole ring the garrison streams in rather than the site
+// radius, so a flip leaves no outer-ring force the attacker never had to beat. The attacker is counted first
+// because a held site usually has none of them near, which skips the second query.
+DUWS_fnc_siteOutnumbers = {
+    params ["_key", "_profile", "_side", "_foe"];
+    private _site = [_key] call fnc_site_at;
+    private _pos = _site get "pos";
+    private _ring = (_site get "radius") + ((DUWS_streamProfiles get _profile) select 0);
+    private _n = [_pos, _ring, _side, true] call fnc_side_count_at;
+    _n > 0 && {_n > ([_pos, _ring, _foe, true] call fnc_side_count_at)}
+};
+
+// Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a
+// soldier doing it does not.
+#define LEFTOVER_KEEP_RADIUS 500
+
+// A flipped zone's or cleared town's survivors fight on where they stand; an engaged group cannot be ordered off
+// (arma_engine_gotchas.md). Their key is cleared so a later wipe records nothing against the ledger the flip has
+// just reseeded, and they move to their own roster so a new garrison's raise and count never see them.
+DUWS_fnc_garrisonRelease = {
+    params ["_key"];
+    private _men = ([_key] call fnc_site_roster) select { alive _x };
+    { _x setVariable ["DUWS_garrisonKey", ""] } forEach _men;
+    ([_key, "leftover"] call fnc_site_roster) append _men;
+    [_key] call fnc_site_roster_clear;
+    count _men
+};
+
+// Retried every pass rather than timed out, so a man someone is standing over is collected eventually. Nothing else
+// would collect him: fnc_repetitive_cleanup takes bodies, wrecks and empty vehicles, never living men.
+DUWS_fnc_garrisonLeftoverSweep = {
+    params ["_key"];
+    private _left = [_key, "leftover"] call fnc_site_roster;
+    if (_left isEqualTo []) exitWith {};
+    // BIS_fnc_listPlayers, not allPlayers: the streaming system's own answer to "is a player here". A list that came
+    // back empty when it shouldn't would delete every survivor in front of whoever is watching.
+    private _players = call BIS_fnc_listPlayers;
+    {
+        private _man = _x;
+        if (alive _man && {(_players findIf { _x distance _man < LEFTOVER_KEEP_RADIUS }) < 0}) then { deleteVehicle _man };
+    } forEach _left;
+    private _alive = _left select { alive _x };
+    _left resize 0;
+    _left append _alive;
 };
 
 // eyePos is ASL, so the target is lifted to standing head height and converted to match. VIEW and GEOM
