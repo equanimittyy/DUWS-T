@@ -16,8 +16,8 @@ DUWS_fnc_opcom_cellDist = {
     (abs ((_ca mod _w) - (_cb mod _w))) max (abs (floor (_ca / _w) - floor (_cb / _w)))
 };
 
-// Returns "arrived", "water" (a transportable unit stopped at a ferry leg's near shore), or "moving". Replans when
-// the route chain is empty.
+// Returns "arrived", "water" (a transportable unit stopped at a ferry leg's near shore), "blocked" (a replan found
+// no dry route for a hull), or "moving". Replans when the route chain is empty.
 DUWS_fnc_opcom_advance = {
     params ["_t"];
     if ((_t get "route") isEqualTo [] && {(_t get "target") isNotEqualTo []}) then {
@@ -25,6 +25,7 @@ DUWS_fnc_opcom_advance = {
         _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
     };
     private _route = _t get "route";
+    if (_route isEqualTo [] && {(_t get "target") isNotEqualTo []}) exitWith { "blocked" };
     private _leg = _t get "leg";
     private _pos = _t get "pos";
     private _transportable = "transportable" in (_t get "flags");

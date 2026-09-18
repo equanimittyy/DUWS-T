@@ -61,6 +61,14 @@ if (_boatHome && {_port < 0}) exitWith {
     ["INFO", "OPCOM", format ["task: site %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
 };
 if (_boatHome) then { _target = [_port] call DUWS_fnc_opcom_c2w };
+// Direct route (lambda 0): distance only.
+private _plan = if (_order isEqualTo "guard") then { [[], "grid"] } else {
+    [_t get "pos", _target, _t get "moveType", 0] call fnc_opcom_route
+};
+_plan params ["_pts", "_mode"];
+if (_order isNotEqualTo "guard" && {_pts isEqualTo []}) exitWith {
+    ["INFO", "OPCOM", format ["task: no dry route for tasking %1 to %2 -- refused", _t get "id", _target]] call fnc_log; false
+};
 
 private _wasGarrison = (_t get "order") isEqualTo "garrison";
 private _hz = _t get "homeZone";
@@ -70,8 +78,6 @@ if (_order isEqualTo "guard") then {
     _t set ["route", []];
 } else {
     _t set ["target", _target];
-    // Direct route (lambda 0): distance only.
-    ([_t get "pos", _target, _t get "moveType", 0] call fnc_opcom_route) params ["_pts", "_mode"];
     _t set ["route", _pts];
     _t set ["routeMode", _mode];
 };

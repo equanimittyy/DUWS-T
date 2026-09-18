@@ -1,15 +1,13 @@
 // Locality: server. Builds the influence-grid substrate once, at OPCOM init: the two live force layers
-// (zeroed, the rebuild fills them each tick), the static per-cell arrays it never rebuilds -- a land mask,
-// land/water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the
-// rebuild never touches (accumulating memory, not a live layer). A ground tasking is ordered only where
-// source and target cell share a component, so the director never routes a squad at an island it cannot
-// reach. Server-local, numbers only, never persisted; a restored campaign refills the live layers on its
-// first tick and re-learns coverage from cold.
+// (zeroed, the rebuild fills them each tick), the static per-cell arrays it never rebuilds -- a land mask and
+// water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the rebuild never
+// touches (accumulating memory, not a live layer). Server-local, numbers only, never persisted; a restored campaign
+// refills the live layers on its first tick and re-learns coverage from cold.
 //
 // Only the play box is calculated. The full-width lattice is allocated so every reader keeps the absolute
-// _cy * _w + _cx index, but surfaceIsWater and both flood fills run only inside the box (DUWS_opcom_box, a
+// _cy * _w + _cx index, but surfaceIsWater and the water flood fill run only inside the box (DUWS_opcom_box, a
 // cell-index rectangle around the zones, towns and HQ plus OPCOM_GRID_BOX_BUFFER_CELLS). Out-of-box cells stay
-// land=false / comp=-1 / water=-1 -- impassable to ground and boat, and the router rejects them -- so OPCOM
+// land=false / water=-1 -- impassable to ground and boat, and the router rejects them -- so OPCOM
 // never computes or routes over the empty rest of the map.
 if (!isServer) exitWith {};
 
@@ -47,13 +45,11 @@ DUWS_opcom_grid_fri = []; DUWS_opcom_grid_fri resize _n;
 DUWS_opcom_grid_ene = []; DUWS_opcom_grid_ene resize _n;
 DUWS_opcom_grid_seen = []; DUWS_opcom_grid_seen resize _n;   // last-swept tick per cell
 private _land = []; _land resize _n;          // true = land, passable to ground
-private _comp = []; _comp resize _n;          // component id per land cell; -1 on water and out-of-box
 
 // Cheap default for every slot so none is left nil; the costly surfaceIsWater runs only inside the box.
 // seen inits a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
 for "_i" from 0 to (_n - 1) do {
     _land set [_i, false];
-    _comp set [_i, -1];
     DUWS_opcom_grid_fri set [_i, 0];
     DUWS_opcom_grid_ene set [_i, 0];
     DUWS_opcom_grid_seen set [_i, -OPCOM_COVER_SPAN];
@@ -64,8 +60,8 @@ for "_cy" from _minCy to _maxCy do {
     };
 };
 
-// The 500 m centre-sample marks a coastal origin's cell water when its centre falls offshore, so the router
-// (source and target must share a land component) can never reach a garrison site that is really on land.
+// The 500 m centre-sample marks a coastal site's cell water when its centre falls offshore, so a ground route would
+// need a ferry, or find no way in, to reach a garrison site that is really on land.
 private _forceLand = {
     params ["_p"];
     private _fx = (floor ((_p select 0) / _cell)) min (_w - 1) max 0;
@@ -75,43 +71,7 @@ private _forceLand = {
 { [_x select 1] call _forceLand } forEach zone_meta_array;
 { [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
 
-// 8-neighbour flood fill: label each connected land region, matching the router's diagonal steps. An
-// explicit stack, not recursion (SQF has no tail call); a cell can be pushed twice before it is labelled,
-// so the pop re-checks. Water cells keep -1 and share a component with nothing. Start and expansion are
-// bounded to the box; out-of-box land=false never seeds a region regardless.
-private _next = 0;
-for "_sy" from _minCy to _maxCy do {
-    for "_sx" from _minCx to _maxCx do {
-        private _start = _sy * _w + _sx;
-        if ((_land select _start) && {(_comp select _start) < 0}) then {
-            private _id = _next; _next = _next + 1;
-            private _stack = [_start];
-            while {count _stack > 0} do {
-                private _i = _stack deleteAt (count _stack - 1);
-                if ((_comp select _i) < 0) then {
-                    _comp set [_i, _id];
-                    private _ix = _i mod _w;
-                    private _iy = floor (_i / _w);
-                    for "_dy" from -1 to 1 do {
-                        for "_dx" from -1 to 1 do {
-                            if (_dx != 0 || _dy != 0) then {
-                                private _nx = _ix + _dx;
-                                private _ny = _iy + _dy;
-                                if (_nx >= _minCx && {_nx <= _maxCx} && {_ny >= _minCy} && {_ny <= _maxCy}) then {
-                                    private _j = _ny * _w + _nx;
-                                    if ((_land select _j) && {(_comp select _j) < 0}) then { _stack pushBack _j };
-                                };
-                            };
-                        };
-                    };
-                };
-            };
-        };
-    };
-};
-
 DUWS_opcom_grid_land = _land;
-DUWS_opcom_grid_comp = _comp;
 
 // Water connectivity, the boat/air domain split: flood-fill the water cells (the mask's complement), size
 // each component, keep only the navigable ones. grid_water >= 0 is navigable water a boat routes and reaches

@@ -125,6 +125,12 @@ private _stepOne = {
     params ["_t", "_grp", "_live"];
     private _row = DUWS_opcom_orders getOrDefault [_t get "order", DUWS_opcom_orderHold];
     private _adv = [_t, _live] call (_row select 0);
+    // Before the order's step, which reads fields guard clears; hold 0 as a drop is no OPCOM commit.
+    if (_adv isEqualTo "blocked") exitWith {
+        ["INFO", "OPCOM", format ["task: tasking %1 has no dry route to %2 -- guards", _t get "id", _t get "target"]] call fnc_log;
+        _t set ["hold", 0];
+        [_t, "guard"] call fnc_opcom_task;
+    };
     private _ctx = [_t, _live, _grp, _adv] call _stepContext;
     if ([_t, _ctx] call (_row select 1)) exitWith {};
     private _bound = [_t, _ctx] call _ferryStage;

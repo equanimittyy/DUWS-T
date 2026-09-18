@@ -1,6 +1,7 @@
 // Locality: server, [] call'd at load. Streaming helpers: de-virtualise a tasking into a live A3 group near a
-// player, stow it back to a world point when it leaves. A live group is steered by re-issuing its order; a land
-// unit whose route crosses water is walked only to the near shore, where the ferry takes over (fnc_opcom_ferry).
+// player, stow it back to a world point when it leaves. A live group is steered by re-issuing its order; a
+// transportable unit whose route crosses water is walked only to the near shore, where the ferry takes over
+// (fnc_opcom_ferry).
 if (!isServer) exitWith {};
 
 // Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.)
@@ -119,7 +120,7 @@ DUWS_fnc_opcom_deVirt = {
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
     _t set ["nearTicks", 0];
-    // reOrderLive (not applyOrder): a land unit spawning mid-crossing walks only to the near shore, not into water.
+    // reOrderLive (not applyOrder): a transportable unit spawning mid-crossing walks only to the near shore.
     [_t] call DUWS_fnc_opcom_reOrderLive;
     true
 };

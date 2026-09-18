@@ -42,10 +42,12 @@ The code is the source of truth. What new work must hold to:
   and otherwise arrives by refill wave. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
   included; the ferry scripts a live carry but never decides when a unit streams.
 - **The ferry** is a consequence of a unit's route, never an order. Only a `transportable` unit, the infantry
-  rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle drives its road route and
-  never stops at water. A freed hull garrisons the nearest held, uncontested zone. Not built: whether an idle hull
-  leaves its post to ferry, whether a rider waits for lift or walks, and land-taxi — lifting a foot unit over dry
-  ground with the same carry.
+  rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle never crosses water. Its
+  road route is none when an off-road stub or gap touches water, read off the terrain and not the grid, so a bridge
+  stays drivable (`fnc_opcom_route`). `fnc_opcom_task` refuses such an order, and a virtual re-plan that finds no
+  route drops the unit to `guard` where it stands. A freed hull garrisons the nearest held, uncontested zone. Not
+  built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or walks, and land-taxi —
+  lifting a foot unit over dry ground with the same carry.
 - **Capture.** A `capture` takes the BLUFOR-held zone at its target and aims at the zone's centre
   (`fnc_opcom_task`). A retake is an `EAST PRESENT` trigger gated on `fnc_zone_retake_ready` — OPFOR outnumber
   BLUFOR, a BLUFOR garrison counting as beaten until one is built — so a zone flips with players inside and takes no

@@ -7,18 +7,24 @@ params ["_startPos", "_destPos", "_moveType", ["_lambda", 0]];
 if (!isServer) exitWith { [[], "grid"] };
 
 // A segment is [points, "road"|"gap"]; a "gap" carries only its two endpoints (a bridge the hull drives itself).
+// No lift carries a hull, so water on an off-road stub or gap makes the route none. Terrain decides, not the 500 m
+// grid. Water within 50 m of a road is a bridge or the unit's own spot mid-bridge, not a crossing; a stub that could
+// not skirt the sea keeps a wet point well past that.
 if (_moveType in ["wheeled", "tracked"]) exitWith {
     private _segs = [_startPos, _destPos] call fnc_convoy_path;
     private _pts = [];
+    private _wet = false;
     {
         _x params ["_p", "_tag"];
-        // A water-crossing gap would beach a ground hull; the router avoids it where it can, so log and bridge.
-        if (_tag isEqualTo "gap" && {[_p select 0, _p select (count _p - 1)] call fnc_route_has_water}) then {
-            ["WARN", "OPCOM", format ["road route gap crosses water %1->%2", _p select 0, _p select (count _p - 1)]] call fnc_log;
+        _wet = if (_tag isEqualTo "gap") then {
+            [_p select 0, _p select (count _p - 1)] call fnc_route_has_water
+        } else {
+            (_p findIf { surfaceIsWater _x && {(_x nearRoads 50) isEqualTo []} }) >= 0
         };
+        if (_wet) exitWith {};
         { if (_pts isEqualTo [] || {(_pts select (count _pts - 1)) distance2D _x > 1}) then { _pts pushBack _x } } forEach _p;
     } forEach _segs;
-    [_pts, "road"]
+    [[_pts, []] select _wet, "road"]
 };
 
 private _w    = DUWS_opcom_grid_w;
