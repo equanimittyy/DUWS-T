@@ -62,15 +62,22 @@ Radio traffic, notifications and task text use the callsign alone.
 
 ### What captures a zone
 
-BLUFOR take a zone on two tests, both in `fnc_zone_capture_ready.sqf`. Both must hold together,
-unbroken, for `DUWS_captureHold` (20 s); losing either one restarts the count. The capture trigger has
-no activation, so nobody has to stand inside the zone radius. Its condition runs every 2 s on every
-zone, and its interruptible timeout is the hold.
+One function decides every capture: `DUWS_fnc_siteTaken {key, profile, side, foe}`
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf`). A zone capture, a zone retake and a town clear
+all call it, with only the sides swapped. It needs three tests to hold together, unbroken, for
+`DUWS_captureHold` (20 s); losing any one restarts the count. The function stamps the hold itself, so
+the zone trigger (every 0.5 s) and the town tick (every 10 s) share it.
 
 | Test | Counts | Threshold |
 |---|---|---|
-| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this zone raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the zone's full token count — the same line a town garrison breaks at |
-| Ground held (`DUWS_fnc_siteOutnumbers`) | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | BLUFOR outnumber OPFOR |
+| Presence | ground units of the attacking side inside the site radius | at least one |
+| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. BLUFOR field no garrison, so a retake skips this test |
+| Ground held | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | the attacker outnumbers the defender |
+
+The zone capture trigger has no activation. A `this` gate would stop the function from being asked
+while the attacker is outside the radius, so the hold stamp would never reset. For an OPFOR-held zone
+nobody is near, the garrison's live check fails first, which keeps the half-second cost to a variable
+read; a BLUFOR-held zone pays one spatial query over its radius.
 
 The line is 15 % rather than a tenth because a group counts as one whole token while any of its men
 stands.
@@ -87,9 +94,9 @@ or a neighbouring town's garrison is not on the roster, so a beaten garrison sta
 many of them arrive to stand on it. And a patrol that has wandered clear of the zone is still the
 zone's and still has to be dealt with.
 
-A roster rather than a flag on each unit, because the capture condition runs every 2 s on every live
-zone — walking `allUnits` to find stamped ones would put a several-hundred-entry scan on exactly the
-frames a firefight is using. Anything spawned into a zone and not appended is
+A roster rather than a flag on each unit, because the capture condition runs twice a second while a
+zone's garrison is live — walking `allUnits` to find stamped ones would put a several-hundred-entry
+scan on exactly the frames a firefight is using. Anything spawned into a zone and not appended is
 invisible to the test, which is the trap for whoever raises men into a zone outside its composition.
 
 **The second test is deliberately owner-blind.** It asks whether the ground is physically held, and
@@ -101,8 +108,8 @@ beat.
 Turret crews are on the roster so that a stream-out or a flip collects them. They are not tokens, so
 they do not count toward the break line, but they contest the ground test for as long as they live.
 
-**A beaten garrison is not the whole condition.** The garrison falling to 15 % only satisfies half of
-`fnc_zone_capture_ready`; the other half asks whether BLUFOR outnumber the OPFOR still standing
+**A beaten garrison is not the whole condition.** The garrison falling to 15 % only satisfies one test
+of `DUWS_fnc_siteTaken`; another asks whether BLUFOR outnumber the OPFOR still standing
 anywhere in the ring. A remnant that stays and fights therefore delays the capture only while it can
 still contest the ground, rather than for as long as one man is alive somewhere in the radius.
 
@@ -249,7 +256,7 @@ the reasoning that a retaken zone is manned by a fresh garrison; that handed the
 straight back the moment they lost the ground again.
 
 **No hold beside it, unlike a town's.** A retake can land with players still inside the radius
-(`fnc_zone_retake_ready`): the ground changes hands under a live fight. The presence latch the retake
+(`DUWS_fnc_siteTaken`): the ground changes hands under a live fight. The presence latch the retake
 re-arms keeps the seeded garrison from raising around them; it arrives on the ordinary streaming rule once
 the ring has been empty.
 
@@ -270,8 +277,7 @@ count at zero. Two things keep that from being read as a garrison wiped:
 
 - The zone tick clears the garrison's live flag (`fnc_zone_garrison_dropped`) on **both** its exits,
   before the sweep runs. The capture condition refuses a zone that is not live, so an empty stowed
-  zone is never takeable — nor is one still mid-spawn. The live check is also the condition's cheap
-  gate, since the trigger has no activation to skip zones nobody is near.
+  zone is never takeable — nor is one still mid-spawn.
 - A spawn band can outlive its own zone: a large band takes longer to place than the 120 s grace.
   The raise flag stops a second cycle starting until the first reports.
 
@@ -280,13 +286,13 @@ made a capture a sweep of every last patrol out to the zone radius, and could be
 anything the engine counts as present. Counting both sides instead means a lone survivor delays a
 capture only while BLUFOR do not outnumber him.
 
-The OPFOR-takes-it-back direction mirrors it: `fnc_zone_retake_ready` asks whether OPFOR outnumber
-BLUFOR over the same ring, held for the same `DUWS_captureHold`. BLUFOR garrisons are not built, so there
-is no garrison half. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
+The OPFOR-takes-it-back direction is the same `DUWS_fnc_siteTaken` with the sides swapped: an OPFOR
+unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held for the same
+`DUWS_captureHold`. BLUFOR garrisons are not built, so there is no garrison test. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
 statement itself once one has stood inside the radius for `DUWS_captureHold`
 ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
-`fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move
-in all of them at once.
+`fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move in
+all of them at once.
 
 The capture trigger is created **server-local**, unlike the notification trigger beside it, because
 the condition reads a server-side global. That also settles the evaluation-locality question the
@@ -437,9 +443,9 @@ enemy would never climb.
 
 Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
 its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
-creation anyway. The clear is decided on the poller tick by a zone capture's two conditions: the
-garrison beaten to 15 % (`DUWS_fnc_garrisonBeaten`) and BLUFOR outnumbering OPFOR over the town's
-streaming ring (`DUWS_fnc_siteOutnumbers`), both held for `DUWS_captureHold`. The tick runs every
+creation anyway. The clear is decided on the poller tick by the rule that takes a zone,
+`DUWS_fnc_siteTaken`: a BLUFOR unit inside the town radius, the garrison beaten to 15 %, and BLUFOR
+outnumbering OPFOR over the town's streaming ring, all held for `DUWS_captureHold`. The tick runs every
 10 s, so the hold lands between 20 and 30 s.
 
 ### Holds: one mechanism, two reasons
@@ -586,7 +592,7 @@ a zone is ground with an owner, a town is ground with an opinion.
 | "OPFOR holds it" means | it is in `WARCOM_zones_controled_by_OPFOR` | its reputation is `<= -10` |
 | How OPFOR come to hold it | generated that way, or retaken | the player ruined it — killed civilians, wrecked buildings |
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
-| How OPFOR get it back | outnumber BLUFOR over radius + 400 m for 20 s, players there or not (`fnc_zone_retake_ready`) | reputation falls back below `-10` |
+| How OPFOR get it back | stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players there or not (`DUWS_fnc_siteTaken`) | reputation falls back below `-10` |
 | Strength when OPFOR take it | tier I at `0.1` on the retake (`fnc_opfor_cap`) | tier I at `0.1` on crossing `-10` |
 | Strength after being beaten | none — a beaten zone is BLUFOR's | tier I at `0.3` on the clear |
 | Time gate | none | `MOBILISING` 30 min, `REGROUPING` 3 h |
@@ -618,8 +624,8 @@ about.
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
-| You beat it to 15 % **and** outnumber OPFOR over radius + 400 m, both for 20 s | Ownership flips. First-capture bonus, AP swings. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
-| OPFOR retake (`fnc_zone_retake_ready`) | OPFOR outnumber BLUFOR over radius + 400 m for 20 s, players inside or not. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
+| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | Ownership flips. First-capture bonus, AP swings. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
+| OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
 | The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground: a zone has no `Regrouping` state to protect | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at | tier + bar |
 
@@ -631,7 +637,7 @@ about.
 | You ruin it past `-10` | Tier I written at once, a tenth of its tokens kept, rounded up: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
 | Hold lapses, you have left once, you return | Garrison raised: the tier composition less its lost tokens | tier |
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
-| You beat it to 15 % **and** outnumber OPFOR over radius + 400 m, both for 20 s | `+5` rep, tier back to I, `floor(0.3 × full)` tokens kept, survivors fight on, 3 h hold, latch armed | **`Regrouping`** |
+| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+5` rep, tier back to I, `floor(0.3 × full)` tokens kept, survivors fight on, 3 h hold, latch armed | **`Regrouping`** |
 | …unless that `+5` cleared `-10` | Tier 0, hold dropped, garrison deleted | none — neutral |
 | You leave for 2 min | Men deleted by roster; losses are already on the ledger | as above |
 | 3 h later, you have left once, you return | Garrison returns at tier I, `0.3` | tier |
@@ -647,7 +653,7 @@ wears down. Those two mechanisms are shared outright, and everything else is del
 | Shared | Where | Why it can be |
 |---|---|---|
 | Attrition | `fnc_garrison_strength_init.sqf` | One token ledger keyed by a string — `zone_<x>_<y>` or `town_<n>`. Owns the seeds and the reinforce step. `fnc_zone_strength` and `fnc_town_garrison_strengthAt` are thin wrappers naming their key |
-| Taking ground | `DUWS_fnc_garrisonBeaten`, `DUWS_fnc_siteOutnumbers`, `DUWS_fnc_garrisonRelease` | The break line, the count over the streaming ring and what happens to survivors are one rule the player learns once |
+| Taking ground | `DUWS_fnc_siteTaken`, `DUWS_fnc_garrisonBeaten`, `DUWS_fnc_garrisonRelease` | Presence, the break line, the count over the streaming ring, the hold and what happens to survivors are one rule the player learns once |
 | Raising men | `DUWS_fnc_raiseGarrison` | The stagger and the search flag are rules about raising a garrison, not about which ground is raising one |
 | Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `DUWS_fnc_teamRoster`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A team means the same thing wherever it is raised, down to the men it fields |
 | Standing orders | `fnc_apply_posture` | A composition entry is `posture:token`. What a group does is a property of the ground it was raised on, not of its roster, so the same team patrols at one site and holds a building at the next |

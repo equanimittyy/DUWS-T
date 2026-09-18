@@ -14,16 +14,32 @@ DUWS_fnc_garrisonBeaten = {
     (([_key] call DUWS_fnc_garrisonGroupCount) + count ([_key] call DUWS_fnc_garrisonReserve)) <= (0.15 * _full)
 };
 
-// The numbers half of taking ground, counted over the whole ring the garrison streams in rather than the site
-// radius, so a flip leaves no outer-ring force the attacker never had to beat. The attacker is counted first
-// because a held site usually has none of them near, which skips the second query.
-DUWS_fnc_siteOutnumbers = {
+// The one rule for taking ground, zone or town, in either direction: _side has a unit inside the site radius, the
+// defender's garrison is beaten, and _side outnumbers _foe over the streaming ring -- all held unbroken for
+// DUWS_captureHold. -> true once held.
+// The hold is stamped here rather than left to a trigger timeout, so a zone trigger and the town tick share it
+// whatever their cadence. One stamp per site, tagged with the side, so a direction's stamp never carries over a
+// flip into the other. Mission time, so a savegame cannot strand it.
+DUWS_fnc_siteTaken = {
     params ["_key", "_profile", "_side", "_foe"];
     private _site = [_key] call fnc_site_at;
     private _pos = _site get "pos";
-    private _ring = (_site get "radius") + ((DUWS_streamProfiles get _profile) select 0);
-    private _n = [_pos, _ring, _side, true] call fnc_side_count_at;
-    _n > 0 && {_n > ([_pos, _ring, _foe, true] call fnc_side_count_at)}
+    private _radius = _site get "radius";
+    // The ring the garrison streams in, not the radius, so a flip leaves no outer-ring force the attacker never
+    // had to beat. Only OPFOR field garrisons: BLUFOR ground has none to beat. A garrison that is not live
+    // (stowed, mid-raise) refuses, so empty ground is never taken before its men are placed.
+    private _ring = _radius + ((DUWS_streamProfiles get _profile) select 0);
+    private _won = (_foe != EAST || {([_key] call DUWS_fnc_garrisonHeld) && {[_key] call DUWS_fnc_garrisonBeaten}})
+        && {([_pos, _radius, _side, true] call fnc_side_count_at) > 0}
+        && {([_pos, _ring, _side, true] call fnc_side_count_at) > ([_pos, _ring, _foe, true] call fnc_side_count_at)};
+    private _var = format ["DUWS_takeSince_%1", _key];
+    if (!_won) exitWith { missionNamespace setVariable [_var, nil]; false };
+    private _held = missionNamespace getVariable [_var, []];
+    if ((_held param [0, sideUnknown]) != _side) then {
+        _held = [_side, time];
+        missionNamespace setVariable [_var, _held];
+    };
+    (time - (_held select 1)) >= DUWS_captureHold
 };
 
 // Wider than the litter sweep's 300 m: these are live men, and a body blinking out at 300 m goes unnoticed while a

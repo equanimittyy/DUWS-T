@@ -384,10 +384,6 @@ publicVariable "fnc_redeployHQUnits";
 // =========================================================================================================
 // server/init_zones
 // =========================================================================================================
-// Not broadcast: read from the zone capture trigger's condition, and that trigger is created
-// server-local precisely because these read server-side zone state.
-fnc_zone_capture_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_capture_ready.sqf";
-fnc_zone_retake_ready = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_retake_ready.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";
 fnc_captured = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_captured.sqf";
 fnc_blufor_cap = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_blufor_cap.sqf";

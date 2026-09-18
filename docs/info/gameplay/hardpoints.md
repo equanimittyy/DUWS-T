@@ -20,11 +20,11 @@ That separation runs deeper than shared globals. Zone-ring siting does not run i
 `fnc_createZone` at all: it runs after every zone has finished building, in a dedicated generation
 phase (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:50-120`, [below](#siting)), reading `zone_meta_array`
 — data the zone already published — rather than the zone builder's own locals. And a hardpoint's
-garrison is never appended to a zone's own roster (`DUWS_zoneUnits_<key>`,
-[`zones_and_civilians.md#what-captures-a-zone`](zones_and_civilians.md#what-captures-a-zone)):
-clearing a zone hardpoint has no effect on `fnc_zone_capture_ready`, which reads only the zone's own
-garrison count and never references `DUWS_hardpoints`. A zone hardpoint is built on a zone's ground
-and streams with the zone's garrison, but does not gate its capture.
+garrison is never appended to a zone's own roster
+([`zones_and_civilians.md#what-captures-a-zone`](zones_and_civilians.md#what-captures-a-zone)):
+clearing a zone hardpoint has no effect on the zone's break test, which reads only the zone's own
+groups and never references `DUWS_hardpoints`. A hardpoint's men still count in the capture's numbers
+test while they stand inside the zone's streaming ring, since that test is owner-blind.
 
 ## Hardpoint types
 

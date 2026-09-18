@@ -110,6 +110,9 @@ private _fnc_tick = {
 
     // Not a garrison state, so it ends nothing: a cleared town's survivors are collected while its next garrison raises.
     [_key] call DUWS_fnc_garrisonLeftoverSweep;
+    // Asked every tick, not only where the clear reads it: the hold is stamped inside, and a tick that skipped the
+    // question would leave a stale stamp to clear the town the moment its garrison came back.
+    private _taken = [_key, "town_gar", WEST, EAST] call DUWS_fnc_siteTaken;
 
     // Raise in flight owns the town until it reports -- otherwise the reinforcement test would read the still-empty roster as owing the whole composition and raise it a second time.
     if (_t get "raising") exitWith {
@@ -186,15 +189,9 @@ private _fnc_tick = {
         ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
             _i, _rep]] call fnc_log;
     } else {
-        // A zone capture's two conditions, the break test and the count over the streaming ring, held unbroken for
-        // DUWS_captureHold. The tick is 10 s, so the hold lands between 20 and 30 s.
+        // Taken by the same rule as a zone. The tick is 10 s, so the hold lands between 20 and 30 s.
         // What clearing does differs from a zone: a reputation credit, garrison reseeded to 0.3, and a REGROUPING hold -- never a change of owner.
-        private _won = _t get "awake" && {[_key] call DUWS_fnc_garrisonBeaten} && {[_key, "town_gar", WEST, EAST] call DUWS_fnc_siteOutnumbers};
-        if (!_won) then { _t set ["clearSince", -1] } else {
-            if ((_t getOrDefault ["clearSince", -1]) < 0) then { _t set ["clearSince", _now] };
-        };
-        if (_won && {_now - (_t get "clearSince") >= DUWS_captureHold}) then {
-            _t set ["clearSince", -1];
+        if (_taken) then {
             [_key, false] call DUWS_fnc_garrisonSetLive;
             [_key] call DUWS_fnc_garrisonReserveClear;
             [_key] call DUWS_fnc_garrisonRelease;

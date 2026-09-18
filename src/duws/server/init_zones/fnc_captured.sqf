@@ -70,7 +70,7 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), 
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
     // The 7th arg is the retired bounty slot, passed 0: no CP rides a recapture any more.
-    _trg setTriggerStatements ["[thisTrigger] call fnc_zone_retake_ready", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius, 0], ""];
+    _trg setTriggerStatements ["[thisTrigger getVariable 'DUWS_zoneKey', 'zone', EAST, WEST] call DUWS_fnc_siteTaken", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius, 0], ""];
 };
 
 if (_firstEver) then {
