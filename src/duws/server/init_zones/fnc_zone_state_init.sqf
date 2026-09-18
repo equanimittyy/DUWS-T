@@ -177,12 +177,13 @@ DUWS_fnc_garrisonReserveSet = {
 };
 
 // Everything the awake session put down that the next raise rebuilds from scratch: the pool, the group
-// ceiling the refill tops up to, and the event debounce stamp. Baseline and strength are left alone --
+// ceiling the refill tops up to, the OPCOM tokens accounted to both, and the event debounce stamp. Baseline and strength are left alone --
 // those outlive a stow, which is how attrition accumulates across visits.
 DUWS_fnc_garrisonReserveClear = {
 	params ["_key"];
 	missionNamespace setVariable [format ["DUWS_zoneReserve_%1", _key], []];
 	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], nil];
+	missionNamespace setVariable [format ["DUWS_zoneReserveOpcom_%1", _key], nil];
 	missionNamespace setVariable [format ["DUWS_zoneReserveEventAt_%1", _key], nil];
 };
 

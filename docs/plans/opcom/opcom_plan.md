@@ -39,7 +39,7 @@ The code is the source of truth. What new work must hold to:
   within K. The BLUFOR read is of true positions and never reaches belief or scoring. The engine resolves every
   fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds the reserve
   pool of the zone or town it is homed at: it stands with the garrison at a raise when the base pool leaves room,
-  and otherwise arrives by refill wave. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
+  and otherwise arrives by refill wave. A wipe of that reserve-spawned group kills the unit. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
   included; the ferry scripts a live carry but never decides when a unit streams.
 - **The ferry** is a consequence of a unit's route, never an order. Only a `transportable` unit, the infantry
   rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle never crosses water. Its

@@ -169,7 +169,9 @@ DUWS_fnc_garrisonReserveWatch = {
                 // Recorded lost only when the whole group is down; chip damage with survivors doesn't
                 // count -- those survivors come back.
                 if (({ alive _x } count units (group _unit)) == 0) then {
-                    [_k, _unit getVariable ["DUWS_garrisonToken", ""]] call DUWS_fnc_garrisonRecordLoss;
+                    private _tok = _unit getVariable ["DUWS_garrisonToken", ""];
+                    [_k, _tok] call DUWS_fnc_garrisonRecordLoss;
+                    if ((_tok select [0, 8]) == "opcomdef") then { [_k, _tok] call DUWS_fnc_opcom_defenderLost };
                 };
                 [_k] call DUWS_fnc_garrisonReserveOnKill;
             }];

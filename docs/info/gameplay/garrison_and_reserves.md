@@ -38,12 +38,20 @@ Every raise, and every buy on a standing garrison, re-stands through `DUWS_fnc_g
 x1}`. It calls the shared derivation `DUWS_fnc_garrisonDerive {key, x1, mult, stand}`
 (`src/duws/server/garrison/fnc_garrison_strength_init.sqf:77`), which stamps `full`, computes
 `surviving`, and splits it against `_stand` (the density-thinned standing template) into
-`[garrison, pool]`. Losses come out of the pool before they ever thin the standing garrison. Restand
-then resets the refill ceiling to the standing template's count and re-syncs OPCOM's homed units into
-the pool, in that order, so the sync does not count them twice.
+`[garrison, pool]`. Losses come out of the pool before they ever thin the standing garrison. The
+derive rebuilds only the base pool, so Restand carries OPCOM's pooled tokens across it. It then sets
+the refill ceiling to the standing template's count plus the OPCOM units already accounted to the
+site, and re-syncs OPCOM's homed units.
+
+The sync, `DUWS_fnc_opcom_zoneReserveSync {key}`
+(`src/duws/server/warcom/opcom/taskings/fnc_opcom_garrison.sqf:11`), compares the homed units with the
+tokens it added this awake session (`DUWS_zoneReserveOpcom_<key>`), not with the pool. A unit already
+drawn onto the ground is out of the pool but still homed, and adding its token again would field it
+twice. The sync adds a token for each newly homed unit, removes the token of a unit that left, and
+moves the ceiling by the difference. A stow clears this record with the pool.
 
 A raise then fills to the ceiling through `DUWS_fnc_garrisonStandFill {key, garrison}`
-(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:103`). It draws random fieldable base tokens
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:106`). It draws random fieldable base tokens
 from the pool first, and OPCOM's homed units take only the room that is left. The drawn tokens leave
 the pool and stand with the garrison, so the players meet the whole force on arrival, not a short or
 empty site that waits up to five minutes for its first refill wave. The draw stops at the global
@@ -91,6 +99,11 @@ before calling `DUWS_fnc_garrisonRecordLoss`; a unit dying with squadmates still
 nothing. The tag rides the *unit*, not the group, since a dead man can outlive it. The same
 handler also fires the event-refill trigger (below).
 
+An OPCOM unit's token is not in `full`, so `DUWS_fnc_garrisonRecordLoss` ignores its wipe. The handler
+passes that wipe to `DUWS_fnc_opcom_defenderLost {key, token}` instead, which marks the unit dead and
+re-syncs. A homed unit exists on the ground only as its reserve-spawned group, so the wipe is its death,
+and without the mark the next raise would stand it again.
+
 ## Reserve depth and the group ceiling
 
 `enemyunitMultiplier` is reserve depth, not a live-force multiplier. A site always stands up its
@@ -102,7 +115,7 @@ triple a tier's groups on one site alone, and two hot sites at once would blow t
 
 Per-site, the live *composition* group count is capped at the standing template's count plus the
 OPCOM combatants homed there, stored as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garrisonGroupCount {key}`
-(`src/duws/server/init_zones/fnc_zone_state_init.sqf:204`) counts distinct alive groups the
+(`src/duws/server/init_zones/fnc_zone_state_init.sqf:205`) counts distinct alive groups the
 streaming garrison raised; a prefab's manned static weapons sit on the same roster but are
 excluded, so a site with guns doesn't read as already at its ceiling. Globally,
 `DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:457`) pauses all garrison
@@ -112,7 +125,7 @@ still count against this wall.
 
 ## The refill pass
 
-`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:485`) walks
+`DUWS_fnc_garrisonReservePass` (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:487`) walks
 every site on `DUWS_garrisonSites` that is held and has a non-empty pool — with no BLUFOR-presence
 gate, the same as the event trigger below, so a site refills whether or not it is being fought;
 sorts the candidates by player count present, most-crowded first; and spawns

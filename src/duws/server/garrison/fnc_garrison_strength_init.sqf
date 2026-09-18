@@ -87,16 +87,19 @@ DUWS_fnc_garrisonDerive = {
 };
 
 // The ceiling is the standing template's count, not what deployed: a mauled garrison stands fewer groups, and reserves
-// bring it back up to this. It is reset before the OPCOM sync, or the sync counts the units the derive wiped from the
-// pool twice. -> garrison
+// bring it back up to this. The derive rebuilds only the base pool, so OPCOM's pooled tokens are carried across it and
+// its accounted units stay in the ceiling; the sync then diffs against them. -> garrison
 DUWS_fnc_garrisonRestand = {
 	params ["_key", "_x1"];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 	private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-	private _split = [_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
-	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
+	private _opcom = ([_key] call DUWS_fnc_garrisonReserve) select { (_x select [0, 8]) == "opcomdef" };
+	private _garrison = ([_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) select 0;
+	([_key] call DUWS_fnc_garrisonReserve) append _opcom;
+	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key],
+		count _stand + count (missionNamespace getVariable [format ["DUWS_zoneReserveOpcom_%1", _key], []])];
 	if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
-	_split select 0
+	_garrison
 };
 
 // A raise stands its gap now, not on the refill's next wave, which can be five minutes off. -> garrison plus the draw
