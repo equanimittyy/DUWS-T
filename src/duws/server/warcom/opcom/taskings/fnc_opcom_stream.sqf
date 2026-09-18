@@ -125,6 +125,18 @@ DUWS_fnc_opcom_deVirt = {
     };
     private _full = _t get "fullForce";
     if (_full > 0) then { [_grp, (_t get "effForce") / _full] call DUWS_fnc_opcom_matchStrength };
+    private _tgt = _t get "target";
+    if (_tgt isNotEqualTo []) then {
+        private _dir = _pos getDir _tgt;
+        _grp setFormDir _dir;
+        {
+            private _v = vehicle _x;
+            // Model-space velocity carried across the turn: a hull spawned flying keeps its airspeed on the new heading.
+            private _vel = velocityModelSpace _v;
+            _v setDir _dir;
+            _v setVelocityModelSpace _vel;
+        } forEach units _grp;
+    };
     _t set ["grp", netId _grp];
     _t set ["status", "moving"];
     _t set ["farTicks", 0];   // fresh live period: a re-used record must not carry a spent stow debounce
