@@ -140,8 +140,8 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 | Zone Reinforce | each uncontested OPFOR zone below full strength | 4.5 |
 | Zone Fortify | each uncontested OPFOR zone below tier IV | 4.5 |
 | Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4.5 |
-| Town Reinforce | each OPFOR-band town below full strength and not regrouping | 4.6 |
-| Town Fortify | each OPFOR-band town below tier IV and not regrouping | 4.6 |
+| Town Reinforce | each OPFOR-band town below full strength | 4.6 |
+| Town Fortify | each OPFOR-band town below tier IV | 4.6 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4.6 |
 | Recruit | once per demand group | 4.6 supply, 4.8 combatant, 4.9 recon |
 | Standalone hardpoint Build | the band cells with the highest coverage Value; each asset type unlocked | 4.7 |
@@ -492,14 +492,14 @@ The OPFOR town ladder (tiers 0–IV in `DUWS_townSpawnTiers`, per-town `DUWS_tow
 `fnc_town_garrison_setTier`) and the zone tiers are shipped and documented in
 [`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv). Reputation
 decides *whether* a town garrisons (crossing −10 writes tier I); AP decides *how hard*. Clearing a town drops it to
-tier I (no refund, three-hour regroup lock) and pins it to the `0.3` strength floor for the campaign.
+tier I (no refund); the tokens the fight wiped stay lost until reinforced.
 
 Not built:
 
 - **BLUFOR garrisons.** BLUFOR buy garrisons for zones and towns as OPFOR do. The BLUFOR band (`>= 10`) has no
   garrison; buying tier I at a held town *creates* one at zero strength (each reinforcement +30 %), never inherits
   OPFOR's — captured ground carries no tier or strength. The presence latch is still wanted (a BLUFOR garrison
-  streams), but the `Mobilising`/`Regrouping` holds are not (a BLUFOR garrison never arrives on ground it owns). A
+  streams), but the `Mobilising` hold is not (a BLUFOR garrison never arrives on ground it owns). A
   BLUFOR-held site also wakes when an OPCOM attacker, live or virtual, closes within K, so its garrison renders and
   renders the attacker in turn.
 

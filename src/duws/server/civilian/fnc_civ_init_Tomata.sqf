@@ -222,7 +222,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // No strength array: the shared attrition store answers full for ground nobody has fought over,
     // so a town needs no entry until something writes one.
     missionNamespace setVariable ["DUWS_townGarrisonHold", _townRep apply {0}];
-    missionNamespace setVariable ["DUWS_townGarrisonHoldKind", _townRep apply {""}];
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
 
     // One garrison thread for all towns, like fnc_civ_handler below. Started after the arrays above

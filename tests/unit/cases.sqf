@@ -644,7 +644,7 @@ missionNamespace setVariable ["DUWS_garrisonLost_pk", ["patrol", "patrol", "team
 ["garrisonStrength: losses filed against an older, larger full never read below empty",
     (["pk"] call DUWS_fnc_garrisonStrength), 0] call fnc_assertClose;
 
-// seed: keep a set number of tokens and file the rest lost -- a recaptured zone, a cleared town.
+// seed: keep a set number of tokens and file the rest lost -- a recaptured zone, a town OPFOR take.
 missionNamespace setVariable ["DUWS_garrisonLost_seedk", []];
 ["seedk", ["patrol", "patrol", "patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
 ["seedk", 2] call DUWS_fnc_garrisonSeed;

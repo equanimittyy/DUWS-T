@@ -65,7 +65,7 @@ private _fnc_raise = {
 };
 
 // One record per town, keyed (not parallel arrays) -- eleven same-indexed fields risk a transposition between towns.
-// awaitVacate latches until BLUFOR leave once after a hold arms; emptySince (-1 while occupied) gates the stream-out; tier is the deployed tier, distinct from the owned tier the band/commander set.
+// awaitVacate latches until BLUFOR leave once after the town flips or is cleared; emptySince (-1 while occupied) gates the stream-out; tier is the deployed tier, distinct from the owned tier the band/commander set.
 private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     private _key = [_i] call fnc_town_site_key;
@@ -93,7 +93,7 @@ private _fnc_tick = {
         [_key, [1] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonSeedOpforCap;
         // Re-armed on every crossing so a retaken town is held again each time; the latch goes with it since the player who spent the reputation is standing right there.
         // Logged once here, not per deferred cycle -- sixty identical lines isn't a readable log, and this one carries the figure a tester needs.
-        private _held = [_i, "MOBILISING"] call fnc_town_garrison_setHold;
+        private _held = [_i] call fnc_town_garrison_setHold;
         _t set ["awaitVacate", true];
         ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s and until the town is left",
             _i, _rep, _held]] call fnc_log;
@@ -102,7 +102,6 @@ private _fnc_tick = {
     if (_rep > OPFOR_BAND && _tier > 0) then {
         [_i, 0, "left the OPFOR band"] call fnc_town_garrison_setTier;
         _tier = 0;
-        // Claim is gone, so the hold goes with it -- a town worked back to neutral is neutral, not regrouping.
         [_i] call fnc_town_garrison_clearHold;
     };
 
@@ -134,7 +133,7 @@ private _fnc_tick = {
         };
     };
 
-    // Hold + latch answer one question (may this town raise yet) as one gate; the latch stops either hold from expiring into a spawn around a player who never left.
+    // Hold + latch answer one question (may this town raise yet) as one gate; the latch stops the hold expiring, or a clear, into a spawn around a player who never left.
     if !(_t get "awake") exitWith {
         if (_tier > 0
             && {!(_t get "awaitVacate")}
@@ -190,7 +189,6 @@ private _fnc_tick = {
             _i, _rep]] call fnc_log;
     } else {
         // Taken by the same rule as a zone. The tick is 10 s, so the hold lands between 20 and 30 s.
-        // What clearing does differs from a zone: a reputation credit, garrison reseeded to 0.3, and a REGROUPING hold -- never a change of owner.
         if (_taken) then {
             [_key, false] call DUWS_fnc_garrisonSetLive;
             [_key] call DUWS_fnc_garrisonReserveClear;
@@ -203,14 +201,9 @@ private _fnc_tick = {
             // Instalment, not absolution -- a full discharge would let a player ruin a town to -20 and walk away square in one fight; a town at the floor now takes four clears to recover.
             // Self-limiting too: only a town at or below the band can hold a garrison to clear, so this can never turn a town friendly by force.
             [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
-            // Seeded to a scratch 0.3: a thin garrison with no reserve depth (spends the pool copies first) and left there -- nothing restores it but a paid reinforcement.
-            // That shell is the lasting half of what clearing buys, against the reputation step which is only an instalment.
-            [_key, floor (0.3 * count ([_key] call DUWS_fnc_garrisonFull))] call DUWS_fnc_garrisonSeed;
-            // Read by others: fnc_town_garrison_fortify and _reinforce refuse a purchase through it (no buying up a beaten town unseen), and the map readout prints it regrouping.
-            [_i, "REGROUPING"] call fnc_town_garrison_setHold;
             if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
             _t set ["awaitVacate", true];
-            ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4, garrison seeded to 0.3 and regrouping",
+            ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4",
                 _i, _tier, _rep, CLEAR_REP]] call fnc_log;
         };
     };

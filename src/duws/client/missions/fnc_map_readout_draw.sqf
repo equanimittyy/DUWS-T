@@ -99,26 +99,16 @@ switch (_kind) do {
 			// reputation can hold no tier either, and printing "None" would read as a town that
 			// merely happens to be ungarrisoned.
 			//
-			// A held town prints why in place of the tier, and the two holds read differently: a
-			// town that has just fallen has men on the way, a town that was cleared has men coming
-			// back. Neither says "destroyed" -- a word that final would have the player write the
-			// town off, and both of these end.
-			_lines pushBack (switch (_hold) do {
-				case "MOBILISING": {
-					format [localize "STR_DUWS_T_mapview_garrison_tier",
-						localize "STR_DUWS_T_mapview_garrison_mobilising"]
-				};
-				case "REGROUPING": {
-					format [localize "STR_DUWS_T_mapview_garrison_tier",
-						localize "STR_DUWS_T_mapview_garrison_regrouping"]
-				};
-				default { [_tier] call _fnc_tier };
+			_lines pushBack (if (_hold isEqualTo "MOBILISING") then {
+				format [localize "STR_DUWS_T_mapview_garrison_tier",
+					localize "STR_DUWS_T_mapview_garrison_mobilising"]
+			} else {
+				[_tier] call _fnc_tier
 			});
 			// Under the tier, where a zone's bar sits. Only on a town that owes a garrison: a
 			// neutral town has none, and a full grey bar there would read as one wiped rather than
-			// as one that was never raised. A town on a hold keeps its bar -- the men are coming
-			// back at that strength, which is exactly what the player is deciding against.
-			if (_tier >= 1 || {_hold != ""}) then { _lines pushBack ([_seg] call _fnc_bar) };
+			// as one that was never raised.
+			if (_tier >= 1) then { _lines pushBack ([_seg] call _fnc_bar) };
 		};
 		_text = _lines joinString "<br/>";
 	};

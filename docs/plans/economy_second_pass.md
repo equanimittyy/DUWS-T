@@ -666,8 +666,7 @@ above the strength bar, in roman, for both sides' ground. A zone reports the tie
 once the player holds it; a town reports what it owes, which is not always what is standing in it,
 since a town nobody has walked into yet has a tier and no men. That is the honest answer for a map
 read before travelling: the readout describes what the player will meet, not what is loaded. A town
-that is holding says so instead — `Mobilising` if it has only just fallen, `Regrouping` if its
-garrison was destroyed.
+that has only just fallen says `Mobilising` instead.
 
 Tier above strength is the pair the player reads together, and they are orthogonal by design: tier is
 how big this ground was ever meant to be, the bar is how much of it is left. A tier I zone at a full

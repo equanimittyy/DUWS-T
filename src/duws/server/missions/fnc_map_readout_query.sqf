@@ -100,10 +100,9 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // a map read before travelling -- the readout is describing what the player will meet, not what is
 // loaded. A town still holding says so instead, below.
 private _tier = [_hit] call fnc_town_garrison_tierAt;
-// A town holding reports why instead of reporting a tier. The tier is real underneath -- the town is
-// enemy ground either way -- but printing a numeral would say a garrison is standing, and there is
-// none: a player who had just fought one out would read it as having failed to.
-private _hold = [_hit] call fnc_town_garrison_holdKindAt;
+// A mobilising town reports that instead of a tier. The tier is real underneath -- the town is enemy
+// ground either way -- but printing a numeral would say a garrison is standing, and there is none yet.
+private _hold = ["", "MOBILISING"] select (([_hit] call fnc_town_garrison_holdAt) > 0);
 
 // The same twenty-segment five-per-cent scale a zone reports on, floored. A town has no equivalent of a
 // deployed zone's live count -- the roster lives inside the garrison thread and is never published -- so

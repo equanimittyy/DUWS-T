@@ -164,11 +164,6 @@ survives a rebuild through `fnc_createzone`, which would otherwise reshuffle gro
 fought over. A zone's strength rises only through a reinforcement: the loss record lowers it. A retake
 resets both: the tier to I and the strength to `0.1`.
 
-One thing a zone will not need is a purchase refusal. A town's `REGROUPING` hold blocks both sinks
-because OPFOR can hold a town whose garrison was just destroyed; there is no equivalent zone state to
-protect, since a beaten zone garrison means the zone changed hands
-([§The two OPFOR garrison states](#the-two-opfor-garrison-states)).
-
 #### Radius reaches placement, not composition
 
 **A composition must not be scaled by a zone's radius.** The map reports a zone's tier, so a radius
@@ -421,7 +416,7 @@ garrison to shrink: a smaller composition diffs to nothing rather than to someth
 **Buying a tier and the men arriving are separate acts.** Reinforcement is deferred while BLUFOR
 are within the same radius the arrival test uses — men
 materialising around a player who is already in contact reads as the mission cheating, which is the
-pop-in the holds exist to prevent, and worse mid-fight.
+pop-in the hold exists to prevent, and worse mid-fight.
 
 **A hold covers upgrades too, by structure rather than by a second test.** Reinforcement requires a
 standing garrison, and only the hold-gated branch raises one — so a tier bought seconds after a town
@@ -442,7 +437,7 @@ squads holding six buildings — by occupying buildings instead.
 claim. No refund either: with one, a player clearing towns would hand the enemy its AP back and the
 enemy would never climb.
 
-### Arrival, holds and the clear
+### Arrival, the hold and the clear
 
 Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
 its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
@@ -451,46 +446,28 @@ creation anyway. The clear is decided on the poller tick by the rule that takes 
 outnumbering OPFOR over the town's streaming ring, all held for `DUWS_captureHold`. The tick runs every
 10 s, so the hold lands between 20 and 30 s.
 
-### Holds: one mechanism, two reasons
+### The mobilising hold
 
-A town raises no garrison while it is *holding*, and the two things that arm a hold are the two
-moments a garrison arriving would land on the player who caused it.
+A town raises no garrison for 30 minutes after its reputation crosses `-10`, and the readout names
+that window `Mobilising`. Reputation is spent *inside* a town — you lose it by killing civilians there
+or wrecking its buildings — so at the instant a town flips, the player is standing in it by definition.
 
-**There are two states, and a hold *is* one of them.** The hold is not a separate stage the town
-passes through on its way to being `Mobilising` — the thirty minutes of held ground with no men on it
-is exactly what `Mobilising` names. Code and readout use one vocabulary so this cannot be misread.
+**`MOBILISING` does not block a purchase.** A town that has only just fallen is exactly the ground the
+enemy should be free to commit to, and the men have not arrived either way, so a tier bought inside
+that window is folded into the first spawn rather than arriving as a second wave.
 
-| State | Armed when | Length | Also refuses |
-|---|---|---|---|
-| `MOBILISING` | reputation crosses `-10` | 30 min | — |
-| `REGROUPING` | its garrison is cleared | 3 h | both purchases — upgrade *and* reinforce |
-
-**`REGROUPING` refusing both purchases is the whole point of it.** Neither needs a garrison standing to
-be bought, so without the refusal a commander could start rebuilding a town before the player who
-destroyed its garrison had left the map, and clearing it would have bought nothing lasting. `MOBILISING`
-refuses neither, because ground that has only just fallen is exactly what the enemy should be free to
-commit to and no men have arrived either way.
-
-Both exist because reputation is spent *inside* a town — you lose it by killing civilians there or
-wrecking its buildings — so at the instant a town flips, and again at the instant its garrison dies,
-the player is standing in it by definition.
-
-**`MOBILISING` does not block a purchase; `REGROUPING` does.** A town that has only just fallen is exactly
-the ground the enemy should be free to commit to, and the men have not arrived either way, so a tier
-bought inside that window is folded into the first spawn rather than arriving as a second wave. A
-town whose garrison was just destroyed is the opposite case: without the refusal the commander could
-buy it up to IV in the hours nobody is watching, and the player would meet a tier IV where they had
-destroyed a tier I.
+A clear arms no hold. The commander may reinforce or fortify a cleared town at once; OPCOM's
+reinforce is what rebuilds it.
 
 **The clock lapsing is not on its own permission to spawn.** A player who took or cleared a town and
-never left is still standing in it when the hold ends, and the arrival test would read them as having
-just walked up. So arming a hold also latches the town until it has been empty of BLUFOR once —
-leaving and coming back is the only way to meet the garrison, whichever hold deferred it.
+never left is still standing in it, and the arrival test would read them as having just walked up. So
+the crossing and the clear both latch the town until it has been empty of BLUFOR once — leaving and
+coming back is the only way to meet the garrison.
 
-Holds store a `diag_tickTime` deadline, which is wall clock and so cannot be shortened by the
+The hold stores a `diag_tickTime` deadline, which is wall clock and so cannot be shortened by the
 mission's time multiplier. A savegame does not restore that clock, so `fnc_town_garrison_holdAt`
-treats a deadline further out than the longest hold as one this session cannot have written and
-spends it; otherwise a reload would pin a town for the rest of the run.
+treats a deadline further out than the hold as one this session cannot have written and spends it;
+otherwise a reload would pin a town for the rest of the run.
 
 Towns seeded into the band at campaign start — the ones whose radius overlaps an enemy zone — arm no
 hold, because nothing crossed. They are pre-existing enemy ground and garrison on sight.
@@ -503,8 +480,8 @@ ever walked through. Three things fall out of that and each is load-bearing:
   so a garrison ground to one group comes back as one group. Streaming refunds nothing on the walk
   home.
 - **The live flag goes with the men.** The clear refuses a town that is not live, so a player walking
-  back into a town whose garrison merely streamed out is not paid a clear — the reputation step, the
-  tier reset and the three-hour hold — for a fight that never happened.
+  back into a town whose garrison merely streamed out is not paid a clear — the reputation step and
+  the tier reset — for a fight that never happened.
 - **The cycle ends there.** Nothing after the teardown describes a town without a garrison, and the
   reinforcement test in particular would read the emptied deployment against a live tier and raise
   the whole composition again, streaming the garrison out and back in on the same pass.
@@ -525,22 +502,20 @@ it can land with players still inside the radius, and the arrival test reaches 4
 on the approach counts as near too — so the zone tick re-latches when the zone returns to OPFOR hands and
 holds until the whole ring is empty, exactly as at campaign start.
 
-The town side latches on the same flag whenever a hold is armed, which covers both the crossing and
-the clear.
+The town side latches on the same flag on the crossing and on the clear.
 
 The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
 and a town lifted out of the band while its garrison lives has it cleared off the map.
 
 ### What clearing a garrison actually buys
 
-Four things, and only one of them is reputation:
+Three things, and only one of them is reputation:
 
 | | |
 |---|---|
 | Reputation | `+5`, an instalment against the debt — not a discharge |
 | Tier | back to I, so the commander's spending is gone but the town is not |
-| Strength | knocked to the `0.3` floor; only a paid reinforcement lifts it, `+30 %` each |
-| Regroup hold | 3 hours of wall clock in which the town raises nothing, takes no reinforcement and cannot be bought up |
+| Strength | every token the fight wiped stays lost; only a paid reinforcement buys them back, `+30 %` each |
 
 **The reputation step is deliberately an instalment.** Discharging the whole debt let a player ruin a
 town to `-20` and walk away square on a single fight, which made the reputation that the garrison was
@@ -551,9 +526,9 @@ or below `-10` can hold a garrison to clear at all, so the most this path can ev
 Reputation cannot be turned friendly by force — aid and heals are still the only way into the BLUFOR
 band.
 
-**The strength knock-down is the lasting half, and it is a bill rather than a brand.** A town fought
-out once fields `0.3` of its tier, and nothing restores that on its own — but the commander can buy it
-back, `+30 %` a reinforcement, three from the floor to full. That is what makes clearing worth doing
+**The losses are the lasting half, and they are a bill rather than a brand.** A town fought out once
+comes back without every token that fight wiped, and nothing restores them on its own — but the
+commander can buy them back, `+30 %` a reinforcement. That is what makes clearing worth doing
 when the reputation step alone would not be: the enemy cannot walk the loss back by waiting, only by
 *paying*, out of the same pool they would rather spend on ground they have not lost.
 
@@ -564,26 +539,11 @@ restore precisely *because* it was beaten, since one payment would buy back the 
 men at once. `fnc_civ_garrison` raises men on either moving, so a reinforcement bought against a
 standing garrison arrives the same way an upgrade does.
 
-**The hold is the mechanic, not the wait.** For those three hours the town is enemy ground standing
-undefended: no garrison, no reinforcement, no purchase. That is the one stretch of a campaign where
-its civilians can be worked without men in the way, which is what the window is for — the redemption
-cost lands on the clock rather than on the fighting, and deliberately so. When it lapses the town
-garrisons on the ordinary streaming rule, and the commander may buy it up again.
-
-**The hold expiring is not enough on its own.** A player who cleared the town and never left is still
-standing in it three hours later, and the arrival test would read them as having just walked up. So a
-clear also latches the town until it has been empty of BLUFOR once: leaving and coming back is the
-only way to meet the new garrison, and it cannot appear around someone who never went away. After the first real fight
-a `0.3` tier I thins to a single group, so later clears are small actions far apart. If that reads
-wrong in play, the levers in order are the reputation step, the floor, and the hold.
-
-**Regrouping is a state the player can see.** `fnc_map_readout_query` reports the hold and the readout
-prints `Garrison Tier: Regrouping` in place of the numeral. Not "destroyed": the men are coming back,
-and a word that said otherwise would have the player write the town off. The hold is per-town state
-rather than a thread local precisely because other things read it — the readout, and the two
-purchases, `fnc_town_garrison_fortify` and `fnc_town_garrison_reinforce`, which refuse while it is live
-so the commander cannot buy a beaten town back up while nobody is looking. The clear files the town
-back down to I through `fnc_town_garrison_setTier`, which records ownership and refuses nothing.
+**A clear latches the town.** A player who cleared the town and never left is still standing in it,
+and the arrival test would read them as having just walked up. So a clear latches the town until it
+has been empty of BLUFOR once: leaving and coming back is the only way to meet the new garrison, and
+it cannot appear around someone who never went away. The clear files the town back down to I through
+`fnc_town_garrison_setTier`, which records ownership and refuses nothing.
 
 ### Zone and town, side by side
 
@@ -597,17 +557,16 @@ a zone is ground with an owner, a town is ground with an opinion.
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
 | How OPFOR get it back | stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players there or not (`DUWS_fnc_siteTaken`) | reputation falls back below `-10` |
 | Strength when OPFOR take it | tier I at `0.1` on the retake (`fnc_opfor_cap`) | tier I at `0.1` on crossing `-10` |
-| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I at `0.3` on the clear |
-| Time gate | none | `MOBILISING` 30 min, `REGROUPING` 3 h |
-| Presence latch | thread start, and every retake | thread start, and every hold armed |
+| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I less the tokens the fight wiped |
+| Time gate | none | `MOBILISING` 30 min |
+| Presence latch | thread start, and every retake | thread start, every crossing and every clear |
 | Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
-| Regrouping | never — a beaten zone is BLUFOR's | after a clear that leaves it in the band |
 
 **Why the zone needs no time gate and the town does.** A zone is retaken by force on the ground — the
 attackers who won it already stand there — and the latch the retake re-arms holds the seeded garrison
 until the ring has been empty once. A town's flip has no such force: reputation is spent *inside* the
-town, so the player is standing in it at the exact moment it crosses, and again at the moment its
-garrison dies. The hold is what buys that garrison its distance.
+town, so the player is standing in it at the exact moment it crosses. The hold is what buys that
+garrison its distance.
 
 **Why the strength seed is symmetric anyway.** Both sides of that difference converge on the same
 rule for ground OPFOR have just taken: a zone retaken and a town that crosses `-10` each start at tier I
@@ -629,7 +588,7 @@ about.
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
 | You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | Ownership flips. First-capture bonus, AP swings. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
-| The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground: a zone has no `Regrouping` state to protect | tier + bar |
+| The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at | tier + bar |
 
 **A town.**
@@ -640,13 +599,13 @@ about.
 | You ruin it past `-10` | Tier I written at once, a tenth of its tokens kept, rounded up: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
 | Hold lapses, you have left once, you return | Garrison raised: the tier composition less its lost tokens | tier |
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
-| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+5` rep, tier back to I, `floor(0.3 × full)` tokens kept, survivors fight on, 3 h hold, latch armed | **`Regrouping`** |
-| …unless that `+5` cleared `-10` | Tier 0, hold dropped, garrison deleted | none — neutral |
+| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+5` rep, tier back to I, wiped tokens stay lost, survivors fight on, latch armed | tier |
+| …unless that `+5` cleared `-10` | Tier 0, garrison deleted | none — neutral |
 | You leave for 2 min | Men deleted by roster; losses are already on the ledger | as above |
-| 3 h later, you have left once, you return | Garrison returns at tier I, `0.3` | tier |
+| You have left once, you return | Garrison raised at whatever the commander has bought since, less its lost tokens | tier |
 
 The shape to take away: **a zone changes hands, a town changes its mind.** Everything else follows
-from that — which is why only a town has a state for "beaten but still theirs".
+from that.
 
 ### What the two share, and what they do not
 
@@ -662,7 +621,7 @@ wears down. Those two mechanisms are shared outright, and everything else is del
 | Standing orders | `fnc_apply_posture` | A composition entry is `posture:token`. What a group does is a property of the ground it was raised on, not of its roster, so the same team patrols at one site and holds a building at the next |
 
 **Not shared, and not candidates for it:** ownership (a list versus a reputation band), what a capture
-means, the holds, the two purchases, and composition props — a zone stows and redeploys a prefab and
+means, the hold, the two purchases, and composition props — a zone stows and redeploys a prefab and
 re-crews its turrets, a town has no composition at all. Merging the two threads would put one large
 conditional through the middle of a lifecycle rather than remove anything.
 
@@ -670,26 +629,14 @@ The gain is not line count. It is that a rule now has one place to be wrong in: 
 quantisation was written out twice and the `survivors / baseline` record three times, so a change to
 either used to mean finding every copy.
 
-### The two OPFOR garrison states
+### The OPFOR mobilising state
 
-Between owning ground and having men on it, OPFOR is in one of two states, and both exist because
-printing a tier in that window would report a garrison that is not there.
+`Mobilising` means OPFOR own the ground and their men are not on it yet: a town that crossed `-10`, or a
+zone retaken off BLUFOR. It exists because printing a tier in that window would report a garrison that
+is not there. A town worked back out of the band is neutral, and `fnc_town_garrison_clearHold` drops
+its hold with the claim.
 
-| | Means | Reached by |
-|---|---|---|
-| `Mobilising` | OPFOR own it, their men are not on it yet | a town crossing `-10`; a zone retaken off BLUFOR |
-| `Regrouping` | OPFOR own it, their garrison was beaten and has not come back | a town garrison cleared while its reputation is still `<= -10` |
-
-A zone is never `Regrouping`, because a beaten zone garrison means the zone changed hands — there is
-no state in which OPFOR hold a zone whose garrison the player has just destroyed. A town has one
-precisely because clearing its garrison does *not* take the ground: reputation is the deed, and a
-clear is one instalment against it.
-
-**Neither state applies to a town the clear pushed out of the band.** That town is neutral, and
-`fnc_town_garrison_clearHold` drops the hold with the claim. Leaving it armed would keep telling the
-player a redeemed town was regrouping.
-
-**And there is a third condition that is not a state.** OPFOR hold it, no men are standing, and
+**A second condition is not a state.** OPFOR hold it, no men are standing, and
 nothing has changed hands — the garrison merely streamed out, or nobody has ever visited. The readout
 prints the tier, which is the honest answer: that is what the player will meet when they arrive.
 `Mobilising` cannot be inferred from the absence of a garrison for exactly this reason, which is why
@@ -703,7 +650,6 @@ more usefully — **which of them cannot be moved alone.**
 | Lever | Where | Moves |
 |---|---|---|
 | `TOWN_HOLD_MOBILISING` `1800` | `fnc_civ_state_init` | how long after falling a town stays empty |
-| `TOWN_HOLD_REGROUPING` `10800` | `fnc_civ_state_init` | the undefended window a clear buys |
 | `REINFORCE_STEP` `0.3` | `fnc_garrison_strength_init` | what one reinforcement buys, town or zone |
 | Break line `0.15` | `DUWS_fnc_garrisonBeaten` | how far a garrison must be worn before its ground can be taken |
 | `DUWS_captureHold` `20` | `server_var_init` | how long both capture conditions must hold, zone, town and OPCOM alike |
@@ -725,9 +671,9 @@ more usefully — **which of them cannot be moved alone.**
 - **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+5` takes
   a town from `-20` in three clears, not four. Any change here should be checked against the sequence
   rather than divided.
-- **`TOWN_HOLD_REGROUPING` doubles as the stale-deadline bound.** `fnc_town_garrison_holdAt` treats a
-  deadline further out than *the longest hold* as one a previous session wrote. Add a longer hold
-  without moving that bound and a genuine deadline gets discarded as stale.
+- **`TOWN_HOLD_MOBILISING` doubles as the stale-deadline bound.** `fnc_town_garrison_holdAt` treats a
+  deadline further out than the hold as one a previous session wrote. Add a longer hold without
+  moving that bound and a genuine deadline gets discarded as stale.
 
 **Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty groups,
 which is the campaign's spawn ceiling — raising it raises what every tier IV zone on the map costs
@@ -755,7 +701,7 @@ when they take the ground back.
 
 So the BLUFOR side is not a mirror of the OPFOR one. OPFOR garrisons *decay* from a tier they were
 given and are rebuilt by a commander spending AP; BLUFOR garrisons *accumulate* from nothing at the
-player's cost. `Mobilising` and `Regrouping` are OPFOR-only labels because only OPFOR arrive on ground
+player's cost. `Mobilising` is an OPFOR-only label because only OPFOR arrive on ground
 they already own — a BLUFOR garrison never arrives, it gets built.
 
 ### The guards belong to streaming, not to a side

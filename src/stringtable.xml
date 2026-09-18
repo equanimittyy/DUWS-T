@@ -1931,10 +1931,6 @@
                 <Original>None</Original>
                 <English>None</English>
             </Key>
-            <Key ID="STR_DUWS_T_mapview_garrison_regrouping">
-                <Original>Regrouping</Original>
-                <English>Regrouping</English>
-            </Key>
             <Key ID="STR_DUWS_T_mapview_garrison_mobilising">
                 <Original>Mobilising</Original>
                 <English>Mobilising</English>

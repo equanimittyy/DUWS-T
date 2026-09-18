@@ -84,59 +84,45 @@ fnc_town_garrison_tierAt = {
 	}
 };
 
-// Both are moments a garrison arriving would land on the player who caused them: MOBILISING flips while
-// the player is still spending reputation in town; REGROUPING is longer on purpose, the one stretch a cleared town's civilians can be worked with nobody in the way.
+// A town flips while the player is still spending reputation in it, so its first garrison would land on them.
 #define TOWN_HOLD_MOBILISING 1800
-#define TOWN_HOLD_REGROUPING 10800
 
 // Stored as a diag_tickTime deadline (process uptime, not wall clock), so it does NOT restore across a
-// savegame -- left alone it would pin a town for the run; bounded to the longest hold, to catch a stale value.
+// savegame -- left alone it would pin a town for the run; bounded to the hold, to catch a stale value.
 fnc_town_garrison_holdAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
 	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
 	if (_townIndex < 0 || _townIndex >= count _holds) exitWith { 0 };
 	private _deadline = _holds select _townIndex;
-	if (_deadline > diag_tickTime + TOWN_HOLD_REGROUPING) then {
+	if (_deadline > diag_tickTime + TOWN_HOLD_MOBILISING) then {
 		_holds set [_townIndex, 0];
 		_deadline = 0;
 	};
 	(_deadline - diag_tickTime) max 0
 };
 
-// Load-bearing, not cosmetic: the tier setter refuses a purchase under REGROUPING but allows one under
-// MOBILISING, and the map readout words the two differently.
-fnc_town_garrison_holdKindAt = {
-	if (!isServer) exitWith { "" };
-	params [["_townIndex", -1]];
-	if (([_townIndex] call fnc_town_garrison_holdAt) <= 0) exitWith { "" };
-	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) param [_townIndex, ""]
-};
-
 fnc_town_garrison_setHold = {
 	if (!isServer) exitWith {};
-	params [["_townIndex", -1], ["_kind", "REGROUPING"]];
+	params [["_townIndex", -1]];
 	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
 	if (_townIndex < 0 || _townIndex >= count _holds) exitWith {};
-	private _secs = [TOWN_HOLD_REGROUPING, TOWN_HOLD_MOBILISING] select (_kind == "MOBILISING");
-	_holds set [_townIndex, diag_tickTime + _secs];
-	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, _kind];
-	_secs
+	_holds set [_townIndex, diag_tickTime + TOWN_HOLD_MOBILISING];
+	TOWN_HOLD_MOBILISING
 };
 
-// Dies with the claim rather than expiring on its own: a stale REGROUPING hold would mislabel a redeemed
-// town on the readout until the three hours ran out.
+// Dies with the claim rather than expiring on its own: a stale hold would mislabel a redeemed town on the readout
+// until it ran out.
 fnc_town_garrison_clearHold = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1]];
 	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
 	if (_townIndex < 0 || _townIndex >= count _holds) exitWith {};
 	_holds set [_townIndex, 0];
-	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, ""];
 };
 
 // Shared attrition-ledger projection keyed by the town's key -- a zone reads the same function. No setter
-// here: the ledger is written by losses, a seed (clear), or an un-lose (reinforcement, below).
+// here: the ledger is written by losses, a seed (OPFOR take the town), or an un-lose (reinforcement, below).
 fnc_town_garrison_strengthAt = {
 	if (!isServer) exitWith { 1 };
 	params [["_townIndex", -1]];
@@ -145,16 +131,11 @@ fnc_town_garrison_strengthAt = {
 };
 
 // Reinforcement buys strength, a tier buys composition -- independent sinks, so the commander pays either or
-// both; un-losing ledger tokens is a paid replacement, not a heal. Refused under REGROUPING (would erase what clearing bought), allowed under MOBILISING.
+// both; un-losing ledger tokens is a paid replacement, not a heal.
 fnc_town_garrison_reinforce = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
 	if (_townIndex < 0 || _townIndex >= count (missionNamespace getVariable ["DUWS_townGarrisonTier", []])) exitWith { -1 };
-	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING") exitWith {
-		["INFO", "CIV", format ["Town %1 reinforcement refused (%2): regrouping for another %3 s",
-			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
-		-1
-	};
 	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
 	private _old = [_key] call DUWS_fnc_garrisonStrength;
 	[_key, [[_townIndex] call fnc_town_garrison_tierAt] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonReinforce;
@@ -164,20 +145,14 @@ fnc_town_garrison_reinforce = {
 };
 
 // -> the tier it now stands at, or -1 if refused. Reputation, not AP, decides whether a town garrisons, so a fortify never
-// raises one from tier 0. REGROUPING refuses it (else a beaten town could rebuild unchallenged); MOBILISING allows it,
-// since it folds into the first spawn. The re-stand is left to the garrison thread, which also catches a buy landing
-// mid-raise at the old tier.
+// raises one from tier 0. Allowed while mobilising, since it folds into the first spawn. The re-stand is left to the
+// garrison thread, which also catches a buy landing mid-raise at the old tier.
 fnc_town_garrison_fortify = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
 	private _old = [_townIndex] call fnc_town_garrison_tierAt;
 	if (_old < 1) exitWith {
 		["INFO", "CIV", format ["Town %1 fortify refused (%2): no garrison", _townIndex, _reason]] call fnc_log;
-		-1
-	};
-	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING") exitWith {
-		["INFO", "CIV", format ["Town %1 fortify refused (%2): regrouping for another %3 s",
-			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 		-1
 	};
 	private _new = (_old + 1) min (count DUWS_townSpawnTiers);
