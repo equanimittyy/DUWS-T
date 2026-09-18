@@ -89,7 +89,7 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    private _tokens = if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken };
+    private _tokens = (if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken }) select { _x isNotEqualTo "" };
     {
         // Off-centre: men spawned at the emplacement snag on its bunker and bags.
         private _sp = _pos findEmptyPosition [30, 70, _soldier];
