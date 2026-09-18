@@ -71,7 +71,7 @@ the zone trigger (every 0.5 s) and the town tick (every 10 s) share it.
 | Test | Counts | Threshold |
 |---|---|---|
 | Presence | ground units of the attacking side inside the site radius | at least one |
-| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. BLUFOR field no garrison, so a retake skips this test |
+| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. Skipped at tier 0, which holds no garrison: a town outside the OPFOR band, or a zone BLUFOR hold |
 | Ground held | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | the attacker outnumbers the defender |
 
 The zone capture trigger has no activation. A `this` gate would stop the function from being asked
@@ -122,8 +122,9 @@ one once no player is within 500 m. A town clear releases its survivors the same
 
 ### Zone tiers
 
-Every zone rolls a tier I to IV when it is generated, and keeps it until OPFOR retake the zone, which
-resets it to I. Tier 0 is reserved for BLUFOR-held ground. **Tier picks
+Every zone rolls a tier I to IV when it is generated. A BLUFOR capture drops it to 0, which means no
+garrison: tier 0 is BLUFOR ground, reserved for BLUFOR to build on. An OPFOR retake resets it to I.
+**Tier picks
 which composition the zone fields; strength is how much of that is left.** Weights are 1/2/3/4, so
 the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
 soft one worth taking early.
@@ -139,7 +140,8 @@ campaign's enemy multiplier — scales whole cards and applies to every zone ali
 ladder's weight is in the dug-in half — the `garrison:garrison_element` slots — which climbs from two slots
 at tier I to six at tier IV: about thirty men at tier I against about seventy at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
 is a minority of a zone's men.
-`fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
+`fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
+stored 0 never re-rolls. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
 is worth behind the player's back and disagree with the garrison peak already measured against the old
 tier. A zone with no tier recorded reads as IV, so a save written before tiers existed comes back at
@@ -288,7 +290,8 @@ capture only while BLUFOR do not outnumber him.
 
 The OPFOR-takes-it-back direction is the same `DUWS_fnc_siteTaken` with the sides swapped: an OPFOR
 unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held for the same
-`DUWS_captureHold`. BLUFOR garrisons are not built, so there is no garrison test. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
+`DUWS_captureHold`. A BLUFOR-held zone sits at tier 0, so there is no garrison test until BLUFOR build
+a garrison and raise its tier. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
 statement itself once one has stood inside the radius for `DUWS_captureHold`
 ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
 `fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move in

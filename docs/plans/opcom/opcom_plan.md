@@ -50,7 +50,7 @@ The code is the source of truth. What new work must hold to:
   lifting a foot unit over dry ground with the same carry.
 - **Capture.** A `capture` takes the BLUFOR-held zone at its target and aims at the zone's centre
   (`fnc_opcom_task`). A retake is the zone trigger running `DUWS_fnc_siteTaken` with OPFOR attacking — an OPFOR unit
-  inside the radius, OPFOR outnumbering BLUFOR over the streaming ring, no BLUFOR garrison to beat — held for
+  inside the radius, OPFOR outnumbering BLUFOR over the streaming ring, no garrison to beat at the BLUFOR zone's tier 0 — held for
   `DUWS_captureHold`, so a zone flips with players inside. A virtual attacker inside the radius posts the contact report as it enters and
   runs the zone's retake statement itself once it has stood inside for `DUWS_captureHold`. The order ends when the zone is OPFOR's: an attacker inside the radius garrisons there, a live one
   holding `guard` until it stows, and one still on the road re-garrisons there.
@@ -319,8 +319,8 @@ launches as a flank.
 - **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points outward.
 - **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action
   ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
-  (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, none bought counting
-  as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
+  (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
+  counting as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
   trigger; a virtual attacker at an empty zone flips it on the OPCOM tick against stored state once it has held
   the radius for `DUWS_captureHold`, and OPCOM sends that attack's contact report itself. The
   attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the unit

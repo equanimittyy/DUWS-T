@@ -26,10 +26,17 @@ DUWS_fnc_siteTaken = {
     private _pos = _site get "pos";
     private _radius = _site get "radius";
     // The ring the garrison streams in, not the radius, so a flip leaves no outer-ring force the attacker never
-    // had to beat. Only OPFOR field garrisons: BLUFOR ground has none to beat. A garrison that is not live
-    // (stowed, mid-raise) refuses, so empty ground is never taken before its men are placed.
+    // had to beat.
     private _ring = _radius + ((DUWS_streamProfiles get _profile) select 0);
-    private _won = (_foe != EAST || {([_key] call DUWS_fnc_garrisonHeld) && {[_key] call DUWS_fnc_garrisonBeaten}})
+    // Tier 0 holds no garrison -- a town outside the OPFOR band, or a zone BLUFOR hold until they build one -- so
+    // there is nothing to beat. A garrison that is not live (stowed, mid-raise) refuses, so ground is never taken
+    // before its men are placed.
+    private _tier = if ((_key select [0, 5]) isEqualTo "town_") then {
+        [parseNumber (_key select [5])] call fnc_town_garrison_tierAt
+    } else {
+        [_key] call fnc_zone_tier
+    };
+    private _won = (_tier == 0 || {([_key] call DUWS_fnc_garrisonHeld) && {[_key] call DUWS_fnc_garrisonBeaten}})
         && {([_pos, _radius, _side, true] call fnc_side_count_at) > 0}
         && {([_pos, _ring, _side, true] call fnc_side_count_at) > ([_pos, _ring, _foe, true] call fnc_side_count_at)};
     private _var = format ["DUWS_takeSince_%1", _key];

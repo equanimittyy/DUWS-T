@@ -61,11 +61,8 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// token the moment its group is wiped, so one figure serves a streamed-in zone and a stowed one alike.
 	private _seg = floor (([_key] call fnc_zone_strength) * 20);
 
-	// Rolled when the zone was generated, raised by a fortify and reset to I by a retake, so this is
-	// what the ground is worth taking rather than how much of it is left -- which is what the bar under
-	// it says. A zone the player took holds no garrison at all, so it reports 0 rather than the tier it
-	// was fought off.
-	private _tier = [([_key] call fnc_zone_tier), 0] select _held;
+	// What the ground is worth taking rather than how much of it is left -- which is what the bar under it says.
+	private _tier = [_key] call fnc_zone_tier;
 	private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", _key], ""];
 	// The same window a town reports as MOBILISING: OPFOR own the ground and their men are not on it yet.
 	// A zone the player holds is never mobilising, whatever the flag says -- BLUFOR inherit no

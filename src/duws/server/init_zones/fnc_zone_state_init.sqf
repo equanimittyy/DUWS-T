@@ -76,10 +76,11 @@ fnc_zone_strength = {
 	[_zoneKey] call DUWS_fnc_garrisonStrength
 };
 
-// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it, and an
-// OPFOR retake resets it to I. Distinct from fnc_zone_strength, which is attrition: tier picks which
-// composition the zone fields, strength says how much of it is left. Keeping them apart is what lets the
-// map readout show a tier I zone at a full bar -- small, but not yet fought over.
+// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it. A BLUFOR
+// capture drops it to 0, which means no garrison, and an OPFOR retake resets it to I. Distinct from
+// fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says how
+// much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a full bar --
+// small, but not yet fought over.
 // Tier selects a list rather than scaling one, so it reaches only the units a zone spawns alongside
 // itself. The fortification garrison and the composition's gun crews scale by attrition alone.
 // Defaults to IV so a zone that never rolled one -- a save written before tiers existed, or any path
@@ -100,8 +101,8 @@ fnc_zone_tier = {
 fnc_zone_tier_roll = {
 	params ["_zoneKey"];
 	private _var = format ["DUWS_zoneTier_%1", _zoneKey];
-	private _existing = missionNamespace getVariable [_var, 0];
-	if (_existing > 0) exitWith { _existing };
+	// Tested for absence, not for a positive tier: 0 is a stored tier, BLUFOR ground, and must not re-roll.
+	if !(isNil { missionNamespace getVariable _var }) exitWith { missionNamespace getVariable _var };
 	private _tier = selectRandomWeighted [1, 1, 2, 2, 3, 3, 4, 4];
 	missionNamespace setVariable [_var, _tier];
 	_tier
@@ -243,6 +244,7 @@ fnc_zone_control_set = {
 			[WARCOM_zones_controled_by_OPFOR, _zonePos] call _fnc_dropFrom;
 			amount_zones_captured = amount_zones_captured + 1;
 			zoneundercontrolblu = zoneundercontrolblu + 1;
+			missionNamespace setVariable [format ["DUWS_zoneTier_%1", [_zonePos] call fnc_zone_key], 0];
 			// Position is the only stable zone id here: the capture path never receives the
 			// generation index, and the prefab name it does carry is not unique.
 			["INFO", "ZONES", format ["captured by BLUFOR at %1, now holding %2",
