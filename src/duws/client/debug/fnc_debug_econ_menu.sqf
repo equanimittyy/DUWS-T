@@ -17,7 +17,7 @@ if (isNull _display) exitWith {};
 uiNamespace setVariable ["DUWS_debug_econ_display", _display];
 
 private _bg = _display ctrlCreate ["RscText", 9510];
-_bg ctrlSetPosition [0.25, 0.18, 0.5, 0.62];
+_bg ctrlSetPosition [0.25, 0.18, 0.5, 0.78];
 _bg ctrlSetBackgroundColor [0, 0, 0, 0.7];
 _bg ctrlCommit 0;
 
@@ -112,20 +112,19 @@ _townLabel ctrlSetText "Towns (rep clamps to +/-20; tier 0-4, and only holds bel
 _townLabel ctrlCommit 0;
 
 private _list = _display ctrlCreate ["RscListBox", 9522];
-_list ctrlSetPosition [0.26, 0.53, 0.48, 0.14];
+_list ctrlSetPosition [0.26, 0.53, 0.48, 0.30];
 _list ctrlCommit 0;
 
-// Three across (pool-row spacing), not two halves, so the tier button fits without growing into Close.
 {
     private _btn = _display ctrlCreate ["RscButton", _x];
-    _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.68, 0.115, 0.05];
+    _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.84, 0.115, 0.05];
     _btn ctrlSetText (["Rep +/-", "Worth +/-", "Tier +/-", "Reinforce x"] select _forEachIndex);
     _btn ctrlCommit 0;
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
 } forEach [9523, 9524, 9526, 9527];
 
 private _closeBtn = _display ctrlCreate ["RscButton", 9517];
-_closeBtn ctrlSetPosition [0.26, 0.74, 0.48, 0.05];
+_closeBtn ctrlSetPosition [0.26, 0.90, 0.48, 0.05];
 _closeBtn ctrlSetText (localize "STR_DUWS_T_MENU_CLOSE");
 _closeBtn ctrlCommit 0;
 _closeBtn ctrlAddEventHandler ["ButtonClick", {
