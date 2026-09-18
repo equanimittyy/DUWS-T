@@ -1,9 +1,6 @@
-// Locality: server, [] call'd at load. A supply run's delivery and OPCOM's hardpoint build. The caller spends the
-// truck whatever a writer answers, so a refused errand is lost (docs/plans/opcom/opcom_plan.md §Shipped).
+// Locality: server, [] call'd at load. The caller spends the truck whatever a writer answers: a refused errand is lost.
 if (!isServer) exitWith {};
 
-// One hardpoint of _type: drawn in _zoneKey's ring, or standalone exactly at _pos when _zoneKey is "". -> false if
-// refused. The build runs spawned: the builder sleeps in its crew drop, and the tick must never sleep.
 DUWS_fnc_opcom_build = {
     params ["_type", ["_zoneKey", ""], ["_pos", []]];
     if (([_type] call fnc_hardpoint_comp) isEqualTo [] && {_type isNotEqualTo "MINEFIELD"}) exitWith {
@@ -19,6 +16,7 @@ DUWS_fnc_opcom_build = {
     };
     private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
     missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
+    // Spawned: the builder sleeps in its crew drop, and the tick must never sleep.
     [_type, format ["hpopcom_%1", _seq], _zoneKey, _anchor] spawn {
         params ["_type", "_key", "_zoneKey", "_anchor"];
         private _at = _anchor select 0;

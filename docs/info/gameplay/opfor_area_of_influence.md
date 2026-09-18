@@ -94,7 +94,7 @@ incremented in place, by `DUWS_fnc_aoi_opforRecount`
 registered (`:328`) or cleared (`:182`) — so a destroyed tower drops the amplifier, and its
 `AOI_TOWER_REACH` coverage with it, in the same recount. `"RADIO"` is a hardpoint type like any
 other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf:417,430`), sited via
-`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:355-393`), which samples the
+`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:314-350`), which samples the
 band, rejects any draw inside another tower's `AOI_TOWER_REACH`, and stands the mast on the
 best-scoring hilltop of what survives. It is deliberately absent from `DUWS_hardpointWeightZone`
 and `DUWS_hardpointWeightSolo` (`server_var_init.sqf:405-410`) — a tower is placed on purpose,
@@ -115,23 +115,21 @@ answer to a rising amplifier — only ground to retake.
 annulus around a random OPFOR zone, out to `AOI_ZONE_REACH` past the zone's edge, and keeps the
 draw only where `fnc_aoi_field_at` is positive and `fnc_aoi_in_any_zone` is false. Every band
 placer goes through it (directly, or via the per-emplacement anchor/candidate pair
-`fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`, `fnc_hardpoint_place.sqf:306-324`), so all
+`fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`, `fnc_hardpoint_place.sqf:231-246`), so all
 of them sample the same ground the same way; siting mechanics beyond the candidate source —
 terrain survey, per-type score, facing, spacing — are shared with the zone ring and documented in
 [`hardpoints.md`](hardpoints.md).
 
-At campaign generation, `fnc_hardpoint_site_aoi` (`fnc_hardpoint_place.sqf:335-341`) spreads
-`count serv_zones_array` standalone combat hardpoints uniformly across the band — there is no front
-yet to weight toward. After generation, a low-frequency director,
-`server/warcom/fnc_WARCOM_opf_hardpoints.sqf`, spawned unconditionally from
-`server/warcom/fnc_WARCOM_init.sqf:57`, spends OPFOR Army Power once per `OPCOM_HP_PERIOD` (120 ticks, 600 s) on
-one of: raising a radio tower toward the cap, topping a depleted zone back toward its stored
-`DUWS_hpCap_<zoneKey>` (`fnc_hardpoint_place.sqf:283-285`), or fortifying the band with one more
-standalone emplacement — priced `OPCOM_AP_TOWER`/`OPCOM_AP_TOPUP`/`OPCOM_AP_BAND`
-(`server_var_init.sqf:472-475`) in that priority order. Its band placement is still uniform, drawn
-through the same `DUWS_fnc_aoi_bandPos` sampler as the start pass — it has no belief about where
-the player operates to weight toward. That weighting, and the personality behind which action a
-commander prefers, is [`../opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md)'s to
+At campaign generation the band is laid after the zone rings: radio towers, the two flank lines, an
+AA net, the observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns
+the passes and their counts).
+
+Nothing builds in the band on its own after generation. The standalone director
+(`server/warcom/fnc_WARCOM_opf_hardpoints.sqf`) is compiled but not spawned: it spent Army Power on
+flat-priced builds on its own clock, and it waits to be re-driven through OPCOM's appraisal so that a
+build competes for the wallet. OPCOM's own standalone build stands a hardpoint where its truck delivers
+it, and is driven only by hand from the debug harness. Choosing that spot, weighted toward where the
+player operates, is [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s to
 add; nothing here reads a belief store or an archetype.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
@@ -150,7 +148,7 @@ menu, not shown to the player.
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
 | `AOI_OPFOR_TOWER_CAP` | 5 | ceiling on `DUWS_opforRadioLevel`; OPFOR's push bottoms out at `-6` |
-| `OPCOM_HP_PERIOD` | 120 ticks (600 s) | how often the hardpoint director acts |
+| `OPCOM_HP_PERIOD` | 120 ticks (600 s) | how often the standalone director acts (not spawned) |
 | `OPCOM_AP_TOWER` | 30 | AP cost to raise a radio tower |
 | `OPCOM_AP_TOPUP` | 8 | AP cost to top up a depleted zone |
 | `OPCOM_AP_BAND` | 12 | AP cost to fortify the band |
