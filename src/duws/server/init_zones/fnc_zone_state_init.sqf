@@ -153,7 +153,7 @@ fnc_zone_garrison_reinforce = {
 };
 
 // -> the tier it now stands at, or -1 if refused. Full potential is re-stamped now, not at the next raise, so the grid
-// and the readout count the new tier's men at once.
+// and the readout see the buy at once.
 fnc_zone_garrison_fortify = {
 	params ["_zoneKey", ["_reason", ""]];
 	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
@@ -165,7 +165,9 @@ fnc_zone_garrison_fortify = {
 	if (_new == _old) exitWith { _old };
 	missionNamespace setVariable [format ["DUWS_zoneTier_%1", _zoneKey], _new];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-	[_zoneKey, [[_new] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
+	private _full = [[_new] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition;
+	[_zoneKey, [[_old] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_garrisonGrow;
+	[_zoneKey, _full] call DUWS_fnc_garrisonSetFull;
 	[_zoneKey] call fnc_zone_garrison_rederive;
 	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
 	_new

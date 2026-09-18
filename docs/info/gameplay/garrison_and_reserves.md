@@ -51,6 +51,7 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 | `DUWS_fnc_garrisonSeed {key, frac}` | Mark random tokens lost until survival is at or under `frac`, spending the pool before the garrison. Recapture and a town clear both call it with `0.3`. |
 | `DUWS_fnc_garrisonUnlose {key, target}` | Remove random lost entries until survival reaches `target` — a paid replacement, not a heal. |
 | `DUWS_fnc_garrisonReinforce {key}` | Unlose one `REINFORCE_STEP` (`0.3`) above current strength. The town and zone reinforce purchases both call it. |
+| `DUWS_fnc_garrisonGrow {key, oldFull, newFull}` | File all but a tenth (rounded down) of the tokens `newFull` adds over `oldFull` as lost, bounded at each token's count in `newFull`. The zone fortify and a town tier raise above I both call it, so a bought tier must be reinforced to field whole. |
 | `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
 | `DUWS_fnc_garrisonHeld {key}` | Liveness: true from the moment a raise finishes placing men to the stow or capture that tears it down. Gates the capture test and the refill pass. |
 

@@ -183,6 +183,12 @@ fnc_town_garrison_setTier = {
 		["INFO", "CIV", format ["Town %1 tier %2 -> %3 refused (%4): regrouping for another %5 s",
 			_townIndex, _old, _new, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 	};
+	// The 0-to-I step is the reputation band's, not a purchase.
+	if (_old > 0 && {_new > _old}) then {
+		private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+		private _fnc_full = { [[DUWS_townSpawnTiers select (_this - 1)] call DUWS_fnc_spawnFilter, _mult] call DUWS_fnc_scaleComposition };
+		[[_townIndex] call DUWS_fnc_townStrengthKey, _old call _fnc_full, _new call _fnc_full] call DUWS_fnc_garrisonGrow;
+	};
 	_tiers set [_townIndex, _new];
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };

@@ -656,6 +656,19 @@ missionNamespace setVariable ["DUWS_garrisonLost_uk", ["patrol", "patrol", "patr
 ["garrisonUnlose: buys survival back up to the target",
     (["uk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
 
+missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
+["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonGrow;
+["garrisonGrow: a tenth of the added tokens is fielded, the rest filed lost",
+    (["gk"] call DUWS_fnc_garrisonLost), ["b", "b", "b", "b", "b", "b", "b", "b", "b"]] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
+["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonGrow;
+["garrisonGrow: under ten added tokens, a tenth rounds down to none fielded",
+    (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_garrisonLost_gk", ["b", "b"]];
+["gk", [], ["b", "b"]] call DUWS_fnc_garrisonGrow;
+["garrisonGrow: a token already lost up to its count in the new full is not filed again",
+    (["gk"] call DUWS_fnc_garrisonLost), ["b", "b"]] call fnc_assertEq;
+
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
 // campaign setting and a squad's leader is not outnumbered by his own automatic riflemen.

@@ -128,8 +128,11 @@ tier. A zone with no tier recorded reads as IV, so a save written before tiers e
 the strength it had rather than silently halving.
 
 **The commander buys a zone's tier and strength as it does a town's.** `fnc_zone_garrison_fortify`
-raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential so the
-new tier's men count as owed; the zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`).
+raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential; the
+zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`). The buy fields only a tenth of the tokens
+the new tier adds, rounded down, and files the rest as lost (`DUWS_fnc_garrisonGrow`), so the commander
+must reinforce to field the whole tier. At multiplier 1 a step adds at most seven tokens, so a fortify
+fields none of them until a reinforcement buys them back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-derive the reserve
 pool, so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM lands them with no truck
@@ -378,6 +381,12 @@ appraise them as neutral.
 | II | The above heavier, plus a sniper pair, an APC and dug-in elements | purchase |
 | III | The above heavier, with wide-patrol teams and a second APC | purchase |
 | IV | The above, plus a lone IFV and more building-occupying units | purchase |
+
+A purchased tier arrives mostly owed. `fnc_town_garrison_setTier` files all but a tenth of the tokens a
+raise from tier I or above adds, rounded down, as lost (`DUWS_fnc_garrisonGrow`), exactly as a zone
+fortify does. A town step adds at most five tokens per multiplier copy, so below multiplier 2 a town
+buy fields nothing new until `fnc_town_garrison_reinforce` buys the tokens back. The step from 0 to I
+is the reputation band's and fields whole.
 
 The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
 `DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town

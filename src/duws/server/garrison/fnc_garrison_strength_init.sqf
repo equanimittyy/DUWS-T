@@ -152,6 +152,21 @@ DUWS_fnc_garrisonReinforce = {
 	[_key, ([_key] call DUWS_fnc_garrisonStrength) + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
 };
 
+// The commander pays reinforcements to field the rest of a bought tier. Bounded by the new full: a cleared town's
+// ledger can still hold the tokens of the higher tier it was cleared at.
+DUWS_fnc_garrisonGrow = {
+	params ["_key", "_oldFull", "_newFull"];
+	private _owed = [_oldFull, _newFull] call DUWS_fnc_spawnDiff;
+	for "_i" from 1 to floor (0.1 * count _owed) do { _owed deleteAt (floor random count _owed) };
+	private _var = format ["DUWS_garrisonLost_%1", _key];
+	private _lost = missionNamespace getVariable [_var, []];
+	{
+		private _token = _x;
+		if (({ _x isEqualTo _token } count _lost) < ({ _x isEqualTo _token } count _newFull)) then { _lost pushBack _token };
+	} forEach _owed;
+	missionNamespace setVariable [_var, _lost];
+};
+
 // Forgets a site's garrison entirely: full potential and loss ledger both cleared. For a site that
 // stops being a garrison at all -- a town worked back out of the OPFOR band -- so if it becomes one
 // again it starts fresh, rather than redeploying the remains of a garrison the ground no longer holds.
