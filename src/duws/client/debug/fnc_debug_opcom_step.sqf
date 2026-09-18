@@ -15,8 +15,14 @@ switch (_mode) do {
     // whose only order is the fire mission; a number is a tasking.
     case "order": {
         if (_key isEqualType "") exitWith { [_key, "firemission"] call fnc_debug_opcom_step };
-        [format ["Tasking %1: order", _key], ["capture", "move", "guard", "regarrison", "supply", "intercept", "teleport"] apply {
-            [_x, { params ["_id", "_next"]; [_id, _next] call fnc_debug_opcom_step }, [_key, _x], _c]
+        // An errand is an order in its own right here: the move that carries it is implied, not picked first.
+        [format ["Tasking %1: order", _key], [
+            ["capture", "capture"], ["move", "move"], ["guard", "guard"], ["re-garrison", "regarrison"],
+            ["reinforce a town", "reinforce"], ["fortify a town", "fortify"], ["rapport a town", "rapport"],
+            ["build a hardpoint", "build"], ["intercept", "intercept"], ["teleport", "teleport"]
+        ] apply {
+            _x params ["_label", "_next"];
+            [_label, { params ["_id", "_n"]; [_id, _n] call fnc_debug_opcom_step }, [_key, _next], _c]
         }] call fnc_open_action_menu;
     };
     case "capture";
@@ -31,14 +37,10 @@ switch (_mode) do {
     case "guard": { ["task", _key, "guard", [], player] remoteExec ["fnc_debug_opcom", 2] };
     case "regarrison": { ["zonelist", _key, "regarrison_zone", "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "regarrison_zone": { ["regarrison", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
-    case "supply": {
-        private _errands = ["reinforce", "fortify", "rapport"] apply {
-            [format ["%1 a town", _x], { params ["_id", "_kind"]; ["townlist", _id, _kind, "", player] remoteExec ["fnc_debug_opcom", 2] }, [_key, _x], _c]
-        };
-        _errands pushBack ["build a hardpoint", { params ["_id"]; [_id, "supply_build"] call fnc_debug_opcom_step }, [_key], _c];
-        [format ["Tasking %1: errand", _key], _errands] call fnc_open_action_menu;
-    };
-    case "supply_build": {
+    case "reinforce";
+    case "fortify";
+    case "rapport": { ["townlist", _key, _mode, "", player] remoteExec ["fnc_debug_opcom", 2] };
+    case "build": {
         [format ["Tasking %1: build which type?", _key], _hpTypes apply {
             [_x, {
                 params ["_id", "_type"];
