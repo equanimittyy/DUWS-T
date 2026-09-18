@@ -9,7 +9,7 @@ private _c = [1, 0.667, 0, 1];
 ["OPCOM", [
     ["Recruit a unit",  { ["recruitlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Order a tasking", { ["tasklist",    "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
-    ["Buy for a zone", { ["zonelist", "", "zonebuy", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
+    ["Defensive taskings", { ["zonelist", "", "zonebuy", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Fire mission", { ["batterylist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["List taskings",   { ["list",        "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], _c],
     ["Tasking unit status", {

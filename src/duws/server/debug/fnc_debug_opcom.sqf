@@ -29,7 +29,7 @@ switch (_verb) do {
         if (_rows isEqualTo []) exitWith { "No OPFOR-owned zone (BLUFOR holds them all)." remoteExec ["hint", _caller] };
         private _title = switch (_next) do {
             case "recruit_zone": { "Recruit at which zone?" };
-            case "zonebuy": { "Buy for which zone?" };
+            case "zonebuy": { "Defensive tasking at which zone?" };
             default { "Re-garrison to which zone?" };
         };
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];

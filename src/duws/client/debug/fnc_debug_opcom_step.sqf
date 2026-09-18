@@ -67,7 +67,7 @@ switch (_mode) do {
             [_x, { params ["_zk", "_kind"]; ["zone", _kind, _zk, "", player] remoteExec ["fnc_debug_opcom", 2] }, [_key, _x], _c]
         };
         _buys pushBack ["build a hardpoint", { params ["_zk"]; [_zk, "zone_build"] call fnc_debug_opcom_step }, [_key], _c];
-        [format ["%1: buy", _key], _buys] call fnc_open_action_menu;
+        [format ["%1: defensive tasking", _key], _buys] call fnc_open_action_menu;
     };
     case "zone_build": {
         [format ["%1: build which type?", _key], _hpTypes apply {
