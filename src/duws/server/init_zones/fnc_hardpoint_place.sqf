@@ -81,9 +81,10 @@ fnc_hardpoint_garrison = {
         private _crew = [_sp, _sideObj, (_arty apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _crew deleteGroupWhenEmpty true;
         (units _crew) call _maxSpot;
+        // Seat before the thaw: a turret only wakes on that transition with a gunner already aboard.
         {
-            _x enableSimulationGlobal true;
             ((units _crew) param [_forEachIndex, objNull]) moveInGunner _x;
+            _x enableSimulationGlobal true;
         } forEach _arty;
         _men append (units _crew);
     };

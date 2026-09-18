@@ -68,7 +68,8 @@ DUWS_fnc_opcom_fireMission = {
         // Loaded before the range test: an empty gun reports no artillery magazine to fire or to measure with.
         _gun setVehicleAmmo 1;
         private _m = (getArtilleryAmmo [_gun]) param [0, ""];
-        if (_m isEqualTo "" || {isNull (gunner _gun)} || {!(_gun inRangeOfArtillery [[_pt], _m])}) then {
+        // Target left, guns in the array -- the mirror of doArtilleryFire; transposed it throws and kills the loop.
+        if (_m isEqualTo "" || {isNull (gunner _gun)} || {!(_pt inRangeOfArtillery [[_gun], _m])}) then {
             _gun setVehicleAmmo 0;
         } else {
             _mag = _m;
