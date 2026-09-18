@@ -80,16 +80,16 @@ fnc_zone_garrison_dropped = {
 // deciding what to place. Names the zone's key to the shared attrition ledger, which a town reads the
 // same way -- a live projection of surviving tokens over full potential, so there is nothing to record
 // or refresh: it is always current, and it rises only by a bought reinforcement. A wiped group records
-// its own loss; recapture reseeds it through DUWS_fnc_garrisonSeed.
+// its own loss; recapture reseeds it through DUWS_fnc_garrisonSeedOpforCap.
 fnc_zone_strength = {
 	params ["_zoneKey"];
 	[_zoneKey] call DUWS_fnc_garrisonStrength
 };
 
-// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it. Distinct from
-// fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says
-// how much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a
-// full bar -- small, but not yet fought over.
+// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it, and an
+// OPFOR retake resets it to I. Distinct from fnc_zone_strength, which is attrition: tier picks which
+// composition the zone fields, strength says how much of it is left. Keeping them apart is what lets the
+// map readout show a tier I zone at a full bar -- small, but not yet fought over.
 // Tier selects a list rather than scaling one, so it reaches only the units a zone spawns alongside
 // itself. The fortification garrison and the composition's gun crews scale by attrition alone.
 // Defaults to IV so a zone that never rolled one -- a save written before tiers existed, or any path

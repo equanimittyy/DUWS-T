@@ -20,14 +20,12 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 // and the lost zone becomes the primary assault target.
 ["OPF", _triggerPos] call fnc_zone_control_set;
 
-// What OPFOR put back on ground they had to retake is a scratch force, not the garrison the zone was
-// generated with. The loss ledger is seeded to 0.3 survival -- a thin single garrison with no reserve
-// depth, since the seed spends the pool copies before it thins the garrison -- so every retake costs
-// them the same and a zone traded back and forth does not converge on full strength.
+// Tier I, not 0: tier 0 is reserved for BLUFOR ground.
 // No hold beside it, unlike a town's: the ground changes hands back and forth under a live fight, and the
 // garrison arrives on the ordinary streaming rule.
 private _retakenKey = [_triggerPos] call fnc_zone_key;
-[_retakenKey, 0.3] call DUWS_fnc_garrisonSeed;
+missionNamespace setVariable [format ["DUWS_zoneTier_%1", _retakenKey], 1];
+[_retakenKey, [1] call DUWS_fnc_zoneSpawnList] call DUWS_fnc_garrisonSeedOpforCap;
 
 // Mobilising: OPFOR own the ground and their men are not on it yet. Set here and cleared by
 // fnc_zone_spawn when the garrison's peak publishes, so it describes exactly the window between the

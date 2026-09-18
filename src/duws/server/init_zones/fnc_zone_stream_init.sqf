@@ -336,8 +336,7 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
         // Called before the send-off: the zone has changed hands, and a live flag surviving past this
         // reads a pack-up as a garrison beaten.
         [_key] call fnc_zone_garrison_dropped;
-        // OPFOR no longer own this ground, so there's nothing to reinforce; a retake reseeds from the
-        // scratch ledger fnc_opfor_cap seeds to 0.3 survival.
+        // OPFOR no longer own this ground, so there's nothing to reinforce.
         [_key] call DUWS_fnc_garrisonReserveClear;
         private _leftovers = [_key, _pos] call DUWS_fnc_zoneSendOff;
         [_key, "withdrawing"] call fnc_site_roster_clear;

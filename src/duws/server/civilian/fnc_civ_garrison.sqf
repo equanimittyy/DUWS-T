@@ -88,6 +88,7 @@ private _fnc_tick = {
     if (_rep <= OPFOR_BAND && _tier == 0) then {
         [_i, 1, "reputation band"] call fnc_town_garrison_setTier;
         _tier = 1;
+        [_key, [1] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonSeedOpforCap;
         // Re-armed on every crossing so a retaken town is held again each time; the latch goes with it since the player who spent the reputation is standing right there.
         // Logged once here, not per deferred cycle -- sixty identical lines isn't a readable log, and this one carries the figure a tester needs.
         private _held = [_i, "MOBILISING"] call fnc_town_garrison_setHold;

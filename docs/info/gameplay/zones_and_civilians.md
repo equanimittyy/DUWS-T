@@ -105,7 +105,8 @@ the radius.
 
 ### Zone tiers
 
-Every zone rolls a tier I to IV when it is generated, and keeps it for the campaign. **Tier picks
+Every zone rolls a tier I to IV when it is generated, and keeps it until OPFOR retake the zone, which
+resets it to I. Tier 0 is reserved for BLUFOR-held ground. **Tier picks
 which composition the zone fields; strength is how much of that is left.** Weights are 1/2/3/4, so
 the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
 soft one worth taking early.
@@ -141,8 +142,8 @@ lands them with no truck
 
 **Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
 survives a rebuild through `fnc_createzone`, which would otherwise reshuffle ground the player has already
-fought over. A zone's strength rises only through a reinforcement: the loss record lowers it, and a
-retake reseeds it to `0.3`.
+fought over. A zone's strength rises only through a reinforcement: the loss record lowers it. A retake
+resets both: the tier to I and the strength to `0.1`.
 
 One thing a zone will not need is a purchase refusal. A town's `REGROUPING` hold blocks both sinks
 because OPFOR can hold a town whose garrison was just destroyed; there is no equivalent zone state to
@@ -230,10 +231,10 @@ time the zone streamed out — the refund the mechanic exists to stop.
 The `0.3` floor is what keeps that from becoming a walk-in, and it is also structural: a zone allowed
 to redeploy empty would be uncapturable outright, because a zero peak refuses capture.
 
-**Strength falls unless the commander pays, and a retake floors it.** Only a bought reinforcement restores a zone. `fnc_opfor_cap` writes
-`0.3` when OPFOR take a zone back, so what they put on ground they had to retake is a scratch force —
-floored rather than merely reduced, so every retake costs them the same and a zone traded back and
-forth cannot converge on full strength. It used to reset to full on the BLUFOR capture instead, on
+**Strength falls unless the commander pays, and a retake resets it.** Only a bought reinforcement restores a zone. `fnc_opfor_cap`
+resets the tier to I and seeds strength to `0.1` when OPFOR take a zone back
+(`DUWS_fnc_garrisonSeedOpforCap`), so what they put on ground they had to retake is a scratch force.
+Every retake costs them the same, and a zone traded back and forth cannot converge on full strength. It used to reset to full on the BLUFOR capture instead, on
 the reasoning that a retaken zone is manned by a fresh garrison; that handed the player's grinding
 straight back the moment they lost the ground again.
 
@@ -416,7 +417,7 @@ pop-in the holds exist to prevent, and worse mid-fight.
 **A hold covers upgrades too, by structure rather than by a second test.** Reinforcement requires a
 standing garrison, and only the hold-gated branch raises one — so a tier bought seconds after a town
 falls cannot arrive early. It raises the stored tier, and the first spawn reads that tier whole once
-the hold lapses: a town captured and immediately bought up to III arrives as a full
+the hold lapses: a town captured and immediately bought up to III arrives as a
 tier III garrison in one go, not as a tier I followed by a top-up. The tier stays owed and lands on a
 later cycle rather than being lost, so the commander may raise a contested town at any time and pays
 for it whether or not the player is standing there. This is why the deferral lives in the garrison
@@ -589,7 +590,8 @@ a zone is ground with an owner, a town is ground with an opinion.
 | How OPFOR come to hold it | generated that way, or retaken | the player ruined it — killed civilians, wrecked buildings |
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
 | How OPFOR get it back | outnumber BLUFOR inside the radius, players there or not (`fnc_zone_retake_ready`) | reputation falls back below `-10` |
-| Strength after being beaten | floored to `0.3` on the retake (`fnc_opfor_cap`) | floored to `0.3` on the clear |
+| Strength when OPFOR take it | tier I at `0.1` on the retake (`fnc_opfor_cap`) | tier I at `0.1` on crossing `-10` |
+| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I at `0.3` on the clear |
 | Time gate | none | `MOBILISING` 30 min, `REGROUPING` 3 h |
 | Presence latch | thread start, and every retake | thread start, and every hold armed |
 | Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
@@ -601,10 +603,9 @@ until the ring has been empty once. A town's flip has no such force: reputation 
 town, so the player is standing in it at the exact moment it crosses, and again at the moment its
 garrison dies. The hold is what buys that garrison its distance.
 
-**Why the strength floor is symmetric anyway.** Both sides of that difference converge on the same
-rule, because both answer the same question — what does a beaten garrison come back as. A zone
-retaken and a town cleared each return at `0.3`, and neither climbs back on its own — each only by a
-purchased reinforcement. Grinding either one
+**Why the strength seed is symmetric anyway.** Both sides of that difference converge on the same
+rule for ground OPFOR have just taken: a zone retaken and a town that crosses `-10` each start at tier I
+and `0.1`. Neither climbs back on its own, only by a purchased reinforcement, so grinding either one
 down is worth something that outlasts the visit.
 
 ### The life of a zone, and the life of a town
@@ -621,7 +622,7 @@ about.
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: the tier composition, thinned by strength. Peak published | tier + bar |
 | You leave for 2 min | Survivors counted, strength recorded (never upward), the zone's own men deleted by roster, props stowed, peak cleared | tier + the bar it will return at |
 | You beat it to 20 % **and** outnumber the OPFOR left in the zone | Ownership flips. CP bounty, AP swings. Survivors are sent off and then collected once no player is within 500 m — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
-| OPFOR retake (`fnc_zone_retake_ready`) | OPFOR outnumber BLUFOR in the radius, players inside or not. Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
+| OPFOR retake (`fnc_zone_retake_ready`) | OPFOR outnumber BLUFOR in the radius, players inside or not. Tier reset to I, strength seeded to `0.1`. Streaming re-latches | **`Mobilising`** |
 | The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground: a zone has no `Regrouping` state to protect | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at, peak published | tier + bar |
 
@@ -630,7 +631,7 @@ about.
 | Step | What happens | State on the readout |
 |---|---|---|
 | Generated | Neutral — unless its radius overlaps an enemy zone, which starts it at `-20`, tier I, no hold | none |
-| You ruin it past `-10` | Tier I written at once: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
+| You ruin it past `-10` | Tier I written at once, strength seeded to `0.1`: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
 | Hold lapses, you have left once, you return | Garrison raised: tier composition thinned by strength | tier |
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
 | `WEST SEIZED` — no OPFOR left | `+5` rep, tier back to I, strength to `0.3`, 3 h hold, latch armed | **`Regrouping`** |
@@ -707,9 +708,9 @@ more usefully — **which of them cannot be moved alone.**
 
 **Five couplings, each of which fails quietly.**
 
-- **The `0.3` floor is written in four places** — the clamp in `DUWS_fnc_garrisonStrengthSet`, the
-  town clear, the zone retake, and implicitly by every consumer that rounds its own share up. Moving
-  the clamp without the two writers leaves them setting a value the clamp then overrides, and the
+- **The `0.3` floor is written in three places** — the clamp in `DUWS_fnc_garrisonStrengthSet`, the
+  town clear, and implicitly by every consumer that rounds its own share up. Moving
+  the clamp without the writer leaves it setting a value the clamp then overrides, and the
   reverse leaves the writers unable to reach the floor they name.
 - **`BREAK_FRACTION` `0.2` sits in three files** — `fnc_civ_garrison`, `fnc_zone_stream_init` and
   `fnc_zone_capture_ready` — because it is one rule the player learns once. It is also *load-bearing

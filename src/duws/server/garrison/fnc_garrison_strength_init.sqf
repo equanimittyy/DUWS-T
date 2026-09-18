@@ -161,6 +161,15 @@ DUWS_fnc_garrisonSeed = {
 	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost];
 };
 
+// Full is stamped here, not left to the raise, because the seed thins against it: a retaken zone still carries its
+// old tier's full, and a town just back in the band has none.
+DUWS_fnc_garrisonSeedOpforCap = {
+	params ["_key", "_x1"];
+	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	[_key, [_x1, _mult] call DUWS_fnc_scaleComposition] call DUWS_fnc_garrisonSetFull;
+	[_key, 0.1] call DUWS_fnc_garrisonSeed;
+};
+
 // Buys destroyed tokens back: removes random lost entries until survival reaches the target fraction.
 // The reinforce purchase's hook -- a paid replacement, the one thing that raises strength, and
 // deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).

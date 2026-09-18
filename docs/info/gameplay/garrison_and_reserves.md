@@ -67,7 +67,8 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 | `DUWS_fnc_garrisonSurviving {key}` | `full` minus `lost`, by value. |
 | `DUWS_fnc_garrisonRecordLoss {key, token}` | Push one lost token, bounded at its count in `full` — a double-fire of the killed handler is a no-op. |
 | `DUWS_fnc_garrisonStrength {key}` | The live `[0,1]` projection the map bar reads. |
-| `DUWS_fnc_garrisonSeed {key, frac}` | Mark random tokens lost until survival is at or under `frac`, spending the pool before the garrison. Recapture and a town clear both call it with `0.3`. |
+| `DUWS_fnc_garrisonSeed {key, frac}` | Mark random tokens lost until survival is at or under `frac`, spending the pool before the garrison. A town clear calls it with `0.3`. |
+| `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then seed it to `0.1`. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
 | `DUWS_fnc_garrisonUnlose {key, target}` | Remove random lost entries until survival reaches `target` — a paid replacement, not a heal. |
 | `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose one `REINFORCE_STEP` (`0.3`) above current strength, then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
 | `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded down) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |

@@ -75,9 +75,10 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	private _seg = floor (_frac * 20);
 	_seg = (_seg max 0) min 20;
 
-	// Rolled when the zone was generated and fixed for the campaign, so this is what the ground is
-	// worth taking rather than how much of it is left -- which is what the bar under it says. A zone
-	// the player took holds no garrison at all, so it reports 0 rather than the tier it was fought off.
+	// Rolled when the zone was generated, raised by a fortify and reset to I by a retake, so this is
+	// what the ground is worth taking rather than how much of it is left -- which is what the bar under
+	// it says. A zone the player took holds no garrison at all, so it reports 0 rather than the tier it
+	// was fought off.
 	private _tier = [([_key] call fnc_zone_tier), 0] select _held;
 	private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", _key], ""];
 	// The same window a town reports as MOBILISING: OPFOR own the ground and their men are not on it yet.
