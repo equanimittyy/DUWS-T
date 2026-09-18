@@ -15,8 +15,30 @@ switch (_verb) do {
         };
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
+    case "garrisonlist": {
+        // _a = tasking id. The OPFOR ground a unit can settle into: every zone BLUFOR has not captured, and every
+        // town holding a garrison. Both file under one site key, so the settle and its reserve sync read the same.
+        private _rows = [];
+        {
+            private _zp = _x select 1;
+            if ((WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _zp) < 1 }) < 0) then {
+                private _d = _caller distance2D _zp;
+                _rows pushBack [_d, [_zp] call fnc_zone_key, format ["zone %1  (%2 m away)", [_zp] call fnc_zone_key, round _d]];
+            };
+        } forEach zone_meta_array;
+        {
+            private _tier = [_forEachIndex] call fnc_town_garrison_tierAt;
+            if (_tier >= 1) then {
+                private _d = _caller distance2D (getPos _x);
+                _rows pushBack [_d, [_forEachIndex] call fnc_town_site_key, format ["town %1  (tier %2, %3 m away)", text _x, _tier, round _d]];
+            };
+        } forEach (missionNamespace getVariable ["civ_locations", []]);
+        if (_rows isEqualTo []) exitWith { "No OPFOR zone or garrisoned town." remoteExec ["hint", _caller] };
+        _rows sort true;
+        ["Garrison which site?", _rows apply { [_x select 1, _x select 2] }, "garrison_site", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
     case "zonelist": {
-        // OPCOM recruits, re-garrisons and buys only in an OPFOR-owned zone -- every zone BLUFOR has not captured.
+        // OPCOM recruits and buys only in an OPFOR-owned zone -- every zone BLUFOR has not captured.
         // _a carries context (recruit row or tasking id) to the next step; _b names that step's picker mode.
         private _next = ["recruit_zone", _b] select (_b isNotEqualTo "");
         private _rows = (zone_meta_array select {
@@ -27,11 +49,7 @@ switch (_verb) do {
             [[_zp] call fnc_zone_key, format ["%1  (%2)", [_zp] call fnc_zone_key, _zp apply { round _x }]]
         };
         if (_rows isEqualTo []) exitWith { "No OPFOR-owned zone (BLUFOR holds them all)." remoteExec ["hint", _caller] };
-        private _title = switch (_next) do {
-            case "recruit_zone": { "Recruit at which zone?" };
-            case "zonebuy": { "Defensive tasking at which zone?" };
-            default { "Re-garrison to which zone?" };
-        };
+        private _title = ["Defensive tasking at which zone?", "Recruit at which zone?"] select (_next isEqualTo "recruit_zone");
         [_title, _rows, _next, _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
     case "tasklist": {
@@ -91,9 +109,9 @@ switch (_verb) do {
         private _ok = ["task", _a, _b, _c] call fnc_opcom_debug_task;
         (if (_ok) then { format ["Tasking %1 -> %2.", _a, _b] } else { format ["Task refused for %1 (mid-ferry carry / bad target). See the log.", _a] }) remoteExec ["hint", _caller];
     };
-    case "regarrison": {
-        private _ok = ["regarrison", _a, _b] call fnc_opcom_debug_task;
-        (if (_ok) then { format ["Re-garrison %1 -> %2.", _a, _b] } else { format ["Re-garrison refused for %1 (mid-ferry carry / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
+    case "garrison": {
+        private _ok = ["garrison", _a, _b] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Tasking %1 garrisons %2.", _a, _b] } else { format ["Garrison refused for %1 (mid-ferry carry / landlocked boat / gone). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "supply": {
         // _b = drop point, or [] for a town errand, which drives to the town centre.

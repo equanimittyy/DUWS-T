@@ -1,5 +1,5 @@
-// Locality: server, [] call'd at load (before any zone raises) so the zone-raise hook can resolve it. Reconciles
-// a zone's reserve pool + ceiling with OPCOM's recruited `garrison` units, so a recruit reinforces through the
+// Locality: server, [] call'd at load (before any zone raises) so the raise hook can resolve it. Reconciles a
+// site's reserve pool + ceiling -- a zone's or a town's, one key either way -- with OPCOM's recruited `garrison` units, so a recruit reinforces through the
 // existing garrison-reserve wave. The base re-seeds pool + ceiling on every raise, so the raise hook re-runs this
 // to re-inject from the OPCOM store.
 //

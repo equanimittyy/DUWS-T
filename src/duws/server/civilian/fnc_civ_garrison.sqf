@@ -43,6 +43,8 @@ private _fnc_raise = {
     private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
     ([_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) params ["_garrison", "_pool"];
     missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
+    // OPCOM re-injects any garrison unit it homed here, which the re-derive above just wiped from the pool.
+    if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
     private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
     private _men = [_grps] call fnc_site_men_of;
 

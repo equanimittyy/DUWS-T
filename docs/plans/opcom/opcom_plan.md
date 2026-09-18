@@ -37,8 +37,8 @@ The code is the source of truth. What new work must hold to:
 - **Streaming.** A tasking is a virtual point on a route until a player or a live BLUFOR group stays within K cells
   for `OPCOM_DEVIRT_BUFFER` ticks, then it spawns live; it stows after `OPCOM_REVIRT_GRACE` ticks with neither
   within K. The BLUFOR read is of true positions and never reaches belief or scoring. The engine resolves every
-  fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds its zone's
-  reserve wave. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
+  fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds the reserve
+  wave of the zone or town it is homed at. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
   included; the ferry scripts a live carry but never decides when a unit streams.
 - **The ferry** is a consequence of a unit's route, never an order. A freed hull garrisons the nearest held,
   uncontested zone. Not built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or

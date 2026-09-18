@@ -4,8 +4,8 @@
 //   _order: "capture"/"move"/"guard" (guard holds where it stands, ignores _target). A capture takes the BLUFOR-held
 //     zone at _target and aims at its centre; it ends when the zone is OPFOR's (fnc_opcom_task_step). An intercept's
 //     _target is a belief row key (a BLUFOR group's netId); it follows the row's believed position.
-//   _returnZone: `move` only -- the zone it settles into as a garrison on arrival. Exclusive with _errand.
-//     A boat goes to the zone's port instead of _target (never a land point); a portless zone refuses it.
+//   _returnZone: `move` only -- the site key, zone or town, it settles into as a garrison on arrival. Exclusive
+//     with _errand. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
 //   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex] or ["build", pos, type],
 //     delivered on arrival (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent.
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
@@ -54,7 +54,7 @@ private _rz = ["", _returnZone] select (_isMove && {!_errandSet});
 private _boatHome = _rz isNotEqualTo "" && {(_t get "moveType") isEqualTo "boat"};
 private _port = [_rz] call DUWS_fnc_opcom_portOf;
 if (_boatHome && {_port < 0}) exitWith {
-    ["INFO", "OPCOM", format ["task: zone %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
+    ["INFO", "OPCOM", format ["task: site %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
 };
 if (_boatHome) then { _target = [_port] call DUWS_fnc_opcom_c2w };
 

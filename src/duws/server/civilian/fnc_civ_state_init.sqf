@@ -160,6 +160,8 @@ fnc_town_garrison_reinforce = {
 			private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 			private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
 			[_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
+			missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
+			if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
 		};
 	};
 	private _new = [_key] call DUWS_fnc_garrisonStrength;

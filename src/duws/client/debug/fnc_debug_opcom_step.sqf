@@ -17,7 +17,7 @@ switch (_mode) do {
         if (_key isEqualType "") exitWith { [_key, "firemission"] call fnc_debug_opcom_step };
         // An errand is an order in its own right here: the move that carries it is implied, not picked first.
         [format ["Tasking %1: order", _key], [
-            ["capture", "capture"], ["move", "move"], ["guard", "guard"], ["re-garrison", "regarrison"],
+            ["capture", "capture"], ["move", "move"], ["guard", "guard"], ["garrison", "garrison"],
             ["reinforce a town", "reinforce"], ["fortify a town", "fortify"], ["rapport a town", "rapport"],
             ["build a hardpoint", "build"], ["intercept", "intercept"], ["teleport", "teleport"]
         ] apply {
@@ -35,8 +35,8 @@ switch (_mode) do {
         };
     };
     case "guard": { ["task", _key, "guard", [], player] remoteExec ["fnc_debug_opcom", 2] };
-    case "regarrison": { ["zonelist", _key, "regarrison_zone", "", player] remoteExec ["fnc_debug_opcom", 2] };
-    case "regarrison_zone": { ["regarrison", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
+    case "garrison": { ["garrisonlist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
+    case "garrison_site": { ["garrison", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "reinforce";
     case "fortify";
     case "rapport": { ["townlist", _key, _mode, "", player] remoteExec ["fnc_debug_opcom", 2] };
