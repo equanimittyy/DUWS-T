@@ -657,17 +657,25 @@ missionNamespace setVariable ["DUWS_garrisonLost_uk", ["patrol", "patrol", "patr
     (["uk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
 
 missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
-["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonGrow;
-["garrisonGrow: a tenth of the added tokens is fielded, the rest filed lost",
+["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
+["garrisonBuyTier: a tenth of the added tokens is fielded, the rest filed lost",
     (["gk"] call DUWS_fnc_garrisonLost), ["b", "b", "b", "b", "b", "b", "b", "b", "b"]] call fnc_assertEq;
+["garrisonBuyTier: full potential is stamped at the new tier",
+    (["gk"] call DUWS_fnc_garrisonFull), ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call fnc_assertEq;
 missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
-["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonGrow;
-["garrisonGrow: under ten added tokens, a tenth rounds down to none fielded",
+["gk", ["a"], ["a", "b", "b", "b", "b", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
+["garrisonBuyTier: under ten added tokens, a tenth rounds down to none fielded",
     (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
 missionNamespace setVariable ["DUWS_garrisonLost_gk", ["b", "b"]];
-["gk", [], ["b", "b"]] call DUWS_fnc_garrisonGrow;
-["garrisonGrow: a token already lost up to its count in the new full is not filed again",
+["gk", [], ["b", "b"]] call DUWS_fnc_garrisonBuyTier;
+["garrisonBuyTier: a token already lost up to its count in the new full is not filed again",
     (["gk"] call DUWS_fnc_garrisonLost), ["b", "b"]] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_garrisonLost_gk", []];
+enemyunitMultiplier = 2;
+["gk", ["a"], ["a", "b", "b", "b", "b", "b"]] call DUWS_fnc_garrisonBuyTier;
+enemyunitMultiplier = nil;
+["garrisonBuyTier: the tenth is taken of every multiplier copy the tier adds",
+    (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
 
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a

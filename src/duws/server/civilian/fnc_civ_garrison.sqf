@@ -37,14 +37,7 @@ private _fnc_raise = {
     };
 
     // Zone's reserve model: filtered x1 tier thins to garrison_density on stand, surplus + mult-1 copies wait in the pool, less the loss ledger.
-    // Filtered before deriving so a token the side can't field isn't counted into full and later chased by refill.
-    private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
-    private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-    private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-    ([_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) params ["_garrison", "_pool"];
-    missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
-    // OPCOM re-injects any garrison unit it homed here, which the re-derive above just wiped from the pool.
-    if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
+    ([_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand) params ["_garrison", "_pool"];
     private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
     private _men = [_grps] call fnc_site_men_of;
 
@@ -106,7 +99,7 @@ private _fnc_tick = {
     if (_rep > OPFOR_BAND && _tier > 0) then {
         [_i, 0, "left the OPFOR band"] call fnc_town_garrison_setTier;
         _tier = 0;
-        // Claim is gone, so the hold goes with it -- a town worked back to neutral is neutral, not regrouping, and a still-armed hold would refuse the tier raise if the town were ruined again inside the window.
+        // Claim is gone, so the hold goes with it -- a town worked back to neutral is neutral, not regrouping.
         [_i] call fnc_town_garrison_clearHold;
     };
 
@@ -160,17 +153,13 @@ private _fnc_tick = {
         _t set ["tier", 0];
     };
 
-    // Commander tier buy re-derives full potential/reserve pool at the new tier (same split the raise uses) and raises the ceiling; the refill pass delivers the growth as hunt waves, same as topping up a mauled garrison.
+    // Commander tier buy re-stands the garrison at the new tier; the refill pass delivers the growth as hunt waves, same as topping up a mauled garrison.
     // No bespoke reinforcement raise -- a town reinforces like a zone now; fnc_town_garrison_reinforce handles the strength half by un-losing tokens back into the pool.
     //
     // INVARIANT: must stay downstream of the hold gate above -- a tier bought while held can't reach here; it raises the owned tier, and the first spawn reads it whole once hold/latch clear.
     // Guarded on awake so a streamed-out town (deployed tier zeroed) re-raises whole instead of re-deriving a pool against a garrison that isn't standing.
     if (_tier > (_t get "tier") && {_t get "awake"}) then {
-        private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
-        private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-        private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-        [_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
-        missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
+        [_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand;
         _t set ["tier", _tier];
         ["INFO", "CIV", format ["Town %1 garrison tier raised to %2; refill brings it up in waves",
             _i, _tier]] call fnc_log;
@@ -208,7 +197,7 @@ private _fnc_tick = {
             // Seeded to a scratch 0.3: a thin garrison with no reserve depth (spends the pool copies first) and left there -- nothing restores it but a paid reinforcement.
             // That shell is the lasting half of what clearing buys, against the reputation step which is only an instalment.
             [_key, 0.3] call DUWS_fnc_garrisonSeed;
-            // Read by two others: fnc_town_garrison_setTier refuses a purchase through it (no buying up a beaten town unseen), and the map readout prints it regrouping.
+            // Read by others: fnc_town_garrison_fortify and _reinforce refuse a purchase through it (no buying up a beaten town unseen), and the map readout prints it regrouping.
             [_i, "REGROUPING"] call fnc_town_garrison_setHold;
             if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
             _t set ["awaitVacate", true];

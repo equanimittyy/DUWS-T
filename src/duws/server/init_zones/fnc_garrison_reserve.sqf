@@ -178,11 +178,12 @@ DUWS_fnc_garrisonReserveWatch = {
 };
 
 // Debounced so a mass-casualty moment fires one wave, not one per body; gated on a deep dip so shallow
-// attrition waits for the heartbeat. Ceiling reads zero for stowed, cleared or mid-raise alike, so
-// nothing-to-pull is one check.
+// attrition waits for the heartbeat. Gated on liveness rather than the ceiling: a raise sets its ceiling
+// before it places men, and a wave must not land mid-raise.
 DUWS_fnc_garrisonReserveOnKill = {
     params ["_key"];
     if (!isServer) exitWith {};
+    if !([_key] call DUWS_fnc_garrisonHeld) exitWith {};
     private _atVar = format ["DUWS_zoneReserveEventAt_%1", _key];
     if (diag_tickTime - (missionNamespace getVariable [_atVar, -1e9]) < DUWS_zoneReserveEventDebounce) exitWith {};
     private _ceiling = missionNamespace getVariable [format ["DUWS_zoneCeiling_%1", _key], 0];

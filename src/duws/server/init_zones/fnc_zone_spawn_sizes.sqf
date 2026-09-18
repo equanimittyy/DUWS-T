@@ -306,24 +306,10 @@ fnc_zone_spawn = {
     // by the standing template -- its worth stands as the garrison, the surplus waits as reserve, so a
     // lost token comes out of the pool before it thins the garrison. Reseeded every raise from the
     // ledger: the pool is per-awake-session, the losses behind it persist.
-    //
-    // Density thins the standing template (patrols only), deepening the pool so even a x1 zone holds a
-    // reserve; full potential is unchanged, so density defers force rather than removing it.
-    private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-    private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-    ([_zoneKey, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) params ["_spawns", "_pool"];
+    ([_zoneKey, _x1] call DUWS_fnc_garrisonRestand) params ["_spawns", "_pool"];
 
     private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
-
-    // The ceiling the refill tops up to is the standing template's count, not the count that just
-    // deployed -- a zone raised mauled stands up fewer groups, and reserves exist to bring it back to
-    // this ceiling. Density-thinned and filtered, so the refill never chases a slot the side can't
-    // field; recomputed per awake session since both can change as OPFOR earns AP.
-    missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _stand];
-    // OPCOM re-injects any garrison units it recruited, which the re-derive above just wiped from the
-    // pool; a no-op when it recruited none.
-    if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_zoneKey] call DUWS_fnc_opcom_zoneReserveSync };
     [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
 
     // Live/mobilised flags let the capture test judge the zone and the reserve pass top it up; cleared

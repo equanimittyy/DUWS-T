@@ -81,7 +81,11 @@ switch (toLower _mode) do {
         // the player stands in the town arrives as reinforcement rather than instantly -- and a
         // tier set on a town above -10 is zeroed again on that same cycle, since the band is what
         // decides whether OPFOR holds the town at all.
+        // A raise on a garrisoned town is a purchase, so it goes through the commander's fortify and its rules.
         private _current = [_townIndex] call fnc_town_garrison_tierAt;
+        if (_delta > 0 && {_current > 0}) exitWith {
+            for "_i" from 1 to _delta do { [_townIndex, "debug menu"] call fnc_town_garrison_fortify };
+        };
         [_townIndex, _current + _delta, "debug menu"] call fnc_town_garrison_setTier;
     };
 

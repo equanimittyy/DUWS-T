@@ -64,6 +64,13 @@ DUWS_townSpawnTiers = [
 ];
 // --DUWS-UNITCOMP END--
 
+// Filtered before any derive, so a token the side can't field isn't counted into full and later chased by refill.
+DUWS_fnc_townSpawnList = {
+	params ["_tier"];
+	if (_tier < 1) exitWith { [] };
+	[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter
+};
+
 // Reputation only ever writes tier 1 (see fnc_civ_garrison); every step above is bought by the OPFOR
 // commander, so tier is stored state, not derived from reputation. 0 by default like fnc_civ_repAt: no owner, no garrison.
 fnc_town_garrison_tierAt = {
@@ -117,8 +124,8 @@ fnc_town_garrison_setHold = {
 	_secs
 };
 
-// Dies with the claim rather than expiring on its own: a stale REGROUPING hold would both mislabel a
-// redeemed town on the readout and silently block tier raises until the three hours ran out.
+// Dies with the claim rather than expiring on its own: a stale REGROUPING hold would mislabel a redeemed
+// town on the readout until the three hours ran out.
 fnc_town_garrison_clearHold = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1]];
@@ -150,27 +157,38 @@ fnc_town_garrison_reinforce = {
 	};
 	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
 	private _old = [_key] call DUWS_fnc_garrisonStrength;
-	[_key] call DUWS_fnc_garrisonReinforce;
-	// A standing garrison re-seeds its reserve pool from survivors so the refill pass walks them in as hunt
-	// waves; a stowed one needs nothing more -- its next raise fields the recovered strength off the ledger.
-	if ([_key] call DUWS_fnc_garrisonHeld) then {
-		private _tier = [_townIndex] call fnc_town_garrison_tierAt;
-		if (_tier > 0) then {
-			private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
-			private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-			private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-			[_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
-			missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
-			if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
-		};
-	};
+	[_key, [[_townIndex] call fnc_town_garrison_tierAt] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonReinforce;
 	private _new = [_key] call DUWS_fnc_garrisonStrength;
 	["INFO", "CIV", format ["Town %1 reinforced %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 	_new
 };
 
+// -> the tier it now stands at, or -1 if refused. Reputation, not AP, decides whether a town garrisons, so a fortify never
+// raises one from tier 0. REGROUPING refuses it (else a beaten town could rebuild unchallenged); MOBILISING allows it,
+// since it folds into the first spawn. The re-stand is left to the garrison thread, which also catches a buy landing
+// mid-raise at the old tier.
+fnc_town_garrison_fortify = {
+	if (!isServer) exitWith { -1 };
+	params [["_townIndex", -1], ["_reason", ""]];
+	private _old = [_townIndex] call fnc_town_garrison_tierAt;
+	if (_old < 1) exitWith {
+		["INFO", "CIV", format ["Town %1 fortify refused (%2): no garrison", _townIndex, _reason]] call fnc_log;
+		-1
+	};
+	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING") exitWith {
+		["INFO", "CIV", format ["Town %1 fortify refused (%2): regrouping for another %3 s",
+			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
+		-1
+	};
+	private _new = (_old + 1) min (count DUWS_townSpawnTiers);
+	if (_new == _old) exitWith { _old };
+	[[_townIndex] call DUWS_fnc_townStrengthKey, [_old] call DUWS_fnc_townSpawnList, [_new] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonBuyTier;
+	[_townIndex, _new, _reason] call fnc_town_garrison_setTier;
+	_new
+};
+
 // Clamped, not trusted -- an out-of-range tier is a fatal table lookup, not a weak garrison. Writes what
-// the town owes, not what stands (the garrison thread picks it up); REGROUPING refuses a raise (else a beaten town could rebuild unchallenged), MOBILISING allows one since it folds into the first spawn.
+// the town owes, not what stands (the garrison thread picks it up). Ownership only; a purchase goes through fnc_town_garrison_fortify.
 fnc_town_garrison_setTier = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_tier", 0], ["_reason", ""]];
@@ -179,16 +197,6 @@ fnc_town_garrison_setTier = {
 	private _new = ((round _tier) max 0) min (count DUWS_townSpawnTiers);
 	private _old = _tiers select _townIndex;
 	if (_new == _old) exitWith {};
-	if (_new > _old && {([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING"}) exitWith {
-		["INFO", "CIV", format ["Town %1 tier %2 -> %3 refused (%4): regrouping for another %5 s",
-			_townIndex, _old, _new, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
-	};
-	// The 0-to-I step is the reputation band's, not a purchase.
-	if (_old > 0 && {_new > _old}) then {
-		private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-		private _fnc_full = { [[DUWS_townSpawnTiers select (_this - 1)] call DUWS_fnc_spawnFilter, _mult] call DUWS_fnc_scaleComposition };
-		[[_townIndex] call DUWS_fnc_townStrengthKey, _old call _fnc_full, _new call _fnc_full] call DUWS_fnc_garrisonGrow;
-	};
 	_tiers set [_townIndex, _new];
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };

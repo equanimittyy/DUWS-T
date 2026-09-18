@@ -67,13 +67,13 @@ The code is the source of truth. What new work must hold to:
 - **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). Within `OPCOM_DELIVER_ARRIVE`
   (100 m) of its target, live or virtual, `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck
   despawns; a killed truck delivers nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a
-  town index (`fnc_town_garrison_reinforce`; `fnc_town_garrison_setTier` one tier up, never from tier 0;
+  town index (`fnc_town_garrison_reinforce`; `fnc_town_garrison_fortify` one tier up, never from tier 0;
   `fnc_town_rep_adjust` −3). `["build", pos, type]` stands a standalone hardpoint exactly at `pos`, with no ground
   hunt, faced by the terrain and toward BLU HQ where the ground gives no bearing (`DUWS_fnc_opcom_build`). A zone
   buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`,
   `fnc_zone_garrison_fortify` (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each
   refused on BLUFOR ground. A zone or town fortify fields a tenth of the tokens its tier adds, rounded down, and files
-  the rest lost (`DUWS_fnc_garrisonGrow`) for a reinforcement to buy back. The harness drives both (`supply` with an
+  the rest lost (`DUWS_fnc_garrisonBuyTier`) for a reinforcement to buy back. The harness drives both (`supply` with an
   errand, `zone`).
 - **Orders run by hand** through the debug harness (`fnc_opcom_debug_task.sqf`, and the OPCOM debug menu over it)
   and spend no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the

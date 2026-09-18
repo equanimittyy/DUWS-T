@@ -86,6 +86,19 @@ DUWS_fnc_garrisonDerive = {
 	[_garrison, _pool]
 };
 
+// The ceiling is the standing template's count, not what deployed: a mauled garrison stands fewer groups, and reserves
+// bring it back up to this. It is reset before the OPCOM sync, or the sync counts the units the derive wiped from the
+// pool twice. -> [garrison, pool]
+DUWS_fnc_garrisonRestand = {
+	params ["_key", "_x1"];
+	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
+	private _split = [_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
+	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _stand];
+	if (!isNil "DUWS_fnc_opcom_zoneReserveSync") then { [_key] call DUWS_fnc_opcom_zoneReserveSync };
+	_split
+};
+
 // Records one destroyed token. Bounded at its count in full: a garrison cannot lose more tanks than it
 // ever had, and the bound is also what makes a double-fire of the killed handler -- which runs per unit
 // -- a no-op once a token's copies are all accounted for. A token not in full is ignored rather than
@@ -145,26 +158,33 @@ DUWS_fnc_garrisonUnlose = {
 	missionNamespace setVariable [_var, _lost];
 };
 
-// Shared by town and zone, so both climb by one rule: three steps from the floor to full, four from nothing.
+// Shared by town and zone, so both climb by one rule: three steps from the floor to full, four from nothing. An empty
+// _x1 skips the re-stand, since deriving from it would stamp full to nothing: a town dropped to tier 0 stays live until
+// its next tick collects it.
 #define REINFORCE_STEP 0.3
 DUWS_fnc_garrisonReinforce = {
-	params ["_key"];
+	params ["_key", "_x1"];
 	[_key, ([_key] call DUWS_fnc_garrisonStrength) + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
+	if (([_key] call DUWS_fnc_garrisonHeld) && {_x1 isNotEqualTo []}) then { [_key, _x1] call DUWS_fnc_garrisonRestand };
 };
 
 // The commander pays reinforcements to field the rest of a bought tier. Bounded by the new full: a cleared town's
-// ledger can still hold the tokens of the higher tier it was cleared at.
-DUWS_fnc_garrisonGrow = {
-	params ["_key", "_oldFull", "_newFull"];
-	private _owed = [_oldFull, _newFull] call DUWS_fnc_spawnDiff;
+// ledger can still hold the tokens of the higher tier it was cleared at. Full is stamped now, not at the next raise,
+// so the grid and the readout see the buy at once. The caller re-stands a standing garrison.
+DUWS_fnc_garrisonBuyTier = {
+	params ["_key", "_oldX1", "_newX1"];
+	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+	private _full = [_newX1, _mult] call DUWS_fnc_scaleComposition;
+	private _owed = [[_oldX1, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_spawnDiff;
 	for "_i" from 1 to floor (0.1 * count _owed) do { _owed deleteAt (floor random count _owed) };
 	private _var = format ["DUWS_garrisonLost_%1", _key];
 	private _lost = missionNamespace getVariable [_var, []];
 	{
 		private _token = _x;
-		if (({ _x isEqualTo _token } count _lost) < ({ _x isEqualTo _token } count _newFull)) then { _lost pushBack _token };
+		if (({ _x isEqualTo _token } count _lost) < ({ _x isEqualTo _token } count _full)) then { _lost pushBack _token };
 	} forEach _owed;
 	missionNamespace setVariable [_var, _lost];
+	[_key, _full] call DUWS_fnc_garrisonSetFull;
 };
 
 // Forgets a site's garrison entirely: full potential and loss ledger both cleared. For a site that

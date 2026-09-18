@@ -130,12 +130,13 @@ the strength it had rather than silently halving.
 **The commander buys a zone's tier and strength as it does a town's.** `fnc_zone_garrison_fortify`
 raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential; the
 zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`). The buy fields only a tenth of the tokens
-the new tier adds, rounded down, and files the rest as lost (`DUWS_fnc_garrisonGrow`), so the commander
+the new tier adds, rounded down, and files the rest as lost (`DUWS_fnc_garrisonBuyTier`), so the commander
 must reinforce to field the whole tier. At multiplier 1 a step adds at most seven tokens, so a fortify
 fields none of them until a reinforcement buys them back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
-(`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-derive the reserve
-pool, so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM lands them with no truck
+(`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
+(`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM
+lands them with no truck
 ([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)).
 
 **Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
@@ -382,11 +383,13 @@ appraise them as neutral.
 | III | The above heavier, with wide-patrol teams and a second APC | purchase |
 | IV | The above, plus a lone IFV and more building-occupying units | purchase |
 
-A purchased tier arrives mostly owed. `fnc_town_garrison_setTier` files all but a tenth of the tokens a
-raise from tier I or above adds, rounded down, as lost (`DUWS_fnc_garrisonGrow`), exactly as a zone
-fortify does. A town step adds at most five tokens per multiplier copy, so below multiplier 2 a town
-buy fields nothing new until `fnc_town_garrison_reinforce` buys the tokens back. The step from 0 to I
-is the reputation band's and fields whole.
+A purchased tier arrives mostly owed. `fnc_town_garrison_fortify` raises the tier by one, never from
+tier 0, and files all but a tenth of the tokens the raise adds, rounded down, as lost
+(`DUWS_fnc_garrisonBuyTier`), exactly as a zone fortify does. A town step adds at most five tokens per
+multiplier copy, so below multiplier 2 a town buy fields nothing new until
+`fnc_town_garrison_reinforce` buys the tokens back. The step from 0 to I is the reputation band's,
+written through `fnc_town_garrison_setTier`, and fields whole. On a standing garrison the garrison
+thread re-stands the town at the new tier on its next tick.
 
 The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
 `DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town
@@ -570,10 +573,10 @@ wrong in play, the levers in order are the reputation step, the floor, and the h
 **Regrouping is a state the player can see.** `fnc_map_readout_query` reports the hold and the readout
 prints `Garrison Tier: Regrouping` in place of the numeral. Not "destroyed": the men are coming back,
 and a word that said otherwise would have the player write the town off. The hold is per-town state
-rather than a thread local precisely because two other things read it — the readout, and
-`fnc_town_garrison_setTier`, which refuses a *raise* while it is live so the commander cannot buy a
-beaten town up to IV while nobody is looking. Lowering is always allowed, since that is how the clear
-files the town back down to I.
+rather than a thread local precisely because other things read it — the readout, and the two
+purchases, `fnc_town_garrison_fortify` and `fnc_town_garrison_reinforce`, which refuse while it is live
+so the commander cannot buy a beaten town back up while nobody is looking. The clear files the town
+back down to I through `fnc_town_garrison_setTier`, which records ownership and refuses nothing.
 
 ### Zone and town, side by side
 
@@ -676,8 +679,7 @@ clear is one instalment against it.
 
 **Neither state applies to a town the clear pushed out of the band.** That town is neutral, and
 `fnc_town_garrison_clearHold` drops the hold with the claim. Leaving it armed would keep telling the
-player a redeemed town was regrouping, and — silently — would refuse the tier raise if they ruined
-the same town again inside the window, since a `REGROUPING` hold refuses raises.
+player a redeemed town was regrouping.
 
 **And there is a third condition that is not a state.** OPFOR hold it, no men are standing, and
 nothing has changed hands — the garrison merely streamed out, or nobody has ever visited. The readout

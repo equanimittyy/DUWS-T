@@ -117,24 +117,11 @@ fnc_zone_tier_roll = {
 	_tier
 };
 
-// OPCOM's zone buys, the zone side of fnc_town_garrison_reinforce / _setTier. Refused on BLUFOR ground: captured
+// OPCOM's zone buys, the zone side of fnc_town_garrison_reinforce / _fortify. Refused on BLUFOR ground: captured
 // ground carries no tier or strength. Tested by key, since a held position may have round-tripped through a string.
 fnc_zone_bluforHeld = {
 	params ["_zoneKey"];
 	(WARCOM_zones_controled_by_BLUFOR findIf { ([_x] call fnc_zone_key) isEqualTo _zoneKey }) >= 0
-};
-
-// A standing garrison re-derives its pool so the refill walks bought men in; a stowed one fields them at its next raise.
-fnc_zone_garrison_rederive = {
-	params ["_zoneKey"];
-	if !([_zoneKey] call DUWS_fnc_garrisonHeld) exitWith {};
-	private _x1 = [[_zoneKey] call fnc_zone_tier] call DUWS_fnc_zoneSpawnList;
-	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-	private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
-	[_zoneKey, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive;
-	// The derive wiped OPCOM's recruits from the pool: reset the ceiling as a raise does, or the re-sync counts them twice.
-	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _stand];
-	[_zoneKey] call DUWS_fnc_opcom_zoneReserveSync;
 };
 
 // -> the new strength, or -1 if refused.
@@ -145,15 +132,13 @@ fnc_zone_garrison_reinforce = {
 		-1
 	};
 	private _old = [_zoneKey] call DUWS_fnc_garrisonStrength;
-	[_zoneKey] call DUWS_fnc_garrisonReinforce;
-	[_zoneKey] call fnc_zone_garrison_rederive;
+	[_zoneKey, [[_zoneKey] call fnc_zone_tier] call DUWS_fnc_zoneSpawnList] call DUWS_fnc_garrisonReinforce;
 	private _new = [_zoneKey] call DUWS_fnc_garrisonStrength;
 	["INFO", "ZONES", format ["%1 reinforced %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
 	_new
 };
 
-// -> the tier it now stands at, or -1 if refused. Full potential is re-stamped now, not at the next raise, so the grid
-// and the readout see the buy at once.
+// -> the tier it now stands at, or -1 if refused.
 fnc_zone_garrison_fortify = {
 	params ["_zoneKey", ["_reason", ""]];
 	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
@@ -164,11 +149,10 @@ fnc_zone_garrison_fortify = {
 	private _new = (_old + 1) min (count DUWS_zoneSpawnTiers);
 	if (_new == _old) exitWith { _old };
 	missionNamespace setVariable [format ["DUWS_zoneTier_%1", _zoneKey], _new];
-	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-	private _full = [[_new] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition;
-	[_zoneKey, [[_old] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_garrisonGrow;
-	[_zoneKey, _full] call DUWS_fnc_garrisonSetFull;
-	[_zoneKey] call fnc_zone_garrison_rederive;
+	private _x1 = [_new] call DUWS_fnc_zoneSpawnList;
+	[_zoneKey, [_old] call DUWS_fnc_zoneSpawnList, _x1] call DUWS_fnc_garrisonBuyTier;
+	// No thread adopts a zone's tier the way the town garrison thread does, so the buy re-stands it here.
+	if ([_zoneKey] call DUWS_fnc_garrisonHeld) then { [_zoneKey, _x1] call DUWS_fnc_garrisonRestand };
 	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
 	_new
 };
