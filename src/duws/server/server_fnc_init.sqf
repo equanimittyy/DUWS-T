@@ -375,11 +375,11 @@ fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\o
 fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
-// taskings\: streaming, movement, the ferry trio (orchestrator, virtual, live), garrison, ports, delivery, fires, intercept and the order table executed to define them;
-// the store init, router, recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
+// taskings\: streaming, the movement core, the ferry trio (orchestrator, virtual, live), garrison, ports, delivery, fires, the order bodies and the order table executed to
+// define them; the store init, router, recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_movement_core.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_virt.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_devirt.sqf";
@@ -388,6 +388,8 @@ fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_deliver.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_fires.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_intercept.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_capture.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";

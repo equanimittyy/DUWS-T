@@ -62,3 +62,18 @@ DUWS_fnc_opcom_interceptArrive = {
     if (_switched || _moved) then { [_t, !isNull _grp, true] call DUWS_fnc_opcom_interceptFollow };
     false
 };
+
+DUWS_fnc_opcom_refreshIntercept = {
+    params ["_t", "_live"];
+    [_t, _live] call DUWS_fnc_opcom_interceptFollow;
+    if (_live) exitWith { "" };
+    [_t] call DUWS_fnc_opcom_advance
+};
+
+DUWS_fnc_opcom_stepIntercept = {
+    params ["_t", "_ctx"];
+    _ctx params ["_pos", "_grp"];
+    if (([_pos, _t get "target"] call DUWS_fnc_opcom_cellDist) != 0) exitWith { false };
+    [_t, _pos, _grp] call DUWS_fnc_opcom_interceptArrive;
+    false
+};

@@ -1,56 +1,37 @@
-// Locality: server, [] call'd at load. Shared OPCOM movement core: the per-tick world-point mover and the
-// grid-geometry tests every tasking's march uses, ferry or not.
+// Locality: server, [] call'd at load. The move order: carry an errand to its target and spend the truck on it,
+// or settle where it was sent. The march itself is fnc_opcom_movement_core.sqf.
 if (!isServer) exitWith {};
 
-// grid_water >= 0 is a navigable-water component; -1 is land or a sub-threshold pool.
-DUWS_fnc_opcom_isWaterPt = {
-    params ["_pt"];
-    (DUWS_opcom_grid_water select ([_pt] call DUWS_fnc_opcom_w2c)) >= 0
+// Settle an arrived move: re-garrison a returnZone or hold as guard. Mutates the record only; true if it garrisoned.
+DUWS_fnc_opcom_settleMove = {
+    params ["_t", "_pos"];
+    private _rz = _t getOrDefault ["returnZone", ""];
+    if (_rz isNotEqualTo "") exitWith { [_t, _rz] call DUWS_fnc_opcom_garrisonInto; true };
+    _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
+    false
 };
 
-DUWS_fnc_opcom_cellDist = {
-    params ["_a", "_b"];
-    private _w = DUWS_opcom_grid_w;
-    private _ca = [_a] call DUWS_fnc_opcom_w2c;
-    private _cb = [_b] call DUWS_fnc_opcom_w2c;
-    (abs ((_ca mod _w) - (_cb mod _w))) max (abs (floor (_ca / _w) - floor (_cb / _w)))
-};
-
-// Returns "arrived", "water" (a land type stopped at a ferry leg's near shore), or "moving". Replans when the
-// route chain is empty.
-DUWS_fnc_opcom_advance = {
-    params ["_t"];
-    if ((_t get "route") isEqualTo [] && {(_t get "target") isNotEqualTo []}) then {
-        ([_t get "pos", _t get "target", _t get "moveType", 0] call fnc_opcom_route) params ["_pts", "_mode"];
-        _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
-    };
-    private _route = _t get "route";
-    private _leg = _t get "leg";
-    private _pos = _t get "pos";
-    private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
-    private _remain = OPCOM_GRID_CELL / (DUWS_opcom_speed getOrDefault [_t get "moveType", 30]);
-    private _water = false;
-    while {_remain > 0 && {_leg < count _route} && {!_water}} do {
-        private _wp = _route select _leg;
-        if (_landRule && {[_wp] call DUWS_fnc_opcom_isWaterPt}) then {
-            _water = true;
-        } else {
-            private _d = _pos distance2D _wp;
-            if (_d <= _remain) then {
-                _pos = +_wp; _leg = _leg + 1; _remain = _remain - _d;
-            } else {
-                private _dir = [(_wp select 0) - (_pos select 0), (_wp select 1) - (_pos select 1)];
-                private _len = sqrt ((_dir select 0) ^ 2 + (_dir select 1) ^ 2);
-                _pos = [(_pos select 0) + (_dir select 0) / _len * _remain, (_pos select 1) + (_dir select 1) / _len * _remain, 0];
-                _remain = 0;
-            };
+DUWS_fnc_opcom_stepMove = {
+    params ["_t", "_ctx"];
+    _ctx params ["_pos", "_grp", "_live", "", "_arrived"];
+    // errand and returnZone are exclusive (set upstream), so a delivery cannot also settle.
+    private _errand = _t getOrDefault ["errand", []];
+    if (_errand isNotEqualTo []) exitWith {
+        private _landed = (_pos distance2D (_t get "target")) < OPCOM_DELIVER_ARRIVE;
+        if (_landed) then {
+            [_t] call DUWS_fnc_opcom_deliver;
+            if (_live) then { [_grp] call DUWS_fnc_opcom_despawn; _t set ["grp", ""] };
+            _t set ["status", "done"];
         };
+        _landed
     };
-    _t set ["pos", _pos];
-    _t set ["leg", _leg];
-    switch (true) do {
-        case (_water): { "water" };
-        case (_leg >= count _route): { "arrived" };
-        default { "moving" };
-    }
+    if (!_arrived) exitWith { false };
+    // A guard settle re-orders the group so map and group agree. A garrison settle despawns -- a combatant's token
+    // now sits in the reserve wave, so a live copy would fight twice.
+    if ([_t, _pos] call DUWS_fnc_opcom_settleMove) then {
+        if (_live) then { [_t] call DUWS_fnc_opcom_reVirt };
+    } else {
+        if (_live) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
+    };
+    true
 };
