@@ -40,9 +40,11 @@ The code is the source of truth. What new work must hold to:
   fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds the reserve
   wave of the zone or town it is homed at. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
   included; the ferry scripts a live carry but never decides when a unit streams.
-- **The ferry** is a consequence of a unit's route, never an order. A freed hull garrisons the nearest held,
-  uncontested zone. Not built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or
-  walks, and land-taxi — lifting a foot unit over dry ground with the same carry.
+- **The ferry** is a consequence of a unit's route, never an order. Only a `transportable` unit, the infantry
+  rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle drives its road route and
+  never stops at water. A freed hull garrisons the nearest held, uncontested zone. Not built: whether an idle hull
+  leaves its post to ferry, whether a rider waits for lift or walks, and land-taxi — lifting a foot unit over dry
+  ground with the same carry.
 - **Capture.** A `capture` takes the BLUFOR-held zone at its target and aims at the zone's centre
   (`fnc_opcom_task`). A retake is an `EAST PRESENT` trigger gated on `fnc_zone_retake_ready` — OPFOR outnumber
   BLUFOR, a BLUFOR garrison counting as beaten until one is built — so a zone flips with players inside and takes no
@@ -352,8 +354,9 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
   single force↔AP knob, which also prices garrison buys, commit `Cost` and Arty kill Value, so the menu carries no
   price column.
 - **Capability flags decide what a unit unlocks; there is no unit "type".** `recon` → Scout (range by platform,
-  `OPCOM_RECON_K` cells), `supply` → a delivery run, `transport` → carry another unit; `noncombat` keeps a row out
-  of a zone's reserve wave (regardless of armament — the boat is armed). A row may carry several.
+  `OPCOM_RECON_K` cells), `supply` → a delivery run, `transport` → carry another unit, `transportable` → ride a
+  ferry across water; `noncombat` keeps a row out of a zone's reserve wave (regardless of armament — the boat is
+  armed). A row may carry several.
 - **The live-group cap is per active locality, not global.** Virtual taskings are cheap and uncapped;
   `OPCOM_MAX_TASKINGS` (start 10) budgets spawned AI per player-bubble / contact point, so one flank cannot starve a
   defender's spawn elsewhere, and co-op localities each keep their own budget.

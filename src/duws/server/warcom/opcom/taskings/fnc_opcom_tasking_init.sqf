@@ -12,14 +12,15 @@ DUWS_opcom_taskSeq  = 0;
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- a hire costs
 // ceil(force * OPCOM_AP_PER_FORCE). `noncombat` keeps a row out of the garrison reserve wave (never spawns to
 // defend, dies with a captured zone) regardless of armament -- a boat is armed; a separate axis from `transport`.
+// `transportable` lets a row ride a ferry lift: only men fit a cabin, so a hull drives its road route instead.
 DUWS_opcom_recruitMenu = createHashMapFromArray [
-    ["rifles",       [["squad"],     []]],
-    ["weapons_team", [["wp_team"],   []]],
+    ["rifles",       [["squad"],     ["transportable"]]],
+    ["weapons_team", [["wp_team"],   ["transportable"]]],
     ["apc",          [["apc"],       ["transport"]]],
     ["ifv",          [["ifv"],       ["transport"]]],
     ["mbt",          [["tank"],       []]],
     ["attack_heli",  [["attackheli"], []]],
-    ["recon_foot",   [["recon"],      ["recon"]]],
+    ["recon_foot",   [["recon"],      ["recon", "transportable"]]],
     ["recon_car",    [["car"],       ["recon"]]],
     ["recon_heli",   [["transheli"], ["recon", "noncombat"]]],
     ["truck",        [["truck"],     ["supply", "transport", "noncombat"]]],

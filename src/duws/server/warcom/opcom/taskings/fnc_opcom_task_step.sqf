@@ -82,8 +82,8 @@ private _stepContext = {
     [_pos, _grp, _live, _engaged, _arrived, _adv]
 };
 
-// A land unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry); no lift free, it
-// waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS. -> true if it bound to a lift this tick.
+// A transportable unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry); no lift free,
+// it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS. -> true if it bound to a lift this tick.
 // Reads the order off the record, never a copy taken before the step: an intercept that gave up is a guard now.
 private _ferryStage = {
     params ["_t", "_ctx"];
@@ -91,7 +91,7 @@ private _ferryStage = {
     private _need = if (!_live) then { _adv isEqualTo "water" } else {
         private _n = false;
         if (!_arrived && {!_engaged} && {(_t get "order") isNotEqualTo "guard"}
-            && {(DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land"}) then {
+            && {"transportable" in (_t get "flags")}) then {
             ([_t, _pos] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
             _n = _crosses && {(_pos distance2D _stage) < OPCOM_FERRY_SHORE_ARRIVE};
         };

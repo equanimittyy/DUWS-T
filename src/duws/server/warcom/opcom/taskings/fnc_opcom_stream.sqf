@@ -36,8 +36,8 @@ DUWS_fnc_opcom_shoreStage = {
     [_crosses, _stage]
 };
 
-// Push a re-order onto a live group. A land route that crosses water drives only to the near shore (the tasking
-// step then borrows a ferry); boat/air, guard, and all-land routes get the real order and target.
+// Push a re-order onto a live group. A transportable unit whose route crosses water drives only to the near shore,
+// where the tasking step borrows a ferry.
 DUWS_fnc_opcom_reOrderLive = {
     params ["_t"];
     private _grp = groupFromNetId (_t get "grp");
@@ -50,8 +50,7 @@ DUWS_fnc_opcom_reOrderLive = {
         (_grp addWaypoint [_here, 0]) setWaypointType "HOLD";
     };
     private _order = _t get "order";
-    private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
-    if (_landRule && {_order isNotEqualTo "guard"}) then {
+    if ("transportable" in (_t get "flags") && {_order isNotEqualTo "guard"}) then {
         ([_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_shoreStage) params ["_crosses", "_stage"];
         if (_crosses) exitWith {
             [_grp, "move", _stage] call DUWS_fnc_opcom_applyOrder;

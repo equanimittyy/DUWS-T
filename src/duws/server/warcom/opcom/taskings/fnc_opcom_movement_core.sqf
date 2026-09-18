@@ -16,8 +16,8 @@ DUWS_fnc_opcom_cellDist = {
     (abs ((_ca mod _w) - (_cb mod _w))) max (abs (floor (_ca / _w) - floor (_cb / _w)))
 };
 
-// Returns "arrived", "water" (a land type stopped at a ferry leg's near shore), or "moving". Replans when the
-// route chain is empty.
+// Returns "arrived", "water" (a transportable unit stopped at a ferry leg's near shore), or "moving". Replans when
+// the route chain is empty.
 DUWS_fnc_opcom_advance = {
     params ["_t"];
     if ((_t get "route") isEqualTo [] && {(_t get "target") isNotEqualTo []}) then {
@@ -27,12 +27,12 @@ DUWS_fnc_opcom_advance = {
     private _route = _t get "route";
     private _leg = _t get "leg";
     private _pos = _t get "pos";
-    private _landRule = (DUWS_opcom_moveWater getOrDefault [_t get "moveType", "land"]) isEqualTo "land";
+    private _transportable = "transportable" in (_t get "flags");
     private _remain = OPCOM_GRID_CELL / (DUWS_opcom_speed getOrDefault [_t get "moveType", 30]);
     private _water = false;
     while {_remain > 0 && {_leg < count _route} && {!_water}} do {
         private _wp = _route select _leg;
-        if (_landRule && {[_wp] call DUWS_fnc_opcom_isWaterPt}) then {
+        if (_transportable && {[_wp] call DUWS_fnc_opcom_isWaterPt}) then {
             _water = true;
         } else {
             private _d = _pos distance2D _wp;
