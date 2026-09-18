@@ -281,7 +281,7 @@ fnc_zone_control_set = {
 				_zonePos, zoneundercontrolblu]] call fnc_log;
 			// A captured zone's resting OPCOM non-combatants die with it. Guarded: this transition is the
 			// critical path and OPCOM lives in a separate subsystem (docs/plans/opcom/opcom_plan.md).
-			if (!isNil "DUWS_fnc_opcom_zoneCaptured") then { [[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_zoneCaptured };
+			if (!isNil "DUWS_fnc_opcom_siteLost") then { [[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_siteLost };
 		};
 		case "OPF": {
 			[WARCOM_zones_controled_by_BLUFOR, _zonePos] call _fnc_dropFrom;

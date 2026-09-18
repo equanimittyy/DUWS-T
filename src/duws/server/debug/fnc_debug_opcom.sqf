@@ -26,9 +26,12 @@ switch (_verb) do {
                 _rows pushBack [_d, [_zp] call fnc_zone_key, format ["zone %1  (%2 m away)", [_zp] call fnc_zone_key, round _d]];
             };
         } forEach zone_meta_array;
+        // A boat garrisons a zone's port, so it is never offered a town.
+        private _t = [_a] call DUWS_fnc_opcom_byId;
+        private _boat = !isNil "_t" && {(_t get "moveType") isEqualTo "boat"};
         {
             private _tier = [_forEachIndex] call fnc_town_garrison_tierAt;
-            if (_tier >= 1) then {
+            if (!_boat && {_tier >= 1}) then {
                 private _d = _caller distance2D (getPos _x);
                 _rows pushBack [_d, [_forEachIndex] call fnc_town_site_key, format ["town %1  (tier %2, %3 m away)", text _x, _tier, round _d]];
             };

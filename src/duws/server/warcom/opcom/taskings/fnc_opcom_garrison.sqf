@@ -32,10 +32,10 @@ DUWS_fnc_opcom_reserveToken = {
     format ["opcomdef%1:%2", _t get "id", [(_t get "comp") select 0] call DUWS_fnc_tokenName]
 };
 
-// A zone fell to BLUFOR: its resting non-combatants die with it (attached, never defenders). Only the ones still
-// garrisoned there are cleared -- one borrowed onto ferry duty has left and survives. Combatants are left to the
-// capture mechanic that fought them.
-DUWS_fnc_opcom_zoneCaptured = {
+// A site was lost -- a zone captured, or a town's garrison cleared. Its resting non-combatants die with it (attached,
+// never defenders). Only the ones still garrisoned there are cleared -- one borrowed onto ferry duty has left and
+// survives. Combatants are left to the mechanic that fought them.
+DUWS_fnc_opcom_siteLost = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
     private _doomed = DUWS_opcom_taskings select {
@@ -44,7 +44,7 @@ DUWS_fnc_opcom_zoneCaptured = {
     {
         if ((_x get "grp") isNotEqualTo "") then {
             private _grp = groupFromNetId (_x get "grp");
-            if (!isNull _grp) then { { deleteVehicle _x } forEach units _grp; deleteGroup _grp };
+            if (!isNull _grp) then { [_grp] call DUWS_fnc_opcom_despawn };
         };
     } forEach _doomed;
     DUWS_opcom_taskings = DUWS_opcom_taskings - _doomed;

@@ -185,6 +185,8 @@ private _fnc_tick = {
         [_key] call fnc_site_collect;
         // Forgets the garrison entirely so a town that crosses back into the band starts fresh, not redeploying the remains of one the ground no longer holds.
         [_key] call DUWS_fnc_garrisonForget;
+        // OPCOM's resting non-combatants go with the garrison they were attached to, as at a captured zone.
+        if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
         _t set ["tier", 0];
         ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
             _i, _rep]] call fnc_log;
@@ -208,6 +210,7 @@ private _fnc_tick = {
             [_key, 0.3] call DUWS_fnc_garrisonSeed;
             // Read by two others: fnc_town_garrison_setTier refuses a purchase through it (no buying up a beaten town unseen), and the map readout prints it regrouping.
             [_i, "REGROUPING"] call fnc_town_garrison_setHold;
+            if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
             _t set ["awaitVacate", true];
             ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4, garrison seeded to 0.3 and regrouping",
                 _i, _tier, _rep, CLEAR_REP]] call fnc_log;
