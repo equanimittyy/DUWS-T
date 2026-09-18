@@ -1899,6 +1899,10 @@
                 <Original>a civilian vehicle was taken</Original>
                 <English>a civilian vehicle was taken</English>
             </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_rapport">
+                <Original>OPCOM delivered supplies</Original>
+                <English>OPCOM delivered supplies</English>
+            </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_other">
                 <Original>recent events</Original>
                 <English>recent events</English>

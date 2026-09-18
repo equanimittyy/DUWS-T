@@ -140,6 +140,7 @@ fnc_town_rep_announce = {
 		case "protect_civ_casualty":  { "STR_DUWS_T_civ_rep_why_escort_lost" };
 		case "garrison_cleared":      { "STR_DUWS_T_civ_rep_why_garrison" };
 		case "vehicle_stolen":        { "STR_DUWS_T_civ_rep_why_vehicle" };
+		case "opcom_rapport":         { "STR_DUWS_T_civ_rep_why_rapport" };
 		default                       { "STR_DUWS_T_civ_rep_why_other" };
 	});
 
