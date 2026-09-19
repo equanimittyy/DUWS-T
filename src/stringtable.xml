@@ -2915,40 +2915,40 @@
                 <English>Need help with anything?</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_NONE">
-                <Original>No. Nothing you can do for me.</Original>
-                <English>No. Nothing you can do for me.</English>
+                <Original>No, nothing right now. Thank you anyways.</Original>
+                <English>No, nothing right now. Thank you anyways.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CAMP_TITLE">
                 <Original>Clear Bandit Camp</Original>
                 <English>Clear Bandit Camp</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CAMP_DESC">
-                <Original>Bandits camp outside town and take what they want. Kill them all, then report back to the local who asked.</Original>
-                <English>Bandits camp outside town and take what they want. Kill them all, then report back to the local who asked.</English>
+                <Original>The locals need help with a local bandit group who have been taking what they want from them. Destroy the camp and then report back to the local.</Original>
+                <English>The locals need help with a local bandit group who have been taking what they want from them. Destroy the camp and then report back to the local.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CAMP_BRIEF">
-                <Original>Bandits. They camp outside town and take what they like. Get rid of them, come back to me, and I'll pay.</Original>
-                <English>Bandits. They camp outside town and take what they like. Get rid of them, come back to me, and I'll pay.</English>
+                <Original>We need help with some bandits camping just outside of town. They loot and rob whenever they please. If you could get rid of them, that would help us greatly.</Original>
+                <English>We need help with some bandits camping just outside of town. They loot and rob whenever they please. If you could get rid of them, that would help us greatly.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_TITLE">
                 <Original>Recover Stolen Car</Original>
                 <English>Recover Stolen Car</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_DESC">
-                <Original>Bandits took a local's car to their camp outside town. Drive it back to its owner, then report back.</Original>
-                <English>Bandits took a local's car to their camp outside town. Drive it back to its owner, then report back.</English>
+                <Original>A local needs help recovering their car from a bandit group who stole it. Drive the car back to its owner and then report back to them.</Original>
+                <English>A local needs help recovering their car from a bandit group who stole it. Drive the car back to its owner and then report back to them.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_BRIEF">
-                <Original>Bandits took my car. It's at their camp outside town. Bring it back to me and I'll pay.</Original>
-                <English>Bandits took my car. It's at their camp outside town. Bring it back to me and I'll pay.</English>
+                <Original>Some bandits stole my car and took it to their camp outside of town. If you could bring it back to me, I'd be very grateful.</Original>
+                <English>Some bandits stole my car and took it to their camp outside of town. If you could bring it back to me, I'd be very grateful.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CPMONEY">
                 <Original>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</Original>
                 <English>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_THANKS">
-                <Original>Thank you. Here, %1 money. It's what I have.</Original>
-                <English>Thank you. Here, %1 money. It's what I have.</English>
+                <Original>Thank you. Here, have this. It's not much, but it's what I owe you.</Original>
+                <English>Thank you. Here, have this. It's not much, but it's what I owe you.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_CANCELED">
                 <Original>Fine. I'll manage on my own.</Original>

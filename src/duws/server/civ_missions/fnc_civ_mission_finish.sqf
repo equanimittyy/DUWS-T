@@ -18,7 +18,7 @@ switch (_status) do {
         [[["Money_roll", _money]], getPosATL _giver] call fnc_money_drop;
         [_e get "town", _rep, "civ_mission"] call fnc_town_rep_adjust;
         private _near = allPlayers select { _x distance _giver < 30 };
-        [localize "STR_DUWS_T_civ", format [localize "STR_DUWS_T_CIVMISSION_THANKS", _money]] remoteExec ["fnc_duws_dialogue", _near];
+        [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_CIVMISSION_THANKS"] remoteExec ["fnc_duws_dialogue", _near];
         ["cpaddedmission", [_cpPaid]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
     };
     case "CANCELED": {
