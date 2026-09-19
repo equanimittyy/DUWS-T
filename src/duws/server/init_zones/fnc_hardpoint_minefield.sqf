@@ -18,7 +18,7 @@ DUWS_mineSquare = 50;
 // A fractional count is rolled per cell, so AP's 1.1 averages 27.5 mines a square.
 DUWS_mineVariants = [
     ["AT", ["ATMine"], 1],
-    ["AP", ["APERSMine", "APERSBoundingMine"], 1.1]
+    ["AP", ["APERSMine"], 1.1]
 ];
 
 // [_center, _dir, _variant, _key] call fnc_hardpoint_minefield -> [mines]

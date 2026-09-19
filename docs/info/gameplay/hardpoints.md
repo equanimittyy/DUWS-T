@@ -119,7 +119,7 @@ Build reads, less the standing ring and any build still siting (`DUWS_opcom_buil
 
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield`
 (`server/init_zones/fnc_hardpoint_minefield.sqf`) lays one 50 m square of vanilla mine objects —
-`ATMine` for the AT variant, `APERSMine`/`APERSBoundingMine` for AP. Each 10 m cell of the square gets
+`ATMine` for the AT variant, `APERSMine` for AP. Each 10 m cell of the square gets
 one mine, so an AT square holds 25 mines. AP runs at 1.1 mines a cell: each cell has a 10% chance of a
 second mine, so an AP square averages 27.5. A mine lands anywhere within 10 m of its cell's centre, up to
 5 m past the cell edge. The spans of neighbouring cells overlap, so mines clump and leave gaps as a
