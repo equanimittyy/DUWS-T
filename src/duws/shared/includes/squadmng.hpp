@@ -152,6 +152,15 @@ class squad_mng_dialog
             h = 1 * GUI_GRID_H;
             sizeEx = 0.026;
         };
+        // One unit narrower than the list: the scrollbar strip stays dark, where its white thumb shows.
+        class taskforce_list_bg: RscText
+        {
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 17 * GUI_GRID_H + GUI_GRID_Y;
+            w = 25 * GUI_GRID_W;
+            h = 4 * GUI_GRID_H;
+            colorBackground[] = {1,1,1,1};
+        };
         class taskforce_list: RscControlsGroup
         {
             idc = 1700;

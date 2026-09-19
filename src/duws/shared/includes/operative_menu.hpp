@@ -1,4 +1,11 @@
 
+// Text on the white panels: the default khaki and its outline shadow do not read on white.
+class RscTextOnWhite: RscText
+{
+	colorText[] = {0,0,0,1};
+	shadow = 0;
+};
+
 class operativemaingui
 {
 	idd = -1;
@@ -16,6 +23,25 @@ class background_operative: RscText
 	w = 34.5 * GUI_GRID_W;
 	h = 16.5 * GUI_GRID_H;
 	colorBackground[] = {0,0,0,0.3};
+};
+class operative_skill_bg: RscText
+{
+	x = 14.2 * GUI_GRID_W + GUI_GRID_X;
+	y = 6.8 * GUI_GRID_H + GUI_GRID_Y;
+	w = 12.6 * GUI_GRID_W;
+	h = 11 * GUI_GRID_H;
+	colorBackground[] = {1,1,1,1};
+};
+class operative_status_bg: operative_skill_bg
+{
+	x = 28.2 * GUI_GRID_W + GUI_GRID_X;
+	w = 7.1 * GUI_GRID_W;
+	h = 6 * GUI_GRID_H;
+};
+class operative_role_bg: operative_status_bg
+{
+	y = 14.3 * GUI_GRID_H + GUI_GRID_Y;
+	h = 3.5 * GUI_GRID_H;
 };
 class operative_main_frame: RscFrame
 {
@@ -76,7 +102,7 @@ class operative_skill_frame: RscFrame
 	w = 13 * GUI_GRID_W;
 	h = 12 * GUI_GRID_H;
 };
-class operative_aim_txt: RscText
+class operative_aim_txt: RscTextOnWhite
 {
 	idc = 1000;
 	text = "Aiming:"; //--- ToDo: Localize;
@@ -86,7 +112,7 @@ class operative_aim_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "General accuracy of the operative with weapons"; //--- ToDo: Localize;
 };
-class operative_spot_txt: RscText
+class operative_spot_txt: RscTextOnWhite
 {
 	idc = 1001;
 	text = "Spotting:"; //--- ToDo: Localize;
@@ -96,7 +122,7 @@ class operative_spot_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "General spotting skill of the operative"; //--- ToDo: Localize;
 };
-class operative_courage_txt: RscText
+class operative_courage_txt: RscTextOnWhite
 {
 	idc = 1002;
 	text = "Courage:"; //--- ToDo: Localize;
@@ -106,7 +132,7 @@ class operative_courage_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Morale of the operative"; //--- ToDo: Localize;
 };
-class operative_communications_txt: RscText
+class operative_communications_txt: RscTextOnWhite
 {
 	idc = 1003;
 	text = "Communications: "; //--- ToDo: Localize;
@@ -116,7 +142,7 @@ class operative_communications_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Affects how quickly recognized targets are shared with the group"; //--- ToDo: Localize;
 };
-class operative_reflexes_txt: RscText
+class operative_reflexes_txt: RscTextOnWhite
 {
 	idc = 1004;
 	text = "Reflexes:"; //--- ToDo: Localize;
@@ -126,7 +152,7 @@ class operative_reflexes_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Affects how quickly the operative can rotate and stabilize its aim"; //--- ToDo: Localize;
 };
-class operative_reload_txt: RscText
+class operative_reload_txt: RscTextOnWhite
 {
 	idc = 1005;
 	text = "Reload speed:"; //--- ToDo: Localize;
@@ -136,7 +162,7 @@ class operative_reload_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "How quickly the operative reload and switch weapons"; //--- ToDo: Localize;
 };
-class operative_aiming_value: RscText
+class operative_aiming_value: RscTextOnWhite
 {
 	idc = 1006;
 	text = "xxx"; //--- ToDo: Localize;
@@ -146,7 +172,7 @@ class operative_aiming_value: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "General accuracy of the operative with weapons"; //--- ToDo: Localize;
 };
-class operative_reflexes_value: RscText
+class operative_reflexes_value: RscTextOnWhite
 {
 	idc = 1007;
 	text = "xxx"; //--- ToDo: Localize;
@@ -156,7 +182,7 @@ class operative_reflexes_value: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Affects how quickly the operative can rotate and stabilize its aim"; //--- ToDo: Localize;
 };
-class operative_spotting_value: RscText
+class operative_spotting_value: RscTextOnWhite
 {
 	idc = 1008;
 	text = "xxx"; //--- ToDo: Localize;
@@ -166,7 +192,7 @@ class operative_spotting_value: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "General spotting skill of the operative"; //--- ToDo: Localize;
 };
-class operative_courage_value: RscText
+class operative_courage_value: RscTextOnWhite
 {
 	idc = 1009;
 	text = "xxx"; //--- ToDo: Localize;
@@ -176,7 +202,7 @@ class operative_courage_value: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Morale of the operative"; //--- ToDo: Localize;
 };
-class operative_communications_value: RscText
+class operative_communications_value: RscTextOnWhite
 {
 	idc = 1010;
 	text = "xxx"; //--- ToDo: Localize;
@@ -186,7 +212,7 @@ class operative_communications_value: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Affects how quickly recognized targets are shared with the group"; //--- ToDo: Localize;
 };
-class operative_reload_value: RscText
+class operative_reload_value: RscTextOnWhite
 {
 	idc = 1011;
 	text = "xxx"; //--- ToDo: Localize;
@@ -214,7 +240,7 @@ class operative_status_frame: RscFrame
 	w = 7.5 * GUI_GRID_W;
 	h = 7 * GUI_GRID_H;
 };
-class operative_status_value: RscText
+class operative_status_value: RscTextOnWhite
 {
 	idc = 1013;
 	text = "xxxx"; //--- ToDo: Localize;
@@ -223,7 +249,7 @@ class operative_status_value: RscText
 	w = 6.5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 };
-class operative_time_remaining: RscText
+class operative_time_remaining: RscTextOnWhite
 {
 	idc = 1012;
 	text = "Wait time:"; //--- ToDo: Localize;
@@ -232,7 +258,7 @@ class operative_time_remaining: RscText
 	w = 6.5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 };
-class operative_role_value: RscText
+class operative_role_value: RscTextOnWhite
 {
 	idc = 1014;
 	text = "xxxx"; //--- ToDo: Localize;
@@ -241,7 +267,7 @@ class operative_role_value: RscText
 	w = 6.5 * GUI_GRID_W;
 	h = 1.5 * GUI_GRID_H;
 };
-class operative_time_remaining_value: RscText
+class operative_time_remaining_value: RscTextOnWhite
 {
 	idc = 1016;
 	text = "xxxx"; //--- ToDo: Localize;
@@ -250,7 +276,7 @@ class operative_time_remaining_value: RscText
 	w = 6.5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
 };
-class operative_available_points_txt: RscText
+class operative_available_points_txt: RscTextOnWhite
 {
 	idc = 1015;
 	text = "Available points:"; //--- ToDo: Localize;
@@ -260,7 +286,7 @@ class operative_available_points_txt: RscText
 	h = 1 * GUI_GRID_H;
 	tooltip = "Available points to spend"; //--- ToDo: Localize;
 };
-class operative_available_points_value: RscText
+class operative_available_points_value: RscTextOnWhite
 {
 	idc = 1017;
 	text = "xxx"; //--- ToDo: Localize;
