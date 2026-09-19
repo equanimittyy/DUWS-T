@@ -8,7 +8,7 @@ reasoning about how often code runs and what it touches.
 
 Two of the three growth terms this tree carried are gone now, and the shape of the fix is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
-with no single call to point at. BLUFOR task forces — the player-directed assault force and the
+with no single call to point at. The original BLUFOR task forces — the player-directed assault force and the
 waypoint slot it wrote — were removed entirely, so neither the permanently simulated AI an ignored
 one left standing beside the base, nor that waypoint list only index 0 was ever read from,
 accumulates any longer. The third, the enemy gear scan, still runs for the whole session, and why a

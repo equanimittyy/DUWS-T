@@ -6792,65 +6792,13 @@
                 <Original>%1 alive</Original>
                 <English>%1 alive</English>
             </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_HOLDING">
-                <Original>Holding position</Original>
-                <English>Holding position</English>
+            <Key ID="STR_DUWS_T_TASKFORCE_AWAITING">
+                <Original>Awaiting orders</Original>
+                <English>Awaiting orders</English>
             </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_ORDERS">
-                <Original>%1 near %2</Original>
-                <English>%1 near %2</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_MOVE">
-                <Original>Move</Original>
-                <English>Move</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_SAD">
-                <Original>Search and destroy</Original>
-                <English>Search and destroy</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_DESTROY">
-                <Original>Destroy</Original>
-                <English>Destroy</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_GUARD">
-                <Original>Guard</Original>
-                <English>Guard</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_HOLD">
-                <Original>Hold</Original>
-                <English>Hold</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_SENTRY">
-                <Original>Sentry</Original>
-                <English>Sentry</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_GETIN">
-                <Original>Get in</Original>
-                <English>Get in</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_GETOUT">
-                <Original>Get out</Original>
-                <English>Get out</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_LOAD">
-                <Original>Load</Original>
-                <English>Load</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_UNLOAD">
-                <Original>Unload</Original>
-                <English>Unload</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_TRUNLOAD">
-                <Original>Unload</Original>
-                <English>Unload</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_SUPPORT">
-                <Original>Support</Original>
-                <English>Support</English>
-            </Key>
-            <Key ID="STR_DUWS_T_TASKFORCE_WP_CYCLE">
-                <Original>Cycle</Original>
-                <English>Cycle</English>
+            <Key ID="STR_DUWS_T_TASKFORCE_CAPTURE">
+                <Original>Capture %1</Original>
+                <English>Capture %1</English>
             </Key>
             <Key ID="STR_DUWS_T_bhlgx74f">
                 <German>Verlasse den Gruppen Manager</German>
@@ -7656,8 +7604,8 @@
                 <German>Der BLUFOR-Kommandant wird regelmäßig Task Forces in feindliches Gebiet schicken und Angriffe starten. Nutze „Kaderverwaltung – Hauptziel ändern“, um die Task Force auf eine Operationszone zu konzentrieren.</German>
                 <Spanish>El comandante BLUFOR enviará periódicamente fuerzas de tarea a territorio enemigo y lanzará asaltos. Usa «Gestión de escuadras – Cambiar objetivo principal» para centrar a la fuerza de tarea en una única zona operativa.</Spanish>
                 <Chinesesimp>蓝方指挥官将定期向敌区派出特遣部队并发起突击。使用小队管理-改变主要目标，使特遣部队集中在1个战区。</Chinesesimp>
-                <Original>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map.</Original>
-                <English>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map.</English>
+                <Original>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map. Overlord sends it to capture the known enemy zone nearest HQ.</Original>
+                <English>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map. Overlord sends it to capture the known enemy zone nearest HQ.</English>
             </Key>
             <Key ID="STR_DUWS_T_ljw9ndqz">
                 <German>Multiplayer Infos</German>
