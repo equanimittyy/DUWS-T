@@ -492,7 +492,7 @@ The OPFOR town ladder (tiers 0–IV in `DUWS_townSpawnTiers`, per-town `DUWS_tow
 `fnc_town_garrison_setTier`) and the zone tiers are shipped and documented in
 [`info/zones_and_civilians.md`](../../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv). Reputation
 decides *whether* a town garrisons (crossing −10 writes tier I); AP decides *how hard*. Clearing a town drops it to
-tier I (no refund); the tokens the fight wiped stay lost until reinforced.
+tier I at strength 0 (no refund), and it cannot be cleared again until OPCOM resupplies it.
 
 Not built:
 

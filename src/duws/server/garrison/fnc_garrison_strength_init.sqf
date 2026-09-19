@@ -8,7 +8,7 @@
 // missing specifically what it lost (destroy one tank, lose one tank). Model:
 // docs/info/gameplay/garrison_and_reserves.md.
 
-// The full fighting potential, stamped at raise and re-stamped by a tier buy or an OPFOR cap. Every strength
+// The full fighting potential, stamped at raise and re-stamped by a tier buy, an OPFOR cap or a town clear. Every strength
 // measure counts tokens, not men: a tank weighs the same as a patrol.
 DUWS_fnc_garrisonFull = {
 	params ["_key"];
@@ -128,7 +128,7 @@ DUWS_fnc_garrisonRecordLoss = {
 
 // The strength a garrison redeploys at, as a fraction: surviving tokens over full tokens. Full for ground
 // nobody has fought over (no full stamped yet). Counted off the surviving multiset rather than the lost count,
-// because a town cleared at a high tier keeps that tier's losses on file after its full is restamped at tier I.
+// so losses filed against an older, larger full never read below empty.
 DUWS_fnc_garrisonStrength = {
 	params ["_key"];
 	private _full = count ([_key] call DUWS_fnc_garrisonFull);

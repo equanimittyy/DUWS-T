@@ -481,7 +481,8 @@ ever walked through. Three things fall out of that and each is load-bearing:
   home.
 - **The live flag goes with the men.** The clear refuses a town that is not live, so a player walking
   back into a town whose garrison merely streamed out is not paid a clear — the reputation step and
-  the tier reset — for a fight that never happened.
+  the tier reset — for a fight that never happened. A raise with nothing to stand is adopted, so a
+  player standing in the town does not re-raise it every tick, but it never goes live.
 - **The cycle ends there.** Nothing after the teardown describes a town without a garrison, and the
   reinforcement test in particular would read the emptied deployment against a live tier and raise
   the whole composition again, streaming the garrison out and back in on the same pass.
@@ -513,24 +514,30 @@ Three things, and only one of them is reputation:
 
 | | |
 |---|---|
-| Reputation | `+5`, an instalment against the debt — not a discharge |
+| Reputation | `+10`, an instalment against the debt — not a discharge |
 | Tier | back to I, so the commander's spending is gone but the town is not |
-| Strength | every token the fight wiped stays lost; only a paid reinforcement buys them back, `+30 %` each |
+| Strength | `0`: every tier I token is filed lost; only a paid reinforcement buys them back, `+30 %` each |
 
 **The reputation step is deliberately an instalment.** Discharging the whole debt let a player ruin a
 town to `-20` and walk away square on a single fight, which made the reputation that the garrison was
-supposed to be the price of effectively free. At `+5` a town driven to the floor takes three clears to
-reach neutral — `-20`, `-15`, `-10`, out at `-5` — because the band is inclusive at `-10` and a town
-sitting exactly there still garrisons. The step is self-limiting for the same reason: only a town at
-or below `-10` can hold a garrison to clear at all, so the most this path can ever reach is `-5`.
+supposed to be the price of effectively free. At `+10` a town driven to the floor takes two clears to
+reach neutral — `-20`, `-10`, out at `0` — because the band is inclusive at `-10` and a town sitting
+exactly there still garrisons. The step is self-limiting for the same reason: only a town at or below
+`-10` can hold a garrison to clear at all, so the most this path can ever reach is `0`.
 Reputation cannot be turned friendly by force — aid and heals are still the only way into the BLUFOR
 band.
 
-**The losses are the lasting half, and they are a bill rather than a brand.** A town fought out once
-comes back without every token that fight wiped, and nothing restores them on its own — but the
-commander can buy them back, `+30 %` a reinforcement. That is what makes clearing worth doing
-when the reputation step alone would not be: the enemy cannot walk the loss back by waiting, only by
-*paying*, out of the same pool they would rather spend on ground they have not lost.
+**The empty garrison is the lasting half, and it is a bill rather than a brand.** The clear stamps
+the town's full at tier I and files every token lost, so it comes back with nothing standing, and
+nothing restores that on its own — but the commander can buy it back, `+30 %` a reinforcement. That is
+what makes clearing worth doing when the reputation step alone would not be: the enemy cannot walk the
+loss back by waiting, only by *paying*, out of the same pool they would rather spend on ground they
+have not lost.
+
+**A town must be resupplied before it can be cleared again.** An empty raise never goes live, and the
+clear refuses a town that is not live, so the `+10` is paid only for a garrison that stood. The
+commander has to reinforce or fortify the town, or home an OPCOM defender there, and its next raise
+stands those men.
 
 **Upgrade and reinforce are two sinks, not one.** The tier says what the town would field; the
 strength says how much of it stands. A commander can hold a tier IV town hollow, fill a tier I one, or
@@ -554,10 +561,10 @@ a zone is ground with an owner, a town is ground with an opinion.
 |---|---|---|
 | "OPFOR holds it" means | it is in `WARCOM_zones_controled_by_OPFOR` | its reputation is `<= -10` |
 | How OPFOR come to hold it | generated that way, or retaken | the player ruined it — killed civilians, wrecked buildings |
-| The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
+| The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+10` reputation — an instalment, not the ground |
 | How OPFOR get it back | stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players there or not (`DUWS_fnc_siteTaken`) | reputation falls back below `-10` |
 | Strength when OPFOR take it | tier I at `0.1` on the retake (`fnc_opfor_cap`) | tier I at `0.1` on crossing `-10` |
-| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I less the tokens the fight wiped |
+| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I at `0` on the clear |
 | Time gate | none | `MOBILISING` 30 min |
 | Presence latch | thread start, and every retake | thread start, every crossing and every clear |
 | Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
@@ -599,10 +606,10 @@ about.
 | You ruin it past `-10` | Tier I written at once, a tenth of its tokens kept, rounded up: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
 | Hold lapses, you have left once, you return | Garrison raised: the tier composition less its lost tokens | tier |
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
-| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+5` rep, tier back to I, wiped tokens stay lost, survivors fight on, latch armed | tier |
-| …unless that `+5` cleared `-10` | Tier 0, garrison deleted | none — neutral |
+| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+10` rep, tier back to I at strength `0`, survivors fight on, latch armed | tier |
+| …unless that `+10` cleared `-10` | Tier 0, garrison deleted | none — neutral |
 | You leave for 2 min | Men deleted by roster; losses are already on the ledger | as above |
-| You have left once, you return | Garrison raised at whatever the commander has bought since, less its lost tokens | tier |
+| You have left once, you return | Garrison raised from whatever the commander has bought since. With nothing bought, nothing stands and the town cannot be cleared | tier |
 
 The shape to take away: **a zone changes hands, a town changes its mind.** Everything else follows
 from that.
@@ -653,7 +660,7 @@ more usefully — **which of them cannot be moved alone.**
 | `REINFORCE_STEP` `0.3` | `fnc_garrison_strength_init` | what one reinforcement buys, town or zone |
 | Break line `0.15` | `DUWS_fnc_garrisonBeaten` | how far a garrison must be worn before its ground can be taken |
 | `DUWS_captureHold` `20` | `server_var_init` | how long both capture conditions must hold, zone, town and OPCOM alike |
-| `CLEAR_REP` `5` | `fnc_civ_garrison` | what one clear repays |
+| `CLEAR_REP` `10` | `fnc_civ_garrison` | what one clear repays |
 | `OPFOR_BAND` `-10` | `fnc_civ_garrison` | where a town changes sides |
 | `grace` `120` | the occupant record, for both zones and town garrisons | how long empty ground waits before streaming out |
 | `buffer` `400` | the occupant record | how far out arrival is noticed (a town's crowd uses 200) |
@@ -668,8 +675,8 @@ more usefully — **which of them cannot be moved alone.**
   town at multiplier 1 (one token of five). Such a site reads beaten from its first raise, and only
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
-- **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+5` takes
-  a town from `-20` in three clears, not four. Any change here should be checked against the sequence
+- **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+10` takes
+  a town from `-20` in two clears, not one. Any change here should be checked against the sequence
   rather than divided.
 - **`TOWN_HOLD_MOBILISING` doubles as the stale-deadline bound.** `fnc_town_garrison_holdAt` treats a
   deadline further out than the hold as one a previous session wrote. Add a longer hold without

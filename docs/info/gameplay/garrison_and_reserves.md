@@ -66,12 +66,12 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 
 | Function | Does |
 |---|---|
-| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy and an OPFOR cap. |
+| `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy, an OPFOR cap and a town clear. |
 | `DUWS_fnc_garrisonLost {key}` | The lost token list. |
 | `DUWS_fnc_garrisonSurviving {key}` | `full` minus `lost`, by value. |
 | `DUWS_fnc_garrisonRecordLoss {key, token}` | Push one lost token, bounded at its count in `full` — a double-fire of the killed handler is a no-op. |
 | `DUWS_fnc_garrisonStrength {key}` | The live `[0,1]` projection the map bar reads. |
-| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, which spends the pool before the garrison. Only `DUWS_fnc_garrisonSeedOpforCap` calls it. |
+| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, which spends the pool before the garrison. Called by `DUWS_fnc_garrisonSeedOpforCap`, and with `keep` 0 by a town clear. |
 | `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then keep `ceil(0.1 × full)` tokens. Rounded up, so a tier I site at multiplier 1 still stands one token. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
 | `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
 | `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
@@ -240,8 +240,9 @@ owner-blind. All three must hold unbroken for `DUWS_captureHold` (20 s,
 - **Zone capture and retake** run it as the zone trigger's condition, twice a second.
 - **Town clear** runs it on the 10 s poller tick (`src/duws/server/civilian/fnc_civ_garrison.sqf`),
   so the hold lands between 20 and 30 s. Clearing pays a reputation credit and drops the tier to I —
-  not 0; ownership survives, only the purchase was beaten. The ledger is not reseeded, so the next
-  raise fields tier I less the tokens the fight wiped.
+  not 0; ownership survives, only the purchase was beaten. It stamps `full` at tier I with every
+  token lost, so the town stands nothing until the commander resupplies it. A raise with nothing to
+  stand never goes live, so the clear cannot fire again on an empty town.
 
 Survivors of a flipped zone or a cleared town are not ordered off. `DUWS_fnc_garrisonRelease` moves
 them to the site's `leftover` roster and clears their garrison key, so a later wipe records nothing

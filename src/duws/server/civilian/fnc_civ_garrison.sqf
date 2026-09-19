@@ -17,7 +17,7 @@ private _centres = _locations apply { getPos _x };
 #define OPFOR_BAND -10
 
 // Value of one cleared garrison against the town's debt -- deliberately a step, not the whole balance (see clear branch below).
-#define CLEAR_REP 5
+#define CLEAR_REP 10
 
 // Streams on the "town_gar" profile (DUWS_streamProfiles): grace 120 matches the zone's, since stepping outside to flank isn't leaving and rebuilding around a returning player would reset their damage for free.
 // Buffer 400 (vs the crowd's 200): a garrison is expensive enough to want the longer warning; the gate and tick below assume this ring.
@@ -38,7 +38,7 @@ private _fnc_raise = {
 
     // Zone's reserve model: filtered x1 tier thins to garrison_density on stand, surplus + mult-1 copies wait in the pool, less the loss ledger.
     private _garrison = [_key, [_key, [_tier] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
-    // Nothing to stand is still adopted, as a zone's empty raise is: a town that never goes live can never be cleared.
+    // Adopted though empty, or a player standing in the town would re-raise it every tick.
     if (_garrison isEqualTo []) exitWith { missionNamespace setVariable [RAISE_SLOT(_i), [[], _tier]] };
     private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
     private _men = [_grps] call fnc_site_men_of;
@@ -124,8 +124,11 @@ private _fnc_tick = {
             private _roster = [_key] call fnc_site_roster;
             { _roster append (units _x) } forEach _gotGrps;
             // Site live also enlists it in the reserve pass; the killed watch reinforces in hunt waves and records each wiped group's token into the ledger, same as a zone. Losses live in the ledger from here on.
-            [_key, _gotGrps] call DUWS_fnc_garrisonReserveWatch;
-            [_key, true] call DUWS_fnc_garrisonSetLive;
+            // An empty raise stays off live, so the clear pays only for a garrison that stood; a purchase or an OPCOM defender lands on the next raise.
+            if (_gotGrps isNotEqualTo []) then {
+                [_key, _gotGrps] call DUWS_fnc_garrisonReserveWatch;
+                [_key, true] call DUWS_fnc_garrisonSetLive;
+            };
             _t set ["tier", _gotTier];
             _t set ["awake", true];
             ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men",
@@ -198,7 +201,11 @@ private _fnc_tick = {
             // Clearing destroys the purchase, not the ownership -- tier files back to I, not 0: the commander's spending was beaten, not the enemy's claim to the ground.
             // No refund either, or a player clearing towns would hand the enemy its AP back and the OPFOR economy would never climb.
             [_i, 1, "garrison cleared"] call fnc_town_garrison_setTier;
-            // Instalment, not absolution -- a full discharge would let a player ruin a town to -20 and walk away square in one fight; a town at the floor now takes four clears to recover.
+            // Tier I with every token lost: the town fields nothing, and cannot be cleared again, until the commander resupplies it.
+            private _full = [[1] call DUWS_fnc_townSpawnList, missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition;
+            [_key, _full] call DUWS_fnc_garrisonSetFull;
+            [_key, 0] call DUWS_fnc_garrisonSeed;
+            // Instalment, not absolution -- a full discharge would let a player ruin a town to -20 and walk away square in one fight; a town at the floor takes two clears to recover.
             // Self-limiting too: only a town at or below the band can hold a garrison to clear, so this can never turn a town friendly by force.
             [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
             if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
