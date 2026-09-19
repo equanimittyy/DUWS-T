@@ -228,6 +228,7 @@ publicVariable "fnc_rearmUnit";
 // server/bandits
 // =========================================================================================================
 fnc_bandit_looks = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_looks.sqf";
+fnc_bandit_spawn = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_spawn.sqf";
 
 // =========================================================================================================
 // server/civilian
@@ -244,7 +245,7 @@ fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
 fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_panic.sqf";
-// Shared loadout helper for the safehouse raid, angry mob, informant flee and protect-civ protectee.
+// Shared loadout helper for the safehouse raid, angry mob, informant flee, protect-civ protectee and bandits.
 fnc_civ_arm = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arm.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian_server = compile preprocessFileLineNumbers "duws\server\civilian\fnc_recruit_civilian_server.sqf";

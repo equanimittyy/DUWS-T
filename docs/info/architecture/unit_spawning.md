@@ -57,6 +57,7 @@ raises that do not fit a team.
 | Player-summoned assets | CAS, transport and attack helis, paradrop, vehicle drop, ammo box, artillery (`client/supports/`) | offmap or scripted delivery, not a patrolling team |
 | Player-hired friendlies | operative recruit, PMC, partisans, HC squads, MHQ deploy (`server/misc/`, `server/dialog/`) | placed on the player, with no zone to garrison under |
 | Civilians | the transport-IDAP delivery group, the protect-civ VIP, the RAVAGE/WBK handler | no role vocabulary or skill pool; the WBK handler is mode code kept separate by rule |
+| Bandits | `fnc_bandit_spawn` (`server/bandits/`) | a bandit is a re-dressed FIA body, not a roster class, and the token spawner serves only the two armies |
 | Rule-scaled, not roster | the side-mission building ring (`fnc_garrisonBuildings`), scaling men by building count | a rule raises the men; no single roster row expresses it |
 | Bespoke seating / routing | the deny-armor convoy hulls and their repair crew, the rescue-pilot WEST pilot group | a posture band would fight the self-routing convoy or the follow behaviour |
 | Cutscene / training | the intro heli, the killhouse | one-shot scenery |

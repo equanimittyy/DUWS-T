@@ -225,6 +225,33 @@ Civilians are templated separately. `shared/factions/CIV_FACTIONS.sqf` sets `civ
 PrOpfor/LOP, Unsung, IFA3, and a Ravage-zombie set (which falls back to vanilla civs if Ravage is absent).
 `civ_array` feeds the civilian/informant system in `server/misc/`.
 
+## Bandits
+
+Bandits are a third hostile force on INDEPENDENT, which `server/server_init.sqf:22-27` sets hostile to
+both armies. They are not a selectable faction and have no variable schema. `fnc_bandit_spawn`
+(`server/bandits/`) raises base-game FIA bodies (`I_G_Soldier_F`), re-dresses them and arms them.
+
+Clothing comes from `DUWS_banditLooks`, which `fnc_bandit_looks` builds once at server init from the
+unit config of three native bandit sources. Each slot (uniform, headgear) draws a source at random and
+then an item from it, so one bandit can mix sources. Facewear is the FIA body's own.
+
+| Source | Factions | Withheld by the `Bandits` parameter |
+|---|---|---|
+| FIA | `BLU_G_F`, `OPF_G_F`, `IND_G_F` | Never |
+| Syndikat | `IND_C_F` | No DLC, No Apex DLC |
+| Looters | `IND_L_F` | No DLC, No Contact DLC |
+
+The parameter gates clothing only. A source that yields no uniforms logs a `BANDIT` warning and is
+dropped.
+
+Kit, vests included, comes from `fnc_civ_arm` with the pool `["opfor", "blufor"]`. The five roles
+(rifleman, autogunner, grenadier, AT, medic) map to its token specs in `fnc_bandit_spawn.sqf`. Bandits
+spawn at `opfor_ai_skill` and carry no random loot.
+
+WBK zombies also spawn on INDEPENDENT (`server/civilian/fnc_civ_handler_wbk.sqf:254`), so bandits and
+zombies never fight each other. A zone's enemy trigger counts EAST only
+(`server/init_zones/fnc_createzone.sqf:155`), so bandits neither hold a zone nor block its capture.
+
 ## Adding a faction
 
 1. Create `factions/MODERN/<FILE>_blufor.sqf` and `<FILE>_opfor.sqf` assigning the full schema (copy an

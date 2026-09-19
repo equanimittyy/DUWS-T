@@ -1,6 +1,6 @@
-// Locality: server. Arms civ-costume bodies with a loadout from the detected-faction gear pools, and
-// optionally flips them to a hostile cell. Shared by the safehouse raid, angry mob, informant flee and
-// protect-civ protectee.
+// Locality: server. Arms civ-costume or bandit bodies with a loadout from the detected-faction gear pools,
+// and optionally flips them to a hostile cell. Shared by the safehouse raid, angry mob, informant flee,
+// protect-civ protectee and bandits.
 //
 // isHostile is the exemption fnc_civ_handler checks: without it a civ-body kill still bills a civilian
 // death after the body joins EAST. Weapons chamber via addWeaponItem so a pocketless costume still fires
