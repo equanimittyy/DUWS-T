@@ -960,8 +960,11 @@ town has settled.
 
 `shared/includes/civ_menu.hpp` holds two dialogs: `civ_dialog` on idc block **8300-8399** and the bribe
 prompt on **8400-8499**, both clear of every idc the mission ships (the nearest neighbours are the
-disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Five framed rows — intel, aid, toolkit,
-recruit, arrest — each `closeDialog 0` and `remoteExec` the work to the server.
+disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Six framed rows — work, intel, aid,
+toolkit, recruit, arrest — each `closeDialog 0` and `remoteExec` the work to the server. Work asks for a
+civilian side mission and reaches its own server function, `fnc_civ_mission_request`; on the giver of a
+live one it becomes Report, with Cancel beside it
+([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
 
 **The client does not need the town's reputation.** The rows are the same whatever the band; only the
 outcome differs, and that is rolled server-side when a row is picked. `civ_town_rep` therefore stays
@@ -1004,6 +1007,7 @@ when a flag lands still has its rows live, and the flag only ever arrives over t
 | `DUWS_civ_panicked` | broadcast | Set by the panic sweep, cleared after a flat 60 s. Suppresses the call-over |
 | `isSurrendered` | broadcast | Held at gunpoint. Gates Search and Release, and makes the panic sweep skip them |
 | `DUWS_civ_pending` | server only | `[caller, row, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
+| `DUWS_civMission_state` | broadcast | `"active"` or `"ready"` while this civilian is the giver of a live civilian side mission. Opens Interact with no call-over, and turns the first row into Report |
 
 Everything but `DUWS_civ_pending` is broadcast because it is read off the server: the dialog is built on
 the client that opens it and has to know at open time which rows are dead, and the `addAction`

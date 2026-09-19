@@ -2886,6 +2886,30 @@
             </Key>
         </Container>
         <Container name="Civilian Side Missions">
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_WORK">
+                <Original>Ask for Work</Original>
+                <English>Ask for Work</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_WORK_DESC">
+                <Original>Ask if they need help. A job pays CP, money and the town's goodwill.</Original>
+                <English>Ask if they need help. A job pays CP, money and the town's goodwill.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_REPORT">
+                <Original>Report Back</Original>
+                <English>Report Back</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_REPORT_DESC">
+                <Original>Tell them the job is done.</Original>
+                <English>Tell them the job is done.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_REPORT">
+                <Original>Report</Original>
+                <English>Report</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CANCEL">
+                <Original>Cancel Job</Original>
+                <English>Cancel Job</English>
+            </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_ASK">
                 <Original>Need help with anything?</Original>
                 <English>Need help with anything?</English>

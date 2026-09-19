@@ -43,7 +43,10 @@ private _actionID = _unit addAction [
     // Spent civilians drop out on the same principle. One exchange -- talked to, or ordered to
     // put their hands up -- is all a person is worth, so the entry going away is what tells the
     // player this one is finished. Leaving it up invited arresting whoever had just refused.
-    "alive _target && {_target getVariable ['DUWS_civ_stopped', false]} && {_this distance _target < 3} && {!(_target getVariable ['isSurrendered', false])} && {!(_target getVariable ['DUWS_civ_closed', false])} && {!(_target getVariable ['DUWS_civ_arrested', false])}"
+    //
+    // The giver of a civilian side mission is the exception: spent, but open for Report and Cancel, and
+    // with no call-over, since they already stand where the task pin shows them.
+    "alive _target && {_this distance _target < 3} && {((_target getVariable ['DUWS_civMission_state', '']) != '') || {_target getVariable ['DUWS_civ_stopped', false] && {!(_target getVariable ['isSurrendered', false])} && {!(_target getVariable ['DUWS_civ_closed', false])} && {!(_target getVariable ['DUWS_civ_arrested', false])}}}"
 ];
 
 _unit setVariable ["civ_menuActionID", _actionID];

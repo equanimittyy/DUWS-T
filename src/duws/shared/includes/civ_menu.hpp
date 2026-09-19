@@ -1,5 +1,5 @@
 // Civilian interaction panel: the single entry point in front of what a local will do for the
-// player. Five framed rows in the Squad-Manager idiom, each with a description and a button that
+// player. Six framed rows in the Squad-Manager idiom, each with a description and a button that
 // closeDialog 0 then remoteExecs the work to the server.
 //
 // Rows carry no price. The reaction is rolled on the server when a row is picked, so a price
@@ -20,9 +20,9 @@ class civ_dialog
         {
             idc = 8300;
             x = 5 * GUI_GRID_W + GUI_GRID_X;
-            y = 1.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 0.3 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 21.9 * GUI_GRID_H;
+            h = 24.7 * GUI_GRID_H;
             colorBackground[] = {0, 0, 0, 0.7};
         };
         class civ_mainframe: RscFrame
@@ -30,9 +30,9 @@ class civ_dialog
             idc = 8301;
             text = "$STR_DUWS_T_CIV_MENU_TITLE";
             x = 5 * GUI_GRID_W + GUI_GRID_X;
-            y = 1.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 0.3 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 21.9 * GUI_GRID_H;
+            h = 24.7 * GUI_GRID_H;
             moving = 1;
         };
         class civ_money: RscText
@@ -40,7 +40,7 @@ class civ_dialog
             idc = 8310;
             text = "";
             x = 6 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 1.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 28 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
             style = ST_CENTER;
@@ -48,9 +48,10 @@ class civ_dialog
             sizeEx = 0.035;
         };
 
-        // Rows are pitched 3.5 apart on a 3.0 frame. The description is the row's tallest part and
-        // wraps to three lines at 0.030 on a narrow window, so the frame has to clear three lines
-        // plus its own border -- at the 2.8 this was, the third line drew over the bottom edge.
+        // Rows are pitched 3.4 apart on a 3.0 frame; at 3.5, six rows ran Close off the bottom of the
+        // screen. The description is the row's tallest part and wraps to three lines at 0.030 on a
+        // narrow window, so the frame has to clear three lines plus its own border -- at the 2.8
+        // this was, the third line drew over the bottom edge.
         //
         // The description sits 0.65 below its frame, not the 0.35 it did: RscFrame centres its
         // title on the top border, so the title's lower half reaches about 0.44 into the frame and
@@ -62,7 +63,7 @@ class civ_dialog
             idc = 8320;
             text = "$STR_DUWS_T_CIV_ROW_INTEL";
             x = 6 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 6.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 28 * GUI_GRID_W;
             h = 3 * GUI_GRID_H;
         };
@@ -71,7 +72,7 @@ class civ_dialog
             idc = 8330;
             text = "$STR_DUWS_T_CIV_ROW_INTEL_DESC";
             x = 6.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7.15 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             style = ST_MULTI;
@@ -83,7 +84,7 @@ class civ_dialog
             idc = 8340;
             text = "$STR_DUWS_T_CIV_ASK";
             x = 25.3 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.25 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7.25 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.2 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
@@ -92,22 +93,55 @@ class civ_dialog
             action = "closeDialog 0; [DUWS_civ_target, player, 'INTEL'] remoteExec ['fnc_civ_request', 2];";
         };
 
+        // fnc_civ_menu relabels this Report on a mission's giver; the server decides Work or Report
+        // from its own record, so the label decides nothing.
+        class civ_work_frame: civ_intel_frame
+        {
+            idc = 8325;
+            text = "$STR_DUWS_T_CIVMISSION_ROW_WORK";
+            y = 3.1 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_work_desc: civ_intel_desc
+        {
+            idc = 8335;
+            text = "$STR_DUWS_T_CIVMISSION_ROW_WORK_DESC";
+            y = 3.75 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_work_button: civ_intel_button
+        {
+            idc = 8345;
+            y = 3.85 * GUI_GRID_H + GUI_GRID_Y;
+            tooltip = "";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'WORK'] remoteExec ['fnc_civ_mission_request', 2];";
+        };
+        class civ_cancel_button: civ_intel_button
+        {
+            idc = 8346;
+            text = "$STR_DUWS_T_CIVMISSION_CANCEL";
+            x = 17 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.85 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8 * GUI_GRID_W;
+            colorBackground[] = {0.6, 0.13, 0.13, 0.85};
+            tooltip = "";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'CANCEL'] remoteExec ['fnc_civ_mission_request', 2];";
+        };
+
         class civ_aid_frame: civ_intel_frame
         {
             idc = 8321;
             text = "$STR_DUWS_T_CIV_ROW_AID";
-            y = 8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 9.9 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_aid_desc: civ_intel_desc
         {
             idc = 8331;
             text = "$STR_DUWS_T_CIV_ROW_AID_DESC";
-            y = 8.65 * GUI_GRID_H + GUI_GRID_Y;
+            y = 10.55 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_aid_button: civ_intel_button
         {
             idc = 8341;
-            y = 8.75 * GUI_GRID_H + GUI_GRID_Y;
+            y = 10.65 * GUI_GRID_H + GUI_GRID_Y;
             tooltip = "$STR_DUWS_T_CIV_ROW_AID_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player, 'AID'] remoteExec ['fnc_civ_request', 2];";
         };
@@ -116,18 +150,18 @@ class civ_dialog
         {
             idc = 8322;
             text = "$STR_DUWS_T_CIV_ROW_TOOLKIT";
-            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13.3 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_toolkit_desc: civ_intel_desc
         {
             idc = 8332;
             text = "$STR_DUWS_T_CIV_ROW_TOOLKIT_DESC";
-            y = 12.15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13.95 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_toolkit_button: civ_intel_button
         {
             idc = 8342;
-            y = 12.25 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.05 * GUI_GRID_H + GUI_GRID_Y;
             tooltip = "$STR_DUWS_T_CIV_ROW_TOOLKIT_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player, 'TOOLKIT'] remoteExec ['fnc_civ_request', 2];";
         };
@@ -136,18 +170,18 @@ class civ_dialog
         {
             idc = 8323;
             text = "$STR_DUWS_T_CIV_ROW_RECRUIT";
-            y = 15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 16.7 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_recruit_desc: civ_intel_desc
         {
             idc = 8333;
             text = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
-            y = 15.65 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.35 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_recruit_button: civ_intel_button
         {
             idc = 8343;
-            y = 15.75 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.45 * GUI_GRID_H + GUI_GRID_Y;
             tooltip = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player, 'RECRUIT'] remoteExec ['fnc_civ_request', 2];";
         };
@@ -159,19 +193,19 @@ class civ_dialog
         {
             idc = 8324;
             text = "$STR_DUWS_T_CIV_ROW_ARREST";
-            y = 18.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20.1 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_arrest_desc: civ_intel_desc
         {
             idc = 8334;
             text = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
-            y = 19.15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20.75 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_arrest_button: civ_intel_button
         {
             idc = 8344;
             text = "$STR_DUWS_T_CIV_ROW_ARREST";
-            y = 19.25 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20.85 * GUI_GRID_H + GUI_GRID_Y;
             colorBackground[] = {0.6, 0.13, 0.13, 0.85};
             tooltip = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player] remoteExec ['fnc_civ_arrest', 2];";
@@ -182,7 +216,7 @@ class civ_dialog
             idc = 8350;
             text = "$STR_DUWS_T_MENU_CLOSE";
             x = 13 * GUI_GRID_W + GUI_GRID_X;
-            y = 21.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 23.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 14 * GUI_GRID_W;
             h = 1.3 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};

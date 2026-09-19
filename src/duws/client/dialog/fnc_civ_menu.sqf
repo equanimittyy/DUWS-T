@@ -39,3 +39,13 @@ ctrlEnable [8340, !_closed && !(player getVariable ["DUWS_civ_intel_asked", fals
 // Arrest greys on the same flag rather than carrying a second life: one exchange is all a person
 // is worth, so talking to someone and then ordering their hands up is two.
 ctrlEnable [8344, !_closed && !(_civilian getVariable ["DUWS_civ_arrested", false])];
+
+private _mission = _civilian getVariable ["DUWS_civMission_state", ""];
+private _giver = _mission != "";
+if (_giver) then {
+    ctrlSetText [8325, localize "STR_DUWS_T_CIVMISSION_ROW_REPORT"];
+    ctrlSetText [8335, localize "STR_DUWS_T_CIVMISSION_ROW_REPORT_DESC"];
+    ctrlSetText [8345, localize "STR_DUWS_T_CIVMISSION_REPORT"];
+};
+ctrlEnable [8345, [!_closed, _mission == "ready"] select _giver];
+ctrlShow [8346, _giver];

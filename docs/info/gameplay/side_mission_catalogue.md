@@ -445,3 +445,57 @@ over the attack helicopter, and
 the two new civilian escorts -- Escort Informant at 5/15/1 (1h00-1h30) and Deliver Supplies at 15/5/3
 (0h30-1h00). Both escorts spawn no opposition of their own, so their pay leans low and the REP carries
 part of the value, as with Recover Humanitarian Supply Truck.
+
+## Civilian side missions
+
+A civilian side mission is a job that a local gives the player through the civilian menu, not through the
+strategic map. It is not a row in `mission_types.hpp`, and it runs beside the HQ mission, never in its
+slot. The code is in `src/duws/server/civ_missions/`.
+
+| | HQ side mission | Civilian side mission |
+|---|---|---|
+| Issued by | the strategic map | the **Work** row, first in the civilian menu |
+| At one time | one (`Mission_available`) | up to three (`CIV_MISSION_CAP`) |
+| Name | a generated operation name | the type's name; no title card and no music |
+| Deadline | a band per type | none |
+| Ends | on the objective | when a player reports to the giver, or cancels |
+| Pays | CP and AP | CP, money and town reputation |
+
+| Type | Bandits | Won when | Lost when | CP | Money | REP |
+|---|---|---|---|---:|---:|---:|
+| Clear Bandit Camp | 4-6 | every bandit is dead | the giver dies | 10 | 3-5 | +2 |
+| Recover Stolen Car | 3-4 | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 8 | 4-6 | +2 |
+
+The CP is scaled by `cp_reward_multiplier`. The money drops at the giver's feet (`fnc_money_drop`), and
+the reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
+and no other cost.
+
+**The offer is a flat 75 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
+where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
+full cap is a refusal, and like every refusal it spends the civilian.
+
+**The giver stays.** The request takes the giver off the town's crowd roster, so a town that sleeps
+leaves them standing, and holds them with `PATH` off, so the task pin stays true. The panic sweep skips
+the giver (`fnc_civ_panic.sqf`). While the mission lives, Interact opens the menu on the giver with no
+call-over: the first row reads Report, live once the job is done, and Cancel sits beside it. When the
+mission ends, the giver walks again and the map sweep collects them once no player is near.
+
+**The thread owns every exit.** A report or a cancel only writes the entry's state, and the thread ends
+the mission on its next poll (`fnc_civ_mission_poll.sqf`) through `fnc_civ_mission_finish.sqf`.
+Readiness is a separate flag, so a poll never overwrites a report. The objective test is code stored on
+the entry and reads the entry it is given, because the request re-runs it at the report and an SQF block
+captures no locals.
+
+**Bandits are owned by their group handle, not by the HQ token.** `fnc_mission_claim` defaults to the
+running HQ mission's token, which cannot advance while the HQ slot is held. A civilian mission that
+advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` /
+`DUWS_binAt` pair that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the
+key `civ_mission_<id>`: an empty car is litter to the map sweep, and a mission with no deadline can
+outlast the litter lifetime.
+
+**The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
+town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
+other live site. Bandits fight both armies, and the objective counts every bandit dead, whoever killed
+them. A town close to HQ often finds no site, so its civilians have no work to give.
+
+A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles.

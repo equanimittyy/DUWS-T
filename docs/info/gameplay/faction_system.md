@@ -246,7 +246,8 @@ dropped.
 
 Kit, vests included, comes from `fnc_civ_arm` with the pool `["opfor", "blufor"]`. The five roles
 (rifleman, autogunner, grenadier, AT, medic) map to its token specs in `fnc_bandit_spawn.sqf`. Bandits
-spawn at `opfor_ai_skill` and carry no random loot.
+spawn at `opfor_ai_skill` and carry no random loot. Civilian side missions raise them
+([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
 
 WBK zombies also spawn on INDEPENDENT (`server/civilian/fnc_civ_handler_wbk.sqf:254`), so bandits and
 zombies never fight each other. A zone's enemy trigger counts EAST only
