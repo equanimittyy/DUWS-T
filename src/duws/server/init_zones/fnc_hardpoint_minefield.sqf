@@ -7,6 +7,9 @@
 // field and leaves BLUFOR to detect and clear it.
 
 #define MINE_CELL 10
+// A mine may land this far from its cell's centre, 5 m past the cell edge, so neighbouring cells overlap
+// and the field clumps and gaps like a hand-laid one instead of tiling evenly.
+#define MINE_SPREAD 10
 
 DUWS_mineSquare = 50;
 
@@ -36,8 +39,10 @@ fnc_hardpoint_minefield = {
     for "_i" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
         for "_j" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
             for "_k" from 1 to (floor (_perCell + random 1)) do {
-                private _off = [_i * MINE_CELL + random MINE_CELL - _half, _j * MINE_CELL + random MINE_CELL - _half, _dir]
-                    call fnc_hardpoint_rotate;
+                private _off = [
+                    (_i + 0.5) * MINE_CELL + ((random 2) - 1) * MINE_SPREAD - _half,
+                    (_j + 0.5) * MINE_CELL + ((random 2) - 1) * MINE_SPREAD - _half,
+                    _dir] call fnc_hardpoint_rotate;
                 private _mine = createMine [selectRandom _classes, [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0];
                 east revealMine _mine;
                 if (_key != "") then { [_mine, _key] call fnc_duws_keep };
