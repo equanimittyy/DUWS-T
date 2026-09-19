@@ -234,6 +234,17 @@ fnc_IsAA = compileFinal {
 	|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_aa_ca.paa"}
 };
 
+fnc_IsGrenadier = compileFinal {
+	params ["_type"];
+	// An underbarrel GL is a second muzzle (not "this") that carries its own magazines. That muzzle,
+	// not the icon, is what a grenadier's rifle has and a plain rifle does not. Icon stays a fallback.
+	private _hasUGL = ((getArray (configFile >> "CfgWeapons" >> _type >> "muzzles")) findIf {
+		_x != "this" && {(getArray (configFile >> "CfgWeapons" >> _type >> _x >> "magazines")) isNotEqualTo []}
+	}) >= 0;
+	_hasUGL
+	|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_gl_ca.paa"}
+};
+
 fnc_unitParseRoles = compileFinal {
 	// Unit role from the config icon (CfgVehicleIcons: pictureHeal/Repair/...); weapon role from the
 	// held weapon's UIPicture, secondary before primary.
@@ -249,17 +260,6 @@ fnc_unitParseRoles = compileFinal {
 	fnc_IsSniper = compileFinal {
 		params ["_type"];
 		getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_sniper_ca.paa";
-	};
-	
-	fnc_IsGrenadier = compileFinal {
-		params ["_type"];
-		// An underbarrel GL is a second muzzle (not "this") that carries its own magazines. That muzzle,
-		// not the icon, is what a grenadier's rifle has and a plain rifle does not. Icon stays a fallback.
-		private _hasUGL = ((getArray (configFile >> "CfgWeapons" >> _type >> "muzzles")) findIf {
-			_x != "this" && {(getArray (configFile >> "CfgWeapons" >> _type >> _x >> "magazines")) isNotEqualTo []}
-		}) >= 0;
-		_hasUGL
-		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_gl_ca.paa"}
 	};
 	
 	fnc_IsMedic = compileFinal {

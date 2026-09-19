@@ -9,12 +9,14 @@
 // Contract: [_units, _side, _pool, _spec, _opts] -> _group (grpNull when not flipping / none alive)
 //   _side  "EAST"|"WEST"|"IND" -- group side a hostile flip joins; decoupled from _pool, so an IND cell
 //          can carry OPFOR kit. Ignored when not flipping.
-//   _pool  "opfor"|"blufor" -- which faction's weapon/vest/backpack pools to draw from.
+//   _pool  "opfor"|"blufor", or an array of both -- which factions' weapon/vest/backpack pools to draw from.
 //   _spec  tokens, gear before weapons:
 //            weapons pistol|submachinegun|assault_rifle|machinegun|sniper -- one of that
-//              BIS_fnc_itemType subcategory from the pool; launcher -- an AT tube, never AA.
-//              Chambered + spares.
+//              BIS_fnc_itemType subcategory from the pool; launcher -- an AT tube, never AA;
+//              grenadier -- a rifle with an underbarrel GL, both muzzles loaded; a plain rifle when the
+//              pool has none. Chambered + spares.
 //            vest / civ_backpack / backpack -- from the matching pool, the lowest 3 by armour/capacity.
+//            medic -- Medikit and first aid kits, and the Medic trait.
 //          A nested array is "pick one of these", e.g. ["vest", ["submachinegun","assault_rifle"], "pistol"];
 //          "NONE" in a set is an empty chance, so ["submachinegun","NONE"] gives an SMG or nothing.
 //   _opts  [_hostile, _skill, _stance, _mags]: flip on/off; six aim-skills to _skill (-1 = leave);
@@ -32,12 +34,18 @@ private _sideObj = switch (toUpper _side) do {
     case "INDEPENDENT": { INDEPENDENT };
     default { EAST };
 };
-private _prefix = toLower _pool;
+private _prefixes = if (_pool isEqualType "") then { [_pool] } else { _pool };
+private _union = {
+    params ["_suffix"];
+    private _all = [];
+    { _all append (missionNamespace getVariable [toLower _x + _suffix, []]) } forEach _prefixes;
+    _all
+};
 
 // Any pool may be empty on a stripped faction -- the per-slot fallbacks below cover that.
-private _weaponPool = missionNamespace getVariable [_prefix + "_ammobox_weapons", []];
-private _vestPool   = missionNamespace getVariable [_prefix + "_vests", []];
-private _sideBags   = missionNamespace getVariable [_prefix + "_backpacks", []];
+private _weaponPool = ["_ammobox_weapons"] call _union;
+private _vestPool   = ["_vests"] call _union;
+private _sideBags   = ["_backpacks"] call _union;
 private _civBags    = missionNamespace getVariable ["DUWS_civBackpacks", []];
 
 private _isSubcat = { params ["_w", "_sub"]; ((_w call BIS_fnc_itemType) select 1) == _sub };
@@ -48,7 +56,8 @@ private _weaponMatch = createHashMapFromArray [
     ["machinegun",    { [_this, "MachineGun"] call _isSubcat }],
     ["sniper",        { [_this, "SniperRifle"] call _isSubcat }],
     // Not a subcategory: BIS_fnc_itemType files a tube under Launcher, MissileLauncher or RocketLauncher by class.
-    ["launcher",      { !(_this call fnc_IsAA) && {_this call fnc_IsAT} }]
+    ["launcher",      { !(_this call fnc_IsAA) && {_this call fnc_IsAT} }],
+    ["grenadier",     { _this call fnc_IsGrenadier }]
 ];
 
 // Raise the scalar armour by the max HitpointsProtectionInfo child: chest/body carry the real number
@@ -77,6 +86,12 @@ private _lowPick = {
     _scored sort true;
     (selectRandom (_scored select [0, _n min count _scored])) select 1
 };
+private _addBag = {
+    params ["_u"];
+    private _b = [_sideBags, _bagScore] call _lowPick;
+    if (_b isEqualTo "") then { _b = [_civBags, _bagScore] call _lowPick };
+    if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
+};
 
 private _newGrp = grpNull;
 if (_hostile) then { _newGrp = createGroup [_sideObj, true] };
@@ -104,15 +119,21 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
                 private _b = [_civBags, _bagScore] call _lowPick;
                 if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
             };
-            case "backpack": {
-                private _b = [_sideBags, _bagScore] call _lowPick;
-                if (_b isEqualTo "") then { _b = [_civBags, _bagScore] call _lowPick };
-                if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
+            case "backpack": { [_u] call _addBag };
+            case "medic": {
+                if (backpack _u == "") then { [_u] call _addBag };
+                _u addItem "Medikit";
+                for "_j" from 1 to 4 do { _u addItem "FirstAidKit" };
+                _u setUnitTrait ["Medic", true];
             };
             default {
                 if (_tok in _weaponMatch) then {
                     private _match = _weaponMatch get _tok;
                     private _cands = _weaponPool select { _x call _match };
+                    if (_cands isEqualTo [] && {_tok == "grenadier"}) then {
+                        private _rifle = _weaponMatch get "assault_rifle";
+                        _cands = _weaponPool select { _x call _rifle };
+                    };
                     // Empty category: pistol falls back to a vanilla sidearm; anything else is skipped.
                     private _w = if (_cands isEqualTo []) then {
                         if (_tok == "pistol") then { "hgun_Rook40_F" } else { "" }
@@ -120,17 +141,25 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
                     if !(_w isEqualTo "") then {
                         if (vest _u == "" && {_tok != "pistol"}) then { _u addVest "V_TacVest_blk" };  // hold rifle mags
                         // Belts and rockets are too bulky for a vest -- a bag carries the spares.
-                        if (_tok in ["machinegun", "launcher"] && {backpack _u == ""}) then {
-                            private _b = [_sideBags, _bagScore] call _lowPick;
-                            if (_b isEqualTo "") then { _b = [_civBags, _bagScore] call _lowPick };
-                            if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
-                        };
+                        if (_tok in ["machinegun", "launcher"] && {backpack _u == ""}) then { [_u] call _addBag };
                         _u addWeapon _w;
                         private _magList = getArray (configFile >> "CfgWeapons" >> _w >> "magazines");
                         if !(_magList isEqualTo []) then {
                             private _mag = _magList select 0;
                             _u addWeaponItem [_w, _mag, true];
                             for "_j" from 1 to _mags do { _u addMagazine _mag };
+                        };
+                        if (_tok == "grenadier") then {
+                            private _muzzles = getArray (configFile >> "CfgWeapons" >> _w >> "muzzles");
+                            private _gl = _muzzles findIf {
+                                _x != "this" && {(getArray (configFile >> "CfgWeapons" >> _w >> _x >> "magazines")) isNotEqualTo []}
+                            };
+                            if (_gl >= 0) then {
+                                private _glMuzzle = _muzzles select _gl;
+                                private _glMag = (getArray (configFile >> "CfgWeapons" >> _w >> _glMuzzle >> "magazines")) select 0;
+                                _u addWeaponItem [_w, [_glMag, 1, _glMuzzle], true];
+                                for "_j" from 1 to _mags do { _u addMagazine _glMag };
+                            };
                         };
                     };
                 };
