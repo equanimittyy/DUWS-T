@@ -125,32 +125,32 @@ _trgwest setTriggerTimeout [0, 0, 0, true];
 // PRESENT list; without this the arrival tick reads empty.
 sleep 1;
 
-_reconMarkers = [];
+// Keyed by side and unit, so a contact still in view moves its marker instead of deleting and recreating
+// it -- every marker command is a network message.
+_reconMarkers = createHashMap;
 _elapsed = 0;
 while {alive _vehicle && _elapsed < _scanDuration} do {
-	{ deleteMarker _x } forEach _reconMarkers;
-	_reconMarkers = [];
-	_idx = 0;
-
+	private _seen = [];
 	{
-		_mk = createMarker [format ["%1_e_%2", _markername, _idx], getPos _x];
-		_mk setMarkerShape "ELLIPSE";
-		_mk setMarkerBrush "SolidBorder";
-		_mk setMarkerColor "ColorRed";
-		_mk setMarkerSize [3, 3];
-		_reconMarkers pushBack _mk;
-		_idx = _idx + 1;
-	} forEach list _trg;
-
+		_x params ["_units", "_tag", "_colour"];
+		{
+			private _mk = format ["%1_%2_%3", _markername, _tag, netId _x];
+			if (_mk in _reconMarkers) then {
+				_mk setMarkerPos (getPos _x);
+			} else {
+				createMarker [_mk, getPos _x];
+				_mk setMarkerShape "ELLIPSE";
+				_mk setMarkerBrush "SolidBorder";
+				_mk setMarkerColor _colour;
+				_mk setMarkerSize [3, 3];
+				_reconMarkers set [_mk, true];
+			};
+			_seen pushBack _mk;
+		} forEach _units;
+	} forEach [[list _trg, "e", "ColorRed"], [list _trgwest, "w", "ColorBlue"]];
 	{
-		_mk = createMarker [format ["%1_w_%2", _markername, _idx], getPos _x];
-		_mk setMarkerShape "ELLIPSE";
-		_mk setMarkerBrush "SolidBorder";
-		_mk setMarkerColor "ColorBlue";
-		_mk setMarkerSize [3, 3];
-		_reconMarkers pushBack _mk;
-		_idx = _idx + 1;
-	} forEach list _trgwest;
+		if !(_x in _seen) then { deleteMarker _x; _reconMarkers deleteAt _x };
+	} forEach keys _reconMarkers;
 
 	sleep _scanInterval;
 	_elapsed = _elapsed + _scanInterval;
@@ -158,7 +158,7 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 
 // Feed ended (drone destroyed or station time up): pull the live markers, the search
 // circle and the triggers now -- the scan is over however the drone leaves.
-{ deleteMarker _x } forEach _reconMarkers;
+{ deleteMarker _x } forEach keys _reconMarkers;
 deleteMarker str(_markername);
 deleteVehicle _trg;
 deleteVehicle _trgwest;
