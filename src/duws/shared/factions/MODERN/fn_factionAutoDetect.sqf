@@ -217,6 +217,23 @@ fnc_classifyVehicle = compileFinal {
 	""
 };
 
+fnc_IsAT = compileFinal {
+	params ["_type"];
+	// A launcher-slot weapon that isn't AA (callers test AA first) is AT: launchers inherit Launcher
+	// whatever their icon. A grenadier's GL is a primary muzzle, not a launcher, so it's safe from this.
+	(_type != "" && {_type isKindOf ["Launcher", configFile >> "CfgWeapons"]})
+	|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_at_ca.paa"}
+};
+
+fnc_IsAA = compileFinal {
+	params ["_type"];
+	// The launcher's missile locks air (airLock >= 1): the config fact that separates an AA tube
+	// from an AT one, ahead of the icon. A non-launcher secondary has no such magazine and fails.
+	private _mag = (getArray (configFile >> "CfgWeapons" >> _type >> "magazines")) param [0, ""];
+	(_mag != "" && {getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _mag >> "ammo") >> "airLock") >= 1})
+	|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_aa_ca.paa"}
+};
+
 fnc_unitParseRoles = compileFinal {
 	// Unit role from the config icon (CfgVehicleIcons: pictureHeal/Repair/...); weapon role from the
 	// held weapon's UIPicture, secondary before primary.
@@ -227,23 +244,6 @@ fnc_unitParseRoles = compileFinal {
 		(_mag != "" && {getNumber (configFile >> "CfgMagazines" >> _mag >> "count") >= 100})
 		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_mg_ca.paa"}
 		|| {getText(configFile >> "CfgWeapons" >> _type >> "cursor") == "mg"}
-	};
-	
-	fnc_IsAT = compileFinal {
-		params ["_type"];
-		// A launcher-slot weapon that isn't AA (the AA case runs first) is AT: launchers inherit Launcher
-		// whatever their icon. A grenadier's GL is a primary muzzle, not a launcher, so it's safe from this.
-		(_type != "" && {_type isKindOf ["Launcher", configFile >> "CfgWeapons"]})
-		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_at_ca.paa"}
-	};
-	
-	fnc_IsAA = compileFinal {
-		params ["_type"];
-		// The launcher's missile locks air (airLock >= 1): the config fact that separates an AA tube
-		// from an AT one, ahead of the icon. A non-launcher secondary has no such magazine and fails.
-		private _mag = (getArray (configFile >> "CfgWeapons" >> _type >> "magazines")) param [0, ""];
-		(_mag != "" && {getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _mag >> "ammo") >> "airLock") >= 1})
-		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_aa_ca.paa"}
 	};
 	
 	fnc_IsSniper = compileFinal {

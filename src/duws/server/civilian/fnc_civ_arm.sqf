@@ -11,8 +11,9 @@
 //          can carry OPFOR kit. Ignored when not flipping.
 //   _pool  "opfor"|"blufor" -- which faction's weapon/vest/backpack pools to draw from.
 //   _spec  tokens, gear before weapons:
-//            weapons pistol|submachinegun|assault_rifle|machinegun|sniper|launcher -- one of that
-//              BIS_fnc_itemType subcategory from the pool, chambered + spares.
+//            weapons pistol|submachinegun|assault_rifle|machinegun|sniper -- one of that
+//              BIS_fnc_itemType subcategory from the pool; launcher -- an AT tube, never AA.
+//              Chambered + spares.
 //            vest / civ_backpack / backpack -- from the matching pool, the lowest 3 by armour/capacity.
 //          A nested array is "pick one of these", e.g. ["vest", ["submachinegun","assault_rifle"], "pistol"];
 //          "NONE" in a set is an empty chance, so ["submachinegun","NONE"] gives an SMG or nothing.
@@ -39,9 +40,15 @@ private _vestPool   = missionNamespace getVariable [_prefix + "_vests", []];
 private _sideBags   = missionNamespace getVariable [_prefix + "_backpacks", []];
 private _civBags    = missionNamespace getVariable ["DUWS_civBackpacks", []];
 
-private _subcatOf = createHashMapFromArray [
-    ["pistol", "Handgun"], ["submachinegun", "SubmachineGun"], ["assault_rifle", "AssaultRifle"],
-    ["machinegun", "MachineGun"], ["sniper", "SniperRifle"], ["launcher", "Launcher"]
+private _isSubcat = { params ["_w", "_sub"]; ((_w call BIS_fnc_itemType) select 1) == _sub };
+private _weaponMatch = createHashMapFromArray [
+    ["pistol",        { [_this, "Handgun"] call _isSubcat }],
+    ["submachinegun", { [_this, "SubmachineGun"] call _isSubcat }],
+    ["assault_rifle", { [_this, "AssaultRifle"] call _isSubcat }],
+    ["machinegun",    { [_this, "MachineGun"] call _isSubcat }],
+    ["sniper",        { [_this, "SniperRifle"] call _isSubcat }],
+    // Not a subcategory: BIS_fnc_itemType files a tube under Launcher, MissileLauncher or RocketLauncher by class.
+    ["launcher",      { !(_this call fnc_IsAA) && {_this call fnc_IsAT} }]
 ];
 
 // Raise the scalar armour by the max HitpointsProtectionInfo child: chest/body carry the real number
@@ -103,9 +110,9 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
                 if !(_b isEqualTo "") then { _u addBackpackGlobal _b };
             };
             default {
-                private _sub = _subcatOf getOrDefault [_tok, ""];
-                if !(_sub isEqualTo "") then {
-                    private _cands = _weaponPool select { ((_x call BIS_fnc_itemType) select 1) == _sub };
+                if (_tok in _weaponMatch) then {
+                    private _match = _weaponMatch get _tok;
+                    private _cands = _weaponPool select { _x call _match };
                     // Empty category: pistol falls back to a vanilla sidearm; anything else is skipped.
                     private _w = if (_cands isEqualTo []) then {
                         if (_tok == "pistol") then { "hgun_Rook40_F" } else { "" }
