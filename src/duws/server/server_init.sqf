@@ -29,6 +29,7 @@ civilian setFriend [west, 1];
 civilian setFriend [east, 1];
 
 [] call fnc_factions_check;
+[] call fnc_bandit_looks;
 
 sleep 1;
 

@@ -225,6 +225,11 @@ fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\arsenal\fnc_rearm
 publicVariable "fnc_rearmUnit";
 
 // =========================================================================================================
+// server/bandits
+// =========================================================================================================
+fnc_bandit_looks = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_looks.sqf";
+
+// =========================================================================================================
 // server/civilian
 // =========================================================================================================
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";

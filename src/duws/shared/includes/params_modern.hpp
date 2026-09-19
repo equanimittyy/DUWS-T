@@ -79,6 +79,16 @@ class Params {
         default = 0;
     };
 
+    // Which native bandit factions dress bandits: a player who does not own a DLC gets its purchase
+    // prompt from its content, so the host withholds what the session's players lack. Read once on
+    // the server by fnc_bandit_looks.
+    class DUWS_Bandits {
+        title = "Bandits";
+        values[] = {0,1,2,3};
+        texts[] = {"Full","No DLC","No Apex DLC","No Contact DLC"};
+        default = 0;
+    };
+
     // Inert separator: a value-less row the engine renders but never reads, splitting the
     // gameplay options above from the developer options below.
     class DUWS_Divider_Dev {
