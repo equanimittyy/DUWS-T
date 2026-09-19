@@ -335,7 +335,7 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Identity | — | format version, `worldName`, campaign start time, UTC write stamp |
 | Server config | input | every global the setup screens broadcast |
 | Callsign | input | `duws_callsign` |
-| Faction list edits | input | `DUWS_factionListEdits`: the player's main, added and dropped classes per edited vehicle role ([`faction_vehicle_lists_plan.md`](faction_vehicle_lists_plan.md#persistence)) |
+| Faction list edits | input | `DUWS_factionListEdits`: the player's main, added and dropped classes per edited vehicle role ([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)) |
 
 **The write stamp is `systemTimeUTC`, and it is a label and a tiebreak, nothing else.** The load
 screen has to say how old a save is, and two carried copies of one campaign need an ordering; UTC
@@ -850,7 +850,7 @@ Storing resolved classnames would pin the campaign to a mod set, which is exactl
 mission's no-hard-dependency rule refuses. The player's vehicle-list edits are the one exception: they
 are stored as intent (main, added, dropped) and applied over the new detection, and a class the session
 lacks is skipped, so the campaign never depends on the mod that supplied it
-([`faction_vehicle_lists_plan.md`](faction_vehicle_lists_plan.md#persistence)).
+([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)).
 
 **The campaign idles at zero players.** Reasoning above. The cost is that a persistent dedicated
 server no longer simulates a living war between sessions, which some hosts will want; the answer
