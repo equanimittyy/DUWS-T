@@ -18,7 +18,7 @@ _e set ["group", _grp];
 _e set ["won", { params ["_e"]; ({ alive _x } count units (_e get "group")) == 0 }];
 _e set ["lost", { false }];
 
-[_id, "STR_DUWS_T_CIVMISSION_CAMP_TITLE", "STR_DUWS_T_CIVMISSION_CAMP_DESC", "STR_DUWS_T_CIVMISSION_CAMP_BRIEF", "attack"] call fnc_civ_mission_present;
+[_id, "STR_DUWS_T_CIVMISSION_CAMP_TITLE", "STR_DUWS_T_CIVMISSION_CAMP_DESC", "attack"] call fnc_civ_mission_present;
 
 private _status = "";
 waitUntil { sleep 5; _status = [_id] call fnc_civ_mission_poll; _status != "" };

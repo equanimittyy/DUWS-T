@@ -1,5 +1,5 @@
 // Locality: server. No operation name, title card or music: those announce an HQ operation (fnc_missionTaskCreate).
-params ["_id", "_titleKey", "_descKey", "_briefKey", "_taskType"];
+params ["_id", "_titleKey", "_descKey", "_taskType"];
 private _e = DUWS_civMissions get _id;
 
 private _centre = (_e get "site") getPos [random 150, random 360];
@@ -14,6 +14,3 @@ private _desc = (localize _descKey) + "<br />" + (localize "STR_DUWS_T_mission_d
     + format [localize "STR_DUWS_T_mission_rep", _rep];
 // Server-side, never remoteExec'd (arma_engine_gotchas.md). "CREATED" leaves the HQ mission the current task.
 [west, [_taskId], [_desc, localize _titleKey, ""], [_centre select 0, _centre select 1], "CREATED", 1, true, _taskType, false] call BIS_fnc_taskCreate;
-
-private _asker = _e get "asker";
-[localize "STR_DUWS_T_civ", localize _briefKey] remoteExec ["fnc_duws_dialogue", _asker];

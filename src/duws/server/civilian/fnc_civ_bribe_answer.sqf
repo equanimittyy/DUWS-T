@@ -22,6 +22,9 @@ _pending params ["_offeredTo", "_row", "_bribe"];
 // was made for.
 if !(_offeredTo isEqualTo _caller) exitWith {};
 
+// A civilian side mission's job offer rides this prompt; its answer is the mission's, not a bribe's.
+if (_row == "WORK") exitWith { [_civilian, _caller, _accepted] call fnc_civ_mission_accept };
+
 if (!_accepted) exitWith {
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_CIV_BRIBE_DECLINED"] remoteExec ["fnc_duws_dialogue", _caller];
     [_civilian, _caller, _row, false] call fnc_civ_close;

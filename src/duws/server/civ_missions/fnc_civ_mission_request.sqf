@@ -43,11 +43,11 @@ if (_force || {count DUWS_civMissions < CIV_MISSION_CAP}) then {
 _civ disableAI "PATH";
 sleep 3;
 
-// [thread, cp, [money min, money max], rep, gate]
+// [thread, brief key, cp, [money min, money max], rep, gate]
 private _types = [
-    ["fnc_civ_mission_camp",   10, [3, 5], 3, { true }],
-    ["fnc_civ_mission_stolen",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }]
-] select { call (_x select 4) };
+    ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }],
+    ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }]
+] select { call (_x select 5) };
 private _town = _civ getVariable ["civ_locIndex", -1];
 
 // A flat chance, not the reputation curve: a hostile town is where the player most needs the reputation a
@@ -62,19 +62,25 @@ if (_site isEqualTo []) exitWith {
     [_civ, _caller, "WORK"] call fnc_civ_close;
 };
 
-(selectRandom _types) params ["_thread", "_cp", "_money", "_rep"];
+(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep"];
 _money params ["_moneyMin", "_moneyMax"];
+private _reward = [_cp, _moneyMin + floor random (_moneyMax - _moneyMin + 1), _rep];
 private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
-    ["state", "active"], ["ready", false], ["announced", false], ["giver", _civ], ["asker", _caller],
-    ["town", _town], ["site", _site], ["reward", [_cp, _moneyMin + floor random (_moneyMax - _moneyMin + 1), _rep]],
-    ["group", grpNull], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
+    ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
+    ["reward", _reward], ["group", grpNull], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
 ];
 
-// Off the town's roster, so a town that sleeps leaves them standing; PATH stays off, so the task pin holds.
-[[_town] call fnc_town_site_key, _civ, "crowd"] call fnc_site_roster_drop;
+// The offer rides the bribe prompt: fnc_civ_bribe_answer checks the answer is the asker's and hands a "WORK"
+// row to fnc_civ_mission_accept. Keys and numbers, not text, so the prompt reads in the asker's language.
 _civ setVariable ["DUWS_civMission_id", _id];
-_civ setVariable ["DUWS_civMission_state", "active", true];
-
+_civ setVariable ["DUWS_civ_pending", [_caller, "WORK", 0]];
+[netId _civ, 0, [_briefKey, floor (_cp * cp_reward_multiplier), _reward select 1, _rep]] remoteExec ["fnc_civ_bribe_prompt", _caller];
+[localize "STR_DUWS_T_civ", localize _briefKey] remoteExec ["fnc_duws_dialogue", _caller];
 ["INFO", "CIV", format ["civilian mission %1 (%2) offered in town %3 at %4", _id, _thread, _town, _site]] call fnc_log;
-[_id] spawn (missionNamespace getVariable _thread);
+
+// Declined for the asker if the prompt goes unanswered, so a lost client cannot hold a slot for the session.
+sleep 120;
+if (((DUWS_civMissions getOrDefault [_id, createHashMap]) getOrDefault ["state", ""]) == "offering") then {
+    [_civ, _caller, false] call fnc_civ_mission_accept;
+};

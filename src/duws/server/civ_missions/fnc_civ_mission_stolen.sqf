@@ -22,7 +22,7 @@ _e set ["group", _grp];
 _e set ["won", { params ["_e"]; private _c = _e get "car"; alive _c && {_c distance (_e get "giver") < 30} }];
 _e set ["lost", { params ["_e"]; !alive (_e get "car") }];
 
-[_id, "STR_DUWS_T_CIVMISSION_STOLEN_TITLE", "STR_DUWS_T_CIVMISSION_STOLEN_DESC", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF", "car"] call fnc_civ_mission_present;
+[_id, "STR_DUWS_T_CIVMISSION_STOLEN_TITLE", "STR_DUWS_T_CIVMISSION_STOLEN_DESC", "car"] call fnc_civ_mission_present;
 
 private _status = "";
 waitUntil { sleep 5; _status = [_id] call fnc_civ_mission_poll; _status != "" };

@@ -474,6 +474,13 @@ and no other cost.
 where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
 full cap is a refusal, and like every refusal it spends the civilian.
 
+**An offer waits on the bribe prompt.** The request files the offer in `DUWS_civ_pending` as the row
+`"WORK"` and raises `civ_bribe_dialog` with the brief and the reward, as the giver speaks the brief.
+`fnc_civ_bribe_answer` proves the answer is the asker's, as for a bribe, and hands it to
+`fnc_civ_mission_accept`: Accept starts the mission, and Decline or Escape frees the slot and spends the
+civilian. The slot is held while the prompt is open, so an unanswered prompt is declined after 120 s, or
+a lost client would hold it for the session.
+
 **The giver stays.** The request takes the giver off the town's crowd roster, so a town that sleeps
 leaves them standing, and holds them with `PATH` off, so the task pin stays true. The panic sweep skips
 the giver (`fnc_civ_panic.sqf`). While the mission lives, Interact opens the menu on the giver with no

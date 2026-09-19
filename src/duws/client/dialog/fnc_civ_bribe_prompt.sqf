@@ -1,11 +1,11 @@
 // Locality: the player the offer was made to -- fnc_civ_request remoteExecs it here when a roll
-// comes back bribe.
+// comes back bribe, and fnc_civ_mission_request with a job offer.
 //
 // The amount arrives from the server and is displayed only. What goes back is a bare yes or no:
 // the server holds which row was offered and what it costs, so this machine never names either.
 if (!hasInterface) exitWith {};
 
-params ["_civNetId", ["_bribe", 0]];
+params ["_civNetId", ["_bribe", 0], ["_job", []]];
 
 private _civilian = objectFromNetId _civNetId;
 if (isNull _civilian) exitWith {};
@@ -18,6 +18,15 @@ DUWS_civ_bribe_accepted = false;
 
 if (!createDialog "civ_bribe_dialog") exitWith {};
 waitUntil { dialog };
+
+if (_job isNotEqualTo []) exitWith {
+    _job params ["_briefKey", "_cp", "_money", "_rep"];
+    ctrlSetText [8401, localize "STR_DUWS_T_CIVMISSION_OFFER_TITLE"];
+    ctrlSetText [8410, localize _briefKey];
+    ctrlSetText [8411, format [localize "STR_DUWS_T_CIVMISSION_OFFER_REWARD", _cp, _money, _rep]];
+    ctrlSetText [8420, localize "STR_DUWS_T_CIVMISSION_ACCEPT"];
+    ctrlSetText [8421, localize "STR_DUWS_T_CIVMISSION_DECLINE"];
+};
 
 private _money = [player] call fnc_money_count;
 ctrlSetText [8410, format [localize "STR_DUWS_T_CIV_BRIBE_DEMAND", _bribe]];

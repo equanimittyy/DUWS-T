@@ -225,7 +225,8 @@ class civ_dialog
     };
 };
 
-// The bribe prompt. onUnload rather than a send on each button, so closing with Escape answers
+// The bribe prompt, which also carries a civilian side mission's job offer (fnc_civ_bribe_prompt).
+// onUnload rather than a send on each button, so closing with Escape answers
 // too: an offer left hanging would block the civilian silently, and refusing is what Escape
 // means here. Answering twice is harmless -- the server clears its record on the first answer
 // and a second arrives to nothing.
@@ -243,7 +244,7 @@ class civ_bribe_dialog
             x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 8 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 8 * GUI_GRID_H;
+            h = 10.2 * GUI_GRID_H;
             colorBackground[] = {0, 0, 0, 0.8};
         };
         class civb_mainframe: RscFrame
@@ -253,9 +254,10 @@ class civ_bribe_dialog
             x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 8 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 8 * GUI_GRID_H;
+            h = 10.2 * GUI_GRID_H;
             moving = 1;
         };
+        // Sized for a job brief, which wraps to five lines where a bribe demand takes two.
         class civb_demand: RscText
         {
             idc = 8410;
@@ -263,7 +265,7 @@ class civ_bribe_dialog
             x = 10.6 * GUI_GRID_W + GUI_GRID_X;
             y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.8 * GUI_GRID_W;
-            h = 2.4 * GUI_GRID_H;
+            h = 4.6 * GUI_GRID_H;
             style = ST_MULTI;
             colorText[] = {1, 1, 1, 1};
             sizeEx = 0.033;
@@ -273,7 +275,7 @@ class civ_bribe_dialog
             idc = 8411;
             text = "";
             x = 10.6 * GUI_GRID_W + GUI_GRID_X;
-            y = 11.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.8 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
             style = ST_CENTER;
@@ -285,7 +287,7 @@ class civ_bribe_dialog
             idc = 8420;
             text = "$STR_DUWS_T_CIV_BRIBE_ACCEPT";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
-            y = 13.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.8 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.16, 0.3, 0.55, 0.7};
@@ -297,7 +299,7 @@ class civ_bribe_dialog
             idc = 8421;
             text = "$STR_DUWS_T_CIV_BRIBE_REFUSE";
             x = 21 * GUI_GRID_W + GUI_GRID_X;
-            y = 13.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.8 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};
