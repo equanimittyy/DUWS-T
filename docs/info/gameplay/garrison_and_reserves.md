@@ -190,6 +190,14 @@ Distance is a flat floor, `DUWS_zoneReserveSpawnDist` (400 m,
 the site radius — a radius-relative distance would drop a wave a kilometre off a small island and
 on top of the player at a large base.
 
+A candidate is rejected when it is in the water or within the floor of a player. A failed
+`BIS_fnc_findSafePos` search returns the map origin, not `[]`
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md)), so the origin is rejected too;
+on Altis it is open sea. The search runs on a ring at `radius + 400` m first. When no bearing passes
+(for example, players ring the site), it runs again on a ring at `radius + 800` m. When that ring
+also fails, the wave spawns at `radius + 800` m on the spawn bearing, with no player or sight test,
+walked in toward the site centre until it is on land.
+
 **Line-of-sight cost.** `lineIntersectsSurfaces` is a raycast, expensive only when run per-frame
 across many units. Here it runs at spawn time only — a handful of candidates times the players
 present, once per wave every few minutes — so it's dozens of casts spread over time, not a

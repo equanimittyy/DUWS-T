@@ -127,42 +127,58 @@ DUWS_fnc_garrisonReservePos = {
     // out the back of the zone, too far to close before the fight was over.
     private _baseDist = _radius + DUWS_zoneReserveSpawnDist;
 
-    // Cast only at spawn time (a wave every few minutes, a handful of rays per candidate) so the cost
-    // never lands on a frame budget. Prefer-hidden, accept-best -- it never blocks a spawn.
-    private _best = [];
-    private _bestSeen = 1e9;
-    {
-        private _cand = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-        // Snapped before the seen-check and floor reject so both judge the point the wave actually spawns
-        // on: a road segment can sit closer to the players or in worse cover than the raw candidate.
-        if (_cand isNotEqualTo []) then { _cand = [_cand] call DUWS_fnc_reserveRoadSnap };
-        // An empty candidate must not reach the spawners: they read [] as "no override" and would drop
-        // the reserve into the objective band, on top of the players.
-        if (_cand isNotEqualTo [] && {(_players findIf { (_cand distance2D _x) < DUWS_zoneReserveSpawnDist }) < 0}) then {
-            private _seen = { [_cand, _x] call DUWS_fnc_posSeenBy } count _players;
-            if (_seen < _bestSeen) then { _bestSeen = _seen; _best = _cand };
-        };
-    } forEach [0, 30, -30, 60, -60];
+    private _fnc_cand = {
+        params ["_bearing", "_dist"];
+        private _p = [_center getPos [_dist, _antiDir + _bearing], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+        // A failed search returns the map origin, not [] (arma_engine_gotchas.md) -- open sea on Altis. Tested
+        // before the snap, which could move it onto a road near the corner.
+        if ((_p select 0) == 0 && {(_p select 1) == 0}) exitWith { [] };
+        // Snapped before the checks so they judge the point the wave actually spawns on: a road segment can
+        // sit closer to the players than the raw candidate.
+        _p = [_p] call DUWS_fnc_reserveRoadSnap;
+        if (surfaceIsWater _p || {(_players findIf { (_p distance2D _x) < DUWS_zoneReserveSpawnDist }) >= 0}) exitWith { [] };
+        _p
+    };
 
-    if (_best isNotEqualTo []) exitWith { _best };
+    private _fnc_ring = {
+        params ["_dist"];
+        // Cast only at spawn time (a wave every few minutes, a handful of rays per candidate) so the cost
+        // never lands on a frame budget. Prefer-hidden, accept-best.
+        private _best = [];
+        private _bestSeen = 1e9;
+        {
+            private _cand = [_x, _dist] call _fnc_cand;
+            if (_cand isNotEqualTo []) then {
+                private _seen = { [_cand, _x] call DUWS_fnc_posSeenBy } count _players;
+                if (_seen < _bestSeen) then { _bestSeen = _seen; _best = _cand };
+            };
+        } forEach [0, 30, -30, 60, -60];
+        if (_best isNotEqualTo []) exitWith { _best };
 
-    // Preferred arc was all bad ground -- usually a far side facing the sea, where waterMode 0 refuses
-    // to land offshore. Widened to the rest of the circle: anti-flank is given up before a water spawn,
-    // since a wave dropped offshore drowns or strands outright, worse than one from a poor angle. First
-    // land wins here rather than fewest-seen: being on the map at all outranks cover.
-    private _wide = [];
-    {
-        if (_wide isEqualTo []) then {
-            private _c = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-            if (_c isNotEqualTo []) then { _c = [_c] call DUWS_fnc_reserveRoadSnap };
-            if (_c isNotEqualTo [] && {(_players findIf { (_c distance2D _x) < DUWS_zoneReserveSpawnDist }) < 0}) then { _wide = _c };
-        };
-    } forEach [90, -90, 120, -120, 150, -150, 180];
-    if (_wide isNotEqualTo []) exitWith { _wide };
+        // Preferred arc was all bad ground -- usually a far side facing the sea. Widened to the rest of the
+        // circle: anti-flank is given up before a water spawn, since a wave dropped offshore drowns or strands
+        // outright. First land wins here rather than fewest-seen: being on the map at all outranks cover.
+        private _wide = [];
+        {
+            if (_wide isEqualTo []) then { _wide = [_x, _dist] call _fnc_cand };
+        } forEach [90, -90, 120, -120, 150, -150, 180];
+        _wide
+    };
 
-    // Whole circle blocked -- a speck of an island. Falls back to getPos, not findSafePos, so this can
-    // never return [] and collapse the spawn into the objective band on top of the players.
-    _center getPos [_baseDist, _antiDir]
+    private _pos = [_baseDist] call _fnc_ring;
+    if (_pos isNotEqualTo []) exitWith { _pos };
+    private _farDist = _baseDist + DUWS_zoneReserveSpawnDist;
+    _pos = [_farDist] call _fnc_ring;
+    if (_pos isNotEqualTo []) exitWith { _pos };
+
+    // Both rings blocked or offshore -- a speck of an island. Walked in toward the centre, which is land, so the
+    // wave never spawns in the sea; never [], which the spawners read as "drop it in the objective band".
+    _pos = _center getPos [_farDist, _antiDir];
+    while { surfaceIsWater _pos && {_farDist > 0} } do {
+        _farDist = _farDist - 25;
+        _pos = _center getPos [_farDist max 0, _antiDir];
+    };
+    _pos
 };
 
 // Reserve rides trucks, so a wave needs drivable ground. Sorted explicitly -- nearRoads' own order
