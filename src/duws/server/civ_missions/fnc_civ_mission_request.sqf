@@ -73,7 +73,7 @@ private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
     ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
     ["reward", _reward], ["target", _goal], ["raised", 0],
-    ["group", grpNull], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
+    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
 ];
 
 // The offer rides the bribe prompt: fnc_civ_bribe_answer checks the answer is the asker's and hands a "WORK"

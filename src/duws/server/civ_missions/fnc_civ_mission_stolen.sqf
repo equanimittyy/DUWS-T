@@ -9,15 +9,17 @@ private _car = [selectRandom (missionNamespace getVariable ["civ_veh_array", []]
 [_car, _e get "compKey"] call fnc_duws_keep;
 _e set ["car", _car];
 
-private _roles = ["rifleman", "rifleman", "autogunner"];
-if (random 1 < 0.5) then { _roles pushBack "grenadier" };
+private _roles = ["rifleman", "rifleman", "autogunner", "grenadier"];
+if (random 1 < 0.5) then { _roles pushBack "rifleman" };
+if (random 1 < 0.5) then { _roles pushBack "medic" };
 private _grp = [_site, _roles] call fnc_bandit_spawn;
 if (isNull _grp) exitWith {
     ["WARN", "CIV", format ["civilian mission %1: no bandits spawned", _id]] call fnc_log;
     [_id, "FAILED"] call fnc_civ_mission_finish;
 };
-[_grp, _site, 30] call BIS_fnc_taskPatrol;
+[_grp, "closepatrol", _site, 100] call fnc_apply_posture;
 _e set ["group", _grp];
+_e set ["pairs", [_site, floor random 3] call fnc_bandit_pairs];
 // Read from the entry, not captured locals: fnc_civ_mission_request re-runs "won" at the report.
 _e set ["won", { params ["_e"]; private _c = _e get "car"; alive _c && {_c distance (_e get "giver") < 30} }];
 _e set ["lost", { params ["_e"]; !alive (_e get "car") }];

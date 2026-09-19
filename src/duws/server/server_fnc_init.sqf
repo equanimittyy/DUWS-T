@@ -231,6 +231,7 @@ publicVariable "fnc_rearmUnit";
 // =========================================================================================================
 fnc_bandit_looks = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_looks.sqf";
 fnc_bandit_spawn = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_spawn.sqf";
+fnc_bandit_pairs = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_pairs.sqf";
 
 // =========================================================================================================
 // server/civ_missions

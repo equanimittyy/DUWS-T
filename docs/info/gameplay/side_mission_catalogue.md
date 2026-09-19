@@ -463,9 +463,13 @@ slot. The code is in `src/duws/server/civ_missions/`.
 
 | Type | Bandits | Won when | Lost when | CP | Money | REP |
 |---|---|---|---|---:|---:|---:|
-| Clear Bandit Camp | 4-6 | every bandit is dead | the giver dies | 10 | 3-5 | +3 |
-| Recover Stolen Car | 3-4 | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
+| Clear Bandit Camp | 6-9, plus 0-2 pairs | every camp bandit is dead | the giver dies | 10 | 3-5 | +3 |
+| Recover Stolen Car | 4-6, plus 0-2 pairs | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
 | Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
+
+The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mission's objective guard
+does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
+site's 300 m clearance from every zone. A pair does not count toward the camp's objective.
 
 The CP is scaled by `cp_reward_multiplier`. The money drops at the giver's feet (`fnc_money_drop`), and
 the reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
@@ -501,7 +505,7 @@ Readiness is a separate flag, so a poll never overwrites a report. The objective
 the entry and reads the entry it is given, because the request re-runs it at the report and an SQF block
 captures no locals.
 
-**Bandits are owned by their group handle, not by the HQ token.** `fnc_mission_claim` defaults to the
+**Bandits are owned by their group handles, not by the HQ token.** `fnc_mission_claim` defaults to the
 running HQ mission's token, which cannot advance while the HQ slot is held. A civilian mission that
 advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` /
 `DUWS_binAt` pair that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the
@@ -510,7 +514,7 @@ outlast the litter lifetime.
 
 **The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
-other live site. Bandits fight both armies, and the objective counts every bandit dead, whoever killed
+other live site. Bandits fight both armies, and the objective counts every camp bandit dead, whoever killed
 them. A town close to HQ often finds no site, so there only a Raise Funds draw becomes a job.
 
 A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug

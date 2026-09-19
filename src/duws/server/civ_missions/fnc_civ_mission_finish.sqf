@@ -28,10 +28,12 @@ switch (_status) do {
     };
 };
 
+private _bandits = units (_e get "group");
+{ _bandits append units _x } forEach (_e get "pairs");
 {
     _x setVariable ["DUWS_binMe", true];
     _x setVariable ["DUWS_binAt", time + 300];
-} forEach ((units (_e get "group")) select { alive _x });
+} forEach (_bandits select { alive _x });
 [_e get "compKey"] call fnc_duws_release;
 
 if (!isNull _giver) then {
