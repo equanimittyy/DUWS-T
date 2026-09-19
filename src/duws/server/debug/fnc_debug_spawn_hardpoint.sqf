@@ -5,20 +5,28 @@
 // registers as its own streamed site under the type's own radius: walk past it and it stows, come back
 // and it raises -- except mortar and artillery, which the type table keeps resident. The men, which
 // are not composition members, ride the site roster; the menu's clear row retires every dev key.
-params ["_type", "_side", "_pos", ["_dir", 0], ["_variant", "AT"]];
+params ["_type", "_side", "_pos", ["_dir", 0], ["_variant", "AT"], ["_size", [1, 1]]];
 if (!isServer) exitWith {};
 
 // Spawned, not called: a dev spawn lands on the player, so it reads up and fnc_hardpoint_register crews it
 // inline -- which sleeps in the static drop-and-settle, and the unscheduled remoteExec target cannot.
 _this spawn {
-    params ["_type", "_side", "_pos", ["_dir", 0], ["_variant", "AT"]];
+    params ["_type", "_side", "_pos", ["_dir", 0], ["_variant", "AT"], ["_size", [1, 1]]];
     private _n = missionNamespace getVariable ["DUWS_hpdevN", 0];
     missionNamespace setVariable ["DUWS_hpdevN", _n + 1];
     private _key = format ["hpdev_%1", _n];
 
     // Garrison is the type's, fielded by the spawn from DUWS_hardpointGarrison -- a dev spawn stands up
     // the same defenders a shipped one of that type would, and a minefield still gets none.
-    private _objs = [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build;
+    private _objs = if (_type isEqualTo "MINEFIELD") then {
+        private _mines = [];
+        {
+            _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield);
+        } forEach ([_pos, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid);
+        _mines
+    } else {
+        [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build
+    };
     [_key, _type, _pos, _side, "", _dir] call fnc_hardpoint_register;
     DUWS_hpdevKeys = (missionNamespace getVariable ["DUWS_hpdevKeys", []]) + [_key];
 

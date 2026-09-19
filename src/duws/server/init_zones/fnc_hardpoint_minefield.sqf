@@ -53,8 +53,27 @@ fnc_hardpoint_minefield = {
 
     // Filed by key so the clearance check can read what is left: the field is spent when no armed mine
     // remains, and its own hazard list is the only count of that. Signs are not in it -- a warning
-    // marker is not a hazard, and a field of only signs is a cleared field.
-    if (_key != "") then { missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines] };
+    // marker is not a hazard, and a field of only signs is a cleared field. Appended, so every square
+    // laid under one key clears as one field.
+    if (_key != "") then {
+        private _var = format ["DUWS_hpMines_%1", _key];
+        missionNamespace setVariable [_var, (missionNamespace getVariable [_var, []]) + _mines];
+    };
 
     _mines
+};
+
+// [_center, _dir, _cols, _rows] call fnc_hardpoint_minefield_grid -> [[x,y], ...] square centres of a
+// block _cols wide and _rows deep about _center, rows stacked along _dir.
+fnc_hardpoint_minefield_grid = {
+    params ["_center", "_dir", "_cols", "_rows"];
+    private _out = [];
+    for "_c" from 0 to (_cols - 1) do {
+        for "_r" from 0 to (_rows - 1) do {
+            private _off = [(_c - (_cols - 1) / 2) * DUWS_mineSquare, (_r - (_rows - 1) / 2) * DUWS_mineSquare, _dir]
+                call fnc_hardpoint_rotate;
+            _out pushBack [(_center select 0) + (_off select 0), (_center select 1) + (_off select 1)];
+        };
+    };
+    _out
 };

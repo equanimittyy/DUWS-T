@@ -39,18 +39,12 @@ private _build = {
         };
         if (_clash < 0) then {
             private _dir = _fieldPos getDir _targetpos;
-            private _cols = 1 + floor random RECON_MINE_MAX;
-            private _rows = 1 + floor random RECON_MINE_MAX;
-            for "_c" from 0 to (_cols - 1) do {
-                for "_r" from 0 to (_rows - 1) do {
-                    private _off = [(_c - (_cols - 1) / 2) * DUWS_mineSquare, (_r - (_rows - 1) / 2) * DUWS_mineSquare, _dir]
-                        call fnc_hardpoint_rotate;
-                    private _sq = _fieldPos vectorAdd [_off select 0, _off select 1, 0];
-                    if (!surfaceIsWater _sq && {(_sq nearRoads 100) isEqualTo []}) then {
-                        [_sq, _dir, "AP", ""] call fnc_hardpoint_minefield;
-                    };
+            {
+                if (!surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []}) then {
+                    [_x, _dir, "AP", ""] call fnc_hardpoint_minefield;
                 };
-            };
+            } forEach ([_fieldPos, _dir, 1 + floor random RECON_MINE_MAX, 1 + floor random RECON_MINE_MAX]
+                call fnc_hardpoint_minefield_grid);
         };
     };
 

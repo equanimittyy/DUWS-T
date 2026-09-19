@@ -40,7 +40,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `OP` | vanilla bunker/tower prop | security team + wide recon patrol | standalone recon screen, seeded at generation; see [below](#observation-posts) |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
 | `ARTY` | `opfor_ARTY_X` | one team | resident; cleared by destroying the piece |
-| `MINEFIELD` | mine lattice, no core weapon | none | AT or AP variant; cleared when no armed mine remains |
+| `MINEFIELD` | 50 m mine squares, no core weapon | none | AT or AP variant; cleared when no armed mine remains |
 | `RADIO` | live comms mast + 7 frozen HMG/AA nests | rifle team + 2 weapons teams | see [`opfor_area_of_influence.md`](opfor_area_of_influence.md#radio-towers) |
 
 Tables: `DUWS_hardpointGarrison`, `DUWS_hardpointName`, `DUWS_hardpointStreaming`
@@ -125,6 +125,11 @@ One or two warning signs sit inside the field as dressing. A larger field is sev
 the caller. Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leaving detection and
 clearance to BLUFOR. It has no fence to place through `fnc_hardpoint_lay`, and no garrison: the score
 function vetoes any candidate with a tree, building or hardpoint already on the footprint.
+
+A block of squares is laid from `fnc_hardpoint_minefield_grid`, which returns the square centres for a
+given width and depth. Squares laid under one site key add to one mine list, so they clear as one field.
+The debug hardpoint spawner lays a field from three map clicks: both ends of the front, then the depth.
+It snaps each measure to the nearest whole square, with one square as the minimum.
 
 **Standalone band and radio towers.** Most standalone hardpoints are sited by sampling the OPFOR-positive
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to

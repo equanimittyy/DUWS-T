@@ -1195,6 +1195,14 @@ TEST_PICK = "";
 ["hp_facing: a roadblock flips to the road heading facing the approach",
     (["ROADBLOCK", 0, 0, 200, 30] call fnc_hardpoint_facing), 210] call fnc_assertEq;
 
+// --- fnc_hardpoint_minefield_grid: square centres of a block, rows stacked along the facing ---
+// DUWS_mineSquare is a file-level global the extractor does not lift; restated at the source value.
+DUWS_mineSquare = 50;
+["mine_grid: a 2x1 block straddles its centre across the facing",
+    ([[0, 0], 0, 2, 1] call fnc_hardpoint_minefield_grid), [[-25, 0], [25, 0]]] call fnc_assertEq;
+["mine_grid: rows stack along the facing",
+    ([[100, 100], 0, 1, 3] call fnc_hardpoint_minefield_grid), [[100, 50], [100, 100], [100, 150]]] call fnc_assertEq;
+
 // --- fnc_hardpoint_zone_cap: a zone ring's cap is its radius step plus one per tier above I ---
 // HP_CAP_STEP is a #define in the source; the extractor lifts the function body, not the define, so it
 // is restated here as the global the extracted body reads in the VM (value mirrors the source constant).
