@@ -463,8 +463,8 @@ slot. The code is in `src/duws/server/civ_missions/`.
 
 | Type | Bandits | Won when | Lost when | CP | Money | REP |
 |---|---|---|---|---:|---:|---:|
-| Clear Bandit Camp | 4-6 | every bandit is dead | the giver dies | 10 | 3-5 | +2 |
-| Recover Stolen Car | 3-4 | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 8 | 4-6 | +2 |
+| Clear Bandit Camp | 4-6 | every bandit is dead | the giver dies | 10 | 3-5 | +3 |
+| Recover Stolen Car | 3-4 | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 8 | 4-6 | +3 |
 
 The CP is scaled by `cp_reward_multiplier`. The money drops at the giver's feet (`fnc_money_drop`), and
 the reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
