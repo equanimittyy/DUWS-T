@@ -89,6 +89,8 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
+// appraisal\: executed to define the action list and the picker's state.
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_actions.sqf";
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";
 // The zone reserve / reinforcement engine: the refill pass, the far-side placement and the two
@@ -673,6 +675,7 @@ fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\o
 fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
+fnc_opcom_pick = compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";
 fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_route.sqf";
 fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_recruit.sqf";
@@ -723,6 +726,7 @@ fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug
 fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_menu.sqf";publicVariable "fnc_debug_opcom_menu";
 fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
 fnc_debug_opcom_step = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_step.sqf";publicVariable "fnc_debug_opcom_step";
+fnc_debug_opcom_ai_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_menu.sqf";publicVariable "fnc_debug_opcom_ai_menu";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
 // The view/draw/calibrate handlers are broadcast

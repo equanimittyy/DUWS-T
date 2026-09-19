@@ -1,4 +1,4 @@
-// Locality: server -- remoteExec'd to 2 by the OPCOM debug menu. Every Phase 3 hand-drive verb in one entry:
+// Locality: server -- remoteExec'd to 2 by the OPCOM and OPCOM AI debug menus. Every hand-drive verb in one entry:
 // action verbs run through fnc_opcom_debug_task and hint the result back; *list verbs read the server-owned
 // store (recruit rows, taskings) and ship rows to the caller's picker, which cannot see the store from a
 // remote client. English-only, like the rest of the debug surface.
@@ -200,6 +200,15 @@ switch (_verb) do {
     case "clear": {
         ["clear"] call fnc_opcom_debug_task;
         "OPCOM store cleared." remoteExec ["hint", _caller];
+    };
+    case "aimode": {
+        DUWS_opcom_aiMode = _a;
+        ["INFO", "OPCOM", format ["AI mode -> %1", _a]] call fnc_log;
+        format ["OPCOM AI: mode %1.", _a] remoteExec ["hint", _caller];
+    };
+    case "pickonce": {
+        DUWS_opcom_pickOnce = true;
+        "OPCOM AI: one pick on the next tick." remoteExec ["hint", _caller];
     };
     default {};
 };

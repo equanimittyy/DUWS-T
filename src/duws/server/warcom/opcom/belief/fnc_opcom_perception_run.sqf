@@ -1,8 +1,6 @@
 // Locality: server. The OPCOM loop thread, spawned once by WARCOM init after zones and civ state exist.
-// Phase 1 is perception-only: each tick it perceives, ages and prunes belief, and rebuilds the influence grid from
-// current holdings and belief -- no decisions. One cadence, not a fast/strategic split: the decision loop
-// adds its scoring and single action commit on this same tick, and the tasking phase steps movement here
-// (a finer step as OPCOM_TICK_PERIOD shrinks), so both drop in without restructuring.
+// One cadence, not a fast/strategic split: perception, the tasking step and the pick share this tick, and a shorter
+// OPCOM_TICK_PERIOD steps movement finer rather than breaking it.
 if (!isServer) exitWith {};
 
 call fnc_opcom_belief_init;
@@ -57,6 +55,8 @@ while {true} do {
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;
+        // Pick after the step, so it sees this tick's arrivals and deaths.
+        "pick" call _enter;      call fnc_opcom_pick;
 
         // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this
         // tick (0 while belief>0 means everything held on last-seen).
