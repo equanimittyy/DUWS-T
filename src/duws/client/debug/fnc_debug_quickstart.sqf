@@ -103,7 +103,7 @@ opfor_ai_skill_random = (random ((opfor_ai_skill select 1) - (opfor_ai_skill sel
 AttackHeli = 1;
 HeavyArmor = 1;
 enemyunitMultiplier = 1;
-garrison_density = 1;
+garrison_density = 0.8;
 { publicVariable _x; } forEach [
     "zones_max_radius", "zones_min_radius", "zones_number", "zones_max_dist_from_hq", "zones_spacing",
     "commandpointsblu1", "cp_reward_multiplier", "DUWSMP_CP_death_cost", "WARCOM_blufor_ap",
