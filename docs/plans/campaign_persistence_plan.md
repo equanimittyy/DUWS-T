@@ -335,6 +335,7 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Identity | — | format version, `worldName`, campaign start time, UTC write stamp |
 | Server config | input | every global the setup screens broadcast |
 | Callsign | input | `duws_callsign` |
+| Faction list edits | input | `DUWS_factionListEdits`: the player's main, added and dropped classes per edited vehicle role ([`faction_vehicle_lists_plan.md`](faction_vehicle_lists_plan.md#persistence)) |
 
 **The write stamp is `systemTimeUTC`, and it is a label and a tiebreak, nothing else.** The load
 screen has to say how old a save is, and two carried copies of one campaign need an ordering; UTC
@@ -723,7 +724,7 @@ function runs unchanged.
 | `server/server_var_init.sqf` (`server_init.sqf:9`) | Runs, then the snapshot overwrites |
 | `fnc_moreUrban_locations` (`:15`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:46,52`) | Pre-satisfied by the gate |
-| Faction init (`:65-95`) | Runs — classnames must be re-resolved against whatever mods are loaded now |
+| Faction init (`:65-95`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools |
 | `fnc_bluHQinit` (`:108`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
 | `fnc_init_OPFOR_WARCOM` (`:129`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
@@ -846,7 +847,10 @@ for the player in that moment and better every other time.
 **Faction classnames are re-resolved, not restored.** A player who removes a faction mod between
 sessions gets whatever auto-detection now picks, not a campaign full of missing classnames.
 Storing resolved classnames would pin the campaign to a mod set, which is exactly what the
-mission's no-hard-dependency rule refuses.
+mission's no-hard-dependency rule refuses. The player's vehicle-list edits are the one exception: they
+are stored as intent (main, added, dropped) and applied over the new detection, and a class the session
+lacks is skipped, so the campaign never depends on the mod that supplied it
+([`faction_vehicle_lists_plan.md`](faction_vehicle_lists_plan.md#persistence)).
 
 **The campaign idles at zero players.** Reasoning above. The cost is that a persistent dedicated
 server no longer simulates a living war between sessions, which some hosts will want; the answer
