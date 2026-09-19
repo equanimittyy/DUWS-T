@@ -46,7 +46,7 @@ private _display = getText (configFile >> "CfgVehicles" >> _class >> "displayNam
 
 // 0 white: the faction's own first choice. 1 yellow: a lower rung or a borrow it still fields.
 // 2 red: a vanilla stand-in, the same worst-case colour a missing role gets. An edit sets the key
-// to 0 (see fnc_faction_key_apply), so a class the player picked stops reading as a fallback.
+// to 0 (fnc_faction_key_apply, fnc_faction_key_list), so a class the player picked stops reading as a fallback.
 private _tiers = missionNamespace getVariable ["duws_faction_tiers", createHashMap];
 private _tier = _tiers getOrDefault [_key, 0];
 

@@ -1,8 +1,9 @@
-// Locality: client -- spawned from a row's SELECT button on the confirmation screen.
+// Locality: client -- spawned from a row's SELECT or EDIT button on the confirmation screen.
 //
 // Picks a new class for one role key. Sits on top of the confirmation screen, which stays open
 // behind it, and takes the AutoDetect picker's shape: choose a faction, choose a class from it,
-// see the editor preview before committing.
+// see the editor preview before committing. A vehicle key opens the list dialog instead, whose
+// right-hand list fnc_faction_key_list drives; the browser here serves both.
 //
 // The class list is filtered to the row's kind so an infantry role is never offered a tank. That
 // kind comes from fnc_faction_schema rather than from the current value, which may be empty.
@@ -46,11 +47,11 @@ duws_faction_fill_classes = {
     if (isNull _classCtrl) exitWith {};
 
     // ALL drops the faction clause so the list spans every loaded faction; the text filter below
-    // is what keeps that reachable.
+    // is what keeps that reachable. Scope 2 only: fnc_faction_keep drops anything less at the commit.
     private _cond = if (_faction isEqualTo "__ALL__") then {
-        "getNumber(_x >> 'scope') in [1,2]"
+        "getNumber(_x >> 'scope') == 2"
     } else {
-        "(getNumber(_x >> 'scope') in [1,2]) && (gettext (_x >> 'faction') == _faction)"
+        "(getNumber(_x >> 'scope') == 2) && (gettext (_x >> 'faction') == _faction)"
     };
     private _classes = (_cond configClasses (configFile >> "CfgVehicles")) apply { configName _x };
 
@@ -116,12 +117,12 @@ duws_faction_edit_preview = {
     private _name = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
     (_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t><br/><t size='0.7' color='#c0c0c0'>%2</t>",
         if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]},
-        localize "STR_DUWS_T_faction_edit_pool"];
+        if (duws_faction_edit_kind isEqualTo "vehicle") then {localize "STR_DUWS_T_faction_edit_pool"} else {""}];
 };
 
 // Logged rather than silent on both counts: a SELECT click that opens nothing is indistinguishable
 // from a dead button, and this is the only place that can say which of the two it was.
-if (!createDialog "startup_faction_key_edit") exitWith {
+if (!createDialog (["startup_faction_key_edit", "startup_faction_key_list"] select (duws_faction_edit_kind isEqualTo "vehicle"))) exitWith {
     ["ERROR", "FACTION", format ["Key editor for %1 failed to open.", _key]] call fnc_log;
 };
 waitUntil { dialog };
@@ -193,3 +194,5 @@ if (_currentClass != "") then {
     };
     if (_cIdx >= 0) then { _classCtrl lbSetCurSel _cIdx; };
 };
+
+if (duws_faction_edit_kind isEqualTo "vehicle") then { [] call fnc_faction_key_list; };

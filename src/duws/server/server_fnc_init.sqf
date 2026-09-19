@@ -145,6 +145,11 @@ publicVariable "fnc_support_wipe";
 publicVariable "fnc_support_despawn";
 // Ahead of faction init, which calls it. Not broadcast: generation and every spawn path are server.
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_pools.sqf";
+// The confirmation screen's list editor runs the first three on its client; edits_apply is server.
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_lists.sqf";
+publicVariable "fnc_faction_list_resolve";
+publicVariable "fnc_faction_list_edit";
+publicVariable "fnc_faction_list_base";
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
@@ -792,6 +797,7 @@ fnc_faction_confirm_rows = compile preprocessFileLineNumbers "duws\client\dialog
 fnc_faction_row_paint = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_row_paint.sqf";publicVariable "fnc_faction_row_paint";
 fnc_faction_key_edit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_edit.sqf";publicVariable "fnc_faction_key_edit";
 fnc_faction_key_apply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_apply.sqf";publicVariable "fnc_faction_key_apply";
+fnc_faction_key_list = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_list.sqf";publicVariable "fnc_faction_key_list";
 fnc_enviro_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_enviro_back.sqf";publicVariable "fnc_enviro_back";
 fnc_startup_enviro_closed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_enviro_closed.sqf";publicVariable "fnc_startup_enviro_closed";
 fnc_request_unit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_unit.sqf";publicVariable "fnc_request_unit";

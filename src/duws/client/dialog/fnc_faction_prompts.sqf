@@ -36,6 +36,8 @@ fnc_faction_key_clear = {
         private _i = _rows findIf { (_x select 0) isEqualTo _key };
         if (_i >= 0) exitWith { _rows set [_i, [_key, ""]]; };
     } forEach duws_faction_table;
+    // Else the commit resolves the record and fills the cleared role again.
+    (uiNamespace getVariable ["duws_faction_edits", createHashMap]) deleteAt _key;
 
     [_key] call fnc_faction_row_paint;
     [] call fnc_faction_prompt_hide;

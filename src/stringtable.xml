@@ -292,8 +292,8 @@
                 <English>CONFIRM YOUR FACTIONS</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_intro">
-                <Original>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</Original>
-                <English>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</English>
+                <Original>Review the unit each side will field for every role. SELECT swaps a role, EDIT changes a vehicle role's list, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</Original>
+                <English>Review the unit each side will field for every role. SELECT swaps a role, EDIT changes a vehicle role's list, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_blufor">
                 <Original>BLUFOR</Original>
@@ -342,6 +342,10 @@
             <Key ID="STR_DUWS_T_faction_confirm_select">
                 <Original>SELECT</Original>
                 <English>SELECT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_edit">
+                <Original>EDIT</Original>
+                <English>EDIT</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_clear">
                 <Original>CLEAR</Original>
@@ -436,8 +440,28 @@
                 <English>CONFIRM</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_pool">
-                <Original>Confirming fills this role with the picked class first, then the rest of its role group from this faction, so spawns keep their variety.</Original>
-                <English>Confirming fills this role with the picked class first, then the rest of its role group from this faction, so spawns keep their variety.</English>
+                <Original>Each spawn draws one class from the list. ADD puts the picked class in it. MAKE MAIN also swaps the detected classes for that class's group.</Original>
+                <English>Each spawn draws one class from the list. ADD puts the picked class in it. MAKE MAIN also swaps the detected classes for that class's group.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_list">
+                <Original>Role list, top row is main</Original>
+                <English>Role list, top row is main</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_add">
+                <Original>ADD</Original>
+                <English>ADD</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_remove">
+                <Original>REMOVE</Original>
+                <English>REMOVE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_main">
+                <Original>MAKE MAIN</Original>
+                <English>MAKE MAIN</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_reset">
+                <Original>RESET</Original>
+                <English>RESET</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_nopreview">
                 <Original>NO PREVIEW</Original>

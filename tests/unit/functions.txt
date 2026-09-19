@@ -50,6 +50,8 @@ duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_scaleComposition
 duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_pick
 duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_resolve
 duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_poolable_keys
+duws/shared/faction_lib/fnc_faction_lists.sqf::fnc_faction_list_resolve
+duws/shared/faction_lib/fnc_faction_lists.sqf::fnc_faction_list_edit
 duws/shared/faction_lib/fnc_faction_schema.sqf::*fnc_faction_schema
 duws/shared/factions/MODERN/fn_factionAutoDetect.sqf::fnc_selectNonEmpty
 duws/shared/functions/fnc_static_roles.sqf::fnc_static_resolve

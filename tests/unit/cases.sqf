@@ -861,6 +861,38 @@ fnc_faction_keep = {
 ["faction_resolve: an omitted fallback comes from the schema vanillaDefault",
     (missionNamespace getVariable "opfor_MBT_TANK1_X"), ["O_MBT_02_cannon_F"]] call fnc_assertEq;
 
+// --- fnc_faction_list_edit / fnc_faction_list_resolve: a vehicle role's edits as [main, added, dropped] ---
+private _base = ["apc_a", "apc_b", "apc_c"];
+private _none = ["", [], []];
+["list_resolve: no edits give the base as it stands",
+    ([_base, _none] call fnc_faction_list_resolve), _base] call fnc_assertEq;
+["list_resolve: main first, then the base less drops, then adds, each class once",
+    ([_base, ["apc_b", ["apc_x", "apc_b"], ["apc_c"]]] call fnc_faction_list_resolve), ["apc_b", "apc_a", "apc_x"]] call fnc_assertEq;
+private _rec = [_none, "remove", "apc_b", _base] call fnc_faction_list_edit;
+["list_edit: removing a detected class drops it", _rec, ["", [], ["apc_b"]]] call fnc_assertEq;
+["list_edit: ... and the list loses it",
+    ([_base, _rec] call fnc_faction_list_resolve), ["apc_a", "apc_c"]] call fnc_assertEq;
+["list_edit: adding a dropped class un-drops it rather than adding it",
+    ([_rec, "add", "apc_b", _base] call fnc_faction_list_edit), _none] call fnc_assertEq;
+_rec = [_none, "add", "heli_z", _base] call fnc_faction_list_edit;
+["list_edit: adding a class from elsewhere appends it", _rec, ["", ["heli_z"], []]] call fnc_assertEq;
+["list_edit: adding it twice keeps one",
+    ([_rec, "add", "heli_z", _base] call fnc_faction_list_edit), _rec] call fnc_assertEq;
+["list_edit: adding a class the base already lists changes nothing",
+    ([_none, "add", "apc_c", _base] call fnc_faction_list_edit), _none] call fnc_assertEq;
+["list_edit: removing an added class takes it out of added, not into dropped",
+    ([_rec, "remove", "heli_z", _base] call fnc_faction_list_edit), _none] call fnc_assertEq;
+// A Make main can re-parent the role onto a base that also holds an added class; clearing it from
+// added alone would leave it listed.
+["list_edit: removing an added class the base also lists drops it too",
+    ([["", ["apc_c"], []], "remove", "apc_c", _base] call fnc_faction_list_edit), ["", [], ["apc_c"]]] call fnc_assertEq;
+["list_edit: making an added class main takes it out of added",
+    ([_rec, "main", "heli_z", _base] call fnc_faction_list_edit), ["heli_z", [], []]] call fnc_assertEq;
+["list_edit: replacing a player-set main keeps the old one as an add",
+    ([["heli_z", [], []], "main", "apc_a", _base] call fnc_faction_list_edit), ["apc_a", ["heli_z"], []]] call fnc_assertEq;
+["list_edit: reset clears every edit",
+    ([["heli_z", ["apc_x"], ["apc_b"]], "reset", "", _base] call fnc_faction_list_edit), _none] call fnc_assertEq;
+
 // --- fnc_faction_schema: the required and vanilla-default columns ---
 // A row short of the required flag reads `nil` there, which fnc_custom_faction_parse's filter would
 // treat as false -- silently dropping a core key out of paste validation. The fifth column is the

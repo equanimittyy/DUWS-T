@@ -72,7 +72,7 @@ DUWS_limitedSeed = 100;
 // The faction confirmation screen's handshake. Request and ready are counters, not flags: a flag
 // cleared by the server can race a fresh request, so the screen waits for ready to reach the number
 // it asked with, never reading the previous pick's rows.
-// duws_faction_locked carries the whole confirmed table -- [[side, [[key, value], ...]], ...] -- rather
+// duws_faction_locked carries the whole confirmed table -- [[side, [[key, value, record], ...]], ...] -- rather
 // than a diff, so the server has one code path to apply, not a reconciliation to work out.
 duws_faction_preview_request = 0;publicVariable "duws_faction_preview_request";
 duws_faction_preview_ready = 0;publicVariable "duws_faction_preview_ready";

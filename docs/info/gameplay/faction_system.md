@@ -90,7 +90,7 @@ paste parser instead of a static file.
 ## The confirmation screen
 
 After both sides are chosen, `client/dialog/fnc_faction_confirm.sqf` shows every role key both sides will
-field, side by side, and lets the player swap or clear any of them. It is the reason faction resolution no
+field, side by side, and lets the player swap, edit or clear any of them. It is the reason faction resolution no
 longer waits for the post-START commit: the screen has to show resolved classnames, so it asks the server
 to resolve and the commit applies the player's table over the result.
 
@@ -107,8 +107,35 @@ On Continue the screen publishes `duws_faction_locked` — the whole table, not 
 it is an overwrite rather than a reconciliation. `server/warcom/fnc_faction_apply_locked.sqf` does that on
 the server at the commit and again on each client after the JIP faction-file re-run, which fetches the
 request-menu catalogue the schema does not cover and puts the file's own classnames back over the role
-globals on the way. An edited key is written back as a pool rebuilt from the picked class's
-`fnc_parseFaction` bucket, so a swap keeps the per-spawn variety instead of pinning the role to one class.
+globals on the way. The table already holds every row's whole pool, because the screen builds its rows from
+`DUWS_factionPreviewPools`. The commit therefore runs `fnc_faction_augment` only when no table was locked
+(the debug quickstart). A second pass would rebuild each pool from its representative and undo the list
+edits.
+
+**A vehicle role is an edited list.** EDIT on a vehicle row opens `startup_faction_key_list`
+(`client/dialog/fnc_faction_key_list.sqf`): the role's list beside the class browser, with Add, Remove,
+Make main and Reset. Infantry and static rows keep the single pick behind SELECT, because
+`fnc_faction_poolable_keys` holds those roles to one class. The browser offers only `scope` 2 classes, the
+gate that `fnc_faction_keep` applies at the commit.
+
+**The edits are kept as intent, not as a list.** A role's edits are one record, `[main, added, dropped]`
+(`shared/faction_lib/fnc_faction_lists.sqf`). The base is the pool the server built before the screen. When
+the player makes a class main, the base becomes that class's bucket (`fnc_faction_pool_for_class`). The
+list is the main first, then the base minus the drops, then the adds. The first entry is the
+representative, so the single-class readers get the main. The main cannot be removed, because a removal
+would silently re-parent the role to the next entry. Each locked vehicle row carries its record, and the
+server rebuilds the row from the record with `fnc_faction_edits_apply` instead of trusting the client's
+list. That function gates the list through `fnc_faction_keep` and keeps the records in
+`DUWS_factionListEdits`, so a later detection can apply them again.
+
+A record applied over a later detection can name a class that the session lacks, for example after the
+player removes a mod. `fnc_faction_edits_apply` handles each case:
+
+| Missing | Result |
+|---|---|
+| `main` | The base falls back to the pool that resolution built, as if `main` were `""` |
+| A class in `added` | `fnc_faction_keep` removes it |
+| Every class in the resolved list | The key keeps the pool that resolution built, and a WARN names the key |
 
 `shared/faction_lib/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
 `[key, group, kind, required]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s

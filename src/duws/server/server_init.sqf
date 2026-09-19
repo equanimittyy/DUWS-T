@@ -103,8 +103,7 @@ while {!createzone_server} do {
 
 	// Expands each role's representative into its faction's pool here, not only at the commit, so
 	// the confirmation screen can show the pool a spawn will draw from -- a static file assigns
-	// one class per role and only this pass widens it. Idempotent, and re-run over the player's
-	// edits at the commit.
+	// one class per role and only this pass widens it.
 	[] call fnc_faction_augment;
 
 	// AutoDetect broadcasts its own and a CUSTOM paste ships its assignment list, but a static
@@ -158,11 +157,10 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 
 [] call fnc_faction_apply_locked;
 
-// Pools live and are read only on the server, so the confirmation screen (a client) locked one
-// class per un-edited role. Re-expands each role's final representative back into its faction's
-// bucket here, after the edits land, so both kinds of faction get per-spawn variety and no edit
-// is overridden.
-[] call fnc_faction_augment;
+// A locked table already holds every row's whole pool (the screen builds from the preview pools), and
+// re-expanding from the representative would undo the player's list edits: drops come back, adds go.
+// Only a commit with no table, the debug quickstart, still needs the pass.
+if (duws_faction_locked isEqualTo []) then { [] call fnc_faction_augment; };
 
 // A side with no static MG leaves each composition's vanilla placeholder standing instead -- the
 // one case where a zone garrisons itself with the wrong side's gun. Checked here, not at each

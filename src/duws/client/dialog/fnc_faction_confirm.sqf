@@ -23,6 +23,8 @@ publicVariable "duws_faction_locked";
 // Cleared per screen: the parse a key edit runs is per faction and expensive, and a faction's
 // buckets do not change within one visit to this screen.
 uiNamespace setVariable ["duws_faction_parse_cache", createHashMap];
+// Vehicle list records by key (fnc_faction_lists.sqf), only for keys the player edited this visit.
+uiNamespace setVariable ["duws_faction_edits", createHashMap];
 
 // Asked for by number: a Back through the setup screens brings the player here again with a
 // different pick, and waiting on the count rather than a flag is what stops this round reading the
@@ -104,7 +106,11 @@ waitUntil { sleep 0.1; duws_faction_confirm_back || duws_faction_confirm_done };
 // Published before the screen closes so the commit has the table even if the player's next step is
 // immediate. Back publishes nothing: the flow restarts and resolution runs again.
 if (duws_faction_confirm_done) then {
-    duws_faction_locked = duws_faction_table;
+    private _edits = uiNamespace getVariable ["duws_faction_edits", createHashMap];
+    duws_faction_locked = duws_faction_table apply {
+        _x params ["_side", "_rows"];
+        [_side, _rows apply { _x + [_edits getOrDefault [_x select 0, []]] }]
+    };
     publicVariable "duws_faction_locked";
 };
 

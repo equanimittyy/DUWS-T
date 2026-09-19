@@ -89,7 +89,7 @@ private _y = 0;
 
                 private _select = _display ctrlCreate ["RscButton", -1, _group];
                 _select ctrlSetPosition [(_blockX + SELECT_X) * GUI_GRID_W, (_y + 0.075) * GUI_GRID_H, SELECT_W * GUI_GRID_W, 0.85 * GUI_GRID_H];
-                _select ctrlSetText localize "STR_DUWS_T_faction_confirm_select";
+                _select ctrlSetText localize (["STR_DUWS_T_faction_confirm_select", "STR_DUWS_T_faction_confirm_edit"] select (((_keys select _i) select 2) isEqualTo "vehicle"));
                 _select ctrlSetFontHeight 0.022;
                 _select ctrlSetBackgroundColor [0.16, 0.3, 0.55, 0.7];
                 _select setVariable ["duws_key", _key];
