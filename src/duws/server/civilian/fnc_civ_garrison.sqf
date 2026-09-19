@@ -60,7 +60,6 @@ private _fnc_raise = {
     };
 
     // Filed for the tick to adopt: raised groups (rostered, killed-watch hung, site marked live) and the tier raised at.
-    // No SEIZED trigger any more -- clearing is decided by the shared garrisonBeaten test on the poller tick, so a town must be beaten, not merely emptied.
     missionNamespace setVariable [RAISE_SLOT(_i), [_grps, _tier]];
 };
 
@@ -109,9 +108,6 @@ private _fnc_tick = {
 
     // Not a garrison state, so it ends nothing: a cleared town's survivors are collected while its next garrison raises.
     [_key] call DUWS_fnc_garrisonLeftoverSweep;
-    // Asked every tick, not only where the clear reads it: the hold is stamped inside, and a tick that skipped the
-    // question would leave a stale stamp to clear the town the moment its garrison came back.
-    private _taken = [_key, "town_gar", WEST, EAST] call DUWS_fnc_siteTaken;
 
     // Raise in flight owns the town until it reports -- otherwise the reinforcement test would read the still-empty roster as owing the whole composition and raise it a second time.
     if (_t get "raising") exitWith {
@@ -190,39 +186,55 @@ private _fnc_tick = {
         _t set ["tier", 0];
         ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
             _i, _rep]] call fnc_log;
-    } else {
-        // Taken by the same rule as a zone. The tick is 10 s, so the hold lands between 20 and 30 s.
-        if (_taken) then {
-            [_key, false] call DUWS_fnc_garrisonSetLive;
-            [_key] call DUWS_fnc_garrisonReserveClear;
-            [_key] call DUWS_fnc_garrisonRelease;
-            _t set ["awake", false];
-            _t set ["tier", 0];
-            // Clearing destroys the purchase, not the ownership -- tier files back to I, not 0: the commander's spending was beaten, not the enemy's claim to the ground.
-            // No refund either, or a player clearing towns would hand the enemy its AP back and the OPFOR economy would never climb.
-            [_i, 1, "garrison cleared"] call fnc_town_garrison_setTier;
-            // Tier I with every token lost: the town fields nothing, and cannot be cleared again, until the commander resupplies it.
-            private _full = [[1] call DUWS_fnc_townSpawnList, missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition;
-            [_key, _full] call DUWS_fnc_garrisonSetFull;
-            [_key, 0] call DUWS_fnc_garrisonSeed;
-            // Instalment, not absolution -- a full discharge would let a player ruin a town to -20 and walk away square in one fight; a town at the floor takes two clears to recover.
-            // Self-limiting too: only a town at or below the band can hold a garrison to clear, so this can never turn a town friendly by force.
-            [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
-            if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
-            _t set ["awaitVacate", true];
-            ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4",
-                _i, _tier, _rep, CLEAR_REP]] call fnc_log;
-        };
     };
 };
 
-// Reached through the mission namespace because the hooks run from the poller's scope, not this one.
+private _fnc_clear = {
+    params ["_i"];
+    private _key = [_i] call fnc_town_site_key;
+    private _t = [_key, "garrison"] call fnc_site_occupant;
+    private _tier = [_i] call fnc_town_garrison_tierAt;
+    private _rep = [_i] call fnc_civ_repAt;
+    [_key, false] call DUWS_fnc_garrisonSetLive;
+    [_key] call DUWS_fnc_garrisonReserveClear;
+    [_key] call DUWS_fnc_garrisonRelease;
+    _t set ["awake", false];
+    _t set ["tier", 0];
+    // Clearing destroys the purchase, not the ownership -- tier files back to I, not 0: the commander's spending was beaten, not the enemy's claim to the ground.
+    // No refund either, or a player clearing towns would hand the enemy its AP back and the OPFOR economy would never climb.
+    [_i, 1, "garrison cleared"] call fnc_town_garrison_setTier;
+    // Tier I with every token lost: the town fields nothing, and cannot be cleared again, until the commander resupplies it.
+    private _full = [[1] call DUWS_fnc_townSpawnList, missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition;
+    [_key, _full] call DUWS_fnc_garrisonSetFull;
+    [_key, 0] call DUWS_fnc_garrisonSeed;
+    // Instalment, not absolution -- a full discharge would let a player ruin a town to -20 and walk away square in one fight; a town at the floor takes two clears to recover.
+    // Self-limiting too: only a town at or below the band can hold a garrison to clear, so this can never turn a town friendly by force.
+    [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
+    if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
+    _t set ["awaitVacate", true];
+    ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4",
+        _i, _tier, _rep, CLEAR_REP]] call fnc_log;
+};
+
+// Reached through the mission namespace because the hooks and triggers run outside this scope.
 missionNamespace setVariable ["DUWS_town_raise", _fnc_raise];
+missionNamespace setVariable ["DUWS_town_clear", _fnc_clear];
 
 {
     private _key = [_forEachIndex] call fnc_town_site_key;
     _x set ["townIndex", _forEachIndex];
     [_key, "garrison", createHashMapFromArray [["tick", _fnc_tick]]] call fnc_site_hooks_set;
+    // A trigger rather than the 10 s tick, so the capture hold is timed at the zones' 0.5 s instead of sampled.
+    // The tier gate comes first because a tier 0 town has nothing to clear, and siteTaken would otherwise run a spatial query on it twice a second.
+    // The clear is called, not spawned: run unscheduled, it cannot interleave with the poller's tick on the same town.
+    private _trg = createTrigger ["EmptyDetector", _centres select _forEachIndex, false];
+    _trg setVariable ["DUWS_townIndex", _forEachIndex];
+    _trg setTriggerActivation ["NONE", "PRESENT", true];
+    _trg setTriggerStatements [
+        "private _i = thisTrigger getVariable 'DUWS_townIndex'; ([_i] call fnc_town_garrison_tierAt) > 0 && {[[_i] call fnc_town_site_key, 'town_gar', WEST, EAST] call DUWS_fnc_siteTaken}",
+        "[thisTrigger getVariable 'DUWS_townIndex'] call DUWS_town_clear",
+        ""
+    ];
 } forEach _towns;
 
 ["INFO", "CIV", format ["%1 town garrisons registered with the site poller", _count]] call fnc_log;

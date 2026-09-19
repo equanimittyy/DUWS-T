@@ -238,8 +238,9 @@ owner-blind. All three must hold unbroken for `DUWS_captureHold` (20 s,
 `src/duws/server/server_var_init.sqf`), and the function stamps that hold itself.
 
 - **Zone capture and retake** run it as the zone trigger's condition, twice a second.
-- **Town clear** runs it on the 10 s poller tick (`src/duws/server/civilian/fnc_civ_garrison.sqf`),
-  so the hold lands between 20 and 30 s. Clearing pays a reputation credit and drops the tier to I —
+- **Town clear** runs it as the condition of the town's own trigger, also twice a second, and only
+  at tier I or above (`src/duws/server/civilian/fnc_civ_garrison.sqf`). Clearing pays a reputation
+  credit and drops the tier to I —
   not 0; ownership survives, only the purchase was beaten. It stamps `full` at tier I with every
   token lost, so the town stands nothing until the commander resupplies it. A raise with nothing to
   stand never goes live, so the clear cannot fire again on an empty town.

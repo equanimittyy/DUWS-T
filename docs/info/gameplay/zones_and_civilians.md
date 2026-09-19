@@ -65,8 +65,8 @@ Radio traffic, notifications and task text use the callsign alone.
 One function decides every capture: `DUWS_fnc_siteTaken {key, profile, side, foe}`
 (`src/duws/server/init_zones/fnc_garrison_reserve.sqf`). A zone capture, a zone retake and a town clear
 all call it, with only the sides swapped. It needs three tests to hold together, unbroken, for
-`DUWS_captureHold` (20 s); losing any one restarts the count. The function stamps the hold itself, so
-the zone trigger (every 0.5 s) and the town tick (every 10 s) share it.
+`DUWS_captureHold` (20 s); losing any one restarts the count. The function stamps the hold itself.
+Every zone and every town asks it from its own trigger, every 0.5 s.
 
 | Test | Counts | Threshold |
 |---|---|---|
@@ -441,10 +441,11 @@ enemy would never climb.
 
 Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
 its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
-creation anyway. The clear is decided on the poller tick by the rule that takes a zone,
-`DUWS_fnc_siteTaken`: a BLUFOR unit inside the town radius, the garrison beaten to 15 %, and BLUFOR
-outnumbering OPFOR over the town's streaming ring, all held for `DUWS_captureHold`. The tick runs every
-10 s, so the hold lands between 20 and 30 s.
+creation anyway. The clear is decided by the rule that takes a zone, `DUWS_fnc_siteTaken`: a BLUFOR
+unit inside the town radius, the garrison beaten to 15 %, and BLUFOR outnumbering OPFOR over the
+town's streaming ring, all held for `DUWS_captureHold`. As at a zone, each town asks it from its own
+trigger every 0.5 s. The trigger asks only at tier I or above, because a tier 0 town is not enemy
+ground and has nothing to clear.
 
 ### The mobilising hold
 

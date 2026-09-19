@@ -17,9 +17,8 @@ DUWS_fnc_garrisonBeaten = {
 // The one rule for taking ground, zone or town, in either direction: _side has a unit inside the site radius, the
 // defender's garrison is beaten, and _side outnumbers _foe over the streaming ring -- all held unbroken for
 // DUWS_captureHold. -> true once held.
-// The hold is stamped here rather than left to a trigger timeout, so a zone trigger and the town tick share it
-// whatever their cadence. One stamp per site, tagged with the side, so a direction's stamp never carries over a
-// flip into the other. Mission time, so a savegame cannot strand it.
+// One stamp per site, tagged with the side, so a direction's stamp never carries over a flip into the other.
+// Mission time, so a savegame cannot strand it.
 DUWS_fnc_siteTaken = {
     params ["_key", "_profile", "_side", "_foe"];
     private _site = [_key] call fnc_site_at;
