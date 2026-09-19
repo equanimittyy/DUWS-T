@@ -58,6 +58,7 @@ private _live = [];
 					private _stage = _objectivePos getPos [_ring + STAGE_MARGIN, _objectivePos getDir leader _group];
 					if ((leader _group) distance2D _objectivePos < _ring + STAGE_MARGIN || {surfaceIsWater _stage}) then { _stage = [] };
 					[_group, _objectivePos, _stage] call _fnc_attack;
+					[groupId _group, format [localize "STR_DUWS_T_TASKFORCE_ASSAULT", groupId _group, _objectiveName], "SUB-NET"] remoteExec ["fnc_duws_dialogue", 0];
 				};
 				_group setVariable ["DUWS_taskforce_target", _objectiveName];
 			} else {

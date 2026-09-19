@@ -6824,6 +6824,10 @@
                 <Original>Capture %1</Original>
                 <English>Capture %1</English>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ASSAULT">
+                <Original>This is %1. We're moving to capture %2.</Original>
+                <English>This is %1. We're moving to capture %2.</English>
+            </Key>
             <Key ID="STR_DUWS_T_bhlgx74f">
                 <German>Verlasse den Gruppen Manager</German>
                 <Spanish>Cerrar el administrador de escuadrones</Spanish>

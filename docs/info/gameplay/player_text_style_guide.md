@@ -113,7 +113,7 @@ explicit speaker lists in `fnc_duws_dialogue`.
 | Channel | Who | Surface | Why |
 |---|---|---|---|
 | **NET** | Overlord alone | engine subtitle, with a squelch tone | the command net — the briefs and results the player least wants to miss |
-| **SUB-NET** | every other radio callsign (Allseer, the supports, the air drops, the rescued squad) | a bottom-left radio log (`fnc_duws_subnet_log`, RscTitles `DUWS_SubnetLog`) | radio chatter present without burying an in-room line or an Overlord brief |
+| **SUB-NET** | every other radio callsign (Allseer, the supports, the air drops, the rescued squad, the task forces, whose drawn names pass `"SUB-NET"` explicitly) | a bottom-left radio log (`fnc_duws_subnet_log`, RscTitles `DUWS_SubnetLog`) | radio chatter present without burying an in-room line or an Overlord brief |
 | **VOICE** | everyone in the room with the player, and the default | engine subtitle | the loud visible surface — a new speaker on no list lands here |
 
 **The speaker decides, and a voice is a real element in the fiction.** Overlord and Allseer on the
