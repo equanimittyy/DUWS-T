@@ -498,4 +498,6 @@ town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the 
 other live site. Bandits fight both armies, and the objective counts every bandit dead, whoever killed
 them. A town close to HQ often finds no site, so its civilians have no work to give.
 
-A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles.
+A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug
+menu's *Force civilian mission* row makes the civilian under the cursor offer a job, with no roll and no
+cap.

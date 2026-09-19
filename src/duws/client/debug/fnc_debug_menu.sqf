@@ -48,6 +48,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 
+    ["Force civilian mission (cursor civilian)", {
+        [cursorObject, player, "WORK", true] remoteExec ["fnc_civ_mission_request", 2];
+    }, [], [1,0.667,0,1]],
+
     ["Spawn random event", fnc_debug_random_event_menu, [], [1,0.667,0,1]],
 
     // Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh seven. The cache
