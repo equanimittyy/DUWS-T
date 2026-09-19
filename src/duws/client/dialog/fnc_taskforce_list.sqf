@@ -15,7 +15,7 @@ private _cell = {
 	private _ctrl = _display ctrlCreate ["RscText", -1, _list];
 	_ctrl ctrlSetPosition [_left * GUI_GRID_W, _top * GUI_GRID_H, _width * GUI_GRID_W, ROW_H * GUI_GRID_H];
 	_ctrl ctrlSetFontHeight 0.026;
-	_ctrl ctrlSetTextColor [0, 0, 0, 1];
+	_ctrl ctrlSetTextColor [1, 1, 1, 1];
 	_ctrl ctrlSetText _text;
 	_ctrl ctrlSetTooltip _text;
 	_ctrl ctrlCommit 0;
