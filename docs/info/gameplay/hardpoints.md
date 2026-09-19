@@ -58,7 +58,8 @@ but is seeded standalone at generation, one per zone on a coin flip
 ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented —
 composition, garrison, streaming, clearance — but reachable today only through the debug menus: the
 hardpoint spawner (`client/debug/fnc_debug_hardpoint_menu.sqf`) and OPCOM's build order. No
-campaign-wide count is enforced on any type.
+campaign-wide count is enforced on any type. OPCOM's builds roll only the types OPFOR's tier has unlocked
+(`DUWS_hardpointTier`); campaign generation rolls every type.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
 composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).
@@ -114,7 +115,7 @@ every count decision rather than baked into the stored cap, so a zone OPCOM late
 tier earns a higher ceiling with no rewrite. At campaign generation a random count up to the cap
 (`round (random _cap)`, which can be zero) is laid, candidates drawn anywhere inside the zone on land
 clear of steep slope, facing radially out from the centre. The cap is the free-slot limit OPCOM's zone
-Build reads.
+Build reads, less the standing ring and any build still siting (`DUWS_opcom_buildsPending`).
 
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield`
 (`server/init_zones/fnc_hardpoint_minefield.sqf`) lays a lattice of vanilla mine objects — `ATMine`
@@ -245,5 +246,6 @@ prices its defences — and neither does a minefield, a hazard removed rather th
 
 An OPCOM hardpoint build is an Army Power sink, and nothing refunds AP when the player clears one. A
 refund would be farmable — build, clear, refund, repeat — and the enemy's pool would never reach
-whatever escalation the commander prices against it. Build prices and the build decision are
+whatever escalation the commander prices against it. Only a build that finds no ground is refunded, since
+nothing stands. Build prices and the build decision are
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s.

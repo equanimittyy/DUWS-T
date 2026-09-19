@@ -35,6 +35,10 @@ DUWS_opcom_aiPollTick = DUWS_opcom_tick;
 private _ids = keys _active;
 _ids sort true;
 private _rows = _ids apply { _active get _x };
+{
+    _x params ["", "_type", "_zk"];
+    _rows pushBack format ["Build %1 at %2 (siting)", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel];
+} forEach DUWS_opcom_buildsPending;
 if (count _rows > AI_ROWS_MAX) then {
     _rows = (_rows select [0, AI_ROWS_MAX - 1]) + [format ["+%1 more", count _rows - AI_ROWS_MAX + 1]];
 };

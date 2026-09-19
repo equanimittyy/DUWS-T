@@ -406,6 +406,10 @@ DUWS_hardpointWeightSolo = createHashMapFromArray [
 DUWS_hardpointWeightNest = createHashMapFromArray [
     ["MG", 3], ["AT", 2], ["GMG", 1]
 ];
+// The OPFOR tier each type unlocks at for OPCOM's builds only; campaign generation still rolls every type.
+DUWS_hardpointTier = createHashMapFromArray [
+    ["RADIO", 1], ["OP", 1], ["MG", 1], ["ROADBLOCK", 1], ["AT", 2], ["GMG", 3], ["AA", 3], ["MORTAR", 3], ["ARTY", 4]
+];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
 // localisation carries the sentence around them, not these.
