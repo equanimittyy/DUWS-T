@@ -14,6 +14,7 @@ private _what = "";
 private _radius = 0;
 private _tier = 0;
 private _tierMax = 0;
+private _townIndex = -1;
 private _best = 1e11;
 
 {
@@ -36,6 +37,7 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 	if (_d < (_radii param [_forEachIndex, 0]) && {_d < _best}) then {
 		_key = [_forEachIndex] call fnc_town_site_key;
 		_what = format ["town %1", _forEachIndex];
+		_townIndex = _forEachIndex;
 		_tier = [_forEachIndex] call fnc_town_garrison_tierAt;
 		_tierMax = count DUWS_townSpawnTiers;
 		_best = _d;
@@ -48,6 +50,12 @@ if (_key isEqualTo "") exitWith {
 
 private _rows = [_key] call DUWS_fnc_garrisonDebug;
 _rows insert [1, [["Tier", format ["%1 / %2", _tier, _tierMax]]]];
+// A town's raise also waits out the mobilising hold and the leave-first latch; without them a held town reads as a streaming fault.
+if (_townIndex >= 0) then {
+	private _vacate = ([_key, "garrison"] call fnc_site_occupant) getOrDefault ["awaitVacate", false];
+	_rows insert [2, [["Hold", format ["%1 s", round ([_townIndex] call fnc_town_garrison_holdAt)],
+		["", "raises only after BLUFOR leave the town"] select _vacate]]];
+};
 // A zone also carries a hardpoint ring; a town raises none, so its readout is the ledger alone.
 if (_what isEqualTo "zone") then { _rows append ([_key, _radius] call fnc_hardpoint_debug) };
 
