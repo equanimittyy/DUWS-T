@@ -21,10 +21,10 @@ fnc_vehiclePostInit = compileFinal {
 		// only AI-crewed vehicles of this side: skip empty, civilian, player-crewed, UAV, disguised
 		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {side _entity == civilian} || {side _entity != _side} || {unitIsUAV _entity} || {_entity getVariable ["DUWS_keepCrewDress", false]}) exitWith {};		
 		
-		// wait for this side's foot units to exist
-		waitUntil {sleep 1; {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x}} count allUnits > 0 };
+		// civilian-class bodies fighting for the side (mob, informant, PMC) never template a crew's dress
+		waitUntil {sleep 1; {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x} && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") != 3}} count allUnits > 0 };
 
-		_factionUnitRandom = selectRandom (allUnits select {alive _x && {!isPlayer _x} && {side _x == _side} && {isNull objectParent _x}});
+		_factionUnitRandom = selectRandom (allUnits select {alive _x && {!isPlayer _x} && {side _x == _side} && {isNull objectParent _x} && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") != 3}});
 		_factionVoice = speaker _factionUnitRandom;
 		
 		// vanilla fallback asset in use: reskin the crew (loadout/voice) and texture to the real faction
