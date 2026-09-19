@@ -44,7 +44,7 @@ _civ disableAI "PATH";
 sleep 3;
 
 // [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max]]. A target is money the
-// players raise at the giver's feet, so that job needs no site outside town.
+// players raise at the giver's feet, so that job's site is the town centre, not ground outside town.
 private _types = [
     ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }, []],
     ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }, []],
@@ -57,7 +57,9 @@ private _town = _civ getVariable ["civ_locIndex", -1];
 // mission pays, and the curve offers nothing at -20.
 private _site = [];
 if (_id >= 0 && {alive _civ} && {_town >= 0} && {_force || {random 1 < CIV_MISSION_OFFER_CHANCE}}) then {
-    _site = if (_target isEqualTo []) then { [_town] call fnc_civ_mission_site } else { getPosATL _civ };
+    _site = if (_target isEqualTo []) then { [_town] call fnc_civ_mission_site } else {
+        getPos ((missionNamespace getVariable ["civ_locations", []]) select _town)
+    };
 };
 if (_site isEqualTo []) exitWith {
     if (_id >= 0) then { DUWS_civMissions deleteAt _id };
@@ -73,7 +75,7 @@ private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
     ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
     ["reward", _reward], ["target", _goal], ["raised", 0],
-    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
+    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["giverMarker", ""], ["taskId", ""], ["title", ""]
 ];
 
 // The offer rides the bribe prompt: fnc_civ_bribe_answer checks the answer is the asker's and hands a "WORK"

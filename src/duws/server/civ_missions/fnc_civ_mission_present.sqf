@@ -2,12 +2,21 @@
 params ["_id", "_titleKey", "_descKey", "_taskType", ["_search", true]];
 private _e = DUWS_civMissions get _id;
 
-// A job with nothing to find pins its site exactly: a search area there would hide the giver.
+// A job with nothing to find pins its site exactly.
 private _centre = _e get "site";
 if (_search) then {
     _centre = _centre getPos [random 150, random 360];
     _e set ["marker", [_centre, 250] call fnc_missionMarkerData];
 };
+
+// fnc_civ_mission_poll moves it on its 5 s tick; the giver's walk indoors leaves the task pin behind.
+private _giverMarker = format ["civ_mission_giver_%1", _id];
+createMarker [_giverMarker, getPosATL (_e get "giver")];
+_giverMarker setMarkerShape "ICON";
+_giverMarker setMarkerType "mil_warning";
+_giverMarker setMarkerColor "ColorBlue";
+_giverMarker setMarkerText localize "STR_DUWS_T_civ";
+_e set ["giverMarker", _giverMarker];
 
 private _taskId = format ["civ_mission_%1", _id];
 _e set ["taskId", _taskId];

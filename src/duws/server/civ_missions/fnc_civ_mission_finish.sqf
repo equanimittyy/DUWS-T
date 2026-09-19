@@ -8,6 +8,7 @@ if (count _e == 0) exitWith {};
 private _giver = _e get "giver";
 
 if ((_e get "marker") != "") then { [_e get "marker"] call fnc_missionMarkerClear };
+if ((_e get "giverMarker") != "") then { deleteMarker (_e get "giverMarker") };
 if ((_e get "taskId") != "") then { [_e get "taskId", _status] call fnc_missionTaskEnd };
 
 switch (_status) do {

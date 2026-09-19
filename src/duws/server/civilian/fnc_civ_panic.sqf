@@ -31,7 +31,7 @@ if (isNull _unit || {!alive _unit}) exitWith {};
 // never rolled for.
 if (_unit getVariable ["isSurrendered", false]) exitWith {};
 
-// A civilian side mission's giver holds still where the task pin shows them until the mission ends.
+// A civilian side mission's giver keeps to the building they took until the mission ends.
 if ((_unit getVariable ["DUWS_civMission_state", ""]) != "") exitWith {};
 
 _unit setVariable ["DUWS_civ_panicked", true, true];

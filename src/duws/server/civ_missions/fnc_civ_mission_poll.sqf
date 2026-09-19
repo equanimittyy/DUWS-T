@@ -3,6 +3,7 @@
 params ["_id"];
 private _e = DUWS_civMissions get _id;
 private _giver = _e get "giver";
+(_e get "giverMarker") setMarkerPos (getPosATL _giver);
 private _state = _e get "state";
 if (_state == "reported") exitWith { "SUCCEEDED" };
 if (_state == "canceled") exitWith { "CANCELED" };

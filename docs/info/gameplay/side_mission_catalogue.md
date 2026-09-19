@@ -487,15 +487,18 @@ civilian. The slot is held while the prompt is open, so an unanswered prompt is 
 a lost client would hold it for the session.
 
 **Raise Funds is paid for at the giver** (`fnc_civ_mission_funds.sqf`). The target is rolled with the
-offer, so the brief names it. The job has no site: the task pins the giver, with no search area. On the
+offer, so the brief names it. Its site is the town centre, and the task pins it with no search area. On the
 giver, the first row reads Give Money and opens `civ_give_dialog`, a slider capped at the money that the
 player carries and the money that the giver still needs. `fnc_civ_mission_give` runs by `remoteExecCall`,
 so it is unscheduled, and two players who give at the same time cannot both pay the same shortfall. Any
 player can give, and the gift that meets the target is the report.
 
-**The giver stays.** The request takes the giver off the town's crowd roster, so a town that sleeps
-leaves them standing, and holds them with `PATH` off, so the task pin stays true. The panic sweep skips
-the giver (`fnc_civ_panic.sqf`). While the mission lives, Interact opens the menu on the giver with no
+**The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
+ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
+run them over, and `PATH` goes off when they arrive. The accept also takes the giver off the town's crowd
+roster, so a town that sleeps leaves them standing. A blue `mil_warning` marker, the escort informant's,
+follows the giver on the thread's 5 s poll, because the task pin does not follow them. The panic sweep
+skips the giver (`fnc_civ_panic.sqf`). While the mission lives, Interact opens the menu on the giver with no
 call-over: the first row reads Report, live once the job is done, and Cancel sits beside it. When the
 mission ends, the giver walks again and the map sweep collects them once no player is near.
 
