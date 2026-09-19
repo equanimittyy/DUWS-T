@@ -45,7 +45,7 @@ private _vehpos = if (_isAir) then {
             _minR = (_band select 0) * _radius;
             _maxR = (_band select 1) * _radius;
         };
-        [_patrolCenter, _minR, _maxR, 15, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
+        [_patrolCenter, _maxR, _minR, 15, 0.5] call fnc_mission_safepos
     }
 };
 

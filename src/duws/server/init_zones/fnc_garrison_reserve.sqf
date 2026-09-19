@@ -368,8 +368,7 @@ DUWS_fnc_garrisonReserveTruckSpawn = {
 DUWS_fnc_garrisonReserveDispatch = {
     params ["_key", "_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
     private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
-    private _debusPos = [_debusRaw, 0, 80, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-    if (_debusPos isEqualTo []) then { _debusPos = _debusRaw };
+    private _debusPos = [_debusRaw, 80, 0, 8, 0.5] call fnc_mission_safepos;
 
     // CARELESS so the driver runs the route instead of stopping to fight -- the same trick the support
     // transports use to drive/fly through fire (fnc_paradrop, fnc_request_hcCAS). Waypoint is the driver
