@@ -53,28 +53,4 @@ if (_what isEqualTo "zone") then { _rows append ([_key, _radius] call fnc_hardpo
 
 // The map is closed by the time this returns, so the hint is not drawn under it.
 diag_log format ["[DUWS garrison debug] %1", _what];
-private _markup = format ["<t size='1.3' color='#00ffff'>Garrison ledger</t><br/><t size='0.85' color='#b0b0b0'>%1</t><br/>", _key];
-{
-	if (_x isEqualType "") then {
-		diag_log format ["[%1 %2]", toUpper _x, _key];
-		_markup = _markup + format ["<br/><t color='#ffcc66'>%1</t><br/>", toUpper _x];
-	} else {
-		_x params ["_label", "_value", ["_detail", ""]];
-		diag_log format ["  %1: %2  %3", _label, _value, _detail];
-		_markup = _markup + format ["<t align='left'>%1</t><t align='right'>%2</t><br/>", _label, _value];
-		if (_detail isNotEqualTo "") then {
-			_markup = _markup + format ["<t align='left' size='0.8' color='#b0b0b0'>%1</t><br/>", _detail];
-		};
-	};
-} forEach _rows;
-
-// hint takes no duration; each re-issue restarts its fade. Stops on a newer readout, which it would paint over.
-[_markup, {
-	DUWS_debugLedgerHint = _this;
-	hint parseText _this;
-	for "_i" from 1 to 3 do {
-		sleep 10;
-		if (DUWS_debugLedgerHint isNotEqualTo _this) exitWith {};
-		hintSilent parseText _this;
-	};
-}] remoteExec ["spawn", _caller];
+["Garrison ledger", _key, _rows, _caller] call fnc_debug_ledger_hint;

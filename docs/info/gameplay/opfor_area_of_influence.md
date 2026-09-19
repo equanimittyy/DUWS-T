@@ -53,14 +53,16 @@ so a candidate outside every zone in OPFOR-positive ground is the band.
 
 Every 30-minute economy tick, before that tick's income tally, each town reads coverage at its
 centre and steps its reputation by the difference of the two sides' pushes
-(`server/warcom/fnc_zonesundercontrol.sqf:39-47`, sharing the tick's own `sleep 1800` at `:11-12`
-rather than running a loop of its own):
+(`server/warcom/fnc_zonesundercontrol.sqf:46-54`, riding the economy clock in
+`server/warcom/fnc_init_OPFOR_WARCOM.sqf:17-29` rather than running a loop of its own):
 
 ```sqf
+private _opforCovers = [_townPos] call fnc_aoi_opfor_covers;
+private _bluforCovers = [_townPos] call fnc_aoi_blufor_covers;
 private _opforPush = 0;
 private _bluforPush = 0;
-if (_townPos call fnc_aoi_opfor_covers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
-if (_townPos call fnc_aoi_blufor_covers) then { _bluforPush = DUWS_bluforRadioLevel };
+if (_opforCovers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
+if (_bluforCovers) then { _bluforPush = DUWS_bluforRadioLevel };
 if (_bluforPush != _opforPush) then {
     [_forEachIndex, _bluforPush - _opforPush, "aoi_drift", true] call fnc_town_rep_adjust;
 };

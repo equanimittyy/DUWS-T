@@ -124,7 +124,7 @@ A `hint`/`hintSilent` issued while the map is open (`forceMap`/`openMap`) draws 
 
 ## `hint` takes no duration, so a longer readout must be re-issued
 
-`hint` and `hintSilent` have no duration argument, and no command reads or sets the time before the engine fades the box. A long readout can fade before the reader finishes it. Fix: hold it with `hintSilent` re-issues of the same text inside the fade window, because each re-issue restarts the fade. Stop the re-issues when a newer readout replaces the text, or an old readout paints over the new one (`src/duws/server/debug/fnc_debug_garrison_query.sqf`).
+`hint` and `hintSilent` have no duration argument, and no command reads or sets the time before the engine fades the box. A long readout can fade before the reader finishes it. Fix: hold it with `hintSilent` re-issues of the same text inside the fade window, because each re-issue restarts the fade. Stop the re-issues when a newer readout replaces the text, or an old readout paints over the new one (`src/duws/server/debug/fnc_debug_ledger_hint.sqf`).
 
 ## `onMapSingleClick` is one global slot: the next installer steals the previous one's click
 

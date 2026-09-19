@@ -42,6 +42,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Adjust CP / AP / Town / Escalation", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
+    ["Fire economy tick", {
+        [player] remoteExec ["fnc_debug_econ_tick", 2];
+    }, [], [1,0.667,0,1]],
+
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 
     ["Spawn random event", fnc_debug_random_event_menu, [], [1,0.667,0,1]],

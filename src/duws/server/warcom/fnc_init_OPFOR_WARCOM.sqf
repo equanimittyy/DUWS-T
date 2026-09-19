@@ -14,7 +14,18 @@ if (!isServer) exitWith {};
 
 //Execution Order requires zone bonus and reward before WARCOM INIT
 // Spawned exactly once, so territory income does not stack per zone captured.
-[] spawn fnc_zonesundercontrol;
+[] spawn {
+    while {true} do {
+        // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
+        try {
+            sleep 1800;
+            call fnc_zonesundercontrol;
+        } catch {
+            ["ERROR", "ECON", format ["econ tick threw, thread held alive: %1", _exception]] call fnc_log;
+            sleep 10;
+        };
+    };
+};
 
 while {!(["ZONES", "serv_zones_array populated by the zone locator", {count serv_zones_array > 0}, 300] call fnc_waitLogged)} do {};
 sleep 1;

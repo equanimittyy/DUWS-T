@@ -188,9 +188,9 @@ which inverts what the death penalty is for.
 |---|---|---|
 | Zone first capture | `server/init_zones/fnc_captured.sqf:37-43` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier |
 | Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
-| Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:69-82` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
-| Town income | `server/warcom/fnc_zonesundercontrol.sqf:56-83` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
-| OPFOR flat income | `server/warcom/fnc_zonesundercontrol.sqf:71` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
+| Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
+| Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
+| OPFOR flat income | `server/warcom/fnc_zonesundercontrol.sqf:75` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
 | OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
@@ -199,7 +199,7 @@ which inverts what the death penalty is for.
 | Enemy corpse loot | `server/search/fnc_addRandomLoot.sqf` | ~60% of enemies carry 0–2 `Money_roll` (personal cash); intel documents no longer dropped here |
 | Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
-| Kill income | `server/server_init.sqf:257-276` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
+| Kill income | `server/server_init.sqf:243-329` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
@@ -235,6 +235,10 @@ Each iteration bumps `econ_tick`, the clock's sequence number. Anything wanting 
 window" cap keys off that rather than starting a timer of its own — `fnc_civ_healed.sqf` is the one
 caller today, capping what a town can pay out for treating its wounded. Server-local and unbroadcast:
 only server-side caps read it.
+
+The Debug menu's *Fire economy tick* row runs one extra iteration off the clock
+(`server/debug/fnc_debug_econ_tick.sqf`), which keeps its own 30-minute schedule. It pays and bumps
+`econ_tick` like any other iteration, then hints the caller each pool's take and each town's drift.
 
 ## Sinks
 
