@@ -593,6 +593,15 @@ OPCOM_ARTY_MIN_SPREAD = 50;
 // Seconds between one gun of a battery opening fire and the next, so a battery ripples rather than volleys.
 OPCOM_ARTY_STAGGER = 1;
 
+// Metres of a creep's length, and of each gun's lane across its width, that one round covers (fnc_opcom_fires).
+OPCOM_ARTY_CREEP_STEP = 50;
+
+// Metres a fire mission's pattern may wander per creep row or saturate round, a random walk, so no barrage runs true.
+OPCOM_ARTY_WANDER = 10;
+
+// Most seconds a gun waits at random before each round, so the impacts keep no rhythm to count.
+OPCOM_ARTY_JITTER = 2;
+
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
 // look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.
 OPCOM_INTERCEPT_K = 1;

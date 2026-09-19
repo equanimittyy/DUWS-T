@@ -91,28 +91,29 @@ switch (_mode) do {
     };
     case "fire_creep": {
         [format ["%1: creep how wide?", _key], [50, 100, 200, 300] apply {
-            [format ["%1 m wide", _x], { params ["_hp", "_w"]; [_hp, "fire_rounds", ["creep", _w]] call fnc_debug_opcom_step }, [_key, _x], _c]
+            [format ["%1 m wide", _x], { params ["_hp", "_w"]; [_hp, "fire_pick", [["creep", _w], 0]] call fnc_debug_opcom_step }, [_key, _x], _c]
         }] call fnc_open_action_menu;
     };
     case "fire_rounds": {
         [format ["%1: how many rounds a gun?", _key], [2, 4, 6, 8] apply {
-            [str _x, {
-                params ["_hp", "_shape", "_rounds"];
-                [_hp, _shape, _rounds] spawn {
-                    params ["_hp", "_shape", "_rounds"];
-                    private _creep = (_shape select 0) isEqualTo "creep";
-                    private _pos = [format ["<t size='2' color='#00ffff'>Click the %1 for %2 (%3 rounds a gun).</t><br/>Close the map to cancel.",
-                        ["target", "creep's start"] select _creep, _hp, _rounds], {true}, "", _creep] call fnc_map_pick_pos;
-                    if (_pos isEqualTo []) exitWith {};
-                    if (_creep) then {
-                        private _end = [format ["<t size='2' color='#00ffff'>Click where %1's creep ends.</t><br/>Close the map to cancel.", _hp]] call fnc_map_pick_pos;
-                        _shape = if (_end isEqualTo []) then { [] } else { _shape + [_pos distance2D _end, _pos getDir _end] };
-                    };
-                    if (_shape isEqualTo []) exitWith {};
-                    ["fire", _hp, _pos, [_rounds, _shape], player] remoteExec ["fnc_debug_opcom", 2];
-                };
-            }, [_key, _ctx, _x], _c]
+            [str _x, { params ["_hp", "_shape", "_rounds"]; [_hp, "fire_pick", [_shape, _rounds]] call fnc_debug_opcom_step }, [_key, _ctx, _x], _c]
         }] call fnc_open_action_menu;
+    };
+    case "fire_pick": {
+        [_key, _ctx] spawn {
+            params ["_hp", "_ctx"];
+            _ctx params ["_shape", "_rounds"];
+            private _creep = (_shape select 0) isEqualTo "creep";
+            private _pos = [format ["<t size='2' color='#00ffff'>Click the %1 for %2.</t><br/>Close the map to cancel.",
+                ["target", "creep's start"] select _creep, _hp], {true}, "", _creep] call fnc_map_pick_pos;
+            if (_pos isEqualTo []) exitWith {};
+            if (_creep) then {
+                private _end = [format ["<t size='2' color='#00ffff'>Click where %1's creep ends.</t><br/>Close the map to cancel.", _hp]] call fnc_map_pick_pos;
+                _shape = if (_end isEqualTo []) then { [] } else { _shape + [_pos distance2D _end, _pos getDir _end] };
+            };
+            if (_shape isEqualTo []) exitWith {};
+            ["fire", _hp, _pos, [_rounds, _shape], player] remoteExec ["fnc_debug_opcom", 2];
+        };
     };
     default {};
 };

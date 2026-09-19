@@ -1325,9 +1325,18 @@ DUWS_timeSkew = 150;
 ["stealth_coef: an unrecognised stance scores as standing",
     (["UNDEFINED", 0, 999] call fnc_stealth_coef), 0.2] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_creepGrid: a creep's rows and a gun's rounds per row ---
+OPCOM_ARTY_MIN_SPREAD = 50;
+OPCOM_ARTY_CREEP_STEP = 50;
+["creep_grid: one row per step of length, one round per step of each gun's lane",
+    [["creep", 300, 1000, 0], 3] call DUWS_fnc_opcom_creepGrid, [20, 2]] call fnc_assertEq;
+["creep_grid: a lane narrower than a step still takes one round a row",
+    [["creep", 100, 300, 0], 3] call DUWS_fnc_opcom_creepGrid, [6, 1]] call fnc_assertEq;
+["creep_grid: a creep under the floor still lays one row of one round",
+    [["creep", 10, 0, 0], 2] call DUWS_fnc_opcom_creepGrid, [1, 1]] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_fireAim: where each round of a shaped fire mission lands ---
 // Every aim is random, so each case samples 200 rounds and asserts the bound holds for all of them.
-OPCOM_ARTY_MIN_SPREAD = 50;
 fnc_test_aimAll = {
     params ["_args", "_pred"];
     private _ok = true;
@@ -1337,19 +1346,28 @@ fnc_test_aimAll = {
     _ok
 };
 fnc_test_aimDist = { sqrt (((_this select 0) - 1000) ^ 2 + ((_this select 1) - 1000) ^ 2) };
+fnc_test_aimIn = {
+    params ["_p", "_x0", "_x1", "_y0", "_y1"];
+    (_p select 0) >= _x0 - 1e-6 && {(_p select 0) <= _x1 + 1e-6} && {(_p select 1) >= _y0 - 1e-6} && {(_p select 1) <= _y1 + 1e-6}
+};
 
 ["fire_aim: a saturate lands inside its radius",
-    [[[1000, 1000, 0], ["saturate", 120], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 120 }] call fnc_test_aimAll, true] call fnc_assertEq;
+    [[[1000, 1000, 0], ["saturate", 120], 0, 1, 0], { (_this call fnc_test_aimDist) <= 120 }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a saturate under the floor still spreads to it, never past it",
-    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 50 }] call fnc_test_aimAll, true] call fnc_assertEq;
+    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0], { (_this call fnc_test_aimDist) <= 50 }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a saturate under the floor does not stay inside the radius it was given",
-    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0, 4], { (_this call fnc_test_aimDist) <= 10 }] call fnc_test_aimAll, false] call fnc_assertEq;
+    [[[1000, 1000, 0], ["saturate", 10], 0, 1, 0], { (_this call fnc_test_aimDist) <= 10 }] call fnc_test_aimAll, false] call fnc_assertEq;
+["fire_aim: a saturate's disc moves with its round's drift",
+    [[[1000, 1000, 0], ["saturate", 50], 0, 1, 1, [[0, 0], [200, -100]]],
+        { sqrt (((_this select 0) - 1200) ^ 2 + ((_this select 1) - 900) ^ 2) <= 50 }] call fnc_test_aimAll, true] call fnc_assertEq;
 // Bearing 0 only, as sqf-vm's sin and cos take radians; creeping north, the first gun's lane (the left half) lies west.
-["fire_aim: a creep's first gun holds the left lane and each round its own band",
-    [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 2, 1, 4],
-        { (_this select 0) >= 950 - 1e-6 && {(_this select 0) <= 1000 + 1e-6} && {(_this select 1) >= 1075 - 1e-6} && {(_this select 1) <= 1150 + 1e-6} }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a creep's first gun holds the left lane and each row its own band",
+    [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 2, 1], { [_this, 950, 1000, 1050, 1100] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a creep's second gun holds the right lane",
-    [[[1000, 1000, 0], ["creep", 100, 300, 0], 1, 2, 1, 4],
-        { (_this select 0) >= 1000 - 1e-6 && {(_this select 0) <= 1050 + 1e-6} }] call fnc_test_aimAll, true] call fnc_assertEq;
+    [[[1000, 1000, 0], ["creep", 100, 300, 0], 1, 2, 1], { [_this, 1000, 1050, 1050, 1100] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a creep's wide lane lays its row across before it steps forward",
+    [[[1000, 1000, 0], ["creep", 300, 300, 0], 0, 3, 3], { [_this, 900, 950, 1050, 1100] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: a creep's row takes only the lateral part of its drift",
+    [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 1, 0, [[30, 500]]], { [_this, 980, 1080, 1000, 1050] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a creep given no length still crawls the floor's depth",
-    [[[1000, 1000, 0], ["creep", 100, 0, 0], 0, 1, 0, 1], { ((_this select 1) - 1000) <= 1 }] call fnc_test_aimAll, false] call fnc_assertEq;
+    [[[1000, 1000, 0], ["creep", 100, 0, 0], 0, 1, 0], { ((_this select 1) - 1000) <= 1 }] call fnc_test_aimAll, false] call fnc_assertEq;

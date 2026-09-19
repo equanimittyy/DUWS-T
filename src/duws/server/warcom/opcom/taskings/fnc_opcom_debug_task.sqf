@@ -9,7 +9,7 @@
 //   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
 //   ["intercept", id, rowKey]       -- send `id` after a belief row (a BLUFOR group's netId)
 //   ["fire", hpKey, targetPos, [rounds, shape]] -- a fire mission from a mortar pit or battery; returns rounds ordered
-//                                   (shape ["saturate", radius] | ["creep", width, length, bearing])
+//                                   (shape ["saturate", radius] | ["creep", width, length, bearing]; a creep ignores rounds)
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
 //   ["list"] / ["clear"]            -- dump every tasking's state / delete all and empty the store
 // e.g. ["recruit", "rifles", getPosASL player] call fnc_opcom_debug_task;

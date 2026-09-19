@@ -29,21 +29,35 @@ DUWS_fnc_opcom_batteryUnload = {
     { _x setVehicleAmmo 0 } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
 };
 
-// A creep gives each gun its own lane and each round its own band, so the line walks forward together.
+// A creep's [rows, rounds a gun lays per row]: one round per OPCOM_ARTY_CREEP_STEP of its length and of each gun's
+// lane, so its density holds whatever its size or the guns that bear.
+DUWS_fnc_opcom_creepGrid = {
+    params ["_shape", "_guns"];
+    _shape params ["", "_width", "_length"];
+    [ceil ((_length max OPCOM_ARTY_MIN_SPREAD) / OPCOM_ARTY_CREEP_STEP),
+        ceil ((_width max OPCOM_ARTY_MIN_SPREAD) / _guns / OPCOM_ARTY_CREEP_STEP)]
+};
+
+// A creep gives each gun its own lane and each row its own band, so the line walks forward together. _drift is the
+// pattern's wander, one [x, y] per creep row or saturate round; a creep takes only its lateral part, off its bearing.
 DUWS_fnc_opcom_fireAim = {
-    params ["_pt", "_shape", "_g", "_guns", "_k", "_rounds"];
+    params ["_pt", "_shape", "_g", "_guns", "_k", ["_drift", []]];
     private _off = switch (_shape select 0) do {
         case "creep": {
             _shape params ["", "_width", "_length", "_dir"];
-            [(_width max OPCOM_ARTY_MIN_SPREAD) * ((_g + random 1) / _guns - 0.5),
-                (_length max OPCOM_ARTY_MIN_SPREAD) * (_k + random 1) / _rounds, _dir] call fnc_hardpoint_rotate
+            ([_shape, _guns] call DUWS_fnc_opcom_creepGrid) params ["_rows", "_perRow"];
+            private _row = floor (_k / _perRow);
+            (_drift param [_row, [0, 0]]) params ["_dx"];
+            [(_width max OPCOM_ARTY_MIN_SPREAD) * ((_g + ((_k mod _perRow) + random 1) / _perRow) / _guns - 0.5) + _dx,
+                (_length max OPCOM_ARTY_MIN_SPREAD) * (_row + random 1) / _rows, _dir] call fnc_hardpoint_rotate
         };
         default {
             _shape params ["", "_radius"];
+            (_drift param [_k, [0, 0]]) params ["_dx", "_dy"];
             // sqrt: uniform over the disc's area, not bunched at its centre.
             private _r = (_radius max OPCOM_ARTY_MIN_SPREAD) * sqrt random 1;
             private _t = random 360;
-            [_r * sin _t, _r * cos _t]
+            [_r * sin _t + _dx, _r * cos _t + _dy]
         };
     };
     [(_pt select 0) + (_off select 0), (_pt select 1) + (_off select 1), 0]
@@ -68,6 +82,7 @@ DUWS_fnc_opcom_gunFire = {
             if (!alive _gun || {!alive (gunner _gun)}) exitWith {};
             // Spread can carry a point past the gun's reach even when the aim point bears; skip it, don't wait it out.
             if !(_x inRangeOfArtillery [[_gun], _mag]) then { continue };
+            sleep random OPCOM_ARTY_JITTER;
             private _before = _gun getVariable ["DUWS_opcomFired", 0];
             private _deadline = time + OPCOM_ARTY_ROUND_SECS;
             _gun doArtilleryFire [_x, _mag, 1];
@@ -83,8 +98,8 @@ DUWS_fnc_opcom_gunFire = {
     };
 };
 
-// _shape is ["saturate", radius] about _target or ["creep", width, length, bearing] walking forward from it.
-// -> rounds ordered, 0 if no gun bears.
+// _shape is ["saturate", radius] about _target or ["creep", width, length, bearing] walking forward from it. _rounds is
+// a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). -> rounds ordered, 0 if no gun bears.
 DUWS_fnc_opcom_fireMission = {
     params ["_key", "_target", ["_rounds", 4], ["_shape", ["saturate", 0]]];
     private _pt = [_target select 0, _target select 1, 0];
@@ -105,12 +120,27 @@ DUWS_fnc_opcom_fireMission = {
         ["INFO", "OPCOM", format ["arty: %1 has no gun bearing on %2", _key, _pt apply { round _x }]] call fnc_log;
         0
     };
+    private _steps = _rounds;
+    if ((_shape select 0) isEqualTo "creep") then {
+        ([_shape, count _guns] call DUWS_fnc_opcom_creepGrid) params ["_rows", "_perRow"];
+        _steps = _rows;
+        _rounds = _rows * _perRow;
+    };
+    // One walk for the whole battery, so the pattern wanders as one rather than each gun scattering alone.
+    private _drift = [];
+    private _dx = 0;
+    private _dy = 0;
+    for "_i" from 1 to _steps do {
+        _dx = _dx + OPCOM_ARTY_WANDER * (random 2 - 1);
+        _dy = _dy + OPCOM_ARTY_WANDER * (random 2 - 1);
+        _drift pushBack [_dx, _dy];
+    };
     {
         _x params ["_gun", "_m"];
         private _g = _forEachIndex;
         private _pts = [];
         for "_k" from 0 to _rounds - 1 do {
-            _pts pushBack ([_pt, _shape, _g, count _guns, _k, _rounds] call DUWS_fnc_opcom_fireAim);
+            _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift] call DUWS_fnc_opcom_fireAim);
         };
         [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g] call DUWS_fnc_opcom_gunFire;
     } forEach _guns;

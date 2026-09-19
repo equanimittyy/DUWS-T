@@ -62,9 +62,13 @@ The code is the source of truth. What new work must hold to:
 - **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds down from one mortar pit or
   battery in a shape: `saturate` spreads them over a disc of a given radius about the target, and `creep` walks a
   line of a given width forward from the target over a given length and bearing, each gun in its own lane across
-  the width. Radius, width and length never close below `OPCOM_ARTY_MIN_SPREAD` (50 m), so no mission converges on
-  one point. Every crewed piece that bears on the target fires, each opening `OPCOM_ARTY_STAGGER` (1 s) after the
-  last, and every round is its own order at its own aim point. Those two types never stream, so their guns and
+  the width. A creep sizes its own rounds: one per `OPCOM_ARTY_CREEP_STEP` (50 m) of its length and of each gun's
+  lane, so its density holds whatever its size or the guns that bear. Radius, width and length never close below
+  `OPCOM_ARTY_MIN_SPREAD` (50 m), so no mission converges on one point. The whole pattern wanders as one random
+  walk, up to `OPCOM_ARTY_WANDER` (10 m) per creep row or saturate round (a creep only sideways, off its bearing),
+  so no barrage runs true. Every crewed piece that bears on the target fires, each opening `OPCOM_ARTY_STAGGER`
+  (1 s) after the last and waiting up to `OPCOM_ARTY_JITTER` (2 s) more at random before each round, so the impacts
+  keep no rhythm; every round is its own order at its own aim point. Those two types never stream, so their guns and
   crews always stand. A standing battery holds **no ammunition** — its guns are emptied at register, loaded for the
   mission they are given, topped up as they fire and emptied again once the rounds are away; a round not away in
   `OPCOM_ARTY_ROUND_SECS` is written off, so a crew never shells anything on its own. It fires what it is handed —
@@ -459,8 +463,9 @@ before; if it does not, the fallback is spawning shells directly as the player's
   aimed elsewhere). The target grid is latched `[x,y,0]` at order time (never an object ref that would follow a
   respawn into the circle), and re-checked against the circle immediately before firing.
 - **Spread** is the size the action hands the shipped shape — a saturate's radius, a creep's width: base by type,
-  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. Telegraph: Allseer
-  line + a temporary marker ~20 s before impact.
+  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. The Cooldown row's
+  rounds are a saturate's; a creep's follow from its width and length. Telegraph: Allseer line + a temporary marker
+  ~20 s before impact.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
   permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
   cap.
