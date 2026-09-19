@@ -13,8 +13,8 @@
 //   _spec  tokens, gear before weapons:
 //            weapons pistol|submachinegun|assault_rifle|machinegun|sniper -- one of that
 //              BIS_fnc_itemType subcategory from the pool; launcher -- an AT tube, never AA;
-//              grenadier -- a rifle with an underbarrel GL, both muzzles loaded; a plain rifle when the
-//              pool has none. Chambered + spares.
+//              grenadier -- a rifle with an underbarrel GL, both muzzles loaded. A primary token the
+//              pool has no match for draws an assault_rifle instead. Chambered + spares.
 //            vest / civ_backpack / backpack -- from the matching pool, the lowest 3 by armour/capacity.
 //            medic -- Medikit and first aid kits, and the Medic trait.
 //          A nested array is "pick one of these", e.g. ["vest", ["submachinegun","assault_rifle"], "pistol"];
@@ -130,7 +130,8 @@ private _skills = ["aimingAccuracy", "aimingShake", "aimingSpeed", "spotDistance
                 if (_tok in _weaponMatch) then {
                     private _match = _weaponMatch get _tok;
                     private _cands = _weaponPool select { _x call _match };
-                    if (_cands isEqualTo [] && {_tok == "grenadier"}) then {
+                    // The pool samples three loadouts per side, so a primary category can be empty.
+                    if (_cands isEqualTo [] && {!(_tok in ["pistol", "launcher"])}) then {
                         private _rifle = _weaponMatch get "assault_rifle";
                         _cands = _weaponPool select { _x call _rifle };
                     };

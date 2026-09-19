@@ -245,7 +245,9 @@ The parameter gates clothing only. A source that yields no uniforms logs a `BAND
 dropped.
 
 Kit, vests included, comes from `fnc_civ_arm` with the pool `["opfor", "blufor"]`. The five roles
-(rifleman, autogunner, grenadier, AT, medic) map to its token specs in `fnc_bandit_spawn.sqf`. Bandits
+(rifleman, autogunner, grenadier, AT, medic) map to its token specs in `fnc_bandit_spawn.sqf`. The
+pool samples only three unit loadouts per side, so a role whose weapon category it lacks (a machine gun,
+an SMG) carries an assault rifle instead. Bandits
 spawn at `opfor_ai_skill` and carry no random loot. Civilian side missions raise them
 ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
 
