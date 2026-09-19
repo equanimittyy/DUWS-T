@@ -20,10 +20,14 @@ if (!createDialog "civ_bribe_dialog") exitWith {};
 waitUntil { dialog };
 
 if (_job isNotEqualTo []) exitWith {
-    _job params ["_briefKey", "_cp", "_money", "_rep"];
+    _job params ["_briefKey", "_cp", "_money", "_rep", "_goal"];
     ctrlSetText [8401, localize "STR_DUWS_T_CIVMISSION_OFFER_TITLE"];
-    ctrlSetText [8410, localize _briefKey];
-    ctrlSetText [8411, format [localize "STR_DUWS_T_CIVMISSION_OFFER_REWARD", _cp, _money, _rep]];
+    ctrlSetText [8410, format [localize _briefKey, _goal]];
+    ctrlSetText [8411, if (_money > 0) then {
+        format [localize "STR_DUWS_T_CIVMISSION_OFFER_REWARD", _cp, _money, _rep]
+    } else {
+        format [localize "STR_DUWS_T_CIVMISSION_OFFER_REWARD_CP", _cp, _rep]
+    }];
     ctrlSetText [8420, localize "STR_DUWS_T_CIVMISSION_ACCEPT"];
     ctrlSetText [8421, localize "STR_DUWS_T_CIVMISSION_DECLINE"];
 };

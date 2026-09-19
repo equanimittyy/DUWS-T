@@ -2891,8 +2891,8 @@
                 <English>Ask for Work</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_ROW_WORK_DESC">
-                <Original>Ask if they need help. A job pays CP, money and the town's goodwill.</Original>
-                <English>Ask if they need help. A job pays CP, money and the town's goodwill.</English>
+                <Original>Ask if they need help. A job pays CP, money or the town's goodwill.</Original>
+                <English>Ask if they need help. A job pays CP, money or the town's goodwill.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_ROW_REPORT">
                 <Original>Report Back</Original>
@@ -2973,6 +2973,54 @@
             <Key ID="STR_DUWS_T_CIVMISSION_DECLINED">
                 <Original>I understand. Stay safe out there.</Original>
                 <English>I understand. Stay safe out there.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CP">
+                <Original>&lt;br /&gt;CP: %1</Original>
+                <English>&lt;br /&gt;CP: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_OFFER_REWARD_CP">
+                <Original>Reward: %1 CP, +%2 town reputation</Original>
+                <English>Reward: %1 CP, +%2 town reputation</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_TITLE">
+                <Original>Raise Funds</Original>
+                <English>Raise Funds</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_DESC">
+                <Original>The locals need help raising %1 money to rebuild part of their town and pay for supplies. Pool what money you can, and provide it to the locals. They will be grateful.</Original>
+                <English>The locals need help raising %1 money to rebuild part of their town and pay for supplies. Pool what money you can, and provide it to the locals. They will be grateful.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_BRIEF">
+                <Original>The war has left part of our town in ruins, and we're %1 money short of what we need to rebuild and buy supplies. If you could spare anything at all, it would help us greatly.</Original>
+                <English>The war has left part of our town in ruins, and we're %1 money short of what we need to rebuild and buy supplies. If you could spare anything at all, it would help us greatly.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_GIVEN">
+                <Original>Thank you. That makes %1 of the %2 we need.</Original>
+                <English>Thank you. That makes %1 of the %2 we need.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_THANKS">
+                <Original>Thank you. I won't forget what you've done for us.</Original>
+                <English>Thank you. I won't forget what you've done for us.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_GIVE">
+                <Original>Give Money</Original>
+                <English>Give Money</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_ROW_GIVE_DESC">
+                <Original>They have %1 of the %2 money they need. Give what you can spare.</Original>
+                <English>They have %1 of the %2 money they need. Give what you can spare.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_GIVE">
+                <Original>Give</Original>
+                <English>Give</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_GIVE_AMOUNT">
+                <Original>Give: %1 money</Original>
+                <English>Give: %1 money</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_FUNDS_RAISED">
+                <Original>Raised: %1 of %2 money</Original>
+                <English>Raised: %1 of %2 money</English>
             </Key>
         </Container>
         <Container name="Informants">

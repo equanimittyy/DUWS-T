@@ -958,12 +958,12 @@ town has settled.
 
 ### The dialog
 
-`shared/includes/civ_menu.hpp` holds two dialogs: `civ_dialog` on idc block **8300-8399** and the bribe
-prompt on **8400-8499**, both clear of every idc the mission ships (the nearest neighbours are the
+`shared/includes/civ_menu.hpp` holds three dialogs: `civ_dialog` on idc block **8300-8399**, and the bribe
+prompt and Raise Funds' `civ_give_dialog` on **8400-8499**, both clear of every idc the mission ships (the nearest neighbours are the
 disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Six framed rows — work, intel, aid,
 toolkit, recruit, arrest — each `closeDialog 0` and `remoteExec` the work to the server. Work asks for a
 civilian side mission and reaches its own server function, `fnc_civ_mission_request`; on the giver of a
-live one it becomes Report, with Cancel beside it
+live one it becomes Report, or Give Money for Raise Funds, with Cancel beside it
 ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
 
 **The client does not need the town's reputation.** The rows are the same whatever the band; only the
@@ -1008,6 +1008,7 @@ when a flag lands still has its rows live, and the flag only ever arrives over t
 | `isSurrendered` | broadcast | Held at gunpoint. Gates Search and Release, and makes the panic sweep skip them |
 | `DUWS_civ_pending` | server only | `[caller, row, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
 | `DUWS_civMission_state` | broadcast | `"active"` or `"ready"` while this civilian is the giver of a live civilian side mission. Opens Interact with no call-over, and turns the first row into Report |
+| `DUWS_civMission_funds` | broadcast | `[raised, target]` while this civilian is the giver of a live Raise Funds mission. Turns the first row into Give Money |
 
 Everything but `DUWS_civ_pending` is broadcast because it is read off the server: the dialog is built on
 the client that opens it and has to know at open time which rows are dead, and the `addAction`

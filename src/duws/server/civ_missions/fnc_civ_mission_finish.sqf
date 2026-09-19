@@ -15,10 +15,11 @@ switch (_status) do {
         (_e get "reward") params ["_cp", "_money", "_rep"];
         private _cpPaid = floor (_cp * cp_reward_multiplier);
         [_cpPaid, format ["civilian mission %1", _id]] call fnc_cp_adjust;
-        [[["Money_roll", _money]], getPosATL _giver] call fnc_money_drop;
+        // fnc_money_drop leaves an empty holder on the ground for a zero count.
+        if (_money > 0) then { [[["Money_roll", _money]], getPosATL _giver] call fnc_money_drop };
         [_e get "town", _rep, "civ_mission"] call fnc_town_rep_adjust;
         private _near = allPlayers select { _x distance _giver < 30 };
-        [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_CIVMISSION_THANKS"] remoteExec ["fnc_duws_dialogue", _near];
+        [localize "STR_DUWS_T_civ", localize (_e getOrDefault ["thanks", "STR_DUWS_T_CIVMISSION_THANKS"])] remoteExec ["fnc_duws_dialogue", _near];
         ["cpaddedmission", [_cpPaid]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
     };
     case "CANCELED": {
@@ -35,6 +36,7 @@ switch (_status) do {
 
 if (!isNull _giver) then {
     _giver setVariable ["DUWS_civMission_state", nil, true];
+    _giver setVariable ["DUWS_civMission_funds", nil, true];
     _giver setVariable ["DUWS_civMission_id", nil];
     // Not back on the roster: the town may have slept and refilled without them. The sweep takes them
     // once no player is near.

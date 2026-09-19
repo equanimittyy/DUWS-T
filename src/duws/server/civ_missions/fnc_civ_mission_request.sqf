@@ -43,18 +43,21 @@ if (_force || {count DUWS_civMissions < CIV_MISSION_CAP}) then {
 _civ disableAI "PATH";
 sleep 3;
 
-// [thread, brief key, cp, [money min, money max], rep, gate]
+// [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max]]. A target is money the
+// players raise at the giver's feet, so that job needs no site outside town.
 private _types = [
-    ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }],
-    ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }]
+    ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }, []],
+    ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }, []],
+    ["fnc_civ_mission_funds",  "STR_DUWS_T_CIVMISSION_FUNDS_BRIEF",  15, [0, 0], 5, { true }, [9, 15]]
 ] select { call (_x select 5) };
+(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep", "", "_target"];
 private _town = _civ getVariable ["civ_locIndex", -1];
 
 // A flat chance, not the reputation curve: a hostile town is where the player most needs the reputation a
 // mission pays, and the curve offers nothing at -20.
 private _site = [];
 if (_id >= 0 && {alive _civ} && {_town >= 0} && {_force || {random 1 < CIV_MISSION_OFFER_CHANCE}}) then {
-    _site = [_town] call fnc_civ_mission_site;
+    _site = if (_target isEqualTo []) then { [_town] call fnc_civ_mission_site } else { getPosATL _civ };
 };
 if (_site isEqualTo []) exitWith {
     if (_id >= 0) then { DUWS_civMissions deleteAt _id };
@@ -62,21 +65,23 @@ if (_site isEqualTo []) exitWith {
     [_civ, _caller, "WORK"] call fnc_civ_close;
 };
 
-(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep"];
-_money params ["_moneyMin", "_moneyMax"];
-private _reward = [_cp, _moneyMin + floor random (_moneyMax - _moneyMin + 1), _rep];
+private _roll = { params ["_min", "_max"]; _min + floor random (_max - _min + 1) };
+private _reward = [_cp, _money call _roll, _rep];
+private _goal = 0;
+if (_target isNotEqualTo []) then { _goal = _target call _roll };
 private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
     ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
-    ["reward", _reward], ["group", grpNull], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
+    ["reward", _reward], ["target", _goal], ["raised", 0],
+    ["group", grpNull], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["taskId", ""], ["title", ""]
 ];
 
 // The offer rides the bribe prompt: fnc_civ_bribe_answer checks the answer is the asker's and hands a "WORK"
 // row to fnc_civ_mission_accept. Keys and numbers, not text, so the prompt reads in the asker's language.
 _civ setVariable ["DUWS_civMission_id", _id];
 _civ setVariable ["DUWS_civ_pending", [_caller, "WORK", 0]];
-[netId _civ, 0, [_briefKey, floor (_cp * cp_reward_multiplier), _reward select 1, _rep]] remoteExec ["fnc_civ_bribe_prompt", _caller];
-[localize "STR_DUWS_T_civ", localize _briefKey] remoteExec ["fnc_duws_dialogue", _caller];
+[netId _civ, 0, [_briefKey, floor (_cp * cp_reward_multiplier), _reward select 1, _rep, _goal]] remoteExec ["fnc_civ_bribe_prompt", _caller];
+[localize "STR_DUWS_T_civ", format [localize _briefKey, _goal]] remoteExec ["fnc_duws_dialogue", _caller];
 ["INFO", "CIV", format ["civilian mission %1 (%2) offered in town %3 at %4", _id, _thread, _town, _site]] call fnc_log;
 
 // Declined for the asker if the prompt goes unanswered, so a lost client cannot hold a slot for the session.

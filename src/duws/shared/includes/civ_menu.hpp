@@ -6,7 +6,7 @@
 // printed here would be a guess at a demand that only arrives some of the time -- if the roll
 // comes back bribe, civ_bribe_dialog below states the amount and the player answers it.
 //
-// idc block 8300-8399 here and 8400-8499 for the prompt; the nearest neighbours are the disguise
+// idc block 8300-8399 here and 8400-8499 for the prompts; the nearest neighbours are the disguise
 // panel's 8000-8203 and fobmanager's 9745. DUWS_civ_target is set by fnc_civ_menu before the
 // dialog opens -- a dialog action string has no access to the addAction's _target.
 class civ_dialog
@@ -93,8 +93,8 @@ class civ_dialog
             action = "closeDialog 0; [DUWS_civ_target, player, 'INTEL'] remoteExec ['fnc_civ_request', 2];";
         };
 
-        // fnc_civ_menu relabels this Report on a mission's giver; the server decides Work or Report
-        // from its own record, so the label decides nothing.
+        // fnc_civ_menu relabels this Report on a mission's giver, and Give Money with its own action on a
+        // Raise Funds giver; the server decides Work or Report from its own record, so the label decides nothing.
         class civ_work_frame: civ_intel_frame
         {
             idc = 8325;
@@ -301,6 +301,85 @@ class civ_bribe_dialog
             x = 21 * GUI_GRID_W + GUI_GRID_X;
             y = 15.8 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
+            h = 1.4 * GUI_GRID_H;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            action = "closeDialog 0;";
+        };
+    };
+};
+
+// Raise Funds' gift, in the rest dialog's slider idiom; opened by fnc_civ_give_menu.
+class civ_give_dialog
+{
+    idd = -1;
+    movingenable = true;
+
+    class controls
+    {
+        class civg_background: RscText
+        {
+            idc = 8430;
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 20 * GUI_GRID_W;
+            h = 7.6 * GUI_GRID_H;
+            colorBackground[] = {0, 0, 0, 0.7};
+        };
+        class civg_mainframe: RscFrame
+        {
+            idc = 8431;
+            text = "$STR_DUWS_T_CIVMISSION_ROW_GIVE";
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 20 * GUI_GRID_W;
+            h = 7.6 * GUI_GRID_H;
+            moving = 1;
+        };
+        class civg_raised: RscText
+        {
+            idc = 8432;
+            style = ST_CENTER;
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 1 * GUI_GRID_H;
+        };
+        class civg_amount: RscText
+        {
+            idc = 8433;
+            style = ST_CENTER;
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 10.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
+        };
+        class civg_slider: RscSlider
+        {
+            idc = 8434;
+            onSliderPosChanged = "ctrlSetText [8433, format [localize 'STR_DUWS_T_CIVMISSION_GIVE_AMOUNT', round (_this select 1)]];";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 11.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18 * GUI_GRID_W;
+            h = 0.8 * GUI_GRID_H;
+        };
+        class civg_confirm: RscButton
+        {
+            idc = 8435;
+            text = "$STR_DUWS_T_CIVMISSION_GIVE";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11 * GUI_GRID_W;
+            h = 1.4 * GUI_GRID_H;
+            colorBackground[] = {0.16, 0.3, 0.55, 0.7};
+            action = "[DUWS_civ_target, player, round (sliderPosition 8434)] remoteExecCall ['fnc_civ_mission_give', 2]; closeDialog 0;";
+        };
+        class civg_close: RscButton
+        {
+            idc = 8436;
+            text = "$STR_DUWS_T_MENU_CLOSE";
+            x = 23 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 6 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};
             action = "closeDialog 0;";

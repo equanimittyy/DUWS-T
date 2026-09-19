@@ -243,6 +243,8 @@ fnc_civ_mission_poll = compile preprocessFileLineNumbers "duws\server\civ_missio
 fnc_civ_mission_finish = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_finish.sqf";
 fnc_civ_mission_camp = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_camp.sqf";
 fnc_civ_mission_stolen = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_stolen.sqf";
+fnc_civ_mission_funds = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_funds.sqf";
+fnc_civ_mission_give = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_give.sqf";
 
 // =========================================================================================================
 // server/civilian
@@ -760,6 +762,8 @@ fnc_civ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_men
 publicVariable "fnc_civ_menu";
 fnc_civ_bribe_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_bribe_prompt.sqf";
 publicVariable "fnc_civ_bribe_prompt";
+fnc_civ_give_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_give_menu.sqf";
+publicVariable "fnc_civ_give_menu";
 fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_faction_dialog.sqf";publicVariable "fnc_HQ_faction_dialog";
 fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
 fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";

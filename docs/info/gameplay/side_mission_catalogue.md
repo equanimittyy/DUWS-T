@@ -458,17 +458,18 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | At one time | one (`Mission_available`) | up to three (`CIV_MISSION_CAP`) |
 | Name | a generated operation name | the type's name; no title card and no music |
 | Deadline | a band per type | none |
-| Ends | on the objective | when a player reports to the giver, or cancels |
+| Ends | on the objective | when a player reports to the giver, or cancels; Raise Funds ends on the gift that meets its target |
 | Pays | CP and AP | CP, money and town reputation |
 
 | Type | Bandits | Won when | Lost when | CP | Money | REP |
 |---|---|---|---|---:|---:|---:|
 | Clear Bandit Camp | 4-6 | every bandit is dead | the giver dies | 10 | 3-5 | +3 |
 | Recover Stolen Car | 3-4 | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
+| Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
 
 The CP is scaled by `cp_reward_multiplier`. The money drops at the giver's feet (`fnc_money_drop`), and
 the reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
-and no other cost.
+and no other cost, except that money given to Raise Funds is not refunded.
 
 **The offer is a flat 75 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is
 where the player most needs the reputation that a mission pays, and the curve offers nothing at -20. A
@@ -480,6 +481,13 @@ full cap is a refusal, and like every refusal it spends the civilian.
 `fnc_civ_mission_accept`: Accept starts the mission, and Decline or Escape frees the slot and spends the
 civilian. The slot is held while the prompt is open, so an unanswered prompt is declined after 120 s, or
 a lost client would hold it for the session.
+
+**Raise Funds is paid for at the giver** (`fnc_civ_mission_funds.sqf`). The target is rolled with the
+offer, so the brief names it. The job has no site: the task pins the giver, with no search area. On the
+giver, the first row reads Give Money and opens `civ_give_dialog`, a slider capped at the money that the
+player carries and the money that the giver still needs. `fnc_civ_mission_give` runs by `remoteExecCall`,
+so it is unscheduled, and two players who give at the same time cannot both pay the same shortfall. Any
+player can give, and the gift that meets the target is the report.
 
 **The giver stays.** The request takes the giver off the town's crowd roster, so a town that sleeps
 leaves them standing, and holds them with `PATH` off, so the task pin stays true. The panic sweep skips
@@ -503,7 +511,7 @@ outlast the litter lifetime.
 **The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
 other live site. Bandits fight both armies, and the objective counts every bandit dead, whoever killed
-them. A town close to HQ often finds no site, so its civilians have no work to give.
+them. A town close to HQ often finds no site, so there only a Raise Funds draw becomes a job.
 
 A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug
 menu's *Force civilian mission* row makes the civilian under the cursor offer a job, with no roll and no
