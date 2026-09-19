@@ -602,6 +602,12 @@ OPCOM_ARTY_WANDER = 10;
 // Most seconds a gun waits at random before each round, so the impacts keep no rhythm to count.
 OPCOM_ARTY_JITTER = 2;
 
+// A rocket launcher's OPCOM_ARTY_JITTER: its salvo ripples out in seconds, where a tube walks its rounds in.
+OPCOM_ARTY_ROCKET_JITTER = 0.3;
+
+// Metres a rocket may land from its aim point, on top of the pattern: rockets fall wider than shells (fnc_opcom_fires).
+OPCOM_ARTY_ROCKET_SCATTER = 75;
+
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
 // look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.
 OPCOM_INTERCEPT_K = 1;

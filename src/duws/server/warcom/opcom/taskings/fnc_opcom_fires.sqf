@@ -40,8 +40,9 @@ DUWS_fnc_opcom_creepGrid = {
 
 // A creep gives each gun its own lane and each row its own band, so the line walks forward together. _drift is the
 // pattern's wander, one [x, y] per creep row or saturate round; a creep takes only its lateral part, off its bearing.
+// _scatter is a radius about each aim point that the round lands anywhere within, on top of the pattern.
 DUWS_fnc_opcom_fireAim = {
-    params ["_pt", "_shape", "_g", "_guns", "_k", ["_drift", []]];
+    params ["_pt", "_shape", "_g", "_guns", "_k", ["_drift", []], ["_scatter", 0]];
     private _off = switch (_shape select 0) do {
         case "creep": {
             _shape params ["", "_width", "_length", "_dir"];
@@ -60,13 +61,18 @@ DUWS_fnc_opcom_fireAim = {
             [_r * sin _t + _dx, _r * cos _t + _dy]
         };
     };
+    if (_scatter > 0) then {
+        private _r = _scatter * sqrt random 1;
+        private _t = random 360;
+        _off = [(_off select 0) + _r * sin _t, (_off select 1) + _r * cos _t];
+    };
     [(_pt select 0) + (_off select 0), (_pt select 1) + (_off select 1), 0]
 };
 
 // doArtilleryFire puts every round of one order on one point, so each aim point is its own one-round order.
 // A round not away inside OPCOM_ARTY_ROUND_SECS is written off, so a dead crew never leaves the gun loaded.
 DUWS_fnc_opcom_gunFire = {
-    params ["_gun", "_mag", "_pts", "_delay"];
+    params ["_gun", "_mag", "_pts", "_delay", "_jitter"];
     private _old = _gun getVariable ["DUWS_opcomFireEH", -1];
     if (_old >= 0) then { _gun removeEventHandler ["Fired", _old] };
     _gun setVariable ["DUWS_opcomFired", 0];
@@ -75,14 +81,14 @@ DUWS_fnc_opcom_gunFire = {
         _g setVariable ["DUWS_opcomFired", (_g getVariable ["DUWS_opcomFired", 0]) + 1];
         _g setVehicleAmmo 1;
     }]];
-    [_gun, _mag, _pts, _delay] spawn {
-        params ["_gun", "_mag", "_pts", "_delay"];
+    [_gun, _mag, _pts, _delay, _jitter] spawn {
+        params ["_gun", "_mag", "_pts", "_delay", "_jitter"];
         sleep _delay;
         {
             if (!alive _gun || {!alive (gunner _gun)}) exitWith {};
             // Spread can carry a point past the gun's reach even when the aim point bears; skip it, don't wait it out.
             if !(_x inRangeOfArtillery [[_gun], _mag]) then { continue };
-            sleep random OPCOM_ARTY_JITTER;
+            sleep random _jitter;
             private _before = _gun getVariable ["DUWS_opcomFired", 0];
             private _deadline = time + OPCOM_ARTY_ROUND_SECS;
             _gun doArtilleryFire [_x, _mag, 1];
@@ -113,7 +119,7 @@ DUWS_fnc_opcom_fireMission = {
         if (_m isEqualTo "" || {isNull (gunner _gun)} || {!(_pt inRangeOfArtillery [[_gun], _m])}) then {
             _gun setVehicleAmmo 0;
         } else {
-            _guns pushBack [_gun, _m];
+            _guns pushBack [_gun, _m, getText (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _m >> "ammo") >> "simulation")];
         };
     } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
     if (_guns isEqualTo []) exitWith {
@@ -136,15 +142,17 @@ DUWS_fnc_opcom_fireMission = {
         _drift pushBack [_dx, _dy];
     };
     {
-        _x params ["_gun", "_m"];
+        _x params ["_gun", "_m", "_sim"];
+        // Not-a-shell rather than is-a-rocket: a launcher's round may be a rocket or a submunition carrier by mod.
+        private _rocket = _sim != "shotShell";
         private _g = _forEachIndex;
         private _pts = [];
         for "_k" from 0 to _rounds - 1 do {
-            _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift] call DUWS_fnc_opcom_fireAim);
+            _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift, [0, OPCOM_ARTY_ROCKET_SCATTER] select _rocket] call DUWS_fnc_opcom_fireAim);
         };
-        [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g] call DUWS_fnc_opcom_gunFire;
+        [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket] call DUWS_fnc_opcom_gunFire;
     } forEach _guns;
-    ["INFO", "OPCOM", format ["arty: %1 fires %2 gun(s) x %3 rounds of %4, %5 at %6", _key, count _guns, _rounds,
-        (_guns select 0) select 1, _shape, _pt apply { round _x }]] call fnc_log;
+    ["INFO", "OPCOM", format ["arty: %1 fires %2 gun(s) x %3 rounds of %4 (%5), %6 at %7", _key, count _guns, _rounds,
+        (_guns select 0) select 1, (_guns select 0) select 2, _shape, _pt apply { round _x }]] call fnc_log;
     _rounds * count _guns
 };

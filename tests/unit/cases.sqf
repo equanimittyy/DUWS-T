@@ -1466,6 +1466,10 @@ fnc_test_aimIn = {
     [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 1, 0, [[30, 500]]], { [_this, 980, 1080, 1000, 1050] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a creep given no length still crawls the floor's depth",
     [[[1000, 1000, 0], ["creep", 100, 0, 0], 0, 1, 0], { ((_this select 1) - 1000) <= 1 }] call fnc_test_aimAll, false] call fnc_assertEq;
+["fire_aim: a rocket's scatter lands within the pattern plus its scatter",
+    [[[1000, 1000, 0], ["saturate", 50], 0, 1, 0, [], 75], { (_this call fnc_test_aimDist) <= 125 }] call fnc_test_aimAll, true] call fnc_assertEq;
+["fire_aim: ... and past the pattern alone",
+    [[[1000, 1000, 0], ["saturate", 50], 0, 1, 0, [], 75], { (_this call fnc_test_aimDist) <= 50 }] call fnc_test_aimAll, false] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_deposit: the grid's linear falloff, and its exact take-back ---
 // The grid stage removes a cached source by depositing its weight negated, so a removal must leave every cell
