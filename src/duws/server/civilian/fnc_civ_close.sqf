@@ -15,8 +15,9 @@ if (isNull _civilian) exitWith {};
 
 // Closed against every row, not just the one that was asked. The refusal is the person deciding
 // they are done talking, so a second row would be the same answer with extra steps.
-// The line is per row only for flavour -- all five mean the same thing.
+// The line is per row only for flavour -- they all mean the same thing.
 private _line = switch (toUpper _row) do {
+    case "WORK": { "STR_DUWS_T_CIVMISSION_NONE" };
     case "RECRUIT": { "STR_DUWS_T_RECRUIT_FAIL_REP" };
     case "AID": { "STR_DUWS_T_ASK_AID_REFUSE" };
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_REFUSE" };

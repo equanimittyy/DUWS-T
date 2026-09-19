@@ -195,6 +195,11 @@ DUWS_retired = [];
 // the wait for a 30 min deadline, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
+// Live civilian side missions, id -> entry; fnc_civ_mission_request adds, fnc_civ_mission_finish deletes.
+// Server-only, and never saved: a restore drops live missions, and the entries hold unit handles.
+DUWS_civMissions = createHashMap;
+DUWS_civMissionSeq = 0;
+
 DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	

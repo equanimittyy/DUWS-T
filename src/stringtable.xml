@@ -2885,6 +2885,52 @@
                 <English>No IED here.</English>
             </Key>
         </Container>
+        <Container name="Civilian Side Missions">
+            <Key ID="STR_DUWS_T_CIVMISSION_ASK">
+                <Original>Need help with anything?</Original>
+                <English>Need help with anything?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_NONE">
+                <Original>No. Nothing you can do for me.</Original>
+                <English>No. Nothing you can do for me.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CAMP_TITLE">
+                <Original>Clear Bandit Camp</Original>
+                <English>Clear Bandit Camp</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CAMP_DESC">
+                <Original>Bandits camp outside town and take what they want. Kill them all, then report back to the local who asked.</Original>
+                <English>Bandits camp outside town and take what they want. Kill them all, then report back to the local who asked.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CAMP_BRIEF">
+                <Original>Bandits. They camp outside town and take what they like. Get rid of them, come back to me, and I'll pay.</Original>
+                <English>Bandits. They camp outside town and take what they like. Get rid of them, come back to me, and I'll pay.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_TITLE">
+                <Original>Recover Stolen Car</Original>
+                <English>Recover Stolen Car</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_DESC">
+                <Original>Bandits took a local's car to their camp outside town. Drive it back to its owner, then report back.</Original>
+                <English>Bandits took a local's car to their camp outside town. Drive it back to its owner, then report back.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_STOLEN_BRIEF">
+                <Original>Bandits took my car. It's at their camp outside town. Bring it back to me and I'll pay.</Original>
+                <English>Bandits took my car. It's at their camp outside town. Bring it back to me and I'll pay.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CPMONEY">
+                <Original>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</Original>
+                <English>&lt;br /&gt;CP: %1&lt;br /&gt;Money: %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_THANKS">
+                <Original>Thank you. Here, %1 money. It's what I have.</Original>
+                <English>Thank you. Here, %1 money. It's what I have.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_CANCELED">
+                <Original>Fine. I'll manage on my own.</Original>
+                <English>Fine. I'll manage on my own.</English>
+            </Key>
+        </Container>
         <Container name="Informants">
             <Key ID="STR_DUWS_T_stfu">
                 <Original>I haven't seen anything. Don't ask me again.</Original>

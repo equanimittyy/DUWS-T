@@ -233,6 +233,17 @@ fnc_bandit_looks = compile preprocessFileLineNumbers "duws\server\bandits\fnc_ba
 fnc_bandit_spawn = compile preprocessFileLineNumbers "duws\server\bandits\fnc_bandit_spawn.sqf";
 
 // =========================================================================================================
+// server/civ_missions
+// =========================================================================================================
+fnc_civ_mission_request = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_request.sqf";
+fnc_civ_mission_site = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_site.sqf";
+fnc_civ_mission_present = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_present.sqf";
+fnc_civ_mission_poll = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_poll.sqf";
+fnc_civ_mission_finish = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_finish.sqf";
+fnc_civ_mission_camp = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_camp.sqf";
+fnc_civ_mission_stolen = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_stolen.sqf";
+
+// =========================================================================================================
 // server/civilian
 // =========================================================================================================
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_garrison.sqf";
