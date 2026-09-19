@@ -1,14 +1,15 @@
-# Civilian shops and jobs: design plan
+# Civilian shops: design plan
 
-Grow the living-population civilian system into a small economy: named vendor NPCs stand in towns,
-sell to the player for money, and dispatch paid jobs. The theme is borrowed from the "shops and
-jobs" life scenarios — a car dealer, a boat dealer, an arms dealer, a mercenary contractor, a post
-office, a garbage depot — but every piece is built on the mission's existing plumbing rather than a
-parallel
-one: vendors are ordinary streamed civilians, purchases move the physical money item, and jobs are
-gated on the existing civilian disguise.
+Grow the living-population civilian system into a small economy: named vendor NPCs stand in towns
+and sell to the player for money. The theme is borrowed from the "shops and jobs" life scenarios — a
+car dealer, a boat dealer, an arms dealer, a mercenary contractor — but every piece is built on the
+mission's existing plumbing rather than a parallel one: vendors are ordinary streamed civilians and
+purchases move the physical money item.
 
-Two rules govern everything below:
+This plan also owns the vendor framework. The paid jobs that fund the shops, and the employer
+vendors that dispatch them, are in [`civilian_jobs_plan.md`](civilian_jobs_plan.md).
+
+Two rules govern both plans:
 
 - **Money is the currency, not CP/AP.** The player already carries `Money_roll` inventory items
   spent at the black market and on civilian bribes. Shops and job payouts move that same item, so
@@ -25,8 +26,8 @@ Two rules govern everything below:
 Money today is scarce — earned in small amounts and spent only on black-market micro-purchases
 (`fnc_addHQBuildingActions.sqf:29-31`) and civilian bribes. Adding large sinks (vehicles, weapons,
 hired groups) without a matching faucet leaves the shops unusable, so **jobs are not optional
-flavour; they are the faucet that funds the shops.** Ship at least one job type in the same phase as
-the first paid shop.
+flavour; they are the faucet that funds the shops** ([`civilian_jobs_plan.md`](civilian_jobs_plan.md)).
+Ship at least one job type alongside the first paid shop.
 
 Money is counted and spent through the two existing server functions — `fnc_money_count`
 (`fnc_economy_init.sqf:237`) and `fnc_money_spend` (`fnc_economy_init.sqf:251`). Every shop purchase
@@ -53,17 +54,9 @@ are picked from that same building survey. Some vendors are location-gated as we
 fishmonger only in a coastal town, a farmer only where there is farmland — so a town's mix reflects
 where it is, not only how big it is.
 
-**The farmer is the one rural vendor.** Unlike every other vendor, the farmer does not stand in a
-town: it sits at an isolated farmhouse in open country, 1–2 km out from a valid zone rather than
-inside a town's building survey. Place it by sampling a random point in that 1–2 km ring around the
-chosen zone centre (`zone_meta_array` carries each zone's position), then taking the nearest `House`
-terrain object with **two doors or fewer** — the low door count rejects the military and industrial
-complexes that have many, and keeps the pick a plausible farm dwelling. `fnc_usableBuildings` is the
-wrong filter here: it selects by building-position count, which favours exactly the large complexes
-to avoid. Count the house's door animation sources directly instead. Because it sits outside every
-town, the farmer cannot ride the town-crowd poller for streaming — it streams off its own position
-(spawn when a player nears the farmhouse, sleep when none is), the one lifecycle difference from the
-town vendors.
+**The farmer is the one rural vendor.** It stands at an isolated farmhouse outside every town and
+streams off its own position rather than the town-crowd poller; its placement is in
+[`civilian_jobs_plan.md`](civilian_jobs_plan.md#farmer-placement).
 
 **Service is gated, not spawning.** Vendors stand in every town including enemy-held ones, but a
 **shop** in a hostile town **refuses to sell** — the menu opens to a refusal line ("not while they're
@@ -72,7 +65,7 @@ an enemy-held town (`fnc_civ_repAt`, the `<= -10` test in `fnc_disguiseAsCivilia
 capturing an area the thing that opens its shops, without needing a separate "friendly town" list.
 **Job employers are the exception**: mundane labour is plausible cover, so an employer still dispatches
 its job in a hostile town — that is exactly the reason a disguised operator has to be there (see
-[Jobs](#jobs)).
+[`civilian_jobs_plan.md`](civilian_jobs_plan.md#jobs)).
 
 **Lifecycle: streamed with the crowd, not always-on.** Persistent AI in every town across Altis is a
 perf cost the mission cannot pay. Vendors ride the same site poller as the crowd — register them as
@@ -100,12 +93,12 @@ car, boat, truck, rifle, box, wrench, and container — a closer fit than the lo
 mapping is deliberate rather than a nearest guess. Those classes were added by the Apex platform
 update, but their textures live in the base `\a3\ui_f\` PBO and platform-update configs ship to every
 owner, so they render on a mod-free client; the wiki's "Apex" tag marks the update that introduced the
-class, not a runtime gate. Two picks are classic base markers — `c_car` (taxi) and `loc_Fountain`
-(fishmonger, a water stand-in). Every marker also carries the vendor's name as text (`setMarkerText`),
+class, not a runtime gate. Every marker also carries the vendor's name as text (`setMarkerText`),
 so an approximate glyph is never ambiguous — the label reads "Fishmonger" even where the icon is only
 water. No *listed* vendor falls back to the bare `c_unknown` question mark; a vendor type with no row
-in the table below defaults to `c_unknown`. The **No.** column is the contact-sheet number in the
-marker reference ([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
+in the table below or in the [employer table](civilian_jobs_plan.md#employer-markers) defaults to
+`c_unknown`. The **No.** column is the contact-sheet number in the marker reference
+([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
 
 | Vendor | Icon | No. | Reads as |
 |---|---|---|---|
@@ -113,14 +106,6 @@ marker reference ([`../info/external/arma3_markers.md`](../info/external/arma3_m
 | Boat dealer | `loc_boat` | 152 | boat |
 | Arms Dealer | `loc_Rifle` | 218 | rifle |
 | Contractor | `loc_Attack` | 151 | crossed swords |
-| Garbage depot | `loc_help` | 174 | help / assist |
-| Post office | `loc_Box` | 153 | package |
-| Taxi rank | `c_car` | 22 | car |
-| Haulage depot | `loc_Truck` | 231 | truck |
-| Mechanic | `loc_repair` | 217 | wrench |
-| Utility works | `loc_use` | 232 | cog / service |
-| Farmer | `loc_container` | 161 | crate |
-| Fishmonger | `loc_Fountain` | 169 | water |
 | *(unlisted type)* | `c_unknown` | 25 | question mark |
 
 None of these is load-bearing — swap any icon freely, the label is what identifies the vendor. If the
@@ -150,10 +135,11 @@ A vendor's interactable menu copies the civilian pattern: `fnc_civ_menuAction.sq
 purpose-built dialog like `civ_menu.hpp` for the ones with a catalogue. The service-refusal check
 (hostile town) happens when the menu opens, before any catalogue is shown.
 
-## Vendor types
+## Shops
 
 Vendors come in two kinds: **shops** that sell to the player, and **employers** that dispatch a job.
-The shops:
+The employers are in [`civilian_jobs_plan.md`](civilian_jobs_plan.md#employers); they use the
+framework above unchanged except for the hostile-town gate. The shops:
 
 | Shop | Sells | Built on |
 |---|---|---|
@@ -161,14 +147,6 @@ The shops:
 | Boat dealer | civilian boats | civilian boat classes, same empty-vehicle spawn; pairs with deep-water fishing |
 | Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; a money-gated pick |
 | Contractor | AI groups (guerilla/PMC) into High Command | `fnc_HCsquad_spawn.sqf` + `hcSetGroup`; see below |
-
-The employers are one per job — a post office for the courier run, a fishmonger for the catch, a
-farmer for the farm pickup, and so on. Each is listed against its job in [Jobs](#jobs); they are
-vendors too, placed, marked, streamed, and persisted exactly like the shops — the farmer excepted,
-which stands rural and streams off its own position (see [Placement](#vendors-are-streamed-civilians)).
-The one behavioural
-difference is the hostile-town gate below: a shop refuses to sell there, but an employer keeps
-dispatching, which is the cover a disguised operator wants.
 
 ### Contractor
 
@@ -187,59 +165,6 @@ The Contractor is where buying groups lives from now on. Two decisions shape it:
 The rework of the request-menu squad column is the one piece here that touches existing balance, so
 it is scoped as its own step rather than folded into vendor framework work.
 
-## Jobs
-
-Jobs pay money and are the economy's faucet. **Every job requires an active disguise**
-(`player getVariable "DUWS_disguised"`, set by `fnc_disguiseAsCivilian.sqf`) and aborts if the
-disguise breaks (firing, drawing a weapon). That keeps a job civilian cover work, not something done
-in full kit, and makes jobs vanilla-mode-only like the disguise, disabled in `NONE`/`RAVAGE`/`WBK`.
-
-The disguise gate gives jobs a role past money. A shop refuses service in a hostile town, but a cover
-job is the *reason* to be in one: a garbage round through an enemy-held town is a plausible excuse for
-a disguised operator to loiter and read the garrison. Jobs are cover plus faucet. The idea is borrowed
-from the resistance-economy scenarios (Overthrow, the Life mods) — jobs dispatched by a vendor and
-repeatable — reframed so the work funds the war and buys cover rather than being an end in itself.
-
-Under the skins the jobs reduce to three reusable primitives: collect a quota at scattered markers,
-transport a passenger or cargo to a destination, and drive to a target for a hold-action then return.
-Build the three and each job is a skin on one, which keeps the set cheap to grow.
-
-| Job | Employer | What | Built on |
-|---|---|---|---|
-| Garbage round | Garbage depot | pick up rubbish scattered around a town with a hold-action until a quota is met | rubbish markers around town + `BIS_fnc_holdActionAdd` (as `fnc_intel_search_action.sqf`) |
-| Postal courier | Post office | deliver a package to another town | traffic road data (`fnc_civ_traffic.sqf`) |
-| Taxi / transport | Taxi rank | pick up an AI civilian passenger and drop them at a destination, which may be another town | spawn a civ passenger, `moveInCargo`, destination marker |
-| Cargo haul | Haulage depot | truck crates between towns; slower, more exposed on the road | vehicle + crate cargo, road route |
-| Roadside assistance | Mechanic | drive to a broken-down civilian vehicle somewhere and repair it with a hold-action | spawn a damaged `civ_veh_array` vehicle at a marker + hold-action repair |
-| Utility repair | Utility works | restore power or water at a town's infrastructure marker with a hold-action; completion raises the town's reputation | go-fix primitive + `fnc_town_rep_adjust` |
-| Farm pickup | Farmer | drive to a rural farm, collect a crate, and return it to the town | transport primitive: a crate at a rural marker, delivered back |
-| Fishing | Fishmonger | fish at a coastal spot; the catch table shifts with water depth, so deep water reached by boat pays far better than the shore | depth via `getTerrainHeightASL` + `BIS_fnc_holdActionAdd`; depth-banded `selectRandomWeighted` catch table |
-
-Fishing is the one job worth borrowing a mechanic for. The Life "gather" loop it comes from validates
-the spot by proximity to a marker, refuses to gather from inside a vehicle, and adds catch on a
-repeated timed action until the carry weight caps. The first two map straight onto these jobs (a
-marker check, an on-foot hold-action); the third does not — there is no virtual-inventory weight
-system here, so the catch is a plain counter and the payout comes through `fnc_money_spend`, not sold
-inventory. What is worth taking is the weighted catch table (common fish / rare fish / junk, rolled
-with `selectRandomWeighted`), and the variance is driven by depth: the catch band is chosen from the
-water depth under the fishing point (`getTerrainHeightASL`, negated to metres of water), so the shore
-pays little and the good catches sit offshore in deep water. That is what the boat dealer is for —
-shore fishing is the on-foot entry, a bought boat reaches the deep bands, and fishing income scales
-with the boat. The Life "no gathering from a vehicle" guard is therefore relaxed for the boat, which
-is the deep-water case; nets are still dropped for a first version, since the depth bands plus a
-hold-action carry the mechanic.
-
-Utility repair is the one job that pays in more than money: finishing it nudges the town's reputation
-up via `fnc_town_rep_adjust`, and reputation is what opens that town's shops — so the jobs loop feeds
-the shop gate, not only the wallet.
-
-Each job is started at its own employer NPC (the Employer column), and for fishing the fishmonger also
-buys the catch. Those employers are the job side of the vendor set: same spawn, marker, respawn, and
-persistence as the shops.
-
-**Start with two: garbage round and postal courier** — one static-marker loop, one town-to-town
-drive. The rest is variation to layer on once the loop is proven and tuned.
-
 ## Persistence contract
 
 Vendors and their state must be rebuildable from plain data, per the campaign-persistence rule that
@@ -252,8 +177,6 @@ Vendors and their state must be rebuildable from plain data, per the campaign-pe
   regenerated, so towns keep their shops. No unit, group, or Location handles in that registry; the
   live vendor objects are rebuilt by the spawn path, not stored.
 - Player money is inventory, so it is carried by whatever saves the player; nothing extra to store.
-- In-progress job state (a half-finished garbage round) is not worth persisting in a first version —
-  drop the job on load rather than trying to resume it.
 
 ## Wiring
 
@@ -262,19 +185,14 @@ is compiled and `publicVariable`'d in the manifest `server/server_fnc_init.sqf`,
 that lists what reaches clients stays complete. Server-only helpers stay server-only and are marked
 as such there, matching the existing convention.
 
-## Open decisions
-
-- **Money faucet size.** Job payouts versus shop prices — untuned. Needs a balance pass once a job
-  and a paid shop both exist (P4).
-- **Merc roster source.** Which groups the Contractor's money mercenaries draw from (an existing
-  independent roster, or a new guerilla/PMC set).
-
 ## Phasing
 
 1. **Vendor framework.** New static "vendor" posture, streamed lifecycle, five-minute respawn, global
    marker, hostile-town service refusal, and one menu — start with the Arms Dealer, whose catalogue
    is the seeded arsenal and needs no new spawn path.
-2. **Shops.** Car Dealer and Boat dealer (civilian vehicle and boat spawn) and the Contractor: relocate the CP/AP squad buy
-   out of the request menu, then add the money mercenaries beside it.
-3. **Jobs.** Garbage round and postal courier, disguise-gated — the money faucet.
-4. **Balance and persistence.** Tune payouts against prices; wire the vendor registry into the save.
+2. **Shops.** Car Dealer and Boat dealer (civilian vehicle and boat spawn) and the Contractor:
+   relocate the CP/AP squad buy out of the request menu, then add the money mercenaries beside it.
+   Settles which groups the money mercenaries draw from: an existing independent roster, or a new
+   guerilla/PMC set.
+3. **Persistence.** Wire the vendor registry into the save. Shop prices are tuned against job
+   payouts in the jobs plan's balance phase.
