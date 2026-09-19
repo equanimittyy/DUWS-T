@@ -456,7 +456,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 |---|---|---|
 | Issued by | the strategic map | the **Work** row, first in the civilian menu |
 | At one time | one (`Mission_available`) | up to three (`CIV_MISSION_CAP`) |
-| Name | a generated operation name | the type's name; no title card and no music |
+| Name | a generated operation name | the giver's town, then the type's name (*Kavala: Clear Bandit Camp*); no title card and no music |
 | Deadline | a band per type | none |
 | Ends | on the objective | when a player reports to the giver, or cancels; Raise Funds ends on the gift that meets its target |
 | Pays | CP and AP | CP, money and town reputation |

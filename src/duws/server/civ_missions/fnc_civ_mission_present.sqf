@@ -11,7 +11,10 @@ if (_search) then {
 
 private _taskId = format ["civ_mission_%1", _id];
 _e set ["taskId", _taskId];
-_e set ["title", _titleKey];
+private _title = localize _titleKey;
+private _townName = text ((missionNamespace getVariable ["civ_locations", []]) select (_e get "town"));
+if (_townName != "") then { _title = format ["%1: %2", _townName, _title] };
+_e set ["title", _title];
 (_e get "reward") params ["_cp", "_money", "_rep"];
 private _pay = if (_money > 0) then {
     format [localize "STR_DUWS_T_CIVMISSION_CPMONEY", floor (_cp * cp_reward_multiplier), _money]
@@ -21,4 +24,4 @@ private _pay = if (_money > 0) then {
 private _desc = (format [localize _descKey, _e get "target"]) + "<br />" + (localize "STR_DUWS_T_mission_divider")
     + _pay + format [localize "STR_DUWS_T_mission_rep", _rep];
 // Server-side, never remoteExec'd (arma_engine_gotchas.md). "CREATED" leaves the HQ mission the current task.
-[west, [_taskId], [_desc, localize _titleKey, ""], [_centre select 0, _centre select 1], "CREATED", 1, true, _taskType, false] call BIS_fnc_taskCreate;
+[west, [_taskId], [_desc, _title, ""], [_centre select 0, _centre select 1], "CREATED", 1, true, _taskType, false] call BIS_fnc_taskCreate;

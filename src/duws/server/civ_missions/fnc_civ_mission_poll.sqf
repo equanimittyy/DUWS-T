@@ -17,6 +17,6 @@ if (_ready isNotEqualTo (_e get "ready")) then {
 if (!(_e get "announced") && {({ alive _x } count units (_e get "group")) == 0}) then {
     _e set ["announced", true];
     [_e get "taskId", [(getPosATL _giver) select 0, (getPosATL _giver) select 1]] call BIS_fnc_taskSetDestination;
-    ["TaskUpdated", ["", localize (_e get "title")]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
+    ["TaskUpdated", ["", _e get "title"]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];
 };
 ""
