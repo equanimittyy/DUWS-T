@@ -230,7 +230,8 @@ publicVariable "DUWS_safehouse_active";
     // raider inside through a gap or blown wall, no door shot).
     DUWS_safehouse_candidates = _bldgs;
     publicVariable "DUWS_safehouse_candidates";
-    { [_x] remoteExec ["fnc_raid_safehouse_arm", 0, _x] } forEach _bldgs;
+    // Keyed by slot, not by house: a terrain house is never deleted, so an object-keyed entry would outlive the raid.
+    { [_x] remoteExec ["fnc_raid_safehouse_arm", 0, format ["DUWS_safehouse_arm_%1", _forEachIndex]] } forEach _bldgs;
     [_bldgs] spawn {
         params ["_bldgs"];
         // "open" room-floor cells only, not door/near/blocked ones: a player straddling a doorway sits on a door
@@ -323,6 +324,7 @@ private _markername2 = [_MissionPos, _radius, _taskId, localize "STR_DUWS_T_RAID
     publicVariable "DUWS_safehouse_active";
     DUWS_safehouse_candidates = [];
     publicVariable "DUWS_safehouse_candidates";
+    { remoteExec ["", format ["DUWS_safehouse_arm_%1", _forEachIndex]] } forEach _bldgs;
     // Lift the lock off every candidate so the town returns to normal; a breached house is already open.
     { private _h = _x; for "_i" from 1 to 10 do { _h setVariable [format ["bis_disabled_Door_%1", _i], 0, true] } } forEach _bldgs;
 

@@ -22,7 +22,7 @@ A `TEXT` object (from `parseText`) does not serialize across `remoteExec` — `p
 | absent / `false` | fire and forget, current machines only |
 | `true` | append under an engine-generated ID — never referenceable, never removable |
 | a string | queue under that ID; a repeat call replaces, `remoteExec ["", id]` deletes |
-| an object | queue under the object's `netId`; dropped when the object is deleted |
+| an object | queue under the object's `netId`; dropped when the object is deleted, which an intact terrain building never is |
 
 A bare `true` backlog grows forever, and an object-keyed ID *is* that object's netId, so two entries on one object evict each other silently — the sabotage laptop's second intel entry once evicted its own breach action. Fix: key every entry that repeats — one entry per object self-cleans; two on one object need a suffixed string each (`format ["fob_guards_%1", netId _fob]`). Never queue a transient message (a one-off OSD or hint) at all.
 

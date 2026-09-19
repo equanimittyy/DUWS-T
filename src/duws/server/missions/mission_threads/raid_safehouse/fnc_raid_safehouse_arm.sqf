@@ -1,4 +1,4 @@
-// Locality: each client with a player (the thread remoteExecs it JIP, keyed on the house).
+// Locality: each client with a player (the raid thread remoteExecs it, JIP).
 //
 // Breach is shot-tracked off per-door points, not a HitPart: a building door is often collision-only geometry
 // that fires no HitPart, so a round into it never registered. Each point carries its door source, so the shot
