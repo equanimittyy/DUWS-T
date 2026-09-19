@@ -33,8 +33,10 @@ DUWS_dbgOpcomAiGen = _gen;
         private _disp = uiNamespace getVariable ["DUWS_opcomAiDisplay", displayNull];
         if (!isNull _disp) then {
             private _now = time;
-            private _lines = [format ["<t color='#ffaa00'>%1</t>", DUWS_dbgOpcomAiHeader]];
-            { _lines pushBack format ["<t color='#ffffff'>%1</t>", _x] } forEach DUWS_dbgOpcomAiRows;
+            private _lines = [format ["<t color='#ffaa00'>%1</t>", DUWS_dbgOpcomAiHeader], "<t color='#ffaa00'>--- Orders ---</t>"];
+            private _rows = [DUWS_dbgOpcomAiRows, ["No persistent orders."]] select (DUWS_dbgOpcomAiRows isEqualTo []);
+            { _lines pushBack format ["<t color='#ffffff'>%1</t>", _x] } forEach _rows;
+            _lines pushBack "<t color='#ffaa00'>--- Log ---</t>";
             {
                 _x params ["_stamp", "_text"];
                 if ((_now - _stamp) < AI_RECENT_LIFETIME) then {
