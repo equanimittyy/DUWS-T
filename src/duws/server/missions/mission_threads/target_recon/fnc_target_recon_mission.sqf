@@ -31,7 +31,7 @@ private _build = {
 
     // AP minefield opposite the patrol (so no mine spawns on the team), a third of the time, at
     // the far ring edge. Skipped near another minefield (<1 km); a square near a road (<100 m) or on water
-    // is dropped. No key, so it is unmanaged and persists past the mission rather than swept with the objective.
+    // is dropped. A standalone hardpoint, not a mission prop, so it outlives the mission.
     if (random 1 < RECON_MINE_CHANCE) then {
         private _fieldPos = _targetpos getPos [_radius * 0.85, (_targetpos getDir _spawnPos) + 180];
         private _clash = DUWS_hardpoints findIf {
@@ -39,12 +39,19 @@ private _build = {
         };
         if (_clash < 0) then {
             private _dir = _fieldPos getDir _targetpos;
+            private _seq = missionNamespace getVariable ["DUWS_hpReconSeq", 0];
+            missionNamespace setVariable ["DUWS_hpReconSeq", _seq + 1];
+            private _key = format ["hprecon_%1", _seq];
+            private _mines = [];
             {
                 if (!surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []}) then {
-                    [_x, _dir, "AP", ""] call fnc_hardpoint_minefield;
+                    _mines append ([_x, _dir, "AP", _key] call fnc_hardpoint_minefield);
                 };
             } forEach ([_fieldPos, _dir, 1 + floor random RECON_MINE_MAX, 1 + floor random RECON_MINE_MAX]
                 call fnc_hardpoint_minefield_grid);
+            if (_mines isNotEqualTo []) then {
+                [_key, "MINEFIELD", _fieldPos, "opfor", "", _dir] call fnc_hardpoint_register;
+            };
         };
     };
 

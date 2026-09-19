@@ -57,7 +57,9 @@ crewed in place rather than dropped and settled, because it already sits on its 
 but is seeded standalone at generation, one per zone on a coin flip
 ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented —
 composition, garrison, streaming, clearance — but reachable today only through the debug menus: the
-hardpoint spawner (`client/debug/fnc_debug_hardpoint_menu.sqf`) and OPCOM's build order. No
+hardpoint spawner (`client/debug/fnc_debug_hardpoint_menu.sqf`) and OPCOM's build order. Outside the
+debug menus, the Eliminate Recon Patrol side mission also lays a `MINEFIELD`, registered as a standalone
+hardpoint ([`side_mission_catalogue.md`](side_mission_catalogue.md)). No
 campaign-wide count is enforced on any type. OPCOM's builds roll only the types OPFOR's tier has unlocked
 (`DUWS_hardpointTier`); campaign generation rolls every type.
 
