@@ -6679,8 +6679,24 @@
                 <German>Bennene eine HC Gruppe um</German>
                 <Spanish>Renombrar escuadrón del Alto Mando</Spanish>
                 <Chinesesimp>重命名一个HC小队</Chinesesimp>
-                <Original>Rename an HC squad</Original>
-                <English>Rename an HC squad</English>
+                <Original>Rename a HC squad</Original>
+                <English>Rename a HC squad</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_GIVE">
+                <Original>Give a HC squad to Overlord</Original>
+                <English>Give a HC squad to Overlord</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_GIVE_TIP">
+                <Original>Hand the selected HC squad to Overlord as a task force. It is automatically commanded.</Original>
+                <English>Hand the selected HC squad to Overlord as a task force. It is automatically commanded.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_TAKEN">
+                <Original>All units, this is Overlord. %1 is now under my command as Task Force %2.</Original>
+                <English>All units, this is Overlord. %1 is now under my command as Task Force %2.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_LOST">
+                <Original>All units, this is Overlord. Task Force %1 is combat ineffective.</Original>
+                <English>All units, this is Overlord. Task Force %1 is combat ineffective.</English>
             </Key>
             <Key ID="STR_DUWS_T_bhlgx74f">
                 <German>Verlasse den Gruppen Manager</German>
@@ -7486,8 +7502,8 @@
                 <German>Der BLUFOR-Kommandant wird regelmäßig Task Forces in feindliches Gebiet schicken und Angriffe starten. Nutze „Kaderverwaltung – Hauptziel ändern“, um die Task Force auf eine Operationszone zu konzentrieren.</German>
                 <Spanish>El comandante BLUFOR enviará periódicamente fuerzas de tarea a territorio enemigo y lanzará asaltos. Usa «Gestión de escuadras – Cambiar objetivo principal» para centrar a la fuerza de tarea en una única zona operativa.</Spanish>
                 <Chinesesimp>蓝方指挥官将定期向敌区派出特遣部队并发起突击。使用小队管理-改变主要目标，使特遣部队集中在1个战区。</Chinesesimp>
-                <Original>The BLUFOR commander sends task forces to assault enemy territory. In Squad Manager, use Change Primary Zone to point one at a single objective zone.</Original>
-                <English>The BLUFOR commander sends task forces to assault enemy territory. In Squad Manager, use Change Primary Zone to point one at a single objective zone.</English>
+                <Original>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map.</Original>
+                <English>In Squad Manager, give a HC squad to Overlord. It leaves your command and becomes a named task force, tracked on the map.</English>
             </Key>
             <Key ID="STR_DUWS_T_ljw9ndqz">
                 <German>Multiplayer Infos</German>

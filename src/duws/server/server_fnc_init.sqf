@@ -664,6 +664,7 @@ fnc_escalation = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escal
 // building a client razed still reaches the server-side counter.
 fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
+fnc_taskforce_create = compile preprocessFileLineNumbers "duws\server\warcom\fnc_taskforce_create.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
 fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
 fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";
@@ -792,6 +793,7 @@ fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_di
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";
+fnc_giveHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_giveHC.sqf";publicVariable "fnc_giveHC";
 fnc_groupReset = compile preprocessFileLineNumbers "duws\client\dialog\fnc_groupReset.sqf";publicVariable "fnc_groupReset";
 fnc_rest_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_rest_menu.sqf";publicVariable "fnc_rest_menu";
 fnc_FOBmanager = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOBmanager.sqf";publicVariable "fnc_FOBmanager";

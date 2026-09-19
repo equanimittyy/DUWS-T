@@ -136,7 +136,6 @@ problem. It mostly is not — locality has to be judged per site:
 | Site | Runs on | Assessment |
 |---|---|---|
 | `server/dialog/fnc_MHQ_deploy.sqf` | server, via target 2 | correct |
-| `client/dialog/fnc_request_squad.sqf` task-force path | server, `server/misc/fnc_playerTF_spawn.sqf` | correct |
 | `client/dialog/fnc_request_squad.sqf` High Command path | server, `server/misc/fnc_HCsquad_spawn.sqf` | correct; campaign assets must outlive one player's session |
 | `client/dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `client/operative/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |

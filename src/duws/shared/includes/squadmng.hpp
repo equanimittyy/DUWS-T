@@ -11,9 +11,9 @@ class squad_mng_dialog
         {
             idc = 1445;
             x = -0.46 * GUI_GRID_W + GUI_GRID_X;
-            y = 7.52 * GUI_GRID_H + GUI_GRID_Y;
+            y = 6.52 * GUI_GRID_H + GUI_GRID_Y;
             w = 29 * GUI_GRID_W;
-            h = 16 * GUI_GRID_H;
+            h = 17.8 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
         };
         class squadmng_mainframe: RscFrame
@@ -21,9 +21,9 @@ class squad_mng_dialog
             idc = 1800;
             text = "$STR_DUWS_T_akva0l14"; //--- ToDo: Localize;
             x = 0.04 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.02 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7.02 * GUI_GRID_H + GUI_GRID_Y;
             w = 28 * GUI_GRID_W;
-            h = 15 * GUI_GRID_H;
+            h = 16.8 * GUI_GRID_H;
             moving = 1;
         };
         class dismiss_frame: RscFrame
@@ -31,7 +31,7 @@ class squad_mng_dialog
             idc = 1801;
             text = "$STR_DUWS_T_svkyfjme"; //--- ToDo: Localize;
             x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
             w = 27 * GUI_GRID_W;
             h = 5.5 * GUI_GRID_H;
         };
@@ -41,7 +41,7 @@ class squad_mng_dialog
             text = "$STR_DUWS_T_zp8b22h7"; //--- ToDo: Localize;
             sizeEx = 0.025;
             x = 8 * GUI_GRID_W + GUI_GRID_X;
-            y = 12.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8ogmbeb1"; //--- ToDo: Localize;
@@ -52,7 +52,7 @@ class squad_mng_dialog
             idc = 1000;
             text = "$STR_DUWS_T_12zqt3fk"; //--- ToDo: Localize;
             x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 9.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 26 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
@@ -64,16 +64,16 @@ class squad_mng_dialog
             idc = 1802;
             text = "High Command squads"; //--- ToDo: Localize;
             x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14 * GUI_GRID_H + GUI_GRID_Y;
             w = 27 * GUI_GRID_W;
-            h = 5.5 * GUI_GRID_H;
+            h = 7.3 * GUI_GRID_H;
         };
         class dismissHC_txt: RscText
         {
             idc = 1001;
             text = "$STR_DUWS_T_u4t2durf"; //--- ToDo: Localize;
             x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 15.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 26 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
@@ -86,7 +86,7 @@ class squad_mng_dialog
             text = "$STR_DUWS_T_qe3lrwmf"; //--- ToDo: Localize;
             sizeEx = 0.025;
             x = 14.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 18.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_qe3lrwmf"; //--- ToDo: Localize;
@@ -98,11 +98,23 @@ class squad_mng_dialog
             text = "$STR_DUWS_T_r4qmnp8o"; //--- ToDo: Localize;
             sizeEx = 0.025;
             x = 1.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 18.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_r4qmnp8o"; //--- ToDo: Localize;
             action = "closeDialog 0; _handle = createDialog 'squad_rename_dialog'";
+        };
+        class giveHC_button: RscButton
+        {
+            idc = 1604;
+            text = "$STR_DUWS_T_TASKFORCE_GIVE";
+            sizeEx = 0.025;
+            x = 8 * GUI_GRID_W + GUI_GRID_X;
+            y = 19.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 12 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_TASKFORCE_GIVE_TIP";
+            action = "[] spawn fnc_giveHC; closeDialog 0";
         };
         class leave_button: RscButton
         {
@@ -110,7 +122,7 @@ class squad_mng_dialog
             text = "$STR_DUWS_T_n66cx0eh"; //--- ToDo: Localize;
             sizeEx = 0.025;
             x = 8 * GUI_GRID_W + GUI_GRID_X;
-            y = 21.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 22 * GUI_GRID_H + GUI_GRID_Y;
             w = 12 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_bhlgx74f"; //--- ToDo: Localize;
