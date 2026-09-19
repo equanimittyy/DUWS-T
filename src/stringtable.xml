@@ -440,8 +440,8 @@
                 <English>CONFIRM</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_pool">
-                <Original>Each spawn picks a random vehicle from the list. The top row is main, used when only one is needed.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top. Auto-detected vehicles are derived from it.&lt;br/&gt;RESET: undo all changes.</Original>
-                <English>Each spawn picks a random vehicle from the list. The top row is main, used when only one is needed.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top. Auto-detected vehicles are derived from it.&lt;br/&gt;RESET: undo all changes.</English>
+                <Original>Each spawn picks a random vehicle from the list. The top row is the main vehicle. Auto-detected vehicles are derived from it.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top.&lt;br/&gt;RESET: undo all changes.</Original>
+                <English>Each spawn picks a random vehicle from the list. The top row is the main vehicle. Auto-detected vehicles are derived from it.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top.&lt;br/&gt;RESET: undo all changes.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_list">
                 <Original>Spawn list</Original>
