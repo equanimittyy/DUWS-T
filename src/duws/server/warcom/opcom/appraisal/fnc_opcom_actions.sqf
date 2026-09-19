@@ -24,6 +24,58 @@ DUWS_fnc_opcom_zoneLabel = {
     (zone_namePOS_pairs select _i) select 0
 };
 
+DUWS_fnc_opcom_zonesOpen = {
+    private _out = [];
+    {
+        _x params ["", "_zp", "_zs"];
+        private _zk = [_zp] call fnc_zone_key;
+        if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_zoneContested)}) then { _out pushBack [_zk, _zs] };
+    } forEach zone_meta_array;
+    _out
+};
+
+// The step buys back random unlocked lost tokens, so it is priced at their average force.
+DUWS_fnc_opcom_zoneReinforceTargets = {
+    private _out = [];
+    {
+        _x params ["_zk"];
+        private _lost = ([_zk] call DUWS_fnc_garrisonLost) select { !([_x] call DUWS_fnc_tokenLocked) };
+        private _n = ([_zk] call DUWS_fnc_garrisonReinforceCount) min count _lost;
+        if (_n > 0 && {([_zk] call DUWS_fnc_garrisonStrength) < 1}) then {
+            private _price = ceil (_n * ([_lost] call DUWS_fnc_tokenListForce) / (count _lost) * OPCOM_AP_PER_FORCE);
+            _out pushBack [_zk, _price, format ["Reinforce %1", [_zk] call DUWS_fnc_opcom_zoneLabel]];
+        };
+    } forEach (call DUWS_fnc_opcom_zonesOpen);
+    _out
+};
+
+DUWS_fnc_opcom_zoneFortifyTargets = {
+    private _top = count DUWS_zoneSpawnTiers;
+    private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+    private _out = [];
+    {
+        _x params ["_zk"];
+        private _tier = [_zk] call fnc_zone_tier;
+        if (_tier < _top) then {
+            private _owed = [
+                [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition,
+                [[_tier + 1] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
+            ] call DUWS_fnc_spawnDiff;
+            private _price = ceil (([_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce) * OPCOM_AP_PER_FORCE);
+            _out pushBack [_zk, _price, format ["Fortify %1 to tier %2", [_zk] call DUWS_fnc_opcom_zoneLabel, _tier + 1]];
+        };
+    } forEach (call DUWS_fnc_opcom_zonesOpen);
+    _out
+};
+
 DUWS_opcom_actions = [
-    ["bank", "bank", { [[[], 0, "Bank"]] }, { true }]
+    ["bank", "bank", { [[[], 0, "Bank"]] }, { true }],
+    ["zone_reinforce", "defensive", DUWS_fnc_opcom_zoneReinforceTargets, {
+        params ["_zk"];
+        ([_zk, "opcom_reinforce"] call fnc_zone_garrison_reinforce) >= 0
+    }],
+    ["zone_fortify", "defensive", DUWS_fnc_opcom_zoneFortifyTargets, {
+        params ["_zk"];
+        ([_zk, "opcom_fortify"] call fnc_zone_garrison_fortify) >= 0
+    }]
 ];

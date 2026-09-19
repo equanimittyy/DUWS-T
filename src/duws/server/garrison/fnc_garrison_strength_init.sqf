@@ -179,9 +179,14 @@ DUWS_fnc_garrisonUnlose = {
 // Shared by town and zone, so both climb by one rule. An empty _x1 skips the re-stand, since deriving from it would
 // stamp full to nothing: a town dropped to tier 0 stays live until its next tick collects it.
 #define REINFORCE_STEP 0.3
+DUWS_fnc_garrisonReinforceCount = {
+	params ["_key"];
+	floor (REINFORCE_STEP * count ([_key] call DUWS_fnc_garrisonFull))
+};
+
 DUWS_fnc_garrisonReinforce = {
 	params ["_key", "_x1"];
-	[_key, floor (REINFORCE_STEP * count ([_key] call DUWS_fnc_garrisonFull))] call DUWS_fnc_garrisonUnlose;
+	[_key, [_key] call DUWS_fnc_garrisonReinforceCount] call DUWS_fnc_garrisonUnlose;
 	if (([_key] call DUWS_fnc_garrisonHeld) && {_x1 isNotEqualTo []}) then { [_key, _x1] call DUWS_fnc_garrisonRestand };
 };
 
