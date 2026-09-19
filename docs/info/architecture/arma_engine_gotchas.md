@@ -284,6 +284,10 @@ A single MOVE waypoint is reached, marked complete, and — with nothing queued 
 
 `waypoints _grp` lists every waypoint the group holds, finished ones included — completing one only advances `currentWaypoint`, so `count waypoints _grp == 0` is true right after a clear and never after an arrival. OPCOM's live ferry gated each leg's move on that test, so no leg after the pickup got its order: the rotor hovered and the boat idled at the pickup for good, the carry leg being untimed. Fix: issue a leg's order once, as the leg starts; to test "done", compare `currentWaypoint _grp >= count waypoints _grp` (`DUWS_fnc_opcom_ferryStepLive`, `fnc_opcom_ferry_devirt.sqf`).
 
+## Deleting waypoints does not move `currentWaypoint`
+
+`deleteWaypoint` removes waypoints but leaves the group's current-waypoint index where it was. A group that already worked through earlier orders can therefore point past the new waypoints and ignore them. A jet sent home from its loiter kept orbiting because its index still pointed at the deleted loiter slot (`client/supports/fnc_arty.sqf`). Fix: after a re-order, point the group at its first new leg with `_grp setCurrentWaypoint _wp`, as the task-force orders do (`server/warcom/fnc_taskforce_tick.sqf`).
+
 ## A group in COMBAT behaviour ignores a commanded move order
 
 An AI group whose behaviour has gone `COMBAT` owns its movement through the danger FSM — a MOVE waypoint or `doMove` is deprioritised or ignored; `setBehaviour "AWARE"` is overridden the instant it takes fire, `setCombatMode "BLUE"` + `disableAI "AUTOTARGET"` stops firing but not cover-seeking, and only `setBehaviour "CARELESS"` moves it reliably — which walks it into fire in the open. A commanded fighting withdrawal is not achievable. Fix: never design a retreat or mid-fight reposition that commands an engaged live group to a safe spot; let it fight to a decision and reclaim it for movement only once out of combat.
