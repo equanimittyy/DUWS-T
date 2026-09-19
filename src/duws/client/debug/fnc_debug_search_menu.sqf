@@ -4,6 +4,7 @@
     from fnc_debug_menu.sqf, which captures that object and passes it in. Strings are English-only
     for the same reason as that file.
 */
+#include "..\..\shared\includes\debug_menu.hpp"
 if (!hasInterface) exitWith {};
 
 // Re-checked rather than trusted to the caller: this function is publicVariable'd, so every
@@ -20,12 +21,12 @@ if (isNull _target) exitWith {
 // rather than flagging nothing.
 private _sources = ["combat", "objective", "civ_frisk"];
 
-private _rows = [];
+private _rows = [DBG_BACK("cursor")];
 {
     _rows pushBack [_x, {
         _this params ["_target", "_source"];
         [player, _target, _source] remoteExec ["fnc_debug_search_flag", 2];
-    }, [_target, _x], [1,0.667,0,1]];
+    }, [_target, _x], DBG_ACTION];
 } forEach _sources;
 
 private _name = typeOf _target;

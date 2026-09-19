@@ -1,5 +1,5 @@
-// Locality: client -- the OPCOM AI menu's overlay toggle. Re-checked against game_master because the function is
-// broadcast to every client.
+// Locality: client -- the Debug Views page's OPCOM AI overlay toggle. Re-checked against game_master because
+// the function is broadcast to every client.
 if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 

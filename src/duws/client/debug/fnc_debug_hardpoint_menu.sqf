@@ -4,6 +4,7 @@
     to the side passed in. Reached from fnc_debug_menu.sqf. Strings are English-only for the same reason
     as that file. _this is the side, "opfor" or "blufor".
 */
+#include "..\..\shared\includes\debug_menu.hpp"
 if (!hasInterface) exitWith {};
 
 // Re-checked rather than trusted to the caller: this function is publicVariable'd, so every client
@@ -26,25 +27,20 @@ private _specs = [
     ["MINEFIELD (AP)", "MINEFIELD", "AP"]
 ];
 
-private _rows = [];
+private _rows = [DBG_BACK("zones")];
 {
     _x params ["_label", "_type", "_variant"];
     _rows pushBack [_label, {
         params ["_type", "_side", "_variant", "_label"];
-        // Click-to-place on the open map, spawned for the helper's scheduled wait.
-        [_type, _side, _variant, _label] spawn {
-            params ["_type", "_side", "_variant", "_label"];
-            private _pos = [format ["<t size='2' color='#00ffff'>Click the map to place a %1 %2 hardpoint. </t><br/>Dev tool: composition, defenders and a gunner on every static gun, resolved to the %2 faction. Close the map to cancel.", _label, _side]] call fnc_map_pick_pos;
-            if (_pos isEqualTo []) exitWith {};
-            [_type, _side, [_pos select 0, _pos select 1], 0, _variant] remoteExec ["fnc_debug_spawn_hardpoint", 2];
-            hint format ["Spawning a %1 %2 hardpoint at the marked spot.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.", _label, _side];
-        };
-    }, [_type, _side, _variant, _label], [1,0.667,0,1]];
+        [format ["Click the map to place a %1 %2 hardpoint.", _label, _side],
+            format ["Dev tool: composition, defenders and a gunner on every static gun, resolved to the %1 faction.", _side],
+            {
+                params ["_pos", "_args"];
+                _args params ["_type", "_side", "_variant", "_label"];
+                [_type, _side, [_pos select 0, _pos select 1], 0, _variant] remoteExec ["fnc_debug_spawn_hardpoint", 2];
+                hint format ["Spawning a %1 %2 hardpoint at the marked spot.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.", _label, _side];
+            }, _this] call fnc_debug_map_click;
+    }, [_type, _side, _variant, _label], DBG_MAP];
 } forEach _specs;
 
-_rows pushBack ["Clear dev hardpoints", {
-    [] remoteExec ["fnc_debug_clear_hardpoints", 2];
-    hint "Clearing every dev-spawned hardpoint.\n\nThe defenders are deleted and the composition drops its\npersistent flag; the map sweep collects the props once\nno player is within 300 m.";
-}, [], [1,0.667,0,1]];
-
-[format ["Spawn %1 hardpoint", _side], _rows] call fnc_open_action_menu;
+[format ["Spawn %1 hardpoint (click map)", _side], _rows] call fnc_open_action_menu;

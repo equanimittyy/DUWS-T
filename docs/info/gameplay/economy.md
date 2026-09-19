@@ -237,7 +237,7 @@ window" cap keys off that rather than starting a timer of its own — `fnc_civ_h
 caller today, capping what a town can pay out for treating its wounded. Server-local and unbroadcast:
 only server-side caps read it.
 
-The Debug menu's *Fire economy tick* row runs one extra iteration off the clock
+The Debug menu's Economy dialog has a *Fire economy tick* button that runs one extra iteration off the clock
 (`server/debug/fnc_debug_econ_tick.sqf`), which keeps its own 30-minute schedule. It pays and bumps
 `econ_tick` like any other iteration, then hints the caller each pool's take and each town's drift.
 

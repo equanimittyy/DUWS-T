@@ -2,7 +2,7 @@
 /*
     Developer tool: type a signed amount, click what it lands in. Campaign pools are client globals
     edited here directly; town rep/worth and the escalation counter are server-only, so those
-    round-trip through fnc_debug_econ_server. English-only like fnc_debug_menu.
+    round-trip through fnc_debug_econ_server. Also fires one economy tick. English-only like fnc_debug_menu.
 */
 if (!hasInterface) exitWith {};
 
@@ -123,8 +123,17 @@ _list ctrlCommit 0;
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
 } forEach [9523, 9524, 9526, 9527];
 
+private _tickBtn = _display ctrlCreate ["RscButton", 9528];
+_tickBtn ctrlSetPosition [0.26, 0.90, 0.235, 0.05];
+_tickBtn ctrlSetText "Fire economy tick";
+_tickBtn ctrlCommit 0;
+_tickBtn ctrlAddEventHandler ["ButtonClick", {
+    [player] remoteExec ["fnc_debug_econ_tick", 2];
+    ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
+}];
+
 private _closeBtn = _display ctrlCreate ["RscButton", 9517];
-_closeBtn ctrlSetPosition [0.26, 0.90, 0.48, 0.05];
+_closeBtn ctrlSetPosition [0.505, 0.90, 0.235, 0.05];
 _closeBtn ctrlSetText (localize "STR_DUWS_T_MENU_CLOSE");
 _closeBtn ctrlCommit 0;
 _closeBtn ctrlAddEventHandler ["ButtonClick", {

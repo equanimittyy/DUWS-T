@@ -728,6 +728,7 @@ fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\chatter
 // client/debug
 // =========================================================================================================
 fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
+fnc_debug_map_click = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_map_click.sqf";publicVariable "fnc_debug_map_click";
 fnc_debug_quickstart = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_quickstart.sqf";publicVariable "fnc_debug_quickstart";
 fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_econ_menu.sqf";publicVariable "fnc_debug_econ_menu";
 fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
@@ -744,7 +745,6 @@ fnc_debug_opcom_grid_draw = compile preprocessFileLineNumbers "duws\client\debug
 fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_menu.sqf";publicVariable "fnc_debug_opcom_menu";
 fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
 fnc_debug_opcom_step = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_step.sqf";publicVariable "fnc_debug_opcom_step";
-fnc_debug_opcom_ai_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_menu.sqf";publicVariable "fnc_debug_opcom_ai_menu";
 fnc_debug_opcom_ai_overlay = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_overlay.sqf";publicVariable "fnc_debug_opcom_ai_overlay";
 fnc_debug_opcom_ai_feed = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_feed.sqf";publicVariable "fnc_debug_opcom_ai_feed";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";

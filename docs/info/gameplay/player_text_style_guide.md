@@ -368,8 +368,7 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |
 | Quick Kits | None — one row per scanned loadout, all default |
-| Debug | `[1,0.667,0,1]` on the six working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
-| Flag *(object)* as searchable, Force side mission | `[1,0.667,0,1]` on every row |
+| Debug and its pages | One meaning per colour (`debug_menu.hpp`): `[1,1,1,1]` opens a page, `[1,0.667,0,1]` acts, `[0,1,1,1]` asks for a map click, `[0.082,1,0,1]` / `[0.6,0.6,0.6,1]` a toggle that is on / off, `[1,0.4,0.4,1]` clears or deletes |
 
 The command column is not a menu in this sense: it is seven fixed buttons in the request dialog
 itself (`request_menu.hpp`, idc 1610-1616), written from the top down by `fnc_command_fill` and run
@@ -383,13 +382,15 @@ mean walking back to the prop between them. Entries that cost are drawn in the s
 supports catalogue paints an unbought permanent with: the label carries the figure, but nothing else
 carried the fact that clicking spends it.
 
-Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
+Quick Kits is the only player menu whose row count is not fixed: the rows come from the loadout list the
 server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are
 deliberately unlocalised English — a dev surface no player reads.
 
-Both menus in the last row open from a Debug row rather than from a scroll entry, and are the one
-place a menu opens another menu. The economy tool sitting between them in Debug is a hand-built
-dialog rather than one of these lists, because it pairs an edit box with the buttons that spend it.
+Debug is the one menu that opens other menus. Its root lists pages, every other page's first row is
+*< Back*, and a label ends ` >` on a page, `(click map)` on a map pick and `[on]` / `[off]` on a
+toggle. The object under the cursor is read once, when the root opens, because a row runs with the
+dialog down and the pointer gone. The Economy row opens a hand-built dialog rather than one of these
+lists, because it pairs an edit box with the buttons that spend it.
 
 ## Vendored module entries
 
