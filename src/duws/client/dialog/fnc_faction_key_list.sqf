@@ -49,6 +49,28 @@ _listCtrl ctrlAddEventHandler ["LBSelChanged", {
     { ((ctrlParent _ctrl) displayCtrl _x) ctrlEnable (_i > 0); } forEach [8635, 8636];
 }];
 
+// Shows the row's vehicle in the browser: its faction (ALL when the combo lacks it), filter cleared.
+_listCtrl ctrlAddEventHandler ["LBDblClick", {
+    params ["_ctrl", "_i"];
+    private _class = _ctrl lbData _i;
+    private _factionCtrl = [8623] call duws_faction_edit_ctrl;
+    private _classCtrl = [8625] call duws_faction_edit_ctrl;
+    ([8632] call duws_faction_edit_ctrl) ctrlSetText "";
+    private _faction = getText (configFile >> "CfgVehicles" >> _class >> "faction");
+    private _fIdx = 0 max (duws_faction_edit_list findIf { (_x select 1) isEqualTo _faction });
+    // Same faction: no selection change raises the combo's refill, and the cleared filter needs one.
+    if (lbCurSel _factionCtrl == _fIdx) then {
+        [_factionCtrl lbData _fIdx] call duws_faction_fill_classes;
+    } else {
+        _factionCtrl lbSetCurSel _fIdx;
+    };
+    private _cIdx = -1;
+    for "_c" from 0 to (lbSize _classCtrl - 1) do {
+        if ((_classCtrl lbData _c) isEqualTo _class) exitWith { _cIdx = _c; };
+    };
+    if (_cIdx >= 0) then { _classCtrl lbSetCurSel _cIdx; } else { [] call duws_faction_edit_preview; };
+}];
+
 (_display displayCtrl 8634) ctrlAddEventHandler ["ButtonClick", {
     private _classCtrl = [8625] call duws_faction_edit_ctrl;
     private _class = _classCtrl lbData (lbCurSel _classCtrl);
