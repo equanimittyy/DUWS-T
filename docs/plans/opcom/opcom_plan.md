@@ -7,20 +7,21 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 [`info/opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md#band-siting).
 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
-**appraisal** scores candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
+**appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3 and Phase 4 Stage A are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth
-for them. This doc specifies what remains. The sections marked **WIP** (Stage B onward) are first-pass decisions: they
-change as each chunk is built and played.
+Phases 1–3 and 4A are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them.
+This doc specifies what remains. The sections marked **WIP** (4B onward) are first-pass decisions: they change as each
+chunk is built and played.
 
 ## Status
 
 | Phase | State |
 |---|---|
-| 1–3, 4 Stage A — Perception, recruitment and tasking, orders driven by hand | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
-| 4, Stage B — The decision loop: 4.5 spine + zone economy, 4.6 trucks + towns + Rapport, 4.7 need and cover fields + standalone hardpoints, 4.8 QRF + Attack decisions, 4.9 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
+| 1–3, 4A — Perception, recruitment and tasking, orders driven by hand | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 4B — The picker: every action, weighted by the archetype | [§Appraisal](#appraisal-phase-4) — WIP |
+| 4C — Balance: the pick scored by `P(win)` × Value ÷ Cost | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
-| 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
+| 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
 
 The ordering is forced by what the next phase reads. Do not pre-build later phases: the tuning constants and
 engine-contact behaviours only settle by running the core.
@@ -48,36 +49,42 @@ Two terms carry one meaning each throughout:
 
 ## Appraisal (Phase 4)
 
-**WIP.** Stage B is decided as a first pass: its Values, prices and constants will change as each chunk is built and
-played.
+**WIP.** 4B and 4C are decided as a first pass: their weights, Values, prices and constants will change as each chunk
+is built and played.
 
-Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, score the survivors, and pick one by
-weighted random over the top `OPCOM_PICK_TOP` (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No
-search or lookahead. The scoring pass runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget,
-`OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
-may yield. One commit per tick. The action list (`fnc_opcom_actions`) holds each action's gate, Value, Cost and
-execute. `archWeight` stays a flat 1 until Phase 6, isolated in one file so Phase 6 replaces it alone. Measure the
-grid rebuild once under a full map before 4.5 stacks scoring on the same tick.
+Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, and pick one by
+weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or lookahead. The pick pass
+runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget, `OPCOM_SCORE_DEADLINE`; the pick
+executes after it in scheduled space, because an order plans a route and the router may yield. One commit per tick.
+The action list (`fnc_opcom_actions`) holds each action's class, gate and execute, and from 4C its Value and Cost.
+Measure the grid rebuild once under a full map before 4B stacks the pick pass on the same tick.
+
+- **4B — The picker.** Every action is wired to the pick through its gate and execute, and weighted by the archetype
+  alone: the pick draws an action class by `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) among the
+  classes with a surviving candidate, then one of that class's candidates at random. There is no Value, Cost or
+  `P(win)`; prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
+- **4C — Balance.** The weight becomes the score below, and the pick runs over the top `OPCOM_PICK_TOP` candidates by
+  score.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
-| **4.5** Spine + zone economy | The action list and scoring pass, Bank, exposure and the hidden HQ flag, zone Reinforce / Fortify / hardpoint Build, force pricing, the savings goal | `OPCOM_AP_PER_FORCE`; the zone prices; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON` |
-| **4.6** Trucks + towns + Rapport | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the delay discount | The town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE` |
-| **4.7** Need and cover fields + standalone hardpoints | The two fields, shown on a debug overlay before anything reads them, then the standalone Build and the asset types | The need field's base ratio (2–3); the asset prices; what a radio's reach and an OP's eyes are worth, in place of the build-price stand-in; where a mortar pit or artillery battery sites; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air) |
-| **4.8** QRF + Attack decisions | Real `P(win)`, combatant Recruit, the QRF and Attack scores, the commit Cost | `OPCOM_PWIN_FLOOR`; `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering) |
-| **4.9** Scout, then one-gun Arty | The staleness Value and recon Recruit; the Arty action over the shipped fire mission — what is worth shelling, the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | `OPCOM_SCOUT_SHARE`; what a gun's fire missions are worth; when the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
+| **4B.1** Picker + zone buys | The action list and pick pass, the archetype roll and weight table, Bank, zone Reinforce / Fortify / hardpoint Build, a decision readout on the OPCOM debug menu | Each archetype's weights, Bank's included |
+| **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a band cell and the asset types | Where a mortar pit or artillery battery sites |
+| **4B.3** Attack, QRF, Scout | Combatant and recon Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
+| **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate, the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
+| **4C** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the need and cover fields, shown on a debug overlay before anything reads them | `OPCOM_AP_PER_FORCE`; the zone prices; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
 
-The score is one number — expected AP returned per AP spent:
+From 4C, the score is one number — expected AP returned per AP spent:
 
 ```
 score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 ```
 
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight` tilts by action class
-([§Archetype](#archetype-phase-6)); `P(win)` scales to the expected return.
+([§Archetype](#archetype)); `P(win)` scales to the expected return.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)`, with `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over the target's
-  3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0. It is a flat 1 until 4.8.
+  3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0.
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
   once, at commit ([§Templates](#templates-phase-5)).
@@ -86,19 +93,19 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 
 | Action | Targets swept | Chunk |
 |---|---|---|
-| Bank | one null | 4.5 |
-| Zone Reinforce | each uncontested OPFOR zone below full strength | 4.5 |
-| Zone Fortify | each uncontested OPFOR zone below tier IV | 4.5 |
-| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4.5 |
-| Town Reinforce | each OPFOR-band town below full strength | 4.6 |
-| Town Fortify | each OPFOR-band town below tier IV | 4.6 |
-| Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4.6 |
-| Recruit | once per demand group | 4.6 supply, 4.8 combatant, 4.9 recon |
-| Standalone hardpoint Build | the band cells with the highest coverage Value; each asset type unlocked | 4.7 |
-| Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4.8 |
-| Attack | each BLUFOR-held zone | 4.8 |
-| Scout | each `recon` unit's route over stale, valuable cells | 4.9 |
-| Arty | each observed belief point in range of an owned gun off cooldown | 4.9 |
+| Bank | one null | 4B.1 |
+| Zone Reinforce | each uncontested OPFOR zone below full strength | 4B.1 |
+| Zone Fortify | each uncontested OPFOR zone below tier IV | 4B.1 |
+| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4B.1 |
+| Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
+| Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
+| Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
+| Recruit | once per demand group | 4B.2 supply, 4B.3 combatant and recon |
+| Standalone hardpoint Build | a band cell, at random in 4B and by the highest coverage Value from 4C; each asset type unlocked | 4B.2 |
+| Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
+| Attack | each BLUFOR-held zone | 4B.3 |
+| Scout | each `recon` unit's route over stale cells | 4B.3 |
+| Arty | each observed belief point in range of an owned gun off cooldown | 4B.4 |
 
 ### Value
 
@@ -143,8 +150,8 @@ threat drives only the fast actions — the QRF and attack staging.
 - **Scout staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷
   `OPCOM_BELIEF_EXPIRE`). The share holds Scout below the ground it reveals, since scouting takes and protects
   nothing itself.
-- **An asset's Value is a stand-in** that favours frontline assets until 4.7 settles what a radio's reach and an
-  OP's eyes are worth, and 4.9 what a gun's fire missions are worth ([§Appraisal](#appraisal-phase-4)).
+- **An asset's Value is a stand-in** that favours frontline assets until play settles what a radio's reach, an OP's
+  eyes and a gun's fire missions are worth ([§Appraisal](#appraisal-phase-4)).
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`), with ETA in
   ticks from the route length and the unit's per-cell speed (`DUWS_opcom_speed`). A zone action's ETA is 0.
 - **No route-risk discount, no emergency reserve.** A truck's odds en route would read threat, so the risk stays
@@ -191,16 +198,17 @@ or cleared or ground changes hands.
 
 - **Gate.** A zone action drops while its zone is contested. A supply-gated action drops only when no truck idles
   and the wallet cannot cover the action plus a hire. A commit action drops when no eligible unit is free, and no
-  pool draws a unit garrisoned in a contested zone. An offensive that does not muster drops below
-  `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at launch
+  pool draws a unit garrisoned in a contested zone. In 4B any action the wallet cannot cover drops. From 4C, an
+  offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at launch
   ([§Commitment](#commitment-intents-are-sticky)).
-- **An unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
+- **From 4C, an unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
   tick; an action that outscores it later, such as a QRF, still commits. Past the horizon it drops, and the pick
   runs over the affordable top few. Without the goal, cheap actions spend every refill and a better, dearer one
   never becomes affordable.
-- **Bank** is a candidate, not a policy — a low flat score that wins when nothing else scores, or when a savings
-  goal stands.
+- **Bank** is a candidate, not a policy. In 4B it is drawn by its own archetype weight, so the archetype sets how
+  thrifty the commander is; from 4C it is a low flat score that wins when nothing else scores, or when a savings goal
+  stands.
 
 ## Commitment: intents are sticky
 
@@ -300,7 +308,7 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Arty | offensive | an observed belief point in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
 | Build | defensive | an own zone ring or band cell | hardpoint build | 0 zone / 1 truck standalone |
-| Bank | — | — | none | 0 |
+| Bank | bank | — | none | 0 |
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
   strikes, and a lost unit is lost standing strength. It scores **once per demand group** (combatant, `recon`,
@@ -364,7 +372,7 @@ site, the type is rolled from the existing weight table — `DUWS_hardpointWeigh
 ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
 still rolls the full list. An asset hardpoint is its own candidate and never stands in a zone's ring: radios and OPs
 site by their own logic. A build cannot be a *typed* counter (AT under armour) until belief carries threat
-category, which 4.7 settles ([§Appraisal](#appraisal-phase-4)).
+category, which 4C settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; no build refund (clearing pays the player CP only). Unlocks key off
 `WARCOM_opfor_tier`, which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet:
@@ -416,14 +424,15 @@ before; if it does not, the fallback is spawning shells directly as the player's
   permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
   cap.
 
-## Archetype (Phase 6)
+## Archetype
 
 **WIP.**
 
 One archetype rolled per campaign (in the persistence snapshot, never re-rolled) sets the
-`archWeight[archetype][actionClass]` factor — it *multiplies* an action class's score, never removes an action, and
-cannot override the ladder (an Aggressive commander with no armour tier fields none). It is not difficulty
-(`opfor_ai_skill` sets aim). A single authored per-class table; further leans (indirect fire, armour) become rows.
+`archWeight[archetype][actionClass]` factor — it weights an action class's draw in 4B and *multiplies* its score from
+4C, never removes an action, and cannot override the ladder (an Aggressive commander with no armour tier fields
+none). It is not difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included; further
+leans (indirect fire, armour) become rows. 4B builds the roll and the table.
 
 | Archetype | Weights toward |
 |---|---|
@@ -433,9 +442,9 @@ cannot override the ladder (an Aggressive commander with no armour tier fields n
 
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
-properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a 3:1
-muster ideal, a 1:1 minimum) applies until Phase 6. Phase 6 settles the set of archetypes, which is not final, and
-whether the player can learn the commander's archetype through the intel system.
+properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. Phase 6 builds that
+patience; the Balanced baseline (a 3:1 muster ideal, a 1:1 minimum) applies until then. Phase 6 settles the set of
+archetypes, which is not final, and whether the player can learn the commander's archetype through the intel system.
 
 ## Town & zone garrisons
 
