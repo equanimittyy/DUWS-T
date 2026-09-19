@@ -72,11 +72,11 @@ and execute, and from 4C.2 its Value and Cost.
 | Chunk | Builds | Settles in play |
 |---|---|---|
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
-| **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | Where a mortar pit or artillery battery sites |
+| **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | — |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
-| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the need and cover fields, shown on a debug overlay before anything reads them; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
+| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -105,7 +105,7 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
 | Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
-| Standalone hardpoint Build | a band cell, at random in 4B and by the highest coverage Value from 4C.2; each asset type unlocked | 4B.2 |
+| Standalone hardpoint Build | a band cell, at random in 4B and by the highest coverage Value from 4C.2; each asset type unlocked, at a random band cell in 4B and by its siting rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
@@ -115,7 +115,9 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 
 Value is the AP worth of what an action delivers. Every build, refill and tier reads slow state only: threat
 (`_ene`) shifts tick to tick, while the trucks and buys it would drive take minutes and stand for the campaign, so
-threat drives only the fast actions — the QRF and attack staging.
+threat drives only the fast actions — the QRF and attack staging. A standalone build also reads the traffic layer
+([§Need and cover fields](#need-and-cover-fields)): built from sightings, it fades over half an hour, so it moves no
+faster than a truck delivers.
 
 - **Worth** is a holding's fixed AP figure. A zone's is `_points`, its radius ÷ 10 (35–50 at the default radii). A
   town's is its level `civ_town_ap` (1–5, the figure its income pays) × a tunable 5, so 5–25 and always below a
@@ -165,16 +167,21 @@ threat drives only the fast actions — the QRF and attack staging.
 ### Need and cover fields
 
 A standalone hardpoint's Value comes from cover over the whole map, not over one zone, because a zone's ring already
-defends its zone: weighted toward OPFOR's holdings, and rewarding cover over the sparse sectors between them. Two
-layers span every land cell; standalone candidates are band cells only. Both change only when a hardpoint is built
-or cleared or ground changes hands.
+defends its zone: weighted toward OPFOR's holdings, and rewarding cover over the sparse sectors between them. Need
+and cover span every land cell; standalone candidates are band cells only. Both change when a hardpoint is built or
+cleared or ground changes hands, and need also moves with the traffic layer.
 
 - **Need** (AP). Each OPFOR holding spreads worth × exposure over the 5×5 block around its cell, with weights that
   fall with distance and sum to exactly that figure. Every band cell also carries a flat base for the sparse
   sectors: a zone's average pull per cell (worth ÷ 25) ÷ a tunable ratio starting at 2–3, × the cell's exposure, so
   a holding pulls harder than a gap but not so hard that hardpoints cluster around zones. Each standing asset
-  hardpoint spreads its build price the same way and becomes an asset worth protecting; radios and OPs site out in
-  the wilderness by their own logic, so the cover network builds up around them into the gaps.
+  hardpoint spreads its build price the same way and becomes an asset worth protecting; assets site by their own
+  rules ([§Asset siting](#asset-siting)), so the cover network builds up around them into the gaps.
+- **Traffic** (force), a belief layer. Each sighting raises its cell to the larger of the cell's current value and
+  the sighting's force; the value halves every `OPCOM_TRAFFIC_HALFLIFE` (360 ticks, 30 min), so a cell BLUFOR
+  crosses once fades within the hour and a route they use every trip stays lit. Need adds each cell's traffic ×
+  `OPCOM_AP_PER_FORCE` × `OPCOM_TRAFFIC_SHARE` (0.5), so hardpoints site on the ground BLUFOR use as well as around
+  what OPFOR holds.
 - **Cover** (0–1). Each standing OPFOR hardpoint within 2 cells, zone rings included, covers half of what is left:
   0, 0.5, 0.75, 0.875. Every type shares that reach.
 - A first hardpoint at a frontline zone worth 40 earns about 10, beside that zone's Reinforce at 15; one beside
@@ -381,9 +388,9 @@ existing in-zone draw; a standalone one stands where its truck delivers it, at t
 (`fnc_hardpoint_spawn_at`). Given the
 site, the type is rolled from the existing weight table — `DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a
 ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
-still rolls the full list. An asset hardpoint is its own candidate and never stands in a zone's ring: radios and OPs
-site by their own logic. A build cannot be a *typed* counter (AT under armour) until belief carries threat
-category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
+still rolls the full list. An asset hardpoint is its own candidate, never stands in a zone's ring, and picks its band
+cell by its own rule ([§Asset siting](#asset-siting)). A build cannot be a *typed* counter (AT under armour) until
+belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build
 that finds no ground is refunded. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`, which climbs the
@@ -399,6 +406,23 @@ earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; the caps lan
 
 Hardpoint garrisons stay fixed per type (`DUWS_hardpointGarrison`). Knobs (all tune): seed subset 2–3 at init; no
 live cap (bounded by player proximity).
+
+### Asset siting
+
+From 4C.2 each asset type picks its band cell by the rule below; in 4B it takes a random band cell. Inside the cell,
+the shared terrain siting picks the spot (`fnc_hardpoint_score`,
+[`info/hardpoints.md`](../../info/gameplay/hardpoints.md#siting)). Where no cell holds traffic, an OP or a gun takes
+the band cell with the highest need.
+
+| Asset | Band cell |
+|---|---|
+| Radio tower | the campaign-generation rule (`fnc_hardpoint_seed_radio`): outside every standing tower's `AOI_TOWER_REACH` |
+| OP | the most traffic within `OP_OBSERVE_K` that no standing OP's ring already covers |
+| Mortar pit | the most traffic within `OPCOM_MORTAR_REACH` (3 km), with none within `OPCOM_GUN_STANDOFF` (1 km) |
+| Artillery battery | the most traffic within `OPCOM_ARTY_REACH` (10 km), with none within `OPCOM_GUN_STANDOFF` |
+
+A gun's true range depends on the faction's gun and is read only at fire time (`inRangeOfArtillery`), so siting
+uses a fixed reach per type.
 
 ### Indirect-fire hardpoints
 
@@ -509,7 +533,7 @@ persisting its state is the snapshot's responsibility. Every field is a number, 
 - **Belief sightings are not saved.** Belief is keyed by group `netId`, which resolves to nothing after a restart,
   and a restart also loses the headless clients and returns players to HQ, so the sightings would describe a
   battlefield that no longer exists. The grid, its coverage layer and the contested set rebuild from the first
-  sensor pass.
+  sensor pass, and the traffic layer refills as sightings land.
 - `fnc_opcom_belief_init` sets the tick to 0 today; it must initialise the tick and the HQ flag only when they are
   nil, or a restore resets them.
 - A saved `spawnClass` the loaded mods no longer define is rerolled from its token against the current faction
