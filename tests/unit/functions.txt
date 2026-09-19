@@ -18,6 +18,7 @@ duws/server/search/fnc_search_drawKind.sqf::*fnc_search_drawKind
 duws/shared/faction_lib/fnc_factionRoles.sqf::*fnc_factionRoles
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrength
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonFull
+duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonLocked
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSetFull
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonLost
 duws/server/garrison/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonSurviving
@@ -42,6 +43,7 @@ duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRow
 duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRoster
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_vehicleRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenClass
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenLocked
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnFilter
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_scaleComposition
 duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_pick

@@ -459,6 +459,8 @@ TEST_Air = 1;
 WARCOM_opfor_ap_earned = 40;
 ["tokenClass: below its Army Power rung a token is not yet unlocked",
     (["tank"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
+["spawnFilter: a token below its rung is kept, locked, rather than dropped",
+    ([["patrol", "tank"]] call DUWS_fnc_spawnFilter), ["patrol", "tank"]] call fnc_assertEq;
 WARCOM_opfor_ap_earned = 100;
 ["tokenClass: reaching the rung unlocks it",
     (["tank"] call DUWS_fnc_tokenClass), "cls_tank"] call fnc_assertEq;
@@ -643,6 +645,41 @@ missionNamespace setVariable ["DUWS_garrisonLost_pk", ["team"]];
 missionNamespace setVariable ["DUWS_garrisonLost_pk", ["patrol", "patrol", "team"]];
 ["garrisonStrength: losses filed against an older, larger full never read below empty",
     (["pk"] call DUWS_fnc_garrisonStrength), 0] call fnc_assertClose;
+
+// Locked tokens: stamped into full, counted nowhere until the side earns their rung (tank sits at 100 here).
+WARCOM_opfor_ap_earned = 40;
+missionNamespace setVariable ["DUWS_garrisonLost_lk", []];
+["lk", ["patrol", "tank", "patrol", "tank"]] call DUWS_fnc_garrisonSetFull;
+["garrisonFull: a locked token is left out of full",
+    (["lk"] call DUWS_fnc_garrisonFull), ["patrol", "patrol"]] call fnc_assertEq;
+["garrisonLocked: and listed on its own",
+    (["lk"] call DUWS_fnc_garrisonLocked), ["tank", "tank"]] call fnc_assertEq;
+["garrisonStrength: a locked token does not read as missing",
+    (["lk"] call DUWS_fnc_garrisonStrength), 1] call fnc_assertClose;
+WARCOM_opfor_ap_earned = 200;
+["garrisonFull: earning the rung counts it, with no restamp",
+    (count (["lk"] call DUWS_fnc_garrisonFull)), 4] call fnc_assertEq;
+
+WARCOM_opfor_ap_earned = 40;
+missionNamespace setVariable ["DUWS_garrisonLost_lsk", []];
+["lsk", ["patrol", "patrol", "tank"]] call DUWS_fnc_garrisonSetFull;
+["lsk", 2] call DUWS_fnc_garrisonSeed;
+WARCOM_opfor_ap_earned = 200;
+["garrisonSeed: a locked token is filed lost, so its rung refills nothing",
+    (["lsk"] call DUWS_fnc_garrisonSurviving), ["patrol", "patrol"]] call fnc_assertEq;
+
+WARCOM_opfor_ap_earned = 40;
+missionNamespace setVariable ["DUWS_garrisonLost_luk", ["tank", "patrol"]];
+["luk", ["patrol", "tank"]] call DUWS_fnc_garrisonSetFull;
+["luk", 1] call DUWS_fnc_garrisonUnlose;
+["garrisonUnlose: buys back an unlocked token before a locked one",
+    (["luk"] call DUWS_fnc_garrisonLost), ["tank"]] call fnc_assertEq;
+
+missionNamespace setVariable ["DUWS_garrisonLost_lgk", []];
+["lgk", ["a"], ["a", "b", "tank"]] call DUWS_fnc_garrisonBuyTier;
+["garrisonBuyTier: the fielded tenth is unlocked; the locked token is filed lost",
+    (["lgk"] call DUWS_fnc_garrisonLost), ["tank"]] call fnc_assertEq;
+WARCOM_opfor_ap_earned = 200;
 
 // seed: keep a set number of tokens and file the rest lost -- a recaptured zone, a town OPFOR take.
 missionNamespace setVariable ["DUWS_garrisonLost_seedk", []];

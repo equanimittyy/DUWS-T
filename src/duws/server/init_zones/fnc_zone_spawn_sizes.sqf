@@ -43,9 +43,11 @@ DUWS_fnc_zoneSpawnList = {
 // who asked for no helicopters got an extra truck per slot instead of a quieter zone.
 //
 // Runs before the strength thin, so the thin reduces the force the side can actually field.
+//
+// An Army Power lock is not a drop: the ledger keeps the token and skips it until the rung is earned.
 DUWS_fnc_spawnFilter = {
     params ["_tokens"];
-    _tokens select { ([_x] call DUWS_fnc_tokenClass) != "" }
+    _tokens select { ([_x, "OPF", true] call DUWS_fnc_tokenClass) != "" }
 };
 
 // The enemy multiplier, applied to a composition rather than inside a roster: a x3 town garrison
@@ -69,21 +71,18 @@ DUWS_fnc_scaleComposition = {
 // Team resolution is not this function's business -- fnc_factionRoles already drops the roles a
 // faction leaves undefined.
 DUWS_fnc_tokenClass = {
-    params ["_token", ["_side", "OPF"]];
+    params ["_token", ["_side", "OPF"], ["_ignoreLock", false]];
     // Posture resolved here, before the classname passthrough below: fnc_spawn_vehicle needs a bare
     // classname, and "closepatrol:O_MBT_02_cannon_F" is not one.
     private _name = [_token] call DUWS_fnc_tokenName;
     if !(([_name] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _name };
     private _row = [_name, _side] call DUWS_fnc_vehicleRow;
     if (_row isEqualTo []) exitWith { _name };
-    _row params ["", "_role", "_setting", "_ap"];
+    _row params ["", "_role", "_setting"];
     // Missing setting defaults to on, so a campaign that predates a new rule keeps the token instead
     // of quietly losing it.
     if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
-    // Gated on the earned counter, not the spendable wallet: a token the side has reached the tier
-    // for must not vanish because the wallet dipped from spending.
-    private _earnedVar = ["WARCOM_opfor_ap_earned", "WARCOM_blufor_ap_earned"] select (_side == "BLU");
-    if (_ap > 0 && {(missionNamespace getVariable [_earnedVar, 0]) < _ap}) exitWith { "" };
+    if (!_ignoreLock && {[_name, _side] call DUWS_fnc_tokenLocked}) exitWith { "" };
     // Drawn per spawn rather than held as one campaign-wide value, so two zones raised in the same
     // second don't both put down the identical APC.
     //
@@ -190,6 +189,16 @@ DUWS_fnc_vehicleRow = {
     private _table = [DUWS_spawnVehicles, DUWS_spawnVehiclesBlu] select (_side == "BLU");
     private _i = _table findIf { (_x select 0) isEqualTo _name };
     if (_i < 0) then { [] } else { _table select _i }
+};
+
+// Gated on the earned counter, not the spendable wallet: a token the side has reached the rung for must
+// not relock because the wallet dipped from spending.
+DUWS_fnc_tokenLocked = {
+    params ["_token", ["_side", "OPF"]];
+    private _row = [_token, _side] call DUWS_fnc_vehicleRow;
+    if (_row isEqualTo []) exitWith { false };
+    private _earnedVar = ["WARCOM_opfor_ap_earned", "WARCOM_blufor_ap_earned"] select (_side == "BLU");
+    (missionNamespace getVariable [_earnedVar, 0]) < (_row select 3)
 };
 
 // Classifies into [hasGun, hasMissile, hasAirMissile] in one config walk, feeding all three token

@@ -10,9 +10,17 @@
 
 // The full fighting potential, stamped at raise and re-stamped by a tier buy, an OPFOR cap or a town clear. Every strength
 // measure counts tokens, not men: a tank weighs the same as a patrol.
+// Tokens behind an unearned Army Power rung are skipped at read, not stamp, so a site gains them the moment the rung is
+// earned. Tested per distinct token: the force grid reads every site's full each rebuild.
 DUWS_fnc_garrisonFull = {
 	params ["_key"];
-	missionNamespace getVariable [format ["DUWS_garrisonFull_%1", _key], []]
+	private _full = missionNamespace getVariable [format ["DUWS_garrisonFull_%1", _key], []];
+	_full - ((_full arrayIntersect _full) select { [_x] call DUWS_fnc_tokenLocked })
+};
+
+DUWS_fnc_garrisonLocked = {
+	params ["_key"];
+	(missionNamespace getVariable [format ["DUWS_garrisonFull_%1", _key], []]) - ([_key] call DUWS_fnc_garrisonFull)
 };
 
 DUWS_fnc_garrisonSetFull = {
@@ -85,7 +93,7 @@ DUWS_fnc_garrisonDerive = {
 DUWS_fnc_garrisonRestand = {
 	params ["_key", "_x1"];
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-	private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
+	private _stand = [_x1 select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_zoneDensityStand;
 	private _opcom = ([_key] call DUWS_fnc_garrisonReserve) select { (_x select [0, 8]) == "opcomdef" };
 	private _garrison = ([_key, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) select 0;
 	([_key] call DUWS_fnc_garrisonReserve) append _opcom;
@@ -138,11 +146,12 @@ DUWS_fnc_garrisonStrength = {
 
 // Keeps _keep random tokens of full and files the rest lost; the caller picks the rounding. The raise fills the
 // garrison before the pool, so a thin seed leaves a thin single garrison with no reserve depth.
+// Locked tokens are filed lost too, so earning their rung never refills ground a seed emptied.
 DUWS_fnc_garrisonSeed = {
 	params ["_key", "_keep"];
 	private _lost = +([_key] call DUWS_fnc_garrisonFull);
 	for "_i" from 1 to (_keep min count _lost) do { _lost deleteAt (floor random count _lost) };
-	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost];
+	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost + ([_key] call DUWS_fnc_garrisonLocked)];
 };
 
 // Full is stamped here, not left to the raise, because the seed thins against it: a retaken zone still carries its
@@ -152,17 +161,19 @@ DUWS_fnc_garrisonSeedOpforCap = {
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 	private _full = [_x1, _mult] call DUWS_fnc_scaleComposition;
 	[_key, _full] call DUWS_fnc_garrisonSetFull;
-	[_key, ceil (0.1 * count _full)] call DUWS_fnc_garrisonSeed;
+	[_key, ceil (0.1 * count ([_key] call DUWS_fnc_garrisonFull))] call DUWS_fnc_garrisonSeed;
 };
 
 // Buys _n random destroyed tokens back. The reinforce purchase's hook -- a paid replacement, the one thing that raises
 // strength, and deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).
+// A locked token is not bought back: it would lift no strength until its rung.
 DUWS_fnc_garrisonUnlose = {
 	params ["_key", "_n"];
 	private _var = format ["DUWS_garrisonLost_%1", _key];
-	private _lost = +(missionNamespace getVariable [_var, []]);
+	private _all = missionNamespace getVariable [_var, []];
+	private _lost = _all select { !([_x] call DUWS_fnc_tokenLocked) };
 	for "_i" from 1 to (_n min count _lost) do { _lost deleteAt (floor random count _lost) };
-	missionNamespace setVariable [_var, _lost];
+	missionNamespace setVariable [_var, _lost + (_all select { [_x] call DUWS_fnc_tokenLocked })];
 };
 
 // Shared by town and zone, so both climb by one rule. An empty _x1 skips the re-stand, since deriving from it would
@@ -182,7 +193,9 @@ DUWS_fnc_garrisonBuyTier = {
 	private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
 	private _full = [_newX1, _mult] call DUWS_fnc_scaleComposition;
 	private _owed = [[_oldX1, _mult] call DUWS_fnc_scaleComposition, _full] call DUWS_fnc_spawnDiff;
-	for "_i" from 1 to ceil (0.1 * count _owed) do { _owed deleteAt (floor random count _owed) };
+	private _open = _owed select { !([_x] call DUWS_fnc_tokenLocked) };
+	for "_i" from 1 to ceil (0.1 * count _open) do { _open deleteAt (floor random count _open) };
+	_owed = _open + (_owed select { [_x] call DUWS_fnc_tokenLocked });
 	private _var = format ["DUWS_garrisonLost_%1", _key];
 	private _lost = missionNamespace getVariable [_var, []];
 	{
@@ -244,6 +257,7 @@ DUWS_fnc_townStrengthKey = {
 DUWS_fnc_garrisonDebug = {
 	params ["_key"];
 	private _full = [_key] call DUWS_fnc_garrisonFull;
+	private _locked = [_key] call DUWS_fnc_garrisonLocked;
 	private _lost = [_key] call DUWS_fnc_garrisonLost;
 	private _surv = [_key] call DUWS_fnc_garrisonSurviving;
 
@@ -273,6 +287,7 @@ DUWS_fnc_garrisonDebug = {
 		["Live on ground", ["no", "yes"] select ([_key] call DUWS_fnc_garrisonHeld)],
 		["Strength", ([_key] call DUWS_fnc_garrisonStrength) toFixed 2, format ["%1 available / %2 full tokens", count _surv, count _full]],
 		["Max tokens", format ["%1 (%2 men)", count _full, [_full] call DUWS_fnc_tokenListMen], [_full] call _tally],
+		["Locked", str count _locked, [_locked] call _tally],
 		["Available", format ["%1 (%2 men)", count _surv, [_surv] call DUWS_fnc_tokenListMen], [_surv] call _tally],
 		["On ground", format ["%1 / %2 groups (x1 cap)", _onGround, _ceiling]],
 		["Reserve", format ["%1 (%2 men)", count _pool, [_pool] call DUWS_fnc_tokenListMen], [_pool] call _tally],

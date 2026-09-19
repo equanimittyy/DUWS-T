@@ -22,13 +22,20 @@ field (`full`), minus the tokens it has actually lost (`lost`):
 
 ```
 full      = mult copies of the filtered x1 tier list, stamped at raise
-              (filtered = what the side can currently field, given AP and settings)
+              (filtered = what the side can field, given settings and faction)
+locked    = the tokens in full behind an Army Power rung the side has not earned
 lost      = flat token list, persists across a stow
 surviving = full minus lost, by value                    (DUWS_fnc_garrisonSurviving)
 pool      = surviving beyond the standing template        (the reserve)
 garrison  = surviving capped to the standing template     (what deploys)
 strength  = count surviving / count full                 (DUWS_fnc_garrisonStrength)
 ```
+
+A locked token is kept, not dropped. `DUWS_fnc_garrisonFull` leaves it out, so it counts toward no
+strength, force, break test or standing template until OPFOR's earned Army Power reaches its rung
+(`DUWS_fnc_tokenLocked`). The site then gains it with no restamp, so a zone stamped at campaign start
+fields its armour once the rung is earned. A seed and a tier buy file locked tokens as lost, so earning a
+rung never refills ground that a clear, a retake or a purchase left owed.
 
 Every strength measure counts tokens, not men: a tank, a 2-man patrol and a 6-man team each weigh one
 token. The one exception is `DUWS_fnc_garrisonForce`, the OPCOM force grid's firepower figure, which
@@ -67,15 +74,16 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 | Function | Does |
 |---|---|
 | `DUWS_fnc_garrisonSetFull {key, full}` | Stamp `full`. Called by the derivation, a tier buy, an OPFOR cap and a town clear. |
+| `DUWS_fnc_garrisonLocked {key}` | The stamped tokens that `DUWS_fnc_garrisonFull` leaves out because their rung is not earned yet. |
 | `DUWS_fnc_garrisonLost {key}` | The lost token list. |
 | `DUWS_fnc_garrisonSurviving {key}` | `full` minus `lost`, by value. |
 | `DUWS_fnc_garrisonRecordLoss {key, token}` | Push one lost token, bounded at its count in `full` — a double-fire of the killed handler is a no-op. |
 | `DUWS_fnc_garrisonStrength {key}` | The live `[0,1]` projection the map bar reads. |
-| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, which spends the pool before the garrison. Called by `DUWS_fnc_garrisonSeedOpforCap`, and with `keep` 0 by a town clear. |
+| `DUWS_fnc_garrisonSeed {key, keep}` | Keep `keep` random tokens of `full` and file the rest lost, locked tokens included, which spends the pool before the garrison. Called by `DUWS_fnc_garrisonSeedOpforCap`, and with `keep` 0 by a town clear. |
 | `DUWS_fnc_garrisonSeedOpforCap {key, x1}` | Stamp `full` at the tier I list `x1`, then keep `ceil(0.1 × full)` tokens. Rounded up, so a tier I site at multiplier 1 still stands one token. Called when OPFOR take ground: a zone retake (`fnc_opfor_cap`) and a town crossing into the OPFOR band (`fnc_civ_garrison`). |
-| `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
+| `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random unlocked lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
 | `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
-| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
+| `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up, drawn from unlocked tokens) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
 | `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
 | `DUWS_fnc_garrisonHeld {key}` | Liveness: true from the moment a raise finishes placing men to the stow or capture that tears it down. Gates the capture test and the refill pass. |
 
