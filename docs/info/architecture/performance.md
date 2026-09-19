@@ -3,8 +3,8 @@
 Sustained cost in this mission comes from two shapes, neither of which is an expensive operation:
 *repeating scans*, which cost the same on the first minute as on the fourth hour, and *state that
 never shrinks*, which does not. This doc covers both, and the design decisions taken against them.
-Everything here was read out of the source rather than profiled in-engine, so treat sizes as
-reasoning about how often code runs and what it touches.
+Most of it was read out of the source rather than profiled in-engine, so treat sizes as reasoning
+about how often code runs and what it touches; a figure that was measured says so.
 
 Two of the three growth terms this tree carried are gone now, and the shape of the fix is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
@@ -142,6 +142,19 @@ Two alternatives were rejected. Caching the count per world does not hold: the m
 and mod-tolerant, so a stored figure goes stale silently whenever terrain content changes. Tiling the
 count across frames removes the stall but raises total work for edge handling, and it is only worth
 revisiting if the placement above proves insufficient.
+
+## OPCOM prices a class once, not once per tick
+
+The OPCOM tick logs each stage's wall time at DEBUG. On a quiet Altis map its grid stage measured
+72-469 ms (median 201 ms) every 5 s, while the other stages read 0-2 ms. The grid rebuild prices every
+holding on every tick. A hardpoint's force is `DUWS_fnc_classPower` summed over every object in its
+layout, props included. `fnc_classifyVehicle`, behind that, walks the class's turret config with
+`configClasses` and runs `BIS_fnc_returnParents` for each weapon. So each tick re-read the same config
+for hundreds of objects whose class cannot change.
+
+`DUWS_fnc_classPower` (`warcom/opcom/belief/fnc_opcom_force.sqf`) therefore memoises by class name.
+Class config is fixed for the session, so the memo never goes stale. The sighting sensors and OPCOM's
+hardpoint pricing read the same memo.
 
 ## Checked and dismissed
 

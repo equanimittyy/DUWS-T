@@ -234,8 +234,10 @@ DUWS_fnc_hardpointOPBurst = {
     private _oc  = [_pos] call DUWS_fnc_opcom_w2c;
     private _ocx = _oc mod _w;
     private _ocy = floor (_oc / _w);
+    // The distance gate is the cell box's circumscribed radius, so it only spares the per-unit cell lookup.
+    private _reach = (OP_OBSERVE_K + 1) * OPCOM_GRID_CELL * 1.415;
     private _blu = allUnits select {
-        side _x == WEST && {alive _x} && {
+        side _x == WEST && {alive _x} && {(_x distance2D _pos) < _reach} && {
             private _c = [getPosASL _x] call DUWS_fnc_opcom_w2c;
             ((abs ((_c mod _w) - _ocx)) max (abs ((floor (_c / _w)) - _ocy))) <= OP_OBSERVE_K
         }

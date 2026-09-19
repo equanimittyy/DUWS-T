@@ -44,9 +44,17 @@ DUWS_fnc_tokenPower = {
 
 // One class -> its force, for a sighted enemy hull with no token to read: fnc_classifyVehicle resolves the
 // class alone (see fn_factionAutoDetect), then category -> power. An unclassifiable class reads 0.
+// Memoised: classifying walks the class's turret and weapon config, and every OPCOM tick prices each prop
+// of every hardpoint layout through here.
+DUWS_classPowerMemo = createHashMap;
 DUWS_fnc_classPower = {
     params ["_class"];
-    OPCOM_FORCE getOrDefault [[_class] call fnc_classifyVehicle, 0]
+    private _p = DUWS_classPowerMemo get _class;
+    if (isNil "_p") then {
+        _p = OPCOM_FORCE getOrDefault [[_class] call fnc_classifyVehicle, 0];
+        DUWS_classPowerMemo set [_class, _p];
+    };
+    _p
 };
 
 // A sighted enemy group -> the strength a belief stamp carries: firepower (a dismounted man 1, each crewed
