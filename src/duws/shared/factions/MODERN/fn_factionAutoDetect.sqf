@@ -18,8 +18,8 @@ fnc_vehiclePostInit = compileFinal {
 		
 		if (_entity isKindOf "ParachuteBase") exitWith {};
 
-		// only AI-crewed vehicles of this side: skip empty, civilian, player-crewed, UAV
-		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {side _entity == civilian} || {side _entity != _side} || {unitIsUAV _entity}) exitWith {};		
+		// only AI-crewed vehicles of this side: skip empty, civilian, player-crewed, UAV, disguised
+		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {side _entity == civilian} || {side _entity != _side} || {unitIsUAV _entity} || {_entity getVariable ["DUWS_keepCrewDress", false]}) exitWith {};		
 		
 		// wait for this side's foot units to exist
 		waitUntil {sleep 1; {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x}} count allUnits > 0 };

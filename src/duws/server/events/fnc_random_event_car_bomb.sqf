@@ -20,6 +20,8 @@ if (_roads isEqualTo []) exitWith {};
 
 private _spawnPos = getPosATL (selectRandom _roads);
 private _veh = [selectRandom _pool, _spawnPos, [_spawnPos, getPos _player] call BIS_fnc_dirTo] call fnc_civ_spawnCar;
+// Else the faction reskin (fnc_vehiclePostInit) redresses the driver as an OPFOR soldier.
+_veh setVariable ["DUWS_keepCrewDress", true];
 
 private _grp = createGroup [CIVILIAN, true];
 private _driver = _grp createUnit [selectRandom _bodies, _spawnPos, [], 0, "NONE"];
