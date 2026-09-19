@@ -229,8 +229,10 @@ vanish with the clear.
 
 Every hardpoint gets a marker on registration: shape `"ICON"`, type `"loc_Bunker"`, coloured by side,
 with the type token as its text (`fnc_hardpoint_stream.sqf:334-341`) — one icon shape for every type,
-distinguished by label rather than by symbol. Alpha starts at the generation-visibility rule zones
-use: shown outside hardcore, `0` under it (`:341`). `fnc_hardpoint_reveal` (`fnc_hardpoint_reveal.sqf`)
+distinguished by label rather than by symbol. The marker's alpha and the revealed flag start at the rule
+in [`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence): a hardpoint
+laid by campaign generation is shown outside hardcore and hidden under it, and one built in play
+(registered after `mission_init_complete`) starts hidden in both modes. `fnc_hardpoint_reveal` (`fnc_hardpoint_reveal.sqf`)
 is the sole writer of the revealed flag — index 5 of a `DUWS_hardpoints` row — keyed on the
 hardpoint's own key rather than position, the way `fnc_zone_reveal` owns its flag and
 `fnc_civ_town_reveal` owns `civ_visible`.

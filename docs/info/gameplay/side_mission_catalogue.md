@@ -243,8 +243,8 @@ emplacements: the mission points at an existing standalone OPFOR hardpoint of an
 *except* RADIO (its own tower mission) and MINEFIELD (a hazard, not an emplacement) -- so MG, AT, AA,
 GMG, roadblock, OP, mortar and artillery are all fair game. Intel *is* required, unlike the tower:
 `fnc_destroy_hardpoint_site` accepts only a **revealed** row (index 5), so the player is never sent
-after an emplacement they have not found; under non-hardcore fog every hardpoint spawns revealed, so
-the flag only bites in hardcore mode. Standalone only (`zoneKey ""`): a zone-child emplacement is taken
+after an emplacement they have not found; outside hardcore only generation's hardpoints spawn revealed,
+so the flag bites under hardcore and on hardpoints OPFOR built in play. Standalone only (`zoneKey ""`): a zone-child emplacement is taken
 by capturing its zone and pays no bounty. Wins when the target's `DUWS_hardpoints` row leaves the array
 -- the streamer's own per-type clearance test (garrison beaten, guns wrecked) decides "destroyed", so
 the mission watches liveness, not any one object. Pays 10/10 on top of the hardpoint's own destruction

@@ -33,8 +33,8 @@ OPFOR build during play stays hidden in both.
 | Enemy elements on missions | **hidden** | **hidden** |
 
 So normal mode has a live intel channel answering "what has changed", and hardcore has that plus
-everything generation produced, answering "where is the war". Both of normal mode's payouts are unbuilt
-today, so outside hardcore the reveal pool is empty and a draw that lands on intel has nothing to give.
+everything generation produced, answering "where is the war". Of normal mode's two payouts, only
+hardpoints built in play exist today, so outside hardcore the reveal pool holds nothing until OPFOR builds one.
 
 **The mode changes what is hidden and nothing else.** Every mechanic runs the same in both — same flag
 rates, same action, same payout table, same substitute when intel comes up dry. Only how often each branch

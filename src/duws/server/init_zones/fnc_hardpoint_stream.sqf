@@ -440,9 +440,11 @@ fnc_hardpoint_register = {
     _occ set ["lastSeen", time];
 
     // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence is
-    // liveness -- the clearance check deletes the row on fall. Revealed follows the zone's fog rule (shown
-    // at once, or hidden until intel finds it under hardcore). Dir is read by the survey to score interlocking fire.
-    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable, _dir];
+    // liveness -- the clearance check deletes the row on fall. Hardcore gates only the initial intel: what
+    // generation lays starts shown outside hardcore, and anything built in play (after mission_init_complete)
+    // starts hidden in both modes. Dir is read by the survey to score interlocking fire.
+    private _shown = !hardcore_mode_enable && {!mission_init_complete};
+    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, _shown, _dir];
     publicVariable "DUWS_hardpoints";
     [_key] call DUWS_fnc_opcom_gridDirty;
     // A newly-registered tower raises the amplifier; recount from the row just pushed.
@@ -457,7 +459,7 @@ fnc_hardpoint_register = {
     _mk setMarkerColor (["ColorOPFOR", "ColorBLUFOR"] select (_side isEqualTo "blufor"));
     _mk setMarkerText _type;
     _mk setMarkerSize [1, 1];
-    _mk setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
+    _mk setMarkerAlpha ([0, 1] select _shown);
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 
