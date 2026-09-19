@@ -82,8 +82,7 @@ private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
     private _fit = _pos findEmptyPosition [0, 25, _class];
     if (_fit isEqualTo []) then {
-        _fit = [_pos, 0, 25, (sizeOf _class) max 6, 0, 0.3, 0] call BIS_fnc_findSafePos;
-        if (_fit isEqualTo [0,0,0]) then { _fit = _pos };
+        _fit = [_pos, 25, 0, (sizeOf _class) max 6, 0.3] call fnc_safe_pos;
     };
     private _veh = _class createVehicle _fit;
     clearItemCargoGlobal _veh; clearMagazineCargoGlobal _veh;
@@ -105,8 +104,7 @@ private _fnc_carPos = {
     // Clear road point if the town has one, else safe ground -- a car in a field still drives off.
     private _clear = _roads select { [getPosATL _x] call _fnc_carClear };
     if (_clear isEqualTo []) exitWith {
-        private _p = [_townPos, 0, _spawnRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
-        [if (_p isEqualTo [0,0,0]) then { _townPos } else { _p }, random 360]
+        [[_townPos, _spawnRadius, 0, 5, 0.3] call fnc_safe_pos, random 360]
     };
     private _road = selectRandom _clear;
     // Heading ALONG the road, via bearing to a connected segment: a road piece's own getDir is often
@@ -145,8 +143,7 @@ private _decoys = [];
 // leave his scripted stroll alone rather than driving a tactical reaction when BLUFOR closes in and
 // outs him. Captive/unarmed while blended; only car-gone AND under fire flips him to EAST (footFlee).
 private _civBodies = missionNamespace getVariable ["civ_array", []];
-private _informantSpawn = [_townPos, 0, _spawnRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
-if (_informantSpawn isEqualTo [0,0,0]) then { _informantSpawn = _townPos };
+private _informantSpawn = [_townPos, _spawnRadius, 0, 3, 0.3] call fnc_safe_pos;
 private _iGroup = createGroup [CIVILIAN, true];
 private _informant = _iGroup createUnit [selectRandom _civBodies, _informantSpawn, [], 0, "NONE"];
 removeAllWeapons _informant;
@@ -209,8 +206,7 @@ publicVariable "DUWS_informant_active";
     params ["_inf", "_tp", "_tr"];
     (group _inf) setSpeedMode "LIMITED";
     while { alive _inf && !(_inf getVariable ["DUWS_informant_leaving", false]) } do {
-        private _dest = [_tp, 0, _tr, 3, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (_dest isEqualTo [0,0,0]) then { _dest = _tp };
+        private _dest = [_tp, _tr, 0, 3, 0.35] call fnc_safe_pos;
         _inf doMove _dest;
         private _until = diag_tickTime + 90;
         waitUntil {
@@ -233,8 +229,7 @@ if (!_enemyTown) then {
 
     private _crowdGroups = [];
     for "_i" from 1 to 8 do {
-        private _anchor = [_townPos, 0, _spawnRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
+        private _anchor = [_townPos, _spawnRadius, 0, 2, 0.35] call fnc_safe_pos;
         private _grp = grpNull;
         for "_j" from 0 to 2 do {
             private _cpos = _anchor getPos [_j * 3, random 360];

@@ -32,12 +32,9 @@ private _targetpos = _MissionPos;
 private _vehpos = [];
 private _tankRoads = _targetpos nearRoads 100;
 if !(_tankRoads isEqualTo []) then {
-    _vehpos = [getPosATL (selectRandom _tankRoads), 8, 30, 12, 0, 0.2, 0] call BIS_fnc_findSafePos;
+    _vehpos = [getPosATL (selectRandom _tankRoads), 30, 8, 12, 0.2, []] call fnc_safe_pos;
 };
-if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then {
-    _vehpos = [_targetpos, 5, 25, 12, 0, 0.2, 0] call BIS_fnc_findSafePos;
-};
-if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetpos };
+if (_vehpos isEqualTo []) then { _vehpos = [_targetpos, 25, 5, 12, 0.2] call fnc_safe_pos };
 
 private _taskId = format ["destroyarmour%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
 

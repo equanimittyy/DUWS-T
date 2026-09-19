@@ -105,7 +105,7 @@ DUWS_fnc_opcom_ferryStepLive = {
     // scripted waypoints. The pin follows the move, whose applyOrder resets behaviour.
     private _rotorLeg = {
         params ["_near"];
-        private _p = [_near, 0, 80, 8, 0, 0.3, 0] call BIS_fnc_findSafePos; _p set [2, 0];
+        private _p = +([_near, 80, 0, 8, 0.3] call fnc_safe_pos); _p set [2, 0];
         [_t] call DUWS_fnc_opcom_ferryClearPad;
         _t set ["ferryPad", netId (createVehicle ["Land_HelipadEmpty_F", _p, [], 0, "NONE"])];
         [_p] call _legTo;

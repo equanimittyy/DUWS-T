@@ -603,7 +603,8 @@ fnc_furnish_push_addAction = compile preprocessFileLineNumbers "duws\server\plac
 // The standing orders half of every spawner below, and of the base guards: a group is raised by one
 // of them and ordered by this.
 fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\placement\fnc_apply_posture.sqf";
-fnc_safe_pos = compile preprocessFileLineNumbers "duws\server\placement\fnc_safe_pos.sqf";
+// Broadcast: the request dialogs and the intro drop place client-side.
+fnc_safe_pos = compile preprocessFileLineNumbers "duws\server\placement\fnc_safe_pos.sqf";publicVariable "fnc_safe_pos";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_team.sqf";
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_vehicle.sqf";
 

@@ -67,8 +67,8 @@ switch (_posture) do {
                 // addWaypoint's own radius pick doesn't water-check, so a coastal patrol can drop a leg
                 // in the sea; findSafePos waterMode 0 finds a ring point clear of water, falling back
                 // to the raw pick (inland zones unaffected) when none is found.
-                private _land = [_centre, 0, _patrolRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-                private _w = if (_land isEqualTo [] || {surfaceIsWater _land}) then {
+                private _land = [_centre, _patrolRadius, 0, 5, 0.5, []] call fnc_safe_pos;
+                private _w = if (_land isEqualTo []) then {
                     _group addWaypoint [_centre, _patrolRadius]
                 } else {
                     _group addWaypoint [_land, 0]

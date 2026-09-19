@@ -14,7 +14,6 @@
 params ["_pos", "_class"];
 private _fit = _pos findEmptyPosition [0, 25, _class];
 if (_fit isEqualTo []) then {
-    _fit = [_pos, 0, 25, (sizeOf _class) max 6, 0, 0.3, 0] call BIS_fnc_findSafePos;
-    if (_fit isEqualTo [0, 0, 0]) then { _fit = _pos };
+    _fit = [_pos, 25, 0, (sizeOf _class) max 6, 0.3] call fnc_safe_pos;
 };
 _fit

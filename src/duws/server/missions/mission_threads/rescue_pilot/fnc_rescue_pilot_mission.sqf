@@ -34,8 +34,8 @@ private _heliPos = _MissionPos;
 private _found = false;
 for "_i" from 1 to 20 do {
     if (!_found) then {
-        private _p = [_MissionPos, 0, 80, 10, 0, 0.3, 0] call BIS_fnc_findSafePos;
-        if (!(_p isEqualTo []) && {!surfaceIsWater _p} && {(_p nearRoads 150) isEqualTo []}) then {
+        private _p = [_MissionPos, 80, 0, 10, 0.3, []] call fnc_safe_pos;
+        if (_p isNotEqualTo [] && {(_p nearRoads 150) isEqualTo []}) then {
             _heliPos = _p; _found = true;
         };
     };

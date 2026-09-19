@@ -4,8 +4,7 @@ if (!isServer) exitWith {};
 params ["_caller", "_clickPos", "_count"];
 if (isNull _caller) exitWith {};
 
-private _spawnPos = [_clickPos, 0, 30, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
-if (_spawnPos isEqualTo [0,0,0]) then { _spawnPos = _clickPos; };
+private _spawnPos = [_clickPos, 30, 0, 5, 0.2] call fnc_safe_pos;
 
 waitUntil { !isNil "civ_array" && {count civ_array > 0} };
 private _civArray = +civ_array;

@@ -31,8 +31,8 @@ for "_i" from 1 to 20 do {
     private _angle = random 360;
     private _dist = 30 + random 70;
     private _candidate = _hqPos getPos [_dist, _angle];
-    private _safe = [_candidate, 0, 20, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
-    if !(_safe isEqualTo [0,0,0]) exitWith { _spawnPos = _safe; };
+    private _safe = [_candidate, 20, 0, 5, 0.2, []] call fnc_safe_pos;
+    if (_safe isNotEqualTo []) exitWith { _spawnPos = _safe; };
 };
 if (_spawnPos isEqualTo []) then { _spawnPos = _hqPos getPos [50, random 360]; };
 

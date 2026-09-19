@@ -301,8 +301,7 @@ if (_mode == "spawn") then {
             _newUnit addEventHandler ["Killed", WBK_unitKilledHandler];
             private _centerPos = _center;
             private _radius = _radius;
-            private _randomPos = [_centerPos, 0, _radius, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
-            if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _centerPos; };
+            private _randomPos = [_centerPos, _radius, 0, 3, 0.2] call fnc_safe_pos;
             while {count (waypoints _newGroup) > 0} do { deleteWaypoint ((waypoints _newGroup) select 0); };
             private _wp = _newGroup addWaypoint [_randomPos, 10];
             _wp setWaypointType "MOVE";
@@ -321,15 +320,13 @@ if (_mode == "spawn") then {
     };
 
     if (_survivorCount > 0) then {
-        private _survivorGroupCenter = [_centerPos, 0, _triggerRadius * 0.5, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-        if (_survivorGroupCenter isEqualTo [0,0,0]) then { _survivorGroupCenter = _centerPos; };
+        private _survivorGroupCenter = [_centerPos, _triggerRadius * 0.5, 0, 5, 0.5] call fnc_safe_pos;
         private _survivorGroup = [_survivorGroupCenter, WEST, _survivorUnitTypes, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
         _survivorGroup deleteGroupWhenEmpty true;
         _allGroups pushBack _survivorGroup;
 
         {
-            private _pos = [_centerPos, 0, _triggerRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-            if (_pos isEqualTo [0,0,0]) then { _pos = _centerPos };
+            private _pos = [_centerPos, _triggerRadius, 0, 5, 0.5] call fnc_safe_pos;
             _x setPos _pos;
             _x setVariable ["civ_locIndex", _locIndex];
             _x setVariable ["isZombie", false, true];
@@ -358,15 +355,13 @@ if (_mode == "spawn") then {
     };
 
     if (_zombieCount > 0) then {
-        private _zombieGroupCenter = [_centerPos, 0, _triggerRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-        if (_zombieGroupCenter isEqualTo [0,0,0]) then { _zombieGroupCenter = _centerPos; };
+        private _zombieGroupCenter = [_centerPos, _triggerRadius, 0, 5, 0.5] call fnc_safe_pos;
         private _zombieGroup = [_zombieGroupCenter, INDEPENDENT, _zombieUnitTypes, [], [], [0.5, 0.6]] call BIS_fnc_spawnGroup;
         _zombieGroup deleteGroupWhenEmpty true;
         _allGroups pushBack _zombieGroup;
 
         {
-            private _pos = [_centerPos, 0, _triggerRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-            if (_pos isEqualTo [0,0,0]) then { _pos = _centerPos };
+            private _pos = [_centerPos, _triggerRadius, 0, 5, 0.5] call fnc_safe_pos;
             _x setPos _pos;
             _x setVariable ["civ_locIndex", _locIndex];
             _x setVariable ["isZombie", true, true];

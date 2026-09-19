@@ -18,8 +18,8 @@ private _build = {
     private _tries = 0;
     while { count _campCentres < _campCount && _tries < 80 } do {
         _tries = _tries + 1;
-        private _p = [_randomPos, 120, _radius - 120, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
-        if (_p isEqualTo [] || {surfaceIsWater _p}) then { continue };
+        private _p = [_randomPos, _radius - 120, 120, 8, 0.4, []] call fnc_safe_pos;
+        if (_p isEqualTo []) then { continue };
         if (_campCentres findIf { (_x distance2D _p) < 400 } >= 0) then { continue };
         if (count (_p nearRoads 300) > 0) then { continue };
         private _trees = count nearestTerrainObjects [_p, ["TREE", "SMALL TREE"], _campTreeRadius, false, true];

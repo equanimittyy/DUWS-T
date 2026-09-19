@@ -16,8 +16,8 @@ if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 private _centre = [];
 private _anchor = getPos _player;
 for "_i" from 1 to 12 do {
-	private _cand = [_anchor, 200, 600, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-	if ((_cand nearRoads OFFROAD) isEqualTo []) exitWith { _centre = _cand };
+	private _cand = [_anchor, 600, 200, 5, 0.5, []] call fnc_safe_pos;
+	if (_cand isNotEqualTo [] && {(_cand nearRoads OFFROAD) isEqualTo []}) exitWith { _centre = _cand };
 };
 if (_centre isEqualTo []) exitWith {};
 

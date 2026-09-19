@@ -31,8 +31,8 @@ waitUntil { sleep 0.5; count allPlayers > 0 };
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
 if (_hqPos isEqualTo []) exitWith { ["PosOfBLUHQ not defined"] call _abandon; };
 
-private _spawnPos = [_hqPos, 700, 1000, 10, 0, 0.2, 0] call BIS_fnc_findSafePos;
-if (_spawnPos isEqualTo [0,0,0]) then {
+private _spawnPos = [_hqPos, 1000, 700, 10, 0.2, []] call fnc_safe_pos;
+if (_spawnPos isEqualTo []) then {
     private _angle = random 360;
     private _dist = 250 + random 50;
     _spawnPos = _hqPos getPos [_dist, _angle];

@@ -53,8 +53,7 @@ private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
 // Tight-settle the truck onto clear ground so it does not spawn on a slope or in the sea; the offer is the fallback.
-_vehPos = [_targetpos, 0, 60, 8, 0, 0.3, 0] call BIS_fnc_findSafePos;
-if (_vehPos isEqualTo [] || {surfaceIsWater _vehPos} || {(_vehPos select 0) == 0}) then { _vehPos = _targetpos };
+_vehPos = [_targetpos, 60, 0, 8, 0.3] call fnc_safe_pos;
 
 // The objective itself: kept for the mission's duration so the abandoned-vehicle sweep cannot collect it.
 _truck1 = "C_Truck_02_transport_F" createVehicle _vehPos;

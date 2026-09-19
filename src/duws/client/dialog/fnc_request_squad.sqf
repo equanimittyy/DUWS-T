@@ -25,7 +25,7 @@ if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
 };
 
 _spawnPos = getpos player;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,400,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
+_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],400,300,15,0.3] call fnc_safe_pos;
 
 sleep 2;
 

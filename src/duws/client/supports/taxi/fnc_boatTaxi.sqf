@@ -36,6 +36,7 @@ _message = localize "STR_DUWS_T_boattaxicall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 _spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+if (0 == _spawnPos select 0 && 0 == _spawnPos select 1) then { _spawnPos = _foundPickupPos };
 
 _boat = createVehicle [blufor_BOAT_TRANS_X, _spawnPos,[], 0, "NONE"];
 _boatgroup = createGroup west; 
@@ -98,6 +99,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 titleCut ["", "BLACK OUT", 3];
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_enroute"] remoteExec ["fnc_duws_dialogue", 0];
 _teleportPoint = [ClickedTaxiPos, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+if (0 == _teleportPoint select 0 && 0 == _teleportPoint select 1) then { _teleportPoint = ClickedTaxiPos };
 sleep 3.5;
 _boat setpos _teleportPoint;
 _wp = _boatgroup addWaypoint [ClickedTaxiPos,0];

@@ -29,7 +29,7 @@ switch (_selected_soldier_status) do
 };
 
 _spawnPos = getpos player;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],200,300,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
+_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,200,15,0.3] call fnc_safe_pos;
 _group = [_spawnPos, WEST, [_selected_soldier_class]] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 _soldier = units _group select 0;

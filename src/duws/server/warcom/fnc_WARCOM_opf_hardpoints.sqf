@@ -48,7 +48,8 @@ while {true} do {
             // count 1, keyed off a global sequence so a top-up never collides with the initial ring or
             // another build; registered under the parent zone, so it streams with that zone.
             private _added = [1, format ["hpopcom_%1", _seq], _zk, {
-                private _c = [_zp, 0, _zs, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+                private _c = [_zp, _zs, 0, 6, 0.35, []] call fnc_safe_pos;
+                if (_c isEqualTo []) exitWith { [] };
                 [_c, _zp getDir _c]
             }] call fnc_hardpoint_lay;
             if (_added > 0) then {

@@ -93,10 +93,7 @@ for "_i" from 1 to zones_number do {
 					private _centerPos = [_centerX, _centerY, 0];
 					
 					// Same safe-pos search radius as the HQ (0-10m).
-					_zonePos = [_centerPos, 0, 10, 5, 0, 0.14, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
-					if (_zonePos isEqualTo [0,0,0]) then {
-						_zonePos = _centerPos;
-					};
+					_zonePos = [_centerPos, 10, 0, 5, 0.14] call fnc_safe_pos;
 				};
 				
 				private _nearRoad = [_zonePos, 5] call BIS_fnc_nearestRoad;
@@ -122,8 +119,7 @@ for "_i" from 1 to zones_number do {
 					};
 					if (_count == 11) exitWith {}; 
 					private _building = nearestBuilding _ZnLocation;
-					_zonePos = [_building, 0, 10, 5, 0, 0.14, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
-					if (_zonePos isEqualTo [0,0,0]) then { _zonePos = getPos _building; };
+					_zonePos = [_building, 10, 0, 5, 0.14, getPos _building] call fnc_safe_pos;
 					private _nearRoad = [_zonePos,10] call BIS_fnc_nearestRoad;
 					if (_zonePos select 0 != 0 && _zonePos select 1 != 0 && isNull _nearRoad) then {_Posfound=true;_count = 11;};
 					_count = _count + 1;

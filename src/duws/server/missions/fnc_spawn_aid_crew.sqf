@@ -12,8 +12,7 @@
 params ["_townPos", ["_radius", 80]];
 if (!isServer) exitWith { [grpNull, objNull, _townPos] };
 
-private _crewPos = [_townPos, 0, _radius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-if (_crewPos isEqualTo [] || { (_crewPos select 0) == 0 && { (_crewPos select 1) == 0 } }) then { _crewPos = _townPos };
+private _crewPos = [_townPos, _radius, 0, 5, 0.5] call fnc_safe_pos;
 
 private _crewClasses = [
     "C_IDAP_Man_Aidworker_01_F", "C_IDAP_Man_Aidworker_02_F", "C_IDAP_Man_Aidworker_03_F",

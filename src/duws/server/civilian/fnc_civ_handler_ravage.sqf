@@ -223,11 +223,9 @@ if (_mode == "spawn") then {
         private _building = if (_cluster isEqualTo []) then { objNull } else { selectRandom _cluster };
         private _pos = [0,0,0];
         if (isNull _building) then {
-            _pos = [_centerPos, 10, _maxOutdoorDist, 3, 0, 0.5, 0] call BIS_fnc_findSafePos;
-            if (_pos isEqualTo [0,0,0]) then { _pos = _centerPos; };
+            _pos = [_centerPos, _maxOutdoorDist, 10, 3, 0.5] call fnc_safe_pos;
         } else {
-            _pos = [_building, 5, _outdoorRange, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
-            if (_pos isEqualTo [0,0,0]) then { _pos = getPos _building; };
+            _pos = [_building, _outdoorRange, 5, 3, 0.3, getPos _building] call fnc_safe_pos;
         };
 
         private _isZombie = _i > _civToSpawn;

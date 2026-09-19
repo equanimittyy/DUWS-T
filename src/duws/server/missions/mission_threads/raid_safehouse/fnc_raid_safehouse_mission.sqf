@@ -262,8 +262,7 @@ private _crowd = [];
 private _spawnRadius = (_townRadius * 0.5) max 100;
 private _crowdGroups = [];
 for "_i" from 1 to 6 do {
-    private _anchor = [_townPos, 0, _spawnRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
-    if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
+    private _anchor = [_townPos, _spawnRadius, 0, 2, 0.35] call fnc_safe_pos;
     private _grp = grpNull;
     for "_j" from 0 to 2 do {
         private _cpos = _anchor getPos [_j * 3, random 360];

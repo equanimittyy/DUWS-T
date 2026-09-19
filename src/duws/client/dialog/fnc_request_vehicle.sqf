@@ -3,7 +3,7 @@ _sel = lbCurSel 2102;
 if (_sel < 0) exitWith {};
 
 _spawnPos = getpos bluHQ_object;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],10,300,15,0,0.4,0,[],[]] call BIS_fnc_findSafePos;
+_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,10,15,0.4] call fnc_safe_pos;
 
 // The faction-list index is read from lbData, not lbCurSel: the list is sorted by tier, so the row's
 // position no longer matches the faction list. An empty data string is a header or spacer row.

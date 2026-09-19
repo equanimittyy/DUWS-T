@@ -372,13 +372,9 @@ if (CIV_PRESENCE == "WBK") then {
 
 // The position guard is what makes the timeout above survivable: server_var_init.sqf broadcasts
 // PosOfBLUHQ as [], so on the early-exit path the client holds an empty array rather than nil,
-// and BIS_fnc_findSafePos would fall back to [0,0,0] and leave `[] getPos [...]` to kill this
-// thread before allowDamage true below.
+// and `[] getPos [...]` in the placement below would kill this thread before allowDamage true.
 if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && {count PosOfBLUHQ > 0}}) then {
-    private _safePos = [PosOfBLUHQ, 0, 30, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
-    if (_safePos isEqualTo [0,0,0]) then {
-        _safePos = PosOfBLUHQ getPos [random 10, random 360];
-    };
+    private _safePos = [PosOfBLUHQ, 30, 0, 3, 0.2, PosOfBLUHQ getPos [random 10, random 360]] call fnc_safe_pos;
     player setPos _safePos;
 	[["", "BLACK IN", 2]] remoteExec ["titleCut", player];
     player setVariable ["intro_completed", true];

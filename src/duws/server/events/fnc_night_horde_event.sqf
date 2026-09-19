@@ -60,12 +60,12 @@ while {true} do {
 
                 for "_wave" from 1 to _waveCount do {
                     private _zombieGroup = createGroup [civilian, true];
-                    private _spawnPos = [_hqPos, 130, 150, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
+                    private _spawnPos = [_hqPos, 150, 130, 5, 0.2, _hqPos getPos [140, random 360]] call fnc_safe_pos;
 
                     for "_i" from 1 to 40 do {
                         private _unitType = selectRandom _zombieClasses;
                         private _unit = _zombieGroup createUnit [_unitType, _spawnPos, [], 0, "NONE"];
-                        _unit setPos ([_spawnPos, 0, 10, 3, 0, 0.2, 0] call BIS_fnc_findSafePos);
+                        _unit setPos ([_spawnPos, 10, 0, 3, 0.2] call fnc_safe_pos);
                         _unit allowDamage false;
                         _unit setBehaviour "AWARE";
                         _unit setCombatMode "RED";

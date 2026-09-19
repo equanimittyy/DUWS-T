@@ -230,7 +230,7 @@ private _snapHull = {
             ) exitWith { _p = _cand };
         };
     };
-    if (surfaceIsWater _p) then { _p = [_p, 0, 30, 6, 0, 0.5, 0] call BIS_fnc_findSafePos };
+    if (surfaceIsWater _p) then { _p = [_p, 30, 0, 6, 0.5] call fnc_safe_pos };
     _veh setVectorDirAndUp [[sin _faceDir, cos _faceDir, 0], [0, 0, 1]];
     _veh setPosATL _p;
     _veh setVelocity [0, 0, 0];

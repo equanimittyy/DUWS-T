@@ -72,15 +72,13 @@ private _fnc_fill = {
         private _building = if (_buildings isEqualTo []) then { objNull } else { selectRandom _buildings };
         private _pos = [0,0,0];
         if (isNull _building) then {
-            _pos = [_centerPos, 10, _maxOutdoorDist, 3, 0, 0.5, 0] call BIS_fnc_findSafePos;
-            if (_pos isEqualTo [0,0,0]) then { _pos = _centerPos };
+            _pos = [_centerPos, _maxOutdoorDist, 10, 3, 0.5] call fnc_safe_pos;
         } else {
             // An empty position list stands in for the outdoor roll, so a building with no
             // interior positions falls through to the same open-ground placement.
             private _positions = if (random 1 < OUTDOOR_SHARE) then { [] } else { [_building] call BIS_fnc_buildingPositions };
             if (_positions isEqualTo []) then {
-                _pos = [_building, 5, _outdoorRange, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
-                if (_pos isEqualTo [0,0,0]) then { _pos = getPos _building };
+                _pos = [_building, _outdoorRange, 5, 3, 0.3, getPos _building] call fnc_safe_pos;
             } else {
                 _pos = selectRandom _positions;
             };

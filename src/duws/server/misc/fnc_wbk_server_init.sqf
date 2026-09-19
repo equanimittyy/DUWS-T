@@ -16,8 +16,7 @@ fnc_wbk_survivorKilled_server = {
         private _isZombie = _dead getVariable ["isZombie", false];
         private _newUnit = objNull;
         private _newGroup = grpNull;
-        private _spawnPos = [_dead, 10, 50, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
-        if (_spawnPos isEqualTo [0,0,0]) then { _spawnPos = getPos _dead; };
+        private _spawnPos = [_dead, 50, 10, 3, 0.2, getPos _dead] call fnc_safe_pos;
         
         if (_isZombie) then {
             private _zombieType = "";

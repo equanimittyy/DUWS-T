@@ -206,7 +206,8 @@ fnc_hardpoint_zone_cap = {
 
 fnc_hardpoint_zone_cand = {
     params ["_zonePos", "_radius"];
-    private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    private _c = [_zonePos, _radius, 0, 6, 0.35, []] call fnc_safe_pos;
+    if (_c isEqualTo []) exitWith { [] };
     [_c, _zonePos getDir _c]
 };
 
