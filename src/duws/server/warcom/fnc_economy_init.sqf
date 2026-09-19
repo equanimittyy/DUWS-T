@@ -458,6 +458,7 @@ fnc_captured_pool_settle = {
 	private _classes = (keys _openC) + (keys _closeC);
 	_classes = _classes arrayIntersect _classes;
 	private _excess = [];
+	private _ledger = [];
 	{
 		private _cls = _x;
 		// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited
@@ -474,6 +475,7 @@ fnc_captured_pool_settle = {
 			[_cls, _cur - _grant] call fnc_captured_pool_setCount;
 			if (_net - _grant > 0) then { _excess pushBack [_cls, _net - _grant]; };
 		};
+		_ledger pushBack [_cls, _net, _cur, [_cls] call fnc_captured_pool_getCount];
 	} forEach _classes;
 	// A worn container that overdrew -- uniform/vest/backpack -- is pulled off the player by
 	// removeUniform/Vest/Backpack, and those also destroy its contents, including gear the pool DID
@@ -503,7 +505,7 @@ fnc_captured_pool_settle = {
 		} forEach ((_closeLoadout param [([3, 4, 5] select _idx), []]) param [1, []]);
 	} forEach _excess;
 
-	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle: touched=%1 excess=%2 salvaged=%3", _classes, _excess, _salvaged]] call fnc_log; };
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle %1: [cls, net, before, after]=%2 excess=%3 salvaged=%4", name _requester, _ledger, _excess, _salvaged]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
 	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
 };

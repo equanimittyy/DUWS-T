@@ -16,6 +16,14 @@
 // BIS's own header, so the control ids track the engine version instead of being hardcoded numbers.
 #include "\A3\Ui_f\hpp\defineResinclDesign.inc"
 
+DUWS_fnc_arsenal_canon = {
+    params ["_cls"];
+    private _canon = configName (configFile >> "CfgMagazines" >> _cls);
+    if (_canon == "") then { _canon = configName (configFile >> "CfgWeapons" >> _cls) };
+    if (_canon == "") then { _canon = configName (configFile >> "CfgVehicles" >> _cls) };
+    if (_canon == "") then { _cls } else { _canon }
+};
+
 // Available count for a class as the shelf actually enforces it: -1 means unlimited (rendered as the
 // infinity glyph). Order matters -- each earlier rule is a hard override of the ones below it.
 DUWS_fnc_arsenal_countFor = {
@@ -40,16 +48,48 @@ DUWS_fnc_arsenal_countFor = {
     // config mag list), while the pool and DUWS_arsenalTaken key on the config's own case. isEqualTo
     // and the HashMap key are both case-sensitive, so a lowercased class read [0]. Canonicalise to the
     // declared case first; configName resolves it (a tracked class is always in one of these).
-    private _canon = configName (configFile >> "CfgMagazines" >> _cls);
-    if (_canon == "") then { _canon = configName (configFile >> "CfgWeapons" >> _cls) };
-    if (_canon == "") then { _canon = configName (configFile >> "CfgVehicles" >> _cls) };
-    if (_canon != "") then { _cls = _canon };
+    _cls = [_cls] call DUWS_fnc_arsenal_canon;
     private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
     private _i = _pool findIf { (_x select 0) isEqualTo _cls };
     private _n = if (_i < 0) then { 0 } else { (_pool select _i) select 1 };
     private _taken = missionNamespace getVariable "DUWS_arsenalTaken";
     private _off = if (isNil "_taken") then { 0 } else { _taken getOrDefault [_cls, 0] };
     (_n - _off) max 0
+};
+
+// Logs every input countFor weighed for a [0] row, once per class per open. *Key fields match
+// case-insensitively, so a key differing from the row only in case exposes a case-sensitive miss;
+// shelf "-" means BIS listed the row with no cargo behind it: held gear if held matches, else a
+// preset's base row.
+DUWS_fnc_arsenal_logZero = {
+    params ["_cls", "_tab"];
+    private _seen = missionNamespace getVariable "DUWS_arsenal_zeroLogged";
+    if (isNil "_seen" || {_cls in _seen}) exitWith {};
+    _seen set [_cls, true];
+    private _canon = [_cls] call DUWS_fnc_arsenal_canon;
+    private _ciKey = {
+        params ["_arr", "_c"];
+        private _j = _arr findIf { _x isEqualType "" && {_x == _c} };
+        if (_j < 0) then { "-" } else { _arr select _j }
+    };
+    private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
+    private _i = _pool findIf { (_x select 0) isEqualTo _canon };
+    private _poolKeys = _pool apply { _x select 0 };
+    private _taken = missionNamespace getVariable "DUWS_arsenalTaken";
+    private _shelf = [];
+    {
+        _shelf append flatten (missionNamespace getVariable [_x, []]);
+    } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
+        "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
+    ["DEBUG", "GEAR", format ["[0] %1 canon=%2 tab=%3 pool=%4 poolKey=%5 taken=%6 friendlyKey=%7 kit=%8 shelf=%9 held=%10",
+        _cls, _canon, _tab,
+        if (_i < 0) then { 0 } else { (_pool select _i) select 1 },
+        [_poolKeys, _canon] call _ciKey,
+        if (isNil "_taken") then { 0 } else { _taken getOrDefault [_canon, 0] },
+        [missionNamespace getVariable ["DUWS_friendlyArsenal", []], _cls] call _ciKey,
+        _cls in (player getVariable ["DUWS_startupKit", []]),
+        [_shelf, _cls] call _ciKey,
+        [flatten getUnitLoadout player, _cls] call _ciKey]] call fnc_log;
 };
 
 // Repaints every populated, visible item list under the arsenal display: only shown lists are walked
@@ -112,6 +152,7 @@ DUWS_fnc_arsenal_paintCounts = {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
+            if (_amt == 0 && {duws_log_level >= 4}) then { [_cls, _x] call DUWS_fnc_arsenal_logZero; };
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".
             private _pfx = if (_amt < 0) then { "[∞] " } else { format ["[%1] ", _amt] };

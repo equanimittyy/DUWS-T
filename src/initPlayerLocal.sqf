@@ -322,8 +322,10 @@ DUWS_fnc_arsenal_stock = {
     };
 
     if (duws_log_level >= 4) then {
-        ["DEBUG", "GEAR", format ["arsenal stock@open: poolN=%1 stockedForeign=%2",
-            count _pool, _addedForeign apply { _x select 0 }]] call fnc_log;
+        ["DEBUG", "GEAR", format ["arsenal stock@open: mode=%1 trackAmmo=%2 poolN=%3 friendlyN=%4 kitN=%5 stockedForeign=%6 hiddenDepleted=%7",
+            ["Hybrid", "Limited"] select _limited, _trackAmmo, count _pool, count _friendly,
+            count (player getVariable ["DUWS_startupKit", []]),
+            _addedForeign apply { _x select 0 }, _hiddenFriendly apply { _x select 0 }]] call fnc_log;
     };
 
     [_addedForeign, _hiddenFriendly, _ammoList]
@@ -386,7 +388,10 @@ DUWS_fnc_arsenal_unstock = {
         // take or return re-numbers the shelf live, no close/reopen. Restricted only; the pool still
         // settles on close, so DUWS_arsenalTaken is display state, reset each open.
         private _openC = if (_isRestricted) then { [_openLoadout] call fnc_captured_loadout_counts } else { createHashMap };
-        if (_isRestricted) then { missionNamespace setVariable ["DUWS_arsenalTaken", createHashMap]; };
+        if (_isRestricted) then {
+            missionNamespace setVariable ["DUWS_arsenalTaken", createHashMap];
+            missionNamespace setVariable ["DUWS_arsenal_zeroLogged", createHashMap];
+        };
 
         // Item-count overlay. Restricted modes only -- Full is the whole-config unlimited arsenal,
         // where a per-row [∞] stamp is meaningless and only races BIS's repopulation of a huge list.
