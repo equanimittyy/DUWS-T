@@ -6765,6 +6765,10 @@
                 <Original>Disband the selected HC squad. They will then fight independently</Original>
                 <English>Disband the selected HC squad. They will then fight independently</English>
             </Key>
+            <Key ID="STR_DUWS_T_HC_DISBAND">
+                <Original>Disband a HC squad</Original>
+                <English>Disband a HC squad</English>
+            </Key>
             <Key ID="STR_DUWS_T_r4qmnp8o">
                 <German>Bennene eine HC Gruppe um</German>
                 <Spanish>Renombrar escuadrón del Alto Mando</Spanish>

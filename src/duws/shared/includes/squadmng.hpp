@@ -83,7 +83,7 @@ class squad_mng_dialog
         class dismissHC_button: RscButton
         {
             idc = 1601;
-            text = "$STR_DUWS_T_qe3lrwmf"; //--- ToDo: Localize;
+            text = "$STR_DUWS_T_HC_DISBAND";
             sizeEx = 0.025;
             x = 14.5 * GUI_GRID_W + GUI_GRID_X;
             y = 11 * GUI_GRID_H + GUI_GRID_Y;
