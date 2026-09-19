@@ -2,13 +2,12 @@
 // fnc_duws_subnet_log only appends lines -- this ages them: each holds at full brightness for
 // HOLD then fades (alpha 1 -> 0) over the remainder of LIFETIME and drops when spent, so older
 // traffic reads progressively fainter after its hold window and a lull
-// empties the box. A structured-text control has no per-line opacity, so the fade is baked into
-// each line's colour as a leading ARGB alpha byte and the whole block is rebuilt every tick.
+// empties the box. The fade is baked into each line's colour (fnc_duws_fade_alpha), so the whole
+// block is rebuilt every tick.
 if (!hasInterface) exitWith {};
 
 #define SUBNET_LIFETIME 15
 #define SUBNET_HOLD 8
-#define HEXDIGITS "0123456789abcdef"
 
 private _lastEmpty = false;
 while {true} do {
@@ -35,11 +34,7 @@ while {true} do {
             private _rich = "";
             {
                 _x params ["_stamp", "_sp", "_tx", "_rgb"];
-                // Hold at full brightness for SUBNET_HOLD, then fade over the remainder to 0 at LIFETIME.
-                private _a = 1 - (((_now - _stamp) - SUBNET_HOLD) / (SUBNET_LIFETIME - SUBNET_HOLD));
-                _a = 0 max _a min 1;
-                private _byte = round (_a * 255);
-                private _ah = (HEXDIGITS select [floor (_byte / 16), 1]) + (HEXDIGITS select [_byte mod 16, 1]);
+                private _ah = [_now - _stamp, SUBNET_HOLD, SUBNET_LIFETIME] call fnc_duws_fade_alpha;
                 if (_rich != "") then { _rich = _rich + "<br/>"; };
                 // Same alpha on speaker and text so a line fades as one unit.
                 _rich = _rich + format ["<t color='#%1%2'>%3</t><t color='#%1ffffff'>: %4</t>", _ah, _rgb, _sp, _tx];

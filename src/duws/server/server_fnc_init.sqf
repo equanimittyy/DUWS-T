@@ -700,6 +700,7 @@ publicVariable "fnc_duws_dialogue_channel";
 fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_duws_subnet_log = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_subnet_log.sqf";publicVariable "fnc_duws_subnet_log";
 fnc_duws_subnet_render = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_subnet_render.sqf";publicVariable "fnc_duws_subnet_render";
+fnc_duws_fade_alpha = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_fade_alpha.sqf";publicVariable "fnc_duws_fade_alpha";
 fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\chatter\fnc_duws_dialogue_drain.sqf";publicVariable "fnc_duws_dialogue_drain";
 
 // =========================================================================================================
