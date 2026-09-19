@@ -30,6 +30,11 @@ DUWS_fnc_arsenal_countFor = {
     params ["_cls"];
     // Full mode leaves the whole arsenal unlimited; the enforcer marks it non-restricted.
     if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith { -1 };
+    // The compatible-magazines list hands back lowercased classnames (BIS folds case from the weapon's
+    // config mag list), while the kit, friendly set, pool and DUWS_arsenalTaken key on the config's own
+    // case. `in`, isEqualTo and the HashMap key are all case-sensitive, so a lowercased class missed
+    // every check below and read [0]. Canonicalise to the declared case before any of them.
+    _cls = [_cls] call DUWS_fnc_arsenal_canon;
     // Startup kit stays the player's to re-draw in Hybrid: the gear deployed with is unlimited there,
     // including a BLUFOR default class the detected faction never fields -- absent from the friendly
     // snapshot, it would otherwise read as an empty pool ([0]). Limited tracks everything and has no
@@ -44,11 +49,6 @@ DUWS_fnc_arsenal_countFor = {
     // only settles on arsenal close; this session's takes/returns are reflected live by subtracting
     // the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (held now but not at open =
     // withdrawn, one fewer available) -- display only, the pool itself stays untouched until close.
-    // The compatible-magazines list hands back lowercased classnames (BIS folds case from the weapon's
-    // config mag list), while the pool and DUWS_arsenalTaken key on the config's own case. isEqualTo
-    // and the HashMap key are both case-sensitive, so a lowercased class read [0]. Canonicalise to the
-    // declared case first; configName resolves it (a tracked class is always in one of these).
-    _cls = [_cls] call DUWS_fnc_arsenal_canon;
     private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
     private _i = _pool findIf { (_x select 0) isEqualTo _cls };
     private _n = if (_i < 0) then { 0 } else { (_pool select _i) select 1 };
@@ -87,7 +87,7 @@ DUWS_fnc_arsenal_logZero = {
         [_poolKeys, _canon] call _ciKey,
         if (isNil "_taken") then { 0 } else { _taken getOrDefault [_canon, 0] },
         [missionNamespace getVariable ["DUWS_friendlyArsenal", []], _cls] call _ciKey,
-        _cls in (player getVariable ["DUWS_startupKit", []]),
+        _canon in (player getVariable ["DUWS_startupKit", []]),
         [_shelf, _cls] call _ciKey,
         [flatten getUnitLoadout player, _cls] call _ciKey]] call fnc_log;
 };
