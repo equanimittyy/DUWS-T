@@ -34,13 +34,18 @@ fnc_hardpoint_build = {
         } forEach _placed;
     };
 
+    // One draw per placeholder class: a pool with several guns varies one battery from the next, never within one.
+    private _drawn = [];
+    private _picks = [];
     // fnc_static_place adds the row's offset to the origin, so the rotated offset rides the origin and X/Y is zeroed.
     {
         if !(_x param [5, false]) then { continue };
         _x params ["_wc", "_wox", "_woy", "_woz", "_wdir"];
+        private _i = _drawn find _wc;
+        if (_i < 0) then { _i = _drawn pushBack _wc; _picks pushBack ([_wc, _side] call fnc_static_resolve) };
         private _off = [_wox, _woy, _dir] call fnc_hardpoint_rotate;
         private _wrow = [_wc, 0, 0, _woz, _wdir + _dir, true];
-        _placed pushBack ([_wrow, [_px + (_off select 0), _py + (_off select 1)], _side, _key, "world"] call fnc_static_place);
+        _placed pushBack ([_wrow, [_px + (_off select 0), _py + (_off select 1)], _side, _key, "world", _picks select _i] call fnc_static_place);
     } forEach _rows;
 
     _placed

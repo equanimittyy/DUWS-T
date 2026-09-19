@@ -159,7 +159,9 @@ Artillery is the one role in that table whose piece is a vehicle. It resolves to
 of a turret key and skips both guards below — the MG substitute would stand a machine gun where a battery
 belongs, and the `StaticWeapon` test refuses every self-propelled gun there is. A side that fields none
 keeps the composition's own placeholder, since a tank standing in for a gun is a battery that cannot
-answer a fire mission.
+answer a fire mission. `fnc_hardpoint_build` draws once for each placeholder class in a composition, so all
+guns in one battery are the same type. The next battery draws again, so a pool with several guns still
+varies from one battery to the next.
 
 Four things it refuses to do silently. A class the table does not carry stands as itself, which is what
 keeps a prefab working while the table is incomplete and is the answer for every prop the placer is handed.

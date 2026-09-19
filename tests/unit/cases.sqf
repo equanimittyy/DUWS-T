@@ -1053,6 +1053,25 @@ TEST_PICK = "";
 ["static_resolve: ... without falling to the MG nest a turret role would take",
     TEST_ASKED, [["opfor_ARTY_X"]]] call fnc_assertEq;
 
+// --- fnc_hardpoint_build: one gun type per battery ---
+// The resolver answers a new class on every call, so a draw per gun would show as a mixed battery.
+fnc_hardpoint_comp = { [
+    ["B_MBT_01_arty_F", 5, 0, 3, 0, true],
+    ["B_MBT_01_arty_F", -5, 0, 3, 0, true],
+    ["B_MBT_01_arty_F", 0, 5, 3, 0, true]
+] };
+fnc_composition_place = { [] };
+TEST_DRAWS = 0;
+fnc_static_resolve = { TEST_DRAWS = TEST_DRAWS + 1; format ["spg_%1", TEST_DRAWS] };
+fnc_static_place = {
+    params ["_row", "", "_side", "", "", ["_resolved", ""]];
+    if (_resolved isEqualTo "") then { _resolved = [_row select 0, _side] call fnc_static_resolve };
+    _resolved
+};
+["hardpoint_build: every gun in a battery is the same class",
+    (["ARTY", [0, 0, 0], 0, "opfor", "test_hp"] call fnc_hardpoint_build),
+    ["spg_1", "spg_1", "spg_1"]] call fnc_assertEq;
+
 // --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
 // Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist,
 // clutter50, aspect, aspectMag, roadDir, roadLos, fofDist, nestDist, nestDir]. Rows below omit the

@@ -134,17 +134,18 @@ fnc_static_baseZ = {
     _z
 };
 
-// [_row, _origin, _side, _key, _mode] call fnc_static_place -- returns the object.
+// [_row, _origin, _side, _key, _mode, _resolved] call fnc_static_place -- returns the object.
 //
-// _row    [class, offsetX, offsetY, offsetZ, dir, role], role optional; the shape both fences use
-// _origin [x, y]; z unused -- in "world" mode a weapon's height comes from the terrain under the gun
-// _key    the site key the object is filed under for teardown
-// _mode   "world" when the row states a height, "pos" when its Z means ground
+// _row      [class, offsetX, offsetY, offsetZ, dir, role], role optional; the shape both fences use
+// _origin   [x, y]; z unused -- in "world" mode a weapon's height comes from the terrain under the gun
+// _key      the site key the object is filed under for teardown
+// _mode     "world" when the row states a height, "pos" when its Z means ground
+// _resolved a class the caller already drew, so several rows share one draw; "" draws here
 //
 // The mode is passed rather than inferred from the Z, because a row genuinely authored at absolute
 // zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
 fnc_static_place = {
-    params ["_row", "_origin", "_side", "_key", ["_mode", "pos"]];
+    params ["_row", "_origin", "_side", "_key", ["_mode", "pos"], ["_resolved", ""]];
     // Index 5 is the isWeapon flag on zone-prefab and hardpoint rows, and absent or "" on the HQ/FOB
     // fences, whose arrays are pre-split into turrets and walls. Neither is a role name -- every row
     // resolves by class through the table below -- but the bool must not reach _role, where it would
@@ -163,7 +164,7 @@ fnc_static_place = {
     // the sea, not the seabed -- the same clamp the prefabs apply to the centre height.
     private _pos = [_px, _py, if (_world) then { ((getTerrainHeightASL [_px, _py]) max 0) + _oz } else { _oz }];
 
-    private _resolved = [_class, _side, _role] call fnc_static_resolve;
+    if (_resolved isEqualTo "") then { _resolved = [_class, _side, _role] call fnc_static_resolve };
     private _obj = createVehicle [_resolved, _pos, [], 0, "CAN_COLLIDE"];
     [_obj, _key] call fnc_duws_keep;
     // The freeze is what holds an elevated row where the row put it: an unsimulated object does not
