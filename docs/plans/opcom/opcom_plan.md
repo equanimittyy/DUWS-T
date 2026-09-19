@@ -369,7 +369,8 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
 ([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
-whichever source costs less. The AP is paid at commit but the result lands only when the *specific* bound truck
+whichever source costs less. A town takes one supply truck at a time: while one drives to it, no supply action
+targets it. The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). A town buy whose
 truck arrives while the town is contested still lands through the garrison's existing hold — owed at once, the men
 arriving once BLUFOR leave — and a town that falls first loses it. **Zones need no supply** — zone Reinforce,
@@ -384,21 +385,22 @@ The escalation ladder and indirect-fire assets, once the commander spends on the
 init and through the Build actions.
 
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
-existing in-zone draw; a standalone one stands where its truck delivers it, at the chosen band cell
-(`fnc_hardpoint_spawn_at`). Given the
-site, the type is rolled from the existing weight table — `DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a
-ring, `DUWS_hardpointWeightSolo` standalone — limited to the types OPFOR's tier has unlocked; campaign generation
-still rolls the full list. An asset hardpoint is its own candidate, never stands in a zone's ring, and picks its band
-cell by its own rule ([§Asset siting](#asset-siting)). A build cannot be a *typed* counter (AT under armour) until
-belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
+existing in-zone draw; a standalone one takes its spot from the shared terrain siting around the band cell its truck
+delivers to (`fnc_hardpoint_spawn_sited`). The type is rolled from the existing weight table —
+`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` standalone — limited to
+the types OPFOR's tier has unlocked; campaign generation still rolls the full list. An asset hardpoint is its own
+candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
+build cannot be a *typed* counter (AT under armour) until belief carries threat category, which 4C.2 settles
+([§Appraisal](#appraisal-phase-4)).
 
-Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build
-that finds no ground is refunded. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`, which climbs the
-earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; the caps land with their types in 4B.2:
+Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build that
+finds no ground is refunded, in full, its truck included. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`,
+which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; the caps land with their types
+in 4B.2 and count a build still on its truck:
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
-| 1 Infantry (0) | radio tower, OP, MG, roadblock |
+| 1 Infantry (0) | radio tower (max `AOI_OPFOR_TOWER_CAP` alive, 5), OP, MG, roadblock |
 | 2 Motorised (60) | + AT |
 | 3 Mechanised (150) | + GMG, AA, mortar pit (max 2 alive) |
 | 4 Armour (350) | + artillery battery (max 1 alive) |
