@@ -2,12 +2,7 @@
 params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
-// Minefield knobs. Depth is fixed shallow: a belt across an approach is wide and a few rows deep, not a
-// square, which also keeps the mine count sane.
 #define RECON_MINE_CHANCE  0.33
-#define RECON_MINE_LENGTH  50     // metres of frontage, laid perpendicular to the line to the zone centre
-#define RECON_MINE_SPACING 2.5    // metres between mines; an AP field sows this tight
-#define RECON_MINE_DEPTH   3      // rows deep
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
@@ -33,7 +28,7 @@ private _build = {
     _grp setBehaviour "STEALTH";
     { _x setWaypointBehaviour "STEALTH" } forEach (waypoints _grp);
 
-    // AP minefield opposite the patrol (so no mine spawns on the team), a third of the time: a wall at
+    // AP minefield opposite the patrol (so no mine spawns on the team), a third of the time, at
     // the far ring edge. Skipped near another minefield (<1 km), a road (<100 m), or water. No key, so
     // it is unmanaged and persists past the mission rather than swept with the objective.
     if (random 1 < RECON_MINE_CHANCE) then {
@@ -42,9 +37,7 @@ private _build = {
             (_x select 2) isEqualTo "MINEFIELD" && {(_x select 1) distance2D _fieldPos < 1000}
         };
         if (_clash < 0 && {!surfaceIsWater _fieldPos} && {(_fieldPos nearRoads 100) isEqualTo []}) then {
-            private _cols = 2 max round (RECON_MINE_LENGTH / RECON_MINE_SPACING);
-            [_fieldPos, _fieldPos getDir _targetpos, "AP", _cols, RECON_MINE_DEPTH, RECON_MINE_SPACING, -1, ""]
-                call fnc_hardpoint_minefield;
+            [_fieldPos, _fieldPos getDir _targetpos, "AP", ""] call fnc_hardpoint_minefield;
         };
     };
 

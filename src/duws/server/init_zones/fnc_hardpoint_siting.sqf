@@ -1,4 +1,4 @@
-// Server-only: the siting loop and minefield generator run where zones are built and faction globals
+// Server-only: the siting loop runs where zones are built and faction globals
 // are authoritative; this file defines the primitives, the (greenfield) placer calls them.
 // Split for testability: fnc_hardpoint_survey is the thin, engine-only terrain read; fnc_hardpoint_score
 // is pure. sqf-vm carries no terrain, so only the survey escapes unit testing.
@@ -221,21 +221,4 @@ fnc_hardpoint_facing = {
     };
     if (!(_type in ["MG", "AT", "GMG"]) || {_aspectMag < 2.5}) exitWith { _radialDir };
     _aspectDir
-};
-
-// [_cols, _rows, _spacing] call fnc_hardpoint_minefield_lattice -> [[x,y], ...] centred on origin, +Y is
-// the field's facing. _cols is frontage, _rows is depth. Alternate rows offset half a spacing so no
-// straight lane runs through -- an aligned grid would let a vehicle thread a column gap untouched.
-fnc_hardpoint_minefield_lattice = {
-    params ["_cols", "_rows", ["_spacing", 4]];
-    private _x0 = - (_cols - 1) * _spacing / 2;
-    private _y0 = - (_rows - 1) * _spacing / 2;
-    private _out = [];
-    for "_r" from 0 to (_rows - 1) do {
-        private _shift = (_r % 2) * _spacing / 2;
-        for "_c" from 0 to (_cols - 1) do {
-            _out pushBack [_x0 + _c * _spacing + _shift, _y0 + _r * _spacing];
-        };
-    };
-    _out
 };

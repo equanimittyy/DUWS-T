@@ -1195,15 +1195,6 @@ TEST_PICK = "";
 ["hp_facing: a roadblock flips to the road heading facing the approach",
     (["ROADBLOCK", 0, 0, 200, 30] call fnc_hardpoint_facing), 210] call fnc_assertEq;
 
-// --- fnc_hardpoint_minefield_lattice: the deterministic mine grid ---
-["hp_lattice: a 2x1 field is centred on the origin",
-    ([2, 1, 4] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
-["hp_lattice: a 3x2 field staggers the odd row by half the spacing",
-    ([3, 2, 4] call fnc_hardpoint_minefield_lattice),
-    [[-4, -2], [0, -2], [4, -2], [-2, 2], [2, 2], [6, 2]]] call fnc_assertEq;
-["hp_lattice: spacing defaults to 4",
-    ([2, 1] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
-
 // --- fnc_hardpoint_zone_cap: a zone ring's cap is its radius step plus one per tier above I ---
 // HP_CAP_STEP is a #define in the source; the extractor lifts the function body, not the define, so it
 // is restated here as the global the extracted body reads in the VM (value mirrors the source constant).

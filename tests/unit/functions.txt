@@ -55,7 +55,6 @@ duws/shared/factions/MODERN/fn_factionAutoDetect.sqf::fnc_selectNonEmpty
 duws/shared/functions/fnc_static_roles.sqf::fnc_static_resolve
 duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_score
 duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_facing
-duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_minefield_lattice
 duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_zone_cap
 duws/shared/faction_lib/fnc_faction_backfill.sqf::fnc_faction_backfill
 duws/shared/faction_lib/fnc_faction_vanilla_fill.sqf::fnc_faction_vanilla_fill

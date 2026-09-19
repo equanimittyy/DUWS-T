@@ -12,9 +12,8 @@ fnc_hardpoint_build = {
     private _px = _pos select 0;
     private _py = _pos select 1;
 
-    // -1 dimensions take the variant's default field shape.
     if (_type isEqualTo "MINEFIELD") exitWith {
-        [[_px, _py], _dir, _variant, -1, -1, -1, -1, _key] call fnc_hardpoint_minefield
+        [[_px, _py], _dir, _variant, _key] call fnc_hardpoint_minefield
     };
 
     private _rows = [_type] call fnc_hardpoint_comp;

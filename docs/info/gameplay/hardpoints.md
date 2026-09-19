@@ -118,10 +118,11 @@ clear of steep slope, facing radially out from the centre. The cap is the free-s
 Build reads, less the standing ring and any build still siting (`DUWS_opcom_buildsPending`).
 
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield`
-(`server/init_zones/fnc_hardpoint_minefield.sqf`) lays a lattice of vanilla mine objects — `ATMine`
-for the AT variant, `APERSMine`/`APERSBoundingMine` for AP — with alternating rows offset half a
-spacing so no straight lane threads the field untouched, plus a handful of warning signs as dressing.
-Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leaving detection and
+(`server/init_zones/fnc_hardpoint_minefield.sqf`) lays one 50 m square of vanilla mine objects —
+`ATMine` for the AT variant, `APERSMine`/`APERSBoundingMine` for AP. Each 10 m cell of the square gets
+one mine at a random spot, so the density is fixed at 25 mines per square but the pattern never repeats.
+One or two warning signs sit inside the field as dressing. A larger field is several squares, laid by
+the caller. Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leaving detection and
 clearance to BLUFOR. It has no fence to place through `fnc_hardpoint_lay`, and no garrison: the score
 function vetoes any candidate with a tree, building or hardpoint already on the footprint.
 
