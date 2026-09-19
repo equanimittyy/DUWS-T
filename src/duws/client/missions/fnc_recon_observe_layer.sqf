@@ -47,7 +47,7 @@ if (isNil "DUWS_fnc_recon_los") then {
         // Foliage the geometry ray misses -- canopy over a look-down sight, low bushes -- sampled on the
         // target end. The thread's overwatch was picked through the same helper, so this cannot reject a
         // hold the thread certified.
-        [_eye, _to] call fnc_recon_observe_foliageClear
+        [_eye, _to] call fnc_sightline_foliageClear
     };
 };
 

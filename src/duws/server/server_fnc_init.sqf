@@ -561,7 +561,6 @@ fnc_informant_ask_reveal = compile preprocessFileLineNumbers "duws\server\missio
 fnc_recon_observe_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_mission.sqf";
 fnc_recon_observe_pick = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_pick.sqf";publicVariable "fnc_recon_observe_pick";
 fnc_recon_observe_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_site.sqf";publicVariable "fnc_recon_observe_site";
-fnc_recon_observe_foliageClear = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_foliageClear.sqf";publicVariable "fnc_recon_observe_foliageClear";
 fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
 fnc_destroy_patrol_camp_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_patrol_camp\fnc_destroy_patrol_camp_mission.sqf";
 fnc_destroy_air_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_air\fnc_destroy_air_mission.sqf";
@@ -958,6 +957,7 @@ fnc_FOBactions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_FO
 fnc_medtent_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_medtent_actions.sqf";publicVariable "fnc_medtent_actions";
 fnc_field_box_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_field_box_actions.sqf";publicVariable "fnc_field_box_actions";
 fnc_pos_near_enemy = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_near_enemy.sqf";publicVariable "fnc_pos_near_enemy";
+fnc_sightline_foliageClear = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sightline_foliageClear.sqf";publicVariable "fnc_sightline_foliageClear";
 fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_duws_senior_name.sqf";publicVariable "fnc_duws_senior_name";
 
 // =========================================================================================================

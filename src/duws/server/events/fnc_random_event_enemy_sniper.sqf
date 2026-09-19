@@ -2,7 +2,8 @@
 // given a standing bead on that player. Rolled in the Hostile band; the
 // runner holds it off a player inside BLUFOR territory.
 //
-// Perch scoring mirrors the eliminate-sniper mission (fnc_target_sniper_mission): terrain-only rays, cheap.
+// Perch scoring mirrors the eliminate-sniper mission (fnc_target_sniper_mission), but the sight test adds
+// objects and foliage: a perch that only clears terrain often has no shot at all.
 // The order is static -- reveal once, hold the perch prone -- so the team does not chase a player who
 // breaks contact.
 if (!isServer) exitWith {};
@@ -14,27 +15,31 @@ if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 #define SNIPER_RANGE 1000
 #define BLU_STANDOFF 500
 #define LIFETIME 1800
+#define PRONE_EYE 0.4
 
 private _tpos = getPos _player;
-private _tz = (getTerrainHeightASL _tpos) + 1.5;
+private _tEye = eyePos _player;
 
 // Anchors the perch must clear by BLU_STANDOFF, so the team never stands up on a FOB or a held zone edge.
 private _bluAnchors = +WARCOM_zones_controled_by_BLUFOR;
 _bluAnchors append Array_of_FOBpos;
 if !(PosOfBLUHQ isEqualTo []) then { _bluAnchors pushBack PosOfBLUHQ };
 
-// Highest ring sample that sees the target over terrain and clears the friendly standoff: LOS gates,
-// elevation ranks.
+// Highest ring sample that sees the target and clears the friendly standoff: LOS gates, elevation ranks.
 private _ring = [0, 45, 90, 135, 180, 225, 270, 315];
 private _perch = [];
 private _perchDir = 0;
 private _best = -1e9;
-for "_i" from 0 to 23 do {
+for "_i" from 0 to 47 do {
 	private _cand = _tpos getPos [200 + random (SNIPER_RANGE - 200), random 360];
 	if (surfaceIsWater _cand) then { continue };
 	if ((_bluAnchors findIf { _cand distance2D _x < BLU_STANDOFF }) >= 0) then { continue };
 	private _z = getTerrainHeightASL _cand;
-	if (terrainIntersectASL [[_cand select 0, _cand select 1, _z + 1.5], [_tpos select 0, _tpos select 1, _tz]]) then { continue };
+	private _eye = [_cand select 0, _cand select 1, _z + PRONE_EYE];
+	if (terrainIntersectASL [_eye, _tEye]) then { continue };
+	if !((lineIntersectsSurfaces [_eye, _tEye, _player, vehicle _player]) isEqualTo []) then { continue };
+	// The team cannot step off a bush at the perch, so test that end too.
+	if !([_eye, _tEye] call fnc_sightline_foliageClear && {[_tEye, _eye] call fnc_sightline_foliageClear}) then { continue };
 	private _ringSum = 0;
 	{ _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [60, _x]) } forEach _ring;
 	private _relElev = _z - _ringSum / 8;

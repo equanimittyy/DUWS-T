@@ -524,3 +524,11 @@ A boat ordered to a `MOVE` waypoint inland climbs up the beach toward it rather 
 ## `selectionPosition` takes `FireGeometry`, not `GeometryFire`
 
 The array form's LOD argument is an engine enum matched word-order-exactly (`Memory`, `Geometry`, `FireGeometry`, `LandContact`, `HitPoints`, and since 2.06 `ViewGeometry`) — writing the Oxygen display order, `"GeometryFire"`, fails with `Foreign error: Unknown enum value: "GeometryFire"`, and the script keeps going past the failed evaluation, so the damage is silent (a fall-through chain loses the rung, one RPT error block per probe that reaches the bad name — first seen at the raid safehouse's door-point broadcast, `fnc_house_door_pts.sqf`). Fix: spell LOD names with `Geometry` last and probe in the engine's own search order — `forEach ["Memory", "Geometry", "FireGeometry"]`. For an unambiguous hit, pass the LOD's resolution as a number instead of a name (FireGeometry is `7e15`).
+
+## `lineIntersectsSurfaces` stops at tree trunks but not at leaves or bushes
+
+The ray tests geometry LODs, so it stops at buildings, rocks and tree trunks. A tree canopy has alpha-textured leaves and no geometry, and a low bush has no geometry LOD, so the ray passes through both although they hide a man. A sight that the ray alone certifies can look straight into a bush. Grass is client-side clutter with no object, so no command can test it. Fix: after the ray, run `fnc_sightline_foliageClear` (`shared/functions/fnc_sightline_foliageClear.sqf`), which samples the line for `TREE`/`SMALL TREE`/`BUSH` terrain objects. The recon overwatch pick and the enemy-sniper perch pick both use it.
+
+## `nearestTerrainObjects` measures 3D distance unless its fifth argument is `true`
+
+The fifth argument (`2Dmode`) defaults to `false`, so the radius is a sphere around the given point. A point above the ground, such as a sample along a sightline, then misses a bush or tree below the sphere. `fnc_sightline_foliageClear` described a 2D lookup but left out the argument, so it missed vegetation under its raised samples. Fix: pass `false, true` (unsorted, 2D) when the question is "what stands at this map spot", as `fnc_site_terrain.sqf` does.
