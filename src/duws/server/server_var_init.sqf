@@ -602,8 +602,8 @@ OPCOM_ARTY_WANDER = 10;
 // Most seconds a gun waits at random before each round, so the impacts keep no rhythm to count.
 OPCOM_ARTY_JITTER = 2;
 
-// A rocket launcher's OPCOM_ARTY_JITTER: its salvo ripples out in seconds, where a tube walks its rounds in.
-OPCOM_ARTY_ROCKET_JITTER = 0.3;
+// A rocket launcher's OPCOM_ARTY_JITTER: none, so its salvo goes as fast as the gun reloads, where a tube walks its rounds in.
+OPCOM_ARTY_ROCKET_JITTER = 0;
 
 // Metres a rocket may land from its aim point, on top of the pattern: rockets fall wider than shells (fnc_opcom_fires).
 OPCOM_ARTY_ROCKET_SCATTER = 75;
