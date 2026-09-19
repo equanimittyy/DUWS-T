@@ -1,13 +1,14 @@
 // Locality: server -- createMine and revealMine must run where the mines are made.
 //
-// One square per call; a larger field is several squares laid by the caller.
+// One square per call; a larger field is several squares laid by the caller, stepped by DUWS_mineSquare.
 //
 // Vanilla mine classes only: the same footing as the Land_* props the compositions use, so nothing
 // here forces a mod. east revealMine marks each mine as OPFOR-laid, which keeps OPFOR AI off its own
 // field and leaves BLUFOR to detect and clear it.
 
-#define MINE_SQUARE 50
-#define MINE_CELL   10
+#define MINE_CELL 10
+
+DUWS_mineSquare = 50;
 
 // The classes each variant draws from. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
@@ -29,10 +30,10 @@ fnc_hardpoint_minefield = {
 
     private _cx = _center select 0;
     private _cy = _center select 1;
-    private _half = MINE_SQUARE / 2;
+    private _half = DUWS_mineSquare / 2;
     private _mines = [];
-    for "_i" from 0 to (MINE_SQUARE / MINE_CELL - 1) do {
-        for "_j" from 0 to (MINE_SQUARE / MINE_CELL - 1) do {
+    for "_i" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
+        for "_j" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
             private _off = [_i * MINE_CELL + random MINE_CELL - _half, _j * MINE_CELL + random MINE_CELL - _half, _dir]
                 call fnc_hardpoint_rotate;
             private _mine = createMine [selectRandom _classes, [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0];
