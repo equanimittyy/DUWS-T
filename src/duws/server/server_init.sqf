@@ -233,6 +233,29 @@ if (ZeusStatus != 0) then {
 // master cannot delete them; re-asserts the lock periodically in case a mod re-adds them to Zeus.
 [] spawn fnc_guard_watch;
 
+// Contention shows only as other stages' wall time running long; this names what is running. The level
+// is read each pass because a debug session can raise it mid-game.
+[] spawn {
+    while {true} do {
+        sleep 60;
+        if (duws_log_level >= 4) then {
+            private _scripts = diag_activeSQFScripts;
+            private _byFile = createHashMap;
+            {
+                private _parts = (_x select 1) splitString "\/";
+                private _f = _parts param [count _parts - 1, "?"];
+                _byFile set [_f, (_byFile getOrDefault [_f, 0]) + 1];
+            } forEach _scripts;
+            private _top = [];
+            { _top pushBack [_y, _x] } forEach _byFile;
+            _top sort false;
+            ["DEBUG", "PERF", format ["fps %1 (min %2), %3 scheduled scripts, %4 units, %5 groups, %6 vehicles, %7 dead, top %8",
+                round diag_fps, round diag_fpsMin, count _scripts, count allUnits, count allGroups, count vehicles, count allDead,
+                ((_top select [0, 5]) apply { format ["%1 x%2", _x select 1, _x select 0] }) joinString ", "]] call fnc_log;
+        };
+    };
+};
+
 // Set the date/time AFTER setting the current weather
 setDate [2035, 8, 3, time_of_day, 0];
 

@@ -87,10 +87,14 @@ while {true} do {
     private _mhq = missionNamespace getVariable ["MHQ1", objNull];
     if (!isNull _mhq) then { _bases pushBack (getPos _mhq) };
 
+    // Timed because each allMissionObjects walks every mission object in one engine call, a frame stall
+    // the scheduler cannot slice.
+    private _t0 = diag_tickTime;
     {
         private _type = _x;
         _candidates append (allMissionObjects _type);
     } forEach _litterClasses;
+    private _censusMs = round ((diag_tickTime - _t0) * 1000);
     // Deduped in one engine call rather than by a unique insert per element: pushBackUnique rescans
     // the list it is building on every insert, so the cost was quadratic in the litter lying on the
     // map -- a few hundred holders and bodies after a firefight is tens of thousands of comparisons a
@@ -246,7 +250,7 @@ while {true} do {
 
     _pass = _pass + 1;
     if (_pass % LOG_EVERY == 0) then {
-        ["INFO", "CLEANUP", format ["litter census %1, %2 tracked", _census, _tracked]] call fnc_log;
+        ["INFO", "CLEANUP", format ["litter census %1, %2 tracked, census %3 ms", _census, _tracked, _censusMs]] call fnc_log;
     };
     } catch {
         ["ERROR", "CLEANUP", format ["pass threw, thread held alive: %1", _exception]] call fnc_log;

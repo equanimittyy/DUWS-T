@@ -156,6 +156,21 @@ for hundreds of objects whose class cannot change.
 Class config is fixed for the session, so the memo never goes stale. The sighting sensors and OPCOM's
 hardpoint pricing read the same memo.
 
+## Reading the cost from a playtest
+
+Four `.rpt` lines time the server's recurring work, all but the cleanup census at DEBUG. All four are
+wall time: a scheduled stage that reads long may be waiting on other scripts, not working.
+
+| Line | Source | What it times |
+|---|---|---|
+| `[OPCOM] grid tick=… ms[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick |
+| `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site |
+| `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 30th pass |
+| `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, entity counts, and the five most numerous scheduled scripts by file |
+
+A site pass that costs 1-2 ms on a quiet map and hundreds of ms in a firefight is doing the same work
+both times. The difference is contention, and the `PERF` line names the scripts behind it.
+
 ## Checked and dismissed
 
 **Paradrop canopies no longer leak.** OPFOR reinforcement used to create a `Steerable_Parachute_F` per
