@@ -17,6 +17,10 @@ if (!isServer) exitWith {false};
 private _fnc_paint = {
     params ["_k"];
     (format ["hpm_%1", _k]) setMarkerAlpha 1;
+    private _mines = missionNamespace getVariable [format ["DUWS_hpMines_%1", _k], []];
+    if (_mines isNotEqualTo []) then {
+        [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, format ["DUWS_hpMineReveal_%1", _k]];
+    };
 };
 
 private _revealed = false;

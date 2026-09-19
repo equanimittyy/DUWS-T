@@ -71,6 +71,14 @@ fnc_hardpoint_minefield = {
     _mines
 };
 
+// [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, jip] -- marks the mines for BLUFOR through the
+// engine's own map and 3D mine icons. Sent to every machine because revealMine's locality is undocumented,
+// and running it everywhere is correct either way.
+fnc_hardpoint_minefield_reveal = {
+    params ["_mines"];
+    { if (!isNull _x) then { west revealMine _x } } forEach _mines;
+};
+
 // [_center, _dir, _cols, _rows] call fnc_hardpoint_minefield_grid -> [[x,y], ...] square centres of a
 // block _cols wide and _rows deep about _center, rows stacked along _dir.
 fnc_hardpoint_minefield_grid = {

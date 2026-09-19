@@ -241,6 +241,13 @@ eligible set is non-empty — unrevealed, and either standalone or whose parent 
 revealed (`server/search/fnc_intel_payout.sqf:51-63`) — matched by `fnc_zone_key`, the same key both a
 revealed zone and a hardpoint row carry.
 
+A minefield is also found when its first mine is gone: set off, disarmed or destroyed. The clear check
+reads its mine list every tick, and reveals the field once fewer mines are armed than were laid. Revealing
+a minefield runs `west revealMine` on every mine, on every machine and in the JIP queue, so the engine
+marks each mine for BLUFOR with its own mine icons, on the map and in 3D, wherever the difficulty's
+detected-mines option allows. BLUFOR AI then also steers clear of the field. Clearing the field removes
+the JIP entry.
+
 ## Clear economy
 
 Clearing pays the player CP, and for the heaviest emplacements AP as well; it never pays OPFOR

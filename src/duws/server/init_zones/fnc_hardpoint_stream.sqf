@@ -108,7 +108,10 @@ DUWS_fnc_hardpointClearCheck = {
     params ["_key", "_o"];
     if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {
         private _mines = missionNamespace getVariable [format ["DUWS_hpMines_%1", _key], []];
-        if (({!isNull _x && {mineActive _x}} count _mines) > 0) exitWith {};
+        private _armed = {!isNull _x && {mineActive _x}} count _mines;
+        // The first mine gone -- set off, disarmed or blown -- gives the whole field away.
+        if (_armed < count _mines) then { ["ONE", _key] call fnc_hardpoint_reveal };
+        if (_armed > 0) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
     // <= 0 covers a stowed hardpoint too (peak nil defaults to 0) -- same guard as the zone capture test.
@@ -168,6 +171,7 @@ DUWS_fnc_hardpointClear = {
     _o set ["cleared", true];
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
     missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], nil];
+    if ((_o get "hpType") isEqualTo "MINEFIELD") then { remoteExec ["", format ["DUWS_hpMineReveal_%1", _key]] };
     // Deleted, not flagged, so it leaves the registry rather than sitting as a dead row OPCOM filters past every pass.
     private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
     if (_i >= 0) then {
