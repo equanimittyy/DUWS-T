@@ -237,7 +237,7 @@ class Mission
 	assetType="Free";
 	class Intel
 	{
-		briefingName="[SP/COOP] DUWS_T v1.6";
+		briefingName="[WIP][SP/COOP] DUWS-T v2.0";
 		overviewText="DUWS_T is a spiritual successor to DUWS_X, created by Killa Tomata. A long-term, persistent scenario: players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones, achieving total victory.";
 		resistanceWest=0;
 		startWeather=0;
