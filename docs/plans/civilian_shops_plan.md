@@ -6,14 +6,14 @@ car dealer, a boat dealer, an arms dealer, a mercenary contractor — but every 
 mission's existing plumbing rather than a parallel one: vendors are ordinary streamed civilians and
 purchases move the physical money item.
 
-This plan also owns the vendor framework. The paid jobs that fund the shops, and the employer
+This plan also owns the vendor framework. The paid jobs, and the employer
 vendors that dispatch them, are in [`civilian_jobs_plan.md`](civilian_jobs_plan.md).
 
 Two rules govern both plans:
 
 - **Money is the currency, not CP/AP.** The player already carries `Money_roll` inventory items
   spent at the black market and on civilian bribes. Shops and job payouts move that same item, so
-  the shop economy is separate from the CP/AP war economy and needs its own faucet (jobs) and sinks
+  the shop economy is separate from the CP/AP war economy and needs its own faucets and sinks
   (shops) to balance. It is per-player: co-op players each have their own wallet, and a bought
   vehicle or hired group belongs to the buyer.
 - **A vendor is a civilian, and the vendor system is a vanilla-mode feature.** Vendors spawn through
@@ -23,11 +23,11 @@ Two rules govern both plans:
 
 ## Currency and balance
 
-Money today is scarce — earned in small amounts and spent only on black-market micro-purchases
-(`fnc_addHQBuildingActions.sqf:29-31`) and civilian bribes. Adding large sinks (vehicles, weapons,
-hired groups) without a matching faucet leaves the shops unusable, so **jobs are not optional
-flavour; they are the faucet that funds the shops** ([`civilian_jobs_plan.md`](civilian_jobs_plan.md)).
-Ship at least one job type alongside the first paid shop.
+Money today is earned from enemy loot (`fnc_addRandomLoot.sqf`), searches (`fnc_search_claim.sqf`),
+civilian missions (`fnc_civ_mission_finish.sqf`), and random events, and spent only on black-market
+micro-purchases (`fnc_addHQBuildingActions.sqf:29-31`) and civilian bribes. The shops are new sinks
+on that existing income, so they do not wait on jobs; jobs
+([`civilian_jobs_plan.md`](civilian_jobs_plan.md)) are one more faucet.
 
 Money is counted and spent through the two existing server functions — `fnc_money_count`
 (`fnc_economy_init.sqf:237`) and `fnc_money_spend` (`fnc_economy_init.sqf:251`). Every shop purchase
@@ -51,8 +51,7 @@ count already computed per town (`fnc_usableBuildings.sqf`, the same count that 
 in `fnc_civ_init_Tomata.sqf`). The assignment lands in the persistent vendor registry and is replayed
 on load, never re-rolled, so a town's shops do not shuffle across a save. Vendor spots within a town
 are picked from that same building survey. Some vendors are location-gated as well as size-scaled — a
-fishmonger only in a coastal town, a farmer only where there is farmland — so a town's mix reflects
-where it is, not only how big it is.
+fishmonger only in a coastal town — so a town's mix reflects where it is, not only how big it is.
 
 **The farmer is the one rural vendor.** It stands at an isolated farmhouse outside every town and
 streams off its own position rather than the town-crowd poller; its placement is in

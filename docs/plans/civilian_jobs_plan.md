@@ -1,7 +1,7 @@
 # Civilian jobs: design plan
 
-Paid jobs dispatched by employer NPCs in towns: the money faucet that funds the
-[civilian shops](civilian_shops_plan.md). The theme is borrowed from the same "shops and jobs" life
+Paid jobs dispatched by employer NPCs: one more money faucet for the
+[civilian shops](civilian_shops_plan.md), beside loot, searches, and civilian missions. The theme is borrowed from the same "shops and jobs" life
 scenarios — a post office, a garbage depot, a taxi rank — and built on the mission's existing
 plumbing: employers are vendors on the shops plan's vendor framework, payouts move the physical
 money item, and jobs are gated on the existing civilian disguise.
@@ -11,7 +11,7 @@ CP/AP, and they run only in vanilla mode.
 
 ## Jobs
 
-Jobs pay money and are the economy's faucet. **Every job requires an active disguise**
+Jobs pay money. **Every job requires an active disguise**
 (`player getVariable "DUWS_disguised"`, set by `fnc_disguiseAsCivilian.sqf`) and aborts if the
 disguise breaks (firing, drawing a weapon). That keeps a job civilian cover work, not something done
 in full kit, and makes jobs vanilla-mode-only like the disguise, disabled in `NONE`/`RAVAGE`/`WBK`.
@@ -111,7 +111,7 @@ Job dispatchers are client-callable, so they are compiled and `publicVariable`'d
 
 ## Phasing
 
-1. **Garbage round and postal courier.** Disguise-gated — the money faucet. Their two employers need
-   the vendor framework (shops plan phase 1).
+1. **Garbage round and postal courier.** Disguise-gated. Their two employers need the vendor
+   framework (shops plan phase 1).
 2. **Balance.** Tune job payouts against shop prices. Settles the faucet size, which stays untuned
    until a job and a paid shop both exist.
