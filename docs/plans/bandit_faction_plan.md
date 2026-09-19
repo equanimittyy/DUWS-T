@@ -82,7 +82,7 @@ fleeing informant, the safehouse cell and the angry mob.
 ### Pool union
 
 `_pool` accepts an array of prefixes as well as one string. `["opfor", "blufor"]` unions the
-`opfor_*` and `blufor_*` weapons, vests and backpacks (`fnc_civ_arm.sqf:34-39`). String callers are
+`opfor_*` and `blufor_*` weapons, vests and backpacks (`fnc_civ_arm.sqf:35-40`). String callers are
 unchanged.
 
 ### Roles
@@ -95,20 +95,19 @@ unchanged.
 | AT | `at` | `["vest", ["submachinegun", "assault_rifle"], "launcher"]` |
 | Medic | `medic` | `["vest", "backpack", ["submachinegun", "assault_rifle"], "medic"]` |
 
-The `machinegun` and `launcher` tokens already add a bag for spares (`fnc_civ_arm.sqf:116`).
+The `machinegun` and `launcher` tokens already add a bag for spares (`fnc_civ_arm.sqf:123`).
 
 ### Token changes
 
 | Token | Change |
 |---|---|
-| `launcher` | Match any pool weapon that passes `fnc_IsAT` and fails `fnc_IsAA`. Today the token matches only the `BIS_fnc_itemType` subcategory `Launcher` (`fnc_civ_arm.sqf:44`), but rocket and missile tubes return `RocketLauncher` and `MissileLauncher` (`client/arsenal/fnc_arsenal_counts.sqf:144` handles all three). No caller uses the token yet, so the fix changes no current behavior. |
 | `grenadier` | New. An assault rifle from the pool that passes `fnc_IsGrenadier`, with the rifle muzzle and the grenade-launcher muzzle each loaded and given spares. With no such rifle in the pool it falls back to `assault_rifle`, so a grenadier never spawns unarmed. |
 | `medic` | New. A `Medikit` and first aid kits in the bag, a bag added when the unit has none, and `setUnitTrait ["Medic", true]` so the AI treats its squad. |
 
-The three predicates live in `shared/factions/MODERN/fn_factionAutoDetect.sqf`, but they are
-assigned inside `fnc_unitParseRoles` (`:220`; predicates at `:232`, `:240`, `:254`), so they are nil
-until that function first runs. Move `fnc_IsAT`, `fnc_IsAA` and `fnc_IsGrenadier` to the top level of
-the file, so they exist once faction init has run.
+`fnc_IsGrenadier` lives in `shared/factions/MODERN/fn_factionAutoDetect.sqf`, but it is assigned
+inside `fnc_unitParseRoles` (`:237`; predicate at `:254`), so it is nil until that function first
+runs. Move it to the top level of the file, beside `fnc_IsAT` and `fnc_IsAA`, so it exists once
+faction init has run.
 
 ### Skill and loot
 
@@ -139,9 +138,9 @@ row can name one.
 
 ### Phase 1: kit tokens
 
-Move the three predicates to the top level of `fn_factionAutoDetect.sqf`. In `fnc_civ_arm`, add the
-pool union, fix `launcher`, add `grenadier` and `medic`, and update the contract header. This phase
-stands alone: existing callers pass a string pool and use none of the three tokens.
+Move `fnc_IsGrenadier` to the top level of `fn_factionAutoDetect.sqf`. In `fnc_civ_arm`, add the
+pool union, add `grenadier` and `medic`, and update the contract header. This phase stands alone:
+existing callers pass a string pool and use neither new token.
 
 ### Phase 2: appearance and the parameter
 
@@ -176,8 +175,8 @@ Every consumer respects these constraints:
 
 | File | Change |
 |---|---|
-| `shared/factions/MODERN/fn_factionAutoDetect.sqf` | Move `fnc_IsAT`, `fnc_IsAA` and `fnc_IsGrenadier` out of `fnc_unitParseRoles`. |
-| `server/civilian/fnc_civ_arm.sqf` | Pool union; `launcher` fix; `grenadier` and `medic` tokens; contract header. |
+| `shared/factions/MODERN/fn_factionAutoDetect.sqf` | Move `fnc_IsGrenadier` out of `fnc_unitParseRoles`. |
+| `server/civilian/fnc_civ_arm.sqf` | Pool union; `grenadier` and `medic` tokens; contract header. |
 | `shared/includes/params_modern.hpp` | `DUWS_Bandits`. |
 | `server/bandits/fnc_bandit_looks.sqf` | New. Scans the sources and builds `DUWS_banditLooks`. |
 | `server/bandits/fnc_bandit_spawn.sqf` | New. Raises a bandit group. |
