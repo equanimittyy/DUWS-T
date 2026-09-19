@@ -33,10 +33,10 @@ private _build = {
         private _ang = _i * (360 / _steps) + random 40;
         private _cand = _randomPos getPos [_radius * (0.4 + random 0.3), _ang];
         // Keep every anchor out of the sea -- a water anchor drowns the patrol: drop road segments over
-        // water (coastal snaps, bridges); road-less fallback is fnc_mission_safepos.
+        // water (coastal snaps, bridges); road-less fallback is fnc_safe_pos.
         private _roads = (_cand nearRoads 400) select { !surfaceIsWater (getPosATL _x) };
         _pts pushBack (if (_roads isEqualTo []) then {
-            [_cand, 200, 0, 5] call fnc_mission_safepos
+            [_cand, 200, 0, 5] call fnc_safe_pos
         } else {
             getPosATL (selectRandom _roads)
         });

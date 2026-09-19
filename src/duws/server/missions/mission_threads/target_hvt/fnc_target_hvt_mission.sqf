@@ -140,9 +140,9 @@ private _near = _MissionPos nearRoads _spawnR;
 while { count _startRoads < 3 } do {
     private _lat = count _startRoads;
     // findSafePos can return the map origin in a road-thin, cluttered corner, seating a column out at sea.
-    // fnc_mission_safepos falls back to the raw offered point so the start stays where it belongs.
+    // fnc_safe_pos falls back to the raw offered point so the start stays where it belongs.
     private _cand = _MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)];
-    _startRoads pushBack [[_cand, 250, 0, 8] call fnc_mission_safepos, _dirZone];
+    _startRoads pushBack [[_cand, 250, 0, 8] call fnc_safe_pos, _dirZone];
 };
 
 private _hvtIdx = floor random 3;

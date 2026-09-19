@@ -25,7 +25,7 @@ if (_townName == "") then { _townName = text (nearestLocation [_townPos, ""]) };
 if (_townName == "") then { _townName = localize "STR_DUWS_T_idap_town_generic" };
 
 private _hqPos = if (!isNil "bluHQ_object" && { !isNull bluHQ_object }) then { getPosATL bluHQ_object } else { +PosOfBLUHQ };
-private _spawnPos = [_hqPos, 300, 10, 15, 0.4] call fnc_mission_safepos;
+private _spawnPos = [_hqPos, 300, 10, 15, 0.4] call fnc_safe_pos;
 
 private _truck = "C_Truck_02_transport_F" createVehicle _spawnPos;
 [_truck, "mission_deliver_supplies"] call fnc_duws_keep;

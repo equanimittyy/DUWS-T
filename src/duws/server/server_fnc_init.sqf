@@ -508,7 +508,6 @@ fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_dressing = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_dressing.sqf";
 fnc_place_bunker_guns = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_bunker_guns.sqf";
-fnc_mission_safepos = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_safepos.sqf";
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 // Broadcast: the finder runs client-side in the picker; else the squad-seating gate is lost to the generic.
 fnc_rescue_squad_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_site.sqf";publicVariable "fnc_rescue_squad_site";
@@ -604,6 +603,7 @@ fnc_furnish_push_addAction = compile preprocessFileLineNumbers "duws\server\plac
 // The standing orders half of every spawner below, and of the base guards: a group is raised by one
 // of them and ordered by this.
 fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\placement\fnc_apply_posture.sqf";
+fnc_safe_pos = compile preprocessFileLineNumbers "duws\server\placement\fnc_safe_pos.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_team.sqf";
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\placement\fnc_spawn_vehicle.sqf";
 

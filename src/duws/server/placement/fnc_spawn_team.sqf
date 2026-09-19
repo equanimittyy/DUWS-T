@@ -47,7 +47,7 @@ private _position = if (_spawnPos isNotEqualTo []) then { _spawnPos } else {
         _minR = (_band select 0) * _radius;
         _maxR = (_band select 1) * _radius;
     };
-    [_center, _maxR, _minR, 5, 0.5] call fnc_mission_safepos
+    [_center, _maxR, _minR, 5, 0.5] call fnc_safe_pos
 };
 private _army = [EAST, WEST] select (_side isEqualTo "blufor");
 private _skill = missionNamespace getVariable [format ["%1_ai_skill", _side], opfor_ai_skill];

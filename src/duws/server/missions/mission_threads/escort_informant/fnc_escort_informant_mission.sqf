@@ -19,7 +19,7 @@ if (_townIdx < 0) exitWith { [20, _requester, "no_delivery_town"] call fnc_missi
 private _townPos = (_circles select _townIdx) select 0;
 
 private _hqPos = if (!isNil "bluHQ_object" && { !isNull bluHQ_object }) then { getPosATL bluHQ_object } else { +PosOfBLUHQ };
-private _spawnPos = [_hqPos, 120, 10, 8, 0.4] call fnc_mission_safepos;
+private _spawnPos = [_hqPos, 120, 10, 8, 0.4] call fnc_safe_pos;
 
 private _civClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_4_F", "C_man_p_fugitive_F", "C_man_hunter_1_F", "C_Man_casual_1_F", "C_Man_casual_4_F"];
 private _grp = [_spawnPos, WEST, [selectRandom _civClasses]] call BIS_fnc_spawnGroup;

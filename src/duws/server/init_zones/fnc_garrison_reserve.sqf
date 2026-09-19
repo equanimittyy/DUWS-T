@@ -129,10 +129,8 @@ DUWS_fnc_garrisonReservePos = {
 
     private _fnc_cand = {
         params ["_bearing", "_dist"];
-        private _p = [_center getPos [_dist, _antiDir + _bearing], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
-        // A failed search returns the map origin, not [] (arma_engine_gotchas.md) -- open sea on Altis. Tested
-        // before the snap, which could move it onto a road near the corner.
-        if ((_p select 0) == 0 && {(_p select 1) == 0}) exitWith { [] };
+        private _p = [_center getPos [_dist, _antiDir + _bearing], 200, 0, 8, 0.5, []] call fnc_safe_pos;
+        if (_p isEqualTo []) exitWith { [] };
         // Snapped before the checks so they judge the point the wave actually spawns on: a road segment can
         // sit closer to the players than the raw candidate.
         _p = [_p] call DUWS_fnc_reserveRoadSnap;
@@ -368,7 +366,7 @@ DUWS_fnc_garrisonReserveTruckSpawn = {
 DUWS_fnc_garrisonReserveDispatch = {
     params ["_key", "_center", "_radius", "_spawnPos", "_truck", "_drv", "_grps"];
     private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
-    private _debusPos = [_debusRaw, 80, 0, 8, 0.5] call fnc_mission_safepos;
+    private _debusPos = [_debusRaw, 80, 0, 8, 0.5] call fnc_safe_pos;
 
     // CARELESS so the driver runs the route instead of stopping to fight -- the same trick the support
     // transports use to drive/fly through fire (fnc_paradrop, fnc_request_hcCAS). Waypoint is the driver

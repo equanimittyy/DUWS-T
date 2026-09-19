@@ -190,10 +190,9 @@ Distance is a flat floor, `DUWS_zoneReserveSpawnDist` (400 m,
 the site radius — a radius-relative distance would drop a wave a kilometre off a small island and
 on top of the player at a large base.
 
-A candidate is rejected when it is in the water or within the floor of a player. A failed
-`BIS_fnc_findSafePos` search returns the map origin, not `[]`
-([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md)), so the origin is rejected too;
-on Altis it is open sea. The search runs on a ring at `radius + 400` m first. When no bearing passes
+A candidate is rejected when it is in the water or within the floor of a player. Candidates come
+from `fnc_safe_pos`, so a failed search is rejected rather than taken as a point
+([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md)). The search runs on a ring at `radius + 400` m first. When no bearing passes
 (for example, players ring the site), it runs again on a ring at `radius + 800` m. When that ring
 also fails, the wave spawns at `radius + 800` m on the spawn bearing, with no player or sight test,
 walked in toward the site centre until it is on land.

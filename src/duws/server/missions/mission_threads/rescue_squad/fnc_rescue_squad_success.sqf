@@ -17,7 +17,7 @@ private _alive = _squad select {alive _x};
 // A safe, flat spot to put down on -- anywhere clear within reach of the building, not pinned right
 // beside it, so the bird gets real open ground instead of a cramped slot against the walls. Wide band
 // and the taxi's gradient tolerance for a reliable find; the squad boards on foot, so it stays walkable.
-private _lz = [_bpos, 200, 40, 15, 0.5, (_bpos getPos [60, random 360])] call fnc_mission_safepos;
+private _lz = [_bpos, 200, 40, 15, 0.5, (_bpos getPos [60, random 360])] call fnc_safe_pos;
 
 private _bearing = random 360;
 private _vehpos = _bpos getPos [2500, _bearing];
