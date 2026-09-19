@@ -270,4 +270,5 @@ fnc_zone_control_set = {
 	publicVariable "WARCOM_zones_controled_by_OPFOR";
 	publicVariable "amount_zones_captured";
 	publicVariable "zoneundercontrolblu";
+	[[_zonePos] call fnc_zone_key] call DUWS_fnc_opcom_gridDirty;
 };

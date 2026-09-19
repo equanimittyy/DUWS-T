@@ -206,6 +206,10 @@ switch (_verb) do {
         ["INFO", "OPCOM", format ["AI mode -> %1", _a]] call fnc_log;
         format ["OPCOM AI: mode %1.", _a] remoteExec ["hint", _caller];
     };
+    case "griddrift": {
+        DUWS_opcom_gridDriftAsk = _caller;
+        "OPCOM grid: drift check runs on the next tick." remoteExec ["hint", _caller];
+    };
     case "pickonce": {
         DUWS_opcom_pickOnce = true;
         "OPCOM AI: one pick on the next tick." remoteExec ["hint", _caller];

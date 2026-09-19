@@ -1,82 +1,63 @@
-// Locality: server. Rebuilds both live force layers from scratch each strategic phase: zero them, then
-// deposit every force source once with a linear falloff to its reach edge. A source is a firepower value
-// at a position -- friendly = OPFOR holdings (zone/town garrisons, hardpoints), enemy = BLU-held zones and
-// belief. Both layers share the one firepower metric (the force model, fnc_opcom_force), so the force
-// ratio that reads this is meaningful.
-// Each deposit scans only the box around its source cell -- never the whole grid, never a pass over allUnits.
+// Locality: server. The grid stage of each OPCOM tick. Holdings nobody is near stay deposited in a cached static layer,
+// which changes only for a key a holding writer marked dirty; live sites, belief and taskings are deposited fresh on a
+// copy of it every tick. Both layers share the one firepower metric (fnc_opcom_force), so the force ratio that reads
+// them is meaningful. Plan: docs/plans/opcom/grid_delta_plan.md.
 if (!isServer) exitWith {};
 
-private _cell = OPCOM_GRID_CELL;
-private _w = DUWS_opcom_grid_w;
-private _fri = DUWS_opcom_grid_fri;
-private _ene = DUWS_opcom_grid_ene;
-// Only the box is touched: out-of-box cells are zeroed once at init and never deposited into (the buffer
-// exceeds every source's reach), so both zeroing and deposits stay inside it.
-(DUWS_opcom_box) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
-for "_cy" from _bMinCy to _bMaxCy do {
-    for "_cx" from _bMinCx to _bMaxCx do { private _i = _cy * _w + _cx; _fri set [_i, 0]; _ene set [_i, 0] };
-};
+// Swapped before any holding is read, the order DUWS_fnc_opcom_gridDirty relies on.
+private _dirty = DUWS_opcom_gridDirty;
+DUWS_opcom_gridDirty = createHashMap;
 
-private _deposit = {
-    params ["_layer", "_pos", "_weight", "_reach"];
-    if (_weight <= 0) exitWith {};
-    private _scx = (floor ((_pos select 0) / _cell)) min (_w - 1) max 0;
-    private _scy = (floor ((_pos select 1) / _cell)) min (_w - 1) max 0;
-    private _k = ceil (_reach / _cell);
-    for "_cy" from (_scy - _k) max _bMinCy to (_scy + _k) min _bMaxCy do {
-        for "_cx" from (_scx - _k) max _bMinCx to (_scx + _k) min _bMaxCx do {
-            private _d = _pos distance2D [(_cx + 0.5) * _cell, (_cy + 0.5) * _cell];
-            if (_d <= _reach) then {
-                private _ci = _cy * _w + _cx;
-                _layer set [_ci, (_layer select _ci) + _weight * (1 - _d / _reach)];
-            };
-        };
+private _static = {
+    params ["_layer"];
+    [DUWS_opcom_gridStaticFri, DUWS_opcom_gridStaticEne] select (_layer isEqualTo "ene")
+};
+private _admit = {
+    params ["_rec"];
+    if (_rec isEqualTo []) exitWith {};
+    _rec params ["_key", "_isStatic", "_layer", "_pos", "_weight", "_reach"];
+    if (!_isStatic) exitWith { DUWS_opcom_gridAwake set [_key, [_pos, _reach]] };
+    if (_weight > 0) then {
+        [[_layer] call _static, _pos, _weight, _reach] call DUWS_fnc_opcom_deposit;
+        DUWS_opcom_gridSrc set [_key, [_layer, _pos, _weight, _reach]];
     };
 };
 
-// A site's own force is DUWS_fnc_garrisonForce (its men plus the power of its surviving vehicle/static tokens).
+if (DUWS_opcom_gridDirtyAll) then {
+    DUWS_opcom_gridDirtyAll = false;
+    [DUWS_opcom_gridStaticFri] call DUWS_fnc_opcom_gridZeroBox;
+    [DUWS_opcom_gridStaticEne] call DUWS_fnc_opcom_gridZeroBox;
+    DUWS_opcom_gridSrc = createHashMap;
+    DUWS_opcom_gridAwake = createHashMap;
+    { [_x] call _admit } forEach (call DUWS_fnc_opcom_gridSources);
+};
 
-// Zones: OPFOR-held deposit their garrison force to friendly; BLU-held are known enemy ground (a
-// territorial fact the commander has for free), so they deposit a nominal baseline even unsighted.
 {
-    _x params ["", "_zp", "_zs"];
-    private _key = format ["zone_%1_%2", round (_zp select 0), round (_zp select 1)];
-    if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) then {
-        [_ene, _zp, OPCOM_GRID_ZONE_ENEMY_FORCE, _zs + OPCOM_GRID_SPREAD] call _deposit;
-    } else {
-        [_fri, _zp, [_key] call DUWS_fnc_garrisonForce, _zs + OPCOM_GRID_SPREAD] call _deposit;
+    private _old = DUWS_opcom_gridSrc get _x;
+    if (!isNil "_old") then {
+        _old params ["_layer", "_pos", "_weight", "_reach"];
+        // Negated from the cache, never re-priced: the inputs have already changed.
+        [[_layer] call _static, _pos, -_weight, _reach] call DUWS_fnc_opcom_deposit;
+        DUWS_opcom_gridSrc deleteAt _x;
     };
-} forEach zone_meta_array;
+    DUWS_opcom_gridAwake deleteAt _x;
+    [[_x] call DUWS_fnc_opcom_gridSourceOf] call _admit;
+} forEach keys _dirty;
 
-// Banded towns: tier is 1 only where the town is OPFOR-banded, 0 elsewhere -- a neutral or BLU town
-// fields no OPFOR garrison and deposits nothing.
-private _locs  = missionNamespace getVariable ["civ_locations", []];
-private _radii = missionNamespace getVariable ["civ_radii", []];
+// Built on copies and assigned last, never written in place: a reader holding a layer across a yield, such as the
+// router, keeps one whole grid.
+private _fri = +DUWS_opcom_gridStaticFri;
+private _ene = +DUWS_opcom_gridStaticEne;
 {
-    if (_x >= 1) then {
-        private _key = [_forEachIndex] call fnc_town_site_key;
-        [_fri, getPos (_locs select _forEachIndex), [_key] call DUWS_fnc_garrisonForce, (_radii param [_forEachIndex, 500]) + OPCOM_GRID_SPREAD] call _deposit;
-    };
-} forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
+    _y params ["_pos", "_reach"];
+    [_fri, _pos, [_x] call DUWS_fnc_garrisonForce, _reach] call DUWS_fnc_opcom_deposit;
+} forEach DUWS_opcom_gridAwake;
+[_fri, _ene] call DUWS_fnc_opcom_gridMobile;
+DUWS_opcom_grid_fri = _fri;
+DUWS_opcom_grid_ene = _ene;
 
-// Standing OPFOR hardpoints: DUWS_fnc_hpForce off the type in each registry row. A row stands until
-// cleared, so every row is a live emitter.
-{
-    if ((_x select 3) isEqualTo "opfor") then { [_fri, _x select 1, [_x select 2] call DUWS_fnc_hpForce, OPCOM_GRID_SPREAD] call _deposit };
-} forEach DUWS_hardpoints;
-
-// Belief: each surviving stamp deposits its firepower scaled by age decay (an expired stamp is already
-// gone from the arrays). Covers a sighted player, a discovered HQ and a discovered FOB alike.
-{
-    private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);
-    private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
-    [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call _deposit;
-} forEach DUWS_opcom_belief_pos;
-
-// Taskings are mobile OPFOR force sources the grid reads at their world point (docs/plans/opcom/opcom_plan.md).
-// Deposited to the friendly layer from stored effForce, virtual or live -- a tasking's group is in no
-// holdings scan, so this is where its force enters the grid at all.
-{
-    private _ef = _x get "effForce";
-    if (_ef > 0) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call _deposit };
-} forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
+if (!isNil "DUWS_opcom_gridDriftAsk") then {
+    private _caller = DUWS_opcom_gridDriftAsk;
+    DUWS_opcom_gridDriftAsk = nil;
+    [_caller] call DUWS_fnc_opcom_gridDrift;
+};

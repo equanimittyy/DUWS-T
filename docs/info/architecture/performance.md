@@ -146,8 +146,8 @@ revisiting if the placement above proves insufficient.
 ## OPCOM prices a class once, not once per tick
 
 The OPCOM tick logs each stage's wall time at DEBUG. On a quiet Altis map its grid stage measured
-72-469 ms (median 201 ms) every 5 s, while the other stages read 0-2 ms. The grid rebuild prices every
-holding on every tick. A hardpoint's force is `DUWS_fnc_classPower` summed over every object in its
+72-469 ms (median 201 ms) every 5 s, while the other stages read 0-2 ms. The grid stage then re-priced
+every holding on every tick. A hardpoint's force is `DUWS_fnc_classPower` summed over every object in its
 layout, props included. `fnc_classifyVehicle`, behind that, walks the class's turret config with
 `configClasses` and runs `BIS_fnc_returnParents` for each weapon. So each tick re-read the same config
 for hundreds of objects whose class cannot change.
@@ -155,6 +155,23 @@ for hundreds of objects whose class cannot change.
 `DUWS_fnc_classPower` (`warcom/opcom/belief/fnc_opcom_force.sqf`) therefore memoises by class name.
 Class config is fixed for the session, so the memo never goes stale. The sighting sensors and OPCOM's
 hardpoint pricing read the same memo.
+
+## An OPCOM stage costs what changed, not what exists
+
+Every OPCOM stage runs in one scheduled thread on one 5 s tick, so stage costs add up. That total
+shares the ~3 ms frame budget with every other scheduled script in the mission. The map, by contrast,
+is mostly asleep: between two ticks, only the sites near players, the belief stamps and the moving
+taskings change.
+
+**The rule for OPCOM code:** a stage's per-tick cost follows what changed since the last tick, or what
+stands near players. It never follows the count of zones, towns or hardpoints on the map. A value
+derived from state that rarely changes, such as a stowed garrison's force or a class's power, is
+cached and recomputed when its input changes, not derived again on every tick.
+
+The grid stage (`warcom/opcom/belief/fnc_opcom_grid_rebuild.sqf`) keeps the holdings nobody is near in a
+cached static layer, and re-prices a holding only when a writer marks its key dirty.
+[`grid_delta_plan.md`](../../plans/opcom/grid_delta_plan.md) lists the writers that must mark, and the drift
+check that catches a missed mark.
 
 ## Reading the cost from a playtest
 

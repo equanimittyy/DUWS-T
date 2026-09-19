@@ -76,6 +76,7 @@ switch (_page) do {
                     "Dev tool: the OPCOM force-grid deposit and its source -- (live), (ledger) or (nominal).",
                     { params ["_pos"]; [_pos, player] remoteExec ["fnc_debug_force_emission", 2] }] call fnc_debug_map_click;
             }, [], DBG_MAP],
+            ["Grid drift check",    { ["griddrift", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] },    [], DBG_ACTION],
             ["Clear store",         { ["clear", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] },        [], DBG_DANGER]
         ]] call fnc_open_action_menu;
     };

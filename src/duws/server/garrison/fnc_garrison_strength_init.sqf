@@ -26,6 +26,7 @@ DUWS_fnc_garrisonLocked = {
 DUWS_fnc_garrisonSetFull = {
 	params ["_key", "_full"];
 	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], _full];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // The lost ledger: a flat token list, a multiset by value. Persists across a stow -- attrition is what
@@ -132,6 +133,7 @@ DUWS_fnc_garrisonRecordLoss = {
 	if (({ _x isEqualTo _token } count _lost) >= _cap) exitWith {};
 	_lost pushBack _token;
 	missionNamespace setVariable [_var, _lost];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // The strength a garrison redeploys at, as a fraction: surviving tokens over full tokens. Full for ground
@@ -152,6 +154,7 @@ DUWS_fnc_garrisonSeed = {
 	private _lost = +([_key] call DUWS_fnc_garrisonFull);
 	for "_i" from 1 to (_keep min count _lost) do { _lost deleteAt (floor random count _lost) };
 	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost + ([_key] call DUWS_fnc_garrisonLocked)];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // Full is stamped here, not left to the raise, because the seed thins against it: a retaken zone still carries its
@@ -174,6 +177,7 @@ DUWS_fnc_garrisonUnlose = {
 	private _lost = _all select { !([_x] call DUWS_fnc_tokenLocked) };
 	for "_i" from 1 to (_n min count _lost) do { _lost deleteAt (floor random count _lost) };
 	missionNamespace setVariable [_var, _lost + (_all select { [_x] call DUWS_fnc_tokenLocked })];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // Shared by town and zone, so both climb by one rule. An empty _x1 skips the re-stand, since deriving from it would
@@ -219,6 +223,7 @@ DUWS_fnc_garrisonForget = {
 	params ["_key"];
 	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], nil];
 	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], nil];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // Liveness: a garrison is live from the moment its raise finishes placing men to the stow or capture
@@ -246,6 +251,7 @@ DUWS_fnc_garrisonSetLive = {
 		if (_i >= 0) then { _sites deleteAt _i };
 	};
 	missionNamespace setVariable ["DUWS_garrisonSites", _sites];
+	[_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // The key a town files under. Delegates to fnc_town_site_key -- the one derivation of a town's key --

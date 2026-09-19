@@ -1,8 +1,8 @@
-// Locality: server. Builds the influence-grid substrate once, at OPCOM init: the two live force layers
-// (zeroed, the rebuild fills them each tick), the static per-cell arrays it never rebuilds -- a land mask and
-// water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the rebuild never
-// touches (accumulating memory, not a live layer). Server-local, numbers only, never persisted; a restored campaign
-// refills the live layers on its first tick and re-learns coverage from cold.
+// Locality: server. Builds the influence-grid substrate once, at OPCOM init: the two live force layers and the static
+// layer cached under them (zeroed; the grid stage's first tick is a dirty-all), the per-cell arrays it never rebuilds
+// -- a land mask and water connectivity -- and the coverage layer, a per-cell last-swept tick the sensors stamp and the
+// rebuild never touches (accumulating memory, not a live layer). Server-local, numbers only, never persisted; a
+// restored campaign refills the live layers on its first tick and re-learns coverage from cold.
 //
 // Only the play box is calculated. The full-width lattice is allocated so every reader keeps the absolute
 // _cy * _w + _cx index, but surfaceIsWater and the water flood fill run only inside the box (DUWS_opcom_box, a
@@ -72,6 +72,13 @@ private _forceLand = {
 { [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
 
 DUWS_opcom_grid_land = _land;
+
+DUWS_opcom_gridStaticFri = +DUWS_opcom_grid_fri;
+DUWS_opcom_gridStaticEne = +DUWS_opcom_grid_ene;
+DUWS_opcom_gridSrc = createHashMap;
+DUWS_opcom_gridAwake = createHashMap;
+DUWS_opcom_gridDirty = createHashMap;
+call DUWS_fnc_opcom_gridDirtyAll;
 
 // Water connectivity, the boat/air domain split: flood-fill the water cells (the mask's complement), size
 // each component, keep only the navigable ones. grid_water >= 0 is navigable water a boat routes and reaches

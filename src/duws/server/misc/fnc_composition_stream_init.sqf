@@ -71,6 +71,7 @@ fnc_duws_release = {
     // Terminal, and readable as such. A gate cycling this composition needs to know it is finished
     // rather than infer it from the key being absent, which is equally true before build-out ran.
     DUWS_retired pushBackUnique _key;
+    [_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // Take a composition off the map, holding the data to put it back -- unlike fnc_duws_release, which retires
@@ -127,6 +128,7 @@ fnc_duws_stow = {
         DUWS_compositions set [_key, _pinned];
     };
     DUWS_stowed set [_key, _records];
+    [_key] call DUWS_fnc_opcom_gridDirty;
     true
 };
 
@@ -177,6 +179,7 @@ fnc_duws_deploy = {
         };
     } forEach (DUWS_stowed getOrDefault [_key, []]);
     DUWS_stowed deleteAt _key;
+    [_key] call DUWS_fnc_opcom_gridDirty;
 };
 
 // Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed, so

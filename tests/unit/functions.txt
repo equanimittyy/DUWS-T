@@ -65,3 +65,5 @@ duws/shared/functions/fnc_stealth_coef.sqf::*fnc_stealth_coef
 duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_rotate
 duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_creepGrid
 duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
+duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
+duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty

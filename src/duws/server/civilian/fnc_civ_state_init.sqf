@@ -173,6 +173,7 @@ fnc_town_garrison_setTier = {
 	private _old = _tiers select _townIndex;
 	if (_new == _old) exitWith {};
 	_tiers set [_townIndex, _new];
+	[[_townIndex] call fnc_town_site_key] call DUWS_fnc_opcom_gridDirty;
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
 

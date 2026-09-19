@@ -173,6 +173,7 @@ DUWS_fnc_hardpointClear = {
     if (_i >= 0) then {
         DUWS_hardpoints deleteAt _i;
         publicVariable "DUWS_hardpoints";
+        [_key] call DUWS_fnc_opcom_gridDirty;
     };
     // A cleared tower is gone from the registry above, so the recount drops the amplifier and its
     // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
@@ -439,6 +440,7 @@ fnc_hardpoint_register = {
     // at once, or hidden until intel finds it under hardcore). Dir is read by the survey to score interlocking fire.
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable, _dir];
     publicVariable "DUWS_hardpoints";
+    [_key] call DUWS_fnc_opcom_gridDirty;
     // A newly-registered tower raises the amplifier; recount from the row just pushed.
     if (_type isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
 

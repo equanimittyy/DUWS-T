@@ -20,6 +20,7 @@ private _keys = missionNamespace getVariable ["DUWS_hpdevKeys", []];
 // Drop the dev rows only, leaving any zone- or OPCOM-placed hardpoint in the registry untouched.
 DUWS_hardpoints = DUWS_hardpoints select { !((_x select 0) in _keys) };
 publicVariable "DUWS_hardpoints";
+call DUWS_fnc_opcom_gridDirtyAll;
 
 DUWS_hpdevKeys = [];
 ["INFO", "HARDPOINT", "dev clear: retired and released every dev hardpoint"] call fnc_log;

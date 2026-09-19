@@ -65,6 +65,8 @@ fnc_ap_adjust = {
 			WARCOM_opfor_ap = round ((WARCOM_opfor_ap + _delta) max 0); publicVariable "WARCOM_opfor_ap";
 			if (_earned > 0) then {
 				WARCOM_opfor_ap_earned = round (WARCOM_opfor_ap_earned + _earned); publicVariable "WARCOM_opfor_ap_earned";
+				// Every garrison's full reads its token locks off this counter, so any site's weight can move.
+				call DUWS_fnc_opcom_gridDirtyAll;
 				private _t = [WARCOM_opfor_ap_earned] call DUWS_fnc_ap_tier;
 				if (_t != WARCOM_opfor_tier) then {
 					WARCOM_opfor_tier = _t; publicVariable "WARCOM_opfor_tier";

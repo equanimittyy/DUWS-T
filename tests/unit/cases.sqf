@@ -1407,3 +1407,49 @@ fnc_test_aimIn = {
     [[[1000, 1000, 0], ["creep", 100, 300, 0], 0, 1, 0, [[30, 500]]], { [_this, 980, 1080, 1000, 1050] call fnc_test_aimIn }] call fnc_test_aimAll, true] call fnc_assertEq;
 ["fire_aim: a creep given no length still crawls the floor's depth",
     [[[1000, 1000, 0], ["creep", 100, 0, 0], 0, 1, 0], { ((_this select 1) - 1000) <= 1 }] call fnc_test_aimAll, false] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_deposit: the grid's linear falloff, and its exact take-back ---
+// The grid stage removes a cached source by depositing its weight negated, so a removal must leave every cell
+// where a build without that source would put it.
+OPCOM_GRID_CELL = 500;
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+fnc_test_zeroGrid = { private _z = []; for "_i" from 1 to 100 do { _z pushBack 0 }; _z };
+fnc_test_maxGap = {
+    params ["_a", "_b"];
+    private _g = 0;
+    { _g = _g max abs (_x - (_b select _forEachIndex)) } forEach _a;
+    _g
+};
+
+private _g1 = call fnc_test_zeroGrid;
+[_g1, [250, 250], 4, 1000] call DUWS_fnc_opcom_deposit;
+["deposit: the source's own cell takes the full weight", _g1 select 0, 4] call fnc_assertClose;
+["deposit: a cell half the reach away takes half", _g1 select 1, 2] call fnc_assertClose;
+["deposit: a cell past the reach takes nothing", _g1 select 3, 0] call fnc_assertClose;
+
+[_g1, [250, 250], -4, 1000] call DUWS_fnc_opcom_deposit;
+["deposit: a negated deposit takes the first back", [_g1, call fnc_test_zeroGrid] call fnc_test_maxGap, 0] call fnc_assertClose;
+
+private _g2 = call fnc_test_zeroGrid;
+[_g2, [250, 250], 0, 1000] call DUWS_fnc_opcom_deposit;
+["deposit: a zero weight writes nothing", [_g2, call fnc_test_zeroGrid] call fnc_test_maxGap, 0] call fnc_assertClose;
+
+DUWS_opcom_box = [2, 2, 7, 7];
+private _g3 = call fnc_test_zeroGrid;
+[_g3, [250, 250], 4, 2000] call DUWS_fnc_opcom_deposit;
+["deposit: a cell outside the box is never written", _g3 select 0, 0] call fnc_assertClose;
+["deposit: a box cell in reach of an outside source still takes its share", _g3 select 22, 4 * (1 - sqrt (2 * 1000 ^ 2) / 2000)] call fnc_assertClose;
+DUWS_opcom_box = [0, 0, 9, 9];
+
+private _mixed = call fnc_test_zeroGrid;
+[_mixed, [1300, 2100], 7.5, 1500] call DUWS_fnc_opcom_deposit;
+[_mixed, [2600, 900], 3.25, 1250] call DUWS_fnc_opcom_deposit;
+[_mixed, [4100, 4400], 11, 2000] call DUWS_fnc_opcom_deposit;
+[_mixed, [2600, 900], -3.25, 1250] call DUWS_fnc_opcom_deposit;
+[_mixed, [900, 3800], 2, 1000] call DUWS_fnc_opcom_deposit;
+[_mixed, [4100, 4400], -11, 2000] call DUWS_fnc_opcom_deposit;
+private _survivors = call fnc_test_zeroGrid;
+[_survivors, [1300, 2100], 7.5, 1500] call DUWS_fnc_opcom_deposit;
+[_survivors, [900, 3800], 2, 1000] call DUWS_fnc_opcom_deposit;
+["deposit: adds and removes in any order match a build of the survivors", [_mixed, _survivors] call fnc_test_maxGap, 0] call fnc_assertClose;
