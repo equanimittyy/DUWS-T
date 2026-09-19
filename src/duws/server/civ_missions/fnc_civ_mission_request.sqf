@@ -46,7 +46,7 @@ sleep 3;
 // [thread, cp, [money min, money max], rep, gate]
 private _types = [
     ["fnc_civ_mission_camp",   10, [3, 5], 3, { true }],
-    ["fnc_civ_mission_stolen",  8, [4, 6], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }]
+    ["fnc_civ_mission_stolen",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }]
 ] select { call (_x select 4) };
 private _town = _civ getVariable ["civ_locIndex", -1];
 
