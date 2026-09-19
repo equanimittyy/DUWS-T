@@ -245,15 +245,15 @@ if (!_enemyTown) then {
     // The ask action reaches every town local -- a poll, not a one-off sweep, since the crowd is not all
     // present at start (the offer is usually taken far off). The askable flag makes each a one-time add;
     // the loop ends with the hunt, and the action self-hides once DUWS_informant_active is false.
-    [_townIndex] spawn {
-        params ["_ti"];
+    [_townIndex, _townPos, _radius + 150] spawn {
+        params ["_ti", "_townPos", "_reach"];
         while { missionNamespace getVariable ["DUWS_informant_active", false] } do {
             {
                 if !(_x getVariable ["DUWS_informant_askable", false]) then {
                     _x setVariable ["DUWS_informant_askable", true];
                     [_x] remoteExec ["fnc_informant_ask_addAction", 0, _x];
                 };
-            } forEach (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _ti });
+            } forEach ((_townPos nearEntities ["CAManBase", _reach]) select { (_x getVariable ["civ_locIndex", -1]) == _ti });
             sleep 5;
         };
     };

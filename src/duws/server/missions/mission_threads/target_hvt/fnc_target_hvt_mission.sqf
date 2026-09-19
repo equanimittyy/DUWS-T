@@ -373,11 +373,11 @@ waitUntil {
     // Peels the car into its own CARELESS group on first real contact (BLUFOR within 300 m, so a convoy
     // fender-bender doesn't trigger it) rather than halting to fight; crew keep their original claim stamp for teardown.
     if (!_split && alive _car
-        && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _car < 300} }) >= 0}
         && {
             (!isNull _hvtColGrp && {count units _hvtColGrp > 0} && {behaviour (leader _hvtColGrp) == "COMBAT"})
             || damage _car > 0
-        }) then {
+        }
+        && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _car < 300} }) >= 0}) then {
         _split = true;
         ["DEBUG", "MISSION", format ["hvt debug: car split (carDmg=%1 hvtAlive=%2)", damage _car, alive _hvt]] call fnc_log;
         _carGrp = createGroup EAST;

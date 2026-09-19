@@ -233,22 +233,27 @@ publicVariable "DUWS_safehouse_active";
     { [_x] remoteExec ["fnc_raid_safehouse_arm", 0, _x] } forEach _bldgs;
     [_bldgs] spawn {
         params ["_bldgs"];
+        // "open" room-floor cells only, not door/near/blocked ones: a player straddling a doorway sits on a door
+        // cell, and counting those would let them breach by walking to the threshold rather than shooting it
+        // open -- the shot on the door is meant to be the way in. Read once, since the furnish join above has
+        // already built every grid; a player beyond a house's farthest open cell skips its cell scan.
+        private _houses = _bldgs apply {
+            private _c = getPosASL _x;
+            private _open = ((_x getVariable ["DUWS_furnishGrid", []]) select { (_x select 1) == "open" }) apply { _x select 0 };
+            [_x, _open, _c, 1 + selectMax ((_open apply { _c distance _x }) + [0])]
+        };
         while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
             {
-                private _h = _x;
+                _x params ["_h", "_open", "_c", "_reach"];
                 if (!(_h getVariable ["DUWS_safehouse_breached", false])) then {
-                    // "open" room-floor cells only, not door/near/blocked ones: a player straddling a doorway sits
-                    // on a door cell, and counting those would let them breach by walking to the threshold rather
-                    // than shooting it open -- the shot on the door is meant to be the way in.
-                    private _cells = (_h getVariable ["DUWS_furnishGrid", []]) select { (_x select 1) == "open" };
                     if ((allPlayers findIf {
                         private _pa = getPosASL _x;
-                        (_cells findIf { _pa distance (_x select 0) < 0.6 }) >= 0
+                        (_pa distance _c) < _reach && { (_open findIf { _pa distance _x < 0.6 }) >= 0 }
                     }) >= 0) then {
                         [_h, "ALL"] call fnc_raid_safehouse_breach;
                     };
                 };
-            } forEach _bldgs;
+            } forEach _houses;
             sleep 2;   // TUNABLE
         };
     };
@@ -279,15 +284,15 @@ private _townBuildings = (missionNamespace getVariable [format ["civ_buildings_%
 
 // Poll the ask action onto every street local -- not a one-off sweep, since the crowd is not all present
 // at start. Askable flags the one-time add; the loop ends with the raid and the action self-hides.
-[_townIndex] spawn {
-    params ["_ti"];
+[_townIndex, _townPos, _radius + 150] spawn {
+    params ["_ti", "_townPos", "_reach"];
     while { missionNamespace getVariable ["DUWS_safehouse_active", false] } do {
         {
             if !(_x getVariable ["DUWS_safehouse_askable", false]) then {
                 _x setVariable ["DUWS_safehouse_askable", true];
                 [_x] remoteExec ["fnc_raid_safehouse_ask_addAction", 0, _x];
             };
-        } forEach (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _ti && !(_x getVariable ["DUWS_safehouse_occupant", false]) });
+        } forEach ((_townPos nearEntities ["CAManBase", _reach]) select { (_x getVariable ["civ_locIndex", -1]) == _ti && !(_x getVariable ["DUWS_safehouse_occupant", false]) });
         sleep 5;
     };
 };

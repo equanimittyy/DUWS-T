@@ -238,36 +238,32 @@ private _clearIcons = {
             [_hostage] spawn { params ["_h"]; sleep 20; if (alive _h) then { _h setDamage 1 }; };
         };
 
-        // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm.
-        private _players = allPlayers select { side _x == west && { alive _x } };
-        private _obs = units _garrison select { alive _x };
-        { _obs append (units _x select { alive _x }) } forEach _ring;
-        private _confirmed = false;
-        {
-            private _pl = _x;
-            // Best knowsAbout among guards with a CURRENT nearTargets fix on this player: the engine's own live
-            // sighting decides who counts, knowsAbout grades how sure they are. A guard who only remembers you
-            // (age > DET_FRESH) is excluded, so the alarm drains when the cordon loses contact.
-            private _knowsCur = 0;
-            {
+        // Observers: the whole cordon spots you -- garrison and patrols alike raise the one global alarm. Skipped
+        // once armed, since nothing calls the alarm off.
+        if (_alarmAt < 0) then {
+            private _players = allPlayers select { side _x == west && { alive _x } };
+            private _obs = units _garrison select { alive _x };
+            { _obs append (units _x select { alive _x }) } forEach _ring;
+            // A guard with a CURRENT nearTargets fix on a player: the engine's own live sighting decides who counts,
+            // knowsAbout grades how sure they are. A guard who only remembers you (age > DET_FRESH) is excluded, so
+            // the alarm drains when the cordon loses contact. One nearTargets query per guard serves every player.
+            private _confirmed = (_obs findIf {
                 private _u = _x;
-                if (((_u nearTargets DET_RANGE) findIf { ((_x select 4) isEqualTo _pl) && { (_x select 5) <= DET_FRESH } }) >= 0) then {
-                    private _k = _u knowsAbout _pl;
-                    if (_k > _knowsCur) then { _knowsCur = _k };
-                };
-            } forEach _obs;
-            if (_knowsCur > CONFIRM) then { _confirmed = true };
-        } forEach _players;
+                ((_u nearTargets DET_RANGE) findIf {
+                    (_x select 5) <= DET_FRESH && { (_x select 4) in _players } && { (_u knowsAbout (_x select 4)) > CONFIRM }
+                }) >= 0
+            }) >= 0;
 
-        if (_confirmed) then {
-            if (_confirmSince < 0) then { _confirmSince = time };
-        } else {
-            _confirmSince = -1;
-        };
+            if (_confirmed) then {
+                if (_confirmSince < 0) then { _confirmSince = time };
+            } else {
+                _confirmSince = -1;
+            };
 
-        if (_alarmAt < 0 && { _confirmSince >= 0 } && { time - _confirmSince >= CONFIRM_HOLD }) then {
-            _alarmAt = time + CLOCK_BASE;
-            call _endStealth;
+            if (_confirmSince >= 0 && { time - _confirmSince >= CONFIRM_HOLD }) then {
+                _alarmAt = time + CLOCK_BASE;
+                call _endStealth;
+            };
         };
 
         if (_alarmAt >= 0) then {
