@@ -586,7 +586,7 @@ same price zones and FOBs pay.
 
 ## Features not built yet
 
-Three planned features are cheap to persist if they are built as registries and expensive if they
+Four planned features are cheap to persist if they are built as registries and expensive if they
 are not. The contract is the same for all three: **the builder takes data and the registry holds
 that data.** Persistence is then a replay, and there is nothing extra to write.
 
@@ -599,6 +599,14 @@ buildable is a new special case.
 **Virtualised OPFOR units.** Whatever a virtualisation layer holds must be classnames, positions,
 sides and group names. A layer that caches group or unit handles is not persistable at all, and
 that will not be visible until a restore produces an empty map.
+
+**Civilian vendors.** The vendor registry
+([`civilian_shops_plan.md`](civilian_shops_plan.md#vendor-registry)) holds, per town, each vendor's
+type, building and respawn cooldown. It is an input: restore replays it in place of the init-time
+roll, so every town keeps the same vendors in the same buildings. The building goes in by position
+on the same footing as towns: a terrain building does not move, so the nearest building to the
+stored position is the same one. Shop money needs no entry, because it is the `Money_roll` item and
+is saved with the player's loadout.
 
 **Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
 rule above.

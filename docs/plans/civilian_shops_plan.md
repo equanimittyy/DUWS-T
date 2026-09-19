@@ -49,9 +49,17 @@ gets is decided a single time at init and then fixed for the campaign — not ev
 dealer or a car dealer. Larger towns carry more vendors; town size is read from the usable-building
 count already computed per town (`fnc_usableBuildings.sqf`, the same count that sets the town radius
 in `fnc_civ_init_Tomata.sqf`). The assignment lands in the persistent vendor registry and is replayed
-on load, never re-rolled, so a town's shops do not shuffle across a save. Vendor spots within a town
-are picked from that same building survey. Some vendors are location-gated as well as size-scaled — a
-fishmonger only in a coastal town — so a town's mix reflects where it is, not only how big it is.
+on load, never re-rolled, so a town's shops do not shuffle across a save. Each vendor is assigned one
+building from that same building survey and stays there for the campaign: it stands at the same spot
+whenever the town wakes and after every respawn. Some vendors are location-gated as well as
+size-scaled — a boat dealer only where there is water inside the town's radius, a fishmonger only in
+a coastal town — so a town's mix reflects where it is, not only how big it is.
+
+**Building picks are weighted by shop type.** A boat dealer takes a building as close to water as
+possible, scored by the distance to the nearest water sampled with `surfaceIsWater`. A car dealer
+takes a building near a fuel station where the town has one (`nearestTerrainObjects` with the
+`"FUELSTATION"` type), and any surveyed building where it does not. The Arms Dealer and the
+Contractor take a random surveyed building.
 
 **The farmer is the one rural vendor.** It stands at an isolated farmhouse outside every town and
 streams off its own position rather than the town-crowd poller; its placement is in
@@ -114,7 +122,7 @@ icon shortage grates, the alternative is a few custom `.paa` glyphs declared in 
 **Two marker states, driven by the respawn registry.** A live vendor's marker is coloured; a dead one
 is grey until it respawns. Use the civilian colour `ColorCIV` (purple, matching the `c_` icons) for
 the open state and grey for the down state. On the vendor's `Killed` handler the server sets the
-marker grey and stamps the five-minute cooldown (as [remaining seconds](#persistence-contract)); when
+marker grey and stamps the five-minute cooldown (as [remaining seconds](#vendor-registry)); when
 the cooldown elapses and the poller respawns the vendor, the server restores `ColorCIV`. Because the
 marker state is a function of the registry's cooldown, not of the live unit, it stays correct across a
 town sleeping and waking and across a rebuild — the marker is redrawn grey or coloured from the stored
@@ -164,18 +172,15 @@ The Contractor is where buying groups lives from now on. Two decisions shape it:
 The rework of the request-menu squad column is the one piece here that touches existing balance, so
 it is scoped as its own step rather than folded into vendor framework work.
 
-## Persistence contract
+## Vendor registry
 
 Vendors and their state must be rebuildable from plain data, per the campaign-persistence rule that
 "a thing is persistable when a single function can build it from numbers and strings"
-(`campaign_persistence_plan.md`). Concretely:
-
-- Keep a registry of vendors as plain values in `missionNamespace` — per town, the vendor types
-  assigned (decided once at init, see [Placement](#vendors-are-streamed-civilians)) and each one's
-  respawn cooldown (remaining seconds). On restore the stored assignment is replayed, not
-  regenerated, so towns keep their shops. No unit, group, or Location handles in that registry; the
-  live vendor objects are rebuilt by the spawn path, not stored.
-- Player money is inventory, so it is carried by whatever saves the player; nothing extra to store.
+(`campaign_persistence_plan.md`). The registry holds plain values in `missionNamespace`: per town,
+each vendor's type, its building (by position, because a terrain object handle is not a plain
+value), and its respawn cooldown (remaining seconds). No unit, group, or Location handles; the live
+vendor objects are rebuilt by the spawn path, not stored. Saving and replaying the registry is in
+[`campaign_persistence_plan.md`](campaign_persistence_plan.md#features-not-built-yet).
 
 ## Wiring
 
@@ -186,12 +191,10 @@ as such there, matching the existing convention.
 
 ## Phasing
 
-1. **Vendor framework.** New static "vendor" posture, streamed lifecycle, five-minute respawn, global
-   marker, hostile-town service refusal, and one menu — start with the Arms Dealer, whose catalogue
-   is the seeded arsenal and needs no new spawn path.
+1. **Vendor framework.** New static "vendor" posture, one weighted building per vendor, streamed
+   lifecycle, five-minute respawn, global marker, hostile-town service refusal, and one menu — start
+   with the Arms Dealer, whose catalogue is the seeded arsenal and needs no new spawn path.
 2. **Shops.** Car Dealer and Boat dealer (civilian vehicle and boat spawn) and the Contractor:
    relocate the CP/AP squad buy out of the request menu, then add the money mercenaries beside it.
    Settles which groups the money mercenaries draw from: an existing independent roster, or a new
-   guerilla/PMC set.
-3. **Persistence.** Wire the vendor registry into the save. Shop prices are tuned against job
-   payouts in the jobs plan's balance phase.
+   guerilla/PMC set. Shop prices are tuned against job payouts in the jobs plan's balance phase.
