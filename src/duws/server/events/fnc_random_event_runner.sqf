@@ -20,7 +20,7 @@ if (isNil "CIV_PRESENCE" || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) exitWit
 while {true} do {
 	// A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). Gated with
 	// nested if rather than exitWith/continue: inside a while body those read as end-of-iteration, not
-	// as "skip the rest, keep the clock" (see fnc_WARCOM_opf_hardpoints).
+	// as "skip the rest, keep the clock".
 	try {
 		sleep (RANDOM_EVENT_TICK_MIN + random (RANDOM_EVENT_TICK_MAX - RANDOM_EVENT_TICK_MIN));
 

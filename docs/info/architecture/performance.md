@@ -84,7 +84,7 @@ where the players are rather than how many zones were generated.
 The arithmetic is what forces it. A zone prefab places 37-72 objects
 (`server/init_zones/prefabs/modern/*.sqf`) plus five crates, a light, 3-4 fortification buildings and a
 flagpole (`fnc_createzone.sqf:151-206`) — call it 65. Zones alone are bounded, since `zones_number`
-tops out at 40, so roughly 2,600. The hardpoint tier ([`hardpoints.md`](../gameplay/hardpoints.md)) breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus director-built normals
+tops out at 40, so roughly 2,600. The hardpoint tier ([`hardpoints.md`](../gameplay/hardpoints.md)) breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus OPCOM's standalone builds
 with no ceiling, reaches five figures on a large campaign.
 
 **Deleted rather than hidden.** A hidden object is still a network entity, still returned by

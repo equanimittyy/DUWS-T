@@ -664,7 +664,6 @@ fnc_escalation = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escal
 // building a client razed still reaches the server-side counter.
 fnc_escalation_watch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation_watch.sqf"; publicVariable "fnc_escalation_watch";
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
-fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_init.sqf";
 fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
 fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";

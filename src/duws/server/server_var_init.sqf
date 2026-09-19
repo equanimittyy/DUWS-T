@@ -540,15 +540,6 @@ AOI_OPFOR_TOWER_CAP = 5;
 DUWS_opforRadioLevel = 0;
 DUWS_bluforRadioLevel = 0;
 
-// OPCOM's hardpoint director: how often it decides (ticks) and the Army Power each build costs. It makes
-// at most one build a pass, in the priority the costs sit in below -- tower dearest and strongest, zone
-// top-up cheapest. Priced so the enemy spends earned AP rather than fortifying free: the escalation loop
-// is rep wins AP, AP buys fortification, fortification wins more rep.
-OPCOM_HP_PERIOD = 120;   // ticks; 600s @ 5s tick
-OPCOM_AP_TOWER = 30;
-OPCOM_AP_BAND  = 12;
-OPCOM_AP_TOPUP = 8;
-
 // OPCOM perception. Plain globals not #define -- the opcom files that read them load by compile-path and
 // run later, out of reach of a macro scoped to this file. Influence-grid geometry in metres:
 OPCOM_GRID_CELL   = 500;

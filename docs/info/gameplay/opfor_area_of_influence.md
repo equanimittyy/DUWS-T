@@ -126,13 +126,11 @@ At campaign generation the band is laid after the zone rings: radio towers, the 
 AA net, the observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns
 the passes and their counts).
 
-Nothing builds in the band on its own after generation. The standalone director
-(`server/warcom/fnc_WARCOM_opf_hardpoints.sqf`) is compiled but not spawned: it spent Army Power on
-flat-priced builds on its own clock, and it waits to be re-driven through OPCOM's appraisal so that a
-build competes for the wallet. OPCOM's own standalone build stands a hardpoint where its truck delivers
-it, and is driven only by hand from the debug harness. Choosing that spot, weighted toward where the
-player operates, is [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s to
-add; nothing here reads a belief store or an archetype.
+Nothing builds in the band on its own after generation. OPCOM's standalone build stands a hardpoint
+where its truck delivers it, and is driven only by hand from the debug harness. Choosing that spot,
+weighted toward where the player operates, is
+[`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s to add; nothing here
+reads a belief store or an archetype.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
 execs `fnc_debug_aoi_circles` (`server/warcom/fnc_debug_aoi_circles.sqf`) to gather every emitter's
@@ -150,11 +148,6 @@ menu, not shown to the player.
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
 | `AOI_OPFOR_TOWER_CAP` | 5 | ceiling on `DUWS_opforRadioLevel`; OPFOR's push bottoms out at `-6` |
-| `OPCOM_HP_PERIOD` | 120 ticks (600 s) | how often the standalone director acts (not spawned) |
-| `OPCOM_AP_TOWER` | 30 | AP cost to raise a radio tower |
-| `OPCOM_AP_TOPUP` | 8 | AP cost to top up a depleted zone |
-| `OPCOM_AP_BAND` | 12 | AP cost to fortify the band |
 
-All defined at `server/server_var_init.sqf:451-475`, server-only (not `publicVariable`d): every
-reader — the drift on the economy tick, the hardpoint band siting, the director tick — runs on the
-server.
+All defined at `server/server_var_init.sqf:529-539`, server-only (not `publicVariable`d): every
+reader — the drift on the economy tick, the hardpoint band siting — runs on the server.

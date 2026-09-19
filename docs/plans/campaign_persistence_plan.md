@@ -210,7 +210,7 @@ poorer wallet and a fully upgraded enemy has lost ground by not playing, which i
 anyone chose — OPCOM spending an unattended night buying garrisons is the sharp
 edge of it. The server also burns CPU simulating a war nobody is watching. The gate goes on the
 campaign clocks — the economy tick, the WARCOM wave threads, the side-mission generator, the
-hardpoint and director build ticks — not on everything. The zone spawn/despawn checker and the JIP
+OPCOM tick — not on everything. The zone spawn/despawn checker and the JIP
 machinery keep running; with no players they are already no-ops, and gating them would only add a
 branch.
 
