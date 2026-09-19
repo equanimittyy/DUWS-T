@@ -1,7 +1,7 @@
 // Locality: server. The grid stage of each OPCOM tick. Holdings nobody is near stay deposited in a cached static layer,
 // which changes only for a key a holding writer marked dirty; live sites, belief and taskings are deposited fresh on a
 // copy of it every tick. Both layers share the one firepower metric (fnc_opcom_force), so the force ratio that reads
-// them is meaningful. Plan: docs/plans/opcom/grid_delta_plan.md.
+// them is meaningful.
 if (!isServer) exitWith {};
 
 // Swapped before any holding is read, the order DUWS_fnc_opcom_gridDirty relies on.

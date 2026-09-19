@@ -1,6 +1,6 @@
 // Locality: server, executed at load by server_fnc_init ([] call compile) so it can define several functions. The force
 // grid's sources, its deposit, and the dirty marks that holding writers call. The marks load ahead of every writer and do
-// nothing until OPCOM init builds the grid, whose first tick is a dirty-all. Plan: docs/plans/opcom/grid_delta_plan.md.
+// nothing until OPCOM init builds the grid, whose first tick is a dirty-all.
 if (!isServer) exitWith {};
 
 // A negative weight takes back an earlier deposit of the same source. Out-of-box cells are never touched: the box
