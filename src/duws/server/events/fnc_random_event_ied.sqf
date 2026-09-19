@@ -139,18 +139,18 @@ if (_liveCount == 0) exitWith {};
 		if ((allPlayers findIf { alive _x && { (_x distance2D _fieldCenter) < _watch } }) < 0) then {
 			sleep TICK;
 		} else {
+		// Once per tick, not per pile: every live pile tests the same BLUFOR.
+		private _blu = allUnits select { side (group _x) == west && { alive _x } };
 		{
 			private _pile = _x;
 			if (!isNull _pile && { (_pile getVariable ["DUWS_ied_state", "decoy"]) == "live" }) then {
 				private _pp = getPosATL _pile;
 				// Trip on any BLUFOR in range that is not a lone prone man: crew ride vehicle _u != _u,
 				// so a drive-over always fires; only crawling in on foot is safe.
-				private _trip = {
-					alive _x
-					&& { side (group _x) == west }
-					&& { (_x distance2D _pp) < ARM_RANGE }
+				private _trip = (_blu findIf {
+					(_x distance2D _pp) < ARM_RANGE
 					&& { !(vehicle _x == _x && { stance _x == "PRONE" }) }
-				} count allUnits > 0;
+				}) >= 0;
 				if (_trip) then {
 					_pile setVariable ["DUWS_ied_state", "gone", false];
 					_pile setVariable ["DUWS_ied_active", false, true];

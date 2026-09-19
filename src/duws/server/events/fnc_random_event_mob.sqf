@@ -107,12 +107,12 @@ _grp setSpeedMode "LIMITED";
 		(({ alive _x } count units _grp) == 0)
 		|| { _grp getVariable ["DUWS_mob_panic", false] }
 		|| { time > _giveUp }
-		|| { (allUnits findIf { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} && {(_x distance2D _centre) < _townRadius} }) >= 0 }
+		|| { (allUnits findIf { side group _x == west && {(_x distance2D _centre) < _townRadius} && {alive _x} && {_x isKindOf "CAManBase"} }) >= 0 }
 	};
 
 	private _activated = ({ alive _x } count units _grp > 0)
 		&& !(_grp getVariable ["DUWS_mob_panic", false])
-		&& { (allUnits findIf { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} && {(_x distance2D _centre) < _townRadius} }) >= 0 };
+		&& { (allUnits findIf { side group _x == west && {(_x distance2D _centre) < _townRadius} && {alive _x} && {_x isKindOf "CAManBase"} }) >= 0 };
 
 	// Scatter only on a real panic; a timeout or a died-out crowd just strolls off below.
 	private _scatter = _grp getVariable ["DUWS_mob_panic", false];
@@ -141,7 +141,7 @@ _grp setSpeedMode "LIMITED";
 				private _east = [_live, "EAST", "opfor", ["pistol", ["submachinegun", "assault_rifle", "NONE"]], [true, 1]] call fnc_civ_arm;
 				// A fresh EAST group starts blind and would mill until it stumbled into contact -- reveal the players and
 				// send it hunting so the cell engages the moment it turns, not whenever it happens to detect them.
-				private _blu = allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} };
+				private _blu = allUnits select { side group _x == west && {alive _x} && {_x isKindOf "CAManBase"} };
 				if !(_blu isEqualTo []) then {
 					{ _east reveal [_x, 4] } forEach _blu;
 					private _wp = _east addWaypoint [getPosATL ([_blu, leader _east] call BIS_fnc_nearestPosition), 0];
@@ -161,7 +161,7 @@ _grp setSpeedMode "LIMITED";
 			if ((_grp getVariable ["DUWS_mob_panic", false]) || { ({ alive _x } count units _grp) < (_mobbers - (_grp getVariable ["DUWS_mob_broke", 0])) }) exitWith { _scatter = true };
 
 			// Every BLUFOR man still in reach of the crowd -- players and AI alike, not one chosen target.
-			private _blu = (allUnits select { alive _x && {_x isKindOf "CAManBase"} && {side group _x == west} }) select { (_x distance2D (leader _grp)) < CHASE };
+			private _blu = allUnits select { side group _x == west && {(_x distance2D (leader _grp)) < CHASE} && {alive _x} && {_x isKindOf "CAManBase"} };
 			if (_blu isEqualTo []) exitWith {};   // broke contact: fall through to the stroll
 
 			private _target = [_blu, leader _grp] call BIS_fnc_nearestPosition;
