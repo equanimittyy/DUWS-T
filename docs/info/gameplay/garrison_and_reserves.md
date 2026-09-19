@@ -112,6 +112,15 @@ before calling `DUWS_fnc_garrisonRecordLoss`; a unit dying with squadmates still
 nothing. The tag rides the *unit*, not the group, since a dead man can outlive it. The same
 handler also fires the event-refill trigger (below).
 
+A zone or town raise hangs the watch only after it places every group, so a group that dies during
+the raise has no handler to record it. `DUWS_fnc_garrisonRefundUnplaced {key, tokens, grps}`
+(`src/duws/server/init_zones/fnc_garrison_reserve.sqf:254`) runs between the raise and the watch. It
+returns the token of each group with no living man, and of each token that raised no group, to the
+pool, and the refill pass fields it again. Such a death comes from the placement (for example, a
+vehicle that spawns on a slope), not from a fight, so it does not cost the garrison a token. Without
+the refund, the token stays in `surviving` but nothing stands for it, and the ledger shows one more
+token available than groups on the ground.
+
 An OPCOM unit's token is not in `full`, so `DUWS_fnc_garrisonRecordLoss` ignores its wipe. The handler
 passes that wipe to `DUWS_fnc_opcom_defenderLost {key, token}` instead, which marks the unit dead and
 re-syncs. A homed unit exists on the ground only as its reserve-spawned group, so the wipe is its death,
@@ -233,8 +242,8 @@ tokens hold it above the line until the waves have spawned and been killed, so a
 and beat most of everything the site was ever worth, not just what happened to be standing when they
 arrived.
 
-The test counts standing groups, not the ledger's `surviving`, because a token whose raise placed
-nobody is neither lost nor pooled and would hold the site forever. OPCOM's homed defenders sit outside
+The test counts standing groups, not the ledger's `surviving`, because a reserve token whose spawn
+placed nobody is neither lost nor pooled and would hold the site forever. OPCOM's homed defenders sit outside
 `full` but count through both halves: standing, they are tagged groups on the roster; pooled, they are
 tokens in the pool. A prefab's turret crews carry no reserve tag, so they do not count.
 

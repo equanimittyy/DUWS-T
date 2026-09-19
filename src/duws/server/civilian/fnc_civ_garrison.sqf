@@ -59,8 +59,8 @@ private _fnc_raise = {
             _tier, _i, _radius]] call fnc_log;
     };
 
-    // Filed for the tick to adopt: raised groups (rostered, killed-watch hung, site marked live) and the tier raised at.
-    missionNamespace setVariable [RAISE_SLOT(_i), [_grps, _tier]];
+    // Filed for the tick to adopt: raised groups (rostered, killed-watch hung, site marked live), the tier raised at, and the tokens raised.
+    missionNamespace setVariable [RAISE_SLOT(_i), [_grps, _tier, _garrison]];
 };
 
 // One record per town, keyed (not parallel arrays) -- eleven same-indexed fields risk a transposition between towns.
@@ -96,12 +96,13 @@ private _fnc_tick = {
         _t set ["raising", false];
         missionNamespace setVariable [RAISE_SLOT(_i), nil];
         if !(_res isEqualTo []) then {
-            _res params ["_gotGrps", "_gotTier"];
+            _res params ["_gotGrps", "_gotTier", "_gotTokens"];
             private _roster = [_key] call fnc_site_roster;
             { _roster append (units _x) } forEach _gotGrps;
             // Site live also enlists it in the reserve pass; the killed watch reinforces in hunt waves and records each wiped group's token into the ledger, same as a zone. Losses live in the ledger from here on.
             // An empty raise stays off live, so the clear pays only for a garrison that stood; a purchase or an OPCOM defender lands on the next raise.
             if (_gotGrps isNotEqualTo []) then {
+                [_key, _gotTokens, _gotGrps] call DUWS_fnc_garrisonRefundUnplaced;
                 [_key, _gotGrps] call DUWS_fnc_garrisonReserveWatch;
                 [_key, true] call DUWS_fnc_garrisonSetLive;
             };

@@ -3,8 +3,8 @@
 // Reinforcement half of the garrison model: accounting lives in fnc_zone_state_init, the strength ledger
 // in fnc_garrison_strength_init. Model: docs/info/gameplay/garrison_and_reserves.md.
 
-// Standing groups plus the pool, not the ledger's surviving count: a token whose raise placed nobody is neither lost
-// nor pooled, and would hold the site forever. The pool keeps a site from falling on an empty perimeter while waves
+// Standing groups plus the pool, not the ledger's surviving count: a reserve token whose spawn placed nobody is neither
+// lost nor pooled, and would hold the site forever. The pool keeps a site from falling on an empty perimeter while waves
 // are still owed, and OPCOM's defenders count through both halves. No full stamped yet reads as not-beaten.
 // 0.15, not a tenth: a group with one man standing counts as a whole token.
 DUWS_fnc_garrisonBeaten = {
@@ -247,6 +247,16 @@ DUWS_fnc_garrisonReserveWatch = {
             }];
         } forEach units _x;
     } forEach _grps;
+};
+
+// A group empty before its watch is hung died to its placement, not a fight, so its token is pooled rather than lost.
+DUWS_fnc_garrisonRefundUnplaced = {
+    params ["_key", "_tokens", "_grps"];
+    private _placed = (_grps select { ({ alive _x } count units _x) > 0 }) apply { _x getVariable ["DUWS_srcToken", ""] };
+    private _refund = [_placed, _tokens] call DUWS_fnc_spawnDiff;
+    if (_refund isEqualTo []) exitWith {};
+    ([_key] call DUWS_fnc_garrisonReserve) append _refund;
+    ["INFO", "RESERVE", format ["%1 placed nobody alive for %2; returned to the reserve pool", _key, _refund]] call fnc_log;
 };
 
 // Debounced so a mass-casualty moment fires one wave, not one per body; gated on a deep dip so shallow

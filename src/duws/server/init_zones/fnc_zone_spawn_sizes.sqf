@@ -321,6 +321,7 @@ fnc_zone_spawn = {
 
     private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
+    [_zoneKey, _spawns, _grps] call DUWS_fnc_garrisonRefundUnplaced;
     [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
 
     // Live/mobilised flags let the capture test judge the zone and the reserve pass top it up; cleared

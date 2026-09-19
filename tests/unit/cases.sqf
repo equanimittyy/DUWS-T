@@ -748,6 +748,14 @@ DUWS_fnc_opforGroupCount = { 128 };
 ["garrisonStandFill: the global group wall caps the draw",
     (["sfk", ["team"]] call DUWS_fnc_garrisonStandFill), ["team", "patrol"]] call fnc_assertEq;
 
+["rfk", ["patrol"]] call DUWS_fnc_garrisonReserveSet;
+["rfk", ["team", "car"], [createGroup east]] call DUWS_fnc_garrisonRefundUnplaced;
+["garrisonRefundUnplaced: a token whose group stands empty, or that raised no group, returns to the pool",
+    (["rfk"] call DUWS_fnc_garrisonReserve), ["patrol", "team", "car"]] call fnc_assertEq;
+["rfk", [], []] call DUWS_fnc_garrisonRefundUnplaced;
+["garrisonRefundUnplaced: nothing unplaced leaves the pool as it was",
+    (["rfk"] call DUWS_fnc_garrisonReserve), ["patrol", "team", "car"]] call fnc_assertEq;
+
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
 // campaign setting and a squad's leader is not outnumbered by his own automatic riflemen.
