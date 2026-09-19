@@ -10,7 +10,7 @@ fnc_selectNonEmpty = compileFinal {
 
 // spawn, do not call
 fnc_vehiclePostInit = compileFinal {
-		params ["_entity", ["_side", west]];
+		params ["_entity"];
 
 		// let the vehicle and crew spawn in
 		sleep 1;
@@ -18,11 +18,12 @@ fnc_vehiclePostInit = compileFinal {
 		
 		if (_entity isKindOf "ParachuteBase") exitWith {};
 
-		// only AI-crewed vehicles of this side: skip empty, civilian, player-crewed, UAV, disguised
-		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {side _entity == civilian} || {side _entity != _side} || {unitIsUAV _entity} || {_entity getVariable ["DUWS_keepCrewDress", false]}) exitWith {};		
+		private _side = side _entity;
+		// only AI-crewed vehicles of an autodetected side: skip empty, civilian, player-crewed, UAV, disguised
+		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {_side == civilian} || {!(_side in DUWS_autodetectSides)} || {unitIsUAV _entity} || {_entity getVariable ["DUWS_keepCrewDress", false]}) exitWith {};		
 		
 		// civilian-class bodies fighting for the side (mob, informant, PMC) never template a crew's dress
-		waitUntil {sleep 1; {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x} && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") != 3}} count allUnits > 0 };
+		waitUntil {sleep 1; (allUnits findIf {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x} && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") != 3}}) >= 0 };
 
 		_factionUnitRandom = selectRandom (allUnits select {alive _x && {!isPlayer _x} && {side _x == _side} && {isNull objectParent _x} && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "side") != 3}});
 		_factionVoice = speaker _factionUnitRandom;
@@ -35,6 +36,22 @@ fnc_vehiclePostInit = compileFinal {
 			_availableTextureGeneric = selectRandom (_availableTextures select {"blu" in toLower _x || {"black" in toLower _x} || {"oliv" in toLower _x} || {"guer" in toLower _x} || {"gre" in toLower _x} || {"eaf" in toLower _x} || {"ion" in toLower _x} || {"idap" in toLower _x}});
 			if (!isNil "_availableTextureGeneric") then { [_entity, _availableTextureGeneric] call BIS_fnc_initVehicle };
 		};
+};
+
+// One handler for both sides, installed once however often a faction regenerates: each handler spawns a
+// post-init per vehicle, so a second one doubles the work.
+fnc_autodetect_watchVehicles = compileFinal {
+	params ["_side"];
+	if (isNil "DUWS_autodetectSides") then {
+		DUWS_autodetectSides = [];
+		addMissionEventHandler ["EntityCreated", {
+			params ["_entity"];
+			if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
+				[_entity] spawn fnc_vehiclePostInit;
+			};
+		}];
+	};
+	DUWS_autodetectSides pushBackUnique _side;
 };
 
 
@@ -734,4 +751,4 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_classifyVehicle","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_autodetect_watchVehicles","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_classifyVehicle","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };

@@ -1,22 +1,7 @@
 // Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31; defines
 // faction helpers rather than running logic of its own.
 
-// Handler installed once, generation re-run every pass -- see AUTODETECT_opfor.sqf. The guard is
-// shared with that file because both wrappers install the same handler for the same side.
-if (isNil "opfor_autodetect_handler_init") then {
-	opfor_autodetect_handler_init = true;
-
-	// retexture opfor vehicles of a different side and redress crew
-	addMissionEventHandler ["EntityCreated", {
-		params ["_entity"];
-
-		if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
-			//systemChat str [ _entity, (typeOf _entity) call BIS_fnc_objectType, _entity isKindOf "LandVehicle"];
-			[_entity, east] spawn fnc_vehiclePostInit;
-		};
-
-	}];
-};
+[east] call fnc_autodetect_watchVehicles;
 
 
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
