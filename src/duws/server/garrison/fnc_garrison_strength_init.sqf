@@ -263,7 +263,8 @@ DUWS_fnc_garrisonDebug = {
 	params ["_key"];
 	private _full = [_key] call DUWS_fnc_garrisonFull;
 	private _locked = [_key] call DUWS_fnc_garrisonLocked;
-	private _lost = [_key] call DUWS_fnc_garrisonLost;
+	// A seed or tier buy files locked tokens lost, but they never fielded: they read under Locked until their rung.
+	private _lost = ([_key] call DUWS_fnc_garrisonLost) select { !([_x] call DUWS_fnc_tokenLocked) };
 	private _surv = [_key] call DUWS_fnc_garrisonSurviving;
 
 	// Awake-session fielding: the x1 group ceiling (the most that stands on the ground at once), what is
