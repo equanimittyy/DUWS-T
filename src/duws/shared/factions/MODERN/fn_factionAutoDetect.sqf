@@ -499,20 +499,27 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "armor") <= 300}
 	};
 	_carArmed =	[ [ _wheeledSoft, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons;
-	_carTransport =	[ _wheeledSoft, 1, 6] call fnc_filterBySeats;
+	// Unarmed only, or an armed troop carrier under the armor gate draws for a supply truck.
+	_carTransport =	[ [ _wheeledSoft, 1, 6] call fnc_filterBySeats, false ] call fnc_filterByWeapons;
 	_carRearm =	[ _wheeledSoft, "transportAmmo"] call fnc_filterByUtility;
 	_carRepair =	[ _wheeledSoft, "transportRepair"] call fnc_filterByUtility;
 	_carRefuel =	[ _wheeledSoft, "transportFuel"] call fnc_filterByUtility;
-	// Armed by turret weapon OR pylon: a mod gunship arming through Turrets, not a pylon component, was
-	// dropped and attack-heli fell to a vanilla airframe. Union keeps the pylon path for loadout jets.
+	// Gunship: pylons, or a cannon/rocket/missile on a turret or the pilot (a mod gunship may arm without pylons).
+	// A door MG alone does not count, or every armed transport lands in the attack pool.
 	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
 	private _heliByPylon = [_heliSeated] call fnc_filterByPylons;
-	_heliArmed =	_heliByPylon + (([ _heliSeated, true ] call fnc_filterByWeapons) select {!(_x in _heliByPylon)});
+	private _heavyWeapon = ["CannonCore", "RocketPods", "MissileLauncher"];
+	_heliArmed =	_heliByPylon + (_heliSeated select {
+		private _type = _x;
+		private _wpn = ([_type] call fnc_vehicleWeaponType)
+			+ flatten ((getArray (configFile >> "CfgVehicles" >> _type >> "weapons")) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
+		!(_type in _heliByPylon) && {(_heavyWeapon findIf {_x in _wpn}) >= 0}
+	});
 	// Count cargo seats as well as transportSoldier: a seat-proxy transport reports transportSoldier 0 and
 	// read as no transport, so TRANS fell to the gunship. Floor of 4 cargo seats, what taxi/paradrop need.
 	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
 	_heliTransport = (_heliList select {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}) + ([_heliList, 1, 4] call fnc_filterBySeats);
-	_heliTransport = _heliTransport arrayIntersect _heliTransport;
+	_heliTransport = (_heliTransport arrayIntersect _heliTransport) - _heliArmed;
 	// Representative is the first entry (fnc_faction_pools_publish), read by taxi/paradrop/intro, so order
 	// transports biggest-first by transportSoldier (or cargo seats for seat-proxy airframes). Patrol draws the whole pool.
 	private _ranked = _heliTransport apply {
@@ -521,7 +528,6 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	};
 	_ranked sort false;
 	_heliTransport = _ranked apply {_x select 1};
-	// Same union as _heliArmed: armed by pylon or by turret weapon.
 	private _planeSeated = [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats;
 	private _planeByPylon = [_planeSeated] call fnc_filterByPylons;
 	_planeArmed =	_planeByPylon + (([ _planeSeated, true ] call fnc_filterByWeapons) select {!(_x in _planeByPylon)});
@@ -545,9 +551,10 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 
 
 // One class -> the pool fnc_faction_pick draws at each spawn: the class plus the rest of its faction's
-// tightest bucket holding it (a rifleman is in both infantry and grunt; the smaller is the role). Class
-// stays first, where fnc_faction_pools_publish reads the representative. Buckets come from a parse of the
-// class's faction -- callers pass a cached one (key editor, augment) or parse on demand; unbucketed/empty yields itself.
+// tightest bucket holding it (a rifleman is in both infantry and grunt; the smaller is the role). Role-blind,
+// so vehicle buckets feeding different roles must not overlap: a heli in both the armed and the transport
+// bucket could hand one role the other's whole pool. Class stays first, where fnc_faction_pools_publish
+// reads the representative. Buckets come from a parse of the class's faction -- callers pass a cached one (key editor, augment) or parse on demand; unbucketed/empty yields itself.
 fnc_faction_pool_for_class = compileFinal {
 	params ["_class", ["_parsed", []]];
 	if (_class isEqualTo "") exitWith { [] };

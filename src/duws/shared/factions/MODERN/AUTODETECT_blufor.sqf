@@ -20,6 +20,7 @@ fnc_factionGen = {
 
 	// The armed-boat key wants a boat with a gun on it, which no detection bucket separates out.
 	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
+	private _heliDoorGun = [_heliTransport, true] call fnc_filterByWeapons;
 
 	// Any static the faction fields, the last rung under every turret role: beats the vanilla
 	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
@@ -75,7 +76,7 @@ fnc_factionGen = {
 	["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt]],    //Rescue Pilot mission
 	["blufor_BOAT_ARMED_X",       [_boatArmed]],   //supports\taxi\fnc_boatTaxi
 	["blufor_BOAT_CREW_X",        [_crew]],    //supports\taxi\fnc_boatTaxi
-	["blufor_HELI_TRANS_ARM_X",   [_heliArmed, _heliTransport]]        //supports\taxi\fnc_helotaxi
+	["blufor_HELI_TRANS_ARM_X",   [_heliDoorGun, _heliTransport]]        //supports\taxi\fnc_helotaxi
 ];
 
 

@@ -172,6 +172,11 @@ Trailing comments name the consuming function for each variable — the de-facto
   crew / diver / UAV, plus suppressed-weapon "spec-ops" variants. Vehicles are bucketed by editor subcategory
   and `isKindOf` filters (`fnc_filterBySeats`, `fnc_filterByWeapons`, `fnc_filterByPylons`,
   `fnc_filterByUtility`) into turrets, APCs, tanks, artillery, cars, helis, planes, boats, drones.
+  Vehicle buckets that feed different roles must not overlap. A pool is rebuilt from the tightest bucket
+  that holds the role's representative (`fnc_faction_pool_for_class`), so a class in two buckets can give
+  one role the other role's pool. For this reason, the armed-heli bucket holds only gunships (pylons, or a
+  cannon, rocket or missile weapon), the transport-heli bucket excludes those gunships, and the truck
+  bucket holds only unarmed vehicles.
 - **`fnc_factionGen`** assigns the `blufor_*`/`opfor_*` globals from the parsed buckets, using
   `fnc_selectNonEmpty` fallback chains that end in vanilla assets, and builds the request-menu vehicle list
   priced by `fnc_evalVehicleCost` (estimates a CP cost from vehicle type, weapons, armor, sensors and threat
