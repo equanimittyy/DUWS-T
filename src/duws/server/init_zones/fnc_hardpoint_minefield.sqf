@@ -10,11 +10,12 @@
 
 DUWS_mineSquare = 50;
 
-// The classes each variant draws from. A table beside its only reader,
+// [variant, classes, mines per cell]. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
+// A fractional count is rolled per cell, so AP's 1.1 averages 27.5 mines a square.
 DUWS_mineVariants = [
-    ["AT", ["ATMine"]],
-    ["AP", ["APERSMine", "APERSBoundingMine"]]
+    ["AT", ["ATMine"], 1],
+    ["AP", ["APERSMine", "APERSBoundingMine"], 1.1]
 ];
 
 // [_center, _dir, _variant, _key] call fnc_hardpoint_minefield -> [mines]
@@ -26,7 +27,7 @@ fnc_hardpoint_minefield = {
     params ["_center", "_dir", ["_variant", "AT"], ["_key", ""]];
 
     private _hit = DUWS_mineVariants findIf { (_x select 0) isEqualTo (toUpper _variant) };
-    private _classes = if (_hit >= 0) then { (DUWS_mineVariants select _hit) select 1 } else { ["ATMine"] };
+    (if (_hit >= 0) then { DUWS_mineVariants select _hit } else { ["AT", ["ATMine"], 1] }) params ["", "_classes", "_perCell"];
 
     private _cx = _center select 0;
     private _cy = _center select 1;
@@ -34,12 +35,14 @@ fnc_hardpoint_minefield = {
     private _mines = [];
     for "_i" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
         for "_j" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
-            private _off = [_i * MINE_CELL + random MINE_CELL - _half, _j * MINE_CELL + random MINE_CELL - _half, _dir]
-                call fnc_hardpoint_rotate;
-            private _mine = createMine [selectRandom _classes, [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0];
-            east revealMine _mine;
-            if (_key != "") then { [_mine, _key] call fnc_duws_keep };
-            _mines pushBack _mine;
+            for "_k" from 1 to (floor (_perCell + random 1)) do {
+                private _off = [_i * MINE_CELL + random MINE_CELL - _half, _j * MINE_CELL + random MINE_CELL - _half, _dir]
+                    call fnc_hardpoint_rotate;
+                private _mine = createMine [selectRandom _classes, [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0];
+                east revealMine _mine;
+                if (_key != "") then { [_mine, _key] call fnc_duws_keep };
+                _mines pushBack _mine;
+            };
         };
     };
 
