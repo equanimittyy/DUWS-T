@@ -585,7 +585,7 @@ OPCOM_DEVIRT_BUFFER = 2;
 OPCOM_DEVIRT_CLEAR_R = 60;
 
 // Seconds one round may take before it is written off (fnc_opcom_fires); generous, as the first carries the traverse.
-OPCOM_ARTY_ROUND_SECS = 60;
+OPCOM_ARTY_ROUND_SECS = 30;
 
 // A fire mission's tightest spread: a saturate radius, a creep's width and its length never close below it.
 OPCOM_ARTY_MIN_SPREAD = 50;
