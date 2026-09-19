@@ -74,8 +74,8 @@ pick pass on the same tick.
 |---|---|---|
 | **4B.1** Picker + zone buys | The action list and pick pass, `random` mode, the OPCOM AI menu and overlay, Bank, zone Reinforce / Fortify / hardpoint Build and the hardpoint tier unlocks; the disabled director deleted ([§What the commander builds](#what-the-commander-builds)) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | Where a mortar pit or artillery battery sites |
-| **4B.3** Attack, QRF, Scout | Combatant and recon Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; `OPCOM_MAX_TASKINGS` per locality and how a bubble is delimited; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
-| **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate, the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
+| **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
+| **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting and the weight table, the class draw, the archetype override on the OPCOM AI menu | Each archetype's weights, Bank's included |
 | **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the need and cover fields, shown on a debug overlay before anything reads them; the difficulty setting on the OPCOM AI menu | `OPCOM_AP_PER_FORCE`; the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
 
@@ -105,12 +105,12 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
-| Recruit | once per demand group | 4B.2 supply, 4B.3 combatant and recon |
+| Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
 | Standalone hardpoint Build | a band cell, at random in 4B and by the highest coverage Value from 4C.2; each asset type unlocked | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
-| Arty | each observed belief point in range of an owned gun off cooldown | 4B.4 |
+| Arty | each observed target in range of an owned gun off cooldown: a fresh belief sighting, or a BLUFOR zone or FOB observed in the last 15 min | 4B.4 |
 
 ### Value
 
@@ -291,7 +291,7 @@ launches as a flank.
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour/air/recon) | approach → make contact → resolve (survives ⇒ soft, escalate; dies ⇒ confirmed, mass/re-target) |
 | `rapport` | a `supply` truck, a Rapport candidate town ([§Candidates](#candidates)) | `courier` ×1 | move → deliver (rep −3) → resolve |
 | `scout` | a `recon` unit, a stale valuable area | `recon` ×1 | move (plain `move`; standing recon detection stamps belief as it goes) → resolve |
-| `arty` | an observed belief point in range of an owned gun off cooldown | owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | mark → salvo (rounds × saturation) → assess (force dropped? re-fire : done) |
+| `arty` | an observed target in range of an owned gun off cooldown | owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | mark → salvo (rounds × saturation) → assess (force dropped? re-fire : done) |
 
 - **`probe` is disposable recon-by-fire** — no-retreat forbids poke-and-withdraw, so it converts uncertain belief
   into observed defender strength by drawing fire, reaching what recon cannot (a dug-in town garrison). It minimises
@@ -327,7 +327,7 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Recruit | buildup | the highest-value demand group | tasking-spawn | 1 (`garrison`, resting) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
-| Arty | offensive | an observed belief point in gun range | bought fire mission | 0 |
+| Arty | offensive | an observed target in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
 | Build | defensive | an own zone ring or band cell | hardpoint build | 0 zone / 1 truck standalone |
 | Bank | bank | — | none | 0 |
@@ -345,9 +345,6 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
   `OPCOM_RECON_K` cells), `supply` → a delivery run, `transport` → carry another unit, `transportable` → ride a
   ferry across water; `noncombat` keeps a row out of a zone's reserve pool (regardless of armament — the boat is
   armed). A row may carry several.
-- **The live-group cap is per active locality, not global.** Virtual taskings are cheap and uncapped;
-  `OPCOM_MAX_TASKINGS` (start 10) budgets spawned AI per player-bubble / contact point, so one flank cannot starve a
-  defender's spawn elsewhere, and co-op localities each keep their own budget.
 
 Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per 30 min (`fnc_zonesundercontrol.sqf`):
 
@@ -361,6 +358,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 | Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus the truck's source cost |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
 | Truck source | the hire price (4), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
+| Fire mission | `OPCOM_AP_PER_ROUND` 2 per round |
 
 - **Force pricing sets the defensive scores.** Pricing garrison force at the hire rate makes a zone or town buy
   score worth × exposure ÷ (full force × rate) whatever the step's size — about 0.5 at a frontline zone worth 40
@@ -400,7 +398,7 @@ Construction is an AP sink; no build refund (clearing pays the player CP only). 
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
-| 1 Infantry (0) | OP, MG, roadblock |
+| 1 Infantry (0) | radio tower, OP, MG, roadblock |
 | 2 Motorised (60) | + AT |
 | 3 Mechanised (150) | + GMG, AA, mortar pit (max 2 alive) |
 | 4 Armour (350) | + artillery battery (max 1 alive) |
