@@ -9,15 +9,15 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3 and 4A are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them.
-This doc specifies what remains. The sections marked **WIP** (4B onward) are first-pass decisions: they change as each
-chunk is built and played.
+Phases 1–3, 4A and 4B.1 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
+them. This doc specifies what remains. The sections marked **WIP** are first-pass decisions: they change as each chunk
+is built and played.
 
 ## Status
 
 | Phase | State |
 |---|---|
-| 1–3, 4A — Perception, recruitment and tasking, orders driven by hand | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 1–3, 4A, 4B.1 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
 | 4C — Weighting: the archetype, then the pick scored by `P(win)` × Value ÷ Cost | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
@@ -29,9 +29,9 @@ engine-contact behaviours only settle by running the core.
 ## Shipped: the substrate the loop drives
 
 The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose
-layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, and `taskings/` the orders, streaming and
-the ferry. The debug harness (`fnc_opcom_debug_task.sqf` and the OPCOM debug menu) runs the orders by hand and spends
-no AP. New work holds to:
+layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, `taskings/` the orders, streaming and
+the ferry, and `appraisal/` the action list and the pick. The debug harness (`fnc_opcom_debug_task.sqf` and the
+OPCOM debug menu) runs the orders by hand and spends no AP. New work holds to:
 
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
@@ -57,8 +57,7 @@ weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No
 runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget, `OPCOM_SCORE_DEADLINE`; the pick
 executes after it in scheduled space, because an order plans a route and the router may yield. One pick per tick
 until 4C.2's difficulty setting. The action list (`fnc_opcom_actions`) holds each action's class, targets, gate, price
-and execute, and from 4C.2 its Value and Cost. Measure the grid rebuild once under a full map before 4B stacks the
-pick pass on the same tick.
+and execute, and from 4C.2 its Value and Cost.
 
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
   they drive — and spends as the weighted commander will. Nothing is weighted: the pick draws an action with a legal
@@ -72,7 +71,7 @@ pick pass on the same tick.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
-| **4B.1** Picker + zone buys | The action list and pick pass, `random` mode, the OPCOM AI menu and overlay, Bank, zone Reinforce / Fortify / hardpoint Build and the hardpoint tier unlocks; the disabled director deleted ([§What the commander builds](#what-the-commander-builds)) | — |
+| **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | Where a mortar pit or artillery battery sites |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
@@ -217,20 +216,13 @@ or cleared or ground changes hands.
 
 ### OPCOM AI menu and overlay
 
-The debug menu's OPCOM AI row drives the picker:
+The debug menu's OPCOM AI row and its overlay are shipped (`fnc_debug_opcom_ai_menu.sqf`). 4C adds to the menu:
 
 | Row | Does |
 |---|---|
-| Mode | Switches the picker between `off` and `random`; 4C adds the weighted mode |
-| Pick once | Runs one pick, whatever the mode |
-| Overlay | Shows or hides the overlay |
+| Mode: weighted | Runs the weighted pick (4C.1) |
 | Archetype | Overrides the campaign's archetype (4C.1) |
 | Difficulty | Sets the picks per tick, below 1 for one pick every few ticks (4C.2) |
-
-The overlay sits on the left of the screen, above the SUB-NET log, for each game master who turns it on. It holds a
-header with the mode and the OPFOR wallet; the active orders, one line each until the order ends, capped with a
-"+N more" line; and the recent picks that land at once and the orders as they end, which fade through the SUB-NET
-log's fade code.
 
 ## Commitment: intents are sticky
 
@@ -364,7 +356,6 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
   score worth × exposure ÷ (full force × rate) whatever the step's size — about 0.5 at a frontline zone worth 40
   with a full force of 40 — and a town, fielding less force, costs less than a zone with no separate price. A
   neutral level-5 town's Rapport scores 7.5 ÷ 14 ≈ 0.5, inside the defensive range.
-- `OPCOM_AP_BAND` and `OPCOM_AP_TOPUP`, the disabled director's flat errand prices, retire.
 
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
@@ -380,9 +371,8 @@ from its zones to the towns.
 
 **WIP.**
 
-The escalation ladder and indirect-fire assets, once the commander spends on them. The disabled
-standalone fortification director (`fnc_WARCOM_opf_hardpoints`), which spent AP on flat-priced builds on its own
-clock, is deleted in 4B.1; the Build actions replace it. Hardpoints otherwise generate at scenario init only.
+The escalation ladder and indirect-fire assets, once the commander spends on them. Hardpoints generate at scenario
+init and through the Build actions.
 
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
 existing in-zone draw; a standalone one stands where its truck delivers it, at the chosen band cell
@@ -393,8 +383,9 @@ still rolls the full list. An asset hardpoint is its own candidate and never sta
 site by their own logic. A build cannot be a *typed* counter (AT under armour) until belief carries threat
 category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
 
-Construction is an AP sink; no build refund (clearing pays the player CP only). Unlocks key off
-`WARCOM_opfor_tier`, which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet:
+Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build
+that finds no ground is refunded. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`, which climbs the
+earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; the caps land with their types in 4B.2:
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
