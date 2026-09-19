@@ -115,9 +115,8 @@ duws_faction_edit_preview = {
     } else {""});
 
     private _name = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
-    (_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t><br/><t size='0.7' color='#c0c0c0'>%2</t>",
-        if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]},
-        if (duws_faction_edit_kind isEqualTo "vehicle") then {localize "STR_DUWS_T_faction_edit_pool"} else {""}];
+    (_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>",
+        if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]}];
 };
 
 // Logged rather than silent on both counts: a SELECT click that opens nothing is indistinguishable

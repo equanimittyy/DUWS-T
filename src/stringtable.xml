@@ -440,12 +440,12 @@
                 <English>CONFIRM</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_pool">
-                <Original>Each spawn draws one class from the list. ADD puts the picked class in it. MAKE MAIN also swaps the detected classes for that class's group.</Original>
-                <English>Each spawn draws one class from the list. ADD puts the picked class in it. MAKE MAIN also swaps the detected classes for that class's group.</English>
+                <Original>Each spawn picks a random vehicle from the list. The top row is main, used when only one is needed.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top. Auto-detected vehicles are derived from it.&lt;br/&gt;RESET: undo all changes.</Original>
+                <English>Each spawn picks a random vehicle from the list. The top row is main, used when only one is needed.&lt;br/&gt;ADD: add the previewed vehicle.&lt;br/&gt;REMOVE: remove the selected vehicle.&lt;br/&gt;MAKE MAIN: move the selected vehicle to the top. Auto-detected vehicles are derived from it.&lt;br/&gt;RESET: undo all changes.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_list">
-                <Original>Role list, top row is main</Original>
-                <English>Role list, top row is main</English>
+                <Original>Spawn list</Original>
+                <English>Spawn list</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_add">
                 <Original>ADD</Original>

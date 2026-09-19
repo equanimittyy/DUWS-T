@@ -39,6 +39,8 @@ duws_faction_list_fill = {
 
 private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
 private _listCtrl = _display displayCtrl 8633;
+(_display displayCtrl 8638) ctrlSetStructuredText parseText format ["<t size='0.7' color='#c0c0c0'>%1</t>",
+    localize "STR_DUWS_T_faction_edit_pool"];
 
 // The top row is main, which cannot be removed: a removal would re-parent the role to the next row
 // without a word.

@@ -414,9 +414,9 @@ class startup_faction_key_list
         {
             idc = -1;
             x = 2 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
+            y = 0.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 36 * GUI_GRID_W;
-            h = 22 * GUI_GRID_H;
+            h = 24.5 * GUI_GRID_H;
             colorBackground[] = {0.2, 0.4, 0.2, 1};
         };
     };
@@ -427,9 +427,9 @@ class startup_faction_key_list
         {
             idc = 8620;
             x = 2.4 * GUI_GRID_W + GUI_GRID_X;
-            y = 3.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 0.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 35.2 * GUI_GRID_W;
-            h = 21.2 * GUI_GRID_H;
+            h = 23.7 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
         };
         class edit_frame: RscFrame
@@ -437,16 +437,16 @@ class startup_faction_key_list
             idc = 8621;
             text = "";
             x = 2 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
+            y = 0.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 36 * GUI_GRID_W;
-            h = 22 * GUI_GRID_H;
+            h = 24.5 * GUI_GRID_H;
         };
         class edit_faction_label: RscText
         {
             idc = 8622;
             text = "$STR_DUWS_T_faction_edit_faction";
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 2.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 4 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.03;
@@ -455,7 +455,7 @@ class startup_faction_key_list
         {
             idc = 8623;
             x = 7 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 2.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 16 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
@@ -464,7 +464,7 @@ class startup_faction_key_list
             idc = 8631;
             text = "$STR_DUWS_T_faction_edit_filter";
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 3.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.03;
@@ -473,7 +473,7 @@ class startup_faction_key_list
         {
             idc = 8632;
             x = 7 * GUI_GRID_W + GUI_GRID_X;
-            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 3.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 16 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_faction_edit_filter_tt";
@@ -483,7 +483,7 @@ class startup_faction_key_list
             idc = 8624;
             text = "$STR_DUWS_T_faction_edit_class";
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.03;
@@ -492,7 +492,7 @@ class startup_faction_key_list
         {
             idc = 8625;
             x = 7 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 12.6 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
@@ -501,7 +501,7 @@ class startup_faction_key_list
             idc = 8634;
             text = "$STR_DUWS_T_faction_edit_add";
             x = 19.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 4.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 3.2 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.025;
@@ -511,15 +511,15 @@ class startup_faction_key_list
             idc = 8626;
             text = "#(argb,8,8,3)color(0,0,0,0.5)";
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 5.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 10.4 * GUI_GRID_H;
+            h = 9 * GUI_GRID_H;
         };
         class edit_preview_caption: RscStructuredText
         {
             idc = 8627;
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 12.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0};
@@ -528,16 +528,16 @@ class startup_faction_key_list
         {
             idc = 8628;
             x = 3 * GUI_GRID_W + GUI_GRID_X;
-            y = 19 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 2.6 * GUI_GRID_H;
+            h = 1.8 * GUI_GRID_H;
         };
         class list_label: RscText
         {
             idc = -1;
             text = "$STR_DUWS_T_faction_edit_list";
             x = 24 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 2.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 13 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.03;
@@ -546,9 +546,9 @@ class startup_faction_key_list
         {
             idc = 8633;
             x = 24 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 3.3 * GUI_GRID_H + GUI_GRID_Y;
             w = 13 * GUI_GRID_W;
-            h = 12.8 * GUI_GRID_H;
+            h = 11.8 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class list_remove: RscButton
@@ -556,7 +556,7 @@ class startup_faction_key_list
             idc = 8635;
             text = "$STR_DUWS_T_faction_edit_remove";
             x = 24 * GUI_GRID_W + GUI_GRID_X;
-            y = 19 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4.2 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
@@ -566,7 +566,7 @@ class startup_faction_key_list
             idc = 8636;
             text = "$STR_DUWS_T_faction_edit_main";
             x = 28.4 * GUI_GRID_W + GUI_GRID_X;
-            y = 19 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4.2 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
@@ -576,18 +576,26 @@ class startup_faction_key_list
             idc = 8637;
             text = "$STR_DUWS_T_faction_edit_reset";
             x = 32.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 19 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4.2 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+        };
+        class list_help: RscStructuredText
+        {
+            idc = 8638;
+            x = 3 * GUI_GRID_W + GUI_GRID_X;
+            y = 17.1 * GUI_GRID_H + GUI_GRID_Y;
+            w = 34 * GUI_GRID_W;
+            h = 5.6 * GUI_GRID_H;
         };
         class edit_cancel: RscButton
         {
             idc = 8629;
             text = "$STR_DUWS_T_faction_cancel";
             x = 3.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 22.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.05;
@@ -599,7 +607,7 @@ class startup_faction_key_list
             idc = 8630;
             text = "$STR_DUWS_T_faction_edit_confirm";
             x = 28.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 22.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.05;
