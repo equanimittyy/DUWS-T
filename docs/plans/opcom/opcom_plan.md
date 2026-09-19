@@ -17,8 +17,7 @@ change as each chunk is built and played.
 
 | Phase | State |
 |---|---|
-| 1 — Perception, 2 — Force weighting, 3 — Recruitment & tasking wiring (+ transport ferry) | **shipped** |
-| 4, Stage A — Orders, driven by hand: 4.1 supply errands, 4.2 live engagement + the Attack order, 4.3 the Intercept order, 4.4 fire missions | **shipped** |
+| 1–3, 4 Stage A — Perception, recruitment and tasking, orders driven by hand | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4, Stage B — The decision loop: 4.5 spine + zone economy, 4.6 trucks + towns + Rapport, 4.7 need and cover fields + standalone hardpoints, 4.8 QRF + Attack decisions, 4.9 Scout, then one-gun Arty | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype: per-class weight sets and the commander's patience | [§Archetype](#archetype-phase-6) — WIP |
@@ -28,76 +27,23 @@ engine-contact behaviours only settle by running the core.
 
 ## Shipped: the substrate the loop drives
 
-The code is the source of truth. What new work must hold to:
+The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose
+layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, and `taskings/` the orders, streaming and
+the ferry. The debug harness (`fnc_opcom_debug_task.sqf` and the OPCOM debug menu) runs the orders by hand and spends
+no AP. New work holds to:
 
-- **Belief, never truth.** The commander plans against belief; only the sensors read live player state. Belief
-  tracks groups, not players, and stores positions, never handles.
-- **The grid** rebuilds `_fri` (known OPFOR) and `_ene` (believed BLUFOR) each tick. Scoring reads the force ratio
-  `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over a 3×3 block, and threat as `_ene`.
-- **Streaming.** A tasking is a virtual point on a route until a player or a live BLUFOR group stays within K cells
-  for `OPCOM_DEVIRT_BUFFER` ticks, then it spawns live; it stows after `OPCOM_REVIRT_GRACE` ticks with neither
-  within K. The BLUFOR read is of true positions and never reaches belief or scoring. The engine resolves every
-  fight, and `P(win)` never dices one. A `garrison` never streams live, and a recruited combatant feeds the reserve
-  pool of the zone or town it is homed at: it stands with the garrison at a raise when the base pool leaves room,
-  and otherwise arrives by refill wave. A wipe of that reserve-spawned group kills the unit. One spawn check and one stow check in `fnc_opcom_task_step.sqf` stream every tasking, a ferry carry
-  included; the ferry scripts a live carry but never decides when a unit streams.
-- **The ferry** is a consequence of a unit's route, never an order. Only a `transportable` unit, the infantry
-  rows, rides one: it stops at the near shore of a water leg and borrows a lift. A vehicle never crosses water. Its
-  road route is none when an off-road stub or gap touches water, read off the terrain and not the grid, so a bridge
-  stays drivable (`fnc_opcom_route`). `fnc_opcom_task` refuses such an order, and a virtual re-plan that finds no
-  route drops the unit to `guard` where it stands. A freed hull garrisons the nearest held, uncontested zone. Not
-  built: whether an idle hull leaves its post to ferry, whether a rider waits for lift or walks, and land-taxi —
-  lifting a foot unit over dry ground with the same carry.
-- **Capture.** A `capture` takes the BLUFOR-held zone at its target and aims at the zone's centre
-  (`fnc_opcom_task`). A retake is the zone trigger running `DUWS_fnc_siteTaken` with OPFOR attacking — an OPFOR unit
-  inside the radius, OPFOR outnumbering BLUFOR over the streaming ring, no garrison to beat at the BLUFOR zone's tier 0 — held for
-  `DUWS_captureHold`, so a zone flips with players inside. A virtual attacker inside the radius posts the contact report as it enters and
-  runs the zone's retake statement itself once it has stood inside for `DUWS_captureHold`. The order ends when the zone is OPFOR's: an attacker inside the radius garrisons there, a live one
-  holding `guard` until it stows, and one still on the road re-garrisons there.
-- **Intercept.** An `intercept` targets a belief row key, a BLUFOR group's `netId` (`fnc_opcom_task`). It follows
-  the row's believed position, re-planning only once that moves past one cell, and keeps the last position read if
-  the row decays. Standing in the cell it was sent to, it takes one guaranteed look `OPCOM_INTERCEPT_K` cells wide:
-  every BLUFOR group inside is stamped for certain, rows the look disproves clear, and it hunts the closest group
-  found. Nothing inside drops it to `guard` there; an interceptor never returns to garrison.
-- **Fire missions.** `DUWS_fnc_opcom_fireMission` (`fnc_opcom_fires.sqf`) puts rounds down from one mortar pit or
-  battery in a shape: `saturate` spreads them over a disc of a given radius about the target, and `creep` walks a
-  line of a given width forward from the target over a given length and bearing, each gun in its own lane across
-  the width. A creep sizes its own rounds: one per `OPCOM_ARTY_CREEP_STEP` (50 m) of its length and of each gun's
-  lane, so its density holds whatever its size or the guns that bear. Radius, width and length never close below
-  `OPCOM_ARTY_MIN_SPREAD` (50 m), so no mission converges on one point. The whole pattern wanders as one random
-  walk, up to `OPCOM_ARTY_WANDER` (10 m) per creep row or saturate round (a creep only sideways, off its bearing),
-  so no barrage runs true. Every crewed piece that bears on the target fires, each opening `OPCOM_ARTY_STAGGER`
-  (1 s) after the last and waiting up to `OPCOM_ARTY_JITTER` (2 s) more at random before each round, so the impacts
-  keep no rhythm; every round is its own order at its own aim point. Those two types never stream, so their guns and
-  crews always stand. A standing battery holds **no ammunition** — its guns are emptied at register, loaded for the
-  mission they are given, topped up as they fire and emptied again once the rounds are away; a round not away in
-  `OPCOM_ARTY_ROUND_SECS` is written off, so a crew never shells anything on its own. It fires what it is handed —
-  what is worth shelling, the shape and its size, the cooldown and the HQ exclusion are the scored Arty action's.
-- **A flipped site frees its orders.** When a zone is captured, or a town's garrison is cleared or works its way out
-  of the band, every tasking tied to that site drops to `guard` where it stands (`DUWS_fnc_opcom_siteLost`): the
-  garrison homed there, the unit still walking in to settle, the errand carrying goods to it. Its resting
-  non-combatants are deleted with the garrison they were attached to; combatants are left to the fight that beat them.
-- **Supply errands.** A `move` given an `errand` is a supply run (`fnc_opcom_task`). Within `OPCOM_DELIVER_ARRIVE`
-  (100 m) of its target, live or virtual, `DUWS_fnc_opcom_deliver` lands the errand through its writer and the truck
-  despawns; a killed truck delivers nothing, and a refused errand is lost. `reinforce`, `fortify` and `rapport` take a
-  town index (`fnc_town_garrison_reinforce`; `fnc_town_garrison_fortify` one tier up, never from tier 0;
-  `fnc_town_rep_adjust` −3). `["build", pos, type]` stands a standalone hardpoint exactly at `pos`, with no ground
-  hunt, faced by the terrain and toward BLU HQ where the ground gives no bearing (`DUWS_fnc_opcom_build`). A zone
-  buy needs no truck and lands the call it is made: `fnc_zone_garrison_reinforce`,
-  `fnc_zone_garrison_fortify` (clamped at IV, full potential re-stamped) and a zone-keyed `DUWS_fnc_opcom_build`, each
-  refused on BLUFOR ground. A zone or town fortify fields a tenth of the tokens its tier adds, rounded up, and files
-  the rest lost (`DUWS_fnc_garrisonBuyTier`) for a reinforcement to buy back. The harness drives both (`supply` with an
-  errand, `zone`).
-- **Orders run by hand** through the debug harness (`fnc_opcom_debug_task.sqf`, and the OPCOM debug menu over it)
-  and spend no AP. Stage B owns everything that decides or pays: scoring, prices, the truck-source pick and the
-  shared contested draw-lock filter it brings, Recruit, and the need and cover fields.
+- **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
+- **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
+
+Not built: whether an idle hull leaves its post to ferry, whether a rider waits for a lift or walks, and land-taxi,
+which lifts a foot unit over dry ground with the same carry.
 
 Two terms carry one meaning each throughout:
 
 | Term | Applies to | Meaning |
 |---|---|---|
-| **Contested** | a zone or a town | BLUFOR are assaulting the site: OPFOR belief holds a BLUFOR sighting within one grid cell of its edge (`fnc_opcom_contested.sqf`). Built for zones only |
+| **Contested** | a zone or a town | BLUFOR are assaulting the site (`fnc_opcom_contested.sqf`). Built for zones only |
 | **Engaged** | a unit | The unit is live and fighting BLUFOR. A virtual unit, a zone and a town are never engaged |
 
 ## Appraisal (Phase 4)
@@ -130,8 +76,8 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight` tilts by action class
 ([§Archetype](#archetype-phase-6)); `P(win)` scales to the expected return.
 
-- **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)` over the target's 3×3 `r`. Parity is a coin-flip, a
-  2:1 edge ≈ 0.8, a hopeless ratio floors near 0. It is a flat 1 until 4.8.
+- **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)`, with `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over the target's
+  3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0. It is a flat 1 until 4.8.
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
   once, at commit ([§Templates](#templates-phase-5)).

@@ -157,7 +157,7 @@ fields one of them until a reinforcement buys the rest back.
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
 (`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM
 lands them with no truck
-([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)).
+([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-ap-buys)).
 
 **Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
 survives a rebuild through `fnc_createzone`, which would otherwise reshuffle ground the player has already
@@ -288,7 +288,7 @@ unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held fo
 `DUWS_captureHold`. A BLUFOR-held zone sits at tier 0, so there is no garrison test until BLUFOR build
 a garrison and raise its tier. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
 statement itself once one has stood inside the radius for `DUWS_captureHold`
-([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#shipped-the-substrate-the-loop-drives)). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
+(`fnc_opcom_capture.sqf`). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
 `fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move in
 all of them at once.
 
