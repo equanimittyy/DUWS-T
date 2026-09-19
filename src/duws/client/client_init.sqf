@@ -4,6 +4,7 @@
 #include "..\shared\includes\action_style.hpp"
 
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
+fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 ["INFO", "BOOT", format ["Client_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;

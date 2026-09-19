@@ -29,7 +29,7 @@ private _bags = [];
 private _helmets = [];
 {
     private _l = getUnitLoadout _x;
-    { private _w = (_l param [_x, []]) param [0, ""]; if (_w != "") then { _weapons pushBackUnique _w; }; } forEach [0, 1, 2];
+    { private _w = (_l param [_x, []]) param [0, ""]; if (_w != "") then { _weapons pushBackUnique ([_w] call fnc_arsenal_weapon_row); }; } forEach [0, 1, 2];
     private _u = (_l param [3, []]) param [0, ""]; if (_u != "") then { _uniforms pushBackUnique _u; };
     private _v = (_l param [4, []]) param [0, ""]; if (_v != "") then { _vests pushBackUnique _v; };
     private _b = (_l param [5, []]) param [0, ""]; if (_b != "") then { _bags pushBackUnique _b; };

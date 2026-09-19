@@ -191,7 +191,8 @@ DUWS_fnc_arsenal_restricted = {
         if (_handgunWeapon != "" && {_className == _handgunWeapon || _className == _handgunBase}) then { continue };
         if (count _handgunItems > 0 && {_handgunItems findIf { _x == _className } != -1}) then { continue };
         
-        if (!(_className in _whitelist)) then {
+        // Banked weapons are shelved by arsenal row, so a held preset passes on its row.
+        if (!(_className in _whitelist) && {!(_category == "Weapon" && {([_className] call fnc_arsenal_weapon_row) in _whitelist})}) then {
             if (_category == "Weapon") then {
                 player removeWeaponGlobal _className;
             } else {
@@ -227,8 +228,9 @@ DUWS_fnc_arsenal_restricted = {
 };
 
 // Remove N instances of a class from the player, category-appropriate: weapons via
-// removeWeaponGlobal, magazines via removeMagazine, everything else via removeItem. Each call
-// removes one instance, so the loop strips exactly the overdraw and leaves the granted count.
+// removeWeaponGlobal, magazines via removeMagazine, everything else via removeItem. A weapon _cls is
+// the pool's arsenal-row key, so the held class it matches may be a preset or a loaded launcher.
+// Each call removes one instance, so the loop strips exactly the overdraw and leaves the granted count.
 // Worn uniform/vest/backpack/headgear/goggles are slots, not container contents, so removeItem
 // never reaches them -- dispatch each to its own command, guarded on the worn class so only the
 // overdrawn one is pulled. A worn slot holds one instance, so it short-circuits the count loop.
@@ -244,7 +246,10 @@ DUWS_fnc_strip_n = {
     private _isWeapon = isClass (configFile >> "CfgWeapons" >> _cls) && {(([_cls] call BIS_fnc_itemType) select 0) isEqualTo "Weapon"};
     private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
     for "_i" from 1 to _n do {
-        if (_isWeapon) then { player removeWeaponGlobal _cls; }
+        if (_isWeapon) then {
+            private _held = (weapons player) findIf { ([_x] call fnc_arsenal_weapon_row) == _cls };
+            if (_held >= 0) then { player removeWeaponGlobal ((weapons player) select _held); };
+        }
         else {
             if (_isMag) then { player removeMagazine _cls; } else { player removeItem _cls; };
         };

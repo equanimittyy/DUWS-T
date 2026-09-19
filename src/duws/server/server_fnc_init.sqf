@@ -972,6 +972,7 @@ fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\factio
 // Shared with the client (the arsenal overlay's live-count loop); economy_init's settle and deposit
 // call it too.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
+fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
 fnc_gm_occupant = compile preprocessFileLineNumbers "duws\shared\functions\fnc_gm_occupant.sqf";

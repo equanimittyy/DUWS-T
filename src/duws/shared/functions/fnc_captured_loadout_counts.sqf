@@ -1,7 +1,8 @@
 // Tally class -> count from a getUnitLoadout array. The loadout nests counts in three shapes -- a
 // weapon's loaded magazine is [mag, ammo] (one magazine), a container holds [class, count] pairs,
 // and worn/assigned slots are bare strings -- so a flat pushBackUnique scan would both lose counts
-// and miss magazines. Returns a HashMap.
+// and miss magazines. Weapons tally under their arsenal row (fnc_arsenal_weapon_row), the pool's key.
+// Returns a HashMap.
 	params [["_loadout", []]];
 	private _counts = createHashMap;
 	private _bump = {
@@ -15,7 +16,9 @@
 	private _weapon = {
 		params ["_w"];
 		if (!(_w isEqualType []) || {_w isEqualTo []}) exitWith {};
-		{ [_w param [_x, ""]] call _bump; } forEach [0, 1, 2, 3, 6];
+		private _name = _w param [0, ""];
+		if (_name != "") then { [[_name] call fnc_arsenal_weapon_row] call _bump; };
+		{ [_w param [_x, ""]] call _bump; } forEach [1, 2, 3, 6];
 		{
 			private _m = _w param [_x, []];
 			if (_m isEqualType [] && {(count _m) >= 1}) then { [_m select 0, 1] call _bump; };
