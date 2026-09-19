@@ -509,6 +509,11 @@ The town side latches on the same flag on the crossing and on the clear.
 The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
 and a town lifted out of the band while its garrison lives has it cleared off the map.
 
+`fnc_town_rep_adjust` applies a crossing when it writes the reputation, through `DUWS_town_band`
+(`fnc_civ_garrison`), so the tier changes with the map colour and not on the next poller pass. Leaving
+the band forgets the town's ledger and releases OPCOM's units bound to it, whether or not a garrison
+stands. The next garrison tick then collects any men still standing.
+
 ### What clearing a garrison actually buys
 
 Three things, and only one of them is reputation:

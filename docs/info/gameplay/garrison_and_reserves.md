@@ -84,7 +84,7 @@ The ledger API, all in `src/duws/server/garrison/fnc_garrison_strength_init.sqf`
 | `DUWS_fnc_garrisonUnlose {key, n}` | Remove `n` random unlocked lost entries, or all of them if fewer are lost — a paid replacement, not a heal. |
 | `DUWS_fnc_garrisonReinforce {key, x1}` | Unlose `floor(REINFORCE_STEP × full)` tokens (`REINFORCE_STEP` is `0.3`), then re-stand a standing garrison at `x1`. The town and zone reinforce purchases both call it. |
 | `DUWS_fnc_garrisonBuyTier {key, oldX1, newX1}` | Stamp `full` at `newX1` and file all but a tenth (rounded up, drawn from unlocked tokens) of the tokens it adds over `oldX1` as lost, bounded at each token's count in the new `full`. The zone and town fortify both call it, so a bought tier must be reinforced to field whole. The caller re-stands a standing garrison. |
-| `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
+| `DUWS_fnc_garrisonForget {key}` | Clear `full`/`lost` entirely. Called only when a town leaves the OPFOR band, whether or not a garrison stands, so a garrison re-earned later starts fresh instead of redeploying the remains of ground that stopped being contested. |
 | `DUWS_fnc_garrisonHeld {key}` | Liveness: true from the moment a raise finishes placing men to the stow or capture that tears it down. Gates the capture test and the refill pass. |
 
 `DUWS_fnc_garrisonSetLive {key, live}` (same file) is the only writer of `DUWS_fnc_garrisonHeld`,

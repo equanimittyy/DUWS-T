@@ -177,6 +177,7 @@ fnc_town_rep_adjust = {
 	// A town crossing either faction band (in either direction) changes the broadcast town-centre lists.
 	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then { [] call fnc_enemy_towns_refresh };
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
+	if ((_old <= -10) != (_new <= -10)) then { [_townIndex] call DUWS_town_band };
 
 	if (_new == _old || _silent) exitWith {};
 	private _key = format ["%1:%2", _townIndex, _reason];

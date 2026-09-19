@@ -84,26 +84,6 @@ private _fnc_tick = {
     private _rep = [_i] call fnc_civ_repAt;
     private _tier = [_i] call fnc_town_garrison_tierAt;
 
-    // Only place reputation writes a tier; seeded regardless of proximity, so a town is OPFOR ground from the moment it crosses the band.
-    // That lets the commander buy it up while the player is elsewhere -- only the men wait for an arrival.
-    if (_rep <= OPFOR_BAND && _tier == 0) then {
-        [_i, 1, "reputation band"] call fnc_town_garrison_setTier;
-        _tier = 1;
-        [_key, [1] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonSeedOpforCap;
-        // Re-armed on every crossing so a retaken town is held again each time; the latch goes with it since the player who spent the reputation is standing right there.
-        // Logged once here, not per deferred cycle -- sixty identical lines isn't a readable log, and this one carries the figure a tester needs.
-        private _held = [_i] call fnc_town_garrison_setHold;
-        _t set ["awaitVacate", true];
-        ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s and until the town is left",
-            _i, _rep, _held]] call fnc_log;
-    };
-    // Band is the sole condition -- leaving it (by aid/heals, not just a fight) takes whatever the commander bought with it; there's no town left to hold.
-    if (_rep > OPFOR_BAND && _tier > 0) then {
-        [_i, 0, "left the OPFOR band"] call fnc_town_garrison_setTier;
-        _tier = 0;
-        [_i] call fnc_town_garrison_clearHold;
-    };
-
     // Presence/empty-clock/vacate-latch are computed once by the poller and passed in, so the arrival test, latch and streaming teardown can't disagree on "somebody is here" a few seconds apart.
 
     // Not a garrison state, so it ends nothing: a cleared town's survivors are collected while its next garrison raises.
@@ -172,7 +152,7 @@ private _fnc_tick = {
             _i, _tier]] call fnc_log;
     };
 
-    // Tier 0 means the town is no longer OPFOR ground (band test above, or the commander directly) -- nothing left to hold, so the garrison goes with the same collection the stream-out uses, vehicles included.
+    // Tier 0 means the town is no longer OPFOR ground (the band, or the commander directly) -- nothing left to hold, so the garrison goes with the same collection the stream-out uses, vehicles included.
     // Can fire with the player standing in the town; having already taken the men out of sight, leaving their transport behind would be the odd half.
     if (_tier == 0) then {
         [_key, false] call DUWS_fnc_garrisonSetLive;
@@ -216,9 +196,41 @@ private _fnc_clear = {
         _i, _tier, _rep, CLEAR_REP]] call fnc_log;
 };
 
+// Called by fnc_town_rep_adjust on the crossing itself, so the tier changes with the map colour rather than on the next poller pass.
+private _fnc_band = {
+    params ["_i"];
+    private _key = [_i] call fnc_town_site_key;
+    private _rep = [_i] call fnc_civ_repAt;
+    private _tier = [_i] call fnc_town_garrison_tierAt;
+
+    // Only place reputation writes a tier; seeded regardless of proximity, so a town is OPFOR ground from the moment it crosses the band.
+    // That lets the commander buy it up while the player is elsewhere -- only the men wait for an arrival.
+    if (_rep <= OPFOR_BAND && _tier == 0) exitWith {
+        [_i, 1, "reputation band"] call fnc_town_garrison_setTier;
+        [_key, [1] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonSeedOpforCap;
+        // Re-armed on every crossing so a retaken town is held again each time; the latch goes with it since the player who spent the reputation is standing right there.
+        private _held = [_i] call fnc_town_garrison_setHold;
+        ([_key, "garrison"] call fnc_site_occupant) set ["awaitVacate", true];
+        ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s and until the town is left",
+            _i, _rep, _held]] call fnc_log;
+    };
+    // Band is the sole condition -- leaving it (by aid/heals, not just a fight) takes whatever the commander bought with it; there's no town left to hold.
+    if (_rep > OPFOR_BAND && _tier > 0) then {
+        [_i, 0, "left the OPFOR band"] call fnc_town_garrison_setTier;
+        [_i] call fnc_town_garrison_clearHold;
+        // Also done by the tick's teardown, which a town with no garrison standing never reaches; unlisting now keeps a
+        // refill wave out of the gap before that tick.
+        [_key, false] call DUWS_fnc_garrisonSetLive;
+        [_key] call DUWS_fnc_garrisonReserveClear;
+        [_key] call DUWS_fnc_garrisonForget;
+        if (!isNil "DUWS_fnc_opcom_siteLost") then { [_key] call DUWS_fnc_opcom_siteLost };
+    };
+};
+
 // Reached through the mission namespace because the hooks and triggers run outside this scope.
 missionNamespace setVariable ["DUWS_town_raise", _fnc_raise];
 missionNamespace setVariable ["DUWS_town_clear", _fnc_clear];
+missionNamespace setVariable ["DUWS_town_band", _fnc_band];
 
 {
     private _key = [_forEachIndex] call fnc_town_site_key;
