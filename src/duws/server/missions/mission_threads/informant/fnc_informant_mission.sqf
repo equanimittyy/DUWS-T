@@ -75,16 +75,10 @@ private _spawnRadius = (_townRadius * 0.5) max 100; // TUNABLE.
 private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
 [_requester, "STR_DUWS_T_MISSION_GEN_BUILD"] call fnc_mission_notice;
 
-// Parks a car near the town, stripped of the free medkit vanilla civ cars carry. findEmptyPosition fits
-// THIS car's footprint against nearby buildings/walls/cars, or a bare road point plus createVehicle's weak
-// relocate drops it into a house wall where it detonates on spawn. Nothing fits -> open ground off the road.
+// Parks a car near the town, stripped of the free medkit vanilla civ cars carry.
 private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
-    private _fit = _pos findEmptyPosition [0, 25, _class];
-    if (_fit isEqualTo []) then {
-        _fit = [_pos, 25, 0, (sizeOf _class) max 6, 0.3] call fnc_safe_pos;
-    };
-    private _veh = _class createVehicle _fit;
+    private _veh = _class createVehicle ([_pos, _class] call fnc_convoy_fit);
     clearItemCargoGlobal _veh; clearMagazineCargoGlobal _veh;
     clearWeaponCargoGlobal _veh; clearBackpackCargoGlobal _veh;
     _veh setDir _dir;
