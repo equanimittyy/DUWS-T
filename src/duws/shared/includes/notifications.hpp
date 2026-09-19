@@ -38,6 +38,37 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
+    // The town's own map glyph, so the card points at the marker that just changed colour.
+    class TownFlip
+    {
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\Tourism_CA.paa";
+        iconText = "";
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
+    class town_blufor : TownFlip
+    {
+        title = "$STR_DUWS_T_TOWN_FLIP_BLUFOR_TITLE";
+        description = "$STR_DUWS_T_TOWN_FLIP_BLUFOR_MSG";
+        color[] = {0.2,0.5,1,1};
+    };
+
+    class town_opfor : TownFlip
+    {
+        title = "$STR_DUWS_T_TOWN_FLIP_OPFOR_TITLE";
+        description = "$STR_DUWS_T_TOWN_FLIP_OPFOR_MSG";
+        color[] = {1,0.2,0.2,1};
+    };
+
+    class town_neutral : TownFlip
+    {
+        title = "$STR_DUWS_T_TOWN_FLIP_NEUTRAL_TITLE";
+        description = "$STR_DUWS_T_TOWN_FLIP_NEUTRAL_MSG";
+        color[] = {1,1,1,1};
+    };
+
     class CPadded
     {
         title = "$STR_DUWS_T_k1glh3eb";

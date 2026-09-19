@@ -366,6 +366,12 @@ so the thresholds are a contract between them:
 | Neutral | `-9` … `9` | nobody | tier 0 |
 | OPFOR | `<= -10` | OPFOR AP | tier I, and no higher from reputation |
 
+A town that enters a new band posts a card to every player, as a zone capture does: `town_blufor`,
+`town_opfor` or `town_neutral` (`fnc_town_rep_adjust`). The card fires even when the passive AoI drift
+causes the crossing, because a crossing is rare and the drift's own reputation cards are silenced. A
+town that hardcore still hides gets no card, because the card would name ground that the map does not
+show.
+
 ### Garrison tiers 0 to IV
 
 **Reputation decides *whether* a town garrisons; it does not decide how hard.** Crossing `-10` is the

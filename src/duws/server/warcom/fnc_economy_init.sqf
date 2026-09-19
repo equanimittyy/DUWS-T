@@ -161,8 +161,9 @@ fnc_town_rep_announce = {
 // (open country, civilians off, RAVAGE/WBK -- all via fnc_civ_townAt) is dropped, not charged elsewhere,
 // since reputation is territory. Not broadcast (no client reads civ_town_rep; markers repaint globally).
 // The player is told here, not per caller (callers announced in six wordings, some not at all), queued
-// off the applied change so a town pinned at a bound claims nothing. _silent suppresses only the card --
-// the passive AoI drift charges every covered town per tick, so a card apiece would bury the event cards.
+// off the applied change so a town pinned at a bound claims nothing. _silent suppresses only the reputation
+// card, never a band crossing's -- the passive AoI drift charges every covered town per tick, so a card
+// apiece would bury the event cards.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""], ["_silent", false]];
@@ -175,7 +176,17 @@ fnc_town_rep_adjust = {
 	_reps set [_townIndex, _new];
 	[_townIndex] call fnc_civ_townRender;
 	// A town crossing either faction band (in either direction) changes the broadcast town-centre lists.
-	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then { [] call fnc_enemy_towns_refresh };
+	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then {
+		[] call fnc_enemy_towns_refresh;
+		// A town hardcore still hides gets no card: naming it would reveal ground the map does not show.
+		if ((missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true]) then {
+			private _name = text ((missionNamespace getVariable ["civ_locations", []]) param [_townIndex, locationNull]);
+			if (_name isEqualTo "") then { _name = format ["Unnamed%1", _townIndex] };
+			private _card = ["town_neutral", "town_opfor"] select (_new <= -10);
+			if (_new >= 10) then { _card = "town_blufor" };
+			[_card, [_name]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
+		};
+	};
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 	if ((_old <= -10) != (_new <= -10)) then { [_townIndex] call DUWS_town_band };
 

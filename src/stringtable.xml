@@ -1855,6 +1855,30 @@
                 <Original>%1 %3 rep: %2</Original>
                 <English>%1 %3 rep: %2</English>
             </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_BLUFOR_TITLE">
+                <Original>Town Friendly</Original>
+                <English>Town Friendly</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_BLUFOR_MSG">
+                <Original>%1 now sides with BLUFOR</Original>
+                <English>%1 now sides with BLUFOR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_OPFOR_TITLE">
+                <Original>Town Hostile</Original>
+                <English>Town Hostile</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_OPFOR_MSG">
+                <Original>%1 now sides with OPFOR</Original>
+                <English>%1 now sides with OPFOR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_NEUTRAL_TITLE">
+                <Original>Town Neutral</Original>
+                <English>Town Neutral</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TOWN_FLIP_NEUTRAL_MSG">
+                <Original>%1 now sides with nobody</Original>
+                <English>%1 now sides with nobody</English>
+            </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_building">
                 <Original>buildings were destroyed</Original>
                 <English>buildings were destroyed</English>
