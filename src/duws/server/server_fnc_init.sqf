@@ -327,6 +327,8 @@ fnc_debug_force_emission = compile preprocessFileLineNumbers "duws\server\debug\
 // Server-only: remoteExec'd to 2 by the OPCOM debug menu; runs the hand-drive verbs and reads the store the
 // menu's remote pickers cannot.
 fnc_debug_opcom = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_opcom.sqf";
+// Not broadcast: the OPCOM AI overlay's poll remoteExecs it to the server.
+fnc_debug_opcom_ai = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_opcom_ai.sqf";
 // Not broadcast: the window remoteExecs it to the server by name, and it re-checks game_master
 // itself because any client could send it.
 fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_econ_server.sqf";
@@ -727,6 +729,8 @@ fnc_debug_opcom_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_
 fnc_debug_opcom_pick = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_pick.sqf";publicVariable "fnc_debug_opcom_pick";
 fnc_debug_opcom_step = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_step.sqf";publicVariable "fnc_debug_opcom_step";
 fnc_debug_opcom_ai_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_menu.sqf";publicVariable "fnc_debug_opcom_ai_menu";
+fnc_debug_opcom_ai_overlay = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_overlay.sqf";publicVariable "fnc_debug_opcom_ai_overlay";
+fnc_debug_opcom_ai_feed = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_opcom_ai_feed.sqf";publicVariable "fnc_debug_opcom_ai_feed";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_debug_furnish_menu = compile preprocessFileLineNumbers "duws\client\debug\fnc_debug_furnish_menu.sqf";publicVariable "fnc_debug_furnish_menu";
 // The view/draw/calibrate handlers are broadcast

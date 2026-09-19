@@ -116,4 +116,32 @@ class RscTitles {
             };
         };
     };
+
+    // The OPCOM AI debug overlay (fnc_debug_opcom_ai_overlay). Bottom-aligned so it sits on the SUB-NET log and grows upward.
+    class DUWS_OpcomAiLog {
+        idd = -1;
+        movingEnable = false;
+        duration = 1000000000;
+        fadein = 0;
+        fadeout = 0;
+        onLoad = "uiNamespace setVariable ['DUWS_opcomAiDisplay', _this select 0];";
+        class controls {
+            class log: RscStructuredText {
+                idc = 8813;
+                x = 0.02 * safezoneW + safezoneX;
+                y = 0.34 * safezoneH + safezoneY;
+                w = 0.34 * safezoneW;
+                h = 0.35 * safezoneH;
+                size = 0.026;
+                text = "";
+                class Attributes {
+                    font = "PuristaMedium";
+                    color = "#ffffff";
+                    align = "left";
+                    valign = "bottom";
+                    shadow = 1;
+                };
+            };
+        };
+    };
 };

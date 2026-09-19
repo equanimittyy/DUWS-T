@@ -22,3 +22,4 @@ if (_ok && {_price > 0}) then { ["OPF", -_price, format ["opcom_%1", _id]] call 
 
 private _line = format ["%1%2%3", _label, [format ["  %1 AP", _price], ""] select (_price == 0), ["  (refused)", ""] select _ok];
 ["INFO", "OPCOM", format ["pick (%1): %2", DUWS_opcom_aiMode, _line]] call fnc_log;
+[_line] call DUWS_fnc_opcom_aiEvent;
