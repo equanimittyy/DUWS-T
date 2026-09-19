@@ -15,7 +15,8 @@ Two rules govern both plans:
   spent at the black market and on civilian bribes. Shops and job payouts move that same item, so
   the shop economy is separate from the CP/AP war economy and needs its own faucets and sinks
   (shops) to balance. It is per-player: co-op players each have their own wallet, and a bought
-  vehicle or hired group belongs to the buyer.
+  vehicle or hired group belongs to the buyer. A purchase sent to the garage or the arsenal joins
+  that shared store instead.
 - **A vendor is a civilian, and the vendor system is a vanilla-mode feature.** Vendors spawn through
   the same path as the town crowd and are disabled in `NONE`, `RAVAGE`, and `WBK`, exactly as the
   disguise is. None of the new code runs on the RAVAGE/WBK path; the deliberate separation behind
@@ -138,9 +139,17 @@ once in `description.ext` `CfgMarkerColors`. Optionally also drop the marker alp
 A vendor's interactable menu copies the civilian pattern: `fnc_civ_menuAction.sqf` adds one
 `ACT_CIVILIAN_INTERACTION` action, distance- and state-gated, whose body opens a dialog. Build a
 `fnc_vendor_menuAction` on that shape, opening either the reusable list dialog
-(`fnc_open_action_menu.sqf`, `[title,[[label,code,args,color]...]]`) for simple vendors, or a
-purpose-built dialog like `civ_menu.hpp` for the ones with a catalogue. The service-refusal check
-(hostile town) happens when the menu opens, before any catalogue is shown.
+(`fnc_open_action_menu.sqf`, `[title,[[label,code,args,color]...]]`) for simple vendors, or the
+catalogue dialog below for the Arms, Car and Boat dealers. The service-refusal check (hostile town)
+happens when the menu opens, before any catalogue is shown.
+
+**The catalogue reuses the faction class browser.** It copies the layout and search of the browser
+the faction confirmation screen opens (`startup_faction_key_edit` in `faction_confirm.hpp`, driven by
+`fnc_faction_key_edit.sqf`), without the faction picker, because a dealer's stock is its own list.
+Rows are sorted by display name and read `Name  --  class`. A text filter matches a case-insensitive
+substring of the display name or the classname on every key. A preview shows the selected class:
+`editorPreview` for a vehicle, the `picture` icon for a weapon or gear item. Lift the row build and
+the filter out of `duws_faction_fill_classes` into one shared helper that both dialogs call.
 
 ## Shops
 
@@ -150,10 +159,26 @@ framework above unchanged except for the hostile-town gate. The shops:
 
 | Shop | Sells | Built on |
 |---|---|---|
-| Car Dealer | civilian vehicles | `civ_veh_array` pool; empty-vehicle spawn as in `fnc_veh_drop.sqf` |
-| Boat dealer | civilian boats | civilian boat classes, same empty-vehicle spawn; pairs with deep-water fishing |
-| Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; a money-gated pick |
+| Car Dealer | civilian vehicles | `civ_veh_array` pool; [vehicle delivery](#delivery) |
+| Boat dealer | civilian boats | civilian boat classes; [vehicle delivery](#delivery); pairs with deep-water fishing |
+| Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; [gear delivery](#delivery) |
 | Contractor | AI groups (guerilla/PMC) into High Command | `fnc_HCsquad_spawn.sqf` + `hcSetGroup`; see below |
+
+### Delivery
+
+Every purchase from the Arms, Car and Boat dealers offers two destinations: store it at base, or
+take it now.
+
+| Bought | Stored | Taken now |
+|---|---|---|
+| Weapons and gear | The arsenal: +1 to the captured-materiel pool (`fnc_captured_pool_setCount`), drawn like any captured class | Into the buyer's inventory when `canAdd` finds room, otherwise dropped in a ground holder at the buyer |
+| Vehicles and boats | The garage: a spec pushed onto `DUWS_garage_stored`, refused when that domain's pool is full (the `fnc_garage_store` cap check) | Spawned at the dealer and hand-placed exactly as a garage retrieval: `fnc_garage_retrieve`'s invulnerable, frozen, locked spawn, the `fnc_depot_place_r3f` carry, then `fnc_depot_place_finish` |
+
+The pool counts only what the arsenal tracks: a friendly class is unlimited outside Limited mode
+(`DUWS_arsenalLimited`), so the arsenal destination is offered only for a class the pool counts. The
+ground drop reuses `fnc_money_drop`, which writes magazine and item cargo only, so it has to cover
+every gear type the dealer sells. A garage spec normally comes from `DUWS_fnc_vehSpecCapture` on a
+live vehicle; a bought vehicle has none, so its spec is built from the class in factory state.
 
 ### Contractor
 
@@ -193,8 +218,10 @@ as such there, matching the existing convention.
 
 1. **Vendor framework.** New static "vendor" posture, one weighted building per vendor, streamed
    lifecycle, five-minute respawn, global marker, hostile-town service refusal, and one menu — start
-   with the Arms Dealer, whose catalogue is the seeded arsenal and needs no new spawn path.
-2. **Shops.** Car Dealer and Boat dealer (civilian vehicle and boat spawn) and the Contractor:
-   relocate the CP/AP squad buy out of the request menu, then add the money mercenaries beside it.
-   Settles which groups the money mercenaries draw from: an existing independent roster, or a new
-   guerilla/PMC set. Shop prices are tuned against job payouts in the jobs plan's balance phase.
+   with the Arms Dealer, whose catalogue is the seeded arsenal and needs no new spawn path. This
+   phase builds the shared catalogue browser and gear delivery.
+2. **Shops.** Car Dealer and Boat dealer (vehicle delivery to the garage or the hand-placed spawn)
+   and the Contractor: relocate the CP/AP squad buy out of the request menu, then add the money
+   mercenaries beside it. Settles which groups the money mercenaries draw from: an existing
+   independent roster, or a new guerilla/PMC set. Shop prices are tuned against job payouts in the
+   jobs plan's balance phase.
