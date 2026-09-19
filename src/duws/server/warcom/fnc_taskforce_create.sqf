@@ -3,6 +3,9 @@ if (!isServer) exitWith {};
 params ["_group"];
 if (isNull _group) exitWith {};
 
+// A yellow-team squad is local to the giver; the campaign owns it now, so it must outlive their session.
+if (!local _group) then { _group setGroupOwner 2; };
+
 private _oldName = groupId _group;
 private _tfName = [1] call fnc_random_name;
 private _label = format ["TF %1", _tfName];
@@ -21,12 +24,9 @@ _marker setMarkerType _markerType;
 _marker setMarkerColor "ColorBLUFOR";
 _marker setMarkerText _label;
 
+// Marker and name ride in the entry, not on the group: an emptied group is deleted with its variables.
+private _taskforces = missionNamespace getVariable ["DUWS_taskforces", []];
+_taskforces pushBack [_group, _marker, _tfName];
+missionNamespace setVariable ["DUWS_taskforces", _taskforces, true];
+
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_TAKEN", _oldName, _tfName]] remoteExec ["fnc_duws_dialogue", 0];
-
-while {!isNull _group && {(units _group) findIf {alive _x} >= 0}} do {
-	_marker setMarkerPos getPosWorld leader _group;
-	sleep 4;
-};
-
-deleteMarker _marker;
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_TASKFORCE_LOST", _tfName]] remoteExec ["fnc_duws_dialogue", 0];

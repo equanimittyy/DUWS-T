@@ -6698,6 +6698,90 @@
                 <Original>All units, this is Overlord. Task Force %1 is combat ineffective.</Original>
                 <English>All units, this is Overlord. Task Force %1 is combat ineffective.</English>
             </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_BOX">
+                <Original>Task Forces</Original>
+                <English>Task Forces</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_COL_NAME">
+                <Original>Task Force</Original>
+                <English>Task Force</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_COL_STATUS">
+                <Original>Status</Original>
+                <English>Status</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_COL_ORDERS">
+                <Original>Current orders</Original>
+                <English>Current orders</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_NONE">
+                <Original>No task forces</Original>
+                <English>No task forces</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ALIVE">
+                <Original>%1 alive</Original>
+                <English>%1 alive</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_HOLDING">
+                <Original>Holding position</Original>
+                <English>Holding position</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_ORDERS">
+                <Original>%1 near %2</Original>
+                <English>%1 near %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_MOVE">
+                <Original>Move</Original>
+                <English>Move</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_SAD">
+                <Original>Search and destroy</Original>
+                <English>Search and destroy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_DESTROY">
+                <Original>Destroy</Original>
+                <English>Destroy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_GUARD">
+                <Original>Guard</Original>
+                <English>Guard</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_HOLD">
+                <Original>Hold</Original>
+                <English>Hold</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_SENTRY">
+                <Original>Sentry</Original>
+                <English>Sentry</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_GETIN">
+                <Original>Get in</Original>
+                <English>Get in</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_GETOUT">
+                <Original>Get out</Original>
+                <English>Get out</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_LOAD">
+                <Original>Load</Original>
+                <English>Load</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_UNLOAD">
+                <Original>Unload</Original>
+                <English>Unload</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_TRUNLOAD">
+                <Original>Unload</Original>
+                <English>Unload</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_SUPPORT">
+                <Original>Support</Original>
+                <English>Support</English>
+            </Key>
+            <Key ID="STR_DUWS_T_TASKFORCE_WP_CYCLE">
+                <Original>Cycle</Original>
+                <English>Cycle</English>
+            </Key>
             <Key ID="STR_DUWS_T_bhlgx74f">
                 <German>Verlasse den Gruppen Manager</German>
                 <Spanish>Cerrar el administrador de escuadrones</Spanish>

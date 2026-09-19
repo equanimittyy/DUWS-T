@@ -57,6 +57,8 @@ while {true} do {
         "taskstep" call _enter;  call fnc_opcom_task_step;
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;      call fnc_opcom_pick;
+        // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.
+        "taskforces" call _enter; call fnc_taskforce_tick;
 
         // friCells/eneCells: cells holding force; belief: live sighting stamps; fresh: groups sensed this
         // tick (0 while belief>0 means everything held on last-seen).
