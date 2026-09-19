@@ -31,7 +31,7 @@ engine-contact behaviours only settle by running the core.
 The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose
 layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, `taskings/` the orders, streaming and
 the ferry, and `appraisal/` the action list and the pick. The debug harness (`fnc_opcom_debug_task.sqf` and the
-OPCOM debug menu) runs the orders by hand and spends no AP. New work holds to:
+Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work holds to:
 
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
@@ -62,8 +62,8 @@ and execute, and from 4C.2 its Value and Cost.
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
   they drive — and spends as the weighted commander will. Nothing is weighted: the pick draws an action with a legal
   target uniformly at random, then one of its targets uniformly. It runs only in `random` mode, switched on from the
-  OPCOM AI debug menu ([§OPCOM AI menu and overlay](#opcom-ai-menu-and-overlay)); the mode is `off` by default.
-  Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
+  Debug menu's OPCOM page ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)); the mode is `off` by
+  default. Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
 - **4C — Weighting.** 4C.1 adds the archetype: the pick draws an action class by
   `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) among the classes with a surviving candidate, then
   one of that class's candidates at random. 4C.2 adds balance: the weight becomes the score below, and the pick runs
@@ -75,8 +75,8 @@ and execute, and from 4C.2 its Value and Cost.
 | **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | Where a mortar pit or artillery battery sites |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
-| **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM AI menu | Each archetype's weights, Bank's included |
-| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the need and cover fields, shown on a debug overlay before anything reads them; the difficulty setting on the OPCOM AI menu | `OPCOM_AP_PER_FORCE`; the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
+| **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
+| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the need and cover fields, shown on a debug overlay before anything reads them; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -214,9 +214,10 @@ or cleared or ground changes hands.
   weight sets how thrifty the commander is; from 4C.2 it is a low flat score that wins when nothing else scores, or
   when a savings goal stands.
 
-### OPCOM AI menu and overlay
+### OPCOM debug page and overlay
 
-The debug menu's OPCOM AI row and its overlay are shipped (`fnc_debug_opcom_ai_menu.sqf`). 4C fills in the menu:
+The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_menu.sqf`,
+`fnc_debug_opcom_ai_overlay.sqf`). 4C fills in the page:
 
 | Row | Does |
 |---|---|
@@ -443,7 +444,7 @@ One archetype per campaign, a campaign setting chosen at start (Defensive, Balan
 `archWeight[archetype][actionClass]` factor — it weights an action class's draw in 4C.1 and *multiplies* its score
 from 4C.2, never removes an action, and cannot override the ladder (an Aggressive commander with no armour tier
 fields none). It is stored in the persistence snapshot and never re-rolled. A Random pick stays hidden: the config
-diary note shows "Random", and nothing in play reveals it. The OPCOM AI menu overrides it for testing. It is not
+diary note shows "Random", and nothing in play reveals it. The OPCOM debug page overrides it for testing. It is not
 difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included; further leans (indirect
 fire, armour) become rows. 4C.1 builds the setting and the table.
 
