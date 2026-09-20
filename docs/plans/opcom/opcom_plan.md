@@ -52,12 +52,12 @@ Two terms carry one meaning each throughout:
 **WIP.** 4B and 4C are decided as a first pass: their weights, Values, prices and constants will change as each chunk
 is built and played.
 
-Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, and pick one by
-weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or lookahead. The pick pass
-runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget, `OPCOM_SCORE_DEADLINE`; the pick
-executes after it in scheduled space, because an order plans a route and the router may yield. One pick per tick
-until 4C.2's difficulty setting. The action list (`fnc_opcom_actions`) holds each action's class, targets, gate, price
-and execute, and from 4C.2 its Value and Cost.
+Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
+best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
+lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget,
+`OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
+may yield. One pick per tick until 4C.2's difficulty setting. The action list (`fnc_opcom_actions`) holds each
+action's class, targets, gate, price and execute, and from 4C.2 its Value and Cost.
 
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
   they drive — and spends as the weighted commander will. Nothing is weighted: the pick draws an action with a legal
@@ -67,7 +67,7 @@ and execute, and from 4C.2 its Value and Cost.
 - **4C — Weighting.** 4C.1 adds the archetype: the pick draws an action class by
   `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) among the classes with a surviving candidate, then
   one of that class's candidates at random. 4C.2 adds balance: the weight becomes the score below, and the pick runs
-  over the top `OPCOM_PICK_TOP` candidates by score.
+  over the top `OPCOM_PICK_TOP` candidates by score ([§The pick](#the-pick)).
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
@@ -76,7 +76,7 @@ and execute, and from 4C.2 its Value and Cost.
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
-| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE` |
+| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -92,6 +92,28 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
   once, at commit ([§Templates](#templates-phase-5)).
+
+### The pick
+
+From 4C.2 the pick is three steps, run each tick over the gated candidates.
+
+1. Score every survivor by the formula above.
+2. Keep the top `OPCOM_PICK_TOP` (10) by score and drop the rest.
+3. Draw one of the ten with `selectRandomWeighted` on `score ^ OPCOM_PICK_SHARPNESS`.
+
+The exponent is how decisive the commander is, and the only dial that changes its temperament without touching a
+price or a Value. At 0 the draw is uniform across the ten; at 1 an action that scores twice as well is picked twice
+as often, which reads as indecisive because a good action and a mediocre one differ by well under an order of
+magnitude; above that the best candidate takes most of the probability, and a high value is all but greedy.
+
+- **The shortlist is what keeps the roll honest.** Scores span the whole candidate set, so a proportional draw over
+  every survivor hands a long tail of poor actions a real share of the picks. Cutting to ten first bounds that tail,
+  then the exponent shapes the choice among candidates that are all worth taking.
+- **A candidate is an `[action, target]` pair,** so one action's targets can fill several of the ten slots. That is
+  the intent: with a score to rank them, a zone that needs reinforcing three places over is three good buys, not one
+  action crowding the list.
+- **`random` mode stays the unscored draw** of 4B — uniform over the actions, then over the chosen action's
+  targets, never over a shortlist — so the debug page keeps a control to compare the weighted commander against.
 
 ### Candidates
 
@@ -217,8 +239,8 @@ cleared or ground changes hands, and need also moves with the traffic layer.
 - **From 4C.2, an unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
   tick; an action that outscores it later, such as a QRF, still commits. Past the horizon it drops, and the pick
-  runs over the affordable top few. Without the goal, cheap actions spend every refill and a better, dearer one
-  never becomes affordable.
+  runs over the affordable top `OPCOM_PICK_TOP`. Without the goal, cheap actions spend every refill and a better,
+  dearer one never becomes affordable.
 - **Bank** is a candidate, not a policy. In 4B it is one more action in the uniform draw; in 4C.1 its archetype
   weight sets how thrifty the commander is; from 4C.2 it is a low flat score that wins when nothing else scores, or
   when a savings goal stands.
