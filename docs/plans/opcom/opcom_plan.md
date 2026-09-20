@@ -502,13 +502,10 @@ uses a fixed reach per type.
 ### Indirect-fire hardpoints
 
 Persistent enemy assets, two tiers sharing one fire-mission implementation. The order ships
-([§Shipped](#shipped-the-substrate-the-loop-drives)); **nothing decides to use it** — no cooldown, shape choice,
-observation gate or HQ exclusion. A zone's own mortar is separate and stays autonomous (`fnc_static_resolve`),
-uncapped here.
-
-Whether an AI gunner reliably executes `doArtilleryFire` settles in play, nothing in the mission having issued it
-before; if it does not, the fallback is spawning shells directly as the player's own arty support does
-(`client/supports/fnc_arty.sqf`), the gun becoming scenery.
+([§Shipped](#shipped-the-substrate-the-loop-drives)) and an AI gunner executes `doArtilleryFire` reliably, so the
+guns fire for real rather than needing shells spawned over them; **nothing decides to use it** — no cooldown, shape
+choice, observation gate or HQ exclusion. A zone's own mortar is separate and stays autonomous
+(`fnc_static_resolve`), uncapped here.
 
 | | Mortar pit | Artillery battery |
 |---|---|---|
