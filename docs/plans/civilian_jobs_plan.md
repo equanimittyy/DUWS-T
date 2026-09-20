@@ -1,10 +1,12 @@
-# Civilian jobs: design plan
+# Civilian jobs and guerilla hires: design plan
 
 Paid jobs dispatched by employer NPCs: one more money faucet for the
-[civilian shops](civilian_shops_plan.md), beside loot, searches, and civilian missions. The theme is borrowed from the same "shops and jobs" life
-scenarios — a post office, a garbage depot, a taxi rank — and built on the mission's existing
-plumbing: employers are vendors on the shops plan's vendor framework, payouts move the physical
-money item, and jobs are gated on the existing civilian disguise.
+[civilian shops](civilian_shops_plan.md), beside loot, searches, and civilian missions. The
+Contractor, who hires local guerillas out for that money, is here too: both are the resistance side
+of the civilian economy. The theme is borrowed from the same "shops and jobs" life scenarios — a
+post office, a garbage depot, a taxi rank — and built on the mission's existing plumbing: employers
+are vendors on the shops plan's vendor framework, payouts move the physical money item, and jobs are
+gated on the existing civilian disguise.
 
 The two rules at the top of the shops plan hold here: jobs pay in the `Money_roll` item, never
 CP/AP, and they run only in vanilla mode.
@@ -80,14 +82,36 @@ Because it sits outside every town, the farmer cannot ride the town-crowd poller
 streams off its own position (spawn when a player nears the farmhouse, sleep when none is), the one
 lifecycle difference from the town vendors.
 
-### Employer markers
+## Contractor
 
-Employer markers follow the shops plan's [marker rules](civilian_shops_plan.md#map-markers-and-icons).
-Two picks are classic base markers rather than `simpletasks` glyphs — `c_car` (taxi) and
-`loc_Fountain` (fishmonger, a water stand-in). The **No.** column is the contact-sheet number in the
-marker reference ([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
+The Contractor is where buying groups lives from now on: a vendor that hires fighters out, and the
+guerilla half of this plan. It is a shop, so it refuses service in a hostile town, and it takes a
+random surveyed building like the Arms Dealer. Two decisions shape it:
 
-| Employer | Icon | No. | Reads as |
+- **The existing CP/AP squad buy moves here.** Today squads are bought in the HQ/FOB request menu
+  (`fnc_request_squad.sqf`, catalogue `DUWS_bluforSquads` at `fnc_BLUFOR_squad_init.sqf:26-32`,
+  spawned by `fnc_HCsquad_spawn.sqf`). That column is pulled out of the request menu
+  (`fnc_request_menu.sqf`) and relocated onto the Contractor NPC. The spawn/hand-off machinery
+  (`fnc_HCsquad_spawn`, `hcSetGroup`) is unchanged; only where the player triggers it moves.
+- **The Contractor also sells money mercenaries in parallel.** Guerilla/PMC-style groups bought with
+  the physical money item rather than CP/AP, hired into the player's High Command the same way. Two
+  distinct sources of groups then coexist: the relocated military squads (CP/AP) and the merc groups
+  (money). Keep them visibly distinct in the menu so the player understands the two costs.
+
+The relationship between the money mercenaries and the CP/AP squads is the one economy question that
+needs a deliberate answer. The rework of the request-menu squad column is also the one piece here
+that touches existing balance, so it is scoped as its own step rather than folded into vendor
+framework work.
+
+## Markers
+
+The employers' and the Contractor's markers follow the shops plan's
+[marker rules](civilian_shops_plan.md#map-markers-and-icons). Two picks are classic base markers
+rather than `simpletasks` glyphs — `c_car` (taxi) and `loc_Fountain` (fishmonger, a water stand-in).
+The **No.** column is the contact-sheet number in the marker reference
+([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
+
+| Vendor | Icon | No. | Reads as |
 |---|---|---|---|
 | Garbage depot | `loc_help` | 174 | help / assist |
 | Post office | `loc_Box` | 153 | package |
@@ -97,6 +121,7 @@ marker reference ([`../info/external/arma3_markers.md`](../info/external/arma3_m
 | Utility works | `loc_use` | 232 | cog / service |
 | Farmer | `loc_container` | 161 | crate |
 | Fishmonger | `loc_Fountain` | 169 | water |
+| Contractor | `loc_Attack` | 151 | crossed swords |
 
 ## Persistence
 
@@ -113,5 +138,8 @@ Job dispatchers are client-callable, so they are compiled and `publicVariable`'d
 
 1. **Garbage round and postal courier.** Disguise-gated. Their two employers need the vendor
    framework (shops plan phase 1).
-2. **Balance.** Tune job payouts against shop prices. Settles the faucet size, which stays untuned
+2. **Contractor.** Relocate the CP/AP squad buy out of the request menu, then add the money
+   mercenaries beside it. Settles which groups the money mercenaries draw from: an existing
+   independent roster, or a new guerilla/PMC set.
+3. **Balance.** Tune job payouts against shop prices. Settles the faucet size, which stays untuned
    until a job and a paid shop both exist.

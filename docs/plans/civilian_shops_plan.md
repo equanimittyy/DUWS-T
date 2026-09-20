@@ -2,7 +2,7 @@
 
 Grow the living-population civilian system into a small economy: named vendor NPCs stand in towns
 and sell to the player for money. The theme is borrowed from the "shops and jobs" life scenarios — a
-car dealer, a boat dealer, an arms dealer, a mercenary contractor — but every piece is built on the
+car dealer, a boat dealer, an arms dealer — but every piece is built on the
 mission's existing plumbing rather than a parallel one: vendors are ordinary streamed civilians and
 purchases move the physical money item.
 
@@ -34,9 +34,6 @@ Money is counted and spent through the two existing server functions — `fnc_mo
 (`fnc_economy_init.sqf:237`) and `fnc_money_spend` (`fnc_economy_init.sqf:251`). Every shop purchase
 and job payout goes through those; no second money path.
 
-The one economy question that needs a deliberate answer is the relationship between the money
-mercenaries and the CP/AP squads — see [Contractor](#contractor) below.
-
 ## Vendors are streamed civilians
 
 A vendor is created by the existing `fnc_civ_spawnUnit` (`server/civilian/fnc_civ_spawnUnit.sqf`) with a
@@ -59,8 +56,8 @@ a coastal town — so a town's mix reflects where it is, not only how big it is.
 **Building picks are weighted by shop type.** A boat dealer takes a building as close to water as
 possible, scored by the distance to the nearest water sampled with `surfaceIsWater`. A car dealer
 takes a building near a fuel station where the town has one (`nearestTerrainObjects` with the
-`"FUELSTATION"` type), and any surveyed building where it does not. The Arms Dealer and the
-Contractor take a random surveyed building.
+`"FUELSTATION"` type), and any surveyed building where it does not. The Arms Dealer takes a random
+surveyed building.
 
 **The farmer is the one rural vendor.** It stands at an isolated farmhouse outside every town and
 streams off its own position rather than the town-crowd poller; its placement is in
@@ -104,7 +101,7 @@ owner, so they render on a mod-free client; the wiki's "Apex" tag marks the upda
 class, not a runtime gate. Every marker also carries the vendor's name as text (`setMarkerText`),
 so an approximate glyph is never ambiguous — the label reads "Fishmonger" even where the icon is only
 water. No *listed* vendor falls back to the bare `c_unknown` question mark; a vendor type with no row
-in the table below or in the [employer table](civilian_jobs_plan.md#employer-markers) defaults to
+in the table below or in the [marker table](civilian_jobs_plan.md#markers) defaults to
 `c_unknown`. The **No.** column is the contact-sheet number in the marker reference
 ([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
 
@@ -113,7 +110,6 @@ in the table below or in the [employer table](civilian_jobs_plan.md#employer-mar
 | Car Dealer | `loc_car` | 157 | car |
 | Boat dealer | `loc_boat` | 152 | boat |
 | Arms Dealer | `loc_Rifle` | 218 | rifle |
-| Contractor | `loc_Attack` | 151 | crossed swords |
 | *(unlisted type)* | `c_unknown` | 25 | question mark |
 
 None of these is load-bearing — swap any icon freely, the label is what identifies the vendor. If the
@@ -155,14 +151,15 @@ the filter out of `duws_faction_fill_classes` into one shared helper that both d
 
 Vendors come in two kinds: **shops** that sell to the player, and **employers** that dispatch a job.
 The employers are in [`civilian_jobs_plan.md`](civilian_jobs_plan.md#employers); they use the
-framework above unchanged except for the hostile-town gate. The shops:
+framework above unchanged except for the hostile-town gate. The Contractor, which hires guerilla
+groups out for money, is an ordinary shop under this framework and lives in that plan too. The shops
+here:
 
 | Shop | Sells | Built on |
 |---|---|---|
 | Car Dealer | civilian vehicles | `civ_veh_array` pool; [vehicle delivery](#delivery) |
 | Boat dealer | civilian boats | civilian boat classes; [vehicle delivery](#delivery); pairs with deep-water fishing |
 | Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; [gear delivery](#delivery) |
-| Contractor | AI groups (guerilla/PMC) into High Command | `fnc_HCsquad_spawn.sqf` + `hcSetGroup`; see below |
 
 ### Delivery
 
@@ -179,23 +176,6 @@ The pool counts only what the arsenal tracks: a friendly class is unlimited outs
 ground drop reuses `fnc_money_drop`, which writes magazine and item cargo only, so it has to cover
 every gear type the dealer sells. A garage spec normally comes from `DUWS_fnc_vehSpecCapture` on a
 live vehicle; a bought vehicle has none, so its spec is built from the class in factory state.
-
-### Contractor
-
-The Contractor is where buying groups lives from now on. Two decisions shape it:
-
-- **The existing CP/AP squad buy moves here.** Today squads are bought in the HQ/FOB request menu
-  (`fnc_request_squad.sqf`, catalogue `DUWS_bluforSquads` at `fnc_BLUFOR_squad_init.sqf:26-32`,
-  spawned by `fnc_HCsquad_spawn.sqf`). That column is pulled out of the request menu
-  (`fnc_request_menu.sqf`) and relocated onto the Contractor NPC. The spawn/hand-off machinery
-  (`fnc_HCsquad_spawn`, `hcSetGroup`) is unchanged; only where the player triggers it moves.
-- **The Contractor also sells money mercenaries in parallel.** Guerilla/PMC-style groups bought with
-  the physical money item rather than CP/AP, hired into the player's High Command the same way. Two
-  distinct sources of groups then coexist: the relocated military squads (CP/AP) and the merc groups
-  (money). Keep them visibly distinct in the menu so the player understands the two costs.
-
-The rework of the request-menu squad column is the one piece here that touches existing balance, so
-it is scoped as its own step rather than folded into vendor framework work.
 
 ## Vendor registry
 
@@ -220,8 +200,5 @@ as such there, matching the existing convention.
    lifecycle, five-minute respawn, global marker, hostile-town service refusal, and one menu — start
    with the Arms Dealer, whose catalogue is the seeded arsenal and needs no new spawn path. This
    phase builds the shared catalogue browser and gear delivery.
-2. **Shops.** Car Dealer and Boat dealer (vehicle delivery to the garage or the hand-placed spawn)
-   and the Contractor: relocate the CP/AP squad buy out of the request menu, then add the money
-   mercenaries beside it. Settles which groups the money mercenaries draw from: an existing
-   independent roster, or a new guerilla/PMC set. Shop prices are tuned against job payouts in the
-   jobs plan's balance phase.
+2. **Shops.** Car Dealer and Boat dealer, with vehicle delivery to the garage or the hand-placed
+   spawn. Shop prices are tuned against job payouts in the jobs plan's balance phase.
