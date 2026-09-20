@@ -492,24 +492,24 @@
                 <English>Game Mode</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_duws">
-                <Original>DUWS</Original>
-                <English>DUWS</English>
+                <Original>DUWS Classic (Default)</Original>
+                <English>DUWS Classic (Default)</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_duws_desc">
                 <Original>OPFOR hold the island in zones. Take them one at a time and spend what you earn on the force that takes the next.</Original>
                 <English>OPFOR hold the island in zones. Take them one at a time and spend what you earn on the force that takes the next.</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_guerilla">
-                <Original>Guerilla</Original>
-                <English>Guerilla</English>
+                <Original>DUWS Guerilla (WIP)</Original>
+                <English>DUWS Guerilla (WIP)</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_guerilla_desc">
                 <Original>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</Original>
                 <English>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_apocalypse">
-                <Original>Apocalypse</Original>
-                <English>Apocalypse</English>
+                <Original>DUWS Apocalypse (WIP)</Original>
+                <English>DUWS Apocalypse (WIP)</English>
             </Key>
             <Key ID="STR_DUWS_T_gamemode_apocalypse_missing">
                 <Original>Apocalypse needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</Original>
