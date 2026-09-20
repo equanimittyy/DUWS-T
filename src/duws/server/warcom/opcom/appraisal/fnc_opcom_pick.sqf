@@ -8,8 +8,9 @@ private _live = [];
 // a route and the router may yield.
 isNil {
     {
-        private _targets = (call (_x select 2)) select { (_x select 1) <= WARCOM_opfor_ap };
-        if (_targets isNotEqualTo []) then { _live pushBack [_x, _targets] };
+        private _row = _x;
+        private _targets = ((_row param [4, []]) call (_row select 2)) select { (_x select 1) <= WARCOM_opfor_ap };
+        if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
     } forEach DUWS_opcom_actions;
 };
 

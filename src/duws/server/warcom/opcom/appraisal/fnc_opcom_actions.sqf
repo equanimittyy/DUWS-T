@@ -1,6 +1,8 @@
 // Locality: server, [] call'd at load. The action list the pick stage (fnc_opcom_pick) draws from.
-// DUWS_opcom_actions row: [id, class, targets, execute].
-//   call targets -> [[target, price, label], ...], the action's legal targets now. Runs inside isNil, so it never suspends.
+// DUWS_opcom_actions row: [id, class, targets, execute, arg].
+//   arg call targets -> [[target, price, label], ...], the action's legal targets now. `arg` is the row's fixed
+//     argument, the hardpoint type or mine variant for a build row and [] elsewhere. Runs inside isNil, so it never
+//     suspends.
 //   [target, price] call execute -> true when the action landed; the pick charges the price only then.
 if (!isServer) exitWith {};
 
@@ -24,7 +26,19 @@ DUWS_fnc_opcom_zoneLabel = {
     (zone_namePOS_pairs select _i) select 0
 };
 
-DUWS_fnc_opcom_zonesOpen = {
+// Cached for the tick: every row asks for the same sweeps and the same band sample, and the store cannot move under
+// them -- the pick reads in one unscheduled pass and executes afterwards.
+DUWS_opcom_tickCache = createHashMap;
+DUWS_fnc_opcom_tickCached = {
+    params ["_key", "_fn"];
+    private _row = DUWS_opcom_tickCache getOrDefault [_key, []];
+    if ((_row param [0, -1]) isEqualTo DUWS_opcom_tick) exitWith { _row select 1 };
+    private _v = call _fn;
+    DUWS_opcom_tickCache set [_key, [DUWS_opcom_tick, _v]];
+    _v
+};
+
+DUWS_fnc_opcom_zonesOpenSweep = {
     private _out = [];
     {
         _x params ["", "_zp", "_zs"];
@@ -33,6 +47,8 @@ DUWS_fnc_opcom_zonesOpen = {
     } forEach zone_meta_array;
     _out
 };
+
+DUWS_fnc_opcom_zonesOpen = { ["zonesOpen", DUWS_fnc_opcom_zonesOpenSweep] call DUWS_fnc_opcom_tickCached };
 
 // 0 with nothing to buy. The step buys back random unlocked lost tokens, so it is priced at their average force.
 DUWS_fnc_opcom_reinforceForce = {
@@ -74,11 +90,6 @@ DUWS_fnc_opcom_zoneFortifyTargets = {
     _out
 };
 
-DUWS_fnc_opcom_unlockedTypes = {
-    params ["_weights"];
-    (keys _weights) select { (DUWS_hardpointTier getOrDefault [_x, 99]) <= WARCOM_opfor_tier }
-};
-
 // A type's force is fixed once the faction is; the pick prices every unlocked type each tick.
 DUWS_opcom_hpPrices = createHashMap;
 DUWS_fnc_opcom_hpPrice = {
@@ -91,21 +102,17 @@ DUWS_fnc_opcom_hpPrice = {
     _p
 };
 
-// Every unlocked type is its own candidate: the weight tables belong in the pick, where the archetype leans (4C.1).
 DUWS_fnc_opcom_zoneBuildTargets = {
-    private _types = [DUWS_hardpointWeightZone] call DUWS_fnc_opcom_unlockedTypes;
-    if (_types isEqualTo []) exitWith { [] };
+    params ["_type"];
+    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _out = [];
     {
         _x params ["_zk", "_zs"];
         private _standing = { (_x select 4) isEqualTo _zk } count DUWS_hardpoints;
         private _pending = { (_x select 2) isEqualTo _zk } count DUWS_opcom_buildsPending;
         if ((([_zk, _zs] call fnc_hardpoint_zone_cap) - _standing - _pending) > 0) then {
-            private _label = [_zk] call DUWS_fnc_opcom_zoneLabel;
-            {
-                _out pushBack [[_zk, _x], [_x] call DUWS_fnc_opcom_hpPrice,
-                    format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_x, _x], _label]];
-            } forEach _types;
+            _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
+                format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel]];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -122,7 +129,7 @@ DUWS_fnc_opcom_townPos = {
 };
 
 // -> [[source, pos, cost], ...]: an idle truck at 0, an open zone's hire at the hire price.
-DUWS_fnc_opcom_truckSources = {
+DUWS_fnc_opcom_truckSourcesSweep = {
     private _out = [];
     {
         if ("supply" in (_x get "flags") && {DUWS_opcom_tick >= (_x get "hold")} && {[_x] call DUWS_fnc_opcom_drawable}) then {
@@ -140,6 +147,8 @@ DUWS_fnc_opcom_truckSources = {
     };
     _out
 };
+
+DUWS_fnc_opcom_truckSources = { ["truckSources", DUWS_fnc_opcom_truckSourcesSweep] call DUWS_fnc_opcom_tickCached };
 
 // -> [source, cost] for the cheapest truck to _dest, or [] with no source.
 DUWS_fnc_opcom_truckFor = {
@@ -259,7 +268,7 @@ DUWS_fnc_opcom_hpCount = {
 };
 
 // A random band point with its cheapest truck -> [point, [source, cost]], or [] when the draw or the truck fails.
-DUWS_fnc_opcom_bandDrop = {
+DUWS_fnc_opcom_bandDropDraw = {
     private _band = call DUWS_fnc_aoi_bandPos;
     if (_band isEqualTo []) exitWith { [] };
     // findSafePos answers a 2D point; tasking positions are 3D throughout.
@@ -270,53 +279,59 @@ DUWS_fnc_opcom_bandDrop = {
     [_at, _truck]
 };
 
-DUWS_fnc_opcom_bandBuildTargets = {
-    private _types = [DUWS_hardpointWeightSolo] call DUWS_fnc_opcom_unlockedTypes;
-    if (_types isEqualTo []) exitWith { [] };
+DUWS_fnc_opcom_bandDrop = { ["bandDrop", DUWS_fnc_opcom_bandDropDraw] call DUWS_fnc_opcom_tickCached };
+
+DUWS_fnc_opcom_standaloneBuildTargets = {
+    params ["_type"];
+    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
-    _types apply {
-        [[_x, _at, _truck select 0], ceil (([_x] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
-            format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_x, _x], mapGridPosition _at]]
-    }
+    [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]]]
 };
 
 DUWS_fnc_opcom_assetTargets = {
-    params ["_types"];
-    private _live = _types select {
-        (DUWS_hardpointTier getOrDefault [_x, 99]) <= WARCOM_opfor_tier
-        && {([_x] call DUWS_fnc_opcom_hpCount) < (DUWS_opcom_assetCap getOrDefault [_x, 1e9])}
-    };
-    if (_live isEqualTo []) exitWith { [] };
+    params ["_type"];
+    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier
+        || {([_type] call DUWS_fnc_opcom_hpCount) >= (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}) exitWith { [] };
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
-    _live apply {
-        [[_x, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _x) + (_truck select 1)),
-            format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_x, _x], mapGridPosition _at]]
-    }
+    [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]]]
 };
 
 // One 50 m square for now; the size rides the target, so a deeper belt is a wider candidate, not a new action.
 DUWS_fnc_opcom_mineBuildTargets = {
+    params ["_variant"];
     if ((DUWS_hardpointTier getOrDefault ["MINEFIELD", 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
     private _size = [1, 1];
-    ["AT", "AP"] apply {
-        [[_x, _size, _at, _truck select 0],
-            ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
-            format ["Lay %1 mines at %2", _x, mapGridPosition _at]]
-    }
+    [[[_variant, _size, _at, _truck select 0],
+        ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
+        format ["Lay %1 mines at %2", _variant, mapGridPosition _at]]]
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.
-DUWS_fnc_opcom_bandBuildRun = {
+DUWS_fnc_opcom_standaloneBuildRun = {
     params ["_target", "_price"];
     _target params ["_type", "_at", "_src"];
     [_src, _at, ["build", _at, _type, _price]] call DUWS_fnc_opcom_supplyRun
+};
+
+DUWS_fnc_opcom_zoneBuildRun = {
+    params ["_target", "_price"];
+    _target params ["_zk", "_type"];
+    [_type, _zk, [], _price] call DUWS_fnc_opcom_build
+};
+
+DUWS_fnc_opcom_mineBuildRun = {
+    params ["_target", "_price"];
+    _target params ["_variant", "_size", "_at", "_src"];
+    [_src, _at, ["mine", _at, [_variant, _size], _price]] call DUWS_fnc_opcom_supplyRun
 };
 
 DUWS_opcom_actions = [
@@ -328,11 +343,6 @@ DUWS_opcom_actions = [
     ["zone_fortify", "defensive", DUWS_fnc_opcom_zoneFortifyTargets, {
         params ["_zk"];
         ([_zk, "opcom_fortify"] call fnc_zone_garrison_fortify) >= 0
-    }],
-    ["zone_build", "defensive", DUWS_fnc_opcom_zoneBuildTargets, {
-        params ["_target", "_price"];
-        _target params ["_zk", "_type"];
-        [_type, _zk, [], _price] call DUWS_fnc_opcom_build
     }],
     ["town_reinforce", "defensive", DUWS_fnc_opcom_townReinforceTargets, {
         params ["_target"];
@@ -353,14 +363,25 @@ DUWS_opcom_actions = [
         params ["_zk"];
         private _t = ["truck", ([_zk] call fnc_site_at) get "pos", _zk, false] call fnc_opcom_recruit;
         !isNil "_t"
-    }],
-    ["band_build", "defensive", DUWS_fnc_opcom_bandBuildTargets, DUWS_fnc_opcom_bandBuildRun],
-    ["tower_build", "buildup", { [["RADIO"]] call DUWS_fnc_opcom_assetTargets }, DUWS_fnc_opcom_bandBuildRun],
-    ["op_build", "recon", { [["OP"]] call DUWS_fnc_opcom_assetTargets }, DUWS_fnc_opcom_bandBuildRun],
-    ["gun_build", "indirect", { [["MORTAR", "ARTY"]] call DUWS_fnc_opcom_assetTargets }, DUWS_fnc_opcom_bandBuildRun],
-    ["mine_build", "defensive", DUWS_fnc_opcom_mineBuildTargets, {
-        params ["_target", "_price"];
-        _target params ["_variant", "_size", "_at", "_src"];
-        [_src, _at, ["mine", _at, [_variant, _size], _price]] call DUWS_fnc_opcom_supplyRun
     }]
 ];
+
+// One row per type, never one row offering several: the pick draws an action, so a shared row would decide the type
+// for it and leave the archetype nothing to lean on (4C.1).
+{
+    DUWS_opcom_actions pushBack [format ["zone_build_%1", toLower _x], "defensive",
+        DUWS_fnc_opcom_zoneBuildTargets, DUWS_fnc_opcom_zoneBuildRun, [_x]];
+} forEach (keys DUWS_hardpointWeightZone);
+{
+    DUWS_opcom_actions pushBack [format ["standalone_build_%1", toLower _x], "defensive",
+        DUWS_fnc_opcom_standaloneBuildTargets, DUWS_fnc_opcom_standaloneBuildRun, [_x]];
+} forEach (keys DUWS_hardpointWeightSolo);
+{
+    _x params ["_type", "_class"];
+    DUWS_opcom_actions pushBack [format ["%1_build", toLower _type], _class,
+        DUWS_fnc_opcom_assetTargets, DUWS_fnc_opcom_standaloneBuildRun, [_type]];
+} forEach [["RADIO", "buildup"], ["OP", "recon"], ["MORTAR", "indirect"], ["ARTY", "indirect"]];
+{
+    DUWS_opcom_actions pushBack [format ["mine_build_%1", toLower _x], "defensive",
+        DUWS_fnc_opcom_mineBuildTargets, DUWS_fnc_opcom_mineBuildRun, [_x]];
+} forEach ["AT", "AP"];
