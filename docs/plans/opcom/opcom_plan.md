@@ -19,7 +19,7 @@ is built and played.
 |---|---|
 | 1–3, 4A, 4B.1, 4B.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
-| 4C — Weighting: the pick scored by `P(win)` × Value ÷ Cost, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
+| 4C — Weighting: the pick scored by Value ÷ Cost, over `P(win)` where an order fights for its target, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
 
@@ -44,7 +44,7 @@ Two terms carry one meaning each throughout:
 
 | Term | Applies to | Meaning |
 |---|---|---|
-| **Contested** | a zone or a town | BLUFOR are assaulting the site (`fnc_opcom_contested.sqf`). Built for zones only |
+| **Contested** | a zone or a town | BLUFOR are assaulting the site: a sighting within one grid cell of its edge (`fnc_opcom_contested.sqf`) |
 | **Engaged** | a unit | The unit is live and fighting BLUFOR. A virtual unit, a zone and a town are never engaged |
 
 ## Appraisal (Phase 4)
@@ -77,7 +77,7 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
-| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag and the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`). Left: the remaining classes' Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`, and whether gain measured against the top tier leaves every buy scoring a few tenths; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
+| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag and the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`). Left: the remaining classes' Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -87,6 +87,10 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight` tilts by action class
 ([§Archetype](#archetype)); `P(win)` scales to the expected return.
+
+**Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Scout and Arty. A purchase
+does not: Reinforce, Fortify, Build, Rapport and Recruit stock ground OPCOM already holds, and their site is gated
+on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores `Value / Cost`.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)`, with `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over the target's
   3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0.
@@ -238,7 +242,7 @@ cleared or ground changes hands, and need also moves with the traffic layer.
 
 ### Gate and the savings goal
 
-- **Gate.** A zone action drops while its zone is contested. A supply-gated action drops only when no truck idles
+- **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. A supply-gated action drops only when no truck idles
   and the wallet cannot cover the action plus a hire. A commit action drops when no eligible unit is free, and no
   pool draws a unit garrisoned in a contested zone. Until 4C.2 any action the wallet cannot cover drops. From 4C.2,
   an offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at
