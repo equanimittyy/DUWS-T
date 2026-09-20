@@ -9,7 +9,7 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3, 4A and 4B.1 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
+Phases 1–3, 4A, 4B.1 and 4B.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
 them. This doc specifies what remains. The sections marked **WIP** are first-pass decisions: they change as each chunk
 is built and played.
 
@@ -17,7 +17,7 @@ is built and played.
 
 | Phase | State |
 |---|---|
-| 1–3, 4A, 4B.1 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 1–3, 4A, 4B.1, 4B.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
 | 4C — Weighting: the archetype, then the pick scored by `P(win)` × Value ÷ Cost | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
@@ -72,7 +72,7 @@ and execute, and from 4C.2 its Value and Cost.
 | Chunk | Builds | Settles in play |
 |---|---|---|
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
-| **4B.2** Trucks + towns + Rapport + standalone builds | The truck-source pick and the shared contested draw-lock filter, Recruit for supply, town Reinforce / Fortify, Rapport, the standalone Build at a random band cell and the asset types | — |
+| **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
@@ -100,12 +100,14 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 | Bank | one null | 4B.1 |
 | Zone Reinforce | each uncontested OPFOR zone below full strength | 4B.1 |
 | Zone Fortify | each uncontested OPFOR zone below tier IV | 4B.1 |
-| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4B.1 |
+| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) × each unlocked ring type | 4B.1 |
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
 | Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
-| Standalone hardpoint Build | a band cell, at random in 4B and by the highest coverage Value from 4C.2; each asset type unlocked, at a random band cell in 4B and by its siting rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
+| Band hardpoint Build | a band cell × each unlocked band type; the cell at random in 4B and by the highest coverage Value from 4C.2 | 4B.2 |
+| Tower / OP / gun Build | a band cell × each unlocked asset type under its cap, sited by its own rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
+| Minefield | a band cell × each variant (AT, AP), one 50 m square | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
@@ -135,7 +137,7 @@ faster than a truck delivers.
 |---|---|
 | Zone or town Reinforce / Fortify, zone hardpoint | worth × exposure × gain |
 | Standalone hardpoint | Σ over its 5×5 block of need × the cover it adds ([§Need and cover fields](#need-and-cover-fields)) |
-| Asset hardpoint (radio tower, OP, mortar pit, artillery battery) | build price × exposure |
+| Asset hardpoint (radio tower, OP, mortar pit, artillery battery, minefield) | build price × exposure |
 | Rapport | town worth × skew × 3/10, with skew = max(0.1, 1 − \|rep\| ÷ 10) |
 | Recruit, specialist (`supply`, `transport`, `recon`) | the Value of the best action blocked for want of it |
 | Recruit, combatant | the larger of that demand and home-zone worth × exposure × unitForce ÷ (the zone's current force + unitForce) |
@@ -330,7 +332,11 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed target in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
-| Build | defensive | an own zone ring or band cell | hardpoint build | 0 zone / 1 truck standalone |
+| Build | defensive | an own zone ring or band cell, one candidate per unlocked type | hardpoint build | 0 zone / 1 truck band |
+| Tower Build | buildup | a band cell | hardpoint build | 1 truck |
+| OP Build | recon | a band cell | hardpoint build | 1 truck |
+| Gun Build | indirect | a band cell (mortar pit, artillery battery) | hardpoint build | 1 truck |
+| Minefield | defensive | a band cell (AT, AP) | mine lay | 1 truck |
 | Bank | bank | — | none | 0 |
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
@@ -357,6 +363,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 | Zone hardpoint (MG, AT, GMG, roadblock) | the hardpoint's force, emplacement and fixed garrison, × `OPCOM_AP_PER_FORCE` |
 | Standalone hardpoint | as a zone hardpoint, plus the truck's source cost |
 | Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus the truck's source cost |
+| Minefield | `OPCOM_AP_MINEFIELD` 15 per 50 m square, plus the truck's source cost |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
 | Truck source | the hire price (4), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
 | Fire mission | `OPCOM_AP_PER_ROUND` 2 per round |
@@ -385,23 +392,25 @@ The escalation ladder and indirect-fire assets, once the commander spends on the
 init and through the Build actions.
 
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
-existing in-zone draw; a standalone one takes its spot from the shared terrain siting around the band cell its truck
-delivers to (`fnc_hardpoint_spawn_sited`). The type is rolled from the existing weight table —
-`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` standalone — limited to
-the types OPFOR's tier has unlocked; campaign generation still rolls the full list. An asset hardpoint is its own
+existing in-zone draw; a band one takes its spot from the shared terrain siting around the band cell its truck
+delivers to (`fnc_hardpoint_spawn_sited`). Every unlocked type is its own candidate and no type is rolled before the
+pick, so the archetype and the score weigh a roadblock against a battery. The weight tables —
+`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` for the band — are the
+per-type prior the 4C.1 weight multiplies; campaign generation still rolls them. An asset hardpoint is its own
 candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
-build cannot be a *typed* counter (AT under armour) until belief carries threat category, which 4C.2 settles
-([§Appraisal](#appraisal-phase-4)).
+minefield is laid, not built: one 50 m square per action (`fnc_hardpoint_minefield_grid`), AT and AP each their own
+candidate, with the size on the target so a deeper belt costs by its footprint. A build cannot be a *typed* counter
+(AT under armour) until belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build that
 finds no ground is refunded, in full, its truck included. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`,
-which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; the caps land with their types
-in 4B.2 and count a build still on its truck:
+which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; each cap counts a build still on
+its truck:
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
 | 1 Infantry (0) | radio tower (max `AOI_OPFOR_TOWER_CAP` alive, 5), OP, MG, roadblock |
-| 2 Motorised (60) | + AT |
+| 2 Motorised (60) | + AT, minefield |
 | 3 Mechanised (150) | + GMG, AA, mortar pit (max 2 alive) |
 | 4 Armour (350) | + artillery battery (max 1 alive) |
 | 5 Jets (600) | nothing new |
@@ -471,8 +480,9 @@ One archetype per campaign, a campaign setting chosen at start (Defensive, Balan
 from 4C.2, never removes an action, and cannot override the ladder (an Aggressive commander with no armour tier
 fields none). It is stored in the persistence snapshot and never re-rolled. A Random pick stays hidden: the config
 diary note shows "Random", and nothing in play reveals it. The OPCOM debug page overrides it for testing. It is not
-difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included; further leans (indirect
-fire, armour) become rows. 4C.1 builds the setting and the table.
+difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included: bank, defensive,
+offensive, buildup, recon and indirect, the guns' own class, so an archetype leans on indirect fire with no per-type
+table; further leans (armour) become rows. 4C.1 builds the setting and the table.
 
 | Archetype | Weights toward |
 |---|---|
