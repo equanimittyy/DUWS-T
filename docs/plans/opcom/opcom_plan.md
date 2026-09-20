@@ -19,7 +19,7 @@ is built and played.
 |---|---|
 | 1–3, 4A, 4B.1, 4B.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
-| 4C — Weighting: the archetype, then the pick scored by `P(win)` × Value ÷ Cost | [§Appraisal](#appraisal-phase-4) — WIP |
+| 4C — Weighting: the pick scored by `P(win)` × Value ÷ Cost, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
 
@@ -64,10 +64,11 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
   target uniformly at random, then one of its targets uniformly. It runs only in `random` mode, switched on from the
   Debug menu's OPCOM page ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)); the mode is `off` by
   default. Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
-- **4C — Weighting.** 4C.1 adds the archetype: the pick draws an action class by
-  `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) among the classes with a surviving candidate, then
-  one of that class's candidates at random. 4C.2 adds balance: the weight becomes the score below, and the pick runs
-  over the top `OPCOM_PICK_TOP` candidates by score ([§The pick](#the-pick)).
+- **4C — Weighting.** 4C.2's balance runs ahead of 4C.1's archetype: the score, the shortlist and the roll are built
+  first ([§The pick](#the-pick)), with `archWeight` held at 1, and the Values land one action class at a time — an
+  action not yet appraised returns its price as its Value and scores as break-even, so the pick stays whole while the
+  classes are worked through. 4C.1 then adds the archetype on top: `archWeight[archetype][actionClass]`
+  ([§Archetype](#archetype)) multiplies a whole class's scores, which is the only change it makes.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
@@ -75,8 +76,8 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
-| **4C.1** Archetype | The campaign setting and the weight table, the class draw, the weighted mode and pick and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
-| **4C.2** Balance | Real `P(win)`; worth, exposure and the hidden HQ flag; force pricing; the Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_PER_FORCE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
+| **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
+| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag and the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`). Left: the remaining classes' Values and the commit Cost; the delay discount; the savings goal; the traffic layer and the need and cover fields, shown on a debug overlay before anything reads them; the asset siting; the difficulty setting on the OPCOM debug page | `OPCOM_AP_UNIT`, `OPCOM_AP_CLASS` and `OPCOM_AP_HARDPOINT`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the build-price stand-in; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -242,8 +243,9 @@ cleared or ground changes hands, and need also moves with the traffic layer.
   runs over the affordable top `OPCOM_PICK_TOP`. Without the goal, cheap actions spend every refill and a better,
   dearer one never becomes affordable.
 - **Bank** is a candidate, not a policy. In 4B it is one more action in the uniform draw; in 4C.1 its archetype
-  weight sets how thrifty the commander is; from 4C.2 it is a low flat score that wins when nothing else scores, or
-  when a savings goal stands.
+  weight sets how thrifty the commander is; from 4C.2 it is `OPCOM_BANK_SCORE`, a flat score below the break-even of an
+  action that returns exactly what it costs, so it wins when nothing on the shortlist pays for itself, or when a
+  savings goal stands.
 
 ### OPCOM debug page and overlay
 
@@ -252,8 +254,8 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 
 | Row | Does |
 |---|---|
-| Mode: weighted | Runs the weighted pick (4C.1) |
-| Pick once: weighted | Runs one weighted pick, whatever the mode; a no-op until 4C.1 |
+| Mode: weighted | Runs the scored pick. Shipped |
+| Pick once: weighted | Runs one scored pick, whatever the mode. Shipped |
 | Archetype | Overrides the campaign's archetype (4C.1) |
 | Difficulty | Sets the picks per tick, below 1 for one pick every few ticks (4C.2) |
 
@@ -367,10 +369,8 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
   `supply`, `transport`), each valued as [§Value](#value) sets out, so it hires what it is short of.
   Units spawn only from OPFOR-held ground; taking the zone cuts what it can raise.
 - **A unit's force is a token composition** — a row in `DUWS_opcom_recruitMenu` (`fnc_opcom_tasking_init.sqf`): an
-  id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. Priced from
-  composition firepower × `OPCOM_AP_PER_FORCE` (`fnc_opcom_recruit.sqf`), decided at 2 where the code holds 1 — the
-  single force↔AP knob, which also prices garrison buys, commit `Cost` and Arty kill Value, so the menu carries no
-  price column.
+  id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. Priced token by
+  token through `OPCOM_AP_UNIT`, so the menu carries no price column.
 - **Capability flags decide what a unit unlocks; there is no unit "type".** `recon` → Scout (range by platform,
   `OPCOM_RECON_K` cells), `supply` → a delivery run, `transport` → carry another unit, `transportable` → ride a
   ferry across water; `noncombat` keeps a row out of a zone's reserve pool (regardless of armament — the boat is
@@ -380,21 +380,26 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 
 | Purchase | Price |
 |---|---|
-| Unit hire | force × `OPCOM_AP_PER_FORCE`: truck 4, APC 8, IFV 18, tank 24, helicopter 30 |
-| Zone Reinforce / Fortify | the force the 0.3 step or the next tier adds × `OPCOM_AP_PER_FORCE` |
+| Unit hire | `OPCOM_AP_UNIT` by token: rifle team 3, squad 5, recon 6, truck 3, armed car 12, APC 25, IFV 40, tank 60, transport helicopter 45, attack helicopter 80 |
+| Zone Reinforce / Fortify | the tokens the 0.3 step or the next tier adds, each priced through `OPCOM_AP_UNIT` |
 | Town Reinforce / Fortify | as a zone, plus the truck's source cost |
-| Zone hardpoint (MG, AT, GMG, roadblock) | the hardpoint's force, emplacement and fixed garrison, × `OPCOM_AP_PER_FORCE` |
+| Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 8, MG 12, GMG 16, AT 16, AA 20 |
 | Standalone hardpoint | as a zone hardpoint, plus the truck's source cost |
 | Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus the truck's source cost |
 | Minefield | `OPCOM_AP_MINEFIELD` 15 per 50 m square, plus the truck's source cost |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
-| Truck source | the hire price (4), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
+| Truck source | the hire price (3), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
 | Fire mission | `OPCOM_AP_PER_ROUND` 2 per round |
 
-- **Force pricing sets the defensive scores.** Pricing garrison force at the hire rate makes a zone or town buy
-  score worth × exposure ÷ (full force × rate) whatever the step's size — about 0.5 at a frontline zone worth 40
-  with a full force of 40 — and a town, fielding less force, costs less than a zone with no separate price. A
-  neutral level-5 town's Rapport scores 7.5 ÷ 14 ≈ 0.5, inside the defensive range.
+- **Price is decoupled from force, and must stay so.** Force answers who wins a fight; price answers what a thing
+  is worth buying, and the two are different questions. Deriving one from the other priced a truck at a rifle pair
+  and an attack helicopter at a tank, and it broke the score outright: with price equal to force, a garrison
+  action's `gain ÷ price` cancelled to worth × exposure ÷ full force, so every zone action tied at every zone and
+  the archetype had nothing to tilt. Infantry is cheap so the commander can always hold ground, every hull carries
+  a premium and air the steepest, so armour reads as a commitment.
+- **Force still converts to AP in three places** — the `Cost` of staking a unit on a commitment, Arty's Value in
+  kills, and the traffic layer's contribution to need. All are 4B.3 and later, so `OPCOM_AP_PER_FORCE` is defined
+  when the first of them lands rather than sitting unread.
 
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
