@@ -237,6 +237,7 @@ private _invulnerableTypes = [
 // composition's own reach -- its farthest wall stands 47 m from the HQ building every offset above is
 // measured against.
 [PosOfBLUHQ, 50] call fnc_clear_foliage;
+[PosOfBLUHQ, 50] call fnc_clear_buildings;
 
 {
     _x params ["_class","_origX","_origY","_origZ","_dir","_isWeapon"];

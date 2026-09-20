@@ -60,21 +60,10 @@ if (hardcore_mode_enable) then {
 	str(_markername2) setMarkerAlpha 0.3; 
 };
 
-// Hiding here is permanent (a terrain object can't be deleted), so this BuildingChanged handler is registered once
-// for the whole campaign to re-hide the replacement building the engine spawns whenever a hidden one takes damage.
-if (isNil "DUWS_zone_hidden") then {
-    DUWS_zone_hidden = [];
-    addMissionEventHandler ["BuildingChanged", {
-        params ["_old", "_new"];
-        private _i = DUWS_zone_hidden find _old;
-        if (_i < 0) exitWith {};
-        _new hideObjectGlobal true;
-        DUWS_zone_hidden set [_i, _new];
-    }];
-};
-
 if (_prefab) then {
     private _clearRadius = 35;
+    // Ahead of the sweep: the helper defines the register the sweep pushes into.
+    [_zonePos, _clearRadius] call fnc_clear_buildings;
     private _allObjects = nearestObjects [_zonePos, [], _clearRadius];
     private _deletedCount = 0;
     private _hiddenCount = 0;
@@ -91,7 +80,7 @@ if (_prefab) then {
                 _deletedCount = _deletedCount + 1;
             } else {
                 _x hideObjectGlobal true;
-                DUWS_zone_hidden pushBack _x;
+                DUWS_terrain_hidden pushBackUnique _x;
                 _hiddenCount = _hiddenCount + 1;
             };
         };

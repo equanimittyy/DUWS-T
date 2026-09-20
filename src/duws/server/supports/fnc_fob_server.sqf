@@ -26,6 +26,10 @@ _message = localize "STR_DUWS_T_fobcall";
 // that ground sees it pop in around them.
 private _fadePlayers = ["OUT", _foundPickupPos] call fnc_baseFade;
 
+// Before the building: a hidden terrain object loses its collision, so createVehicle below is not
+// shoved off the requested spot by a house it would otherwise stand in.
+[_foundPickupPos, 15] call fnc_clear_buildings;
+
 _fob = "";
 switch (VERSION_X) do {
 	case "MODERN": {

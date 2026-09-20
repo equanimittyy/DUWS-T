@@ -3,10 +3,8 @@
 
 params ["_pos", ["_radius", 50]];
 
-// Foliage only, never buildings: a terrain object cannot be deleted, so anything caught here stays
-// hidden for the rest of the campaign, and an invisible house is a worse trade at a base site than
-// a tree standing through a tent. No BuildingChanged register for the same reason -- that event
-// swaps a damaged *building* for a fresh visible one, and nothing here is a building.
+// Foliage only, and permanently hidden: structures go through fnc_clear_buildings, which carries the
+// BuildingChanged register that a hidden building needs and a hidden bush does not.
 private _foliage = nearestTerrainObjects [_pos, ["TREE", "SMALL TREE", "BUSH"], _radius, false];
 { _x hideObjectGlobal true } forEach _foliage;
 

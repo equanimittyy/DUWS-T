@@ -461,6 +461,7 @@ fnc_duws_bluforNear = compile preprocessFileLineNumbers "duws\server\misc\fnc_du
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
 // the only machine allowed to hide a terrain object.
 fnc_clear_foliage = compile preprocessFileLineNumbers "duws\server\misc\fnc_clear_foliage.sqf";
+fnc_clear_buildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_clear_buildings.sqf";
 fnc_intro_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_intro_heli.sqf";
 publicVariable "fnc_intro_heli";
 fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc_repetitive_cleanup.sqf";
