@@ -50,6 +50,8 @@ DUWS_fnc_opcom_blockForce = {
     [_fri, _ene]
 };
 
+// Whether a unit sent into contact wins it -- an attacking order's term, never a buy's: a garrison purchase stocks
+// ground OPCOM already holds, and its site is gated on being uncontested anyway.
 // Lanchester-square: parity is a coin flip, a 2:1 edge about 0.8. The +1 keeps unopposed ground off a divide by zero.
 DUWS_fnc_opcom_pWinAt = {
     params ["_fri", "_ene"];
