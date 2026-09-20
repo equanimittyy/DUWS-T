@@ -153,8 +153,14 @@ faster than a truck delivers.
   the first BLUFOR sighting within 2 cells of it flips the flag for good, checked once in
   `fnc_opcom_belief_upsert`. Until the first capture or that reveal, exposure sits at its floor everywhere and
   OPCOM defends evenly.
-- **Gain** (0–1) is the share of the full result a partial action delivers: the force a purchase adds ÷ the force
-  the holding fields at full strength and top tier, or 3/10 for Rapport, whose −3 step is three tenths of a flip.
+- **Gain** (0–1) is the share of the job a partial action finishes: the force a purchase adds ÷ the force the
+  holding fields at full strength **on its own current tier**, or 3/10 for Rapport, whose −3 step is three tenths
+  of a flip. Measured against the top tier instead, a small zone's refill read as a few percent of a zone it will
+  never be, so every buy scored a fraction of what it was worth and the commander banked rather than defend. A
+  Fortify's gain is the size of the jump against what the holding has now, since it buys the next tier rather than
+  filling this one. Two holdings on different tiers therefore compete on how finished each is, which is the
+  question that matters at each of them; worth and exposure still separate a big frontline zone from a small rear
+  one.
 
 | Action | Value |
 |---|---|
