@@ -56,12 +56,14 @@ crewed in place rather than dropped and settled, because it already sits on its 
 (`DUWS_hardpointWeightZone` / `_Solo`, `server_var_init.sqf:405-410`). `OP` sits in no weight table
 but is seeded standalone at generation, one per zone on a coin flip
 ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented —
-composition, garrison, streaming, clearance — but reachable today only through the debug menus: the
-hardpoint spawner (`client/debug/fnc_debug_hardpoint_menu.sqf`) and OPCOM's build order. Outside the
-debug menus, the Eliminate Recon Patrol side mission also lays a `MINEFIELD`, registered as a standalone
-hardpoint ([`side_mission_catalogue.md`](side_mission_catalogue.md)). No
-campaign-wide count is enforced on any type. OPCOM's builds roll only the types OPFOR's tier has unlocked
-(`DUWS_hardpointTier`); campaign generation rolls every type.
+composition, garrison, streaming, clearance — but campaign generation never places them. All three come
+from OPCOM's band builds (`appraisal/fnc_opcom_actions.sqf`), which lay a `MINEFIELD` one 50 m square at a
+time, AT or AP. A `MINEFIELD` also comes from the debug hardpoint spawner
+(`client/debug/fnc_debug_hardpoint_menu.sqf`) and from the Eliminate Recon Patrol side mission, which
+registers it as a standalone hardpoint ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
+OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), and cap three types
+campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at `OPCOM_CAP_MORTAR` (2) and `ARTY` at
+`OPCOM_CAP_ARTY` (1), counting a build still on its truck. Campaign generation rolls every type and caps none.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
 composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).
@@ -78,10 +80,14 @@ unit-tested independently of the terrain read that feeds it:
   eight-point ring, a fall-line bearing and magnitude (which way the ground drops, and how
   decisively), distance and drop to the nearest road, tree and building counts at several radii, and
   distance to the nearest already-placed hardpoint.
-- **`fnc_hardpoint_score [_facts, _type]`** (`:141-233`) turns that row into a multiplier for one
-  type: 0 means the site cannot hold it (water, or a per-type veto — artillery needs level ground,
-  a roadblock needs a road within 8 m, every non-roadblock type is kept 100 m clear of any road, and
-  a minefield's footprint must be clear of trees and buildings).
+- **`fnc_hardpoint_score [_facts, _type, _variant]`** (`:141-233`) turns that row into a multiplier for
+  one type: 0 means the site cannot hold it (water, or a per-type veto — artillery needs level ground,
+  a roadblock needs a road within 8 m, every other type is kept 100 m clear of any road, and
+  a minefield's footprint must be clear of trees and buildings). `_variant` is the minefield's, and an
+  `AT` field is the second exception to the road standoff: buried mines are not spotted from the verge,
+  and `fnc_hardpoint_best_ground` snaps one onto a road when it draws within reach of one, since mines off
+  the road stop nothing that drives. Unlike a roadblock it is not bound to a road, and lays where it fell
+  when none is near. An `AP` field keeps the standoff.
   Otherwise the multiplier rewards what that type wants — high ground and a road below for MG/AT,
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.
@@ -99,8 +105,8 @@ base weights, and terrain decides only *where* a type lands, never *whether* it 
 **Facing has no separate registry field.** `fnc_hardpoint_facing [_type, _aspectDir, _aspectMag,
 _radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:246-255`) picks a heading per type — a roadblock stays
 square across its road and takes whichever of its two headings faces the approach (`_radialDir`: outward
-for a zone ring, toward BLU HQ for the corridor pass and for an OPCOM truck build, which stands exactly
-where it is delivered through `fnc_hardpoint_spawn_at`), MG/AT/GMG face down the fall line when one is
+for a zone ring, toward BLU HQ for the corridor pass and for an OPCOM truck build, which the siting loop
+places within half a grid cell of where it is delivered, `DUWS_fnc_opcom_buildCand`), MG/AT/GMG face down the fall line when one is
 pronounced enough to trust, everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
 (`fnc_hardpoint_place.sqf:10-48`) then rotates every composition offset around that heading
 (`fnc_hardpoint_rotate`, `:5-8`) before placing each object, so the heading is baked into each
@@ -267,5 +273,5 @@ prices its defences — and neither does a minefield, a hazard removed rather th
 An OPCOM hardpoint build is an Army Power sink, and nothing refunds AP when the player clears one. A
 refund would be farmable — build, clear, refund, repeat — and the enemy's pool would never reach
 whatever escalation the commander prices against it. Only a build that finds no ground is refunded, since
-nothing stands. Build prices and the build decision are
+nothing stands; a truck-delivered build refunds in full, the truck included. Build prices and the build decision are
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s.

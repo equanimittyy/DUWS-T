@@ -126,9 +126,10 @@ At campaign generation the band is laid after the zone rings: radio towers, the 
 AA net, the observation-post net and the roadblock net ([`hardpoints.md`](hardpoints.md#siting) owns
 the passes and their counts).
 
-Nothing builds in the band on its own after generation. OPCOM's standalone build stands a hardpoint
-where its truck delivers it, and is driven only by hand from the debug harness. Choosing that spot,
-weighted toward where the player operates, is
+After generation, only OPCOM's standalone and asset Build add to the band
+(`appraisal/fnc_opcom_actions.sqf`): its truck drives to a random `DUWS_fnc_aoi_bandPos` draw, and the
+hardpoint is sited within half a grid cell of where it is delivered. Choosing that spot, weighted toward
+where the player operates, is
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-the-commander-builds)'s to add; nothing here
 reads a belief store or an archetype.
 

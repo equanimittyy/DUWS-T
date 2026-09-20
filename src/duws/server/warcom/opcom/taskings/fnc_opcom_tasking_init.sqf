@@ -68,4 +68,13 @@ DUWS_fnc_opcom_byId = {
     DUWS_opcom_taskings select _i
 };
 
+// A resting unit an order may draw on -- never one garrisoned in a contested zone, which holds ground under assault.
+DUWS_fnc_opcom_drawable = {
+    params ["_t"];
+    (_t get "order") in ["guard", "garrison"]
+    && {(_t getOrDefault ["carrying", -1]) < 0}
+    && {(_t getOrDefault ["status", ""]) isNotEqualTo "engaged"}
+    && {!(((_t get "order") isEqualTo "garrison") && {[_t get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
+};
+
 call DUWS_fnc_opcom_ports_init;

@@ -1,8 +1,16 @@
 // Locality: server, [] call'd at load. The caller spends the truck whatever a writer answers: a refused errand is lost.
 if (!isServer) exitWith {};
 
-// [key, type, zoneKey] per build still siting, so the zone Build action cannot overfill a zone's slots.
+// [key, type, zoneKey] per build still siting, so a Build cannot overfill a zone's slots or an asset's cap.
 DUWS_opcom_buildsPending = [];
+
+// Half a cell around the truck's drop, so a build stands where it was delivered; it faces where BLUFOR come from.
+DUWS_fnc_opcom_buildCand = {
+    private _at = _this select 0;
+    private _c = [_at, OPCOM_GRID_CELL / 2, 0, 8, 0.35, []] call fnc_safe_pos;
+    if (_c isEqualTo [] || {([_c] call fnc_aoi_field_at) <= 0} || {[_c] call fnc_aoi_in_any_zone}) exitWith { [] };
+    [_c, [random 360, _c getDir PosOfBLUHQ] select (PosOfBLUHQ isNotEqualTo [])]
+};
 
 // _refund goes back to the wallet when no ground holds the build; spendable only, so it never moves the ladder.
 DUWS_fnc_opcom_build = {
@@ -26,13 +34,8 @@ DUWS_fnc_opcom_build = {
     [_type, _key, _zoneKey, _anchor, _refund] spawn {
         params ["_type", "_key", "_zoneKey", "_anchor", "_refund"];
         private _at = _anchor select 0;
-        private _res = if (_zoneKey isEqualTo "") then {
-            // No terrain bearing: face where BLUFOR comes from, as a frontline nest does.
-            private _radial = if (PosOfBLUHQ isEqualTo []) then { random 360 } else { _at getDir PosOfBLUHQ };
-            [_type, _at, _key, "", _radial] call fnc_hardpoint_spawn_at
-        } else {
-            [_type, fnc_hardpoint_zone_cand, _key, _zoneKey, _anchor] call fnc_hardpoint_spawn_sited
-        };
+        private _cand = [DUWS_fnc_opcom_buildCand, fnc_hardpoint_zone_cand] select (_zoneKey isNotEqualTo "");
+        private _res = [_type, _cand, _key, _zoneKey, _anchor] call fnc_hardpoint_spawn_sited;
         DUWS_opcom_buildsPending deleteAt (DUWS_opcom_buildsPending findIf { (_x select 0) isEqualTo _key });
         [["INFO", "WARN"] select (_res isEqualTo []), "OPCOM", format ["build: %1 %2 as %3 (zone %4 near %5)",
             _type, ["sited", "found no ground"] select (_res isEqualTo []), _key, _zoneKey, _at apply { round _x }]] call fnc_log;
@@ -45,14 +48,43 @@ DUWS_fnc_opcom_build = {
     true
 };
 
+// A minefield is laid, not composed: one key over the whole grid, so the player clears the field as one hardpoint.
+DUWS_fnc_opcom_mineBuild = {
+    params ["_pos", ["_variant", "AT"], ["_size", [1, 1]], ["_refund", 0]];
+    // Spawned: the lay walks every square, and the tick must never carry it.
+    [_pos, _variant, _size, _refund] spawn {
+        params ["_pos", "_variant", "_size", "_refund"];
+        private _best = ["MINEFIELD", DUWS_fnc_opcom_buildCand, [_pos], true, _variant] call fnc_hardpoint_best_ground;
+        if (_best isEqualTo []) exitWith {
+            ["WARN", "OPCOM", format ["mine: no ground for a %1 field near %2", _variant, _pos apply { round _x }]] call fnc_log;
+            if (_refund > 0) then { ["OPF", _refund, "opcom_build_refund"] call fnc_ap_adjust };
+            [format ["Lay %1 mines at %2 found no ground%3", _variant, mapGridPosition _pos,
+                ["", format ["  %1 AP back", _refund]] select (_refund > 0)]] call DUWS_fnc_opcom_aiEvent;
+        };
+        _best params ["_at", "", "_dir"];
+        private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
+        missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
+        private _key = format ["hpopcom_%1", _seq];
+        {
+            [_x, _dir, _variant, _key] call fnc_hardpoint_minefield;
+        } forEach ([_at, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid);
+        [_key, "MINEFIELD", _at, "opfor", "", _dir] call fnc_hardpoint_register;
+        ["INFO", "OPCOM", format ["mine: %1 field %2 squares laid as %3 near %4",
+            _variant, _size, _key, _at apply { round _x }]] call fnc_log;
+        [format ["Lay %1 mines at %2 laid", _variant, mapGridPosition _at]] call DUWS_fnc_opcom_aiEvent;
+    };
+    true
+};
+
 DUWS_fnc_opcom_deliver = {
     params ["_t"];
-    (_t get "errand") params [["_kind", ""], "_arg", ["_type", ""]];
+    (_t get "errand") params [["_kind", ""], "_arg", ["_spec", ""], ["_refund", 0]];
     ["INFO", "OPCOM", format ["deliver: tasking %1 lands %2 at %3", _t get "id", _t get "errand", _t get "target"]] call fnc_log;
     switch (_kind) do {
         case "reinforce": { [_arg, "opcom_reinforce"] call fnc_town_garrison_reinforce };
         case "fortify": { [_arg, "opcom_fortify"] call fnc_town_garrison_fortify };
         case "rapport": { [_arg, -3, "opcom_rapport"] call fnc_town_rep_adjust };
-        case "build": { [_type, "", _arg] call DUWS_fnc_opcom_build };
+        case "build": { [_spec, "", _arg, _refund] call DUWS_fnc_opcom_build };
+        case "mine": { [_arg, _spec select 0, _spec select 1, _refund] call DUWS_fnc_opcom_mineBuild };
     };
 };

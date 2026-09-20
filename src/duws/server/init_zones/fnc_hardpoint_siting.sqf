@@ -122,10 +122,10 @@ fnc_hardpoint_survey = {
     [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir, _roadLos, _fofDist, _nestDist, _nestDir]
 };
 
-// [_facts, _type] call fnc_hardpoint_score -> terrain multiplier on the type's base weight; 0 vetoes the
-// site (water, or a per-type gate below).
+// [_facts, _type, _variant] call fnc_hardpoint_score -> terrain multiplier on the type's base weight; 0 vetoes the
+// site (water, or a per-type gate below). _variant is the minefield's, "" for every other type.
 fnc_hardpoint_score = {
-    params ["_facts", "_type"];
+    params ["_facts", "_type", ["_variant", ""]];
     // roadDir (index 12) is the facing's, not the score's -- skipped. The remaining defaults ("clear",
     // "open", "no neighbour") mean a fixture row that omits them (the unit tests) reads no LOS, field-of-
     // fire or interlock penalty. 240 is a literal, not HP_FOF_MAX -- the score is pure and the unit
@@ -136,7 +136,10 @@ fnc_hardpoint_score = {
 
     // Every emplacement but the roadblock keeps 100 m off any road -- trivially spotted and bypassed on
     // the verge; overwatch nests fire on it from a standoff, not atop it. Roadblock has its own gate below.
-    if (!(_type isEqualTo "ROADBLOCK") && {_roadDist < 100}) exitWith { 0 };
+    // An AT minefield is the other exception: buried mines are not spotted from the verge, and the road is what
+    // they kill on.
+    private _onRoadOk = _type isEqualTo "ROADBLOCK" || {_type isEqualTo "MINEFIELD" && {_variant isEqualTo "AT"}};
+    if (!_onRoadOk && {_roadDist < 100}) exitWith { 0 };
 
     private _ramp = { params ["_v", "_lo", "_hi"]; (((_v - _lo) / (_hi - _lo)) max 0) min 1 };
 

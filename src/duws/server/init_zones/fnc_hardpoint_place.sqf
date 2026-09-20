@@ -118,7 +118,7 @@ fnc_hardpoint_garrison = {
 // A weighted pick, not the single best, so a type's likeliest ground isn't its only ground. _rejectInZone keeps a
 // standalone road snap out of a zone, whose own ring already holds its roads.
 fnc_hardpoint_best_ground = {
-    params ["_type", "_fnCand", ["_anchor", []], ["_rejectInZone", false]];
+    params ["_type", "_fnCand", ["_anchor", []], ["_rejectInZone", false], ["_variant", ""]];
     private _pool = [];
     private _draws = 0;
     while { _draws < HP_TYPE_DRAWS && {(count _pool) < HP_POOL_ENOUGH * 2} } do {
@@ -126,21 +126,25 @@ fnc_hardpoint_best_ground = {
         private _draw = _anchor call _fnCand;
         if (_draw isEqualTo []) then { continue };
         _draw params ["_c", "_rdir"];
-        if (_type isEqualTo "ROADBLOCK") then {
+        // Mines off the road stop nothing that drives, so an AT field snaps to one in reach; unlike a block it is
+        // not bound to one.
+        if (_type isEqualTo "ROADBLOCK" || {_type isEqualTo "MINEFIELD" && {_variant isEqualTo "AT"}}) then {
             // Main road first: a block earns more astride the arteries the enemy resupplies on.
             private _mains = (_c nearRoads HP_ROAD_SNAP) select { toUpper ((getRoadInfo _x) param [0, ""]) isEqualTo "MAIN ROAD" };
             private _road = objNull;
             private _bestD = 1e9;
             { private _d = _c distance2D _x; if (_d < _bestD) then { _bestD = _d; _road = _x } } forEach _mains;
             if (isNull _road) then { _road = [_c, HP_ROAD_SNAP] call BIS_fnc_nearestRoad };
-            if (isNull _road) then { continue };
-            private _rp = getPosASL _road;
-            _c = [_rp select 0, _rp select 1, 0];
+            if (isNull _road && {_type isEqualTo "ROADBLOCK"}) then { continue };
+            if (!isNull _road) then {
+                private _rp = getPosASL _road;
+                _c = [_rp select 0, _rp select 1, 0];
+            };
             if (_rejectInZone && {[_c] call fnc_aoi_in_any_zone}) then { continue };
         };
         private _f = [_c] call fnc_hardpoint_survey;
         if ((_f select 8) < HP_SITE_SPACING) then { continue };
-        private _s = [_f, _type] call fnc_hardpoint_score;
+        private _s = [_f, _type, _variant] call fnc_hardpoint_score;
         if (_s <= 0) then { continue };
         _pool pushBack [_c, _f, _rdir];
         _pool pushBack _s;

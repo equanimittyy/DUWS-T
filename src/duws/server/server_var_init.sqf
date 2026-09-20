@@ -413,7 +413,8 @@ DUWS_hardpointWeightNest = createHashMapFromArray [
 ];
 // The OPFOR tier each type unlocks at for OPCOM's builds only; campaign generation still rolls every type.
 DUWS_hardpointTier = createHashMapFromArray [
-    ["RADIO", 1], ["OP", 1], ["MG", 1], ["ROADBLOCK", 1], ["AT", 2], ["GMG", 3], ["AA", 3], ["MORTAR", 3], ["ARTY", 4]
+    ["RADIO", 1], ["OP", 1], ["MG", 1], ["ROADBLOCK", 1], ["AT", 2], ["MINEFIELD", 2], ["GMG", 3], ["AA", 3],
+    ["MORTAR", 3], ["ARTY", 4]
 ];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
@@ -658,6 +659,20 @@ OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 // commitment's Cost and Arty's kill Value, so no price can drift out of step with what a unit is worth.
 // Start at parity (one point of firepower = one Army Power); tune against the AP faucet in the decision loop.
 OPCOM_AP_PER_FORCE = 1;
+
+// Added to a truck's source cost per km driven, so the nearest source wins.
+OPCOM_AP_PER_KM = 0.5;
+OPCOM_AP_RAPPORT = 10;
+// Asset hardpoints are flat-priced: what they are worth is reach, eyes or fire missions, not the force they field.
+OPCOM_AP_TOWER = 30;
+OPCOM_AP_OP = 15;
+OPCOM_AP_MORTAR = 25;
+OPCOM_AP_ARTY = 50;
+// Per 50 m square, so a deeper belt costs by its footprint.
+OPCOM_AP_MINEFIELD = 15;
+// Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
+OPCOM_CAP_MORTAR = 2;
+OPCOM_CAP_ARTY = 1;
 
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are

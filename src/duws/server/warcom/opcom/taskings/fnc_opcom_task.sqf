@@ -6,8 +6,10 @@
 //     _target is a belief row key (a BLUFOR group's netId); it follows the row's believed position.
 //   _returnZone: `move` only -- the site key, zone or town, it settles into as a garrison on arrival. Exclusive
 //     with _errand. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
-//   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex] or ["build", pos, type],
-//     delivered on arrival (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent.
+//   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex],
+//     ["build", pos, type, refund] or ["mine", pos, [variant, [cols, rows]], refund], delivered on arrival
+//     (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent. A build that finds no ground pays refund
+//     back.
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
 if (!isServer) exitWith { false };
 
@@ -17,7 +19,7 @@ if (!(_order in ["capture", "move", "guard", "intercept"])) exitWith {
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: order %1 needs a target", _order]] call fnc_log; false
 };
-if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build"])}) exitWith {
+if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build", "mine"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
 // An errand is goods spent on arrival, so it rides a supply unit (docs/plans/opcom/opcom_plan.md, What AP buys).

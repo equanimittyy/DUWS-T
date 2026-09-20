@@ -1208,6 +1208,10 @@ fnc_static_place = {
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 1, 1e9], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
 ["hp_score: minefield vetoes another emplacement nearby",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 20], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: an AT minefield lays on the road",
+    ([[false, 0, 0.2, 0, 0, 0, 0, 0, 1e9], "MINEFIELD", "AT"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+["hp_score: an AP minefield keeps the 100 m road standoff",
+    ([[false, 0, 0.2, 0, 0, 0, 0, 0, 1e9], "MINEFIELD", "AP"] call fnc_hardpoint_score), 0] call fnc_assertEq;
 
 // A radio mast wants a hilltop crest: high above the ring (relElev) with the ground falling away on
 // every bearing (aspectMag near 0). A one-sided slope is docked, never vetoed; a flat plain has no
@@ -1516,3 +1520,11 @@ private _survivors = call fnc_test_zeroGrid;
 [_survivors, [1300, 2100], 7.5, 1500] call DUWS_fnc_opcom_deposit;
 [_survivors, [900, 3800], 2, 1000] call DUWS_fnc_opcom_deposit;
 ["deposit: adds and removes in any order match a build of the survivors", [_mixed, _survivors] call fnc_test_maxGap, 0] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_truckFor: the cheapest truck source to a destination ---
+OPCOM_AP_PER_KM = 0.5;
+["truck_for: an idle truck beats a hire as far away",
+    [[[["truck", 1], [0, 0, 0], 0], [["hire", "z"], [0, 0, 0], 4]], [1000, 0, 0]] call DUWS_fnc_opcom_truckFor, [["truck", 1], 0.5]] call fnc_assertEq;
+["truck_for: a near hire beats a far idle truck",
+    [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5]] call fnc_assertEq;
+["truck_for: no source is no truck", [[], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, []] call fnc_assertEq;

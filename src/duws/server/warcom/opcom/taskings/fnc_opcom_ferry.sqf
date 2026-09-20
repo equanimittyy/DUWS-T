@@ -39,12 +39,9 @@ DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1]];
     DUWS_opcom_taskings select {
         ("transport" in (_x get "flags"))
-        && {(_x getOrDefault ["carrying", -1]) < 0}
         && {(_x get "id") != _excludeId}
         && {(_x get "moveType") in ["boat", "rotary"]}
-        && {(_x get "order") in ["guard", "garrison"]}
-        && {(_x getOrDefault ["status", ""]) isNotEqualTo "engaged"}
-        && {!(((_x get "order") isEqualTo "garrison") && {[_x get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
+        && {[_x] call DUWS_fnc_opcom_drawable}
     }
 };
 
