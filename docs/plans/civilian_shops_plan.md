@@ -12,11 +12,10 @@ vendors that dispatch them, are in [`civilian_jobs_plan.md`](civilian_jobs_plan.
 Two rules govern both plans:
 
 - **Money is the currency, not CP/AP.** The player already carries `Money_roll` inventory items
-  spent at the black market and on civilian bribes. Shops and job payouts move that same item, so
-  the shop economy is separate from the CP/AP war economy and needs its own faucets and sinks
-  (shops) to balance. It is per-player: co-op players each have their own wallet, and a bought
-  vehicle or hired group belongs to the buyer. A purchase sent to the garage or the arsenal joins
-  that shared store instead.
+  spent on civilian bribes. Shops and job payouts move that same item, so the shop economy is
+  separate from the CP/AP war economy and needs its own faucets and sinks (shops) to balance. It is
+  per-player: co-op players each have their own wallet, and a bought vehicle or hired group belongs
+  to the buyer. A purchase sent to the garage or the arsenal joins that shared store instead.
 - **A vendor is a civilian, and the vendor system is a vanilla-mode feature.** Vendors spawn through
   the same path as the town crowd and are disabled in `NONE`, `RAVAGE`, and `WBK`, exactly as the
   disguise is. None of the new code runs on the RAVAGE/WBK path; the deliberate separation behind
@@ -25,14 +24,19 @@ Two rules govern both plans:
 ## Currency and balance
 
 Money today is earned from enemy loot (`fnc_addRandomLoot.sqf`), searches (`fnc_search_claim.sqf`),
-civilian missions (`fnc_civ_mission_finish.sqf`), and random events, and spent only on black-market
-micro-purchases (`fnc_addHQBuildingActions.sqf:29-31`) and civilian bribes. The shops are new sinks
-on that existing income, so they do not wait on jobs; jobs
+civilian missions (`fnc_civ_mission_finish.sqf`), and random events, and spent only on civilian
+bribes. The black market these vendors replace is deleted, so a shop is the only place money buys
+gear. The shops are new sinks on that existing income, so they do not wait on jobs; jobs
 ([`civilian_jobs_plan.md`](civilian_jobs_plan.md)) are one more faucet.
 
 Money is counted and spent through the two existing server functions — `fnc_money_count`
-(`fnc_economy_init.sqf:237`) and `fnc_money_spend` (`fnc_economy_init.sqf:251`). Every shop purchase
+(`fnc_economy_init.sqf:238`) and `fnc_money_spend` (`fnc_economy_init.sqf:252`). Every shop purchase
 and job payout goes through those; no second money path.
+
+**Prices carry the balance, not a gate.** A dealer sells any class it lists whatever the arsenal
+mode is; a foreign or high-end class is priced steeply instead. Gating the catalogue on
+`DUWS_arsenalLimited` would make the shop a second face of the captured-materiel rules, and the two
+economies are deliberately separate.
 
 ## Vendors are streamed civilians
 
@@ -72,10 +76,15 @@ capturing an area the thing that opens its shops, without needing a separate "fr
 its job in a hostile town — that is exactly the reason a disguised operator has to be there (see
 [`civilian_jobs_plan.md`](civilian_jobs_plan.md#jobs)).
 
+The check runs twice, because `fnc_civ_repAt` is server-only and returns 0 on a client. The menu
+greys its rows from the broadcast `DUWS_enemy_town_pos` list, which `fnc_enemy_towns_refresh`
+rebuilds on every band crossing; the server re-tests with `fnc_civ_repAt` when a row is actually
+picked — the same advisory-then-authoritative split `fnc_civ_menu` already uses for the money count.
+
 **Lifecycle: streamed with the crowd, not always-on.** Persistent AI in every town across Altis is a
 perf cost the mission cannot pay. Vendors ride the same site poller as the crowd — register them as
 occupants of the town's `town_crowd` profile (or a parallel `town_vendors` profile) so they spawn
-when a player is near and are deleted when the town sleeps (`fnc_civ_handler.sqf:116-140`).
+when a player is near and are deleted when the town sleeps (`fnc_civ_handler.sqf:114-138`).
 
 **Respawn five minutes after a kill.** A killed vendor denies its service until it respawns. The
 `Killed` handler stamps a per-town, per-type cooldown; the poller's wake hook recreates the vendor
@@ -87,11 +96,12 @@ live, the town simply lacks that vendor and its service.
 ## Map markers and icons
 
 Each vendor gets a global marker (`createMarker`, server-side, so it replicates and rebuilds cleanly)
-with an icon per type. Follow the zone-marker idiom in `fnc_createzone.sqf:47-69`; do not use the
+with an icon per type. Follow the zone-marker idiom in `fnc_createzone.sqf:39-49`; do not use the
 local per-object registry (`kndr_assignMarker`), which is per-machine and survives neither JIP nor a
-rebuild. Reveal a town's markers only once the player has discovered it, keyed on the same visibility
-flag the zone markers use (`setMarkerAlpha`), so the map is not pre-populated with every shop on the
-island.
+rebuild. Reveal a town's markers only once the player has discovered it. `fnc_civ_town_reveal` is
+the sole writer of `civ_visible` and already paints that town's own two markers, so a vendor's marker
+alpha is set there too — the map is not pre-populated with every shop on the island, and hardcore
+mode needs no separate answer.
 
 **Icons.** Drawn from the stock `CfgMarkers` task-glyph set (the `simpletasks` icons), which carries a
 car, boat, truck, rifle, box, wrench, and container — a closer fit than the location pins, so the
@@ -132,7 +142,7 @@ once in `description.ext` `CfgMarkerColors`. Optionally also drop the marker alp
 
 ## Interaction and menus
 
-A vendor's interactable menu copies the civilian pattern: `fnc_civ_menuAction.sqf` adds one
+A vendor's interactable menu copies the civilian pattern: `shared/civ/fnc_civ_menuAction.sqf` adds one
 `ACT_CIVILIAN_INTERACTION` action, distance- and state-gated, whose body opens a dialog. Build a
 `fnc_vendor_menuAction` on that shape, opening either the reusable list dialog
 (`fnc_open_action_menu.sqf`, `[title,[[label,code,args,color]...]]`) for simple vendors, or the
@@ -141,11 +151,16 @@ happens when the menu opens, before any catalogue is shown.
 
 **The catalogue reuses the faction class browser.** It copies the layout and search of the browser
 the faction confirmation screen opens (`startup_faction_key_edit` in `faction_confirm.hpp`, driven by
-`fnc_faction_key_edit.sqf`), without the faction picker, because a dealer's stock is its own list.
-Rows are sorted by display name and read `Name  --  class`. A text filter matches a case-insensitive
-substring of the display name or the classname on every key. A preview shows the selected class:
-`editorPreview` for a vehicle, the `picture` icon for a weapon or gear item. Lift the row build and
-the filter out of `duws_faction_fill_classes` into one shared helper that both dialogs call.
+`fnc_faction_key_edit.sqf`). Rows are sorted by display name and read `Name  --  class`. A text
+filter matches a case-insensitive substring of the display name or the classname on every key. A
+preview shows the selected class: `editorPreview` for a vehicle, the `picture` icon for a weapon or
+gear item. Lift the row build and the filter out of `duws_faction_fill_classes` into one shared
+helper that both dialogs call.
+
+That browser's left-hand combo is kept rather than dropped, repurposed from a faction picker to a
+**stock picker**. The Arms Dealer fills it with three entries; the Car and Boat dealers fill it with
+one, since a dealer with a single list still needs the combo to exist for the shared helper to fill
+against.
 
 ## Shops
 
@@ -159,7 +174,38 @@ here:
 |---|---|---|
 | Car Dealer | civilian vehicles | `civ_veh_array` pool; [vehicle delivery](#delivery) |
 | Boat dealer | civilian boats | civilian boat classes; [vehicle delivery](#delivery); pairs with deep-water fishing |
-| Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; [gear delivery](#delivery) |
+| Arms Dealer | weapons and gear | three stock lists, [below](#the-arms-dealers-stock); [gear delivery](#delivery) |
+
+### The Arms Dealer's stock
+
+Three lists on the stock picker. They overlap freely: a class in a side list is also in Everything.
+
+| List | Holds |
+|---|---|
+| BLUFOR | the kit of every BLUFOR DUWS role key |
+| OPFOR | the kit of every OPFOR DUWS role key |
+| Everything | every gear class the server's config carries at scope 2 |
+
+The side lists are built from `fnc_faction_unit_keylist`, which already takes a side and returns each
+man key's representative plus its spawn pool. Their kit is read **out of config**, never by spawning:
+`weapons[]`, `magazines[]`, `items[]`, `linkedItems[]` and `backpack` off the unit class, plus the
+`uniformList` / `vestList` / `headgearList` / `facewearList` random lists that
+`fnc_create_ammo_lists.sqf:188-220` already walks the same way. Spawning each key to call
+`getUnitLoadout` is what that file does for BLUFOR today, at a 0.1 s sleep per class; a shop needs
+both sides and cannot pay it twice.
+
+Do not reuse `blufor_ammobox_weapons` / `opfor_ammobox_weapons` for the side lists. Those are
+sampled from exactly three hardcoded role keys per side (`fnc_create_ammo_lists.sqf:87-88`), not
+from the key list, so they are a thin slice of what a side actually fields.
+`DUWS_friendlyArsenal` is the wrong source too: it is a snapshot of the assembled arsenal shelf,
+which carries curated extras and the folded-in civilian disguise gear, so a BLUFOR tab built from it
+would not be the mirror of the OPFOR one.
+
+Everything is a whole-config sweep at scope 2 — `CfgWeapons` (weapons and items), `CfgMagazines`,
+`CfgGlasses`, and `CfgVehicles` classes of `Bag_Base` — so a modded server sells its mods. It is the
+one expensive build here, so it is built once and cached rather than per open, and it is built on the
+server: a class the server cannot spawn must not be sellable, which is the same rule
+`fnc_faction_query` enforces for the faction browser.
 
 ### Delivery
 
@@ -168,14 +214,22 @@ take it now.
 
 | Bought | Stored | Taken now |
 |---|---|---|
-| Weapons and gear | The arsenal: +1 to the captured-materiel pool (`fnc_captured_pool_setCount`), drawn like any captured class | Into the buyer's inventory when `canAdd` finds room, otherwise dropped in a ground holder at the buyer |
+| Weapons and gear | The arsenal: +1 to the captured-materiel pool (`fnc_captured_pool_setCount`, then `publicVariable "DUWS_capturedPool"` — the setter does not broadcast) | Into the buyer's inventory when `canAdd` finds room, otherwise dropped in a ground holder at the buyer |
 | Vehicles and boats | The garage: a spec pushed onto `DUWS_garage_stored`, refused when that domain's pool is full (the `fnc_garage_store` cap check) | Spawned at the dealer and hand-placed exactly as a garage retrieval: `fnc_garage_retrieve`'s invulnerable, frozen, locked spawn, the `fnc_depot_place_r3f` carry, then `fnc_depot_place_finish` |
 
 The pool counts only what the arsenal tracks: a friendly class is unlimited outside Limited mode
-(`DUWS_arsenalLimited`), so the arsenal destination is offered only for a class the pool counts. The
-ground drop reuses `fnc_money_drop`, which writes magazine and item cargo only, so it has to cover
-every gear type the dealer sells. A garage spec normally comes from `DUWS_fnc_vehSpecCapture` on a
-live vehicle; a bought vehicle has none, so its spec is built from the class in factory state.
+(`DUWS_arsenalLimited`), so the arsenal destination is offered only for a class the pool counts.
+
+The ground drop reuses `fnc_money_drop`, which is extended to do it. It writes magazine and item
+cargo only today, so a dropped rifle or backpack would vanish; it gains `addWeaponCargoGlobal` and
+`addBackpackCargoGlobal` on the same `isClass` dispatch it already uses to tell a magazine from an
+item. One holder builder for every gear type, rather than the per-slot branching
+`fnc_blackMarketPurchase` grew.
+
+A garage spec normally comes from `DUWS_fnc_vehSpecCapture` on a live vehicle; a bought vehicle has
+none, so its spec is built from the class in factory state. That spec cannot be sparse:
+`DUWS_fnc_vehSpecApply` destructures the hitpoints field into three arrays and then walks the first,
+so a factory spec's hitpoints entry is `[[],[],[]]` and never `[]`, which would throw.
 
 ## Vendor registry
 
@@ -198,7 +252,7 @@ as such there, matching the existing convention.
 
 1. **Vendor framework.** New static "vendor" posture, one weighted building per vendor, streamed
    lifecycle, five-minute respawn, global marker, hostile-town service refusal, and one menu — start
-   with the Arms Dealer, whose catalogue is the seeded arsenal and needs no new spawn path. This
-   phase builds the shared catalogue browser and gear delivery.
+   with the Arms Dealer, which needs no new spawn path: its goods go to a pool or an inventory. This
+   phase builds the shared catalogue browser, the three stock lists, and gear delivery.
 2. **Shops.** Car Dealer and Boat dealer, with vehicle delivery to the garage or the hand-placed
    spawn. Shop prices are tuned against job payouts in the jobs plan's balance phase.
