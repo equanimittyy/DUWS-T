@@ -88,7 +88,7 @@ DUWS_fnc_opcom_ferryHome = {
             private _port = [_k] call DUWS_fnc_opcom_portOf;
             _dest = if (_port < 0) then { [] } else { [_port] call DUWS_fnc_opcom_c2w };
         };
-        if (_dest isNotEqualTo [] && {!([_k] call DUWS_fnc_opcom_zoneContested)} && {(_dest distance2D _from) < _best}) then {
+        if (_dest isNotEqualTo [] && {!([_k] call DUWS_fnc_opcom_siteContested)} && {(_dest distance2D _from) < _best}) then {
             _best = _dest distance2D _from; _key = _k; _zpos = _x;
         };
     } forEach WARCOM_zones_controled_by_OPFOR;

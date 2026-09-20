@@ -44,7 +44,7 @@ DUWS_fnc_opcom_zonesOpenSweep = {
     {
         _x params ["", "_zp", "_zs"];
         private _zk = [_zp] call fnc_zone_key;
-        if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_zoneContested)}) then {
+        if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_siteContested)}) then {
             _out pushBack [_zk, _zs, _zp, _x select 3, [_zp] call DUWS_fnc_opcom_exposure, [_zp] call DUWS_fnc_opcom_pWin,
                 [_zk] call fnc_zone_tier];
         };
@@ -198,7 +198,7 @@ DUWS_fnc_opcom_townReinforceTargets = {
     {
         private _i = _forEachIndex;
         private _tier = _x;
-        if (_tier < 1 || {_i in _busy}) then { continue };
+        if (_tier < 1 || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _force = [[_i] call DUWS_fnc_townStrengthKey] call DUWS_fnc_opcom_reinforceForce;
         if (_force <= 0) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
@@ -220,7 +220,7 @@ DUWS_fnc_opcom_townFortifyTargets = {
     {
         private _i = _forEachIndex;
         private _tier = _x;
-        if (_tier < 1 || {_tier >= _top} || {_i in _busy}) then { continue };
+        if (_tier < 1 || {_tier >= _top} || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
         private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;
         if (_truck isEqualTo []) then { continue };
@@ -240,7 +240,7 @@ DUWS_fnc_opcom_rapportTargets = {
     private _out = [];
     {
         private _i = _forEachIndex;
-        if (_x <= -15 || {_x >= 10} || {_i in _busy}) then { continue };
+        if (_x <= -15 || {_x >= 10} || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
         if !([_pos] call fnc_aoi_opfor_covers) then { continue };
         private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;

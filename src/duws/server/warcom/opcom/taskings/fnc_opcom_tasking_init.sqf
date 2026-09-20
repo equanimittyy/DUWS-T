@@ -74,7 +74,7 @@ DUWS_fnc_opcom_drawable = {
     (_t get "order") in ["guard", "garrison"]
     && {(_t getOrDefault ["carrying", -1]) < 0}
     && {(_t getOrDefault ["status", ""]) isNotEqualTo "engaged"}
-    && {!(((_t get "order") isEqualTo "garrison") && {[_t get "homeZone"] call DUWS_fnc_opcom_zoneContested})}
+    && {!(((_t get "order") isEqualTo "garrison") && {[_t get "homeZone"] call DUWS_fnc_opcom_siteContested})}
 };
 
 call DUWS_fnc_opcom_ports_init;

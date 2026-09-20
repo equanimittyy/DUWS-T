@@ -1,5 +1,5 @@
 // Locality: server, executed at load by server_fnc_init ([] call compile) so it can define several
-// functions. Zone contest is a belief fact, rebuilt once per OPCOM tick from the settled store (after decay
+// functions. Site contest is a belief fact, rebuilt once per OPCOM tick from the settled store (after decay
 // and prune), so every reader in a tick sees one snapshot.
 if (!isServer) exitWith {};
 
@@ -9,7 +9,8 @@ DUWS_fnc_opcom_beliefIsSighting = {
     _key isEqualType "" && {(_key find ":") >= 1}
 };
 
-// Contested: a BLUFOR sighting within one grid cell of the zone's edge -- some OPFOR knows BLUFOR is there.
+// Contested: a BLUFOR sighting within one grid cell of the site's edge -- some OPFOR knows BLUFOR is there. Zones
+// and towns both, so a garrison buy reads the same rule wherever it lands.
 DUWS_fnc_opcom_contestedUpdate = {
     private _sighted = [];
     {
@@ -19,7 +20,7 @@ DUWS_fnc_opcom_contestedUpdate = {
     if (_sighted isNotEqualTo []) then {
         {
             private _key = _x;
-            if ((_key select [0, 5]) == "zone_") then {
+            if ((_key select [0, 5]) == "zone_" || {(_key select [0, 5]) == "town_"}) then {
                 private _site = [_key] call fnc_site_at;
                 private _pos = _site getOrDefault ["pos", []];
                 private _reach = (_site getOrDefault ["radius", 0]) + OPCOM_GRID_CELL;
@@ -32,7 +33,7 @@ DUWS_fnc_opcom_contestedUpdate = {
     DUWS_opcom_contested = _contested;
 };
 
-DUWS_fnc_opcom_zoneContested = {
+DUWS_fnc_opcom_siteContested = {
     params ["_key"];
     DUWS_opcom_contested getOrDefault [_key, false]
 };

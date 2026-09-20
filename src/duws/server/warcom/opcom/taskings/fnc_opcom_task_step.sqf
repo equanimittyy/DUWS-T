@@ -78,7 +78,7 @@ private _stepContext = {
         _adv isEqualTo "arrived"
     };
     // A garrison settle must not walk men into a zone BLUFOR is still fighting over.
-    if (_arrived && {[_t getOrDefault ["returnZone", ""]] call DUWS_fnc_opcom_zoneContested}) then { _arrived = false };
+    if (_arrived && {[_t getOrDefault ["returnZone", ""]] call DUWS_fnc_opcom_siteContested}) then { _arrived = false };
     [_pos, _grp, _live, _engaged, _arrived, _adv]
 };
 
