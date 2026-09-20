@@ -655,25 +655,25 @@ OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 // data, kept with the store in fnc_opcom_tasking_init so they resolve at runtime alongside the force model.
 // Server-only, read by the tasking phase of the perception loop.
 
-// Never derived from force: deriving it made every garrison action at a zone score the same, since the force bought
-// cancelled against the force paid for. Set against an OPFOR income near 40-80 AP per 30 min.
+// What OPCOM pays, keyed by the thing it buys: a DUWS_opcom_recruitMenu row id here, a hardpoint type below. Never
+// off the composition or its force -- that tied two rows sharing a composition to one price, and made the same order
+// cost different amounts at different sites. Set against an OPFOR income near 40-80 AP per 30 min.
 OPCOM_AP_UNIT = createHashMapFromArray [
-    ["patrol", 1], ["team", 3], ["wp_team", 4], ["garrison_element", 3], ["squad", 5],
-    ["recon", 6], ["sniper_element", 4],
-    ["truck", 3], ["car", 12], ["at_car", 12], ["aa_car", 12], ["boat", 10],
-    ["apc", 25], ["ifv", 40], ["tank", 60],
-    ["transheli", 45], ["attackheli", 80], ["plane", 80]
-];
-
-// Fallback for a bare classname a faction names directly, mirroring OPCOM_AP_UNIT so the two cannot drift apart.
-OPCOM_AP_CLASS = createHashMapFromArray [
-    ["man", 0.5], ["static_mg", 6], ["static_hi", 10], ["static_arty", 8],
-    ["car_unarmed", 3], ["car_armed", 12], ["apc", 25], ["ifv", 40], ["tank", 60], ["air", 60], ["boat", 10]
+    ["rifles", 10], ["weapons_team", 5], ["recon_foot", 5],
+    ["truck", 3], ["recon_car", 10], ["boat", 3],
+    ["apc", 15], ["ifv", 25], ["mbt", 40],
+    ["recon_heli", 20], ["trans_heli", 10], ["attack_heli", 60]
 ];
 
 OPCOM_AP_HARDPOINT = createHashMapFromArray [
     ["ROADBLOCK", 8], ["MG", 12], ["GMG", 16], ["AT", 16], ["AA", 20]
 ];
+
+// Flat wherever the step lands and whatever it buys back: pricing it on the tokens owed made the cost a lottery on
+// what died there. A town adds only its truck, the delivery rather than the step. Fortify is dearer because a tier
+// raise is permanent where a refill is consumed.
+OPCOM_AP_REINFORCE = 15;
+OPCOM_AP_FORTIFY = 25;
 
 // Added to a truck's source cost per km driven, so the nearest source wins.
 OPCOM_AP_PER_KM = 0.5;
@@ -699,8 +699,9 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 // A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
 OPCOM_TOWN_WORTH = 5;
 
-// Banking's flat score, under the break-even 1, so OPCOM saves only when nothing on the shortlist pays for itself.
-OPCOM_BANK_SCORE = 0.5;
+// Banking's flat score. Set under the defensive band, not under the break-even 1: a single purchase is a small
+// slice of a full-strength holding, so a defensive buy scores a few tenths and a higher bar would bank every tick.
+OPCOM_BANK_SCORE = 0.1;
 
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;

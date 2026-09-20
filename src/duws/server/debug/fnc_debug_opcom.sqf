@@ -11,7 +11,7 @@ switch (_verb) do {
         private _rows = (keys DUWS_opcom_recruitMenu) apply {
             private _comp = (DUWS_opcom_recruitMenu get _x) select 0;
             private _force = [_comp] call DUWS_fnc_tokenListForce;
-            [_x, format ["%1  (force %2, %3 AP)", _x, _force, ceil ([_comp] call DUWS_fnc_opcom_listPrice)]]
+            [_x, format ["%1  (force %2, %3 AP)", _x, _force, OPCOM_AP_UNIT getOrDefault [_x, 0]]]
         };
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };

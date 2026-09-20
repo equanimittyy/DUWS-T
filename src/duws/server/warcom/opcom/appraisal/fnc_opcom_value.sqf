@@ -3,31 +3,6 @@
 // a zone buy compares against a hardpoint. Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
-// Resolved by the same three paths as DUWS_fnc_tokenPower, so a price and a force read off the same thing.
-DUWS_opcom_classPriceMemo = createHashMap;
-DUWS_fnc_opcom_tokenPrice = {
-    params ["_token"];
-    private _name = [_token] call DUWS_fnc_tokenName;
-    private _p = OPCOM_AP_UNIT getOrDefault [_name, -1];
-    if (_p >= 0) exitWith { _p };
-    private _men = [_token] call DUWS_fnc_tokenMenCount;
-    if (_men > 0) exitWith { _men * (OPCOM_AP_CLASS get "man") };
-    _p = DUWS_opcom_classPriceMemo get _name;
-    // Memoised: classifying walks the class's turret and weapon config, and the pick prices every type each tick.
-    if (isNil "_p") then {
-        _p = OPCOM_AP_CLASS getOrDefault [[_name] call fnc_classifyVehicle, 0];
-        DUWS_opcom_classPriceMemo set [_name, _p];
-    };
-    _p
-};
-
-DUWS_fnc_opcom_listPrice = {
-    params ["_tokens"];
-    private _sum = 0;
-    { _sum = _sum + ([_x] call DUWS_fnc_opcom_tokenPrice) } forEach _tokens;
-    _sum
-};
-
 // The HQ counts only once revealed, so an unfound base pulls no defense toward itself.
 DUWS_fnc_opcom_bluforGroundSweep = {
     private _out = +(missionNamespace getVariable ["WARCOM_zones_controled_by_BLUFOR", []]);
