@@ -421,9 +421,12 @@ arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / 
 ([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
 whichever source costs less. A town takes one supply truck at a time: while one drives to it, no supply action
 targets it. The AP is paid at commit but the result lands only when the *specific* bound truck
-arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). A town buy whose
-truck arrives while the town is contested still lands through the garrison's existing hold — owed at once, the men
-arriving once BLUFOR leave — and a town that falls first loses it. **Zones need no supply** — zone Reinforce,
+arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). **Arrival is the
+only test**: the contest gate keeps OPCOM from ordering a buy into a fight, but a truck already driving is never
+recalled, so a town that turns contested behind it still takes the delivery. A Reinforce landing there returns its
+lost tokens to the ledger and the reserve pool, and the reserve pass favours the sites players stand on, so those
+men feed into the engagement — the commander reinforcing a fight it did not know about when it paid. A town that
+falls first loses it. **Zones need no supply** — zone Reinforce,
 Fortify and hardpoint Build resolve on AP alone the tick they commit, reading as OPFOR trucking matériel outward
 from its zones to the towns.
 
