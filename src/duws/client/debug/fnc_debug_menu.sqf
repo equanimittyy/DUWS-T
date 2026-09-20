@@ -68,8 +68,9 @@ switch (_page) do {
             DBG_BACK("root"),
             ["Mode: off",           { ["aimode", "off", "", "", player] remoteExec ["fnc_debug_opcom", 2] },    [], DBG_ACTION],
             ["Mode: random",        { ["aimode", "random", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
-            ["Pick once: random",   { ["pickonce", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] },     [], DBG_ACTION],
-            ["Pick once: weighted", { hint "OPCOM AI: the weighted pick is not built yet." },                  [], DBG_ACTION],
+            ["Mode: weighted",      { ["aimode", "weighted", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
+            ["Pick once: random",   { ["pickonce", "random", "", "", player] remoteExec ["fnc_debug_opcom", 2] },   [], DBG_ACTION],
+            ["Pick once: weighted", { ["pickonce", "weighted", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
             ["Orders >",            fnc_debug_opcom_menu, [], DBG_PAGE],
             ["Force emission (click map)", {
                 ["Click a zone or OPFOR hardpoint to read its force emission.",

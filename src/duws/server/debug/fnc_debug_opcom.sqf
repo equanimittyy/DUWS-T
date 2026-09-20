@@ -11,7 +11,7 @@ switch (_verb) do {
         private _rows = (keys DUWS_opcom_recruitMenu) apply {
             private _comp = (DUWS_opcom_recruitMenu get _x) select 0;
             private _force = [_comp] call DUWS_fnc_tokenListForce;
-            [_x, format ["%1  (force %2, %3 AP)", _x, _force, ceil (_force * OPCOM_AP_PER_FORCE)]]
+            [_x, format ["%1  (force %2, %3 AP)", _x, _force, ceil ([_comp] call DUWS_fnc_opcom_listPrice)]]
         };
         ["Recruit a unit", _rows, "recruit", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
@@ -211,8 +211,8 @@ switch (_verb) do {
         "OPCOM grid: drift check runs on the next tick." remoteExec ["hint", _caller];
     };
     case "pickonce": {
-        DUWS_opcom_pickOnce = true;
-        "OPCOM AI: one pick on the next tick." remoteExec ["hint", _caller];
+        DUWS_opcom_pickOnce = _a;
+        format ["OPCOM AI: one %1 pick on the next tick.", _a] remoteExec ["hint", _caller];
     };
     default {};
 };

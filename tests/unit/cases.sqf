@@ -1528,3 +1528,23 @@ OPCOM_AP_PER_KM = 0.5;
 ["truck_for: a near hire beats a far idle truck",
     [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5]] call fnc_assertEq;
 ["truck_for: no source is no truck", [[], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, []] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_exposureAt: how close a holding sits to BLUFOR-held ground ---
+OPCOM_EXPOSE_NEAR = 5000;
+OPCOM_EXPOSE_FAR = 10000;
+OPCOM_EXPOSE_FLOOR = 0.2;
+["exposureAt: inside the near radius is full exposure",
+    ([2000] call DUWS_fnc_opcom_exposureAt), 1] call fnc_assertEq;
+["exposureAt: past the far radius is the floor",
+    ([20000] call DUWS_fnc_opcom_exposureAt), 0.2] call fnc_assertEq;
+["exposureAt: halfway between the knees is halfway down the fall",
+    ([7500] call DUWS_fnc_opcom_exposureAt), 0.6] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_pWinAt: Lanchester-square odds from a force ratio ---
+["pWinAt: unopposed ground is near certain",
+    (([20, 0] call DUWS_fnc_opcom_pWinAt) > 0.99), true] call fnc_assertEq;
+["pWinAt: parity is a coin flip",
+    (([9, 8] call DUWS_fnc_opcom_pWinAt) toFixed 2), "0.50"] call fnc_assertEq;
+["pWinAt: outnumbered two to one is a long shot",
+    (([8, 15] call DUWS_fnc_opcom_pWinAt) toFixed 2), "0.20"] call fnc_assertEq;
+

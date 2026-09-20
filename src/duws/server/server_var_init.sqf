@@ -655,10 +655,25 @@ OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 // data, kept with the store in fnc_opcom_tasking_init so they resolve at runtime alongside the force model.
 // Server-only, read by the tasking phase of the perception loop.
 
-// The single force<->AP exchange rate: a hire costs ceil(force * this), and the same rate prices a
-// commitment's Cost and Arty's kill Value, so no price can drift out of step with what a unit is worth.
-// Start at parity (one point of firepower = one Army Power); tune against the AP faucet in the decision loop.
-OPCOM_AP_PER_FORCE = 1;
+// Never derived from force: deriving it made every garrison action at a zone score the same, since the force bought
+// cancelled against the force paid for. Set against an OPFOR income near 40-80 AP per 30 min.
+OPCOM_AP_UNIT = createHashMapFromArray [
+    ["patrol", 1], ["team", 3], ["wp_team", 4], ["garrison_element", 3], ["squad", 5],
+    ["recon", 6], ["sniper_element", 4],
+    ["truck", 3], ["car", 12], ["at_car", 12], ["aa_car", 12], ["boat", 10],
+    ["apc", 25], ["ifv", 40], ["tank", 60],
+    ["transheli", 45], ["attackheli", 80], ["plane", 80]
+];
+
+// Fallback for a bare classname a faction names directly, mirroring OPCOM_AP_UNIT so the two cannot drift apart.
+OPCOM_AP_CLASS = createHashMapFromArray [
+    ["man", 0.5], ["static_mg", 6], ["static_hi", 10], ["static_arty", 8],
+    ["car_unarmed", 3], ["car_armed", 12], ["apc", 25], ["ifv", 40], ["tank", 60], ["air", 60], ["boat", 10]
+];
+
+OPCOM_AP_HARDPOINT = createHashMapFromArray [
+    ["ROADBLOCK", 8], ["MG", 12], ["GMG", 16], ["AT", 16], ["AA", 20]
+];
 
 // Added to a truck's source cost per km driven, so the nearest source wins.
 OPCOM_AP_PER_KM = 0.5;
@@ -673,6 +688,23 @@ OPCOM_AP_MINEFIELD = 15;
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
+
+// OPCOM appraisal (Phase 4C). Every figure below is a stand-in to be tuned in play, not a balance decision.
+
+// The floor keeps a deep-rear holding worth defending at all.
+OPCOM_EXPOSE_NEAR = 5000;
+OPCOM_EXPOSE_FAR = 10000;
+OPCOM_EXPOSE_FLOOR = 0.2;
+
+// A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
+OPCOM_TOWN_WORTH = 5;
+
+// Banking's flat score, under the break-even 1, so OPCOM saves only when nothing on the shortlist pays for itself.
+OPCOM_BANK_SCORE = 0.5;
+
+// Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
+OPCOM_PICK_TOP = 10;
+OPCOM_PICK_SHARPNESS = 2;
 
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are

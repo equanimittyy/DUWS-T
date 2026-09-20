@@ -9,8 +9,8 @@ DUWS_opcom_taskings = [];
 DUWS_opcom_taskSeq  = 0;
 
 // The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
-// to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- a hire costs
-// ceil(force * OPCOM_AP_PER_FORCE). `noncombat` keeps a row out of the garrison reserve pool (never spawns to
+// to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- a hire is
+// priced token by token through OPCOM_AP_UNIT. `noncombat` keeps a row out of the garrison reserve pool (never spawns to
 // defend, dies with a captured zone) regardless of armament -- a boat is armed; a separate axis from `transport`.
 // `transportable` lets a row ride a ferry lift: only men fit a cabin, so a hull drives its road route instead.
 DUWS_opcom_recruitMenu = createHashMapFromArray [

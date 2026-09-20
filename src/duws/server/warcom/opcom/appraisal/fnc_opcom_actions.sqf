@@ -1,13 +1,14 @@
 // Locality: server, [] call'd at load. The action list the pick stage (fnc_opcom_pick) draws from.
 // DUWS_opcom_actions row: [id, class, targets, execute, arg].
-//   arg call targets -> [[target, price, label], ...], the action's legal targets now. `arg` is the row's fixed
-//     argument, the hardpoint type or mine variant for a build row and [] elsewhere. Runs inside isNil, so it never
-//     suspends.
+//   arg call targets -> [[target, price, label, value, pWin], ...], the action's legal targets now. `arg` is the
+//     row's fixed argument, the hardpoint type or mine variant for a build row and [] elsewhere. Runs inside isNil,
+//     so it never suspends. `value` is the AP the target returns and `pWin` the odds it holds; omitting them scores
+//     the action break-even until its category is appraised.
 //   [target, price] call execute -> true when the action landed; the pick charges the price only then.
 if (!isServer) exitWith {};
 
 DUWS_opcom_aiMode = "off";
-DUWS_opcom_pickOnce = false;
+DUWS_opcom_pickOnce = "";
 DUWS_opcom_aiEvents = [];
 DUWS_opcom_aiSeq = 0;
 
@@ -43,29 +44,33 @@ DUWS_fnc_opcom_zonesOpenSweep = {
     {
         _x params ["", "_zp", "_zs"];
         private _zk = [_zp] call fnc_zone_key;
-        if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_zoneContested)}) then { _out pushBack [_zk, _zs] };
+        if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_zoneContested)}) then {
+            _out pushBack [_zk, _zs, _zp, _x select 3, [_zp] call DUWS_fnc_opcom_exposure, [_zp] call DUWS_fnc_opcom_pWin];
+        };
     } forEach zone_meta_array;
     _out
 };
 
 DUWS_fnc_opcom_zonesOpen = { ["zonesOpen", DUWS_fnc_opcom_zonesOpenSweep] call DUWS_fnc_opcom_tickCached };
 
-// 0 with nothing to buy. The step buys back random unlocked lost tokens, so it is priced at their average force.
-DUWS_fnc_opcom_reinforceForce = {
+// -> [force, price], 0 with nothing to buy. The step buys back random lost tokens, so both read their average.
+DUWS_fnc_opcom_reinforceBuy = {
     params ["_key"];
     private _lost = ([_key] call DUWS_fnc_garrisonLost) select { !([_x] call DUWS_fnc_tokenLocked) };
     private _n = ([_key] call DUWS_fnc_garrisonReinforceCount) min count _lost;
-    if (_n <= 0 || {([_key] call DUWS_fnc_garrisonStrength) >= 1}) exitWith { 0 };
-    _n * ([_lost] call DUWS_fnc_tokenListForce) / (count _lost)
+    if (_n <= 0 || {([_key] call DUWS_fnc_garrisonStrength) >= 1}) exitWith { [0, 0] };
+    private _c = count _lost;
+    [_n * ([_lost] call DUWS_fnc_tokenListForce) / _c, _n * ([_lost] call DUWS_fnc_opcom_listPrice) / _c]
 };
 
 DUWS_fnc_opcom_zoneReinforceTargets = {
     private _out = [];
     {
-        _x params ["_zk"];
-        private _force = [_zk] call DUWS_fnc_opcom_reinforceForce;
+        _x params ["_zk", "", "", "_worth", "_exp", "_pWin"];
+        ([_zk] call DUWS_fnc_opcom_reinforceBuy) params ["_force", "_price"];
         if (_force > 0) then {
-            _out pushBack [_zk, ceil (_force * OPCOM_AP_PER_FORCE), format ["Reinforce %1", [_zk] call DUWS_fnc_opcom_zoneLabel]];
+            _out pushBack [_zk, ceil _price, format ["Reinforce %1", [_zk] call DUWS_fnc_opcom_zoneLabel],
+                [_worth, _exp, _force, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -76,30 +81,26 @@ DUWS_fnc_opcom_zoneFortifyTargets = {
     private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
     private _out = [];
     {
-        _x params ["_zk"];
+        _x params ["_zk", "", "", "_worth", "_exp", "_pWin"];
         private _tier = [_zk] call fnc_zone_tier;
         if (_tier < _top) then {
             private _owed = [
                 [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition,
                 [[_tier + 1] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
             ] call DUWS_fnc_spawnDiff;
-            private _price = ceil (([_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce) * OPCOM_AP_PER_FORCE);
-            _out pushBack [_zk, _price, format ["Fortify %1 to tier %2", [_zk] call DUWS_fnc_opcom_zoneLabel, _tier + 1]];
+            private _buy = _owed select { !([_x] call DUWS_fnc_tokenLocked) };
+            private _force = [_buy] call DUWS_fnc_tokenListForce;
+            _out pushBack [_zk, ceil ([_buy] call DUWS_fnc_opcom_listPrice),
+                format ["Fortify %1 to tier %2", [_zk] call DUWS_fnc_opcom_zoneLabel, _tier + 1],
+                [_worth, _exp, _force, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
 };
 
-// A type's force is fixed once the faction is; the pick prices every unlocked type each tick.
-DUWS_opcom_hpPrices = createHashMap;
 DUWS_fnc_opcom_hpPrice = {
     params ["_type"];
-    private _p = DUWS_opcom_hpPrices getOrDefault [_type, -1];
-    if (_p < 0) then {
-        _p = ceil (([_type] call DUWS_fnc_hpForce) * OPCOM_AP_PER_FORCE);
-        DUWS_opcom_hpPrices set [_type, _p];
-    };
-    _p
+    OPCOM_AP_HARDPOINT getOrDefault [_type, 0]
 };
 
 DUWS_fnc_opcom_zoneBuildTargets = {
@@ -107,12 +108,13 @@ DUWS_fnc_opcom_zoneBuildTargets = {
     if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _out = [];
     {
-        _x params ["_zk", "_zs"];
+        _x params ["_zk", "_zs", "", "_worth", "_exp", "_pWin"];
         private _standing = { (_x select 4) isEqualTo _zk } count DUWS_hardpoints;
         private _pending = { (_x select 2) isEqualTo _zk } count DUWS_opcom_buildsPending;
         if ((([_zk, _zs] call fnc_hardpoint_zone_cap) - _standing - _pending) > 0) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
-                format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel]];
+                format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
+                [_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -137,9 +139,9 @@ DUWS_fnc_opcom_truckSourcesSweep = {
         };
     } forEach DUWS_opcom_taskings;
     private _comp = (DUWS_opcom_recruitMenu get "truck") select 0;
-    private _force = [_comp] call DUWS_fnc_tokenListForce;
-    if (_force > 0 && {([_comp select 0, "OPF"] call DUWS_fnc_tokenClass) isNotEqualTo ""}) then {
-        private _hire = ceil (_force * OPCOM_AP_PER_FORCE);
+    private _hire = ceil ([_comp] call DUWS_fnc_opcom_listPrice);
+    // A zero price is an unpriced token, not a free truck; an empty class is a faction that cannot field one yet.
+    if (_hire > 0 && {([_comp select 0, "OPF"] call DUWS_fnc_tokenClass) isNotEqualTo ""}) then {
         {
             _x params ["_zk"];
             _out pushBack [["hire", _zk], ([_zk] call fnc_site_at) get "pos", _hire];
@@ -197,12 +199,15 @@ DUWS_fnc_opcom_townReinforceTargets = {
     {
         private _i = _forEachIndex;
         if (_x < 1 || {_i in _busy}) then { continue };
-        private _force = [[_i] call DUWS_fnc_townStrengthKey] call DUWS_fnc_opcom_reinforceForce;
+        ([[_i] call DUWS_fnc_townStrengthKey] call DUWS_fnc_opcom_reinforceBuy) params ["_force", "_price"];
         if (_force <= 0) then { continue };
-        private _truck = [_sources, [_i] call DUWS_fnc_opcom_townPos] call DUWS_fnc_opcom_truckFor;
+        private _pos = [_i] call DUWS_fnc_opcom_townPos;
+        private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;
         if (_truck isEqualTo []) then { continue };
-        _out pushBack [[_i, _truck select 0], ceil (_force * OPCOM_AP_PER_FORCE + (_truck select 1)),
-            format ["Reinforce %1", [_i] call DUWS_fnc_opcom_townLabel]];
+        _out pushBack [[_i, _truck select 0], ceil (_price + (_truck select 1)),
+            format ["Reinforce %1", [_i] call DUWS_fnc_opcom_townLabel],
+            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town"] call DUWS_fnc_opcom_holdValue,
+            [_pos] call DUWS_fnc_opcom_pWin];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
 };
@@ -216,12 +221,16 @@ DUWS_fnc_opcom_townFortifyTargets = {
         private _i = _forEachIndex;
         private _tier = _x;
         if (_tier < 1 || {_tier >= _top} || {_i in _busy}) then { continue };
-        private _truck = [_sources, [_i] call DUWS_fnc_opcom_townPos] call DUWS_fnc_opcom_truckFor;
+        private _pos = [_i] call DUWS_fnc_opcom_townPos;
+        private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;
         if (_truck isEqualTo []) then { continue };
         private _owed = [[_tier] call DUWS_fnc_townSpawnList, [_tier + 1] call DUWS_fnc_townSpawnList] call DUWS_fnc_spawnDiff;
-        private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
-        _out pushBack [[_i, _truck select 0], ceil (_force * OPCOM_AP_PER_FORCE + (_truck select 1)),
-            format ["Fortify %1 to tier %2", [_i] call DUWS_fnc_opcom_townLabel, _tier + 1]];
+        private _buy = _owed select { !([_x] call DUWS_fnc_tokenLocked) };
+        private _force = [_buy] call DUWS_fnc_tokenListForce;
+        _out pushBack [[_i, _truck select 0], ceil (([_buy] call DUWS_fnc_opcom_listPrice) + (_truck select 1)),
+            format ["Fortify %1 to tier %2", [_i] call DUWS_fnc_opcom_townLabel, _tier + 1],
+            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town"] call DUWS_fnc_opcom_holdValue,
+            [_pos] call DUWS_fnc_opcom_pWin];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
 };
@@ -335,7 +344,8 @@ DUWS_fnc_opcom_mineBuildRun = {
 };
 
 DUWS_opcom_actions = [
-    ["bank", "bank", { [[[], 0, "Bank"]] }, { true }],
+    // Priced at nothing, so its Value doubles as its score: the bar every other action has to clear to be worth buying.
+    ["bank", "bank", { [[[], 0, "Bank", OPCOM_BANK_SCORE]] }, { true }],
     ["zone_reinforce", "defensive", DUWS_fnc_opcom_zoneReinforceTargets, {
         params ["_zk"];
         ([_zk, "opcom_reinforce"] call fnc_zone_garrison_reinforce) >= 0

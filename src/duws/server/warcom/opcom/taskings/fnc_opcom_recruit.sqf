@@ -12,7 +12,7 @@ _menu params ["_comp", "_flags"];
 // Zero force means an unresolvable/unbuilt token -- refused, not hired for free.
 private _force = [_comp] call DUWS_fnc_tokenListForce;
 if (_force <= 0) exitWith { ["WARN", "OPCOM", format ["recruit: row %1 has no resolvable force (unbuilt token?)", _row]] call fnc_log; nil };
-private _cost = ceil (_force * OPCOM_AP_PER_FORCE);
+private _cost = ceil ([_comp] call DUWS_fnc_opcom_listPrice);
 
 if (_pay && {WARCOM_opfor_ap < _cost}) exitWith { ["INFO", "OPCOM", format ["recruit: %1 costs %2 AP, wallet %3 -- refused", _row, _cost, WARCOM_opfor_ap]] call fnc_log; nil };
 

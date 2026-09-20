@@ -21,7 +21,7 @@ switch (_verb) do {
         {
             _y params ["_comp", "_flags"];
             private _force = [_comp] call DUWS_fnc_tokenListForce;
-            ["INFO", "OPCOMDBG", format ["row %1: comp %2 flags %3 force %4 cost %5 AP", _x, _comp, _flags, _force, ceil (_force * OPCOM_AP_PER_FORCE)]] call fnc_log;
+            ["INFO", "OPCOMDBG", format ["row %1: comp %2 flags %3 force %4 cost %5 AP", _x, _comp, _flags, _force, ceil ([_comp] call DUWS_fnc_opcom_listPrice)]] call fnc_log;
         } forEach DUWS_opcom_recruitMenu;
         true
     };
