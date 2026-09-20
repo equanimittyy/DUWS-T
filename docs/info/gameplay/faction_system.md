@@ -73,6 +73,31 @@ defaults). The same file probes signature civilian classes to set `civ_mod`. The
 and, on selection, sets `BLUFOR_FactionFile_X` / `OPFOR_FactionFile_X` to the chosen faction-file token,
 then hands off to HQ placement.
 
+### The server answers the setup screens
+
+The setup screens run on the game master's client, but the server builds the factions from its own mods.
+Arma does not make a client's mods match the server's, so a list or a check made against the client's
+config can offer a class the server cannot spawn, or reject one it can. Every answer that decides what a
+faction may hold therefore comes from the server:
+
+| Setup data | Server source |
+|---|---|
+| Preset dropdowns | `Factions_Available_BLUFOR_X` / `Factions_Available_OPFOR_X` |
+| AutoDetect picker and key-editor faction lists | `DUWS_detectedFactions` / `DUWS_detectedZombieFactions`, built by `fnc_factions_check` |
+| Key-editor class rows | `fnc_faction_query`, op `classes` |
+| The base of a list whose main the player changed | `fnc_faction_query`, op `base` |
+| The custom-paste check | `fnc_faction_query`, op `validate` |
+
+The lists are fixed for the session, so the server broadcasts them once at init. The other rows depend
+on what the player clicks, so the client asks with `fnc_faction_ask`
+(`shared/faction_lib/fnc_faction_query.sqf`), which blocks until the server replies. Every caller must
+therefore be scheduled. The server runs the query with `remoteExecCall`, because a class list for ALL
+walks the whole of `CfgVehicles` and would crawl at the scheduler's frame budget.
+
+Previews still read the client's config: an editor picture needs the mod's files on that machine to show
+at all. No faction file runs on a client, and clients take the resolved faction from the server's
+broadcasts ([§The confirmation screen](#the-confirmation-screen)).
+
 **Two globals, two meanings.** `*_FactionFile_X` is the player's answer — a faction-file token, or
 `CUSTOM`/`AUTODETECT`. `*_Faction_X` is the faction *class*, written only by faction init; its functional
 reader was the BLUFOR vehicle patrols, retired with the WARCOM cleanup, so today it survives as the
@@ -100,14 +125,15 @@ which is what the screen waits on. A loop because the environment screen's Back 
 selection and the screen asks again with the new pick; counters because a flag cleared by the server races
 a fresh request, and the screen would paint the previous pick's rows. Two obligations land outside the
 screen: every path the loop calls — both faction inits, all three AutoDetect wrappers, the paste parser —
-has to survive a second call, and the loop `publicVariable`s every schema key before answering, because a
-static faction file assigns server-side only and the OPFOR file never runs on a client at all.
+has to survive a second call, and the loop `publicVariable`s every schema key before answering, because no
+faction file runs on a client and a static one assigns server-side only. The loop also publishes the
+request-menu catalogue, which the schema does not cover: `blufor_RQST_UNITS` / `blufor_RQST_VEHICLES`, or
+the numbered slots that `fnc_faction_rqst_list` falls back to.
 
 On Continue the screen publishes `duws_faction_locked` — the whole table, not just the edits, so applying
 it is an overwrite rather than a reconciliation. `server/warcom/fnc_faction_apply_locked.sqf` does that on
-the server at the commit and again on each client after the JIP faction-file re-run, which fetches the
-request-menu catalogue the schema does not cover and puts the file's own classnames back over the role
-globals on the way. The table already holds every row's whole pool, because the screen builds its rows from
+the server at the commit and broadcasts every key, so every client reads the confirmed table, a joining
+client included. The table already holds every row's whole pool, because the screen builds its rows from
 `DUWS_factionPreviewPools`. The commit therefore runs `fnc_faction_augment` only when no table was locked
 (the debug quickstart). A second pass would rebuild each pool from its representative and undo the list
 edits.
@@ -210,8 +236,9 @@ Trailing comments name the consuming function for each variable — the de-facto
   `fnc_selectNonEmpty` fallback chains that end in vanilla assets, and builds the request-menu vehicle list
   priced by `fnc_evalVehicleCost` (estimates a CP cost from vehicle type, weapons, armor, sensors and threat
   rating).
-- **`fnc_factionSelector`** is a listbox of all present factions (`fnc_getAllFactionsClean` over
-  `BIS_fnc_getFactions`); on dedicated it is `remoteExec`d to the admin.
+- **`fnc_factionSelector`** is a listbox of the factions the server detected (`DUWS_detectedFactions`,
+  built at init by `fnc_getAllFactionsClean` over `BIS_fnc_getFactions`). It runs on the game master's
+  client and is the only AutoDetect helper broadcast to clients.
 - The `AUTODETECT_{blufor,opfor}.sqf` wrappers add an `EntityCreated` handler (`fnc_vehiclePostInit`) that
   retextures and re-crews vehicles spawned for a mismatched faction, then hand every array-valued role to
   `fnc_faction_pools_publish`. `AUTODETECT_RANDOM_opfor.sqf` is the same pipeline but auto-picks a random
@@ -231,9 +258,10 @@ The `CUSTOM` option lets a player define a faction by pasting text. `fnc_custom_
 two dialog text boxes (controls 2100/2101, defined in `shared/includes/custom_faction.hpp`) into
 `BLUfactionDataTemp` / `OPFfactionDataTemp`. `fnc_custom_faction_init.sqf` then splits the pasted text on
 newlines, keeps lines containing `blufor_` / `opfor_`, strips path-like lines, and `call compile`s each
-`variable = "classname";` pair — so the paste is executed as SQF. It validates that the resulting
-`*_SOLDIER_X` rifleman is a real class and loops an error message if not. This is a runtime eval of user
-input; it is server-side and gated behind the custom-faction dialog.
+`variable = "classname";` pair — so the paste is executed as SQF. The paste dialog does not close until
+the server's check passes (`fnc_faction_query`, op `validate`): every required key must name a class that
+the server has. This is a runtime eval of user input; it is server-side and gated behind the
+custom-faction dialog.
 
 ## Squads and civilians
 

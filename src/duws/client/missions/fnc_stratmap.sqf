@@ -1,13 +1,5 @@
 // Locality: client -- invoked from a dialog action.
 
-
-// Reruns the OPFOR faction file for a JIP client: side-mission generation needs the faction globals it
-// sets, and a late joiner never ran the boot-time faction init that set them.
-if (hasInterface && isMultiplayer)	then {
-	[] call fnc_OPFOR_FactionFile_X;
-	sleep 1;
-};
-
 if (isnil ("Mission_available")) then {Mission_available = true;publicVariable "Mission_available"};
 if (!Mission_available) exitWith {
 _speaker = localize "STR_DUWS_T_OVERLORD";

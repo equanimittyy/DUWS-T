@@ -161,7 +161,6 @@ _publish = ((["blufor"] call fnc_faction_schema) apply {_x select 0}) + ["blufor
 
 
 }; // end of function: fnc_factionGen
-publicVariable "fnc_factionGen";
 
 // The faction was chosen during setup (fnc_startup_faction_resolve) and broadcast as
 // selectedFaction_BLU; generate its data now, at the deferred commit.

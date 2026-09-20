@@ -20,9 +20,6 @@ duws_faction_confirm_done = false;
 duws_faction_locked = [];
 publicVariable "duws_faction_locked";
 
-// Cleared per screen: the parse a key edit runs is per faction and expensive, and a faction's
-// buckets do not change within one visit to this screen.
-uiNamespace setVariable ["duws_faction_parse_cache", createHashMap];
 // Vehicle list records by key (fnc_faction_lists.sqf), only for keys the player edited this visit.
 uiNamespace setVariable ["duws_faction_edits", createHashMap];
 

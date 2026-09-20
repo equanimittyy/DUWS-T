@@ -1,12 +1,11 @@
-// Locality: server or client -- fnc_custom_faction_init calls it on the server,
-// fnc_custom_faction_capture on a client; it only parses text into locals, so either is safe.
+// Locality: server -- fnc_custom_faction_init calls it at the build, fnc_faction_query when the
+// paste screen submits.
 //
 // Parse pasted custom-faction text into ["<var> = <class>", ...] assignment fragments, then report
 // which required faction keys the paste left missing or pointing at a class that doesn't exist.
-// Shared by the paste screen's submit validation (client) and the deferred faction build (server).
 //
-// Side effect: compiling the fragments assigns the faction globals -- intended server-side, a
-// transient pre-check on the client (overwritten when the server's data is applied). Every schema
+// Side effect: compiling the fragments assigns the faction globals. The paste screen's check is
+// harmless for that: the confirmation screen's request resolves both sides again. Every schema
 // key is cleared first so a leftover value can't mask a key this paste never defines: a misspelled
 // key (blufor_SOLDER_X) leaves its canonical name (blufor_SOLDIER_X) cleared, so it reports missing
 // rather than being silently accepted.

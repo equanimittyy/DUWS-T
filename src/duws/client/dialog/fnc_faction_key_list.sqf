@@ -14,9 +14,14 @@ duws_faction_list_record = (uiNamespace getVariable ["duws_faction_edits", creat
 duws_faction_list_current = (createHashMapFromArray (missionNamespace getVariable ["DUWS_factionPreviewPools", []]))
     getOrDefault [_key, missionNamespace getVariable [_key, ""]];
 
+// A main's base is its bucket in the server's config, so that branch blocks on the server: only
+// scheduled callers ever set a main.
 duws_faction_list_rebase = {
-    duws_faction_list_base = [duws_faction_list_record, duws_faction_list_current,
-        uiNamespace getVariable ["duws_faction_parse_cache", createHashMap]] call fnc_faction_list_base;
+    duws_faction_list_base = if ((duws_faction_list_record select 0) isEqualTo "") then {
+        [duws_faction_list_record, duws_faction_list_current, createHashMap] call fnc_faction_list_base
+    } else {
+        ["base", [duws_faction_list_record], []] call fnc_faction_ask
+    };
 };
 
 // _sel is a row index or a class to land on.
@@ -54,21 +59,16 @@ _listCtrl ctrlAddEventHandler ["LBDblClick", {
     params ["_ctrl", "_i"];
     private _class = _ctrl lbData _i;
     private _factionCtrl = [8623] call duws_faction_edit_ctrl;
-    private _classCtrl = [8625] call duws_faction_edit_ctrl;
     ([8632] call duws_faction_edit_ctrl) ctrlSetText "";
     private _faction = getText (configFile >> "CfgVehicles" >> _class >> "faction");
     private _fIdx = 0 max (duws_faction_edit_list findIf { (_x select 1) isEqualTo _faction });
-    // Same faction: no selection change raises the combo's refill, and the cleared filter needs one.
+    duws_faction_edit_pick = _class;
+    // Same faction: no selection change raises the combo's refetch, and the cleared filter needs a refill.
     if (lbCurSel _factionCtrl == _fIdx) then {
-        [_factionCtrl lbData _fIdx] call duws_faction_fill_classes;
+        [] call duws_faction_fill_classes;
     } else {
         _factionCtrl lbSetCurSel _fIdx;
     };
-    private _cIdx = -1;
-    for "_c" from 0 to (lbSize _classCtrl - 1) do {
-        if ((_classCtrl lbData _c) isEqualTo _class) exitWith { _cIdx = _c; };
-    };
-    if (_cIdx >= 0) then { _classCtrl lbSetCurSel _cIdx; } else { [] call duws_faction_edit_preview; };
 }];
 
 (_display displayCtrl 8634) ctrlAddEventHandler ["ButtonClick", {

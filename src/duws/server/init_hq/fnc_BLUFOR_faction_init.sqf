@@ -36,4 +36,3 @@ sleep 1;
 
 publicVariable "BLUFOR_Faction_X";
 publicVariable "BLUFOR_FactionFile_X";
-publicVariable "fnc_BLUFOR_FactionFile_X";

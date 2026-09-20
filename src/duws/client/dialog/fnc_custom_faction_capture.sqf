@@ -21,7 +21,11 @@ private _error = "";
 if (_text call _fnc_isBlank) then {
     _error = localize "STR_DUWS_T_vho23y9e";
 } else {
-    ([_side, _text] call fnc_custom_faction_parse) params ["", "_valid", "_bad"];
+    // The server's mods decide, so the server checks. Buttons off while it answers: a second click
+    // would close the next dialog.
+    { ctrlEnable [_x, false]; } forEach [1600, 1601];
+    (["validate", [_side, _text], [false, []]] call fnc_faction_ask) params ["_valid", "_bad"];
+    { ctrlEnable [_x, true]; } forEach [1600, 1601];
     if (!_valid) then { _error = format [localize "STR_DUWS_T_ow2fwl24", _bad joinString ", "]; };
 };
 

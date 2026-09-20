@@ -106,15 +106,25 @@ while {!createzone_server} do {
 	// one class per role and only this pass widens it.
 	[] call fnc_faction_augment;
 
-	// AutoDetect broadcasts its own and a CUSTOM paste ships its assignment list, but a static
-	// faction file only assigns server-side, and the OPFOR file never runs on a client at all --
-	// without this the screen would paint whatever that machine happened to hold, not what the
-	// server just resolved.
+	// No faction file runs on a client, and a static one assigns server-side only -- without this the
+	// screen would paint whatever that machine happened to hold, not what the server just resolved.
 	{
 		private _side = _x;
 		{ missionNamespace setVariable [_x select 0, missionNamespace getVariable [_x select 0, ""], true]; }
 			forEach ([_side] call fnc_faction_schema);
 	} forEach ["blufor", "opfor"];
+
+	// The menus reading this are client-side and the schema does not carry the catalogue. Numbered
+	// slots too: a pasted faction may spell it fnc_faction_rqst_list's older way.
+	{ publicVariable _x; } forEach (["blufor_RQST_UNITS", "blufor_RQST_VEHICLES"] select { !isNil _x });
+	{
+		private _kind = _x;
+		for "_i" from 1 to 99 do {
+			private _var = format ["blufor_RQST_%1_%2_X", _kind, if (_i < 10) then { "0" + str _i } else { str _i }];
+			if (isNil _var) exitWith {};
+			publicVariable _var;
+		};
+	} forEach ["UNIT", "VEHICLE"];
 
 	// One broadcast of every key's resolution tier, read once here after backfill so a borrow's
 	// yellow is already in. The confirmation screen colours each row from it: 0 white, 1 yellow, 2 red.

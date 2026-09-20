@@ -121,10 +121,6 @@ duws_gamemodes = [
 ];
 if (isNil "duws_gamemode") then { duws_gamemode = "duws"; };
 
-// Does any loaded mod supply a zombie faction? Same enumeration the AutoDetect picker runs, done
-// once here rather than per click, and read by the mode row below.
-duws_zombie_factions_found = count ([true] call fnc_getAllFactionsClean) > 0;
-
 // The frame carries the caption, so there is no separate label control. Its own box above the
 // faction row keeps the order of the screen readable: the mode is answered first and narrows what
 // the factions may be.

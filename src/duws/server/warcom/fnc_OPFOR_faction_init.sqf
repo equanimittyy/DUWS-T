@@ -22,7 +22,6 @@ sleep 1;
 
 publicVariable "OPFOR_FactionFile_X";
 publicVariable "OPFOR_Faction_X";
-publicVariable "fnc_OPFOR_FactionFile_X";
 
 // R3F logistics needs to know these values
 publicVariable "opfor_TRANS_TRUCK_X";

@@ -136,22 +136,6 @@ if (isMultiplayer) then {
 
 	"commandpointsblu1" addPublicVariableEventHandler {ctrlSetText [1000, format["%1",commandpointsblu1]]; };
 	"WARCOM_blufor_ap" addPublicVariableEventHandler {ctrlSetText [1002, format["%1",WARCOM_blufor_ap]]; };
-	
-	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_FactionFile_X]] call fnc_log;
-	if (BLUFOR_FactionFile_X == "CUSTOM") then {
-		while {!(["FACTION", "BLUfactionData (JIP custom faction)", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
-		{
-			call compile _x;
-		} forEach BLUfactionData;
-	} else {
-		[] call fnc_BLUFOR_FactionFile_X;
-	};
-	sleep 1;
-	// The run above is for the request-menu catalogue, which the confirmation screen's schema does
-	// not cover -- but it also puts the faction file's own classnames back over the role globals.
-	// Re-apply the locked table so this machine fields what the player confirmed.
-	[] call fnc_faction_apply_locked;
-	["INFO", "BOOT", format ["Blufor Faction init for JIP complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
 
 };
 
@@ -300,8 +284,8 @@ hint localize "STR_DUWS_T_zu4bxt24";
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 
-// Only now is this machine ready to be flown in: everything above it -- the JIP faction re-run, the
-// squad-lead extras, the action set -- still had to happen, and the intro remoteExecs a seat onto
+// Only now is this machine ready to be flown in: everything above it -- the squad-lead extras, the
+// action set -- still had to happen, and the intro remoteExecs a seat onto
 // this client. Announced here rather than beside fnc_remoteBoard at the top of this file, which
 // says only that the function exists and let the server spawn the helicopter while the client was
 // still initialising, boarding nobody.

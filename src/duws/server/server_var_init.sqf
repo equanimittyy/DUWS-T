@@ -21,8 +21,8 @@ OPFOR_FactionFile_X = "OPF_F_ARID";publicVariable "OPFOR_FactionFile_X";
 
 BLUfactionDataTemp = "";publicVariable "BLUfactionDataTemp";
 OPFfactionDataTemp = "";publicVariable "OPFfactionDataTemp";
-BLUfactionData = [];publicVariable "BLUfactionData";
-OPFfactionData = [];publicVariable "OPFfactionData";
+BLUfactionData = [];
+OPFfactionData = [];
 
 Factions_Available_OPFOR_X = [];publicVariable "Factions_Available_OPFOR_X";
 Factions_Available_BLUFOR_X = [];publicVariable "Factions_Available_BLUFOR_X";

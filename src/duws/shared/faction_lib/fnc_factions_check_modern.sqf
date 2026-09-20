@@ -15,10 +15,7 @@
 //	 - they are DEFAULTs
 if (!isServer) exitWith {};
 
-// Publish the AutoDetect helpers (fnc_factionSelector, fnc_getAllFactionsClean,
-// fnc_parseFaction, ...) up front so the setup-screen faction picker can use them
-// before START. Otherwise they only come into existence when an AUTODETECT faction
-// file is compiled at the post-START commit, and the picker fires too late.
+// Compiled up front: the setup-screen picker fires before START, and the lists below are its rows.
 call compile preprocessFileLineNumbers "duws\shared\factions\MODERN\fn_factionAutoDetect.sqf";
 
 _faction_files_BLUFOR = [
@@ -312,6 +309,15 @@ Factions_Available_OPFOR_X pushback ["OPF_F", "Default = CSAT (Arid)","OPF_F_ARI
 
 publicVariable "Factions_Available_OPFOR_X";
 publicVariable "Factions_Available_BLUFOR_X";
+
+// The picker and the key editor run on a client, but the server builds what they pick. Sorted by the
+// label the player reads, so a long mod list is scannable.
+DUWS_detectedFactions = [false] call fnc_getAllFactionsClean;
+DUWS_detectedZombieFactions = [true] call fnc_getAllFactionsClean;
+DUWS_detectedFactions sort true;
+DUWS_detectedZombieFactions sort true;
+publicVariable "DUWS_detectedFactions";
+publicVariable "DUWS_detectedZombieFactions";
  
 civ_mod = "vanilla";
 if (isClass(configFile >> "CfgVehicles" >> "CUP_C_C_Citizen_01")) then {

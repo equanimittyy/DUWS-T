@@ -55,8 +55,7 @@ fnc_autodetect_watchVehicles = compileFinal {
 };
 
 
-// No in-tree caller, kept: publicVariable'd with the other helpers, so a third-party faction file may
-// call it -- and a missing broadcast name fails silently at the call site, uncaught by lint or self-check.
+// No in-tree caller, kept: a third-party faction file may call it.
 fnc_padZero = compileFinal {
 	switch (True) do { 
 		case (_this < 10): {format ["0%1", str _this]};
@@ -581,7 +580,7 @@ fnc_faction_pool_for_class = compileFinal {
 
 // Zombie faction? Matched on display name, not a per-mod class list: two zombie mods are supported and
 // cannot all be named, but both name theirs for what they field. One test both ways -- zombies stay out
-// of ordinary picks, are the only OPFOR in zombie mode. Markers live in the block (what clients get), not a lockstep global.
+// of ordinary picks, are the only OPFOR in zombie mode.
 fnc_factionIsZombie = compileFinal {
 	params ["_factionClass"];
 	private _name = toLower getText (configFile >> "CfgFactionClasses" >> _factionClass >> "displayName");
@@ -620,9 +619,7 @@ fnc_factionSelector = compileFinal {
 	selectionDone = nil;
 	DUWS_factionSelectFinal = _finalRound;	// read by the ButtonClick handler at click time
 
-	factionList = [_wantZombies] call fnc_getAllFactionsClean;
-	// Alphabetical by the display label the player reads, so a long mod list is scannable.
-	factionList sort true;
+	factionList = [DUWS_detectedFactions, DUWS_detectedZombieFactions] select _wantZombies;
 
 	disableSerialization;
 
@@ -758,4 +755,5 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_autodetect_watchVehicles","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_classifyVehicle","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+// The picker is the one helper a client runs: faction files and detection run on the server alone.
+publicVariable "fnc_factionSelector";

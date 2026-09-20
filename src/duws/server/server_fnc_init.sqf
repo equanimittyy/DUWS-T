@@ -150,6 +150,9 @@ publicVariable "fnc_support_despawn";
 publicVariable "fnc_faction_list_resolve";
 publicVariable "fnc_faction_list_edit";
 publicVariable "fnc_faction_list_base";
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_query.sqf";
+publicVariable "fnc_faction_ask";
+publicVariable "fnc_faction_reply";
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
@@ -679,8 +682,7 @@ publicVariable "fnc_apocalypse_buildings";
 // =========================================================================================================
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
 fnc_OPFOR_faction_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_faction_init.sqf";
-// Broadcast: clients re-run the faction file for themselves on join and have to re-apply over it.
-fnc_faction_apply_locked = compile preprocessFileLineNumbers "duws\server\warcom\fnc_faction_apply_locked.sqf";publicVariable "fnc_faction_apply_locked";
+fnc_faction_apply_locked = compile preprocessFileLineNumbers "duws\server\warcom\fnc_faction_apply_locked.sqf";
 fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\warcom\fnc_AI_Master_Control.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\warcom\fnc_escalation.sqf";
 // Broadcast: fnc_escalation arms this on every machine (BuildingChanged is a local event) so a
@@ -970,7 +972,7 @@ fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\faction_lib
 // The two AutoDetect wrappers and fnc_custom_faction_parse build their key lists from it. Broadcast
 // because the confirmation screen builds its rows from it client-side.
 fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";
-fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
+fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_custom_faction_parse.sqf";
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_unit_keylist.sqf";

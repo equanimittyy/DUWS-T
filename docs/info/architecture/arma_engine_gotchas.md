@@ -331,6 +331,10 @@ A unary command binds tighter than binary `remoteExec`, so `titleText [...] remo
 
 Fix: this mission resolves server-side nearly everywhere (`fnc_duws_dialogue` call sites hand already-`localize`d text), so the `BIS_fnc_Spawn` hint sites are the exception — don't fold them into the first form, or the DE/ES/ZH tags stop reaching anyone on a dedicated server.
 
+## `configFile` is the running machine's mod set, so a client can list classes the server cannot spawn
+
+Each machine builds `configFile` from the mods it loaded, and Arma does not make a client's set match the server's. A faction enumeration, a `configClasses` list or an `isClass` check run on a client therefore answers for that client's mods, not for the server's, which is the machine that spawns. The setup screens once did all three on the game master's client: they offered factions and classes that the server could not build, and they rejected a pasted class that the server had. Clients also re-ran the faction files against their own config and rebroadcast the results over the server's. Fix: run on the server any list or check that decides what the server will build. Broadcast an answer that is fixed at init, and get a per-click answer with a server round trip (`fnc_faction_ask` calling `fnc_faction_query`, `src/duws/shared/faction_lib/fnc_faction_query.sqf`). A client-side config read is correct only for presentation that needs the mod's files locally anyway, such as an `editorPreview` picture.
+
 ## `player1` is an editor unit, so `remoteExec`ing to it addresses slot 1 and nobody else
 
 A `remoteExec` object target runs only where that object is local, and `player1` is a `mission.sqm` unit, not a synonym for "the player" — it resolves to whoever holds slot 1 (the Game Master seat); SP hides this, a second co-op player exposes it. Fix: `player1` is right only for the Game Master seat. Anything the team reads takes `[0,-2] select isDedicated`, evaluated where the call is made — `isDedicated` is false on every client, so the idiom only excludes an interfaceless server when the call site is server-side.

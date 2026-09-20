@@ -42,7 +42,6 @@ _publish = (["opfor"] call fnc_faction_schema) apply {_x select 0};
 { missionNamespace setVariable [_x, missionNamespace getVariable [_x, []], true] } forEach _publish;
 
 }; // end of function: fnc_factionGen
-publicVariable "fnc_factionGen";
 
 //selectRandom factionList select 1 call fnc_factionGen;
 
