@@ -3506,58 +3506,6 @@
                 <English>Intel recovered in the field. A new position is marked on your map.</English>
             </Key>
         </Container>
-        <Container name="Black Market">
-            <Key ID="STR_DUWS_T_BLACKMARKET_TITLE">
-                <Original>Black Market</Original>
-                <English>Black Market</English>
-                <Chinesesimp>黑市</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND">
-                <Original>Item dropped on the ground (no inventory space left).</Original>
-                <English>Item dropped on the ground (no inventory space left).</English>
-                <Chinesesimp>物品已掉落在地面 (玩家没有充足的库存空间)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BUY_GOGGLES">
-                <Original>Buy Random Facewear (1 cash)</Original>
-                <English>Buy Random Facewear (1 cash)</English>
-                <Chinesesimp>购买随机面部装备 (1 纸币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BUY_PISTOL">
-                <Original>Buy Random Sidearm (5 cash)</Original>
-                <English>Buy Random Sidearm (5 cash)</English>
-                <Chinesesimp>购买随机副手武器 (5 纸币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BUY_OPTIC">
-                <Original>Buy Random Optic (5 cash)</Original>
-                <English>Buy Random Optic (5 cash)</English>
-                <Chinesesimp>购买随机瞄具 (5 纸币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_OPTIC">
-                <Original>%1 bought an optic: %2.</Original>
-                <English>%1 bought an optic: %2.</English>
-                <Chinesesimp>%1 购买了瞄具：%2</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY">
-                <Original>Not enough money. This costs %1; you have %2.</Original>
-                <English>Not enough money. This costs %1; you have %2.</English>
-                <Chinesesimp>需要 %1 个纸币，你只有 %2 个</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_GOGGLES">
-                <Original>%1 bought facewear: %2.</Original>
-                <English>%1 bought facewear: %2.</English>
-                <Chinesesimp>%1 购买了面部装备：%2</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_sent">
-                <Original>Your black market order has been delivered to HQ.</Original>
-                <English>Your black market order has been delivered to HQ.</English>
-                <Chinesesimp>战区的黑市刚刚派人送了点东西到总部。谁买的？...我是说，好品味。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_PISTOL">
-                <Original>%1 bought a sidearm: %2.</Original>
-                <English>%1 bought a sidearm: %2.</English>
-                <Chinesesimp>%1 购买了副手武器：%2</Chinesesimp>
-            </Key>
-        </Container>
         <Container name="Kill Rewards &amp; Bonuses">
             <Key ID="STR_DUWS_T_RARE_ZOMBIE_KILL_TITLE">
                 <Original>Elite Demon eliminated</Original>
