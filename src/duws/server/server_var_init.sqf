@@ -699,9 +699,9 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 // A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
 OPCOM_TOWN_WORTH = 5;
 
-// Banking's flat score. Set under the defensive band, not under the break-even 1: a single purchase is a small
-// slice of a full-strength holding, so a defensive buy scores a few tenths and a higher bar would bank every tick.
-OPCOM_BANK_SCORE = 0.1;
+// Banking's flat score, under the break-even 1 of an action that returns exactly what it costs, so OPCOM saves only
+// when nothing on the shortlist pays for itself.
+OPCOM_BANK_SCORE = 0.5;
 
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;

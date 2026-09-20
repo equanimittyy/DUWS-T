@@ -68,26 +68,28 @@ DUWS_fnc_opcom_townWorth = {
     ((missionNamespace getVariable ["civ_town_ap", []]) param [_i, 0]) * OPCOM_TOWN_WORTH
 };
 
-// The denominator that turns a partial buy into the share of the whole.
-DUWS_opcom_fullForceMemo = createHashMap;
-DUWS_fnc_opcom_fullForce = {
-    params ["_kind"];
-    private _f = DUWS_opcom_fullForceMemo getOrDefault [_kind, -1];
+// What the holding fields at its own current tier. Measured against the top tier instead, a small zone's refill
+// read as a few percent of a zone it will never be, and every buy scored a fraction of what it was worth.
+DUWS_opcom_tierForceMemo = createHashMap;
+DUWS_fnc_opcom_tierForce = {
+    params ["_kind", "_tier"];
+    private _key = format ["%1_%2", _kind, _tier];
+    private _f = DUWS_opcom_tierForceMemo getOrDefault [_key, -1];
     if (_f < 0) then {
         private _list = if (_kind isEqualTo "zone") then {
             private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-            [[count DUWS_zoneSpawnTiers] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
+            [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
         } else {
-            [count DUWS_townSpawnTiers] call DUWS_fnc_townSpawnList
+            [_tier] call DUWS_fnc_townSpawnList
         };
         _f = ([_list] call DUWS_fnc_tokenListForce) max 1;
-        DUWS_opcom_fullForceMemo set [_kind, _f];
+        DUWS_opcom_tierForceMemo set [_key, _f];
     };
     _f
 };
 
 // Exposure arrives measured: a holding's is the same for every action on it, so the sweep reads it once.
 DUWS_fnc_opcom_holdValue = {
-    params ["_worth", "_exposure", "_force", "_kind"];
-    _worth * _exposure * ((_force / ([_kind] call DUWS_fnc_opcom_fullForce)) min 1)
+    params ["_worth", "_exposure", "_force", "_kind", "_tier"];
+    _worth * _exposure * ((_force / ([_kind, _tier] call DUWS_fnc_opcom_tierForce)) min 1)
 };

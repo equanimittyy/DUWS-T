@@ -45,7 +45,8 @@ DUWS_fnc_opcom_zonesOpenSweep = {
         _x params ["", "_zp", "_zs"];
         private _zk = [_zp] call fnc_zone_key;
         if (!([_zk] call fnc_zone_bluforHeld) && {!([_zk] call DUWS_fnc_opcom_zoneContested)}) then {
-            _out pushBack [_zk, _zs, _zp, _x select 3, [_zp] call DUWS_fnc_opcom_exposure, [_zp] call DUWS_fnc_opcom_pWin];
+            _out pushBack [_zk, _zs, _zp, _x select 3, [_zp] call DUWS_fnc_opcom_exposure, [_zp] call DUWS_fnc_opcom_pWin,
+                [_zk] call fnc_zone_tier];
         };
     } forEach zone_meta_array;
     _out
@@ -66,11 +67,11 @@ DUWS_fnc_opcom_reinforceForce = {
 DUWS_fnc_opcom_zoneReinforceTargets = {
     private _out = [];
     {
-        _x params ["_zk", "", "", "_worth", "_exp", "_pWin"];
+        _x params ["_zk", "", "", "_worth", "_exp", "_pWin", "_tier"];
         private _force = [_zk] call DUWS_fnc_opcom_reinforceForce;
         if (_force > 0) then {
             _out pushBack [_zk, OPCOM_AP_REINFORCE, format ["Reinforce %1", [_zk] call DUWS_fnc_opcom_zoneLabel],
-                [_worth, _exp, _force, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
+                [_worth, _exp, _force, "zone", _tier] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -81,8 +82,7 @@ DUWS_fnc_opcom_zoneFortifyTargets = {
     private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
     private _out = [];
     {
-        _x params ["_zk", "", "", "_worth", "_exp", "_pWin"];
-        private _tier = [_zk] call fnc_zone_tier;
+        _x params ["_zk", "", "", "_worth", "_exp", "_pWin", "_tier"];
         if (_tier < _top) then {
             private _owed = [
                 [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition,
@@ -91,7 +91,7 @@ DUWS_fnc_opcom_zoneFortifyTargets = {
             private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
             _out pushBack [_zk, OPCOM_AP_FORTIFY,
                 format ["Fortify %1 to tier %2", [_zk] call DUWS_fnc_opcom_zoneLabel, _tier + 1],
-                [_worth, _exp, _force, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
+                [_worth, _exp, _force, "zone", _tier] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -107,13 +107,13 @@ DUWS_fnc_opcom_zoneBuildTargets = {
     if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _out = [];
     {
-        _x params ["_zk", "_zs", "", "_worth", "_exp", "_pWin"];
+        _x params ["_zk", "_zs", "", "_worth", "_exp", "_pWin", "_tier"];
         private _standing = { (_x select 4) isEqualTo _zk } count DUWS_hardpoints;
         private _pending = { (_x select 2) isEqualTo _zk } count DUWS_opcom_buildsPending;
         if ((([_zk, _zs] call fnc_hardpoint_zone_cap) - _standing - _pending) > 0) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
                 format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
-                [_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone"] call DUWS_fnc_opcom_holdValue, _pWin];
+                [_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone", _tier] call DUWS_fnc_opcom_holdValue, _pWin];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -197,7 +197,8 @@ DUWS_fnc_opcom_townReinforceTargets = {
     private _out = [];
     {
         private _i = _forEachIndex;
-        if (_x < 1 || {_i in _busy}) then { continue };
+        private _tier = _x;
+        if (_tier < 1 || {_i in _busy}) then { continue };
         private _force = [[_i] call DUWS_fnc_townStrengthKey] call DUWS_fnc_opcom_reinforceForce;
         if (_force <= 0) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
@@ -205,7 +206,7 @@ DUWS_fnc_opcom_townReinforceTargets = {
         if (_truck isEqualTo []) then { continue };
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_REINFORCE + (_truck select 1)),
             format ["Reinforce %1", [_i] call DUWS_fnc_opcom_townLabel],
-            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town"] call DUWS_fnc_opcom_holdValue,
+            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue,
             [_pos] call DUWS_fnc_opcom_pWin];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
@@ -227,7 +228,7 @@ DUWS_fnc_opcom_townFortifyTargets = {
         private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_FORTIFY + (_truck select 1)),
             format ["Fortify %1 to tier %2", [_i] call DUWS_fnc_opcom_townLabel, _tier + 1],
-            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town"] call DUWS_fnc_opcom_holdValue,
+            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue,
             [_pos] call DUWS_fnc_opcom_pWin];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
