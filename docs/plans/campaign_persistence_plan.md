@@ -123,7 +123,7 @@ zones and no others.
 frame the last player leaves, so a `spawn`ed save is a thread the mission may never get to run —
 the trigger that exists *because* it is the last moment the mission exists is also the one with no
 time to spare. The snapshot and the flush both `call`, inside the disconnect handler
-(`server/server_init.sqf:221`). That handler also has to identify the last player rather than count
+(`server/server_init.sqf:322`). That handler also has to identify the last player rather than count
 them: the leaver can still be in `allPlayers` when it fires, so the test excludes the UID the
 handler was handed.
 
@@ -151,7 +151,7 @@ sets it in `server.cfg` without touching the PBO, which is the whole point.
 **Off means manual saves only, not no saves.** The other three triggers are not part of this loop,
 so a campaign with the interval at zero still writes on the last disconnect and on a clean mission
 end, and the player can still save on demand: SITREP is a comm-menu item granted at boot rather
-than an unlock, and `client/client_init.sqf:453` grants it to the singleplayer player as well as
+than an unlock, and `client/client_init.sqf:383` grants it to the singleplayer player as well as
 the game master. What Off actually costs is the crash case — an ALT-F4 or a hang loses the whole
 session instead of one interval.
 
@@ -188,7 +188,7 @@ closing the game, so the periodic timer is the only thing standing between an AL
 interval. Neither ever reaches zero players, so the idle gate below never fires for them.
 
 Singleplayer is the case where this changes the most, because **there is no save there today**:
-`enableSaving [false, false]` (`server/server_init.sqf:113`) removes the engine autosave *and* the
+`enableSaving [false, false]` (`server/server_init.sqf:196`) removes the engine autosave *and* the
 pause menu's Save & Exit, so quitting a singleplayer campaign currently loses it outright. That
 line stays — an engine save and a snapshot are two sources of truth that would drift apart — which
 means the snapshot has to carry the whole job, and a player pressing Escape expecting to save needs
@@ -234,7 +234,7 @@ correctly by every future loop and a missed read is silent.
 **Time-based state must be stored as a remaining duration, never as an absolute stamp.**
 `diag_tickTime` counts from process start, so any stamp saved in one session sits in the future in
 the next and wedges whatever it gates for as long as the old session ran. The mission already
-carries a monitor that clears future stamps off player objects (`server/server_init.sqf:434-467`);
+carries a monitor that clears future stamps off player objects (`server/server_init.sqf:441-468`);
 that stays as the backstop, and nothing new should need it.
 
 ## What the current save does not cover
@@ -242,7 +242,7 @@ that stays as the backstop, and nothing new should need it.
 | Problem | Where |
 |---|---|
 | The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/persistence/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
-| Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
+| Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:196` |
 | `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/civilian/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
 | Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
@@ -263,7 +263,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 |---|---|---|
 | `fnc_createZone` appends to `zone_namePOS_pairs` and `Array_of_OPFOR_zones`, registers the site, and increments `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-34` | Restoring those globals *and* replaying the builder counts every zone twice |
 | `fnc_WARCOM_init` clears the BLUFOR zone list and hands every zone back to OPFOR | `server/warcom/fnc_WARCOM_init.sqf:38-46` | Ownership applied before it runs is wiped; every capture is lost |
-| The setup-screen gates block on globals a *client* publishes | `server/server_init.sqf:46,52` | A restore has no player at those screens, so boot never gets past them |
+| The setup-screen gates block on globals a *client* publishes | `server/server_init.sqf:161,166` | A restore has no player at those screens, so boot never gets past them |
 | The locator `spawn`s `fnc_createZone` per zone, so builds finish out of order | `server/init_zones/fnc_locatorzones_random.sqf:181` | Registration order is not zone order, so anything keyed by array position is keyed to the wrong zone. `zone_meta_array` carries `_zone_num` for this reason |
 | `fnc_fob_server` rolls a fresh name and announces the FOB over radio behind a 5 s sleep | `server/supports/fnc_fob_server.sqf:7,20-24` | Replaying it renames every FOB and queues one callout per FOB at boot |
 | Zone names are drawn at random from a pool that records what it has spent | `server/init_zones/fnc_zone_state_init.sqf`, `fnc_createzone.sqf` | Replaying the builder renames every zone on the map. The names *and* the used list have to be restored, and the builder must not re-draw |
@@ -371,11 +371,11 @@ must not have a snapshot put the old list back.
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
 **The campaign clock is stored because boot sets it unconditionally.**
-`server/server_init.sqf:154` calls `setDate [2035, 8, 3, time_of_day, 0]`, so without this every
+`server/server_init.sqf:268` calls `setDate [2035, 8, 3, time_of_day, 0]`, so without this every
 restore snaps back to the third day at the hour the campaign was configured with, and a night
 operation resumes at noon. It is gameplay state rather than presentation:
 `server/events/fnc_night_horde_event.sqf:33` counts days off `date`, and the load screen labels each
-row with one. It is an outcome because it has to be re-applied after `setTimeMultiplier` (`:159`)
+row with one. It is an outcome because it has to be re-applied after the boot `setDate` (`:268`)
 rather than before the builders — the boot line would overwrite it. `DUWS_timeSkew` (seconds a rest
 has skipped, the campaign clock's offset over engine `time` — see `fnc_campaign_now`) rides in the
 same group: a plain serializable scalar, stored and re-applied beside `date`, exempt from the
@@ -427,7 +427,7 @@ silently un-unlocking an enemy that had already reached armour — the failure m
 describes. Floor shipped these globals broadcast but unsaved; this snapshot is what closes that.
 
 **Kill income needs one existing handler changed to survive a restore.**
-`server/server_init.sqf:214` zeroes a UID's tally on `PlayerConnected` so that a rejoining player
+`server/server_init.sqf:315` zeroes a UID's tally on `PlayerConnected` so that a rejoining player
 does not resume a count from earlier in the session; against a restored tally it deletes exactly
 the entries the snapshot was written for. The handler has to skip UIDs the restore has just
 written. The banked total goes in beside the tally because it holds a leaver's unpaid kills
@@ -486,7 +486,7 @@ commander lands and omitting them until then costs a restore nothing.
 | Reveal | outcome | positions of revealed zones and revealed towns, indices of revealed normal hardpoints |
 | Cooldowns | outcome | remaining seconds per player-scoped cooldown, per UID |
 
-Loadouts are already data; what they lack is a stable key. `client/client_init.sqf:449` stores the
+Loadouts are already data; what they lack is a stable key. `client/client_init.sqf:377` stores the
 loadout on the player object, which dies with the session, so the mirror keys on UID. One hashmap
 of per-player hashmaps, and the three guards a UID-keyed player save needs — a per-player
 "restored yet" flag, stripping a loadout saved while dead, and deleting the unit whose gear has
@@ -671,14 +671,14 @@ load that was not wanted cannot damage what it read: nothing is written until
 `mission_init_complete`, and a New Game started afterwards writes under its own campaign ID.
 
 **Everyone else waits where they already wait.** Non-game-master clients block on
-`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:139-143`) and need no knowledge
+`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:114-123`) and need no knowledge
 of the screen at all — a load satisfies both flags the same way a finished setup does.
 
 ### Hooks, in boot order
 
-**An early gate in `server_init.sqf`, between `:9` and `:15`.** After `server_var_init` so a snapshot
+**An early gate in `server_init.sqf`, between `:8` and `:13`.** After `server_var_init` so a snapshot
 overwrites the defaults, before the terrain survey so the survey can be skipped. It has to sit this
-early because the setup gates at `:46,52` block on globals a *client* publishes. Because the answer
+early because the setup gates at `:161,166` block on globals a *client* publishes. Because the answer
 now comes from a player, the gate is three steps rather than one:
 
 1. **Scan.** Read the key, validate version and world, publish the summary the load screen labels
@@ -687,7 +687,7 @@ now comes from a player, the gate is three steps rather than one:
    indistinguishable from a server still working.
 2. **Wait — but only when there is something to load.** On an empty summary the gate returns
    immediately and boot proceeds exactly as today. That is not a micro-optimisation:
-   `fnc_moreUrban_locations` is `spawn`ed at `:15` and has been recorded taking 140 s, and today it
+   `fnc_moreUrban_locations` is `spawn`ed at `:13` and has been recorded taking 140 s, and today it
    runs *while* the player is in the setup screens. Blocking ahead of it on every campaign would move
    that 140 s out from behind the screens and into the player's wait.
 3. **Apply, on Load only.** Publish the settings and placement inputs, raise `DUWST_restoring` for
@@ -700,7 +700,7 @@ The client must **wait** for the summary rather than sample it. A joining client
 ([`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them)),
 so a screen that reads the variable once at boot can read back the default it just wrote itself.
 
-**The fork lives inside the existing game-master block** (`client/client_init.sqf:95-113`), with that
+**The fork lives inside the existing game-master block** (`client/client_init.sqf:84-98`), with that
 block's current contents — `fnc_startup_faction_flow` and its `chosen_settings` wait — moving into
 the New Game branch. Load needs no client-side flag of its own: the branch it is not in is the one
 that opens the setup screens.
@@ -729,14 +729,14 @@ function runs unchanged.
 
 | Boot step | On restore |
 |---|---|
-| `server/server_var_init.sqf` (`server_init.sqf:9`) | Runs, then the snapshot overwrites |
-| `fnc_moreUrban_locations` (`:15`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
-| Setup gates, `chosen_hq_placement` / `createzone_server` (`:46,52`) | Pre-satisfied by the gate |
-| Faction init (`:65-95`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools |
-| `fnc_bluHQinit` (`:108`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
-| `fnc_init_OPFOR_WARCOM` (`:129`) | Runs, with the locator bypassed as above |
+| `server/server_var_init.sqf` (`server_init.sqf:8`) | Runs, then the snapshot overwrites |
+| `fnc_moreUrban_locations` (`:13`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
+| Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
+| Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
+| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
+| `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
-| `fnc_intro_heli` (`:424`) | **Skipped** |
+| `fnc_intro_heli` (`:433`) | **Skipped** |
 
 FOBs restore the same way: call `fnc_fob_server` per saved position — silently, and with the saved
 name — rather than reimplementing what it builds. Vehicles are spawned last, after every anchor is
@@ -797,15 +797,15 @@ refund attached to the one restore that consumes it.
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/persistence/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
 | `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)'s business. |
-| `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:159`, and stop the connect handler at `:214` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
+| `server/server_init.sqf` | Early gate before `:13` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:268`, and stop the connect handler at `:315` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:196`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/chatter/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
-| `client/client_init.sqf:449` | Loadout save keys on player UID, not the player object. |
+| `client/client_init.sqf:377` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
-| `client/client_init.sqf:95-113` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
+| `client/client_init.sqf:84-98` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
 | `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
 | `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |

@@ -12,7 +12,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | Problem | Where |
 |---|---|
 | A headless client runs `server_init.sqf` in full — faction init, HQ build, WARCOM, mission locator, the site poller and every other background loop — in parallel with the real server | `INIT.sqf:21`, with `_duwst_isHeadless` defined at `:15` |
-| `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The two inner `if (isServer)` blocks cover only the kill-income and flare handlers | `server/server_init.sqf:472`, inner guards `:195,281` |
+| `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The one inner `if (isServer)` block covers only the kill income | `server/server_init.sqf:470`, inner guard `:275` |
 | No ownership transfer exists anywhere. `setGroupOwner` and `setOwner` appear nowhere in `server/`, `client/` or `shared/` | — |
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
 | Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
@@ -21,7 +21,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 The abbreviation is also overloaded, which matters because the file a newcomer will open first
 is the wrong one. `client/misc/fnc_hc_init.sqf` is Arma's **High Command** commanding UI —
 `:10` creates a `HighCommand` module, `:20` a `HighCommandsubordinate`, `:12` synchronises the
-player to it — called from `client/client_init.sqf:218` for squad leaders. The same naming runs
+player to it — called from `client/client_init.sqf:209` for squad leaders. The same naming runs
 through `server/misc/fnc_HCsquad_spawn.sqf:44` and the `hc_ATTchop` / `hc_CAS` comm-menu items
 at `client/dialog/fnc_request_support.sqf:384,416`. None of it is headless-client code.
 
