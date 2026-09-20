@@ -2035,6 +2035,10 @@
                 <Original>Your commanding officer is dead. Operation is a failure.</Original>
                 <English>Your commanding officer is dead. Operation is a failure.</English>
             </Key>
+            <Key ID="STR_DUWS_T_REQUESTS_NO_OFFICER">
+                <Original>Your commanding officer is dead. The REQUESTS menu is no longer available.</Original>
+                <English>Your commanding officer is dead. The REQUESTS menu is no longer available.</English>
+            </Key>
             <Key ID="STR_DUWS_T_support_ap_suffix">
                 <Original>%1  +%2 AP</Original>
                 <English>%1  +%2 AP</English>

@@ -56,6 +56,15 @@ class Params {
         default = 1;
     };
 
+    // Which endings fire: 0 both, 1 the officer's death only, 2 escalation only, 3 neither. Read
+    // where each one fires -- fnc_BluHQinit.sqf, and fnc_escalation_report for the razed island.
+    class DUWS_LoseConditions {
+        title = "Campaign Lose Conditions";
+        values[] = {0,1,2,3};
+        texts[] = {"Full","Officer Death Only","Escalation Only","Off"};
+        default = 0;
+    };
+
     // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
     // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
     // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime

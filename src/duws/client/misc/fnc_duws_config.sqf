@@ -98,6 +98,8 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
         ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2]] call _param],
     ["Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1]] call _param],
     ["Rest Weather", ["DUWS_RestWeather", 1, ["Off", "On"], [0,1]] call _param],
+    ["Lose Conditions", ["DUWS_LoseConditions", 0,
+        ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3]] call _param],
     ["Garbage Collection", format ["%1 min",
         (["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue) / 60]],
     ["Debug Menu", ["DUWS_Debug", 0, ["Disabled", "Enabled"], [0,1]] call _param],

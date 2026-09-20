@@ -16,6 +16,11 @@
 */
 if (!hasInterface) exitWith {};
 
+// Nil, not dead, on a client the hq_blu1 broadcast has yet to reach, which must not lock them out.
+if (!isNil "hq_blu1" && {!alive hq_blu1}) exitWith {
+    hint localize "STR_DUWS_T_REQUESTS_NO_OFFICER";
+};
+
 private _site = _this param [0, objNull];
 private _isFob = (_this param [3, []]) param [0, false];
 

@@ -131,6 +131,19 @@ Stripping the numbers out and re-formatting from a `%1` placeholder is the tidie
 on localisation grounds: a placeholder added to English but not to the other four languages leaves them
 printing the stale baked figure, which is a wrong number rather than an untranslated one.
 
+`fnc_escalation.sqf` sets the multiplier from a level ladder: a level is a fixed count of ruined
+houses — a fifty-third of the map's house census split into eleven levels, so thirty houses on Altis
+— and each level adds 0.1 to the multiplier. Level 11 is the ceiling, and it ends the campaign:
+`campaign_lost` with the `island_ruined` ending.
+
+The `DUWS_LoseConditions` parameter (default Full) says whether that ending fires; the other
+campaign ending it covers is the commanding officer's death (`server/init_hq/fnc_BluHQinit.sqf`).
+Where escalation is not a lose condition the level clamps at the ceiling instead, so prices plateau
+at x2.1 and the war continues. Where the officer's death is not one, it costs the request menu
+instead: `client/dialog/fnc_request_menu.sqf` refuses to open once he is dead, so a campaign that
+survives him can spend nothing. Escalation itself is switched off elsewhere, by the
+`escalation_enabled` environment-menu option.
+
 ## Supports: permanent and consumable
 
 One catalogue, `fnc_support_defs` in `client/supports/fnc_supports_init.sqf`, holds every row of the

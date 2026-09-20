@@ -98,7 +98,8 @@ fnc_escalation_report = {
     if !(missionNamespace getVariable ["escalation_enabled", true]) exitWith {};
 
     escalation_destroyed = escalation_destroyed + 1;
-    private _level = floor (escalation_destroyed / escalation_tier);
+    // Clamped: with the ending off, the ceiling is a plateau, not prices climbing without limit.
+    private _level = (floor (escalation_destroyed / escalation_tier)) min ESCALATION_MAX_LEVEL;
     if (_level <= escalation_level) exitWith {};
 
     escalation_level = _level;
@@ -107,7 +108,9 @@ fnc_escalation_report = {
     ["INFO", "ECON", format ["Escalation level %1 (%2 destroyed of %3), prices x%4",
         _level, escalation_destroyed, escalation_budget, escalation_multiplier]] call fnc_log;
 
-    if (_level >= ESCALATION_MAX_LEVEL) exitWith {
+    // Lose conditions Full (0) or Escalation Only (2).
+    if (_level >= ESCALATION_MAX_LEVEL
+        && {(["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 2]}) exitWith {
         campaign_lost = true;
         campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST";
         campaign_lost_ending = "island_ruined";
