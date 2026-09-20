@@ -100,14 +100,14 @@ score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 | Bank | one null | 4B.1 |
 | Zone Reinforce | each uncontested OPFOR zone below full strength | 4B.1 |
 | Zone Fortify | each uncontested OPFOR zone below tier IV | 4B.1 |
-| Zone hardpoint Build | each uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) × each unlocked ring type | 4B.1 |
+| Zone hardpoint Build | one action per unlocked ring type, its targets every uncontested OPFOR zone with a free hardpoint slot (`fnc_hardpoint_zone_cap`) | 4B.1 |
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
 | Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
-| Band hardpoint Build | a band cell × each unlocked band type; the cell at random in 4B and by the highest coverage Value from 4C.2 | 4B.2 |
-| Tower / OP / gun Build | a band cell × each unlocked asset type under its cap, sited by its own rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
-| Minefield | a band cell × each variant (AT, AP), one 50 m square | 4B.2 |
+| Standalone hardpoint Build | one action per unlocked standalone type, its target the tick's band cell — drawn at random in 4B and by the highest coverage Value from 4C.2 | 4B.2 |
+| Tower / OP / mortar / battery Build | one action each, target the tick's band cell, under the type's cap and sited by its own rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
+| Minefield | one action per variant (AT, AP), target the tick's band cell, one 50 m square | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
@@ -332,10 +332,11 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
 | Arty | offensive | an observed target in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
-| Build | defensive | an own zone ring or band cell, one candidate per unlocked type | hardpoint build | 0 zone / 1 truck band |
+| Build | defensive | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
 | Tower Build | buildup | a band cell | hardpoint build | 1 truck |
 | OP Build | recon | a band cell | hardpoint build | 1 truck |
-| Gun Build | indirect | a band cell (mortar pit, artillery battery) | hardpoint build | 1 truck |
+| Mortar Build | indirect | a band cell | hardpoint build | 1 truck |
+| Battery Build | indirect | a band cell | hardpoint build | 1 truck |
 | Minefield | defensive | a band cell (AT, AP) | mine lay | 1 truck |
 | Bank | bank | — | none | 0 |
 
@@ -392,10 +393,11 @@ The escalation ladder and indirect-fire assets, once the commander spends on the
 init and through the Build actions.
 
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
-existing in-zone draw; a band one takes its spot from the shared terrain siting around the band cell its truck
-delivers to (`fnc_hardpoint_spawn_sited`). Every unlocked type is its own candidate and no type is rolled before the
-pick, so the archetype and the score weigh a roadblock against a battery. The weight tables —
-`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` for the band — are the
+existing in-zone draw; a standalone one takes its spot from the shared terrain siting around the band cell its truck
+delivers to (`fnc_hardpoint_spawn_sited`). Every unlocked type is its own action row and no type is rolled before the
+pick, so the pick draws "an AT nest" or "a battery", never "a build", and the archetype and the score weigh one
+against the other. The weight tables —
+`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` for the standalone rows — are the
 per-type prior the 4C.1 weight multiplies; campaign generation still rolls them. An asset hardpoint is its own
 candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
 minefield is laid, not built: one 50 m square per action (`fnc_hardpoint_minefield_grid`), AT and AP each their own
