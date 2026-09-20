@@ -76,7 +76,7 @@ either way, because it touches no shared state.
 Nothing load-bearing is left undocumented. Getting there needed hand-tracing for 28 files that automated
 resolution could not reach, and the reasons are worth knowing:
 
-- **Function names are referenced in mixed case.** `server/server_init.sqf:108` spawns `fnc_bluHQinit`
+- **Function names are referenced in mixed case.** `server/server_init.sqf:192` spawns `fnc_bluHQinit`
   while the registry defines `fnc_BluHQinit`; `shared/includes/operative_menu.hpp:70` calls
   `fnc_LBselected` against a registered `fnc_lbselected`. SQF does not care, but any exact-match search
   over the source does, so a grep for callers silently comes back empty.
@@ -115,14 +115,14 @@ against `objNull` so the keep-out always passed, and on a hosted server it only 
 host — the class of bug that must test `allPlayers`, never a bare `player`.
 
 Counters that name things must live server-side for the same reason. `DUWS_number_*` were initialised only
-in `client/includes/squad_number_init.hpp` via `client/client_init.sqf:53`, so each client kept its own and
+in `client/includes/squad_number_init.hpp` via `client/client_init.sqf:64`, so each client kept its own and
 two players both minted "Inf 1". The High Command counters now live in `server/misc/fnc_HCsquad_spawn.sqf`,
 read as `missionNamespace getVariable [key, 0]` so they self-initialise wherever the server first needs
 them; the remaining entries in that include are still client-local.
 
 **One deliberate exception.** Pre-play configuration is authored on a *client*: the game master runs the
 campaign menu and broadcasts the result, and everyone else waits on
-`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:124-138`). That survives a dedicated
+`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:114-123`). That survives a dedicated
 server because game master is a client role rather than the host, but roughly 18 globals in
 `client/dialog/fnc_process_campaign_menu.sqf` are set from a client and broadcast. It is safe only because
 it happens once, before any other writer exists. Do not let it become the precedent for anything

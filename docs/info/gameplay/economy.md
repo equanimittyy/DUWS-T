@@ -40,7 +40,7 @@ One deliberate difference from `fnc_cp_adjust`: an unrecognised side drops the d
 rather than crediting the wrong pool, so a bad call shows up in the RPT instead of corrupting a pool
 or throwing. Display then differs by side. `WARCOM_blufor_ap` carries a live counter — a
 `publicVariableEventHandler` mirrors it to the request-menu AP box (ctrl 1002) on clients
-(`client_init.sqf:145`) while the host refreshes the same control directly (`fnc_economy_init.sqf:86`)
+(`client_init.sqf:138`) while the host refreshes the same control directly (`fnc_economy_init.sqf:86`)
 — and its earned-AP total crossing a force tier fires a card and a sound (`:88-96`). `WARCOM_opfor_ap`
 has no counter; it surfaces on demand in the map readout and in the request-menu labels of what it now
 buys, not through a pushed update.
@@ -200,7 +200,7 @@ which inverts what the death penalty is for.
 | Enemy corpse loot | `server/search/fnc_addRandomLoot.sqf` | ~60% of enemies carry 0–2 `Money_roll` (personal cash); intel documents no longer dropped here |
 | Search payout (`pool` kind) | `server/search/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
-| Kill income | `server/server_init.sqf:243-329` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
+| Kill income | `server/server_init.sqf:275-361` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/killhouse/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Rare-zombie kill (WBK) | `server/civilian/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
@@ -254,7 +254,7 @@ The Debug menu's Economy dialog has a *Fire economy tick* button that runs one e
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
-| Death | `client/client_init.sqf:172,187` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
+| Death | `client/client_init.sqf:156,171` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
@@ -277,6 +277,6 @@ trimmed: on a dedicated server, cutting it to the real squad-lead slots restrict
 single edit.
 
 That only holds while **nothing outside a permission check reads it**. Personal kit — the medic,
-engineer and UAV traits — is granted unconditionally at `client/client_init.sqf:199-201` for exactly
+engineer and UAV traits — is granted unconditionally at `client/client_init.sqf:202-204` for exactly
 this reason. Gating a *capability* rather than a *privilege* on this array would mean trimming it
 silently removed revives from the rest of the team, with no error to point at.

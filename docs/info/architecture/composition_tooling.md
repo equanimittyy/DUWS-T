@@ -243,7 +243,7 @@ afterwards and survive later round trips by the match-by-order rule above.
 ## Editing the HQ layout
 
 The player's Main Base (`src/duws/server/init_hq/fnc_BluHQinit.sqf`, compiled at
-`server_fnc_init.sqf:35`, spawned at `server_init.sqf:194`) anchors on `PosOfBLUHQ`, the spot chosen at
+`server_fnc_init.sqf:35`, spawned at `server_init.sqf:192`) anchors on `PosOfBLUHQ`, the spot chosen at
 placement (`fnc_HQ_random_place.sqf:38` or `fnc_HQ_manual_place.sqf:42`). It is the static-composition
 workflow's one outlier: two fenced compositions share this file, both keyed to a runtime position
 instead of `[0,0]`. Small nudges — shifting a tent, rotating a wall — are safe to hand-edit as row
