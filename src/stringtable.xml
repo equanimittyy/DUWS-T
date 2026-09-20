@@ -511,10 +511,6 @@
                 <Original>DUWS Apocalypse (WIP)</Original>
                 <English>DUWS Apocalypse (WIP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_gamemode_apocalypse_missing">
-                <Original>Apocalypse needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</Original>
-                <English>Apocalypse needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</English>
-            </Key>
             <Key ID="STR_DUWS_T_gamemode_apocalypse_desc">
                 <Original>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</Original>
                 <English>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</English>
