@@ -102,6 +102,9 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
         ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3]] call _param],
     ["Garbage Collection", format ["%1 min",
         (["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue) / 60]],
+    ["Map Group Icons", ["DUWS_GroupIcons", 0, ["Off", "On"], [0,1]] call _param],
+    ["Bandits", ["DUWS_Bandits", 0,
+        ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3]] call _param],
     ["Debug Menu", ["DUWS_Debug", 0, ["Disabled", "Enabled"], [0,1]] call _param],
     ["Logging Level", ["DUWS_LogLevel", 3,
         ["Off", "Errors only", "Errors + warnings", "Normal", "Debug"], [0,1,2,3,4]] call _param]
