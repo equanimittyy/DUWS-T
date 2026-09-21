@@ -91,8 +91,8 @@ streams off its own position rather than the town-crowd poller; its placement is
 [`civilian_jobs_plan.md`](civilian_jobs_plan.md#farmer-placement).
 
 **Service is gated, not spawning.** Vendors stand in every town including enemy-held ones, but a
-**shop** in a hostile town **refuses to sell** — the menu opens to a refusal line ("not while they're
-watching"), never the catalogue. Reuse the town-reputation read the disguise already uses to break in
+**shop** in a hostile town **refuses to sell** — the menu opens to a refusal hint that names the
+town, never the catalogue. Reuse the town-reputation read the disguise already uses to break in
 an enemy-held town (`fnc_civ_repAt`, the `<= -10` test in `fnc_disguiseAsCivilian.sqf`). This makes
 capturing an area the thing that opens its shops, without needing a separate "friendly town" list.
 **Job employers are the exception**: mundane labour is plausible cover, so an employer still dispatches
@@ -161,14 +161,18 @@ icon shortage grates, the alternative is a few custom `.paa` glyphs declared in 
 `CfgMarkers`, but that is art and portability cost for a cosmetic win, so it is a later polish.
 
 **Two marker states, driven by the respawn registry.** A live vendor's marker is coloured; a dead one
-is grey until it respawns. Use the civilian colour `ColorCIV` (purple, matching the `c_` icons) for
-the open state and grey for the down state. On the vendor's `Killed` handler the server sets the
-marker grey and stamps the five-minute cooldown (as [remaining seconds](#vendor-registry)); when the
-`tick` hook runs that cooldown out and respawns the vendor, the server restores `ColorCIV`. Because
+is grey until it respawns. The open colour is the town icon's band colour (`fnc_civ_townBand`), as a
+zone's port takes the zone's colour, and grey is the down state. On the vendor's `Killed` handler the
+server sets the marker grey and stamps the five-minute cooldown (as [remaining seconds](#vendor-registry));
+when the `tick` hook runs that cooldown out and respawns the vendor, the server restores the band colour. Because
 the marker state is a function of the registry's cooldown, not of the live unit, it stays correct
 across a town sleeping and waking and across a rebuild — the marker is redrawn grey or coloured from
 the stored cooldown, never from a unit handle. A sleeping town's shops read open, because an
 uncooled vendor is simply not simulated, not shut.
+
+The band colour is read at each paint, and `fnc_town_rep_adjust` repaints a town's shops whenever its
+reputation crosses either band, so a shop in an enemy-held town shows the OPFOR red that explains its
+refusal.
 
 `ColorGrey` is stock and already in use (`fnc_arty.sqf:93`), so no custom colour class is needed.
 Colour alone carries the closed state: marker alpha is already the reveal channel, set from
