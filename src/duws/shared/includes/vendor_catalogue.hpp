@@ -146,11 +146,11 @@ class vendor_catalogue
         {
             idc = 8912;
             text = "$STR_DUWS_T_MENU_CLOSE";
-            x = 10.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6 * GUI_GRID_W;
+            w = 4.5 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            sizeEx = 0.04;
+            sizeEx = 0.035;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};
             action = "closeDialog 0;";
         };
@@ -159,12 +159,12 @@ class vendor_catalogue
             idc = 8913;
             text = "$STR_DUWS_T_VENDOR_TAKE";
             tooltip = "$STR_DUWS_T_VENDOR_TAKE_TT";
-            x = 16.9 * GUI_GRID_W + GUI_GRID_X;
+            x = 15 * GUI_GRID_W + GUI_GRID_X;
             y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6 * GUI_GRID_W;
+            w = 5.5 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            sizeEx = 0.04;
-            colorBackground[] = {1, 0.5, 0, 0.5};
+            sizeEx = 0.035;
+            colorBackground[] = {1, 0, 0, 0.5};
             colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
         };
         class vendor_store: RscButton
@@ -172,12 +172,12 @@ class vendor_catalogue
             idc = 8914;
             text = "$STR_DUWS_T_VENDOR_STORE";
             tooltip = "$STR_DUWS_T_VENDOR_STORE_TT";
-            x = 23.3 * GUI_GRID_W + GUI_GRID_X;
+            x = 21 * GUI_GRID_W + GUI_GRID_X;
             y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6 * GUI_GRID_W;
+            w = 9 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
-            sizeEx = 0.04;
-            colorBackground[] = {1, 0.5, 0, 0.5};
+            sizeEx = 0.035;
+            colorBackground[] = {1, 0, 0, 0.5};
             colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
         };
     };
