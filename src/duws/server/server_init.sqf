@@ -217,7 +217,7 @@ if (dynamic_weather_enable) then {
 
 // One lifetime for every category the sweep collects; the sweep is always on (a 0 from an old save
 // is floored, not off). The default lives in the parameter, not here, so the two cannot drift apart.
-[["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
+[["DUWS_CleanupLifetime", 300] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
 for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {
     _thePlayer = missionNamespace getVariable format["player%1", _x];

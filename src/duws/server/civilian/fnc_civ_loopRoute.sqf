@@ -2,8 +2,8 @@
 // CYCLE anchored on the first so the group drives the circuit forever. The ambient random events (car,
 // convoy, heli) share it so a spawned vehicle keeps moving instead of reaching a dead-end waypoint and
 // sitting idle for the rest of its cleanup lifetime (fnc_repetitive_cleanup, DUWS_CleanupLifetime is
-// ~15 min) -- an ambient car frozen at a town edge reads as broken. Speed and behaviour are the caller's
-// group setup; only the route is laid here.
+// 5 min by default) -- an ambient car frozen at a town edge reads as broken. Speed and behaviour are
+// the caller's group setup; only the route is laid here.
 if (!isServer) exitWith {};
 params ["_grp", "_points", ["_compRadius", 40]];
 if (_points isEqualTo []) exitWith {};

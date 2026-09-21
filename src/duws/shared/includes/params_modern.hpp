@@ -71,10 +71,10 @@ class Params {
     // trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
     // side-mission objectives are not affected by shortening it.
     class DUWS_CleanupLifetime {
-        title = "Garbage Collection";
+        title = "Default Garbage Lifetime";
         values[] = {300,600,900,1200,1500,1800};
         texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","25 minutes","30 minutes"};
-        default = 900;
+        default = 300;
     };
 
     // Toggles map group icons (setGroupIconsVisible). Friendly groups always show; enemy groups show
