@@ -42,8 +42,23 @@ economies are deliberately separate.
 
 A vendor is created by the existing `fnc_civ_spawnUnit` (`server/civilian/fnc_civ_spawnUnit.sqf`) with a
 new **static "vendor" posture**: no stroll waypoints (`fnc_civ_wp_Tomata`), no traffic, fixed facing
-at a chosen building position. Everything else — the `Killed` handler, the client interaction action
-remoteExec — reuses what a civilian already gets.
+at a chosen building position.
+
+**A vendor is not an interactable civilian.** It keeps the `civ_locIndex` tag and the shared
+`Killed` handler, so shooting a shopkeeper costs the town reputation exactly like any other civilian
+death. It gets neither of the two things `fnc_civ_spawnUnit` hands a plain civilian:
+
+- **No civilian action set.** The `fnc_civ_clientActions` remoteExec is skipped. That pair is the
+  talk/intel/arrest/recruit menu (`fnc_civ_menuAction`) and the call-over (`fnc_civ_stopCommand`),
+  none of which a vendor answers. A vendor carries one action, its own, and nothing else.
+- **No panic handler.** The `FiredNear` hook into `fnc_civ_panic` is skipped. A panicking civilian
+  runs 200 m and stays calm-locked for 60 s, which for a vendor means abandoning the shop — and the
+  fixed building is the entire point of the placement. `fnc_civ_panic` already exempts a surrendered
+  civilian and a side-mission giver on the same principle; a vendor is the third case, refused at the
+  spawn rather than inside the function, because it never needs the handler at all.
+
+Both come off one vendor flag on `fnc_civ_spawnUnit`, which is also what picks the vendor action set
+over the civilian one.
 
 **Placement: assigned once at campaign start, scaled by town size, persistent.** Every town the
 civilian selector already picks (`fnc_civ_selectTowns.sqf`) can host vendors, but which types a town
@@ -94,7 +109,10 @@ perf cost the mission cannot pay. Vendors ride the same site poller as the crowd
 a player is near and are deleted when the town sleeps (`fnc_civ_handler.sqf:114-138`).
 
 They register as their **own occupant kind** on the town's site, `vendors`, reusing the `town_crowd`
-profile's presence numbers so they appear and vanish on the crowd's clock. An own kind is not about
+profile's presence numbers so they appear and vanish on the crowd's clock. Reusing those numbers is
+not sharing a population: vendors are additive and never count against the crowd. `fnc_civ_liveTarget`
+sizes the crowd from `civ_pop_<n>` and the density setting, never from live units, so a town fields
+its full crowd plus its vendors — a shop does not cost the town a passer-by. An own kind is not about
 the spawn — the crowd's wake hook could raise them, and its sleep hook would collect them off the
 same roster. It is about the respawn below: hooks are per kind, and only a kind of its own can
 declare the poller's `tick` hook, which fires every pass instead of only on a wake/sleep transition
@@ -159,12 +177,17 @@ both "undiscovered" and "closed".
 
 ## Interaction and menus
 
-A vendor's interactable menu copies the civilian pattern: `shared/civ/fnc_civ_menuAction.sqf` adds one
-`ACT_CIVILIAN_INTERACTION` action, distance- and state-gated, whose body opens a dialog. Build a
-`fnc_vendor_menuAction` on that shape, opening either the reusable list dialog
-(`fnc_open_action_menu.sqf`, `[title,[[label,code,args,color]...]]`) for simple vendors, or the
+A vendor's menu borrows the *shape* of `shared/civ/fnc_civ_menuAction.sqf`, not its contents: one
+`ACT_CIVILIAN_INTERACTION` action whose body opens a dialog, added once behind a duplicate guard and
+removed on death. Build a `fnc_vendor_menuAction` on that shape, opening either the reusable list
+dialog (`fnc_open_action_menu.sqf`, `[title,[[label,code,args,color]...]]`) for simple vendors, or the
 catalogue dialog below for the Arms, Car and Boat dealers. The service-refusal check (hostile town)
 happens when the menu opens, before any catalogue is shown.
+
+Its condition is distance and `alive` alone. The civilian action gates on `DUWS_civ_stopped`,
+`isSurrendered`, `DUWS_civ_closed` and `DUWS_civ_arrested` — a call-over state machine and a
+one-exchange budget that a vendor has no part of. A shop is open as often as the player walks up to
+it, so none of those flags is read and none is set.
 
 **The catalogue reuses the faction class browser.** It copies the layout and search of the browser
 the faction confirmation screen opens (`startup_faction_key_edit` in `faction_confirm.hpp`, driven by
