@@ -2939,16 +2939,16 @@
                 <English>Civilian</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE_TT_VEH">
-                <Original>Take it here. It is left outside the shop.</Original>
-                <English>Take it here. It is left outside the shop.</English>
+                <Original>Buy and place.</Original>
+                <English>Buy and place.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE_VEH">
                 <Original>Buy to Garage</Original>
                 <English>Buy to Garage</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE_TT_VEH">
-                <Original>Send it to the base garage instead of taking it here.</Original>
-                <English>Send it to the base garage instead of taking it here.</English>
+                <Original>Buy and send to garage.</Original>
+                <English>Buy and send to garage.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT_GARAGE">
                 <Original>Bought. It is in your garage.</Original>
@@ -2999,16 +2999,16 @@
                 <English>Buy</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE_TT">
-                <Original>Into your inventory, or at your feet if there is no room.</Original>
-                <English>Into your inventory, or at your feet if there is no room.</English>
+                <Original>Buy one into inventory.</Original>
+                <English>Buy one into inventory.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE">
                 <Original>Buy to Arsenal</Original>
                 <English>Buy to Arsenal</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE_TT">
-                <Original>Add one to the base arsenal instead of carrying it.</Original>
-                <English>Add one to the base arsenal instead of carrying it.</English>
+                <Original>Buy one into Arsenal.</Original>
+                <English>Buy one into Arsenal.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_HOSTILE">
                 <Original>Not while they are watching.</Original>
