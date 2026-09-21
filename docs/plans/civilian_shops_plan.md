@@ -280,7 +280,7 @@ take it now.
 
 | Bought | Stored | Taken now |
 |---|---|---|
-| Weapons and gear | The arsenal: +1 to the captured-materiel pool (`fnc_captured_pool_setCount`, then `publicVariable "DUWS_capturedPool"` — the setter does not broadcast) | Into the buyer's inventory when `canAdd` finds room, otherwise dropped in a ground holder at the buyer |
+| Weapons and gear | The arsenal: +1 to the captured-materiel pool (`fnc_captured_pool_setCount`, then `publicVariable "DUWS_capturedPool"` — the setter does not broadcast) | Into the item's own equipment slot when that slot is empty and the buyer is not disguised, otherwise into the buyer's inventory when `canAdd` finds room, otherwise dropped in a ground holder at the buyer |
 | Vehicles and boats | The garage: a spec pushed onto `DUWS_garage_stored`, refused when that domain's pool is full (the `fnc_garage_store` cap check) | Spawned at the buyer and hand-placed as a garage retrieval is: the `fnc_depot_carry_spawn` invulnerable, frozen, locked spawn, the `fnc_depot_place_r3f` carry, then `fnc_depot_place_finish`. The drop has no base-keep bound, because the buyer stands in a town |
 
 The pool counts only what the arsenal tracks: a friendly class is unlimited outside Limited mode
