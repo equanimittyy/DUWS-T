@@ -310,7 +310,8 @@ Kit, vests included, comes from `fnc_civ_arm` with the pool `["opfor", "blufor"]
 (rifleman, autogunner, grenadier, AT, medic) map to its token specs in `fnc_bandit_spawn.sqf`. The
 pool samples only three unit loadouts per side, so a role whose weapon category it lacks (a machine gun,
 an SMG) carries an assault rifle instead. Every bandit also carries two `HandGrenade` and two
-`FirstAidKit`. Bandits spawn at `opfor_ai_skill` and carry no random loot. Civilian side missions raise them
+`FirstAidKit`, then 0-5 `Money_roll`. The money goes in last because `addMagazine` drops what does not fit, so
+a full inventory loses money, never kit. Bandits spawn at `opfor_ai_skill`. Civilian side missions raise them
 ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
 
 WBK zombies also spawn on INDEPENDENT (`server/civilian/fnc_civ_handler_wbk.sqf:254`), so bandits and
