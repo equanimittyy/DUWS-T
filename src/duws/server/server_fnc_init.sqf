@@ -330,6 +330,7 @@ fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\civilian\f
 publicVariable "fnc_civ_bribe_answer";
 fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_arrest.sqf";
 publicVariable "fnc_civ_arrest";
+fnc_disguise_hunted = compile preprocessFileLineNumbers "duws\server\disguise\fnc_disguise_hunted.sqf";
 fnc_disguiseAsCivilian = compile preprocessFileLineNumbers "duws\server\civilian\fnc_disguiseAsCivilian.sqf";
 publicVariable "fnc_disguiseAsCivilian";
 fnc_scanCivilianGear = compile preprocessFileLineNumbers "duws\server\civilian\fnc_scanCivilianGear.sqf";

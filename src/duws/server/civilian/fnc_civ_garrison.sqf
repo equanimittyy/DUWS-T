@@ -12,7 +12,7 @@ if (_count == 0) exitWith {};
 private _radii = missionNamespace getVariable ["civ_radii", []];
 private _centres = _locations apply { getPos _x };
 
-// Read as town ownership by the map markers, OPFOR AP income and disguise gate: crossing it sets tier I OPFOR ground, leaving it discharges the town.
+// Read as town ownership by the map markers, OPFOR AP income and vendor refusal: crossing it sets tier I OPFOR ground, leaving it discharges the town.
 // Tiers II-IV are the commander's purchase, so a merely-ruined town isn't automatically hard -- the enemy has to have spent on it.
 #define OPFOR_BAND -10
 

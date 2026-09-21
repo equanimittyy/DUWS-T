@@ -2551,8 +2551,8 @@
                 <English>Civilian</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_DESC">
-                <Original>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, or linger near enemies.</Original>
-                <English>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, or linger near enemies.</English>
+                <Original>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, linger near enemies, or approach a known enemy position.</Original>
+                <English>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, linger near enemies, or approach a known enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_UNAVAIL">
                 <Original>Not available in this campaign - there is no civilian population to blend into.</Original>
@@ -2668,10 +2668,9 @@
                 <English>Disguise broken: Entered a non-civilian vehicle.</English>
                 <Chinesesimp>伪装暴露：进入非民用载具。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_REP_TOWN">
-                <Original>Disguise broken: Recognised by the locals here.</Original>
-                <English>Disguise broken: Recognised by the locals here.</English>
-                <Chinesesimp>伪装暴露：负声望进入城镇——你的伪装在居住当地多年的民众面前不值一提。</Chinesesimp>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SITE">
+                <Original>Disguise broken: Too close to a known enemy position.</Original>
+                <English>Disguise broken: Too close to a known enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_ZOMBIE">
                 <Original>Cannot disguise: Not available in this scenario.</Original>
@@ -2713,6 +2712,18 @@
             <Key ID="STR_DUWS_T_DISGUISE_CANT_BACKPACK">
                 <Original>Cannot disguise: You are carrying a military backpack.</Original>
                 <English>Cannot disguise: You are carrying a military backpack.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_HUNTED">
+                <Original>Cannot disguise: The enemy has eyes on you.</Original>
+                <English>Cannot disguise: The enemy has eyes on you.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR">
+                <Original>Cannot disguise: Enemies are too close.</Original>
+                <English>Cannot disguise: Enemies are too close.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_SITE">
+                <Original>Cannot disguise: You are too close to a known enemy position.</Original>
+                <English>Cannot disguise: You are too close to a known enemy position.</English>
             </Key>
         </Container>
         <Container name="Hiring Auxiliaries">

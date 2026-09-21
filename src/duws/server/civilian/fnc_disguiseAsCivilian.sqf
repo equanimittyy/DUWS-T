@@ -33,6 +33,27 @@ fnc_disguise_isCivGear = {
     _item == "" || {_item in _scanned} || {_item in _whitelist}
 };
 
+fnc_disguise_enemyNear = {
+    params ["_player", "_radius"];
+    ((_player nearEntities [["CAManBase"], _radius]) findIf { side _x == EAST && alive _x }) >= 0
+};
+
+// Revealed sites only: a break near a hidden site would tell the player that it exists, and hidden
+// sites are what intel pays for. Towns are in neither registry, so an OPFOR-held town stays safe.
+fnc_disguise_atEnemySite = {
+    params ["_pos"];
+    private _opforZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
+    private _atZone = (zone_meta_array findIf {
+        private _key = str (_x select 1);
+        (_pos distance2D (_x select 1)) < ((_x select 2) + DISGUISE_CIV_SITE_MARGIN)
+        && {(_opforZones findIf {str _x == _key}) >= 0}
+        && {(zone_namePOS_pairs findIf {str (_x select 1) == _key && {_x select 2}}) >= 0}
+    }) >= 0;
+    _atZone || {(DUWS_hardpoints findIf {
+        (_x select 3) isEqualTo "opfor" && {_x select 5} && {(_pos distance2D (_x select 1)) < DISGUISE_CIV_SITE_MARGIN}
+    }) >= 0}
+};
+
 // Curated civilian classes the population scan can miss: gear a player loots but no local NPC
 // spawns wearing. Vanilla civilians almost never wear a vest, so the press vest is seeded to keep
 // a safety/hi-viz style vest valid; add mod safety-vest classes here. Headgear/backpack lean on
@@ -51,8 +72,8 @@ private _civilianVehicles = [
     "C_Truck_02_transport_F"
 ];
 
-private _lastUse = _player getVariable ["DUWS_disguise_lastUse", -300];
-private _cooldownRemaining = 300 - (diag_tickTime - _lastUse);
+private _blownAt = _player getVariable ["DUWS_disguise_blownAt", -300];
+private _cooldownRemaining = 300 - (diag_tickTime - _blownAt);
 if (_cooldownRemaining > 0) exitWith {
     private _minutes = floor (_cooldownRemaining / 60);
     private _seconds = floor (_cooldownRemaining % 60);
@@ -60,12 +81,20 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _player];
 };
 
-private _veh = vehicle _player;
-if (_veh != _player) then {
-    private _vehType = typeOf _veh;
-    if (!(_vehType in _civilianVehicles)) exitWith {
-        [_player, "STR_DUWS_T_DISGUISE_CANT_VEHICLE"] call fnc_disguise_hintFail;
-    };
+// Rolled once and stored, so the gate and the monitor test the same radius.
+private _alertDistance = 50 + random 30;
+if ([_player] call fnc_disguise_hunted) exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_HUNTED"] call fnc_disguise_hintFail;
+};
+if ([_player, _alertDistance] call fnc_disguise_enemyNear) exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR"] call fnc_disguise_hintFail;
+};
+if ([getPosATL _player] call fnc_disguise_atEnemySite) exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_SITE"] call fnc_disguise_hintFail;
+};
+
+if (vehicle _player != _player && {!(typeOf vehicle _player in _civilianVehicles)}) exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_VEHICLE"] call fnc_disguise_hintFail;
 };
 
 if (CIV_PRESENCE == "NONE") exitWith {
@@ -104,14 +133,13 @@ if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], 
     [_player, "STR_DUWS_T_DISGUISE_CANT_BACKPACK"] call fnc_disguise_hintFail;
 };
 
-_player setVariable ["DUWS_disguise_lastUse", diag_tickTime];
 _player setVariable ["DUWS_disguised", true, true];
 _player setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
 
 _player setVariable ["DUWS_disguise_warningActive", false, true];
 _player setVariable ["DUWS_disguise_warningPos", nil, true];
-_player setVariable ["DUWS_disguise_paused", false, true];
+_player setVariable ["DUWS_disguise_alertDist", _alertDistance];
 _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 
 [localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
@@ -124,6 +152,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
         params ["_unit"];
         if (_unit getVariable ["DUWS_disguised", false]) then {
             _unit setVariable ["DUWS_disguised", false, true];
+            _unit setVariable ["DUWS_disguise_blownAt", diag_tickTime];
             _unit setCaptive false;
             [false] remoteExec ["fnc_disguise_setCaptiveLocal", _unit];
             [localize "STR_DUWS_T_DISGUISE_BROKEN_THROW"] remoteExec ["hint", _unit];
@@ -133,9 +162,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
     
     [_player] spawn {
         params ["_player"];
-        
-        private _alertDistance = 50 + random 30;
-        _player setVariable ["DUWS_disguise_alertDist", _alertDistance];
         
         private _warningKeys = [
             "STR_DUWS_T_DISGUISE_WARNING_1",
@@ -149,6 +175,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             params ["_reasonKey"];
             if (_player getVariable ["DUWS_disguised", false]) then {
                 _player setVariable ["DUWS_disguised", false, true];
+                _player setVariable ["DUWS_disguise_blownAt", diag_tickTime];
                 _player setCaptive false;
                 [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
                 [localize _reasonKey] remoteExec ["hint", _player];
@@ -156,11 +183,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
         };
         
         while {alive _player && {_player getVariable ["DUWS_disguised", false]}} do {
-            if (_player getVariable ["DUWS_disguise_paused", false]) then {
-                sleep 5;
-                continue;
-            };
-            
             if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_WEAPON"] call _fnc_breakDisguise;
             };
@@ -191,10 +213,14 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 ["STR_DUWS_T_DISGUISE_BROKEN_CORPSE"] call _fnc_breakDisguise;
             };
 
-            private _nearEnemies = _player nearEntities [["CAManBase"], _alertDistance] select { side _x == EAST && alive _x };
+            if ([getPosATL _player] call fnc_disguise_atEnemySite) exitWith {
+                ["STR_DUWS_T_DISGUISE_BROKEN_SITE"] call _fnc_breakDisguise;
+            };
+
+            private _alertDistance = _player getVariable ["DUWS_disguise_alertDist", 50];
             private _warningActive = _player getVariable ["DUWS_disguise_warningActive", false];
             
-            if (count _nearEnemies > 0) then {
+            if ([_player, _alertDistance] call fnc_disguise_enemyNear) then {
                 if (!_warningActive) then {
                     _player setVariable ["DUWS_disguise_warningActive", true, true];
                     _player setVariable ["DUWS_disguise_warningPos", getPos _player, true];
@@ -226,13 +252,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 };
             };
             
-            // The OPFOR band, not any negative figure: a town the enemy holds is where a
-            // disguise gets you recognised, and with reputation localised a campaign-wide
-            // negative says nothing about the ground the player is standing on.
-            if (([[getPos _player] call fnc_civ_townAt] call fnc_civ_repAt) <= -10) then {
-                ["STR_DUWS_T_DISGUISE_BROKEN_REP_TOWN"] call _fnc_breakDisguise;
-            };
-            
             sleep 5;
         };
         
@@ -242,7 +261,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 _player setCaptive false;
                 [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
             };
-            _player setVariable ["DUWS_disguise_paused", false, true];
             _player setVariable ["DUWS_disguise_warningActive", false, true];
             _player setVariable ["DUWS_disguise_monitorRunning", false];
             

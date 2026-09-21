@@ -357,8 +357,8 @@ is in [`intel_system.md`](intel_system.md).
 
 ### Ownership bands and the garrison
 
-A town's reputation runs `-20 … 20` and three consumers read it as a *band* rather than a magnitude,
-so the thresholds are a contract between them:
+A town's reputation runs `-20 … 20`, and every system that reads ownership from it reads it as a *band*
+rather than a magnitude, so the thresholds are a contract between them:
 
 | Band | Reputation | Pays | Garrison |
 |---|---|---|---|

@@ -444,7 +444,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
 
     [] spawn {
         private _cooldownVars = [
-            "DUWS_disguise_lastUse",
+            "DUWS_disguise_blownAt",
             "DUWS_hirePartisans_lastUse",
             "DUWS_hirePMC_lastUse"
         ];

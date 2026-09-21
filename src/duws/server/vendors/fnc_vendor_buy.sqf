@@ -31,7 +31,7 @@ private _type = _vendor getVariable ["DUWS_vendor_type", ""];
 private _kind = [_type] call fnc_vendor_kind;
 private _gear = _kind isEqualTo "gear";
 
-// The same OPFOR band the disguise breaks in, read here rather than from the client's copy:
+// The OPFOR ownership band, read here rather than from the client's copy:
 // civ_town_rep is server-only, and DUWS_enemy_town_pos is a derivative that rebuilds on a crossing.
 if (([_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt) <= -10) exitWith {
     [format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]]] remoteExec ["hint", _buyer];
