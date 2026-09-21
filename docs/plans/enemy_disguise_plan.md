@@ -6,9 +6,9 @@ kit sets the floor of the meter, so a badly matched kit breaks cover almost at o
 removed enemy disguise, which gave 120 s of total invisibility and a free uniform, and broke only on a
 shot, a gear change, or an enemy within 10 m. Paths are relative to `src/`.
 
-The plan depends on [`civilian_disguise_fixes_plan.md`](civilian_disguise_fixes_plan.md): phase 1
-supplies `fnc_disguise_hunted` and `docs/info/gameplay/disguise.md`, and phase 2 sets the
-cooldown-from-blown pattern. Each phase below updates `disguise.md` in the same change.
+The plan builds on the civilian disguise as [`disguise.md`](../info/gameplay/disguise.md) describes
+it: it calls `fnc_disguise_hunted` and copies the cooldown from cover blown. Each phase below updates
+`disguise.md` in the same change.
 
 ## Rules
 
@@ -130,7 +130,7 @@ spotting values (150 m, 60°, 0.5 visibility, 5 s fire window) go in `server/ser
 ## Phase 3: activation and monitor
 
 `server/disguise/fnc_disguiseAsEnemy.sqf` is compiled and broadcast in `server/server_fnc_init.sqf`,
-as `fnc_disguiseAsCivilian` is (`:333-334`).
+as `fnc_disguiseAsCivilian` is (`:334-335`).
 
 Activation checks, in this order:
 
