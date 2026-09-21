@@ -36,8 +36,7 @@ _unit addEventHandler ["HandleHeal", fnc_civ_healed];
 //
 // So are vendors. A panicking civilian runs 200 m and stays calm-locked for a minute, which for a
 // shopkeeper means abandoning the shop -- and the fixed building is the whole point of the placement.
-// fnc_civ_panic already exempts a surrendered civilian and a side-mission giver on the same
-// principle; a vendor is refused at the spawn instead, because it never needs the handler at all.
+// fnc_civ_panic refuses them as well, because its alarm sweep reaches civilians that never heard the shot.
 if (!_isZombie && !_isVendor) then {
     _unit addEventHandler ["FiredNear", {
         params ["_unit", "_firer"];

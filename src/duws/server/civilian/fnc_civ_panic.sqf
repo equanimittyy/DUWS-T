@@ -34,6 +34,9 @@ if (_unit getVariable ["isSurrendered", false]) exitWith {};
 // A civilian side mission's giver keeps to the building they took until the mission ends.
 if ((_unit getVariable ["DUWS_civMission_state", ""]) != "") exitWith {};
 
+// A vendor holds its shop: see fnc_civ_spawnUnit.
+if ((_unit getVariable ["DUWS_vendor_type", ""]) != "") exitWith {};
+
 _unit setVariable ["DUWS_civ_panicked", true, true];
 
 // Broadcast, because the interaction action's condition is evaluated on every machine that
