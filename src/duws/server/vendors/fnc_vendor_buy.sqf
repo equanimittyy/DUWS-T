@@ -5,7 +5,7 @@
     Sells one class to one player. Params: [_vendor, _buyer, _class, _list, _store].
     _list is the stock list the class was picked from, which sets its price. _store picks the second
     destination -- the arsenal for gear, the garage for a vehicle -- against taking it here and now.
-    Every answer is spoken to the buyer alone; a purchase is nobody else's news.
+    Every answer goes to the buyer alone; a purchase is nobody else's news.
 
     Everything that can refuse the sale is asked before the money moves. A charge that cannot be
     delivered would have to be refunded, and a refund is a second place for the price to be wrong.
@@ -17,6 +17,11 @@ if (isNull _vendor || isNull _buyer) exitWith {};
 private _fnc_say = {
     params ["_line"];
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _buyer];
+};
+private _fnc_bought = {
+    params ["_key"];
+    private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
+    [format [localize _key, [_name, _class] select (_name isEqualTo "")]] remoteExec ["hint", _buyer];
 };
 
 // The reach the action opens at, with a metre of slack for the walk to the dialog button.
@@ -68,7 +73,7 @@ if (_gear) exitWith {
         // The setter deliberately does not broadcast -- its other callers batch several writes behind
         // one publish -- so a single sale has to publish for itself or no client sees the shelf move.
         publicVariable "DUWS_capturedPool";
-        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL"] call _fnc_say;
+        ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL"] call _fnc_bought;
     };
     [_class] remoteExec ["fnc_vendor_grant", _buyer];
 };
@@ -81,7 +86,7 @@ private _spec = [_class, [], [], [[],[],[]], 0, 1, [[[],[]],[[],[]],[[],[]],[[],
 if (_store) exitWith {
     DUWS_garage_stored pushBack _spec;
     publicVariable "DUWS_garage_stored";
-    ["STR_DUWS_T_VENDOR_BOUGHT_GARAGE"] call _fnc_say;
+    ["STR_DUWS_T_VENDOR_BOUGHT_GARAGE"] call _fnc_bought;
 };
 
 // Radius 5 with "NONE" as the garage retrieval uses, so a second purchase lands beside the first
@@ -89,4 +94,4 @@ if (_store) exitWith {
 // the plain setFuel and setDamage in it replicate.
 private _veh = createVehicle [_class, _spawnPos, [], 5, "NONE"];
 [_veh, _spec] call DUWS_fnc_vehSpecApply;
-["STR_DUWS_T_VENDOR_BOUGHT_VEHICLE"] call _fnc_say;
+["STR_DUWS_T_VENDOR_BOUGHT"] call _fnc_bought;

@@ -2935,12 +2935,8 @@
                 <English>Buy and send to garage.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT_GARAGE">
-                <Original>Bought. It is in your garage.</Original>
-                <English>Bought. It is in your garage.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_VEHICLE">
-                <Original>Bought. It is outside.</Original>
-                <English>Bought. It is outside.</English>
+                <Original>%1 purchased to garage.</Original>
+                <English>%1 purchased to garage.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_NO_ROOM">
                 <Original>There is nowhere here to put it.</Original>
@@ -3006,13 +3002,13 @@
                 <Original>The arsenal already stocks that.</Original>
                 <English>The arsenal already stocks that.</English>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_ITEM">
-                <Original>Bought %1.</Original>
-                <English>Bought %1.</English>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT">
+                <Original>%1 purchased.</Original>
+                <English>%1 purchased.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT_ARSENAL">
-                <Original>Bought. It will be at your arsenal.</Original>
-                <English>Bought. It will be at your arsenal.</English>
+                <Original>%1 purchased to Arsenal.</Original>
+                <English>%1 purchased to Arsenal.</English>
             </Key>
         </Container>
         <Container name="Civilian Side Missions">

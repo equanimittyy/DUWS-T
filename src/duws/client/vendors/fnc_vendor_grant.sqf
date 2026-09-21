@@ -1,7 +1,7 @@
 // Locality: client -- an inventory add takes effect only where the unit is local.
 //
 // Hands one bought gear class to the player: into the first worn container with room, otherwise at
-// their feet. The hint mirrors fnc_loot_grant's, so a purchase reads the way a find does.
+// their feet.
 params ["_class"];
 
 private _taken = call {
@@ -19,6 +19,5 @@ private _taken = call {
 if (!_taken) then { [[[_class, 1]], getPosATL player] remoteExec ["fnc_money_drop", 2] };
 
 private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
-hint format ["%1\n\n%2",
-    format [localize "STR_DUWS_T_VENDOR_BOUGHT_ITEM", [_name, _class] select (_name isEqualTo "")],
-    if (_taken) then { localize "STR_DUWS_T_LOOT_TAKEN" } else { [[[_class, 1]]] call DUWS_fnc_dropped_line }];
+private _line = format [localize "STR_DUWS_T_VENDOR_BOUGHT", [_name, _class] select (_name isEqualTo "")];
+hint (if (_taken) then { _line } else { format ["%1\n\n%2", _line, [[[_class, 1]]] call DUWS_fnc_dropped_line] });
