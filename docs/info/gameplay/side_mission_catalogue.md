@@ -496,7 +496,7 @@ so it is unscheduled, and two players who give at the same time cannot both pay 
 player can give, and the gift that meets the target is the report.
 
 **Clear Minefield lays a real OPFOR field** (`fnc_civ_mission_mines.sqf`). The field is 1-2 by 1-2 squares of
-50 m, AP or AT at random, laid by `fnc_hardpoint_minefield`. Only 5-12 % of the mines are kept, and at least
+50 m, AP or AT at random, laid by `fnc_hardpoint_minefield`. Only 10-17 % of the mines are kept, and at least
 one. The field is registered as a standalone `MINEFIELD` hardpoint and revealed at once, so every mine shows on
 the map and the hardpoint poller removes the row when the last mine is gone
 ([`hardpoints.md`](hardpoints.md)). The objective reads the same mines. The field belongs to OPFOR, not to the
