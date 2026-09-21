@@ -5133,10 +5133,6 @@
                 <Original>Outside the HQ area.</Original>
                 <English>Outside the HQ area.</English>
             </Key>
-            <Key ID="STR_DUWS_T_DEPOT_BLOCKED">
-                <Original>Set it down clear of people, vehicles and buildings.</Original>
-                <English>Set it down clear of people, vehicles and buildings.</English>
-            </Key>
             <Key ID="STR_DUWS_T_DEPOT_PLACING">
                 <Original>Placing vehicle...</Original>
                 <English>Placing vehicle...</English>
