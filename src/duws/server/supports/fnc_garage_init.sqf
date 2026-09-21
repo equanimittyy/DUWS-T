@@ -62,7 +62,7 @@ fnc_garage_retrieve = {
     [netId _veh] remoteExec ["fnc_depot_place_r3f", _caller];
 };
 
-// Finalize: reclaim for the server (the carry made the caller owner), restore damage, disable R3F.
+// Finalize: reclaim for the server (the carry made the caller owner), thaw, disable R3F.
 // Every R3F action gates on !R3F_LOG_disabled, so the one flag retires all of them.
 fnc_depot_place_finish = {
     if (!isServer) exitWith {};
@@ -71,8 +71,15 @@ fnc_depot_place_finish = {
     if (isNull _veh) exitWith {};
 
     _veh setOwner 2;
-    _veh enableSimulationGlobal true; // thaw from the placed position (invulnerable) before damage is restored
-    _veh allowDamage true;
+    // R3F's carry-end handler has already restored damage on every machine, so the guard over the thaw's
+    // settle is set again here.
+    _veh allowDamage false;
+    _veh enableSimulationGlobal true;
     _veh lock false;
     _veh setVariable ["R3F_LOG_disabled", true, true];
+    [_veh] spawn {
+        params ["_veh"];
+        sleep 2;
+        if (!isNull _veh) then { _veh allowDamage true };
+    };
 };

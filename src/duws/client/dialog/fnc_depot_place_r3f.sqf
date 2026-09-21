@@ -28,6 +28,18 @@ _veh setVariable ["DUWS_depot_placing", true];
     };
 };
 
+// The thaw throws a hull clear of anything it was left inside with an impulse that kills a unit or breaks
+// a building, which would make the carry a weapon. The 30 m reach covers a large building whose origin
+// sits far from its walls; a flat object such as a pad has no collision to clip.
+private _fnc_clear = {
+    (nearestObjects [_veh, ["AllVehicles", "Building"], (boundingBoxReal _veh select 2) + 30]) findIf {
+        _x != _veh
+        && {((boundingBoxReal _x select 1 select 2) - (boundingBoxReal _x select 0 select 2)) > 0.5}
+        && {[_veh, _x] call R3F_LOG_FNCT_3D_intersect_bounding_sphere_objs}
+        && {[_veh, _x] call R3F_LOG_FNCT_3D_bbox_intersect_bbox_objs}
+    } < 0
+};
+
 // A death mid-carry still finalizes below, so the vehicle is never left invulnerable on a dead client.
 private _placed = false;
 while { !_placed && alive player } do {
@@ -36,10 +48,10 @@ while { !_placed && alive player } do {
     if (alive player) then {
         // 4th arg = unload mode, re-anchoring in front; plain carry keeps the spawn offset, landing it beside.
         [_veh, objNull, objNull, true] call R3F_LOG_FNCT_objet_deplacer;
-        if (!_baseBound || {[getPosATL _veh] call fnc_in_base_keep}) then {
+        call {
+            if (_baseBound && {!([getPosATL _veh] call fnc_in_base_keep)}) exitWith { hint localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE" };
+            if !(call _fnc_clear) exitWith { hint localize "STR_DUWS_T_DEPOT_BLOCKED" };
             _placed = true;
-        } else {
-            hint localize "STR_DUWS_T_DEPOT_MAP_OUTSIDE";
         };
     };
 };
