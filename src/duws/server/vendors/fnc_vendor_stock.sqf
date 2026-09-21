@@ -20,12 +20,25 @@ private _classes = [];
 
 private _fnc_rows = {
     params ["_classes"];
+    // OPFOR drops what BLUFOR sells and All drops what every other list sells, so one item never shows
+    // on two lists at two prices. Lowercased: unit loadout arrays need not match the config's case.
+    private _taken = createHashMap;
+    {
+        { _taken set [toLower (_x select 1), true] } forEach ([_kind, _x] call fnc_vendor_stock);
+    } forEach (switch (_list) do {
+        case "opfor": { ["blufor"] };
+        // An arms dealer has no Civilian list: asking for one falls through to the whole-config sweep
+        // and would empty All.
+        case "all": { [["civilian", "blufor", "opfor"], ["blufor", "opfor"]] select (_kind isEqualTo "gear") };
+        default { [] };
+    });
     private _rows = [];
     {
         private _cfg = [_x] call fnc_vendor_classCfg;
         // Priced first: the price function is the one place that decides what may be sold at all, so
         // a row can never reach the catalogue without a number the server will honour.
-        if (!isNull _cfg && {getNumber (_cfg >> "scope") == 2} && {([_x, _list] call fnc_vendor_price) > 0}) then {
+        if (!isNull _cfg && {!(toLower _x in _taken)} && {getNumber (_cfg >> "scope") == 2}
+            && {([_x, _list] call fnc_vendor_price) > 0}) then {
             private _name = getText (_cfg >> "displayName");
             _rows pushBack [if (_name isEqualTo "") then {_x} else {_name}, _x];
         };
