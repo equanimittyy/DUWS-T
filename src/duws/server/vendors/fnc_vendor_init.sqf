@@ -53,20 +53,12 @@ for "_i" from 0 to (_count - 1) do {
     _water pushBack ([getPos (_locations select _i), _radii param [_i, 500]] call _fnc_townWater);
 };
 
-// A type with nowhere to stand, or nothing to sell, is left out of the draft rather than drafted and
-// then found empty: a landlocked map has no boat dealer, and neither does one whose civilian faction
-// ships no boats.
+// A type with nowhere to stand is left out of the draft rather than drafted and then found stranded:
+// a landlocked map has no boat dealer.
 private _fnc_canHost = {
     params ["_town", "_type"];
-    private _row = [_type] call fnc_vendor_type;
-    private _stocked = switch (_row select 3) do {
-        case "car":  { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] };
-        case "boat": { (missionNamespace getVariable ["civ_boat_array", []]) isNotEqualTo [] };
-        default      { true };
-    };
-    if (!_stocked) exitWith { false };
-    if ((_row select 4) isEqualTo "water") exitWith { (_water select _town) isNotEqualTo [] };
-    true
+    if ((([_type] call fnc_vendor_type) select 4) isNotEqualTo "water") exitWith { true };
+    (_water select _town) isNotEqualTo []
 };
 
 // Largest town first, so the guaranteed pass below seeds each type into the town most able to host it

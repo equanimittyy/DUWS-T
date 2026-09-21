@@ -42,6 +42,7 @@ publicVariable "fnc_vendor_type";
 publicVariable "fnc_vendor_kind";
 publicVariable "fnc_vendor_lists";
 publicVariable "fnc_vendor_classCfg";
+publicVariable "fnc_vendor_hullFits";
 publicVariable "fnc_vendor_poolCounts";
 publicVariable "fnc_vendor_ask";
 publicVariable "fnc_vendor_reply";

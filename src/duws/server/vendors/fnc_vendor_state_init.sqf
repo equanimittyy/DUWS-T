@@ -29,16 +29,23 @@ fnc_vendor_type = {
 
 fnc_vendor_kind = { params ["_type"]; ([_type] call fnc_vendor_type) select 3 };
 
-// The stock picker's entries for one type, and the server's whitelist with them: a vehicle purchase
-// is refused unless the class is in one of these, so a hand-made remoteExec cannot buy a tank from a
-// car dealer. A dealer with a single list still fills the combo, which is what the shared browser
-// helper fills against.
+// The stock picker's entries for one type, and the server's whitelist with them: a purchase is refused
+// unless the class is on the list it was priced from. A vehicle dealer opens on its own town's traffic.
 fnc_vendor_lists = {
 	params ["_type"];
-	switch ([_type] call fnc_vendor_kind) do {
-		case "car":  { ["cars"] };
-		case "boat": { ["boats"] };
-		default      { ["blufor", "opfor", "all"] };
+	if (([_type] call fnc_vendor_kind) isEqualTo "gear") exitWith { ["blufor", "opfor", "all"] };
+	["civilian", "blufor", "opfor", "all"]
+};
+
+// Whether a vehicle dealer of this kind may sell the class. StaticWeapon is a LandVehicle in config,
+// and a mortar is not something a car dealer drives off the lot.
+fnc_vendor_hullFits = {
+	params ["_kind", "_class"];
+	private _cv = configFile >> "CfgVehicles";
+	switch (_kind) do {
+		case "car":  { _class isKindOf ["LandVehicle", _cv] && {!(_class isKindOf ["StaticWeapon", _cv])} };
+		case "boat": { _class isKindOf ["Ship", _cv] };
+		default      { false };
 	};
 };
 
@@ -107,16 +114,16 @@ fnc_vendor_reply = {
 // frame for as long as it took and stall the whole session. The ask below waits it out.
 fnc_vendor_query = {
 	if (!isServer) exitWith {};
-	params ["_list", "_requester", "_replyVar"];
-	[_replyVar, [_list] call fnc_vendor_stock] remoteExecCall ["fnc_vendor_reply", _requester];
+	params ["_kind", "_list", "_requester", "_replyVar"];
+	[_replyVar, [_kind, _list] call fnc_vendor_stock] remoteExecCall ["fnc_vendor_reply", _requester];
 };
 
 // Blocks on the answer, so every caller has to be scheduled.
 fnc_vendor_ask = {
-	params ["_list"];
+	params ["_kind", "_list"];
 	DUWS_vendorAskSeq = (missionNamespace getVariable ["DUWS_vendorAskSeq", 0]) + 1;
 	private _replyVar = format ["duws_vendor_reply_%1", DUWS_vendorAskSeq];
-	[_list, player, _replyVar] remoteExec ["fnc_vendor_query", 2];
+	[_kind, _list, player, _replyVar] remoteExec ["fnc_vendor_query", 2];
 	// A server-side throw sends no reply at all; without a deadline the catalogue would wait on it
 	// for the rest of the session.
 	private _deadline = diag_tickTime + 30;
@@ -124,7 +131,7 @@ fnc_vendor_ask = {
 	private _res = missionNamespace getVariable [_replyVar, []];
 	missionNamespace setVariable [_replyVar, nil];
 	if (_res isEqualTo []) then {
-		["ERROR", "VENDOR", format ["stock request '%1' went unanswered for 30 s", _list]] call fnc_log;
+		["ERROR", "VENDOR", format ["stock request '%1/%2' went unanswered for 30 s", _kind, _list]] call fnc_log;
 	};
 	_res param [0, []]
 };

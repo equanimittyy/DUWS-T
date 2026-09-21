@@ -33,6 +33,9 @@ if (((missionNamespace getVariable ["DUWS_enemy_town_pos", []]) findIf {
 // vendor is handed over through a global.
 DUWS_vendor_target = _vendor;
 duws_vendor_rows = [];
+// The list the shown rows came from, not the combo's pick: a new pick shows old rows until its fetch
+// answers, and those rows must keep their own list's price.
+duws_vendor_list = "";
 // Read by the painter below, which branches the preview, the second destination and its cap on it.
 duws_vendor_kind = [_type] call fnc_vendor_kind;
 
@@ -77,7 +80,7 @@ duws_vendor_paint = {
     ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>",
         if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]}];
 
-    private _price = [_class] call fnc_vendor_price;
+    private _price = [_class, duws_vendor_list] call fnc_vendor_price;
     ([8911] call duws_vendor_ctrl) ctrlSetText
         format [localize "STR_DUWS_T_VENDOR_PRICE", _price, _money];
 
@@ -110,13 +113,14 @@ duws_vendor_fetch = {
     ([8911] call duws_vendor_ctrl) ctrlSetText (localize "STR_DUWS_T_faction_edit_working");
     [_list] spawn {
         params ["_list"];
-        private _rows = [_list] call fnc_vendor_ask;
+        private _rows = [duws_vendor_kind, _list] call fnc_vendor_ask;
         private _stockCtrl = [8903] call duws_vendor_ctrl;
         if (isNull _stockCtrl) exitWith {};
         // A slow answer must not overwrite a newer pick: the player can change list while the first
         // sweep is still running.
         if ((_stockCtrl lbData (lbCurSel _stockCtrl)) != _list) exitWith {};
         duws_vendor_rows = _rows;
+        duws_vendor_list = _list;
         [] call duws_vendor_fill;
     };
 };
@@ -142,14 +146,12 @@ private _gear = duws_vendor_kind isEqualTo "gear";
 (_display displayCtrl 8914) ctrlSetTooltip
     (localize (["STR_DUWS_T_VENDOR_STORE_TT_VEH", "STR_DUWS_T_VENDOR_STORE_TT"] select _gear));
 
-// The faction browser's left-hand combo, repurposed from a faction picker to a stock picker. A dealer
-// with a single list still fills it, since that is what the shared browser helper fills against.
+// The faction browser's left-hand combo, repurposed from a faction picker to a stock picker.
 private _listLabels = createHashMapFromArray [
-    ["blufor", "STR_DUWS_T_VENDOR_STOCK_BLUFOR"],
-    ["opfor",  "STR_DUWS_T_VENDOR_STOCK_OPFOR"],
-    ["all",    "STR_DUWS_T_VENDOR_STOCK_ALL"],
-    ["cars",   "STR_DUWS_T_VENDOR_STOCK_CARS"],
-    ["boats",  "STR_DUWS_T_VENDOR_STOCK_BOATS"]
+    ["civilian", "STR_DUWS_T_VENDOR_STOCK_CIV"],
+    ["blufor",   "STR_DUWS_T_VENDOR_STOCK_BLUFOR"],
+    ["opfor",    "STR_DUWS_T_VENDOR_STOCK_OPFOR"],
+    ["all",      "STR_DUWS_T_VENDOR_STOCK_ALL"]
 ];
 private _stockCtrl = _display displayCtrl 8903;
 {
@@ -161,7 +163,7 @@ private _fnc_buy = {
     private _classCtrl = [8907] call duws_vendor_ctrl;
     private _class = _classCtrl lbData (lbCurSel _classCtrl);
     if (_class isEqualTo "") exitWith {};
-    [DUWS_vendor_target, player, _class, _store] remoteExec ["fnc_vendor_buy", 2];
+    [DUWS_vendor_target, player, _class, duws_vendor_list, _store] remoteExec ["fnc_vendor_buy", 2];
 
     // Money leaves on the server, so the count here only moves once the removal replicates back. The
     // panel waits for that rather than repainting a figure the player has already spent.

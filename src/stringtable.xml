@@ -2934,13 +2934,9 @@
                 <Original>Boat Dealer</Original>
                 <English>Boat Dealer</English>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_STOCK_CARS">
-                <Original>Vehicles</Original>
-                <English>Vehicles</English>
-            </Key>
-            <Key ID="STR_DUWS_T_VENDOR_STOCK_BOATS">
-                <Original>Boats</Original>
-                <English>Boats</English>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_CIV">
+                <Original>Civilian</Original>
+                <English>Civilian</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE_TT_VEH">
                 <Original>Take it here. It is left outside the shop.</Original>
@@ -2979,12 +2975,12 @@
                 <English>Stock</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STOCK_BLUFOR">
-                <Original>BLUFOR kit</Original>
-                <English>BLUFOR kit</English>
+                <Original>BLUFOR</Original>
+                <English>BLUFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STOCK_OPFOR">
-                <Original>OPFOR kit</Original>
-                <English>OPFOR kit</English>
+                <Original>OPFOR</Original>
+                <English>OPFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STOCK_ALL">
                 <Original>Everything</Original>

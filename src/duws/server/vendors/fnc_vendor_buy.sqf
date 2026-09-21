@@ -2,15 +2,16 @@
 // catalogue only greyed. Nothing a client sends is trusted: its town list is a broadcast copy, its
 // money count is a snapshot, and in co-op two players can spend the same note.
 /*
-    Sells one class to one player. Params: [_vendor, _buyer, _class, _store].
-    _store picks the second destination -- the arsenal for gear, the garage for a vehicle -- against
-    taking it here and now. Every answer is spoken to the buyer alone; a purchase is nobody else's news.
+    Sells one class to one player. Params: [_vendor, _buyer, _class, _list, _store].
+    _list is the stock list the class was picked from, which sets its price. _store picks the second
+    destination -- the arsenal for gear, the garage for a vehicle -- against taking it here and now.
+    Every answer is spoken to the buyer alone; a purchase is nobody else's news.
 
     Everything that can refuse the sale is asked before the money moves. A charge that cannot be
     delivered would have to be refunded, and a refund is a second place for the price to be wrong.
 */
 if (!isServer) exitWith {};
-params ["_vendor", "_buyer", "_class", ["_store", false]];
+params ["_vendor", "_buyer", "_class", ["_list", ""], ["_store", false]];
 if (isNull _vendor || isNull _buyer) exitWith {};
 
 private _fnc_say = {
@@ -31,20 +32,13 @@ if (([_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt) <= -10) 
     ["STR_DUWS_T_VENDOR_HOSTILE"] call _fnc_say;
 };
 
-private _price = [_class] call fnc_vendor_price;
-if (_price < 0) exitWith {};
+// A hand-made remoteExec must not buy a tank from an arms dealer, nor name the BLUFOR list for an
+// OPFOR class to dodge the markup, so the class has to be on the list it is priced from.
+if !(_list in ([_type] call fnc_vendor_lists)) exitWith {};
+if ((([_kind, _list] call fnc_vendor_stock) findIf { (_x select 1) isEqualTo _class }) < 0) exitWith {};
 
-// A hand-made remoteExec must not buy a tank from a car dealer, so a vehicle has to be in the
-// dealer's own pool. Gear needs no equivalent: Everything is by construction every class
-// fnc_vendor_price will price, so the price gate above already is the membership test.
-private _stocked = _gear;
-if (!_gear) then {
-    {
-        private _rows = [_x] call fnc_vendor_stock;
-        if ((_rows findIf { (_x select 1) isEqualTo _class }) >= 0) exitWith { _stocked = true };
-    } forEach ([_type] call fnc_vendor_lists);
-};
-if (!_stocked) exitWith {};
+private _price = [_class, _list] call fnc_vendor_price;
+if (_price < 0) exitWith {};
 
 // Outside Limited mode a friendly class is already unlimited on the shelf, so stocking it would buy
 // nothing at all.
