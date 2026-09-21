@@ -191,8 +191,8 @@ DUWS_stowed = createHashMap;
 DUWS_retired = [];
 
 // One-shot request for the map cleanup to sweep now, treating every lifetime as already elapsed.
-// Set through fnc_duws_forceCleanup and cleared by the pass it wakes. A testing tool: it skips
-// the wait for the lifetime, but not KEEP_RADIUS and not the persistent flag.
+// Set through fnc_duws_forceCleanup and cleared by the pass it wakes. It skips the wait for the
+// lifetime, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
 // Live civilian side missions, id -> entry; fnc_civ_mission_request adds, fnc_civ_mission_finish deletes.

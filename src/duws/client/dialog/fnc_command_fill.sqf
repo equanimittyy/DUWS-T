@@ -14,7 +14,8 @@
     `closes` is set only on the three entries that open a dialog of their own, which would otherwise
     stack on this one; everything else leaves the menu up, so buying two things in a row needs no walk
     back to the HQ prop. `colour` marks what an entry costs -- orange is the same "costs money, not
-    yet yours" signal the supports catalogue paints unbought permanents with.
+    yet yours" signal the supports catalogue paints unbought permanents with. The garbage cleanup is
+    free but wears it too: it deletes world state for every player and cannot be undone.
 */
 #define COST_COLOUR [1, 0.502, 0, 1]
 
@@ -41,6 +42,16 @@ _rows pushBack [localize "STR_DUWS_T_0dlbonpc", { [] call fnc_operator_open }, [
 // everyone else brought back into CP, so the two are one errand.
 if (!_isFob) then {
     _rows pushBack [localize "STR_DUWS_T_INTEL_ANALYSIS_ACTION", { [player] remoteExec ["fnc_intelAnalysis", 2] }, []];
+};
+
+// Game Master only, as rest is: one press deletes litter the whole team may still want.
+if ((vehiclevarname player) in game_master) then {
+    _rows pushBack [localize "STR_DUWS_T_GARBAGE_CLEANUP_ACTION", {
+        if !([localize "STR_DUWS_T_GARBAGE_CLEANUP_CONFIRM", localize "STR_DUWS_T_GARBAGE_CLEANUP_ACTION",
+            true, true] call BIS_fnc_guiMessage) exitWith {};
+        [] remoteExec ["fnc_duws_forceCleanup", 2];
+        hint localize "STR_DUWS_T_GARBAGE_CLEANUP_STARTED";
+    }, [], false, COST_COLOUR];
 };
 
 // Below the free entries, for the reason the scroll bucket put it lowest: a mis-clicked spend costs

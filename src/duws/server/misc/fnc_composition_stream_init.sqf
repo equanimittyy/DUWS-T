@@ -184,15 +184,14 @@ fnc_duws_deploy = {
     [_key] call DUWS_fnc_opcom_gridDirty;
 };
 
-// Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed, so
-// a tester does not wait 30 min to see collection happen. The sweep's interval wait breaks on this
-// flag, so it lands within half a second. Bounded by what it cannot skip -- KEEP_RADIUS and the
-// persistent flag -- so the worst a client reaching it can do is bin distant litter early. Not
-// published, because nothing calls it locally: the menu remoteExecs it to the server, the only
-// machine holding the deadlines.
+// Entry point for the request menu's Garbage Cleanup button and the debug menu: sweep now, with every
+// lifetime treated as elapsed. The sweep's interval wait breaks on this flag, so it lands within half a
+// second. Bounded by what it cannot skip -- KEEP_RADIUS and the persistent flag -- so the worst a client
+// reaching it can do is bin distant litter early. Not published, because nothing calls it locally: both
+// menus remoteExec it to the server, the only machine holding the deadlines.
 fnc_duws_forceCleanup = {
     DUWS_cleanup_force = true;
-    ["INFO", "CLEANUP", "Forced sweep requested from the debug menu."] call fnc_log;
+    ["INFO", "CLEANUP", "Forced sweep requested."] call fnc_log;
 };
 
 // Debug-menu entry point for composition streaming: stow the nearest zone, or deploy it if already

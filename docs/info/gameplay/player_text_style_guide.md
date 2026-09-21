@@ -272,9 +272,9 @@ to ask command for is a button in the dialog Requests already opens, so the HQ s
 scroll entry instead of the twelve it once did. The dividing line is **who needs it and how fast** —
 an arsenal, a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay
 on the scroll wheel and on the prop they belong to, because a player reaches for those without asking
-anyone. Squad and FOB management, operative recruitment, intel analysis, the redeploy and the two
-hires are buttons, built by `fnc_command_fill` in that order: what costs nothing above what does,
-and the analysis directly under the operatives whose take it converts.
+anyone. Squad and FOB management, operative recruitment, intel analysis, the garbage cleanup (Game
+Master only) and the redeploy are buttons, built by `fnc_command_fill` in that order: what costs
+nothing above what does, and the analysis directly under the operatives whose take it converts.
 
 Rest and the squad-leader reset went the other way and are scroll entries again, on the HQ medical
 tent (`fnc_medtent_actions`) and on the FOB object. Both are things a player walks somewhere to do

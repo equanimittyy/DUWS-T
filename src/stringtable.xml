@@ -2074,6 +2074,18 @@
                 <English>Close</English>
                 <Chinese>关闭</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_GARBAGE_CLEANUP_ACTION">
+                <Original>Garbage Cleanup</Original>
+                <English>Garbage Cleanup</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARBAGE_CLEANUP_CONFIRM">
+                <Original>Are you sure you want to run garbage cleanup now?</Original>
+                <English>Are you sure you want to run garbage cleanup now?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_GARBAGE_CLEANUP_STARTED">
+                <Original>Garbage cleanup running. Anything within 300 m of a player stays.</Original>
+                <English>Garbage cleanup running. Anything within 300 m of a player stays.</English>
+            </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_ACTION">
                 <Original>Redeploy Base Units (2 CP)</Original>
                 <English>Redeploy Base Units (2 CP)</English>
