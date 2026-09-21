@@ -98,15 +98,24 @@ fnc_escalation_report = {
     if !(missionNamespace getVariable ["escalation_enabled", true]) exitWith {};
 
     escalation_destroyed = escalation_destroyed + 1;
+    call fnc_escalation_apply;
+};
+
+// Walks the level down as well as up: the debug menu can take houses back, and the multiplier must
+// follow them.
+fnc_escalation_apply = {
     // Clamped: with the ending off, the ceiling is a plateau, not prices climbing without limit.
     private _level = (floor (escalation_destroyed / escalation_tier)) min ESCALATION_MAX_LEVEL;
-    if (_level <= escalation_level) exitWith {};
+    if (_level == escalation_level) exitWith {};
+    private _raised = _level > escalation_level;
 
     escalation_level = _level;
     escalation_multiplier = 1 + (_level / 10);
     publicVariable "escalation_multiplier";
     ["INFO", "ECON", format ["Escalation level %1 (%2 destroyed of %3), prices x%4",
         _level, escalation_destroyed, escalation_budget, escalation_multiplier]] call fnc_log;
+
+    if (!_raised) exitWith {};
 
     if (_level >= ESCALATION_MAX_LEVEL) exitWith {
         ["alert", [localize "STR_DUWS_T_escalation_title", localize "STR_DUWS_T_escalation_max"]]

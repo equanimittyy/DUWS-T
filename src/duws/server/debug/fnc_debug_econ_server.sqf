@@ -110,13 +110,7 @@ switch (toLower _mode) do {
             ["Escalation is not running in this campaign."] remoteExec ["hint", _caller];
         };
         escalation_destroyed = (escalation_destroyed + _delta) max 0;
-        // Recomputed in both directions, unlike the BuildingChanged handler, which only ever raises
-        // the level -- a tool that can take houses back has to be able to walk the level down with
-        // them or the price multiplier stays where the highest count left it.
-        escalation_level = (floor (escalation_destroyed / escalation_tier)) min 11;
-        escalation_multiplier = 1 + (escalation_level / 10);
-        publicVariable "escalation_multiplier";
-        ["INFO", "ECON", format ["Escalation set to %1 destroyed, level %2, prices x%3 (debug menu)",
-            escalation_destroyed, escalation_level, escalation_multiplier]] call fnc_log;
+        ["INFO", "ECON", format ["Escalation set to %1 destroyed (debug menu)", escalation_destroyed]] call fnc_log;
+        call fnc_escalation_apply;
     };
 };
