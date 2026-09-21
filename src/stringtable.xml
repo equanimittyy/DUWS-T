@@ -2600,27 +2600,6 @@
                 <Spanish>¡Oye tú! Ven aquí!</Spanish>
                 <Chinesesimp>嘿，你！给我过来！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_fight4freedom">
-                <Original>We're arming locals who'll fight. Will you come with us?</Original>
-                <English>We're arming locals who'll fight. Will you come with us?</English>
-                <German>Hey, Kumpel... Wir sind von BLUFOR. Willst du für die Freiheit kämpfen? (reicht ihm ein paar Geldscheine)</German>
-                <Spanish>Oye, amigo... Somos de BLUFOR. ¿Quieres luchar por la libertad? (dándole unos billetes)</Spanish>
-                <Chinesesimp>嘿，朋友...我们是蓝军的，你愿意为了自由而战吗？(递过去几张纸币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_FAIL_REP">
-                <Original>I've got people here who need me. Find someone else.</Original>
-                <English>I've got people here who need me. Find someone else.</English>
-                <German>...Wer zum Teufel will mit euch gehen? Ihr seid nur ein Haufen Banditen! (schlägt dein Geld auf den Boden)</German>
-                <Spanish>...¿Quién demonios quiere ir con vosotros? Solo sois un montón de bandidos! (golpeando tu dinero contra el suelo)</Spanish>
-                <Chinesesimp>...谁他妈要跟你们走？一帮匪徒！(把你的钱拍在地上)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_SUCCESS">
-                <Original>All right. I'll come with you.</Original>
-                <English>All right. I'll come with you.</English>
-                <German>Na gut! Ich wollte diese Bastarde schon immer abschlachten! (nimmt die Geldscheine entgegen)</German>
-                <Spanish>¡Bien! ¡Siempre he querido matar a esos bastardos! (recibiendo los billetes)</Spanish>
-                <Chinesesimp>行，我一直都很想杀光那帮杂碎！(接过纸币)</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_HANDSUP1">
                 <Original>Hands up!</Original>
                 <English>Hands up!</English>
@@ -2868,14 +2847,6 @@
             <Key ID="STR_DUWS_T_CIV_ROW_TOOLKIT_DESC">
                 <Original>A toolkit, left at their feet.</Original>
                 <English>A toolkit, left at their feet.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CIV_ROW_RECRUIT">
-                <Original>Offer to Enlist</Original>
-                <English>Offer to Enlist</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CIV_ROW_RECRUIT_DESC">
-                <Original>Arm them and take them along. They fight for the town's opinion of you, not for pay.</Original>
-                <English>Arm them and take them along. They fight for the town's opinion of you, not for pay.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ROW_ARREST">
                 <Original>Arrest</Original>
@@ -7358,8 +7329,8 @@
                 <Chinesesimp>经济与资源</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_CIV_BODY">
-                <Original>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid, request a toolkit, or recruit them to your side, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</Original>
-                <English>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid, request a toolkit, or recruit them to your side, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</English>
+                <Original>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid or request a toolkit, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</Original>
+                <English>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid or request a toolkit, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</English>
                 <Chinesesimp>平民为可选内容，在任务设置界面开启。在环境选项中，将“启用平民”设为某种人群类型；第一个选项（关闭）会完全禁用平民。可用的人群类型取决于检测到的平民模组，原版阿尔蒂斯/塔诺亚人群始终可用。&lt;br/&gt;&lt;br/&gt;启用后，城镇和区域会有非战斗人员。近距离时你可以向他们请求援助、索取工具包，或将其招募到己方，并可能出现“保护平民”支线任务。伤害或杀死平民会损失声望，因此在有人区域请注意火力。&lt;br/&gt;&lt;br/&gt;两种特殊模式会以幸存者撤离目标取代常规互动：丧尸末日（Ravage）与WBK事件。在这些模式中天气锁定为永久薄雾，你对平民的唯一任务是招募幸存者并带回基地撤离，每次营救都会奖励指挥点。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_L_OBJECTIVE">

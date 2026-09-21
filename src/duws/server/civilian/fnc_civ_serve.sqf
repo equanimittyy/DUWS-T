@@ -37,11 +37,6 @@ switch (toUpper _row) do {
         [getPos _caller, _caller] call fnc_intel_payout;
     };
 
-    // Clears captive and broadcasts it itself, so no client-side setCaptive pairs with this.
-    case "RECRUIT": {
-        [_civilian, _caller, netId _civilian] call fnc_recruitSuccessServer;
-    };
-
     // Dressings alongside the medikit: a medikit is unusable without the medic trait, so a squad
     // without one got nothing it could actually spend out of the only favour this person does.
     case "AID": {
@@ -55,8 +50,5 @@ switch (toUpper _row) do {
 
 };
 
-// Back to what they were doing, the same exit a refusal takes. A recruit is excluded: they have
-// just joined the player's group and take their orders from it.
-if ((toUpper _row) != "RECRUIT") then {
-    [_civilian] call fnc_civ_resume;
-};
+// Back to what they were doing, the same exit a refusal takes.
+[_civilian] call fnc_civ_resume;

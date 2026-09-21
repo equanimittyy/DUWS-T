@@ -928,8 +928,7 @@ who has helped is as finished with the player as one who refused.
 resolves.** `fnc_civ_request` sets `DUWS_civ_closed` before the three-second pause it spends speaking
 the opener, so the flag is broadcast while the exchange is still in flight. Written on the way out
 instead — in `fnc_civ_serve` or `fnc_civ_close` — it left three seconds in which a second player stood
-at the same local passed the same check, and the person answered both: two medikits, two intel drops,
-or a recruit joining one group while already in another.
+at the same local passed the same check, and the person answered both: two medikits or two intel drops.
 
 An arrest is one of the exchanges a civilian only has one of, so it and a conversation block each
 other. `fnc_civ_arrest` claims `DUWS_civ_arrested` before its own pause and tests `DUWS_civ_closed`;
@@ -960,8 +959,8 @@ town has settled.
 
 `shared/includes/civ_menu.hpp` holds three dialogs: `civ_dialog` on idc block **8300-8399**, and the bribe
 prompt and Raise Funds' `civ_give_dialog` on **8400-8499**, both clear of every idc the mission ships (the nearest neighbours are the
-disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Six framed rows — work, intel, aid,
-toolkit, recruit, arrest — each `closeDialog 0` and `remoteExec` the work to the server. Work asks for a
+disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Five framed rows — work, intel, aid,
+toolkit, arrest — each `closeDialog 0` and `remoteExec` the work to the server. Work asks for a
 civilian side mission and reaches its own server function, `fnc_civ_mission_request`; on the giver of a
 live one it becomes Report, or Give Money for Raise Funds, with Cancel beside it
 ([`side_mission_catalogue.md`](side_mission_catalogue.md#civilian-side-missions)).
@@ -1042,8 +1041,6 @@ rides the same clock and the same sweep as the body search rather than starting 
 Spending it on the attempt is what stops a player working a hostile town local by local until one of
 them says yes — the reaction curve prices that walk in people, and this prices it in time.
 
-**Recruit** reaches `fnc_recruitSuccessServer`, which clears captive and broadcasts it itself.
-
 **Aid and toolkit are one choice, not two.** A civilian answers one request and then walks, which is
 what removes the old dominance without inventing a number: same price, same odds, and the only
 difference left is which item the player needs. Aid drops a medikit *and three first aid kits* — a
@@ -1104,14 +1101,13 @@ coins in a town are a function of how many people the player is willing to hold 
 
 #### What a bribe costs
 
-Per row (`fnc_civ_rowPrice`, `src/duws/server/civilian/fnc_civ_state_init.sqf:81-90`), and **not** scaled by
+Per row (`fnc_civ_rowPrice`, `src/duws/server/civilian/fnc_civ_state_init.sqf:196-204`), and **not** scaled by
 reputation — the curve already carries that signal by deciding whether money is asked for at all, so a
 reputation term in the amount would count it twice.
 
 | Row | Bribe |
 |---|---:|
 | Intel | 3 |
-| Recruit | 2 |
 | Aid | 2 |
 | Toolkit | 2 |
 | Arrest | — |

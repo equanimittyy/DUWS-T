@@ -22,13 +22,13 @@ ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_MONEY", _money]];
 
 private _closed = _civilian getVariable ["DUWS_civ_closed", false];
 
-// These three grey together: one exchange -- served or refused -- closes the person for good, so
+// These two grey together: one exchange -- served or refused -- closes the person for good, so
 // there is no state where one of them is still open and another is not. No range test any more:
 // the action that opens this menu is itself gated to the 3 m the rows work at, so a row can no
 // longer be reached from further away than it functions.
 {
     ctrlEnable [_x, !_closed];
-} forEach [8341, 8342, 8343];
+} forEach [8341, 8342];
 
 // Intel carries a second gate the others do not: one ask per player per 30-minute economy tick,
 // spent on the attempt whatever the local answers. Read off the player because that is where the

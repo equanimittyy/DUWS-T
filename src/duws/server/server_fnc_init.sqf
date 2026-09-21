@@ -493,8 +493,6 @@ publicVariable "fnc_hirePartisans_spawnDeployed";
 fnc_veh_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_comp_damage.sqf";
 fnc_veh_disable_engine = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_disable_engine.sqf";
 fnc_veh_set_comp_damage = compile preprocessFileLineNumbers "duws\server\misc\fnc_veh_set_comp_damage.sqf";
-fnc_recruitSuccessServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_recruitSuccessServer.sqf";
-publicVariable "fnc_recruitSuccessServer";
 // fnc_throw (server) creates a dynamic body and launches it with setVelocity, so PhysX flies and
 // bounces it. createVehicle is global, so the one server-simulated object networks to every machine on its own.
 fnc_throw = compile preprocessFileLineNumbers "duws\server\misc\fnc_throw.sqf";

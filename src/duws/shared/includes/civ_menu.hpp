@@ -1,5 +1,5 @@
 // Civilian interaction panel: the single entry point in front of what a local will do for the
-// player. Six framed rows in the Squad-Manager idiom, each with a description and a button that
+// player. Five framed rows in the Squad-Manager idiom, each with a description and a button that
 // closeDialog 0 then remoteExecs the work to the server.
 //
 // Rows carry no price. The reaction is rolled on the server when a row is picked, so a price
@@ -22,7 +22,7 @@ class civ_dialog
             x = 5 * GUI_GRID_W + GUI_GRID_X;
             y = 0.3 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 24.7 * GUI_GRID_H;
+            h = 21.3 * GUI_GRID_H;
             colorBackground[] = {0, 0, 0, 0.7};
         };
         class civ_mainframe: RscFrame
@@ -32,7 +32,7 @@ class civ_dialog
             x = 5 * GUI_GRID_W + GUI_GRID_X;
             y = 0.3 * GUI_GRID_H + GUI_GRID_Y;
             w = 30 * GUI_GRID_W;
-            h = 24.7 * GUI_GRID_H;
+            h = 21.3 * GUI_GRID_H;
             moving = 1;
         };
         class civ_money: RscText
@@ -166,26 +166,6 @@ class civ_dialog
             action = "closeDialog 0; [DUWS_civ_target, player, 'TOOLKIT'] remoteExec ['fnc_civ_request', 2];";
         };
 
-        class civ_recruit_frame: civ_intel_frame
-        {
-            idc = 8323;
-            text = "$STR_DUWS_T_CIV_ROW_RECRUIT";
-            y = 16.7 * GUI_GRID_H + GUI_GRID_Y;
-        };
-        class civ_recruit_desc: civ_intel_desc
-        {
-            idc = 8333;
-            text = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
-            y = 17.35 * GUI_GRID_H + GUI_GRID_Y;
-        };
-        class civ_recruit_button: civ_intel_button
-        {
-            idc = 8343;
-            y = 17.45 * GUI_GRID_H + GUI_GRID_Y;
-            tooltip = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
-            action = "closeDialog 0; [DUWS_civ_target, player, 'RECRUIT'] remoteExec ['fnc_civ_request', 2];";
-        };
-
         // Red, and named for what the player is doing. Arrest is coercion rather than
         // conversation, so it reaches its own server function: no reaction is rolled, no bribe is
         // asked, and a civilian who has refused to talk can still be detained.
@@ -193,19 +173,19 @@ class civ_dialog
         {
             idc = 8324;
             text = "$STR_DUWS_T_CIV_ROW_ARREST";
-            y = 20.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 16.7 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_arrest_desc: civ_intel_desc
         {
             idc = 8334;
             text = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
-            y = 20.75 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.35 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_arrest_button: civ_intel_button
         {
             idc = 8344;
             text = "$STR_DUWS_T_CIV_ROW_ARREST";
-            y = 20.85 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.45 * GUI_GRID_H + GUI_GRID_Y;
             colorBackground[] = {0.6, 0.13, 0.13, 0.85};
             tooltip = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
             action = "closeDialog 0; [DUWS_civ_target, player] remoteExec ['fnc_civ_arrest', 2];";
@@ -216,7 +196,7 @@ class civ_dialog
             idc = 8350;
             text = "$STR_DUWS_T_MENU_CLOSE";
             x = 13 * GUI_GRID_W + GUI_GRID_X;
-            y = 23.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20 * GUI_GRID_H + GUI_GRID_Y;
             w = 14 * GUI_GRID_W;
             h = 1.3 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};

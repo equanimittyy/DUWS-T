@@ -18,7 +18,6 @@ if (isNull _civilian) exitWith {};
 // The line is per row only for flavour -- they all mean the same thing.
 private _line = switch (toUpper _row) do {
     case "WORK": { "STR_DUWS_T_CIVMISSION_NONE" };
-    case "RECRUIT": { "STR_DUWS_T_RECRUIT_FAIL_REP" };
     case "AID": { "STR_DUWS_T_ASK_AID_REFUSE" };
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_REFUSE" };
     case "INFORMANT": { "STR_DUWS_T_INTEL_INFORMANT_ASK_MISS" };

@@ -33,7 +33,6 @@ if (_civilian getVariable ["DUWS_civ_arrested", false]) exitWith {};
 if (((toUpper _row) isEqualTo "INTEL") && {_caller getVariable ["DUWS_civ_intel_asked", false]}) exitWith {};
 
 private _opener = switch (toUpper _row) do {
-    case "RECRUIT": { "STR_DUWS_T_fight4freedom" };
     case "AID": { "STR_DUWS_T_ASK_AID_hi" };
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_hi" };
     default { "STR_DUWS_T_askopforloc" };
@@ -45,7 +44,7 @@ private _opener = switch (toUpper _row) do {
 // The civilian is claimed here rather than where the roll resolves, three seconds below. Two
 // players can be stood at the same local in co-op, and a flag written only on the way out leaves
 // the check above passing for both of them: the same person then answers twice, paying two
-// medikits, two intel drops, or recruiting into one group while already in another.
+// medikits or two intel drops.
 _civilian setVariable ["DUWS_civ_closed", true, true];
 if ((toUpper _row) isEqualTo "INTEL") then {
     _caller setVariable ["DUWS_civ_intel_asked", true, true];

@@ -55,7 +55,7 @@ if (CIV_PRESENCE == "RAVAGE") then {
     };
 } else {
     if (side _unit == CIVILIAN) then {
-        // A vendor answers none of the civilian pair -- fnc_civ_menuAction's talk/intel/arrest/recruit
+        // A vendor answers none of the civilian pair -- fnc_civ_menuAction's talk/intel/arrest
         // menu and fnc_civ_stopCommand's call-over -- so it carries its own one action and nothing else.
         private _fn = ["fnc_civ_clientActions", "fnc_vendor_menuAction"] select _isVendor;
         [_unit] remoteExec [_fn, 0, _unit];

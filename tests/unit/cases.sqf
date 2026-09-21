@@ -106,7 +106,6 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
 
 // --- fnc_civ_rowPrice: what a row costs when the roll comes back bribe ---
 ["rowPrice: intel", (["INTEL"] call fnc_civ_rowPrice), 3] call fnc_assertEq;
-["rowPrice: recruit", (["RECRUIT"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
 ["rowPrice: aid", (["AID"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
 ["rowPrice: toolkit", (["TOOLKIT"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
 
