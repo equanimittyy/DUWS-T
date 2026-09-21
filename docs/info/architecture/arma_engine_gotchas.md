@@ -544,3 +544,7 @@ The ray tests geometry LODs, so it stops at buildings, rocks and tree trunks. A 
 ## `nearestTerrainObjects` measures 3D distance unless its fifth argument is `true`
 
 The fifth argument (`2Dmode`) defaults to `false`, so the radius is a sphere around the given point. A point above the ground, such as a sample along a sightline, then misses a bush or tree below the sphere. `fnc_sightline_foliageClear` described a 2D lookup but left out the argument, so it missed vegetation under its raised samples. Fix: pass `false, true` (unsorted, 2D) when the question is "what stands at this map spot", as `fnc_site_terrain.sqf` does.
+
+## A static's bag list is `assembleInfo >> dissasembleTo`, misspelled, and the English spelling reads empty
+
+A static weapon names the backpacks it breaks into in `CfgVehicles >> <static> >> assembleInfo >> dissasembleTo[]`. The engine puts the double s first (`dissasemble`), where English puts it second (`disassemble`). `getArray` on a key that does not exist returns `[]` and logs nothing, so the English spelling `disassembleTo` gives every static no bags and gives no error. The bag side of the same link, `assembleTo`, is spelled correctly. Fix: read `dissasembleTo` as the engine writes it, as `fnc_create_ammo_lists.sqf` does for the static assembly bags on the arsenal shelf. An empty array from `dissasembleTo` means that the static cannot be assembled from bags.

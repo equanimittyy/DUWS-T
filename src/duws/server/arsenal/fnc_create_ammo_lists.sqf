@@ -15,12 +15,6 @@ _excludedItems = [
     "I_E_UAV_01_backpack_F",
     "I_E_UAV_06_backpack_F",
     "I_E_UAV_06_medical_backpack_F",
-    "B_Mortar_01_support_F",
-    "O_Mortar_01_support_F",
-    "I_Mortar_01_support_F",
-    "I_Mortar_01_weapon_F",
-    "B_Mortar_01_weapon_F",
-    "O_Mortar_01_weapon_F",
     "B_Patrol_Respawn_bag_F"
 ];
 
@@ -66,7 +60,6 @@ _snapFriendly = {
     ["INFO", "GEAR", format ["Friendly arsenal snapshot: %1 classes", count DUWS_friendlyArsenal]] call fnc_log;
 };
 
-// Create the base list for Restricted Arsenal
 _basic_ammoArray = [] call fnc_basic_ammo_lists;
 _ACE_Items = _basic_ammoArray select 0;
 _basic_backpacks = _basic_ammoArray select 1;
@@ -118,7 +111,6 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
     } forEach _sideArray;
 
-    // Copy temp items to "total items" arrays
     {
         _class = _x;
         {
@@ -152,7 +144,6 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
     _total_magazines = _total_magazines - _excludedItems;
     _total_items = _total_items - _excludedItems;
 
-    // Create global ammobox arrays
     if (_side == 1) then {
         blufor_ammobox_weapons = _total_weapons;publicVariable "blufor_ammobox_weapons";
         blufor_ammobox_magazines = _total_magazines;publicVariable "blufor_ammobox_magazines";
@@ -176,14 +167,12 @@ waitUntil {sleep 5;chosen_settings};
 // kits already draw from, so both surfaces now offer the same units.
 _factionUnitArray = ["blufor"] call fnc_faction_unit_keylist;
 
-//array of all loadouts of all units in player faction
 _factionLoadouts = [];
 {
     _factionLoadouts append (flatten getUnitLoadout _x);
     sleep 0.1;
 } forEach _factionUnitArray;
 
-//remove duplicates
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
 
 private _randomListItems = [];
@@ -239,7 +228,6 @@ _isBackpackWithCapacity = {
     };
 };
 
-//add faction items to arsenal
 {
     if (typeName _x == "STRING") then {
         if (_x != "") then {
@@ -276,8 +264,7 @@ _isBackpackWithCapacity = {
     };
 } forEach _factionLoadouts;
 
-//Add additional basic items that some factions may lack, especially backpacks.
-//basic backpacks - multicolor variants to make them as usable with as many factions as possible
+// Basic kit some factions lack, backpacks above all; the backpacks are multicolor to suit any camo.
 if (VERSION_X != "MODERN") exitWith { call _snapFriendly; };
 
 private _filteredBackpacks = [];
@@ -288,15 +275,25 @@ private _filteredBackpacks = [];
 } forEach (_basic_backpacks - _excludedItems);
 [missionNamespace, _filteredBackpacks, true, false] call BIS_fnc_addVirtualBackpackCargo;
 
-//basic vests
+// Static assembly bags: no cargo space, so the capacity filter above drops every one, and the shelf
+// is left with no route to a crew-served weapon. Read off the gun each turret key resolved to rather
+// than hand-listed, so a modded faction delivers its own and a static with no assembleInfo delivers
+// none. Deduped: the vanilla AA and AT mounts share the HMG tripod.
+private _staticBags = [];
+{
+    private _gun = [format ["blufor_TURRET_%1", _x]] call fnc_faction_pick;
+    if (_gun != "") then {
+        _staticBags append getArray (configFile >> "CfgVehicles" >> _gun >> "assembleInfo" >> "dissasembleTo");
+    };
+} forEach ["HMG", "GMG", "AA", "AT", "MORTAR"];
+_staticBags = _staticBags arrayIntersect _staticBags;
+[missionNamespace, _staticBags, true, false] call BIS_fnc_addVirtualBackpackCargo;
+["INFO", "GEAR", format ["static assembly bags on the shelf: %1", _staticBags]] call fnc_log;
+
 [missionNamespace, _basic_vests - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
-//basic items
 [missionNamespace, _basic_items - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
-//basic optics
 [missionNamespace, _basic_optics - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
-//misc magazines
 [missionNamespace, _basic_magazines - _excludedItems, true, false ] call BIS_fnc_addVirtualMagazineCargo;
-//extra weapons
 [missionNamespace, _extra_weapons - _excludedItems, true, false ] call BIS_fnc_addVirtualWeaponCargo;
 
 // ACE items: scanned medical, curated tools, and extra utility gear. Route each by where it actually
@@ -361,5 +358,5 @@ private _opfFaction = "";
 
 // Pass the curated basic/extra classes so they join the friendly set: these are on the shelf but no
 // sampled unit wears them, so the cargo scan alone leaves them at [0].
-[(_extra_weapons + _basic_vests + _basic_items + _basic_optics + _basic_magazines
-    + _filteredBackpacks + _aceMedical + _aceFoods) - _excludedItems] call _snapFriendly;
+[((_extra_weapons + _basic_vests + _basic_items + _basic_optics + _basic_magazines
+    + _filteredBackpacks + _aceMedical + _aceFoods) - _excludedItems) + _staticBags] call _snapFriendly;
