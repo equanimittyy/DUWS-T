@@ -24,7 +24,7 @@ if (isNull ([_class] call fnc_vendor_classCfg)) exitWith { -1 };
 private _base = call {
     if (isClass (configFile >> "CfgMagazines" >> _class)) exitWith { 1 };
     if (isClass (configFile >> "CfgGlasses" >> _class)) exitWith { 1 };
-    if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith { 3 };
+    if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith { 2 };
 
     // Hulls take the request menu's CP price, so a dealer ranks them exactly as HQ does and a retune
     // of the CP bands carries through to the forecourt.
@@ -39,10 +39,10 @@ private _base = call {
     // CfgWeapons holds the guns and everything worn or clipped to one. type is the engine's own split:
     // 1 primary, 2 handgun, 4 launcher; clothing and attachments carry neither.
     switch (getNumber (configFile >> "CfgWeapons" >> _class >> "type")) do {
-        case 4: { 25 };
-        case 1: { 10 };
-        case 2: { 6 };
-        default { 3 };
+        case 4: { 5 };
+        case 1: { 3 };
+        case 2: { 2 };
+        default { 1 };
     }
 };
 if (_base < 0) exitWith { -1 };
