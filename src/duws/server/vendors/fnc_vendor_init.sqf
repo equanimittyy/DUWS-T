@@ -20,8 +20,8 @@ if (CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]) exitWith {};
 // Weight of "leave this slot empty", as a share of the total weight of the types the town could host.
 // Without it every slot in every town would carry a vendor. Measured against their total rather than
 // set as one more type's weight, so the draft's density does not thin every time the catalogue grows:
-// at 1 a second-pass slot comes up empty about half the time, whatever a campaign fields.
-#define EMPTY_SHARE 1
+// at 1.5 a second-pass slot comes up empty 60% of the time, whatever a campaign fields.
+#define EMPTY_SHARE 1.5
 
 private _locations = missionNamespace getVariable ["civ_locations", []];
 private _count = count _locations;
