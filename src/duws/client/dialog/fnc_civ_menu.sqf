@@ -51,7 +51,6 @@ if (_giver) then {
 // A Raise Funds giver takes money instead of a report: the gift that meets the target ends the job.
 if (_funds isNotEqualTo []) then {
     ctrlSetText [8325, localize "STR_DUWS_T_CIVMISSION_ROW_GIVE"];
-    ctrlSetText [8335, format [localize "STR_DUWS_T_CIVMISSION_ROW_GIVE_DESC", _funds select 0, _funds select 1]];
     ctrlSetText [8345, localize "STR_DUWS_T_CIVMISSION_GIVE"];
     buttonSetAction [8345, "closeDialog 0; [DUWS_civ_target] spawn fnc_civ_give_menu;"];
 };

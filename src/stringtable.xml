@@ -3045,8 +3045,8 @@
                 <English>Report Back</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_ROW_REPORT_DESC">
-                <Original>Tell them the job is done.</Original>
-                <English>Tell them the job is done.</English>
+                <Original>A job is in progress.</Original>
+                <English>A job is in progress.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_REPORT">
                 <Original>Report</Original>
@@ -3151,10 +3151,6 @@
             <Key ID="STR_DUWS_T_CIVMISSION_ROW_GIVE">
                 <Original>Give Money</Original>
                 <English>Give Money</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CIVMISSION_ROW_GIVE_DESC">
-                <Original>They have %1 of the %2 money they need. Give what you can spare.</Original>
-                <English>They have %1 of the %2 money they need. Give what you can spare.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIVMISSION_GIVE">
                 <Original>Give</Original>
