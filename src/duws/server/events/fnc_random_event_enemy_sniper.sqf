@@ -14,7 +14,7 @@ if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 
 #define SNIPER_RANGE 1000
 #define BLU_STANDOFF 500
-#define LIFETIME 1800
+#define LIFETIME 1200
 #define PRONE_EYE 0.4
 
 private _tpos = getPos _player;
