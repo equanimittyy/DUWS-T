@@ -466,7 +466,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Clear Bandit Camp | 6-9, plus 0-2 pairs | every camp bandit is dead | the giver dies | 10 | 3-5 | +3 |
 | Recover Stolen Car | 4-6, plus 0-2 pairs | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
 | Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
-| Clear Minefield | none | no mine in the field is still armed | the giver dies | 10 | 3-5 | +3 |
+| Clear Minefield | 0-10, once the first mine goes | no mine in the field is still armed | the giver dies | 10 | 3-5 | +3 |
 
 The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mission's objective guard
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
@@ -503,9 +503,14 @@ the map and the hardpoint poller removes the row when the last mine is gone
 giver, so a cancel or the giver's death leaves it on the map. An AT mine does not fire under a man on foot, so
 the AT roll is the easier job.
 
-**OPFOR patrols the field.** The thread raises 0-1 `team` and 0-2 `patrol` groups with `fnc_spawn_team`, all
-on `widepatrol` round the site. Each group spawns 100 m beyond the outermost kept mine, on a bearing weighted
-away from the giver's town, and patrols inside that ring. A patrol does not count toward the objective.
+**The first mine to go brings a fight.** When the first mine is disarmed or set off, OPFOR raises 0-1 `team` and
+0-2 `patrol` groups (`fnc_spawn_team`), and the bandits roll their own 0-1 and 0-2 of the same rosters in bandit
+roles (`fnc_bandit_spawn`). Each side spawns on its own flank, 45° either side of the bearing that points away
+from the players within 600 m of the field, or from the town when none is near. OPFOR spawns 200 m beyond the
+outermost kept mine and the bandits 300 m, so the bandits are never nearer the field than OPFOR. Each spot is
+the one within 40° of its flank that the fewest of those players can see, and each group scatters up to 15 m
+from it. Both sides `hunt` the field, so they meet there and fight each other and the players. Neither side
+counts toward the objective. The mines are revealed to OPFOR alone, so the bandits walk the field blind.
 
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
