@@ -1,14 +1,50 @@
 // Locality: client -- an inventory add takes effect only where the unit is local.
 //
-// Hands one bought gear class to the player: into the first worn container with room, otherwise at
-// their feet.
+// Hands one bought gear class to the player: into its own empty equipment slot, otherwise into the
+// first worn container with room, otherwise at their feet.
 params ["_class"];
+
+// Every fill command replaces what its slot holds, so only an empty slot is filled.
+private _fnc_equip = {
+    private _slot = call {
+        ([_class] call BIS_fnc_itemType) params ["_cat", "_sub"];
+        // The engine seats a gun by its config type; BIS_fnc_itemType's subtypes name the gun, not the slot.
+        if (_cat isEqualTo "Weapon") exitWith {
+            switch (getNumber (configFile >> "CfgWeapons" >> _class >> "type")) do {
+                case 1: { [primaryWeapon player, { player addWeapon _class }] };
+                case 2: { [handgunWeapon player, { player addWeapon _class }] };
+                case 4: { [secondaryWeapon player, { player addWeapon _class }] };
+                default { [] };
+            }
+        };
+        // getUnitLoadout's assigned-item order; a UAV terminal takes the GPS slot.
+        private _linkedSub = [_sub, "GPS"] select (_sub isEqualTo "UAVTerminal");
+        private _linked = ["Map", "GPS", "Radio", "Compass", "Watch", "NVGoggles"] find _linkedSub;
+        if (_linked >= 0) exitWith { [(getUnitLoadout player) select 9 select _linked, { player linkItem _class }] };
+        switch (_sub) do {
+            case "Uniform": { [uniform player, { player addUniform _class }] };
+            case "Vest": { [vest player, { player addVest _class }] };
+            case "Headgear": { [headgear player, { player addHeadgear _class }] };
+            case "Glasses": { [goggles player, { player addGoggles _class }] };
+            case "Binocular";
+            case "LaserDesignator": { [binocular player, { player addWeapon _class }] };
+            default { [] };
+        }
+    };
+    if (_slot isEqualTo [] || {(_slot select 0) isNotEqualTo ""}) exitWith { false };
+    // Read back, not assumed: addUniform refuses a uniform the player's side may not wear.
+    private _before = getUnitLoadout player;
+    call (_slot select 1);
+    getUnitLoadout player isNotEqualTo _before
+};
 
 private _taken = call {
     // A pack never nests inside another container, so it only fits on an empty back.
     if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith {
         if (backpack player isEqualTo "") then { player addBackpack _class; true } else { false }
     };
+    // Disguised, an empty weapon or kit slot is the cover: a gun worn there breaks it, one in a pack does not.
+    if (!(player getVariable ["DUWS_disguised", false]) && {call _fnc_equip}) exitWith { true };
     // The per-container adds take a weapon or a magazine as readily as an item, so every other gear
     // type goes through the one path.
     if (player canAddItemToUniform _class) exitWith { player addItemToUniform _class; true };
