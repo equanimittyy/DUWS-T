@@ -205,7 +205,7 @@ so it moves no faster than a truck delivers.
 - **An asset is worth the ground it covers that nothing of its kind covers already**, so a second mortar sited on
   the first one's ground scores nothing and the commander spreads its assets rather than stacking them. A radio's
   towns, an OP's cells and a gun's reach are properties of the ground an asset overlooks, not of the cell it stands
-  on, so no asset reads the need field. A gun's reach is sampled coarsely, since testing every cell of a 10 km disc
+  on, so no asset reads the need field. A gun's reach is sampled coarsely, since testing every cell of a 20 km disc
   against the area of influence would not fit the pick's unscheduled pass. Overlap counts against the asset's own
   type: a pit answers a contact in seconds where a battery shells across the map, so neither does the other's job.
   What a radio's reach, an OP's eyes and a gun's fire missions are actually worth, in place of these stand-ins,
@@ -513,8 +513,8 @@ is bought. Inside the cell, the shared terrain siting picks the spot (`fnc_hardp
 |---|---|
 | Radio tower | the most town worth brought newly under OPFOR's area of influence, outside every standing tower's `AOI_TOWER_REACH` (the campaign-generation rule, `fnc_hardpoint_seed_radio`) |
 | OP | the most cells within `OP_OBSERVE_K` that no standing OP's ring already covers |
-| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (3 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF` (1 km) |
-| Artillery battery | the same over `OPCOM_ARTY_REACH` (10 km), against the other batteries |
+| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (5 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF` (1 km) |
+| Artillery battery | the same over `OPCOM_ARTY_REACH` (20 km), against the other batteries |
 | Minefield | the band cell holding the most traffic, since a field is worth what it denies and denies nothing on ground nobody crosses |
 
 A gun's true range depends on the faction's gun and is read only at fire time (`inRangeOfArtillery`), so siting and
