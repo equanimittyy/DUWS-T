@@ -24,6 +24,13 @@ _vis set [_townIndex, true];
 (format ["civ_area_%1", _townIndex]) setMarkerAlpha 0.3;
 (format ["civ_icon_%1", _townIndex]) setMarkerAlpha 1;
 
+// The town's shops come up with it, so the map is never pre-populated with every vendor on the
+// island and hardcore mode needs no separate answer. Alpha only: colour is the open/closed channel
+// (fnc_vendor_markerPaint), and a revealed shop keeps whichever state its cooldown says.
+{
+    ([_townIndex, _forEachIndex] call fnc_vendor_markerName) setMarkerAlpha 1;
+} forEach ([_townIndex] call fnc_vendor_recs);
+
 if (!_quiet) then {
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_townreveal", _audience] call fnc_duws_report;
 };

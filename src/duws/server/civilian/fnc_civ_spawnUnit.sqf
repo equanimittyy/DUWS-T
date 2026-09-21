@@ -1,10 +1,13 @@
 // Locality: server -- creates the unit; the interaction actions it broadcasts run on clients.
 /*
     Creates one civilian for a town, wired for interaction, reputation and recycling.
-    Params: [_locIndex, _pos, _unitType, _isZombie]. Returns the unit, or objNull.
+    Params: [_locIndex, _pos, _unitType, _isZombie, _isVendor]. Returns the unit, or objNull.
+
+    A vendor is a civilian in everything the town weighs -- the locIndex tag and the reputation
+    handler below are the same -- and neither of the two things a passer-by gets: see each skip.
 */
 if (!isServer) exitWith { objNull };
-params ["_locIndex", "_pos", "_unitType", ["_isZombie", false]];
+params ["_locIndex", "_pos", "_unitType", ["_isZombie", false], ["_isVendor", false]];
 
 private _group = createGroup [CIVILIAN, true];
 private _unit = _group createUnit [_unitType, _pos, [], 0, "NONE"];
@@ -30,7 +33,12 @@ _unit addEventHandler ["HandleHeal", fnc_civ_healed];
 
 // Added on the server alone, so this is the only copy of the handler that exists. Zombies are
 // left out: a crowd of undead scattering from gunfire is not what the mode spawns them for.
-if (!_isZombie) then {
+//
+// So are vendors. A panicking civilian runs 200 m and stays calm-locked for a minute, which for a
+// shopkeeper means abandoning the shop -- and the fixed building is the whole point of the placement.
+// fnc_civ_panic already exempts a surrendered civilian and a side-mission giver on the same
+// principle; a vendor is refused at the spawn instead, because it never needs the handler at all.
+if (!_isZombie && !_isVendor) then {
     _unit addEventHandler ["FiredNear", {
         params ["_unit", "_firer"];
         [_unit, _firer] call fnc_civ_panic;
@@ -48,7 +56,10 @@ if (CIV_PRESENCE == "RAVAGE") then {
     };
 } else {
     if (side _unit == CIVILIAN) then {
-        [_unit] remoteExec ["fnc_civ_clientActions", 0, _unit];
+        // A vendor answers none of the civilian pair -- fnc_civ_menuAction's talk/intel/arrest/recruit
+        // menu and fnc_civ_stopCommand's call-over -- so it carries its own one action and nothing else.
+        private _fn = ["fnc_civ_clientActions", "fnc_vendor_menuAction"] select _isVendor;
+        [_unit] remoteExec [_fn, 0, _unit];
     };
 };
 

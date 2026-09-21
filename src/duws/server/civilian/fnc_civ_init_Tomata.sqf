@@ -295,6 +295,11 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 // list: registration reads all three. Called rather than spawned -- it files hooks and returns.
 if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then { [] call fnc_civ_handler };
 
+// After the crowd, because both register occupants on the same sites and the draft reads the
+// per-town population and building survey the loop above published. Called rather than spawned --
+// it files hooks and returns, and they have to exist before the poller reaches these towns.
+[] call fnc_vendor_init;
+
 // No start-up delay: this runs after zone build-out, not alongside a map-wide scan, so the
 // spawns have nothing left to wait out.
 missionNamespace setVariable ["civ_spawn_enabled_time", time, true];

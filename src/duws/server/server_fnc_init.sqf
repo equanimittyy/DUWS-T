@@ -695,6 +695,9 @@ publicVariable "fnc_apocalypse_buildings";
 // Server-only throughout, bar the price: the draft, the spawn path and the stock sweep all read state
 // no client holds, and a purchase is remoteExec'd to the server rather than decided on the buyer's
 // machine.
+fnc_vendor_init = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_init.sqf";
+fnc_vendor_spawn = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_spawn.sqf";
+fnc_vendor_killed = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_killed.sqf";
 fnc_vendor_stock = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_stock.sqf";
 fnc_vendor_buy = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_buy.sqf";
 fnc_vendor_dropPos = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_dropPos.sqf";
@@ -989,6 +992,14 @@ fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\civ\fnc_c
 publicVariable "fnc_civ_clientActions";
 fnc_civ_menuAction = compile preprocessFileLineNumbers "duws\shared\civ\fnc_civ_menuAction.sqf";
 publicVariable "fnc_civ_menuAction";
+
+// =========================================================================================================
+// shared/vendors
+// =========================================================================================================
+// Broadcast: fnc_civ_spawnUnit remoteExecs it to every client to hang a vendor's one action, in place
+// of the civilian pair.
+fnc_vendor_menuAction = compile preprocessFileLineNumbers "duws\shared\vendors\fnc_vendor_menuAction.sqf";
+publicVariable "fnc_vendor_menuAction";
 
 // =========================================================================================================
 // shared/faction_lib
