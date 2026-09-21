@@ -976,6 +976,11 @@ fnc_client_addDepotActions = compile preprocessFileLineNumbers "duws\client\supp
 publicVariable "fnc_client_addDepotActions";
 
 // =========================================================================================================
+// client/vendors
+// =========================================================================================================
+fnc_vendor_grant = compile preprocessFileLineNumbers "duws\client\vendors\fnc_vendor_grant.sqf";publicVariable "fnc_vendor_grant";
+
+// =========================================================================================================
 // client/warcom
 // =========================================================================================================
 fnc_fob_unlock_notice = compile preprocessFileLineNumbers "duws\client\warcom\fnc_fob_unlock_notice.sqf";publicVariable "fnc_fob_unlock_notice";

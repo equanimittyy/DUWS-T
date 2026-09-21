@@ -70,12 +70,7 @@ if (_gear) exitWith {
         publicVariable "DUWS_capturedPool";
         ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL"] call _fnc_say;
     };
-    // One holder builder for every gear type, rather than branching per inventory slot the way the
-    // black market did. An inventory add only takes effect where the unit is local, and addBackpack
-    // would swap out whatever the buyer is already wearing and spill its contents; the holder is
-    // global-effect, and the goods are handed over to be picked up exactly as fnc_civ_serve does it.
-    [[[_class, 1]], getPosATL _buyer] call fnc_money_drop;
-    ["STR_DUWS_T_VENDOR_BOUGHT"] call _fnc_say;
+    [_class] remoteExec ["fnc_vendor_grant", _buyer];
 };
 
 // A bought vehicle has no live original to capture a spec from, so one is built in factory state. The

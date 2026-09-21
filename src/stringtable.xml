@@ -2999,8 +2999,8 @@
                 <English>Buy</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE_TT">
-                <Original>Take it here. The goods are dropped at your feet.</Original>
-                <English>Take it here. The goods are dropped at your feet.</English>
+                <Original>Into your inventory, or at your feet if there is no room.</Original>
+                <English>Into your inventory, or at your feet if there is no room.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_STORE">
                 <Original>Buy to Arsenal</Original>
@@ -3022,9 +3022,9 @@
                 <Original>The arsenal already stocks that.</Original>
                 <English>The arsenal already stocks that.</English>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_BOUGHT">
-                <Original>Bought. It is at your feet.</Original>
-                <English>Bought. It is at your feet.</English>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_ITEM">
+                <Original>Bought %1.</Original>
+                <English>Bought %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BOUGHT_ARSENAL">
                 <Original>Bought. It will be at your arsenal.</Original>
