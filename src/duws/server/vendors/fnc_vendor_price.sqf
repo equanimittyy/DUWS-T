@@ -13,14 +13,17 @@ params ["_class", ["_list", ""]];
 
 // Money per CP. The lowest CP band starts at 1, so a floored price never reaches 0 and delists a hull.
 #define VEHICLE_RATE 1.2
-// A premium on stock that is not BLUFOR's own issue.
-#define FOREIGN_MARKUP 1.1
+// A premium on stock that is not BLUFOR's own issue. Gear prices are single digits, so a hull-sized
+// markup would floor away to nothing on them.
+#define FOREIGN_MARKUP_HULL 1.1
+#define FOREIGN_MARKUP_GEAR 1.5
 
 // Selling the currency for the currency would be a loop with a profit in it.
 if (_class isEqualTo "Money_roll") exitWith { -1 };
 
 if (isNull ([_class] call fnc_vendor_classCfg)) exitWith { -1 };
 
+private _markup = FOREIGN_MARKUP_GEAR;
 private _base = call {
     if (isClass (configFile >> "CfgMagazines" >> _class)) exitWith { 1 };
     if (isClass (configFile >> "CfgGlasses" >> _class)) exitWith { 1 };
@@ -29,6 +32,7 @@ private _base = call {
     // Hulls take the request menu's CP price, so a dealer ranks them exactly as HQ does and a retune
     // of the CP bands carries through to the forecourt.
     if (["car", _class] call fnc_vendor_hullFits || {["boat", _class] call fnc_vendor_hullFits}) exitWith {
+        _markup = FOREIGN_MARKUP_HULL;
         VEHICLE_RATE * ([_class] call DUWS_fnc_vehPrice)
     };
 
@@ -48,4 +52,4 @@ private _base = call {
 if (_base < 0) exitWith { -1 };
 
 // One floor over both rates, so a marked-up hull is not rounded down twice.
-floor (_base * ([1, FOREIGN_MARKUP] select (_list in ["opfor", "all"])))
+floor (_base * ([1, _markup] select (_list in ["opfor", "all"])))
