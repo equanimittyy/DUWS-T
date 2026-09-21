@@ -284,10 +284,22 @@ fnc_money_drop = {
 	{
 		_x params ["_cls", ["_n", 0]];
 		if (_n > 0) then {
-			if (isClass (configFile >> "CfgMagazines" >> _cls)) then {
-				_holder addMagazineCargoGlobal [_cls, _n];
-			} else {
-				_holder addItemCargoGlobal [_cls, _n];
+			// One holder builder for every gear type. A weapon or a backpack put into the item cargo
+			// is accepted and then never renders in the holder, so a dropped rifle simply vanished --
+			// which the vendors' "take it now" makes reachable for the first time.
+			switch (true) do {
+				case (isClass (configFile >> "CfgMagazines" >> _cls)): {
+					_holder addMagazineCargoGlobal [_cls, _n];
+				};
+				case (_cls isKindOf ["Bag_Base", configFile >> "CfgVehicles"]): {
+					_holder addBackpackCargoGlobal [_cls, _n];
+				};
+				// type is the engine's own split: 1 primary, 2 handgun, 4 launcher. Clothing and
+				// attachments carry neither and stay items.
+				case (getNumber (configFile >> "CfgWeapons" >> _cls >> "type") in [1, 2, 4]): {
+					_holder addWeaponCargoGlobal [_cls, _n];
+				};
+				default { _holder addItemCargoGlobal [_cls, _n] };
 			};
 		};
 	} forEach _pairs;
