@@ -4,12 +4,7 @@
 //
 // Returns true only when this call changed something, so a caller can tell "revealed a town"
 // from "that town was already on the map".
-//
-// _audience is who is told, on the same rule fnc_zone_reveal uses: the presence trigger's reveal
-// is everyone's news and takes the default, while one bought with a search is hinted to the
-// player who paid for it as well as spoken to them. _quiet likewise hands the reporting to the
-// caller, so a search speaks in the searcher's voice rather than Overlord's.
-params ["_townIndex", ["_audience", 0], ["_quiet", false]];
+params ["_townIndex"];
 
 if (!isServer) exitWith {false};
 
@@ -31,8 +26,6 @@ _vis set [_townIndex, true];
     ([_townIndex, _forEachIndex] call fnc_vendor_markerName) setMarkerAlpha 1;
 } forEach ([_townIndex] call fnc_vendor_recs);
 
-if (!_quiet) then {
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_townreveal", _audience] call fnc_duws_report;
-};
+["town_discovered", [text ((missionNamespace getVariable ["civ_locations", []]) select _townIndex)]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 true

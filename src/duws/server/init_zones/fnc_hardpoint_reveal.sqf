@@ -5,12 +5,11 @@
 // so there is no pos-matching and no str() marker-name dance -- the marker is named hpm_<key>.
 //
 // Returns true only when this call changed something, so a caller can tell "found it" from "already
-// on the map". _audience and _quiet follow the same rule the zone and town reveals use: an intel
-// search belongs to the one player who paid for it and hands its own reporting back through _quiet.
+// on the map". _quiet follows fnc_zone_reveal's rule.
 //
 // The parent gate (a zone-child hardpoint is only discoverable once its zone is revealed) lives in
 // the intel-draw eligibility filter, not here: this function reveals whatever key it is handed.
-params ["_one_or_all", ["_key", ""], ["_audience", 0], ["_quiet", false]];
+params ["_one_or_all", ["_key", ""], ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -34,8 +33,10 @@ switch (_one_or_all) do {
             [_key] call _fnc_paint;
             _revealed = true;
             if (!_quiet) then {
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hpreveal",
-                    _audience] call fnc_duws_report;
+                (DUWS_hardpoints select _i) params ["", "_pos", "_type"];
+                [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_INTEL_REVEAL_HP_LINE",
+                    DUWS_hardpointName getOrDefault [_type, _type], [_pos] call DUWS_fnc_hardpointNearestPlace]]
+                    remoteExec ["fnc_duws_dialogue", 0];
             };
         };
     };

@@ -4,20 +4,17 @@
 //
 // Takes the position the intel was earned at, which only the town bucket uses, and who earned it,
 // who is told when there is nothing left. Returns true if something was awarded, false if there
-// was nothing left to give.
+// was nothing left to give. A reveal is announced by its writer, not here.
 //
-// _silent hands every line this would speak -- the reveal and the dry answer alike -- to the
-// caller, and is for the one that reports its own result either way. Silencing only the dry answer
-// is not enough: a caller that declines has to pay something else and would otherwise announce an
-// empty search and then hand over a document, and a caller that succeeds would have Overlord
-// broadcast the reveal on top of the line it speaks itself.
+// _silent drops the dry answer, for a caller that pays something else on a decline and would
+// otherwise announce an empty search and then hand over a document.
 params [["_origin", []], ["_earner", objNull], ["_silent", false]];
 
 if (!isServer) exitWith {false};
 
-// Who hears about it. A null earner is a faucet with no one player to tell -- a mission completing
-// is everyone's news -- and 0 carries it to every machine; anyone else earned the reveal
-// themselves and is the only one told.
+// Who hears the dry answer. A null earner is a faucet with no one player to tell -- a mission
+// completing is everyone's news -- and 0 carries it to every machine; anyone else asked for the
+// intel themselves and is the only one told.
 private _audience = if (isNull _earner) then { 0 } else { _earner };
 
 // Rolled over the kinds that have something to give right now, not a fixed list: a kind whose
@@ -83,7 +80,7 @@ switch (selectRandom _kinds) do {
     // odds decaying as a campaign progresses, when late on most winning rolls land on ground
     // already found.
     case "ZONE": {
-        _awarded = ["ONE", (selectRandom _hiddenZones) select 1, _audience, _silent] call fnc_zone_reveal;
+        _awarded = ["ONE", (selectRandom _hiddenZones) select 1] call fnc_zone_reveal;
     };
 
     // Nearest wins. A town is somewhere the player goes to do something -- trade, recruit, ask a
@@ -97,13 +94,13 @@ switch (selectRandom _kinds) do {
             private _dist = _from distance2D (getPos (_towns select _x));
             if (_dist < _bestDist) then { _bestDist = _dist; _closest = _x };
         } forEach _hiddenTowns;
-        _awarded = [_closest, _audience, _silent] call fnc_civ_town_reveal;
+        _awarded = [_closest] call fnc_civ_town_reveal;
     };
 
     // Random from the eligible unrevealed set, like the zone bucket: a hardpoint is a target the
     // campaign points the player at, not a place they are measured a distance from.
     case "HP": {
-        _awarded = ["ONE", (selectRandom _hiddenHPs) select 0, _audience, _silent] call fnc_hardpoint_reveal;
+        _awarded = ["ONE", (selectRandom _hiddenHPs) select 0] call fnc_hardpoint_reveal;
     };
 
 };

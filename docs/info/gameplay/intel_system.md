@@ -53,14 +53,18 @@ are `[name, pos, revealed]`; `fnc_civ_town_reveal` owns `civ_visible`, one boole
 map and the array disagreeing, and both return whether they changed anything so a caller can tell
 "revealed something" from "that was already on the map".
 
-Both take the audience for their announcement rather than assuming one. Walking into a zone or a town is
-everyone's news and takes the default of `0`; a reveal bought with a bribe belongs to the one player who
-paid for it, so `fnc_intel_payout` passes its earner down and the line is hinted to that player as well as
-spoken to them.
+The writers also make the announcement, so every source reports a reveal the same way. It goes to every
+player, because the position lands on every player's map.
 
-Both also take a `_quiet` flag that hands the reporting to the caller outright. The line they speak is
-Overlord broadcasting to the AO — *"All units in the AO, be advised"* — which is the wrong voice for a
-reveal the searcher bought and speaks in their own, so a search suppresses it rather than talking over it.
+| Kind | Announcement |
+|---|---|
+| Zone | a *Zone Discovered* card, and an Overlord line naming the zone and the nearest settlement (`fnc_place_name`) |
+| Town | a *Town Discovered* card naming the town |
+| Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
+
+`fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
+caller: the recon mission marks its target under its own confirm line rather than beneath a second
+announcement.
 
 Two functions rather than one switched writer, because the two arrays are keyed differently — a zone by
 position compared through `str`, since that array carries no index; a town by index — and their markers
@@ -179,27 +183,27 @@ kind standing — an intel-only source such as a mission objective, which hardco
 found and normal mode reaches on every such search. Reaching the objective still pays, so a reveal pool going
 dry costs the search its best outcome rather than its whole worth.
 
-`fnc_search_claim` silences its own call into `fnc_intel_payout`, so a live reveal is reported in the
-searcher's voice rather than announced twice; the flat consolation above is spoken the same way when there is
-nothing left to reveal.
+`fnc_search_claim` silences the payout's dry answer, so the flat consolation above answers a decline
+without contradiction.
 
 `nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of a kind.
 The empty-handed line is per-source too, because a body that held nothing and a detainee who was carrying
 nothing are different sentences.
 
-**Every outcome is spoken in the searcher's voice, to the searcher alone.** A frisk spoke in the team's
+**Every outcome except a reveal is spoken in the searcher's voice, to the searcher alone.** A frisk spoke in the team's
 callsign until the two shapes were reconciled; the player did the searching either way, and one voice per
 faucet was the thing this system was collapsed to remove. It is hinted as well as spoken: the dialogue queue
 holds a line behind whatever traffic is already in it, and a result the player held an action for should not
 arrive late or scroll past unread. The audience is the searcher rather than everyone because a body emptied
-in co-op is not news the other three players asked for. That holds for the reveal kinds too, which is why
-they are silenced upstream rather than left to announce themselves.
+in co-op is not news the other three players asked for.
 
-**What the team sees instead is a notification, and only for the two kinds that move shared state.** A
+**What the team sees instead is an announcement, and only for the two kinds that move shared state.** A
 revealed position lands on every player's map and a pool payout lands on every player's CP total, so the
-team is told those happened even though the search that bought them is reported locally. Money, a document
-and an empty pocket move nothing anyone else can see and stay with the searcher. This is the one split the
-system draws: *voice and hint are local, the notification is global*, and the notification prose is written
+team is told those happened even though the search that bought them is reported locally. A reveal is
+announced by its writer ([§One writer per reveal flag](#one-writer-per-reveal-flag-one-function-for-payout)),
+not by the search. Money, a document and an empty pocket move nothing anyone else can see and stay with the
+searcher. This is the one split the system draws: *voice and hint are local, the announcement is global*,
+and the notification prose is written
 for a reader who did not do the searching — hence *"The pool gains 2 CP"* rather than *"you gained"*.
 
 **Money and a document go straight into the searcher's inventory, or at their feet if the find does not

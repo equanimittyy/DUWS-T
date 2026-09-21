@@ -241,14 +241,15 @@ laid by campaign generation is shown outside hardcore and hidden under it, and o
 (registered after `mission_init_complete`) starts hidden in both modes. `fnc_hardpoint_reveal` (`fnc_hardpoint_reveal.sqf`)
 is the sole writer of the revealed flag — index 5 of a `DUWS_hardpoints` row — keyed on the
 hardpoint's own key rather than position, the way `fnc_zone_reveal` owns its flag and
-`fnc_civ_town_reveal` owns `civ_visible`.
+`fnc_civ_town_reveal` owns `civ_visible`. It announces each reveal as an Allseer line on SUB-NET, naming
+the type (`DUWS_hardpointName`) and the nearest zone or town (`DUWS_fnc_hardpointNearestPlace`).
 
 Two ways a hidden hardpoint is found. **Proximity**: the streaming tick checks every player within
 100 m (`HP_REVEAL_RADIUS`, `fnc_hardpoint_stream.sqf:15`) of a still-hidden hardpoint whose parent
 zone (if any) is itself already revealed, and reveals it — a zone-child hardpoint cannot be found
 before its zone is. **Intel**: `fnc_intel_payout` draws `"HP"` as one of its kinds whenever the
 eligible set is non-empty — unrevealed, and either standalone or whose parent zone is already
-revealed (`server/search/fnc_intel_payout.sqf:51-63`) — matched by `fnc_zone_key`, the same key both a
+revealed (`server/search/fnc_intel_payout.sqf:48-60`) — matched by `fnc_zone_key`, the same key both a
 revealed zone and a hardpoint row carry.
 
 A minefield is also found when its first mine is gone: set off, disarmed or destroyed. The clear check

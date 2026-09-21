@@ -148,8 +148,8 @@ if (_zoneSiteKey isNotEqualTo "") then { ([_zoneSiteKey] call fnc_site_at) set [
 if (_outcome isEqualTo "WIN") then {
     // The payoff: the scouted position comes up on the strategic map. Quiet reveal -- the line here is the
     // mission's own, not the reveal's AO-wide broadcast. An HP reveals by its key, a zone by pos.
-    if (_kind isEqualTo "hp") then { ["ONE", _hpKey, 0, true] call fnc_hardpoint_reveal }
-    else { ["ONE", _target, 0, true] call fnc_zone_reveal };
+    if (_kind isEqualTo "hp") then { ["ONE", _hpKey, true] call fnc_hardpoint_reveal }
+    else { ["ONE", _target, true] call fnc_zone_reveal };
 
     // Bonus intel: the scout also picks up rand(0-2) of the nearest unrevealed positions -- the target's
     // own hardpoints (now discoverable), standalone or already-revealed-zone hardpoints, and unrevealed
@@ -175,8 +175,8 @@ if (_outcome isEqualTo "WIN") then {
     private _n = (floor (random (BONUS_MAX + 1))) min (count _idx);
     for "_k" from 0 to (_n - 1) do {
         (_extra select ((_idx select _k) select 1)) params ["_kind", "_ref"];
-        if (_kind isEqualTo "zone") then { ["ONE", _ref, 0, true] call fnc_zone_reveal }
-        else { ["ONE", _ref, 0, true] call fnc_hardpoint_reveal };
+        if (_kind isEqualTo "zone") then { ["ONE", _ref, true] call fnc_zone_reveal }
+        else { ["ONE", _ref, true] call fnc_hardpoint_reveal };
     };
 
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];

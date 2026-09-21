@@ -69,6 +69,26 @@ class CfgNotifications
         color[] = {1,1,1,1};
     };
 
+    class town_discovered : TownFlip
+    {
+        title = "$STR_DUWS_T_INTEL_REVEAL_TOWN_TITLE";
+        description = "%1";
+        color[] = {0.2,0.5,1,1};
+    };
+
+    // The zone marker's own glyph and colour.
+    class zone_discovered
+    {
+        title = "$STR_DUWS_T_INTEL_REVEAL_ZONE_TITLE";
+        iconPicture = "\A3\ui_f\data\map\markers\nato\o_inf.paa";
+        iconText = "";
+        description = "%1";
+        color[] = {1,0.2,0.2,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class CPadded
     {
         title = "$STR_DUWS_T_k1glh3eb";
@@ -128,7 +148,7 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    // A bonus map reveal fires its own infosearch card, so this one only ever reports the CP.
+    // A bonus map reveal announces itself, so this one only ever reports the CP.
     class intel_analysis
     {
         title = "$STR_DUWS_T_INTEL_ANALYSIS_TITLE";
@@ -196,18 +216,6 @@ class CfgNotifications
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
         color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class infosearch
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0.2,0.5,1,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled

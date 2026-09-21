@@ -3,15 +3,9 @@
 // Returns true only when this call changed something, so a caller can tell "revealed a zone"
 // from "that zone was already on the map" without re-reading the array.
 //
-// _audience is who is told. Walking into a zone is everyone's news and takes the default; a zone
-// bought with a search belongs to the one player who paid for it, and passing that player also
-// puts the line on their screen as a hint -- the dialogue queue can hold it behind other traffic,
-// and a result the player acted for should not arrive late or scroll past unread.
-//
-// _quiet hands the reporting to the caller. Overlord's line here is an AO-wide broadcast, which is
-// the wrong voice for a search: that result is the searcher's own, spoken by them and heard only by
-// them, so the caller says its piece instead of both of them talking over one reveal.
-params ["_one_or_all", ["_zonePos", []], ["_audience", 0], ["_quiet", false]];
+// A single reveal is announced to every player whatever its source, since the zone lands on every
+// map. _quiet hands the reporting to a caller that speaks its own line over the reveal.
+params ["_one_or_all", ["_zonePos", []], ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -40,8 +34,10 @@ switch (_one_or_all) do {
             [_zonePos] call _fnc_paint;
             _revealed = true;
             if (!_quiet) then {
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonereveal",
-                    _audience] call fnc_duws_report;
+                private _name = (zone_namePOS_pairs select _i) select 0;
+                ["zone_discovered", [_name]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+                [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_REVEAL_ZONE_LINE",
+                    _name, [_zonePos] call fnc_place_name]] remoteExec ["fnc_duws_dialogue", 0];
             };
         };
     };

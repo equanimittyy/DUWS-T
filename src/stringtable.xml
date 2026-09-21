@@ -3583,13 +3583,21 @@
                 <Spanish>¿Nada? Bueno…</Spanish>
                 <Chinesesimp>什么都没有？好吧...</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_MAP_TITLE">
-                <Original>Position Marked</Original>
-                <English>Position Marked</English>
+            <Key ID="STR_DUWS_T_INTEL_REVEAL_ZONE_TITLE">
+                <Original>Zone Discovered</Original>
+                <English>Zone Discovered</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_MAP_DESC">
-                <Original>Intel recovered in the field. A new position is marked on your map.</Original>
-                <English>Intel recovered in the field. A new position is marked on your map.</English>
+            <Key ID="STR_DUWS_T_INTEL_REVEAL_TOWN_TITLE">
+                <Original>Town Discovered</Original>
+                <English>Town Discovered</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_REVEAL_ZONE_LINE">
+                <Original>Be advised, we have discovered enemy zone %1 near %2.</Original>
+                <English>Be advised, we have discovered enemy zone %1 near %2.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_REVEAL_HP_LINE">
+                <Original>Be advised, we have intel on an enemy %1 near %2. Check your map.</Original>
+                <English>Be advised, we have intel on an enemy %1 near %2. Check your map.</English>
             </Key>
         </Container>
         <Container name="Kill Rewards &amp; Bonuses">
@@ -3946,21 +3954,6 @@
                 <Spanish>Las fuerzas aliadas han perdido el control de: %1</Spanish>
                 <Original>%1 has fallen to the enemy.</Original>
                 <English>%1 has fallen to the enemy.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zonereveal">
-                <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone ausgemacht. Sie ist nun auf euren GPS-Terminals einsehbar.</German>
-                <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos localizado una zona enemiga. Ya es visible en vuestros terminales GPS.</Spanish>
-                <Chinesesimp>战区所有单位注意，我们发现了一个敌区。现可在GPS终端查看。</Chinesesimp>
-                <Original>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</Original>
-                <English>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_townreveal">
-                <Original>All units in the AO, be advised. We have located a populated settlement. It is now marked on your map.</Original>
-                <English>All units in the AO, be advised. We have located a populated settlement. It is now marked on your map.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_hpreveal">
-                <Original>All units in the AO, be advised. We have located an enemy emplacement. It is now marked on your map.</Original>
-                <English>All units in the AO, be advised. We have located an enemy emplacement. It is now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_daqqfq5j">
                 <German>==AUFKLÄRUNGSDATEN GEFUNDEN==\n\nPosition aller Zonen wurden auf der Karte aufgedeckt.</German>

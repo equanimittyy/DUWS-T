@@ -503,8 +503,6 @@ fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enem
 // Straight-line water probe the convoy threads and the client-side HVT offer picker use to reject an
 // approach bearing that crosses the sea. Broadcast for that picker call site (fnc_hvt_dest_pick).
 fnc_route_has_water = compile preprocessFileLineNumbers "duws\server\misc\fnc_route_has_water.sqf";publicVariable "fnc_route_has_water";
-// Not broadcast: it fans out to clients itself, so a client call would fan out a second time.
-fnc_duws_report = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_report.sqf";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 fnc_hirePartisans = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans.sqf";

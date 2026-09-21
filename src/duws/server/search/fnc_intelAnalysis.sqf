@@ -86,11 +86,7 @@ DUWS_intelAnalysisBatch = nil;
 private _finalCP = floor _batchCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 
-// Silenced so the reveal's own Overlord line does not double the reveal card fired below.
-private _gotIntel = _batchReveal && {[getPos _caller, _caller, true] call fnc_intel_payout};
+["intel_analysis", [_finalCP]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-private _target = [0,-2] select isDedicated;
-["intel_analysis", [_finalCP]] remoteExec ["BIS_fnc_showNotification", _target];
-if (_gotIntel) then {
-    ["infosearch", [localize "STR_DUWS_T_INTEL_MAP_TITLE", localize "STR_DUWS_T_INTEL_MAP_DESC"]] remoteExec ["BIS_fnc_showNotification", _target];
-};
+// Silenced: a dry pool has nothing to add to the CP card.
+if (_batchReveal) then { [getPos _caller, _caller, true] call fnc_intel_payout };

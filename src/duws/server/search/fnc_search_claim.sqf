@@ -61,14 +61,6 @@ private _fnc_hint = {
     [_line] remoteExec ["hint", _caller];
 };
 
-// The one outcome the whole team is told about: a revealed position lands on every player's map, so
-// the reveal is broadcast as a notification card. CP, money, a document and an empty pocket move
-// nothing anyone else can see and stay in the searcher's hint box.
-private _fnc_notify = {
-    params ["_title", "_desc"];
-    ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-};
-
 // What the document kind hands the searcher, analysed later at the terminal for CP. The item pool,
 // its weights and its labels are shared (DUWS_intelDocuments in server_var_init) so a patrol camp's
 // table draws the same classes rather than a second copy that drifts.
@@ -94,14 +86,9 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
     switch (_kind) do {
         // The only kind that can decline: fnc_intel_payout returns false once every zone, town
         // and hardpoint is already revealed. Silenced when it declines, so the fallback below is
-        // free to answer a decline without contradiction; a successful reveal is the one search
-        // outcome the whole team sees, broadcast as a notification card.
+        // free to answer a decline without contradiction; a successful reveal announces itself.
         case "intel": {
             _paid = [getPosATL _target, _caller, true] call fnc_intel_payout;
-            if (_paid) then {
-                [localize "STR_DUWS_T_INTEL_MAP_TITLE",
-                    localize "STR_DUWS_T_INTEL_MAP_DESC"] call _fnc_notify;
-            };
         };
 
         case "money": {

@@ -417,12 +417,12 @@ DUWS_hardpointTier = createHashMapFromArray [
     ["MORTAR", 3], ["ARTY", 4]
 ];
 
-// Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
-// localisation carries the sentence around them, not these.
+// Readable name per hardpoint type, for the reveal line and the destroyed-hardpoint notification.
+// English labels; the localisation carries the sentence around them, not these.
 DUWS_hardpointName = createHashMapFromArray [
     ["MG", "MG"], ["AT", "AT"], ["AA", "AA"], ["MORTAR", "Mortar"],
     ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"], ["GMG", "GMG"],
-    ["RADIO", "Radio Tower"]
+    ["RADIO", "Radio Tower"], ["MINEFIELD", "Minefield"]
 ];
 
 // Bounty for destroying a standalone hardpoint, [CP, AP], read by fnc_hardpoint_stream when cleared.
