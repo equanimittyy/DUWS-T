@@ -1,8 +1,8 @@
 // Locality: server, spawned by fnc_civ_mission_request. An old OPFOR field thinned to the few mines it still
 // holds, registered as a revealed standalone hardpoint so its mines show on the map and its row clears on the
 // hardpoint poller's own test. It outlives a failed or canceled job: the field is OPFOR's, not the giver's.
-#define MINES_LEFT_MIN 0.10
-#define MINES_LEFT_MAX 0.17
+#define MINES_LEFT_MIN 0.15
+#define MINES_LEFT_MAX 0.22
 params ["_id"];
 private _e = DUWS_civMissions get _id;
 private _site = _e get "site";
