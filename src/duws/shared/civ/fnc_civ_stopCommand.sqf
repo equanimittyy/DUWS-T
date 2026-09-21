@@ -11,12 +11,8 @@ _unit addAction [
     params ["_target", "_caller", "_actionId"];
 
     [name _caller, localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
-    
+    // No reply line: the local walking over is the answer.
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
-    sleep 4;
-    // The spoken reply is the whole feedback. A hint on top of it narrated the civilian walking
-    // over, which the player can already see.
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_STOP_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
 },
     [],
     50,
