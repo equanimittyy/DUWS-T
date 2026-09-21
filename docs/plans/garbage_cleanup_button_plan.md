@@ -1,7 +1,8 @@
 # Garbage Cleanup button
 
 A "Garbage Cleanup" button in the request menu's COMMAND AND CONTROL column runs the map cleanup at
-once, at the HQ and at every FOB. The player confirms first. Paths are relative to `src/`.
+once, at the HQ and at every FOB. Only the Game Master sees it, and confirms before it runs. Paths are
+relative to `src/`.
 
 The button calls the same server function as the debug menu's "Force garbage clean":
 `fnc_duws_forceCleanup` sets `DUWS_cleanup_force`, and the next pass of
@@ -40,9 +41,14 @@ but it deletes shared world state for every player and cannot be undone. The com
 `docs/info/gameplay/player_text_style_guide.md:270-277` lists the column's buttons in order; add the
 cleanup before the redeploy.
 
-**Access.** Every player at every base can use it, with no cost and no cooldown. It can delete a body
-that a teammate more than 300 m away walks toward. **Open:** whether it is for squad leaders only
-(`Squad_Leaders`, as the squad manager is).
+**Access.** Game Master only. The row is added only when `(vehiclevarname player) in game_master`, the
+same test that gates rest and the debug menu. Other players do not see the row: the column leaves out an
+entry that cannot apply, as it does the squad manager for a player who is not a squad leader. The
+button costs nothing and has no cooldown.
+
+The server does not check the caller again. Rest (`client/dialog/fnc_rest_menu.sqf:9`) is also gated on
+the client only, and the worst a client that reaches `fnc_duws_forceCleanup` can do is delete distant
+litter early.
 
 ## Phase 2: strings
 
