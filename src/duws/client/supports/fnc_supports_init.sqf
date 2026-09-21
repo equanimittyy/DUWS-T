@@ -7,9 +7,7 @@
 #include "..\..\shared\includes\action_style.hpp"
 
 // The catalogue: one ordered list, permanent rows first. fnc_duws_help reads it raw for the manual;
-// the menu build and buy/refund handler use the filtered fnc_support_defs below. Rows are
-// order-dependent: inserting one anywhere but the end repoints every row below it at another
-// support's price, flag and comm item.
+// the menu build and buy/refund handler use the filtered fnc_support_defs below.
 //
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
 // Column 8 is the AP half of a dual price (indirect-fire/air-strike rows, and HALO plus the upper
@@ -27,6 +25,7 @@ fnc_support_catalogue = {
 		["vehicle_depot", "PERM", 20, "support_veh_repair_available", "STR_DUWS_T_vehicle_repair",     "",           false],
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false],
+		["logistics", "PERM", 10, "support_logistics_available",   "STR_DUWS_T_logistics_row",        "",           false],
 
 		// Radio towers: each tier a permanent +1 to BLUFOR rep drift (DUWS_bluforRadioLevel). No comm
 		// item -- owned outright once bought, mirroring the enemy's amplifier without a structure.
@@ -76,6 +75,9 @@ fnc_support_defs = {
 		// A FOB is not offered until a zone has been taken, the same gate the comm item it grants waits on.
 		if (_key == "fob" && {zoneundercontrolblu < 1}) then { _keep = false };
 		if (_key == "mhq_slot" && {!(["support_mobile_HQ_available"] call fnc_support_owned)}) then {
+			_keep = false;
+		};
+		if (_key in ["supply", "veh_drop", "helotaxi", "helolift", "boattaxi"] && {!(["support_logistics_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
 		// Radio tiers unlock in order: each hidden until the one below it is owned, so the player cannot

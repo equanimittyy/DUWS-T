@@ -107,7 +107,7 @@ never rolled into the ordinary hardpoint mix.
 `DUWS_bluforRadioLevel` is the tier bought, `0`-`3`, recomputed from the permanent-support record
 on every grant (`server/supports/fnc_support_perm_grant.sqf:19`). It is three `PERM` catalogue
 rows — `radio1`/`radio2`/`radio3` — in `client/supports/fnc_supports_init.sqf:32-34`, gated so a
-tier is hidden until the one below it is owned (`:74-75`). Nothing is placed and nothing streams:
+tier is hidden until the one below it is owned (`:85-86`). Nothing is placed and nothing streams:
 the purchase itself is the whole effect, so there is no BLUFOR structure for OPFOR to destroy in
 answer to a rising amplifier — only ground to retake.
 

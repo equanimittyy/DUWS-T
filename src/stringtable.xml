@@ -4091,6 +4091,10 @@
                 <Original>BLUFOR has unlocked Forward Operating Bases</Original>
                 <English>BLUFOR has unlocked Forward Operating Bases</English>
             </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_LOGISTICS">
+                <Original>BLUFOR has unlocked Logistical Supports</Original>
+                <English>BLUFOR has unlocked Logistical Supports</English>
+            </Key>
             <Key ID="STR_DUWS_T_UNLOCK_REPAIR">
                 <Original>BLUFOR has unlocked the Vehicle Depot</Original>
                 <English>BLUFOR has unlocked the Vehicle Depot</English>
@@ -6553,6 +6557,10 @@
                 <Original>Establish FOB</Original>
                 <English>Establish FOB</English>
             </Key>
+            <Key ID="STR_DUWS_T_logistics_row">
+                <Original>Logistical Supports</Original>
+                <English>Logistical Supports</English>
+            </Key>
             <Key ID="STR_DUWS_T_radio_tower_1">
                 <Original>Radio Tower</Original>
                 <English>Radio Tower</English>
@@ -7883,6 +7891,10 @@
                 <Original>A forward base with its own garrison, patrol and logistics, available once the first zone is taken; each FOB you establish draws CP.</Original>
                 <English>A forward base with its own garrison, patrol and logistics, available once the first zone is taken; each FOB you establish draws CP.</English>
             </Key>
+            <Key ID="STR_DUWS_T_sdesc_logistics">
+                <Original>Unlocks the supply drop, vehicle drop, helicopter taxi, heavy heli vehicle transport and boat taxi.</Original>
+                <English>Unlocks the supply drop, vehicle drop, helicopter taxi, heavy heli vehicle transport and boat taxi.</English>
+            </Key>
             <Key ID="STR_DUWS_T_sdesc_radio1">
                 <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</Original>
                 <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</English>
@@ -7916,28 +7928,28 @@
                 <English>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_supply">
-                <Original>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm.</Original>
-                <English>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm.</English>
+                <Original>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm; requires Logistical Supports.</Original>
+                <English>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_veh_drop">
-                <Original>A helicopter drops a light vehicle of your choice.</Original>
-                <English>A helicopter drops a light vehicle of your choice.</English>
+                <Original>A helicopter drops a light vehicle of your choice; requires Logistical Supports.</Original>
+                <English>A helicopter drops a light vehicle of your choice; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_uav">
                 <Original>A recon drone scans units in range and marks them on your map.</Original>
                 <English>A recon drone scans units in range and marks them on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_helotaxi">
-                <Original>A transport helicopter moves your squad.</Original>
-                <English>A transport helicopter moves your squad.</English>
+                <Original>A transport helicopter moves your squad; requires Logistical Supports.</Original>
+                <English>A transport helicopter moves your squad; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_helolift">
-                <Original>A heavy helicopter lifts a chosen vehicle to a target.</Original>
-                <English>A heavy helicopter lifts a chosen vehicle to a target.</English>
+                <Original>A heavy helicopter lifts a chosen vehicle to a target; requires Logistical Supports.</Original>
+                <English>A heavy helicopter lifts a chosen vehicle to a target; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_boattaxi">
-                <Original>A boat team moves your squad; can be buggy.</Original>
-                <English>A boat team moves your squad; can be buggy.</English>
+                <Original>A boat team moves your squad (can be buggy); requires Logistical Supports.</Original>
+                <English>A boat team moves your squad (can be buggy); requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_arty">
                 <Original>Off-map 155mm guns shell your mark for one minute.</Original>

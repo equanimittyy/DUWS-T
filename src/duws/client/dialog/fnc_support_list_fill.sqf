@@ -61,9 +61,7 @@ private _rows = [];   // listbox index -> its def, [] for a heading
             "_insBlocked"];
         private _free = _key == "mobile_HQ" && _insurgent;
         // Name plus the shared price bracket (fnc_supports_init.sqf): the CP is read from the
-        // catalogue and scaled by escalation, never baked into the label. English and Original label
-        // strings carry the name alone now; the other languages still bake their own bracket until
-        // retranslated, so those transiently show it ahead of this one.
+        // catalogue and scaled by escalation, never baked into the label.
         private _label = (localize _labelKey) + ([_cost, _x param [7, 0], _free] call fnc_support_cost_bracket);
         // The tier tag, appended after the price. A locked row is greyed below, whatever state colour
         // it would otherwise have carried.
