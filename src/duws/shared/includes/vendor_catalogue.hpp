@@ -165,6 +165,7 @@ class vendor_catalogue
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.04;
             colorBackground[] = {1, 0.5, 0, 0.5};
+            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
         };
         class vendor_store: RscButton
         {
@@ -177,6 +178,7 @@ class vendor_catalogue
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.04;
             colorBackground[] = {1, 0.5, 0, 0.5};
+            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
         };
     };
 };
