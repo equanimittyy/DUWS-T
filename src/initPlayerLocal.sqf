@@ -65,8 +65,8 @@ DUWS_forcedRemoveItems = [
 // whole inventory -- an arsenal edit, a quick-kit setUnitLoadout -- would delete it. Stash pulls
 // every carried money/intel class out and returns [[class, n], ...]; regrant hands that back, into
 // inventory where it fits and dropped at the player's feet where it does not, so a full pack loses
-// none. All or nothing per class: money landing in two places needs one hint to name both.
-// Both run client-local on player; the overflow drop is a server-side remoteExec.
+// none. All or nothing across the whole stash: money landing in two places needs one hint to name
+// both. Both run client-local on player; the overflow drop is a server-side remoteExec.
 DUWS_fnc_money_stash = {
     private _stash = [];
     {
@@ -82,20 +82,33 @@ DUWS_fnc_money_stash = {
 
 DUWS_fnc_money_regrant = {
     params [["_stash", []]];
-    private _dropPairs = [];
+    // Added as it goes and rolled back on the first class that will not fit, rather than measured
+    // first: canAdd answers for the pack as it stands, so testing every class before adding any
+    // measures each against the room the others are about to take.
+    private _added = [];
+    private _fits = true;
     {
-        _x params ["_cls", "_n"];
-        if (player canAdd [_cls, _n]) then {
-            private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
-            for "_i" from 1 to _n do {
-                if (_isMag) then { player addMagazine _cls; } else { player addItem _cls; };
+        if (_fits) then {
+            _x params ["_cls", "_n"];
+            if (player canAdd [_cls, _n]) then {
+                private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
+                for "_i" from 1 to _n do {
+                    if (_isMag) then { player addMagazine _cls; } else { player addItem _cls; };
+                };
+                _added pushBack [_cls, _n];
+            } else {
+                _fits = false;
             };
-        } else {
-            _dropPairs pushBack [_cls, _n];
         };
     } forEach _stash;
-    if (count _dropPairs > 0) then { [_dropPairs, getPosATL player] remoteExec ["fnc_money_drop", 2]; };
-    _dropPairs
+
+    if (_fits) exitWith { [] };
+    {
+        _x params ["_cls", "_n"];
+        for "_i" from 1 to _n do { player removeItem _cls; player removeMagazine _cls; };
+    } forEach _added;
+    [_stash, getPosATL player] remoteExec ["fnc_money_drop", 2];
+    _stash
 };
 
 // restricted-arsenal handler: whitelist filter plus forced money/intel removal
