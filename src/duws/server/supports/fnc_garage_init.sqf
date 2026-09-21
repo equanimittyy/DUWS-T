@@ -37,9 +37,14 @@ fnc_garage_store = {
 // setDamage replicate.
 fnc_depot_carry_spawn = {
     params ["_spec", "_pos"];
-    private _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];
-    _veh allowDamage false;
-    _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
+    private _veh = objNull;
+    // Unscheduled, so no physics step lands between the create and the guard: a vendor sale spawns at
+    // the buyer's feet in the shop doorway, and a hull clipping the wall cooks off on its first step.
+    isNil {
+        _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];
+        _veh allowDamage false;
+        _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
+    };
     _veh lock true; // block entry while the player hand-places it; both cleared in fnc_depot_place_finish
     [_veh, _spec] call DUWS_fnc_vehSpecApply;
     _veh
