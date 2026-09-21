@@ -825,6 +825,7 @@ fnc_hq_placement = compile preprocessFileLineNumbers "duws\client\dialog\fnc_hq_
 fnc_faction_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm.sqf";publicVariable "fnc_faction_confirm";
 fnc_faction_confirm_rows = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm_rows.sqf";publicVariable "fnc_faction_confirm_rows";
 fnc_faction_row_paint = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_row_paint.sqf";publicVariable "fnc_faction_row_paint";
+fnc_faction_role_name = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_role_name.sqf";publicVariable "fnc_faction_role_name";
 fnc_faction_key_edit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_edit.sqf";publicVariable "fnc_faction_key_edit";
 fnc_faction_key_apply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_apply.sqf";publicVariable "fnc_faction_key_apply";
 fnc_faction_key_list = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_list.sqf";publicVariable "fnc_faction_key_list";

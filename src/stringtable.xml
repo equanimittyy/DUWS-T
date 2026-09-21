@@ -395,6 +395,202 @@
                 <Original>SPECIAL</Original>
                 <English>SPECIAL</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_role_soldier">
+                <Original>Rifleman</Original>
+                <English>Rifleman</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_aa_soldier">
+                <Original>Anti-air specialist</Original>
+                <English>Anti-air specialist</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_ar_soldier">
+                <Original>Autorifleman</Original>
+                <English>Autorifleman</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_at_soldier">
+                <Original>Anti-tank specialist</Original>
+                <English>Anti-tank specialist</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_gl_soldier">
+                <Original>Grenadier</Original>
+                <English>Grenadier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_lat_soldier">
+                <Original>Light anti-tank rifleman</Original>
+                <English>Light anti-tank rifleman</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_sl_soldier">
+                <Original>Squad leader</Original>
+                <English>Squad leader</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_tl_soldier">
+                <Original>Team leader</Original>
+                <English>Team leader</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_mark_soldier">
+                <Original>Marksman</Original>
+                <English>Marksman</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_sniper_soldier">
+                <Original>Sniper</Original>
+                <English>Sniper</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_medic">
+                <Original>Medic</Original>
+                <English>Medic</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_officer">
+                <Original>Officer</Original>
+                <English>Officer</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_armed_car1">
+                <Original>Armed car</Original>
+                <English>Armed car</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_apc1">
+                <Original>Armored personnel carrier</Original>
+                <English>Armored personnel carrier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_apc2">
+                <Original>Armored personnel carrier</Original>
+                <English>Armored personnel carrier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_mbt_tank1">
+                <Original>Main battle tank</Original>
+                <English>Main battle tank</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_trans_heli">
+                <Original>Transport helicopter</Original>
+                <English>Transport helicopter</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_attack_heli">
+                <Original>Attack helicopter</Original>
+                <English>Attack helicopter</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_misc_air">
+                <Original>Combat aircraft</Original>
+                <English>Combat aircraft</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_turret_aa">
+                <Original>Static anti-air launcher</Original>
+                <English>Static anti-air launcher</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_turret_at">
+                <Original>Static anti-tank launcher</Original>
+                <English>Static anti-tank launcher</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_turret_hmg">
+                <Original>Static heavy machine gun</Original>
+                <English>Static heavy machine gun</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_turret_gmg">
+                <Original>Static grenade launcher</Original>
+                <English>Static grenade launcher</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_turret_mortar">
+                <Original>Mortar</Original>
+                <English>Mortar</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops">
+                <Original>Operator</Original>
+                <English>Operator</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_gl">
+                <Original>Operator (grenadier)</Original>
+                <English>Operator (grenadier)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_lat">
+                <Original>Operator (light anti-tank)</Original>
+                <English>Operator (light anti-tank)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_hat">
+                <Original>Operator (heavy anti-tank)</Original>
+                <English>Operator (heavy anti-tank)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_aa">
+                <Original>Operator (anti-air)</Original>
+                <English>Operator (anti-air)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_mg">
+                <Original>Operator (machine gunner)</Original>
+                <English>Operator (machine gunner)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_medic">
+                <Original>Operator (medic)</Original>
+                <English>Operator (medic)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_mark">
+                <Original>Operator (marksman)</Original>
+                <English>Operator (marksman)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_sniper">
+                <Original>Operator (sniper)</Original>
+                <English>Operator (sniper)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_exp">
+                <Original>Operator (explosives)</Original>
+                <English>Operator (explosives)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_specops_eng">
+                <Original>Operator (engineer)</Original>
+                <English>Operator (engineer)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_heli_pilot">
+                <Original>Helicopter pilot</Original>
+                <English>Helicopter pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_boat_armed">
+                <Original>Armed boat</Original>
+                <English>Armed boat</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_boat_crew">
+                <Original>Boat crew</Original>
+                <English>Boat crew</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_boat_trans">
+                <Original>Transport boat</Original>
+                <English>Transport boat</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_heli_trans_arm">
+                <Original>Armed transport helicopter</Original>
+                <English>Armed transport helicopter</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_eng_soldier">
+                <Original>Engineer</Original>
+                <English>Engineer</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_crew">
+                <Original>Vehicle crew</Original>
+                <English>Vehicle crew</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_operator">
+                <Original>Recon soldier</Original>
+                <English>Recon soldier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_aa_apc">
+                <Original>Anti-air vehicle</Original>
+                <English>Anti-air vehicle</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_arty">
+                <Original>Artillery</Original>
+                <English>Artillery</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_trans_truck">
+                <Original>Transport truck</Original>
+                <English>Transport truck</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_covered_truck">
+                <Original>Covered truck</Original>
+                <English>Covered truck</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_ammo_truck">
+                <Original>Ammunition truck</Original>
+                <English>Ammunition truck</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_role_repair_truck">
+                <Original>Repair truck</Original>
+                <English>Repair truck</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_cancel">
                 <Original>CANCEL</Original>
                 <English>CANCEL</English>

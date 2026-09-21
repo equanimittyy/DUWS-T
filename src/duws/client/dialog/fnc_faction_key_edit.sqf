@@ -106,9 +106,8 @@ if (isNull _display) exitWith {
     closeDialog 0;
 };
 
-private _short = (_key regexReplace ["^(blufor|opfor)_", ""]) regexReplace ["_X$", ""];
 (_display displayCtrl 8621) ctrlSetText format ["%1 -- %2 / %3",
-    localize "STR_DUWS_T_faction_edit_title", toUpper _side, _short];
+    localize "STR_DUWS_T_faction_edit_title", toUpper _side, [_key] call fnc_faction_role_name];
 (_display displayCtrl 8621) ctrlSetFont "PuristaMedium";
 
 private _factionCtrl = _display displayCtrl 8623;

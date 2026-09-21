@@ -3,9 +3,7 @@
 // and again whenever the key editor or the clear prompt changes it.
 //
 // The label carries "ROLE: classname" as one string rather than two controls, which is what makes
-// the common case fit: the blufor_/opfor_ prefix and the _X suffix are dropped -- the column
-// heading already says which side and the suffix carries nothing -- and 27 characters of the rest
-// survive. Longer combinations cut off; the tooltip holds the untruncated form.
+// the common case fit. Longer combinations cut off; the tooltip holds the untruncated form.
 //
 // A value may be an array: AutoDetect fills a role with every class it found for it, and
 // fnc_faction_pick draws one per spawn. The row shows the representative that fnc_faction_pools_publish
@@ -27,13 +25,12 @@ private _value = "";
 private _pool = if (_value isEqualType []) then {_value} else {[_value]};
 _pool = _pool select { _x isEqualType "" && {_x != ""} };
 
-private _short = _key regexReplace ["^(blufor|opfor)_", ""];
-_short = _short regexReplace ["_X$", ""];
+private _role = [_key] call fnc_faction_role_name;
 
 private _clear = _ctrls get (_key + "_clear");
 
 if (_pool isEqualTo []) exitWith {
-    _label ctrlSetText format ["%1: %2", _short, localize "STR_DUWS_T_faction_confirm_missing"];
+    _label ctrlSetText format ["%1: %2", _role, localize "STR_DUWS_T_faction_confirm_missing"];
     _label ctrlSetTextColor [1, 0.35, 0.35, 1];
     _label ctrlSetTooltip format ["%1 = %2", _key, localize "STR_DUWS_T_faction_confirm_missing"];
     _label ctrlCommit 0;
@@ -50,7 +47,7 @@ private _display = getText (configFile >> "CfgVehicles" >> _class >> "displayNam
 private _tiers = missionNamespace getVariable ["duws_faction_tiers", createHashMap];
 private _tier = _tiers getOrDefault [_key, 0];
 
-_label ctrlSetText format ["%1: %2%3", _short, _class,
+_label ctrlSetText format ["%1: %2%3", _role, _class,
     if (_extra > 0) then { format [" (+%1)", _extra] } else { "" }];
 _label ctrlSetTextColor (switch (_tier) do {
     case 1: { [1, 0.82, 0.2, 1] };
