@@ -326,11 +326,11 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
             _o set ["looseRaising", false];
             _o set ["looseUp", _res];
         };
-        // Garrison roster is the loose men alone (crew is a separate driven occupant), so a defender in
-        // COMBAT holds the stow here while the crew dueling from a pinned gun does not.
+        // Garrison roster is the loose men alone (crew is a separate driven occupant), so an engaged
+        // defender holds the stow here while the crew dueling from a pinned gun does not.
         private _up = _here
             || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
-            || {([_key] call fnc_site_roster) findIf { alive _x && {behaviour _x isEqualTo "COMBAT"} } > -1};
+            || {([_key] call fnc_site_roster) findIf { alive _x && {[_x] call fnc_duws_engaged} } > -1};
         if (_o getOrDefault ["looseUp", false]) then {
             if (!_up) then {
                 _o set ["looseUp", false];
@@ -355,15 +355,14 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         _o set ["awake", _res];
     };
 
-    // Standalone hardpoints hold while near, within grace, or in a fight: COMBAT is the engine's own
-    // contact state (fnc_apply_posture spawns SAFE, the engine promotes on detection), so a gun dueling a
-    // player from beyond its ring isn't stowed out from under the fight and re-raised at full strength.
-    // The roster scan is the bounded list the clear-check already walks; || defers it to this frame.
+    // Standalone hardpoints hold while near, within grace, or in a fight (fnc_duws_engaged), so a gun
+    // dueling a player from beyond its ring isn't stowed out from under the fight and re-raised at full
+    // strength. The roster scan is the bounded list the clear-check already walks; || defers it to this frame.
     private _zk = _o getOrDefault ["hpZoneKey", ""];
     private _up = if (_zk isEqualTo "") then {
         _here
         || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
-        || {([_key] call fnc_site_roster) findIf { alive _x && {behaviour _x isEqualTo "COMBAT"} } > -1}
+        || {([_key] call fnc_site_roster) findIf { alive _x && {[_x] call fnc_duws_engaged} } > -1}
     } else {
         _zk call DUWS_fnc_hardpointZoneAwake
     };

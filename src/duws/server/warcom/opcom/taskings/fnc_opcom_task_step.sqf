@@ -61,14 +61,7 @@ private _stepContext = {
     if (_live) then {
         private _ldr = leader _grp;
         _pos = getPosASL _ldr;
-        _engaged = behaviour _ldr isEqualTo "COMBAT";
-        if (!_engaged && {count allPlayers > 0}) then {
-            private _pl = (allPlayers select { alive _x }) apply { [_ldr distance _x, _x] };
-            if (_pl isNotEqualTo []) then {
-                _pl sort true;
-                _engaged = _ldr knowsAbout ((_pl select 0) select 1) > 1.5;
-            };
-        };
+        _engaged = [_ldr] call fnc_duws_engaged;
         _t set ["status", ["moving", "engaged"] select _engaged];
     };
     // A live tasking is walked by its waypoints, so arrival is a distance read; a virtual one by the refresh above.

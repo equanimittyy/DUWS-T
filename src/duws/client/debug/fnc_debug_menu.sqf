@@ -117,7 +117,7 @@ switch (_page) do {
             DBG_BACK("root"),
             ["Force garbage clean", {
                 [] remoteExec ["fnc_duws_forceCleanup", 2];
-                hint "Map cleanup: sweeping now.\n\nLifetimes are treated as elapsed, so all litter goes\nexcept: within 300 m of a player, flagged persistent,\nor an intact vehicle parked within 250 m of the HQ,\na FOB or the MHQ. Counts land in the log.";
+                hint "Map cleanup: sweeping now.\n\nLifetimes are treated as elapsed, so all litter goes\nexcept: within 300 m of a player, flagged persistent,\na unit still fighting within 1.5 km of a player,\nor an intact vehicle parked within 250 m of the HQ,\na FOB or the MHQ. Counts land in the log.";
             }, [], DBG_DANGER],
             ["Spawn intel items (drop-test)", { [player] remoteExec ["fnc_debug_spawn_intel", 2] },  [], DBG_ACTION],
             ["Simulate intel search",         { [player] remoteExec ["fnc_debug_intel_search", 2] }, [], DBG_ACTION],

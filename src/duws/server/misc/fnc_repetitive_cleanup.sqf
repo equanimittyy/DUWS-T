@@ -12,6 +12,11 @@ if (!isServer) exitWith {};
 // watched stays and is retried, so it goes once they leave rather than never.
 #define KEEP_RADIUS 300
 
+// An engaged unit (fnc_duws_engaged) is spared only with a living player this close. Groups scripted into
+// COMBAT -- the sniper event, several mission garrisons -- read as engaged at any range, so without it
+// they would never be collected. Covers the sniper event's farthest perch (1000 m).
+#define ENGAGE_RADIUS 1500
+
 // Bases are cleanup exclusion zones: an intact vehicle parked within DUWS_base_keep_radius of the HQ,
 // a FOB or the MHQ is never collected. This is the supported way to keep a vehicle, which is why no
 // vehicle carries the persistence flag any more -- drive it home instead of tagging it in script.
@@ -106,16 +111,22 @@ while {true} do {
     _candidates append allDeadMen;
     _candidates append ((allDead - allDeadMen) select { _x == vehicle _x });
 
+    private _engaged = {
+        params ["_u"];
+        (allPlayers findIf {alive _x && {_x distance _u < ENGAGE_RADIUS}}) >= 0 && {[_u] call fnc_duws_engaged}
+    };
+
     // A vehicle counts as in use -- and so is spared -- when a living player, or a player's AI
     // squadmate, is aboard, or when living AI crew still has a mobile hull under them. A crewed hull
     // that cannot move is wreckage its crew never bailed from, not a vehicle in service, so it ages
-    // out on the clock like an empty one, which is what collects an immobilised-but-manned vehicle.
-    // A static is never mobile, so it is spared on any living crew instead: collecting a manned
-    // emplacement would strip a held zone.
+    // out on the clock like an empty one, which is what collects an immobilised-but-manned vehicle --
+    // unless that crew is still fighting from it. A static is never mobile, so it is spared on any
+    // living crew instead: collecting a manned emplacement would strip a held zone.
     private _inUse = {
         params ["_v"];
         if ((crew _v) findIf {alive _x && {isPlayer _x || {(units group _x) findIf {isPlayer _x} >= 0}}} >= 0) exitWith { true };
-        ({alive _x} count crew _v > 0) && {_v isKindOf "StaticWeapon" || {canMove _v}}
+        ({alive _x} count crew _v > 0) && {_v isKindOf "StaticWeapon" || {canMove _v}
+            || {(crew _v) findIf {alive _x && {_x call _engaged}} >= 0}}
     };
 
     // Idling and immobilised vehicles: not-in-use is the whole test now. They are still held by
@@ -223,8 +234,8 @@ while {true} do {
     // Flagged living entities: a delete order stamped by a teardown, not litter found by class. Own
     // pass because every shared-sweep spare would protect them -- a living man is his own crew, and a
     // man and a mission vehicle both read as AllVehicles the base-keep radius would hold. Only
-    // KEEP_RADIUS, the deadline and a forced sweep apply; the flag is itself the not-persistent
-    // decision. Dead flagged men ride the allDeadMen census above.
+    // KEEP_RADIUS, an engaged crew, the deadline and a forced sweep apply; the flag is itself the
+    // not-persistent decision. Dead flagged men ride the allDeadMen census above.
     {
         private _unit = _x;
         if (!isNull _unit && {alive _unit} && {(_unit getVariable ["DUWS_binMe", false]) || {_unit call _deadOwner}}) then {
@@ -233,7 +244,8 @@ while {true} do {
             // _unit, not _x, inside findIf: the engine binds _x to the player per element there.
             if ((_force || {_binAt <= _now})
                 && {(allPlayers findIf {_x distance _unit < KEEP_RADIUS}) < 0}
-                && {(units group _unit) findIf {isPlayer _x} < 0}) then {
+                && {(units group _unit) findIf {isPlayer _x} < 0}
+                && {(crew _unit) findIf {alive _x && {_x call _engaged}} < 0}) then {
                 if (_unit isKindOf "CAManBase") then { deleteVehicle _unit }
                     else { deleteVehicleCrew _unit; deleteVehicle _unit };
                 _binned = _binned + 1;
