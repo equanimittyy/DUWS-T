@@ -3571,6 +3571,10 @@
                 <English>Copy. Analysis team's on it. Good work.</English>
                 <Chinesesimp>"霸王1-1"收到，数据分析小组会好好看看它们的。干得漂亮。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_DONE">
+                <Original>Intel analysis is complete.</Original>
+                <English>Intel analysis is complete.</English>
+            </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_NO_ITEMS">
                 <Original>No intel items to analyze.</Original>
                 <English>No intel items to analyze.</English>

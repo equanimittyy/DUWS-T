@@ -86,6 +86,7 @@ DUWS_intelAnalysisBatch = nil;
 private _finalCP = floor _batchCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 
+[localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_INTEL_ANALYSIS_DONE"] remoteExec ["fnc_duws_dialogue", 0];
 ["intel_analysis", [_finalCP]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 // Silenced: a dry pool has nothing to add to the CP card.
