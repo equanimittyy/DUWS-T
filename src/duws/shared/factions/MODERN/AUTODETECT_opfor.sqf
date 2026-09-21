@@ -10,30 +10,7 @@
 fnc_factionGen = {
 	_faction = _this;
 	//systemChat str _faction;
-	([_faction] call fnc_parseFaction) params ["_infantry","_infantryByRoles","_boat","_droneAir","_droneLand","_droneStatic","_submersible","_turretHMG","_turretGMG","_turretMortar","_turretAA","_turretAT","_apcWheeled","_apcTracked","_tank","_arty","_antiAir","_carArmed","_carTransport","_carRearm","_carRepair","_carRefuel","_heliArmed","_heliTransport","_planeArmed","_planeTransport"];
-	
-	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
-							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
-
-	// Pilots and crew are kept out of the combat buckets upstream (fnc_unitParseRoles tests them
-	// first). This is only the basic rifleman: an officer or parade-dress variant fills a patrol poorly.
-	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
-
-	// Any static the faction fields, the last rung under every turret role: beats the vanilla
-	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
-	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
-	_turretAny = _turretAny arrayIntersect _turretAny;
-
-	// Armed boats only -- the detection has no armed/unarmed boat split, so filter the boat bucket by
-	// weapons. Fed to the opfor_BOAT_ARMED_X ladder in the shared hpp; empty on a faction with no gunboat.
-	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
-
-
-// One ladder table for every role key, shared with AUTODETECT_RANDOM_opfor so they cannot drift,
-// and gated on the schema kind so a wrong-bucket detection cannot reach a man/vehicle spawner.
-{ _x call fnc_faction_resolve } forEach [
-#include "..\..\includes\autodetect_roles_opfor.hpp"
-];
+	{ _x call fnc_faction_resolve } forEach (["opfor", [_faction] call fnc_parseFaction] call fnc_faction_ladders);
 
 
 // Make vars public (dedicated-server compat) from the schema key list, not name-fragment matching

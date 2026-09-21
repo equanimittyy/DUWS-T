@@ -14,13 +14,13 @@ duws_faction_list_record = (uiNamespace getVariable ["duws_faction_edits", creat
 duws_faction_list_current = (createHashMapFromArray (missionNamespace getVariable ["DUWS_factionPreviewPools", []]))
     getOrDefault [_key, missionNamespace getVariable [_key, ""]];
 
-// A main's base is its bucket in the server's config, so that branch blocks on the server: only
+// A main's base is a parse of the server's config, so that branch blocks on the server: only
 // scheduled callers ever set a main.
 duws_faction_list_rebase = {
     duws_faction_list_base = if ((duws_faction_list_record select 0) isEqualTo "") then {
-        [duws_faction_list_record, duws_faction_list_current, createHashMap] call fnc_faction_list_base
+        [duws_faction_edit_key, duws_faction_list_record, duws_faction_list_current, createHashMap] call fnc_faction_list_base
     } else {
-        ["base", [duws_faction_list_record], []] call fnc_faction_ask
+        ["base", [duws_faction_edit_key, duws_faction_list_record], []] call fnc_faction_ask
     };
 };
 

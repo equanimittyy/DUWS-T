@@ -159,6 +159,7 @@ publicVariable "fnc_support_wipe";
 publicVariable "fnc_support_despawn";
 // Ahead of faction init, which calls it. Not broadcast: generation and every spawn path are server.
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_pools.sqf";
+[] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_ladders.sqf";
 // The confirmation screen's list editor runs the first three on its client; edits_apply is server.
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_lists.sqf";
 publicVariable "fnc_faction_list_resolve";

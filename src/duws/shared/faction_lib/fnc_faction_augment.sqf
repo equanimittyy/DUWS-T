@@ -8,8 +8,9 @@
 // player's list edits.
 //
 // A hand-written faction file assigns one classname per role, so every zone it fills would field the
-// identical man and vehicle. Each role's representative is expanded into its faction's role bucket
-// (fnc_faction_pool_for_class) and kept first, so the class resolution chose stays the role's main.
+// identical man and vehicle. Each role's representative is expanded into the rung of the role's ladder
+// that holds it (fnc_faction_pool_for_role) and kept first, so the class resolution chose stays the
+// role's main. An AutoDetect side comes out as it resolved, since its ladder is the same table.
 //
 // A pasted CUSTOM faction is left alone: it never built a pool to collapse, and its per-role list is
 // the paster's own, not a curator's single pick asking to be widened.
@@ -36,7 +37,7 @@ private _parseCache = createHashMap;
                     _parsed = [_faction] call fnc_parseFaction;
                     _parseCache set [_faction, _parsed];
                 };
-                private _pool = [_class, _parsed] call fnc_faction_pool_for_class;
+                private _pool = [_key, _class, _parsed] call fnc_faction_pool_for_role;
                 // Only when detection found siblings: a one-entry pool is what fnc_faction_pick
                 // already makes of a plain string, so writing the array back would just churn.
                 if (count _pool > 1) then { missionNamespace setVariable [_key, _pool]; };

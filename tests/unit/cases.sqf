@@ -892,6 +892,45 @@ _rec = [_none, "add", "heli_z", _base] call fnc_faction_list_edit;
 ["list_edit: reset clears every edit",
     ([["heli_z", ["apc_x"], ["apc_b"]], "reset", "", _base] call fnc_faction_list_edit), _none] call fnc_assertEq;
 
+// --- fnc_faction_ladders / fnc_faction_pool_for_role: one role table for detection and Make main ---
+// A parse with every bucket empty except the ones a case fills, by fnc_parseFaction's return index.
+private _fakeParse = {
+    params [["_fill", []]];
+    private _p = [];
+    for "_i" from 0 to 28 do { _p pushBack [] };
+    private _roles = [];
+    for "_i" from 0 to 33 do { _roles pushBack [] };
+    _p set [1, _roles];
+    { _p set [_x select 0, _x select 1] } forEach _fill;
+    _p
+};
+{
+    private _side = _x;
+    private _laddered = ([_side, [] call _fakeParse] call fnc_faction_ladders) apply { _x select 0 };
+    private _vehicles = (([_side] call fnc_faction_schema) select { (_x select 2) == "vehicle" }) apply { _x select 0 };
+    [format ["ladders: every %1 vehicle key has a ladder for Make main to rebuild from", _side],
+        _vehicles - _laddered, []] call fnc_assertEq;
+} forEach ["blufor", "opfor"];
+
+// 23 is the unarmed transport helis, 26 the door-gunned ones, 14 the tanks.
+private _heliParse = [[[23, ["h_u1", "h_u2"]], [26, ["h_d1", "h_d2"]], [14, ["tank_1"]]]] call _fakeParse;
+["pool_for_role: an unarmed transport made main keeps unarmed siblings",
+    (["opfor_TRANS_HELI_X", "h_u2", _heliParse] call fnc_faction_pool_for_role), ["h_u2", "h_u1"]] call fnc_assertEq;
+["pool_for_role: a door-gunned one takes the door-gun rung",
+    (["opfor_TRANS_HELI_X", "h_d2", _heliParse] call fnc_faction_pool_for_role), ["h_d2", "h_d1"]] call fnc_assertEq;
+["pool_for_role: a class the role's ladder does not hold stands alone",
+    (["opfor_TRANS_HELI_X", "tank_1", _heliParse] call fnc_faction_pool_for_role), ["tank_1"]] call fnc_assertEq;
+["pool_for_role: a key with no ladder stands alone",
+    (["opfor_NO_SUCH_KEY_X", "h_u1", _heliParse] call fnc_faction_pool_for_role), ["h_u1"]] call fnc_assertEq;
+
+// The augment pass re-expands every representative, AutoDetect's included; one table means it hands
+// back what resolution built rather than a different pool.
+private _truckParse = [[[18, ["t_cargo1", "t_cargo2"]], [19, ["t_ammo"]], [17, ["car_hmg"]]]] call _fakeParse;
+private _ladder = ((["opfor", _truckParse] call fnc_faction_ladders) select { (_x select 0) == "opfor_TRANS_TRUCK_X" }) select 0;
+private _resolved = _ladder call fnc_faction_resolve;
+["ladders: re-expanding the resolved representative reproduces the resolved pool",
+    (["opfor_TRANS_TRUCK_X", _resolved select 0, _truckParse] call fnc_faction_pool_for_role), _resolved] call fnc_assertEq;
+
 // --- fnc_faction_schema: the required and vanilla-default columns ---
 // A row short of the required flag reads `nil` there, which fnc_custom_faction_parse's filter would
 // treat as false -- silently dropping a core key out of paste validation. The fifth column is the

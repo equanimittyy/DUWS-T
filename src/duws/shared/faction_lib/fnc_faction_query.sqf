@@ -40,7 +40,8 @@ fnc_faction_query = {
         };
         // Asked only with a main set, and fnc_faction_list_base ignores _current then.
         case "base": {
-            [_args select 0, [], DUWS_factionParseCache] call fnc_faction_list_base
+            _args params ["_key", "_record"];
+            [_key, _record, [], DUWS_factionParseCache] call fnc_faction_list_base
         };
         // Verdict only: the build parses the paste again for itself.
         case "validate": {

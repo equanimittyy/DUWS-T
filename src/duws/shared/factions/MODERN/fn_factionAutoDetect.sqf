@@ -166,6 +166,20 @@ fnc_filterByWeapons = compileFinal {
 	};
 };
 
+// Gunships and armed drones: pylons, or a cannon, rocket or missile on a turret or the pilot, since a mod
+// gunship may arm without pylons. A door MG or a designator alone does not count.
+fnc_filterByHeavyArms = compileFinal {
+	params ["_factionData"];
+	private _byPylon = [_factionData] call fnc_filterByPylons;
+	private _heavyWeapon = ["CannonCore", "RocketPods", "MissileLauncher"];
+	_byPylon + (_factionData select {
+		private _type = _x;
+		private _wpn = ([_type] call fnc_vehicleWeaponType)
+			+ flatten ((getArray (configFile >> "CfgVehicles" >> _type >> "weapons")) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
+		!(_type in _byPylon) && {(_heavyWeapon findIf {_x in _wpn}) >= 0}
+	})
+};
+
 fnc_isThreatTo = compileFinal {
 	params ["_type"];
 	getArray (configFile >> "CfgVehicles" >> _type >> "threat") params [["_threatToInf", 0], ["_threatToArmor", 0], ["_threatToAir", 0]];	// {Soft, Armor, Air}	
@@ -454,6 +468,9 @@ fnc_unitParseRoles = compileFinal {
 		
 	};
 	
+	// An officer or parade-dress rifleman fills a patrol poorly.
+	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
+
 	[_grunt,_medic,_sl,_tl,_ar,_mg,_gl,_aa,_lat,_hat,_officer,_spec,_diver,_pilot,_crew,_marksman,_sniper,_eng,_exp,_uavOp] +
 	[_spec,_spec_medic,_spec_sl,_spec_tl,_spec_ar,_spec_mg,_spec_gl,_spec_aa,_spec_lat,_spec_hat,_spec_marksman,_spec_sniper,_spec_eng,_spec_exp]
 };
@@ -473,7 +490,10 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 
 	_turrets = [ _factionData, "turrets" ] call fnc_factionGetFilteredByEditorSubcat select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isNotEqualTo "Autonomous" };
 	_boat =	[ _factionData, "boats" ] call fnc_factionGetFilteredByEditorSubcat;
+	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
+	_boat = _boat - _boatArmed;
 	_droneAir =	[ [ _factionData, "drones" ] call fnc_factionGetFilteredByEditorSubcat, "Air" ] call fnc_factionGetFilteredByType;
+	private _droneAirArmed = [_droneAir] call fnc_filterByHeavyArms;
 	_droneLand =	 [ [ _factionData, "drones" ] call fnc_factionGetFilteredByEditorSubcat, "LandVehicle" ] call fnc_factionGetFilteredByType;
 	_droneStatic = _turrets select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isEqualTo "Autonomous" };
 	_submersible =	[ _factionData, "submersibles" ] call fnc_factionGetFilteredByEditorSubcat;
@@ -490,6 +510,10 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_tank =	[ _factionData, "tank" ] call fnc_factionGetFilteredByEditorSubcat;
 	_arty =	[ _factionData, "artillery" ] call fnc_factionGetFilteredByEditorSubcat;
 	_antiAir =	[ _factionData, "aas" ] call fnc_factionGetFilteredByEditorSubcat;
+	// A subcategory fallback takes every hull of the kind, so SPGs, SPAA and APCs would pass for tanks.
+	_apcWheeled = _apcWheeled - (_arty + _antiAir);
+	_apcTracked = _apcTracked - (_arty + _antiAir);
+	_tank = _tank - (_apcWheeled + _apcTracked + _arty + _antiAir);
 	// Every soft-skin wheeled vehicle (isKindOf Car), cars and trucks alike -- the cars fallback only fires
 	// when cars is empty, so a faction with both once dropped its trucks. Armor <= 300 excludes wheeled APCs.
 	private _wheeledSoft = _factionData select {
@@ -497,23 +521,15 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}
 		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "armor") <= 300}
 	};
-	_carArmed =	[ [ _wheeledSoft, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons;
-	// Unarmed only, or an armed troop carrier under the armor gate draws for a supply truck.
-	_carTransport =	[ [ _wheeledSoft, 1, 6] call fnc_filterBySeats, false ] call fnc_filterByWeapons;
+	// Minus artillery: a rocket truck is a soft-skin car with a turret gun.
+	_carArmed =	([ [ _wheeledSoft, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons) - _arty;
 	_carRearm =	[ _wheeledSoft, "transportAmmo"] call fnc_filterByUtility;
 	_carRepair =	[ _wheeledSoft, "transportRepair"] call fnc_filterByUtility;
 	_carRefuel =	[ _wheeledSoft, "transportFuel"] call fnc_filterByUtility;
-	// Gunship: pylons, or a cannon/rocket/missile on a turret or the pilot (a mod gunship may arm without pylons).
-	// A door MG alone does not count, or every armed transport lands in the attack pool.
+	// Unarmed troop carriers: an armed one belongs to the armed cars, a service truck with benches to its own bucket.
+	_carTransport =	([ [ _wheeledSoft, 1, 6] call fnc_filterBySeats, false ] call fnc_filterByWeapons) - (_carRearm + _carRepair + _carRefuel);
 	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
-	private _heliByPylon = [_heliSeated] call fnc_filterByPylons;
-	private _heavyWeapon = ["CannonCore", "RocketPods", "MissileLauncher"];
-	_heliArmed =	_heliByPylon + (_heliSeated select {
-		private _type = _x;
-		private _wpn = ([_type] call fnc_vehicleWeaponType)
-			+ flatten ((getArray (configFile >> "CfgVehicles" >> _type >> "weapons")) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
-		!(_type in _heliByPylon) && {(_heavyWeapon findIf {_x in _wpn}) >= 0}
-	});
+	_heliArmed =	[_heliSeated] call fnc_filterByHeavyArms;
 	// Count cargo seats as well as transportSoldier: a seat-proxy transport reports transportSoldier 0 and
 	// read as no transport, so TRANS fell to the gunship. Floor of 4 cargo seats, what taxi/paradrop need.
 	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
@@ -527,6 +543,8 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	};
 	_ranked sort false;
 	_heliTransport = _ranked apply {_x select 1};
+	private _heliDoorGun = [_heliTransport, true] call fnc_filterByWeapons;
+	_heliTransport = _heliTransport - _heliDoorGun;
 	private _planeSeated = [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats;
 	private _planeByPylon = [_planeSeated] call fnc_filterByPylons;
 	_planeArmed =	_planeByPylon + (([ _planeSeated, true ] call fnc_filterByWeapons) select {!(_x in _planeByPylon)});
@@ -544,37 +562,10 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 		_antiAir, 
 		_carArmed, _carTransport, _carRearm, _carRepair, _carRefuel,
 		_heliArmed, _heliTransport,
-		_planeArmed  select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isNotEqualTo "Autonomous" }, _planeTransport
+		_planeArmed  select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isNotEqualTo "Autonomous" }, _planeTransport,
+		// Appended, not beside their kin: fnc_civ_setup_array reads buckets by index.
+		_heliDoorGun, _boatArmed, _droneAirArmed
 	]
-};
-
-
-// One class -> the pool fnc_faction_pick draws at each spawn: the class plus the rest of its faction's
-// tightest bucket holding it (a rifleman is in both infantry and grunt; the smaller is the role). Role-blind,
-// so vehicle buckets feeding different roles must not overlap: a heli in both the armed and the transport
-// bucket could hand one role the other's whole pool. Class stays first, where fnc_faction_pools_publish
-// reads the representative. Buckets come from a parse of the class's faction -- callers pass a cached one (key editor, augment) or parse on demand; unbucketed/empty yields itself.
-fnc_faction_pool_for_class = compileFinal {
-	params ["_class", ["_parsed", []]];
-	if (_class isEqualTo "") exitWith { [] };
-	if (_parsed isEqualTo []) then {
-		_parsed = [getText (configFile >> "CfgVehicles" >> _class >> "faction")] call fnc_parseFaction;
-	};
-
-	// Index 1 is itself a list of per-role infantry buckets; every other index is a flat classname
-	// list. Flattening it in gives every bucket the class could belong to.
-	private _buckets = [];
-	{ if (_forEachIndex != 1) then { _buckets pushBack _x; }; } forEach _parsed;
-	_buckets append (_parsed select 1);
-
-	private _matching = _buckets select { _x isEqualType [] && {!(_x isEqualTo [])} && {_class in _x} };
-	private _pool = [_class];
-	if !(_matching isEqualTo []) then {
-		private _best = _matching select 0;
-		{ if (count _x < count _best) then { _best = _x; }; } forEach _matching;
-		_pool = [_class] + (_best select { _x isEqualType "" && {_x != _class} });
-	};
-	_pool
 };
 
 

@@ -52,6 +52,8 @@ duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_resolve
 duws/shared/faction_lib/fnc_faction_pools.sqf::fnc_faction_poolable_keys
 duws/shared/faction_lib/fnc_faction_lists.sqf::fnc_faction_list_resolve
 duws/shared/faction_lib/fnc_faction_lists.sqf::fnc_faction_list_edit
+duws/shared/faction_lib/fnc_faction_ladders.sqf::fnc_faction_ladders
+duws/shared/faction_lib/fnc_faction_ladders.sqf::fnc_faction_pool_for_role
 duws/shared/faction_lib/fnc_faction_schema.sqf::*fnc_faction_schema
 duws/shared/factions/MODERN/fn_factionAutoDetect.sqf::fnc_selectNonEmpty
 duws/shared/functions/fnc_static_roles.sqf::fnc_static_resolve

@@ -146,10 +146,11 @@ gate that `fnc_faction_keep` applies at the commit.
 
 **The edits are kept as intent, not as a list.** A role's edits are one record, `[main, added, dropped]`
 (`shared/faction_lib/fnc_faction_lists.sqf`). The base is the pool the server built before the screen. When
-the player makes a class main, the base becomes that class's bucket (`fnc_faction_pool_for_class`). The
-list is the main first, then the base minus the drops, then the adds. The first entry is the
-representative, so the single-class readers get the main. The main cannot be removed, because a removal
-would silently re-parent the role to the next entry. Each locked vehicle row carries its record, and the
+the player makes a class main, the base becomes the first rung of the role's ladder that holds that class
+(`fnc_faction_pool_for_role`, see [§autodetect](#the-procedural-generator-autodetect)), or the class alone
+when no rung holds it. The list is the main first, then the base minus the drops, then the adds. The first
+entry is the representative, so the single-class readers get the main. The main cannot be removed, because
+a removal would silently re-parent the role to the next entry. Each locked vehicle row carries its record, and the
 server rebuilds the row from the record with `fnc_faction_edits_apply` instead of trusting the client's
 list. That function gates the list through `fnc_faction_keep` and keeps the records in
 `DUWS_factionListEdits`, so a later detection can apply them again.
@@ -227,15 +228,25 @@ Trailing comments name the consuming function for each variable — the de-facto
   crew / diver / UAV, plus suppressed-weapon "spec-ops" variants. Vehicles are bucketed by editor subcategory
   and `isKindOf` filters (`fnc_filterBySeats`, `fnc_filterByWeapons`, `fnc_filterByPylons`,
   `fnc_filterByUtility`) into turrets, APCs, tanks, artillery, cars, helis, planes, boats, drones.
-  Vehicle buckets that feed different roles must not overlap. A pool is rebuilt from the tightest bucket
-  that holds the role's representative (`fnc_faction_pool_for_class`), so a class in two buckets can give
-  one role the other role's pool. For this reason, the armed-heli bucket holds only gunships (pylons, or a
-  cannon, rocket or missile weapon), the transport-heli bucket excludes those gunships, and the truck
-  bucket holds only unarmed vehicles.
-- **`fnc_factionGen`** assigns the `blufor_*`/`opfor_*` globals from the parsed buckets, using
-  `fnc_selectNonEmpty` fallback chains that end in vanilla assets, and builds the request-menu vehicle list
-  priced by `fnc_evalVehicleCost` (estimates a CP cost from vehicle type, weapons, armor, sensors and threat
-  rating).
+- **`fnc_faction_ladders`** (`shared/faction_lib/fnc_faction_ladders.sqf`) is the one table of which
+  buckets each role key draws from, in preference order. AutoDetect resolves a key from its first rung with
+  anything in it (`fnc_faction_resolve`). A class that a faction file names, or that the player makes main,
+  takes its siblings from the first rung that holds it (`fnc_faction_pool_for_role`). The augment pass and
+  the list editor both use this function, so an expanded or edited list keeps the constraints that detection
+  applied. For this reason, each bucket that a ladder names holds only the classes that its roles can field:
+
+  | Bucket | Holds | Keeps out |
+  |---|---|---|
+  | Armed helis | Gunships: pylons, or a cannon, rocket or missile | Door-gun transports |
+  | Transport helis | Unarmed helis with 4 or more cargo seats | Door-gun transports, which have their own bucket |
+  | Boats | Unarmed boats | Armed boats, which have their own bucket |
+  | Armed drones | Air drones with pylons, or a cannon, rocket or missile | Unarmed drones, for example a quadcopter |
+  | Armed cars | Soft-skin cars with a turret weapon | Artillery, for example a rocket truck |
+  | Transport trucks | Unarmed soft-skin vehicles with 6 or more cargo seats | Ammo, repair and fuel vehicles |
+  | Tanks and APCs | Their editor subcategory, or every hull of the kind when the faction has none | Artillery and anti-air; the tanks also keep out APCs |
+- **`fnc_factionGen`** resolves each role key's ladder into the `blufor_*`/`opfor_*` globals, and builds the
+  request-menu vehicle list priced by `fnc_evalVehicleCost` (estimates a CP cost from vehicle type,
+  weapons, armor, sensors and threat rating).
 - **`fnc_factionSelector`** is a listbox of the factions the server detected (`DUWS_detectedFactions`,
   built at init by `fnc_getAllFactionsClean` over `BIS_fnc_getFactions`). It runs on the game master's
   client and is the only AutoDetect helper broadcast to clients.

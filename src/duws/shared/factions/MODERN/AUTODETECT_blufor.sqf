@@ -9,75 +9,13 @@
 
 fnc_factionGen = {
 	_faction = _this;
-	([_faction] call fnc_parseFaction) params ["_infantry","_infantryByRoles","_boat","_droneAir","_droneLand","_droneStatic","_submersible","_turretHMG","_turretGMG","_turretMortar","_turretAA","_turretAT","_apcWheeled","_apcTracked","_tank","_arty","_antiAir","_carArmed","_carTransport","_carRearm","_carRepair","_carRefuel","_heliArmed","_heliTransport","_planeArmed","_planeTransport"];
+	private _parsed = [_faction] call fnc_parseFaction;
+	_parsed params ["_infantry","_infantryByRoles","_boat","_droneAir","_droneLand","_droneStatic","_submersible","_turretHMG","_turretGMG","_turretMortar","_turretAA","_turretAT","_apcWheeled","_apcTracked","_tank","_arty","_antiAir","_carArmed","_carTransport","_carRearm","_carRepair","_carRefuel","_heliArmed","_heliTransport","_planeArmed","_planeTransport","_heliDoorGun","_boatArmed","_droneAirArmed"];
 	
 	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
 							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
 
-	// Pilots and crew are kept out of the combat buckets upstream (fnc_unitParseRoles tests them
-	// first). This is only the basic rifleman: an officer or parade-dress variant fills a patrol poorly.
-	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
-
-	// The armed-boat key wants a boat with a gun on it, which no detection bucket separates out.
-	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
-	private _heliDoorGun = [_heliTransport, true] call fnc_filterByWeapons;
-
-	// Any static the faction fields, the last rung under every turret role: beats the vanilla
-	// placeholder when no weapon bucket matched. Deduped -- a combo static lands in more than one bucket.
-	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
-	_turretAny = _turretAny arrayIntersect _turretAny;
-
-
-// Every role key resolves through one ladder: first non-empty bucket wins, gated on schema kind so a
-// wrong-bucket class can't reach a spawner; empty rungs skip, so the row reads as the degrade path.
-// vanillaDefault (NATO fallback) is appended by fnc_faction_resolve, so rows carry none. Operators
-// recompute per key, not one `_spec arrayIntersect _sl` -- that would sum buckets and misrate the slot.
-{ _x call fnc_faction_resolve } forEach [
-	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry]],      //patrol, fortify, paradrop
-	["blufor_AA_SOLDIER_X",       [_aa, _hat, _lat, _grunt, _infantry]],   //shared team rosters
-	["blufor_AR_SOLDIER_X",       [_ar, _mg, _grunt, _infantry]],   //supports\fnc_paradrop, init_hq\fnc_HQguards
-	["blufor_AT_SOLDIER_X",       [_hat, _lat, _aa, _grunt, _infantry]],   //shared team rosters
-	["blufor_GL_SOLDIER_X",       [_gl, _grunt, _infantry]],   //init_hq\fnc_HQguards, supports\fnc_paradrop
-	["blufor_LAT_SOLDIER_X",      [_lat, _hat, _aa, _grunt, _infantry]],  //init_hq\fnc_HQguards, supports\fnc_paradrop
-	["blufor_SL_SOLDIER_X",       [_sl, _tl, _officer, _grunt, _infantry]],   //Comms voice, Multiplayer slot
-	["blufor_TL_SOLDIER_X",       [_tl, _sl, _grunt, _infantry]],   //init_hq\fnc_HQguards
-	["blufor_MARK_SOLDIER_X",     [_marksman, _sniper, _grunt, _infantry]],    //init_hq\fnc_HQguards
-	["blufor_SNIPER_SOLDIER_X",   [_sniper, _marksman, _grunt, _infantry]],       //shared team rosters
-	["blufor_OFFICER_X",          [_officer, _sl, _tl, _grunt, _infantry]],      //init_hq\fnc_BluHQinit
-
-	["blufor_ARMED_CAR1_X",       [_carArmed, _apcWheeled, _carTransport]],             //random patrol
-	["blufor_APC1_X",             [_apcTracked, _apcWheeled, _carArmed]],     //random patrol
-	["blufor_APC2_X",             [_apcWheeled, _apcTracked, _carArmed]],   //random patrol
-	["blufor_MBT_TANK1_X",        [_tank, _apcTracked, _apcWheeled]],           //random patrol
-	["blufor_TRANS_HELI_X",       [_heliTransport, _heliArmed]],   //random patrol
-	["blufor_ATTACK_HELI_X",      [_heliArmed, _droneAir, _heliTransport]],          //dialog\fnc_request_hcATTchop, random patrol
-	["blufor_MISC_AIR_X",         [_planeArmed, _droneAir]],            //dialog\fnc_request_hcCAS, random patrol
-
-	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG, _turretAny]],
-	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG, _turretAny]],
-	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG, _turretAny]],
-	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG, _turretAny]],
-	// The GMG rung before the MG one: a grenade launcher is the nearest thing a faction with no
-	// tube has to arcing HE. Read by fnc_static_resolve, like the four above.
-	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG, _turretAny]],
-
-	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry]],
-	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry]],
-	["blufor_SPECOPS_LAT_X",      [_spec_lat, _lat, _hat, _grunt, _infantry]],
-	["blufor_SPECOPS_HAT_X",      [_spec_hat, _hat, _lat, _grunt, _infantry]],
-	["blufor_SPECOPS_AA_X",       [_spec_aa, _aa, _hat, _grunt, _infantry]],
-	["blufor_SPECOPS_MG_X",       [_spec_mg, _spec_ar, _mg, _ar, _grunt, _infantry]],
-	["blufor_SPECOPS_MEDIC_X",    [_spec_medic, _medic, _grunt, _infantry]],
-	["blufor_SPECOPS_MARK_X",     [_spec_marksman, _marksman, _sniper, _grunt]],
-	["blufor_SPECOPS_SNIPER_X",   [_spec_sniper, _sniper, _marksman, _grunt]],
-	["blufor_SPECOPS_EXP_X",      [_spec_exp, _exp, _eng, _grunt, _infantry]],
-	["blufor_SPECOPS_ENG_X",      [_spec_eng, _eng, _exp, _grunt, _infantry]],
-
-	["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt]],    //Rescue Pilot mission
-	["blufor_BOAT_ARMED_X",       [_boatArmed]],   //supports\taxi\fnc_boatTaxi
-	["blufor_BOAT_CREW_X",        [_crew]],    //supports\taxi\fnc_boatTaxi
-	["blufor_HELI_TRANS_ARM_X",   [_heliDoorGun, _heliTransport]]        //supports\taxi\fnc_helotaxi
-];
+{ _x call fnc_faction_resolve } forEach (["blufor", _parsed] call fnc_faction_ladders);
 
 
 
@@ -134,10 +72,12 @@ requestAssets append _tank;
 requestAssets append _antiAir;
 requestAssets append _arty;
 requestAssets append _heliTransport;
+requestAssets append _heliDoorGun;
 requestAssets append _heliArmed;
 requestAssets append _planeArmed;
 requestAssets append _planeTransport;
 requestAssets append _boat;
+requestAssets append _boatArmed;
 requestAssets append _submersible;
 requestAssets append _civilianVeh;
 requestAssets = requestAssets arrayIntersect requestAssets;	// remove potential duplicates, very unlikely but...all the same

@@ -2,9 +2,9 @@
 // [main, added, dropped]. A later detection rebuilds the detected part (the base) and the edits land
 // on top, so a restore after a mod update still picks up the vehicles the update added.
 //
-// main is the parent: once set, the base is main's own bucket (fnc_faction_pool_for_class), not the
-// pool resolution built. main heads the resolved list, where fnc_faction_pools_publish reads the
-// representative.
+// main is the parent: once set, the base is the rung of the role's ladder that holds main
+// (fnc_faction_pool_for_role), not the pool resolution built. main heads the resolved list, where
+// fnc_faction_pools_publish reads the representative.
 
 fnc_faction_list_resolve = {
     params ["_base", "_record"];
@@ -42,7 +42,7 @@ fnc_faction_list_edit = {
 // _current is the role's value before any edit, a class or a pool. _cache maps faction to parse: the
 // parse walks a whole faction's CfgVehicles.
 fnc_faction_list_base = {
-    params ["_record", "_current", "_cache"];
+    params ["_key", "_record", "_current", "_cache"];
     private _main = _record select 0;
     if (_main isEqualTo "") exitWith { if (_current isEqualType []) then { _current } else { [_current] - [""] } };
     private _faction = getText (configFile >> "CfgVehicles" >> _main >> "faction");
@@ -51,7 +51,7 @@ fnc_faction_list_base = {
         _parsed = [_faction] call fnc_parseFaction;
         _cache set [_faction, _parsed];
     };
-    [_main, _parsed] call fnc_faction_pool_for_class
+    [_key, _main, _parsed] call fnc_faction_pool_for_role
 };
 
 // Locality: server. The one path from a record to a live pool, for the commit and for a restore alike,
@@ -67,7 +67,7 @@ fnc_faction_edits_apply = {
         // Same fallback the preview broadcast takes, so the server rebuilds the base the screen showed.
         private _current = missionNamespace getVariable [format ["DUWS_factionPool_%1", _key], []];
         if (_current isEqualTo []) then { _current = missionNamespace getVariable [_key, ""]; };
-        private _list = [[[_record, _current, _cache] call fnc_faction_list_base, _record] call fnc_faction_list_resolve, "vehicle"] call fnc_faction_keep;
+        private _list = [[[_key, _record, _current, _cache] call fnc_faction_list_base, _record] call fnc_faction_list_resolve, "vehicle"] call fnc_faction_keep;
         if (_list isEqualTo []) then {
             ["WARN", "FACTION", format ["%1 list edits left no spawnable class -- kept the resolved pool", _key]] call fnc_log;
         } else {
