@@ -27,6 +27,20 @@ if (_cars isEqualTo []) then {
 };
 missionNamespace setVariable ["civ_veh_array", _cars, true];
 
+// Civilian boat pool, detected like cars (fnc_parseFaction index 2). Only the boat dealer draws from
+// it, and only in a town with water inside its radius, so an empty pool on a landlocked map simply
+// means no such town can host one.
+private _boats = [];
+if (!isNil "fnc_parseFaction") then {
+    { _boats append (([_x] call fnc_parseFaction) param [2, []]) } forEach _civFactions;
+    if (_boats isEqualTo []) then { _boats = (["CIV_F"] call fnc_parseFaction) param [2, []] };
+};
+_boats = _boats arrayIntersect _boats;
+if (_boats isEqualTo []) then {
+    _boats = ["C_Boat_Civil_01_F", "C_Boat_Civil_01_rescue_F", "C_Rubberboat"];
+};
+missionNamespace setVariable ["civ_boat_array", _boats, true];
+
 // Civilian air pool, detected like cars: each faction's unarmed transport helicopters (fnc_parseFaction
 // index 23). Most civ factions ship only men and cars, so this usually falls back to the vanilla civilian
 // light helicopter; a men-only mod with no vanilla config leaves it empty and the heli event no-ops.

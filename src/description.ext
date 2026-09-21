@@ -61,6 +61,7 @@ class CfgMagazines
 #include "duws\shared\includes\operative_menu.hpp"
 #include "duws\shared\includes\disguise_menu.hpp"
 #include "duws\shared\includes\civ_menu.hpp"
+#include "duws\shared\includes\vendor_catalogue.hpp"
 #include "duws\shared\includes\veh_drop_menu.hpp"
 #include "duws\shared\includes\rest_menu.hpp"
 

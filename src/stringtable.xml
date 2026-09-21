@@ -2921,6 +2921,120 @@
                 <English>No IED here.</English>
             </Key>
         </Container>
+        <Container name="Civilian Vendors">
+            <Key ID="STR_DUWS_T_VENDOR_ARMS">
+                <Original>Arms Dealer</Original>
+                <English>Arms Dealer</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_CAR">
+                <Original>Car Dealer</Original>
+                <English>Car Dealer</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BOAT">
+                <Original>Boat Dealer</Original>
+                <English>Boat Dealer</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_CARS">
+                <Original>Vehicles</Original>
+                <English>Vehicles</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_BOATS">
+                <Original>Boats</Original>
+                <English>Boats</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_TAKE_TT_VEH">
+                <Original>Take it here. It is left outside the shop.</Original>
+                <English>Take it here. It is left outside the shop.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STORE_VEH">
+                <Original>Buy to Garage</Original>
+                <English>Buy to Garage</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STORE_TT_VEH">
+                <Original>Send it to the base garage instead of taking it here.</Original>
+                <English>Send it to the base garage instead of taking it here.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_GARAGE">
+                <Original>Bought. It is in your garage.</Original>
+                <English>Bought. It is in your garage.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_VEHICLE">
+                <Original>Bought. It is outside.</Original>
+                <English>Bought. It is outside.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_NO_ROOM">
+                <Original>There is nowhere here to put it.</Original>
+                <English>There is nowhere here to put it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_UNKNOWN">
+                <Original>Vendor</Original>
+                <English>Vendor</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_ACTION">
+                <Original>Browse Stock</Original>
+                <English>Browse Stock</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK">
+                <Original>Stock</Original>
+                <English>Stock</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_BLUFOR">
+                <Original>BLUFOR kit</Original>
+                <English>BLUFOR kit</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_OPFOR">
+                <Original>OPFOR kit</Original>
+                <English>OPFOR kit</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STOCK_ALL">
+                <Original>Everything</Original>
+                <English>Everything</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_MONEY">
+                <Original>You have %1 money</Original>
+                <English>You have %1 money</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_PRICE">
+                <Original>%1 money. You have %2</Original>
+                <English>%1 money. You have %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_TAKE">
+                <Original>Buy</Original>
+                <English>Buy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_TAKE_TT">
+                <Original>Take it here. The goods are dropped at your feet.</Original>
+                <English>Take it here. The goods are dropped at your feet.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STORE">
+                <Original>Buy to Arsenal</Original>
+                <English>Buy to Arsenal</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_STORE_TT">
+                <Original>Add one to the base arsenal instead of carrying it.</Original>
+                <English>Add one to the base arsenal instead of carrying it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_HOSTILE">
+                <Original>Not while they are watching.</Original>
+                <English>Not while they are watching.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BROKE">
+                <Original>You do not have the money.</Original>
+                <English>You do not have the money.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_NO_POOL">
+                <Original>The arsenal already stocks that.</Original>
+                <English>The arsenal already stocks that.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT">
+                <Original>Bought. It is at your feet.</Original>
+                <English>Bought. It is at your feet.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_VENDOR_BOUGHT_ARSENAL">
+                <Original>Bought. It will be at your arsenal.</Original>
+                <English>Bought. It will be at your arsenal.</English>
+            </Key>
+        </Container>
         <Container name="Civilian Side Missions">
             <Key ID="STR_DUWS_T_CIVMISSION_ROW_WORK">
                 <Original>Ask for Work</Original>

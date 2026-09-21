@@ -33,6 +33,18 @@ publicVariable "fnc_pool_reply";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_state_init.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ_state_init.sqf";
 publicVariable "fnc_civ_moveToPlayerServer";
+// After the civilian state it builds on, and after the site store: vendors are streamed civilians
+// registered as a second occupant of each town's site.
+[] call compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_state_init.sqf";
+// The catalogue runs on the buyer's machine: it names the shop, resolves each class's config for the
+// preview, prices the row and greys the arsenal button. The reply lands there too.
+publicVariable "fnc_vendor_type";
+publicVariable "fnc_vendor_kind";
+publicVariable "fnc_vendor_lists";
+publicVariable "fnc_vendor_classCfg";
+publicVariable "fnc_vendor_poolCounts";
+publicVariable "fnc_vendor_ask";
+publicVariable "fnc_vendor_reply";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_support_claim_init.sqf";
 publicVariable "fnc_support_reply";
 publicVariable "fnc_support_claim";
@@ -678,6 +690,19 @@ fnc_apocalypse_buildings = compile preprocessFileLineNumbers "duws\server\suppor
 publicVariable "fnc_apocalypse_buildings";
 
 // =========================================================================================================
+// server/vendors
+// =========================================================================================================
+// Server-only throughout, bar the price: the draft, the spawn path and the stock sweep all read state
+// no client holds, and a purchase is remoteExec'd to the server rather than decided on the buyer's
+// machine.
+fnc_vendor_stock = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_stock.sqf";
+fnc_vendor_buy = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_buy.sqf";
+fnc_vendor_dropPos = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_dropPos.sqf";
+// Broadcast: the catalogue prints the price the server will charge, so both sides read one function.
+fnc_vendor_price = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_price.sqf";
+publicVariable "fnc_vendor_price";
+
+// =========================================================================================================
 // server/warcom
 // =========================================================================================================
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
@@ -775,6 +800,8 @@ fnc_civ_bribe_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 publicVariable "fnc_civ_bribe_prompt";
 fnc_civ_give_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_give_menu.sqf";
 publicVariable "fnc_civ_give_menu";
+fnc_vendor_catalogue = compile preprocessFileLineNumbers "duws\client\dialog\fnc_vendor_catalogue.sqf";
+publicVariable "fnc_vendor_catalogue";
 fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_faction_dialog.sqf";publicVariable "fnc_HQ_faction_dialog";
 fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
 fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";
