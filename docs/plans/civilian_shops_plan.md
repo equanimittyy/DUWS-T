@@ -49,7 +49,7 @@ at a chosen building position.
 death. It gets neither of the two things `fnc_civ_spawnUnit` hands a plain civilian:
 
 - **No civilian action set.** The `fnc_civ_clientActions` remoteExec is skipped. That pair is the
-  talk/intel/arrest/recruit menu (`fnc_civ_menuAction`) and the call-over (`fnc_civ_stopCommand`),
+  talk/intel/arrest menu (`fnc_civ_menuAction`) and the call-over (`fnc_civ_stopCommand`),
   none of which a vendor answers. A vendor carries one action, its own, and nothing else.
 - **No panic handler.** The `FiredNear` hook into `fnc_civ_panic` is skipped. A panicking civilian
   runs 200 m and stays calm-locked for 60 s, which for a vendor means abandoning the shop — and the
