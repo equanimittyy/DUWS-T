@@ -24,7 +24,7 @@ if (!isServer) exitWith {};
 // offline -- allMissionObjects is documented around mission- and script-created objects, and a
 // dropped rifle's holder is created by the engine. A zero here with combat behind you means the
 // census does not see them and discovery has to go back to searching from unit positions.
-#define LOG_EVERY 30
+#define LOG_EVERY 10
 
 private _lifetime = [_this, 0, 0, [0]] call BIS_fnc_param;
 // Never disabled: teardowns hand their live leftovers to this sweep, so a stopped one would strand
@@ -66,9 +66,9 @@ private _pass = 0;
 
 while {true} do {
     // Interruptible interval, not a flat sleep: a forced sweep asked for just after a pass began
-    // waiting would otherwise sit out the whole interval, and a debug button that does nothing
-    // for ten seconds reads as broken.
-    private _nextPass = time + 10;
+    // waiting would otherwise sit out the whole interval, and a cleanup button that does nothing
+    // for thirty seconds reads as broken.
+    private _nextPass = time + 30;
     waitUntil { sleep 0.5; DUWS_cleanup_force || {time >= _nextPass} };
 
     // Only cleanup thread in the campaign: an unhandled throw in a spawned loop terminates it for the

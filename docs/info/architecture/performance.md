@@ -184,7 +184,7 @@ wall time: a scheduled stage that reads long may be waiting on other scripts, no
 |---|---|---|
 | `[OPCOM] grid tick=… ms[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick |
 | `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site |
-| `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 30th pass |
+| `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 10th pass |
 | `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, entity counts, and the five most numerous scheduled scripts by file |
 
 A site pass that costs 1-2 ms on a quiet map and hundreds of ms in a firefight is doing the same work
