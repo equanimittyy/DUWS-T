@@ -2938,10 +2938,6 @@
                 <Original>%1 purchased to garage.</Original>
                 <English>%1 purchased to garage.</English>
             </Key>
-            <Key ID="STR_DUWS_T_VENDOR_NO_ROOM">
-                <Original>There is nowhere here to put it.</Original>
-                <English>There is nowhere here to put it.</English>
-            </Key>
             <Key ID="STR_DUWS_T_VENDOR_UNKNOWN">
                 <Original>Vendor</Original>
                 <English>Vendor</English>

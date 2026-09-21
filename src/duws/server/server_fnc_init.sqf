@@ -698,7 +698,6 @@ fnc_vendor_spawn = compile preprocessFileLineNumbers "duws\server\vendors\fnc_ve
 fnc_vendor_killed = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_killed.sqf";
 fnc_vendor_stock = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_stock.sqf";
 fnc_vendor_buy = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_buy.sqf";
-fnc_vendor_dropPos = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_dropPos.sqf";
 // Broadcast: the catalogue prints the price the server will charge, so both sides read one function.
 fnc_vendor_price = compile preprocessFileLineNumbers "duws\server\vendors\fnc_vendor_price.sqf";
 publicVariable "fnc_vendor_price";

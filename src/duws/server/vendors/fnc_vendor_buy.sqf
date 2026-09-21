@@ -60,11 +60,6 @@ if (_store && {_domainIndex >= 0}
     [localize "STR_DUWS_T_GARAGE_POOL_FULL"] remoteExec ["hint", _buyer];
 };
 
-private _spawnPos = if (_gear || _store) then { [] } else { [_vendor, _kind] call fnc_vendor_dropPos };
-if (!_gear && {!_store} && {_spawnPos isEqualTo []}) exitWith {
-    ["STR_DUWS_T_VENDOR_NO_ROOM"] call _fnc_say;
-};
-
 if !([_buyer, _price] call fnc_money_spend) exitWith { ["STR_DUWS_T_VENDOR_BROKE"] call _fnc_say };
 
 if (_gear) exitWith {
@@ -89,9 +84,5 @@ if (_store) exitWith {
     ["STR_DUWS_T_VENDOR_BOUGHT_GARAGE"] call _fnc_bought;
 };
 
-// Radius 5 with "NONE" as the garage retrieval uses, so a second purchase lands beside the first
-// rather than inside it. The spec is applied while the hull is still server-local, which is what lets
-// the plain setFuel and setDamage in it replicate.
-private _veh = createVehicle [_class, _spawnPos, [], 5, "NONE"];
-[_veh, _spec] call DUWS_fnc_vehSpecApply;
-["STR_DUWS_T_VENDOR_BOUGHT"] call _fnc_bought;
+private _veh = [_spec, getPosATL _buyer] call fnc_depot_carry_spawn;
+[netId _veh, false, "STR_DUWS_T_VENDOR_BOUGHT"] remoteExec ["fnc_depot_place_r3f", _buyer];

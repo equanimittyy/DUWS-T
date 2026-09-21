@@ -31,9 +31,21 @@ fnc_garage_store = {
     [] remoteExec ["fnc_depot_menu_fill", _caller];
 };
 
-// Retrieve: spawn the stored vehicle on the pad (inside the base-keep ring), invulnerable so the carry's
-// clips cannot damage it, then hand it to the caller's R3F carry. Radius-5 "NONE" drops it on an empty
-// gap so it never stacks on a pad vehicle.
+// Spawns a spec for an R3F carry (fnc_depot_place_r3f) to place, invulnerable so the carry's clips
+// cannot damage it. Radius-5 "NONE" drops it on an empty gap so it never stacks on a parked vehicle.
+// The spec is applied while the hull is still server-local, which is what lets its plain setFuel and
+// setDamage replicate.
+fnc_depot_carry_spawn = {
+    params ["_spec", "_pos"];
+    private _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];
+    _veh allowDamage false;
+    _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
+    _veh lock true; // block entry while the player hand-places it; both cleared in fnc_depot_place_finish
+    [_veh, _spec] call DUWS_fnc_vehSpecApply;
+    _veh
+};
+
+// Retrieve: spawn the stored vehicle on the pad (inside the base-keep ring) for the caller's R3F carry.
 fnc_garage_retrieve = {
     if (!isServer) exitWith {};
     params ["_caller", "_index", "_padNet"];
@@ -42,12 +54,7 @@ fnc_garage_retrieve = {
 
     private _pad = objectFromNetId _padNet;
     private _spawnPos = if (isNull _pad) then { PosOfBLUHQ } else { getPosATL _pad };
-    private _spec = _stored select _index;
-    private _veh = createVehicle [_spec select 0, _spawnPos, [], 5, "NONE"];
-    _veh allowDamage false;
-    _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
-    _veh lock true; // block entry while the player hand-places it; both cleared in fnc_depot_place_finish
-    [_veh, _spec] call DUWS_fnc_vehSpecApply;
+    private _veh = [_stored select _index, _spawnPos] call fnc_depot_carry_spawn;
 
     DUWS_garage_stored deleteAt _index;
     publicVariable "DUWS_garage_stored";
