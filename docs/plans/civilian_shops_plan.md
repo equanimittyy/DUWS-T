@@ -212,8 +212,8 @@ here:
 
 | Shop | Sells | Built on |
 |---|---|---|
-| Car Dealer | civilian vehicles | `civ_veh_array` pool; [vehicle delivery](#delivery) |
-| Boat dealer | civilian boats | civilian boat classes; [vehicle delivery](#delivery); pairs with deep-water fishing |
+| Car Dealer | land vehicles | four stock lists, [below](#the-vehicle-dealers-stock); [vehicle delivery](#delivery) |
+| Boat dealer | boats | four stock lists, [below](#the-vehicle-dealers-stock); [vehicle delivery](#delivery); pairs with deep-water fishing |
 | Arms Dealer | weapons and gear | three stock lists, [below](#the-arms-dealers-stock); [gear delivery](#delivery) |
 
 ### The Arms Dealer's stock
@@ -246,6 +246,27 @@ Everything is a whole-config sweep at scope 2 — `CfgWeapons` (weapons and item
 one expensive build here, so it is built once and cached rather than per open, and it is built on the
 server: a class the server cannot spawn must not be sellable, which is the same rule
 `fnc_faction_query` enforces for the faction browser.
+
+### The vehicle dealers' stock
+
+The Car and Boat dealers carry the Arms Dealer's three lists and a Civilian list in front of them.
+Each list is filtered to the dealer's hulls: the Car Dealer sells any `LandVehicle` that is not a
+`StaticWeapon`, tanks included, and the Boat dealer any `Ship`. No AP tier gates a dealer's stock;
+the price carries the balance.
+
+| List | Holds |
+|---|---|
+| Civilian | the town's own traffic: `civ_veh_array` or `civ_boat_array` |
+| BLUFOR | every BLUFOR `vehicle` role key and its spawn pool, plus the request menu's vehicles |
+| OPFOR | every OPFOR `vehicle` role key and its spawn pool |
+| Everything | every `CfgVehicles` class the server's config carries at scope 2 |
+
+The request menu is added to BLUFOR because the role keys name only what the AI fields; BLUFOR's
+unarmed transports exist only in the request menu.
+
+A hull costs 1.5 money per CP of its request-menu price (`DUWS_fnc_vehPrice`), rounded down. The
+OPFOR and Everything lists at every dealer, the Arms Dealer included, cost 1.1 times as much, with
+one rounding down over both rates.
 
 ### Delivery
 
