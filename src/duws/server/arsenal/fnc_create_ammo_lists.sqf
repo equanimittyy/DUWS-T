@@ -15,7 +15,10 @@ _excludedItems = [
     "I_E_UAV_01_backpack_F",
     "I_E_UAV_06_backpack_F",
     "I_E_UAV_06_medical_backpack_F",
-    "B_Patrol_Respawn_bag_F"
+    "B_Patrol_Respawn_bag_F",
+    // Pseudo-weapons from `weapons`: their muzzles carry magazines, so fnc_IsGrenadier matches them.
+    "Throw",
+    "Put"
 ];
 
 blufor_ammobox_weapons = [];
