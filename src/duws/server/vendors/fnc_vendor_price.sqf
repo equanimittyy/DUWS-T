@@ -12,7 +12,7 @@
 params ["_class", ["_list", ""]];
 
 // Money per CP. The lowest CP band starts at 1, so a floored price never reaches 0 and delists a hull.
-#define VEHICLE_RATE 1.5
+#define VEHICLE_RATE 1.2
 // A premium on stock that is not BLUFOR's own issue.
 #define FOREIGN_MARKUP 1.1
 
