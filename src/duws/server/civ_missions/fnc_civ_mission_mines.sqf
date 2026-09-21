@@ -1,0 +1,44 @@
+// Locality: server, spawned by fnc_civ_mission_request. An old OPFOR field thinned to the few mines it still
+// holds, registered as a revealed standalone hardpoint so its mines show on the map and its row clears on the
+// hardpoint poller's own test. It outlives a failed or canceled job: the field is OPFOR's, not the giver's.
+#define MINES_LEFT_MIN 0.05
+#define MINES_LEFT_MAX 0.12
+params ["_id"];
+private _e = DUWS_civMissions get _id;
+private _site = _e get "site";
+
+private _variant = selectRandom ["AP", "AT"];
+private _dir = random 360;
+private _key = format ["hpcivmine_%1", _id];
+private _mines = [];
+{
+    if (!surfaceIsWater _x) then { _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield) };
+} forEach ([_site, _dir, 1 + floor random 2, 1 + floor random 2] call fnc_hardpoint_minefield_grid);
+if (_mines isEqualTo []) exitWith {
+    ["WARN", "CIV", format ["civilian mission %1: no mines laid", _id]] call fnc_log;
+    [_id, "FAILED"] call fnc_civ_mission_finish;
+};
+
+private _laid = count _mines;
+private _left = 1 max round (_laid * (MINES_LEFT_MIN + random (MINES_LEFT_MAX - MINES_LEFT_MIN)));
+_mines = _mines call BIS_fnc_arrayShuffle;
+{ deleteVehicle _x } forEach (_mines select [_left]);
+_mines resize _left;
+// Survivors only: the list rides the JIP reveal to every client.
+missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines];
+[_key, "MINEFIELD", _site, "opfor", "", _dir] call fnc_hardpoint_register;
+["ONE", _key, true] call fnc_hardpoint_reveal;
+["INFO", "CIV", format ["civilian mission %1: %2 field %3 keeps %4 of %5 mines", _id, _variant, _key, _left, _laid]] call fnc_log;
+
+_e set ["mines", _mines];
+_e set ["thanks", "STR_DUWS_T_CIVMISSION_MINES_THANKS"];
+// Read from the entry, not a captured local: fnc_civ_mission_request re-runs it at the report.
+_e set ["won", { params ["_e"]; ((_e get "mines") findIf { !isNull _x && {mineActive _x} }) < 0 }];
+_e set ["lost", { false }];
+_e set ["cleared", _e get "won"];
+
+[_id, "STR_DUWS_T_CIVMISSION_MINES_TITLE", ["STR_DUWS_T_CIVMISSION_MINES_AT_DESC", "STR_DUWS_T_CIVMISSION_MINES_AP_DESC"] select (_variant == "AP"), "mine", false] call fnc_civ_mission_present;
+
+private _status = "";
+waitUntil { sleep 5; _status = [_id] call fnc_civ_mission_poll; _status != "" };
+[_id, _status] call fnc_civ_mission_finish;

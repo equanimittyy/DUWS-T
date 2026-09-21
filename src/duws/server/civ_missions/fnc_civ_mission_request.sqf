@@ -43,21 +43,24 @@ if (_force || {count DUWS_civMissions < CIV_MISSION_CAP}) then {
 _civ disableAI "PATH";
 sleep 3;
 
-// [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max]]. A target is money the
-// players raise at the giver's feet, so that job's site is the town centre, not ground outside town.
+// [thread, brief key, cp, [money min, money max], rep, gate, [target min, target max], site check]. A target is
+// money the players raise at the giver's feet, so that job's site is the town centre, not ground outside town.
+// The optional site check vets each outside-town draw.
 private _types = [
     ["fnc_civ_mission_camp",   "STR_DUWS_T_CIVMISSION_CAMP_BRIEF",   10, [3, 5], 3, { true }, []],
     ["fnc_civ_mission_stolen", "STR_DUWS_T_CIVMISSION_STOLEN_BRIEF",  5, [5, 8], 3, { (missionNamespace getVariable ["civ_veh_array", []]) isNotEqualTo [] }, []],
-    ["fnc_civ_mission_funds",  "STR_DUWS_T_CIVMISSION_FUNDS_BRIEF",  15, [0, 0], 5, { true }, [9, 15]]
+    ["fnc_civ_mission_funds",  "STR_DUWS_T_CIVMISSION_FUNDS_BRIEF",  15, [0, 0], 5, { true }, [9, 15]],
+    // 100 m off the centre keeps the widest field's mines about 25 m clear of a road, out of the traffic.
+    ["fnc_civ_mission_mines",  "STR_DUWS_T_CIVMISSION_MINES_BRIEF",  10, [3, 5], 3, { true }, [], { params ["_p"]; (_p nearRoads 100) isEqualTo [] }]
 ] select { call (_x select 5) };
-(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep", "", "_target"];
+(selectRandom _types) params ["_thread", "_briefKey", "_cp", "_money", "_rep", "", "_target", ["_siteOk", { true }]];
 private _town = _civ getVariable ["civ_locIndex", -1];
 
 // A flat chance, not the reputation curve: a hostile town is where the player most needs the reputation a
 // mission pays, and the curve offers nothing at -20.
 private _site = [];
 if (_id >= 0 && {alive _civ} && {_town >= 0} && {_force || {random 1 < CIV_MISSION_OFFER_CHANCE}}) then {
-    _site = if (_target isEqualTo []) then { [_town] call fnc_civ_mission_site } else {
+    _site = if (_target isEqualTo []) then { [_town, _siteOk] call fnc_civ_mission_site } else {
         getPos ((missionNamespace getVariable ["civ_locations", []]) select _town)
     };
 };
@@ -75,7 +78,8 @@ private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
     ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
     ["reward", _reward], ["target", _goal], ["raised", 0],
-    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["giverMarker", ""], ["taskId", ""], ["title", ""]
+    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["giverMarker", ""], ["taskId", ""], ["title", ""],
+    ["cleared", { params ["_e"]; ({ alive _x } count units (_e get "group")) == 0 }]
 ];
 
 // The offer rides the bribe prompt: fnc_civ_bribe_answer checks the answer is the asker's and hands a "WORK"

@@ -59,8 +59,9 @@ but is seeded standalone at generation, one per zone on a coin flip
 composition, garrison, streaming, clearance — but campaign generation never places them. All three come
 from OPCOM's standalone builds (`appraisal/fnc_opcom_actions.sqf`), which lay a `MINEFIELD` one 50 m square at a
 time, AT or AP. A `MINEFIELD` also comes from the debug hardpoint spawner
-(`client/debug/fnc_debug_hardpoint_menu.sqf`) and from the Eliminate Recon Patrol side mission, which
-registers it as a standalone hardpoint ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
+(`client/debug/fnc_debug_hardpoint_menu.sqf`), from the Eliminate Recon Patrol side mission, which
+registers it as a standalone hardpoint, and from the Clear Minefield civilian mission, which registers a
+thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
 OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), and cap three types
 campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at `OPCOM_CAP_MORTAR` (2) and `ARTY` at
 `OPCOM_CAP_ARTY` (1), counting a build still on its truck. Campaign generation rolls every type and caps none.
@@ -134,8 +135,9 @@ second mine, so an AP square averages 27.5. A mine lands anywhere within 10 m of
 hand-laid field does, and the square's edge blurs by up to 5 m.
 One or two warning signs sit inside the field as dressing. A larger field is several squares, laid by
 the caller. Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leaving detection and
-clearance to BLUFOR. It has no fence to place through `fnc_hardpoint_lay`, and no garrison: the score
-function vetoes any candidate with a tree, building or hardpoint already on the footprint.
+clearance to BLUFOR. Every player has the `explosiveSpecialist` trait (`client/client_init.sqf`), so any player
+can disarm a mine with the engine's own action. It has no fence to place through `fnc_hardpoint_lay`, and no
+garrison: the score function vetoes any candidate with a tree, building or hardpoint already on the footprint.
 
 A block of squares is laid from `fnc_hardpoint_minefield_grid`, which returns the square centres for a
 given width and depth. Squares laid under one site key add to one mine list, so they clear as one field.

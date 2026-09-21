@@ -466,6 +466,7 @@ slot. The code is in `src/duws/server/civ_missions/`.
 | Clear Bandit Camp | 6-9, plus 0-2 pairs | every camp bandit is dead | the giver dies | 10 | 3-5 | +3 |
 | Recover Stolen Car | 4-6, plus 0-2 pairs | the car stands within 30 m of the giver | the giver dies, or the car is destroyed | 5 | 5-8 | +3 |
 | Raise Funds | none | the players give the giver 9-15 money between them | the giver dies | 15 | none | +5 |
+| Clear Minefield | none | no mine in the field is still armed | the giver dies | 10 | 3-5 | +3 |
 
 The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mission's objective guard
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
@@ -494,6 +495,14 @@ player carries and the money that the giver still needs. `fnc_civ_mission_give` 
 so it is unscheduled, and two players who give at the same time cannot both pay the same shortfall. Any
 player can give, and the gift that meets the target is the report.
 
+**Clear Minefield lays a real OPFOR field** (`fnc_civ_mission_mines.sqf`). The field is 1-2 by 1-2 squares of
+50 m, AP or AT at random, laid by `fnc_hardpoint_minefield`. Only 5-12 % of the mines are kept, and at least
+one. The field is registered as a standalone `MINEFIELD` hardpoint and revealed at once, so every mine shows on
+the map and the hardpoint poller removes the row when the last mine is gone
+([`hardpoints.md`](hardpoints.md)). The objective reads the same mines. The field belongs to OPFOR, not to the
+giver, so a cancel or the giver's death leaves it on the map. An AT mine does not fire under a man on foot, so
+the AT roll is the easier job.
+
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
 run them over, and `PATH` goes off when they arrive. The accept also takes the giver off the town's crowd
@@ -518,7 +527,8 @@ outlast the litter lifetime.
 
 **The site keeps the fight for the player** (`fnc_civ_mission_site.sqf`). It is 300-1200 m beyond the
 town's edge, outside every zone's radius + 300 m, outside `AOI_HQ_REACH` of the HQ, and 500 m from any
-other live site. Bandits fight both armies, and the objective counts every camp bandit dead, whoever killed
+other live site. A Clear Minefield site is also 100 m or more from any road, so that traffic cannot reach a mine
+in the largest field. Bandits fight both armies, and the objective counts every camp bandit dead, whoever killed
 them. A town close to HQ often finds no site, so there only a Raise Funds draw becomes a job.
 
 A live civilian mission is not saved. The registry, `DUWS_civMissions`, holds unit handles. The Debug

@@ -270,6 +270,7 @@ fnc_civ_mission_finish = compile preprocessFileLineNumbers "duws\server\civ_miss
 fnc_civ_mission_camp = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_camp.sqf";
 fnc_civ_mission_stolen = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_stolen.sqf";
 fnc_civ_mission_funds = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_funds.sqf";
+fnc_civ_mission_mines = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_mines.sqf";
 fnc_civ_mission_give = compile preprocessFileLineNumbers "duws\server\civ_missions\fnc_civ_mission_give.sqf";
 
 // =========================================================================================================

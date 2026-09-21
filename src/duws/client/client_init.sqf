@@ -196,12 +196,13 @@ if (_restrict1P > 0) then {
 	};
 };
 // Traits go to everyone, deliberately not gated: any player should be able to use a medkit or
-// toolkit on a squadmate, and a UAV terminal is a personal tool rather than a command
+// toolkit on a squadmate or disarm a mine, and a UAV terminal is a personal tool rather than a command
 // privilege. Keeping these out of Squad_Leaders is what lets that array be trimmed to a few
 // slots without silently taking revives away from the rest of the team.
 player setUnitTrait ["Medic",true];
 player setUnitTrait ["Engineer",true];
 player setUnitTrait ["uavHacker",true];
+player setUnitTrait ["explosiveSpecialist",true];
 
 if ((vehiclevarname player) in Squad_Leaders) then {
 	[] spawn fnc_fob_unlock_notice;

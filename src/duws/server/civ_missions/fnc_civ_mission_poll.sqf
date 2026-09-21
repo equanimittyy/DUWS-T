@@ -15,7 +15,7 @@ if (_ready isNotEqualTo (_e get "ready")) then {
     _giver setVariable ["DUWS_civMission_state", ["active", "ready"] select _ready, true];
 };
 
-if (!(_e get "announced") && {({ alive _x } count units (_e get "group")) == 0}) then {
+if (!(_e get "announced") && {[_e] call (_e get "cleared")}) then {
     _e set ["announced", true];
     [_e get "taskId", [(getPosATL _giver) select 0, (getPosATL _giver) select 1]] call BIS_fnc_taskSetDestination;
     ["TaskUpdated", ["", _e get "title"]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated];

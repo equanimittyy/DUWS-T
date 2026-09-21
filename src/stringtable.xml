@@ -3148,6 +3148,26 @@
                 <Original>Raised: %1 of %2 money</Original>
                 <English>Raised: %1 of %2 money</English>
             </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_TITLE">
+                <Original>Clear Minefield</Original>
+                <English>Clear Minefield</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_BRIEF">
+                <Original>There's an old minefield just outside town, and a few mines are still in the ground. No one dares farm there. If you could clear what's left, we could work that land again.</Original>
+                <English>There's an old minefield just outside town, and a few mines are still in the ground. No one dares farm there. If you could clear what's left, we could work that land again.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_AP_DESC">
+                <Original>The locals need an old anti-personnel minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</Original>
+                <English>The locals need an old anti-personnel minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_AT_DESC">
+                <Original>The locals need an old anti-tank minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</Original>
+                <English>The locals need an old anti-tank minefield outside town cleared. The remaining mines are marked. Disarm or destroy every mine, then report back to the local.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIVMISSION_MINES_THANKS">
+                <Original>Thank you. We can work that field again. It's not much, but take this.</Original>
+                <English>Thank you. We can work that field again. It's not much, but take this.</English>
+            </Key>
         </Container>
         <Container name="Informants">
             <Key ID="STR_DUWS_T_stfu">
