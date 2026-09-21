@@ -2675,11 +2675,15 @@
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_SEARCH_LOOT_TAKEN">
+            <Key ID="STR_DUWS_T_CIVMISSION_PAID">
+                <Original>The local hands you %1 money.</Original>
+                <English>The local hands you %1 money.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOOT_TAKEN">
                 <Original>Added to your inventory.</Original>
                 <English>Added to your inventory.</English>
             </Key>
-            <Key ID="STR_DUWS_T_SEARCH_LOOT_DROPPED">
+            <Key ID="STR_DUWS_T_LOOT_DROPPED">
                 <Original>Inventory full. Dropped at your feet.</Original>
                 <English>Inventory full. Dropped at your feet.</English>
             </Key>
@@ -3418,8 +3422,8 @@
                 <English>Thanks for the help. Here's something for your troubles.</English>
             </Key>
             <Key ID="STR_DUWS_T_RANDOM_STRANDED_REWARD">
-                <Original>The local dropped %1 money.</Original>
-                <English>The local dropped %1 money.</English>
+                <Original>The local dropped %1 money at their feet.</Original>
+                <English>The local dropped %1 money at their feet.</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_cpap">
                 <Original>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</Original>

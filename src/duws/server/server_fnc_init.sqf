@@ -871,6 +871,7 @@ publicVariable "fnc_killhouse_markers";
 // =========================================================================================================
 // client/misc
 // =========================================================================================================
+fnc_loot_grant = compile preprocessFileLineNumbers "duws\client\misc\fnc_loot_grant.sqf";publicVariable "fnc_loot_grant";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_addHQBuildingActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQBuildingActions.sqf";
 publicVariable "fnc_addHQBuildingActions";
@@ -915,7 +916,6 @@ fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\
 // =========================================================================================================
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_search_pick = compile preprocessFileLineNumbers "duws\client\search\fnc_search_pick.sqf";publicVariable "fnc_search_pick";
-fnc_search_grant = compile preprocessFileLineNumbers "duws\client\search\fnc_search_grant.sqf";publicVariable "fnc_search_grant";
 
 // =========================================================================================================
 // client/supports

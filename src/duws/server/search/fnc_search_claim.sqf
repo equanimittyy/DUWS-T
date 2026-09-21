@@ -82,7 +82,7 @@ private _payDocument = {
     private _class = _documents selectRandomWeighted _documentWeights;
     private _label = localize (_documentLabels select (_documents find _class));
     // The inventory takes the bare class, but DUWS_intelDocuments lists Item_* ground bodies -- strip it.
-    [_class select [5], 1, format [localize "STR_DUWS_T_LOOT2", _label]] remoteExec ["fnc_search_grant", _caller];
+    [_class select [5], 1, format [localize "STR_DUWS_T_LOOT2", _label]] remoteExec ["fnc_loot_grant", _caller];
 };
 
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
@@ -106,7 +106,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
         case "money": {
             private _count = 1 + floor random 3;
-            ["Money_roll", _count, format [localize "STR_DUWS_T_LOOT4", _count]] remoteExec ["fnc_search_grant", _caller];
+            ["Money_roll", _count, format [localize "STR_DUWS_T_LOOT4", _count]] remoteExec ["fnc_loot_grant", _caller];
             _paid = true;
         };
 

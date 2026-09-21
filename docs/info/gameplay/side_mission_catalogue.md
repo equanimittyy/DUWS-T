@@ -471,8 +471,9 @@ The main group walks `closepatrol` round the site at a 100 m radius, as an HQ mi
 does. The pairs are two riflemen each (`fnc_bandit_pairs`) on `widepatrol` at a 250 m radius, inside the
 site's 300 m clearance from every zone. A pair does not count toward the camp's objective.
 
-The CP is scaled by `cp_reward_multiplier`. The money drops at the giver's feet (`fnc_money_drop`), and
-the reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
+The CP is scaled by `cp_reward_multiplier`. The money goes into the inventory of the player who reported
+the job, and at their feet if it does not fit (`fnc_loot_grant`) — for Raise Funds that is whoever's gift
+met the target. A reporter who has left the session is paid at the giver's feet instead. The reputation goes to the giver's town (`fnc_town_rep_adjust`). A cancel ends the mission with no pay
 and no other cost, except that money given to Raise Funds is not refunded.
 
 **The offer is a flat 75 %, not the reaction curve** (`fnc_civ_mission_request.sqf`). A hostile town is

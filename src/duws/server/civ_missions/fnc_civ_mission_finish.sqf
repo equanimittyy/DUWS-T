@@ -16,8 +16,15 @@ switch (_status) do {
         (_e get "reward") params ["_cp", "_money", "_rep"];
         private _cpPaid = floor (_cp * cp_reward_multiplier);
         [_cpPaid, format ["civilian mission %1", _id]] call fnc_cp_adjust;
+        // Paid into the hands of whoever reported the job, not onto the giver's feet: a player who walks
+        // away without looking down is a player who was not paid. A reporter who has since left the
+        // session is paid where the giver stands, for whoever is there to take it.
         // fnc_money_drop leaves an empty holder on the ground for a zero count.
-        if (_money > 0) then { [[["Money_roll", _money]], getPosATL _giver] call fnc_money_drop };
+        private _reporter = _e getOrDefault ["by", objNull];
+        if (_money > 0) then {
+            if (isNull _reporter) then { [[["Money_roll", _money]], getPosATL _giver] call fnc_money_drop }
+            else { ["Money_roll", _money, format [localize "STR_DUWS_T_CIVMISSION_PAID", _money]] remoteExec ["fnc_loot_grant", _reporter] };
+        };
         [_e get "town", _rep, "civ_mission"] call fnc_town_rep_adjust;
         private _near = allPlayers select { _x distance _giver < 30 };
         [localize "STR_DUWS_T_civ", localize (_e getOrDefault ["thanks", "STR_DUWS_T_CIVMISSION_THANKS"])] remoteExec ["fnc_duws_dialogue", _near];
