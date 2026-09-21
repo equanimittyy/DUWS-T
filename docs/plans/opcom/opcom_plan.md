@@ -85,7 +85,7 @@ written, and the archetype comes last.
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
 | **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag and the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`). Left, in this order: the asset Values one type at a time (the OP, then the guns, then the radio tower), then Rapport and the supply hire; then the traffic layer and the need and cover fields on a debug overlay before anything reads them, which the standalone builds and the minefields wait on; then the delay discount, the savings goal, the asset siting and the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; the need field's base ratio (2–3); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
-| **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does; whether the static weights carry a held site's whole edge, or `r` needs a posture factor on the defender for infantry in cover |
+| **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
 
@@ -106,9 +106,9 @@ on being uncontested, so the term would read 1 wherever it was legal to spend. A
   3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0.
 - **A defender's edge is its guns.** Both layers price force off one table (`belief/fnc_opcom_force.sqf`): a man
   is 1, a static MG 2, and a static GMG, AT or AA gun 4. A hardpoint or a zone's centre statics therefore weigh their
-  guns on top of their garrison, so `r` reads a dug-in site above its headcount with no separate posture term.
-  Infantry in cover still counts 1 a man. A sighted player adds `OPCOM_PLAYER_WORTH` (3) to their group's
-  firepower, because a player can turn a fight that headcount says is lost.
+  guns on top of their garrison, so `r` reads a dug-in site above its headcount. Infantry in cover counts 1 a man,
+  and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
+  `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
   once, at commit ([§Templates](#templates-phase-5)).
@@ -282,6 +282,11 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   OPCOM-recruited units, never a zone's base garrison, so the term prices a thinned zone, never an empty one; a
   `noncombat` unit covers nothing and abandons 0.
 
+  The rebuy prices the whole stake at every ratio, never the expected losses. The square law has a win at ratio `r`
+  keep √(1 − 1/r²) of the force, so a Cost of expected losses would score a 3:1 attack 12 times above an even one,
+  where the whole stake scores it 1.8 times above. That steep a preference has OPCOM attack only at crushing odds,
+  which is no fight for the players. How often OPCOM attacks is the offensive `archWeight`'s job, not the Cost's.
+
 ### Gate and the savings goal
 
 - **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. A supply-gated action drops only when no truck idles
@@ -334,9 +339,11 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 - **A multi-unit assault musters, then launches as one wave** (Phase 5, WIP). In `mustering` it binds force across
   ticks at a safe rally short of the target, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
-  **ideal** ratio over believed BLUFOR force at the target (3:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
-  it holds at least the archetype's **minimum** (1:1 baseline), and is otherwise abandoned, its units returning to
-  rest, so a player who keeps reinforcing cannot hold it forever. Both bars read believed force, so a mid-muster
+  **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
+  it holds at least the archetype's **minimum** (0.75:1 baseline), and is otherwise abandoned, its units returning to
+  rest, so a player who keeps reinforcing cannot hold it forever. The baseline sits below an attacker's usual 3:1
+  because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
+  for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
   reinforcement raises them. A mustering action checks `OPCOM_PWIN_FLOOR` at launch, against its archetype's
   minimum, because it commits below the odds it launches at. Mustering is also how a force-short action waits for
   units — from the roster or from Recruit.
@@ -359,8 +366,8 @@ the route/streaming machinery moves the units.
 contested zone. Binding pulls a unit (a `garrison`ed draw strips that zone's reinforcement); release returns it.
 One unit, one owner. A template applies only when its band fits, enough roles fill, and the geometry holds; short a
 role, it commits in `mustering`. The band picks the template once, at commit, and a muster launches that template
-whatever `r` it reaches, so a plan never flips mid-muster: a `flank` committed at 1.5 that musters to 3:1 still
-launches as a flank.
+whatever `r` it reaches, so a plan never flips mid-muster: the template picked at commit is the one that launches,
+even when the muster ends in another band.
 
 | Template | Picked when | Roles | Phases (→ on transition) |
 |---|---|---|---|
@@ -593,7 +600,7 @@ table; further leans (armour) become rows. 4C.1 builds the setting and the table
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
 properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. Phase 6 builds that
-patience; the Balanced baseline (a 3:1 muster ideal, a 1:1 minimum) applies until then. Phase 6 settles the set of
+patience; the Balanced baseline (a 1.5:1 muster ideal, a 0.75:1 minimum) applies until then. Phase 6 settles the set of
 archetypes, which is not final.
 
 ## Town & zone garrisons
