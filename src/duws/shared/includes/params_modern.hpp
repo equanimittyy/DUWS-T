@@ -65,10 +65,11 @@ class Params {
         default = 0;
     };
 
-    // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
-    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
-    // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime
-    // trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
+    // How long litter survives before the map sweep deletes it -- the default for bodies, wrecks,
+    // abandoned vehicles, dropped weapons, smoke, crates and parachutes, and for what a teardown
+    // hands over: mission leftovers, a cleared hardpoint's defenders, released props. An event that
+    // sets its own lifetime keeps it. The sweep is always on: teardowns hand it their live leftovers,
+    // so there is no off. A longer lifetime trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
     // side-mission objectives are not affected by shortening it.
     class DUWS_CleanupLifetime {
         title = "Default Garbage Lifetime";

@@ -225,12 +225,12 @@ Judged only while the hardpoint is deployed (`DUWS_hpPeak_<key>` present), so a 
 empty roster is never read as one beaten — the same guard a zone's own capture test uses.
 
 Clearing is latched and destructive to the record, not a flag: `DUWS_fnc_hardpointClear`
-(`:168-211`) deletes the row from `DUWS_hardpoints` outright (`:177`) rather than marking it cleared
+(`:169-227`) deletes the row from `DUWS_hardpoints` outright (`:178`) rather than marking it cleared
 in place, so a re-manned gun cannot un-clear what the player already took. Survivors are left where
-they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`/`DUWS_binAt`,
-`:192-193`) rather than deleted in front of anyone — a radio tower in particular can fall with
+they fell, flagged for the cleanup sweep once the player is clear (`DUWS_binMe`, `:196`, on the
+default lifetime) rather than deleted in front of anyone — a radio tower in particular can fall with
 defenders still alive, since its clear condition is the mast, not the garrison. The composition is
-released through `fnc_duws_release` (`:197`) like any other, so wrecks stay for the sweep rather than
+released through `fnc_duws_release` (`:201`) like any other, so wrecks stay for the sweep rather than
 vanish with the clear.
 
 ## Reveal

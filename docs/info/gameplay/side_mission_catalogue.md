@@ -529,8 +529,8 @@ captures no locals.
 
 **A job's men are owned by their group handles, not by the HQ token.** `fnc_mission_claim` defaults to the
 running HQ mission's token, which cannot advance while the HQ slot is held. A civilian mission that
-advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` /
-`DUWS_binAt` pair that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the
+advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` flag
+that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the
 key `civ_mission_<id>`: an empty car is litter to the map sweep, and a mission with no deadline can
 outlast the litter lifetime.
 

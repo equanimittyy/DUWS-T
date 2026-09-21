@@ -137,9 +137,9 @@ while {true} do {
 
     { if (count units _x == 0) then { deleteGroup _x } } forEach allGroups;
 
-    // Explicit lifetimes win over the shared one: fnc_duws_release asks for its own.
+    // Seconds given to fnc_duws_disposeAfter win over the shared lifetime.
     {
-        _x params ["_obj", "_ttd"];
+        _x params ["_obj", ["_ttd", _lifetime]];
         if (!isNull _obj) then {
             _obj setVariable ["DUWS_binAt", _now + _ttd];
             _disposed pushBackUnique _obj;

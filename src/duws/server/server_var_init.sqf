@@ -168,9 +168,9 @@ zone_ap_trickle = 5;
 // Save state: it lives in the mission namespace so a campaign save carries it.
 DUWS_zone_first_captured = [];
 
-// [object, seconds] pairs awaiting pickup by the map cleanup, written through
-// fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
-// reach it by remoteExec.
+// [object, seconds] entries awaiting pickup by the map cleanup, written through
+// fnc_duws_disposeAfter and drained every pass; nil seconds means the default lifetime. Server-only:
+// the sweep runs here and clients reach it by remoteExec.
 DUWS_disposables = [];
 
 // composition key -> the objects it owns, written through fnc_duws_keep. Every member is tagged

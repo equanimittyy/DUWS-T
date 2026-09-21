@@ -38,10 +38,7 @@ switch (_status) do {
 
 private _men = units (_e get "group");
 { _men append units _x } forEach (_e get "patrols");
-{
-    _x setVariable ["DUWS_binMe", true];
-    _x setVariable ["DUWS_binAt", time + 300];
-} forEach (_men select { alive _x });
+{ _x setVariable ["DUWS_binMe", true] } forEach (_men select { alive _x });
 [_e get "compKey"] call fnc_duws_release;
 
 if (!isNull _giver) then {

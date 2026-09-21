@@ -194,7 +194,6 @@ DUWS_fnc_hardpointClear = {
         {
             if (!isNull _x && {alive _x}) then {
                 _x setVariable ["DUWS_binMe", true];
-                _x setVariable ["DUWS_binAt", time + 300];
             };
         } forEach ([_key, _x] call fnc_site_roster);
     } forEach ["garrison", "crew"];

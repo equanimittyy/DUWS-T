@@ -215,8 +215,8 @@ if (dynamic_weather_enable) then {
 	[] spawn fnc_weather;
 };
 
-// One lifetime for every category the sweep collects; the sweep is always on (a 0 from an old save
-// is floored, not off). The default lives in the parameter, not here, so the two cannot drift apart.
+// The default lifetime for everything the sweep collects that names none of its own; the sweep is
+// always on (a 0 from an old save is floored, not off). The default lives in the parameter, not here, so the two cannot drift apart.
 [["DUWS_CleanupLifetime", 300] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
 for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {

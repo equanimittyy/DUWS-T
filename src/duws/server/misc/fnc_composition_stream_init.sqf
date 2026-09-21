@@ -4,19 +4,21 @@
 // stay in server_fnc_init.sqf beside the load, so the manifest remains the one place to see what
 // reaches clients.
 
-// Hand an object to the map cleanup, to be deleted _ttd seconds from now once no player is near it.
+// Hand an object to the map cleanup, to be deleted _ttd seconds from now (the default lifetime when
+// omitted) once no player is near it.
 // Opt-in by whoever created the object, because class cannot tell these apart: a supply drop and the
 // HQ arsenal crate are both B_supplyCrate_F, and three side missions use crate classes for their
 // objectives -- only the code that made the thing knows it is litter. Callable from anywhere: a
 // client call forwards itself to the server, which owns the sweep.
 fnc_duws_disposeAfter = {
-    params ["_obj", ["_ttd", 1800]];
+    params ["_obj", "_ttd"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_disposeAfter", 2] };
     // Living entities are out of scope here -- they have their own spawn and despawn logic.
     // Refused rather than trusted to callers: the sweep spares anything with living crew, and
     // crew of a man on foot is the man, so one reaching the disposal list would never leave it.
     if (_obj isKindOf "CAManBase") exitWith {};
-    DUWS_disposables pushBack [_obj, _ttd];
+    // Omitted rather than nil, so the drain's params default fills it; sqf-vm does not fill a nil element.
+    DUWS_disposables pushBack ([[_obj], [_obj, _ttd]] select !isNil "_ttd");
 };
 
 // Mark an object as part of a standing composition (HQ, FOB, zone prefab, hardpoint): tagged persistent so
@@ -54,7 +56,7 @@ fnc_duws_keep = {
 // Deletion still respects the keep-radius, so a hardpoint wrecked under the player's nose clears
 // once they leave rather than in front of them.
 fnc_duws_release = {
-    params ["_key", ["_ttd", 300]];
+    params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_release", 2] };
     {
         _x setVariable ["persistent", false, true];
@@ -62,7 +64,7 @@ fnc_duws_release = {
         // through the BuildingChanged handler if destroyed inside its disposal window, reviving the
         // retired key and re-protecting the wreck the release just handed to the sweep.
         _x setVariable ["DUWS_compKey", nil];
-        [_x, _ttd] call fnc_duws_disposeAfter;
+        [_x] call fnc_duws_disposeAfter;
     } forEach (DUWS_compositions getOrDefault [_key, []]);
     DUWS_compositions deleteAt _key;
     // Stowed members do not exist, so there is nothing to hand the sweep -- but the records have to
