@@ -31,6 +31,7 @@ _group deleteGroupWhenEmpty true;
     _x setUnitLoadout [[], [], [], [_uniform, []], [], [], _hat, goggles _x, [],
         ["ItemMap", "", "ItemRadio", "ItemCompass", "ItemWatch", ""]];
     [[_x], "IND", ["opfor", "blufor"], _specs get (_known select _forEachIndex), [false]] call fnc_civ_arm;
+    for "_j" from 1 to 2 do { _x addMagazine "HandGrenade"; _x addItem "FirstAidKit" };
 } forEach units _group;
 
 _group
