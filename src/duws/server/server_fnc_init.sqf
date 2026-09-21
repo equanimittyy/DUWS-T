@@ -915,6 +915,7 @@ fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\
 // =========================================================================================================
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\search\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_search_pick = compile preprocessFileLineNumbers "duws\client\search\fnc_search_pick.sqf";publicVariable "fnc_search_pick";
+fnc_search_grant = compile preprocessFileLineNumbers "duws\client\search\fnc_search_grant.sqf";publicVariable "fnc_search_grant";
 
 // =========================================================================================================
 // client/supports

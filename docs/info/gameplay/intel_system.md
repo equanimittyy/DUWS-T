@@ -202,6 +202,13 @@ and an empty pocket move nothing anyone else can see and stay with the searcher.
 system draws: *voice and hint are local, the notification is global*, and the notification prose is written
 for a reader who did not do the searching — hence *"The pool gains 2 CP"* rather than *"you gained"*.
 
+**Money and a document go straight into the searcher's inventory, or at their feet if the find does not
+fit whole.** All or nothing, not the arsenal's per-item fit test (`DUWS_fnc_money_regrant`,
+`initPlayerLocal.sqf`), which hands a player back what they already owned and may split it: a find split
+between pack and ground has to tell the player twice where it went. The hint says which of the two
+happened. The grant runs on the searcher's machine (`client/search/fnc_search_grant.sqf`), because an
+inventory add works only where the unit is local; the server decides only what was found.
+
 **Both rolls run on the server, and so does everything they read.** A roll a client makes is a roll a client
 can retry. Server authority over the roll alone is not enough: the reveal payout was once handed a target
 position sampled on the client, from a global only the server ever wrote, so it silently paid nothing on a

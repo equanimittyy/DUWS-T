@@ -50,10 +50,6 @@ private _nothingLine = localize (_config param [2, "STR_DUWS_T_INTEL_FOUND_n"]);
 // miss, so this only ever thins the combat source.
 if (random 1 >= (_config select 0)) exitWith { [_nothingLine] remoteExec ["hint", _caller] };
 
-// Loot seats in a holder at the corpse, not the searcher's feet: a GroundWeaponHolder has no PhysX
-// (fnc_money_drop, arma_engine_gotchas), so it stays put and openable even where a body ragdolled into
-// a wall or onto a roof would drop a loose ground item through the surface, out of reach.
-private _origin = getPosATL _target;
 private _remaining = +(_config select 1);
 private _paid = false;
 
@@ -73,7 +69,7 @@ private _fnc_notify = {
     ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
-// What the document kind drops on the ground, analysed later at the terminal for CP. The item pool,
+// What the document kind hands the searcher, analysed later at the terminal for CP. The item pool,
 // its weights and its labels are shared (DUWS_intelDocuments in server_var_init) so a patrol camp's
 // table draws the same classes rather than a second copy that drifts.
 private _documents = DUWS_intelDocuments;
@@ -84,10 +80,9 @@ private _documentLabels = DUWS_intelDocumentLabels;
 // single search. The hint names which one, so the player knows its worth before the terminal.
 private _payDocument = {
     private _class = _documents selectRandomWeighted _documentWeights;
-    // Holder cargo needs the bare class, but DUWS_intelDocuments lists Item_* ground bodies -- strip it.
-    [[[_class select [5], 1]], _origin] call fnc_money_drop;
     private _label = localize (_documentLabels select (_documents find _class));
-    [format [localize "STR_DUWS_T_LOOT2", _label]] call _fnc_hint;
+    // The inventory takes the bare class, but DUWS_intelDocuments lists Item_* ground bodies -- strip it.
+    [_class select [5], 1, format [localize "STR_DUWS_T_LOOT2", _label]] remoteExec ["fnc_search_grant", _caller];
 };
 
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
@@ -102,7 +97,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         // free to answer a decline without contradiction; a successful reveal is the one search
         // outcome the whole team sees, broadcast as a notification card.
         case "intel": {
-            _paid = [_origin, _caller, true] call fnc_intel_payout;
+            _paid = [getPosATL _target, _caller, true] call fnc_intel_payout;
             if (_paid) then {
                 [localize "STR_DUWS_T_INTEL_MAP_TITLE",
                     localize "STR_DUWS_T_INTEL_MAP_DESC"] call _fnc_notify;
@@ -111,8 +106,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
         case "money": {
             private _count = 1 + floor random 3;
-            [[["Money_roll", _count]], _origin] call fnc_money_drop;
-            [format [localize "STR_DUWS_T_LOOT4", _count]] call _fnc_hint;
+            ["Money_roll", _count, format [localize "STR_DUWS_T_LOOT4", _count]] remoteExec ["fnc_search_grant", _caller];
             _paid = true;
         };
 

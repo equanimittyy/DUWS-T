@@ -2675,6 +2675,14 @@
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_SEARCH_LOOT_TAKEN">
+                <Original>Added to your inventory.</Original>
+                <English>Added to your inventory.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SEARCH_LOOT_DROPPED">
+                <Original>Inventory full. Dropped at your feet.</Original>
+                <English>Inventory full. Dropped at your feet.</English>
+            </Key>
             <Key ID="STR_DUWS_T_INTEL_ITEM_phone">
                 <Original>Mobile Phone</Original>
                 <English>Mobile Phone</English>
