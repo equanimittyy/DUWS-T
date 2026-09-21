@@ -23,9 +23,12 @@ _unit setDir _dir;
 _unit disableAI "PATH";
 _unit setVariable ["DUWS_vendor_slot", _slot];
 // Broadcast: the catalogue runs on the player's machine and has to know which shop it is standing in
-// front of, and which town's reputation gates it.
+// front of, which town's reputation gates it, and that town's name for the refusal -- civ_locations
+// is server-only.
 _unit setVariable ["DUWS_vendor_type", _type, true];
 _unit setVariable ["DUWS_vendor_town", _townIndex, true];
+private _loc = (missionNamespace getVariable ["civ_locations", []]) param [_townIndex, locationNull];
+_unit setVariable ["DUWS_vendor_townName", [text _loc, format ["Unnamed%1", _townIndex]] select (text _loc isEqualTo ""), true];
 
 ([[_townIndex] call fnc_town_site_key, "vendors"] call fnc_site_roster) pushBack _unit;
 

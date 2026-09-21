@@ -34,7 +34,7 @@ private _gear = _kind isEqualTo "gear";
 // The same OPFOR band the disguise breaks in, read here rather than from the client's copy:
 // civ_town_rep is server-only, and DUWS_enemy_town_pos is a derivative that rebuilds on a crossing.
 if (([_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt) <= -10) exitWith {
-    ["STR_DUWS_T_VENDOR_HOSTILE"] call _fnc_say;
+    [format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]]] remoteExec ["hint", _buyer];
 };
 
 // A hand-made remoteExec must not buy a tank from an arms dealer, nor name the BLUFOR list for an
@@ -60,7 +60,7 @@ if (_store && {_domainIndex >= 0}
     [localize "STR_DUWS_T_GARAGE_POOL_FULL"] remoteExec ["hint", _buyer];
 };
 
-if !([_buyer, _price] call fnc_money_spend) exitWith { ["STR_DUWS_T_VENDOR_BROKE"] call _fnc_say };
+if !([_buyer, _price] call fnc_money_spend) exitWith { [localize "STR_DUWS_T_VENDOR_BROKE"] remoteExec ["hint", _buyer] };
 
 if (_gear) exitWith {
     if (_store) exitWith {

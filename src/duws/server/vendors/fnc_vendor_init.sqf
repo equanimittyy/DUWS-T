@@ -179,7 +179,7 @@ private _fnc_tick = {
         if (_left > 0) then {
             _left = (_left - _dt) max 0;
             _x set [3, _left];
-            if (_left <= 0) then { [_i, _forEachIndex, 0] call fnc_vendor_markerPaint };
+            if (_left <= 0) then { [_i, _forEachIndex] call fnc_vendor_markerPaint };
         };
     } forEach _recs;
 
@@ -222,7 +222,7 @@ private _placed = 0;
         // Hidden until fnc_civ_town_reveal uncovers the town, so the map does not open with every
         // shop on the island already pinned.
         _m setMarkerAlpha ([0, 1] select (_vis param [_i, false]));
-        [_i, _forEachIndex, 0] call fnc_vendor_markerPaint;
+        [_i, _forEachIndex] call fnc_vendor_markerPaint;
     } forEach _recs;
 
     private _key = [_i] call fnc_town_site_key;

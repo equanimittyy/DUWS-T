@@ -21,7 +21,7 @@ _vis set [_townIndex, true];
 
 // The town's shops come up with it, so the map is never pre-populated with every vendor on the
 // island and hardcore mode needs no separate answer. Alpha only: colour is the open/closed channel
-// (fnc_vendor_markerPaint), and a revealed shop keeps whichever state its cooldown says.
+// (fnc_vendor_markerPaint), and a revealed shop keeps whichever state its cooldown and band say.
 {
     ([_townIndex, _forEachIndex] call fnc_vendor_markerName) setMarkerAlpha 1;
 } forEach ([_townIndex] call fnc_vendor_recs);

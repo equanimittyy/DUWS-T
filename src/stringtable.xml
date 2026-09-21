@@ -2987,12 +2987,12 @@
                 <English>Buy one into Arsenal.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_HOSTILE">
-                <Original>Not while they are watching.</Original>
-                <English>Not while they are watching.</English>
+                <Original>The trader refuses to deal with you while %1 is hostile towards you.</Original>
+                <English>The trader refuses to deal with you while %1 is hostile towards you.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_BROKE">
-                <Original>You do not have the money.</Original>
-                <English>You do not have the money.</English>
+                <Original>You do not have enough money.</Original>
+                <English>You do not have enough money.</English>
             </Key>
             <Key ID="STR_DUWS_T_VENDOR_NO_POOL">
                 <Original>The arsenal already stocks that.</Original>

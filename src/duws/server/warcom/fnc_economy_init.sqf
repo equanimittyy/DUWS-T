@@ -177,9 +177,11 @@ fnc_town_rep_adjust = {
 	if (abs _new < 0.01) then { _new = 0 };
 	_reps set [_townIndex, _new];
 	[_townIndex] call fnc_civ_townRender;
-	// A town crossing either faction band (in either direction) changes the broadcast town-centre lists.
+	// A town crossing either faction band (in either direction) changes the broadcast town-centre lists
+	// and the colour its shops take.
 	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then {
 		[] call fnc_enemy_towns_refresh;
+		{ [_townIndex, _forEachIndex] call fnc_vendor_markerPaint } forEach ([_townIndex] call fnc_vendor_recs);
 		// A town hardcore still hides gets no card: naming it would reveal ground the map does not show.
 		if ((missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true]) then {
 			private _name = text ((missionNamespace getVariable ["civ_locations", []]) param [_townIndex, locationNull]);

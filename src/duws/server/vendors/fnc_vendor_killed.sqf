@@ -13,4 +13,4 @@ private _recs = [_townIndex] call fnc_vendor_recs;
 if (_slot < 0 || _slot >= count _recs) exitWith {};
 
 (_recs select _slot) set [3, VENDOR_RESPAWN];
-[_townIndex, _slot, VENDOR_RESPAWN] call fnc_vendor_markerPaint;
+[_townIndex, _slot] call fnc_vendor_markerPaint;

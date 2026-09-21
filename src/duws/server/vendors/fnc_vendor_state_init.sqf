@@ -15,9 +15,8 @@ DUWS_vendorTypes = createHashMapFromArray [
 
 // Open and closed. Colour alone carries the state: marker alpha is already the reveal channel, set
 // from civ_visible in fnc_civ_town_reveal, and dimming a dead vendor as well would make one number
-// mean both "undiscovered" and "closed". Open is the neutral town icon's purple (fnc_civ_townBand),
-// so a shop pin reads as part of the civilian layer rather than a fourth band.
-#define VENDOR_COLOUR_OPEN "#(0.42,0.15,0.58,1)"
+// mean both "undiscovered" and "closed". Open is the town icon's band colour (fnc_civ_townBand), as a
+// zone's port takes the zone's, so a shop pin reads as part of its town.
 #define VENDOR_COLOUR_DOWN "ColorGrey"
 
 // An unknown type still has to answer: a draft or a marker pass that faulted on one bad row would
@@ -62,13 +61,18 @@ fnc_vendor_markerName = {
 	format ["civ_vendor_%1_%2", _townIndex, _slot]
 };
 
-// Painted from the stored cooldown, never from a unit handle, so the marker stays right while the
-// town sleeps and across a rebuild: an uncooled vendor that is simply not simulated reads open.
+// Painted from the stored cooldown and the town's band, never from a unit handle, so the marker stays
+// right while the town sleeps and across a rebuild: an uncooled vendor that is simply not simulated
+// reads open.
 fnc_vendor_markerPaint = {
 	if (!isServer) exitWith {};
-	params ["_townIndex", "_slot", ["_cooldown", 0]];
-	([_townIndex, _slot] call fnc_vendor_markerName) setMarkerColor
-		([VENDOR_COLOUR_OPEN, VENDOR_COLOUR_DOWN] select (_cooldown > 0));
+	params ["_townIndex", "_slot"];
+	private _colour = if (((([_townIndex] call fnc_vendor_recs) param [_slot, []]) param [3, 0]) > 0) then {
+		VENDOR_COLOUR_DOWN
+	} else {
+		([[_townIndex] call fnc_civ_repAt] call fnc_civ_townBand) select 1
+	};
+	([_townIndex, _slot] call fnc_vendor_markerName) setMarkerColor _colour;
 };
 
 // The live vendor in one slot, or objNull. Corpses stay on the roster until the town sleeps, the way

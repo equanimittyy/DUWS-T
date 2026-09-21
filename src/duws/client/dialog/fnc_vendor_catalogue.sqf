@@ -26,7 +26,7 @@ private _centre = ((missionNamespace getVariable ["duws_town_circles", []])
 if (((missionNamespace getVariable ["DUWS_enemy_town_pos", []]) findIf {
     _x distance2D _centre < 1
 }) >= 0) exitWith {
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_VENDOR_HOSTILE"] call fnc_duws_dialogue;
+    hint format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]];
 };
 
 // The dialog's controls run outside this scope and have no access to the addAction's _target, so the
