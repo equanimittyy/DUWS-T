@@ -264,7 +264,7 @@ the price carries the balance.
 The request menu is added to BLUFOR because the role keys name only what the AI fields; BLUFOR's
 unarmed transports exist only in the request menu.
 
-A hull costs 1.5 money per CP of its request-menu price (`DUWS_fnc_vehPrice`), rounded down. The
+A hull costs 1.2 money per CP of its request-menu price (`DUWS_fnc_vehPrice`), rounded down. The
 OPFOR and Everything lists at every dealer, the Arms Dealer included, cost 1.1 times as much, with
 one rounding down over both rates.
 
