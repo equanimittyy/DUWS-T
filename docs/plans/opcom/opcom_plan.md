@@ -21,7 +21,7 @@ is built and played.
 | 1–3, 4A, 4B.1, 4B.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
 | 4C — Weighting: the pick scored by Value ÷ Cost, over `P(win)` where an order fights for its target, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
-| 5 — Orchestration: multi-unit templates + mustering | [§Templates](#templates-phase-5) — WIP |
+| 5 — Orchestration: multi-unit templates, mustering and threat-aware routes | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
 
 The ordering is forced by what the next phase reads. Do not pre-build later phases: the tuning constants and
@@ -386,8 +386,20 @@ launches as a flank.
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
 
-Phase 5 settles in play the band thresholds, the route λ weights and their recompute cadence, and
-`OPCOM_MUSTER_EXPIRY`.
+**Routes read threat on the road and off it.** A wheeled or tracked route takes the same threat term as the foot
+cell chain, `OPCOM_ROUTE_LAMBDA` × the order's λ × `_ene`, so a hull takes a flanking road, or leaves the road to
+flank, rather than drive through a threatened stretch. One A* runs over road segments and land cells together: a
+road segment costs its length plus the threat term over the cells it crosses, and an off-road step costs its length
+× `OPCOM_ROUTE_OFFROAD` plus the same term. The route leaves or rejoins the road where a segment crosses a cell. An
+off-road stretch is a `gap` segment the hull drives itself, so the water test that rejects a wet gap still applies.
+The off-road layer joins the search only when λ > 0, so at λ 0 the search is the length-only road search and the
+convoy side missions, which share `fnc_convoy_path`, route as before. Every order routes with λ > 0, a supply truck
+included. A supply truck's route is planned once, at departure, and never re-planned, so the truck skirts only the
+threat believed when it leaves and drives on into any threat that appears after. Today the road branch is
+threat-blind and every caller passes λ 0 (`taskings/fnc_opcom_route.sqf`).
+
+Phase 5 settles in play the band thresholds, the route λ weights and their recompute cadence,
+`OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, and `OPCOM_MUSTER_EXPIRY`.
 
 ## What AP buys
 

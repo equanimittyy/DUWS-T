@@ -37,7 +37,7 @@ describes a commercial RTS: its built-in AI, and the open competition bots writt
 | Retreat | Each unit pulls back below 50% health (a builder below 85%) | Competition bots: retreat when the simulator says the fight is lost | None ([engine gotcha](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)) |
 | Anti-flap | A factory switch waits for a randomised threshold of time and income | A retreat timer that resets while the simulator still says retreat | The commit `hold` |
 | Unseen enemies | The enemy manager keeps each unit's last known position | Competition bots count remembered units that are out of sight | Belief with decay |
-| Pathing | The threat map is a path cost | — | An A* cost of step + λ × `_ene` (`taskings/fnc_opcom_route.sqf`). Road routes ignore threat |
+| Pathing | The threat map is a path cost | — | The foot cell chain costs step + λ × `_ene` (`taskings/fnc_opcom_route.sqf`), but every caller passes λ 0 and road routes carry no threat term. Phase 5 adds threat to road segments and off-road flanking legs ([§Templates](opcom_plan.md#templates-phase-5)) |
 | Counter builds | `response.json`: the odds of building a counter role rise with enemy strength in the role it counters and fall as its own counter force grows, capped at a share of the army | Fixed in each build order | Open in 4C.2: whether belief carries a threat category |
 | Personality and difficulty | Whole config sets per level, including `hard_aggressive` | Built-in AI: personalities. The top levels cheat with map vision and extra income | Archetype weights. OPCOM reads belief and never cheats |
 
