@@ -124,12 +124,10 @@ purchase path does not depend on whether escalation ever started — with no mul
 the identity. It scales CP only: on a dual CP+AP price (the advanced supports) `fnc_pool_try_spend`
 multiplies the CP half and leaves the AP half at face value, so escalation is a CP lever, not an AP one.
 
-The multiplier is `publicVariable`d because the request menu displays it. Base costs are baked into
-each row's stringtable label (`"Supply Drop (5CP) Radio"`), so `client/dialog/fnc_request_menu.sqf`
-appends the scaled figure rather than substituting it, against a cost table it keeps for that purpose.
-Stripping the numbers out and re-formatting from a `%1` placeholder is the tidier shape and is rejected
-on localisation grounds: a placeholder added to English but not to the other four languages leaves them
-printing the stale baked figure, which is a wrong number rather than an untranslated one.
+The multiplier is `publicVariable`d because the support list and the manual display it. Both append
+the live figure from `fnc_support_cost_bracket` (`client/supports/fnc_supports_init.sqf`) to the
+localised name, so a support's stringtable label holds no price in any language. A price baked into a
+label is a second price, and it goes stale the first time the catalogue changes.
 
 `fnc_escalation.sqf` sets the multiplier from a level ladder: a level is a fixed count of ruined
 houses — a fifty-third of the map's house census split into eleven levels, so thirty houses on Altis
@@ -147,11 +145,11 @@ campaign that survives one still reports it. Escalation itself is switched off e
 
 ## Supports: permanent and consumable
 
-One catalogue, `fnc_support_defs` in `client/supports/fnc_supports_init.sqf`, holds every row of the
+One catalogue, `fnc_support_catalogue` in `client/supports/fnc_supports_init.sqf`, holds every row of the
 request menu's support list in display order, and the `PERM`/`CONS` column decides everything the two
 mechanisms differ in:
 
-| | Permanent (6 rows) | Consumable (17 rows) |
+| | Permanent (12 rows) | Consumable (17 rows) |
 |---|---|---|
 | Bought for | the whole team, once | the buyer alone |
 | Slot | none | one of `support_max_slots` |
@@ -179,12 +177,12 @@ late, and one computed at the current multiplier mints the difference for a play
 buy the slate at 1.0x, refund at 2.0x, and the difference comes from nowhere. What the server
 debited is what comes back.
 
-**It refunds unlocks, never uses.** Every comm-menu support charges again when it is called
-(`fnc_mapclickarty` and the five drops all spend on use), so buying, calling and refunding around a
-single fire mission costs exactly that fire mission — which is what stops the refund from being a way
-to replay a campaign's worth of supports for free.
+**It refunds unlocks, never uses.** A consumable is one use, paid at purchase. Calling it costs
+nothing more, and `fnc_support_consume` clears its flag and its recorded charge, so a used support has
+nothing left to refund. Only two calls charge again: a FOB deploy (10 CP) and a vehicle drop (the
+vehicle's own price, from `DUWS_fnc_vehPrice`).
 
-**A support that is not in hand cannot be refunded.** The thirteen comm-menu classes with
+**A support that is not in hand cannot be refunded.** The comm-menu classes with
 `removeAfterExpressionCall = 1` are absent from the player's menu for as long as their mission is
 running, and `fnc_supports_init` tracks presence for its own reasons
 ([`arma_engine_gotchas.md`](../architecture/arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
@@ -192,9 +190,9 @@ so that one test covers a fire mission in flight, a taxi in transit and a High C
 the air without a guard per support.
 
 Both constants are in `server/server_var_init.sqf` and broadcast because clients read them:
-`support_max_slots` (8, unchanged) and `support_death_refund` (0.1). The death share is deliberately
-small — a generous one makes dying a cheaper way to liquidate a slate than walking back to a base,
-which inverts what the death penalty is for.
+`support_max_slots` (8) and `support_death_refund` (0.5, a share of both currencies). The death share
+is half so that walking an item back to a base still beats dying with it — a bigger share makes dying
+a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 
 ## Faucets
 
@@ -259,7 +257,7 @@ The Debug menu's Economy dialog has a *Fire economy tick* button that runs one e
 
 | Category | Where | Cost |
 |---|---|---|
-| Support unlocks | `client/supports/fnc_supports_init.sqf` | CP 2–25 (boat taxi 2 … CAS/CAP 25), plus AP 20–40 on the advanced rows (catalogue column 8); refundable if consumable, see [above](#supports-permanent-and-consumable) |
+| Support unlocks | `client/supports/fnc_supports_init.sqf` | CP 0–60 (Mobile HQ designation 0, the taxis 1 … Radio Tower III 60), plus AP 5–30 on the advanced rows (catalogue column 8); refundable if consumable, see [above](#supports-permanent-and-consumable) |
 | Reinforcement units | `dialog/fnc_request_unit*.sqf` | 2–4 (from `blufor_RQST_UNIT_*`) |
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | CP only today, from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`): a kind band set by role, a heaviness score placing the vehicle inside it |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |

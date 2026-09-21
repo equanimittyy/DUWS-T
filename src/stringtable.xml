@@ -2118,7 +2118,7 @@
             <Key ID="STR_DUWS_T_vehicle_repair">
                 <Original>Vehicle Depot</Original>
                 <English>Vehicle Depot</English>
-                <Chinesesimp>载具改装站(5CP)</Chinesesimp>
+                <Chinesesimp>载具改装站</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_vehicle">
                 <Original>Repair</Original>
@@ -5166,9 +5166,9 @@
                 <English>Recycled %1 for %2 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
-                <German>Versorgungsabwurf (5CP) Funk</German>
-                <Spanish>Entrega de suministros (5 CP) Radio</Spanish>
-                <Chinesesimp>空投补给(5CP)</Chinesesimp>
+                <German>Versorgungsabwurf</German>
+                <Spanish>Entrega de suministros</Spanish>
+                <Chinesesimp>空投补给</Chinesesimp>
                 <Original>Supply drop</Original>
                 <English>Supply drop</English>
             </Key>
@@ -5180,16 +5180,16 @@
                 <English>Supply drop</English>
             </Key>
             <Key ID="STR_DUWS_T_kw2lnaig">
-                <German>Virtuelles Arsenal (10CP)</German>
-                <Spanish>Arsenal VA (10 CP)</Spanish>
-                <Chinesesimp>虚拟军火库(10CP)</Chinesesimp>
+                <German>Virtuelles Arsenal</German>
+                <Spanish>Arsenal VA</Spanish>
+                <Chinesesimp>虚拟军火库</Chinesesimp>
                 <Original>VA Arsenal</Original>
                 <English>VA Arsenal</English>
             </Key>
             <Key ID="STR_DUWS_T_oq3q7yrq">
-                <German>Notfall Fahrzeugabwurf (5 CP) Funk</German>
-                <Spanish>Entrega de vehículo de emergencia (5 CP) Radio</Spanish>
-                <Chinesesimp>紧急载具空投(5CP)</Chinesesimp>
+                <German>Notfall Fahrzeugabwurf</German>
+                <Spanish>Entrega de vehículo de emergencia</Spanish>
+                <Chinesesimp>紧急载具空投</Chinesesimp>
                 <Original>Vehicle Drop</Original>
                 <English>Vehicle Drop</English>
             </Key>
@@ -5306,16 +5306,16 @@
                 <English>Establish FOB (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_xghf3qqd">
-                <German>HALO Absprung (15CP)</German>
-                <Spanish>Salto HALO (15 CP)</Spanish>
-                <Chinesesimp>空降(15CP)</Chinesesimp>
+                <German>HALO Absprung</German>
+                <Spanish>Salto HALO</Spanish>
+                <Chinesesimp>空降</Chinesesimp>
                 <Original>HALO Jump</Original>
                 <English>HALO Jump</English>
             </Key>
             <Key ID="STR_DUWS_T_892wo8h0">
-                <German>Drohnen Aufklärung (10CP) Funk</German>
-                <Spanish>Reconocimiento VANT (10 CP) Radio</Spanish>
-                <Chinesesimp>特种UAV(10CP)</Chinesesimp>
+                <German>Drohnen Aufklärung</German>
+                <Spanish>Reconocimiento VANT</Spanish>
+                <Chinesesimp>特种UAV</Chinesesimp>
                 <Original>UAV Recon</Original>
                 <English>UAV Recon</English>
             </Key>
@@ -5327,9 +5327,9 @@
                 <English>UAV Recon</English>
             </Key>
             <Key ID="STR_DUWS_T_witoiij3">
-                <German>Helikopter-Transport (5CP) Funk</German>
-                <Spanish>Helicóptero Taxi (5 CP) Radio</Spanish>
-                <Chinesesimp>直升机运输(5CP)</Chinesesimp>
+                <German>Helikopter-Transport</German>
+                <Spanish>Helicóptero Taxi</Spanish>
+                <Chinesesimp>直升机运输</Chinesesimp>
                 <Original>Helicopter Taxi</Original>
                 <English>Helicopter Taxi</English>
             </Key>
@@ -5348,16 +5348,16 @@
                 <English>Heavy Heli Vehicle Transport</English>
             </Key>
             <Key ID="STR_DUWS_T_heloliftbuy">
-                <German>Schwerer Hubschrauber-Fahrzeugtransport(10CP)</German>
-                <Spanish>Transporte de Vehículos por Helicóptero Pesado(10CP)</Spanish>
-                <Chinesesimp>重型直升机载具运输(10CP)</Chinesesimp>
+                <German>Schwerer Hubschrauber-Fahrzeugtransport</German>
+                <Spanish>Transporte de Vehículos por Helicóptero Pesado</Spanish>
+                <Chinesesimp>重型直升机载具运输</Chinesesimp>
                 <Original>Heavy Heli Vehicle Transport</Original>
                 <English>Heavy Heli Vehicle Transport</English>
             </Key>
             <Key ID="STR_DUWS_T_3wiovyga">
-                <German>Boot-Transport (2CP) Funk</German>
-                <Spanish>Bote Taxi (2 CP) Radio</Spanish>
-                <Chinesesimp>船运(2CP)</Chinesesimp>
+                <German>Boot-Transport</German>
+                <Spanish>Bote Taxi</Spanish>
+                <Chinesesimp>船运</Chinesesimp>
                 <Original>Boat Taxi</Original>
                 <English>Boat Taxi</English>
             </Key>
@@ -5369,9 +5369,9 @@
                 <English>Boat Taxi</English>
             </Key>
             <Key ID="STR_DUWS_T_btiiyafy">
-                <German>Artillerieschlag (20CP) Funk</German>
-                <Spanish>Ataque de artillería (20 CP) Radio</Spanish>
-                <Chinesesimp>155毫米炮支援(20CP)</Chinesesimp>
+                <German>Artillerieschlag</German>
+                <Spanish>Ataque de artillería</Spanish>
+                <Chinesesimp>155毫米炮支援</Chinesesimp>
                 <Original>Artillery Strike</Original>
                 <English>Artillery Strike</English>
             </Key>
@@ -5383,9 +5383,9 @@
                 <English>Artillery Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_xca5aaxu">
-                <German>Mörserschlag (10CP) Funk</German>
-                <Spanish>Ataque de morteros (10 CP) Radio</Spanish>
-                <Chinesesimp>迫击炮支援(10CP)</Chinesesimp>
+                <German>Mörserschlag</German>
+                <Spanish>Ataque de morteros</Spanish>
+                <Chinesesimp>迫击炮支援</Chinesesimp>
                 <Original>Mortar Strike</Original>
                 <English>Mortar Strike</English>
             </Key>
@@ -5397,9 +5397,9 @@
                 <English>Mortar Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_mortar_smoke_row">
-                <German>Mortar Smoke Screen (5CP)</German>
-                <Spanish>Mortar Smoke Screen (5CP)</Spanish>
-                <Chinesesimp>Mortar Smoke Screen (5CP)</Chinesesimp>
+                <German>Mortar Smoke Screen</German>
+                <Spanish>Mortar Smoke Screen</Spanish>
+                <Chinesesimp>Mortar Smoke Screen</Chinesesimp>
                 <Original>Mortar Smoke Screen</Original>
                 <English>Mortar Smoke Screen</English>
             </Key>
@@ -5418,9 +5418,9 @@
                 <English>Smoke</English>
             </Key>
             <Key ID="STR_DUWS_T_mbhh2q2e">
-                <German>JDAM Luftschlag (10CP) Funk</German>
-                <Spanish>Ataque JDAM (10 CP) Radio</Spanish>
-                <Chinesesimp>JDAM炸弹(10CP)</Chinesesimp>
+                <German>JDAM Luftschlag</German>
+                <Spanish>Ataque JDAM</Spanish>
+                <Chinesesimp>JDAM炸弹</Chinesesimp>
                 <Original>JDAM strike</Original>
                 <English>JDAM strike</English>
             </Key>
@@ -5432,9 +5432,9 @@
                 <English>JDAM strike</English>
             </Key>
             <Key ID="STR_DUWS_T_xja6gemx">
-                <German>Lasergelenkte Bombe (10CP) Funk</German>
-                <Spanish>Bomba Guiada por Láser (10 CP) Radio</Spanish>
-                <Chinesesimp>激光制导炸弹(10CP)</Chinesesimp>
+                <German>Lasergelenkte Bombe</German>
+                <Spanish>Bomba Guiada por Láser</Spanish>
+                <Chinesesimp>激光制导炸弹</Chinesesimp>
                 <Original>Laser Guided Bomb</Original>
                 <English>Laser Guided Bomb</English>
             </Key>
@@ -5446,9 +5446,9 @@
                 <English>Laser Guided Bomb</English>
             </Key>
             <Key ID="STR_DUWS_T_d5qzh6mj">
-                <German>Mk.20 Streubomben (25CP) Funk</German>
-                <Spanish>Ataque con Bomba de racimo (25 CP) Radio</Spanish>
-                <Chinesesimp>Mk.20集束炸弹(25CP)</Chinesesimp>
+                <German>Mk.20 Streubomben</German>
+                <Spanish>Ataque con Bomba de racimo</Spanish>
+                <Chinesesimp>Mk.20集束炸弹</Chinesesimp>
                 <Original>Mk.20 Cluster Strike</Original>
                 <English>Mk.20 Cluster Strike</English>
             </Key>
@@ -5460,9 +5460,9 @@
                 <English>Mk.20 Cluster Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_owven8ki">
-                <German>Napalm Luftschlag (20CP) Funk</German>
-                <Spanish>Ataque con Napalm (20 CP) Radio</Spanish>
-                <Chinesesimp>凝固汽油弹(20CP)</Chinesesimp>
+                <German>Napalm Luftschlag</German>
+                <Spanish>Ataque con Napalm</Spanish>
+                <Chinesesimp>凝固汽油弹</Chinesesimp>
                 <Original>Napalm Strike</Original>
                 <English>Napalm Strike</English>
             </Key>
@@ -5474,9 +5474,9 @@
                 <English>Napalm Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_t4jo046q">
-                <German>HC Angriffshelikopter (20CP) Funk</German>
-                <Spanish>Helicóptero de ataque del Alto Mando (20 CP) Radio</Spanish>
-                <Chinesesimp>HC 攻击直升机(20CP)</Chinesesimp>
+                <German>HC Angriffshelikopter</German>
+                <Spanish>Helicóptero de ataque del Alto Mando</Spanish>
+                <Chinesesimp>HC 攻击直升机</Chinesesimp>
                 <Original>HC Attack Helicopter</Original>
                 <English>HC Attack Helicopter</English>
             </Key>
@@ -5488,9 +5488,9 @@
                 <English>HC Attack Helicopter</English>
             </Key>
             <Key ID="STR_DUWS_T_6khosjp7">
-                <German>HC CAS Jet (25CP) Funk</German>
-                <Spanish>Jet de Apoyo Áereo del Alto Mando (25 CP) Radio</Spanish>
-                <Chinesesimp>HC CAS战斗机(25CP)</Chinesesimp>
+                <German>HC CAS Jet</German>
+                <Spanish>Jet de Apoyo Áereo del Alto Mando</Spanish>
+                <Chinesesimp>HC CAS战斗机</Chinesesimp>
                 <Original>HC CAS Jet</Original>
                 <English>HC CAS Jet</English>
             </Key>
@@ -5502,9 +5502,9 @@
                 <English>HC CAS Jet</English>
             </Key>
             <Key ID="STR_DUWS_T_9hmlads9">
-                <German>Fallschirmspringer (20CP) Funk</German>
-                <Spanish>Paracaídistas (20 CP)</Spanish>
-                <Chinesesimp>空降部队(20CP)</Chinesesimp>
+                <German>Fallschirmspringer</German>
+                <Spanish>Paracaídistas</Spanish>
+                <Chinesesimp>空降部队</Chinesesimp>
                 <Original>Airborne troops</Original>
                 <English>Airborne troops</English>
             </Key>
@@ -5516,9 +5516,9 @@
                 <English>Airborne troops</English>
             </Key>
             <Key ID="STR_DUWS_T_b7gmddq3">
-                <German>Baue Mobiles HQ (10CP) Funk</German>
-                <Spanish>Construir Cuartel General móvil (10 CP) Radio</Spanish>
-                <Chinesesimp>建立机动指挥部(10CP)</Chinesesimp>
+                <German>Baue Mobiles HQ</German>
+                <Spanish>Construir Cuartel General móvil</Spanish>
+                <Chinesesimp>建立机动指挥部</Chinesesimp>
                 <Original>Mobile HQ</Original>
                 <English>Mobile HQ</English>
             </Key>

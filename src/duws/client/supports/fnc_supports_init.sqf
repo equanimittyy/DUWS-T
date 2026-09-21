@@ -43,12 +43,12 @@ fnc_support_catalogue = {
 
 		// Slot only -- the team already paid for Mobile HQ at the permanent row, so this costs 0 CP.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
-		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
-		["veh_drop",  "CONS",  4, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
-		["uav",       "CONS",  5, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
-		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
-		["helolift",  "CONS",  5, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
-		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
+		["supply",    "CONS",  2, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
+		["veh_drop",  "CONS",  2, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
+		["uav",       "CONS",  3, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
+		["helotaxi",  "CONS",  1, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
+		["helolift",  "CONS",  2, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
+		["boattaxi",  "CONS",  1, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
 		["arty",      "CONS", 15, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  25],
 		["mortar",    "CONS",  8, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  8],
 		["mortar_smoke","CONS",3, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
