@@ -21,4 +21,4 @@ if (!_taken) then { [[[_class, 1]], getPosATL player] remoteExec ["fnc_money_dro
 private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
 hint format ["%1\n\n%2",
     format [localize "STR_DUWS_T_VENDOR_BOUGHT_ITEM", [_name, _class] select (_name isEqualTo "")],
-    localize (["STR_DUWS_T_LOOT_DROPPED", "STR_DUWS_T_LOOT_TAKEN"] select _taken)];
+    if (_taken) then { localize "STR_DUWS_T_LOOT_TAKEN" } else { [[[_class, 1]]] call DUWS_fnc_dropped_line }];

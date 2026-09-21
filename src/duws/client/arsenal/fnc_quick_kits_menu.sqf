@@ -42,13 +42,10 @@ if (_loadouts isEqualTo []) exitWith { hint localize "STR_DUWS_T_QUICK_KITS_NONE
                 };
 
                 private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
-                private _moneyDropped = 0;
-                { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
-                if (_moneyDropped > 0) then {
-                    hint format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped];
-                } else {
-                    hint format [localize "STR_DUWS_T_CHANGED_TO", _displayName];
-                };
+                private _changed = format [localize "STR_DUWS_T_CHANGED_TO", _displayName];
+                hint (if (_dropPairs isEqualTo []) then { _changed } else {
+                    format ["%1\n\n%2", _changed, [_dropPairs] call DUWS_fnc_dropped_line]
+                });
             };
         },
         [_loadout, _displayName]

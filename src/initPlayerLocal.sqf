@@ -111,6 +111,32 @@ DUWS_fnc_money_regrant = {
     _stash
 };
 
+// Money and intel are named by kind, not class: the intel items carry generic or empty displayNames.
+DUWS_fnc_dropped_line = {
+    params ["_pairs"];
+    private _names = [];
+    private _counts = [];
+    {
+        _x params ["_cls", "_n"];
+        private _name = call {
+            if (_cls == "Money_roll") exitWith { localize "STR_DUWS_T_DROPPED_MONEY" };
+            if (_cls in DUWS_forcedRemoveItems) exitWith { localize "STR_DUWS_T_DROPPED_INTEL" };
+            private _display = getText (([_cls] call fnc_vendor_classCfg) >> "displayName");
+            [_display, _cls] select (_display isEqualTo "")
+        };
+        private _i = _names find _name;
+        if (_i < 0) then {
+            _names pushBack _name;
+            _counts pushBack _n;
+        } else {
+            _counts set [_i, (_counts select _i) + _n];
+        };
+    } forEach _pairs;
+    private _msg = localize "STR_DUWS_T_LOOT_DROPPED";
+    { _msg = _msg + format ["\n%1x %2", _counts select _forEachIndex, _x]; } forEach _names;
+    _msg
+};
+
 // restricted-arsenal handler: whitelist filter plus forced money/intel removal
 DUWS_fnc_arsenal_restricted = {
     // Whitelist is every virtual shelf, not just weapons: the strip below runs on all categories, so
@@ -526,12 +552,10 @@ DUWS_fnc_arsenal_unstock = {
 
         // Hand the money back into inventory, overflow dropped at the player's feet.
         private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
-        private _moneyDropped = 0;
-        { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
 
         // Close news to the player's own hint box (per-player), never a team card: gear the shared pool
-        // ran out of before this player's draw settled (stripped on close), then any cash that would not
-        // fit back into inventory. Built as one string -- a second hint call would replace the box.
+        // ran out of before this player's draw settled (stripped on close), then any money or intel that
+        // would not fit back into inventory. Built as one string -- a second hint call would replace the box.
         private _msg = "";
         if (count _excess > 0) then {
             _msg = localize "STR_DUWS_ARSENAL_UNOBTAINED";
@@ -545,9 +569,9 @@ DUWS_fnc_arsenal_unstock = {
                 _msg = _msg + format ["\n%1x %2", _n, _name];
             } forEach _excess;
         };
-        if (_moneyDropped > 0) then {
+        if (_dropPairs isNotEqualTo []) then {
             if (_msg != "") then { _msg = _msg + "\n\n"; };
-            _msg = _msg + format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped];
+            _msg = _msg + ([_dropPairs] call DUWS_fnc_dropped_line);
         };
         if (_msg != "") then { hint _msg; };
 

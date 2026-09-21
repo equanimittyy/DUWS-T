@@ -2249,10 +2249,6 @@
             </Key>
 </Container>
         <Container name="Arsenal">
-            <Key ID="STR_DUWS_ARSENAL_MONEY_DROPPED">
-                <Original>Inventory full.\n\n%1 money dropped at your feet.</Original>
-                <English>Inventory full.\n\n%1 money dropped at your feet.</English>
-            </Key>
             <Key ID="STR_DUWS_ARSENAL_UNOBTAINED">
                 <Original>You were unable to obtain:</Original>
                 <English>You were unable to obtain:</English>
@@ -2672,8 +2668,16 @@
                 <English>Added to your inventory.</English>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_DROPPED">
-                <Original>Inventory full. Dropped at your feet.</Original>
-                <English>Inventory full. Dropped at your feet.</English>
+                <Original>Inventory full.\n\nDropped at your feet:</Original>
+                <English>Inventory full.\n\nDropped at your feet:</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DROPPED_MONEY">
+                <Original>Money</Original>
+                <English>Money</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DROPPED_INTEL">
+                <Original>Intel</Original>
+                <English>Intel</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ITEM_phone">
                 <Original>Mobile Phone</Original>
@@ -3340,11 +3344,6 @@
                 <Original>Found %1 items. Check your inventory.</Original>
                 <English>Found %1 items. Check your inventory.</English>
                 <Chinesesimp>发现 %1 件物品！请检查你的背包。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ITEMS_DROPPED">
-                <Original>Inventory full. Items dropped on the ground.</Original>
-                <English>Inventory full. Items dropped on the ground.</English>
-                <Chinesesimp>背包已满，物品已掉落在地面。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_DESC">
                 <Original>An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that in the event locals are hostile, they will not offer you any information, and it is advisable you wait for his departure.</Original>
