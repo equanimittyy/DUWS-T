@@ -539,8 +539,10 @@ AOI_FOB_REACH   = 2000;
 AOI_TOWN_REACH  = 2000;   // added to a banded town's civ_radius
 
 // Metres past a revealed OPFOR zone's radius, or from a revealed OPFOR hardpoint, inside which civilian
-// cover breaks. Server-only (fnc_disguiseAsCivilian), not broadcast.
+// cover breaks, and the band beyond that which warns once on the way in. Server-only
+// (fnc_disguiseAsCivilian), not broadcast.
 DISGUISE_CIV_SITE_MARGIN = 150;
+DISGUISE_CIV_SITE_WARN = 100;
 
 // The radio-tower amplifiers, global scalars rather than per-town. DUWS_opforRadioLevel is the count of
 // uncleared enemy "RADIO" hardpoints, capped at AOI_OPFOR_TOWER_CAP, recomputed by fnc_hardpoint_stream

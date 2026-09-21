@@ -65,6 +65,9 @@ moving away before the next check.
 | OPFOR zone | inside the zone radius + `DISGUISE_CIV_SITE_MARGIN` (150 m). The zone must be in `WARCOM_zones_controled_by_OPFOR` and revealed in `zone_namePOS_pairs`. The radius comes from `zone_meta_array`. Rows match by position. |
 | OPFOR hardpoint | within `DISGUISE_CIV_SITE_MARGIN` of a `DUWS_hardpoints` row with side `"opfor"` and the revealed flag set |
 
+A band `DISGUISE_CIV_SITE_WARN` (100 m) wide outside that ring warns first. The first check inside the
+band shows one hint, and the player gets the hint again only after leaving the band and coming back.
+
 Only revealed sites count. A break near a hidden site would tell the player that the site exists, and
 hidden sites are what intel pays for
 ([`intel_system.md`](intel_system.md#what-is-hidden-depends-on-when-it-came-into-existence)). When

@@ -2613,6 +2613,10 @@
                 <English>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise.</English>
                 <Chinesesimp>敌人开始怀疑你的身份，迅速离开敌人到安全距离以继续伪装。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_WARNING_SITE_HINT">
+                <Original>You are getting too close to an enemy position.</Original>
+                <English>You are getting too close to an enemy position.</English>
+            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_SUCCESS_HINT">
                 <Original>Disguise activated. Stay low.</Original>
                 <English>Disguise activated. Stay low.</English>

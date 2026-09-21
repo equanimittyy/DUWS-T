@@ -41,16 +41,16 @@ fnc_disguise_enemyNear = {
 // Revealed sites only: a break near a hidden site would tell the player that it exists, and hidden
 // sites are what intel pays for. Towns are in neither registry, so an OPFOR-held town stays safe.
 fnc_disguise_atEnemySite = {
-    params ["_pos"];
+    params ["_pos", "_margin"];
     private _opforZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
     private _atZone = (zone_meta_array findIf {
         private _key = str (_x select 1);
-        (_pos distance2D (_x select 1)) < ((_x select 2) + DISGUISE_CIV_SITE_MARGIN)
+        (_pos distance2D (_x select 1)) < ((_x select 2) + _margin)
         && {(_opforZones findIf {str _x == _key}) >= 0}
         && {(zone_namePOS_pairs findIf {str (_x select 1) == _key && {_x select 2}}) >= 0}
     }) >= 0;
     _atZone || {(DUWS_hardpoints findIf {
-        (_x select 3) isEqualTo "opfor" && {_x select 5} && {(_pos distance2D (_x select 1)) < DISGUISE_CIV_SITE_MARGIN}
+        (_x select 3) isEqualTo "opfor" && {_x select 5} && {(_pos distance2D (_x select 1)) < _margin}
     }) >= 0}
 };
 
@@ -89,7 +89,7 @@ if ([_player] call fnc_disguise_hunted) exitWith {
 if ([_player, _alertDistance] call fnc_disguise_enemyNear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR"] call fnc_disguise_hintFail;
 };
-if ([getPosATL _player] call fnc_disguise_atEnemySite) exitWith {
+if ([getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_SITE"] call fnc_disguise_hintFail;
 };
 
@@ -140,6 +140,7 @@ _player setCaptive true;
 _player setVariable ["DUWS_disguise_warningActive", false, true];
 _player setVariable ["DUWS_disguise_warningPos", nil, true];
 _player setVariable ["DUWS_disguise_alertDist", _alertDistance];
+_player setVariable ["DUWS_disguise_siteWarned", false];
 _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 
 [localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
@@ -213,9 +214,15 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 ["STR_DUWS_T_DISGUISE_BROKEN_CORPSE"] call _fnc_breakDisguise;
             };
 
-            if ([getPosATL _player] call fnc_disguise_atEnemySite) exitWith {
+            if ([getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite) exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_SITE"] call _fnc_breakDisguise;
             };
+
+            private _nearSite = [getPosATL _player, DISGUISE_CIV_SITE_MARGIN + DISGUISE_CIV_SITE_WARN] call fnc_disguise_atEnemySite;
+            if (_nearSite && {!(_player getVariable ["DUWS_disguise_siteWarned", false])}) then {
+                [localize "STR_DUWS_T_DISGUISE_WARNING_SITE_HINT"] remoteExec ["hint", _player];
+            };
+            _player setVariable ["DUWS_disguise_siteWarned", _nearSite];
 
             private _alertDistance = _player getVariable ["DUWS_disguise_alertDist", 50];
             private _warningActive = _player getVariable ["DUWS_disguise_warningActive", false];
