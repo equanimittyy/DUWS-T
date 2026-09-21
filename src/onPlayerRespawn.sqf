@@ -9,7 +9,7 @@ private _savedGoggles = player getVariable ["Saved_Goggles", ""];
 if (_savedFace != "") then { player setFace _savedFace; };
 if (_savedSpeaker != "") then { player setSpeaker _savedSpeaker; };
 if (_savedGoggles != "") then { player addGoggles _savedGoggles; };
-player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
+player_fatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;
 player enableStamina (player_fatigue != 0);
 player addRating 10000000;
 

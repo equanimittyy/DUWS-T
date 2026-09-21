@@ -8,13 +8,13 @@ class Params {
     };
 
     // Stamina/fatigue for the player and the AI they field -- recruits, requested units and
-    // paradrops read player_fatigue at spawn. Off (default) disables it for all of them; On
-    // restores the engine's drain. Read into player_fatigue in client_init and onPlayerRespawn.
+    // paradrops read player_fatigue at spawn. On (default) keeps the engine's drain; Off disables it
+    // for all of them. Read into player_fatigue in client_init and onPlayerRespawn.
     class DUWS_Fatigue {
         title = "Fatigue";
         values[] = {0,1};
         texts[] = {"Off","On"};
-        default = 0;
+        default = 1;
     };
 
     // Snap the player back to first person whenever they pop to third. Camera is client-local,

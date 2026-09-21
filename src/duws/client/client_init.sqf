@@ -172,9 +172,9 @@ player addEventHandler ["killed", {
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
-// Stamina/fatigue from the lobby param (default off). Drives the player here and the AI units
+// Stamina/fatigue from the lobby param (default on). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
-player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
+player_fatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;
 player enableStamina (player_fatigue != 0);
 
 // First-person restriction from the lobby param (default off). Camera view is local, so the
