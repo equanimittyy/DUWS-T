@@ -54,30 +54,15 @@ duws_faction_fetch_classes = {
     };
 };
 
+// The row build and the filter are fnc_class_rows_fill's, shared with the vendor catalogue, which
+// browses classes the same way. What stays here is the one-shot pick: duws_faction_edit_pick asks the
+// next fill to land on a named class and is consumed by it, so a later refill does not jump back.
 duws_faction_fill_classes = {
-    private _classCtrl = [8625] call duws_faction_edit_ctrl;
-    if (isNull _classCtrl) exitWith {};
-
-    // Case-insensitive substring over both the display name and the classname, so a filter matches
-    // either what the player reads or the raw class they already know.
-    private _rows = duws_faction_class_rows;
-    private _filterCtrl = [8632] call duws_faction_edit_ctrl;
-    private _filter = toLower (if (isNull _filterCtrl) then {""} else {ctrlText _filterCtrl});
-    if (_filter != "") then {
-        _rows = _rows select {
-            ((toLower (_x select 0)) find _filter >= 0) || {(toLower (_x select 1)) find _filter >= 0}
-        };
-    };
-
-    lbClear _classCtrl;
-    {
-        private _i = _classCtrl lbAdd format ["%1  --  %2", _x select 0, _x select 1];
-        _classCtrl lbSetData [_i, _x select 1];
-    } forEach _rows;
-
-    private _pick = _rows findIf { (_x select 1) isEqualTo duws_faction_edit_pick };
+    private _rows = [[8625] call duws_faction_edit_ctrl, [8632] call duws_faction_edit_ctrl,
+        duws_faction_class_rows, duws_faction_edit_pick] call fnc_class_rows_fill;
     duws_faction_edit_pick = "";
-    if (_rows isEqualTo []) then { [] call duws_faction_edit_preview; } else { _classCtrl lbSetCurSel (0 max _pick); };
+    // lbSetCurSel raises no LBSelChanged on an empty list, so the preview has to be told itself.
+    if (_rows isEqualTo []) then { [] call duws_faction_edit_preview; };
 };
 
 // Preview of the class the class combo is on, plus the line naming it. Same fallback the AutoDetect

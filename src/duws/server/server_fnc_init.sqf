@@ -985,6 +985,10 @@ fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\factio
 // call it too.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 fnc_arsenal_weapon_row = compile preprocessFileLineNumbers "duws\shared\functions\fnc_arsenal_weapon_row.sqf";
+// Broadcast: both class browsers that call it -- the faction key editor and the vendor catalogue --
+// run on the player's machine.
+fnc_class_rows_fill = compile preprocessFileLineNumbers "duws\shared\functions\fnc_class_rows_fill.sqf";
+publicVariable "fnc_class_rows_fill";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
 fnc_gm_occupant = compile preprocessFileLineNumbers "duws\shared\functions\fnc_gm_occupant.sqf";
