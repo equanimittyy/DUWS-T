@@ -141,7 +141,8 @@ campaign ending it covers is the commanding officer's death (`server/init_hq/fnc
 Where escalation is not a lose condition the level clamps at the ceiling instead, so prices plateau
 at x2.1 and the war continues. Where the officer's death is not one, it costs the request menu
 instead: `client/dialog/fnc_request_menu.sqf` refuses to open once he is dead, so a campaign that
-survives him can spend nothing. Escalation itself is switched off elsewhere, by the
+survives him can spend nothing. Both events raise a red card for the team under every setting, so a
+campaign that survives one still reports it. Escalation itself is switched off elsewhere, by the
 `escalation_enabled` environment-menu option.
 
 ## Supports: permanent and consumable

@@ -108,15 +108,18 @@ fnc_escalation_report = {
     ["INFO", "ECON", format ["Escalation level %1 (%2 destroyed of %3), prices x%4",
         _level, escalation_destroyed, escalation_budget, escalation_multiplier]] call fnc_log;
 
-    // Lose conditions Full (0) or Escalation Only (2).
-    if (_level >= ESCALATION_MAX_LEVEL
-        && {(["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 2]}) exitWith {
-        campaign_lost = true;
-        campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST";
-        campaign_lost_ending = "island_ruined";
-        publicVariable "campaign_lost";
-        publicVariable "campaign_lost_body";
-        ["INFO", "ECON", "Escalation reached its ceiling: campaign lost"] call fnc_log;
+    if (_level >= ESCALATION_MAX_LEVEL) exitWith {
+        ["alert", [localize "STR_DUWS_T_escalation_title", localize "STR_DUWS_T_escalation_max"]]
+            remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+        // Lose conditions Full (0) or Escalation Only (2).
+        if ((["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 2]) then {
+            campaign_lost = true;
+            campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST";
+            campaign_lost_ending = "island_ruined";
+            publicVariable "campaign_lost";
+            publicVariable "campaign_lost_body";
+            ["INFO", "ECON", "Escalation reached its ceiling: campaign lost"] call fnc_log;
+        };
     };
 
     ["alert", [localize "STR_DUWS_T_escalation_title",

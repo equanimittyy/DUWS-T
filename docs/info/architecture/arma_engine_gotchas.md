@@ -104,7 +104,7 @@ Two `class Foo { ... }` blocks at the same scope in the merged `description.ext`
 
 ## Config text is shown verbatim, so a `%N` in it reaches the player unsubstituted
 
-A `$STR_` reference in config (`CfgDebriefing`, action names, `displayName`) is resolved and displayed as-is — no call site hands it arguments, so a shared key that gains a `%N` in a script use (a hint in `server/misc/fnc_capture_zones_task.sqf`) renders literal `%1` on the config side (the outro card, `shared/includes/debriefing.hpp`). Fix: a `%N`-bearing key belongs to script call sites only; give config its own placeholder-free key.
+A `$STR_` reference in config (`CfgDebriefing`, action names, `displayName`) is resolved and displayed as-is — no call site hands it arguments, so a shared key that gains a `%N` in a script use (the defeat notification in `server/misc/fnc_capture_zones_task.sqf`) renders literal `%1` on the config side (the outro card, `shared/includes/debriefing.hpp`). Fix: a `%N`-bearing key belongs to script call sites only; give config its own placeholder-free key.
 
 ## `localize` on a finished sentence looks it up as a key and speaks nothing
 

@@ -2024,8 +2024,8 @@
                 <English>Campaign Lost</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST">
-                <Original>%1 is in ruins. Operation is a failure.</Original>
-                <English>%1 is in ruins. Operation is a failure.</English>
+                <Original>The campaign is lost. %1 is in ruins</Original>
+                <English>The campaign is lost. %1 is in ruins</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_CARD">
                 <Original>The AO is in ruins. Operation is a failure.</Original>
@@ -2034,6 +2034,18 @@
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_OFFICER">
                 <Original>Your commanding officer is dead. Operation is a failure.</Original>
                 <English>Your commanding officer is dead. Operation is a failure.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CAMPAIGN_LOST_OFFICER_MSG">
+                <Original>The campaign is lost. Your commanding officer is dead</Original>
+                <English>The campaign is lost. Your commanding officer is dead</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OFFICER_KILLED_TITLE">
+                <Original>Officer Killed</Original>
+                <English>Officer Killed</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OFFICER_KILLED">
+                <Original>Your commanding officer is dead</Original>
+                <English>Your commanding officer is dead</English>
             </Key>
             <Key ID="STR_DUWS_T_REQUESTS_NO_OFFICER">
                 <Original>Your commanding officer is dead. The REQUESTS menu is no longer available.</Original>
@@ -2094,6 +2106,10 @@
             <Key ID="STR_DUWS_T_escalation_level">
                 <Original>Escalation is now level %1. Supports cost more</Original>
                 <English>Escalation is now level %1. Supports cost more</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escalation_max">
+                <Original>Escalation is at its maximum level</Original>
+                <English>Escalation is at its maximum level</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of it and the campaign is lost.</Original>

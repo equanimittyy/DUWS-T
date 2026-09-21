@@ -391,14 +391,16 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
         hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0);
         sleep 1;
     };
+    ["alert", [localize "STR_DUWS_T_OFFICER_KILLED_TITLE", localize "STR_DUWS_T_OFFICER_KILLED"]]
+        remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
     // Lose conditions Full (0) or Officer Death Only (1).
     if !((["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 1]) exitWith {
         ["INFO", "WARCOM", "Commanding officer killed: lose condition disabled"] call fnc_log;
     };
 
     campaign_lost = true;
-    campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
-    // Names the outro card as well as the hint: both endings are worded, and the debriefing
+    campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER_MSG";
+    // Names the outro card as well as the notification: both endings are worded, and the debriefing
     // class is read on the server only, so it needs no broadcast.
     campaign_lost_ending = "officerkilled";
     publicVariable "campaign_lost";

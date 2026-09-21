@@ -222,7 +222,7 @@ class CfgNotifications
     };
 
     // Title comes from the call site: this class carries four different losses -- a FOB, the MHQ,
-    // an informant, a rise in escalation -- and a fixed title titled every one of them "FOB Lost".
+    // the commanding officer, a rise in escalation -- and a fixed title titled every one of them "FOB Lost".
     class alert
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
