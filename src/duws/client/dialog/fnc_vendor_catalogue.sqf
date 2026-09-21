@@ -29,6 +29,8 @@ if (((missionNamespace getVariable ["DUWS_enemy_town_pos", []]) findIf {
     hint format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]];
 };
 
+[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_VENDOR_GREET"] call fnc_duws_dialogue;
+
 // The dialog's controls run outside this scope and have no access to the addAction's _target, so the
 // vendor is handed over through a global.
 DUWS_vendor_target = _vendor;

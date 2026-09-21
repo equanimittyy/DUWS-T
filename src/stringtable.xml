@@ -2990,6 +2990,10 @@
                 <Original>The trader refuses to deal with you while %1 is hostile towards you.</Original>
                 <English>The trader refuses to deal with you while %1 is hostile towards you.</English>
             </Key>
+            <Key ID="STR_DUWS_T_VENDOR_GREET">
+                <Original>I've got just what you need.</Original>
+                <English>I've got just what you need.</English>
+            </Key>
             <Key ID="STR_DUWS_T_VENDOR_BROKE">
                 <Original>You do not have enough money.</Original>
                 <English>You do not have enough money.</English>
