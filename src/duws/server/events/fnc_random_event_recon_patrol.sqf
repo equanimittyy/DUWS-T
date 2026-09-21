@@ -10,7 +10,7 @@ if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 
 #define RECON_RADIUS 500
 #define OFFROAD 300
-#define LIFETIME 1200
+#define LIFETIME 900
 
 // A patrol centre near the player, OFFROAD clear of any road. A few tries, then drop rather than force it.
 private _centre = [];

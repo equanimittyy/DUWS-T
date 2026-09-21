@@ -20,7 +20,7 @@ private _grp = [_class, _spawnPos, 0, "none", _spawnPos, "opfor"] call fnc_spawn
 if (isNull _grp) exitWith {};
 private _veh = vehicle (units _grp select 0);
 
-#define LIFETIME 1200
+#define LIFETIME 900
 
 // A point past the player on the car's line of approach, snapped to the nearest road so the leg stays on
 // tarmac rather than cutting cross-country to it.

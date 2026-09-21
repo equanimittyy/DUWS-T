@@ -27,7 +27,7 @@ if (isNull _player) exitWith {};
 #define IED_LIVE_CHANCE 0.10
 #define ARM_RANGE 20
 #define FUSE (random 2)
-#define LIFETIME 1200
+#define LIFETIME 900
 #define TICK 0.5
 
 private _pileClasses = [
