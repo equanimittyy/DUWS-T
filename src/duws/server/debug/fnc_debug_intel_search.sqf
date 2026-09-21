@@ -1,9 +1,10 @@
 // Locality: server. Runs the real payout draw and the real payout, and deliberately skips stage
 // one: the flag is rolled when a unit spawns, so exercising it honestly means fighting a garrison
-// per sample. The stage-one chance is reported rather than obeyed. Nothing else is faked.
+// per sample. The stage-one chance is reported rather than obeyed. Nothing else is faked, except
+// that _forceIntel skips the kind draw so a reveal can be tested on demand.
 if (!isServer) exitWith {};
 
-params ["_caller", ["_source", "combat"]];
+params ["_caller", ["_source", "combat"], ["_forceIntel", false]];
 if (isNull _caller) exitWith {};
 
 private _config = DUWS_searchSources getOrDefault [_source, []];
@@ -11,7 +12,7 @@ if (_config isEqualTo []) exitWith {
     [format ["Intel search (debug)\n\nNo source named '%1' in DUWS_searchSources.", _source]] remoteExec ["hint", _caller];
 };
 
-// Names copied out as strings, zones and hardcore-hidden towns together. The entries themselves
+// Names copied out as strings: zones, hardcore-hidden towns and hardpoint keys. The entries themselves
 // are handed out by reference, so a snapshot of them would mutate along with the array and show
 // nothing changed.
 private _fnc_hidden = {
@@ -23,12 +24,13 @@ private _fnc_hidden = {
             _out pushBack (if (_name != "") then {_name} else {format ["Town %1", _forEachIndex]});
         };
     } forEach (missionNamespace getVariable ["civ_visible", []]);
+    { if (!(_x select 5)) then { _out pushBack (_x select 0) } } forEach DUWS_hardpoints;
     _out
 };
 
 private _hiddenBefore = call _fnc_hidden;
 
-private _kind = [_config select 1] call fnc_search_drawKind;
+private _kind = if (_forceIntel) then { "intel" } else { [_config select 1] call fnc_search_drawKind };
 private _outcome = format ["drew '%1'", _kind];
 
 // Only the intel kind can decline, and only the intel kind is worth showing the pool for. The
