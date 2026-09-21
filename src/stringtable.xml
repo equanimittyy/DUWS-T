@@ -2234,8 +2234,8 @@
 </Container>
         <Container name="Arsenal">
             <Key ID="STR_DUWS_ARSENAL_MONEY_DROPPED">
-                <Original>Inventory full. %1 money dropped at your feet.</Original>
-                <English>Inventory full. %1 money dropped at your feet.</English>
+                <Original>Inventory full.\n\n%1 money dropped at your feet.</Original>
+                <English>Inventory full.\n\n%1 money dropped at your feet.</English>
             </Key>
             <Key ID="STR_DUWS_ARSENAL_UNOBTAINED">
                 <Original>You were unable to obtain:</Original>
