@@ -57,6 +57,14 @@ whenever the town wakes and after every respawn. Some vendors are location-gated
 size-scaled — a boat dealer only where there is water inside the town's radius, a fishmonger only in
 a coastal town — so a town's mix reflects where it is, not only how big it is.
 
+**Every type appears at least once, where the map allows it.** The assignment is a draft, not an
+independent roll per town: a first pass seeds one of each type listed here and in the jobs plan into
+a town that can host it, largest town first and location gates respected; a second pass fills the
+remaining slots by weighted roll. Rolling each town independently would let a type come up zero
+times across the campaign, or only in towns that start enemy-held and refuse to sell. A type whose
+gate no town satisfies — a boat dealer on a landlocked map — is simply absent, since the draft
+cannot invent ground for it.
+
 **Building picks are weighted by shop type.** A boat dealer takes a building as close to water as
 possible, scored by the distance to the nearest water sampled with `surfaceIsWater`. A car dealer
 takes a building near a fuel station where the town has one (`nearestTerrainObjects` with the
@@ -82,15 +90,23 @@ rebuilds on every band crossing; the server re-tests with `fnc_civ_repAt` when a
 picked — the same advisory-then-authoritative split `fnc_civ_menu` already uses for the money count.
 
 **Lifecycle: streamed with the crowd, not always-on.** Persistent AI in every town across Altis is a
-perf cost the mission cannot pay. Vendors ride the same site poller as the crowd — register them as
-occupants of the town's `town_crowd` profile (or a parallel `town_vendors` profile) so they spawn
-when a player is near and are deleted when the town sleeps (`fnc_civ_handler.sqf:114-138`).
+perf cost the mission cannot pay. Vendors ride the same site poller as the crowd, so they spawn when
+a player is near and are deleted when the town sleeps (`fnc_civ_handler.sqf:114-138`).
+
+They register as their **own occupant kind** on the town's site, `vendors`, reusing the `town_crowd`
+profile's presence numbers so they appear and vanish on the crowd's clock. An own kind is not about
+the spawn — the crowd's wake hook could raise them, and its sleep hook would collect them off the
+same roster. It is about the respawn below: hooks are per kind, and only a kind of its own can
+declare the poller's `tick` hook, which fires every pass instead of only on a wake/sleep transition
+(`fnc_site_stream_init.sqf:380-382`). The town garrison keeps its own cycle for the same reason
+(`fnc_civ_garrison.sqf:239`). Riding the crowd would mean a bespoke timer thread beside the poller.
 
 **Respawn five minutes after a kill.** A killed vendor denies its service until it respawns. The
-`Killed` handler stamps a per-town, per-type cooldown; the poller's wake hook recreates the vendor
-only once the cooldown has elapsed. Store the cooldown as **remaining seconds, never a
-`diag_tickTime` stamp** — the persistence contract forbids absolute timestamps because they do not
-survive a save/restore (`campaign_persistence_plan.md`, time-state rule). While the cooldown is
+`Killed` handler stamps a per-town, per-type cooldown; the `tick` hook counts it down each pass and
+recreates the vendor once it reaches zero, whether or not the town has slept in between. Store the
+cooldown as **remaining seconds, never a `diag_tickTime` stamp** — the persistence contract forbids
+absolute timestamps because they do not survive a save/restore (`campaign_persistence_plan.md`,
+time-state rule). While the cooldown is
 live, the town simply lacks that vendor and its service.
 
 ## Map markers and icons
@@ -129,16 +145,17 @@ icon shortage grates, the alternative is a few custom `.paa` glyphs declared in 
 **Two marker states, driven by the respawn registry.** A live vendor's marker is coloured; a dead one
 is grey until it respawns. Use the civilian colour `ColorCIV` (purple, matching the `c_` icons) for
 the open state and grey for the down state. On the vendor's `Killed` handler the server sets the
-marker grey and stamps the five-minute cooldown (as [remaining seconds](#vendor-registry)); when
-the cooldown elapses and the poller respawns the vendor, the server restores `ColorCIV`. Because the
-marker state is a function of the registry's cooldown, not of the live unit, it stays correct across a
-town sleeping and waking and across a rebuild — the marker is redrawn grey or coloured from the stored
-cooldown, never from a unit handle.
+marker grey and stamps the five-minute cooldown (as [remaining seconds](#vendor-registry)); when the
+`tick` hook runs that cooldown out and respawns the vendor, the server restores `ColorCIV`. Because
+the marker state is a function of the registry's cooldown, not of the live unit, it stays correct
+across a town sleeping and waking and across a rebuild — the marker is redrawn grey or coloured from
+the stored cooldown, never from a unit handle. A sleeping town's shops read open, because an
+uncooled vendor is simply not simulated, not shut.
 
-Grey needs one check: confirm `ColorGrey` exists in `CfgMarkerColors` on this build. If it does not,
-use `ColorBlack` (definitely present, reads as a dead marker) or declare a custom `class ColorDUWS_Grey`
-once in `description.ext` `CfgMarkerColors`. Optionally also drop the marker alpha while down
-(`setMarkerAlpha 0.5`) so grey plus dim reads unmistakably as "closed."
+`ColorGrey` is stock and already in use (`fnc_arty.sqf:93`), so no custom colour class is needed.
+Colour alone carries the closed state: marker alpha is already the reveal channel, set from
+`civ_visible` in `fnc_civ_town_reveal`, and dimming a down vendor as well would make one number mean
+both "undiscovered" and "closed".
 
 ## Interaction and menus
 
