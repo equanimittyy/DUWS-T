@@ -398,198 +398,247 @@
             <Key ID="STR_DUWS_T_faction_role_soldier">
                 <Original>Rifleman</Original>
                 <English>Rifleman</English>
+                <Chinesesimp>步枪兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_aa_soldier">
                 <Original>Anti-air specialist</Original>
                 <English>Anti-air specialist</English>
+                <Chinesesimp>防空兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_ar_soldier">
                 <Original>Autorifleman</Original>
                 <English>Autorifleman</English>
+                <Chinesesimp>自动步枪手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_at_soldier">
                 <Original>Anti-tank specialist</Original>
                 <English>Anti-tank specialist</English>
+                <Chinesesimp>反坦克兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_gl_soldier">
                 <Original>Grenadier</Original>
                 <English>Grenadier</English>
+                <Chinesesimp>掷弹兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_lat_soldier">
                 <Original>Light anti-tank rifleman</Original>
                 <English>Light anti-tank rifleman</English>
+                <Chinesesimp>轻型反坦克兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_sl_soldier">
                 <Original>Squad leader</Original>
                 <English>Squad leader</English>
+                <Chinesesimp>班长</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_tl_soldier">
                 <Original>Team leader</Original>
                 <English>Team leader</English>
+                <Chinesesimp>组长</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_mark_soldier">
                 <Original>Marksman</Original>
                 <English>Marksman</English>
+                <Chinesesimp>精确射手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_sniper_soldier">
                 <Original>Sniper</Original>
                 <English>Sniper</English>
+                <Chinesesimp>狙击手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_medic">
                 <Original>Medic</Original>
                 <English>Medic</English>
+                <Chinesesimp>医疗兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_officer">
                 <Original>Officer</Original>
                 <English>Officer</English>
+                <Chinesesimp>军官</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_armed_car1">
                 <Original>Armed car</Original>
                 <English>Armed car</English>
+                <Chinesesimp>武装车辆</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_apc1">
                 <Original>Armored personnel carrier</Original>
                 <English>Armored personnel carrier</English>
+                <Chinesesimp>装甲运兵车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_apc2">
                 <Original>Armored personnel carrier</Original>
                 <English>Armored personnel carrier</English>
+                <Chinesesimp>装甲运兵车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_mbt_tank1">
                 <Original>Main battle tank</Original>
                 <English>Main battle tank</English>
+                <Chinesesimp>主战坦克</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_trans_heli">
                 <Original>Transport helicopter</Original>
                 <English>Transport helicopter</English>
+                <Chinesesimp>运输直升机</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_attack_heli">
                 <Original>Attack helicopter</Original>
                 <English>Attack helicopter</English>
+                <Chinesesimp>攻击直升机</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_misc_air">
                 <Original>Combat aircraft</Original>
                 <English>Combat aircraft</English>
+                <Chinesesimp>作战飞机</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_turret_aa">
                 <Original>Static anti-air launcher</Original>
                 <English>Static anti-air launcher</English>
+                <Chinesesimp>固定式防空发射器</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_turret_at">
                 <Original>Static anti-tank launcher</Original>
                 <English>Static anti-tank launcher</English>
+                <Chinesesimp>固定式反坦克发射器</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_turret_hmg">
                 <Original>Static heavy machine gun</Original>
                 <English>Static heavy machine gun</English>
+                <Chinesesimp>固定式重机枪</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_turret_gmg">
                 <Original>Static grenade launcher</Original>
                 <English>Static grenade launcher</English>
+                <Chinesesimp>固定式榴弹发射器</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_turret_mortar">
                 <Original>Mortar</Original>
                 <English>Mortar</English>
+                <Chinesesimp>迫击炮</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops">
                 <Original>Operator</Original>
                 <English>Operator</English>
+                <Chinesesimp>特种兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_gl">
                 <Original>Operator (grenadier)</Original>
                 <English>Operator (grenadier)</English>
+                <Chinesesimp>特种掷弹兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_lat">
                 <Original>Operator (light anti-tank)</Original>
                 <English>Operator (light anti-tank)</English>
+                <Chinesesimp>特种轻型反坦克兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_hat">
                 <Original>Operator (heavy anti-tank)</Original>
                 <English>Operator (heavy anti-tank)</English>
+                <Chinesesimp>特种重型反坦克兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_aa">
                 <Original>Operator (anti-air)</Original>
                 <English>Operator (anti-air)</English>
+                <Chinesesimp>特种防空兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_mg">
                 <Original>Operator (machine gunner)</Original>
                 <English>Operator (machine gunner)</English>
+                <Chinesesimp>特种机枪手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_medic">
                 <Original>Operator (medic)</Original>
                 <English>Operator (medic)</English>
+                <Chinesesimp>特种医疗兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_mark">
                 <Original>Operator (marksman)</Original>
                 <English>Operator (marksman)</English>
+                <Chinesesimp>特种精确射手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_sniper">
                 <Original>Operator (sniper)</Original>
                 <English>Operator (sniper)</English>
+                <Chinesesimp>特种狙击手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_exp">
                 <Original>Operator (explosives)</Original>
                 <English>Operator (explosives)</English>
+                <Chinesesimp>特种爆破手</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_specops_eng">
                 <Original>Operator (engineer)</Original>
                 <English>Operator (engineer)</English>
+                <Chinesesimp>特种工兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_heli_pilot">
                 <Original>Helicopter pilot</Original>
                 <English>Helicopter pilot</English>
+                <Chinesesimp>直升机飞行员</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_boat_armed">
                 <Original>Armed boat</Original>
                 <English>Armed boat</English>
+                <Chinesesimp>武装快艇</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_boat_crew">
                 <Original>Boat crew</Original>
                 <English>Boat crew</English>
+                <Chinesesimp>船员</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_boat_trans">
                 <Original>Transport boat</Original>
                 <English>Transport boat</English>
+                <Chinesesimp>运输艇</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_heli_trans_arm">
                 <Original>Armed transport helicopter</Original>
                 <English>Armed transport helicopter</English>
+                <Chinesesimp>武装运输直升机</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_eng_soldier">
                 <Original>Engineer</Original>
                 <English>Engineer</English>
+                <Chinesesimp>工兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_crew">
                 <Original>Vehicle crew</Original>
                 <English>Vehicle crew</English>
+                <Chinesesimp>载具乘员</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_operator">
                 <Original>Recon soldier</Original>
                 <English>Recon soldier</English>
+                <Chinesesimp>侦察兵</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_aa_apc">
                 <Original>Anti-air vehicle</Original>
                 <English>Anti-air vehicle</English>
+                <Chinesesimp>防空车辆</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_arty">
                 <Original>Artillery</Original>
                 <English>Artillery</English>
+                <Chinesesimp>火炮</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_trans_truck">
                 <Original>Transport truck</Original>
                 <English>Transport truck</English>
+                <Chinesesimp>运输卡车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_covered_truck">
                 <Original>Covered truck</Original>
                 <English>Covered truck</English>
+                <Chinesesimp>篷布卡车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_ammo_truck">
                 <Original>Ammunition truck</Original>
                 <English>Ammunition truck</English>
+                <Chinesesimp>弹药卡车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_role_repair_truck">
                 <Original>Repair truck</Original>
                 <English>Repair truck</English>
+                <Chinesesimp>维修卡车</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_faction_cancel">
                 <Original>CANCEL</Original>
