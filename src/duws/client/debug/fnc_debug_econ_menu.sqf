@@ -1,8 +1,8 @@
 // Locality: client -- the button handlers below run on whoever opened the menu.
 /*
-    Developer tool: type a signed amount, click what it lands in. Campaign pools are client globals
-    edited here directly; town rep/worth and the escalation counter are server-only, so those
-    round-trip through fnc_debug_econ_server. Also fires one economy tick. English-only like fnc_debug_menu.
+    Developer tool: type a signed amount, click what it lands in. Money lands in the player's own
+    inventory, so it is granted here; everything else is server-owned and is sent there. Also fires
+    one economy tick. English-only like fnc_debug_menu.
 */
 if (!hasInterface) exitWith {};
 
@@ -23,7 +23,7 @@ _bg ctrlCommit 0;
 
 private _titleCtrl = _display ctrlCreate ["RscText", 9511];
 _titleCtrl ctrlSetPosition [0.25, 0.18, 0.5, 0.05];
-_titleCtrl ctrlSetText "Adjust CP / AP / Town / Escalation";
+_titleCtrl ctrlSetText "Adjust CP / AP / Money / Town / Escalation";
 _titleCtrl ctrlSetBackgroundColor [0, 0, 0, 0.9];
 _titleCtrl ctrlCommit 0;
 
@@ -47,7 +47,7 @@ private _apply = {
     if (_delta == 0) exitWith { hint "Enter a non-zero number."; };
 
     private _idc = ctrlIDC (_this select 0);
-    private _i = [9514, 9515, 9516] find _idc;
+    private _i = [9514, 9515, 9516, 9518] find _idc;
 
     // Stays open like the town and escalation edits: the pools are client globals the server
     // broadcasts back, so a trailing snapshot request re-labels these buttons once the new totals land.
@@ -58,6 +58,10 @@ private _apply = {
             // earned counter is a one-way ratchet a negative test delta must not credit.
             case 1: { ["BLU", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
             case 2: { ["OPF", _delta, "debug menu", _delta max 0] remoteExec ["fnc_ap_adjust", 2]; };
+            case 3: {
+                if (_delta < 0) exitWith { hint "Money takes a positive count."; };
+                ["Money_roll", _delta, format ["Spawned %1 money.", _delta]] call fnc_loot_grant;
+            };
         };
         ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
     };
@@ -81,15 +85,16 @@ private _apply = {
 
 {
     private _btn = _display ctrlCreate ["RscButton", _x];
-    _btn ctrlSetPosition [0.26 + 0.16 * _forEachIndex, 0.33, 0.155, 0.05];
+    _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.33, 0.115, 0.05];
     _btn ctrlSetText ([
         format ["BLU CP (%1)", commandpointsblu1],
         format ["BLU AP (%1)", WARCOM_blufor_ap],
-        format ["OPF AP (%1)", WARCOM_opfor_ap]
+        format ["OPF AP (%1)", WARCOM_opfor_ap],
+        format ["Money (%1)", [player] call fnc_money_count]
     ] select _forEachIndex);
     _btn ctrlCommit 0;
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
-} forEach [9514, 9515, 9516];
+} forEach [9514, 9515, 9516, 9518];
 
 // Filled by fnc_debug_econ_fill; until then says so rather than showing a stale zero.
 private _escReadout = _display ctrlCreate ["RscText", 9520];

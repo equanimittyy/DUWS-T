@@ -10,11 +10,12 @@ disableSerialization;
 private _display = uiNamespace getVariable ["DUWS_debug_econ_display", displayNull];
 if (isNull _display) exitWith {};
 
-// Client globals the server broadcasts; re-read each snapshot so a pool edit shows its new total.
+// Client-side figures, re-read each snapshot so an edit shows its new total.
 {
     private _ctrl = _display displayCtrl (_x select 0);
     if (!isNull _ctrl) then { _ctrl ctrlSetText format [_x select 1, _x select 2] };
-} forEach [[9514, "BLU CP (%1)", commandpointsblu1], [9515, "BLU AP (%1)", WARCOM_blufor_ap], [9516, "OPF AP (%1)", WARCOM_opfor_ap]];
+} forEach [[9514, "BLU CP (%1)", commandpointsblu1], [9515, "BLU AP (%1)", WARCOM_blufor_ap], [9516, "OPF AP (%1)", WARCOM_opfor_ap],
+    [9518, "Money (%1)", [player] call fnc_money_count]];
 
 private _list = _display displayCtrl 9522;
 if (isNull _list) exitWith {};
