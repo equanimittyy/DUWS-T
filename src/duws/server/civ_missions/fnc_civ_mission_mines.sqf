@@ -68,14 +68,19 @@ if (_status == "") then {
         } forEach [0, 20, -20, 40, -40];
         _best
     };
-    private _roll = { params ["_team", "_patrol"]; ([_team] select [0, floor random 2]) + ([_patrol, _patrol] select [0, floor random 3]) };
+    private _roll = {
+        params ["_team", "_patrol", "_patrolsMax"];
+        private _rolled = [_team] select [0, floor random 2];
+        for "_i" from 1 to floor random (_patrolsMax + 1) do { _rolled pushBack _patrol };
+        _rolled
+    };
 
     private _groups = [];
     private _at = [_ring, _away + _swing] call _fnc_spot;
     if (_at isNotEqualTo []) then {
         {
             _groups pushBack ([_x, _site, _ring, "hunt", [_at, 15, 0, 3, 0.5] call fnc_safe_pos] call fnc_spawn_team);
-        } forEach (["team", "patrol"] call _roll);
+        } forEach (["team", "patrol", 2] call _roll);
     };
     private _opfor = count _groups;
     _at = [_ring + 100, _away - _swing] call _fnc_spot;
@@ -85,7 +90,7 @@ if (_status == "") then {
             private _grp = [[_at, 15, 0, 3, 0.5] call fnc_safe_pos, _x] call fnc_bandit_spawn;
             [_grp, "hunt", _site, _ring] call fnc_apply_posture;
             _groups pushBack _grp;
-        } forEach ([["rifleman", "autogunner", "grenadier", "rifleman", "at", "medic"], ["rifleman", "autogunner"]] call _roll);
+        } forEach ([["rifleman", "autogunner", "grenadier", "rifleman", "at", "medic"], ["rifleman", "autogunner"], 4] call _roll);
     };
     _e set ["patrols", _groups];
     ["INFO", "CIV", format ["civilian mission %1: first mine gone, %2 OPFOR and %3 bandit groups move on the field", _id, _opfor, count _groups - _opfor]] call fnc_log;
