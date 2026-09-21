@@ -1,7 +1,7 @@
 // Locality: server; a mission's own thread is its only caller.
 //
-// Bandits are owned by their group handle, not by fnc_mission_claim's token: the token belongs to the single
-// HQ slot, and advancing it here would re-stamp a running HQ mission's later claims.
+// A job's men are owned by their group handles, not by fnc_mission_claim's token: the token belongs to the
+// single HQ slot, and advancing it here would re-stamp a running HQ mission's later claims.
 params ["_id", "_status"];
 private _e = DUWS_civMissions getOrDefault [_id, createHashMap];
 if (count _e == 0) exitWith {};
@@ -36,12 +36,12 @@ switch (_status) do {
     };
 };
 
-private _bandits = units (_e get "group");
-{ _bandits append units _x } forEach (_e get "pairs");
+private _men = units (_e get "group");
+{ _men append units _x } forEach (_e get "patrols");
 {
     _x setVariable ["DUWS_binMe", true];
     _x setVariable ["DUWS_binAt", time + 300];
-} forEach (_bandits select { alive _x });
+} forEach (_men select { alive _x });
 [_e get "compKey"] call fnc_duws_release;
 
 if (!isNull _giver) then {

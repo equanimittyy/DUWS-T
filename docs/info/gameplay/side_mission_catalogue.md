@@ -503,6 +503,10 @@ the map and the hardpoint poller removes the row when the last mine is gone
 giver, so a cancel or the giver's death leaves it on the map. An AT mine does not fire under a man on foot, so
 the AT roll is the easier job.
 
+**OPFOR patrols the field.** The thread raises 0-1 `team` and 0-2 `patrol` groups with `fnc_spawn_team`, all
+on `widepatrol` round the site. Each group spawns 100 m beyond the outermost kept mine, on a bearing weighted
+away from the giver's town, and patrols inside that ring. A patrol does not count toward the objective.
+
 **The giver goes indoors and stays** (`fnc_civ_mission_accept.sqf`). On the accept, the giver walks to a
 ground-floor position in the nearest enterable building within 150 m, off the street where traffic could
 run them over, and `PATH` goes off when they arrive. The accept also takes the giver off the town's crowd
@@ -518,7 +522,7 @@ Readiness is a separate flag, so a poll never overwrites a report. The objective
 the entry and reads the entry it is given, because the request re-runs it at the report and an SQF block
 captures no locals.
 
-**Bandits are owned by their group handles, not by the HQ token.** `fnc_mission_claim` defaults to the
+**A job's men are owned by their group handles, not by the HQ token.** `fnc_mission_claim` defaults to the
 running HQ mission's token, which cannot advance while the HQ slot is held. A civilian mission that
 advanced it would re-stamp the HQ mission's later claims. The finish writes the same `DUWS_binMe` /
 `DUWS_binAt` pair that `fnc_mission_cleanup` writes. The camp props and the stolen car are kept under the

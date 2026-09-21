@@ -15,7 +15,7 @@ if (isNull _grp) exitWith {
 };
 [_grp, "closepatrol", _site, 100] call fnc_apply_posture;
 _e set ["group", _grp];
-_e set ["pairs", [_site, floor random 3] call fnc_bandit_pairs];
+_e set ["patrols", [_site, floor random 3] call fnc_bandit_pairs];
 // Read from the entry, not a captured local: fnc_civ_mission_request re-runs it at the report.
 _e set ["won", { params ["_e"]; ({ alive _x } count units (_e get "group")) == 0 }];
 _e set ["lost", { false }];

@@ -31,6 +31,16 @@ missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines];
 ["INFO", "CIV", format ["civilian mission %1: %2 field %3 keeps %4 of %5 mines", _id, _variant, _key, _left, _laid]] call fnc_log;
 
 _e set ["mines", _mines];
+private _townPos = getPos ((missionNamespace getVariable ["civ_locations", []]) select (_e get "town"));
+private _ring = 100 + selectMax (_mines apply { _x distance2D _site });
+private _patrols = [];
+{
+    // random [min, mid, max] peaks at mid, so most groups start on the field's far side from town.
+    private _at = [_site getPos [_ring, (_townPos getDir _site) + random [-180, 0, 180]], 25, 0, 5, 0.5, []] call fnc_safe_pos;
+    if (_at isEqualTo []) then { continue };
+    _patrols pushBack ([_x, _site, _ring, "widepatrol", _at] call fnc_spawn_team);
+} forEach ((["team"] select [0, floor random 2]) + (["patrol", "patrol"] select [0, floor random 3]));
+_e set ["patrols", _patrols];
 _e set ["thanks", "STR_DUWS_T_CIVMISSION_MINES_THANKS"];
 // Read from the entry, not a captured local: fnc_civ_mission_request re-runs it at the report.
 _e set ["won", { params ["_e"]; ((_e get "mines") findIf { !isNull _x && {mineActive _x} }) < 0 }];

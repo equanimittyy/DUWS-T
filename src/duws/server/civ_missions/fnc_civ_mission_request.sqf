@@ -78,7 +78,7 @@ private _e = DUWS_civMissions get _id;
 { _e set _x } forEach [
     ["thread", _thread], ["ready", false], ["announced", false], ["giver", _civ], ["town", _town], ["site", _site],
     ["reward", _reward], ["target", _goal], ["raised", 0],
-    ["group", grpNull], ["pairs", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["giverMarker", ""], ["taskId", ""], ["title", ""],
+    ["group", grpNull], ["patrols", []], ["compKey", format ["civ_mission_%1", _id]], ["marker", ""], ["giverMarker", ""], ["taskId", ""], ["title", ""],
     ["cleared", { params ["_e"]; ({ alive _x } count units (_e get "group")) == 0 }]
 ];
 
