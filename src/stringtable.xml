@@ -3560,6 +3560,10 @@
                 <English>No intel items to analyze.</English>
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_ADDED">
+                <Original>Intel added to the analysis in progress.</Original>
+                <English>Intel added to the analysis in progress.</English>
+            </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_AWARD">
                 <Original>Intel converted to CP</Original>
                 <English>Intel converted to CP</English>

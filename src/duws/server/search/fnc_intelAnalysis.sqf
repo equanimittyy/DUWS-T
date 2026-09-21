@@ -61,6 +61,16 @@ private _playerItems = items _caller;
 if (_totalCP == 0) exitWith {
     [localize "STR_DUWS_T_INTEL_ANALYSIS_NO_ITEMS"] remoteExec ["hint", _caller];
 };
+
+// A turn-in while an award is pending joins that batch, so one card reports everything uploaded
+// before the award lands.
+if (!isNil "DUWS_intelAnalysisBatch") exitWith {
+    DUWS_intelAnalysisBatch set [0, (DUWS_intelAnalysisBatch select 0) + _totalCP];
+    if (_revealTriggered) then { DUWS_intelAnalysisBatch set [1, true] };
+    [localize "STR_DUWS_T_INTEL_ANALYSIS_ADDED"] remoteExec ["hint", _caller];
+};
+DUWS_intelAnalysisBatch = [_totalCP, _revealTriggered];
+
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_ANALYSIS_rqst"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_ANALYSIS_roger"] remoteExec ["fnc_duws_dialogue", 0];
@@ -70,11 +80,14 @@ sleep 5;
 // reads as work being done rather than an instant payout.
 sleep (random 60);
 
-private _finalCP = floor _totalCP;
+DUWS_intelAnalysisBatch params ["_batchCP", "_batchReveal"];
+DUWS_intelAnalysisBatch = nil;
+
+private _finalCP = floor _batchCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 
 // Silenced so the reveal's own Overlord line does not double the reveal card fired below.
-private _gotIntel = _revealTriggered && {[getPos _caller, _caller, true] call fnc_intel_payout};
+private _gotIntel = _batchReveal && {[getPos _caller, _caller, true] call fnc_intel_payout};
 
 private _target = [0,-2] select isDedicated;
 ["intel_analysis", [_finalCP]] remoteExec ["BIS_fnc_showNotification", _target];
