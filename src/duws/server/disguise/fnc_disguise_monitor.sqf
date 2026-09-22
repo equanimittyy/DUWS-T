@@ -1,13 +1,12 @@
 // Locality: server, because the captive state and the cooldown stamp belong to the server.
 // One loop per disguised player for both disguises; _kind ("civ" | "enemy") picks the kit test, the
-// floor, the ground rate, the body multiplier, the cooldown stamp and the break hints. The civilian
-// branch calls the helpers fnc_disguiseAsCivilian defines, which always runs first.
+// floor, the ground rate, the cooldown stamp and the break hints. The civilian branch calls the
+// helpers fnc_disguiseAsCivilian defines, which always runs first.
 params ["_player", "_kind"];
 
 private _civ = _kind isEqualTo "civ";
 private _flag = ["DUWS_enemyDisguised", "DUWS_disguised"] select _civ;
 private _stampVar = ["DUWS_enemyDisguise_blownAt", "DUWS_disguise_blownAt"] select _civ;
-private _bodyMult = [DISGUISE_BODY_MULT_ENEMY, DISGUISE_BODY_MULT_CIV] select _civ;
 private _warningKeys = [
     "STR_DUWS_T_DISGUISE_WARNING_1", "STR_DUWS_T_DISGUISE_WARNING_2", "STR_DUWS_T_DISGUISE_WARNING_3",
     "STR_DUWS_T_DISGUISE_WARNING_4", "STR_DUWS_T_DISGUISE_WARNING_5", "STR_DUWS_T_DISGUISE_WARNING_6",
@@ -80,8 +79,8 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
 
     private _rate = 1;
     if (_seen) then {
-        if (((_player nearObjects ["CAManBase", 20]) findIf { !alive _x }) >= 0) then { _rate = _bodyMult };
-        if (_civ) then { _rate = _rate * ([DISGUISE_CIV_RATE_OPEN, DISGUISE_CIV_RATE_BAND] select _inBand) };
+        if (((_player nearObjects ["CAManBase", 20]) findIf { !alive _x }) >= 0) then { _rate = DISGUISE_BODY_MULT };
+        _rate = _rate * ([DISGUISE_ENEMY_RATE, [DISGUISE_CIV_RATE_OPEN, DISGUISE_CIV_RATE_BAND] select _inBand] select _civ);
     };
 
     private _prev = _meter;

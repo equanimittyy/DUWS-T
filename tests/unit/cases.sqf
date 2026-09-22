@@ -1604,18 +1604,18 @@ fnc_test_breakTime = {
     };
     _t
 };
-["suspicion: civilian elsewhere, 1 at 50 m breaks in 25 s", [0, [50], 2] call fnc_test_breakTime, 25] call fnc_assertEq;
-["suspicion: civilian elsewhere, 4 at 50 m breaks in 14.5 s", [0, [50, 50, 50, 50], 2] call fnc_test_breakTime, 14.5] call fnc_assertEq;
-["suspicion: civilian elsewhere, 1 at 10 m breaks in 5 s", [0, [10], 2] call fnc_test_breakTime, 5] call fnc_assertEq;
-["suspicion: civilian elsewhere by a body, 1 at 10 m breaks in 1.5 s", [0, [10], 2 * 4] call fnc_test_breakTime, 1.5] call fnc_assertEq;
+["suspicion: civilian elsewhere, 1 at 50 m breaks in 50 s", [0, [50], 1] call fnc_test_breakTime, 50] call fnc_assertEq;
+["suspicion: civilian elsewhere, 4 at 50 m breaks in 29 s", [0, [50, 50, 50, 50], 1] call fnc_test_breakTime, 29] call fnc_assertEq;
+["suspicion: civilian elsewhere, 1 at 10 m breaks in 10 s", [0, [10], 1] call fnc_test_breakTime, 10] call fnc_assertEq;
+["suspicion: civilian elsewhere by a body, 1 at 10 m breaks in 2.5 s", [0, [10], 1 * 4] call fnc_test_breakTime, 2.5] call fnc_assertEq;
 ["suspicion: civilian in the band, 1 at 50 m breaks in 8.5 s", [0, [50], 6] call fnc_test_breakTime, 8.5] call fnc_assertEq;
-["suspicion: enemy full kit, 1 at 50 m breaks in 50 s", [0, [50], 1] call fnc_test_breakTime, 50] call fnc_assertEq;
-["suspicion: enemy full kit, 4 at 50 m breaks in 29 s", [0, [50, 50, 50, 50], 1] call fnc_test_breakTime, 29] call fnc_assertEq;
-["suspicion: enemy full kit, 1 at 10 m breaks in 10 s", [0, [10], 1] call fnc_test_breakTime, 10] call fnc_assertEq;
-["suspicion: enemy wrong rifle and helmet, 1 at 20 m breaks in 10 s", [50, [20], 1] call fnc_test_breakTime, 10] call fnc_assertEq;
-["suspicion: enemy wrong rifle and helmet by a body, 1 at 20 m breaks in 5 s", [50, [20], 2] call fnc_test_breakTime, 5] call fnc_assertEq;
-["suspicion: enemy only the uniform, 1 at 50 m breaks in 2.5 s", [95, [50], 1] call fnc_test_breakTime, 2.5] call fnc_assertEq;
-["suspicion: enemy only the uniform, 1 at 10 m breaks in 0.5 s", [95, [10], 1] call fnc_test_breakTime, 0.5] call fnc_assertEq;
+["suspicion: enemy full kit, 1 at 50 m breaks in 100 s", [0, [50], 0.5] call fnc_test_breakTime, 100] call fnc_assertEq;
+["suspicion: enemy full kit, 4 at 50 m breaks in 57.5 s", [0, [50, 50, 50, 50], 0.5] call fnc_test_breakTime, 57.5] call fnc_assertEq;
+["suspicion: enemy full kit, 1 at 10 m breaks in 20 s", [0, [10], 0.5] call fnc_test_breakTime, 20] call fnc_assertEq;
+["suspicion: enemy wrong rifle and helmet, 1 at 20 m breaks in 20 s", [50, [20], 0.5] call fnc_test_breakTime, 20] call fnc_assertEq;
+["suspicion: enemy wrong rifle and helmet by a body, 1 at 20 m breaks in 5 s", [50, [20], 0.5 * 4] call fnc_test_breakTime, 5] call fnc_assertEq;
+["suspicion: enemy only the uniform, 1 at 50 m breaks in 5 s", [95, [50], 0.5] call fnc_test_breakTime, 5] call fnc_assertEq;
+["suspicion: enemy only the uniform, 1 at 10 m breaks in 1 s", [95, [10], 0.5] call fnc_test_breakTime, 1] call fnc_assertEq;
 ["suspicion: a spotter inside 10 m rises no faster than one at 10 m",
     [0, 0, [2], 1, 1] call fnc_disguise_suspicion_step, 10] call fnc_assertClose;
 ["suspicion: decay stops at the floor", [60, 50, [], 1, 10] call fnc_disguise_suspicion_step, 50] call fnc_assertClose;

@@ -557,9 +557,9 @@ DISGUISE_SPOT_VIS = 0.5;
 // squad turning round catches a shot fired unseen.
 DISGUISE_FIRE_WINDOW = 5;
 DISGUISE_CIV_RATE_BAND = 6;
-DISGUISE_CIV_RATE_OPEN = 2;
-DISGUISE_BODY_MULT_CIV = 4;
-DISGUISE_BODY_MULT_ENEMY = 2;
+DISGUISE_CIV_RATE_OPEN = 1;
+DISGUISE_ENEMY_RATE = 0.5;
+DISGUISE_BODY_MULT = 4;
 
 // The radio-tower amplifiers, global scalars rather than per-town. DUWS_opforRadioLevel is the count of
 // uncleared enemy "RADIO" hardpoints, capped at AOI_OPFOR_TOWER_CAP, recomputed by fnc_hardpoint_stream

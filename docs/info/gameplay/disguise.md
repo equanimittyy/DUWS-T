@@ -79,15 +79,15 @@ Each disguised player has a meter from 0 to 100 on the server. The monitor updat
 **Rise.** While a unit spots the player, the meter rises each second by the spotter sum, times the
 ground rate, times the body multiplier. The spotter sum is `100 / max(d, 10)` for the nearest spotter
 at `d` m, plus 25% of its own rate for each other spotter. The body multiplier applies while a dead
-body is within 20 m: ×4 for a civilian, ×2 for the enemy disguise.
+body is within 20 m: `DISGUISE_BODY_MULT` (×4) for both disguises.
 
 | Civilian ground | Rate |
 |---|---|
 | Within a site ring | The first spotter breaks cover at once |
 | In the band outside a ring | `DISGUISE_CIV_RATE_BAND` (×6) |
-| Anywhere else, including OPFOR-held towns | `DISGUISE_CIV_RATE_OPEN` (×2) |
+| Anywhere else, including OPFOR-held towns | `DISGUISE_CIV_RATE_OPEN` (×1) |
 
-The enemy disguise rises at ×1 everywhere.
+The enemy disguise rises at `DISGUISE_ENEMY_RATE` (×0.5) everywhere.
 
 **Floor.** The civilian floor is always 0, because the kit rules break on every item that does not
 read civilian. The enemy floor is the sum of a penalty for each item OPFOR does not issue: primary
@@ -98,13 +98,13 @@ capped at 95, so the floor alone never breaks cover.
 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|
-| Civilian | Elsewhere | 1 at 50 m | 25 s |
-| Civilian | Elsewhere, body within 20 m | 1 at 10 m | 1.5 s |
+| Civilian | Elsewhere | 1 at 50 m | 50 s |
+| Civilian | Elsewhere, body within 20 m | 1 at 10 m | 2.5 s |
 | Civilian | Band | 1 at 50 m | 8.5 s |
-| Enemy | All OPFOR | 1 at 50 m | 50 s |
-| Enemy | All OPFOR | 4 at 50 m | 29 s |
-| Enemy | Wrong rifle and helmet | 1 at 20 m | 10 s |
-| Enemy | Only the uniform matches | 1 at 10 m | 0.5 s |
+| Enemy | All OPFOR | 1 at 50 m | 100 s |
+| Enemy | All OPFOR | 4 at 50 m | 57.5 s |
+| Enemy | Wrong rifle and helmet | 1 at 20 m | 20 s |
+| Enemy | Only the uniform matches | 1 at 10 m | 1 s |
 
 `tests/unit/cases.sqf` checks these rows and the rest of the model.
 
