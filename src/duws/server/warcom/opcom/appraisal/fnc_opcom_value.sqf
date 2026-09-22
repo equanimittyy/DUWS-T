@@ -173,3 +173,45 @@ DUWS_fnc_opcom_gunValue = {
     private _reach = [OPCOM_ARTY_REACH, OPCOM_MORTAR_REACH] select (_type isEqualTo "MORTAR");
     (DUWS_opcom_assetPrice get _type) * ([_at, _reach, [_type] call DUWS_fnc_opcom_assetsOf] call DUWS_fnc_opcom_gunShare)
 };
+
+DUWS_fnc_opcom_towerReach = {
+    params ["_at", "_towns", "_others"];
+    private _sum = 0;
+    {
+        _x params ["_pos", "_worth", "_covered"];
+        if (!_covered && {(_pos distance2D _at) <= AOI_TOWER_REACH} && {(_others findIf { (_x distance2D _pos) <= AOI_TOWER_REACH }) < 0}) then {
+            _sum = _sum + _worth;
+        };
+    } forEach _towns;
+    _sum
+};
+
+DUWS_fnc_opcom_defendAt = {
+    params ["_dist"];
+    if (_dist <= OPCOM_DEFEND_NEAR) exitWith { 1 };
+    if (_dist >= OPCOM_DEFEND_FAR) exitWith { OPCOM_DEFEND_FLOOR };
+    1 - (1 - OPCOM_DEFEND_FLOOR) * (_dist - OPCOM_DEFEND_NEAR) / (OPCOM_DEFEND_FAR - OPCOM_DEFEND_NEAR)
+};
+
+// Standing defenses only: a tasking drives away tomorrow.
+DUWS_fnc_opcom_defend = {
+    params ["_pos"];
+    private _near = OPCOM_DEFEND_FAR;
+    {
+        _x params ["", "_zp", "_zs"];
+        if !([[_zp] call fnc_zone_key] call fnc_zone_bluforHeld) then { _near = _near min (((_pos distance2D _zp) - _zs) max 0) };
+    } forEach zone_meta_array;
+    { if ((_x select 3) isEqualTo "opfor") then { _near = _near min (_pos distance2D (_x select 1)) } } forEach DUWS_hardpoints;
+    [_near] call DUWS_fnc_opcom_defendAt
+};
+
+// The amplifier every tower adds stays out: it reads the same at every site, so it ranks nothing.
+DUWS_fnc_opcom_towerValue = {
+    params ["_at"];
+    private _towns = [];
+    {
+        private _pos = [_forEachIndex] call DUWS_fnc_opcom_townPos;
+        _towns pushBack [_pos, [_forEachIndex] call DUWS_fnc_opcom_townWorth, [_pos] call fnc_aoi_opfor_covers];
+    } forEach (missionNamespace getVariable ["civ_town_rep", []]);
+    ([_at, _towns, ["RADIO"] call DUWS_fnc_opcom_assetsOf] call DUWS_fnc_opcom_towerReach) * ([_at] call DUWS_fnc_opcom_defend)
+};

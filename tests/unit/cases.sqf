@@ -1633,6 +1633,21 @@ DUWS_opcom_box = [0, 0, 39, 39];
 DUWS_opcom_grid_land = [true] call fnc_test_westLand;
 ["gunShare: sea in reach counts against the site", [[10000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 35/81] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_towerReach: the town worth a new mast brings under OPFOR's area of influence ---
+AOI_TOWER_REACH = 5000;
+private _towns = [[[1000, 0, 0], 10, false], [[4000, 0, 0], 25, false], [[9000, 0, 0], 5, false], [[2000, 0, 0], 15, true]];
+["towerReach: sums the uncovered towns in reach", [[0, 0, 0], _towns, []] call DUWS_fnc_opcom_towerReach, 35] call fnc_assertEq;
+["towerReach: a town another mast on its way reaches is not new", [[0, 0, 0], _towns, [[8000, 0, 0]]] call DUWS_fnc_opcom_towerReach, 10] call fnc_assertEq;
+["towerReach: a mast that reaches no uncovered town scores nothing", [[0, 0, 0], [[[2000, 0, 0], 15, true]], []] call DUWS_fnc_opcom_towerReach, 0] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_defendAt: how close a mast stands to OPFOR's fixed defenses ---
+OPCOM_DEFEND_NEAR = 500;
+OPCOM_DEFEND_FAR = 2000;
+OPCOM_DEFEND_FLOOR = 0.2;
+["defendAt: beside a defense is fully defended", [300] call DUWS_fnc_opcom_defendAt, 1] call fnc_assertClose;
+["defendAt: past the far edge is the floor", [5000] call DUWS_fnc_opcom_defendAt, 0.2] call fnc_assertClose;
+["defendAt: halfway down the ramp is halfway down the fall", [1250] call DUWS_fnc_opcom_defendAt, 0.6] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

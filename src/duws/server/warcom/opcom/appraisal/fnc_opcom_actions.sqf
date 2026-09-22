@@ -300,6 +300,7 @@ DUWS_fnc_opcom_assetTargets = {
     private _cand = [[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
         format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]];
     switch (_type) do {
+        case "RADIO": { _cand pushBack ([_at] call DUWS_fnc_opcom_towerValue) };
         case "OP": { _cand pushBack ([_at] call DUWS_fnc_opcom_opValue) };
         case "MORTAR";
         case "ARTY": { _cand pushBack ([_type, _at] call DUWS_fnc_opcom_gunValue) };

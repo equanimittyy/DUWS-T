@@ -730,6 +730,12 @@ OPCOM_EXPOSE_NEAR = 5000;
 OPCOM_EXPOSE_FAR = 10000;
 OPCOM_EXPOSE_FLOOR = 0.2;
 
+// A mast's defend ramp: the far edge matches AOI_ZONE_REACH, the widest a band candidate sits from its zone, so the
+// ramp spans every site a mast can draw.
+OPCOM_DEFEND_NEAR = 500;
+OPCOM_DEFEND_FAR = 2000;
+OPCOM_DEFEND_FLOOR = 0.2;
+
 // A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
 OPCOM_TOWN_WORTH = 5;
 
