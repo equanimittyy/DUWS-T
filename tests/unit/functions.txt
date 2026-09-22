@@ -95,3 +95,4 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_aban
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutCells
+duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone

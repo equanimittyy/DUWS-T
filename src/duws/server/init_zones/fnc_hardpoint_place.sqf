@@ -255,36 +255,44 @@ fnc_hardpoint_band_cand = {
     [_c, _azone getDir _c]
 };
 
-// Few samples, so the HQ bias stays a lean and nests scatter through the band rather than lining one contour.
-#define HP_FLANK_SAMPLES 5
+// Keeps nests off a zone's edge, so a flank line does not clump onto the zone's own ring.
+#define HP_FLANK_ZONE_GAP 300
+#define HP_FLANK_POOL_DRAWS 500
+#define HP_FLANK_JITTER 500
 
-// The blocks below read _toHQ up the call stack from inside fnc_hardpoint_lay (SQF dynamic scope).
+// [] call fnc_hardpoint_flank_halves -> [far, near]: band points split at their median distance to BLU HQ.
+// Drawn over the whole map, not per zone: a per-zone draw gives a small zone's band as many nests as a large one's.
+fnc_hardpoint_flank_halves = {
+    private _pts = [];
+    for "_i" from 1 to HP_FLANK_POOL_DRAWS do {
+        private _p = [random worldSize, random worldSize, 0];
+        if (!surfaceIsWater _p && {([_p] call fnc_aoi_field_at) > 0} && {!([_p, HP_FLANK_ZONE_GAP] call fnc_aoi_in_any_zone)}) then {
+            _pts pushBack _p;
+        };
+    };
+    if (PosOfBLUHQ isEqualTo []) exitWith { [_pts, _pts] };
+    _pts = [_pts, [], { _x distance2D PosOfBLUHQ }, "DESCEND"] call BIS_fnc_sortBy;
+    private _mid = floor ((count _pts) / 2);
+    [_pts select [0, _mid], _pts select [_mid]]
+};
+
+// The candidate block reads _half and _toHQ up the call stack from inside fnc_hardpoint_lay (SQF dynamic scope).
 fnc_hardpoint_site_flank = {
     params ["_count", "_toHQ", ["_fnTick", {}]];
     if (_count <= 0) exitWith { 0 };
     private _prefix = ["hpback", "hpfront"] select _toHQ;
+    private _half = (call fnc_hardpoint_flank_halves) select _toHQ;
+    if (_half isEqualTo []) exitWith {
+        ["WARN", "HARDPOINT", format ["%1 line found no band ground", _prefix]] call fnc_log;
+        0
+    };
     private _placed = [_count, _prefix, "", {
-        private _d = _this call fnc_hardpoint_band_cand;
-        if (_d isEqualTo []) exitWith { [] };
-        _d params ["_c"];
-        private _rdir = if (PosOfBLUHQ isEqualTo []) then { _d select 1 }
+        private _c = [selectRandom _half, 0, HP_FLANK_JITTER, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (([_c] call fnc_aoi_field_at) <= 0 || {[_c, HP_FLANK_ZONE_GAP] call fnc_aoi_in_any_zone}) exitWith { [] };
+        private _rdir = if (PosOfBLUHQ isEqualTo []) then { random 360 }
             else { [PosOfBLUHQ getDir _c, _c getDir PosOfBLUHQ] select _toHQ };
         [_c, _rdir]
-    }, _fnTick, {
-        if (PosOfBLUHQ isEqualTo []) exitWith { call fnc_hardpoint_band_anchor };
-        private _best = [];
-        private _bestD = [-1, 1e12] select _toHQ;
-        for "_i" from 1 to HP_FLANK_SAMPLES do {
-            private _a = call fnc_hardpoint_band_anchor;
-            if (_a isEqualTo []) then { continue };
-            private _dist = (_a select 0) distance2D PosOfBLUHQ;
-            if ((_toHQ && {_dist < _bestD}) || {!_toHQ && {_dist > _bestD}}) then {
-                _bestD = _dist;
-                _best = _a;
-            };
-        };
-        _best
-    }, DUWS_hardpointWeightNest] call fnc_hardpoint_lay;
+    }, _fnTick, {[]}, DUWS_hardpointWeightNest] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["%1 line sited %2/%3 nests", _prefix, _placed, _count]] call fnc_log;
     _placed
 };
@@ -360,8 +368,6 @@ fnc_hardpoint_seed_radio = {
 };
 
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real hardpoints.
-#define HP_FLANK_KNEE 6
-#define HP_FLANK_SLOPE 0.5
 #define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
 #define HP_ROAD_NBR_P 0.4   // per-zone chance of an off-axis inter-zone roadblock
 #define HP_OBS_P 0.5        // per-zone chance of a standalone observation post out in the band
@@ -407,13 +413,8 @@ fnc_hardpoint_plan_counts = {
     } forEach zone_meta_array;
     _total = _total + count _roadTargets;
 
-    // Zones screen each other's flanks as they multiply, so past the knee each extra zone adds only part of one.
-    private _fz = if (_zc <= HP_FLANK_KNEE) then { _zc } else { HP_FLANK_KNEE + round ((_zc - HP_FLANK_KNEE) * HP_FLANK_SLOPE) };
-    private _lo = floor (_fz / 2);
-    private _backline = _lo + floor random (_fz - _lo + 1);
-    private _frontline = _lo + floor random (_fz - _lo + 1);
-    _total = _total + _backline + _frontline;
-    [_zoneCounts, _backline, _frontline, _roadTargets, _obs, _total]
+    _total = _total + 2 * _zc;
+    [_zoneCounts, _zc, _zc, _roadTargets, _obs, _total]
 };
 
 fnc_hardpoint_debug = {

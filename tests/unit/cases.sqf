@@ -1786,3 +1786,10 @@ fnc_test_breakTime = {
 ["suspicion: unseen with an enemy near, the meter falls a third as fast", [60, 0, [], 1, 3, 1/3] call fnc_disguise_suspicion_step, 55] call fnc_assertClose;
 ["suspicion: a floor above the meter lifts it at once", [10, 50, [], 1, 0.5] call fnc_disguise_suspicion_step, 50] call fnc_assertClose;
 ["suspicion: the meter never passes 100", [99, 0, [10], 1, 5] call fnc_disguise_suspicion_step, 100] call fnc_assertClose;
+
+// --- fnc_aoi_in_any_zone: zone interior, widened by an optional margin past the edge ---
+zone_meta_array = [[1, [0, 0, 0], 200]];
+["aoi_in_any_zone: a point inside the radius is in", [[150, 0, 0]] call fnc_aoi_in_any_zone, true] call fnc_assertEq;
+["aoi_in_any_zone: 250 m past the edge is out with no margin", [[450, 0, 0]] call fnc_aoi_in_any_zone, false] call fnc_assertEq;
+["aoi_in_any_zone: 250 m past the edge is in with a 300 m margin", [[450, 0, 0], 300] call fnc_aoi_in_any_zone, true] call fnc_assertEq;
+["aoi_in_any_zone: 350 m past the edge is out with a 300 m margin", [[550, 0, 0], 300] call fnc_aoi_in_any_zone, false] call fnc_assertEq;

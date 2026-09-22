@@ -64,9 +64,8 @@ sleep 1;
     // (the stored cap guards a rebuild), keyed by fnc_zone_key of the centre.
     //
     // The whole emplacement plan -- every zone's ring, the roadblock net, the two flank lines -- is
-    // rolled before laying any of it, so the banner counts hardpoints toward a real total, not zones.
-    // Radio and AA are deterministic (radio rolled here so the seed call and plan total share it; AA
-    // counts serv_zones_array), so the plan derives both and hands them back with the rolled arrays.
+    // fixed before laying any of it, so the banner counts hardpoints toward a real total, not zones.
+    // Radio is rolled here so the seed call and the plan total share it.
     // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
     private _radioN = 1 + floor random 2;
     ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
@@ -91,7 +90,7 @@ sleep 1;
     // redraws the same "1 of N".
     1 call _tick;
 
-    // Zone rings first: each zone's own fortification, capped by its radius.
+    // Zone rings first: each zone's own fortification, capped by its radius and tier.
     {
         _x params ["", "_hpPos", "_hpSize"];
         [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
@@ -108,16 +107,14 @@ sleep 1;
     [_radioN, _tick] call fnc_hardpoint_seed_radio;
     _hpDone = _hpDone + _radioN;
 
-    // Flank lines: gun nests leaning away from the fight (backline) and into it (frontline), offset from
-    // the zones rather than ringing them.
+    // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
+    // offset from the zones rather than ringing them.
     [_backline, false, _tick] call fnc_hardpoint_site_flank;
     _hpDone = _hpDone + _backline;
     [_frontline, true, _tick] call fnc_hardpoint_site_flank;
     _hpDone = _hpDone + _frontline;
 
-    // AA spread uniformly through the countryside to deny the airspace, then the roadblock net -- an HQ
-    // approach block plus an off-axis inter-zone block per zone (fnc_hardpoint_plan_counts). The AA net
-    // reuses the band sampler with an AA-only mix.
+    // AA through the countryside to deny the airspace; the net reuses the band sampler with an AA-only mix.
     [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
     _hpDone = _hpDone + _aaN;
     // Observation posts scattered through the same band -- eyes on the countryside between the zones, manned by

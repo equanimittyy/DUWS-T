@@ -75,13 +75,14 @@ fnc_aoi_field_at = {
     ([0, 1] select _o) - ([0, 1] select _b)
 };
 
-// [_pos] call fnc_aoi_in_any_zone -> bool. Point inside any zone's own radius, whoever holds it.
+// [_pos, _margin] call fnc_aoi_in_any_zone -> bool. Point within _margin (default 0) of any zone's own
+// radius, whoever holds it.
 // Inside a zone is the zone hardpoint system's ground, gated by the capture trigger; the band is the
 // countryside between, so the siting mask excludes zone interiors even though the field still covers
 // them (a town under a zone still drifts).
 fnc_aoi_in_any_zone = {
-    params ["_pos"];
-    (zone_meta_array findIf { (_pos distance2D (_x select 1)) <= (_x select 2) }) >= 0
+    params ["_pos", ["_margin", 0]];
+    (zone_meta_array findIf { (_pos distance2D (_x select 1)) <= (_x select 2) + _margin }) >= 0
 };
 
 // [] call DUWS_fnc_aoi_bandPos -> [_pos, _radialDir] in the OPFOR-positive band, or [] if the draw

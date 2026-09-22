@@ -43,7 +43,7 @@ built. That asymmetry is the starting pressure the rest of the mechanic answers.
 ### The exclusion
 
 The area of influence is the field's OPFOR-positive region minus the interior of every zone.
-`fnc_aoi_in_any_zone [_pos]` (`fnc_aoi_init.sqf:79-82`) tests a point against each zone's own
+`fnc_aoi_in_any_zone [_pos]` (`fnc_aoi_init.sqf:83-86`) tests a point against each zone's own
 `_size`, whoever holds it; inside a zone is the zone hardpoint ring's ground (see
 [`hardpoints.md`](hardpoints.md)), not the band's. The field still *covers* zone interiors — a
 town under a zone still drifts — but siting reads `fnc_aoi_field_at > 0 && !(fnc_aoi_in_any_zone)`,
@@ -96,7 +96,7 @@ incremented in place, by `DUWS_fnc_aoi_opforRecount`
 registered (`:328`) or cleared (`:182`) — so a destroyed tower drops the amplifier, and its
 `AOI_TOWER_REACH` coverage with it, in the same recount. `"RADIO"` is a hardpoint type like any
 other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf:417,430`), sited via
-`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:314-350`), which samples the
+`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:332-368`), which samples the
 band, rejects any draw inside another tower's `AOI_TOWER_REACH`, and stands the mast on the
 best-scoring hilltop of what survives. It is deliberately absent from `DUWS_hardpointWeightZone`
 and `DUWS_hardpointWeightSolo` (`server_var_init.sqf:405-410`) — a tower is placed on purpose,
@@ -113,13 +113,16 @@ answer to a rising amplifier — only ground to retake.
 
 ## Band siting
 
-`DUWS_fnc_aoi_bandPos` (`fnc_aoi_init.sqf:91-106`) is the shared candidate sampler: it draws an
+`DUWS_fnc_aoi_bandPos` (`fnc_aoi_init.sqf:95-110`) is the shared candidate sampler: it draws an
 annulus around a random OPFOR zone, out to `AOI_ZONE_REACH` past the zone's edge, and keeps the
 draw only where `fnc_aoi_field_at` is positive and `fnc_aoi_in_any_zone` is false. Every band
-placer goes through it (directly, or via the per-emplacement anchor/candidate pair
-`fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`, `fnc_hardpoint_place.sqf:231-246`), so all
-of them sample the same ground the same way; siting mechanics beyond the candidate source —
-terrain survey, per-type score, facing, spacing — are shared with the zone ring and documented in
+placer except the two flank lines goes through it (directly, or via the per-emplacement
+anchor/candidate pair `fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`,
+`fnc_hardpoint_place.sqf:241-256`), so all of them sample the same ground the same way. The flank
+lines sample the band uniformly over the whole map instead, so a nest's odds do not depend on which
+zone's band it falls in ([`hardpoints.md`](hardpoints.md#siting)); siting mechanics beyond the
+candidate source — terrain survey, per-type score, facing, spacing — are shared with the zone ring and
+documented in
 [`hardpoints.md`](hardpoints.md).
 
 At campaign generation the band is laid after the zone rings: radio towers, the two flank lines, an
