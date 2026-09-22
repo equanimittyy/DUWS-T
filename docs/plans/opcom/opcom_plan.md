@@ -497,7 +497,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 
 | Purchase | Price |
 |---|---|
-| Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 10, weapons team 5, recon foot 5, truck 3, recon car 10, boat 3, APC 15, IFV 25, MBT 40, recon helicopter 20, transport helicopter 10, attack helicopter 60 |
+| Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 10, weapons team 5, recon foot 5, truck 3, recon car 10, boat 3, APC 15, IFV 25, MBT 40, recon helicopter 20, transport helicopter 10, attack helicopter 50, jet 80 |
 | Zone Reinforce / Fortify | `OPCOM_AP_REINFORCE` 15 / `OPCOM_AP_FORTIFY` 25, flat |
 | Town Reinforce / Fortify | the same flat price, plus the truck's source cost |
 | Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 8, MG 12, GMG 16, AT 16, AA 20 |
