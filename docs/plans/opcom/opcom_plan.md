@@ -218,7 +218,9 @@ so it moves no faster than a truck delivers.
   alone the truck would take every ride, because its lift is more than a third of the helicopter's at under a
   third of the price. A ground hull's drive is priced at `OPCOM_ROAD_DETOUR` (1.3) × the straight line, since it
   keeps to the roads a helicopter flies over. With a 2 km pickup the helicopter wins from a ride of about 8.5 km
-  for an order worth 40, 14 km for 20 and 21.5 km for 10.
+  for an order worth 40, 14 km for 20 and 21.5 km for 10. A row the wallet cannot pay beats no other row, so a
+  long ride still offers a truck when the helicopter is out of reach, and the helicopter stays on the shortlist
+  for the savings goal.
 - **A truck is also worth its stock.** An idle truck spares the next supply buy its hire price, and that saving
   splits across the trucks already idle, so the stock settles at one or two, where the hire's score meets Bank's.
   A supply action still hires its own truck in the same commit when none idles, so no action is ever blocked for
