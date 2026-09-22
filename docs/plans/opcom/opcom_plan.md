@@ -34,9 +34,10 @@ last of all — it multiplies a class's scores, so it has nothing to tilt until 
 
 ## Shipped: the substrate the loop drives
 
-The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose
-layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, `taskings/` the orders, streaming and
-the ferry, and `appraisal/` the action list, the Values, the need and cover fields, the siting pass and the pick. The debug harness (`fnc_opcom_debug_task.sqf` and the
+The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception, the influence grid, whose
+layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, and the traffic layer; `taskings/` the
+orders, streaming and the ferry; `appraisal/` the action list, supply trucks, the siting pass and the pick; and
+`appraisal/value/` the score's terms, one file each — every Value, the need and cover fields, `P(win)` and the delay. The debug harness (`fnc_opcom_debug_task.sqf` and the
 Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work holds to:
 
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
