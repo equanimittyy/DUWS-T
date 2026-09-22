@@ -198,7 +198,7 @@ so it moves no faster than a truck delivers.
 | Recruit, combatant | the larger of that demand and home-zone worth × exposure × unitForce ÷ (the zone's current force + unitForce) |
 | Recruit, `transport` | the lift it would give; a combatant hull takes the larger of that and its defense |
 | Recruit, truck | the larger of its lift and its stock: the truck hire price ÷ (idle supply trucks + 1) |
-| Intercept (QRF) | Σ need over the sighting's 5×5 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
+| Intercept (QRF) | Σ need over the sighting's 7×7 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Scout | Σ need × staleness × `OPCOM_SCOUT_SHARE` (0.2) over the unique cells within its K of its route |
 | Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
@@ -281,10 +281,10 @@ and cover span every land cell; standalone and minefield candidates are band cel
 hardpoint is built or cleared or ground changes hands, and need also moves with the traffic layer.
 
 - **Need** (AP). Each OPFOR holding — an OPFOR zone, or a town at −10 or below — spreads worth × exposure over the
-  5×5 block around its cell (`OPCOM_BLOCK_K` 2), with weights of 3, 2 and 1 by Chebyshev ring, normalised over the
+  7×7 block around its cell (`OPCOM_NEED_K` 3), with weights of 4, 3, 2 and 1 by Chebyshev ring, normalised over the
   block's land inside the play box so they sum to exactly that figure at a coast or the box edge too. Every band
   cell — a land cell whose centre the area of influence reads OPFOR-positive, outside every zone — also carries a
-  flat base for the sparse sectors: the average zone's pull per cell (worth ÷ 25) ÷ `OPCOM_NEED_BASE_RATIO` (2.5),
+  flat base for the sparse sectors: the average zone's pull per cell (worth ÷ 49) ÷ `OPCOM_NEED_BASE_RATIO` (2.5),
   × the cell's exposure, so a holding pulls harder than a gap but not so hard that hardpoints cluster around zones.
   Each standing asset hardpoint spreads its build price the same way and becomes an asset worth protecting; assets
   site by their own rules ([§Asset siting](#asset-siting)), so the cover network builds up around them into the
