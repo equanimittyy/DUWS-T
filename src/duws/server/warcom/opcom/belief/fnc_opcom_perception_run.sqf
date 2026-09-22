@@ -55,7 +55,7 @@ while {true} do {
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;
-        "fields" call _enter;    call DUWS_fnc_opcom_fieldsRefresh;
+        "need" call _enter;      call DUWS_fnc_opcom_needRefresh;
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;
         DUWS_opcom_pickDebt = DUWS_opcom_pickDebt + DUWS_opcom_picksPerTick;
@@ -64,7 +64,7 @@ while {true} do {
         if (_picks == 0 && {DUWS_opcom_pickOnce isNotEqualTo ""}) then { _picks = 1 };
         for "_k" from 1 to _picks do {
             // A second pick must see the truck, wallet and sites the first one spent.
-            DUWS_opcom_tickCache = createHashMap;
+            call DUWS_fnc_opcom_tickCacheReset;
             call fnc_opcom_pick;
         };
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.

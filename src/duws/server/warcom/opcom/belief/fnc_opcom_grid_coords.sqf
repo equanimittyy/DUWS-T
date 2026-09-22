@@ -31,3 +31,12 @@ DUWS_fnc_opcom_nearestWater = {
     } forEach DUWS_opcom_grid_water;
     _best
 };
+
+// Not w2c: it clamps an off-box point onto an edge cell and would read that cell's land.
+DUWS_fnc_opcom_landAt = {
+    params ["_pos"];
+    private _cx = floor ((_pos select 0) / OPCOM_GRID_CELL);
+    private _cy = floor ((_pos select 1) / OPCOM_GRID_CELL);
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    _cx >= _minCx && {_cx <= _maxCx} && {_cy >= _minCy} && {_cy <= _maxCy} && {DUWS_opcom_grid_land select (_cy * DUWS_opcom_grid_w + _cx)}
+};

@@ -79,11 +79,12 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_asset_guard.sqf";
 // OPCOM (the opposing commander): server-only, so not broadcast. Two subsystems, one folder each under
 // warcom\opcom\. belief\ -- the force model, strength, grid-coordinate, grid-source and zone-contest helpers (executed to
-// define their tables and resolvers), the belief store, sighting sweep, decay, and the perception grid with its
-// per-tick run.
+// define their tables and resolvers), the traffic layer, the belief store, sighting sweep, decay, and the perception grid
+// with its per-tick run.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_force.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_strength.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_coords.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_traffic.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_sources.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
 // taskings\: streaming, the movement core, the ferry trio (orchestrator, virtual, live), garrison, ports, delivery, fires, the order bodies and the order table executed to
@@ -103,9 +104,22 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
-// appraisal\: executed to define the action list and the picker's state.
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_value.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_fields.sqf";
+// appraisal\: executed to define the score's terms (value\, one file per term), the asset tables, supply trucks, the
+// siting pass, the action list and the picker's state. siting reads the Value functions into its table at load.
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_tick_cache.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_exposure.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_pwin.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_holding.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_rapport.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_op.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_gun.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_tower.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_need.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_cover.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_delay.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_assets.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_supply.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_siting.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_actions.sqf";
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";

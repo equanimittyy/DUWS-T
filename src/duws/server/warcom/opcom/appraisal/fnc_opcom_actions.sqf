@@ -13,7 +13,6 @@ DUWS_opcom_pickOnce = "";
 // Carried as a debt, so a rate below 1 picks once every few ticks.
 DUWS_opcom_picksPerTick = 1;
 DUWS_opcom_pickDebt = 0;
-DUWS_opcom_sites = createHashMap;
 DUWS_opcom_aiEvents = [];
 DUWS_opcom_aiSeq = 0;
 
@@ -30,18 +29,6 @@ DUWS_fnc_opcom_zoneLabel = {
     private _i = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
     if (_i < 0) exitWith { _zk };
     (zone_namePOS_pairs select _i) select 0
-};
-
-// Cached for the tick: every row asks for the same sweeps and the same band sample, and the store cannot move under
-// them -- the pick reads in one unscheduled pass and executes afterwards.
-DUWS_opcom_tickCache = createHashMap;
-DUWS_fnc_opcom_tickCached = {
-    params ["_key", "_fn"];
-    private _row = DUWS_opcom_tickCache getOrDefault [_key, []];
-    if ((_row param [0, -1]) isEqualTo DUWS_opcom_tick) exitWith { _row select 1 };
-    private _v = call _fn;
-    DUWS_opcom_tickCache set [_key, [DUWS_opcom_tick, _v]];
-    _v
 };
 
 DUWS_fnc_opcom_zonesOpenSweep = {
@@ -133,75 +120,6 @@ DUWS_fnc_opcom_townPos = {
     ([[_i] call fnc_town_site_key] call fnc_site_at) getOrDefault ["pos", []]
 };
 
-// -> [[source, pos, cost], ...]: an idle truck at 0, an open zone's hire at the hire price.
-DUWS_fnc_opcom_truckSourcesSweep = {
-    private _out = [];
-    {
-        if ("supply" in (_x get "flags") && {DUWS_opcom_tick >= (_x get "hold")} && {[_x] call DUWS_fnc_opcom_drawable}) then {
-            _out pushBack [["truck", _x get "id"], _x get "pos", 0];
-        };
-    } forEach DUWS_opcom_taskings;
-    private _comp = (DUWS_opcom_recruitMenu get "truck") select 0;
-    private _hire = OPCOM_AP_UNIT getOrDefault ["truck", 0];
-    // A zero price is an unpriced row, not a free truck; an empty class is a faction that cannot field one yet.
-    if (_hire > 0 && {([_comp select 0, "OPF"] call DUWS_fnc_tokenClass) isNotEqualTo ""}) then {
-        {
-            _x params ["_zk"];
-            _out pushBack [["hire", _zk], ([_zk] call fnc_site_at) get "pos", _hire];
-        } forEach (call DUWS_fnc_opcom_zonesOpen);
-    };
-    _out
-};
-
-DUWS_fnc_opcom_truckSources = { ["truckSources", DUWS_fnc_opcom_truckSourcesSweep] call DUWS_fnc_opcom_tickCached };
-
-// -> [source, cost, distance] for the cheapest truck to _dest, or [] with no source.
-DUWS_fnc_opcom_truckFor = {
-    params ["_sources", "_dest"];
-    private _best = [];
-    {
-        _x params ["_src", "_pos", "_base"];
-        private _d = _pos distance2D _dest;
-        private _cost = _base + OPCOM_AP_PER_KM * _d / 1000;
-        if (_best isEqualTo [] || {_cost < (_best select 1)}) then { _best = [_src, _cost, _d] };
-    } forEach _sources;
-    _best
-};
-
-// A delivery's Value lands when the truck arrives.
-DUWS_fnc_opcom_truckDelay = {
-    params ["_truck"];
-    [_truck select 2, DUWS_opcom_speed get (DUWS_opcom_moveType get "truck")] call DUWS_fnc_opcom_delay
-};
-
-// One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.
-DUWS_fnc_opcom_townsSupplied = {
-    private _busy = [];
-    {
-        (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_town", -1]];
-        if (_kind in ["reinforce", "fortify", "rapport"]) then { _busy pushBackUnique _town };
-    } forEach DUWS_opcom_taskings;
-    _busy
-};
-
-// -> true if the truck set off. A hire the router refuses is dismissed, so a refused action leaves no unpaid truck.
-DUWS_fnc_opcom_supplyRun = {
-    params ["_src", "_dest", "_errand"];
-    _src params ["_kind", "_ref"];
-    private _t = if (_kind isEqualTo "hire") then {
-        ["truck", ([_ref] call fnc_site_at) get "pos", _ref, false] call fnc_opcom_recruit
-    } else {
-        [_ref] call DUWS_fnc_opcom_byId
-    };
-    if (isNil "_t") exitWith { false };
-    private _ok = [_t, "move", _dest, "", _errand] call fnc_opcom_task;
-    if (!_ok && {_kind isEqualTo "hire"}) then {
-        DUWS_opcom_taskings = DUWS_opcom_taskings - [_t];
-        [_ref] call DUWS_fnc_opcom_zoneReserveSync;
-    };
-    _ok
-};
-
 DUWS_fnc_opcom_townReinforceTargets = {
     private _sources = call DUWS_fnc_opcom_truckSources;
     private _busy = call DUWS_fnc_opcom_townsSupplied;
@@ -271,98 +189,6 @@ DUWS_fnc_opcom_recruitSupplyTargets = {
     private _zk = _src select 1;
     // Worth 0 until land-taxi gives a truck transport demand (4B.3): every supply action hires its own when none idles.
     [[_zk, _price, format ["Recruit a truck at %1", [_zk] call DUWS_fnc_opcom_zoneLabel], 0]]
-};
-
-DUWS_opcom_assetPrice = createHashMapFromArray [
-    ["RADIO", OPCOM_AP_TOWER], ["OP", OPCOM_AP_OP], ["MORTAR", OPCOM_AP_MORTAR], ["ARTY", OPCOM_AP_ARTY]
-];
-// OP carries no cap.
-DUWS_opcom_assetCap = createHashMapFromArray [
-    ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY]
-];
-
-DUWS_fnc_opcom_assetOpen = {
-    params ["_type"];
-    (DUWS_hardpointTier getOrDefault [_type, 99]) <= WARCOM_opfor_tier
-        && {count ([_type] call DUWS_fnc_opcom_assetsOf) < (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}
-};
-
-// Index of the largest value, -1 for none.
-DUWS_fnc_opcom_argMax = {
-    private _best = -1;
-    { if (_best < 0 || {_x > (_this select _best)}) then { _best = _forEachIndex } } forEach _this;
-    _best
-};
-
-// A tower's and a gun's Value run the area of influence over many points but read only slow state, so a band cell's
-// Value is kept until that state or the type's own assets change, and siting costs what changed rather than what exists.
-DUWS_opcom_siteMemo = createHashMap;
-
-// Scheduled, before the pick's unscheduled pass: each build type takes the best of a few band cells by its own Value,
-// so the pick weighs the best spot on offer rather than a random one. -> DUWS_opcom_sites, key -> [point, Value].
-DUWS_fnc_opcom_siteAll = {
-    params ["_samples"];
-    private _sites = createHashMap;
-    private _pool = +DUWS_opcom_bandCells;
-    private _cells = [];
-    for "_k" from 1 to (_samples min count _pool) do { _cells pushBack (_pool deleteAt (floor random count _pool)) };
-    if (_cells isEqualTo []) exitWith { DUWS_opcom_sites = _sites };
-    private _w = DUWS_opcom_grid_w;
-    private _pts = _cells apply { [((_x mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_x / _w)) + 0.5) * OPCOM_GRID_CELL, 0] };
-
-    private _cover = _pts apply { [_x] call DUWS_fnc_opcom_coverValue };
-    private _i = _cover call DUWS_fnc_opcom_argMax;
-    _sites set ["STANDALONE", [_pts select _i, _cover select _i]];
-    // A field is worth what it denies, and it denies nothing on ground nobody crosses; cover breaks a tie.
-    private _denial = [];
-    { _denial pushBack (([_x] call DUWS_fnc_opcom_trafficAt) * 1e3 + (_cover select _forEachIndex)) } forEach _cells;
-    _i = _denial call DUWS_fnc_opcom_argMax;
-    _sites set ["MINE", [_pts select _i, _cover select _i]];
-
-    {
-        private _type = _x;
-        if ([_type] call DUWS_fnc_opcom_assetOpen) then {
-            private _others = [_type] call DUWS_fnc_opcom_assetsOf;
-            private _stamp = [DUWS_opcom_needSig, _others];
-            private _memo = DUWS_opcom_siteMemo getOrDefault [_type, [[], createHashMap]];
-            if !((_memo select 0) isEqualTo _stamp) then { _memo = [_stamp, createHashMap]; DUWS_opcom_siteMemo set [_type, _memo] };
-            private _keep = switch (_type) do {
-                case "RADIO": { AOI_TOWER_REACH };
-                case "OP": { -1 };
-                default { OPCOM_GUN_STANDOFF };
-            };
-            private _vals = [];
-            {
-                private _p = _x;
-                private _c = _cells select _forEachIndex;
-                private _v = -1;
-                if ((_others findIf { (_x distance2D _p) < _keep }) < 0) then {
-                    if (_type isEqualTo "OP") then { _v = [_p] call DUWS_fnc_opcom_opValue } else {
-                        _v = (_memo select 1) getOrDefault [_c, -1];
-                        if (_v < 0) then {
-                            _v = if (_type isEqualTo "RADIO") then { [_p] call DUWS_fnc_opcom_towerValue } else { [_type, _p] call DUWS_fnc_opcom_gunValue };
-                            (_memo select 1) set [_c, _v];
-                        };
-                    };
-                };
-                _vals pushBack _v;
-            } forEach _pts;
-            private _j = _vals call DUWS_fnc_opcom_argMax;
-            if ((_vals select _j) >= 0) then { _sites set [_type, [_pts select _j, _vals select _j]] };
-        };
-    } forEach ["RADIO", "OP", "MORTAR", "ARTY"];
-    DUWS_opcom_sites = _sites;
-};
-
-// -> [point, Value discounted by the drive, truck], or [] with no site or no truck.
-DUWS_fnc_opcom_siteTruck = {
-    params ["_key"];
-    private _site = DUWS_opcom_sites getOrDefault [_key, []];
-    if (_site isEqualTo []) exitWith { [] };
-    _site params ["_at", "_v"];
-    private _truck = [call DUWS_fnc_opcom_truckSources, _at] call DUWS_fnc_opcom_truckFor;
-    if (_truck isEqualTo []) exitWith { [] };
-    [_at, _v * ([_truck] call DUWS_fnc_opcom_truckDelay), _truck]
 };
 
 DUWS_fnc_opcom_standaloneBuildTargets = {

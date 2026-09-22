@@ -128,8 +128,9 @@ the passes and their counts).
 
 After generation, only OPCOM's standalone, asset and minefield builds add to the band
 (`appraisal/fnc_opcom_actions.sqf`). They do not draw from `DUWS_fnc_aoi_bandPos`. Each pick,
-`DUWS_fnc_opcom_siteAll` samples `OPCOM_SITE_SAMPLES` band cells from the band mask the need field keeps
-(`appraisal/fnc_opcom_fields.sqf`), and each build type takes the best of them by its own Value. A
+`DUWS_fnc_opcom_siteAll` (`appraisal/fnc_opcom_siting.sqf`) samples `OPCOM_SITE_SAMPLES` band cells from the
+band mask the need field keeps (`appraisal/value/fnc_opcom_need.sqf`), and each build type takes the best of
+them by its own Value. A
 minefield takes the cell holding the most BLUFOR traffic. The truck drives to that cell's centre, and the
 hardpoint is sited within half a grid cell of where it is delivered. The rules are
 [`opcom_plan.md`](../../plans/opcom/opcom_plan.md#asset-siting)'s.
