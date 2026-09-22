@@ -88,7 +88,7 @@ duws_vendor_paint = {
     private _priceCtrl = [8911] call duws_vendor_ctrl;
     if (duws_vendor_discount > 0) then {
         _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE_DISCOUNT",
-            _price, duws_vendor_discount, _money];
+            _price, duws_vendor_discount, "%", _money];
         _priceCtrl ctrlSetTextColor [0.2, 0.5, 1, 1];
     } else {
         _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE", _price, _money];

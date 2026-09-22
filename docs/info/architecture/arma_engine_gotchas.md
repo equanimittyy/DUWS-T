@@ -102,6 +102,10 @@ Two `class Foo { ... }` blocks at the same scope in the merged `description.ext`
 
 `format` drops any argument with no matching `%N` — no error — so a string with fewer placeholders than args renders plausible-but-wrong forever, and a *duplicated* placeholder (`"%1 %2-%2"` on `[_name,_d1,_d2]`) hides best. The boat taxi's eight `format` calls handed args to placeholder-less strings with no complaint; localisation multiplies exposure. Fix: treat the placeholder set as a contract with *every* language variant — grep the `format[...]` call, count args, confirm the highest `%N` matches in each language tag.
 
+## `format` does not print a literal `%` written in its string
+
+A bare `%` in a `format` string is dropped: the shop price line `"%1 money (%2% discount)"` rendered `20 discount`, with no error. Fix: pass the sign as an argument — `"(%2%3 discount)"` on `[_price, _pct, "%", _money]` (`client/dialog/fnc_vendor_catalogue.sqf`, `client/missions/fnc_recon_observe_layer.sqf`).
+
 ## Config text is shown verbatim, so a `%N` in it reaches the player unsubstituted
 
 A `$STR_` reference in config (`CfgDebriefing`, action names, `displayName`) is resolved and displayed as-is — no call site hands it arguments, so a shared key that gains a `%N` in a script use (the defeat notification in `server/misc/fnc_capture_zones_task.sqf`) renders literal `%1` on the config side (the outro card, `shared/includes/debriefing.hpp`). Fix: a `%N`-bearing key belongs to script call sites only; give config its own placeholder-free key.
