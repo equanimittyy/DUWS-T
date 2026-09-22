@@ -20,6 +20,7 @@ DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["ifv",          [["ifv"],       ["transport"]]],
     ["mbt",          [["tank"],       []]],
     ["attack_heli",  [["attackheli"], []]],
+    ["jet",          [["plane"],      []]],
     ["recon_foot",   [["recon"],      ["recon", "transportable"]]],
     ["recon_car",    [["car"],       ["recon"]]],
     ["recon_heli",   [["transheli"], ["recon", "noncombat"]]],

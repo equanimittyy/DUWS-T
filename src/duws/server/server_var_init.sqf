@@ -711,7 +711,7 @@ OPCOM_AP_UNIT = createHashMapFromArray [
     ["rifles", 10], ["weapons_team", 5], ["recon_foot", 5],
     ["truck", 3], ["recon_car", 10], ["boat", 3],
     ["apc", 15], ["ifv", 25], ["mbt", 40],
-    ["recon_heli", 20], ["trans_heli", 10], ["attack_heli", 60]
+    ["recon_heli", 20], ["trans_heli", 10], ["attack_heli", 50], ["jet", 80]
 ];
 
 OPCOM_AP_HARDPOINT = createHashMapFromArray [
