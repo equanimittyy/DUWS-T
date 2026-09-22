@@ -33,6 +33,7 @@ private _fnc_break = {
 };
 
 private _meter = 0;
+private _sentKit = [];
 private _shown = [];
 private _last = diag_tickTime;
 while {alive _player && {_player getVariable [_flag, false]}} do {
@@ -61,7 +62,13 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
             ["STR_DUWS_T_ENEMY_DISGUISE_ENDED_UNIFORM", false] call _fnc_break;
             _stop = true;
         } else {
-            _floor = [[_player] call fnc_disguise_enemyMismatch] call fnc_disguise_floor;
+            private _mismatch = [_player] call fnc_disguise_enemyMismatch;
+            _floor = [_mismatch] call fnc_disguise_floor;
+            // For the disguise panel, which cannot judge the kit: DUWS_enemyKit is server-only.
+            if ([_floor, _mismatch] isNotEqualTo _sentKit) then {
+                _sentKit = [_floor, _mismatch];
+                _player setVariable ["DUWS_enemyDisguise_kit", _sentKit, true];
+            };
         };
     };
     if (_stop) exitWith {};

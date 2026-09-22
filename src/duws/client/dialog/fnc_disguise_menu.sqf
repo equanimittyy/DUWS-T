@@ -33,6 +33,43 @@ if (_activeBtn >= 0) then {
     _btn buttonSetAction "closeDialog 0; [player] remoteExec ['fnc_disguise_cancel', 2];";
 };
 
+private _fnc_section = {
+    params ["_titleKey", "_lines"];
+    format ["<t size='1.15' color='#ffcc66'>%1</t><br/>%2", localize _titleKey, (_lines apply { "- " + _x }) joinString "<br/>"]
+};
+private _info = localize "STR_DUWS_T_DISGUISE_MENU_INFO_NONE";
+if (_activeBtn == 8201) then {
+    _info = ["STR_DUWS_T_DISGUISE_MENU_INFO_CIV_TITLE", [
+        "STR_DUWS_T_DISGUISE_MENU_INFO_CIV_KIT", "STR_DUWS_T_DISGUISE_MENU_INFO_CIV_VEHICLE",
+        "STR_DUWS_T_DISGUISE_MENU_INFO_CIV_THROW", "STR_DUWS_T_DISGUISE_MENU_INFO_CIV_SITE",
+        "STR_DUWS_T_DISGUISE_MENU_INFO_CIV_SUSPICION"
+    ] apply { localize _x }] call _fnc_section;
+};
+if (_activeBtn == 8202) then {
+    // Set by the server's disguise monitor, because only the server holds the OPFOR kit.
+    (player getVariable ["DUWS_enemyDisguise_kit", [0, []]]) params ["_floor", "_mismatch"];
+    // Item names come from mod config, where an unescaped & or < voids the whole parseText.
+    private _fnc_escape = { ((_this regexReplace ["&", "&amp;"]) regexReplace ["<", "&lt;"]) regexReplace [">", "&gt;"] };
+    private _wrong = (_mismatch select { (_x select 1) != "" }) apply {
+        _x params ["_slot", "_cls"];
+        private _root = ["CfgWeapons", "CfgVehicles"] select (_slot in ["backpack", "vehicle"]);
+        getText (configFile >> _root >> _cls >> "displayName") call _fnc_escape
+    };
+    private _lacking = (_mismatch select { (_x select 1) == "" }) apply { localize ("STR_DUWS_T_ENEMY_DISGUISE_SLOT_" + toUpper (_x select 0)) };
+    private _gear = [];
+    if (_wrong isNotEqualTo []) then { _gear pushBack format [localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_WRONG_FMT", _wrong joinString ", "] };
+    if (_lacking isNotEqualTo []) then { _gear pushBack format [localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_MISSING_FMT", _lacking joinString ", "] };
+    if (_gear isEqualTo []) then { _gear pushBack localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_CLEAN" };
+    _info = ["STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_TITLE", [
+        format [localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_FLOOR_FMT", _floor]
+            + ((_gear apply { "<br/><t color='#b0b0b0'>    - " + _x + "</t>" }) joinString ""),
+        localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_SUSPICION",
+        localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_ATTACK",
+        localize "STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_UNIFORM"
+    ]] call _fnc_section;
+};
+(_display displayCtrl 8105) ctrlSetStructuredText parseText format ["<t align='left'>%1</t>", _info];
+
 // Neither mode runs without a civilian population or in the zombie modes. Grey the buttons and swap
 // the card text when they can't run. Cooldown is deliberately not gated here -- the Activate button
 // always fires, and the server function hints the remaining cooldown on demand. No client countdown

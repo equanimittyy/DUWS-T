@@ -2602,6 +2602,70 @@
                 <Original>Not available in this campaign.</Original>
                 <English>Not available in this campaign.</English>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_TITLE">
+                <Original>Info</Original>
+                <English>Info</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_NONE">
+                <Original>No disguise active.</Original>
+                <English>No disguise active.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_TITLE">
+                <Original>Civilian Disguise</Original>
+                <English>Civilian Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_KIT">
+                <Original>Equipping a weapon, NVGs or any non-civilian gear breaks the disguise.</Original>
+                <English>Equipping a weapon, NVGs or any non-civilian gear breaks the disguise.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_VEHICLE">
+                <Original>Entering a non-civilian vehicle breaks the disguise.</Original>
+                <English>Entering a non-civilian vehicle breaks the disguise.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_THROW">
+                <Original>Throwing anything or placing a charge while seen breaks the disguise.</Original>
+                <English>Throwing anything or placing a charge while seen breaks the disguise.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_SITE">
+                <Original>Being seen inside an enemy position breaks the disguise.</Original>
+                <English>Being seen inside an enemy position breaks the disguise.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_SUSPICION">
+                <Original>Suspicion rises while the enemy watches you, faster up close, near enemy positions and near bodies.</Original>
+                <English>Suspicion rises while the enemy watches you, faster up close, near enemy positions and near bodies.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_TITLE">
+                <Original>Enemy Disguise</Original>
+                <English>Enemy Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_FLOOR_FMT">
+                <Original>Current suspicion value is %1 of 100 (lower is better), based on your gear:</Original>
+                <English>Current suspicion value is %1 of 100 (lower is better), based on your gear:</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_WRONG_FMT">
+                <Original>Not enemy issue: %1.</Original>
+                <English>Not enemy issue: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_MISSING_FMT">
+                <Original>Missing: %1.</Original>
+                <English>Missing: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_CLEAN">
+                <Original>All of it is enemy issue.</Original>
+                <English>All of it is enemy issue.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_SUSPICION">
+                <Original>Suspicion rises while the enemy watches you, faster up close and near bodies.</Original>
+                <English>Suspicion rises while the enemy watches you, faster up close and near bodies.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_ATTACK">
+                <Original>Attacking while seen breaks the disguise.</Original>
+                <English>Attacking while seen breaks the disguise.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_UNIFORM">
+                <Original>Taking off the enemy uniform ends the disguise.</Original>
+                <English>Taking off the enemy uniform ends the disguise.</English>
+            </Key>
         </Container>
         <Container name="Civilian Disguise">
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_FMT">

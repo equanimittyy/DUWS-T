@@ -184,6 +184,15 @@ The sets hold lowercase classes, because `in` compares strings by case. A weapon
 by its arsenal base row (`fnc_arsenal_base_weapons`), so a looted rifle with a different optic still
 matches. A civilian vehicle (config side 3) adds no penalty.
 
+## The info panel
+
+The bottom of the disguise panel lists the rules of the active disguise, or reads "No disguise
+active." For the enemy disguise, it also gives the floor and names each item that raises it. The
+client cannot calculate the floor, because `DUWS_enemyKit` is server-only. The monitor therefore
+publishes `[floor, mismatch]` as `DUWS_enemyDisguise_kit` on the player when either changes. A public
+variable is correct here, unlike for the meter, because it changes only when the kit changes. The
+panel reads it once, when it opens.
+
 ## The readout
 
 The bar stays on screen for the whole disguise, for both disguises. `fnc_disguise_meter` draws it
