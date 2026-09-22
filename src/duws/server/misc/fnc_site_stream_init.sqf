@@ -271,7 +271,8 @@ fnc_site_poller = {
         // A crowd is held up by a player, a garrison by any BLUFOR -- two different answers, so both
         // lists are built once here, and neither costs a spatial query until somebody is actually
         // within reach of the site being asked about.
-        private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
+        // side group, not side: a disguised player is captive, and a captive unit reads CIVILIAN.
+        private _west = (allUnits select { side group _x == WEST }) apply { getPosATL _x };
         // WEST aircraft positions for occupant-declared air rings, off the vehicle list (not
         // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
         // _westAir: every WEST aircraft, for an AA ring that must catch any jet, AI-flown included.
