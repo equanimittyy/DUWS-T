@@ -18,7 +18,7 @@ if (!isServer) exitWith {};
     while {true} do {
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
-            sleep 1800;
+            sleep DUWS_econ_period;
             call fnc_zonesundercontrol;
         } catch {
             ["ERROR", "ECON", format ["econ tick threw, thread held alive: %1", _exception]] call fnc_log;

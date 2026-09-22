@@ -73,6 +73,7 @@ private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
 private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
 private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle);
 private _opfAP = _opfTownAP + _opfZoneAP + opfor_flat_ap_income;
+WARCOM_opfor_lastIncome = _opfAP;
 
 // One call per pool per side, not one per town: fnc_ap_adjust/fnc_cp_adjust publicVariable and
 // log every time, so per-town calls would broadcast the same global a dozen times a tick.

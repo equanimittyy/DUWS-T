@@ -748,6 +748,10 @@ OPCOM_BANK_SCORE = 0.5;
 // Value that lands later counts for less, halving over this many ticks of travel.
 OPCOM_VALUE_HALFLIFE = 360;
 
+// Ticks OPCOM will bank toward an unaffordable top pick: one economy period, since income lands in lumps and a
+// shorter horizon would rarely hold a payout.
+OPCOM_SAVE_HORIZON = 360;
+
 // A cell BLUFOR cross once fades within the hour while a route they use every trip stays lit.
 OPCOM_TRAFFIC_HALFLIFE = 360;
 OPCOM_TRAFFIC_SHARE = 0.5;
@@ -813,6 +817,10 @@ publicVariable "DUWS_base_keep_radius";
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.
 econ_tick = 0;
+// Seconds between economy ticks; OPCOM's savings goal divides a payout by it to read an income rate.
+DUWS_econ_period = 1800;
+// OPFOR's last economy payout, 0 until the first, so OPCOM sets no savings goal before it knows its income.
+WARCOM_opfor_lastIncome = 0;
 
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference

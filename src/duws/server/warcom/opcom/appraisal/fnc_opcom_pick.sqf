@@ -9,11 +9,12 @@ if (_mode isEqualTo "off") exitWith {};
 
 private _live = [];
 // Unscheduled so every action reads one wallet and one store. The execute runs after, scheduled, because an order
-// plans a route and the router may yield.
+// plans a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
 isNil {
     {
         private _row = _x;
-        private _targets = ((_row param [4, []]) call (_row select 2)) select { (_x select 1) <= WARCOM_opfor_ap };
+        private _targets = (_row param [4, []]) call (_row select 2);
+        if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
         if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
     } forEach DUWS_opcom_actions;
 };
@@ -38,10 +39,29 @@ if (_mode isEqualTo "weighted") then {
     { _rank pushBack [_x select 0, _forEachIndex] } forEach _all;
     _rank sort false;
 
+    // Without a goal, cheap actions spend every refill and a dearer, better one never becomes affordable.
+    private _goal = [];
+    if (_rank isNotEqualTo []) then {
+        (_all select ((_rank select 0) select 1)) params ["_s", "", "_c"];
+        private _short = (_c select 1) - WARCOM_opfor_ap;
+        private _rate = WARCOM_opfor_lastIncome * OPCOM_TICK_PERIOD / DUWS_econ_period;
+        if (_s > 0 && {_short > 0} && {_rate > 0} && {_short / _rate <= OPCOM_SAVE_HORIZON}) then {
+            _goal = [_s, _c, _short, _short / _rate];
+        };
+    };
+    if (_goal isNotEqualTo []) exitWith {
+        _goal params ["_s", "_c", "_short", "_eta"];
+        _score = _s;
+        _row = DUWS_opcom_actions select (DUWS_opcom_actions findIf { (_x select 0) isEqualTo "bank" });
+        _cand = [[], 0, format ["Bank, saving for %1 (%2 AP short, ~%3 min)", _c select 2, ceil _short, ceil (_eta * OPCOM_TICK_PERIOD / 60)]];
+    };
+
     private _draw = [];
     {
         _x params ["_s", "_i"];
         if (_s <= 0 || {count _draw >= OPCOM_PICK_TOP * 2}) then { break };
+        private _c = (_all select _i) select 2;
+        if ((_c select 1) > WARCOM_opfor_ap) then { continue };
         _draw pushBack (_all select _i);
         _draw pushBack (_s ^ OPCOM_PICK_SHARPNESS);
     } forEach _rank;
