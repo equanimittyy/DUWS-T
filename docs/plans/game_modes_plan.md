@@ -97,7 +97,7 @@ only what flavour of civilian a town holds. Grouped by what they actually gate:
 | Reputation and garrison suppression | `server/civilian/fnc_civ_rep_Tomata.sqf:12`, `fnc_civ_garrison.sqf:8`, `fnc_escalation.sqf:9` |
 | Ravage-only spawn extras | `server/civilian/fnc_civ_spawnUnit.sqf:28,44`, `fnc_civ_recycle.sqf:125,141`, `server/server_init.sqf:270` |
 | Task text and objectives | `server/misc/fnc_capture_zones_task.sqf:37,46` |
-| Disguise and recruitment | `client/dialog/fnc_disguise_menu.sqf:28`, `server/civilian/fnc_disguiseAsCivilian.sqf:46`, `fnc_recruit_civilian_server.sqf:107` |
+| Disguise and recruitment | `client/dialog/fnc_disguise_menu.sqf:32`, `server/civilian/fnc_disguiseAsCivilian.sqf:112,115`, `server/disguise/fnc_disguiseAsEnemy.sqf:16`, `fnc_recruit_civilian_server.sqf:96` |
 | Cleanup and client atmosphere | `server/missions/fnc_mission_cleanup.sqf:95-96`, `server/server_init.sqf:434`, `client/client_init.sqf:294,361,364` |
 
 The mode's own goal — a survivor base to build up and an escape to reach — is new content built on
