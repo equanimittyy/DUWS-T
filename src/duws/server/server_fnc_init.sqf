@@ -1059,6 +1059,7 @@ fnc_medtent_actions = compile preprocessFileLineNumbers "duws\shared\functions\f
 fnc_field_box_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_field_box_actions.sqf";publicVariable "fnc_field_box_actions";
 fnc_pos_near_enemy = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_near_enemy.sqf";publicVariable "fnc_pos_near_enemy";
 fnc_sightline_foliageClear = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sightline_foliageClear.sqf";publicVariable "fnc_sightline_foliageClear";
+fnc_sightline_clear = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sightline_clear.sqf";publicVariable "fnc_sightline_clear";
 fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_duws_senior_name.sqf";publicVariable "fnc_duws_senior_name";
 
 // =========================================================================================================

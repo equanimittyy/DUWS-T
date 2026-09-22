@@ -29,9 +29,7 @@ if (isNil "DUWS_fnc_recon_glassing") then {
     };
 };
 
-// Terrain- and object-honest LOS from the player's eye to a point just above the target. terrainIntersectASL
-// answers elevation (a ridge in the way); lineIntersectsSurfaces answers structures, ignoring the player's
-// own vehicle so glassing from inside one still counts.
+// Ignores the player's own vehicle so glassing from inside one still counts.
 if (isNil "DUWS_fnc_recon_los") then {
     DUWS_fnc_recon_los = {
         params ["_p", "_tgt", "_range"];
@@ -42,12 +40,7 @@ if (isNil "DUWS_fnc_recon_los") then {
         // composition, and a central piece would otherwise occlude the hold the overwatch was picked for.
         // Higher is strictly more terrain-clear, so +8 keeps the +5 certification valid and clears the camp.
         private _to  = [_tgt select 0, _tgt select 1, (getTerrainHeightASL _tgt) + 8];
-        if (terrainIntersectASL [_eye, _to]) exitWith { false };
-        if !((lineIntersectsSurfaces [_eye, _to, _p, vehicle _p]) isEqualTo []) exitWith { false };
-        // Foliage the geometry ray misses -- canopy over a look-down sight, low bushes -- sampled on the
-        // target end. The thread's overwatch was picked through the same helper, so this cannot reject a
-        // hold the thread certified.
-        [_eye, _to] call fnc_sightline_foliageClear
+        [_eye, _to, _p, vehicle _p] call fnc_sightline_clear
     };
 };
 

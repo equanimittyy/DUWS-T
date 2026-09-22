@@ -36,10 +36,7 @@ for "_i" from 0 to 47 do {
 	if ((_bluAnchors findIf { _cand distance2D _x < BLU_STANDOFF }) >= 0) then { continue };
 	private _z = getTerrainHeightASL _cand;
 	private _eye = [_cand select 0, _cand select 1, _z + PRONE_EYE];
-	if (terrainIntersectASL [_eye, _tEye]) then { continue };
-	if !((lineIntersectsSurfaces [_eye, _tEye, _player, vehicle _player]) isEqualTo []) then { continue };
-	// The team cannot step off a bush at the perch, so test that end too.
-	if !([_eye, _tEye] call fnc_sightline_foliageClear && {[_tEye, _eye] call fnc_sightline_foliageClear}) then { continue };
+	if !([_eye, _tEye, _player, vehicle _player, true] call fnc_sightline_clear) then { continue };
 	private _ringSum = 0;
 	{ _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [60, _x]) } forEach _ring;
 	private _relElev = _z - _ringSum / 8;

@@ -31,9 +31,8 @@ private _hpKey  = if (_kind isEqualTo "hp") then { _pick select 2 } else { "" };
 if (!([12, _MissionPos, _mission_name, _requester] call fnc_mission_begin)) exitWith {};
 
 // The overwatch. Sample bearings across the friendly-facing arc at 600-800 m and keep the highest one
-// with clear line-of-sight to the target -- terrain (terrainIntersectASL) and structures
-// (lineIntersectsSurfaces) both -- that also stands clear of every OTHER enemy zone and hardpoint, so
-// the player never observes from on top of one. Nothing left after that filter aborts the mission.
+// with clear line-of-sight to the target that also stands clear of every OTHER enemy zone and hardpoint,
+// so the player never observes from on top of one. Nothing left after that filter aborts the mission.
 private _tgtASL    = [_target select 0, _target select 1, (getTerrainHeightASL _target) + 5];
 private _tgtGround = getTerrainHeightASL _target;
 
@@ -63,9 +62,7 @@ for "_i" from 0 to 17 do {
     private _ground  = getTerrainHeightASL _cand;
     private _eyeASL  = [_cand select 0, _cand select 1, _ground + 1.5];
     if (
-        !(terrainIntersectASL [_eyeASL, _tgtASL])
-        && {(lineIntersectsSurfaces [_eyeASL, _tgtASL]) isEqualTo []}
-        && {[_eyeASL, _tgtASL] call fnc_sightline_foliageClear}
+        [_eyeASL, _tgtASL] call fnc_sightline_clear
         && {(_avoidZones findIf { _cand distance2D (_x select 1) < ((_x select 2) + ZONE_CLEAR) }) < 0}
         && {(_hps findIf { _cand distance2D (_x select 1) < HP_CLEAR }) < 0}
     ) then {

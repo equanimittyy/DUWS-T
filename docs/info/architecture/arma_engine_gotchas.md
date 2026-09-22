@@ -543,7 +543,7 @@ The array form's LOD argument is an engine enum matched word-order-exactly (`Mem
 
 ## `lineIntersectsSurfaces` stops at tree trunks but not at leaves or bushes
 
-The ray tests geometry LODs, so it stops at buildings, rocks and tree trunks. A tree canopy has alpha-textured leaves and no geometry, and a low bush has no geometry LOD, so the ray passes through both although they hide a man. A sight that the ray alone certifies can look straight into a bush. Grass is client-side clutter with no object, so no command can test it. Fix: after the ray, run `fnc_sightline_foliageClear` (`shared/functions/fnc_sightline_foliageClear.sqf`), which samples the line for `TREE`/`SMALL TREE`/`BUSH` terrain objects. The recon overwatch pick and the enemy-sniper perch pick both use it.
+The ray tests geometry LODs, so it stops at buildings, rocks and tree trunks. A tree canopy has alpha-textured leaves and no geometry, and a low bush has no geometry LOD, so the ray passes through both although they hide a man. A sight that the ray alone certifies can look straight into a bush. Grass is client-side clutter with no object, so no command can test it. Fix: test the sight with `fnc_sightline_clear` (`shared/functions/fnc_sightline_clear.sqf`). It runs the ray and then `fnc_sightline_foliageClear`, which samples the line for `TREE`/`SMALL TREE`/`BUSH` terrain objects. The recon hold check, the recon overwatch pick and the enemy-sniper perch pick all use it.
 
 ## `nearestTerrainObjects` measures 3D distance unless its fifth argument is `true`
 
