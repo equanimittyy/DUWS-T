@@ -171,5 +171,9 @@ While the meter moves, it owns the hint box, and any other hint shows for 0.5 s 
 The cooldown runs from cover blown, not from activation: 300 s for the civilian disguise
 (`DUWS_disguise_blownAt`) and 600 s for the enemy disguise (`DUWS_enemyDisguise_blownAt`).
 
+A rest clears both cooldowns for every player through `fnc_disguise_resetCooldown`, because the rest
+skips hours of game time and the stamps count real seconds. The Debug menu's World page has the same
+reset for the player who opens it.
+
 `diag_tickTime` counts from the start of the Arma process. When a save resumes in a new Arma session,
 every stamp is in the future, so the cooldown sweep in `server/server_init.sqf` clears it.

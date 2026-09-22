@@ -38,6 +38,10 @@ skiptime _hours;
 DUWS_timeSkew = DUWS_timeSkew + _hours * 3600;
 publicVariable "DUWS_timeSkew";
 
+// The disguise cooldowns count real seconds, which skiptime does not move, and the hours pass for
+// every player, not only those healed.
+{ [_x] call fnc_disguise_resetCooldown } forEach (call BIS_fnc_ListPlayers);
+
 // Gated server-side too, so the parameter holds even if a client sent weather values anyway.
 if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
     // Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call

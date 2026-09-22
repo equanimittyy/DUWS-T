@@ -122,6 +122,10 @@ switch (_page) do {
             ["Spawn intel items (drop-test)", { [player] remoteExec ["fnc_debug_spawn_intel", 2] },  [], DBG_ACTION],
             ["Simulate intel search",         { [player] remoteExec ["fnc_debug_intel_search", 2] }, [], DBG_ACTION],
             ["Force intel reveal",            { [player, "combat", true] remoteExec ["fnc_debug_intel_search", 2] }, [], DBG_ACTION],
+            ["Reset disguise cooldowns", {
+                [player] remoteExec ["fnc_disguise_resetCooldown", 2];
+                hint "Disguise cooldowns reset.\n\nBoth the civilian and the enemy disguise can activate again.";
+            }, [], DBG_ACTION],
             ["Calibrate furniture fronts >",  { call fnc_debug_furnish_calibrate },                   [], DBG_PAGE]
         ]] call fnc_open_action_menu;
     };
