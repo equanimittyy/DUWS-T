@@ -1562,9 +1562,9 @@ private _survivors = call fnc_test_zeroGrid;
 // --- DUWS_fnc_opcom_truckFor: the cheapest truck source to a destination ---
 OPCOM_AP_PER_KM = 0.5;
 ["truck_for: an idle truck beats a hire as far away",
-    [[[["truck", 1], [0, 0, 0], 0], [["hire", "z"], [0, 0, 0], 4]], [1000, 0, 0]] call DUWS_fnc_opcom_truckFor, [["truck", 1], 0.5]] call fnc_assertEq;
+    [[[["truck", 1], [0, 0, 0], 0], [["hire", "z"], [0, 0, 0], 4]], [1000, 0, 0]] call DUWS_fnc_opcom_truckFor, [["truck", 1], 0.5, 1000]] call fnc_assertEq;
 ["truck_for: a near hire beats a far idle truck",
-    [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5]] call fnc_assertEq;
+    [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5, 1000]] call fnc_assertEq;
 ["truck_for: no source is no truck", [[], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, []] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_exposureAt: how close a holding sits to BLUFOR-held ground ---
@@ -1696,6 +1696,11 @@ DUWS_fnc_opcom_coverAt = { 0.75 };
 ["coverValue: a block two hardpoints cover earns an eighth", [[2750, 2750, 0]] call DUWS_fnc_opcom_coverValue, 6.25] call fnc_assertClose;
 DUWS_fnc_opcom_coverAt = { 0 };
 ["coverValue: a block clipped at the box edge earns only its cells inside", [[250, 250, 0]] call DUWS_fnc_opcom_coverValue, 9] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_delay: Value that lands later counts for less ---
+OPCOM_VALUE_HALFLIFE = 40;
+["delay: a delivery on the spot keeps its whole Value", [0, 4] call DUWS_fnc_opcom_delay, 1] call fnc_assertClose;
+["delay: a drive of one half-life keeps half", [5000, 4] call DUWS_fnc_opcom_delay, 0.5] call fnc_assertClose;
 
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---

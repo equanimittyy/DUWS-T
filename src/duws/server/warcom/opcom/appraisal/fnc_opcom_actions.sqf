@@ -151,16 +151,23 @@ DUWS_fnc_opcom_truckSourcesSweep = {
 
 DUWS_fnc_opcom_truckSources = { ["truckSources", DUWS_fnc_opcom_truckSourcesSweep] call DUWS_fnc_opcom_tickCached };
 
-// -> [source, cost] for the cheapest truck to _dest, or [] with no source.
+// -> [source, cost, distance] for the cheapest truck to _dest, or [] with no source.
 DUWS_fnc_opcom_truckFor = {
     params ["_sources", "_dest"];
     private _best = [];
     {
         _x params ["_src", "_pos", "_base"];
-        private _cost = _base + OPCOM_AP_PER_KM * (_pos distance2D _dest) / 1000;
-        if (_best isEqualTo [] || {_cost < (_best select 1)}) then { _best = [_src, _cost] };
+        private _d = _pos distance2D _dest;
+        private _cost = _base + OPCOM_AP_PER_KM * _d / 1000;
+        if (_best isEqualTo [] || {_cost < (_best select 1)}) then { _best = [_src, _cost, _d] };
     } forEach _sources;
     _best
+};
+
+// A delivery's Value lands when the truck arrives.
+DUWS_fnc_opcom_truckDelay = {
+    params ["_truck"];
+    [_truck select 2, DUWS_opcom_speed get (DUWS_opcom_moveType get "truck")] call DUWS_fnc_opcom_delay
 };
 
 // One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.
@@ -206,7 +213,8 @@ DUWS_fnc_opcom_townReinforceTargets = {
         if (_truck isEqualTo []) then { continue };
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_REINFORCE + (_truck select 1)),
             format ["Reinforce %1", [_i] call DUWS_fnc_opcom_townLabel],
-            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue];
+            ([[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue)
+                * ([_truck] call DUWS_fnc_opcom_truckDelay)];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
 };
@@ -227,7 +235,8 @@ DUWS_fnc_opcom_townFortifyTargets = {
         private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_FORTIFY + (_truck select 1)),
             format ["Fortify %1 to tier %2", [_i] call DUWS_fnc_opcom_townLabel, _tier + 1],
-            [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue];
+            ([[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue)
+                * ([_truck] call DUWS_fnc_opcom_truckDelay)];
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     _out
 };
@@ -246,7 +255,7 @@ DUWS_fnc_opcom_rapportTargets = {
         if (_truck isEqualTo []) then { continue };
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_RAPPORT + (_truck select 1)),
             format ["Rapport at %1", [_i] call DUWS_fnc_opcom_townLabel],
-            [[_i] call DUWS_fnc_opcom_townWorth, _rep] call DUWS_fnc_opcom_rapportValue];
+            ([[_i] call DUWS_fnc_opcom_townWorth, _rep] call DUWS_fnc_opcom_rapportValue) * ([_truck] call DUWS_fnc_opcom_truckDelay)];
     } forEach (missionNamespace getVariable ["civ_town_rep", []]);
     _out
 };
@@ -290,7 +299,7 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
     _drop params ["_at", "_truck"];
     [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
         format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
-        [_at] call DUWS_fnc_opcom_coverValue]]
+        ([_at] call DUWS_fnc_opcom_coverValue) * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
 };
 
 DUWS_fnc_opcom_assetTargets = {
@@ -300,15 +309,14 @@ DUWS_fnc_opcom_assetTargets = {
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
-    private _cand = [[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]];
-    switch (_type) do {
-        case "RADIO": { _cand pushBack ([_at] call DUWS_fnc_opcom_towerValue) };
-        case "OP": { _cand pushBack ([_at] call DUWS_fnc_opcom_opValue) };
-        case "MORTAR";
-        case "ARTY": { _cand pushBack ([_type, _at] call DUWS_fnc_opcom_gunValue) };
+    private _v = switch (_type) do {
+        case "RADIO": { [_at] call DUWS_fnc_opcom_towerValue };
+        case "OP": { [_at] call DUWS_fnc_opcom_opValue };
+        default { [_type, _at] call DUWS_fnc_opcom_gunValue };
     };
-    [_cand]
+    [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
+        _v * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
 };
 
 // One 50 m square for now; the size rides the target, so a deeper belt is a wider candidate, not a new action.
@@ -322,7 +330,7 @@ DUWS_fnc_opcom_mineBuildTargets = {
     [[[_variant, _size, _at, _truck select 0],
         ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
         format ["Lay %1 mines at %2", _variant, mapGridPosition _at],
-        [_at] call DUWS_fnc_opcom_coverValue]]
+        ([_at] call DUWS_fnc_opcom_coverValue) * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.

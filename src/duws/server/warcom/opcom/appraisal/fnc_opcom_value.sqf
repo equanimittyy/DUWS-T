@@ -221,3 +221,9 @@ DUWS_fnc_opcom_rapportValue = {
     params ["_worth", "_rep"];
     _worth * ((1 - (abs _rep) / 10) max 0.1) * OPCOM_RAPPORT_STEP / 10
 };
+
+// Straight-line, not the route: planning a route per candidate would not fit the pick's unscheduled pass.
+DUWS_fnc_opcom_delay = {
+    params ["_dist", "_ticksPerCell"];
+    0.5 ^ ((_dist / OPCOM_GRID_CELL) * _ticksPerCell / OPCOM_VALUE_HALFLIFE)
+};

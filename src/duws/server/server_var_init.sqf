@@ -745,6 +745,9 @@ OPCOM_TOWN_WORTH = 5;
 // when nothing on the shortlist pays for itself.
 OPCOM_BANK_SCORE = 0.5;
 
+// Value that lands later counts for less, halving over this many ticks of travel.
+OPCOM_VALUE_HALFLIFE = 360;
+
 // A cell BLUFOR cross once fades within the hour while a route they use every trip stays lit.
 OPCOM_TRAFFIC_HALFLIFE = 360;
 OPCOM_TRAFFIC_SHARE = 0.5;
