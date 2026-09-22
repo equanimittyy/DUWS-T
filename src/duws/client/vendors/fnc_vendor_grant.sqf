@@ -1,8 +1,8 @@
 // Locality: client -- an inventory add takes effect only where the unit is local.
 //
-// Hands one bought gear class to the player: into its own empty equipment slot, otherwise into the
+// Hands bought gear to the player: each piece into its own empty equipment slot, otherwise into the
 // first worn container with room, otherwise at their feet.
-params ["_class"];
+params ["_class", "_count"];
 
 // Every fill command replaces what its slot holds, so only an empty slot is filled.
 private _fnc_equip = {
@@ -38,7 +38,7 @@ private _fnc_equip = {
     getUnitLoadout player isNotEqualTo _before
 };
 
-private _taken = call {
+private _fnc_take = {
     // A pack never nests inside another container, so it only fits on an empty back.
     if (_class isKindOf ["Bag_Base", configFile >> "CfgVehicles"]) exitWith {
         if (backpack player isEqualTo "") then { player addBackpack _class; true } else { false }
@@ -52,8 +52,10 @@ private _taken = call {
     if (player canAddItemToBackpack _class) exitWith { player addItemToBackpack _class; true };
     false
 };
-if (!_taken) then { [[[_class, 1]], getPosATL player] remoteExec ["fnc_money_drop", 2] };
+private _dropped = 0;
+for "_i" from 1 to _count do { if !(call _fnc_take) then { _dropped = _dropped + 1 } };
+if (_dropped > 0) then { [[[_class, _dropped]], getPosATL player] remoteExec ["fnc_money_drop", 2] };
 
 private _name = getText (([_class] call fnc_vendor_classCfg) >> "displayName");
 private _line = format [localize "STR_DUWS_T_VENDOR_BOUGHT", [_name, _class] select (_name isEqualTo "")];
-hint (if (_taken) then { _line } else { format ["%1\n\n%2", _line, [[[_class, 1]]] call DUWS_fnc_dropped_line] });
+hint (if (_dropped == 0) then { _line } else { format ["%1\n\n%2", _line, [[[_class, _dropped]]] call DUWS_fnc_dropped_line] });

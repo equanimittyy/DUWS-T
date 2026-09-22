@@ -64,14 +64,28 @@ if (_store && {_domainIndex >= 0}
 if !([_buyer, _price] call fnc_money_spend) exitWith { [localize "STR_DUWS_T_VENDOR_BROKE"] remoteExec ["hint", _buyer] };
 
 if (_gear) exitWith {
+    private _pack = call {
+        private _mag = configFile >> "CfgMagazines" >> _class;
+        if (!isClass _mag) exitWith { 1 };
+        private _sim = getText (configFile >> "CfgAmmo" >> getText (_mag >> "ammo") >> "simulation");
+        if (_sim in ["shotMissile", "shotRocket"]) exitWith { 2 };
+        // shotShell is the 40 mm grenade round.
+        if (_sim in [
+            "shotGrenade", "shotShell", "shotSmoke", "shotSmokeX", "shotIlluminating",
+            "shotMine", "shotBoundingMine", "shotDirectionalBomb", "shotPipeBomb", "shotTimeBomb"
+        ]) exitWith { 3 };
+        // The belt-fed line fnc_IsMG draws.
+        if (getNumber (_mag >> "count") >= 100) exitWith { 3 };
+        5
+    };
     if (_store) exitWith {
-        [_class, ([_class] call fnc_captured_pool_getCount) + 1] call fnc_captured_pool_setCount;
+        [_class, ([_class] call fnc_captured_pool_getCount) + _pack] call fnc_captured_pool_setCount;
         // The setter deliberately does not broadcast -- its other callers batch several writes behind
         // one publish -- so a single sale has to publish for itself or no client sees the shelf move.
         publicVariable "DUWS_capturedPool";
         ["STR_DUWS_T_VENDOR_BOUGHT_ARSENAL"] call _fnc_bought;
     };
-    [_class] remoteExec ["fnc_vendor_grant", _buyer];
+    [_class, _pack] remoteExec ["fnc_vendor_grant", _buyer];
 };
 
 // A bought vehicle has no live original to capture a spec from, so one is built in factory state. The

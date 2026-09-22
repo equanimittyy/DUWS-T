@@ -224,8 +224,18 @@ Each purchase offers two destinations:
 
 | Bought | Stored at base | Taken now |
 |---|---|---|
-| Gear | The arsenal: +1 to the captured-materiel pool, then `publicVariable "DUWS_capturedPool"`, because the setter does not broadcast | `fnc_vendor_grant` on the buyer's machine: the item's own empty equipment slot, then the first worn container with room, then a ground holder at the buyer |
+| Gear | The arsenal: the pack size is added to the captured-materiel pool, then `publicVariable "DUWS_capturedPool"`, because the setter does not broadcast | `fnc_vendor_grant` on the buyer's machine, one piece at a time: the item's own empty equipment slot, then the first worn container with room, then a ground holder at the buyer |
 | Vehicle | The garage: a spec pushed onto `DUWS_garage_stored` | `fnc_depot_carry_spawn` at the buyer, then the R3F carry of a garage retrieval (`fnc_depot_place_r3f`) |
+
+A magazine sells as a pack (`fnc_vendor_buy.sqf:67`). Every other gear class sells as one piece.
+The price is for the whole pack.
+
+| Magazine | Pack |
+|---|---|
+| Rocket or missile, read from the ammo `simulation` | 2 |
+| Grenade (hand or 40 mm) or explosive, read from the ammo `simulation` | 3 |
+| 100 rounds or more, the belt-fed line of `fnc_IsMG` | 3 |
+| Every other magazine | 5 |
 
 The arsenal counts a class only in Limited mode, or when the class is not on `DUWS_friendlyArsenal`.
 A friendly class is already unlimited on the shelf, so storing one buys nothing.
@@ -236,7 +246,7 @@ The ground holder comes from `fnc_money_drop`, which puts a weapon or a backpack
 backpack cargo. Item cargo accepts both but never renders them, so a dropped rifle disappeared.
 
 A bought vehicle has no live original, so its garage spec is built in factory state
-(`fnc_vendor_buy.sqf:80`). The hitpoints field is `[[],[],[]]` and never `[]`, because
+(`fnc_vendor_buy.sqf:94`). The hitpoints field is `[[],[],[]]` and never `[]`, because
 `DUWS_fnc_vehSpecApply` destructures it into three arrays.
 
 The carry for a vehicle taken now passes `_baseBound` as false: the buyer stands in a town, not
