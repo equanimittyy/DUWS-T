@@ -115,7 +115,9 @@ costs, because a soldier without them reads wrong even where a pilot or an offic
 on foot is never an empty vehicle slot. The floor is capped at 95, so the floor alone never breaks
 cover.
 
-**Decay.** While no unit spots the player, the meter falls 5 per second, down to the floor.
+**Decay.** While no unit spots the player, the meter falls 5 per second, down to the floor. While a
+living OPFOR unit is within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, it falls at
+`DISGUISE_DECAY_NEAR_SCALE` (half) that rate, whether or not that unit can see the player.
 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|

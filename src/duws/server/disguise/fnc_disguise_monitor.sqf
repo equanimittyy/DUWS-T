@@ -85,13 +85,18 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
     };
 
     private _rate = 1;
+    private _decayScale = 1;
     if (_seen) then {
         if (((_player nearObjects ["CAManBase", 20]) findIf { !alive _x }) >= 0) then { _rate = DISGUISE_BODY_MULT };
         _rate = _rate * ([DISGUISE_ENEMY_RATE, [DISGUISE_CIV_RATE_OPEN, DISGUISE_CIV_RATE_BAND] select _inBand] select _civ);
+    } else {
+        if (((_player nearEntities [["AllVehicles"], DISGUISE_DECAY_NEAR_RANGE]) findIf {
+            ((crew _x) findIf { alive _x && {side group _x == east} }) >= 0
+        }) >= 0) then { _decayScale = DISGUISE_DECAY_NEAR_SCALE };
     };
 
     private _prev = _meter;
-    _meter = [_meter, _floor, _dists, _rate, _dt] call fnc_disguise_suspicion_step;
+    _meter = [_meter, _floor, _dists, _rate, _dt, _decayScale] call fnc_disguise_suspicion_step;
     if (_seen && {_meter >= 100}) exitWith {
         ["STR_DUWS_T_DISGUISE_BROKEN_SUSPICION", true] call _fnc_break;
     };

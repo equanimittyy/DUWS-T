@@ -1622,5 +1622,6 @@ fnc_test_breakTime = {
     [0, 0, [2], 1, 1] call fnc_disguise_suspicion_step, 10] call fnc_assertClose;
 ["suspicion: decay stops at the floor", [60, 50, [], 1, 10] call fnc_disguise_suspicion_step, 50] call fnc_assertClose;
 ["suspicion: unseen, the meter falls 5 a second", [60, 0, [], 1, 2] call fnc_disguise_suspicion_step, 50] call fnc_assertClose;
+["suspicion: unseen with an enemy near, the meter falls half as fast", [60, 0, [], 1, 2, 0.5] call fnc_disguise_suspicion_step, 55] call fnc_assertClose;
 ["suspicion: a floor above the meter lifts it at once", [10, 50, [], 1, 0.5] call fnc_disguise_suspicion_step, 50] call fnc_assertClose;
 ["suspicion: the meter never passes 100", [99, 0, [10], 1, 5] call fnc_disguise_suspicion_step, 100] call fnc_assertClose;
