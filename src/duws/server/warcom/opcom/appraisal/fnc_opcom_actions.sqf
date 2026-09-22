@@ -276,7 +276,8 @@ DUWS_opcom_actions = [
         !isNil "_t"
     }],
     ["attack", "offensive", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun],
-    ["intercept", "defensive", DUWS_fnc_opcom_interceptTargets, DUWS_fnc_opcom_interceptRun]
+    ["intercept", "defensive", DUWS_fnc_opcom_interceptTargets, DUWS_fnc_opcom_interceptRun],
+    ["scout", "recon", DUWS_fnc_opcom_scoutTargets, DUWS_fnc_opcom_scoutRun]
 ];
 
 // One row per type, never one row offering several: the pick draws an action, so a shared row would decide the type

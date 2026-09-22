@@ -1728,6 +1728,24 @@ DUWS_fnc_opcom_cellDist = { 1 };
 ["interceptShare: a group a quarter as strong takes a quarter", [5, 20 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 0.25] call fnc_assertClose;
 ["interceptShare: past the defense it stops at the whole", [50, 0] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_scoutCells: the ground a recon sweeps on its way ---
+OPCOM_BELIEF_EXPIRE = 240;
+DUWS_opcom_grid_seen = [100, -140, 220];
+DUWS_opcom_tick = 220;
+["stalenessAt: a cell swept this tick reads fresh", [2] call DUWS_fnc_opcom_stalenessAt, 0] call fnc_assertClose;
+["stalenessAt: half a horizon unseen reads half", [0] call DUWS_fnc_opcom_stalenessAt, 0.5] call fnc_assertClose;
+["stalenessAt: past the horizon it stops at wholly unseen", [1] call DUWS_fnc_opcom_stalenessAt, 1] call fnc_assertClose;
+OPCOM_GRID_CELL = 500;
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor ((_p select 0) / 500) };
+["scoutCells: a move inside one cell sweeps its own block",
+    count ([[250, 250, 0], [400, 400, 0], 1] call DUWS_fnc_opcom_scoutCells), 4] call fnc_assertEq;
+["scoutCells: a run of four cells sweeps a band three deep",
+    count ([[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_scoutCells), 12] call fnc_assertEq;
+["scoutCells: a wider reach sweeps a wider band, clipped at the box edge",
+    count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_scoutCells), 28] call fnc_assertEq;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

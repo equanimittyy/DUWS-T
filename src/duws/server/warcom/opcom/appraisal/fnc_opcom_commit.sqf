@@ -77,3 +77,44 @@ DUWS_fnc_opcom_interceptRun = {
     private _t = [_id] call DUWS_fnc_opcom_byId;
     !isNil "_t" && {[_t, "intercept", _key] call fnc_opcom_task}
 };
+
+// Every recon weighs the same few destinations, drawn from the cells the need field lights: the sample is the Scout's
+// siting pass, and a recon already out is on a move order and out of the roster.
+DUWS_fnc_opcom_scoutTargets = {
+    private _units = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
+    if (_units isEqualTo [] || {DUWS_opcom_needCells isEqualTo []}) exitWith { [] };
+    private _pool = +DUWS_opcom_needCells;
+    private _dests = [];
+    for "_i" from 1 to (OPCOM_SITE_SAMPLES min count _pool) do {
+        _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
+    };
+    private _out = [];
+    {
+        private _t = _x;
+        private _k = OPCOM_RECON_K getOrDefault [_t get "moveType", 1];
+        private _c = [_t] call DUWS_fnc_opcom_commitCost;
+        private _best = [];
+        private _bs = -1;
+        {
+            private _pw = [_x, _t get "pos", _t get "effForce"] call DUWS_fnc_opcom_pWinSend;
+            if (_pw >= OPCOM_PWIN_FLOOR) then {
+                private _v = ([_t get "pos", _x, _k] call DUWS_fnc_opcom_scoutValue) * ([_t, _x] call DUWS_fnc_opcom_unitDelay);
+                private _s = _pw * _v / (_c max 1);
+                if (_s > _bs) then { _bs = _s; _best = [_x, _v, _pw] };
+            };
+        } forEach _dests;
+        if (_best isNotEqualTo []) then {
+            _best params ["_to", "_v", "_pw"];
+            _out pushBack [[_t get "id", _to], 0,
+                format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
+        };
+    } forEach _units;
+    _out
+};
+
+DUWS_fnc_opcom_scoutRun = {
+    params ["_target"];
+    _target params ["_id", "_to"];
+    private _t = [_id] call DUWS_fnc_opcom_byId;
+    !isNil "_t" && {[_t, "move", _to] call fnc_opcom_task}
+};

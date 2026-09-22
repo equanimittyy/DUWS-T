@@ -769,6 +769,9 @@ OPCOM_NEED_BASE_RATIO = 2.5;
 // Chebyshev reach in cells of the need spread, a hardpoint's cover and a standalone build's Value: a 5x5 block.
 OPCOM_BLOCK_K = 2;
 
+// A Scout is worth this share of the need it reveals: scouting takes and protects nothing itself.
+OPCOM_SCOUT_SHARE = 0.2;
+
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;
 OPCOM_PICK_SHARPNESS = 2;
