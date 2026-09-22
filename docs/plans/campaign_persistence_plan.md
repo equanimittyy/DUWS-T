@@ -601,12 +601,12 @@ sides and group names. A layer that caches group or unit handles is not persista
 that will not be visible until a restore produces an empty map.
 
 **Civilian vendors.** The vendor registry
-([`civilian_shops_plan.md`](civilian_shops_plan.md#vendor-registry)) holds, per town, each vendor's
-type, building and respawn cooldown. It is an input: restore replays it in place of the init-time
-roll, so every town keeps the same vendors in the same buildings. The building goes in by position
-on the same footing as towns: a terrain building does not move, so the nearest building to the
-stored position is the same one. Shop money needs no entry, because it is the `Money_roll` item and
-is saved with the player's loadout.
+([`civilian_shops.md`](../info/gameplay/civilian_shops.md#vendor-registry)) holds, per town, each
+vendor's type, building, facing and respawn cooldown. It is an input: restore replays it in place of
+the init-time roll, so every town keeps the same vendors in the same buildings. The building goes in
+by position on the same footing as towns: a terrain building does not move, so the nearest building
+to the stored position is the same one. Shop money needs no entry, because it is the `Money_roll`
+item and is saved with the player's loadout.
 
 **Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
 rule above.

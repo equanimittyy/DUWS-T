@@ -1,15 +1,15 @@
 # Civilian jobs and guerilla hires: design plan
 
 Paid jobs dispatched by employer NPCs: one more money faucet for the
-[civilian shops](civilian_shops_plan.md), beside loot, searches, and civilian missions. The
+[civilian shops](../info/gameplay/civilian_shops.md), beside loot, searches, and civilian missions. The
 Contractor, who hires local guerillas out for that money, is here too: both are the resistance side
 of the civilian economy. The theme is borrowed from the same "shops and jobs" life scenarios — a
 post office, a garbage depot, a taxi rank — and built on the mission's existing plumbing: employers
-are vendors on the shops plan's vendor framework, payouts move the physical money item, and jobs are
+are vendors on the shops' vendor framework, payouts move the physical money item, and jobs are
 gated on the existing civilian disguise.
 
-The two rules at the top of the shops plan hold here: jobs pay in the `Money_roll` item, never
-CP/AP, and they run only in vanilla mode.
+The shops' two rules hold here ([`civilian_shops.md`](../info/gameplay/civilian_shops.md)): jobs
+pay in the `Money_roll` item, never CP/AP, and they run only in vanilla mode.
 
 ## Jobs
 
@@ -63,8 +63,8 @@ drive. The rest is variation to layer on once the loop is proven and tuned.
 ## Employers
 
 Each job is started at its own employer NPC (the Employer column in [Jobs](#jobs)), and for fishing
-the fishmonger also buys the catch. Employers are vendors: the shops plan's
-[vendor framework](civilian_shops_plan.md#vendors-are-streamed-civilians) places, marks, streams,
+the fishmonger also buys the catch. Employers are vendors: the
+[vendor framework](../info/gameplay/civilian_shops.md#placement) places, marks, streams,
 respawns, and persists them exactly like the shops. The one behavioural difference is the
 hostile-town gate: a shop refuses to sell there, but an employer keeps dispatching, which is the
 cover a disguised operator wants. The farmer is the one placement exception.
@@ -105,8 +105,8 @@ framework work.
 
 ## Markers
 
-The employers' and the Contractor's markers follow the shops plan's
-[marker rules](civilian_shops_plan.md#map-markers-and-icons). Two picks are classic base markers
+The employers' and the Contractor's markers follow the shops'
+[marker rules](../info/gameplay/civilian_shops.md#markers). Two picks are classic base markers
 rather than `simpletasks` glyphs — `c_car` (taxi) and `loc_Fountain` (fishmonger, a water stand-in).
 The **No.** column is the contact-sheet number in the marker reference
 ([`../info/external/arma3_markers.md`](../info/external/arma3_markers.md)).
@@ -126,18 +126,18 @@ The **No.** column is the contact-sheet number in the marker reference
 ## Persistence
 
 In-progress job state (a half-finished garbage round) is not worth persisting in a first version —
-drop the job on load rather than trying to resume it. Employers persist through the shops plan's
-vendor registry.
+drop the job on load rather than trying to resume it. Employers persist through the
+[vendor registry](../info/gameplay/civilian_shops.md#vendor-registry).
 
 ## Wiring
 
 Job dispatchers are client-callable, so they are compiled and `publicVariable`'d in
-`server/server_fnc_init.sqf` like every vendor function ([shops plan](civilian_shops_plan.md#wiring)).
+`server/server_fnc_init.sqf` like every vendor function ([`civilian_shops.md`](../info/gameplay/civilian_shops.md#wiring)).
 
 ## Phasing
 
-1. **Garbage round and postal courier.** Disguise-gated. Their two employers need the vendor
-   framework (shops plan phase 1).
+1. **Garbage round and postal courier.** Disguise-gated. Their two employers are vendor types
+   on the existing framework.
 2. **Contractor.** Relocate the CP/AP squad buy out of the request menu, then add the money
    mercenaries beside it. Settles which groups the money mercenaries draw from: an existing
    independent roster, or a new guerilla/PMC set.
