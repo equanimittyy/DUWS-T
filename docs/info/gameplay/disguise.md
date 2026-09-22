@@ -117,7 +117,7 @@ cover.
 
 **Decay.** While no unit spots the player, the meter falls 5 per second, down to the floor. While a
 living OPFOR unit is within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, it falls at
-`DISGUISE_DECAY_NEAR_SCALE` (half) that rate, whether or not that unit can see the player.
+`DISGUISE_DECAY_NEAR_SCALE` (a third of) that rate, whether or not that unit can see the player.
 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|

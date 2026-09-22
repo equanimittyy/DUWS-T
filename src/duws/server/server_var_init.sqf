@@ -563,7 +563,7 @@ DISGUISE_BODY_MULT = 4;
 // Unseen suspicion falls at this share of its rate while a living OPFOR unit is this near, so ducking
 // out of sight beside a patrol does not clear it as fast as walking away.
 DISGUISE_DECAY_NEAR_RANGE = 50;
-DISGUISE_DECAY_NEAR_SCALE = 0.5;
+DISGUISE_DECAY_NEAR_SCALE = 1/3;
 
 // The radio-tower amplifiers, global scalars rather than per-town. DUWS_opforRadioLevel is the count of
 // uncleared enemy "RADIO" hardpoints, capped at AOI_OPFOR_TOWER_CAP, recomputed by fnc_hardpoint_stream
