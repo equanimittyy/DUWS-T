@@ -264,14 +264,15 @@ the JIP entry.
 ## Clear economy
 
 Clearing pays the player CP, and for the heaviest emplacements AP as well; it never pays OPFOR
-anything back. Only a *standalone*, non-minefield hardpoint pays, a per-type bounty read from
-`DUWS_hardpointBounty` (`server_var_init.sqf:461-463`): `5 CP` by default, `10 CP` for a radio,
+anything back. Every hardpoint except a minefield pays, zone and standalone alike, a per-type bounty read from
+`DUWS_hardpointBounty` (`server_var_init.sqf:437-439`): `5 CP` by default, `10 CP` for a radio,
 artillery or mortar hardpoint, of which a radio also pays `10 AP` and artillery `5 AP`. CP runs
 through `fnc_cp_adjust` and any AP through `fnc_ap_adjust`, each on its own carded notification naming
 the type and nearest zone or town — a single combined card buried the AP gain in the CP badge
-(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:251-267`; `notifications.hpp`, `HPdestroyed` /
-`HPdestroyedAP`). A zone hardpoint pays nothing on clear — the zone's own capture bounty already
-prices its defences — and neither does a minefield, a hazard removed rather than a garrison beaten.
+(`DUWS_fnc_hardpointClear`, `fnc_hardpoint_stream.sqf:209-225`; `notifications.hpp`, `HPdestroyed` /
+`HPdestroyedAP`). A zone hardpoint's bounty is paid on top of the zone's own capture bounty. A minefield
+pays nothing, a hazard removed rather than a garrison beaten, but its clear is still carded without a
+bounty badge (`HPcleared`).
 
 An OPCOM hardpoint build is an Army Power sink, and nothing refunds AP when the player clears one. A
 refund would be farmable — build, clear, refund, repeat — and the enemy's pool would never reach

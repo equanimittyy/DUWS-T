@@ -245,7 +245,7 @@ GMG, roadblock, OP, mortar and artillery are all fair game. Intel *is* required,
 `fnc_destroy_hardpoint_site` accepts only a **revealed** row (index 5), so the player is never sent
 after an emplacement they have not found; outside hardcore only generation's hardpoints spawn revealed,
 so the flag bites under hardcore and on hardpoints OPFOR built in play. Standalone only (`zoneKey ""`): a zone-child emplacement is taken
-by capturing its zone and pays no bounty. Wins when the target's `DUWS_hardpoints` row leaves the array
+by capturing its zone. Wins when the target's `DUWS_hardpoints` row leaves the array
 -- the streamer's own per-type clearance test (garrison beaten, guns wrecked) decides "destroyed", so
 the mission watches liveness, not any one object. Pays 10/10 on top of the hardpoint's own destruction
 bounty (type-scaled: [5,0] for most, [10,5]/[10,0] for artillery/mortar), all credited by the streamer.

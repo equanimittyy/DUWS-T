@@ -206,16 +206,16 @@ DUWS_fnc_hardpointClear = {
     };
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 
-    // Only a standalone strongpoint pays a bounty and announces itself: a zone emplacement pays nothing
-    // (taking the zone already credits its defences), nor does a minefield -- a hazard, not a garrison beaten.
-    if !((_o get "hpZoneKey") isEqualTo "") exitWith {};
-    if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {};
-    (DUWS_hardpointBounty getOrDefault [_o get "hpType", [5, 0]]) params ["_cp", "_ap"];
-    [_cp, "hardpoint_cleared"] call fnc_cp_adjust;
-    if (_ap > 0) then { ["BLU", _ap, "hardpoint_cleared", _ap] call fnc_ap_adjust; };
     private _name = DUWS_hardpointName getOrDefault [_o get "hpType", _o get "hpType"];
     private _place = [([_key] call fnc_site_at) get "pos"] call DUWS_fnc_hardpointNearestPlace;
     private _tgt = [0, -2] select isDedicated;
+    // A minefield is announced but pays nothing: a hazard removed, not a garrison beaten.
+    if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {
+        ["HPcleared", ["", _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
+    };
+    (DUWS_hardpointBounty getOrDefault [_o get "hpType", [5, 0]]) params ["_cp", "_ap"];
+    [_cp, "hardpoint_cleared"] call fnc_cp_adjust;
+    if (_ap > 0) then { ["BLU", _ap, "hardpoint_cleared", _ap] call fnc_ap_adjust; };
     // CP and AP each get their own card: a single combined card buried the AP gain in a badge that
     // only ever showed the CP figure, so the AP the player earned went unread.
     ["HPdestroyed", [_cp, _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];

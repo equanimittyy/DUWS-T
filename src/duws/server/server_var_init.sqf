@@ -430,7 +430,7 @@ DUWS_hardpointName = createHashMapFromArray [
     ["RADIO", "Radio Tower"], ["MINEFIELD", "Minefield"]
 ];
 
-// Bounty for destroying a standalone hardpoint, [CP, AP], read by fnc_hardpoint_stream when cleared.
+// Bounty for destroying a hardpoint, [CP, AP], read by fnc_hardpoint_stream when cleared.
 // Unlisted types pay the base 5 CP, no AP -- only the strategic ones pay above the floor: the batteries
 // OPCOM fires from (ARTY, MORTAR) and the radio tower, whose 5 km reach makes it the biggest single loss.
 // AP paid here is earned (raises the BLUFOR tier), not a spend.

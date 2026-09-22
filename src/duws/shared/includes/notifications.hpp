@@ -112,7 +112,7 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    // A destroyed standalone enemy hardpoint, carded like the rest of the CP-gain family: iconText the
+    // A destroyed enemy hardpoint, carded like the rest of the CP-gain family: iconText the
     // bounty (%1), description the type (%2) and the place (%3) -- see DUWS_fnc_hardpointClear.
     class HPdestroyed
     {
@@ -132,6 +132,16 @@ class CfgNotifications
     {
         title = "$STR_DUWS_T_HP_destroyed_ap_title";
         iconText = "+%1";
+        description = "$STR_DUWS_T_HP_destroyed";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
+    // No bounty badge: a minefield pays nothing. %1 goes unused so the args match the shared body key.
+    class HPcleared
+    {
+        title = "$STR_DUWS_T_HP_cleared_title";
         description = "$STR_DUWS_T_HP_destroyed";
         color[] = {0.5,1,1,1};
         priority = 0;
