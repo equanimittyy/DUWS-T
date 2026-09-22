@@ -31,10 +31,10 @@ DUWS_fnc_tierName = {
 // that seats a squad is a tier below the pure gun platform of the same chassis: an APC or IFV (T3)
 // against an MBT (T4), a transport helicopter (T3) against a gunship (T4). UAVs sit at Mechanised (T3)
 // armed or not -- even a recon drone outranges what infantry can field, and the armed ones carry more
-// than a car. Logistics and boats are T1; an unarmed car splits on seats -- a quad or runabout T1, a
-// larger passenger car T2. Anything the classifier cannot place falls to Mechanised (T3), not the
-// infantry floor: an unrecognised hull -- most likely a modded one -- is gated rather than handed over
-// free mid-game. DUWS_fnc_vehKind lives in shared/functions/fnc_veh_price.sqf, broadcast alongside.
+// than a car. Logistics, boats and unarmed trucks are T1; any other unarmed car splits on seats -- six
+// or fewer T1, a larger passenger car T2. Anything the classifier cannot place falls to Mechanised
+// (T3), not the infantry floor: an unrecognised hull -- most likely a modded one -- is gated rather
+// than handed over free mid-game. DUWS_fnc_vehKind lives in shared/functions/fnc_veh_price.sqf, broadcast alongside.
 DUWS_fnc_vehTier = {
     params ["_class"];
     if (_class == "") exitWith { 1 };
@@ -53,7 +53,7 @@ DUWS_fnc_vehTier = {
             private _cfg = configFile >> "CfgVehicles" >> _class;
             private _seats = (getNumber (_cfg >> "hasDriver")) + (getNumber (_cfg >> "transportSoldier"))
                 + count ("true" configClasses (_cfg >> "Turrets"));
-            [2, 1] select (_seats <= 2)
+            [2, 1] select (_seats <= 6 || {_class isKindOf "Truck_F"})
         };
         case "logi": { 1 };
         case "boat": { 1 };
