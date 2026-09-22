@@ -95,10 +95,12 @@ DUWS_fnc_opcom_hireDemand = {
                     private _zp = _z select 2;
                     private _s = [_v, _rp, _rm, _to, _zp, _moveType] call DUWS_fnc_opcom_taxiSaving;
                     // The lift rows compete on lift less price, so a dear fast hull takes only the long rides its
-                    // time saving pays for; on score alone the cheapest hull would win every ride.
+                    // time saving pays for; on score alone the cheapest hull would win every ride. A rival the wallet
+                    // cannot pay beats no one, so a ride it wins still offers a cheaper hull the commander can afford.
                     private _beaten = (_rivals findIf {
                         _x params ["", "_mt", "_p"];
-                        (([_v, _rp, _rm, _to, _zp, _mt] call DUWS_fnc_opcom_taxiSaving) - _p) > (_s - _price)
+                        _p <= WARCOM_opfor_ap
+                        && {(([_v, _rp, _rm, _to, _zp, _mt] call DUWS_fnc_opcom_taxiSaving) - _p) > (_s - _price)}
                     }) >= 0;
                     if (!_beaten) then {
                         private _have = 0;
