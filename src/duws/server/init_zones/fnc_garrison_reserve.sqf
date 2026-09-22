@@ -82,14 +82,6 @@ DUWS_fnc_garrisonLeftoverSweep = {
     _left append _alive;
 };
 
-// eyePos is ASL, so the target is lifted to standing head height and converted to match. VIEW and GEOM
-// together answer terrain and buildings both; an empty intersection list means a clear line.
-DUWS_fnc_posSeenBy = {
-    params ["_pos", "_unit"];
-    private _to = AGLToASL [_pos select 0, _pos select 1, 1.5];
-    (lineIntersectsSurfaces [eyePos _unit, _to, _unit, objNull, true, 1, "VIEW", "GEOM"]) isEqualTo []
-};
-
 // Far side, past the players, preferably unseen -- so a player never watches a squad appear or gets
 // flanked from their own approach direction.
 DUWS_fnc_garrisonReservePos = {
@@ -147,7 +139,7 @@ DUWS_fnc_garrisonReservePos = {
         {
             private _cand = [_x, _dist] call _fnc_cand;
             if (_cand isNotEqualTo []) then {
-                private _seen = { [_cand, _x] call DUWS_fnc_posSeenBy } count _players;
+                private _seen = { [_cand, _x] call fnc_duws_posSeenBy } count _players;
                 if (_seen < _bestSeen) then { _bestSeen = _seen; _best = _cand };
             };
         } forEach [0, 30, -30, 60, -60];

@@ -62,7 +62,7 @@ if (_status == "") then {
         {
             private _p = _site getPos [_dist, _bearing + _x];
             if (surfaceIsWater _p) then { continue };
-            private _seen = { [_p, _x] call DUWS_fnc_posSeenBy } count _near;
+            private _seen = { [_p, _x] call fnc_duws_posSeenBy } count _near;
             if (_seen < _bestSeen) then { _bestSeen = _seen; _best = _p };
             if (_seen == 0) exitWith {};
         } forEach [0, 20, -20, 40, -40];

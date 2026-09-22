@@ -1,8 +1,8 @@
 // Locality: server -- a placement query for the ambient random events.
 //
 // Candidate roads out past _anchor, narrowed to those no nearby player can see. The events used a blind
-// selectRandom over nearRoads, so on open ground a car popped in in plain view; the reserve's line-of-sight
-// test (DUWS_fnc_posSeenBy) keeps the spawn behind cover and it drives into view instead. Never blocks the
+// selectRandom over nearRoads, so on open ground a car popped in in plain view; the shared line-of-sight
+// test (fnc_duws_posSeenBy) keeps the spawn behind cover and it drives into view instead. Never blocks the
 // event: falls back to the full set when all are exposed, and to any road when no player is near.
 //
 // [_anchor] -> array of road objects (empty when no road is within reach)
@@ -23,7 +23,7 @@ if (_players isEqualTo []) exitWith { _roads };
 private _sample = (_roads call BIS_fnc_arrayShuffle) select [0, 16 min (count _roads)];
 private _hidden = _sample select {
     private _rp = getPosATL _x;
-    (_players findIf { [_rp, _x] call DUWS_fnc_posSeenBy }) < 0
+    (_players findIf { [_rp, _x] call fnc_duws_posSeenBy }) < 0
 };
 if !(_hidden isEqualTo []) exitWith { _hidden };
 _roads

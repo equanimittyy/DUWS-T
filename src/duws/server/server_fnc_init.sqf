@@ -475,6 +475,7 @@ publicVariable "fnc_createKillhouse";
 // =========================================================================================================
 fnc_duws_bluforNear = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_bluforNear.sqf";
 fnc_duws_engaged = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_engaged.sqf";
+fnc_duws_posSeenBy = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_posSeenBy.sqf";
 // Not broadcast: each client's GetInMan handler reaches it by remoteExec to the server, which holds the claims.
 fnc_duws_claimRide = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_claimRide.sqf";
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
