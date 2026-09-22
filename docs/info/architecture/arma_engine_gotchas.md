@@ -206,9 +206,11 @@ A unit in an `Acts_*`/`acts_*` ambient animation via raw `switchMove` stays in i
 
 Once a unit dies the engine reports it on side `civilian`, whatever it fought as — `side _corpse == east` is false on every OPFOR body, so any check gated on it silently never fires (a `Killed` handler running `side _unit` at the instant of death still catches the fighting side, which is why that shape breaks only on a settled corpse). Caching side at spawn re-exposes it to a body-swapping GC (AGC mod rebuilds distant corpses). Fix: identify an enemy corpse by config side — `getNumber (configFile >> "CfgVehicles" >> typeOf _corpse >> "side") == 0` (0 east, 1 west, 2 independent, 3 civilian) — death-stable and corpse-swap-safe (`client/search/fnc_intel_search_action.sqf`).
 
-## `side` of a captive unit is civilian, so a BLUFOR presence test must read `side group`
+## A captive unit's `side` reads civilian, but its `side group` does not
 
 `setCaptive true` makes `side _unit` report `civilian`, but the unit stays in its group, and `side group _unit` still reports the group's side. Both disguises set the player captive (`server/disguise/fnc_disguiseAsEnemy.sqf`, `server/civilian/fnc_disguiseAsCivilian.sqf`). The site poller built its BLUFOR pre-gate on `side _x == WEST`, so a lone disguised player never woke an OPFOR zone, hardpoint or town garrison, and a site that was already awake stowed around the player when its grace ran out. Fix: filter BLUFOR presence on `side group _x`, which captive state does not change (`server/misc/fnc_site_stream_init.sqf`).
+
+The reverse also holds: a `side group` test sees straight through a disguise, and so does a group scan such as `allGroups select { side _x == west }`. A BLUFOR test that must respect a disguise, such as an OPFOR sensor, must check the disguise itself.
 
 ## `knowsAbout` is a decaying knowledge scalar, not a current-visibility flag
 
