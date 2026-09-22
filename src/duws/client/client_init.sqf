@@ -172,6 +172,13 @@ player addEventHandler ["killed", {
     [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
+// An event, not a server poll of every player's seat: the cost stays per entry as the player count grows.
+// Carried to the respawned body like the killed handler above.
+player addEventHandler ["GetInMan", {
+    params ["_unit", "", "_veh"];
+    [_unit, _veh] remoteExec ["fnc_duws_claimRide", 2];
+}];
+
 // Stamina/fatigue from the lobby param (default on). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
 player_fatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;

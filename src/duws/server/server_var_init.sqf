@@ -195,6 +195,11 @@ DUWS_retired = [];
 // lifetime, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
+// UID -> the last vehicle that player rode, which the map cleanup spares as in use. Several players may
+// hold one vehicle, so a mid-session drop by one leaves it spared for the rest. Written by
+// fnc_duws_claimRide and pruned by the sweep's PlayerDisconnected handler (fnc_repetitive_cleanup.sqf).
+DUWS_playerRides = createHashMap;
+
 // Live civilian side missions, id -> entry; fnc_civ_mission_request adds, fnc_civ_mission_finish deletes.
 // Server-only, and never saved: a restore drops live missions, and the entries hold unit handles.
 DUWS_civMissions = createHashMap;
