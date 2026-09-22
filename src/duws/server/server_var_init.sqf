@@ -788,8 +788,11 @@ OPCOM_AP_PER_FORCE = 1;
 // A band cell's base need is a zone's average pull per cell divided by this: a holding pulls harder than a gap, but
 // not so hard that hardpoints cluster around zones.
 OPCOM_NEED_BASE_RATIO = 2.5;
-// Chebyshev reach in cells of the need spread, a hardpoint's cover and a standalone build's Value: a 5x5 block.
+// Chebyshev reach in cells of a hardpoint's cover and a standalone build's Value: a 5x5 block.
 OPCOM_BLOCK_K = 2;
+// Chebyshev reach in cells of a holding's need spread and an Intercept's need sum: a 7x7 block. Wider than the cover
+// reach so a holding pulls defense from further out without spacing the standalone builds wider.
+OPCOM_NEED_K = 3;
 
 // A Scout is worth this share of the need it reveals: scouting takes and protects nothing itself.
 OPCOM_SCOUT_SHARE = 0.2;

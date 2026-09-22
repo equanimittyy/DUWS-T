@@ -1660,7 +1660,7 @@ OPCOM_RAPPORT_STEP = 3;
 ["rapportValue: a town near the flip scores at the floor", [20, -12] call DUWS_fnc_opcom_rapportValue, 0.6] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_spread: a holding's need over its 5x5 block, weights 3/2/1 by ring ---
-OPCOM_BLOCK_K = 2;
+OPCOM_NEED_K = 2;
 DUWS_opcom_grid_w = 10;
 DUWS_opcom_box = [0, 0, 9, 9];
 DUWS_opcom_grid_land = [] call fnc_test_landGrid;
@@ -1690,6 +1690,7 @@ DUWS_opcom_tick = 460;
 ["trafficAt: one half-life later it reads half", [0] call DUWS_fnc_opcom_trafficAt, 4] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_coverValue: the need a new hardpoint covers, half of what each cell still lacks ---
+OPCOM_BLOCK_K = 2;
 OPCOM_GRID_CELL = 500;
 DUWS_opcom_grid_w = 10;
 DUWS_opcom_box = [0, 0, 9, 9];

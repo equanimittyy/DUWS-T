@@ -17,8 +17,8 @@ DUWS_fnc_opcom_interceptValue = {
     private _cy = floor (_c / _w);
     DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _need = 0;
-    for "_iy" from ((_cy - OPCOM_BLOCK_K) max _minCy) to ((_cy + OPCOM_BLOCK_K) min _maxCy) do {
-        for "_ix" from ((_cx - OPCOM_BLOCK_K) max _minCx) to ((_cx + OPCOM_BLOCK_K) min _maxCx) do {
+    for "_iy" from ((_cy - OPCOM_NEED_K) max _minCy) to ((_cy + OPCOM_NEED_K) min _maxCy) do {
+        for "_ix" from ((_cx - OPCOM_NEED_K) max _minCx) to ((_cx + OPCOM_NEED_K) min _maxCx) do {
             _need = _need + ([_iy * _w + _ix] call DUWS_fnc_opcom_needAt);
         };
     };

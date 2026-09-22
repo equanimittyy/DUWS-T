@@ -13,11 +13,11 @@ DUWS_fnc_opcom_spread = {
     DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _cells = [];
     private _sum = 0;
-    for "_iy" from ((_cy - OPCOM_BLOCK_K) max _minCy) to ((_cy + OPCOM_BLOCK_K) min _maxCy) do {
-        for "_ix" from ((_cx - OPCOM_BLOCK_K) max _minCx) to ((_cx + OPCOM_BLOCK_K) min _maxCx) do {
+    for "_iy" from ((_cy - OPCOM_NEED_K) max _minCy) to ((_cy + OPCOM_NEED_K) min _maxCy) do {
+        for "_ix" from ((_cx - OPCOM_NEED_K) max _minCx) to ((_cx + OPCOM_NEED_K) min _maxCx) do {
             private _i = _iy * _w + _ix;
             if (DUWS_opcom_grid_land select _i) then {
-                private _wt = OPCOM_BLOCK_K + 1 - ((abs (_ix - _cx)) max (abs (_iy - _cy)));
+                private _wt = OPCOM_NEED_K + 1 - ((abs (_ix - _cx)) max (abs (_iy - _cy)));
                 _cells pushBack [_i, _wt];
                 _sum = _sum + _wt;
             };
@@ -63,7 +63,7 @@ DUWS_fnc_opcom_needBuild = {
 
     private _worths = zone_meta_array apply { _x select 3 };
     private _base = if (_worths isEqualTo []) then { 0 } else {
-        ((_worths call BIS_fnc_arithmeticMean) / ((2 * OPCOM_BLOCK_K + 1) ^ 2)) / OPCOM_NEED_BASE_RATIO
+        ((_worths call BIS_fnc_arithmeticMean) / ((2 * OPCOM_NEED_K + 1) ^ 2)) / OPCOM_NEED_BASE_RATIO
     };
     private _band = [];
     DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
