@@ -34,10 +34,9 @@ DUWS_fnc_opcom_taxiWorth = {
 // The rider's fields come loose, so the Recruit rows can price an order the pick has not committed yet.
 DUWS_fnc_opcom_taxiSaving = {
     params ["_value", "_rp", "_riderMove", "_to", "_from", "_moveType"];
-    [_value,
-        [_rp distance2D _to, _riderMove] call DUWS_fnc_opcom_moveTicks,
-        [(_from distance2D _rp) + (_rp distance2D _to), _moveType] call DUWS_fnc_opcom_moveTicks
-    ] call DUWS_fnc_opcom_taxiWorth
+    private _lift = [(_from distance2D _rp) + (_rp distance2D _to), _moveType] call DUWS_fnc_opcom_moveTicks;
+    if (_moveType in ["wheeled", "tracked"]) then { _lift = _lift * OPCOM_ROAD_DETOUR };
+    [_value, [_rp distance2D _to, _riderMove] call DUWS_fnc_opcom_moveTicks, _lift] call DUWS_fnc_opcom_taxiWorth
 };
 
 // The lift that saves the most, and none when walking beats every hull on hand.

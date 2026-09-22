@@ -772,6 +772,10 @@ OPCOM_BANK_SCORE = 0.5;
 // Value that lands later counts for less, halving over this many ticks of travel.
 OPCOM_VALUE_HALFLIFE = 360;
 
+// A ground hull's lift drive is priced at this multiple of the straight line, since it keeps to the roads a helicopter
+// flies over.
+OPCOM_ROAD_DETOUR = 1.3;
+
 // Ticks OPCOM will bank toward an unaffordable top pick: one economy period, since income lands in lumps and a
 // shorter horizon would rarely hold a payout.
 OPCOM_SAVE_HORIZON = 360;

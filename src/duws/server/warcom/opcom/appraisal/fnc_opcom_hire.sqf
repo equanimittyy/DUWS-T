@@ -26,7 +26,7 @@ DUWS_fnc_opcom_recruitTargets = {
     // A boat rests at its zone's port, so a portless zone raises none.
     if (_moveType isEqualTo "boat") then { _zones = _zones select { ([_x select 0] call DUWS_fnc_opcom_portOf) >= 0 } };
     if (_zones isEqualTo []) exitWith { [] };
-    ([_flags, _force, _moveType, _zones] call DUWS_fnc_opcom_hireDemand) params ["_demand", "_at"];
+    ([_flags, _force, _moveType, _zones, _row] call DUWS_fnc_opcom_hireDemand) params ["_demand", "_at"];
 
     if ("noncombat" in _flags || {"recon" in _flags}) exitWith {
         private _z = if (_demand <= 0) then { [] } else { [_at, _zones] call DUWS_fnc_opcom_nearestOpen };

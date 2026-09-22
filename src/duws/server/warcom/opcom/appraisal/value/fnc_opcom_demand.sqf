@@ -28,10 +28,28 @@ DUWS_fnc_opcom_hireDefense = {
     _worth * _exposure * _force / ((_zoneForce + _force) max 1)
 };
 
+// -> [[row, moveType, price], ...]: the rows OPCOM can hire now to lift a unit over ground or through the air.
+DUWS_fnc_opcom_liftRowsSweep = {
+    private _out = [];
+    {
+        private _row = _x;
+        _y params ["_comp", "_flags"];
+        private _mt = [_comp] call DUWS_fnc_opcom_moveType;
+        private _price = OPCOM_AP_UNIT getOrDefault [_row, -1];
+        if ("transport" in _flags && {_mt in ["wheeled", "tracked", "rotary"]} && {_price >= 0}
+            && {(_comp findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" }) < 0}) then {
+            _out pushBack [_row, _mt, _price];
+        };
+    } forEach DUWS_opcom_recruitMenu;
+    _out
+};
+
+DUWS_fnc_opcom_liftRows = { ["liftRows", DUWS_fnc_opcom_liftRowsSweep] call DUWS_fnc_opcom_tickCached };
+
 // -> [Value, the target's position], [0, []] when the hire serves nothing. Scored as if the hire already stood at that
 // target, so OPCOM never hires for a fight it could not win.
 DUWS_fnc_opcom_hireDemand = {
-    params ["_flags", "_force", "_moveType", "_zones"];
+    params ["_flags", "_force", "_moveType", "_zones", "_row"];
     private _best = 0;
     private _at = [];
     private _weigh = {
@@ -66,18 +84,29 @@ DUWS_fnc_opcom_hireDemand = {
         // Land-taxi binds only at commit, so a unit already marching can never ride: the lift is priced on the orders
         // the pick may send, less what the best hull on hand already saves them.
         if (_moveType in ["wheeled", "tracked", "rotary"]) then {
+            private _price = OPCOM_AP_UNIT getOrDefault [_row, 0];
+            private _rivals = (call DUWS_fnc_opcom_liftRows) select { (_x select 0) isNotEqualTo _row };
             {
                 _x params ["_r", "_to", "_v"];
                 private _rp = _r get "pos";
                 private _z = [_rp, _zones] call DUWS_fnc_opcom_nearestOpen;
                 if ("transportable" in (_r get "flags") && {_z isNotEqualTo []}) then {
                     private _rm = _r get "moveType";
-                    private _have = 0;
-                    {
-                        _have = _have max ([_v, _rp, _rm, _to, _x get "pos", _x get "moveType"] call DUWS_fnc_opcom_taxiSaving);
-                    } forEach ([_r get "id"] call DUWS_fnc_opcom_taxiPool);
-                    private _gain = ([_v, _rp, _rm, _to, _z select 2, _moveType] call DUWS_fnc_opcom_taxiSaving) - _have;
-                    if (_gain > _best) then { _best = _gain; _at = _rp };
+                    private _zp = _z select 2;
+                    private _s = [_v, _rp, _rm, _to, _zp, _moveType] call DUWS_fnc_opcom_taxiSaving;
+                    // The lift rows compete on lift less price, so a dear fast hull takes only the long rides its
+                    // time saving pays for; on score alone the cheapest hull would win every ride.
+                    private _beaten = (_rivals findIf {
+                        _x params ["", "_mt", "_p"];
+                        (([_v, _rp, _rm, _to, _zp, _mt] call DUWS_fnc_opcom_taxiSaving) - _p) > (_s - _price)
+                    }) >= 0;
+                    if (!_beaten) then {
+                        private _have = 0;
+                        {
+                            _have = _have max ([_v, _rp, _rm, _to, _x get "pos", _x get "moveType"] call DUWS_fnc_opcom_taxiSaving);
+                        } forEach ([_r get "id"] call DUWS_fnc_opcom_taxiPool);
+                        if ((_s - _have) > _best) then { _best = _s - _have; _at = _rp };
+                    };
                 };
             } forEach (call DUWS_fnc_opcom_pendingRiders);
         };
