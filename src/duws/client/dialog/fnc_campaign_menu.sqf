@@ -70,12 +70,13 @@
   [2104, "0", "0"] call _addOpt;
   [2104, "10", "10"] call _addOpt;
   [2104, "20", "20"] call _addOpt;
-  private _defCp = [2104, "30", "30"] call _addOpt;
-  [2104, "60", "60"] call _addOpt;
+  [2104, "30", "30"] call _addOpt;
+  private _defCp = [2104, "50", "50"] call _addOpt;
+  [2104, "75", "75"] call _addOpt;
   [2104, "100", "100"] call _addOpt;
   [2104, "150", "150"] call _addOpt;
   [2104, "300", "300"] call _addOpt;
-  [2104, "350", "350"] call _addOpt;
+  [2104, "400", "400"] call _addOpt;
   [2104, "600", "600"] call _addOpt;
   [2104, _defCp] call _setDefault;
 
