@@ -91,7 +91,7 @@ written, and the archetype comes last.
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
 | **4C.2** Balance | **Shipped** (`appraisal/`) — the score, the shortlist and the roll; `P(win)`; every wired row's Value; the traffic, need and cover fields on the grid overlay; the delay discount; the savings goal; the siting pass; the difficulty setting on the OPCOM debug page. The commit Cost landed with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 | **4B.3** Attack, QRF, Scout | **Shipped** (`appraisal/`, `taskings/`) — the roster and the free-unit check, the commit Cost, Attack, Intercept (QRF), Scout, one Recruit row per menu row, and land-taxi | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does; whether one attacker per zone is too thin once Phase 5 can muster; whether a taxi should set its riders down short of the target rather than on it; whether a ground taxi needs its pickup drive timed out, which no carry phase does today; `OPCOM_FERRY_BOARD_GROUND` |
-| **4B.4** One-gun Arty | **Shipped** (`appraisal/`, `belief/`) — the Arty action over the shipped fire mission: the observation tracker (the tick each BLUFOR zone and FOB was last observed), the target sweep, the shape and its spread, the cooldown, the HQ and own-ground exclusions and the telegraph ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor; the first-pass figures leave a mission scoring well under Bank except against a large sighting seen close in — an emplacement fields three pieces, so a pit's saturate is 18 rounds at 36 AP against a believed force of 8 at a zone — and `OPCOM_AP_PER_ROUND` (2), `OPCOM_ARTY_LETHAL` and `OPCOM_GRID_ZONE_ENEMY_FORCE` are the levers; `OPCOM_OBSERVE_NEAR` and `OPCOM_OBSERVE_SPAN`; whether the telegraph's `OPCOM_ARTY_WARN` gives the players enough to move on |
+| **4B.4** One-gun Arty | **Shipped** (`appraisal/`) — the Arty action over the shipped fire mission: the belief target sweep, the clustered-force Value, the spread, the cooldown, the HQ and own-ground exclusions and the telegraph ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | How often a sighting is fresh enough and close enough to shell at all, now that belief is the only channel; how bunched BLUFOR actually stands in play, since that is what the Value now turns on — an emplacement fields three pieces, so a pit covers 69 m on a low draw for 12 AP and a battery 127 m for 36, which puts a mortar over Bank on a lone squad and a battery over it only from two squads together, and `OPCOM_ARTY_LETHAL` and `OPCOM_ARTY_ROUNDS` are the levers; whether weighting by the clustered share of all fresh belief double-counts what the score already does, because a dispersed BLUFOR raises every Attack and Intercept candidate by itself; whether the random rounds draw should stand at all, because a high draw widens the cover but costs in step, so it only pays when the extra ground holds more force; whether the telegraph's `OPCOM_ARTY_WARN` gives the players enough to move on. The creep is not this chunk's: a walked barrage needs an assault to walk it for, so it lands with the `arty` template in Phase 5 |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
@@ -158,7 +158,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
-| Arty | each observed target in range of an owned gun off cooldown: a fresh belief sighting, or a BLUFOR zone or FOB observed in the last `OPCOM_OBSERVE_SPAN` (15 min) | 4B.4 |
+| Arty | each fresh belief sighting in range of an owned gun off cooldown | 4B.4 |
 
 ### Value
 
@@ -201,7 +201,7 @@ so it moves no faster than a truck delivers.
 | Intercept (QRF) | Σ need over the sighting's 5×5 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Scout | Σ need × staleness × `OPCOM_SCOUT_SHARE` (0.2) over the unique cells within its K of its route |
-| Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force at the target, less OPFOR's own force inside the pattern, × min(1, rounds × lethal area ÷ pattern area) |
+| Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 
 - **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
   step barely moves one near +10. The skew is 1 at 0, 0.5 at ±5 and 0.1 from ±9 out, so a town between −15 and −10
@@ -414,7 +414,7 @@ even when the muster ends in another band.
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour/air/recon) | approach → make contact → resolve (survives ⇒ soft, escalate; dies ⇒ confirmed, mass/re-target) |
 | `rapport` | a `supply` truck, a Rapport candidate town ([§Candidates](#candidates)) | `courier` ×1 | move → deliver (rep −3) → resolve |
 | `scout` | a `recon` unit, a stale valuable area | `recon` ×1 | move (plain `move`; standing recon detection stamps belief as it goes) → resolve |
-| `arty` | an observed target in range of an owned gun off cooldown | owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | mark → salvo (rounds × saturation) → assess (force dropped? re-fire : done) |
+| `arty` | a fresh belief sighting in range of an owned gun off cooldown | owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | mark → salvo (saturate standing, creep ahead of a bound assault) → assess (force dropped? re-fire : done) |
 
 - **`probe` is disposable recon-by-fire** — no-retreat forbids poke-and-withdraw, so it converts uncertain belief
   into observed defender strength by drawing fire, reaching what recon cannot (a dug-in town garrison). It minimises
@@ -498,7 +498,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 | Minefield | `OPCOM_AP_MINEFIELD` 15 per 50 m square, plus the truck's source cost |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
 | Truck source | the hire price (3), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
-| Fire mission | `OPCOM_AP_PER_ROUND` 2 per round |
+| Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
 
 - **A garrison step is flat-priced.** Reinforce and Fortify cost the same wherever they land and whatever they buy
   back, and a zone and a town charge the same rate for the same order; a town adds only its truck, which is the
@@ -600,25 +600,34 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 | Cooldown | 4–8 rounds, then 25–40 min | 6–10 rounds, then 40–60 min |
 | Spread | tighter (base 50 m) | wider (base 100 m) |
 
-- **A fire mission is the Arty action** — scored and committed like any other, `Cost` scaling with rounds ×
-  saturation; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
+- **A fire mission is the Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
+  fires; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
   range is the availability gate, nothing more. **AP is the ammunition** — the guns rest empty and are loaded per
   mission, so there is no finite store and the wallet is the only limit.
-- **Observation is the trigger** — nothing is shelled the enemy has not seen. A sighting carries its own
-  observation and is shelled while it is fresh; a BLU zone or FOB is shelled while an OP covers it or an OPFOR
-  element passed within `OPCOM_OBSERVE_NEAR` inside `OPCOM_OBSERVE_SPAN`, which the tracker stamps each tick
-  (`fnc_opcom_observed.sqf`). OPs are the artillery's eyes; killing them blinds guns.
-- **`P(win)` is the sighting's freshness**, because a fading sighting has probably moved; ground does not move, so a
-  zone or FOB reads 1.
+- **Belief is the only trigger** — a gun fires on a fresh sighting in the belief store and on nothing else. Ground
+  OPFOR merely owns eyes near is not a target: an OP post is a sensor like any other, and feeding the guns a channel
+  outside belief would make them see what the commander does not. The guns are exactly as blind as the sensors are.
+- **Guns are for a mass** — Value sums the believed force within `lethal × √rounds` of the aim point, the radius the
+  rounds' lethal areas tile, and then weights it by that force's share of every fresh sighting OPCOM holds. Three
+  squads standing together are worth three times one, and worth more again when they are most of what is known to
+  be out there; a pattern that catches one squad of many is a poor use of the guns.
+- **Rounds buy footprint, spread buys nothing** — where the rounds fall is a property of the gun and the range, so
+  the spread prices no kills. It sizes the pattern the mission lays and the telegraph's marker, and bounds the
+  friendly force that comes off the Value, and that is all. Pricing kills by the spread would make the same squad
+  worth less at range for a reason that says nothing about the squad, and would ignore that a wider pattern also
+  covers a stale sighting's drift.
+- **`P(win)` is the sighting's freshness**, because a fading sighting has probably moved.
 - **Never onto OPFOR's own ground** — a target inside a zone OPFOR holds is refused outright, and the force of
   OPCOM's own units inside the pattern comes off the Value, so the commander does not shell its own men.
 - **HQ exclusion** — no mission *aimed* inside 100 m of `PosOfBLUHQ` (rounds may still stray there from a barrage
   aimed elsewhere). The target grid is latched `[x,y,0]` at order time (never an object ref that would follow a
   respawn into the circle), and re-checked against the circle immediately before firing.
-- **Spread** is the size the action hands the shipped shape — a saturate's radius, a creep's width: base by type,
-  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. A sighting is saturated
-  where it stands; a zone or FOB is crept across, on the bearing from the gun. The Cooldown row's rounds are a
-  saturate's; a creep's follow from its width and length, so its Cost is what the shape will actually fire.
+- **Spread** is the radius the action hands the shipped saturate: base by type, +25 m per km range, never below
+  `OPCOM_ARTY_MIN_SPREAD`.
+- **The one-gun action only ever saturates.** A creep is a barrage walked ahead of someone, so it is worth firing
+  only when there is an assault to walk it for, and that pairing is the `arty` template's job
+  ([§Templates](#templates-phase-5)). Until then the shipped fire mission's creep stays reachable from the debug
+  step, which is where a walked pattern is asked for by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
   timed off `getArtilleryETA`.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
