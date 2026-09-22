@@ -84,7 +84,7 @@ written, and the archetype comes last.
 |---|---|---|
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
-| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag, the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`), the truck hire's Value of 0, the Values of the OP, the guns, the radio tower and Rapport, the traffic layer and the need and cover fields on the grid overlay, the standalone builds' and the minefields' Values (`appraisal/fnc_opcom_fields.sqf`), so every wired row is appraised, the delay discount and the savings goal. Left, in this order: the asset siting and the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
+| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag, the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`), the truck hire's Value of 0, the Values of the OP, the guns, the radio tower and Rapport, the traffic layer and the need and cover fields on the grid overlay, the standalone builds' and the minefields' Values (`appraisal/fnc_opcom_fields.sqf`), so every wired row is appraised, the delay discount, the savings goal and the asset siting. Left: the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, land-taxi, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
@@ -147,9 +147,9 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
 | Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
-| Standalone hardpoint Build | one action per unlocked standalone type, its target the tick's band cell — drawn at random in 4B and by the highest coverage Value from 4C.2 | 4B.2 |
-| Tower / OP / mortar / battery Build | one action each, target the tick's band cell, under the type's cap and sited by its own rule from 4C.2 ([§Asset siting](#asset-siting)) | 4B.2 |
-| Minefield | one action per variant (AT, AP), target the tick's band cell, one 50 m square | 4B.2 |
+| Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) | 4B.2 |
+| Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
+| Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, one 50 m square | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
@@ -549,19 +549,23 @@ live cap (bounded by player proximity).
 
 ### Asset siting
 
-Each asset type picks its band cell by the rule below, which ranks cells on the same coverage its Value measures
-([§Value](#value)) — the siting pass is the Value run over several cells instead of one. Until it lands, and in all
-of 4B, an asset scores the one random band cell the tick drew, so a poor cell falls off the shortlist and a good one
-is bought. Inside the cell, the shared terrain siting picks the spot (`fnc_hardpoint_score`,
+Each build type picks its band cell by the rule below, which ranks cells on the same coverage its Value measures
+([§Value](#value)) — the siting pass is the Value run over several cells instead of one. Each pick samples
+`OPCOM_SITE_SAMPLES` (8) band cells from the need field's band mask ([§Need and cover fields](#need-and-cover-fields)),
+and every type takes the best of the same sample; `random` mode samples one, so it stays the unscored draw. The pass
+runs scheduled, ahead of the pick's unscheduled pass, and keeps a cell's tower and gun Value until the
+area-of-influence inputs or the type's own assets change. The truck drives to the cell's centre, and inside the cell
+the shared terrain siting picks the spot (`fnc_hardpoint_score`,
 [`info/hardpoints.md`](../../info/gameplay/hardpoints.md#siting)).
 
-| Asset | Band cell |
+| Build | Band cell |
 |---|---|
-| Radio tower | the most town worth brought newly under OPFOR's area of influence, outside every standing tower's `AOI_TOWER_REACH` (the campaign-generation rule, `fnc_hardpoint_seed_radio`) |
+| Radio tower | the most town worth brought newly under OPFOR's area of influence × defend, outside every other tower's `AOI_TOWER_REACH` (the campaign-generation rule, `fnc_hardpoint_seed_radio`) |
 | OP | the most cells within `OP_OBSERVE_K` that no other OP's ring already covers |
 | Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (5 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF` (1 km) |
 | Artillery battery | the same over `OPCOM_ARTY_REACH` (20 km), against the other batteries |
-| Minefield | the band cell holding the most traffic, since a field is worth what it denies and denies nothing on ground nobody crosses |
+| Standalone hardpoint | the most cover Value: need × the cover it adds over its 5×5 block |
+| Minefield | the band cell holding the most traffic, cover Value breaking a tie, since a field is worth what it denies and denies nothing on ground nobody crosses |
 
 A gun's true range depends on the faction's gun and is read only at fire time (`inRangeOfArtillery`), so siting and
 Value both use a fixed reach per type.
