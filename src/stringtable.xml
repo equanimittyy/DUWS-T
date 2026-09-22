@@ -2651,8 +2651,8 @@
                 <English>Missing: %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_CLEAN">
-                <Original>All of it is enemy issue.</Original>
-                <English>All of it is enemy issue.</English>
+                <Original>Your gear is not suspicious.</Original>
+                <English>Your gear is not suspicious.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_SUSPICION">
                 <Original>Suspicion rises while the enemy watches you, faster up close and near bodies.</Original>
