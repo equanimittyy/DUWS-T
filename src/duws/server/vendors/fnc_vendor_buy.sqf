@@ -33,7 +33,8 @@ private _gear = _kind isEqualTo "gear";
 
 // The OPFOR ownership band, read here rather than from the client's copy:
 // civ_town_rep is server-only, and DUWS_enemy_town_pos is a derivative that rebuilds on a crossing.
-if (([_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt) <= -10) exitWith {
+private _rep = [_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt;
+if (_rep <= -10) exitWith {
     [format [localize "STR_DUWS_T_VENDOR_HOSTILE", _vendor getVariable ["DUWS_vendor_townName", ""]]] remoteExec ["hint", _buyer];
 };
 
@@ -42,7 +43,7 @@ if (([_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt) <= -10) 
 if !(_list in ([_type] call fnc_vendor_lists)) exitWith {};
 if ((([_kind, _list] call fnc_vendor_stock) findIf { (_x select 1) isEqualTo _class }) < 0) exitWith {};
 
-private _price = [_class, _list] call fnc_vendor_price;
+private _price = [_class, _list, [_rep] call fnc_vendor_discount] call fnc_vendor_price;
 if (_price < 0) exitWith {};
 
 // Outside Limited mode a friendly class is already unlimited on the shelf, so stocking it would buy

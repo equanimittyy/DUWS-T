@@ -38,6 +38,7 @@ duws_vendor_rows = [];
 // The list the shown rows came from, not the combo's pick: a new pick shows old rows until its fetch
 // answers, and those rows must keep their own list's price.
 duws_vendor_list = "";
+duws_vendor_discount = 0;
 // Read by the painter below, which branches the preview, the second destination and its cap on it.
 duws_vendor_kind = [_type] call fnc_vendor_kind;
 
@@ -62,6 +63,7 @@ duws_vendor_paint = {
         ([8909] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText "";
         ([8911] call duws_vendor_ctrl) ctrlSetText format [localize "STR_DUWS_T_VENDOR_MONEY", _money];
+        ([8911] call duws_vendor_ctrl) ctrlSetTextColor [1, 1, 1, 1];
         { ([_x] call duws_vendor_ctrl) ctrlEnable false } forEach [8913, 8914];
     };
 
@@ -82,9 +84,16 @@ duws_vendor_paint = {
     ([8910] call duws_vendor_ctrl) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>",
         if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]}];
 
-    private _price = [_class, duws_vendor_list] call fnc_vendor_price;
-    ([8911] call duws_vendor_ctrl) ctrlSetText
-        format [localize "STR_DUWS_T_VENDOR_PRICE", _price, _money];
+    private _price = [_class, duws_vendor_list, duws_vendor_discount] call fnc_vendor_price;
+    private _priceCtrl = [8911] call duws_vendor_ctrl;
+    if (duws_vendor_discount > 0) then {
+        _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE_DISCOUNT",
+            _price, duws_vendor_discount, _money];
+        _priceCtrl ctrlSetTextColor [0.2, 0.5, 1, 1];
+    } else {
+        _priceCtrl ctrlSetText format [localize "STR_DUWS_T_VENDOR_PRICE", _price, _money];
+        _priceCtrl ctrlSetTextColor [1, 1, 1, 1];
+    };
 
     private _afford = _price >= 0 && {_money >= _price};
     ([8913] call duws_vendor_ctrl) ctrlEnable _afford;
@@ -115,7 +124,7 @@ duws_vendor_fetch = {
     ([8911] call duws_vendor_ctrl) ctrlSetText (localize "STR_DUWS_T_faction_edit_working");
     [_list] spawn {
         params ["_list"];
-        private _rows = [duws_vendor_kind, _list] call fnc_vendor_ask;
+        ([duws_vendor_kind, _list, DUWS_vendor_target] call fnc_vendor_ask) params ["_rows", "_discount"];
         private _stockCtrl = [8903] call duws_vendor_ctrl;
         if (isNull _stockCtrl) exitWith {};
         // A slow answer must not overwrite a newer pick: the player can change list while the first
@@ -123,6 +132,7 @@ duws_vendor_fetch = {
         if ((_stockCtrl lbData (lbCurSel _stockCtrl)) != _list) exitWith {};
         duws_vendor_rows = _rows;
         duws_vendor_list = _list;
+        duws_vendor_discount = _discount;
         [] call duws_vendor_fill;
     };
 };

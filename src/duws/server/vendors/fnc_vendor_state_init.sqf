@@ -28,6 +28,13 @@ fnc_vendor_type = {
 
 fnc_vendor_kind = { params ["_type"]; ([_type] call fnc_vendor_type) select 3 };
 
+fnc_vendor_discount = {
+	params ["_rep"];
+	if (_rep >= 20) exitWith { 20 };
+	if (_rep >= 10) exitWith { 10 };
+	0
+};
+
 // The stock picker's entries for one type, and the server's whitelist with them: a purchase is refused
 // unless the class is on the list it was priced from. A vehicle dealer opens on its own town's traffic.
 fnc_vendor_lists = {
@@ -108,9 +115,9 @@ fnc_vendor_poolCounts = {
 // to push to every client at boot for a shop most of them never open. Shaped on fnc_faction_ask,
 // which answers the faction browser the same way.
 fnc_vendor_reply = {
-	params [["_replyVar", ""], ["_rows", []]];
+	params [["_replyVar", ""], ["_rows", []], ["_discount", 0]];
 	// Wrapped, so an empty answer stays distinguishable from no answer yet.
-	missionNamespace setVariable [_replyVar, [_rows]];
+	missionNamespace setVariable [_replyVar, [_rows, _discount]];
 };
 
 // Reached by remoteExec, not remoteExecCall, so the build runs on the server's scheduler: the
@@ -118,16 +125,18 @@ fnc_vendor_reply = {
 // frame for as long as it took and stall the whole session. The ask below waits it out.
 fnc_vendor_query = {
 	if (!isServer) exitWith {};
-	params ["_kind", "_list", "_requester", "_replyVar"];
-	[_replyVar, [_kind, _list] call fnc_vendor_stock] remoteExecCall ["fnc_vendor_reply", _requester];
+	params ["_kind", "_list", "_requester", "_replyVar", ["_vendor", objNull]];
+	// Sent with every list rather than once per open, so a list switch also picks up a reputation move.
+	private _discount = [[_vendor getVariable ["DUWS_vendor_town", -1]] call fnc_civ_repAt] call fnc_vendor_discount;
+	[_replyVar, [_kind, _list] call fnc_vendor_stock, _discount] remoteExecCall ["fnc_vendor_reply", _requester];
 };
 
 // Blocks on the answer, so every caller has to be scheduled.
 fnc_vendor_ask = {
-	params ["_kind", "_list"];
+	params ["_kind", "_list", ["_vendor", objNull]];
 	DUWS_vendorAskSeq = (missionNamespace getVariable ["DUWS_vendorAskSeq", 0]) + 1;
 	private _replyVar = format ["duws_vendor_reply_%1", DUWS_vendorAskSeq];
-	[_kind, _list, player, _replyVar] remoteExec ["fnc_vendor_query", 2];
+	[_kind, _list, player, _replyVar, _vendor] remoteExec ["fnc_vendor_query", 2];
 	// A server-side throw sends no reply at all; without a deadline the catalogue would wait on it
 	// for the rest of the session.
 	private _deadline = diag_tickTime + 30;
@@ -137,5 +146,5 @@ fnc_vendor_ask = {
 	if (_res isEqualTo []) then {
 		["ERROR", "VENDOR", format ["stock request '%1/%2' went unanswered for 30 s", _kind, _list]] call fnc_log;
 	};
-	_res param [0, []]
+	[_res param [0, []], _res param [1, 0]]
 };

@@ -3293,6 +3293,10 @@
                 <Original>%1 money. You have %2</Original>
                 <English>%1 money. You have %2</English>
             </Key>
+            <Key ID="STR_DUWS_T_VENDOR_PRICE_DISCOUNT">
+                <Original>%1 money (%2% discount). You have %3</Original>
+                <English>%1 money (%2% discount). You have %3</English>
+            </Key>
             <Key ID="STR_DUWS_T_VENDOR_TAKE">
                 <Original>Buy</Original>
                 <English>Buy</English>
