@@ -15,8 +15,6 @@ _selected_soldier_name = _selected_soldier select 8;
 _selected_soldier_identity = _selected_soldier select 9;
 _selected_soldier_class = _selected_soldier select 10;
 
-hint _selected_soldier_identity;
-
 // Re-deploying a healed operative is free, so only "Ready" costs CP. The guard must stay at top
 // level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
 if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_operative_no_cp"};
