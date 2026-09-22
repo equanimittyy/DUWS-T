@@ -29,6 +29,8 @@ while {true} do {
         "decay" call _enter;     call fnc_opcom_decay;
         "prune" call _enter;     call fnc_opcom_belief_prune;
         "contested" call _enter; call DUWS_fnc_opcom_contestedUpdate;
+        // Arty's gate: which BLUFOR ground OPFOR has eyes on, and when it last did.
+        "observed" call _enter;  call DUWS_fnc_opcom_observeUpdate;
         // Refresh live taskings' strength/position before the grid reads them: grid_rebuild runs ahead of
         // task_step (which needs the fresh grid), so a kill would otherwise reach the grid a tick late.
         // effForceLive counts only the living, so a wiped group weighs 0 and drops out the same tick.

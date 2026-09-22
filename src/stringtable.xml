@@ -5482,6 +5482,10 @@
                 <Original>Your position was revealed to OPFOR due to an enemy recon post</Original>
                 <English>Your position was revealed to OPFOR due to an enemy recon post</English>
             </Key>
+            <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND">
+                <Original>Enemy guns are firing on %1. Rounds land in seconds, get off that ground.</Original>
+                <English>Enemy guns are firing on %1. Rounds land in seconds, get off that ground.</English>
+            </Key>
 </Container>
         <Container name="Support &amp; Radio">
             <Key ID="STR_DUWS_T_halo_ai_only">

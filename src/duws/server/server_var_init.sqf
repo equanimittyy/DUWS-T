@@ -642,6 +642,28 @@ OPCOM_ARTY_ROCKET_JITTER = 0;
 // Metres a rocket may land from its aim point, on top of the pattern: rockets fall wider than shells (fnc_opcom_fires).
 OPCOM_ARTY_ROCKET_SCATTER = 75;
 
+// What the Arty action decides with. Spread is the size of the pattern it asks for: a base by type, wider the
+// further the gun shoots, tighter with an OP watching the rounds fall.
+OPCOM_ARTY_SPREAD = createHashMapFromArray [["MORTAR", 50], ["ARTY", 100]];
+OPCOM_ARTY_SPREAD_PER_KM = 25;
+OPCOM_ARTY_SPREAD_OP = 30;
+// Rounds a saturate lays per gun, and the ticks the emplacement rests after any mission: a pit answers again in
+// 25-40 min, a battery in 40-60. A creep's rounds follow from its size instead.
+OPCOM_ARTY_ROUNDS = createHashMapFromArray [["MORTAR", [4, 8]], ["ARTY", [6, 10]]];
+OPCOM_ARTY_COOLDOWN = createHashMapFromArray [["MORTAR", [300, 480]], ["ARTY", [480, 720]]];
+// The radius a round kills inside: what the pattern's saturation, and so the mission's Value in kills, is measured on.
+OPCOM_ARTY_LETHAL = createHashMapFromArray [["MORTAR", 20], ["ARTY", 30]];
+// No mission is aimed inside this of the player HQ (rounds may still stray there from a barrage aimed elsewhere).
+OPCOM_ARTY_HQ_CLEAR = 100;
+// Seconds before the first round lands that the telegraph goes out, and how long its marker then stands.
+OPCOM_ARTY_WARN = 20;
+OPCOM_ARTY_MARK = 120;
+
+// A BLUFOR holding counts as observed when an OPFOR element passes this close or an OP covers it (OP_OBSERVE_K),
+// and stays shellable for this many ticks after -- 15 min at the 5 s cadence. Nothing is shelled unseen.
+OPCOM_OBSERVE_NEAR = 500;
+OPCOM_OBSERVE_SPAN = 180;
+
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
 // look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.
 OPCOM_INTERCEPT_K = 1;
@@ -720,6 +742,8 @@ OPCOM_AP_MORTAR = 25;
 OPCOM_AP_ARTY = 50;
 // Per 50 m square, so a deeper belt costs by its footprint.
 OPCOM_AP_MINEFIELD = 15;
+// AP is the ammunition: the guns rest empty and are loaded per mission, so the wallet is the only limit.
+OPCOM_AP_PER_ROUND = 2;
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;

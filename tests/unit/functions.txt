@@ -99,3 +99,6 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_sco
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
 duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_artySpread
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_artyShare
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_patternArea

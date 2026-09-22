@@ -104,6 +104,23 @@ DUWS_fnc_opcom_gunFire = {
     };
 };
 
+// Seconds until the first round lands, off the first gun that bears -- what the telegraph is timed against. The gun
+// is emptied again: the mission's own load decides what actually fires.
+DUWS_fnc_opcom_fireETA = {
+    params ["_key", "_pt"];
+    private _eta = 0;
+    {
+        private _gun = _x;
+        _gun setVehicleAmmo 1;
+        private _m = (getArtilleryAmmo [_gun]) param [0, ""];
+        private _bears = _m isNotEqualTo "" && {!isNull (gunner _gun)} && {_pt inRangeOfArtillery [[_gun], _m]};
+        if (_bears) then { _eta = _gun getArtilleryETA [_pt, _m] };
+        _gun setVehicleAmmo 0;
+        if (_bears) exitWith {};
+    } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
+    _eta
+};
+
 // _shape is ["saturate", radius] about _target or ["creep", width, length, bearing] walking forward from it. _rounds is
 // a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). -> rounds ordered, 0 if no gun bears.
 DUWS_fnc_opcom_fireMission = {

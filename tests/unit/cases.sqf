@@ -1760,6 +1760,18 @@ OPCOM_VALUE_HALFLIFE = 360;
 ["taxiWorth: a lift slower than the walk is worth nothing", [10, 360, 500] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
 ["taxiWorth: a worthless order buys no lift", [0, 720, 60] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_artySpread / artyShare / patternArea: a fire mission's pattern and what it covers ---
+OPCOM_ARTY_SPREAD_PER_KM = 25;
+OPCOM_ARTY_SPREAD_OP = 30;
+OPCOM_ARTY_MIN_SPREAD = 50;
+["artySpread: a mortar 3 km out scatters 75 m wider", [50, 3000, false] call DUWS_fnc_opcom_artySpread, 125] call fnc_assertClose;
+["artySpread: an OP watching the fall tightens it", [50, 3000, true] call DUWS_fnc_opcom_artySpread, 95] call fnc_assertClose;
+["artySpread: the bonus never takes it below the floor", [50, 0, true] call DUWS_fnc_opcom_artySpread, 50] call fnc_assertClose;
+["patternArea: a saturate covers its disc", [["saturate", 100]] call DUWS_fnc_opcom_patternArea, pi * 10000] call fnc_assertClose;
+["patternArea: a creep covers its width by its length", [["creep", 100, 200, 0]] call DUWS_fnc_opcom_patternArea, 20000] call fnc_assertClose;
+["artyShare: four rounds of 25 m over a 100 m disc cover a quarter", [4, 25, pi * 10000] call DUWS_fnc_opcom_artyShare, 0.25] call fnc_assertClose;
+["artyShare: rounds past saturation kill what stands there once", [100, 25, pi * 10000] call DUWS_fnc_opcom_artyShare, 1] call fnc_assertClose;
+
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;
 ["disguise_floor: an empty helmet slot costs the helmet penalty", [[["headgear", ""]]] call fnc_disguise_floor, 20] call fnc_assertEq;
