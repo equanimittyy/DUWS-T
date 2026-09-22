@@ -58,9 +58,9 @@ The only durable write a mission reaches on its own is the profile-backed namesp
 
 `params [["_v", default, [typeTemplate]]]` doesn't *silently* coerce a wrong-typed value — it writes a "Type X, expected Y" RPT error first, then uses the default, so a template is wrong for a slot whose type legitimately varies (a `["_role", "", [""]]` meant to absorb a bool logged one error per gun per site). Fix: read a varying slot untyped (`["_role", ""]`) and coerce by hand — `if !(_role isEqualType "") then { _role = "" }`.
 
-## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
+## `exitWith` exits only the innermost block, not the script
 
-`if (cond) exitWith {...}` inside a loop terminates the whole loop, not just the enclosing `if/then`/`switch` — `exitWith` unwinds to the nearest `while`/`for`/`forEach`/`count`/`call`/`spawn`/`execVM` scope, so `if (a) then { if (b) exitWith {...} }` meaning to abandon only the inner block exits the loop instead. Fix: skip-and-retry with `continue` (or fall off the body's end); reserve `exitWith` for stopping the loop. Hit the zone locator ([`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects)).
+`if (cond) exitWith {...}` leaves only the code block that holds it. Nested in an `if/then` block or a `switch` case, it ends that block and the script continues after it; nested in an `if/then` block inside a loop, the loop keeps iterating. A guard nested this way does not stop the script: the operative recruit's CP check sat in a `switch` case, so a refused purchase hinted "no CP" and then deployed the operative unpaid. Fix: put a guard that must stop the script at the script's top level (`fnc_operator_recruit.sqf`), or set a flag inside the block and test it with `exitWith` at top level.
 
 ## `ctrlCreate` on a config display ignores the mission's base classes entirely
 

@@ -17,16 +17,9 @@ _selected_soldier_class = _selected_soldier select 10;
 
 hint _selected_soldier_identity;
 
-// Re-deploying an already-recruited, healed operative is free, so only "Ready"
-// costs CP. The hint lives inside the guard because exitWith is transparent to
-// switch and unwinds to the spawn scope: a flag checked after the switch could
-// never be read.
-switch (_selected_soldier_status) do
-{
-  case "Ready": {
-	if !(["CP", 8] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_operative_no_cp"};
-  };
-};
+// Re-deploying a healed operative is free, so only "Ready" costs CP. The guard must stay at top
+// level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
+if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_operative_no_cp"};
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,200,15,0.3] call fnc_safe_pos;

@@ -268,7 +268,7 @@ The Debug menu's Economy dialog has a *Fire economy tick* button that runs one e
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | CP only today, from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`): a kind band set by role, a heaviness score placing the vehicle inside it |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
-| Operatives | `client/operative/fnc_operator_recruit.sqf:29` | 8 (re-deploying a healed one is free) |
+| Operatives | `client/operative/fnc_operator_recruit.sqf:22` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
