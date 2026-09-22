@@ -62,7 +62,7 @@ if (isNil "fnc_veh_repair_check_status") then {
                 _hasDamage = true;
                 private _healthPercent = (1 - _dmg) * 100;
                 if (_healthPercent < 0) then { _healthPercent = 0; };
-                _lines pushBack format ["%1: %2%", _x, round _healthPercent];
+                _lines pushBack format ["%1: %2%3", _x, round _healthPercent, "%"];
             };
         } forEach _hitPoints;
 
@@ -75,13 +75,13 @@ if (isNil "fnc_veh_repair_check_status") then {
                 if (typeName _dmg == "STRING") then { _dmg = parseNumber _dmg; };
                 if (typeName _dmg == "ARRAY") then { _dmg = _dmg select 0; };
                 if (isNil "_dmg" || {typeName _dmg != "SCALAR"}) then { _dmg = 0; };
-                _lines pushBack format ["%1: %2%", _parts select _i, round ((1 - _dmg) * 100)];
+                _lines pushBack format ["%1: %2%3", _parts select _i, round ((1 - _dmg) * 100), "%"];
             };
         };
 
-        _lines pushBack format ["Fuel: %1%", round (fuel _veh * 100)];
+        _lines pushBack format ["Fuel: %1%2", round (fuel _veh * 100), "%"];
         private _ammoFrac = [_veh] call DUWS_fnc_vehAmmoFrac;
-        if (_ammoFrac >= 0) then { _lines pushBack format ["Ammo: %1%", round (_ammoFrac * 100)]; };
+        if (_ammoFrac >= 0) then { _lines pushBack format ["Ammo: %1%2", round (_ammoFrac * 100), "%"]; };
         [_lines joinString "\n"] remoteExec ["hint", _caller];
     };
     publicVariable "fnc_veh_repair_check_status";

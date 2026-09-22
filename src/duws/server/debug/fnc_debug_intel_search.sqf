@@ -44,11 +44,12 @@ if (_kind isEqualTo "intel") then {
 };
 
 [format [
-    "Intel search (debug)\n\nSource '%1', flagged at spawn %2%% of the time\nWeights: %3\n\n%4\n\nHidden positions: %5 -> %6",
+    "Intel search (debug)\n\nSource '%1', flagged at spawn %2%7 of the time\nWeights: %3\n\n%4\n\nHidden positions: %5 -> %6",
     _source,
     (_config select 0) * 100,
     _config select 1,
     _outcome,
     count _hiddenBefore,
-    count (call _fnc_hidden)
+    count (call _fnc_hidden),
+    "%"
 ]] remoteExec ["hint", _caller];

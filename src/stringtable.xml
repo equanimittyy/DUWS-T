@@ -7598,11 +7598,11 @@
                 <English>Too many FOBs</English>
             </Key>
             <Key ID="STR_DUWS_T_6vjxo4eb">
-                <Spanish>PdA máximos: %1 (50% de las zonas enemigas) - Intenta borrar alguno.</Spanish>
-                <German>Maximale FOBs: %1 (50% der Feindzonen) - Versuche vorher eine zu löschen.</German>
-                <Chinesesimp>最大FOB数是: %1 (敌区的50%) - 试试去掉一个。</Chinesesimp>
-                <Original>Maximum FOBs: %1 (50% of enemy zones) - try deleting one.</Original>
-                <English>Maximum FOBs: %1 (50% of enemy zones) - try deleting one.</English>
+                <Spanish>PdA máximos: %1 (50%2 de las zonas enemigas) - Intenta borrar alguno.</Spanish>
+                <German>Maximale FOBs: %1 (50%2 der Feindzonen) - Versuche vorher eine zu löschen.</German>
+                <Chinesesimp>最大FOB数是: %1 (敌区的50%2) - 试试去掉一个。</Chinesesimp>
+                <Original>Maximum FOBs: %1 (50%2 of enemy zones) - try deleting one.</Original>
+                <English>Maximum FOBs: %1 (50%2 of enemy zones) - try deleting one.</English>
             </Key>
         </Container>
         <Container name="Special Modes (Ravage / WBK)">
