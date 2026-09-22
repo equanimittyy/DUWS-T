@@ -162,7 +162,7 @@ OPFOR speaker.
 | Site | Ring |
 |---|---|
 | OPFOR zone | the zone radius. The zone must be in `WARCOM_zones_controled_by_OPFOR`. The radius comes from `zone_meta_array`. Rows match by position. |
-| OPFOR hardpoint | `DISGUISE_CIV_HP_RING` (150 m) from a `DUWS_hardpoints` row with side `"opfor"` |
+| OPFOR hardpoint | `DISGUISE_CIV_HP_RING` (50 m) from a `DUWS_hardpoints` row with side `"opfor"` |
 
 The band is `DISGUISE_CIV_SITE_WARN` (100 m) wide outside the ring. The first tick inside the band
 shows one hint, and the player gets the hint again only after leaving the band and coming back.

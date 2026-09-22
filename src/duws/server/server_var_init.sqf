@@ -546,7 +546,7 @@ AOI_TOWN_REACH  = 2000;   // added to a banded town's civ_radius
 // A civilian is caught on sight inside an OPFOR zone's radius or this near an OPFOR hardpoint. The band
 // this wide beyond either ring warns once on the way in and fills the meter faster.
 // Server-only, like every DISGUISE_* value, so none is broadcast.
-DISGUISE_CIV_HP_RING = 150;
+DISGUISE_CIV_HP_RING = 50;
 DISGUISE_CIV_SITE_WARN = 100;
 // An OPFOR unit spots a disguised player within this range and cone (degrees off its eye direction),
 // at this checkVisibility or more.
