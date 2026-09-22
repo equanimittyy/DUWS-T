@@ -4366,8 +4366,8 @@
                 <English>Reduced Income</English>
             </Key>
             <Key ID="STR_DUWS_T_econ_reduced_desc">
-                <Original>Income reduced by %1% due to campaign size</Original>
-                <English>Income reduced by %1% due to campaign size</English>
+                <Original>Income reduced by %1%2 due to campaign size</Original>
+                <English>Income reduced by %1%2 due to campaign size</English>
             </Key>
             <Key ID="STR_DUWS_T_takencontrol">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone eingenommen. Gut gemacht.</German>
@@ -5581,12 +5581,12 @@
                 <English>Stores the selected landing-pad vehicle.</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORED_ROW">
-                <Original>%1 (hull %2%, fuel %3%, ammo %4%)</Original>
-                <English>%1 (hull %2%, fuel %3%, ammo %4%)</English>
+                <Original>%1 (hull %2%5, fuel %3%5, ammo %4%5)</Original>
+                <English>%1 (hull %2%5, fuel %3%5, ammo %4%5)</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_STORED_ROW_NOAMMO">
-                <Original>%1 (hull %2%, fuel %3%)</Original>
-                <English>%1 (hull %2%, fuel %3%)</English>
+                <Original>%1 (hull %2%4, fuel %3%4)</Original>
+                <English>%1 (hull %2%4, fuel %3%4)</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_RECYCLE_CONFIRM">
                 <Original>Recycle %1 for %2 CP?</Original>

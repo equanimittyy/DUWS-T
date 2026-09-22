@@ -48,9 +48,9 @@ isNil {
             default      { 2021 };
         };
         private _rowText = if (_ammoFrac < 0) then {
-            format [localize "STR_DUWS_T_GARAGE_STORED_ROW_NOAMMO", _name, _hp, _fuel]
+            format [localize "STR_DUWS_T_GARAGE_STORED_ROW_NOAMMO", _name, _hp, _fuel, "%"]
         } else {
-            format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel, round (_ammoFrac * 100)]
+            format [localize "STR_DUWS_T_GARAGE_STORED_ROW", _name, _hp, _fuel, round (_ammoFrac * 100), "%"]
         };
         private _row = lbAdd [_idc, _rowText];
         lbSetData [_idc, _row, str _forEachIndex];

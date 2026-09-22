@@ -105,7 +105,7 @@ if (_bluCP > 0 || {_bluZoneAP > 0}) then {
     // tick -- "reduced" with no income line to reduce would read as an error.
     if (DUWS_econ_throttle < 1) then {
         private _cut = round ((1 - DUWS_econ_throttle) * 100);
-        ["sitrepinfo", [localize "STR_DUWS_T_econ_reduced_title", format [localize "STR_DUWS_T_econ_reduced_desc", _cut]]]
+        ["sitrepinfo", [localize "STR_DUWS_T_econ_reduced_title", format [localize "STR_DUWS_T_econ_reduced_desc", _cut, "%"]]]
             remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
     };
 };
