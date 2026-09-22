@@ -273,6 +273,11 @@ OPFOR and Everything lists cost more at every dealer. A hull costs 1.1 times as 
 rounding down over both rates. The Arms Dealer's gear costs 1.5 times as much, rounded down, because
 a smaller markup rounds away to nothing on single-digit gear prices.
 
+A town's reputation gives a discount at every shop in that town: 10% at 10 and 20% at 20, the
+reputation cap (`fnc_vendor_discount`). The discount goes into the same single rounding down, and no
+price drops below 1. The server sends the discount with each stock list, and the catalogue shows it
+on the price line in BLUFOR blue.
+
 ### Delivery
 
 Every purchase from the Arms, Car and Boat dealers offers two destinations: store it at base, or
