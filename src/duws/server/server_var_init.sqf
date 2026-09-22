@@ -834,7 +834,7 @@ OPCOM_FERRY_STRAND_TICKS = 24;   // ticks; 120s @ 5s tick
 // Live ferry rendering tunables (docs/plans/opcom/opcom_plan.md §Shipped). The wait cap is the load-bearing one:
 // a board or landing that never settles (a bad LZ, stuck AI) forces through at it rather than hang bound.
 OPCOM_FERRY_BOARD_BOAT = 100;    // m; a boat reaches its park, and its riders their shore, within this
-OPCOM_FERRY_BOARD_GROUND = 50;   // m; a ground taxi pulls up this close to the men, and to the drop, to swap them
+OPCOM_FERRY_BOARD_GROUND = 50;   // m; a ground taxi stops and holds this close to the men, and to the drop
 OPCOM_FERRY_BOAT_PARK = 100;     // m; a live boat parks this far out from the shoreline, clear of the shallows
 OPCOM_FERRY_SHORE_ARRIVE = 100;  // m; leader within this of the shore stage calls the ferry (own tunable, not the streaming margin)
 OPCOM_FERRY_GROUND_ALT = 4;      // m ATL under which a landing rotary counts as grounded (mirrors fnc_helotaxi)
