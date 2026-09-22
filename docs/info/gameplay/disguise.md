@@ -63,6 +63,23 @@ target only every few seconds
 ([gotchas](../architecture/arma_engine_gotchas.md#knowsabout-is-a-decaying-knowledge-scalar-not-a-current-visibility-flag)).
 Both activations call it; the monitor does not, because a 5 s fix is too slow for a 0.5 s meter.
 
+## OPCOM sensing
+
+OPCOM does not record a disguised player in its belief store. The sighting sweep, recon and the
+interceptor's look skip each man for whom `server/disguise/fnc_disguise_active.sqf` returns true. It
+reads the `DUWS_disguised` and `DUWS_enemyDisguised` flags, not the captive state, because the inbound
+High Command aircraft and some mission units are also captive, and OPCOM must still see them. A vehicle
+is skipped only when every man aboard is disguised. The OP post burst skips the player because it
+filters on unit `side`, and a captive unit reads civilian
+([gotchas](../architecture/arma_engine_gotchas.md#a-captive-units-side-reads-civilian-but-its-side-group-does-not)).
+When cover breaks, the flags clear and the next sweep records the player again.
+
+A squad with a disguised member is still recorded through its undisguised members. The record takes
+the position of the leader, or of the first undisguised member while the leader is disguised, and its
+strength leaves the disguised members out (`DUWS_fnc_opcom_sightLead` and `DUWS_fnc_opcom_sightStr`,
+`server/warcom/opcom/belief/fnc_opcom_force.sqf`). A record made before the player put on the disguise
+stays and decays like that of any group that nobody sees.
+
 ## The suspicion meter
 
 Each disguised player has a meter from 0 to 100 on the server. The monitor updates it every 0.5 s.

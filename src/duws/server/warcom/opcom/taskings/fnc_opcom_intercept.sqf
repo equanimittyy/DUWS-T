@@ -31,8 +31,8 @@ DUWS_fnc_opcom_interceptLook = {
     private _best = "";
     private _bd = 1e12;
     {
-        private _l = leader _x;
-        if (alive _l) then {
+        private _l = [_x] call DUWS_fnc_opcom_sightLead;
+        if (!isNull _l) then {
             private _lp = getPosASL _l;
             if (([_lp, _pos] call DUWS_fnc_opcom_cellDist) <= OPCOM_INTERCEPT_K) then {
                 [netId _x, [_lp select 0, _lp select 1, 0], [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;

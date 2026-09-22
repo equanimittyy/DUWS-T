@@ -64,7 +64,7 @@ DUWS_fnc_classPower = {
 // sighting reads firepower and intent, not condition; decay is the fog. Shared by both belief sensors.
 DUWS_fnc_opcom_sightStr = {
     params ["_grp"];
-    private _gu = units _grp;
+    private _gu = (units _grp) select { !([_x] call fnc_disguise_active) };
     private _fp = 0;
     {
         private _veh = vehicle _x;
@@ -77,6 +77,19 @@ DUWS_fnc_opcom_sightStr = {
         };
     } forEach _gu;
     _fp + OPCOM_PLAYER_WORTH * ({isPlayer _x} count _gu)
+};
+
+// The member a guaranteed sweep sees a group by: its leader, or while the leader is disguised the first live
+// undisguised member, so a disguised leader who left the squad behind is not stamped where they stand.
+// objNull when no member is visible.
+DUWS_fnc_opcom_sightLead = {
+    params ["_grp"];
+    private _ldr = leader _grp;
+    if (alive _ldr && {!([_ldr] call fnc_disguise_active)}) exitWith { _ldr };
+    private _gu = units _grp;
+    private _i = _gu findIf { alive _x && {!([_x] call fnc_disguise_active)} };
+    if (_i < 0) exitWith { objNull };
+    _gu select _i
 };
 
 // A token list -> total force. The stowed path for a garrison's surviving-token ledger and for a

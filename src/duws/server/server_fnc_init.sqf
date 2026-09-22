@@ -339,6 +339,7 @@ fnc_disguise_enemyMismatch = compile preprocessFileLineNumbers "duws\server\disg
 fnc_disguise_monitor = compile preprocessFileLineNumbers "duws\server\disguise\fnc_disguise_monitor.sqf";
 fnc_disguise_resetCooldown = compile preprocessFileLineNumbers "duws\server\disguise\fnc_disguise_resetCooldown.sqf";
 fnc_disguise_cancel = compile preprocessFileLineNumbers "duws\server\disguise\fnc_disguise_cancel.sqf";
+fnc_disguise_active = compile preprocessFileLineNumbers "duws\server\disguise\fnc_disguise_active.sqf";
 fnc_scanEnemyGear = compile preprocessFileLineNumbers "duws\server\disguise\fnc_scanEnemyGear.sqf";
 fnc_disguiseAsCivilian = compile preprocessFileLineNumbers "duws\server\civilian\fnc_disguiseAsCivilian.sqf";
 publicVariable "fnc_disguiseAsCivilian";

@@ -263,7 +263,7 @@ DUWS_fnc_hardpointOPBurst = {
     private _seenG = [];
     { _seenG pushBackUnique (group _x) } forEach _blu;
     {
-        private _bp = getPosASL (leader _x);
+        private _bp = getPosASL ([_x] call DUWS_fnc_opcom_sightLead);
         _bp set [2, 0];
         [netId _x, _bp, [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
     } forEach _seenG;

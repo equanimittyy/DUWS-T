@@ -41,7 +41,7 @@ for "_gi" from (DUWS_opcom_tick % _stride) to ((count _east) - 1) step _stride d
         };
         {
             private _tgt = _x select _NT_OBJECT;
-            if (!isNull _tgt && {side (group _tgt) == west}) then {
+            if (!isNull _tgt && {side (group _tgt) == west} && {!([_tgt] call fnc_disguise_active)}) then {
                 private _age = _x select _NT_POSAGE;
                 // Confirms element 5 grows for a remembered target; if it never fires, 5 is not age (pivot to nearTargetsCurrent).
                 if (isNil "DUWS_opcom_ntStaleProbed" && {_age > OPCOM_TICK_PERIOD}) then {

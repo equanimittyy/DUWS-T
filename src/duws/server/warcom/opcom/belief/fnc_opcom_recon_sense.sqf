@@ -18,15 +18,15 @@ if (isNil "DUWS_opcom_grid_w") exitWith {};
 
 private _w = DUWS_opcom_grid_w;
 
-// Every live BLUFOR group's cell once for the tick: [group, cx, cy]. Group, not unit -- belief keys and
-// stamps by group at its leader's cell, matching fnc_opcom_sense. allGroups (handles), never a scan over
-// allUnits/nearEntities (info/performance.md).
+// Every visible BLUFOR group's cell once for the tick: [group, cx, cy, lead]. Group, not unit -- belief keys
+// and stamps by group at its sight lead's cell, matching fnc_opcom_sense. allGroups (handles), never a scan
+// over allUnits/nearEntities (info/performance.md).
 private _wcells = [];
 {
-    private _ldr = leader _x;
-    if (!isNull _ldr && {alive _ldr}) then {
+    private _ldr = [_x] call DUWS_fnc_opcom_sightLead;
+    if (!isNull _ldr) then {
         private _ci = [getPosASL _ldr] call DUWS_fnc_opcom_w2c;
-        _wcells pushBack [_x, _ci mod _w, floor (_ci / _w)];
+        _wcells pushBack [_x, _ci mod _w, floor (_ci / _w), _ldr];
     };
 } forEach (allGroups select { side _x == west });
 
@@ -48,10 +48,10 @@ private _wcells = [];
         private _rcy = floor (_rc / _w);
 
         {
-            _x params ["_wg", "_gcx", "_gcy"];
+            _x params ["_wg", "_gcx", "_gcy", "_lead"];
             if (((abs (_rcx - _gcx)) max (abs (_rcy - _gcy))) <= _k) then {
                 private _key = netId _wg;
-                private _bp = getPosASL (leader _wg);
+                private _bp = getPosASL _lead;
                 _bp set [2, 0];
                 private _str = [_wg] call DUWS_fnc_opcom_sightStr;
                 [_key, _bp, _str] call fnc_opcom_belief_upsert;
