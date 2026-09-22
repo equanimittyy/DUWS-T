@@ -13,3 +13,9 @@ DUWS_fnc_opcom_truckDelay = {
     params ["_truck"];
     [_truck select 2, DUWS_opcom_speed get (DUWS_opcom_moveType get "truck")] call DUWS_fnc_opcom_delay
 };
+
+// A commit's Value lands when the unit sent reaches its target.
+DUWS_fnc_opcom_unitDelay = {
+    params ["_t", "_to"];
+    [(_t get "pos") distance2D _to, DUWS_opcom_speed getOrDefault [_t get "moveType", 15]] call DUWS_fnc_opcom_delay
+};

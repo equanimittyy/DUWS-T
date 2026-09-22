@@ -773,6 +773,9 @@ OPCOM_BLOCK_K = 2;
 OPCOM_PICK_TOP = 10;
 OPCOM_PICK_SHARPNESS = 2;
 
+// An order that fights for its target drops below these odds at commit: one unit sent in on worse is thrown away.
+OPCOM_PWIN_FLOOR = 0.3;
+
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are
 // unheld. Six ticks at the 5 s cadence is 30 s.

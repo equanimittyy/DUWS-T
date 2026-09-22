@@ -33,7 +33,7 @@ if (_mode isEqualTo "weighted") then {
         _x params ["_r", "_ts"];
         {
             private _price = _x select 1;
-            _all pushBack [(_x param [4, 1]) * (_x param [3, _price]) / (_price max 1), _r, _x];
+            _all pushBack [(_x param [4, 1]) * (_x param [3, _price]) / ((_x param [5, _price]) max 1), _r, _x];
         } forEach _ts;
     } forEach _live;
 

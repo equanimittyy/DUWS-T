@@ -105,7 +105,8 @@ publicVariable "fnc_duws_deploy";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
 // appraisal\: executed to define the score's terms (value\, one file per term), the asset tables, supply trucks, the
-// siting pass, the action list and the picker's state. siting reads the Value functions into its table at load.
+// siting pass, the roster and commit actions, the action list and the picker's state. siting reads the Value functions
+// into its table at load, and the action list reads every row's functions into its own.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_tick_cache.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_exposure.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_pwin.sqf";
@@ -117,9 +118,12 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_need.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_cover.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_delay.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_cost.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_assets.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_supply.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_siting.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_roster.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_commit.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_actions.sqf";
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";

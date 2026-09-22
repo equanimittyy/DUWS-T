@@ -7,6 +7,18 @@ DUWS_fnc_opcom_townWorth = {
     ((missionNamespace getVariable ["civ_town_ap", []]) param [_i, 0]) * OPCOM_TOWN_WORTH
 };
 
+DUWS_fnc_opcom_zoneWorthsSweep = {
+    private _out = createHashMap;
+    { _out set [[_x select 1] call fnc_zone_key, _x select 3] } forEach zone_meta_array;
+    _out
+};
+
+DUWS_fnc_opcom_siteWorth = {
+    params ["_key"];
+    if ((_key select [0, 5]) isEqualTo "town_") exitWith { [parseNumber (_key select [5])] call DUWS_fnc_opcom_townWorth };
+    (["zoneWorths", DUWS_fnc_opcom_zoneWorthsSweep] call DUWS_fnc_opcom_tickCached) getOrDefault [_key, 0]
+};
+
 // What the holding fields at its own current tier. Measured against the top tier instead, a small zone's refill
 // read as a few percent of a zone it will never be, and every buy scored a fraction of what it was worth.
 DUWS_opcom_tierForceMemo = createHashMap;

@@ -35,3 +35,23 @@ DUWS_fnc_opcom_pWin = {
     if (isNil "DUWS_opcom_grid_w") exitWith { 1 };
     ([_pos] call DUWS_fnc_opcom_blockForce) call DUWS_fnc_opcom_pWinAt
 };
+
+// A force as the 3x3 block reads it once it stands at the block's centre: the grid deposits a force spread over
+// OPCOM_GRID_SPREAD, so the block sums about four times the raw figure, and a raw add would undercount the unit sent.
+DUWS_fnc_opcom_blockGain = {
+    private _g = 0;
+    for "_dy" from -1 to 1 do {
+        for "_dx" from -1 to 1 do {
+            _g = _g + ((1 - OPCOM_GRID_CELL * sqrt (_dx * _dx + _dy * _dy) / OPCOM_GRID_SPREAD) max 0);
+        };
+    };
+    _g
+};
+
+// The odds with the unit sent added, unless it already stands inside the block and the grid counts it there.
+DUWS_fnc_opcom_pWinSend = {
+    params ["_pos", "_from", "_force"];
+    ([_pos] call DUWS_fnc_opcom_blockForce) params ["_fri", "_ene"];
+    if (([_pos, _from] call DUWS_fnc_opcom_cellDist) > 1) then { _fri = _fri + _force * (call DUWS_fnc_opcom_blockGain) };
+    [_fri, _ene] call DUWS_fnc_opcom_pWinAt
+};

@@ -1707,6 +1707,22 @@ OPCOM_VALUE_HALFLIFE = 40;
 ["delay: a delivery on the spot keeps its whole Value", [0, 4] call DUWS_fnc_opcom_delay, 1] call fnc_assertClose;
 ["delay: a drive of one half-life keeps half", [5000, 4] call DUWS_fnc_opcom_delay, 0.5] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_blockGain / DUWS_fnc_opcom_pWinSend: the odds with the unit sent added ---
+OPCOM_GRID_SPREAD = 1000;
+["blockGain: a force at the centre reads its falloff summed over the 3x3", call DUWS_fnc_opcom_blockGain, 3 + 4 * (1 - sqrt 0.5)] call fnc_assertClose;
+DUWS_fnc_opcom_blockForce = { [0, 20] };
+DUWS_fnc_opcom_cellDist = { 5 };
+["pWinSend: a unit from afar adds its force as the block reads it",
+    [[0, 0, 0], [0, 0, 0], 20 / (call DUWS_fnc_opcom_blockGain)] call DUWS_fnc_opcom_pWinSend, ([20, 20] call DUWS_fnc_opcom_pWinAt)] call fnc_assertClose;
+DUWS_fnc_opcom_cellDist = { 1 };
+["pWinSend: a unit already in the block is not counted twice", [[0, 0, 0], [0, 0, 0], 9] call DUWS_fnc_opcom_pWinSend, 0] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_abandonAt: the defense a committed unit leaves behind ---
+["abandonAt: a safe backline costs almost nothing", [40, 40, 0, 10] call DUWS_fnc_opcom_abandonAt, 0.25] call fnc_assertClose;
+["abandonAt: a threatened home costs its share of the worth", [40, 20, 30, 10] call DUWS_fnc_opcom_abandonAt, 20] call fnc_assertClose;
+["abandonAt: the only force there takes the whole worth", [40, 10, 30, 12] call DUWS_fnc_opcom_abandonAt, 40] call fnc_assertClose;
+["abandonAt: no OPFOR force at home abandons nothing", [40, 0, 30, 10] call DUWS_fnc_opcom_abandonAt, 0] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;
