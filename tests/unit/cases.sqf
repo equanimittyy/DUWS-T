@@ -1684,6 +1684,19 @@ DUWS_opcom_tick = 100;
 DUWS_opcom_tick = 460;
 ["trafficAt: one half-life later it reads half", [0] call DUWS_fnc_opcom_trafficAt, 4] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_coverValue: the need a new hardpoint covers, half of what each cell still lacks ---
+OPCOM_GRID_CELL = 500;
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor ((_p select 0) / 500) };
+DUWS_fnc_opcom_needAt = { 2 };
+DUWS_fnc_opcom_coverAt = { 0 };
+["coverValue: an uncovered block earns half its need", [[2750, 2750, 0]] call DUWS_fnc_opcom_coverValue, 25] call fnc_assertClose;
+DUWS_fnc_opcom_coverAt = { 0.75 };
+["coverValue: a block two hardpoints cover earns an eighth", [[2750, 2750, 0]] call DUWS_fnc_opcom_coverValue, 6.25] call fnc_assertClose;
+DUWS_fnc_opcom_coverAt = { 0 };
+["coverValue: a block clipped at the box edge earns only its cells inside", [[250, 250, 0]] call DUWS_fnc_opcom_coverValue, 9] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

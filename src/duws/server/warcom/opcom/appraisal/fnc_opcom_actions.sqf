@@ -289,7 +289,8 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
     [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
+        [_at] call DUWS_fnc_opcom_coverValue]]
 };
 
 DUWS_fnc_opcom_assetTargets = {
@@ -320,7 +321,8 @@ DUWS_fnc_opcom_mineBuildTargets = {
     private _size = [1, 1];
     [[[_variant, _size, _at, _truck select 0],
         ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
-        format ["Lay %1 mines at %2", _variant, mapGridPosition _at]]]
+        format ["Lay %1 mines at %2", _variant, mapGridPosition _at],
+        [_at] call DUWS_fnc_opcom_coverValue]]
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.
