@@ -84,8 +84,8 @@ body is within 20 m: ×4 for a civilian, ×2 for the enemy disguise.
 | Civilian ground | Rate |
 |---|---|
 | Within a site ring | The first spotter breaks cover at once |
-| In the band outside a ring | `DISGUISE_CIV_RATE_BAND` (×3) |
-| Anywhere else, including OPFOR-held towns | `DISGUISE_CIV_RATE_OPEN` (×0.25) |
+| In the band outside a ring | `DISGUISE_CIV_RATE_BAND` (×6) |
+| Anywhere else, including OPFOR-held towns | `DISGUISE_CIV_RATE_OPEN` (×2) |
 
 The enemy disguise rises at ×1 everywhere.
 
@@ -98,9 +98,9 @@ capped at 95, so the floor alone never breaks cover.
 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|
-| Civilian | Elsewhere | 1 at 50 m | 200 s |
-| Civilian | Elsewhere, body within 20 m | 1 at 10 m | 10 s |
-| Civilian | Band | 1 at 50 m | 17 s |
+| Civilian | Elsewhere | 1 at 50 m | 25 s |
+| Civilian | Elsewhere, body within 20 m | 1 at 10 m | 1.5 s |
+| Civilian | Band | 1 at 50 m | 8.5 s |
 | Enemy | All OPFOR | 1 at 50 m | 50 s |
 | Enemy | All OPFOR | 4 at 50 m | 29 s |
 | Enemy | Wrong rifle and helmet | 1 at 20 m | 10 s |
@@ -134,8 +134,8 @@ OPFOR speaker.
 
 | Site | Ring |
 |---|---|
-| OPFOR zone | the zone radius + `DISGUISE_CIV_SITE_MARGIN` (150 m). The zone must be in `WARCOM_zones_controled_by_OPFOR`. The radius comes from `zone_meta_array`. Rows match by position. |
-| OPFOR hardpoint | `DISGUISE_CIV_SITE_MARGIN` from a `DUWS_hardpoints` row with side `"opfor"` |
+| OPFOR zone | the zone radius. The zone must be in `WARCOM_zones_controled_by_OPFOR`. The radius comes from `zone_meta_array`. Rows match by position. |
+| OPFOR hardpoint | `DISGUISE_CIV_HP_RING` (150 m) from a `DUWS_hardpoints` row with side `"opfor"` |
 
 The band is `DISGUISE_CIV_SITE_WARN` (100 m) wide outside the ring. The first tick inside the band
 shows one hint, and the player gets the hint again only after leaving the band and coming back.

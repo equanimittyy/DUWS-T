@@ -1604,11 +1604,11 @@ fnc_test_breakTime = {
     };
     _t
 };
-["suspicion: civilian elsewhere, 1 at 50 m breaks in 200 s", [0, [50], 0.25] call fnc_test_breakTime, 200] call fnc_assertEq;
-["suspicion: civilian elsewhere, 4 at 50 m breaks in 114.5 s", [0, [50, 50, 50, 50], 0.25] call fnc_test_breakTime, 114.5] call fnc_assertEq;
-["suspicion: civilian elsewhere, 1 at 10 m breaks in 40 s", [0, [10], 0.25] call fnc_test_breakTime, 40] call fnc_assertEq;
-["suspicion: civilian elsewhere by a body, 1 at 10 m breaks in 10 s", [0, [10], 0.25 * 4] call fnc_test_breakTime, 10] call fnc_assertEq;
-["suspicion: civilian in the band, 1 at 50 m breaks in 17 s", [0, [50], 3] call fnc_test_breakTime, 17] call fnc_assertEq;
+["suspicion: civilian elsewhere, 1 at 50 m breaks in 25 s", [0, [50], 2] call fnc_test_breakTime, 25] call fnc_assertEq;
+["suspicion: civilian elsewhere, 4 at 50 m breaks in 14.5 s", [0, [50, 50, 50, 50], 2] call fnc_test_breakTime, 14.5] call fnc_assertEq;
+["suspicion: civilian elsewhere, 1 at 10 m breaks in 5 s", [0, [10], 2] call fnc_test_breakTime, 5] call fnc_assertEq;
+["suspicion: civilian elsewhere by a body, 1 at 10 m breaks in 1.5 s", [0, [10], 2 * 4] call fnc_test_breakTime, 1.5] call fnc_assertEq;
+["suspicion: civilian in the band, 1 at 50 m breaks in 8.5 s", [0, [50], 6] call fnc_test_breakTime, 8.5] call fnc_assertEq;
 ["suspicion: enemy full kit, 1 at 50 m breaks in 50 s", [0, [50], 1] call fnc_test_breakTime, 50] call fnc_assertEq;
 ["suspicion: enemy full kit, 4 at 50 m breaks in 29 s", [0, [50, 50, 50, 50], 1] call fnc_test_breakTime, 29] call fnc_assertEq;
 ["suspicion: enemy full kit, 1 at 10 m breaks in 10 s", [0, [10], 1] call fnc_test_breakTime, 10] call fnc_assertEq;

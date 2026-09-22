@@ -58,14 +58,14 @@ fnc_disguise_enemyNear = {
 // Every OPFOR site, revealed or not: a hidden site streams in live, and a player who comes near reveals
 // it anyway. Towns are in neither registry, so an OPFOR-held town stays safe.
 fnc_disguise_atEnemySite = {
-    params ["_pos", "_margin"];
+    params ["_pos", "_pad"];
     private _opforZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
     private _atZone = (zone_meta_array findIf {
-        (_pos distance2D (_x select 1)) < ((_x select 2) + _margin)
+        (_pos distance2D (_x select 1)) < ((_x select 2) + _pad)
         && {private _key = str (_x select 1); (_opforZones findIf {str _x == _key}) >= 0}
     }) >= 0;
     _atZone || {(DUWS_hardpoints findIf {
-        (_x select 3) isEqualTo "opfor" && {(_pos distance2D (_x select 1)) < _margin}
+        (_x select 3) isEqualTo "opfor" && {(_pos distance2D (_x select 1)) < (DISGUISE_CIV_HP_RING + _pad)}
     }) >= 0}
 };
 
@@ -105,7 +105,7 @@ if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters
 if ([_player, 50 + random 30] call fnc_disguise_enemyNear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR"] call fnc_disguise_hintFail;
 };
-if ([getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite) exitWith {
+if ([getPosATL _player, 0] call fnc_disguise_atEnemySite) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_SITE"] call fnc_disguise_hintFail;
 };
 

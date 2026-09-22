@@ -50,7 +50,7 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
             ["STR_DUWS_T_DISGUISE_BROKEN_" + _fault, true] call _fnc_break;
             _stop = true;
         } else {
-            _inBand = [getPosATL _player, DISGUISE_CIV_SITE_MARGIN + DISGUISE_CIV_SITE_WARN] call fnc_disguise_atEnemySite;
+            _inBand = [getPosATL _player, DISGUISE_CIV_SITE_WARN] call fnc_disguise_atEnemySite;
             if (_inBand && {!(_player getVariable ["DUWS_disguise_siteWarned", false])}) then {
                 [localize "STR_DUWS_T_DISGUISE_WARNING_SITE_HINT"] remoteExec ["hint", _player];
             };
@@ -74,7 +74,7 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
         [["STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE", "STR_DUWS_T_DISGUISE_BROKEN_THROW"] select _civ, true] call _fnc_break;
     };
 
-    if (_seen && {_inBand} && {[getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite}) exitWith {
+    if (_seen && {_inBand} && {[getPosATL _player, 0] call fnc_disguise_atEnemySite}) exitWith {
         ["STR_DUWS_T_DISGUISE_BROKEN_SITE", true] call _fnc_break;
     };
 
