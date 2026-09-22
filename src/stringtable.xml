@@ -5649,6 +5649,26 @@
                 <Original>No light vehicles available to requisition.</Original>
                 <English>No light vehicles available to requisition.</English>
             </Key>
+            <Key ID="STR_DUWS_T_RALLY_POINT">
+                <Original>Rally Point</Original>
+                <English>Rally Point</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RALLY_MARKER">
+                <Original>Rally Point (%1)</Original>
+                <English>Rally Point (%1)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RALLY_PLACED_TITLE">
+                <Original>Rally Point Placed</Original>
+                <English>Rally Point Placed</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RALLY_PLACED_MSG">
+                <Original>BLUFOR now has access to temporary respawn</Original>
+                <English>BLUFOR now has access to temporary respawn</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RALLY_LOCKED">
+                <Original>New rally point locked for %1 min.</Original>
+                <English>New rally point locked for %1 min.</English>
+            </Key>
             <Key ID="STR_DUWS_T_veh_drop_nosel">
                 <German>Select a vehicle first.</German>
                 <Spanish>Select a vehicle first.</Spanish>
@@ -8155,6 +8175,10 @@
             <Key ID="STR_DUWS_T_sdesc_paradrop">
                 <Original>An infantry squad drops around you and joins your squad.</Original>
                 <English>An infantry squad drops around you and joins your squad.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_rally">
+                <Original>Plants a flag the team can respawn at 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</Original>
+                <English>Plants a flag the team can respawn at 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>

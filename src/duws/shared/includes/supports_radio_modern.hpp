@@ -111,6 +111,16 @@ class CfgCommunicationMenu
         enable = "1"; // Simple expression condition for enabling the item
         removeAfterExpressionCall = 1; // one-time use: removed on use, consumed by fnc_support_comm_used
     };
+    class rally_point
+    {
+        text = "$STR_DUWS_T_RALLY_POINT";
+        submenu = "";
+        expression = "['rally_point', true] call fnc_support_comm_used; [player] remoteExec ['fnc_rally_place', 2]"; // deferred: the server consumes it, or hands it back while placement is locked
+        icon = "\A3\ui_f\data\map\markers\military\flag_CA.paa";
+        cursor = "";
+        enable = "1";
+        removeAfterExpressionCall = 1;
+    };
     class paradrop
     {
         text = "$STR_DUWS_T_nafdmcoy"; // Text displayed in the menu and in a notification

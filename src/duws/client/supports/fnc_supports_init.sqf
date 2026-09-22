@@ -42,6 +42,7 @@ fnc_support_catalogue = {
 
 		// Slot only -- the team already paid for Mobile HQ at the permanent row, so this costs 0 CP.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
+		["rally",     "CONS",  0, "support_rally_available",       "STR_DUWS_T_RALLY_POINT",          "rally_point",false],
 		["supply",    "CONS",  2, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
 		["veh_drop",  "CONS",  2, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
 		["uav",       "CONS",  3, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
@@ -80,6 +81,7 @@ fnc_support_defs = {
 		if (_key in ["supply", "veh_drop", "helotaxi", "helolift", "boattaxi"] && {!(["support_logistics_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
+		if (_key == "rally" && {!((vehicleVarName player) in Squad_Leaders)}) then { _keep = false };
 		// Radio tiers unlock in order: each hidden until the one below it is owned, so the player cannot
 		// skip to III and the drift amplifier only ever climbs one step at a time.
 		if (_key == "radio2" && {!(["support_radio1_available"] call fnc_support_owned)}) then { _keep = false };

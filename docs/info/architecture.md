@@ -116,7 +116,7 @@ does not imply server-only.
 | `placement/` | Shared primitives that put objects and units in the world, called by zones, hardpoints, HQ and missions alike: team/vehicle spawners and standing-orders posture, composition placement and its era sets, at-rest prop/loot seating, and building interior furnishing |
 | `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. The Main Base layout, the tool that edits it and the spawn tables are in [`composition_tooling.md`](architecture/composition_tooling.md) (HQ specifics: [§Editing the HQ layout](architecture/composition_tooling.md#editing-the-hq-layout)) |
 | `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type. How to add a type, and the design bar it must clear, in [`side_mission_authoring.md`](gameplay/side_mission_authoring.md) |
-| `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
+| `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, rally point, transport |
 | `warcom/` | War Command — the OPFOR commander (OPCOM, `warcom/opcom/`), spawned after generation; no BLUFOR director and no live assault/patrol waves |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
 | `misc/` | Autosave, civilian/informant system, intel-on-death, AI master control |

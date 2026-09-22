@@ -257,6 +257,7 @@ publicVariable "fnc_pylon_hint_success";
 publicVariable "fnc_garage_store";
 publicVariable "fnc_garage_retrieve";
 publicVariable "fnc_depot_place_finish";
+[] call compile preprocessFileLineNumbers "duws\server\supports\fnc_rally_init.sqf";
 
 // =========================================================================================================
 // STATIC DECLARATIONS -- compiled and named only, nothing runs; order is free

@@ -343,6 +343,18 @@ class CfgNotifications
     // naming the facility only repeats the row the player just clicked. The class name is derived from
     // the catalogue key (server/supports/fnc_support_perm_grant.sqf), so a new permanent row needs a
     // class here under the matching name or its card draws the engine's empty default.
+    class rally_placed
+    {
+        title = "$STR_DUWS_T_RALLY_PLACED_TITLE";
+        iconPicture = "\A3\ui_f\data\map\markers\military\flag_CA.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_RALLY_PLACED_MSG";
+        color[] = {0.2,0.5,1,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class SupportUnlock
     {
         title = "$STR_DUWS_T_SUPPORT_UNLOCK_TITLE";
