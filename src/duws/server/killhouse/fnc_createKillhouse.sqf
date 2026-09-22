@@ -48,11 +48,6 @@ missionNamespace setVariable ["killhouse_bells", _bellObjects];
 ["INFO", "SUPPORT", format ["spawned %1 props, %2 targets pending, %3 computers", count _objectsData, count _targetsData, count _computerObjects]] call fnc_log;
 private _flagBlueking = objNull;
 private _flagRedstone = objNull;
-{
-    if (_x isKindOf "SignAd_Sponsor_Blueking_F") then { _flagBlueking = _x; };
-    if (_x isKindOf "SignAd_Sponsor_Redstone_F") then { _flagRedstone = _x; };
-} forEach _computerObjects;  // Flags never end up in _computerObjects; scanned separately below by proximity.
-
 private _flags = nearestObjects [[_centerSpawnX, _centerSpawnY, _centerSpawnZ], ["SignAd_Sponsor_Blueking_F","SignAd_Sponsor_Redstone_F"], 500];
 {
     if (_x isKindOf "SignAd_Sponsor_Blueking_F") then { _flagBlueking = _x; };
@@ -84,26 +79,21 @@ killhouse_srv_target_hit = {
     private _targets = missionNamespace getVariable ["killhouse_targets", []];
     if !(_target in _targets) exitWith {};
     missionNamespace setVariable ["killhouse_targets", _targets - [_target], true];
-    // Off the list at once but off the map a beat later: the list drives wave pacing and must react
+    // Off the list at once but off the map a beat later: the list drives the run's count and must react
     // immediately, while deleting under the player's crosshair would read as the round missing.
     _target spawn { sleep killhouse_corpse_linger; deleteVehicle _this; };
 };
 publicVariable "killhouse_srv_target_hit";
 
 // Globals rather than file-scope privates: the killhouse_srv_* bodies run later from remoteExec, where a private declared here is long out of scope.
-killhouse_run_total              = 30;
-killhouse_wave_size              = 10;
-killhouse_wave_threshold         = 3;   // next wave once this many or fewer are alive
-killhouse_wave_timeout           = 30;  // ...or this long after the last wave, but only while
-killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run cannot stack
-                                        // wave on wave onto a course nobody is clearing
+killhouse_total_training         = 10;
+killhouse_total_challenge        = 20;
 killhouse_reward_training        = 1;
 killhouse_reward_challenge       = 3;
 killhouse_progress_delay         = 10;  // before the first progress hint, so the opening briefing is readable before the counter overwrites it
-killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve finer than the wave loop's own tick below
+killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve finer than the run loop's own tick below
 killhouse_corpse_linger          = 2;
-killhouse_min_spawn_dist         = 15;
-killhouse_max_spawn_dist         = 25;
+killhouse_min_spawn_dist         = 15;  // from any player in the course: a contact that appears in their face reads as a glitch
 killhouse_area_radius            = 80;  // 3D from the composition centre: the one definition of
                                         // "inside the killhouse" -- who hears hints, which enemies are still in play. The structure
                                         // reaches ~55 m from centre and floats at 1000 m, so it cannot catch anyone standing underneath.
@@ -131,7 +121,7 @@ killhouse_srv_hint = {
     [_msg] remoteExec ["hint", _who];
 };
 
-// Rung to open a run and again when one ends, whether finished or failed. Both bells ring rather
+// Rung to open a run and again when it is cleared. Both bells ring rather
 // than the nearer one: they are ~60 m apart at opposite entrances, so 3D falloff already decides
 // who hears what -- picking a bell would mean picking a player to pick it from. say3D carries to every client by itself, so this needs no remoteExec.
 killhouse_srv_bell = {
@@ -139,8 +129,7 @@ killhouse_srv_bell = {
     { _x say3D "killhouse_bell"; } forEach (missionNamespace getVariable ["killhouse_bells", []]);
 };
 
-// Three call sites need exactly this, and a half-cleared killhouse leaks objects at 1000 m
-// where nobody will ever see them to notice.
+// A half-cleared killhouse leaks objects at 1000 m where nobody will ever see them to notice.
 killhouse_srv_clear_all = {
     if (!isServer) exitWith {};
     { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_targets", []]);
@@ -149,7 +138,7 @@ killhouse_srv_clear_all = {
     missionNamespace setVariable ["killhouse_enemies", [], true];
 };
 
-// Clearing the flag is the whole cancel mechanism -- the wave loop polls it and returns within a
+// Clearing the flag is the whole cancel mechanism -- the run loop polls it and returns within a
 // tick. Holding the script handle to terminate would be the obvious alternative, but SCRIPT has no serialized form and the mission namespace is written into save games.
 killhouse_srv_end_run = {
     if (!isServer) exitWith {};
@@ -161,75 +150,7 @@ killhouse_srv_end_run = {
     };
 };
 
-// One death inside the course ends a challenge run with nothing paid: the drill is meant to cost the
-// player for a bad move, and respawning back in to finish would remove that. Training is untouched.
-//
-// The client reports every death and the server decides: killhouse_area_radius is the mission's one
-// definition of "inside the killhouse", while the client's own death handler measures a much wider radius for a different purpose (waiving the CP death penalty) -- two radii answering one question is how they drift apart.
-killhouse_srv_player_died = {
-    if (!isServer) exitWith {};
-    params ["_unit", "_deathPos"];
-    if !(missionNamespace getVariable ["killhouse_run_active", false]) exitWith {};
-    if !((missionNamespace getVariable ["killhouse_run_mode", ""]) isEqualTo "CHALLENGE") exitWith {};
-    private _centre = [
-        missionNamespace getVariable ["killhouse_centerX", 0],
-        missionNamespace getVariable ["killhouse_centerY", 0],
-        missionNamespace getVariable ["killhouse_centerZ", 0]
-    ];
-    if (_deathPos distance _centre > killhouse_area_radius) exitWith {};
-
-    [false] call killhouse_srv_end_run;   // silent: the failure below replaces the cancel message
-    call killhouse_srv_clear_all;
-    call killhouse_srv_bell;
-    // Occupants plus the unit that just died, so the message does not depend on whether a dead
-    // player is still returned by allPlayers -- on a solo run that is the only recipient there is.
-    [localize "STR_DUWS_KILLHOUSE_FAILED"] remoteExec ["hint", ((call killhouse_srv_occupants) - [_unit]) + [_unit]];
-};
-publicVariable "killhouse_srv_player_died";
-
-// A row is wanted between killhouse_min_spawn_dist and max of the nearest player: closer reads as a
-// glitch, further turns the drill into a hunt. The pool is consumed rather than cursor-walked because
-// most rows fail the band at any moment -- a cursor would skip nearly the whole composition on wave one.
-//
-// The minimum is hard, the maximum a preference: once the band is picked clean, the wave falls back to
-// the nearest rows outside it (honouring the maximum could hang the run forever). An empty return means the pool is exhausted -- the caller's signal to finish on what is already down.
-killhouse_srv_pick_slots = {
-    if (!isServer) exitWith {[]};
-    params ["_pool", "_want"];
-    private _centerX = missionNamespace getVariable "killhouse_centerX";
-    private _centerY = missionNamespace getVariable "killhouse_centerY";
-    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
-    // Resolved once: the test runs per row, the occupant list does not change within a wave.
-    private _occupied = (call killhouse_srv_occupants) apply { getPosWorld _x };
-
-    // [rank, index] per usable row: 0 for one inside the band and its distance for one outside,
-    // so sorting puts the whole band first and then the nearest of the rest.
-    private _ranked = [];
-    {
-        _x params ["_class", "_dX", "_dY", "_dZ"];
-        private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
-        // Nobody in the course leaves the band without a reference point, so every row counts as inside it -- a run whose players have all left must still place its rows and finish.
-        if (_occupied isEqualTo []) then {
-            _ranked pushBack [0, _forEachIndex];
-        } else {
-            private _near = selectMin (_occupied apply { _x distance _pos });
-            if (_near >= killhouse_min_spawn_dist) then {
-                private _rank = [_near, 0] select (_near <= killhouse_max_spawn_dist);
-                _ranked pushBack [_rank, _forEachIndex];
-            };
-        };
-    } forEach _pool;
-    _ranked sort true;
-
-    private _take = (_ranked select [0, _want]) apply { _x select 1 };
-    private _rows = _take apply { _pool select _x };
-    // Highest index first, so each removal leaves the ones still to go where they are.
-    _take sort false;
-    { _pool deleteAt _x } forEach _take;
-    _rows
-};
-
-killhouse_srv_spawn_wave = {
+killhouse_srv_spawn_contacts = {
     if (!isServer) exitWith {};
     params ["_mode", "_slots"];
     private _centerX = missionNamespace getVariable "killhouse_centerX";
@@ -280,7 +201,7 @@ killhouse_srv_spawn_wave = {
             // Read by the kill-income handler in server_init.sqf; a run already pays its own reward, so its bodies must not also feed the tally.
             _unit setVariable ["killhouse_enemy", true];
             // Drop from the list before deleting, not after: a deleted unit no longer matches for removal, and
-            // the wave loop counts this array to decide when the next wave is due. The body lingers so a kill is something the player sees rather than a unit blinking out of existence.
+            // the run loop counts this array to decide when the course is clear. The body lingers so a kill is something the player sees rather than a unit blinking out of existence.
             _unit addEventHandler ["Killed", {
                 params ["_unit"];
                 if (!isServer) exitWith {};
@@ -304,30 +225,34 @@ killhouse_srv_start_run = {
     [false] call killhouse_srv_end_run;   // silent: a new run supersedes, it does not cancel
     call killhouse_srv_clear_all;
 
-    // One shuffled row per spawn, consumed from the pool as used, so nothing spawns on top of
-    // anything already placed -- and why the total is capped at the row count instead of wrapping.
-    // The guarantee holds only at the moment of spawning; enemies path away and may bunch up after.
+    private _centerX = missionNamespace getVariable "killhouse_centerX";
+    private _centerY = missionNamespace getVariable "killhouse_centerY";
+    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
+    private _occupied = (call killhouse_srv_occupants) apply { getPosWorld _x };
+    // One row per contact, so nothing spawns on top of another -- and why the total is capped at the row count instead of wrapping.
     // Shuffled from a copy because BIS_fnc_arrayShuffle works in place, which would eat the master row list a run at a time.
-    private _slots = (+_allSlots) call BIS_fnc_arrayShuffle;
-    private _total = killhouse_run_total min (count _slots);
-    // Without this an empty composition would read as "all spawned, none alive" on the first pass and pay the reward for a run that never happened.
+    private _slots = ((+_allSlots) call BIS_fnc_arrayShuffle) select {
+        _x params ["_class", "_dX", "_dY", "_dZ"];
+        private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
+        (_occupied findIf { _x distance _pos < killhouse_min_spawn_dist }) == -1
+    };
+    _slots = _slots select [0, [killhouse_total_challenge, killhouse_total_training] select (_mode == "TRAINING")];
+    private _total = count _slots;
+    // Without this a run with no usable row would read as "none alive" on the first pass and pay the reward for a run that never happened.
     if (_total < 1) exitWith {};
 
     // Supersede token: clearing the active flag alone does not stop the outgoing thread, which can
-    // wake from its sleep after this function sets the flag back true and keep spawning alongside the
-    // new run. Each run captures its own id and stops once it is no longer current; a number so it still serializes into a save.
+    // wake from its sleep after this function sets the flag back true, count the new run as its own
+    // and pay it twice. Each run captures its own id and stops once it is no longer current; a number so it still serializes into a save.
     private _runId = (missionNamespace getVariable ["killhouse_run_id", 0]) + 1;
     missionNamespace setVariable ["killhouse_run_id", _runId];
     missionNamespace setVariable ["killhouse_run_active", true];
-    // Read by killhouse_srv_player_died: only a challenge run is failed by a death.
-    missionNamespace setVariable ["killhouse_run_mode", _mode];
     call killhouse_srv_bell;
+    [_mode, _slots] call killhouse_srv_spawn_contacts;
 
-    [_mode, _slots, _total, _runId] spawn {
-        params ["_mode", "_slots", "_total", "_runId"];
+    [_mode, _total, _runId] spawn {
+        params ["_mode", "_total", "_runId"];
         private _listVar = ["killhouse_enemies", "killhouse_targets"] select (_mode == "TRAINING");
-        private _spawned = 0;
-        private _lastWave = time;
         private _nextProgress = time + killhouse_progress_delay;
         private _complete = false;
         private _centre = [
@@ -348,30 +273,10 @@ killhouse_srv_start_run = {
                 };
             } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
 
-            private _alive = count (missionNamespace getVariable [_listVar, []]);
-            if (_spawned >= _total) then {
-                _complete = (_alive == 0);
-            } else {
-                private _due = (_alive <= killhouse_wave_threshold)
-                    || { _alive <= killhouse_wave_timeout_threshold
-                         && { time - _lastWave >= killhouse_wave_timeout } };
-                if (_due) then {
-                    private _want = killhouse_wave_size min (_total - _spawned);
-                    private _wave = [_slots, _want] call killhouse_srv_pick_slots;
-                    if !(_wave isEqualTo []) then {
-                        [_mode, _wave] call killhouse_srv_spawn_wave;
-                        _spawned = _spawned + (count _wave);
-                        _lastWave = time;
-                    };
-                    // Pool emptied without meeting the count: every row the composition has is already down or
-                    // was down earlier this run. Settle at what actually went out, so the loop finishes instead of waiting on a wave that will never come.
-                    if (_slots isEqualTo []) then { _total = _spawned; };
-                };
-            };
-            // Re-read rather than reuse _alive: a wave may have gone up this pass, and the count the player is told should include it.
+            private _up = count (missionNamespace getVariable [_listVar, []]);
+            _complete = (_up == 0);
             if (!_complete && { time >= _nextProgress }) then {
-                private _up = count (missionNamespace getVariable [_listVar, []]);
-                [format [localize "STR_DUWS_KILLHOUSE_PROGRESS", _total - (_spawned - _up), _total, _up]] call killhouse_srv_hint;
+                [format [localize "STR_DUWS_KILLHOUSE_PROGRESS", _up, _total]] call killhouse_srv_hint;
                 _nextProgress = time + killhouse_progress_period;
             };
 

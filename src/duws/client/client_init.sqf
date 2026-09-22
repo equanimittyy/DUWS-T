@@ -167,9 +167,6 @@ player addEventHandler ["killed", {
         // reason the CP penalty is waived there: a training death is not a battlefield one.
         [] call fnc_support_wipe;
     };
-    // Reported unfiltered: a challenge run fails on a death inside the course, and the server
-    // owns that test against its own area radius rather than the wider one used just above.
-    [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
 }];
 
 // An event, not a server poll of every player's seat: the cost stays per entry as the player count grows.
