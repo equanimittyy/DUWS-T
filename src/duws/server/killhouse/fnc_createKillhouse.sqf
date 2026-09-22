@@ -63,11 +63,13 @@ if (!isNull _flagBlueking) then {
     private _tpA = _flagBlueking modelToWorld [0.484848, -3.43652, 0];
     _tpA set [2, (getPosWorld _flagBlueking select 2) + (-1.04517)];
     missionNamespace setVariable ["killhouse_tpA", _tpA, true];
+    [west, _tpA, localize "STR_DUWS_KILLHOUSE_TELEPORT_A"] call BIS_fnc_addRespawnPosition;
 };
 if (!isNull _flagRedstone) then {
     private _tpB = _flagRedstone modelToWorld [0.478247, -4.01343, 0];
     _tpB set [2, (getPosWorld _flagRedstone select 2) + (-1.05688)];
     missionNamespace setVariable ["killhouse_tpB", _tpB, true];
+    [west, _tpB, localize "STR_DUWS_KILLHOUSE_TELEPORT_B"] call BIS_fnc_addRespawnPosition;
 };
 ["INFO", "SUPPORT", format ["Teleport A: %1, Teleport B: %2", missionNamespace getVariable "killhouse_tpA", missionNamespace getVariable "killhouse_tpB"]] call fnc_log;
 missionNamespace setVariable ["killhouse_targets", []];

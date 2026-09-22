@@ -18,8 +18,8 @@ Base-side healing (the rearm/rest actions) is separate from the revive framework
 Revive template — there is no `respawnTemplates[]`, `ReviveMode`, or `ReviveRequiredItems`. Revive is
 scripted (AIS) or off, never the engine's own revive. BASE respawn returns the player to the
 `respawn_west` marker, which the HQ repositions
-([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ and FOBs add
-further respawn points via `BIS_fnc_addRespawnPosition`.
+([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ, FOBs, the rally
+point and the two killhouse entrances add further respawn points via `BIS_fnc_addRespawnPosition`.
 
 A respawned player starts naked: [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets an empty
 loadout, because the engine otherwise dresses the new unit in its class kit. The dead body keeps the old
