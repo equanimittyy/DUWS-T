@@ -254,7 +254,8 @@ DUWS_fnc_opcom_recruitSupplyTargets = {
     if (_hires isEqualTo []) exitWith { [] };
     (selectRandom _hires) params ["_src", "", "_price"];
     private _zk = _src select 1;
-    [[_zk, _price, format ["Recruit a truck at %1", [_zk] call DUWS_fnc_opcom_zoneLabel]]]
+    // Worth 0 until land-taxi gives a truck transport demand (4B.3): every supply action hires its own when none idles.
+    [[_zk, _price, format ["Recruit a truck at %1", [_zk] call DUWS_fnc_opcom_zoneLabel], 0]]
 };
 
 DUWS_opcom_assetPrice = createHashMapFromArray [
