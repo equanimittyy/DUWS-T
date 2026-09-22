@@ -263,15 +263,14 @@ the opening runs client-side (the drops, arty), `name _caller` where it runs on 
 | `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
 
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
-Black Market, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick Kits and the debug
-menu each occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu
-entries.
+Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick Kits and the debug menu each
+occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu entries.
 
 The request menu's COMMAND AND CONTROL column is the same idea one level up: everything a player has
 to ask command for is a button in the dialog Requests already opens, so the HQ structure carries one
 scroll entry instead of the twelve it once did. The dividing line is **who needs it and how fast** —
-an arsenal, a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay
-on the scroll wheel and on the prop they belong to, because a player reaches for those without asking
+an arsenal, a HALO jump, quick kits, an AI rearm and the killhouse teleports stay on the scroll
+wheel and on the prop they belong to, because a player reaches for those without asking
 anyone. Squad and FOB management, operative recruitment, intel analysis, the garbage cleanup (Game
 Master only) and the redeploy are buttons, built by `fnc_command_fill` in that order: what costs
 nothing above what does, and the analysis directly under the operatives whose take it converts.
@@ -363,7 +362,6 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 
 | Menu | Row colours |
 | --- | --- |
-| Black Market | `[0,1,0,1]` on all three purchases |
 | Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[1,0.533,0,1]` exit |
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |

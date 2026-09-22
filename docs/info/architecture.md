@@ -119,7 +119,7 @@ does not imply server-only.
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
 | `warcom/` | War Command — the OPFOR commander (OPCOM, `warcom/opcom/`), spawned after generation; no BLUFOR director and no live assault/patrol waves |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
-| `misc/` | Autosave, black market, civilian/informant system, intel-on-death, AI master control |
+| `misc/` | Autosave, civilian/informant system, intel-on-death, AI master control |
 | `sounds/` | Ambient music loop |
 | `operative/` | Operative recruit/deploy menu |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |

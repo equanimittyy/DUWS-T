@@ -12,6 +12,7 @@ dependency runs one way.
 Both are server-only and run near campaign start; civilians are registered once zone build-out has
 finished. For the boot order see [`architecture.md`](../architecture.md#boot-flow); siting defects are
 catalogued in [`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
+The shopkeepers that stand in the civilian towns are in [`civilian_shops.md`](civilian_shops.md).
 
 ## Enemy zone siting ("More Urban")
 

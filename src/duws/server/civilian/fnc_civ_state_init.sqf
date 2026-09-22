@@ -192,7 +192,7 @@ fnc_civ_reaction_weights = {
 };
 
 // One table rather than a switch per consumer, so the request roll, serve and bribe answers can't drift
-// apart on price; prices anchor on the black market the player already reads (placeholders, not measured). An unrecognised row returns negative, a fail-closed reject since rows only ever come off the wire.
+// apart on price; prices are placeholders, not measured. An unrecognised row returns negative, a fail-closed reject since rows only ever come off the wire.
 fnc_civ_rowPrice = {
 	params [["_row", ""]];
 	switch (toUpper _row) do {

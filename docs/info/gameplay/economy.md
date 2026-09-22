@@ -274,6 +274,7 @@ The Debug menu's Economy dialog has a *Fire economy tick* button that runs one e
 | Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
 | Death | `client/client_init.sqf:156,171` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
+| Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR and Everything lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in
