@@ -473,7 +473,7 @@ private _cons = roadsConnectedTo _road;
 private _dir = if (_cons isEqualTo []) then { getDir _road } else { _road getDir (_cons select 0) };
 ```
 
-Placing on a road is also where cars detonate on spawn — `createVehicle [..., "NONE"]` drops exactly where told, so a point holding a wall, rock or parked car spawns it clipping and blows it up. Reject the point up front with `nearestTerrainObjects [_p, ["WALL","FENCE","ROCK","TREE"], 4]` and `nearestObjects [_p, ["Car"], r]`.
+Placing on a road is also where cars detonate on spawn — `createVehicle [..., "NONE"]` drops exactly where told, so a point holding a wall, rock or parked car spawns it clipping and blows it up. A vehicle check sized to one car is too tight: with a 4 m radius, a second car spawned nose into the first, and the first car, which was vulnerable again, detonated. Reject the point up front with `nearestTerrainObjects [_p, ["WALL","FENCE","ROCK","TREE"], 4]`, with `nearestObjects [_p, ["LandVehicle","Air","Ship"], 20]`, and with rays through the class's bounding-box footprint (`fnc_class_half_extents`) for any other solid object (`fnc_civ_traffic`).
 
 ## A `remoteExec`'d `BIS_fnc_taskCreate` floods `objectFromNetId` every frame the map is open
 

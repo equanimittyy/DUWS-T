@@ -31,23 +31,6 @@ fnc_furnish_room = {
 
     private _objs = [];
 
-    // boundingBoxReal is model-space, so a probe's box equals the placed piece's: measure once per class
-    // (cached mission-wide) to know a footprint before spawning, instead of spawning then rejecting on overlap.
-    private _dimsOf = {
-        params ["_class"];
-        private _cache = missionNamespace getVariable ["DUWS_furnishDims", createHashMap];
-        private _d = _cache getOrDefault [_class, []];
-        if (_d isNotEqualTo []) exitWith { _d };
-        private _p = createVehicleLocal [_class, [0, 0, 0], [], 0, "CAN_COLLIDE"];
-        private _bb = boundingBoxReal _p;
-        deleteVehicle _p;
-        _d = [(abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0)),
-              (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1))];
-        _cache set [_class, _d];
-        missionNamespace setVariable ["DUWS_furnishDims", _cache];
-        _d
-    };
-
     // Mark every grid cell within _r of a point occupied. One-shot server pass, so a linear scan is fine.
     private _reserve = {
         params ["_p", "_r"];
@@ -291,7 +274,7 @@ fnc_furnish_room = {
         params ["_cell", "_class"];
         (_catalog get _class) params ["", "_fy"];
         _cell params ["_cpos", "", "_nearB", "_clear"];
-        ([_class] call _dimsOf) params ["_hx", "_hy"];
+        ([_class] call fnc_class_half_extents) params ["_hx", "_hy"];
         if (_nearB >= 0) then { _nearB = _bdir + 90 * round ((_nearB - _bdir) / 90) };
         private _heading = if (_nearB >= 0) then { (_nearB + 180) - _fy } else { - _fy };
         private _center = _cpos;
@@ -377,7 +360,7 @@ fnc_furnish_room = {
         while { !_got && _tries < PLACE_RETRY } do {
             private _cls = [_centerAnchors] call _pickCapped;
             if (_cls == "") exitWith {};
-            ([_cls] call _dimsOf) params ["_ahx", "_ahy"];
+            ([_cls] call fnc_class_half_extents) params ["_ahx", "_ahy"];
             private _riX = ceil ((_ahx + SEAT_GAP) / _pitch);
             private _riY = ceil ((_ahy + SEAT_GAP) / _pitch);
             private _fit = _rcells select { (_x select 1) == "open" && {!(_x select 5)} && {[_x, _riX, _riY] call _ringsClear} };
@@ -430,7 +413,7 @@ fnc_furnish_room = {
         while { _placed < _n && _miss < PLACE_RETRY } do {
             private _cls = [_freeStand] call _pickCapped;
             if (_cls == "") exitWith {};
-            ([_cls] call _dimsOf) params ["_ahx", "_ahy"];
+            ([_cls] call fnc_class_half_extents) params ["_ahx", "_ahy"];
             private _riX = ceil ((_ahx + SEAT_GAP) / _pitch);
             private _riY = ceil ((_ahy + SEAT_GAP) / _pitch);
             private _fit = _rcells select { (_x select 1) == "open" && {!(_x select 5)} && {[_x, _riX, _riY] call _ringsClear} };

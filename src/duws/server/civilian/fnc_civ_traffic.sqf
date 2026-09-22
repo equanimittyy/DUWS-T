@@ -10,6 +10,8 @@
 if (!isServer) exitWith {};
 params ["_locIndex", "_centerPos", "_radius"];
 
+#define VEH_GAP 20
+
 private _pool = missionNamespace getVariable ["civ_veh_array", []];
 if (_pool isEqualTo []) exitWith {};
 
@@ -37,9 +39,42 @@ private _fnc_settledClean = {
     && { abs ((getPosATL _veh) select 2) < 2 }
 };
 
-// Parked cars: pulled 3 m off the carriageway centre so a lane stays passable, and skipped where
-// one already stands so a short road does not stack them nose to tail. "up to" the target -- a
-// town with few road segments parks fewer.
+// A car spawned into another vehicle detonates the one already placed (the new car is invulnerable
+// through its settle, the old one is not), so no vehicle, wreck included, may stand within VEH_GAP.
+// Rays through the class's footprint box catch anything else solid before the car exists; the lowest
+// runs under a car's body, so a half-wall a hand high still rejects the spot.
+private _fnc_spotClear = {
+    params ["_class", "_pos", "_dir"];
+    if ((nearestObjects [_pos, ["LandVehicle", "Air", "Ship"], VEH_GAP]) isNotEqualTo []) exitWith { false };
+    ([_class] call fnc_class_half_extents) params ["_hx", "_hy"];
+    private _s = sin _dir; private _c = cos _dir;
+    private _at = {
+        params ["_lx", "_ly", "_h"];
+        AGLToASL [(_pos select 0) + _lx * _c + _ly * _s, (_pos select 1) - _lx * _s + _ly * _c, _h]
+    };
+    // Object hits only, so a low ray grazing a bumpy verge is not read as a wall.
+    private _blocked = {
+        params ["_a", "_b"];
+        ((lineIntersectsSurfaces [_a, _b, objNull, objNull, true, 4, "GEOM"]) findIf { !isNull (_x select 2) }) >= 0
+    };
+    private _rim = [[_hx, _hy], [_hx, 0], [_hx, -_hy], [0, -_hy], [-_hx, -_hy], [-_hx, 0], [-_hx, _hy], [0, _hy]];
+    private _clear = true;
+    {
+        private _h = _x;
+        private _mid = [0, 0, _h] call _at;
+        {
+            private _p = [_x select 0, _x select 1, _h] call _at;
+            private _n = _rim select ((_forEachIndex + 1) mod (count _rim));
+            private _q = [_n select 0, _n select 1, _h] call _at;
+            if ([_mid, _p] call _blocked || {[_p, _q] call _blocked}) exitWith { _clear = false };
+        } forEach _rim;
+        if (!_clear) exitWith {};
+    } forEach [0.2, 0.7, 1.2];
+    _clear
+};
+
+// Parked cars: pulled 3 m off the carriageway centre so a lane stays passable. "up to" the target --
+// a town with few road segments parks fewer.
 private _parked = 0;
 private _tries = 0;
 while { _parked < _nPark && _tries < _nPark * 3 } do {
@@ -47,12 +82,13 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     private _road = selectRandom _roads;
     private _dir = [_road] call fnc_civ_roadDir;
     private _pos = (getPosATL _road) getPos [3, _dir + 90];
-    if (count (nearestObjects [_pos, ["Car", "Truck"], 4]) > 0) then { continue };
+    private _class = selectRandom _pool;
     // The 3 m verge offset above sometimes lands the car on a roadside stone wall, which the settle
     // check below passes when the clip stays level -- then allowDamage true detonates it. Reject the
     // point outright rather than trust the settle to shove clear of a wall it is embedded in.
     if !((nearestTerrainObjects [_pos, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []) then { continue };
-    private _car = [selectRandom _pool, _pos, _dir] call fnc_civ_spawnCar;
+    if !([_class, _pos, _dir] call _fnc_spotClear) then { continue };
+    private _car = [_class, _pos, _dir] call fnc_civ_spawnCar;
     // Invulnerable through the settle so a clipped spawn is shoved clear instead of detonating, then
     // read back: a car that did not come to rest clean is dropped for a fresh road point. Damage is
     // restored only once it has placed -- a parked car the player cannot destroy is worse than none.
@@ -86,7 +122,9 @@ private _ownCentre = _centres param [_locIndex, _centerPos];
 for "_i" from 1 to _nDrive do {
     private _road = selectRandom _roads;
     private _dir = [_road] call fnc_civ_roadDir;
-    private _veh = [selectRandom _pool, getPosATL _road, _dir] call fnc_civ_spawnCar;
+    private _class = selectRandom _pool;
+    if !([_class, getPosATL _road, _dir] call _fnc_spotClear) then { continue };
+    private _veh = [_class, getPosATL _road, _dir] call fnc_civ_spawnCar;
 
     private _driver = [_locIndex, getPosATL _road, selectRandom _bodies, false] call fnc_civ_spawnUnit;
     if (isNull _driver) then { deleteVehicle _veh; continue };
