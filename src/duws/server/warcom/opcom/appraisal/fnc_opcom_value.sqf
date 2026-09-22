@@ -120,15 +120,56 @@ DUWS_fnc_opcom_opUnwatched = {
     _free / _land
 };
 
-// Posts still siting or on a truck count as watching, or consecutive ticks send two posts to the same ground.
+// Siting and on-truck assets count too, or two trucks fill a cap's last slot or carry two posts to one spot.
+DUWS_fnc_opcom_assetsOf = {
+    params ["_type"];
+    private _out = [];
+    { if ((_x select 2) isEqualTo _type && {(_x select 3) isEqualTo "opfor"}) then { _out pushBack (_x select 1) } } forEach DUWS_hardpoints;
+    { if ((_x select 1) isEqualTo _type) then { _out pushBack (_x select 3) } } forEach DUWS_opcom_buildsPending;
+    {
+        (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_to", []], ["_t", ""]];
+        if (_kind isEqualTo "build" && {_t isEqualTo _type}) then { _out pushBack _to };
+    } forEach DUWS_opcom_taskings;
+    _out
+};
+
 DUWS_fnc_opcom_opValue = {
     params ["_at"];
-    private _ops = [];
-    { if ((_x select 2) isEqualTo "OP" && {(_x select 3) isEqualTo "opfor"}) then { _ops pushBack (_x select 1) } } forEach DUWS_hardpoints;
-    { if ((_x select 1) isEqualTo "OP") then { _ops pushBack (_x select 3) } } forEach DUWS_opcom_buildsPending;
-    {
-        (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_to", []], ["_type", ""]];
-        if (_kind isEqualTo "build" && {_type isEqualTo "OP"}) then { _ops pushBack _to };
-    } forEach DUWS_opcom_taskings;
-    OPCOM_AP_OP * ([[_at] call DUWS_fnc_opcom_w2c, _ops apply { [_x] call DUWS_fnc_opcom_w2c }] call DUWS_fnc_opcom_opUnwatched)
+    OPCOM_AP_OP * ([[_at] call DUWS_fnc_opcom_w2c, (["OP"] call DUWS_fnc_opcom_assetsOf) apply { [_x] call DUWS_fnc_opcom_w2c }] call DUWS_fnc_opcom_opUnwatched)
+};
+
+// Not w2c: it clamps an off-box point onto an edge cell and would read that cell's land.
+DUWS_fnc_opcom_landAt = {
+    params ["_pos"];
+    private _cx = floor ((_pos select 0) / OPCOM_GRID_CELL);
+    private _cy = floor ((_pos select 1) / OPCOM_GRID_CELL);
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    _cx >= _minCx && {_cx <= _maxCx} && {_cy >= _minCy} && {_cy <= _maxCy} && {DUWS_opcom_grid_land select (_cy * DUWS_opcom_grid_w + _cx)}
+};
+
+// Sampled: every cell of a 20 km disc against the area of influence would overrun the pick's unscheduled pass.
+DUWS_fnc_opcom_gunShare = {
+    params ["_at", "_reach", "_others"];
+    private _step = _reach / 5;
+    private _n = 0;
+    private _free = 0;
+    for "_i" from -5 to 5 do {
+        for "_j" from -5 to 5 do {
+            if (_i * _i + _j * _j <= 25) then {
+                _n = _n + 1;
+                private _p = [(_at select 0) + _i * _step, (_at select 1) + _j * _step, 0];
+                if ([_p] call DUWS_fnc_opcom_landAt
+                    && {(_others findIf { (_x distance2D _p) <= _reach }) < 0}
+                    && {[_p] call fnc_aoi_opfor_covers}) then { _free = _free + 1 };
+            };
+        };
+    };
+    _free / _n
+};
+
+// Own type only: a pit answers contact in seconds, a battery shells across the map, so neither does the other's job.
+DUWS_fnc_opcom_gunValue = {
+    params ["_type", "_at"];
+    private _reach = [OPCOM_ARTY_REACH, OPCOM_MORTAR_REACH] select (_type isEqualTo "MORTAR");
+    (DUWS_opcom_assetPrice get _type) * ([_at, _reach, [_type] call DUWS_fnc_opcom_assetsOf] call DUWS_fnc_opcom_gunShare)
 };

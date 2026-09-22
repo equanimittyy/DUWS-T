@@ -77,5 +77,7 @@ duws/server/warcom/opcom/appraisal/fnc_opcom_actions.sqf::DUWS_fnc_opcom_truckFo
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_exposureAt
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_pWinAt
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_opUnwatched
+duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_landAt
+duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_gunShare
 duws/server/disguise/fnc_disguise_floor.sqf::*fnc_disguise_floor
 duws/server/disguise/fnc_disguise_suspicion_step.sqf::*fnc_disguise_suspicion_step

@@ -266,14 +266,6 @@ DUWS_opcom_assetCap = createHashMapFromArray [
     ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY]
 ];
 
-// Standing, siting and still on a truck, so two trucks cannot both deliver the last slot under a cap.
-DUWS_fnc_opcom_hpCount = {
-    params ["_type"];
-    ({ (_x select 2) isEqualTo _type && {(_x select 3) isEqualTo "opfor"} } count DUWS_hardpoints)
-    + ({ (_x select 1) isEqualTo _type } count DUWS_opcom_buildsPending)
-    + ({ ((_x getOrDefault ["errand", []]) param [0, ""]) isEqualTo "build" && {((_x get "errand") param [2, ""]) isEqualTo _type} } count DUWS_opcom_taskings)
-};
-
 // A random band point with its cheapest truck -> [point, [source, cost]], or [] when the draw or the truck fails.
 DUWS_fnc_opcom_bandDropDraw = {
     private _band = call DUWS_fnc_aoi_bandPos;
@@ -301,13 +293,17 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
 DUWS_fnc_opcom_assetTargets = {
     params ["_type"];
     if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier
-        || {([_type] call DUWS_fnc_opcom_hpCount) >= (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}) exitWith { [] };
+        || {count ([_type] call DUWS_fnc_opcom_assetsOf) >= (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}) exitWith { [] };
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
     private _cand = [[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
         format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]];
-    if (_type isEqualTo "OP") then { _cand pushBack ([_at] call DUWS_fnc_opcom_opValue) };
+    switch (_type) do {
+        case "OP": { _cand pushBack ([_at] call DUWS_fnc_opcom_opValue) };
+        case "MORTAR";
+        case "ARTY": { _cand pushBack ([_type, _at] call DUWS_fnc_opcom_gunValue) };
+    };
     [_cand]
 };
 

@@ -1609,6 +1609,30 @@ DUWS_opcom_grid_land = [];
 for "_i" from 0 to 99 do { DUWS_opcom_grid_land pushBack false };
 ["opUnwatched: an all-sea block is worth nothing", [55, []] call DUWS_fnc_opcom_opUnwatched, 0] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_gunShare: the share of a gun's reach that is OPFOR ground no gun of its type reaches ---
+// 20 km map, OPFOR's area of influence its western half: 35 of the 81 samples lie west of the centre column.
+DUWS_opcom_grid_w = 40;
+DUWS_opcom_box = [0, 0, 39, 39];
+fnc_test_westLand = {
+    params ["_westOnly"];
+    private _l = [];
+    for "_i" from 0 to 1599 do { _l pushBack (!_westOnly || {(_i mod 40) < 20}) };
+    _l
+};
+DUWS_opcom_grid_land = [false] call fnc_test_westLand;
+fnc_aoi_opfor_covers = { params ["_p"]; (_p select 0) < 10000 };
+["landAt: a point off the play box reads sea", [[-100, 5000, 0]] call DUWS_fnc_opcom_landAt, false] call fnc_assertEq;
+["gunShare: a gun deep in OPFOR ground covers its whole reach", [[5000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 1] call fnc_assertClose;
+["gunShare: a gun on the front covers only the OPFOR side", [[10000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 35/81] call fnc_assertClose;
+["gunShare: a gun on another of its type covers nothing new", [[5000, 10000, 0], 2000, [[5000, 10000, 0]]] call DUWS_fnc_opcom_gunShare, 0] call fnc_assertClose;
+["gunShare: a gun past another's reach overlaps nothing", [[5000, 10000, 0], 2000, [[5000, 15000, 0]]] call DUWS_fnc_opcom_gunShare, 1] call fnc_assertClose;
+fnc_aoi_opfor_covers = { true };
+DUWS_opcom_box = [0, 0, 19, 39];
+["gunShare: the reach past the play box counts against the site", [[9000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 64/81] call fnc_assertClose;
+DUWS_opcom_box = [0, 0, 39, 39];
+DUWS_opcom_grid_land = [true] call fnc_test_westLand;
+["gunShare: sea in reach counts against the site", [[10000, 10000, 0], 2000, []] call DUWS_fnc_opcom_gunShare, 35/81] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

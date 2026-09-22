@@ -719,6 +719,9 @@ OPCOM_AP_MINEFIELD = 15;
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
+// Fixed per type: a gun's true range is the faction gun's, known only at fire time.
+OPCOM_MORTAR_REACH = 5000;
+OPCOM_ARTY_REACH = 20000;
 
 // OPCOM appraisal (Phase 4C). Every figure below is a stand-in to be tuned in play, not a balance decision.
 
