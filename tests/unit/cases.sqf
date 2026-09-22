@@ -1723,6 +1723,11 @@ DUWS_fnc_opcom_cellDist = { 1 };
 ["abandonAt: the only force there takes the whole worth", [40, 10, 30, 12] call DUWS_fnc_opcom_abandonAt, 40] call fnc_assertClose;
 ["abandonAt: no OPFOR force at home abandons nothing", [40, 0, 30, 10] call DUWS_fnc_opcom_abandonAt, 0] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_interceptShare: how much of the local defense a sighted group can overwhelm ---
+["interceptShare: a group as strong as the defense takes it all", [10, 10 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
+["interceptShare: a group a quarter as strong takes a quarter", [5, 20 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 0.25] call fnc_assertClose;
+["interceptShare: past the defense it stops at the whole", [50, 0] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

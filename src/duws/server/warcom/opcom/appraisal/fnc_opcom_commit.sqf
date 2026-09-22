@@ -48,3 +48,32 @@ DUWS_fnc_opcom_attackRun = {
     private _t = [_id] call DUWS_fnc_opcom_byId;
     !isNil "_t" && {[_t, "capture", ([_zk] call fnc_site_at) get "pos"] call fnc_opcom_task}
 };
+
+// One interceptor per sighting, for the reason one attacker goes at a zone.
+DUWS_fnc_opcom_interceptTargets = {
+    private _units = [true] call DUWS_fnc_opcom_freeCombatants;
+    if (_units isEqualTo []) exitWith { [] };
+    private _busy = (DUWS_opcom_taskings select { (_x get "order") isEqualTo "intercept" }) apply { _x getOrDefault ["interceptKey", ""] };
+    private _out = [];
+    {
+        private _key = _x;
+        private _bp = DUWS_opcom_belief_pos select _forEachIndex;
+        if ([_key] call DUWS_fnc_opcom_beliefIsSighting && {!(_key in _busy)} && {[_bp] call fnc_aoi_opfor_covers}) then {
+            private _v = [_bp, DUWS_opcom_belief_str select _forEachIndex] call DUWS_fnc_opcom_interceptValue;
+            private _best = [_bp, _v, _units] call DUWS_fnc_opcom_bestSend;
+            if (_best isNotEqualTo []) then {
+                _best params ["_t", "_bv", "_pw", "_c"];
+                _out pushBack [[_key, _t get "id"], 0,
+                    format ["Intercept at %1 with %2 %3", mapGridPosition _bp, _t get "menu", _t get "id"], _bv, _pw, _c];
+            };
+        };
+    } forEach DUWS_opcom_belief_key;
+    _out
+};
+
+DUWS_fnc_opcom_interceptRun = {
+    params ["_target"];
+    _target params ["_key", "_id"];
+    private _t = [_id] call DUWS_fnc_opcom_byId;
+    !isNil "_t" && {[_t, "intercept", _key] call fnc_opcom_task}
+};

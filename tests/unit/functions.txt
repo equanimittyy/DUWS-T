@@ -92,3 +92,4 @@ duws/server/disguise/fnc_disguise_suspicion_step.sqf::*fnc_disguise_suspicion_st
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_blockGain
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinSend
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_abandonAt
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare

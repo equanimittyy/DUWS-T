@@ -275,7 +275,8 @@ DUWS_opcom_actions = [
         private _t = ["truck", ([_zk] call fnc_site_at) get "pos", _zk, false] call fnc_opcom_recruit;
         !isNil "_t"
     }],
-    ["attack", "offensive", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun]
+    ["attack", "offensive", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun],
+    ["intercept", "defensive", DUWS_fnc_opcom_interceptTargets, DUWS_fnc_opcom_interceptRun]
 ];
 
 // One row per type, never one row offering several: the pick draws an action, so a shared row would decide the type
