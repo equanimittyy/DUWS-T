@@ -71,6 +71,7 @@ switch (_page) do {
             ["Mode: weighted",      { ["aimode", "weighted", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
             ["Pick once: random",   { ["pickonce", "random", "", "", player] remoteExec ["fnc_debug_opcom", 2] },   [], DBG_ACTION],
             ["Pick once: weighted", { ["pickonce", "weighted", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
+            ["Difficulty: next picks-per-tick step", { ["difficulty", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
             ["Orders >",            fnc_debug_opcom_menu, [], DBG_PAGE],
             ["Force emission (click map)", {
                 ["Click a zone or OPFOR hardpoint to read its force emission.",

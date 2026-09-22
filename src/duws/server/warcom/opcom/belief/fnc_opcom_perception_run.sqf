@@ -57,7 +57,16 @@ while {true} do {
         "taskstep" call _enter;  call fnc_opcom_task_step;
         "fields" call _enter;    call DUWS_fnc_opcom_fieldsRefresh;
         // Pick after the step, so it sees this tick's arrivals and deaths.
-        "pick" call _enter;      call fnc_opcom_pick;
+        "pick" call _enter;
+        DUWS_opcom_pickDebt = DUWS_opcom_pickDebt + DUWS_opcom_picksPerTick;
+        private _picks = floor DUWS_opcom_pickDebt;
+        DUWS_opcom_pickDebt = DUWS_opcom_pickDebt - _picks;
+        if (_picks == 0 && {DUWS_opcom_pickOnce isNotEqualTo ""}) then { _picks = 1 };
+        for "_k" from 1 to _picks do {
+            // A second pick must see the truck, wallet and sites the first one spent.
+            DUWS_opcom_tickCache = createHashMap;
+            call fnc_opcom_pick;
+        };
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.
         "taskforces" call _enter; call fnc_taskforce_tick;
 

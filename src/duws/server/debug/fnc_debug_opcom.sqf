@@ -214,5 +214,11 @@ switch (_verb) do {
         DUWS_opcom_pickOnce = _a;
         format ["OPCOM AI: one %1 pick on the next tick.", _a] remoteExec ["hint", _caller];
     };
+    case "difficulty": {
+        private _steps = [0.25, 0.5, 1, 2];
+        DUWS_opcom_picksPerTick = _steps select (((_steps find DUWS_opcom_picksPerTick) + 1) mod count _steps);
+        ["INFO", "OPCOM", format ["AI difficulty -> %1 picks per tick", DUWS_opcom_picksPerTick]] call fnc_log;
+        format ["OPCOM AI: %1 picks per tick.", DUWS_opcom_picksPerTick] remoteExec ["hint", _caller];
+    };
     default {};
 };
