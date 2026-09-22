@@ -2746,8 +2746,8 @@
                 <English>Move along. You cannot be here.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_8">
-                <Original>Keep moving. This area is off limits.</Original>
-                <English>Keep moving. This area is off limits.</English>
+                <Original>This area is off limits. Clear off.</Original>
+                <English>This area is off limits. Clear off.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NAKED">
                 <Original>No civilian clothing.</Original>
