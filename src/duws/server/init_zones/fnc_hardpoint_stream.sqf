@@ -12,9 +12,7 @@ if (!isServer) exitWith {};
 // Tighter than any streaming ring, so a hardpoint reveals about when it comes into view, not when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
-// Reach kept wider than the garrison stream so a player cannot sit just outside it unseen; the chance
-// rolls per tick rather than firing every one, so the fix is a risk to break out of, not a certain reveal.
-#define OP_OBSERVE_K 2             // Chebyshev grid cells (OPCOM_GRID_CELL each): k=2 ~ 1000 m on axis
+// The chance rolls per tick rather than firing every one, so the fix is a risk to break out of, not a certain reveal.
 #define OP_OBSERVE_CHANCE 0.02     // per OPCOM tick; ~0.24/min at OPCOM_TICK_PERIOD 5
 
 // OPFOR radio amplifier = live count of uncleared "RADIO" rows, capped. Recomputed from the registry

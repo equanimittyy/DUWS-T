@@ -1586,6 +1586,29 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 ["pWinAt: outnumbered two to one is a long shot",
     (([8, 15] call DUWS_fnc_opcom_pWinAt) toFixed 2), "0.20"] call fnc_assertEq;
 
+// --- DUWS_fnc_opcom_opUnwatched: the share of a new OP's land block no other OP watches ---
+OP_OBSERVE_K = 2;
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+fnc_test_landGrid = {
+    params [["_waterCol", -1]];
+    private _l = [];
+    for "_i" from 0 to 99 do { _l pushBack ((_i mod 10) != _waterCol) };
+    _l
+};
+DUWS_opcom_grid_land = [] call fnc_test_landGrid;
+["opUnwatched: a post with no other OP watches its whole block", [55, []] call DUWS_fnc_opcom_opUnwatched, 1] call fnc_assertClose;
+["opUnwatched: a post on another OP's cell watches nothing new", [55, [55]] call DUWS_fnc_opcom_opUnwatched, 0] call fnc_assertClose;
+["opUnwatched: an OP two cells over already watches three of five columns", [55, [57]] call DUWS_fnc_opcom_opUnwatched, 0.4] call fnc_assertClose;
+["opUnwatched: an OP past both reaches overlaps nothing", [55, [5]] call DUWS_fnc_opcom_opUnwatched, 1] call fnc_assertClose;
+["opUnwatched: a block clipped at the box edge counts only its cells inside", [0, [3]] call DUWS_fnc_opcom_opUnwatched, 1/3] call fnc_assertClose;
+DUWS_opcom_grid_land = [3] call fnc_test_landGrid;
+["opUnwatched: sea in the block counts on neither side", [55, []] call DUWS_fnc_opcom_opUnwatched, 1] call fnc_assertClose;
+["opUnwatched: sea leaves the overlap a larger share", [55, [57]] call DUWS_fnc_opcom_opUnwatched, 0.25] call fnc_assertClose;
+DUWS_opcom_grid_land = [];
+for "_i" from 0 to 99 do { DUWS_opcom_grid_land pushBack false };
+["opUnwatched: an all-sea block is worth nothing", [55, []] call DUWS_fnc_opcom_opUnwatched, 0] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

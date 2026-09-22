@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. The caller spends the truck whatever a writer answers: a refused errand is lost.
 if (!isServer) exitWith {};
 
-// [key, type, zoneKey] per build still siting, so a Build cannot overfill a zone's slots or an asset's cap.
+// [key, type, zoneKey, pos] per build still siting, so a Build cannot overfill a zone's slots or an asset's cap.
 DUWS_opcom_buildsPending = [];
 
 // Half a cell around the truck's drop, so a build stands where it was delivered; it faces where BLUFOR come from.
@@ -29,7 +29,7 @@ DUWS_fnc_opcom_build = {
     private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
     missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
     private _key = format ["hpopcom_%1", _seq];
-    DUWS_opcom_buildsPending pushBack [_key, _type, _zoneKey];
+    DUWS_opcom_buildsPending pushBack [_key, _type, _zoneKey, _anchor select 0];
     // Spawned: the builder sleeps in its crew drop, and the tick must never sleep.
     [_type, _key, _zoneKey, _anchor, _refund] spawn {
         params ["_type", "_key", "_zoneKey", "_anchor", "_refund"];

@@ -578,6 +578,10 @@ DUWS_bluforRadioLevel = 0;
 OPCOM_GRID_CELL   = 500;
 OPCOM_GRID_SPREAD = 1000;
 
+// An OP's reach in Chebyshev grid cells (k=2 ~ 1000 m on axis), kept wider than the garrison stream so a player
+// cannot sit just outside it unseen.
+OP_OBSERVE_K = 2;
+
 // The grid is built, rebuilt, routed and drawn only inside a box around the play area (every zone, town and
 // the HQ grown by its radius plus this buffer) -- OPCOM never calculates the empty rest of the map. Counted
 // in cells, not metres, so it holds if the cell size changes. Must exceed the largest deposit reach in cells

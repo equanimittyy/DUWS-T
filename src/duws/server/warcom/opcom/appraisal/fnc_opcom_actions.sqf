@@ -305,8 +305,10 @@ DUWS_fnc_opcom_assetTargets = {
     private _drop = call DUWS_fnc_opcom_bandDrop;
     if (_drop isEqualTo []) exitWith { [] };
     _drop params ["_at", "_truck"];
-    [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]]]
+    private _cand = [[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at]];
+    if (_type isEqualTo "OP") then { _cand pushBack ([_at] call DUWS_fnc_opcom_opValue) };
+    [_cand]
 };
 
 // One 50 m square for now; the size rides the target, so a deeper belt is a wider candidate, not a new action.
