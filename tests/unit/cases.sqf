@@ -1654,6 +1654,36 @@ OPCOM_RAPPORT_STEP = 3;
 ["rapportValue: a town at -5 takes half", [20, -5] call DUWS_fnc_opcom_rapportValue, 3] call fnc_assertClose;
 ["rapportValue: a town near the flip scores at the floor", [20, -12] call DUWS_fnc_opcom_rapportValue, 0.6] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_spread: a holding's need over its 5x5 block, weights 3/2/1 by ring ---
+OPCOM_BLOCK_K = 2;
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+DUWS_opcom_grid_land = [] call fnc_test_landGrid;
+fnc_test_sum = { private _s = 0; { _s = _s + _x } forEach _this; _s };
+private _need = call fnc_test_zeroGrid;
+[_need, 55, 35] call DUWS_fnc_opcom_spread;
+["spread: the block takes the whole amount", _need call fnc_test_sum, 35] call fnc_assertClose;
+["spread: the centre cell takes the heaviest weight", _need select 55, 3] call fnc_assertClose;
+["spread: the outer ring takes the lightest", _need select 75, 1] call fnc_assertClose;
+["spread: a cell past the block takes nothing", _need select 58, 0] call fnc_assertClose;
+private _corner = call fnc_test_zeroGrid;
+[_corner, 0, 10] call DUWS_fnc_opcom_spread;
+["spread: a block clipped at the box edge still lands the whole amount", _corner call fnc_test_sum, 10] call fnc_assertClose;
+DUWS_opcom_grid_land = [3] call fnc_test_landGrid;
+private _coast = call fnc_test_zeroGrid;
+[_coast, 55, 10] call DUWS_fnc_opcom_spread;
+["spread: sea in the block takes nothing", _coast select 53, 0] call fnc_assertClose;
+["spread: sea in the block still lands the whole amount on land", (_coast call fnc_test_sum) toFixed 4, "10.0000"] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_trafficAt: a sighting's force, halving every half-life ---
+OPCOM_TRAFFIC_HALFLIFE = 360;
+DUWS_opcom_grid_traffic = [8];
+DUWS_opcom_grid_trafficTick = [100];
+DUWS_opcom_tick = 100;
+["trafficAt: a fresh stamp reads its whole force", [0] call DUWS_fnc_opcom_trafficAt, 8] call fnc_assertClose;
+DUWS_opcom_tick = 460;
+["trafficAt: one half-life later it reads half", [0] call DUWS_fnc_opcom_trafficAt, 4] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

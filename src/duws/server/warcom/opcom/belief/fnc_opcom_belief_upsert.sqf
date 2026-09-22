@@ -22,6 +22,15 @@ if (_i < 0) then {
 // this one cell was looked at, not that the sector around a known enemy is clear (the recon/OP sweep's bubble).
 [_pos, 0] call fnc_opcom_cover_stamp;
 
+// Traffic keeps the larger of what the cell still holds and this sighting, so a route used every trip stays lit.
+if (!isNil "DUWS_opcom_grid_traffic") then {
+    private _c = [_pos] call DUWS_fnc_opcom_w2c;
+    if (_str > ([_c] call DUWS_fnc_opcom_trafficAt)) then {
+        DUWS_opcom_grid_traffic set [_c, _str];
+        DUWS_opcom_grid_trafficTick set [_c, DUWS_opcom_tick];
+    };
+};
+
 // Until BLUFOR is seen near it the HQ pulls no defense toward itself, so the opening campaign defends evenly
 // instead of massing on a base the commander has no business knowing. One-way: a base found once stays found.
 if (!DUWS_opcom_hqKnown && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []} && {(_pos distance2D PosOfBLUHQ) < OPCOM_GRID_CELL * 2}) then {

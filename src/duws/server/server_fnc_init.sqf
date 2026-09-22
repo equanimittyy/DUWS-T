@@ -105,6 +105,7 @@ publicVariable "fnc_duws_deploy";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
 // appraisal\: executed to define the action list and the picker's state.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_value.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_fields.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_actions.sqf";
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";

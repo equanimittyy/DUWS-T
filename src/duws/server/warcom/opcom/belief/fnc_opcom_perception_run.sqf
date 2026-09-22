@@ -55,6 +55,7 @@ while {true} do {
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;
+        "fields" call _enter;    call DUWS_fnc_opcom_fieldsRefresh;
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;      call fnc_opcom_pick;
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.

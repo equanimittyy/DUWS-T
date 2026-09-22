@@ -745,6 +745,17 @@ OPCOM_TOWN_WORTH = 5;
 // when nothing on the shortlist pays for itself.
 OPCOM_BANK_SCORE = 0.5;
 
+// A cell BLUFOR cross once fades within the hour while a route they use every trip stays lit.
+OPCOM_TRAFFIC_HALFLIFE = 360;
+OPCOM_TRAFFIC_SHARE = 0.5;
+// Infantry's rate, the cheapest force OPCOM buys.
+OPCOM_AP_PER_FORCE = 1;
+// A band cell's base need is a zone's average pull per cell divided by this: a holding pulls harder than a gap, but
+// not so hard that hardpoints cluster around zones.
+OPCOM_NEED_BASE_RATIO = 2.5;
+// Chebyshev reach in cells of the need spread, a hardpoint's cover and a standalone build's Value: a 5x5 block.
+OPCOM_BLOCK_K = 2;
+
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;
 OPCOM_PICK_SHARPNESS = 2;

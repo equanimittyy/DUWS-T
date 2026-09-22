@@ -143,6 +143,10 @@ switch (_page) do {
                 DUWS_dbgOpcomCoverOn = !(missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true]);
                 hint format ["OPCOM grid: staleness labels %1.", ["off", "on"] select DUWS_dbgOpcomCoverOn];
             }] call _toggle,
+            ["Need & cover labels", missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false], {
+                DUWS_dbgOpcomNeedOn = !(missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false]);
+                hint format ["OPCOM grid: need (N), cover (C) and traffic (T) labels %1.", ["off", "on"] select DUWS_dbgOpcomNeedOn];
+            }] call _toggle,
             ["OPCOM AI overlay", missionNamespace getVariable ["DUWS_dbgOpcomAiOn", false], fnc_debug_opcom_ai_overlay] call _toggle
         ]] call fnc_open_action_menu;
     };

@@ -12,6 +12,7 @@ params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []]];
 private _half = _cell / 2;
 private _eps = 0.05;
 private _coverOn = missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true];
+private _needOn = missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false];
 
 // Fixed grid width means the cell count only changes on a first draw or a name-clash guard.
 private _sig = [count _cells];
@@ -25,7 +26,7 @@ if (_rebuild) then {
 
 private _sample = "";
 {
-    _x params ["_c", "_f", "_e", "_front", "_land", "_stale"];
+    _x params ["_c", "_f", "_e", "_front", "_land", "_stale", "_need", "_cov", "_traf"];
     private _i = _forEachIndex;
 
     if (_rebuild) then {
@@ -76,6 +77,20 @@ private _sample = "";
         _sm setMarkerTextLocal format ["%1t", _stale];
     } else {
         if ((getMarkerType _sm) isNotEqualTo "") then { deleteMarkerLocal _sm };
+    };
+
+    private _nm = format ["duws_opcom_need_%1", _i];
+    if (_needOn && {_need > _eps || {_cov > 0} || {_traf > _eps}}) then {
+        if ((getMarkerType _nm) isEqualTo "") then {
+            createMarkerLocal [_nm, [_c select 0, (_c select 1) - _cell * 0.3]];
+            _nm setMarkerShapeLocal "ICON";
+            _nm setMarkerTypeLocal "mil_dot";
+            _nm setMarkerColorLocal "#(0.3,1,0.4,1)";
+            _nm setMarkerSizeLocal [0.4, 0.4];
+        };
+        _nm setMarkerTextLocal format ["N%1 C%2 T%3", _need toFixed 1, _cov toFixed 2, _traf toFixed 1];
+    } else {
+        if ((getMarkerType _nm) isNotEqualTo "") then { deleteMarkerLocal _nm };
     };
 } forEach _cells;
 

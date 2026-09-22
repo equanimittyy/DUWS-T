@@ -18,7 +18,7 @@ private _seen = DUWS_opcom_grid_seen;
 private _tick = DUWS_opcom_tick;
 private _eps = 0.05;
 
-// [centre, fri, ene, isFront, isLand, coverAge] per cell, only for the play box (the rest of the lattice is
+// [centre, fri, ene, isFront, isLand, coverAge, need, cover, traffic] per cell, only for the play box (the rest of the lattice is
 // never built). Front = the balance's sign differs from an orthogonal neighbour's: the zero-crossing band
 // between friendly and enemy ground.
 (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
@@ -44,7 +44,8 @@ for "_iy" from _bMinCy to _bMaxCy do {
         // Collapse to -1 past the span so never-seen and long-expired read alike and the client needs no span.
         private _age = _tick - (_seen select _i);
         if (_age >= OPCOM_COVER_SPAN) then { _age = -1 };
-        _cells pushBack [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i, _age];
+        _cells pushBack [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i, _age,
+            [_i] call DUWS_fnc_opcom_needAt, [_i] call DUWS_fnc_opcom_coverAt, [_i] call DUWS_fnc_opcom_trafficAt];
     };
 };
 

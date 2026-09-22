@@ -45,6 +45,8 @@ DUWS_opcom_grid_fri = []; DUWS_opcom_grid_fri resize _n;
 DUWS_opcom_grid_ene = []; DUWS_opcom_grid_ene resize _n;
 DUWS_opcom_grid_seen = []; DUWS_opcom_grid_seen resize _n;   // last-swept tick per cell
 private _land = []; _land resize _n;          // true = land, passable to ground
+DUWS_opcom_grid_traffic = []; DUWS_opcom_grid_traffic resize _n;           // believed force last crossing, decayed on read
+DUWS_opcom_grid_trafficTick = []; DUWS_opcom_grid_trafficTick resize _n;
 
 // Cheap default for every slot so none is left nil; the costly surfaceIsWater runs only inside the box.
 // seen inits a full span in the past so an unswept cell reads max staleness via the same formula, no sentinel.
@@ -53,6 +55,8 @@ for "_i" from 0 to (_n - 1) do {
     DUWS_opcom_grid_fri set [_i, 0];
     DUWS_opcom_grid_ene set [_i, 0];
     DUWS_opcom_grid_seen set [_i, -OPCOM_COVER_SPAN];
+    DUWS_opcom_grid_traffic set [_i, 0];
+    DUWS_opcom_grid_trafficTick set [_i, 0];
 };
 for "_cy" from _minCy to _maxCy do {
     for "_cx" from _minCx to _maxCx do {
@@ -72,6 +76,10 @@ private _forceLand = {
 { [getPos _x] call _forceLand } forEach (missionNamespace getVariable ["civ_locations", []]);
 
 DUWS_opcom_grid_land = _land;
+DUWS_opcom_needStatic = _land apply { 0 };
+DUWS_opcom_bandCells = [];
+DUWS_opcom_needSig = [];
+DUWS_opcom_needBuilding = false;
 
 DUWS_opcom_gridStaticFri = +DUWS_opcom_grid_fri;
 DUWS_opcom_gridStaticEne = +DUWS_opcom_grid_ene;

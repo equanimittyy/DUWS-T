@@ -82,5 +82,7 @@ duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_gunShare
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_towerReach
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_defendAt
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_rapportValue
+duws/server/warcom/opcom/appraisal/fnc_opcom_fields.sqf::DUWS_fnc_opcom_spread
+duws/server/warcom/opcom/appraisal/fnc_opcom_fields.sqf::DUWS_fnc_opcom_trafficAt
 duws/server/disguise/fnc_disguise_floor.sqf::*fnc_disguise_floor
 duws/server/disguise/fnc_disguise_suspicion_step.sqf::*fnc_disguise_suspicion_step
