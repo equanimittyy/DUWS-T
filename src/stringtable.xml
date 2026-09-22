@@ -2713,41 +2713,44 @@
                 <Chinesesimp>伪装已激活。保持低调。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_1">
-                <Original>Hey, you! What are you doing? Get out of here!</Original>
-                <English>Hey, you! What are you doing? Get out of here!</English>
-                <Chinesesimp>嘿...你！你在那鬼鬼祟祟的干什么呢...</Chinesesimp>
+                <Original>I'm watching you. Go back the way you came.</Original>
+                <English>I'm watching you. Go back the way you came.</English>
+                <Chinesesimp>我盯着你呢。原路返回。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_2">
                 <Original>Halt. This is a restricted area. Turn around.</Original>
                 <English>Halt. This is a restricted area. Turn around.</English>
-                <Chinesesimp>我发现了个怪人...所有人向我靠拢！</Chinesesimp>
+                <Chinesesimp>站住。这里是禁区。掉头回去。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_3">
                 <Original>This area is closed to civilians. Leave now.</Original>
                 <English>This area is closed to civilians. Leave now.</English>
-                <Chinesesimp>这里是战区，滚开！不然我就开枪了！</Chinesesimp>
+                <Chinesesimp>这里禁止平民进入。马上离开。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_4">
                 <Original>You are not cleared to be here. Move back.</Original>
                 <English>You are not cleared to be here. Move back.</English>
-                <Chinesesimp>嘿，你！过来！我没怎么见过你！</Chinesesimp>
+                <Chinesesimp>你无权待在这里。往后退。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_5">
                 <Original>Civilian, this is a military zone. Clear the area.</Original>
                 <English>Civilian, this is a military zone. Clear the area.</English>
-                <Chinesesimp>那边那个人，谁让你跑到战区来的？</Chinesesimp>
+                <Chinesesimp>平民，这里是军事区。离开这片区域。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_6">
                 <Original>Do not come any closer. Turn back now.</Original>
                 <English>Do not come any closer. Turn back now.</English>
+                <Chinesesimp>不许再靠近。立刻回头。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_7">
                 <Original>Move along. You cannot be here.</Original>
                 <English>Move along. You cannot be here.</English>
+                <Chinesesimp>快走。这里不是你该来的地方。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_8">
                 <Original>This area is off limits. Clear off.</Original>
                 <English>This area is off limits. Clear off.</English>
+                <Chinesesimp>此区域禁止进入。给我走开。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NAKED">
                 <Original>No civilian clothing.</Original>
