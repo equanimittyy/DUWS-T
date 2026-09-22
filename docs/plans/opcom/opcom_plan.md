@@ -49,9 +49,9 @@ A lift is the commander's call, not the rider's: a water crossing borrows a boat
 (`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, an APC, an IFV or a transport helicopter at commit, when the
 pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry — the same binding, the
 same orchestrator — with a drop the taxi latches at the bind where a crossing scans for its far shore. The live
-carry has three shapes: a rotor lands and walks its squad aboard, while a boat and a ground hull swap the whole
-group at once. Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a
-garrisoned unit out.
+carry has three shapes: a rotor lands and walks its squad aboard, a ground hull stops beside the squad and walks
+it aboard the same way, and a boat swaps the whole group at once. Drawing a combatant hull onto taxi duty empties
+its post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
 
