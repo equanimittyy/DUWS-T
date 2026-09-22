@@ -1,5 +1,6 @@
-// Locality: server, [] call'd at load. What a hire is worth: the action it unblocks, and the defense it adds at the
-// zone that raises it (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// Locality: server, [] call'd at load. What a hire is worth: the action it unblocks, the lift or stock it gives, and
+// the defense it adds at the zone that raises it (opcom_plan.md §Value). Read from the pick's unscheduled pass, so
+// nothing here may suspend.
 if (!isServer) exitWith {};
 
 // A zone's garrison plus the combatants OPCOM has homed there, which the base ledger leaves out.
@@ -27,7 +28,7 @@ DUWS_fnc_opcom_hireDefense = {
     _worth * _exposure * _force / ((_zoneForce + _force) max 1)
 };
 
-// -> [Value, the target's position], [0, []] with nothing blocked. Scored as if the hire already stood at that
+// -> [Value, the target's position], [0, []] when the hire serves nothing. Scored as if the hire already stood at that
 // target, so OPCOM never hires for a fight it could not win.
 DUWS_fnc_opcom_hireDemand = {
     params ["_flags", "_force", "_moveType", "_zones"];
@@ -55,22 +56,38 @@ DUWS_fnc_opcom_hireDemand = {
     };
     // No P(win) on a lift: it fights nothing, and the rider's committed Value already carries the odds.
     if ("transport" in _flags) then {
-        private _crosses = _moveType in ["boat", "rotary"];
-        private _drives = _moveType in ["wheeled", "tracked", "rotary"];
-        {
-            private _r = _x;
-            private _v = 0;
-            if ((_r getOrDefault ["strandTicks", 0]) > 0) then {
+        if (_moveType in ["boat", "rotary"]) then {
+            {
                 // Stopped at a water leg with no lift free: the whole order waits on a crossing.
-                if (_crosses) then { _v = _r getOrDefault ["expValue", 0] };
-            } else {
-                if (_drives && {[_r, _moveType] call DUWS_fnc_opcom_taxiFits}) then {
-                    private _z = [_r get "pos", _zones] call DUWS_fnc_opcom_nearestOpen;
-                    if (_z isNotEqualTo []) then { _v = [_r, _z select 2, _moveType] call DUWS_fnc_opcom_taxiSaving };
+                private _v = _x getOrDefault ["expValue", 0];
+                if ((_x getOrDefault ["strandTicks", 0]) > 0 && {_v > _best}) then { _best = _v; _at = _x get "pos" };
+            } forEach DUWS_opcom_taskings;
+        };
+        // Land-taxi binds only at commit, so a unit already marching can never ride: the lift is priced on the orders
+        // the pick may send, less what the best hull on hand already saves them.
+        if (_moveType in ["wheeled", "tracked", "rotary"]) then {
+            {
+                _x params ["_r", "_to", "_v"];
+                private _rp = _r get "pos";
+                private _z = [_rp, _zones] call DUWS_fnc_opcom_nearestOpen;
+                if ("transportable" in (_r get "flags") && {_z isNotEqualTo []}) then {
+                    private _rm = _r get "moveType";
+                    private _have = 0;
+                    {
+                        _have = _have max ([_v, _rp, _rm, _to, _x get "pos", _x get "moveType"] call DUWS_fnc_opcom_taxiSaving);
+                    } forEach ([_r get "id"] call DUWS_fnc_opcom_taxiPool);
+                    private _gain = ([_v, _rp, _rm, _to, _z select 2, _moveType] call DUWS_fnc_opcom_taxiSaving) - _have;
+                    if (_gain > _best) then { _best = _gain; _at = _rp };
                 };
-            };
-            if (_v > _best) then { _best = _v; _at = _r get "pos" };
-        } forEach DUWS_opcom_taskings;
+            } forEach (call DUWS_fnc_opcom_pendingRiders);
+        };
+    };
+    // An idle truck spares the next supply buy its hire. The saving splits across the trucks already idle, so the stock
+    // settles where the hire's score meets Bank's; it rests at a random open zone, since that buy's target is unknown.
+    if ("supply" in _flags) then {
+        private _idle = { ((_x select 0) select 0) isEqualTo "truck" } count (call DUWS_fnc_opcom_truckSources);
+        private _v = (OPCOM_AP_UNIT getOrDefault ["truck", 0]) / (_idle + 1);
+        if (_v > _best) then { _best = _v; _at = (selectRandom _zones) select 2 };
     };
     [_best, _at]
 };

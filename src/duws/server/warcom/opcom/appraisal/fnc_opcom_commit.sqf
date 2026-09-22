@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. The commit actions, which stake a roster unit rather than AP: which unit goes
 // and what its target is worth (opcom_plan.md §Appraisal). One unit per order until Phase 5's templates muster several.
-// Each sweep returns [candidates, blocked] through the tick cache, so Recruit reads the blocked targets whatever
-// order the rows run in (fnc_opcom_hire).
+// Each sweep returns [candidates, blocked, riders] through the tick cache, so Recruit reads the blocked targets and
+// the units a lift would carry whatever order the rows run in (fnc_opcom_hire).
 if (!isServer) exitWith {};
 
 // The free unit that scores best sent at _to, any below OPCOM_PWIN_FLOOR dropped. -> [tasking, Value, P(win), Cost], or
@@ -29,6 +29,7 @@ DUWS_fnc_opcom_attackSweep = {
     private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
     private _out = [];
     private _blocked = [];
+    private _riders = [];
     {
         private _zp = _x;
         private _zk = [_zp] call fnc_zone_key;
@@ -41,10 +42,11 @@ DUWS_fnc_opcom_attackSweep = {
                 _best params ["_t", "_v", "_pw", "_c"];
                 _out pushBack [[_zk, _t get "id", _pw * _v], 0,
                     format ["Attack %1 with %2 %3", [_zk] call DUWS_fnc_opcom_zoneLabel, _t get "menu", _t get "id"], _v, _pw, _c];
+                _riders pushBack [_t, _zp, _pw * _v];
             };
         };
     } forEach WARCOM_zones_controled_by_BLUFOR;
-    [_out, _blocked]
+    [_out, _blocked, _riders]
 };
 
 DUWS_fnc_opcom_attackTargets = { (["attackSweep", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) select 0 };
@@ -69,6 +71,7 @@ DUWS_fnc_opcom_interceptSweep = {
     private _busy = (DUWS_opcom_taskings select { (_x get "order") isEqualTo "intercept" }) apply { _x getOrDefault ["interceptKey", ""] };
     private _out = [];
     private _blocked = [];
+    private _riders = [];
     {
         private _key = _x;
         private _bp = DUWS_opcom_belief_pos select _forEachIndex;
@@ -81,10 +84,11 @@ DUWS_fnc_opcom_interceptSweep = {
                 _best params ["_t", "_bv", "_pw", "_c"];
                 _out pushBack [[_key, _t get "id", _pw * _bv], 0,
                     format ["Intercept at %1 with %2 %3", mapGridPosition _bp, _t get "menu", _t get "id"], _bv, _pw, _c];
+                _riders pushBack [_t, _bp, _pw * _bv];
             };
         };
     } forEach DUWS_opcom_belief_key;
-    [_out, _blocked]
+    [_out, _blocked, _riders]
 };
 
 DUWS_fnc_opcom_interceptTargets = { (["interceptSweep", DUWS_fnc_opcom_interceptSweep] call DUWS_fnc_opcom_tickCached) select 0 };
@@ -105,13 +109,14 @@ DUWS_fnc_opcom_interceptRun = {
 // siting pass, and a recon already out is on a move order and out of the roster.
 DUWS_fnc_opcom_scoutSweep = {
     private _units = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
-    if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], []] };
+    if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], [], []] };
     private _pool = +DUWS_opcom_needCells;
     private _dests = [];
     for "_i" from 1 to (OPCOM_SITE_SAMPLES min count _pool) do {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
     };
     private _out = [];
+    private _riders = [];
     private _taken = _dests apply { false };
     {
         private _t = _x;
@@ -132,15 +137,23 @@ DUWS_fnc_opcom_scoutSweep = {
             _best params ["_to", "_v", "_pw"];
             _out pushBack [[_t get "id", _to, _pw * _v], 0,
                 format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
+            _riders pushBack [_t, _to, _pw * _v];
         };
     } forEach _units;
     private _blocked = [];
     { if !(_taken select _forEachIndex) then { _blocked pushBack _x } } forEach _dests;
-    [_out, _blocked]
+    [_out, _blocked, _riders]
 };
 
 DUWS_fnc_opcom_scoutTargets = { (["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 0 };
 DUWS_fnc_opcom_scoutBlocked = { (["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 1 };
+
+// -> [[tasking, destination, Value], ...]: each order the pick may commit this tick.
+DUWS_fnc_opcom_pendingRiders = {
+    ((["attackSweep", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) select 2)
+    + ((["interceptSweep", DUWS_fnc_opcom_interceptSweep] call DUWS_fnc_opcom_tickCached) select 2)
+    + ((["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 2)
+};
 
 DUWS_fnc_opcom_scoutRun = {
     params ["_target"];

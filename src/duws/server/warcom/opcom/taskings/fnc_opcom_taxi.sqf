@@ -31,14 +31,11 @@ DUWS_fnc_opcom_taxiWorth = {
     _value * ((2 ^ ((_walk - _lift) / OPCOM_VALUE_HALFLIFE)) - 1)
 };
 
+// The rider's fields come loose, so the Recruit rows can price an order the pick has not committed yet.
 DUWS_fnc_opcom_taxiSaving = {
-    params ["_rider", "_from", "_moveType"];
-    private _to = _rider get "target";
-    private _v = _rider getOrDefault ["expValue", 0];
-    if (_v <= 0 || {_to isEqualTo []}) exitWith { 0 };
-    private _rp = _rider get "pos";
-    [_v,
-        [_rp distance2D _to, _rider get "moveType"] call DUWS_fnc_opcom_moveTicks,
+    params ["_value", "_rp", "_riderMove", "_to", "_from", "_moveType"];
+    [_value,
+        [_rp distance2D _to, _riderMove] call DUWS_fnc_opcom_moveTicks,
         [(_from distance2D _rp) + (_rp distance2D _to), _moveType] call DUWS_fnc_opcom_moveTicks
     ] call DUWS_fnc_opcom_taxiWorth
 };
@@ -46,11 +43,15 @@ DUWS_fnc_opcom_taxiSaving = {
 // The lift that saves the most, and none when walking beats every hull on hand.
 DUWS_fnc_opcom_taxiBind = {
     params ["_rider"];
+    private _to = _rider get "target";
+    private _v = _rider getOrDefault ["expValue", 0];
+    if (_v <= 0 || {_to isEqualTo []}) exitWith {};
     private _best = 0;
     private _pick = [];
     {
         if ([_rider, _x get "moveType"] call DUWS_fnc_opcom_taxiFits) then {
-            private _s = [_rider, _x get "pos", _x get "moveType"] call DUWS_fnc_opcom_taxiSaving;
+            private _s = [_v, _rider get "pos", _rider get "moveType", _to, _x get "pos", _x get "moveType"]
+                call DUWS_fnc_opcom_taxiSaving;
             if (_s > _best) then { _best = _s; _pick = _x };
         };
     } forEach ([_rider get "id"] call DUWS_fnc_opcom_taxiPool);
@@ -58,7 +59,7 @@ DUWS_fnc_opcom_taxiBind = {
     // The saving is measured straight-line, so check the ground before binding: a hull that cannot drive to the
     // rider would bind and then sit, and no carry phase times a pickup drive out.
     if ((([_pick get "pos", _rider get "pos", _pick get "moveType", 0] call fnc_opcom_route) select 0) isEqualTo []) exitWith {};
-    [_pick, _rider, _rider get "target"] call DUWS_fnc_opcom_carryBind;
+    [_pick, _rider, _to] call DUWS_fnc_opcom_carryBind;
     ["INFO", "OPCOM", format ["taxi: tasking %1 rides %2 transport %3 to %4, saving %5 AP", _rider get "id",
-        _pick get "moveType", _pick get "id", (_rider get "target") apply { round _x }, _best toFixed 1]] call fnc_log;
+        _pick get "moveType", _pick get "id", _to apply { round _x }, _best toFixed 1]] call fnc_log;
 };
