@@ -94,9 +94,12 @@ Each disguised player has a meter from 0 to 100 on the server. The monitor updat
    hull hits that hull.
 
 **Rise.** While a unit spots the player, the meter rises each second by the spotter sum, times the
-ground rate, times the body multiplier. The spotter sum is `100 / max(d, 10)` for the nearest spotter
-at `d` m, plus 25% of its own rate for each other spotter. The body multiplier applies while a dead
-body is within 20 m: `DISGUISE_BODY_MULT` (×4) for both disguises.
+ground rate, times the body multiplier, times the stance multiplier. The spotter sum is
+`100 / max(d, 10)` for the nearest spotter at `d` m, plus 25% of its own rate for each other spotter.
+The body multiplier applies while a dead body is within 20 m: `DISGUISE_BODY_MULT` (×4) for both
+disguises. The stance multiplier is `DISGUISE_CROUCH_MULT` (×1.1) while the player crouches and
+`DISGUISE_PRONE_MULT` (×1.3) while the player is prone, for both disguises, because a civilian or a
+soldier at ease does not creep.
 
 | Civilian ground | Rate |
 |---|---|

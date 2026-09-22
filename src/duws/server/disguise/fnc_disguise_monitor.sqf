@@ -89,6 +89,11 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
     if (_seen) then {
         if (((_player nearObjects ["CAManBase", 20]) findIf { !alive _x }) >= 0) then { _rate = DISGUISE_BODY_MULT };
         _rate = _rate * ([DISGUISE_ENEMY_RATE, [DISGUISE_CIV_RATE_OPEN, DISGUISE_CIV_RATE_BAND] select _inBand] select _civ);
+        _rate = _rate * (switch (stance _player) do {
+            case "CROUCH": { DISGUISE_CROUCH_MULT };
+            case "PRONE": { DISGUISE_PRONE_MULT };
+            default { 1 };
+        });
     } else {
         if (((_player nearEntities [["AllVehicles"], DISGUISE_DECAY_NEAR_RANGE]) findIf {
             ((crew _x) findIf { alive _x && {side group _x == east} }) >= 0

@@ -560,6 +560,8 @@ DISGUISE_CIV_RATE_BAND = 6;
 DISGUISE_CIV_RATE_OPEN = 1;
 DISGUISE_ENEMY_RATE = 0.5;
 DISGUISE_BODY_MULT = 4;
+DISGUISE_CROUCH_MULT = 1.1;
+DISGUISE_PRONE_MULT = 1.3;
 // Unseen suspicion falls at this share of its rate while a living OPFOR unit is this near, so ducking
 // out of sight beside a patrol does not clear it as fast as walking away.
 DISGUISE_DECAY_NEAR_RANGE = 50;

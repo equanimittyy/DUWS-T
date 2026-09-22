@@ -1,7 +1,7 @@
 // Locality: any. Pure, so the unit tests drive it directly.
 // Each spotter past the nearest adds only a share of its own rate: a full sum would let a garrison of
 // ten at 50 m break a full kit in 5 s, and the disguise exists to move among them.
-// Contract: [_meter, _floor, _dists (spotter metres), _rate (ground x body multiplier), _dt,
+// Contract: [_meter, _floor, _dists (spotter metres), _rate (ground x body x stance multiplier), _dt,
 // _decayScale (share of the unseen fall, default 1)] -> meter.
 #define RISE_K 100
 #define RISE_NEAR 10

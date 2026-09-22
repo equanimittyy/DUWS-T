@@ -2631,8 +2631,8 @@
                 <English>Being seen inside an enemy position breaks the disguise.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_CIV_SUSPICION">
-                <Original>Suspicion rises while the enemy watches you, faster up close, near enemy positions and near bodies.</Original>
-                <English>Suspicion rises while the enemy watches you, faster up close, near enemy positions and near bodies.</English>
+                <Original>Suspicion rises while the enemy watches you, faster up close, while crouched or prone, near enemy positions and near bodies.</Original>
+                <English>Suspicion rises while the enemy watches you, faster up close, while crouched or prone, near enemy positions and near bodies.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_TITLE">
                 <Original>Enemy Disguise</Original>
@@ -2655,8 +2655,8 @@
                 <English>Your gear is not suspicious.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_SUSPICION">
-                <Original>Suspicion rises while the enemy watches you, faster up close and near bodies.</Original>
-                <English>Suspicion rises while the enemy watches you, faster up close and near bodies.</English>
+                <Original>Suspicion rises while the enemy watches you, faster up close, while crouched or prone and near bodies.</Original>
+                <English>Suspicion rises while the enemy watches you, faster up close, while crouched or prone and near bodies.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_INFO_ENEMY_ATTACK">
                 <Original>Attacking while seen breaks the disguise.</Original>
