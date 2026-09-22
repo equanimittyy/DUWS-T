@@ -10,7 +10,7 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3, 4A, 4B.1, 4B.2 and 4C.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
+Phases 1–3, 4A, 4B and 4C.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
 them. This doc specifies what remains. The sections marked **WIP** are first-pass decisions: they change as each chunk
 is built and played.
 
@@ -18,8 +18,7 @@ is built and played.
 
 | Phase | State |
 |---|---|
-| 1–3, 4A, 4B.1, 4B.2, 4C.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds, and the weighted commander's balance | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
-| 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
+| 1–3, 4A, 4B, 4C.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's balance | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4C — Weighting: the pick scored by Value ÷ Cost, over `P(win)` where an order fights for its target, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates, mustering and threat-aware routes | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
@@ -27,16 +26,18 @@ is built and played.
 The ordering is forced by what the next phase reads. Do not pre-build later phases: the tuning constants and
 engine-contact behaviours only settle by running the core.
 
-**4C.2's Values run first, then 4B.3's actions, then the rest of 4C.** Every wired action is scored before any new
-one is written: an unappraised row returns its price and scores break-even, so a half-appraised picker quietly
-favours whatever it cannot yet judge, and adding actions into that only widens the blind spot. The archetype is
-last of all — it multiplies a class's scores, so it has nothing to tilt until the scores mean something.
+**Every wired action is scored before any new one is written**: an unappraised row returns its price and scores
+break-even, so a half-appraised picker quietly favours whatever it cannot yet judge, and adding actions into that
+only widens the blind spot. The archetype is last of all — it multiplies a class's scores, so it has nothing to
+tilt until the scores mean something.
 
 ## Shipped: the substrate the loop drives
 
 The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception, the influence grid, whose
-layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, and the traffic layer; `taskings/` the
-orders, streaming and the ferry; `appraisal/` the action list, supply trucks, the siting pass and the pick; and
+layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, the traffic layer and the observation
+tracker the guns are gated on; `taskings/` the orders, streaming, the carry (ferry and taxi) and the fire mission;
+`appraisal/` the action list, supply trucks, the roster, the commit orders, the Recruit rows, the Arty action, the
+siting pass and the pick; and
 `appraisal/value/` the score's terms, one file each — every Value, the need and cover fields, `P(win)` and the delay. The debug harness (`fnc_opcom_debug_task.sqf` and the
 Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work holds to:
 
@@ -44,8 +45,13 @@ Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work hol
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 
-Not built: whether an idle hull leaves its post to ferry, and whether a rider waits for a lift or walks. Land-taxi,
-which lifts a foot unit over dry ground with the same carry, is 4B.3 ([§Appraisal](#appraisal-phase-4)).
+A lift is the commander's call, not the rider's: a water crossing borrows a boat or a helicopter at the shore
+(`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, an APC, an IFV or a transport helicopter at commit, when the
+pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry — the same binding, the
+same orchestrator — with a drop the taxi latches at the bind where a crossing scans for its far shore. The live
+carry has three shapes: a rotor lands and walks its squad aboard, while a boat and a ground hull swap the whole
+group at once. Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a
+garrisoned unit out.
 
 Two terms carry one meaning each throughout:
 
@@ -56,8 +62,8 @@ Two terms carry one meaning each throughout:
 
 ## Appraisal (Phase 4)
 
-**WIP.** 4B and 4C are decided as a first pass: their weights, Values, prices and constants will change as each chunk
-is built and played.
+**WIP.** 4B is shipped and 4C.1 remains. Every weight, Value, price and constant here is a first pass and changes
+as it is played.
 
 Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
@@ -72,23 +78,20 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
   target uniformly at random, then one of its targets uniformly. It runs only in `random` mode, switched on from the
   Debug menu's OPCOM page ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)); the mode is `off` by
   default. Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
-- **4C — Weighting.** 4C.2's balance runs ahead of both 4C.1's archetype and 4B.3's new actions. The score, the
-  shortlist and the roll are built first ([§The pick](#the-pick)) with `archWeight` held at 1, then the Values land
-  one action class at a time until every wired row is appraised — an unappraised row returns its price as its Value
-  and scores break-even, which is a shrug the pick takes too often, so the shrugs are cleared before anything new is
-  wired. 4C.1 comes last and adds the archetype on top: `archWeight[archetype][actionClass]`
+- **4C — Weighting.** The score, the shortlist and the roll are built with `archWeight` held at 1 (4C.2), and every
+  wired row carries a Value. 4C.1 comes last and adds the archetype on top: `archWeight[archetype][actionClass]`
   ([§Archetype](#archetype)) multiplies a whole class's scores, which is the only change it makes.
 
-The rows run in the order listed, which is not their chunk number: the Values are finished before new actions are
+The rows run in the order listed, which is not their chunk number: the Values were finished before new actions were
 written, and the archetype comes last.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
-| **4C.2** Balance | **Shipped** (`appraisal/`) — the score, the shortlist and the roll; `P(win)`; every wired row's Value; the traffic, need and cover fields on the grid overlay; the delay discount; the savings goal; the siting pass; the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
-| **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, land-taxi, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
-| **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
+| **4C.2** Balance | **Shipped** (`appraisal/`) — the score, the shortlist and the roll; `P(win)`; every wired row's Value; the traffic, need and cover fields on the grid overlay; the delay discount; the savings goal; the siting pass; the difficulty setting on the OPCOM debug page. The commit Cost landed with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
+| **4B.3** Attack, QRF, Scout | **Shipped** (`appraisal/`, `taskings/`) — the roster and the free-unit check, the commit Cost, Attack, Intercept (QRF), Scout, one Recruit row per menu row, and land-taxi | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does; whether one attacker per zone is too thin once Phase 5 can muster; whether a taxi should set its riders down short of the target rather than on it; whether a ground taxi needs its pickup drive timed out, which no carry phase does today; `OPCOM_FERRY_BOARD_GROUND` |
+| **4B.4** One-gun Arty | **Shipped** (`appraisal/`, `belief/`) — the Arty action over the shipped fire mission: the observation tracker (the tick each BLUFOR zone and FOB was last observed), the target sweep, the shape and its spread, the cooldown, the HQ and own-ground exclusions and the telegraph ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor; the first-pass figures leave a mission scoring well under Bank except against a large sighting seen close in — an emplacement fields three pieces, so a pit's saturate is 18 rounds at 36 AP against a believed force of 8 at a zone — and `OPCOM_AP_PER_ROUND` (2), `OPCOM_ARTY_LETHAL` and `OPCOM_GRID_ZONE_ENEMY_FORCE` are the levers; `OPCOM_OBSERVE_NEAR` and `OPCOM_OBSERVE_SPAN`; whether the telegraph's `OPCOM_ARTY_WARN` gives the players enough to move on |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
@@ -148,14 +151,14 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
-| Recruit | once per demand group | 4B.2 supply, 4B.3 combatant, recon and transport |
+| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it | 4B.3 |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) | 4B.2 |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, one 50 m square | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
-| Arty | each observed target in range of an owned gun off cooldown: a fresh belief sighting, or a BLUFOR zone or FOB observed in the last 15 min | 4B.4 |
+| Arty | each observed target in range of an owned gun off cooldown: a fresh belief sighting, or a BLUFOR zone or FOB observed in the last `OPCOM_OBSERVE_SPAN` (15 min) | 4B.4 |
 
 ### Value
 
@@ -191,12 +194,12 @@ so it moves no faster than a truck delivers.
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 3/10, with skew = max(0.1, 1 − \|rep\| ÷ 10) |
-| Recruit, specialist (`supply`, `transport`, `recon`) | the Value of the best action blocked for want of it |
+| Recruit, specialist (`transport`, `recon`) | its demand: `P(win)` × the Value of the best action blocked for want of it, scored as if the hire already stood at that target |
 | Recruit, combatant | the larger of that demand and home-zone worth × exposure × unitForce ÷ (the zone's current force + unitForce) |
 | Intercept (QRF) | Σ need over the sighting's 5×5 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Scout | Σ need × staleness × `OPCOM_SCOUT_SHARE` (0.2) over the unique cells within its K of its route |
-| Arty | `effForce` killed × `OPCOM_AP_PER_FORCE` |
+| Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force at the target, less OPFOR's own force inside the pattern, × min(1, rounds × lethal area ÷ pattern area) |
 
 - **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
   step barely moves one near +10. The skew is 1 at 0, 0.5 at ±5 and 0.1 from ±9 out, so a town between −15 and −10
@@ -205,11 +208,16 @@ so it moves no faster than a truck delivers.
   larger of demand and defense, not the sum, because one unit serves one role at a time. Its gain shrinks as the
   zone stacks up, so combatants gather where exposure is high and a QRF pool forms there with no roster table.
 - **A truck is worth its transport demand.** Its supply demand is always 0, because every supply action hires its
-  own truck in the same commit when none idles, so no action is ever blocked for want of one. A truck is also cheap
-  infantry transport, and that demand lands with land-taxi in 4B.3. Until then a truck hire scores 0, and the
-  weighted commander hires a truck only inside a supply purchase.
+  own truck in the same commit when none idles, so no action is ever blocked for want of one. What a transport row
+  is worth is the lift it would give: the Value a rider stranded at a water leg is waiting on, or the time a
+  land-taxi would save a marching unit — the same Value landing sooner, priced by the delay discount
+  (`DUWS_fnc_opcom_taxiWorth`).
 - **The QRF share** is how much of the local defense the sighted group can overwhelm. `P(win)` says whether the QRF
   can win, so a platoon is worth stopping but a small QRF is not thrown at it.
+- **A blocked target is what Recruit reads.** Each commit sweep returns the targets no free unit could take
+  beside its candidates, so a hire is valued on the best of them whatever order the action list runs in. A target
+  is blocked when no unit is free for it, or when none clears `OPCOM_PWIN_FLOOR` — so OPCOM never hires for a fight
+  it could not win even with the hire standing there.
 - **Scout staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷
   `OPCOM_BELIEF_EXPIRE`). The share holds Scout below the ground it reveals, since scouting takes and protects
   nothing itself.
@@ -445,10 +453,10 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band → template) |
 | Intercept (QRF) | defensive | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1–N |
 | Rapport | offensive | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
-| Recruit | buildup | the highest-value demand group | tasking-spawn | 1 (`garrison`, resting) |
+| Recruit | buildup | an open zone, one action per menu row | tasking-spawn | 1 (`garrison`, resting) |
 | Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
-| Arty | offensive | an observed target in gun range | bought fire mission | 0 |
+| Arty | indirect | an observed target in gun range | bought fire mission | 0 |
 | Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
 | Build | defensive | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
 | Tower Build | buildup | a band cell | hardpoint build | 1 truck |
@@ -459,8 +467,9 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Bank | bank | — | none | 0 |
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
-  strikes, and a lost unit is lost standing strength. It scores **once per demand group** (combatant, `recon`,
-  `supply`, `transport`), each valued as [§Value](#value) sets out, so it hires what it is short of.
+  strikes, and a lost unit is lost standing strength. It scores **once per recruit-menu row**, each valued as
+  [§Value](#value) sets out, so it hires what it is short of and the archetype can lean on a kind (4C.1) rather
+  than on hiring in general. A row the faction cannot field now scores nothing.
   Units spawn only from OPFOR-held ground; taking the zone cuts what it can raise.
 - **A unit's force is a token composition** — a row in `DUWS_opcom_recruitMenu` (`fnc_opcom_tasking_init.sqf`): an
   id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. `OPCOM_AP_UNIT`
@@ -574,11 +583,9 @@ Value both use a fixed reach per type.
 
 ### Indirect-fire hardpoints
 
-Persistent enemy assets, two tiers sharing one fire-mission implementation. The order ships
-([§Shipped](#shipped-the-substrate-the-loop-drives)) and an AI gunner executes `doArtilleryFire` reliably, so the
-guns fire for real rather than needing shells spawned over them; **nothing decides to use it** — no cooldown, shape
-choice, observation gate or HQ exclusion. A zone's own mortar is separate and stays autonomous
-(`fnc_static_resolve`), uncapped here.
+Persistent enemy assets, two tiers sharing one fire-mission implementation. An AI gunner executes `doArtilleryFire`
+reliably, so the guns fire for real rather than needing shells spawned over them. A zone's own mortar is separate and
+stays autonomous (`fnc_static_resolve`), uncapped here.
 
 | | Mortar pit | Artillery battery |
 |---|---|---|
@@ -591,16 +598,23 @@ choice, observation gate or HQ exclusion. A zone's own mortar is separate and st
   saturation; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
   range is the availability gate, nothing more. **AP is the ammunition** — the guns rest empty and are loaded per
   mission, so there is no finite store and the wallet is the only limit.
-- **Observation is the trigger** — nothing is shelled the enemy has not seen. A player above `east knowsAbout ~1.5`
-  (shared with the sighting sweep); a BLU zone/FOB an OP covers or an OPFOR element was within ~500 m of in 15 min.
-  OPs are the artillery's eyes; killing them blinds guns.
+- **Observation is the trigger** — nothing is shelled the enemy has not seen. A sighting carries its own
+  observation and is shelled while it is fresh; a BLU zone or FOB is shelled while an OP covers it or an OPFOR
+  element passed within `OPCOM_OBSERVE_NEAR` inside `OPCOM_OBSERVE_SPAN`, which the tracker stamps each tick
+  (`fnc_opcom_observed.sqf`). OPs are the artillery's eyes; killing them blinds guns.
+- **`P(win)` is the sighting's freshness**, because a fading sighting has probably moved; ground does not move, so a
+  zone or FOB reads 1.
+- **Never onto OPFOR's own ground** — a target inside a zone OPFOR holds is refused outright, and the force of
+  OPCOM's own units inside the pattern comes off the Value, so the commander does not shell its own men.
 - **HQ exclusion** — no mission *aimed* inside 100 m of `PosOfBLUHQ` (rounds may still stray there from a barrage
   aimed elsewhere). The target grid is latched `[x,y,0]` at order time (never an object ref that would follow a
   respawn into the circle), and re-checked against the circle immediately before firing.
 - **Spread** is the size the action hands the shipped shape — a saturate's radius, a creep's width: base by type,
-  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. The Cooldown row's
-  rounds are a saturate's; a creep's follow from its width and length. Telegraph: Allseer line + a temporary marker
-  ~20 s before impact.
+  +25 m per km range, −30 m with direct OP observation, never below `OPCOM_ARTY_MIN_SPREAD`. A sighting is saturated
+  where it stands; a zone or FOB is crept across, on the bearing from the gun. The Cooldown row's rounds are a
+  saturate's; a creep's follow from its width and length, so its Cost is what the shape will actually fire.
+  Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
+  timed off `getArtilleryETA`.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
   permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
   cap.
