@@ -33,7 +33,7 @@ private _fnc_break = {
 };
 
 private _meter = 0;
-private _sentAbove = false;
+private _shown = [];
 private _last = diag_tickTime;
 while {alive _player && {_player getVariable [_flag, false]}} do {
     private _now = diag_tickTime;
@@ -91,10 +91,12 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
     if (_civ && {_prev < 50} && {_meter >= 50}) then {
         [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize (selectRandom _warningKeys)] remoteExec ["fnc_duws_dialogue", _player];
     };
-    // A public variable would reach every client twice a second; only the owner reads the meter.
-    if (_meter > _floor || _sentAbove) then {
-        [_meter, _floor] remoteExec ["fnc_disguise_meter", _player];
-        _sentAbove = _meter > _floor;
+    // Only the owner reads the meter, and only a new bar segment changes what it draws; a public
+    // variable would reach every client twice a second.
+    private _view = [round (_meter / 5), round (_floor / 5)];
+    if (_view isNotEqualTo _shown) then {
+        [_meter, _floor, _civ] remoteExec ["fnc_disguise_meter", _player];
+        _shown = _view;
     };
 
     sleep 0.5;
@@ -107,5 +109,6 @@ if (!isNull _player) then {
         [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
     };
     _player removeEventHandler ["FiredMan", _firedEH];
+    [] remoteExec ["fnc_disguise_meter", _player];
     _player setVariable ["DUWS_disguise_monitorRunning", false];
 };

@@ -145,4 +145,34 @@ class RscTitles {
             };
         };
     };
+
+    // The disguise suspicion bar (fnc_disguise_meter), in the OPCOM AI overlay's box, which only a debug
+    // session opens. onLoad draws the last text itself, so the first draw does not depend on when the
+    // display exists relative to the cutRsc that made it.
+    class DUWS_DisguiseMeter {
+        idd = -1;
+        movingEnable = false;
+        duration = 1000000000;
+        fadein = 0;
+        fadeout = 0;
+        onLoad = "uiNamespace setVariable ['DUWS_disguiseMeterDisplay', _this select 0]; ((_this select 0) displayCtrl 8814) ctrlSetStructuredText parseText (missionNamespace getVariable ['DUWS_disguiseMeterText', '']);";
+        class controls {
+            class bar: RscStructuredText {
+                idc = 8814;
+                x = 0.02 * safezoneW + safezoneX;
+                y = 0.28 * safezoneH + safezoneY;
+                w = 0.34 * safezoneW;
+                h = 0.41 * safezoneH;
+                size = 0.032;
+                text = "";
+                class Attributes {
+                    font = "PuristaMedium";
+                    color = "#ffffff";
+                    align = "left";
+                    valign = "bottom";
+                    shadow = 1;
+                };
+            };
+        };
+    };
 };

@@ -186,13 +186,16 @@ matches. A civilian vehicle (config side 3) adds no penalty.
 
 ## The readout
 
-While the meter is above the floor, the monitor sends `[meter, floor]` to the owner every tick, and
-once more when it reaches the floor. `fnc_disguise_meter` draws a 20-segment bar with `hintSilent`:
-grey for the floor, red for the rise above it. After the last send, the box fades on its own. The
-meter goes to the owner by `remoteExec`, not by a public variable, which would reach every client
-twice a second.
+The bar stays on screen for the whole disguise, for both disguises. `fnc_disguise_meter` draws it
+with 20 segments: grey for the floor, red for the rise above it, and dark for the rest. A line above it
+names the active disguise, with the panel's status text. It draws on a
+HUD layer (`DUWS_DisguiseMeter` in `description.ext`), not in the hint box, because a bar held in the
+hint box for the whole disguise would hide every other hint. The layer uses the same box on the left
+of the screen as the OPCOM AI debug overlay, so the two overlap only in a debug session.
 
-While the meter moves, it owns the hint box, and any other hint shows for 0.5 s at most.
+The monitor sends `[meter, floor, civ]` to the owner on the first tick and then only when a segment
+changes, and sends an empty call when the disguise ends, which hides the bar. The meter goes to the
+owner by `remoteExec`, not by a public variable, which would reach every client twice a second.
 
 ## Cooldown
 
