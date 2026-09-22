@@ -147,11 +147,12 @@ It snaps each measure to the nearest whole square, with one square as the minimu
 **Standalone band and radio towers.** Most standalone hardpoints are sited by sampling the OPFOR-positive
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to
 a zone (kept where the OPFOR field is positive) and snapping it to a road, a main road preferred. The two
-flank lines sample the band their own way. `fnc_hardpoint_flank_halves` (`fnc_hardpoint_place.sqf:265`) samples
-the band uniformly over the whole map and splits the samples at their median distance to BLU HQ. The
-backline takes the far half and the frontline the near half, one nest per zone each. A per-zone draw would
-give a small zone's band as many nests as a large one's. Flank nests also keep `HP_FLANK_ZONE_GAP` (300 m)
-clear of every zone's edge, so they do not clump onto a zone's own ring. Radio
+flank lines and the observation posts sample the band their own way. `fnc_hardpoint_band_pool`
+(`fnc_hardpoint_place.sqf:265`) draws band points uniformly over the whole map, once, after the radio
+towers widen the band. A per-zone draw would give a small zone's band as many sites as a large one's. The
+flank lines split the pool at its median distance to BLU HQ: the backline takes the far half and the
+frontline the near half, one nest per zone each. Every pool site keeps `HP_POOL_ZONE_GAP` (300 m) clear of
+every zone's edge, so it does not clump onto a zone's own ring. Radio
 towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage radius. Both the band sampler and the campaign's radio-tower economics —
 `DUWS_opforRadioLevel` and its cap — belong to
 [`opfor_area_of_influence.md`](opfor_area_of_influence.md#band-siting): this file owns the
@@ -161,7 +162,7 @@ that one owns what the band *is* and what a tower buys the enemy.
 All of it — the zone ring, radio-tower seeding, and the standalone band (the two flank lines, an AA
 net, the observation-post net and the roadblock net) — runs in one generation phase between zone
 build-out finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:61-128`), under the same
-progress banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:374`)
+progress banner the other phases use. `fnc_hardpoint_plan_counts` (`fnc_hardpoint_place.sqf:405`)
 rolls every zone's ring, both flank-line counts, the observation-post count and the roadblock targets
 before any of it is laid, so the banner totals real hardpoints rather than counting zones.
 
@@ -197,9 +198,10 @@ the codebase scales hardpoint garrison size to `WARCOM_opfor_ap`.
 
 An `OP` is a lookout, not a strongpoint: it fields a close security team on the post and a recon
 patrol screening wide, and while it stands it runs a recon screen against the player. Standalone OPs
-are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:373`) —
-at most one OP out in the band per zone — counted into the generation banner and laid in the band
-pass, not rolled from any weight table.
+are seeded at generation on a per-zone coin flip (`HP_OBS_P` = 0.5, `fnc_hardpoint_place.sqf:404`) —
+at most one OP out in the band per zone — counted into the generation banner and sited off the flank
+lines' uniform band pool (`fnc_hardpoint_site_obs`, `:316`), facing away from the nearest zone. They are
+not rolled from any weight table.
 
 `DUWS_fnc_hardpointOPSense` (`fnc_hardpoint_stream.sqf`) is swept once per OPCOM perception tick
 alongside the belief sensors, not on a per-post clock: each standing OPFOR post rolls a per-tick

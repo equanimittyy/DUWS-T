@@ -255,46 +255,77 @@ fnc_hardpoint_band_cand = {
     [_c, _azone getDir _c]
 };
 
-// Keeps nests off a zone's edge, so a flank line does not clump onto the zone's own ring.
-#define HP_FLANK_ZONE_GAP 300
-#define HP_FLANK_POOL_DRAWS 500
-#define HP_FLANK_JITTER 500
+// Keeps sites off a zone's edge, so they do not clump onto the zone's own ring.
+#define HP_POOL_ZONE_GAP 300
+#define HP_POOL_DRAWS 500
+#define HP_POOL_JITTER 500
 
-// [] call fnc_hardpoint_flank_halves -> [far, near]: band points split at their median distance to BLU HQ.
-// Drawn over the whole map, not per zone: a per-zone draw gives a small zone's band as many nests as a large one's.
-fnc_hardpoint_flank_halves = {
+// [] call fnc_hardpoint_band_pool -> band points drawn uniformly over the whole map.
+// Not per zone: a per-zone draw gives a small zone's band as many sites as a large one's.
+fnc_hardpoint_band_pool = {
     private _pts = [];
-    for "_i" from 1 to HP_FLANK_POOL_DRAWS do {
+    for "_i" from 1 to HP_POOL_DRAWS do {
         private _p = [random worldSize, random worldSize, 0];
-        if (!surfaceIsWater _p && {([_p] call fnc_aoi_field_at) > 0} && {!([_p, HP_FLANK_ZONE_GAP] call fnc_aoi_in_any_zone)}) then {
+        if (!surfaceIsWater _p && {([_p] call fnc_aoi_field_at) > 0} && {!([_p, HP_POOL_ZONE_GAP] call fnc_aoi_in_any_zone)}) then {
             _pts pushBack _p;
         };
     };
+    _pts
+};
+
+// [_pts] call fnc_hardpoint_pool_pos -> clear, level ground near a random pool point, or [] if it left the band.
+fnc_hardpoint_pool_pos = {
+    params ["_pts"];
+    private _c = [selectRandom _pts, 0, HP_POOL_JITTER, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    if (([_c] call fnc_aoi_field_at) <= 0 || {[_c, HP_POOL_ZONE_GAP] call fnc_aoi_in_any_zone}) exitWith { [] };
+    _c
+};
+
+// [_pts] call fnc_hardpoint_flank_halves -> [far, near]: the pool split at its median distance to BLU HQ.
+fnc_hardpoint_flank_halves = {
+    params ["_pts"];
     if (PosOfBLUHQ isEqualTo []) exitWith { [_pts, _pts] };
     _pts = [_pts, [], { _x distance2D PosOfBLUHQ }, "DESCEND"] call BIS_fnc_sortBy;
     private _mid = floor ((count _pts) / 2);
     [_pts select [0, _mid], _pts select [_mid]]
 };
 
-// The candidate block reads _half and _toHQ up the call stack from inside fnc_hardpoint_lay (SQF dynamic scope).
+// The candidate blocks below read their site's locals up the call stack from inside fnc_hardpoint_lay (SQF
+// dynamic scope), so none may share a name with a local of fnc_hardpoint_lay or fnc_hardpoint_best_ground.
 fnc_hardpoint_site_flank = {
-    params ["_count", "_toHQ", ["_fnTick", {}]];
+    params ["_count", "_toHQ", "_bandPts", ["_fnTick", {}]];
     if (_count <= 0) exitWith { 0 };
     private _prefix = ["hpback", "hpfront"] select _toHQ;
-    private _half = (call fnc_hardpoint_flank_halves) select _toHQ;
+    private _half = ([_bandPts] call fnc_hardpoint_flank_halves) select _toHQ;
     if (_half isEqualTo []) exitWith {
         ["WARN", "HARDPOINT", format ["%1 line found no band ground", _prefix]] call fnc_log;
         0
     };
     private _placed = [_count, _prefix, "", {
-        private _c = [selectRandom _half, 0, HP_FLANK_JITTER, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (([_c] call fnc_aoi_field_at) <= 0 || {[_c, HP_FLANK_ZONE_GAP] call fnc_aoi_in_any_zone}) exitWith { [] };
+        private _c = [_half] call fnc_hardpoint_pool_pos;
+        if (_c isEqualTo []) exitWith { [] };
         private _rdir = if (PosOfBLUHQ isEqualTo []) then { random 360 }
             else { [PosOfBLUHQ getDir _c, _c getDir PosOfBLUHQ] select _toHQ };
         [_c, _rdir]
     }, _fnTick, {[]}, DUWS_hardpointWeightNest] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["%1 line sited %2/%3 nests", _prefix, _placed, _count]] call fnc_log;
     _placed
+};
+
+// Faces away from the nearest zone, so the post watches the countryside rather than its own ground.
+fnc_hardpoint_site_obs = {
+    params ["_count", "_bandPts", ["_fnTick", {}]];
+    if (_count <= 0) exitWith { 0 };
+    if (_bandPts isEqualTo []) exitWith {
+        ["WARN", "HARDPOINT", "observation posts found no band ground"] call fnc_log;
+        0
+    };
+    private _zonePosList = zone_meta_array apply { _x select 1 };
+    [_count, "hpobs", "", {
+        private _c = [_bandPts] call fnc_hardpoint_pool_pos;
+        if (_c isEqualTo []) exitWith { [] };
+        [_c, ([_zonePosList, _c] call BIS_fnc_nearestPosition) getDir _c]
+    }, _fnTick, {[]}, createHashMapFromArray [["OP", 1]]] call fnc_hardpoint_lay
 };
 
 // A dropped block still consumes its target, so the generation banner total stays honest.

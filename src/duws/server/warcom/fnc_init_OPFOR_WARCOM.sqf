@@ -108,19 +108,19 @@ sleep 1;
     _hpDone = _hpDone + _radioN;
 
     // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
-    // offset from the zones rather than ringing them.
-    [_backline, false, _tick] call fnc_hardpoint_site_flank;
+    // offset from the zones rather than ringing them. The observation posts below site off the same draw.
+    private _bandPts = call fnc_hardpoint_band_pool;
+    [_backline, false, _bandPts, _tick] call fnc_hardpoint_site_flank;
     _hpDone = _hpDone + _backline;
-    [_frontline, true, _tick] call fnc_hardpoint_site_flank;
+    [_frontline, true, _bandPts, _tick] call fnc_hardpoint_site_flank;
     _hpDone = _hpDone + _frontline;
 
     // AA through the countryside to deny the airspace; the net reuses the band sampler with an AA-only mix.
     [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
     _hpDone = _hpDone + _aaN;
-    // Observation posts scattered through the same band -- eyes on the countryside between the zones, manned by
-    // a loose team but carrying no gun. A per-zone coin flip rolled in fnc_hardpoint_plan_counts, sited and
-    // faced off the band sampler exactly like the AA net, with an OP-only mix.
-    [_obsN, "hpobs", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["OP", 1]]] call fnc_hardpoint_lay;
+    // Observation posts -- eyes on the countryside between the zones, manned by a loose team but carrying no
+    // gun. A per-zone coin flip rolled in fnc_hardpoint_plan_counts.
+    [_obsN, _bandPts, _tick] call fnc_hardpoint_site_obs;
     _hpDone = _hpDone + _obsN;
     [_roadTargets, _tick] call fnc_hardpoint_site_roadblocks;
     _hpDone = _hpDone + count _roadTargets;

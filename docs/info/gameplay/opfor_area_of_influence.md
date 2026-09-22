@@ -96,7 +96,7 @@ incremented in place, by `DUWS_fnc_aoi_opforRecount`
 registered (`:328`) or cleared (`:182`) — so a destroyed tower drops the amplifier, and its
 `AOI_TOWER_REACH` coverage with it, in the same recount. `"RADIO"` is a hardpoint type like any
 other (`DUWS_hardpointName`, `DUWS_hardpointGarrison`, `server_var_init.sqf:417,430`), sited via
-`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:332-368`), which samples the
+`fnc_hardpoint_seed_radio` (`server/init_zones/fnc_hardpoint_place.sqf:363-399`), which samples the
 band, rejects any draw inside another tower's `AOI_TOWER_REACH`, and stands the mast on the
 best-scoring hilltop of what survives. It is deliberately absent from `DUWS_hardpointWeightZone`
 and `DUWS_hardpointWeightSolo` (`server_var_init.sqf:405-410`) — a tower is placed on purpose,
@@ -116,11 +116,11 @@ answer to a rising amplifier — only ground to retake.
 `DUWS_fnc_aoi_bandPos` (`fnc_aoi_init.sqf:95-110`) is the shared candidate sampler: it draws an
 annulus around a random OPFOR zone, out to `AOI_ZONE_REACH` past the zone's edge, and keeps the
 draw only where `fnc_aoi_field_at` is positive and `fnc_aoi_in_any_zone` is false. Every band
-placer except the two flank lines goes through it (directly, or via the per-emplacement
+placer except the two flank lines and the observation posts goes through it (directly, or via the per-emplacement
 anchor/candidate pair `fnc_hardpoint_band_anchor` / `fnc_hardpoint_band_cand`,
 `fnc_hardpoint_place.sqf:241-256`), so all of them sample the same ground the same way. The flank
-lines sample the band uniformly over the whole map instead, so a nest's odds do not depend on which
-zone's band it falls in ([`hardpoints.md`](hardpoints.md#siting)); siting mechanics beyond the
+lines and the observation posts sample the band uniformly over the whole map instead, so a site's odds do
+not depend on which zone's band it falls in ([`hardpoints.md`](hardpoints.md#siting)); siting mechanics beyond the
 candidate source — terrain survey, per-type score, facing, spacing — are shared with the zone ring and
 documented in
 [`hardpoints.md`](hardpoints.md).
