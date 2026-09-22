@@ -2600,31 +2600,35 @@
             </Key>
         </Container>
         <Container name="Civilian Disguise">
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_FMT">
+                <Original>Disguise broken:\n\n%1</Original>
+                <English>Disguise broken:\n\n%1</English>
+            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_THROW">
-                <Original>Disguise broken: Threw an item.</Original>
-                <English>Disguise broken: Threw an item.</English>
+                <Original>Threw an item.</Original>
+                <English>Threw an item.</English>
                 <Chinesesimp>伪装暴露：投掷物品。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NVG">
-                <Original>Disguise broken: Night vision goggles detected.</Original>
-                <English>Disguise broken: Night vision goggles detected.</English>
+                <Original>Night vision goggles detected.</Original>
+                <English>Night vision goggles detected.</English>
                 <Chinesesimp>伪装暴露：佩戴夜视仪。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_UNIFORM">
-                <Original>Disguise broken: Non-civilian uniform.</Original>
-                <English>Disguise broken: Non-civilian uniform.</English>
+                <Original>Non-civilian uniform.</Original>
+                <English>Non-civilian uniform.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEST">
-                <Original>Disguise broken: Non-civilian vest.</Original>
-                <English>Disguise broken: Non-civilian vest.</English>
+                <Original>Non-civilian vest.</Original>
+                <English>Non-civilian vest.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR">
-                <Original>Disguise broken: Non-civilian headgear.</Original>
-                <English>Disguise broken: Non-civilian headgear.</English>
+                <Original>Non-civilian headgear.</Original>
+                <English>Non-civilian headgear.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_BACKPACK">
-                <Original>Disguise broken: Non-civilian backpack.</Original>
-                <English>Disguise broken: Non-civilian backpack.</English>
+                <Original>Non-civilian backpack.</Original>
+                <English>Non-civilian backpack.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_COOLDOWN_FMT">
                 <Original>Disguise cooldown: %1 min %2 sec remaining</Original>
@@ -2636,63 +2640,70 @@
                 <English>You are getting too close to an enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_SUCCESS_HINT">
-                <Original>Disguise activated. Stay low.</Original>
-                <English>Disguise activated. Stay low.</English>
+                <Original>You are now disguised as a civilian.</Original>
+                <English>You are now disguised as a civilian.</English>
                 <Chinesesimp>伪装已激活。保持低调。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_1">
-                <Original>Hey, you! What are you doing sneaking around here?</Original>
-                <English>Hey, you! What are you doing sneaking around here?</English>
+                <Original>Hey, you! What are you doing? Get out of here!</Original>
+                <English>Hey, you! What are you doing? Get out of here!</English>
                 <Chinesesimp>嘿...你！你在那鬼鬼祟祟的干什么呢...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_2">
-                <Original>I've got a suspicious guy here! All units, form on me!</Original>
-                <English>I've got a suspicious guy here! All units, form on me!</English>
+                <Original>Halt. This is a restricted area. Turn around.</Original>
+                <English>Halt. This is a restricted area. Turn around.</English>
                 <Chinesesimp>我发现了个怪人...所有人向我靠拢！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_3">
-                <Original>This is a warzone! Get back or I'll shoot!</Original>
-                <English>This is a warzone! Get back or I'll shoot!</English>
+                <Original>This area is closed to civilians. Leave now.</Original>
+                <English>This area is closed to civilians. Leave now.</English>
                 <Chinesesimp>这里是战区，滚开！不然我就开枪了！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_4">
-                <Original>Hey you! Get over here! I haven't seen you around!</Original>
-                <English>Hey you! Get over here! I haven't seen you around!</English>
+                <Original>You are not cleared to be here. Move back.</Original>
+                <English>You are not cleared to be here. Move back.</English>
                 <Chinesesimp>嘿，你！过来！我没怎么见过你！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_5">
-                <Original>You there! Nobody's supposed to be out here.</Original>
-                <English>You there! Nobody's supposed to be out here.</English>
+                <Original>Civilian, this is a military zone. Clear the area.</Original>
+                <English>Civilian, this is a military zone. Clear the area.</English>
                 <Chinesesimp>那边那个人，谁让你跑到战区来的？</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_WARNING_6">
+                <Original>Do not come any closer. Turn back now.</Original>
+                <English>Do not come any closer. Turn back now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_WARNING_7">
+                <Original>Move along. You cannot be here.</Original>
+                <English>Move along. You cannot be here.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_WARNING_8">
+                <Original>Keep moving. This area is off limits.</Original>
+                <English>Keep moving. This area is off limits.</English>
+            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NAKED">
-                <Original>Disguise broken: No civilian clothing.</Original>
-                <English>Disguise broken: No civilian clothing.</English>
+                <Original>No civilian clothing.</Original>
+                <English>No civilian clothing.</English>
                 <Chinesesimp>伪装暴露：未穿着平民衣物。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_ACTIVATED_DESC">
-                <Original>Disguised as a civilian. Avoid suspicious actions.</Original>
-                <English>Disguised as a civilian. Avoid suspicious actions.</English>
-                <Chinesesimp>你已伪装成平民。请避免可疑行为。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_WEAPON">
-                <Original>Disguise broken: Weapon detected.</Original>
-                <English>Disguise broken: Weapon detected.</English>
+                <Original>Weapon detected.</Original>
+                <English>Weapon detected.</English>
                 <Chinesesimp>伪装暴露：携带武器。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SUSPICION">
-                <Original>Disguise broken: The enemy saw through it.</Original>
-                <English>Disguise broken: The enemy saw through it.</English>
+                <Original>The enemy saw through it.</Original>
+                <English>The enemy saw through it.</English>
                 <Chinesesimp>伪装暴露：距离敌人过近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEHICLE">
-                <Original>Disguise broken: Entered a non-civilian vehicle.</Original>
-                <English>Disguise broken: Entered a non-civilian vehicle.</English>
+                <Original>Entered a non-civilian vehicle.</Original>
+                <English>Entered a non-civilian vehicle.</English>
                 <Chinesesimp>伪装暴露：进入非民用载具。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SITE">
-                <Original>Disguise broken: Spotted too close to an enemy position.</Original>
-                <English>Disguise broken: Spotted too close to an enemy position.</English>
+                <Original>Spotted too close to an enemy position.</Original>
+                <English>Spotted too close to an enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_ZOMBIE">
                 <Original>Cannot disguise: Not available in this scenario.</Original>
@@ -2736,20 +2747,20 @@
                 <English>Cannot disguise: You are carrying a military backpack.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_HUNTED">
-                <Original>Cannot disguise: The enemy has eyes on you.</Original>
-                <English>Cannot disguise: The enemy has eyes on you.</English>
+                <Original>Cannot disguise while an enemy can see you.</Original>
+                <English>Cannot disguise while an enemy can see you.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR">
-                <Original>Cannot disguise: Enemies are too close.</Original>
-                <English>Cannot disguise: Enemies are too close.</English>
+                <Original>Cannot disguise while enemies are too close.</Original>
+                <English>Cannot disguise while enemies are too close.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_SITE">
-                <Original>Cannot disguise: You are too close to an enemy position.</Original>
-                <English>Cannot disguise: You are too close to an enemy position.</English>
+                <Original>Cannot disguise while too close to an enemy position.</Original>
+                <English>Cannot disguise while too close to an enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_OTHER">
-                <Original>Cannot disguise: Another disguise is already on.</Original>
-                <English>Cannot disguise: Another disguise is already on.</English>
+                <Original>Disguise already active.</Original>
+                <English>Disguise already active.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_METER">
                 <Original>Suspicion</Original>
@@ -2766,16 +2777,16 @@
                 <English>Cannot disguise: You are not wearing an enemy uniform.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED_FMT">
-                <Original>Disguised as an enemy soldier. Suspicion starts at %1 of 100.</Original>
-                <English>Disguised as an enemy soldier. Suspicion starts at %1 of 100.</English>
+                <Original>You are now disguised as an OPFOR. Suspicion starts at %1 of 100.</Original>
+                <English>You are now disguised as an OPFOR. Suspicion starts at %1 of 100.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_MISMATCH_FMT">
                 <Original>Not enemy issue: %1.</Original>
                 <English>Not enemy issue: %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE">
-                <Original>Disguise broken: Seen attacking.</Original>
-                <English>Disguise broken: Seen attacking.</English>
+                <Original>Seen attacking.</Original>
+                <English>Seen attacking.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ENDED_UNIFORM">
                 <Original>Disguise off: You are no longer in an enemy uniform.</Original>

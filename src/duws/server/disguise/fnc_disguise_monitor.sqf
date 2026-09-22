@@ -10,7 +10,8 @@ private _stampVar = ["DUWS_enemyDisguise_blownAt", "DUWS_disguise_blownAt"] sele
 private _bodyMult = [DISGUISE_BODY_MULT_ENEMY, DISGUISE_BODY_MULT_CIV] select _civ;
 private _warningKeys = [
     "STR_DUWS_T_DISGUISE_WARNING_1", "STR_DUWS_T_DISGUISE_WARNING_2", "STR_DUWS_T_DISGUISE_WARNING_3",
-    "STR_DUWS_T_DISGUISE_WARNING_4", "STR_DUWS_T_DISGUISE_WARNING_5"
+    "STR_DUWS_T_DISGUISE_WARNING_4", "STR_DUWS_T_DISGUISE_WARNING_5", "STR_DUWS_T_DISGUISE_WARNING_6",
+    "STR_DUWS_T_DISGUISE_WARNING_7", "STR_DUWS_T_DISGUISE_WARNING_8"
 ];
 
 // The handler only stamps: the loop decides, because a shot breaks cover only while a unit spots the
@@ -22,10 +23,14 @@ private _firedEH = _player addEventHandler ["FiredMan", {
 }];
 
 private _fnc_break = {
-    params ["_key", "_stamp"];
+    params ["_key", "_blown"];
     _player setVariable [_flag, false, true];
-    if (_stamp) then { _player setVariable [_stampVar, diag_tickTime] };
-    [localize _key] remoteExec ["hint", _player];
+    private _text = localize _key;
+    if (_blown) then {
+        _player setVariable [_stampVar, diag_tickTime];
+        _text = format [localize "STR_DUWS_T_DISGUISE_BROKEN_FMT", _text];
+    };
+    [_text] remoteExec ["hint", _player];
 };
 
 private _meter = 0;

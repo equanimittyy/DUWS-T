@@ -3,8 +3,8 @@ if (!isServer) exitWith {};
 params ["_player"];
 if (isNull _player) exitWith {};
 
-// Refusals take DISGUISE_CANT_*, breaks take DISGUISE_BROKEN_* -- the two read as whole
-// sentences from different frames, so a key never serves both paths.
+// Refusals take DISGUISE_CANT_*, breaks take DISGUISE_BROKEN_*: a refusal is a whole sentence and a
+// break is a reason under the BROKEN_FMT heading, so a key never serves both paths.
 fnc_disguise_hintFail = {
     params ["_player", "_reasonKey"];
     [localize _reasonKey] remoteExec ["hint", _player];
@@ -126,7 +126,6 @@ _player setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
 _player setVariable ["DUWS_disguise_siteWarned", false];
 
-[localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
 
 if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
