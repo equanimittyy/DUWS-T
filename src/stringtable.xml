@@ -2760,8 +2760,8 @@
                 <Chinesesimp>伪装暴露：携带武器。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SUSPICION">
-                <Original>The enemy saw through it.</Original>
-                <English>The enemy saw through it.</English>
+                <Original>You raised too much suspicion.</Original>
+                <English>You raised too much suspicion.</English>
                 <Chinesesimp>伪装暴露：距离敌人过近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEHICLE">
