@@ -10,7 +10,7 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3, 4A, 4B.1 and 4B.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
+Phases 1–3, 4A, 4B.1, 4B.2 and 4C.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
 them. This doc specifies what remains. The sections marked **WIP** are first-pass decisions: they change as each chunk
 is built and played.
 
@@ -18,7 +18,7 @@ is built and played.
 
 | Phase | State |
 |---|---|
-| 1–3, 4A, 4B.1, 4B.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 1–3, 4A, 4B.1, 4B.2, 4C.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with zone buys, supply trucks, town buys, Rapport and standalone builds, and the weighted commander's balance | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4B — The picker: every action wired, picked at random | [§Appraisal](#appraisal-phase-4) — WIP |
 | 4C — Weighting: the pick scored by Value ÷ Cost, over `P(win)` where an order fights for its target, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates, mustering and threat-aware routes | [§Templates](#templates-phase-5) — WIP |
@@ -36,7 +36,7 @@ last of all — it multiplies a class's scores, so it has nothing to tilt until 
 
 The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose
 layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, `taskings/` the orders, streaming and
-the ferry, and `appraisal/` the action list and the pick. The debug harness (`fnc_opcom_debug_task.sqf` and the
+the ferry, and `appraisal/` the action list, the Values, the need and cover fields, the siting pass and the pick. The debug harness (`fnc_opcom_debug_task.sqf` and the
 Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work holds to:
 
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
@@ -62,7 +62,8 @@ Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weig
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
 lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget,
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
-may yield. One pick per tick until 4C.2's difficulty setting. The action list (`fnc_opcom_actions`) holds each
+may yield. One pick per tick by default; the difficulty setting changes the rate
+([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's class, targets, gate, price and execute, and from 4C.2 its Value and Cost.
 
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
@@ -84,7 +85,7 @@ written, and the archetype comes last.
 |---|---|---|
 | **4B.1** Picker + zone buys | **Shipped** (`appraisal/`) | — |
 | **4B.2** Trucks + towns + Rapport + standalone builds | **Shipped** (`appraisal/`) | — |
-| **4C.2** Balance | **Part shipped** — the score, the shortlist, the roll, the weighted mode, `P(win)`, worth, exposure, the hidden HQ flag, the defensive holdings' Values (`appraisal/fnc_opcom_value.sqf`), the truck hire's Value of 0, the Values of the OP, the guns, the radio tower and Rapport, the traffic layer and the need and cover fields on the grid overlay, the standalone builds' and the minefields' Values (`appraisal/fnc_opcom_fields.sqf`), so every wired row is appraised, the delay discount, the savings goal and the asset siting. Left: the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
+| **4C.2** Balance | **Shipped** (`appraisal/`) — the score, the shortlist and the roll; `P(win)`; every wired row's Value; the traffic, need and cover fields on the grid overlay; the delay discount; the savings goal; the siting pass; the difficulty setting on the OPCOM debug page. The commit Cost lands with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 | **4B.3** Attack, QRF, Scout | Combatant, recon and transport Recruit, land-taxi, the free-unit check, Attack, Intercept (QRF), Scout | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does |
 | **4B.4** One-gun Arty | The Arty action over the shipped fire mission — the observation gate and the tracker it reads (the tick each BLUFOR zone and FOB was last observed), the shape and its size, the cooldown and the HQ exclusion ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | When the action picks a creep over a saturate; whether a mortar's OP spread bonus survives the 50 m floor |
 | **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
@@ -309,8 +310,8 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 - **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. A supply-gated action drops only when no truck idles
   and the wallet cannot cover the action plus a hire. A commit action drops when no eligible unit is free, and no
-  pool draws a unit garrisoned in a contested zone. Until 4C.2 any action the wallet cannot cover drops. From 4C.2,
-  an offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at
+  pool draws a unit garrisoned in a contested zone. The random draw drops any action the wallet cannot cover. From
+  4C.2, an offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at
   launch ([§Commitment](#commitment-intents-are-sticky)).
 - **From 4C.2, an unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
@@ -335,7 +336,7 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 | Mode: weighted | Runs the scored pick. Shipped |
 | Pick once: weighted | Runs one scored pick, whatever the mode. Shipped |
 | Archetype | Overrides the campaign's archetype (4C.1) |
-| Difficulty | Sets the picks per tick, below 1 for one pick every few ticks (4C.2) |
+| Difficulty | Steps the picks per tick through 0.25, 0.5, 1 and 2, carried as a debt so a rate below 1 picks once every few ticks. Shipped |
 
 ## Commitment: intents are sticky
 
