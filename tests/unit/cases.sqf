@@ -1607,6 +1607,7 @@ fnc_test_breakTime = {
     _t
 };
 ["suspicion: civilian elsewhere, 1 at 50 m breaks in 50 s", [0, [50], 1] call fnc_test_breakTime, 50] call fnc_assertEq;
+["suspicion: civilian elsewhere, 1 at 200 m breaks in 200 s", [0, [200], 1] call fnc_test_breakTime, 200] call fnc_assertEq;
 ["suspicion: civilian elsewhere, 4 at 50 m breaks in 29 s", [0, [50, 50, 50, 50], 1] call fnc_test_breakTime, 29] call fnc_assertEq;
 ["suspicion: civilian elsewhere, 1 at 10 m breaks in 10 s", [0, [10], 1] call fnc_test_breakTime, 10] call fnc_assertEq;
 ["suspicion: civilian elsewhere by a body, 1 at 10 m breaks in 2.5 s", [0, [10], 1 * 4] call fnc_test_breakTime, 2.5] call fnc_assertEq;

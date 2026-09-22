@@ -550,7 +550,7 @@ DISGUISE_CIV_HP_RING = 50;
 DISGUISE_CIV_SITE_WARN = 100;
 // An OPFOR unit spots a disguised player within this range and cone (degrees off its eye direction),
 // at this checkVisibility or more.
-DISGUISE_SPOT_RANGE = 150;
+DISGUISE_SPOT_RANGE = 200;
 DISGUISE_SPOT_CONE = 60;
 DISGUISE_SPOT_VIS = 0.5;
 // Seconds after a shot in which a unit that spots the shooter still breaks cover, so the victims'

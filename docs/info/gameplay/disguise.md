@@ -87,7 +87,7 @@ Each disguised player has a meter from 0 to 100 on the server. The monitor updat
 **Spotting.** An OPFOR unit spots the player when all three of these are true
 (`fnc_disguise_spotters`):
 
-1. It is alive and within `DISGUISE_SPOT_RANGE` (150 m). Crews of vehicles and static weapons count.
+1. It is alive and within `DISGUISE_SPOT_RANGE` (200 m). Crews of vehicles and static weapons count.
 2. The player is within `DISGUISE_SPOT_CONE` (60°) of its `eyeDirection`.
 3. `checkVisibility` from its eye to the player's eye is `DISGUISE_SPOT_VIS` (0.5) or more, so
    terrain, walls, smoke and foliage block it. Both vehicles are ignored, because a ray from inside a
@@ -122,6 +122,7 @@ living OPFOR unit is within `DISGUISE_DECAY_NEAR_RANGE` (50 m), crews included, 
 | Disguise | Kit or ground | Spotters | Time to break |
 |---|---|---|---|
 | Civilian | Elsewhere | 1 at 50 m | 50 s |
+| Civilian | Elsewhere | 1 at 200 m | 200 s |
 | Civilian | Elsewhere, body within 20 m | 1 at 10 m | 2.5 s |
 | Civilian | Band | 1 at 50 m | 8.5 s |
 | Enemy | All OPFOR | 1 at 50 m | 100 s |
