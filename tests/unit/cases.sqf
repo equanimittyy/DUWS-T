@@ -1648,6 +1648,12 @@ OPCOM_DEFEND_FLOOR = 0.2;
 ["defendAt: past the far edge is the floor", [5000] call DUWS_fnc_opcom_defendAt, 0.2] call fnc_assertClose;
 ["defendAt: halfway down the ramp is halfway down the fall", [1250] call DUWS_fnc_opcom_defendAt, 0.6] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_rapportValue: a Rapport's worth, skewed to a neutral town ---
+OPCOM_RAPPORT_STEP = 3;
+["rapportValue: a neutral town takes the whole step", [20, 0] call DUWS_fnc_opcom_rapportValue, 6] call fnc_assertClose;
+["rapportValue: a town at -5 takes half", [20, -5] call DUWS_fnc_opcom_rapportValue, 3] call fnc_assertClose;
+["rapportValue: a town near the flip scores at the floor", [20, -12] call DUWS_fnc_opcom_rapportValue, 0.6] call fnc_assertClose;
+
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;

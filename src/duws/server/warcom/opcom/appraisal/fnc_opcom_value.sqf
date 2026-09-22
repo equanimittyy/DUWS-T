@@ -215,3 +215,9 @@ DUWS_fnc_opcom_towerValue = {
     } forEach (missionNamespace getVariable ["civ_town_rep", []]);
     ([_at, _towns, ["RADIO"] call DUWS_fnc_opcom_assetsOf] call DUWS_fnc_opcom_towerReach) * ([_at] call DUWS_fnc_opcom_defend)
 };
+
+// Skewed to a neutral town: one near -10 turns anyway on the free drift, and a step barely moves one near +10.
+DUWS_fnc_opcom_rapportValue = {
+    params ["_worth", "_rep"];
+    _worth * ((1 - (abs _rep) / 10) max 0.1) * OPCOM_RAPPORT_STEP / 10
+};

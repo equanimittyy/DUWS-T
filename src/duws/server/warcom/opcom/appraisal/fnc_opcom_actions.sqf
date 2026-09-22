@@ -238,13 +238,15 @@ DUWS_fnc_opcom_rapportTargets = {
     private _out = [];
     {
         private _i = _forEachIndex;
-        if (_x <= -15 || {_x >= 10} || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
+        private _rep = _x;
+        if (_rep <= -15 || {_rep >= 10} || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
         if !([_pos] call fnc_aoi_opfor_covers) then { continue };
         private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;
         if (_truck isEqualTo []) then { continue };
         _out pushBack [[_i, _truck select 0], ceil (OPCOM_AP_RAPPORT + (_truck select 1)),
-            format ["Rapport at %1", [_i] call DUWS_fnc_opcom_townLabel]];
+            format ["Rapport at %1", [_i] call DUWS_fnc_opcom_townLabel],
+            [[_i] call DUWS_fnc_opcom_townWorth, _rep] call DUWS_fnc_opcom_rapportValue];
     } forEach (missionNamespace getVariable ["civ_town_rep", []]);
     _out
 };

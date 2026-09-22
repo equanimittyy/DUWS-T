@@ -709,6 +709,8 @@ OPCOM_AP_FORTIFY = 25;
 // Added to a truck's source cost per km driven, so the nearest source wins.
 OPCOM_AP_PER_KM = 0.5;
 OPCOM_AP_RAPPORT = 10;
+// The reputation a delivered Rapport takes off its town, of the 10 that flip it.
+OPCOM_RAPPORT_STEP = 3;
 // Asset hardpoints are flat-priced: what they are worth is reach, eyes or fire missions, not the force they field.
 OPCOM_AP_TOWER = 30;
 OPCOM_AP_OP = 15;
