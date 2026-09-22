@@ -21,6 +21,12 @@ scripted (AIS) or off, never the engine's own revive. BASE respawn returns the p
 ([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ and FOBs add
 further respawn points via `BIS_fnc_addRespawnPosition`.
 
+A respawned player starts naked: [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets an empty
+loadout, because the engine otherwise dresses the new unit in its class kit. The dead body keeps the old
+kit. The Full and Hybrid arsenal modes keep the startup kit free to draw again. The Limited mode draws it
+from the pool like any other gear
+([`fnc_arsenal_counts.sqf`](../../../src/duws/client/arsenal/fnc_arsenal_counts.sqf)).
+
 AIS is compiled through `#include "modules\AIS\cfgFunctions.hpp"` in `description.ext` and auto-boots via
 its CfgFunctions pre/postInit.
 

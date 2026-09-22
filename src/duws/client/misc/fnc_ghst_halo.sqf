@@ -171,16 +171,17 @@ if (!_excludePlayer) then {
     waituntil {sleep 0.1;(position _caller select 2) <= _altchute};
     _caller removeaction _bis_fnc_halo_action;
 
+    // _caller, not player: a death mid-jump rebinds player to the respawned body, which must stay naked.
     if ((vehicle _caller) iskindof "ParachuteBase") exitwith {
-        waitUntil {sleep 0.1;isTouchingGround player};
-        player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+        waitUntil {sleep 0.1; !alive _caller || {isTouchingGround _caller}};
+        if (alive _caller) then { player setUnitLoadout(player getVariable["Saved_Loadout",[]]); };
     };
 
     hint localize "STR_DUWS_T_o3yt6tzg";
     [_caller] spawn bis_fnc_halo;
 
-    waitUntil {sleep 0.1;isTouchingGround player};
-    player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+    waitUntil {sleep 0.1; !alive _caller || {isTouchingGround _caller}};
+    if (alive _caller) then { player setUnitLoadout(player getVariable["Saved_Loadout",[]]); };
 } else {
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
     openMap false;

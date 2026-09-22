@@ -3008,16 +3008,6 @@
                 <English>Take it. It's not much, but it's what we have.</English>
                 <Chinesesimp>...拿着这个，别让我再看到你。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_RESPAWN_LOSS_TITLE">
-                <Original>Respawn Loss</Original>
-                <English>Respawn Loss</English>
-                <Chinesesimp>重生损失</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_RESPAWN_LOSS_DESC">
-                <Original>You lost the following on respawn: %1.</Original>
-                <English>You lost the following on respawn: %1.</English>
-                <Chinesesimp>你在重生时损失了以下物品：%1</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_civ">
                 <Original>Local</Original>
                 <English>Local</English>
