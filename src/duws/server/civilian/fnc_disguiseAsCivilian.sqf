@@ -96,7 +96,9 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _player];
 };
 
-if (_player getVariable ["DUWS_enemyDisguised", false]) exitWith {
+// The monitor flag, not the disguise flags: after a cancel the old monitor runs up to one more tick,
+// and a second disguise started inside it would get no monitor of its own.
+if (_player getVariable ["DUWS_disguise_monitorRunning", false]) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_OTHER"] call fnc_disguise_hintFail;
 };
 if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
@@ -128,7 +130,5 @@ _player setVariable ["DUWS_disguise_siteWarned", false];
 
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
 
-if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
-    _player setVariable ["DUWS_disguise_monitorRunning", true];
-    [_player, "civ"] spawn fnc_disguise_monitor;
-};
+_player setVariable ["DUWS_disguise_monitorRunning", true];
+[_player, "civ"] spawn fnc_disguise_monitor;

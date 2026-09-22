@@ -2574,6 +2574,10 @@
                 <Original>Activate</Original>
                 <English>Activate</English>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_DEACTIVATE">
+                <Original>Deactivate</Original>
+                <English>Deactivate</English>
+            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_NONE">
                 <Original>Active Disguise: None</Original>
                 <English>Active Disguise: None</English>
@@ -2761,6 +2765,10 @@
             <Key ID="STR_DUWS_T_DISGUISE_CANT_OTHER">
                 <Original>Disguise already active.</Original>
                 <English>Disguise already active.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_ENDED_CANCEL">
+                <Original>You are no longer disguised.</Original>
+                <English>You are no longer disguised.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_METER">
                 <Original>Suspicion</Original>

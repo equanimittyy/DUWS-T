@@ -14,7 +14,7 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _player];
 };
 if (CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]) exitWith { ["STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call _fnc_refuse };
-if (_player getVariable ["DUWS_disguised", false]) exitWith { ["STR_DUWS_T_DISGUISE_CANT_OTHER"] call _fnc_refuse };
+if (_player getVariable ["DUWS_disguise_monitorRunning", false]) exitWith { ["STR_DUWS_T_DISGUISE_CANT_OTHER"] call _fnc_refuse };
 if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
     ["STR_DUWS_T_DISGUISE_CANT_HUNTED"] call _fnc_refuse;
 };
@@ -38,7 +38,5 @@ if (_mismatch isNotEqualTo []) then {
 };
 [_msg] remoteExec ["hint", _player];
 
-if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
-    _player setVariable ["DUWS_disguise_monitorRunning", true];
-    [_player, "enemy"] spawn fnc_disguise_monitor;
-};
+_player setVariable ["DUWS_disguise_monitorRunning", true];
+[_player, "enemy"] spawn fnc_disguise_monitor;

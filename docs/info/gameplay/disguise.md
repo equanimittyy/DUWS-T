@@ -22,7 +22,7 @@ Each activation refuses on the first check that fails, in this order.
 | Civilian check | Refusal key |
 |---|---|
 | Cover was blown less than 300 s ago | `STR_DUWS_T_DISGUISE_COOLDOWN_FMT` |
-| The enemy disguise is on | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
+| A disguise monitor still runs for the player | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
 | An OPFOR unit hunts the player (`fnc_disguise_hunted`) or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
 | A living OPFOR soldier is within `50 + random 30` m | `STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR` |
 | The player is within a site ring (below) | `STR_DUWS_T_DISGUISE_CANT_SITE` |
@@ -33,7 +33,7 @@ Each activation refuses on the first check that fails, in this order.
 |---|---|
 | Cover was blown less than 600 s ago | `STR_DUWS_T_DISGUISE_COOLDOWN_FMT` |
 | `CIV_PRESENCE` is `NONE`, `RAVAGE` or `WBK` | `STR_DUWS_T_DISGUISE_CANT_ZOMBIE` |
-| The civilian disguise is on | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
+| A disguise monitor still runs for the player | `STR_DUWS_T_DISGUISE_CANT_OTHER` |
 | An OPFOR unit hunts or spots the player | `STR_DUWS_T_DISGUISE_CANT_HUNTED` |
 | The OPFOR kit scan has not finished | `STR_DUWS_T_ENEMY_DISGUISE_CANT_NOKIT` |
 | The player does not wear an OPFOR uniform | `STR_DUWS_T_ENEMY_DISGUISE_CANT_UNIFORM` |
@@ -121,6 +121,12 @@ The monitor checks these every 0.5 s. Each break stamps the cooldown.
 
 The enemy disguise ends without a stamp when the player wears a uniform that is not in the OPFOR
 kit, because the player took the disguise off. Death ends either disguise without a stamp.
+
+The player can end either disguise without a stamp from the panel, where the active card's button
+reads Deactivate (`server/disguise/fnc_disguise_cancel.sqf`). The monitor sees the flag drop at its
+next tick, so it can run for up to 0.5 s after the cancel. Both activations therefore refuse while
+`DUWS_disguise_monitorRunning` is set, not while a disguise flag is set, or a disguise started in
+that tick would get no monitor.
 
 A `FiredMan` handler only stamps the time of the shot. The monitor decides at the next tick, because
 only a unit that spots the player breaks cover.
