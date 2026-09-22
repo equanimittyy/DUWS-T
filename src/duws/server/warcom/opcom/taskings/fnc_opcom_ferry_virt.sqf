@@ -35,7 +35,7 @@ DUWS_fnc_opcom_ferryStep = {
         if (_arrived) exitWith {
             _rider set ["pos", _rider getOrDefault ["ferryLand", _t get "pos"]];
             // Off-screen drop skips ferryRelease, so thaw the freeze here (a live board may have set it).
-            _rider set ["ridingOn", -1]; _rider set ["route", []]; _rider set ["ferryFrozen", false];
+            _rider set ["ridingOn", -1]; _rider set ["route", []]; _rider set ["ferryFrozen", false]; _rider set ["taxiDrop", []];
             // A boat backs off to navigable water so it never routes, rests or de-virt spawns from land.
             private _tpos = _t get "pos";
             if ((_t get "moveType") isEqualTo "boat") then { _tpos = [_tpos] call DUWS_fnc_opcom_nearestWater };

@@ -36,6 +36,17 @@ DUWS_fnc_opcom_reserveToken = {
     format ["opcomdef%1:%2", _t get "id", [(_t get "comp") select 0] call DUWS_fnc_tokenName]
 };
 
+// Draw a homed unit out of its zone: delete the defender its reserve token stands as, then re-sync so the pool and
+// the ceiling drop by it. A unit going mobile must not also stand in the wave.
+DUWS_fnc_opcom_drawOut = {
+    params ["_t"];
+    private _hz = _t get "homeZone";
+    if (_hz isEqualTo "") exitWith {};
+    private _tok = [_t] call DUWS_fnc_opcom_reserveToken;
+    { if ((_x getVariable ["DUWS_garrisonToken", ""]) isEqualTo _tok) then { { deleteVehicle _x } forEach units _x; deleteGroup _x } } forEach allGroups;
+    [_hz] call DUWS_fnc_opcom_zoneReserveSync;
+};
+
 // A homed unit fights only as its reserve-spawned group, so that group's wipe is the unit's death. Left in the store,
 // the next raise would stand it again.
 DUWS_fnc_opcom_defenderLost = {

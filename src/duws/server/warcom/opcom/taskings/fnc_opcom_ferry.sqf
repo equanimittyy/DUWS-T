@@ -11,6 +11,9 @@ if (!isServer) exitWith {};
 // leg not stepped). Falls back to the rider's target if the chain runs to water (an offshore target).
 DUWS_fnc_opcom_ferryDrop = {
     params ["_rider"];
+    // A taxi's drop is latched at the bind -- the rider's own destination, not the far shore of a water span.
+    private _taxi = _rider getOrDefault ["taxiDrop", []];
+    if (_taxi isNotEqualTo []) exitWith { _taxi };
     private _route = _rider get "route";
     private _far = -1;
     private _seenWater = false;
@@ -36,32 +39,39 @@ DUWS_fnc_opcom_ferryApproach = {
 // borrows itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
 // re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.
 DUWS_fnc_opcom_ferryPool = {
-    params [["_excludeId", -1]];
+    params [["_excludeId", -1], ["_moveTypes", ["boat", "rotary"]]];
     DUWS_opcom_taskings select {
         ("transport" in (_x get "flags"))
         && {(_x get "id") != _excludeId}
-        && {(_x get "moveType") in ["boat", "rotary"]}
+        && {(_x get "moveType") in _moveTypes}
         && {[_x] call DUWS_fnc_opcom_drawable}
     }
 };
 
+// Bind a rider to a transport, which owns it until the drop. `_drop` latches a taxi's drop point; [] leaves a water
+// crossing to find its far shore at the board. A garrisoned pick is flipped to `move` so its carry turn runs.
+DUWS_fnc_opcom_carryBind = {
+    params ["_tr", "_rider", ["_drop", []]];
+    // A combatant lift (an APC, an IFV) leaves its post: field nothing in its place while it drives.
+    if ((_tr get "order") isEqualTo "garrison" && {!("noncombat" in (_tr get "flags"))}) then { [_tr] call DUWS_fnc_opcom_drawOut };
+    _tr set ["order", "move"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
+    _tr set ["ferryPhase", "topickup"]; _tr set ["ferryWait", 0]; _tr set ["ferryLZ", []];
+    _rider set ["ridingOn", _tr get "id"];
+    _rider set ["taxiDrop", _drop];
+    // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.
+    if ((_rider get "grp") isNotEqualTo "") then { [_rider] call DUWS_fnc_opcom_reOrderLive };
+};
+
 // Borrow the nearest free compatible transport for a rider at a water leg; returns it, or nil if none is free.
-// A garrisoned pick is flipped to `move` so its ferry turn runs; no reserve draw-out, since a ferry-capable
-// transport is a non-combatant never in the wave.
 DUWS_fnc_opcom_borrowFerry = {
     params ["_rider"];
     private _rpos = _rider get "pos";
     private _pool = [_rider get "id"] call DUWS_fnc_opcom_ferryPool;
     if (_pool isEqualTo []) exitWith { nil };
-    private _cands = _pool;
     private _best = 1e12; private _pick = -1;
-    { private _dd = (_x get "pos") distance2D _rpos; if (_dd < _best) then { _best = _dd; _pick = _forEachIndex } } forEach _cands;
-    private _tr = _cands select _pick;
-    _tr set ["order", "move"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
-    _tr set ["ferryPhase", "topickup"]; _tr set ["ferryWait", 0]; _tr set ["ferryLZ", []];
-    _rider set ["ridingOn", _tr get "id"];
-    // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.
-    if ((_rider get "grp") isNotEqualTo "") then { [_rider] call DUWS_fnc_opcom_reOrderLive };
+    { private _dd = (_x get "pos") distance2D _rpos; if (_dd < _best) then { _best = _dd; _pick = _forEachIndex } } forEach _pool;
+    private _tr = _pool select _pick;
+    [_tr, _rider] call DUWS_fnc_opcom_carryBind;
     ["INFO", "OPCOM", format ["ferry: tasking %1 borrows %2 transport %3 for a water leg", _rider get "id", _tr get "moveType", _tr get "id"]] call fnc_log;
     _tr
 };
@@ -70,7 +80,7 @@ DUWS_fnc_opcom_borrowFerry = {
 // rider is still bound, which pins it with a HOLD, so without the re-order it would stand at the drop.
 DUWS_fnc_opcom_ferryUnbind = {
     params ["_r"];
-    _r set ["ridingOn", -1]; _r set ["ferryFrozen", false];
+    _r set ["ridingOn", -1]; _r set ["ferryFrozen", false]; _r set ["taxiDrop", []];
     [_r] call DUWS_fnc_opcom_reOrderLive;
 };
 

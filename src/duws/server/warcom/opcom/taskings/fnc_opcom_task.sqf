@@ -73,7 +73,6 @@ if (_order isNotEqualTo "guard" && {_pts isEqualTo []}) exitWith {
 };
 
 private _wasGarrison = (_t get "order") isEqualTo "garrison";
-private _hz = _t get "homeZone";
 _t set ["order", _order];
 if (_order isEqualTo "guard") then {
     _t set ["target", _t get "pos"];
@@ -90,13 +89,7 @@ _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
 _t set ["interceptKey", _ik];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
-// Drawing a garrison unit out: delete its reserve-spawned defender (going mobile), then re-sync so the zone's
-// reserve pool and ceiling drop by this unit.
-if (_wasGarrison && {_hz isNotEqualTo ""}) then {
-    private _tok = [_t] call DUWS_fnc_opcom_reserveToken;
-    { if ((_x getVariable ["DUWS_garrisonToken", ""]) isEqualTo _tok) then { { deleteVehicle _x } forEach units _x; deleteGroup _x } } forEach allGroups;
-    [_hz] call DUWS_fnc_opcom_zoneReserveSync;
-};
+if (_wasGarrison) then { [_t] call DUWS_fnc_opcom_drawOut };
 if (_live) then { [_t] call DUWS_fnc_opcom_reOrderLive };
 ["INFO", "OPCOM", format ["task: tasking %1 -> %2 at %3 (%4, %5 legs)", _t get "id", _order, _t get "target", _t get "routeMode", count (_t get "route")]] call fnc_log;
 true

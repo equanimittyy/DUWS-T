@@ -54,12 +54,22 @@ DUWS_fnc_opcom_hireDemand = {
         } forEach (call DUWS_fnc_opcom_scoutBlocked);
     };
     // No P(win) on a lift: it fights nothing, and the rider's committed Value already carries the odds.
-    if (("transport" in _flags) && {_moveType in ["boat", "rotary"]}) then {
+    if ("transport" in _flags) then {
+        private _crosses = _moveType in ["boat", "rotary"];
+        private _drives = _moveType in ["wheeled", "tracked", "rotary"];
         {
-            if ((_x getOrDefault ["strandTicks", 0]) > 0) then {
-                private _v = _x getOrDefault ["expValue", 0];
-                if (_v > _best) then { _best = _v; _at = _x get "pos" };
+            private _r = _x;
+            private _v = 0;
+            if ((_r getOrDefault ["strandTicks", 0]) > 0) then {
+                // Stopped at a water leg with no lift free: the whole order waits on a crossing.
+                if (_crosses) then { _v = _r getOrDefault ["expValue", 0] };
+            } else {
+                if (_drives && {[_r, _moveType] call DUWS_fnc_opcom_taxiFits}) then {
+                    private _z = [_r get "pos", _zones] call DUWS_fnc_opcom_nearestOpen;
+                    if (_z isNotEqualTo []) then { _v = [_r, _z select 2, _moveType] call DUWS_fnc_opcom_taxiSaving };
+                };
             };
+            if (_v > _best) then { _best = _v; _at = _r get "pos" };
         } forEach DUWS_opcom_taskings;
     };
     [_best, _at]

@@ -56,8 +56,10 @@ DUWS_fnc_opcom_attackRun = {
     private _t = [_id] call DUWS_fnc_opcom_byId;
     if (isNil "_t") exitWith { false };
     if !([_t, "capture", ([_zk] call fnc_site_at) get "pos"] call fnc_opcom_task) exitWith { false };
-    // What a lift is worth to this unit if a water leg strands it (fnc_opcom_hire).
+    // What the order is worth once committed: a lift is priced against it, stranded at a water leg or taxied over
+    // dry ground (fnc_opcom_taxi, fnc_opcom_hire).
     _t set ["expValue", _exp];
+    [_t] call DUWS_fnc_opcom_taxiBind;
     true
 };
 
@@ -95,6 +97,7 @@ DUWS_fnc_opcom_interceptRun = {
     if (isNil "_t") exitWith { false };
     if !([_t, "intercept", _key] call fnc_opcom_task) exitWith { false };
     _t set ["expValue", _exp];
+    [_t] call DUWS_fnc_opcom_taxiBind;
     true
 };
 
@@ -146,5 +149,6 @@ DUWS_fnc_opcom_scoutRun = {
     if (isNil "_t") exitWith { false };
     if !([_t, "move", _to] call fnc_opcom_task) exitWith { false };
     _t set ["expValue", _exp];
+    [_t] call DUWS_fnc_opcom_taxiBind;
     true
 };

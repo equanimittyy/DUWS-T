@@ -97,4 +97,5 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
+duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone

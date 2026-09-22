@@ -1753,6 +1753,13 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
 ["hireDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
 ["hireDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_hireDefense, 40] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_taxiWorth: what a lift adds by landing the same Value sooner ---
+OPCOM_VALUE_HALFLIFE = 360;
+["taxiWorth: a lift that saves a half-life doubles what the order returns", [10, 720, 360] call DUWS_fnc_opcom_taxiWorth, 10] call fnc_assertClose;
+["taxiWorth: a lift that saves nothing is worth nothing", [10, 360, 360] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
+["taxiWorth: a lift slower than the walk is worth nothing", [10, 360, 500] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
+["taxiWorth: a worthless order buys no lift", [0, 720, 60] call DUWS_fnc_opcom_taxiWorth, 0] call fnc_assertClose;
+
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;
 ["disguise_floor: an empty helmet slot costs the helmet penalty", [[["headgear", ""]]] call fnc_disguise_floor, 20] call fnc_assertEq;
