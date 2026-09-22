@@ -89,7 +89,6 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_traffic.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_sources.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_observed.sqf";
 // taskings\: streaming, the movement core, the ferry trio (orchestrator, virtual, live), garrison, ports, delivery, fires, the order bodies and the order table executed to
 // define them; the store init, router, recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.

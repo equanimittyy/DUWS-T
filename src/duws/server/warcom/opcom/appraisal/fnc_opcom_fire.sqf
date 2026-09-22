@@ -17,10 +17,9 @@ DUWS_fnc_opcom_fireClear = {
     }) < 0
 };
 
-// [[pos, believed force, P(win), shape kind, under an OP], ...]: a sighting fresh enough to still be there, and a
-// zone or FOB seen inside the observation span. A sighting's odds are its freshness, because a fading one has
-// probably moved; ground does not move, so a holding reads 1. Everything that does not depend on which gun fires is
-// settled here, so the per-gun sweep only measures range.
+// [[pos, believed force, P(win)], ...]: a sighting fresh enough to still be there. Belief only -- OPFOR shells
+// what it has seen, never ground it merely owns eyes near, so a gun is as blind as the commander's sensors are.
+// A sighting's odds are its freshness, because a fading one has probably moved.
 DUWS_fnc_opcom_fireTargetsSeen = {
     private _out = [];
     {
@@ -29,16 +28,10 @@ DUWS_fnc_opcom_fireTargetsSeen = {
             private _pos = DUWS_opcom_belief_pos select _forEachIndex;
             if (_age <= OPCOM_BELIEF_FRESH && {[_pos] call DUWS_fnc_opcom_fireClear}) then {
                 _out pushBack [_pos, DUWS_opcom_belief_str select _forEachIndex,
-                    1 - ((_age / OPCOM_BELIEF_EXPIRE) min 1), "saturate", [_pos] call DUWS_fnc_opcom_opWatches];
+                    1 - ((_age / OPCOM_BELIEF_EXPIRE) min 1)];
             };
         };
     } forEach DUWS_opcom_belief_key;
-    {
-        _x params ["_key", "_pos"];
-        if ((([_key] call DUWS_fnc_opcom_observedAge) <= OPCOM_OBSERVE_SPAN) && {[_pos] call DUWS_fnc_opcom_fireClear}) then {
-            _out pushBack [_pos, OPCOM_GRID_ZONE_ENEMY_FORCE, 1, "creep", [_pos] call DUWS_fnc_opcom_opWatches];
-        };
-    } forEach (call DUWS_fnc_opcom_bluforSites);
     _out
 };
 
@@ -46,32 +39,28 @@ DUWS_fnc_opcom_fireTargets = {
     if (isNil "DUWS_opcom_grid_w") exitWith { [] };
     private _seen = call DUWS_fnc_opcom_fireTargetsSeen;
     if (_seen isEqualTo []) exitWith { [] };
+    private _total = 0;
+    { _total = _total + (_x select 1) } forEach _seen;
     private _out = [];
     {
         _x params ["_key", "_gpos", "_type"];
         private _guns = count ([_key] call DUWS_fnc_opcom_batteryPieces);
         if (_guns > 0 && {DUWS_opcom_tick >= (DUWS_opcom_gunReady getOrDefault [_key, 0])}) then {
-            private _reach = [OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY");
+            private _range = [OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY");
             private _lethal = OPCOM_ARTY_LETHAL getOrDefault [_type, 20];
+            private _perRound = OPCOM_AP_PER_ROUND getOrDefault [_type, 2];
             (OPCOM_ARTY_ROUNDS getOrDefault [_type, [4, 8]]) params ["_lo", "_hi"];
             private _rounds = _lo + floor random (_hi - _lo + 1);
+            private _fired = _rounds * _guns;
+            private _cover = [_lethal, _fired] call DUWS_fnc_opcom_artyReach;
             {
-                _x params ["_pos", "_force", "_pw", "_kind", "_op"];
+                _x params ["_pos", "", "_pw"];
                 private _d = _gpos distance2D _pos;
-                if (_d <= _reach) then {
-                    private _spread = [OPCOM_ARTY_SPREAD getOrDefault [_type, 50], _d, _op] call DUWS_fnc_opcom_artySpread;
-                    // A sighting is saturated where it stands; a zone or a FOB is walked across, away from the gun.
-                    private _shape = if (_kind isEqualTo "creep") then { ["creep", _spread, _spread, _gpos getDir _pos] } else { ["saturate", _spread] };
-                    // A creep's rounds follow from its size, so its Cost is what the shape will actually fire.
-                    private _fired = if (_kind isEqualTo "creep") then {
-                        ([_shape, _guns] call DUWS_fnc_opcom_creepGrid) params ["_rows", "_perRow"];
-                        _rows * _perRow * _guns
-                    } else { _rounds * _guns };
-                    private _area = [_shape] call DUWS_fnc_opcom_patternArea;
-                    private _share = [_fired, _lethal, _area] call DUWS_fnc_opcom_artyShare;
-                    _out pushBack [[_key, _type, +_pos, _rounds, _shape, _spread], _fired * OPCOM_AP_PER_ROUND,
+                if (_d <= _range) then {
+                    private _spread = [OPCOM_ARTY_SPREAD getOrDefault [_type, 50], _d] call DUWS_fnc_opcom_artySpread;
+                    _out pushBack [[_key, _type, +_pos, _rounds, ["saturate", _spread], _spread], _fired * _perRound,
                         format ["Shell %1 from %2", mapGridPosition _pos, DUWS_hardpointName getOrDefault [_type, _type]],
-                        [_pos, _force, _spread, _share] call DUWS_fnc_opcom_artyValue, _pw];
+                        [_pos, _cover, _spread, _seen, _total] call DUWS_fnc_opcom_artyValue, _pw];
                 };
             } forEach _seen;
         };
