@@ -1747,6 +1747,12 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
     count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_scoutCells), 28] call fnc_assertEq;
 
 
+// --- DUWS_fnc_opcom_hireDefense: the defense a hire adds at the zone that raises it ---
+["hireDefense: a hire doubling a thin zone is worth half its worth", [40, 1, 10, 10] call DUWS_fnc_opcom_hireDefense, 20] call fnc_assertClose;
+["hireDefense: the same hire at a stacked zone is worth a tenth", [40, 1, 10, 90] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
+["hireDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
+["hireDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_hireDefense, 40] call fnc_assertClose;
+
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;
 ["disguise_floor: an empty helmet slot costs the helmet penalty", [[["headgear", ""]]] call fnc_disguise_floor, 20] call fnc_assertEq;

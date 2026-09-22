@@ -90,9 +90,11 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_cover.sqf::DUWS_fnc_opcom_cov
 duws/server/disguise/fnc_disguise_floor.sqf::*fnc_disguise_floor
 duws/server/disguise/fnc_disguise_suspicion_step.sqf::*fnc_disguise_suspicion_step
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_blockGain
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinWith
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinSend
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_abandonAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutCells
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone

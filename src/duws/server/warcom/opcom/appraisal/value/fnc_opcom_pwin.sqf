@@ -48,10 +48,16 @@ DUWS_fnc_opcom_blockGain = {
     _g
 };
 
+// The odds with a force the grid does not already count at _pos: a unit sent in, or one OPCOM has yet to hire.
+DUWS_fnc_opcom_pWinWith = {
+    params ["_pos", "_force"];
+    ([_pos] call DUWS_fnc_opcom_blockForce) params ["_fri", "_ene"];
+    [_fri + _force * (call DUWS_fnc_opcom_blockGain), _ene] call DUWS_fnc_opcom_pWinAt
+};
+
 // The odds with the unit sent added, unless it already stands inside the block and the grid counts it there.
 DUWS_fnc_opcom_pWinSend = {
     params ["_pos", "_from", "_force"];
-    ([_pos] call DUWS_fnc_opcom_blockForce) params ["_fri", "_ene"];
-    if (([_pos, _from] call DUWS_fnc_opcom_cellDist) > 1) then { _fri = _fri + _force * (call DUWS_fnc_opcom_blockGain) };
-    [_fri, _ene] call DUWS_fnc_opcom_pWinAt
+    private _add = [0, _force] select (([_pos, _from] call DUWS_fnc_opcom_cellDist) > 1);
+    [_pos, _add] call DUWS_fnc_opcom_pWinWith
 };

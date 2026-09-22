@@ -183,15 +183,6 @@ DUWS_fnc_opcom_rapportTargets = {
     _out
 };
 
-DUWS_fnc_opcom_recruitSupplyTargets = {
-    private _hires = (call DUWS_fnc_opcom_truckSources) select { ((_x select 0) select 0) isEqualTo "hire" };
-    if (_hires isEqualTo []) exitWith { [] };
-    (selectRandom _hires) params ["_src", "", "_price"];
-    private _zk = _src select 1;
-    // Worth 0 until land-taxi gives a truck transport demand (4B.3): every supply action hires its own when none idles.
-    [[_zk, _price, format ["Recruit a truck at %1", [_zk] call DUWS_fnc_opcom_zoneLabel], 0]]
-};
-
 DUWS_fnc_opcom_standaloneBuildTargets = {
     params ["_type"];
     if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
@@ -269,11 +260,6 @@ DUWS_opcom_actions = [
         params ["_target"];
         _target params ["_i", "_src"];
         [_src, [_i] call DUWS_fnc_opcom_townPos, ["rapport", _i]] call DUWS_fnc_opcom_supplyRun
-    }],
-    ["recruit_supply", "buildup", DUWS_fnc_opcom_recruitSupplyTargets, {
-        params ["_zk"];
-        private _t = ["truck", ([_zk] call fnc_site_at) get "pos", _zk, false] call fnc_opcom_recruit;
-        !isNil "_t"
     }],
     ["attack", "offensive", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun],
     ["intercept", "defensive", DUWS_fnc_opcom_interceptTargets, DUWS_fnc_opcom_interceptRun],
