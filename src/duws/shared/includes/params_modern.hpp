@@ -41,7 +41,7 @@ class Params {
     // enemy weapon gets its ammo free on the shelf. On folds magazines into whatever the mode tracks
     // (Hybrid pools foreign ammo, Limited pools all of it) -- for scarcity scenarios like zombie mode.
     class DUWS_TrackAmmo {
-        title = "Track Ammo";
+        title = "Arsenal - Track Ammo";
         values[] = {0,1};
         texts[] = {"Off (ammo unlimited)","On (ammo tracked)"};
         default = 0;
