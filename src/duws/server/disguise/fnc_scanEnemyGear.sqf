@@ -13,18 +13,20 @@ private _safePos = [worldSize / 2, worldSize / 2, 0];
 private _kit = createHashMapFromArray [
     ["uniform", []], ["vest", []], ["headgear", []], ["backpack", []], ["nvg", []], ["weapon", []]
 ];
+// The slots some OPFOR class leaves empty, so an empty one on the player is still OPFOR issue.
+private _optional = [];
 private _grp = createGroup east;
 {
     private _unit = _grp createUnit [_x, _safePos, [], 0, "NONE"];
     if (!isNull _unit) then {
         sleep 0.05;
         {
-            _x params ["_slot", "_cls"];
-            if (_cls != "") then { (_kit get _slot) pushBackUnique (toLowerANSI _cls) };
+            _x params ["_slot", "_set", "_cls"];
+            if (_cls == "") then { _optional pushBackUnique _slot } else { (_kit get _set) pushBackUnique (toLowerANSI _cls) };
         } forEach [
-            ["uniform", uniform _unit], ["vest", vest _unit], ["headgear", headgear _unit],
-            ["backpack", backpack _unit], ["nvg", hmd _unit], ["weapon", primaryWeapon _unit],
-            ["weapon", secondaryWeapon _unit], ["weapon", handgunWeapon _unit]
+            ["uniform", "uniform", uniform _unit], ["vest", "vest", vest _unit], ["headgear", "headgear", headgear _unit],
+            ["backpack", "backpack", backpack _unit], ["nvg", "nvg", hmd _unit], ["primary", "weapon", primaryWeapon _unit],
+            ["launcher", "weapon", secondaryWeapon _unit], ["handgun", "weapon", handgunWeapon _unit]
         ];
         deleteVehicle _unit;
     };
@@ -34,8 +36,9 @@ deleteGroup _grp;
 private _weapons = _kit get "weapon";
 { _weapons pushBackUnique (toLowerANSI _x) } forEach ([_weapons] call fnc_arsenal_base_weapons);
 _kit set ["vehicle", _vehicles apply { toLowerANSI _x }];
+_kit set ["optional", _optional];
 
 DUWS_enemyKit = _kit;
-["INFO", "GEAR", format ["enemy kit: %1 uniforms, %2 vests, %3 headgear, %4 backpacks, %5 NVGs, %6 weapons, %7 vehicles",
+["INFO", "GEAR", format ["enemy kit: %1 uniforms, %2 vests, %3 headgear, %4 backpacks, %5 NVGs, %6 weapons, %7 vehicles, optional slots %8",
     count (_kit get "uniform"), count (_kit get "vest"), count (_kit get "headgear"), count (_kit get "backpack"),
-    count (_kit get "nvg"), count _weapons, count (_kit get "vehicle")]] call fnc_log;
+    count (_kit get "nvg"), count _weapons, count (_kit get "vehicle"), _optional]] call fnc_log;

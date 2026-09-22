@@ -2789,8 +2789,40 @@
                 <English>You are now disguised as an OPFOR. Suspicion starts at %1 of 100.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_MISMATCH_FMT">
-                <Original>Not enemy issue: %1.</Original>
-                <English>Not enemy issue: %1.</English>
+                <Original>\n\nNot enemy issue:\n%1</Original>
+                <English>\n\nNot enemy issue:\n%1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_MISSING_FMT">
+                <Original>\n\nMissing:\n%1</Original>
+                <English>\n\nMissing:\n%1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_PRIMARY">
+                <Original>Primary weapon</Original>
+                <English>Primary weapon</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_LAUNCHER">
+                <Original>Launcher</Original>
+                <English>Launcher</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_HANDGUN">
+                <Original>Handgun</Original>
+                <English>Handgun</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_VEST">
+                <Original>Vest</Original>
+                <English>Vest</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_HEADGEAR">
+                <Original>Headgear</Original>
+                <English>Headgear</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_NVG">
+                <Original>NVG</Original>
+                <English>NVG</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SLOT_BACKPACK">
+                <Original>Backpack</Original>
+                <English>Backpack</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE">
                 <Original>Seen attacking.</Original>

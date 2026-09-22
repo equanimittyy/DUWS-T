@@ -1589,9 +1589,11 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 
 // --- fnc_disguise_floor / fnc_disguise_suspicion_step: the disguise suspicion meter ---
 ["disguise_floor: a matched kit starts at nothing", [[]] call fnc_disguise_floor, 0] call fnc_assertEq;
-["disguise_floor: wrong rifle and helmet", [["primary", "headgear"]] call fnc_disguise_floor, 50] call fnc_assertEq;
-["disguise_floor: only the uniform matching caps at 95",
-    [["primary", "vehicle", "launcher", "vest", "headgear", "nvg", "handgun", "backpack"]] call fnc_disguise_floor, 95] call fnc_assertEq;
+["disguise_floor: an empty helmet slot costs the helmet penalty", [[["headgear", ""]]] call fnc_disguise_floor, 20] call fnc_assertEq;
+["disguise_floor: a wrong helmet costs twice the penalty", [[["headgear", "h_helmetb"]]] call fnc_disguise_floor, 40] call fnc_assertEq;
+["disguise_floor: a wrong rifle and no vest", [[["primary", "arifle_mx_f"], ["vest", ""]]] call fnc_disguise_floor, 80] call fnc_assertEq;
+["disguise_floor: a wrong rifle and a wrong helmet cap at 95",
+    [[["primary", "arifle_mx_f"], ["headgear", "h_helmetb"]]] call fnc_disguise_floor, 95] call fnc_assertEq;
 
 // Seconds from the floor to a break at the monitor's 0.5 s tick, for a fixed set of spotters.
 fnc_test_breakTime = {
@@ -1612,8 +1614,8 @@ fnc_test_breakTime = {
 ["suspicion: enemy full kit, 1 at 50 m breaks in 100 s", [0, [50], 0.5] call fnc_test_breakTime, 100] call fnc_assertEq;
 ["suspicion: enemy full kit, 4 at 50 m breaks in 57.5 s", [0, [50, 50, 50, 50], 0.5] call fnc_test_breakTime, 57.5] call fnc_assertEq;
 ["suspicion: enemy full kit, 1 at 10 m breaks in 20 s", [0, [10], 0.5] call fnc_test_breakTime, 20] call fnc_assertEq;
-["suspicion: enemy wrong rifle and helmet, 1 at 20 m breaks in 20 s", [50, [20], 0.5] call fnc_test_breakTime, 20] call fnc_assertEq;
-["suspicion: enemy wrong rifle and helmet by a body, 1 at 20 m breaks in 5 s", [50, [20], 0.5 * 4] call fnc_test_breakTime, 5] call fnc_assertEq;
+["suspicion: enemy with no rifle and no helmet, 1 at 20 m breaks in 20 s", [50, [20], 0.5] call fnc_test_breakTime, 20] call fnc_assertEq;
+["suspicion: enemy with no rifle and no helmet by a body, 1 at 20 m breaks in 5 s", [50, [20], 0.5 * 4] call fnc_test_breakTime, 5] call fnc_assertEq;
 ["suspicion: enemy only the uniform, 1 at 50 m breaks in 5 s", [95, [50], 0.5] call fnc_test_breakTime, 5] call fnc_assertEq;
 ["suspicion: enemy only the uniform, 1 at 10 m breaks in 1 s", [95, [10], 0.5] call fnc_test_breakTime, 1] call fnc_assertEq;
 ["suspicion: a spotter inside 10 m rises no faster than one at 10 m",

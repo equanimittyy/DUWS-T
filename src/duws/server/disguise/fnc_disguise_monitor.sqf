@@ -61,7 +61,7 @@ while {alive _player && {_player getVariable [_flag, false]}} do {
             ["STR_DUWS_T_ENEMY_DISGUISE_ENDED_UNIFORM", false] call _fnc_break;
             _stop = true;
         } else {
-            _floor = [([_player] call fnc_disguise_enemyMismatch) apply { _x select 0 }] call fnc_disguise_floor;
+            _floor = [[_player] call fnc_disguise_enemyMismatch] call fnc_disguise_floor;
         };
     };
     if (_stop) exitWith {};

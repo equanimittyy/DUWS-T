@@ -38,8 +38,8 @@ Each activation refuses on the first check that fails, in this order.
 | The OPFOR kit scan has not finished | `STR_DUWS_T_ENEMY_DISGUISE_CANT_NOKIT` |
 | The player does not wear an OPFOR uniform | `STR_DUWS_T_ENEMY_DISGUISE_CANT_UNIFORM` |
 
-The enemy activation hint gives the suspicion floor and names each item that OPFOR does not issue,
-so the player can fix the kit before moving in.
+The enemy activation hint gives the suspicion floor, names each item that OPFOR does not issue, and
+names each empty slot that counts, so the player can fix the kit before moving in.
 
 ### The civilian kit rules
 
@@ -90,9 +90,13 @@ body is within 20 m: `DISGUISE_BODY_MULT` (×4) for both disguises.
 The enemy disguise rises at `DISGUISE_ENEMY_RATE` (×0.5) everywhere.
 
 **Floor.** The civilian floor is always 0, because the kit rules break on every item that does not
-read civilian. The enemy floor is the sum of a penalty for each item OPFOR does not issue: primary
-weapon 30, vehicle 30, launcher 20, vest 20, headgear 20, NVG 15, handgun 10, backpack 10. It is
-capped at 95, so the floor alone never breaks cover.
+read civilian. The enemy floor is the sum of a penalty per slot: primary weapon 30, vehicle 30,
+launcher 20, vest 20, headgear 20, NVG 15, handgun 10, backpack 10. An item that OPFOR does not issue
+costs twice its slot's penalty. An empty slot costs the penalty once, but only when every OPFOR class
+fills that slot, so a rifleman with no launcher pays nothing. An empty vest or headgear slot always
+costs, because a soldier without them reads wrong even where a pilot or an officer goes without. Being
+on foot is never an empty vehicle slot. The floor is capped at 95, so the floor alone never breaks
+cover.
 
 **Decay.** While no unit spots the player, the meter falls 5 per second, down to the floor.
 
@@ -103,7 +107,7 @@ capped at 95, so the floor alone never breaks cover.
 | Civilian | Band | 1 at 50 m | 8.5 s |
 | Enemy | All OPFOR | 1 at 50 m | 100 s |
 | Enemy | All OPFOR | 4 at 50 m | 57.5 s |
-| Enemy | Wrong rifle and helmet | 1 at 20 m | 20 s |
+| Enemy | No rifle and no helmet | 1 at 20 m | 20 s |
 | Enemy | Only the uniform matches | 1 at 10 m | 1 s |
 
 `tests/unit/cases.sqf` checks these rows and the rest of the model.
@@ -156,7 +160,8 @@ town reputation does not affect the disguise.
 `DUWS_enemyKit`. It spawns one of each OPFOR man class from the roster (`fnc_faction_unit_keylist`),
 reads the worn kit, and deletes it. The vehicle set is every OPFOR vehicle and static class. The sets
 come from the roster, not config side 0, because auto-detection can field a faction as OPFOR whose
-units are side 2 in config.
+units are side 2 in config. The scan also records each slot that some OPFOR class leaves empty, as
+`optional`, and the empty-slot penalty skips those slots.
 
 The sets hold lowercase classes, because `in` compares strings by case. A weapon matches by class or
 by its arsenal base row (`fnc_arsenal_base_weapons`), so a looted rifle with a different optic still

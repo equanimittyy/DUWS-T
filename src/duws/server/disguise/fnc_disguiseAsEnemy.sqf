@@ -27,14 +27,20 @@ _player setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
 
 private _mismatch = [_player] call fnc_disguise_enemyMismatch;
-private _msg = format [localize "STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED_FMT", [_mismatch apply { _x select 0 }] call fnc_disguise_floor];
-if (_mismatch isNotEqualTo []) then {
-    private _names = _mismatch apply {
+private _msg = format [localize "STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED_FMT", [_mismatch] call fnc_disguise_floor];
+private _wrong = _mismatch select { (_x select 1) != "" };
+private _lacking = _mismatch select { (_x select 1) == "" };
+if (_wrong isNotEqualTo []) then {
+    private _names = _wrong apply {
         _x params ["_slot", "_cls"];
         private _root = ["CfgWeapons", "CfgVehicles"] select (_slot in ["backpack", "vehicle"]);
         getText (configFile >> _root >> _cls >> "displayName")
     };
-    _msg = _msg + " " + format [localize "STR_DUWS_T_ENEMY_DISGUISE_MISMATCH_FMT", _names joinString ", "];
+    _msg = _msg + format [localize "STR_DUWS_T_ENEMY_DISGUISE_MISMATCH_FMT", (_names apply { "- " + _x }) joinString "\n"];
+};
+if (_lacking isNotEqualTo []) then {
+    private _names = _lacking apply { "- " + localize ("STR_DUWS_T_ENEMY_DISGUISE_SLOT_" + toUpper (_x select 0)) };
+    _msg = _msg + format [localize "STR_DUWS_T_ENEMY_DISGUISE_MISSING_FMT", _names joinString "\n"];
 };
 [_msg] remoteExec ["hint", _player];
 
