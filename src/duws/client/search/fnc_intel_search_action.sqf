@@ -4,11 +4,6 @@
 // One action on the player looking outward at whatever is under the cursor, rather than one
 // action per corpse. The per-corpse shape needed a remoteExec with the JIP flag set per death,
 // so the queue grew with the campaign's kill count instead of with its player count.
-//
-// The id is kept so onPlayerKilled can strip the action off the body being left behind. It does not
-// die with its owner: the engine evaluates the conditions of actions on any object near a player,
-// so without that removal every corpse the player leaves goes on polling this one for the rest of
-// the campaign.
 if (!hasInterface) exitWith {};
 
 // The gate -- what is searchable, within reach, in view, and inside budget -- lives in
@@ -17,7 +12,7 @@ if (!hasInterface) exitWith {};
 // small: a cursor test first, and a nearestObjects scan only when an ordinary corpse is the target.
 private _cond = "!isNull ([_target] call fnc_search_pick)";
 
-private _id = [
+[
     player,
     localize "STR_DUWS_T_INTEL_SEARCH_ACTION",
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
@@ -38,5 +33,3 @@ private _id = [
     false,
     false
 ] call BIS_fnc_holdActionAdd;
-
-player setVariable ["DUWS_intel_search_actionId", _id];

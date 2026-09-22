@@ -241,8 +241,7 @@ more often than one on a distant object — the player is never out of range of 
 **The action survives its owner's death, so it has to be stripped.** An `addAction` is not removed by its owner
 dying and the engine goes on evaluating the conditions of actions on any object near a player, so a corpse left
 carrying this one polls the whole condition for the rest of the campaign — one more per death, forever, which
-is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips it from the body using the id
-stashed at add time.
+is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips every action from the body.
 
 ## Persistence
 
