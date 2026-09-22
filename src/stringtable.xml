@@ -2308,6 +2308,10 @@
                 <Original>Your commanding officer is dead. The REQUESTS menu is no longer available.</Original>
                 <English>Your commanding officer is dead. The REQUESTS menu is no longer available.</English>
             </Key>
+            <Key ID="STR_DUWS_T_REQUEST_VEHICLE_DELIVERED">
+                <Original>%1 delivered.</Original>
+                <English>%1 delivered.</English>
+            </Key>
             <Key ID="STR_DUWS_T_support_ap_suffix">
                 <Original>%1  +%2 AP</Original>
                 <English>%1  +%2 AP</English>
@@ -5557,17 +5561,9 @@
                 <Original>Retrieve</Original>
                 <English>Retrieve</English>
             </Key>
-            <Key ID="STR_DUWS_T_DEPOT_MAP_PLACE">
-                <Original>PLACE VEHICLE</Original>
-                <English>PLACE VEHICLE</English>
-            </Key>
-            <Key ID="STR_DUWS_T_DEPOT_MAP_HINT">
-                <Original>Click inside the HQ area to drop the vehicle. Close the map to cancel.</Original>
-                <English>Click inside the HQ area to drop the vehicle. Close the map to cancel.</English>
-            </Key>
             <Key ID="STR_DUWS_T_DEPOT_MAP_OUTSIDE">
-                <Original>Outside the HQ area.</Original>
-                <English>Outside the HQ area.</English>
+                <Original>Outside the base area.</Original>
+                <English>Outside the base area.</English>
             </Key>
             <Key ID="STR_DUWS_T_DEPOT_PLACING">
                 <Original>Placing vehicle...</Original>
@@ -6076,13 +6072,6 @@
                 <Chinesesimp>在再次请求之前，您必须等待几分钟，以便选项返回到0-8菜单！</Chinesesimp>
                 <Original>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</Original>
                 <English>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_uhaz94ur">
-                <German>Fahrzeug gespawnt</German>
-                <Spanish>Punto de aparición del vehículo</Spanish>
-                <Chinesesimp>载具生成</Chinesesimp>
-                <Original>Vehicle Spawn</Original>
-                <English>Vehicle Spawn</English>
             </Key>
             <Key ID="STR_DUWS_T_royy580r">
                 <German>HALO nicht verfügbar</German>
@@ -6933,13 +6922,6 @@
                 <Chinesesimp>UAV正在返回基地</Chinesesimp>
                 <Original>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</Original>
                 <English>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_vehicleready">
-                <Spanish>Despacho, el vehículo solicitado ya ha sido desplegado. Revisa tu terminal GPS.</Spanish>
-                <German>Dispo, das angeforderte Fahrzeug ist eingetroffen. Überprüfe dein GPS-Terminal.</German>
-                <Chinesesimp>你刚刚请求的载具已完成投送，检查你的GPS终端。</Chinesesimp>
-                <Original>Your vehicle is on the ground at your position. Check your map.</Original>
-                <English>Your vehicle is on the ground at your position. Check your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_unitready">
                 <Spanish>"Overlord 1-1" al Action Squad, refuerzos de personal han llegado.</Spanish>

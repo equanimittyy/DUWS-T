@@ -31,23 +31,23 @@ fnc_garage_store = {
     [] remoteExec ["fnc_depot_menu_fill", _caller];
 };
 
-// Spawns a spec for an R3F carry (fnc_depot_place_r3f) to place, invulnerable so the carry's clips
-// cannot damage it. Radius-5 "NONE" drops it on an empty gap so it never stacks on a parked vehicle.
-// The spec is applied while the hull is still server-local, which is what lets its plain setFuel and
-// setDamage replicate.
+// Spawns a vehicle and hands it to the caller's R3F carry (fnc_depot_place_r3f), invulnerable so the
+// carry's clips cannot damage it. Radius-5 "NONE" drops it on an empty gap so it never stacks on a
+// parked vehicle. A spec is applied while the hull is still server-local, which is what lets its
+// plain setFuel and setDamage replicate; without one the vehicle keeps its config cargo.
 fnc_depot_carry_spawn = {
-    params ["_spec", "_pos"];
+    params ["_caller", "_class", "_pos", "_baseBound", "_doneKey", ["_spec", []]];
     private _veh = objNull;
     // Unscheduled, so no physics step lands between the create and the guard: a vendor sale spawns at
     // the buyer's feet in the shop doorway, and a hull clipping the wall cooks off on its first step.
     isNil {
-        _veh = createVehicle [_spec select 0, _pos, [], 5, "NONE"];
+        _veh = createVehicle [_class, _pos, [], 5, "NONE"];
         _veh allowDamage false;
         _veh enableSimulationGlobal false; // freeze for the carry so the dragged hull can't collision-damage objects it sweeps (units shielded via R3F HandleDamage)
     };
     _veh lock true; // block entry while the player hand-places it; both cleared in fnc_depot_place_finish
-    [_veh, _spec] call DUWS_fnc_vehSpecApply;
-    _veh
+    if !(_spec isEqualTo []) then { [_veh, _spec] call DUWS_fnc_vehSpecApply };
+    [netId _veh, _baseBound, _doneKey] remoteExec ["fnc_depot_place_r3f", _caller];
 };
 
 // Retrieve: spawn the stored vehicle on the pad (inside the base-keep ring) for the caller's R3F carry.
@@ -59,12 +59,10 @@ fnc_garage_retrieve = {
 
     private _pad = objectFromNetId _padNet;
     private _spawnPos = if (isNull _pad) then { PosOfBLUHQ } else { getPosATL _pad };
-    private _veh = [_stored select _index, _spawnPos] call fnc_depot_carry_spawn;
-
-    DUWS_garage_stored deleteAt _index;
+    private _spec = DUWS_garage_stored deleteAt _index;
     publicVariable "DUWS_garage_stored";
 
-    [netId _veh] remoteExec ["fnc_depot_place_r3f", _caller];
+    [_caller, _spec select 0, _spawnPos, true, "STR_DUWS_T_GARAGE_RETRIEVED", _spec] call fnc_depot_carry_spawn;
 };
 
 // Finalize: reclaim for the server (the carry made the caller owner), thaw, disable R3F.

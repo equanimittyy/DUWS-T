@@ -1,12 +1,12 @@
-// Locality: client -- drives the R3F carry to place a retrieved or bought vehicle, then hands it to the
-// server.
+// Locality: client -- drives the R3F carry to place a retrieved, requested or bought vehicle, then hands
+// it to the server.
 //
 // allowDamage is machine-local and does not follow R3F's ownership grab, so invulnerability is
 // re-asserted here; fnc_depot_place_finish restores damage after the server reclaims the vehicle.
-// With _baseBound, release only takes inside the base-keep ring -- a garage drop outside it is eaten by
-// the cleanup sweep. A vendor sale clears it: the buyer stands in a town, not at a base.
+// With _baseBound, release only takes inside the base-keep ring -- a drop outside it is eaten by the
+// cleanup sweep. A vendor sale clears it: the buyer stands in a town, not at a base.
 if (!hasInterface) exitWith {};
-params ["_vehNet", ["_baseBound", true], ["_doneKey", "STR_DUWS_T_GARAGE_RETRIEVED"]];
+params ["_vehNet", "_baseBound", "_doneKey"];
 private _veh = objectFromNetId _vehNet;
 if (isNull _veh) exitWith {};
 

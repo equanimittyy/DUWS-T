@@ -1,12 +1,17 @@
-// Locality: any. Reads PosOfBLUHQ and DUWS_base_keep_radius, both broadcast by the server.
+// Locality: any. Reads PosOfBLUHQ, Array_of_FOBpos, MHQ1 and DUWS_base_keep_radius, all broadcast by
+// the server.
 
-// Does this position sit within the base-keep ring of the BLUFOR HQ -- the radius the cleanup sweep
-// spares (server/misc/fnc_repetitive_cleanup.sqf)? A vehicle placed outside it is collected by the
-// sweep, so the depot map-retrieve bounds its drop here: the client predicate on the pick and the
-// server on the reported point.
+// Does this position sit within the base-keep ring of the HQ, a FOB or the MHQ -- the set the cleanup
+// sweep spares (server/misc/fnc_repetitive_cleanup.sqf)? A vehicle dropped outside it is collected by
+// the sweep, so the R3F carry refuses a base-bound drop there.
 //
-// False when the HQ position is not yet known, so a caller never treats an unbounded ring as inside.
 // The radius falls back to 250 for a JIP client that missed the DUWS_base_keep_radius broadcast.
 params ["_pos"];
-if (isNil "PosOfBLUHQ" || {PosOfBLUHQ isEqualTo []}) exitWith { false };
-(_pos distance2D PosOfBLUHQ) <= (missionNamespace getVariable ["DUWS_base_keep_radius", 250])
+// Copied: pushBack would otherwise grow the broadcast array itself.
+private _bases = +(missionNamespace getVariable ["Array_of_FOBpos", []]);
+private _hq = missionNamespace getVariable ["PosOfBLUHQ", []];
+if !(_hq isEqualTo []) then { _bases pushBack _hq };
+private _mhq = missionNamespace getVariable ["MHQ1", objNull];
+if (!isNull _mhq) then { _bases pushBack (getPos _mhq) };
+private _radius = missionNamespace getVariable ["DUWS_base_keep_radius", 250];
+(_bases findIf { (_pos distance2D _x) <= _radius }) >= 0

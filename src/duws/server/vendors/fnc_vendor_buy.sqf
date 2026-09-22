@@ -99,5 +99,4 @@ if (_store) exitWith {
     ["STR_DUWS_T_VENDOR_BOUGHT_GARAGE"] call _fnc_bought;
 };
 
-private _veh = [_spec, getPosATL _buyer] call fnc_depot_carry_spawn;
-[netId _veh, false, "STR_DUWS_T_VENDOR_BOUGHT"] remoteExec ["fnc_depot_place_r3f", _buyer];
+[_buyer, _class, getPosATL _buyer, false, "STR_DUWS_T_VENDOR_BOUGHT", _spec] call fnc_depot_carry_spawn;

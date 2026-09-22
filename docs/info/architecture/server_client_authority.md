@@ -139,7 +139,7 @@ problem. It mostly is not — locality has to be judged per site:
 | `client/dialog/fnc_request_squad.sqf` High Command path | server, `server/misc/fnc_HCsquad_spawn.sqf` | correct; campaign assets must outlive one player's session |
 | `client/dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `client/operative/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
-| `client/dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
+| `client/dialog/fnc_request_vehicle.sqf` | server, `fnc_depot_carry_spawn` (`server/supports/fnc_garage_init.sqf`) via target 2 | correct |
 | `server/init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on rebuild alike | correct |
 
 The distinction that matters: a group the player *commands* belongs on the commanding machine, because

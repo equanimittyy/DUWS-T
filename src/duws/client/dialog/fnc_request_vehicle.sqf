@@ -1,9 +1,6 @@
-// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp:97).
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp).
 _sel = lbCurSel 2102;
 if (_sel < 0) exitWith {};
-
-_spawnPos = getpos bluHQ_object;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,10,15,0.4] call fnc_safe_pos;
 
 // The faction-list index is read from lbData, not lbCurSel: the list is sorted by tier, so the row's
 // position no longer matches the faction list. An empty data string is a header or spacer row.
@@ -23,19 +20,4 @@ if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
 
 if !(["CP", _vehicle select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
 
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_vehicleready";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-ctrlSetText [1000, format["%1",commandpointsblu1]];
-_vehicle select 0 createVehicle _spawnPos;
-
-
-_markername = format["lbl%1",_spawnPos];
-createMarker [_markername, _spawnPos];
-_markername setMarkerShape "ICON";
-_markername setMarkerType "hd_objective";
-_markername setMarkerColor "ColorBlue";
-_markername setMarkerSize [.5,.5];
-_markername setMarkerText localize "STR_DUWS_T_uhaz94ur";
-sleep 60;
-deletemarker _markername;
+[player, _vehicle select 0, getPosATL player, true, "STR_DUWS_T_REQUEST_VEHICLE_DELIVERED"] remoteExec ["fnc_depot_carry_spawn", 2];
