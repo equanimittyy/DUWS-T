@@ -433,6 +433,7 @@ sleep 15;
 [] spawn fnc_intro_heli;
 if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     [] spawn fnc_scanCivilianGear;
+    [] spawn fnc_scanEnemyGear;
 };
 // These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission start.
 // Resuming an autosave in a fresh Arma session restarts that clock, so every stamp sits in the
@@ -445,6 +446,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
     [] spawn {
         private _cooldownVars = [
             "DUWS_disguise_blownAt",
+            "DUWS_enemyDisguise_blownAt",
             "DUWS_hirePartisans_lastUse",
             "DUWS_hirePMC_lastUse"
         ];

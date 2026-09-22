@@ -2563,8 +2563,8 @@
                 <English>Civilian</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_DESC">
-                <Original>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, linger near enemies, or approach a known enemy position.</Original>
-                <English>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, linger near enemies, or approach a known enemy position.</English>
+                <Original>Blend into the population. Needs civilian clothing, no weapons or NVGs, on foot or in a civilian vehicle. Suspicion builds while enemies watch you, faster near bodies and enemy positions. Arming up or changing gear breaks cover.</Original>
+                <English>Blend into the population. Needs civilian clothing, no weapons or NVGs, on foot or in a civilian vehicle. Suspicion builds while enemies watch you, faster near bodies and enemy positions. Arming up or changing gear breaks cover.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_UNAVAIL">
                 <Original>Not available in this campaign - there is no civilian population to blend into.</Original>
@@ -2582,17 +2582,28 @@
                 <Original>Active Disguise: Civilian</Original>
                 <English>Active Disguise: Civilian</English>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY">
+                <Original>Active Disguise: Enemy</Original>
+                <English>Active Disguise: Enemy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_TITLE">
+                <Original>Enemy</Original>
+                <English>Enemy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_DESC">
+                <Original>Pass as an enemy soldier. Needs a looted enemy uniform, worn. Suspicion builds while enemies watch you, and starts higher for each item the enemy does not issue. Attacking in sight breaks cover.</Original>
+                <English>Pass as an enemy soldier. Needs a looted enemy uniform, worn. Suspicion builds while enemies watch you, and starts higher for each item the enemy does not issue. Attacking in sight breaks cover.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_UNAVAIL">
+                <Original>Not available in this campaign.</Original>
+                <English>Not available in this campaign.</English>
+            </Key>
         </Container>
         <Container name="Civilian Disguise">
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_THROW">
                 <Original>Disguise broken: Threw an item.</Original>
                 <English>Disguise broken: Threw an item.</English>
                 <Chinesesimp>伪装暴露：投掷物品。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_CORPSE">
-                <Original>Disguise broken: Too close to a corpse.</Original>
-                <English>Disguise broken: Too close to a corpse.</English>
-                <Chinesesimp>伪装暴露：附近有尸体。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NVG">
                 <Original>Disguise broken: Night vision goggles detected.</Original>
@@ -2619,11 +2630,6 @@
                 <Original>Disguise cooldown: %1 min %2 sec remaining</Original>
                 <English>Disguise cooldown: %1 min %2 sec remaining</English>
                 <Chinesesimp>伪装冷却剩余：%1 分 %2 秒。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_WARNING_HINT">
-                <Original>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise.</Original>
-                <English>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise.</English>
-                <Chinesesimp>敌人开始怀疑你的身份，迅速离开敌人到安全距离以继续伪装。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_SITE_HINT">
                 <Original>You are getting too close to an enemy position.</Original>
@@ -2674,9 +2680,9 @@
                 <English>Disguise broken: Weapon detected.</English>
                 <Chinesesimp>伪装暴露：携带武器。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_DISTANCE">
-                <Original>Disguise broken: Too close to enemy.</Original>
-                <English>Disguise broken: Too close to enemy.</English>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SUSPICION">
+                <Original>Disguise broken: The enemy saw through it.</Original>
+                <English>Disguise broken: The enemy saw through it.</English>
                 <Chinesesimp>伪装暴露：距离敌人过近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEHICLE">
@@ -2685,8 +2691,8 @@
                 <Chinesesimp>伪装暴露：进入非民用载具。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_SITE">
-                <Original>Disguise broken: Too close to a known enemy position.</Original>
-                <English>Disguise broken: Too close to a known enemy position.</English>
+                <Original>Disguise broken: Spotted too close to an enemy position.</Original>
+                <English>Disguise broken: Spotted too close to an enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_ZOMBIE">
                 <Original>Cannot disguise: Not available in this scenario.</Original>
@@ -2738,8 +2744,42 @@
                 <English>Cannot disguise: Enemies are too close.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_SITE">
-                <Original>Cannot disguise: You are too close to a known enemy position.</Original>
-                <English>Cannot disguise: You are too close to a known enemy position.</English>
+                <Original>Cannot disguise: You are too close to an enemy position.</Original>
+                <English>Cannot disguise: You are too close to an enemy position.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_OTHER">
+                <Original>Cannot disguise: Another disguise is already on.</Original>
+                <English>Cannot disguise: Another disguise is already on.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_METER">
+                <Original>Suspicion</Original>
+                <English>Suspicion</English>
+            </Key>
+        </Container>
+        <Container name="Enemy Disguise">
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_CANT_NOKIT">
+                <Original>Cannot disguise: Enemy issue is not known yet. Try again in a minute.</Original>
+                <English>Cannot disguise: Enemy issue is not known yet. Try again in a minute.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_CANT_UNIFORM">
+                <Original>Cannot disguise: You are not wearing an enemy uniform.</Original>
+                <English>Cannot disguise: You are not wearing an enemy uniform.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED_FMT">
+                <Original>Disguised as an enemy soldier. Suspicion starts at %1 of 100.</Original>
+                <English>Disguised as an enemy soldier. Suspicion starts at %1 of 100.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_MISMATCH_FMT">
+                <Original>Not enemy issue: %1.</Original>
+                <English>Not enemy issue: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE">
+                <Original>Disguise broken: Seen attacking.</Original>
+                <English>Disguise broken: Seen attacking.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ENDED_UNIFORM">
+                <Original>Disguise off: You are no longer in an enemy uniform.</Original>
+                <English>Disguise off: You are no longer in an enemy uniform.</English>
             </Key>
         </Container>
         <Container name="Hiring Auxiliaries">

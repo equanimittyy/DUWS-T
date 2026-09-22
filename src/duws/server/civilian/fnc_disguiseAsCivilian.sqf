@@ -13,9 +13,7 @@ publicVariable "fnc_disguise_hintFail";
 
 // Civilian by config, not by the scanned wardrobe: the uniform's linked unit carries side 3
 // (TCivilian), so any civilian shirt passes -- including modded clothes and classes no spawned
-// local happened to wear. Shared by the activation gate and the maintenance monitor so the two
-// agree; if they diverged the disguise would activate then break on the next tick. Server-only
-// (the whole file is), so no broadcast.
+// local happened to wear.
 fnc_disguise_isCivUniform = {
     params ["_uniform"];
     if (_uniform == "") exitWith { false };
@@ -27,10 +25,29 @@ fnc_disguise_isCivUniform = {
 // Vests and headgear are CfgWeapons items with no side field, so they cannot be classed civilian
 // by config the way the uniform is. An accessory reads civilian when the slot is empty, when a
 // local civilian is seen wearing the class (the population scan, mod-adaptive), or when it is on a
-// curated allowlist below. Shared by gate and monitor so the two cannot drift.
+// curated allowlist below.
 fnc_disguise_isCivGear = {
     params ["_item", "_scanned", "_whitelist"];
     _item == "" || {_item in _scanned} || {_item in _whitelist}
+};
+
+// The kit rule the civilian activation refuses on and the shared monitor breaks on, as the suffix of
+// its CANT_/BROKEN_ key, or "" when the kit passes. One function, so the two cannot drift: if they
+// did, the disguise would activate and then break on the first tick.
+fnc_disguise_civFault = {
+    params ["_player"];
+    if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith { "WEAPON" };
+    private _assigned = assignedItems _player;
+    if ("NVGoggles" in _assigned || "NVGoggles_OPFOR" in _assigned || "NVGoggles_INDEP" in _assigned) exitWith { "NVG" };
+    if (uniform _player == "") exitWith { "NAKED" };
+    if !([uniform _player] call fnc_disguise_isCivUniform) exitWith { "UNIFORM" };
+    // Accessories must read civilian too, or a military plate carrier or helmet under a civilian
+    // shirt would still pass.
+    if !([vest _player, missionNamespace getVariable ["DUWS_civVests", []], DUWS_disguise_civVestWhitelist] call fnc_disguise_isCivGear) exitWith { "VEST" };
+    if !([headgear _player, missionNamespace getVariable ["DUWS_civHeadgear", []], DUWS_disguise_civHeadgearWhitelist] call fnc_disguise_isCivGear) exitWith { "HEADGEAR" };
+    if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], DUWS_disguise_civBackpackWhitelist] call fnc_disguise_isCivGear) exitWith { "BACKPACK" };
+    if (vehicle _player != _player && {!(typeOf vehicle _player in DUWS_disguise_civVehicles)}) exitWith { "VEHICLE" };
+    ""
 };
 
 fnc_disguise_enemyNear = {
@@ -38,19 +55,17 @@ fnc_disguise_enemyNear = {
     ((_player nearEntities [["CAManBase"], _radius]) findIf { side _x == EAST && alive _x }) >= 0
 };
 
-// Revealed sites only: a break near a hidden site would tell the player that it exists, and hidden
-// sites are what intel pays for. Towns are in neither registry, so an OPFOR-held town stays safe.
+// Every OPFOR site, revealed or not: a hidden site streams in live, and a player who comes near reveals
+// it anyway. Towns are in neither registry, so an OPFOR-held town stays safe.
 fnc_disguise_atEnemySite = {
     params ["_pos", "_margin"];
     private _opforZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
     private _atZone = (zone_meta_array findIf {
-        private _key = str (_x select 1);
         (_pos distance2D (_x select 1)) < ((_x select 2) + _margin)
-        && {(_opforZones findIf {str _x == _key}) >= 0}
-        && {(zone_namePOS_pairs findIf {str (_x select 1) == _key && {_x select 2}}) >= 0}
+        && {private _key = str (_x select 1); (_opforZones findIf {str _x == _key}) >= 0}
     }) >= 0;
     _atZone || {(DUWS_hardpoints findIf {
-        (_x select 3) isEqualTo "opfor" && {_x select 5} && {(_pos distance2D (_x select 1)) < _margin}
+        (_x select 3) isEqualTo "opfor" && {(_pos distance2D (_x select 1)) < _margin}
     }) >= 0}
 };
 
@@ -62,7 +77,7 @@ DUWS_disguise_civVestWhitelist = ["V_Press_F"];
 DUWS_disguise_civHeadgearWhitelist = [];
 DUWS_disguise_civBackpackWhitelist = [];
 
-private _civilianVehicles = [
+DUWS_disguise_civVehicles = [
     "C_Van_01_fuel_F", "C_Van_01_box_F", "C_Van_01_transport_F",
     "C_Tractor_01_F", "C_Hatchback_01_sport_F", "C_Hatchback_01_F",
     "C_Offroad_01_covered_F", "C_Offroad_01_comms_F", "C_Offroad_01_repair_F",
@@ -81,20 +96,17 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _player];
 };
 
-// Rolled once and stored, so the gate and the monitor test the same radius.
-private _alertDistance = 50 + random 30;
-if ([_player] call fnc_disguise_hunted) exitWith {
+if (_player getVariable ["DUWS_enemyDisguised", false]) exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_OTHER"] call fnc_disguise_hintFail;
+};
+if ([_player] call fnc_disguise_hunted || {([_player] call fnc_disguise_spotters) isNotEqualTo []}) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_HUNTED"] call fnc_disguise_hintFail;
 };
-if ([_player, _alertDistance] call fnc_disguise_enemyNear) exitWith {
+if ([_player, 50 + random 30] call fnc_disguise_enemyNear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ENEMY_NEAR"] call fnc_disguise_hintFail;
 };
 if ([getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_SITE"] call fnc_disguise_hintFail;
-};
-
-if (vehicle _player != _player && {!(typeOf vehicle _player in _civilianVehicles)}) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_VEHICLE"] call fnc_disguise_hintFail;
 };
 
 if (CIV_PRESENCE == "NONE") exitWith {
@@ -104,178 +116,20 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call fnc_disguise_hintFail;
 };
 
-if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_WEAPON"] call fnc_disguise_hintFail;
-};
-
-private _assignedItems = assignedItems _player;
-if ("NVGoggles" in _assignedItems || "NVGoggles_OPFOR" in _assignedItems || "NVGoggles_INDEP" in _assignedItems) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_NVG"] call fnc_disguise_hintFail;
-};
-
-private _currentUniform = uniform _player;
-if (_currentUniform == "") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_NAKED"] call fnc_disguise_hintFail;
-};
-if !([_currentUniform] call fnc_disguise_isCivUniform) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_UNIFORM"] call fnc_disguise_hintFail;
-};
-
-// Accessories must read civilian too, or a military plate carrier or helmet under a civilian
-// shirt would still pass.
-if !([vest _player, missionNamespace getVariable ["DUWS_civVests", []], DUWS_disguise_civVestWhitelist] call fnc_disguise_isCivGear) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_VEST"] call fnc_disguise_hintFail;
-};
-if !([headgear _player, missionNamespace getVariable ["DUWS_civHeadgear", []], DUWS_disguise_civHeadgearWhitelist] call fnc_disguise_isCivGear) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_HEADGEAR"] call fnc_disguise_hintFail;
-};
-if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], DUWS_disguise_civBackpackWhitelist] call fnc_disguise_isCivGear) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_BACKPACK"] call fnc_disguise_hintFail;
+private _fault = [_player] call fnc_disguise_civFault;
+if (_fault != "") exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_" + _fault] call fnc_disguise_hintFail;
 };
 
 _player setVariable ["DUWS_disguised", true, true];
 _player setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
-
-_player setVariable ["DUWS_disguise_warningActive", false, true];
-_player setVariable ["DUWS_disguise_warningPos", nil, true];
-_player setVariable ["DUWS_disguise_alertDist", _alertDistance];
 _player setVariable ["DUWS_disguise_siteWarned", false];
-_player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 
 [localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
 
 if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
     _player setVariable ["DUWS_disguise_monitorRunning", true];
-    
-    private _firedEH = _player addEventHandler ["FiredMan", {
-        params ["_unit"];
-        if (_unit getVariable ["DUWS_disguised", false]) then {
-            _unit setVariable ["DUWS_disguised", false, true];
-            _unit setVariable ["DUWS_disguise_blownAt", diag_tickTime];
-            _unit setCaptive false;
-            [false] remoteExec ["fnc_disguise_setCaptiveLocal", _unit];
-            [localize "STR_DUWS_T_DISGUISE_BROKEN_THROW"] remoteExec ["hint", _unit];
-        };
-    }];
-    _player setVariable ["DUWS_disguise_firedEH", _firedEH];
-    
-    [_player] spawn {
-        params ["_player"];
-        
-        private _warningKeys = [
-            "STR_DUWS_T_DISGUISE_WARNING_1",
-            "STR_DUWS_T_DISGUISE_WARNING_2",
-            "STR_DUWS_T_DISGUISE_WARNING_3",
-            "STR_DUWS_T_DISGUISE_WARNING_4",
-            "STR_DUWS_T_DISGUISE_WARNING_5"
-        ];
-        
-        private _fnc_breakDisguise = {
-            params ["_reasonKey"];
-            if (_player getVariable ["DUWS_disguised", false]) then {
-                _player setVariable ["DUWS_disguised", false, true];
-                _player setVariable ["DUWS_disguise_blownAt", diag_tickTime];
-                _player setCaptive false;
-                [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
-                [localize _reasonKey] remoteExec ["hint", _player];
-            };
-        };
-        
-        while {alive _player && {_player getVariable ["DUWS_disguised", false]}} do {
-            if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_WEAPON"] call _fnc_breakDisguise;
-            };
-
-            private _assigned = assignedItems _player;
-            if ("NVGoggles" in _assigned || "NVGoggles_OPFOR" in _assigned || "NVGoggles_INDEP" in _assigned) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_NVG"] call _fnc_breakDisguise;
-            };
-            
-            if (uniform _player == "") exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_NAKED"] call _fnc_breakDisguise;
-            };
-            if !([uniform _player] call fnc_disguise_isCivUniform) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_UNIFORM"] call _fnc_breakDisguise;
-            };
-            if !([vest _player, missionNamespace getVariable ["DUWS_civVests", []], DUWS_disguise_civVestWhitelist] call fnc_disguise_isCivGear) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_VEST"] call _fnc_breakDisguise;
-            };
-            if !([headgear _player, missionNamespace getVariable ["DUWS_civHeadgear", []], DUWS_disguise_civHeadgearWhitelist] call fnc_disguise_isCivGear) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR"] call _fnc_breakDisguise;
-            };
-            if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], DUWS_disguise_civBackpackWhitelist] call fnc_disguise_isCivGear) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_BACKPACK"] call _fnc_breakDisguise;
-            };
-            
-            private _nearCorpses = _player nearObjects ["CAManBase", 20] select { !alive _x };
-            if (count _nearCorpses > 0) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_CORPSE"] call _fnc_breakDisguise;
-            };
-
-            if ([getPosATL _player, DISGUISE_CIV_SITE_MARGIN] call fnc_disguise_atEnemySite) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_SITE"] call _fnc_breakDisguise;
-            };
-
-            private _nearSite = [getPosATL _player, DISGUISE_CIV_SITE_MARGIN + DISGUISE_CIV_SITE_WARN] call fnc_disguise_atEnemySite;
-            if (_nearSite && {!(_player getVariable ["DUWS_disguise_siteWarned", false])}) then {
-                [localize "STR_DUWS_T_DISGUISE_WARNING_SITE_HINT"] remoteExec ["hint", _player];
-            };
-            _player setVariable ["DUWS_disguise_siteWarned", _nearSite];
-
-            private _alertDistance = _player getVariable ["DUWS_disguise_alertDist", 50];
-            private _warningActive = _player getVariable ["DUWS_disguise_warningActive", false];
-            
-            if ([_player, _alertDistance] call fnc_disguise_enemyNear) then {
-                if (!_warningActive) then {
-                    _player setVariable ["DUWS_disguise_warningActive", true, true];
-                    _player setVariable ["DUWS_disguise_warningPos", getPos _player, true];
-                    
-                    private _warningKey = selectRandom _warningKeys;
-                    [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize _warningKey] remoteExec ["fnc_duws_dialogue", _player];
-                    [localize "STR_DUWS_T_DISGUISE_WARNING_HINT"] remoteExec ["hint", _player];
-                } else {
-                    private _warningPos = _player getVariable ["DUWS_disguise_warningPos", [0,0,0]];
-                    if (_player distance _warningPos < _alertDistance * 1.5) exitWith {
-                        ["STR_DUWS_T_DISGUISE_BROKEN_DISTANCE"] call _fnc_breakDisguise;
-                    };
-                    _player setVariable ["DUWS_disguise_warningActive", false, true];
-                };
-            } else {
-                if (_warningActive) then {
-                    _player setVariable ["DUWS_disguise_warningActive", false, true];
-                };
-            };
-            
-            if (!(_player getVariable ["DUWS_disguised", false])) exitWith {};
-            
-            private _veh = vehicle _player;
-            if (_veh != _player) then {
-                private _vehType = typeOf _veh;
-                private _civVehList = _player getVariable ["DUWS_disguise_civilianVehicles", []];
-                if (!(_vehType in _civVehList)) exitWith {
-                    ["STR_DUWS_T_DISGUISE_BROKEN_VEHICLE"] call _fnc_breakDisguise;
-                };
-            };
-            
-            sleep 5;
-        };
-        
-        if (!isNull _player) then {
-            _player setVariable ["DUWS_disguised", false, true];
-            if (alive _player) then {
-                _player setCaptive false;
-                [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
-            };
-            _player setVariable ["DUWS_disguise_warningActive", false, true];
-            _player setVariable ["DUWS_disguise_monitorRunning", false];
-            
-            private _eh = _player getVariable ["DUWS_disguise_firedEH", -1];
-            if (_eh != -1) then {
-                _player removeEventHandler ["FiredMan", _eh];
-                _player setVariable ["DUWS_disguise_firedEH", nil];
-            };
-        };
-    };
+    [_player, "civ"] spawn fnc_disguise_monitor;
 };

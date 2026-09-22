@@ -422,3 +422,4 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
 };
 fnc_disguise_setCaptiveLocal = compile preprocessFileLineNumbers "duws\client\civilian\fnc_disguise_setCaptiveLocal.sqf";
 publicVariable "fnc_disguise_setCaptiveLocal";
+fnc_disguise_meter = compile preprocessFileLineNumbers "duws\client\disguise\fnc_disguise_meter.sqf";
