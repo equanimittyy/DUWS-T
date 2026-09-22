@@ -151,7 +151,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
-| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it | 4B.3 |
+| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it, and a truck held as stock goes to a random open zone | 4B.3 |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) | 4B.2 |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, one 50 m square | 4B.2 |
@@ -194,8 +194,10 @@ so it moves no faster than a truck delivers.
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 3/10, with skew = max(0.1, 1 − \|rep\| ÷ 10) |
-| Recruit, specialist (`transport`, `recon`) | its demand: `P(win)` × the Value of the best action blocked for want of it, scored as if the hire already stood at that target |
+| Recruit, specialist (`recon`) | its demand: `P(win)` × the Value of the best action blocked for want of it, scored as if the hire already stood at that target |
 | Recruit, combatant | the larger of that demand and home-zone worth × exposure × unitForce ÷ (the zone's current force + unitForce) |
+| Recruit, `transport` | the lift it would give; a combatant hull takes the larger of that and its defense |
+| Recruit, truck | the larger of its lift and its stock: the truck hire price ÷ (idle supply trucks + 1) |
 | Intercept (QRF) | Σ need over the sighting's 5×5 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Scout | Σ need × staleness × `OPCOM_SCOUT_SHARE` (0.2) over the unique cells within its K of its route |
@@ -207,17 +209,21 @@ so it moves no faster than a truck delivers.
 - **A combatant counts once.** It joins its zone's reserve pool on hire, so it defends at once; its Value is the
   larger of demand and defense, not the sum, because one unit serves one role at a time. Its gain shrinks as the
   zone stacks up, so combatants gather where exposure is high and a QRF pool forms there with no roster table.
-- **A truck is worth its transport demand.** Its supply demand is always 0, because every supply action hires its
-  own truck in the same commit when none idles, so no action is ever blocked for want of one. What a transport row
-  is worth is the lift it would give: the Value a rider stranded at a water leg is waiting on, or the time a
-  land-taxi would save a marching unit — the same Value landing sooner, priced by the delay discount
-  (`DUWS_fnc_opcom_taxiWorth`).
+- **A transport row is worth the lift it would give.** That is the Value a rider stranded at a water leg is
+  waiting on, or the time land-taxi would save an order the pick may commit — the same Value landing sooner, priced
+  by the delay discount (`DUWS_fnc_opcom_taxiWorth`), less what the best hull on hand already saves it. Land-taxi
+  binds only at commit, so the lift is priced on the orders not yet sent, never on a unit already marching.
+- **A truck is also worth its stock.** An idle truck spares the next supply buy its hire price, and that saving
+  splits across the trucks already idle, so the stock settles at one or two, where the hire's score meets Bank's.
+  A supply action still hires its own truck in the same commit when none idles, so no action is ever blocked for
+  want of one.
 - **The QRF share** is how much of the local defense the sighted group can overwhelm. `P(win)` says whether the QRF
   can win, so a platoon is worth stopping but a small QRF is not thrown at it.
 - **A blocked target is what Recruit reads.** Each commit sweep returns the targets no free unit could take
   beside its candidates, so a hire is valued on the best of them whatever order the action list runs in. A target
   is blocked when no unit is free for it, or when none clears `OPCOM_PWIN_FLOOR` — so OPCOM never hires for a fight
-  it could not win even with the hire standing there.
+  it could not win even with the hire standing there. A sweep also returns each unit it would send, with the
+  destination and the Value, which a transport row's lift is priced on.
 - **Scout staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷
   `OPCOM_BELIEF_EXPIRE`). The share holds Scout below the ground it reveals, since scouting takes and protects
   nothing itself.
