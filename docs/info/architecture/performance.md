@@ -175,6 +175,13 @@ garrison ledger, zone ownership, a town's tier, the hardpoint registry or a comp
 until the next full rebuild. The Debug menu's OPCOM page runs a "Grid drift check" that reports it: a gap
 above 0.05 names the cell.
 
+The appraisal follows the same rule. The need field's holdings and band base
+(`warcom/opcom/appraisal/fnc_opcom_fields.sqf`) rebuild in a spawned thread only when a signature of their
+inputs changes, because the band test runs the area of influence over every land cell in the box. The
+siting pass (`DUWS_fnc_opcom_siteAll`, `appraisal/fnc_opcom_actions.sqf`) runs scheduled, before the pick's
+unscheduled pass. It keeps each band cell's radio tower and gun Value until that signature or the type's own
+assets change, so a tick scores only the sampled cells it has not scored before.
+
 ## Reading the cost from a playtest
 
 Four `.rpt` lines time the server's recurring work, all but the cleanup census at DEBUG. All four are

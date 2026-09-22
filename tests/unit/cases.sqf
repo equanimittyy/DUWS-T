@@ -1567,6 +1567,11 @@ OPCOM_AP_PER_KM = 0.5;
     [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5, 1000]] call fnc_assertEq;
 ["truck_for: no source is no truck", [[], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, []] call fnc_assertEq;
 
+// --- DUWS_fnc_opcom_argMax: the siting pass's best sample ---
+["argMax: the largest value's index", [3, 9, 1] call DUWS_fnc_opcom_argMax, 1] call fnc_assertEq;
+["argMax: a tie keeps the first", [4, 4] call DUWS_fnc_opcom_argMax, 0] call fnc_assertEq;
+["argMax: no values is no index", [] call DUWS_fnc_opcom_argMax, -1] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_exposureAt: how close a holding sits to BLUFOR-held ground ---
 OPCOM_EXPOSE_NEAR = 5000;
 OPCOM_EXPOSE_FAR = 10000;

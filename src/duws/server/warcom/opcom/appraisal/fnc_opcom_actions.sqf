@@ -10,6 +10,7 @@ if (!isServer) exitWith {};
 
 DUWS_opcom_aiMode = "off";
 DUWS_opcom_pickOnce = "";
+DUWS_opcom_sites = createHashMap;
 DUWS_opcom_aiEvents = [];
 DUWS_opcom_aiSeq = 0;
 
@@ -277,60 +278,121 @@ DUWS_opcom_assetCap = createHashMapFromArray [
     ["RADIO", AOI_OPFOR_TOWER_CAP], ["MORTAR", OPCOM_CAP_MORTAR], ["ARTY", OPCOM_CAP_ARTY]
 ];
 
-// A random band point with its cheapest truck -> [point, [source, cost]], or [] when the draw or the truck fails.
-DUWS_fnc_opcom_bandDropDraw = {
-    private _band = call DUWS_fnc_aoi_bandPos;
-    if (_band isEqualTo []) exitWith { [] };
-    // findSafePos answers a 2D point; tasking positions are 3D throughout.
-    private _at = +(_band select 0);
-    _at set [2, 0];
-    private _truck = [call DUWS_fnc_opcom_truckSources, _at] call DUWS_fnc_opcom_truckFor;
-    if (_truck isEqualTo []) exitWith { [] };
-    [_at, _truck]
+DUWS_fnc_opcom_assetOpen = {
+    params ["_type"];
+    (DUWS_hardpointTier getOrDefault [_type, 99]) <= WARCOM_opfor_tier
+        && {count ([_type] call DUWS_fnc_opcom_assetsOf) < (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}
 };
 
-DUWS_fnc_opcom_bandDrop = { ["bandDrop", DUWS_fnc_opcom_bandDropDraw] call DUWS_fnc_opcom_tickCached };
+// Index of the largest value, -1 for none.
+DUWS_fnc_opcom_argMax = {
+    private _best = -1;
+    { if (_best < 0 || {_x > (_this select _best)}) then { _best = _forEachIndex } } forEach _this;
+    _best
+};
+
+// A tower's and a gun's Value run the area of influence over many points but read only slow state, so a band cell's
+// Value is kept until that state or the type's own assets change, and siting costs what changed rather than what exists.
+DUWS_opcom_siteMemo = createHashMap;
+
+// Scheduled, before the pick's unscheduled pass: each build type takes the best of a few band cells by its own Value,
+// so the pick weighs the best spot on offer rather than a random one. -> DUWS_opcom_sites, key -> [point, Value].
+DUWS_fnc_opcom_siteAll = {
+    params ["_samples"];
+    private _sites = createHashMap;
+    private _pool = +DUWS_opcom_bandCells;
+    private _cells = [];
+    for "_k" from 1 to (_samples min count _pool) do { _cells pushBack (_pool deleteAt (floor random count _pool)) };
+    if (_cells isEqualTo []) exitWith { DUWS_opcom_sites = _sites };
+    private _w = DUWS_opcom_grid_w;
+    private _pts = _cells apply { [((_x mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_x / _w)) + 0.5) * OPCOM_GRID_CELL, 0] };
+
+    private _cover = _pts apply { [_x] call DUWS_fnc_opcom_coverValue };
+    private _i = _cover call DUWS_fnc_opcom_argMax;
+    _sites set ["STANDALONE", [_pts select _i, _cover select _i]];
+    // A field is worth what it denies, and it denies nothing on ground nobody crosses; cover breaks a tie.
+    private _denial = [];
+    { _denial pushBack (([_x] call DUWS_fnc_opcom_trafficAt) * 1e3 + (_cover select _forEachIndex)) } forEach _cells;
+    _i = _denial call DUWS_fnc_opcom_argMax;
+    _sites set ["MINE", [_pts select _i, _cover select _i]];
+
+    {
+        private _type = _x;
+        if ([_type] call DUWS_fnc_opcom_assetOpen) then {
+            private _others = [_type] call DUWS_fnc_opcom_assetsOf;
+            private _stamp = [DUWS_opcom_needSig, _others];
+            private _memo = DUWS_opcom_siteMemo getOrDefault [_type, [[], createHashMap]];
+            if !((_memo select 0) isEqualTo _stamp) then { _memo = [_stamp, createHashMap]; DUWS_opcom_siteMemo set [_type, _memo] };
+            private _keep = switch (_type) do {
+                case "RADIO": { AOI_TOWER_REACH };
+                case "OP": { -1 };
+                default { OPCOM_GUN_STANDOFF };
+            };
+            private _vals = [];
+            {
+                private _p = _x;
+                private _c = _cells select _forEachIndex;
+                private _v = -1;
+                if ((_others findIf { (_x distance2D _p) < _keep }) < 0) then {
+                    if (_type isEqualTo "OP") then { _v = [_p] call DUWS_fnc_opcom_opValue } else {
+                        _v = (_memo select 1) getOrDefault [_c, -1];
+                        if (_v < 0) then {
+                            _v = if (_type isEqualTo "RADIO") then { [_p] call DUWS_fnc_opcom_towerValue } else { [_type, _p] call DUWS_fnc_opcom_gunValue };
+                            (_memo select 1) set [_c, _v];
+                        };
+                    };
+                };
+                _vals pushBack _v;
+            } forEach _pts;
+            private _j = _vals call DUWS_fnc_opcom_argMax;
+            if ((_vals select _j) >= 0) then { _sites set [_type, [_pts select _j, _vals select _j]] };
+        };
+    } forEach ["RADIO", "OP", "MORTAR", "ARTY"];
+    DUWS_opcom_sites = _sites;
+};
+
+// -> [point, Value discounted by the drive, truck], or [] with no site or no truck.
+DUWS_fnc_opcom_siteTruck = {
+    params ["_key"];
+    private _site = DUWS_opcom_sites getOrDefault [_key, []];
+    if (_site isEqualTo []) exitWith { [] };
+    _site params ["_at", "_v"];
+    private _truck = [call DUWS_fnc_opcom_truckSources, _at] call DUWS_fnc_opcom_truckFor;
+    if (_truck isEqualTo []) exitWith { [] };
+    [_at, _v * ([_truck] call DUWS_fnc_opcom_truckDelay), _truck]
+};
 
 DUWS_fnc_opcom_standaloneBuildTargets = {
     params ["_type"];
     if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
-    private _drop = call DUWS_fnc_opcom_bandDrop;
-    if (_drop isEqualTo []) exitWith { [] };
-    _drop params ["_at", "_truck"];
+    private _st = ["STANDALONE"] call DUWS_fnc_opcom_siteTruck;
+    if (_st isEqualTo []) exitWith { [] };
+    _st params ["_at", "_v", "_truck"];
     [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
-        ([_at] call DUWS_fnc_opcom_coverValue) * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
 };
 
 DUWS_fnc_opcom_assetTargets = {
     params ["_type"];
-    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier
-        || {count ([_type] call DUWS_fnc_opcom_assetsOf) >= (DUWS_opcom_assetCap getOrDefault [_type, 1e9])}) exitWith { [] };
-    private _drop = call DUWS_fnc_opcom_bandDrop;
-    if (_drop isEqualTo []) exitWith { [] };
-    _drop params ["_at", "_truck"];
-    private _v = switch (_type) do {
-        case "RADIO": { [_at] call DUWS_fnc_opcom_towerValue };
-        case "OP": { [_at] call DUWS_fnc_opcom_opValue };
-        default { [_type, _at] call DUWS_fnc_opcom_gunValue };
-    };
+    if !([_type] call DUWS_fnc_opcom_assetOpen) exitWith { [] };
+    private _st = [_type] call DUWS_fnc_opcom_siteTruck;
+    if (_st isEqualTo []) exitWith { [] };
+    _st params ["_at", "_v", "_truck"];
     [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
-        _v * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
 };
 
 // One 50 m square for now; the size rides the target, so a deeper belt is a wider candidate, not a new action.
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
     if ((DUWS_hardpointTier getOrDefault ["MINEFIELD", 99]) > WARCOM_opfor_tier) exitWith { [] };
-    private _drop = call DUWS_fnc_opcom_bandDrop;
-    if (_drop isEqualTo []) exitWith { [] };
-    _drop params ["_at", "_truck"];
+    private _st = ["MINE"] call DUWS_fnc_opcom_siteTruck;
+    if (_st isEqualTo []) exitWith { [] };
+    _st params ["_at", "_v", "_truck"];
     private _size = [1, 1];
     [[[_variant, _size, _at, _truck select 0],
         ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
-        format ["Lay %1 mines at %2", _variant, mapGridPosition _at],
-        ([_at] call DUWS_fnc_opcom_coverValue) * ([_truck] call DUWS_fnc_opcom_truckDelay)]]
+        format ["Lay %1 mines at %2", _variant, mapGridPosition _at], _v]]
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.

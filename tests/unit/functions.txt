@@ -74,6 +74,7 @@ duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty
 duws/server/warcom/opcom/appraisal/fnc_opcom_actions.sqf::DUWS_fnc_opcom_truckFor
+duws/server/warcom/opcom/appraisal/fnc_opcom_actions.sqf::DUWS_fnc_opcom_argMax
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_exposureAt
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_pWinAt
 duws/server/warcom/opcom/appraisal/fnc_opcom_value.sqf::DUWS_fnc_opcom_opUnwatched

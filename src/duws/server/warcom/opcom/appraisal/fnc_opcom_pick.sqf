@@ -7,6 +7,9 @@ if (DUWS_opcom_pickOnce isNotEqualTo "") then {
 };
 if (_mode isEqualTo "off") exitWith {};
 
+// Random mode sites on one band cell, so the control stays an unscored draw.
+[[OPCOM_SITE_SAMPLES, 1] select (_mode isNotEqualTo "weighted")] call DUWS_fnc_opcom_siteAll;
+
 private _live = [];
 // Unscheduled so every action reads one wallet and one store. The execute runs after, scheduled, because an order
 // plans a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
