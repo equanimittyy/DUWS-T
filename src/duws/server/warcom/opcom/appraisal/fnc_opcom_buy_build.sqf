@@ -7,6 +7,11 @@ DUWS_fnc_opcom_hpPrice = {
     OPCOM_AP_HARDPOINT getOrDefault [_type, 0]
 };
 
+DUWS_fnc_opcom_zoneSlotsUsed = {
+    params ["_zk"];
+    ({ (_x select 4) isEqualTo _zk } count DUWS_hardpoints) + ({ (_x select 2) isEqualTo _zk } count DUWS_opcom_buildsPending)
+};
+
 DUWS_fnc_opcom_zoneBuildTargets = {
     params ["_type"];
     if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
@@ -14,9 +19,7 @@ DUWS_fnc_opcom_zoneBuildTargets = {
     private _out = [];
     {
         _x params ["_zk", "_zs", "", "_worth", "_exp", "_tier"];
-        private _standing = { (_x select 4) isEqualTo _zk } count DUWS_hardpoints;
-        private _pending = { (_x select 2) isEqualTo _zk } count DUWS_opcom_buildsPending;
-        if ((([_zk, _zs] call fnc_hardpoint_zone_cap) - _standing - _pending) > 0) then {
+        if (([_zk, _zs] call fnc_hardpoint_zone_cap) > ([_zk] call DUWS_fnc_opcom_zoneSlotsUsed)) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
                 format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
                 _mix * ([_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone", _tier] call DUWS_fnc_opcom_holdValue)];

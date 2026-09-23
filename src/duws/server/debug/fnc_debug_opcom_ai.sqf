@@ -43,5 +43,44 @@ if (count _rows > AI_ROWS_MAX) then {
     _rows = (_rows select [0, AI_ROWS_MAX - 1]) + [format ["+%1 more", count _rows - AI_ROWS_MAX + 1]];
 };
 
-private _header = format ["OPCOM AI  %1   AP %2   tier %3   tick %4", toUpper DUWS_opcom_aiMode, WARCOM_opfor_ap, WARCOM_opfor_tier, DUWS_opcom_tick];
-[_header, _rows, DUWS_opcom_aiEvents select { (_x select 0) > _since }, DUWS_opcom_aiSeq] remoteExecCall ["fnc_debug_opcom_ai_feed", _caller];
+// Swept here rather than read from the pick's tick cache, which a build ordered since the last pick has outrun.
+private _hps = (call DUWS_fnc_opcom_hpSweep) select 0;
+private _hpAll = 0;
+{ _hpAll = _hpAll + count _y } forEach _hps;
+private _hpItem = {
+    params ["_label", "_type"];
+    [_label, count (_hps getOrDefault [_type, []]), [_type] call DUWS_fnc_opcom_hpCap]
+};
+private _open = call DUWS_fnc_opcom_zonesOpenSweep;
+private _homed = call DUWS_fnc_opcom_homedSweep;
+private _full = { (_homed getOrDefault [_x select 0, 0]) >= OPCOM_CAP_GARRISON } count _open;
+private _slotsUsed = 0;
+private _slotsCap = 0;
+{
+    _x params ["_zk", "_zs"];
+    private _cap = [_zk, _zs] call fnc_hardpoint_zone_cap;
+    _slotsCap = _slotsCap + _cap;
+    _slotsUsed = _slotsUsed + (([_zk] call DUWS_fnc_opcom_zoneSlotsUsed) min _cap);
+} forEach _open;
+private _locked = ((keys DUWS_hardpointTier) select { (DUWS_hardpointTier get _x) > WARCOM_opfor_tier })
+    apply { DUWS_hardpointName getOrDefault [_x, _x] };
+_locked sort true;
+private _reloading = 0;
+{ if (_y > DUWS_opcom_tick) then { _reloading = _reloading + 1 } } forEach DUWS_opcom_gunReady;
+
+// A [label, count, cap] item is drawn red once full; a string is drawn as it stands.
+private _limits = [
+    [format ["AP %1   income %2 per %3 min   picks %4/tick", WARCOM_opfor_ap, round WARCOM_opfor_lastIncome,
+        DUWS_econ_period / 60, DUWS_opcom_picksPerTick]],
+    [["Units", call DUWS_fnc_opcom_unitCount, OPCOM_CAP_UNITS], ["Supply", call DUWS_fnc_opcom_supplyCount, OPCOM_CAP_SUPPLY],
+        ["Garrisons full", _full, count _open]],
+    [["Hardpoints", _hpAll, OPCOM_CAP_HP_PER_ZONE * count zone_meta_array], ["Zone slots", _slotsUsed, _slotsCap]],
+    [["Radio", "RADIO"] call _hpItem, ["OP", "OP"] call _hpItem, ["Mortar", "MORTAR"] call _hpItem, ["Arty", "ARTY"] call _hpItem],
+    [["AT", "AT"] call _hpItem, ["AA", "AA"] call _hpItem, ["GMG", "GMG"] call _hpItem, ["Mines", "MINEFIELD"] call _hpItem],
+    [[format ["Tier %1 locks %2", WARCOM_opfor_tier, _locked joinString ", "], format ["Tier %1 locks nothing", WARCOM_opfor_tier]]
+        select (_locked isEqualTo []), format ["Guns reloading %1", _reloading]]
+];
+
+private _header = format ["OPCOM AI  %1   %2   tick %3", toUpper DUWS_opcom_aiMode, DUWS_opcom_archetype, DUWS_opcom_tick];
+[_header, _rows, DUWS_opcom_aiEvents select { (_x select 0) > _since }, DUWS_opcom_aiSeq, _limits]
+    remoteExecCall ["fnc_debug_opcom_ai_feed", _caller];

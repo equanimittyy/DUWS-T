@@ -41,14 +41,17 @@ DUWS_fnc_opcom_rosterSweep = {
     [_counts, _open]
 };
 
+DUWS_fnc_opcom_unitCount = {
+    { !("supply" in (_x get "flags")) && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
+};
+
 DUWS_fnc_opcom_recruitTargets = {
     params ["_row"];
     private _menu = DUWS_opcom_recruitMenu getOrDefault [_row, []];
     private _price = OPCOM_AP_UNIT getOrDefault [_row, -1];
     if (_menu isEqualTo [] || {_price < 0}) exitWith { [] };
     _menu params ["_comp", "_flags"];
-    private _units = { !("supply" in (_x get "flags")) && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings;
-    if (!("supply" in _flags) && {_units >= OPCOM_CAP_UNITS}) exitWith { [] };
+    if (!("supply" in _flags) && {(call DUWS_fnc_opcom_unitCount) >= OPCOM_CAP_UNITS}) exitWith { [] };
     // An empty class is a faction that cannot field the row now, which fnc_opcom_recruit refuses at the hire.
     if ((_comp findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" }) >= 0) exitWith { [] };
     private _force = [_comp] call DUWS_fnc_tokenListForce;

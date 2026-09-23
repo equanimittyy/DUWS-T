@@ -130,9 +130,9 @@ class RscTitles {
             class log: RscStructuredText {
                 idc = 8813;
                 x = 0.02 * safezoneW + safezoneX;
-                y = 0.28 * safezoneH + safezoneY;
+                y = 0.08 * safezoneH + safezoneY;
                 w = 0.34 * safezoneW;
-                h = 0.41 * safezoneH;
+                h = 0.61 * safezoneH;
                 size = 0.026;
                 text = "";
                 class Attributes {

@@ -51,15 +51,17 @@ DUWS_fnc_opcom_hpMix = {
         call DUWS_fnc_opcom_mixFactor
 };
 
+DUWS_fnc_opcom_hpCap = {
+    params ["_type"];
+    DUWS_opcom_assetCap getOrDefault [_type, ceil ((OPCOM_CAP_HP_TYPE_PER_ZONE getOrDefault [_type, 1e9]) * count zone_meta_array)]
+};
+
 DUWS_fnc_opcom_hpOpen = {
     params ["_type"];
     private _hps = (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 0;
-    private _zones = count zone_meta_array;
-    private _cap = DUWS_opcom_assetCap getOrDefault [_type,
-        ceil ((OPCOM_CAP_HP_TYPE_PER_ZONE getOrDefault [_type, 1e9]) * _zones)];
     private _all = 0;
     { _all = _all + count _y } forEach _hps;
     (DUWS_hardpointTier getOrDefault [_type, 99]) <= WARCOM_opfor_tier
-        && {count (_hps getOrDefault [_type, []]) < _cap}
-        && {_all < OPCOM_CAP_HP_PER_ZONE * _zones}
+        && {count (_hps getOrDefault [_type, []]) < ([_type] call DUWS_fnc_opcom_hpCap)}
+        && {_all < OPCOM_CAP_HP_PER_ZONE * count zone_meta_array}
 };

@@ -15,6 +15,7 @@ if (missionNamespace getVariable ["DUWS_dbgOpcomAiOn", false]) exitWith {
 DUWS_dbgOpcomAiOn = true;
 DUWS_dbgOpcomAiHeader = "OPCOM AI";
 DUWS_dbgOpcomAiRows = [];
+DUWS_dbgOpcomAiLimits = [];
 DUWS_dbgOpcomAiRecent = [];
 DUWS_dbgOpcomAiSeq = 0;
 ("DUWS_OpcomAiLog" call BIS_fnc_rscLayer) cutRsc ["DUWS_OpcomAiLog", "PLAIN", 0, false];
@@ -33,7 +34,17 @@ DUWS_dbgOpcomAiGen = _gen;
         private _disp = uiNamespace getVariable ["DUWS_opcomAiDisplay", displayNull];
         if (!isNull _disp) then {
             private _now = time;
-            private _lines = [format ["<t color='#ffaa00'>%1</t>", DUWS_dbgOpcomAiHeader], "<t color='#ffaa00'>--- Orders ---</t>"];
+            private _lines = [format ["<t color='#ffaa00'>%1</t>", DUWS_dbgOpcomAiHeader], "<t color='#ffaa00'>--- Limits ---</t>"];
+            {
+                private _items = _x apply {
+                    if (_x isEqualType "") then { _x } else {
+                        _x params ["_label", "_n", "_cap"];
+                        format ["<t color='%1'>%2 %3/%4</t>", ["#ffffff", "#ff5555"] select (_n >= _cap), _label, _n, _cap]
+                    }
+                };
+                _lines pushBack format ["<t color='#ffffff'>%1</t>", _items joinString "   "];
+            } forEach DUWS_dbgOpcomAiLimits;
+            _lines pushBack "<t color='#ffaa00'>--- Orders ---</t>";
             private _rows = [DUWS_dbgOpcomAiRows, ["No persistent orders."]] select (DUWS_dbgOpcomAiRows isEqualTo []);
             { _lines pushBack format ["<t color='#ffffff'>%1</t>", _x] } forEach _rows;
             _lines pushBack "<t color='#ffaa00'>--- Log ---</t>";

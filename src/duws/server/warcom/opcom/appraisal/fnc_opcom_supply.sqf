@@ -37,10 +37,11 @@ DUWS_fnc_opcom_truckFor = {
     _best
 };
 
-DUWS_fnc_opcom_supplyFull = {
-    ({ (_x getOrDefault ["errand", []]) isNotEqualTo [] && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings)
-        >= OPCOM_CAP_SUPPLY
+DUWS_fnc_opcom_supplyCount = {
+    { (_x getOrDefault ["errand", []]) isNotEqualTo [] && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
 };
+
+DUWS_fnc_opcom_supplyFull = { (call DUWS_fnc_opcom_supplyCount) >= OPCOM_CAP_SUPPLY };
 
 // One supply truck per town at a time, so a second never lands a buy on a garrison the first already filled.
 DUWS_fnc_opcom_townsSupplied = {
