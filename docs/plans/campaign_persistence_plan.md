@@ -454,7 +454,8 @@ multiplier and the loss condition together.
 
 | Group | Kind | Contents |
 |---|---|---|
-| Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) |
+| Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) and whose it is (`DUWS_townGarrisonOwner`) |
+| Zone garrisons | outcome | purchased tier per zone (`DUWS_zoneTier_<key>`) |
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array`, the `zone_hp_left_<n>` counters |
 
 Hardpoints are an input for the same reason zones are:
@@ -468,7 +469,13 @@ so they stay out of the save.
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
 moment a town crosses `-10` into the OPFOR band, independently of the commander
 ([`info/zones_and_civilians.md`](../info/gameplay/zones_and_civilians.md#garrison-tiers-0-to-iv)), so a restore
-that dropped it would repair every turned town back to ungarrisoned.
+that dropped it would repair every turned town back to ungarrisoned. Its owner rides with it for the
+same reason: a tier and the side it belongs to are one fact, and a restored tier read as the wrong
+side's would hand one army the other's men.
+
+**A tier is not only the enemy's any more.** Both sides garrison ground they hold, so a zone's tier is
+outcome the same way a town's is — it is bought, and a restore that dropped it would take back every
+garrison the player paid for.
 
 **The commander's own state is deferred with the commander.** The archetype, its standing orders
 (taskings) and — if it is ever wanted — its belief store are snapshot content only once OPCOM exists,

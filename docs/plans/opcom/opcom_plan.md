@@ -432,9 +432,10 @@ even when the muster ends in another band.
   ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
   counting as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
-  trigger; a virtual attacker at an empty zone flips it on the OPCOM tick against stored state once it has held
-  the radius for `DUWS_captureHold`, and OPCOM sends that attack's contact report itself. The
-  attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the unit
+  trigger; a virtual attacker flips it on the OPCOM tick against stored state once it has held the radius for
+  `DUWS_captureHold`, **and only at tier 0** — a zone the player has garrisoned has to be beaten, and the site
+  poller standing those men up is what renders the attacker to fight them. OPCOM sends that attack's contact
+  report itself. The attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
 
@@ -675,14 +676,23 @@ The OPFOR town ladder (tiers 0–IV in `DUWS_townSpawnTiers`, per-town `DUWS_tow
 decides *whether* a town garrisons (crossing −10 writes tier I); AP decides *how hard*. Clearing a town drops it to
 tier I at strength 0 (no refund), and it cannot be cleared again until OPCOM resupplies it.
 
+BLUFOR garrisons are shipped on the same model
+([`info/garrison_and_reserves.md`](../../info/gameplay/garrison_and_reserves.md#whose-garrison-it-is)): both sides
+field the same tier rows through their own hulls and their own AP rungs, a flip in either direction zeroes the tier
+and forgets the ledger, and buying tier I at held ground *creates* a garrison at a tenth of that tier rather than
+inheriting anything. The presence latch carries over; the `Mobilising` hold does not, since a BLUFOR garrison never
+arrives on ground it owns. A BLUFOR-held site also wakes for an OPCOM attacker, live or virtual, inside its ring, so
+its garrison renders and renders the attacker in turn.
+
 Not built:
 
-- **BLUFOR garrisons.** BLUFOR buy garrisons for zones and towns as OPFOR do. The BLUFOR band (`>= 10`) has no
-  garrison; buying tier I at a held town *creates* one at zero strength (each reinforcement +30 %), never inherits
-  OPFOR's — captured ground carries no tier or strength. The presence latch is still wanted (a BLUFOR garrison
-  streams), but the `Mobilising` hold is not (a BLUFOR garrison never arrives on ground it owns). A
-  BLUFOR-held site also wakes when an OPCOM attacker, live or virtual, closes within K, so its garrison renders and
-  renders the attacker in turn.
+- **What the player pays for one.** `fnc_zone_garrison_fortify` / `_reinforce` and the town pair charge nothing —
+  the price is the caller's, as it is for OPCOM. Only the debug surface calls them for BLUFOR today, so the
+  currency, the price and where the player spends it are open. OPCOM's own candidate lists skip BLUFOR-held sites,
+  so nothing it buys can reach them.
+- **Attacking a BLUFOR town.** Attack targets BLUFOR-held zones only, so a town the player has garrisoned is
+  cleared only by OPFOR who happen to be standing in it. Whether a friendly town is worth a commit, and what it
+  scores against a zone, belongs with the Attack targeting it would extend.
 
 ## Random events: what a turned town does
 
