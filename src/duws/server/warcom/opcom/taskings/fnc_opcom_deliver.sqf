@@ -54,23 +54,38 @@ DUWS_fnc_opcom_mineBuild = {
     // Spawned: the lay walks every square, and the tick must never carry it.
     [_pos, _variant, _size, _refund] spawn {
         params ["_pos", "_variant", "_size", "_refund"];
-        private _best = ["MINEFIELD", DUWS_fnc_opcom_buildCand, [_pos], true, _variant] call fnc_hardpoint_best_ground;
-        if (_best isEqualTo []) exitWith {
+        // Reads the locals around it, the way fnc_hardpoint_reveal's _fnc_paint does: a belt can fail on
+        // the candidate or on every square of the grid, and both owe the same refund and the same line.
+        private _fnc_noGround = {
             ["WARN", "OPCOM", format ["mine: no ground for a %1 field near %2", _variant, _pos apply { round _x }]] call fnc_log;
             if (_refund > 0) then { ["OPF", _refund, "opcom_build_refund"] call fnc_ap_adjust };
             [format ["Lay %1 mines at %2 found no ground%3", _variant, mapGridPosition _pos,
                 ["", format ["  %1 AP back", _refund]] select (_refund > 0)]] call DUWS_fnc_opcom_aiEvent;
         };
+        private _best = ["MINEFIELD", DUWS_fnc_opcom_buildCand, [_pos], true, _variant] call fnc_hardpoint_best_ground;
+        if (_best isEqualTo []) exitWith { call _fnc_noGround };
         _best params ["_at", "", "_dir"];
+        // Only the centre was scored. A belt runs kilometres past it and crosses ground the one candidate
+        // never saw, so every square is tested here. AP keeps the 100 m road standoff its siting gate
+        // applies; AT is laid on roads by design.
+        private _centres = ([_at, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid) select {
+            !surfaceIsWater _x && {_variant isEqualTo "AT" || {(_x nearRoads 100) isEqualTo []}}
+        };
         private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
         missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
         private _key = format ["hpopcom_%1", _seq];
-        {
-            [_x, _dir, _variant, _key] call fnc_hardpoint_minefield;
-        } forEach ([_at, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid);
-        [_key, "MINEFIELD", _at, "opfor", "", _dir] call fnc_hardpoint_register;
-        ["INFO", "OPCOM", format ["mine: %1 field %2 squares laid as %3 near %4",
-            _variant, _size, _key, _at apply { round _x }]] call fnc_log;
+        // Planned, not laid: the squares are made and unmade by the site poller as players reach them.
+        private _laid = [_centres, _dir, _variant, _key] call fnc_hardpoint_minefield_stream;
+        if (_laid < 1) exitWith {
+            missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], nil];
+            missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], nil];
+            call _fnc_noGround;
+        };
+        [_centres, _dir, _key] call fnc_hardpoint_minefield_signs;
+        [_key, "MINEFIELD", _at, "opfor", "", _dir, _size call fnc_hardpoint_minefield_ring] call fnc_hardpoint_register;
+        ["INFO", "OPCOM", format ["mine: %1 belt %2 planned as %3 near %4: %5 mines over %6 of %7 squares",
+            _variant, _size, _key, _at apply { round _x }, _laid, count _centres,
+            (_size select 0) * (_size select 1)]] call fnc_log;
         [format ["Lay %1 mines at %2 laid", _variant, mapGridPosition _at]] call DUWS_fnc_opcom_aiEvent;
     };
     true

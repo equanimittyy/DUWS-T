@@ -11,9 +11,9 @@ private _variant = selectRandom ["AP", "AT"];
 private _dir = random 360;
 private _key = format ["hpcivmine_%1", _id];
 private _mines = [];
-{
-    if (!surfaceIsWater _x) then { _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield) };
-} forEach ([_site, _dir, 1 + floor random 2, 1 + floor random 2] call fnc_hardpoint_minefield_grid);
+private _squares = ([_site, _dir, 1 + floor random 2, 1 + floor random 2] call fnc_hardpoint_minefield_grid)
+    select { !surfaceIsWater _x };
+{ _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield) } forEach _squares;
 if (_mines isEqualTo []) exitWith {
     ["WARN", "CIV", format ["civilian mission %1: no mines laid", _id]] call fnc_log;
     [_id, "FAILED"] call fnc_civ_mission_finish;
@@ -26,6 +26,7 @@ _mines = _mines call BIS_fnc_arrayShuffle;
 _mines resize _left;
 // Survivors only: the list rides the JIP reveal to every client.
 missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines];
+[_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
 [_key, "MINEFIELD", _site, "opfor", "", _dir] call fnc_hardpoint_register;
 ["ONE", _key, true] call fnc_hardpoint_reveal;
 ["INFO", "CIV", format ["civilian mission %1: %2 field %3 keeps %4 of %5 mines", _id, _variant, _key, _left, _laid]] call fnc_log;

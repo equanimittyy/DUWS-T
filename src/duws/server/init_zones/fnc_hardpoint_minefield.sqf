@@ -2,6 +2,12 @@
 //
 // One square per call; a larger field is several squares laid by the caller, stepped by DUWS_mineSquare.
 //
+// A field is planned as coordinates first and only then made into objects. OPCOM lays belts up to 1.5 km
+// long, which is hundreds of mines if every square exists at once, so for those the plan is the
+// field's real state: a square within reach of a player holds objects, every other square holds only the
+// positions it will put back, and a mine the player took off the map leaves the plan rather than a list
+// of handles. A short field (a civilian job, a recon ambush) is laid whole and skips all of it.
+//
 // Vanilla mine classes only: the same footing as the Land_* props the compositions use, so nothing
 // here forces a mod. east revealMine marks each mine as OPFOR-laid, which keeps OPFOR AI off its own
 // field and leaves BLUFOR to detect and clear it.
@@ -13,29 +19,36 @@
 
 DUWS_mineSquare = 50;
 
+// A streamed square's mines are made inside the first distance and deleted past the second. The in-ring
+// must cover a vehicle crossing a whole site poll (SITE_TICK, 10 s) at speed, or a driver reaches ground
+// whose mines do not exist yet; the gap between the two is hysteresis, so a man on the edge does not
+// re-lay the same square every pass.
+DUWS_mineStreamIn = 350;
+DUWS_mineStreamOut = 550;
+
 // [variant, classes, mines per cell]. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
-// A fractional count is rolled per cell, so AP's 1.1 averages 27.5 mines a square.
+// A fractional count is rolled per cell, so AT's 0.3 averages 7.5 mines a square and AP's 0.33 averages 8.25.
+// Thin, because a belt is deep rather than dense: what a vehicle meets is the mines down the whole depth it
+// crosses, so depth buys the same bite for fewer mines standing at once.
 DUWS_mineVariants = [
-    ["AT", ["ATMine"], 1],
-    ["AP", ["APERSMine"], 1.1]
+    ["AT", ["ATMine"], 0.3],
+    ["AP", ["APERSMine"], 0.33]
 ];
 
-// [_center, _dir, _variant, _key] call fnc_hardpoint_minefield -> [mines]
-//   _dir     degrees         clockwise like setDir
-//   _variant "AT" | "AP"     resolved through DUWS_mineVariants; an unknown token falls to AT
-//   _key     site key        files each mine under the key for teardown and the clearance count;
-//                            "" leaves them unmanaged
-fnc_hardpoint_minefield = {
-    params ["_center", "_dir", ["_variant", "AT"], ["_key", ""]];
+// [_center, _dir, _variant] call fnc_hardpoint_minefield_plan -> [[[x,y], class], ...]
+//   _dir     degrees     clockwise like setDir
+//   _variant "AT" | "AP" resolved through DUWS_mineVariants; an unknown token falls to AT
+fnc_hardpoint_minefield_plan = {
+    params ["_center", "_dir", ["_variant", "AT"]];
 
     private _hit = DUWS_mineVariants findIf { (_x select 0) isEqualTo (toUpper _variant) };
-    (if (_hit >= 0) then { DUWS_mineVariants select _hit } else { ["AT", ["ATMine"], 1] }) params ["", "_classes", "_perCell"];
+    (if (_hit >= 0) then { DUWS_mineVariants select _hit } else { DUWS_mineVariants select 0 }) params ["", "_classes", "_perCell"];
 
     private _cx = _center select 0;
     private _cy = _center select 1;
     private _half = DUWS_mineSquare / 2;
-    private _mines = [];
+    private _plan = [];
     for "_i" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
         for "_j" from 0 to (DUWS_mineSquare / MINE_CELL - 1) do {
             for "_k" from 1 to (floor (_perCell + random 1)) do {
@@ -43,21 +56,34 @@ fnc_hardpoint_minefield = {
                     (_i + 0.5) * MINE_CELL + ((random 2) - 1) * MINE_SPREAD - _half,
                     (_j + 0.5) * MINE_CELL + ((random 2) - 1) * MINE_SPREAD - _half,
                     _dir] call fnc_hardpoint_rotate;
-                private _mine = createMine [selectRandom _classes, [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0];
-                east revealMine _mine;
-                if (_key != "") then { [_mine, _key] call fnc_duws_keep };
-                _mines pushBack _mine;
+                _plan pushBack [[_cx + (_off select 0), _cy + (_off select 1)], selectRandom _classes];
             };
         };
     };
+    _plan
+};
 
-    // Inner 80% only: a sign on the edge would trace the field for the player.
-    for "_i" from 1 to (1 + floor random 2) do {
-        private _off = [((random 2) - 1) * _half * 0.8, ((random 2) - 1) * _half * 0.8, _dir] call fnc_hardpoint_rotate;
-        private _sign = createVehicle ["Land_Sign_Mines_F", [_cx + (_off select 0), _cy + (_off select 1), 0], [], 0, "CAN_COLLIDE"];
-        _sign setDir (random 360);
-        if (_key != "") then { [_sign, _key] call fnc_duws_keep };
-    };
+// [_plan, _key] call fnc_hardpoint_minefield_make -> [mines], one object per plan entry and in the same
+// order, so a caller holding both can drop a spent mine's position with it.
+fnc_hardpoint_minefield_make = {
+    params ["_plan", ["_key", ""]];
+    private _mines = [];
+    {
+        _x params ["_p", "_class"];
+        private _mine = createMine [_class, [_p select 0, _p select 1, 0], [], 0];
+        east revealMine _mine;
+        if (_key != "") then { [_mine, _key] call fnc_duws_keep };
+        _mines pushBack _mine;
+    } forEach _plan;
+    _mines
+};
+
+// [_center, _dir, _variant, _key] call fnc_hardpoint_minefield -> [mines]
+//   _key  site key  files each mine under the key for teardown and the clearance count;
+//                   "" leaves them unmanaged
+fnc_hardpoint_minefield = {
+    params ["_center", "_dir", ["_variant", "AT"], ["_key", ""]];
+    private _mines = [[_center, _dir, _variant] call fnc_hardpoint_minefield_plan, _key] call fnc_hardpoint_minefield_make;
 
     // Filed by key so the clearance check can read what is left: the field is spent when no armed mine
     // remains, and its own hazard list is the only count of that. Signs are not in it -- a warning
@@ -69,6 +95,97 @@ fnc_hardpoint_minefield = {
     };
 
     _mines
+};
+
+// [_centres, _dir, _key] call fnc_hardpoint_minefield_signs -- warning signs for a whole field, drawn
+// from its squares. One per eight squares rather than one per square: a sign on every square of a long
+// belt traces its whole run for the player, and costs more objects than a square's mines.
+// Inner 80% of the square only, so a sign never marks the field's edge.
+fnc_hardpoint_minefield_signs = {
+    params ["_centres", "_dir", ["_key", ""]];
+    if (_centres isEqualTo []) exitWith {};
+    private _half = DUWS_mineSquare / 2;
+    for "_i" from 1 to (2 max round ((count _centres) / 8)) do {
+        private _c = selectRandom _centres;
+        private _off = [((random 2) - 1) * _half * 0.8, ((random 2) - 1) * _half * 0.8, _dir] call fnc_hardpoint_rotate;
+        private _sign = createVehicle ["Land_Sign_Mines_F",
+            [(_c select 0) + (_off select 0), (_c select 1) + (_off select 1), 0], [], 0, "CAN_COLLIDE"];
+        _sign setDir (random 360);
+        if (_key != "") then { [_sign, _key] call fnc_duws_keep };
+    };
+};
+
+// [_centres, _dir, _variant, _key] call fnc_hardpoint_minefield_stream -> mines planned. Registers the
+// field for streaming instead of laying it: nothing is made until fnc_hardpoint_minefield_cycle runs.
+// A square is [centre, plan, objects]; objects [] means the square is off the map.
+fnc_hardpoint_minefield_stream = {
+    params ["_centres", "_dir", "_variant", "_key"];
+    private _squares = [];
+    private _total = 0;
+    {
+        private _plan = [_x, _dir, _variant] call fnc_hardpoint_minefield_plan;
+        if (_plan isEqualTo []) then { continue };
+        _total = _total + count _plan;
+        _squares pushBack [_x, _plan, []];
+    } forEach _centres;
+    missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], _squares];
+    missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], _total];
+    _total
+};
+
+// [_cols, _rows] call fnc_hardpoint_minefield_ring -> the site radius a belt needs: half its long side
+// plus the stream-out distance, so the poller is still looking at the field while a player stands on its
+// far end. The type table's ring covers one emplacement, and a belt is kilometres of them.
+fnc_hardpoint_minefield_ring = {
+    params ["_cols", "_rows"];
+    ceil (((_cols max _rows) * DUWS_mineSquare / 2) + DUWS_mineStreamOut)
+};
+
+// [_key] call fnc_hardpoint_minefield_left -> mines the field still holds, standing or not. The plan is
+// the count, not the objects: a square off the map is still mined ground.
+fnc_hardpoint_minefield_left = {
+    params ["_key"];
+    private _n = 0;
+    { _n = _n + count (_x select 1) } forEach (missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []]);
+    _n
+};
+
+// [_key, _here, _revealed] call fnc_hardpoint_minefield_cycle -- one site-poller pass over a streamed
+// field. A square nobody is near never exists, so a belt costs its stream ring, not its length.
+// _here false (nobody inside the site's ring) takes the whole field off the map without a player scan.
+fnc_hardpoint_minefield_cycle = {
+    params ["_key", "_here", ["_revealed", false]];
+    private _squares = missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []];
+    if (_squares isEqualTo []) exitWith {};
+
+    private _players = [];
+    if (_here) then { _players = ((call BIS_fnc_listPlayers) select { alive _x }) apply { getPosATL _x } };
+
+    {
+        _x params ["_c", "_plan", "_objs"];
+        // Backwards, so deleting an entry cannot skip the next one. Plan and objects are index-aligned:
+        // a mine that has gone off or been disarmed takes its position with it, and that ground stays clear.
+        for "_i" from (count _objs) - 1 to 0 step -1 do {
+            private _m = _objs select _i;
+            if (isNull _m || {!mineActive _m}) then {
+                _objs deleteAt _i;
+                _plan deleteAt _i;
+            };
+        };
+
+        private _d = if (_players isEqualTo []) then { 1e9 } else { selectMin (_players apply { _x distance2D _c }) };
+        if (_objs isEqualTo [] && {_plan isNotEqualTo []} && {_d < DUWS_mineStreamIn}) then {
+            private _made = [_plan, _key] call fnc_hardpoint_minefield_make;
+            // Not JIP-queued: these objects live only while somebody is near, and a queue entry per square
+            // per pass would outlive them. A client joining onto a standing square reveals on its next lay.
+            if (_revealed) then { [_made] remoteExec ["fnc_hardpoint_minefield_reveal", 0] };
+            _objs append _made;
+        };
+        if (_objs isNotEqualTo [] && {_d > DUWS_mineStreamOut}) then {
+            { deleteVehicle _x } forEach _objs;
+            _objs resize 0;
+        };
+    } forEach _squares;
 };
 
 // [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, jip] -- marks the mines for BLUFOR through the

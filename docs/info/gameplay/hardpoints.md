@@ -40,7 +40,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `OP` | vanilla bunker/tower prop | security team + wide recon patrol | standalone recon screen, seeded at generation; see [below](#observation-posts) |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
 | `ARTY` | `opfor_ARTY_X` | one team | resident; cleared by destroying the piece |
-| `MINEFIELD` | 50 m mine squares, no core weapon | none | AT or AP variant; cleared when no armed mine remains |
+| `MINEFIELD` | 50 m mine squares, no core weapon | none | AT or AP variant; squares stream per player distance; cleared when no armed mine remains |
 | `RADIO` | live comms mast + 7 frozen HMG/AA nests | rifle team + 2 weapons teams | see [`opfor_area_of_influence.md`](opfor_area_of_influence.md#radio-towers) |
 
 Tables: `DUWS_hardpointGarrison`, `DUWS_hardpointName`, `DUWS_hardpointStreaming`
@@ -57,8 +57,9 @@ crewed in place rather than dropped and settled, because it already sits on its 
 but is seeded standalone at generation, one per zone on a coin flip
 ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented —
 composition, garrison, streaming, clearance — but campaign generation never places them. All three come
-from OPCOM's standalone builds (`appraisal/fnc_opcom_buy_build.sqf`), which lay a `MINEFIELD` one 50 m square at a
-time, AT or AP. A `MINEFIELD` also comes from the debug hardpoint spawner
+from OPCOM's standalone builds (`appraisal/fnc_opcom_buy_build.sqf`), which lay a `MINEFIELD` as a belt
+150 m deep (`OPCOM_MINE_DEPTH`) and 500 m to 1.5 km long (`OPCOM_MINE_LEN_MIN` / `_MAX`), AT or AP.
+A `MINEFIELD` also comes from the debug hardpoint spawner
 (`client/debug/fnc_debug_hardpoint_menu.sqf`), from the Eliminate Recon Patrol side mission, which
 registers it as a standalone hardpoint, and from the Clear Minefield civilian mission, which registers a
 thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
@@ -126,14 +127,18 @@ tier earns a higher ceiling with no rewrite. At campaign generation a random cou
 clear of steep slope, facing radially out from the centre. The cap is the free-slot limit OPCOM's zone
 Build reads, less the standing ring and any build still siting (`DUWS_opcom_buildsPending`).
 
-**Minefields are generated, not composed.** `fnc_hardpoint_minefield`
-(`server/init_zones/fnc_hardpoint_minefield.sqf`) lays one 50 m square of vanilla mine objects —
-`ATMine` for the AT variant, `APERSMine` for AP. Each 10 m cell of the square gets
-one mine, so an AT square holds 25 mines. AP runs at 1.1 mines a cell: each cell has a 10% chance of a
-second mine, so an AP square averages 27.5. A mine lands anywhere within 10 m of its cell's centre, up to
+**Minefields are generated, not composed.** `fnc_hardpoint_minefield_plan`
+(`server/init_zones/fnc_hardpoint_minefield.sqf`) plans one 50 m square of vanilla mine objects —
+`ATMine` for the AT variant, `APERSMine` for AP. Each 10 m cell of the square carries a fractional mine
+count rolled per cell: AT runs at 0.3, so an AT square averages 7.5 mines, and AP at 0.33, averaging 8.25.
+The density is deliberately thin. What a crossing vehicle meets is the mines down the whole depth of the
+belt, so depth carries the lethality and keeps fewer mines standing at once than a shallow dense field.
+A mine lands anywhere within 10 m of its cell's centre, up to
 5 m past the cell edge. The spans of neighbouring cells overlap, so mines clump and leave gaps as a
 hand-laid field does, and the square's edge blurs by up to 5 m.
-One or two warning signs sit inside the field as dressing. A larger field is several squares, laid by
+Warning signs are placed once per field by `fnc_hardpoint_minefield_signs`, one per eight squares and at
+least two, inside the inner 80% of a square it draws at random — a sign on every square traced a long
+belt's whole run. A larger field is several squares, laid by
 the caller. Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leaving detection and
 clearance to BLUFOR. Every player has the `explosiveSpecialist` trait (`client/client_init.sqf`), so any player
 can disarm a mine with the engine's own action. It has no fence to place through `fnc_hardpoint_lay`, and no
@@ -143,6 +148,19 @@ A block of squares is laid from `fnc_hardpoint_minefield_grid`, which returns th
 given width and depth. Squares laid under one site key add to one mine list, so they clear as one field.
 The debug hardpoint spawner lays a field from three map clicks: both ends of the front, then the depth.
 It snaps each measure to the nearest whole square, with one square as the minimum.
+
+**A long field streams square by square.** A 1.5 km belt is hundreds of mines, so OPCOM's belts and the
+debug spawner's fields register through `fnc_hardpoint_minefield_stream` instead of being laid: the field
+is stored as squares of `[centre, plan, objects]`, where the plan is the positions the square still owes
+and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
+hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
+`DUWS_mineStreamOut` (550 m), so a belt costs its stream ring rather than its length. The in-ring covers a
+vehicle crossing one 10 s site poll at speed. Each pass first prunes every standing square back to the
+mines still armed, dropping a spent mine's position with it, so ground the player cleared stays clear
+across a stow. `fnc_hardpoint_minefield_ring` gives the site radius such a field registers with — half its
+long side plus the stream-out distance — since the poller only looks at a site somebody is already
+inside, and the type table's 600 m ring covers one emplacement, not a belt. Short fields (a civilian job,
+a recon ambush) skip all of this and are laid whole through `fnc_hardpoint_minefield`.
 
 **Standalone band and radio towers.** Most standalone hardpoints are sited by sampling the OPFOR-positive
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to
@@ -184,7 +202,11 @@ same problem the plan raised for AA (a static gun cannot deploy fast enough to c
 600 m ring in seconds), solved here by waking earlier rather than by never sleeping.
 
 **Pinning is `neverStream` only.** `MORTAR`, `ARTY` and `MINEFIELD` are marked `neverStream` in
-`DUWS_hardpointStreaming` (`server_var_init.sqf:377-393`) and, on registration, every member of their
+`DUWS_hardpointStreaming` (`server_var_init.sqf:377-393`). A battery is pinned so OPCOM can task it with
+no player near; a minefield is pinned because a mine has to be made with `createMine`, and the
+composition's own deploy rebuilds members with `createVehicle`, which would hand back inert props.
+A minefield instead streams on its own path, square by square ([Siting](#siting)).
+On registration, every member of their
 composition is re-filed through `fnc_duws_keep` with `_pinned = true`
 (`fnc_hardpoint_stream.sqf:319-321`), which sets `DUWS_noStow` and excludes the object from
 `fnc_duws_stow`'s crewed-member refusal and its delete pass
@@ -223,7 +245,7 @@ tick and branches on type family:
 
 | Family | Cleared when |
 |---|---|
-| `MINEFIELD` | no mine in its filed hazard list is still armed |
+| `MINEFIELD` | no mine is left: its plan for a streamed field, its filed hazard list for one laid whole |
 | `MORTAR`, `ARTY` | no piece in its composition is alive — crew alone is not enough, since the pieces are pinned resident and a crew killed off an intact gun would otherwise clear a battery that still stands |
 | `RADIO` | its mast (the one live, damageable member) is destroyed, whatever the garrison's state |
 | everything else | its site roster — gun crew plus loose defenders — is down to zero alive |
@@ -266,7 +288,10 @@ reads its mine list every tick, and reveals the field once fewer mines are armed
 a minefield runs `west revealMine` on every mine, on every machine and in the JIP queue, so the engine
 marks each mine for BLUFOR with its own mine icons, on the map and in 3D, wherever the difficulty's
 detected-mines option allows. BLUFOR AI then also steers clear of the field. Clearing the field removes
-the JIP entry.
+the JIP entry. A streamed field is not JIP-queued: its objects live only while somebody is near, so a
+queue entry would outlive them. The squares standing at the moment of reveal are marked then — a field is
+usually given away by a mine going off under somebody, who is therefore inside one — and every later
+square marks itself as it is made.
 
 ## Clear economy
 

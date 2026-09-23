@@ -44,14 +44,17 @@ DUWS_fnc_opcom_assetTargets = {
         format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
 };
 
-// One 50 m square for now; the size rides the target, so a deeper belt is a wider candidate, not a new action.
+// Fixed depth, length rolled per field, both in 50 m squares. The roll rides the target, so the price the
+// pick weighs is the price of the belt it would actually lay.
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
     if ((DUWS_hardpointTier getOrDefault ["MINEFIELD", 99]) > WARCOM_opfor_tier) exitWith { [] };
     private _st = ["MINE"] call DUWS_fnc_opcom_siteTruck;
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
-    private _size = [1, 1];
+    private _lo = round (OPCOM_MINE_LEN_MIN / DUWS_mineSquare);
+    private _hi = round (OPCOM_MINE_LEN_MAX / DUWS_mineSquare);
+    private _size = [_lo + floor random (_hi - _lo + 1), round (OPCOM_MINE_DEPTH / DUWS_mineSquare)];
     [[[_variant, _size, _at, _truck select 0],
         ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
         format ["Lay %1 mines at %2", _variant, mapGridPosition _at], _v]]

@@ -18,18 +18,24 @@ _this spawn {
 
     // Garrison is the type's, fielded by the spawn from DUWS_hardpointGarrison -- a dev spawn stands up
     // the same defenders a shipped one of that type would, and a minefield still gets none.
-    private _objs = if (_type isEqualTo "MINEFIELD") then {
-        private _mines = [];
-        {
-            _mines append ([_x, _dir, _variant, _key] call fnc_hardpoint_minefield);
-        } forEach ([_pos, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid);
-        _mines
+    private _objs = [];
+    private _ring = 0;
+    private _what = "";
+    if (_type isEqualTo "MINEFIELD") then {
+        // Planned, not laid, the way OPCOM lays one: the dev tool is how a belt's streaming is looked at,
+        // so its squares have to appear and go on the same rule.
+        private _squares = [_pos, _dir, _size select 0, _size select 1] call fnc_hardpoint_minefield_grid;
+        private _laid = [_squares, _dir, _variant, _key] call fnc_hardpoint_minefield_stream;
+        [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
+        _ring = _size call fnc_hardpoint_minefield_ring;
+        _what = format ["%1 %2 mines planned over %3 squares", _laid, _variant, count _squares];
     } else {
-        [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build
+        _objs = [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build;
+        _what = format ["%1 objects", count _objs];
     };
-    [_key, _type, _pos, _side, "", _dir] call fnc_hardpoint_register;
+    [_key, _type, _pos, _side, "", _dir, _ring] call fnc_hardpoint_register;
     DUWS_hpdevKeys = (missionNamespace getVariable ["DUWS_hpdevKeys", []]) + [_key];
 
-    ["INFO", "HARDPOINT", format ["dev spawn: %1 %2 [%3], %4 objects at %5",
-        _side, _type, _key, count _objs, mapGridPosition _pos]] call fnc_log;
+    ["INFO", "HARDPOINT", format ["dev spawn: %1 %2 [%3], %4 at %5",
+        _side, _type, _key, _what, mapGridPosition _pos]] call fnc_log;
 };

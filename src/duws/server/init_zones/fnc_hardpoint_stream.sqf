@@ -105,6 +105,16 @@ DUWS_fnc_hardpointStow = {
 DUWS_fnc_hardpointClearCheck = {
     params ["_key", "_o"];
     if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {
+        // A streamed field is counted off its plan, not its objects: most of its squares are off the map
+        // at any moment, and an empty object list there is unlaid ground rather than cleared ground.
+        if ((missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []]) isNotEqualTo []) exitWith {
+            private _left = [_key] call fnc_hardpoint_minefield_left;
+            if (_left < (missionNamespace getVariable [format ["DUWS_hpMineLaid_%1", _key], _left])) then {
+                ["ONE", _key] call fnc_hardpoint_reveal;
+            };
+            if (_left > 0) exitWith {};
+            [_key, _o] call DUWS_fnc_hardpointClear;
+        };
         private _mines = missionNamespace getVariable [format ["DUWS_hpMines_%1", _key], []];
         private _armed = {!isNull _x && {mineActive _x}} count _mines;
         // The first mine gone -- set off, disarmed or blown -- gives the whole field away.
@@ -169,6 +179,8 @@ DUWS_fnc_hardpointClear = {
     _o set ["cleared", true];
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
     missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], nil];
+    missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], nil];
+    missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], nil];
     if ((_o get "hpType") isEqualTo "MINEFIELD") then { remoteExec ["", format ["DUWS_hpMineReveal_%1", _key]] };
     // Deleted, not flagged, so it leaves the registry rather than sitting as a dead row OPCOM filters past every pass.
     private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
@@ -310,6 +322,12 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         };
     };
 
+    // Ahead of the clearance count, which reads the plan this pass prunes.
+    if ((_o get "hpType") isEqualTo "MINEFIELD") then {
+        private _r = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+        [_key, _here, _r > -1 && {(DUWS_hardpoints select _r) select 5}] call fnc_hardpoint_minefield_cycle;
+    };
+
     [_key, _o] call DUWS_fnc_hardpointClearCheck;
     if (_o getOrDefault ["cleared", false]) exitWith {};
 
@@ -422,9 +440,12 @@ fnc_roadblock_gate_arm = {
 //
 // _zoneKey "" is standalone, on its own ring; set, it mirrors that zone's garrison instead.
 fnc_hardpoint_register = {
-    params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
+    params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0], ["_ring", 0]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
+    // _ring overrides the type's, for a hardpoint bigger than one emplacement: a minefield belt runs
+    // kilometres, and the poller only looks at a site somebody is already inside.
+    if (_ring > 0) then { _radius = _ring };
     [_key, _pos, _radius, "stream"] call fnc_site_register;
     private _occ = [_key, "garrison", EAST, 0, _grace, true, true] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];

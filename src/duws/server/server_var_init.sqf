@@ -365,9 +365,11 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 //                a mast/battery is destroyed up close, so neither needs gun-range wake-up)
 //   grace        seconds empty before it stows
 //   neverStream  built once, kept resident, never stowed -- mortar/artillery so OPCOM can task them with
-//                no player near, a minefield so its mines are never stowed off the map. Only the
-//                composition is pinned; the loose garrison still streams, but the gun crew stays live
-//                (a frozen crew cannot fire)
+//                no player near, a minefield because a mine must be made with createMine and the
+//                composition's own deploy rebuilds members with createVehicle, which would hand back
+//                inert props. A minefield streams per square on its own path instead
+//                (fnc_hardpoint_minefield_cycle). Only the composition is pinned; the loose garrison
+//                still streams, but the gun crew stays live (a frozen crew cannot fire)
 //   airRing      a second, larger radius answered only by aircraft; 0 = none. Lets AA catch a jet its
 //                ground ring would never notice, without waking on every distant foot patrol.
 // Server-only: every consumer (the site poller, fnc_hardpoint_register) runs on the server.
@@ -734,8 +736,16 @@ OPCOM_AP_TOWER = 30;
 OPCOM_AP_OP = 15;
 OPCOM_AP_MORTAR = 25;
 OPCOM_AP_ARTY = 50;
-// Per 50 m square, so a deeper belt costs by its footprint.
-OPCOM_AP_MINEFIELD = 15;
+// Per 50 m square, so a longer belt costs by its footprint. Low because a belt is tens of squares: at the
+// longest belt it is the dearest thing OPCOM buys, and any dearer a square puts even a short one over the
+// bank horizon, where the pick can never reach it.
+OPCOM_AP_MINEFIELD = 1;
+// A belt OPCOM lays, in metres: fixed depth, length rolled per field. Metres rather than squares because
+// DUWS_mineSquare is defined in server_fnc_init, which loads after this file. Depth is what a crossing
+// vehicle actually meets, so it carries the belt's lethality and the per-cell density stays low.
+OPCOM_MINE_DEPTH = 150;
+OPCOM_MINE_LEN_MIN = 500;
+OPCOM_MINE_LEN_MAX = 1500;
 // AP is the ammunition: the guns rest empty and are loaded per mission, so the wallet is the only limit.
 OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 1], ["ARTY", 2]];
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.

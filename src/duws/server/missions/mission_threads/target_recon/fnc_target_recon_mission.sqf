@@ -43,13 +43,11 @@ private _build = {
             missionNamespace setVariable ["DUWS_hpReconSeq", _seq + 1];
             private _key = format ["hprecon_%1", _seq];
             private _mines = [];
-            {
-                if (!surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []}) then {
-                    _mines append ([_x, _dir, "AP", _key] call fnc_hardpoint_minefield);
-                };
-            } forEach ([_fieldPos, _dir, 1 + floor random RECON_MINE_MAX, 1 + floor random RECON_MINE_MAX]
-                call fnc_hardpoint_minefield_grid);
+            private _squares = ([_fieldPos, _dir, 1 + floor random RECON_MINE_MAX, 1 + floor random RECON_MINE_MAX]
+                call fnc_hardpoint_minefield_grid) select { !surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []} };
+            { _mines append ([_x, _dir, "AP", _key] call fnc_hardpoint_minefield) } forEach _squares;
             if (_mines isNotEqualTo []) then {
+                [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
                 [_key, "MINEFIELD", _fieldPos, "opfor", "", _dir] call fnc_hardpoint_register;
             };
         };

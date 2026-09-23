@@ -20,6 +20,14 @@ private _fnc_paint = {
     if (_mines isNotEqualTo []) then {
         [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, format ["DUWS_hpMineReveal_%1", _k]];
     };
+    // A streamed field's squares are made and unmade as players move, so its mines cannot ride a JIP queue.
+    // The squares standing right now are marked here -- the field is usually revealed by a mine going off
+    // under somebody, who is therefore inside one -- and every later square marks itself as it is made.
+    private _standing = [];
+    { _standing append (_x select 2) } forEach (missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _k], []]);
+    if (_standing isNotEqualTo []) then {
+        [_standing] remoteExec ["fnc_hardpoint_minefield_reveal", 0];
+    };
 };
 
 private _revealed = false;
