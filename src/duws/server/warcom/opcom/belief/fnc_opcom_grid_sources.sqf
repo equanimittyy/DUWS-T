@@ -62,11 +62,17 @@ DUWS_fnc_opcom_gridZone = {
 
 DUWS_fnc_opcom_gridTown = {
     params ["_i"];
-    // Tier is 1 or more only where the town is OPFOR-banded: a neutral or BLU town fields no garrison.
+    // A neutral town fields no garrison, so it deposits nothing.
     if (((missionNamespace getVariable ["DUWS_townGarrisonTier", []]) param [_i, 0]) < 1) exitWith { [] };
     private _key = [_i] call fnc_town_site_key;
-    [_key, !([_key] call DUWS_fnc_garrisonHeld), "fri", getPos ((missionNamespace getVariable ["civ_locations", []]) select _i),
-        [_key] call DUWS_fnc_garrisonForce, ((missionNamespace getVariable ["civ_radii", []]) param [_i, 500]) + OPCOM_GRID_SPREAD]
+    private _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select _i);
+    private _reach = ((missionNamespace getVariable ["civ_radii", []]) param [_i, 500]) + OPCOM_GRID_SPREAD;
+    // A town BLUFOR garrison is enemy ground on the same terms a BLU-held zone is: known to be held, read at
+    // the nominal rather than at its true force, which the commander has no way to see.
+    if (([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU") exitWith {
+        [_key, true, "ene", _pos, OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
+    };
+    [_key, !([_key] call DUWS_fnc_garrisonHeld), "fri", _pos, [_key] call DUWS_fnc_garrisonForce, _reach]
 };
 
 // Priced off the type's layout, so a row weighs the same deployed or stowed; it stands until cleared.

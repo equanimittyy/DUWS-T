@@ -193,6 +193,8 @@ _occ set ["minAIHold", 1];
 // AI transit/support or cruising jets don't wake it; DUWS_zoneAirRing=0 keeps the ground-only default.
 _occ set ["airRing", DUWS_zoneAirRing];
 _occ set ["airRingCommitted", true];
+// Once the player owns the ground, the force that matters is the one attacking it: see the poller.
+_occ set ["enemyAware", true];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
 // Driven by the garrison's cycle, not polled: the three occupants have a strict order -- the prefab must exist

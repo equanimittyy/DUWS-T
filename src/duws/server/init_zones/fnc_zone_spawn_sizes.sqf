@@ -32,10 +32,14 @@ DUWS_zoneSpawnTiers = [
 // Returns the x1 garrison only -- the enemy multiplier no longer scales what stands on the ground,
 // it is reserve depth now (surplus mult-1 copies become the zone's reserve pool in fnc_zone_spawn).
 // Tier is passed rather than read, so the pick is testable against a stand-in tier.
+//
+// Tier 0 is no garrison, not the smallest one: clamping it up to I would price a first buy at nothing,
+// since the buy charges what the new tier adds over the old.
 DUWS_fnc_zoneSpawnList = {
-    params ["_tier"];
-    private _t = (((round _tier) max 1) min (count DUWS_zoneSpawnTiers)) - 1;
-    [DUWS_zoneSpawnTiers select _t] call DUWS_fnc_spawnFilter
+    params ["_tier", ["_side", "OPF"]];
+    if (_tier < 1) exitWith { [] };
+    private _t = ((round _tier) min (count DUWS_zoneSpawnTiers)) - 1;
+    [DUWS_zoneSpawnTiers select _t, _side] call DUWS_fnc_spawnFilter
 };
 
 // Dropped, not substituted: substituting was never a choice, only an `if` leaking -- an air slot
@@ -46,8 +50,8 @@ DUWS_fnc_zoneSpawnList = {
 //
 // An Army Power lock is not a drop: the ledger keeps the token and skips it until the rung is earned.
 DUWS_fnc_spawnFilter = {
-    params ["_tokens"];
-    _tokens select { ([_x, "OPF", true] call DUWS_fnc_tokenClass) != "" }
+    params ["_tokens", ["_side", "OPF"]];
+    _tokens select { ([_x, _side, true] call DUWS_fnc_tokenClass) != "" }
 };
 
 // The enemy multiplier, applied to a composition rather than inside a roster: a x3 town garrison
@@ -116,10 +120,10 @@ DUWS_fnc_spawnDiff = {
 // rather than appending: safe because nothing reads a zone's roster mid-place -- the capture test
 // refuses until the garrison is flagged live, which happens after this returns.
 DUWS_fnc_raiseGarrison = {
-    params ["_tokens", "_pos", "_radius"];
+    params ["_tokens", "_pos", "_radius", ["_side", "OPF"]];
     private _grps = [];
     {
-        private _grp = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
+        private _grp = [_x, _pos, _radius, "", [], _side] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then { _grps pushBack _grp };
         if (_forEachIndex < (count _tokens) - 1) then { sleep 2 };
     } forEach _tokens;
@@ -168,9 +172,13 @@ DUWS_spawnVehicles = [
 
 // Mirror of DUWS_spawnVehicles, same tokens/rungs resolving to BLUFOR's role globals; only the
 // tokens BLUFOR actually raises are listed. No setting column: the asset toggles (HeavyArmor,
-// AttackHeli) are the enemy's, BLUFOR answers to the ladder alone. Kept in lockstep by hand.
+// AttackHeli) are the enemy's, BLUFOR answers to the ladder alone.
 // transheli resolves to the armed HELI_TRANS_ARM_X; the unarmed TRANS_HELI_X is the taxi left to the
 // support functions.
+//
+// Fenced because a tier row both armies raise needs both tables: a token this one misses resolves to its
+// own bare name and reaches createVehicle as a class that does not exist.
+// --DUWS-UNITCOMP BEGIN name="BLUFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=blufor_--
 DUWS_spawnVehiclesBlu = [
     ["car",        "blufor_ARMED_CAR1_X",     "", 60],
     ["at_car",     "blufor_ARMED_CAR1_X",     "", 60],
@@ -182,6 +190,7 @@ DUWS_spawnVehiclesBlu = [
     ["attackheli", "blufor_ATTACK_HELI_X",    "", 350],
     ["plane",      "blufor_MISC_AIR_X",       "", 600]
 ];
+// --DUWS-UNITCOMP END--
 
 DUWS_fnc_vehicleRow = {
     params ["_token", ["_side", "OPF"]];
@@ -246,21 +255,23 @@ DUWS_fnc_classAA = { (_this call DUWS_fnc_classArms) params ["_g", "_m", "_a"]; 
 // alone -- a reserve rides "hunt" orders regardless of its pool token's own posture, and spawns where
 // the pass chose on the zone's far side rather than in the token's own radius band.
 DUWS_fnc_zoneSpawnOne = {
-    params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []]];
+    params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []], ["_side", "OPF"]];
+    // The token layer spells a side "OPF"/"BLU" and the placers "opfor"/"blufor"; one boundary, here.
+    private _army = ["opfor", "blufor"] select (_side isEqualTo "BLU");
     private _posture = [_token] call DUWS_fnc_tokenPosture;
     // An OPCOM reserve token's prefix is its tasking id, not a posture.
     if ((_token select [0, 8]) == "opcomdef") then { _posture = "closepatrol" };
     if (_postureOverride != "") then { _posture = _postureOverride };
     private _grp = grpNull;
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) then {
-        _grp = [_token, _pos, _size, _posture, _spawnPos] call fnc_spawn_team;
+        _grp = [_token, _pos, _size, _posture, _spawnPos, _army] call fnc_spawn_team;
     } else {
-        private _class = [_token] call DUWS_fnc_tokenClass;
+        private _class = [_token, _side] call DUWS_fnc_tokenClass;
         if (_class == "") exitWith {
             ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
             grpNull
         };
-        _grp = [_class, _pos, _size, _posture, _spawnPos] call fnc_spawn_vehicle;
+        _grp = [_class, _pos, _size, _posture, _spawnPos, _army] call fnc_spawn_vehicle;
     };
     // The source token rides the group so the killed handler can record which composition entry died
     // (DUWS_fnc_garrisonReserveWatch reads it back). A group that failed to field exited above, so a
@@ -306,7 +317,8 @@ fnc_zone_spawn = {
     private _roster = [_zoneKey] call fnc_zone_roster;
 
     private _tier = [_zoneKey] call fnc_zone_tier;
-    private _x1 = [_tier] call DUWS_fnc_zoneSpawnList;
+    private _side = [_zoneKey] call DUWS_fnc_garrisonSideOf;
+    private _x1 = [_tier, _side] call DUWS_fnc_zoneSpawnList;
     if (_x1 isEqualTo []) exitWith {
         ["ERROR", "ZONES", format ["tier %1 fields nothing this side can raise, so %2 stands empty",
             _tier, _zoneKey]] call fnc_log;
@@ -319,7 +331,7 @@ fnc_zone_spawn = {
     // ledger: the pool is per-awake-session, the losses behind it persist.
     private _spawns = [_zoneKey, [_zoneKey, _x1] call DUWS_fnc_garrisonRestand] call DUWS_fnc_garrisonStandFill;
 
-    private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
+    private _grps = [_spawns, _spawnPos, _size, _side] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
     [_zoneKey, _spawns, _grps] call DUWS_fnc_garrisonRefundUnplaced;
     [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
@@ -331,6 +343,6 @@ fnc_zone_spawn = {
     [_zoneKey, true] call DUWS_fnc_garrisonSetLive;
     missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _zoneKey], nil];
     private _placed = [_zoneKey] call fnc_site_alive;
-    ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; full %6 tokens, reserve pool %7",
-        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, count ([_zoneKey] call DUWS_fnc_garrisonFull), count ([_zoneKey] call DUWS_fnc_garrisonReserve)]] call fnc_log;
+    ["INFO", "ZONES", format ["%1 deployed %2 %3 men (%4 groups) at tier %5, %6 strength; full %7 tokens, reserve pool %8",
+        _zoneKey, _placed, _side, count _grps, _tier, [_zoneKey] call fnc_zone_strength, count ([_zoneKey] call DUWS_fnc_garrisonFull), count ([_zoneKey] call DUWS_fnc_garrisonReserve)]] call fnc_log;
 };

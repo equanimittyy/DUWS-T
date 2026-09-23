@@ -95,6 +95,16 @@ switch (_page) do {
                 [getPos player] remoteExec ["fnc_duws_toggleNearestZone", 2];
                 hint "Composition streaming: toggling the nearest zone.\n\nStowed compositions are deleted and rebuilt from a record,\nso destroyed parts stay gone and crates keep what is left\nin them. Refused while a gun still has its gunner.";
             }, [], DBG_ACTION],
+            ["Build zone garrison (click map)", {
+                ["Click a zone to buy its holder a tier.",
+                    "Dev tool: the zone buys are the only way BLUFOR ground gets a garrison -- tier I is where a captured zone starts.",
+                    { params ["_pos"]; [_pos, "fortify", player] remoteExec ["fnc_debug_zone_garrison", 2] }] call fnc_debug_map_click;
+            }, [], DBG_MAP],
+            ["Reinforce zone garrison (click map)", {
+                ["Click a zone to buy its holder a reinforcement.",
+                    "Dev tool: buys back a third of the tokens the garrison has lost, which the next reserve wave walks in.",
+                    { params ["_pos"]; [_pos, "reinforce", player] remoteExec ["fnc_debug_zone_garrison", 2] }] call fnc_debug_map_click;
+            }, [], DBG_MAP],
             ["Spawn OPFOR hardpoint >", fnc_debug_hardpoint_menu, "opfor",  DBG_PAGE],
             ["Spawn BLUFOR hardpoint >", fnc_debug_hardpoint_menu, "blufor", DBG_PAGE],
             ["Clear dev hardpoints", {

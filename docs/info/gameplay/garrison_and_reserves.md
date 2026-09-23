@@ -1,9 +1,8 @@
 # Garrison strength and reserves
 
-Every OPFOR-held zone and town fields a garrison whose strength is a ledger of destroyed
-composition tokens, and whose live footprint is capped and topped up from a reserve pool. This
-doc is the reference for that model; where it and the source (`src/duws/server`) disagree, the
-source wins.
+A held zone or town fields a garrison whose strength is a ledger of destroyed composition tokens,
+and whose live footprint is capped and topped up from a reserve pool. This doc is the reference for
+that model; where it and the source (`src/duws/server`) disagree, the source wins.
 
 ## One model, two site kinds
 
@@ -14,6 +13,38 @@ it. The only differences are which tier table it draws from (`DUWS_zoneSpawnTier
 `src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf:24`, vs `DUWS_townSpawnTiers`,
 `src/duws/server/civilian/fnc_civ_state_init.sqf:59`) and what happens once it's beaten: a zone flips
 to BLUFOR, a town is cleared back toward neutral and bought up again by the commander.
+
+## Whose garrison it is
+
+The model is one side's or the other's, never both. `DUWS_fnc_garrisonSideOf {key}`
+(`src/duws/server/garrison/fnc_garrison_strength_init.sqf:11`) is the single derivation, read by every
+ledger call, composition filter and raise below: a zone answers to `WARCOM_zones_controled_by_BLUFOR`,
+a town to the reputation bands (`fnc_civ_townOwner`), and anything else answers `"OPF"`.
+
+Both sides field the **same tier rows**. A token resolves through the asking side's vehicle table
+(`DUWS_spawnVehicles` / `DUWS_spawnVehiclesBlu`) and its own earned Army Power, so one row raises either
+army out of its own hulls. Both tables are fenced, and the composition lint fails a vehicle token only
+one of them answers — the other side would otherwise resolve the token to its own bare name and hand
+`createVehicle` a class that does not exist.
+
+What differs is how a garrison comes to exist, and it is the one asymmetry in the model:
+
+| | OPFOR | BLUFOR |
+|---|---|---|
+| First tier | handed over: a retaken zone resets to I, a town crossing the band is written I | bought, like every tier above it |
+| Inherited on a flip | nothing — the ledger is forgotten and the tier zeroed | nothing, same rule |
+| Beaten town garrison | files back to tier I, unrefunded | files back to tier 0 |
+| Mobilising hold | held, because OPFOR arrive on ground they already own | none: a BLUFOR garrison never arrives, it is built |
+
+A flip in either direction zeroes the tier and forgets the ledger, so neither side is ever handed the
+other's attrition or their spending. Survivors of the beaten garrison fight on where they stand
+(`DUWS_fnc_garrisonRelease`) and are swept once no player is near, whichever side they belong to.
+
+Buying is `fnc_zone_garrison_fortify` / `_reinforce` and `fnc_town_garrison_fortify` / `_reinforce`.
+Neither charges: the price is the caller's, which is what keeps OPCOM spending only on its own ground
+(its candidate lists skip BLUFOR-held sites) and leaves the player's price to whatever surface spends
+their currency. The zone pair is reachable today only from the Debug menu's map-click rows; the town
+pair from the economy debug window.
 
 ## The ledger
 
@@ -140,10 +171,11 @@ OPCOM combatants homed there, stored as `DUWS_zoneCeiling_<key>`. `DUWS_fnc_garr
 (`src/duws/server/init_zones/fnc_zone_state_init.sqf:205`) counts distinct alive groups the
 streaming garrison raised; a prefab's manned static weapons sit on the same roster but are
 excluded, so a site with guns doesn't read as already at its ceiling. Globally,
-`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:457`) pauses all garrison
-spawns and refills once every OPFOR group on the map (`DUWS_fnc_opforGroupCount`) reaches it —
-slack for hardpoints and town garrisons, which raise their own groups outside any per-site cap but
-still count against this wall.
+`DUWS_zoneGroupCeiling` (130, `src/duws/server/server_var_init.sqf:457`) pauses a garrison's spawns
+and refills once its own side's group count (`DUWS_fnc_sideGroupCount {side}`) reaches it — slack for
+hardpoints and town garrisons, which raise their own groups outside any per-site cap but still count
+against this wall. The engine's limit is per side, so a BLUFOR garrison is throttled by BLUFOR groups,
+the player's own squads and recruits included.
 
 ## The refill pass
 
@@ -155,7 +187,8 @@ sorts the candidates by player count present, most-crowded first; and spawns
 pool and delivers them until the site's group count reaches its ceiling, the pool empties, or the
 global throttle is hit. Infantry tokens now ride in trucks, batched — consecutive squads share one
 until it's at least half full, then it's dispatched — rather than walking in on foot; a vehicle
-token drives itself in, unbatched.
+token drives itself in, unbatched. The truck is drawn from the site's own side, and no BLUFOR faction
+file names one, so a BLUFOR wave walks.
 
 Two triggers fire the pass: a 5-minute heartbeat (`DUWS_fnc_garrisonReserveLoop`,
 `DUWS_zoneReservePollPeriod = 300`) for the steady grind, and a debounced
@@ -169,7 +202,7 @@ the pool to the ground without changing that total; only a wipe does.
 
 ## Placement: keeping a wave off the player's back
 
-`DUWS_fnc_garrisonReservePos {center, radius}`
+`DUWS_fnc_garrisonReservePos {center, radius, side}`
 (`src/duws/server/init_zones/fnc_garrison_reserve.sqf:89`) chooses where a wave stands up, in
 priority order over a flat distance floor, so a player never watches a squad appear and never gets
 flanked from their own approach direction:
@@ -177,7 +210,7 @@ flanked from their own approach direction:
 1. **Opposite the player approach (non-negotiable).** The spawn bearing is `-bluDir`, where
    `bluDir` is the site-centre-to-player-centroid direction — reserves come from the far side and
    meet the advance head-on, never from behind it.
-2. **Nudged toward the nearest other OPFOR zone (soft).** The bearing bends up to 50 degrees
+2. **Nudged toward the nearest other zone the side holds (soft).** The bearing bends up to 50 degrees
    toward a neighbouring zone so a wave reads as coming from friendly ground, clamped so it can
    never fight the anti-flank rule.
 3. **Preferably out of sight (best-effort).** A handful of candidate points along the bearing are

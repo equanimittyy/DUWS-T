@@ -47,6 +47,9 @@ DUWS_fnc_opcom_stepCapture = {
         private _ni = zone_namePOS_pairs findIf { ([_x select 1] call fnc_zone_key) isEqualTo _zk };
         if (_ni >= 0) then { [(zone_namePOS_pairs select _ni) select 0, []] call fnc_enemy_contact };
     };
+    // A garrisoned zone is never taken virtually: standing its men up is what renders this attacker to fight
+    // them (fnc_site_poller wakes on a virtual one). Below is the undefended case alone.
+    if (([_zk] call fnc_zone_tier) > 0) exitWith { false };
     // No BLUFOR count: any within K would have rendered the attacker, so its stored force outnumbers nobody. It still
     // holds for DUWS_captureHold, the rule a live attacker meets through the trigger's timeout.
     if ((_t get "inZone") && {(_t get "effForce") > 0} && {time - (_t get "inZoneAt") >= DUWS_captureHold}) then {

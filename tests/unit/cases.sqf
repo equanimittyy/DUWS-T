@@ -377,6 +377,16 @@ opfor_HELI_X = "cls_heli";
 TEST_Heavy = 1;
 TEST_Air = 1;
 WARCOM_opfor_ap = 200;
+// The BLUFOR half, on the same token names and rungs -- what lets one tier row raise either army.
+DUWS_spawnVehiclesBlu = [
+    ["car",  "blufor_CAR_X",  "", 0],
+    ["apc",  "blufor_APC_X",  "", 0],
+    ["tank", "blufor_TANK_X", "", 100]
+];
+blufor_CAR_X = "blu_car";
+blufor_APC_X = "blu_apc";
+blufor_TANK_X = "blu_tank";
+WARCOM_blufor_ap_earned = 200;
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
     ["patrol", "team", "car", "apc", "heli"]];
 
@@ -498,6 +508,22 @@ TEST_Air = 1;
     ([1] call DUWS_fnc_zoneSpawnList), ["patrol"]] call fnc_assertEq;
 ["zoneSpawnList: a tier above the table clamps rather than faulting",
     ([9] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car", "apc", "heli"]] call fnc_assertEq;
+// Clamping tier 0 up to I would price a first buy at nothing.
+["zoneSpawnList: tier 0 fields nothing",
+    ([0] call DUWS_fnc_zoneSpawnList), []] call fnc_assertEq;
+
+// The same rows raised for the other army, resolved through its own hulls.
+["tokenClass: a token resolves to the asking side's hull",
+    (["apc", "BLU"] call DUWS_fnc_tokenClass), "blu_apc"] call fnc_assertEq;
+["zoneSpawnList: a tier raised for BLUFOR is the same row",
+    ([2, "BLU"] call DUWS_fnc_zoneSpawnList), ["patrol", "car"]] call fnc_assertEq;
+// Each side's rungs are its own counter: BLUFOR's earned Army Power unlocks BLUFOR's armour.
+WARCOM_blufor_ap_earned = 40;
+["tokenClass: a BLUFOR token below its rung is locked on BLUFOR's counter",
+    (["tank", "BLU"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
+["tokenClass: and the same token stays unlocked for OPFOR",
+    (["tank"] call DUWS_fnc_tokenClass), "cls_tank"] call fnc_assertEq;
+WARCOM_blufor_ap_earned = 200;
 
 // --- DUWS_fnc_spawnDiff: what an upgrade owes ---
 ["spawnDiff: only what the new composition adds",
@@ -601,6 +627,9 @@ blufor_B_X = "cls_blu_B";
 // The ledger keys off the site key, so each case seeds its own key's state and reads it back. A zone
 // and a town read exactly these functions; the split below is what both raises derive their garrison
 // and reserve pool from.
+// Test keys are not real sites, so the owner derivation has nothing to read. Every case below is OPFOR's.
+DUWS_fnc_garrisonSideOf = { "OPF" };
+
 missionNamespace setVariable ["DUWS_garrisonLost_svk", ["patrol"]];
 ["svk", ["patrol", "patrol", "team"]] call DUWS_fnc_garrisonSetFull;
 ["garrisonSurviving: full potential minus the lost ledger, by value",
@@ -727,7 +756,7 @@ enemyunitMultiplier = nil;
     (count (["gk"] call DUWS_fnc_garrisonLost)), 9] call fnc_assertEq;
 
 DUWS_zoneGroupCeiling = 130;
-DUWS_fnc_opforGroupCount = { 0 };
+DUWS_fnc_sideGroupCount = { 0 };
 missionNamespace setVariable ["DUWS_zoneCeiling_sfk", 4];
 ["sfk", ["patrol", "opcomdef7:team", "absent"]] call DUWS_fnc_garrisonReserveSet;
 ["garrisonStandFill: a raise stands to its ceiling, base tokens before OPCOM's",
@@ -742,7 +771,7 @@ missionNamespace setVariable ["DUWS_zoneCeiling_sfk", 3];
     (["sfk"] call DUWS_fnc_garrisonReserve), ["opcomdef7:team"]] call fnc_assertEq;
 ["garrisonStandFill: a garrison already at its ceiling draws nothing",
     (["sfk", ["team", "team", "team"]] call DUWS_fnc_garrisonStandFill), ["team", "team", "team"]] call fnc_assertEq;
-DUWS_fnc_opforGroupCount = { 128 };
+DUWS_fnc_sideGroupCount = { 128 };
 ["sfk", ["patrol", "patrol"]] call DUWS_fnc_garrisonReserveSet;
 ["garrisonStandFill: the global group wall caps the draw",
     (["sfk", ["team"]] call DUWS_fnc_garrisonStandFill), ["team", "patrol"]] call fnc_assertEq;

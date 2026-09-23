@@ -65,14 +65,15 @@ DUWS_townSpawnTiers = [
 // --DUWS-UNITCOMP END--
 
 // Filtered before any derive, so a token the side can't field isn't counted into full and later chased by refill.
+// One table for both armies, as the zone tiers are: a town the player holds garrisons it off the same rows.
 DUWS_fnc_townSpawnList = {
-	params ["_tier"];
+	params ["_tier", ["_side", "OPF"]];
 	if (_tier < 1) exitWith { [] };
-	[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter
+	[DUWS_townSpawnTiers select (_tier - 1), _side] call DUWS_fnc_spawnFilter
 };
 
-// Reputation only ever writes tier 1 (see fnc_civ_garrison); every step above is bought by the OPFOR
-// commander, so tier is stored state, not derived from reputation. 0 by default like fnc_civ_repAt: no owner, no garrison.
+// Reputation writes tier 1 for OPFOR alone (see fnc_civ_garrison); every step above it, and all of BLUFOR's,
+// is bought -- so tier is stored state, not derived. 0 by default like fnc_civ_repAt: no garrison.
 fnc_town_garrison_tierAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -84,7 +85,19 @@ fnc_town_garrison_tierAt = {
 	}
 };
 
+// Whose the stored tier is. Needed because one reputation step can carry a town across both bands, and the
+// tier alone cannot say whose men it owes. No record falls back to the band, never to "": read as nobody's,
+// a garrison the bands plainly own would be discharged on its next reputation step.
+fnc_town_garrison_ownerAt = {
+	if (!isServer) exitWith { "" };
+	params [["_townIndex", -1]];
+	private _owners = missionNamespace getVariable ["DUWS_townGarrisonOwner", []];
+	if (_townIndex >= 0 && _townIndex < count _owners) exitWith { _owners select _townIndex };
+	[[_townIndex] call fnc_civ_repAt] call fnc_civ_townOwner
+};
+
 // A town flips while the player is still spending reputation in it, so its first garrison would land on them.
+// OPFOR only: BLUFOR never arrive on ground they already own, they build on it, so there is nothing to defer.
 #define TOWN_HOLD_MOBILISING 1800
 
 // Stored as a diag_tickTime deadline (process uptime, not wall clock), so it does NOT restore across a
@@ -138,26 +151,29 @@ fnc_town_garrison_reinforce = {
 	if (_townIndex < 0 || _townIndex >= count (missionNamespace getVariable ["DUWS_townGarrisonTier", []])) exitWith { -1 };
 	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
 	private _old = [_key] call DUWS_fnc_garrisonStrength;
-	[_key, [[_townIndex] call fnc_town_garrison_tierAt] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonReinforce;
+	[_key, [[_townIndex] call fnc_town_garrison_tierAt, [_key] call DUWS_fnc_garrisonSideOf] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonReinforce;
 	private _new = [_key] call DUWS_fnc_garrisonStrength;
 	["INFO", "CIV", format ["Town %1 reinforced %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 	_new
 };
 
-// -> the tier it now stands at, or -1 if refused. Reputation, not AP, decides whether a town garrisons, so a fortify never
-// raises one from tier 0. Allowed while mobilising, since it folds into the first spawn. The re-stand is left to the
-// garrison thread, which also catches a buy landing mid-raise at the old tier.
+// -> the tier it now stands at, or -1 if refused. Reputation, not AP, decides *whether* a town garrisons, so a
+// neutral town is refused -- there is no owner to garrison for. Raising from 0 is how a BLUFOR garrison comes to
+// exist. Allowed while mobilising, since it folds into the first spawn. The re-stand is left to the garrison
+// thread, which also catches a buy landing mid-raise at the old tier.
 fnc_town_garrison_fortify = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
 	private _old = [_townIndex] call fnc_town_garrison_tierAt;
-	if (_old < 1) exitWith {
-		["INFO", "CIV", format ["Town %1 fortify refused (%2): no garrison", _townIndex, _reason]] call fnc_log;
+	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
+	if (([[_townIndex] call fnc_civ_repAt] call fnc_civ_townOwner) isEqualTo "") exitWith {
+		["INFO", "CIV", format ["Town %1 fortify refused (%2): neutral ground", _townIndex, _reason]] call fnc_log;
 		-1
 	};
 	private _new = (_old + 1) min (count DUWS_townSpawnTiers);
 	if (_new == _old) exitWith { _old };
-	[[_townIndex] call DUWS_fnc_townStrengthKey, [_old] call DUWS_fnc_townSpawnList, [_new] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonBuyTier;
+	private _side = [_key] call DUWS_fnc_garrisonSideOf;
+	[_key, [_old, _side] call DUWS_fnc_townSpawnList, [_new, _side] call DUWS_fnc_townSpawnList] call DUWS_fnc_garrisonBuyTier;
 	[_townIndex, _new, _reason] call fnc_town_garrison_setTier;
 	_new
 };
@@ -173,6 +189,11 @@ fnc_town_garrison_setTier = {
 	private _old = _tiers select _townIndex;
 	if (_new == _old) exitWith {};
 	_tiers set [_townIndex, _new];
+	// Stamped as the tier is written, so the pair always describes one side's garrison.
+	private _owners = missionNamespace getVariable ["DUWS_townGarrisonOwner", []];
+	if (_townIndex < count _owners) then {
+		_owners set [_townIndex, if (_new == 0) then { "" } else { [[_townIndex] call fnc_civ_repAt] call fnc_civ_townOwner }];
+	};
 	[[_townIndex] call fnc_town_site_key] call DUWS_fnc_opcom_gridDirty;
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
@@ -203,23 +224,34 @@ fnc_civ_rowPrice = {
 	};
 };
 
+// The one reading of the two bands: markers, AP income and the garrison all ask here rather than each
+// spelling out its own thresholds.
+fnc_civ_townOwner = {
+	params [["_rep", 0]];
+	if (_rep >= 10) exitWith { "BLU" };
+	if (_rep <= -10) exitWith { "OPF" };
+	""
+};
+
 // One table rather than a literal per paint site, so the two markers can't disagree on which side a town
 // is on, and there's a neutral pair before any reputation array exists. Blue/red, not green -- the engine
 // reads green as Independent, which this mission sets hostile to west; the icon is deeper than the washed-out ellipse so it stays readable without fighting a zone marker at zoom-out.
 fnc_civ_townBand = {
 	params [["_rep", 0]];
-	if (_rep >= 10) exitWith { ["#(0.45,0.62,1.0,1)", "#(0.15,0.38,0.95,1)"] };
-	if (_rep <= -10) exitWith { ["#(1.0,0.45,0.45,1)", "#(0.85,0.1,0.1,1)"] };
-	["#(0.6,0.35,0.7,1)", "#(0.42,0.15,0.58,1)"]
+	switch ([_rep] call fnc_civ_townOwner) do {
+		case "BLU": { ["#(0.45,0.62,1.0,1)", "#(0.15,0.38,0.95,1)"] };
+		case "OPF": { ["#(1.0,0.45,0.45,1)", "#(0.85,0.1,0.1,1)"] };
+		default { ["#(0.6,0.35,0.7,1)", "#(0.42,0.15,0.58,1)"] };
+	}
 };
 
 // Derived here rather than at each consumer, so the map readout and the tick that actually pays can't
 // disagree -- a readout promising AP the tick never credits would be worse than no readout.
 fnc_civ_townIncome = {
 	params [["_rep", 0], ["_ap", 0]];
-	if (_rep >= 10) exitWith { [_ap, "BLU"] };
-	if (_rep <= -10) exitWith { [_ap, "OPF"] };
-	[0, ""]
+	private _owner = [_rep] call fnc_civ_townOwner;
+	if (_owner isEqualTo "") exitWith { [0, ""] };
+	[_ap, _owner]
 };
 
 // The band is the sole writer of both colours, so nothing races this repaint. setMarkerColor takes an

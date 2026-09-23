@@ -128,7 +128,9 @@ DUWS_fnc_opcom_townReinforceTargets = {
     {
         private _i = _forEachIndex;
         private _tier = _x;
-        if (_tier < 1 || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
+        // Not the player's towns: a tier is the owner's, and the commander buys only for its own ground.
+        if (_tier < 1 || {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}
+            || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _force = [[_i] call DUWS_fnc_townStrengthKey] call DUWS_fnc_opcom_reinforceForce;
         if (_force <= 0) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
@@ -150,7 +152,8 @@ DUWS_fnc_opcom_townFortifyTargets = {
     {
         private _i = _forEachIndex;
         private _tier = _x;
-        if (_tier < 1 || {_tier >= _top} || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
+        if (_tier < 1 || {_tier >= _top} || {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}
+            || {_i in _busy} || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then { continue };
         private _pos = [_i] call DUWS_fnc_opcom_townPos;
         private _truck = [_sources, _pos] call DUWS_fnc_opcom_truckFor;
         if (_truck isEqualTo []) then { continue };

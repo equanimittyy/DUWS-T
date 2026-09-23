@@ -294,6 +294,12 @@ fnc_site_poller = {
         // site: with the HQ plus a FOB per zone-and-a-half, per-site spatial queries would run more
         // often than the per-zone threads this poller replaced.
         private _east = (allUnits select { side _x == EAST }) apply { getPosATL _x };
+        // OPCOM's virtual units stand on no unit list, so a site closing with one would never see it --
+        // and raising the garrison to meet it is what renders it (fnc_opcom_task_step).
+        private _eastVirt = [];
+        if (!isNil "DUWS_opcom_taskings") then {
+            { if ((_y get "grp") isEqualTo "") then { _eastVirt pushBack (_y get "pos") } } forEach DUWS_opcom_taskings;
+        };
         private _now = time;
         private _t0 = diag_tickTime;
 
@@ -347,6 +353,16 @@ fnc_site_poller = {
                 // somebody is actually within range.
                 if (_frozen && {!_here} && {(_east findIf { _x distance _pos < _ring }) >= 0}) then {
                     _here = ([_pos, _ring, EAST] call fnc_side_count_at) > 0;
+                };
+
+                // The test above watches for BLUFOR, which on BLUFOR ground would leave an assault walking
+                // into an empty site and taking it off men who never rendered.
+                if (!_here && {_o getOrDefault ["enemyAware", false]}
+                    && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"}) then {
+                    // A virtual attacker has no unit to count, so its stored position is the whole answer.
+                    _here = ((_eastVirt findIf { _x distance2D _pos < _ring }) >= 0)
+                        || {((_east findIf { _x distance _pos < _ring }) >= 0)
+                            && {([_pos, _ring, EAST] call fnc_side_count_at) > 0}};
                 };
 
                 // Latch-clear and wake happen on different passes: the arrival test can't distinguish

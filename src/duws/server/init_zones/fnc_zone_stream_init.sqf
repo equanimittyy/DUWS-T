@@ -216,7 +216,13 @@ DUWS_fnc_zoneRaiseWorker = {
     // Confirmed after a 5s pause rather than on first perimeter contact, so a transiting helicopter or
     // a patrol that turns back doesn't trigger a full rebuild for someone already leaving. Air uses the same terms the poller's wake does: a committed aircraft holds the raise, where discounting anything airborne would confirm an air wake straight back off.
     sleep 5;
-    if !([_pos, _size + DUWS_streamArrivalMargin, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true] call fnc_site_bluforOrAir) exitWith {
+    private _reach = _size + DUWS_streamArrivalMargin;
+    private _confirmed = [_pos, _reach, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true] call fnc_site_bluforOrAir;
+    // The same second reading the poller's wake took, so the two cannot disagree and strand the site.
+    if (!_confirmed && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"}) then {
+        _confirmed = ([_pos, _reach, EAST] call fnc_side_count_at) > 0;
+    };
+    if (!_confirmed) exitWith {
         missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
     };
 
@@ -237,7 +243,8 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     private _site = [_key] call fnc_site_at;
     private _pos = _site get "pos";
     private _size = _site get "radius";
-    private _opforHolds = _pos in WARCOM_zones_controled_by_OPFOR;
+    // Who the ground answers to now, against "holder" -- who the men standing on it were raised for.
+    private _holder = [_key] call DUWS_fnc_garrisonSideOf;
 
     // Not a garrison state, so it ends nothing: a retake raises the new garrison beside the old one's survivors.
     [_key] call DUWS_fnc_garrisonLeftoverSweep;
@@ -252,19 +259,22 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     };
 
     if !(_o get "awake") exitWith {
-        if (_here && {!(_o get "awaitVacate")} && {_opforHolds}) then {
+        // Tier, not ownership: tier 0 is ground with no garrison on it, which is where BLUFOR start.
+        if (_here && {!(_o get "awaitVacate")} && {([_key] call fnc_zone_tier) > 0}) then {
+            _o set ["holder", _holder];
             _o set ["raising", true];
             missionNamespace setVariable [ZONE_RAISE_SLOT(_key), nil];
             [_key, _pos, _size] spawn DUWS_fnc_zoneRaiseWorker;
         };
     };
 
-    // Composition isn't despawned -- the emplacements are the player's now.
-    if !(_opforHolds) exitWith {
+    // The ground changed hands under a standing garrison, in either direction. Composition isn't
+    // despawned -- the emplacements belong to whoever holds the ground now.
+    if ((_o getOrDefault ["holder", "OPF"]) isNotEqualTo _holder) exitWith {
         // Called before the release: the zone has changed hands, and a live flag surviving past this
         // reads a pack-up as a garrison beaten.
         [_key] call fnc_zone_garrison_dropped;
-        // OPFOR no longer own this ground, so there's nothing to reinforce.
+        // The men who held it no longer own this ground, so there's nothing to reinforce.
         [_key] call DUWS_fnc_garrisonReserveClear;
         private _left = [_key] call DUWS_fnc_garrisonRelease;
         _o set ["awake", false];

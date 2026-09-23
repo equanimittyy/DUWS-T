@@ -6,7 +6,7 @@ params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
 // These raise groups outside the garrison ledger but still count against the engine's OPFOR group wall.
-if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
+if ((["OPF"] call DUWS_fnc_sideGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 
 #define RECON_RADIUS 500
 #define OFFROAD 300

@@ -18,7 +18,9 @@ Two invariants, mirroring what the TUI enforces at write time:
 
   Composition tokens -- every `posture:name` cell in a tier/squad must name a team
   (DUWS_teamRosters) or a vehicle (DUWS_spawnVehicles). A dangling name is a rename
-  that did not propagate.
+  that did not propagate. A vehicle token must be answered by every side's vehicle
+  table, since both armies raise the same tier rows: a side missing a row resolves
+  the token to its own bare name and hands createVehicle a class that does not exist.
 
 Column meaning is read from each fence's own `fields=`/`kind=` header, not a table
 whitelist, so a new fenced table is checked without editing this script -- but a
@@ -158,17 +160,23 @@ def main():
     # Vocab first: a fence keyed "team"/"token" in its first column defines the
     # names every composition token later resolves against.
     teams, vehicles = set(), set()
+    # Per-table vehicle vocabularies, for the both-sides coverage check below.
+    vehicle_tables = {}
     for f in fences:
         if f.kind == "team" and f.fields and f.rows:
             head = f.fields[0]
             if head in ("team", "token"):
                 target = teams if head == "team" else vehicles
+                names = set()
                 for row in f.rows:
                     cols = split_top(row.strip()[1:-1])
                     if cols:
-                        target.add(unquote(cols[0]))
+                        names.add(unquote(cols[0]))
+                target |= names
+                if head == "token":
+                    vehicle_tables[f.name] = names
 
-    role_fail, comp_fail = [], []
+    role_fail, comp_fail, side_fail = [], [], []
     roles_checked = comp_checked = 0
 
     def check_role(tok, sides, f):
@@ -189,6 +197,11 @@ def main():
         comp_checked += 1
         if name not in teams and name not in vehicles:
             comp_fail.append((f.rel, f.name, name))
+            return
+        if name in vehicles:
+            for table, names in vehicle_tables.items():
+                if name not in names:
+                    side_fail.append((f.rel, f.name, name, table))
 
     for f in fences:
         if f.fields:
@@ -209,12 +222,14 @@ def main():
 
     print(f"[compositions] {len(fences)} fences; {roles_checked} role tokens, "
           f"{comp_checked} composition tokens ({len(teams)} teams, {len(vehicles)} vehicles)")
-    if role_fail or comp_fail:
+    if role_fail or comp_fail or side_fail:
         for rel, fn, key in role_fail:
             print(f"  {rel}  [{fn}]  role '{key}' not in fnc_faction_schema -- would spawn nothing")
         for rel, fn, name in comp_fail:
             print(f"  {rel}  [{fn}]  token '{name}' names no team or vehicle")
-        print(f"[compositions] FAIL: {len(role_fail)} role, {len(comp_fail)} composition")
+        for rel, fn, name, table in side_fail:
+            print(f"  {rel}  [{fn}]  vehicle token '{name}' has no row in {table} -- that side would spawn a bare classname")
+        print(f"[compositions] FAIL: {len(role_fail)} role, {len(comp_fail)} composition, {len(side_fail)} one-sided")
         return 1
     print("[compositions] OK: every role and composition token resolves")
     return 0

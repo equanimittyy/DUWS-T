@@ -72,13 +72,14 @@ Every zone and every town asks it from its own trigger, every 0.5 s.
 | Test | Counts | Threshold |
 |---|---|---|
 | Presence | ground units of the attacking side inside the site radius | at least one |
-| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. Skipped at tier 0, which holds no garrison: a town outside the OPFOR band, or a zone BLUFOR hold |
+| Garrison beaten (`DUWS_fnc_garrisonBeaten`) | **only groups this site raised**, by roster, wherever they are, plus the tokens still in its reserve pool | at or below 15 % of the site's full token count. Skipped at tier 0, which holds no garrison: a town the bands leave neutral, or ground its holder has bought no tier on |
 | Ground held | **any** ground unit of either side inside the streaming ring (radius + 400 m), whoever raised it; aircraft do not count | the attacker outnumbers the defender |
 
 The zone capture trigger has no activation. A `this` gate would stop the function from being asked
 while the attacker is outside the radius, so the hold stamp would never reset. For an OPFOR-held zone
 nobody is near, the garrison's live check fails first, which keeps the half-second cost to a variable
-read; a BLUFOR-held zone pays one spatial query over its radius.
+read; a BLUFOR-held zone pays one spatial query over its radius, and once the player has built a garrison
+on it the live check gates that one too.
 
 The line is 15 % rather than a tenth because a group counts as one whole token while any of its men
 stands.
@@ -123,8 +124,9 @@ one once no player is within 500 m. A town clear releases its survivors the same
 
 ### Zone tiers
 
-Every zone rolls a tier I to IV when it is generated. A BLUFOR capture drops it to 0, which means no
-garrison: tier 0 is BLUFOR ground, reserved for BLUFOR to build on. An OPFOR retake resets it to I.
+Every zone rolls a tier I to IV when it is generated. The tier belongs to whoever holds the ground, and a
+flip in either direction drops it to 0 — no garrison, and the ledger forgotten with it. An OPFOR retake
+then resets it to I; BLUFOR buy their first tier like every one above it.
 **Tier picks
 which composition the zone fields; strength is how much of that is left.** Weights are 1/2/3/4, so
 the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
@@ -156,9 +158,11 @@ must reinforce to field the whole tier. At multiplier 1 a step adds at most seve
 fields one of them until a reinforcement buys the rest back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
-(`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both refuse a BLUFOR-held zone, and OPCOM
-lands them with no truck
-([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-ap-buys)).
+(`DUWS_fnc_garrisonRestand`), so the refill walks the men in. Both serve whichever side holds the zone
+and neither charges, so the price stays the caller's: OPCOM's candidate lists skip BLUFOR-held zones, and
+OPCOM lands its own buys with no truck
+([`opcom_plan.md`](../../plans/opcom/opcom_plan.md#what-ap-buys)). A reinforcement is refused at tier 0,
+where there is no garrison to put men back into.
 
 **Nothing else writes either purchase.** `fnc_zone_tier_roll` declines a second roll, so a bought tier
 survives a rebuild through `fnc_createzone`, which would otherwise reshuffle ground the player has already
@@ -286,10 +290,12 @@ capture only while BLUFOR do not outnumber him.
 
 The OPFOR-takes-it-back direction is the same `DUWS_fnc_siteTaken` with the sides swapped: an OPFOR
 unit inside the radius and OPFOR outnumbering BLUFOR over the same ring, held for the same
-`DUWS_captureHold`. A BLUFOR-held zone sits at tier 0, so there is no garrison test until BLUFOR build
-a garrison and raise its tier. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake
-statement itself once one has stood inside the radius for `DUWS_captureHold`
-(`fnc_opcom_capture.sqf`). Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
+`DUWS_captureHold`. A BLUFOR-held zone starts at tier 0, so there is no garrison test until the player
+buys one. A virtual OPCOM attacker has no units to count, so OPCOM runs the zone's retake statement itself
+once one has stood inside the radius for `DUWS_captureHold` — but only on a zone at tier 0
+(`fnc_opcom_capture.sqf`). A garrisoned zone has to be beaten, and standing its men up is what renders the
+attacker to fight them: the site poller wakes a BLUFOR-held site for a virtual attacker as readily as a
+live one, and any live WEST group renders an OPCOM tasking within K. Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
 `fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the statement lives in four places and has to move in
 all of them at once.
 
@@ -363,9 +369,12 @@ rather than a magnitude, so the thresholds are a contract between them:
 
 | Band | Reputation | Pays | Garrison |
 |---|---|---|---|
-| BLUFOR | `>= 10` | BLUFOR AP | tier 0 |
-| Neutral | `-9` … `9` | nobody | tier 0 |
+| BLUFOR | `>= 10` | BLUFOR AP | tier 0, and every tier above it is bought |
+| Neutral | `-9` … `9` | nobody | none, and none can be bought |
 | OPFOR | `<= -10` | OPFOR AP | tier I, and no higher from reputation |
+
+The bands are read through `fnc_civ_townOwner`, the one place the two thresholds are spelled out, so the
+markers, the income and the garrison cannot disagree about which side a town is on.
 
 A town that enters a new band posts a card to every player, as a zone capture does: `town_blufor`,
 `town_opfor` or `town_neutral` (`fnc_town_rep_adjust`). The card fires even when the passive AoI drift
@@ -378,12 +387,16 @@ show.
 **Reputation decides *whether* a town garrisons; it does not decide how hard.** Crossing `-10` is the
 capture — it writes tier I and nothing deeper in the negative writes more. Tiers II to IV are the
 OPCOM's to buy, so a town the player has merely ruined is not automatically a hard one:
-the enemy has to have spent on it. Tier 0 is a town OPFOR does not hold, which is where both the
-neutral and the BLUFOR band sit.
+the enemy has to have spent on it. Crossing `+10` hands BLUFOR nothing at all: every tier of a friendly
+town's garrison is bought, the first one included. Tier 0 is a town nobody garrisons, which is where the
+neutral band and an unbuilt BLUFOR town both sit.
 
 The tier is stored per town in `DUWS_townGarrisonTier` and written only through
 `fnc_town_garrison_setTier` (`server/civilian/fnc_civ_state_init.sqf`) — a number per town, so it
-serialises. Towns that start inside an enemy zone are seeded at tier I rather than 0: they are enemy
+serialises. `DUWS_townGarrisonOwner` is stamped beside it by that same writer, and says whose tier it is:
+one reputation step can carry a town across both bands at once, and the tier alone cannot say whose men
+it owes. Any change of owner discharges the garrison and forgets its ledger before the new owner is
+served. Towns that start inside an enemy zone are seeded at tier I rather than 0: they are enemy
 ground before anyone has played a minute, and reading them as ungarrisoned would have the commander
 appraise them as neutral.
 
@@ -451,8 +464,13 @@ its own, which would fire the instant anyone crossed the radius and whose handle
 creation anyway. The clear is decided by the rule that takes a zone, `DUWS_fnc_siteTaken`: a BLUFOR
 unit inside the town radius, the garrison beaten to 15 %, and BLUFOR outnumbering OPFOR over the
 town's streaming ring, all held for `DUWS_captureHold`. As at a zone, each town asks it from its own
-trigger every 0.5 s. The trigger asks only at tier I or above, because a tier 0 town is not enemy
-ground and has nothing to clear.
+trigger every 0.5 s, with the sides swapped when the town is BLUFOR's — its garrison is cleared by
+OPFOR on the same terms. The trigger asks only at tier I or above, because a tier 0 town garrisons
+nobody and has nothing to clear.
+
+A cleared BLUFOR town files back to tier 0, not tier I, and its ledger is forgotten: nobody hands BLUFOR
+a first tier, so a beaten garrison cannot leave them one. The reputation step is toward neutral either
+way, so neither side can be shoved past the middle by force alone.
 
 ### The mobilising hold
 
@@ -538,7 +556,8 @@ reach neutral — `-20`, `-10`, out at `0` — because the band is inclusive at 
 exactly there still garrisons. The step is self-limiting for the same reason: only a town at or below
 `-10` can hold a garrison to clear at all, so the most this path can ever reach is `0`.
 Reputation cannot be turned friendly by force — aid and heals are still the only way into the BLUFOR
-band.
+band. The mirror holds on the other side: OPFOR clearing a town the player garrisoned pays `-10`, toward
+neutral and no further, so neither side reaches the other's band by beating men.
 
 **The empty garrison is the lasting half, and it is a bill rather than a brand.** The clear stamps
 the town's full at tier I and files every token lost, so it comes back with nothing standing, and
@@ -577,7 +596,7 @@ a zone is ground with an owner, a town is ground with an opinion.
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+10` reputation — an instalment, not the ground |
 | How OPFOR get it back | stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players there or not (`DUWS_fnc_siteTaken`) | reputation falls back below `-10` |
 | Strength when OPFOR take it | tier I at `0.1` on the retake (`fnc_opfor_cap`) | tier I at `0.1` on crossing `-10` |
-| Strength after being beaten | none — a beaten zone is BLUFOR's | tier I at `0` on the clear |
+| Strength after being beaten | none — a beaten zone is BLUFOR's, at tier 0 until they buy one | tier I at `0` on the clear, or tier 0 if the town was BLUFOR's |
 | Time gate | none | `MOBILISING` 30 min |
 | Presence latch | thread start, and every retake | thread start, every crossing and every clear |
 | Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
@@ -606,9 +625,10 @@ about.
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
-| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | Ownership flips. First-capture bonus, AP swings. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
-| OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
-| The commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Refused only on BLUFOR ground | tier + bar |
+| You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | Ownership flips. First-capture bonus, AP swings. Tier drops to 0 and the ledger is forgotten. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
+| You buy a tier on it | Tier I, a tenth of its tokens fielded and the rest owed. Your garrison raises when you next come within radius + 400 m, and wears down on the same ledger | tier + bar |
+| OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not — and beat your garrison first, if you built one. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
+| Either commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Whoever holds the ground may buy for it | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at | tier + bar |
 
 **A town.**
@@ -621,6 +641,7 @@ about.
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
 | You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | `+10` rep, tier back to I at strength `0`, survivors fight on, latch armed | tier |
 | …unless that `+10` cleared `-10` | Tier 0, garrison deleted | none — neutral |
+| You aid it past `+10`, then buy a tier | Your own garrison, bought from nothing, streaming and wearing down as the enemy's did. OPFOR clear it on the same rule with the sides swapped, for `-10` rep, and it files back to tier 0 | tier |
 | You leave for 2 min | Men deleted by roster; losses are already on the ledger | as above |
 | You have left once, you return | Garrison raised from whatever the commander has bought since. With nothing bought, nothing stands and the town cannot be cleared | tier |
 
@@ -710,19 +731,25 @@ thing to settle, since a zone garrison is the benchmark the town ladder climbs t
 ### BLUFOR inherits nothing
 
 **There is no destroyed state, and a captured zone or town hands the player no garrison.** When
-BLUFOR take ground it simply has none — no tier, no strength — and building one is the player's job
-and their expense.
+BLUFOR take ground it simply has none — no tier, no strength, the ledger forgotten with the flip —
+and building one is the player's job and their expense.
 
-That garrison is planned to start at **tier I with zero strength** and climb by **30 % per
-reinforcement**, so four reinforcements bring it to full
-([`../opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md#town--zone-garrisons)). It shares nothing with what
-OPFOR left behind: the enemy's attrition figure is theirs, is floored at `0.3`, and is re-read only
-when they take the ground back.
+A bought tier fields a tenth of what it adds and owes the rest, so the first buy stands a thin tier I
+that climbs by **30 % per reinforcement** — the same two sinks and the same ledger the enemy commander
+spends on. The garrison itself is the same model: the same tier rows, raised through BLUFOR's hulls and
+their own Army Power rungs, streaming and wearing down exactly as the enemy's does
+([`garrison_and_reserves.md`](garrison_and_reserves.md#whose-garrison-it-is)).
 
 So the BLUFOR side is not a mirror of the OPFOR one. OPFOR garrisons *decay* from a tier they were
 given and are rebuilt by a commander spending AP; BLUFOR garrisons *accumulate* from nothing at the
-player's cost. `Mobilising` is an OPFOR-only label because only OPFOR arrive on ground
-they already own — a BLUFOR garrison never arrives, it gets built.
+player's cost. A beaten town garrison files back to tier I for OPFOR and to tier 0 for BLUFOR, for the
+same reason: nobody hands BLUFOR a tier, so nothing can leave them one. `Mobilising` is an OPFOR-only
+label because only OPFOR arrive on ground they already own — a BLUFOR garrison never arrives, it gets
+built.
+
+**What the player pays is still open.** Neither buy charges anything; the zone pair is reachable from
+the Debug menu's map-click rows and the town pair from the economy debug window, so the currency and the
+price belong to whatever player-facing surface spends them.
 
 ### The guards belong to streaming, not to a side
 
@@ -739,14 +766,17 @@ Three cases, and the distinction that separates them is whether the player asked
 - **Neither — nothing to guard.** The HQ and FOB garrisons are placed once with the base and never
   respawn, so there is no arrival to hide.
 
-**A BLUFOR-held town will be the first BLUFOR force in the second case.** The tier ladder is planned
-for both sides ([`../opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md#town--zone-garrisons)), and a town
-the player holds will stream on the same rules a town the enemy holds does — so it will need the same
-latch, and whoever builds it should reuse the machinery rather than re-derive it.
-
-It will *not* need the holds. Those exist because OPFOR arrive on ground they already own, and a
-BLUFOR garrison never arrives — it is built, from nothing, at the player's expense
+**A BLUFOR-held zone or town is the second case too**, and it streams on the machinery the enemy's
+does — the same latch, the same grace, the same worker. It takes no holds: those exist because OPFOR
+arrive on ground they already own, and a BLUFOR garrison never arrives, it is built
 ([§BLUFOR inherits nothing](#blufor-inherits-nothing)). There is nothing to defer.
+
+**One test had to widen for it.** The shared presence answer watches for BLUFOR, which on BLUFOR ground
+would leave an assault walking into an empty site and taking it off men who never rendered. A site
+declaring `enemyAware` also wakes, while its ground is BLUFOR's, for an attacker inside the ring —
+including a virtual OPCOM one, which stands on no unit list and would otherwise be invisible to it.
+That wake is also what renders the attacker: `fnc_opcom_task_step` renders a tasking within K of any
+live WEST group, so the garrison standing up is what brings the fight into the world.
 
 **Bases are a special case, and fast travel is why.** The `freeze` disposal mode freezes their garrisons
 rather than deleting it, and the usual reason given — that rebuilding would hand back every soldier

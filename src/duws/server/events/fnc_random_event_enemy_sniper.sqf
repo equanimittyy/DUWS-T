@@ -10,7 +10,7 @@ if (!isServer) exitWith {};
 params [["_townIndex", -1], ["_player", objNull]];
 if (isNull _player) exitWith {};
 
-if ((call DUWS_fnc_opforGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
+if ((["OPF"] call DUWS_fnc_sideGroupCount) >= DUWS_zoneGroupCeiling) exitWith {};
 
 #define SNIPER_RANGE 1000
 #define BLU_STANDOFF 500

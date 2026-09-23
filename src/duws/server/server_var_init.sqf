@@ -695,9 +695,9 @@ OPCOM_RECON_K = createHashMapFromArray [
     ["inf", 1], ["wheeled", 1], ["rotary", 3]
 ];
 
-// The force a BLU-held zone deposits to the enemy layer: the player's garrison strength is not modelled,
-// so the commander knows the ground is held but not how strongly and reads a fixed nominal. A standing
-// OPFOR hardpoint has no such nominal -- its force composes from its static and garrison (DUWS_fnc_hpForce).
+// The force BLUFOR-held ground -- a zone, or a town inside their band -- deposits to the enemy layer. A fixed
+// nominal rather than the ledger: the true force would hand OPCOM knowledge nothing scouted. A standing OPFOR
+// hardpoint has no such nominal -- its force composes from its static and garrison (DUWS_fnc_hpForce).
 OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 
 // OPCOM tasking (Phase 3). Scalar tunables only; the per-type speed/reach tables and the recruit menu are

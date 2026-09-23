@@ -62,9 +62,9 @@ switch (_kind) do {
 		} else {
 			[_tier] call _fnc_tier
 		});
-		if (_held) then {
-			// No bar on a zone the player owns: a full run of grey would read as a garrison wiped
-			// rather than as one that was never there.
+		// A bar wherever there is a garrison to measure. A zone the player holds at tier 0 has none, and a
+		// full run of grey there would read as a garrison wiped rather than one never built.
+		if (_held && {_tier < 1}) then {
 			_lines pushBack localize "STR_DUWS_T_zone_mapview_held";
 		} else {
 			_lines pushBack ([_seg] call _fnc_bar);

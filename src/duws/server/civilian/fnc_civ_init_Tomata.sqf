@@ -219,6 +219,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // before anyone has played a minute, and reading them as ungarrisoned until the first garrison cycle
     // would let the commander appraise them as neutral. Everything else starts at 0 (BLUFOR/neutral).
     missionNamespace setVariable ["DUWS_townGarrisonTier", _townRep apply {[0, 1] select (_x <= -10)}];
+    // Whose those tiers are. Only the OPFOR band grants one at start, so every other town owes nobody.
+    missionNamespace setVariable ["DUWS_townGarrisonOwner", _townRep apply {["", "OPF"] select (_x <= -10)}];
     // No strength array: the shared attrition store answers full for ground nobody has fought over,
     // so a town needs no entry until something writes one.
     missionNamespace setVariable ["DUWS_townGarrisonHold", _townRep apply {0}];

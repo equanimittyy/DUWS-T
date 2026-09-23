@@ -49,7 +49,8 @@ if (_key isEqualTo "") exitWith {
 };
 
 private _rows = [_key] call DUWS_fnc_garrisonDebug;
-_rows insert [1, [["Tier", format ["%1 / %2", _tier, _tierMax]]]];
+_rows insert [1, [["Tier", format ["%1 / %2", _tier, _tierMax],
+	format ["%1 holds it", [_key] call DUWS_fnc_garrisonSideOf]]]];
 // A town's raise also waits out the mobilising hold and the leave-first latch; without them a held town reads as a streaming fault.
 if (_townIndex >= 0) then {
 	private _vacate = ([_key, "garrison"] call fnc_site_occupant) getOrDefault ["awaitVacate", false];

@@ -85,7 +85,7 @@ DUWS_fnc_garrisonLeftoverSweep = {
 // Far side, past the players, preferably unseen -- so a player never watches a squad appear or gets
 // flanked from their own approach direction.
 DUWS_fnc_garrisonReservePos = {
-    params ["_center", "_radius"];
+    params ["_center", "_radius", ["_side", "OPF"]];
     private _reach = _radius + DUWS_streamArrivalMargin;
     private _players = (call BIS_fnc_listPlayers) select { alive _x && {(_x distance2D _center) < _reach} };
     if (_players isEqualTo []) then { _players = (call BIS_fnc_listPlayers) select { alive _x } };
@@ -100,11 +100,12 @@ DUWS_fnc_garrisonReservePos = {
     };
     private _antiDir = (_center getDir _centroid) + 180;
 
-    // Soft nudge toward the nearest OPFOR zone so the wave reads as coming from friendly ground; clamped
-    // to a narrow arc since anti-flank always wins -- this only ever bends the spawn, never swings it
-    // back toward the players. Applies to town reserves too: zones are the only friendly-ground signal
+    // Soft nudge toward the nearest zone the side holds so the wave reads as coming from friendly ground;
+    // clamped to a narrow arc since anti-flank always wins -- this only ever bends the spawn, never swings
+    // it back toward the players. Applies to town reserves too: zones are the only friendly-ground signal
     // there is.
-    private _others = (missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []]) select {
+    private _others = (missionNamespace getVariable [
+        ["WARCOM_zones_controled_by_OPFOR", "WARCOM_zones_controled_by_BLUFOR"] select (_side isEqualTo "BLU"), []]) select {
         (_x distance2D _center) > _radius
     };
     if (_others isNotEqualTo []) then {
@@ -218,9 +219,9 @@ DUWS_fnc_reserveConvoySlot = {
 // wave lines up off the same lead instead of re-picking and stacking. _wave/_slots are the caller's own
 // arrays, mutated in place (SQF arrays pass by reference) -- wave state lives in the refill loop, not here.
 DUWS_fnc_reserveWaveSlot = {
-    params ["_center", "_radius", "_wave", "_slots"];
+    params ["_center", "_radius", "_wave", "_slots", ["_side", "OPF"]];
     if (_wave isEqualTo []) then {
-        private _lead = [_center, _radius] call DUWS_fnc_garrisonReservePos;
+        private _lead = [_center, _radius, _side] call DUWS_fnc_garrisonReservePos;
         _wave set [0, _lead];
         _wave set [1, _center getDir _lead];
     };
@@ -306,9 +307,11 @@ DUWS_fnc_classIsArmed = {
 // Resolved through tokenClass so a pooled auto-detected variant draws the same as a hand-written class;
 // empties dropped. Weighted toward an unarmed hull -- a taxi needs no gunner and can't be held up trading
 // fire on the run in -- so armed is only drawn when the faction offers nothing else. "" when the side
-// defines neither key; the caller then walks the squad in.
+// defines neither key; the caller then walks the squad in. BLUFOR is that side today -- no faction file
+// names a BLUFOR truck -- so a garrison the player owns reinforces on foot.
 DUWS_fnc_reserveTruckClass = {
-    private _opts = ["truck", "transport"] apply { [_x, "OPF"] call DUWS_fnc_tokenClass };
+    params [["_side", "OPF"]];
+    private _opts = ["truck", "transport"] apply { [_x, _side] call DUWS_fnc_tokenClass };
     _opts = _opts select { _x != "" };
     if (_opts isEqualTo []) exitWith { "" };
     private _unarmed = _opts select { !([_x] call DUWS_fnc_classIsArmed) };
@@ -322,18 +325,18 @@ DUWS_fnc_reserveTruckClass = {
 // doesn't roll in dead, and every teardown path that clears the driver clears them all. Truck is never
 // rostered or garrison-flagged -- the dispatch monitor owns its whole life.
 DUWS_fnc_garrisonReserveTruckSpawn = {
-    params ["_spawnPos", "_center"];
-    private _tclass = call DUWS_fnc_reserveTruckClass;
+    params ["_spawnPos", "_center", ["_side", "OPF"]];
+    private _tclass = [_side] call DUWS_fnc_reserveTruckClass;
     if (_tclass == "") exitWith { [] };
     private _truck = createVehicle [_tclass, _spawnPos, [], 0, "NONE"];
     _truck setDir (_spawnPos getDir _center);
     // Hold the load aboard through contact -- the dispatch monitor is the only thing that dismounts them.
     _truck setUnloadInCombat [false, false];
-    // The vehicle's own crew class into a fresh east group: faction-correct for a mod truck, and east by
-    // construction so the driver runs to the objective rather than being read as friendly or fleeing.
+    // The vehicle's own crew class into a fresh group on the garrison's side: faction-correct for a mod
+    // truck, and on the right side by construction so the driver runs to the objective.
     private _crewCls = getText (configFile >> "CfgVehicles" >> _tclass >> "crew");
-    if (_crewCls == "") then { _crewCls = "O_Soldier_F" };
-    private _drv = createGroup east;
+    if (_crewCls == "") then { _crewCls = ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "BLU") };
+    private _drv = createGroup ([east, west] select (_side isEqualTo "BLU"));
     private _driver = _drv createUnit [_crewCls, _spawnPos, [], 0, "NONE"];
     _driver moveInDriver _truck;
     // A truck that seated no driver would never move: scrap it and let the caller walk the squad in.
@@ -460,6 +463,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
     private _radius = _site getOrDefault ["radius", 0];
     private _pool = [_key] call DUWS_fnc_garrisonReserve;
     private _roster = [_key] call fnc_zone_roster;
+    private _side = [_key] call DUWS_fnc_garrisonSideOf;
 
     // Held open across iterations so consecutive squads share one truck; flushed on every loop exit below.
     private _truck = objNull;
@@ -482,13 +486,13 @@ DUWS_fnc_garrisonReserveRefillOne = {
         && {[_key] call DUWS_fnc_garrisonHeld}
         && {count _pool > 0}
         && {([_key] call DUWS_fnc_garrisonGroupCount) < _ceiling}
-        && {(call DUWS_fnc_opforGroupCount) < DUWS_zoneGroupCeiling}
+        && {([_side] call DUWS_fnc_sideGroupCount) < DUWS_zoneGroupCeiling}
     } do {
         // Random fieldable token so a lost group is answered by any of the pool, not a fixed order -- a
         // downed tank might bring another tank or a rifle section. Fieldable: a team always, a vehicle
         // only once AP/settings resolve its class; unfieldable tokens wait in the pool rather than block
         // the wave.
-        private _fieldable = _pool select { ([_x] call DUWS_fnc_tokenClass) != "" };
+        private _fieldable = _pool select { ([_x, _side] call DUWS_fnc_tokenClass) != "" };
         if (_fieldable isEqualTo []) then { _spent = true } else {
             // Located fresh at delete time, not by the index the list above carried -- a concurrent
             // refill may have taken this token since, so a value now gone from the pool is skipped
@@ -499,8 +503,8 @@ DUWS_fnc_garrisonReserveRefillOne = {
                 private _men = [_tok] call DUWS_fnc_tokenMenCount;
                 if (_men == 0) then {
                     // A vehicle or bare-class token owes no infantry men: it drives itself in, unbatched.
-                    private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
-                    private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
+                    private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                    private _grp = [_tok, _center, _radius, "hunt", _pos, _side] call DUWS_fnc_zoneSpawnOne;
                     [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                 } else {
                     // Trucks are opened only at the point of loading, so an open one always has a squad
@@ -510,8 +514,8 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         _truck = objNull; _drv = grpNull; _aboard = []; _used = 0; _cap = 0; _trkPos = [];
                     };
                     if (isNull _truck) then {
-                        private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
-                        private _made = [_pos, _center] call DUWS_fnc_garrisonReserveTruckSpawn;
+                        private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                        private _made = [_pos, _center, _side] call DUWS_fnc_garrisonReserveTruckSpawn;
                         if (_made isNotEqualTo []) then {
                             _made params ["_mt", "_md", "_mc"];
                             _truck = _mt; _drv = _md; _cap = _mc; _trkPos = _pos;
@@ -525,15 +529,15 @@ DUWS_fnc_garrisonReserveRefillOne = {
                             deleteVehicle _truck;
                             _truck = objNull; _drv = grpNull; _cap = 0; _trkPos = [];
                         };
-                        private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
-                        private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
+                        private _pos = [_center, _radius, _wave, _slots, _side] call DUWS_fnc_reserveWaveSlot;
+                        private _grp = [_tok, _center, _radius, "hunt", _pos, _side] call DUWS_fnc_zoneSpawnOne;
                         [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                     } else {
                         // Raised orderless so it rides then hunts at the debus; rostered now while the
                         // site is held (the loop's own guard). If a mid-ride capture scraps the ride, the
                         // dispatch monitor deletes the group and leaves the stale roster entry for the
                         // teardown sweep, as for any reserve.
-                        private _grp = [_tok, _center, _radius, "none", _trkPos] call DUWS_fnc_zoneSpawnOne;
+                        private _grp = [_tok, _center, _radius, "none", _trkPos, _side] call DUWS_fnc_zoneSpawnOne;
                         if (!isNull _grp) then {
                             { _x moveInCargo _truck } forEach units _grp;
                             _roster append (units _grp);

@@ -76,10 +76,12 @@ fnc_zone_strength = {
 	[_zoneKey] call DUWS_fnc_garrisonStrength
 };
 
-// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it. A BLUFOR
-// capture drops it to 0, which means no garrison, and an OPFOR retake resets it to I. Distinct from
-// fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says how
-// much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a full bar --
+// A zone's inherent size, rolled once when it is generated; only a bought fortification raises it. It is
+// the holder's tier, not OPFOR's: a flip in either direction drops it to 0, and what the new holder does
+// then is the one place the two sides differ -- an OPFOR retake resets it to I, where BLUFOR must buy
+// their way up from nothing.
+// Distinct from fnc_zone_strength, which is attrition: tier picks which composition the zone fields,
+// strength says how much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a full bar --
 // small, but not yet fought over.
 // Tier selects a list rather than scaling one, so it reaches only the units a zone spawns alongside
 // itself. The fortification garrison and the composition's gun crews scale by attrition alone.
@@ -108,40 +110,40 @@ fnc_zone_tier_roll = {
 	_tier
 };
 
-// OPCOM's zone buys, the zone side of fnc_town_garrison_reinforce / _fortify. Refused on BLUFOR ground: captured
-// ground carries no tier or strength. Tested by key, since a held position may have round-tripped through a string.
+// Whether BLUFOR hold a zone. Tested by key, since a held position may have round-tripped through a string.
 fnc_zone_bluforHeld = {
 	params ["_zoneKey"];
 	(WARCOM_zones_controled_by_BLUFOR findIf { ([_x] call fnc_zone_key) isEqualTo _zoneKey }) >= 0
 };
 
-// -> the new strength, or -1 if refused.
+// Whoever holds the ground may buy. Neither side pays here -- the price is the caller's, and each side's
+// candidate list is what keeps a commander off the other's ground.
+// -> the new strength, or -1 if refused. Tier 0 has no garrison to put men back into.
 fnc_zone_garrison_reinforce = {
 	params ["_zoneKey", ["_reason", ""]];
-	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
-		["INFO", "ZONES", format ["%1 reinforcement refused (%2): held by BLUFOR", _zoneKey, _reason]] call fnc_log;
+	private _tier = [_zoneKey] call fnc_zone_tier;
+	if (_tier < 1) exitWith {
+		["INFO", "ZONES", format ["%1 reinforcement refused (%2): no garrison", _zoneKey, _reason]] call fnc_log;
 		-1
 	};
 	private _old = [_zoneKey] call DUWS_fnc_garrisonStrength;
-	[_zoneKey, [[_zoneKey] call fnc_zone_tier] call DUWS_fnc_zoneSpawnList] call DUWS_fnc_garrisonReinforce;
+	[_zoneKey, [_tier, [_zoneKey] call DUWS_fnc_garrisonSideOf] call DUWS_fnc_zoneSpawnList] call DUWS_fnc_garrisonReinforce;
 	private _new = [_zoneKey] call DUWS_fnc_garrisonStrength;
 	["INFO", "ZONES", format ["%1 reinforced %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
 	_new
 };
 
-// -> the tier it now stands at, or -1 if refused.
+// -> the tier it now stands at, or -1 if refused. Raising from 0 is the whole of how a BLUFOR garrison comes
+// to exist; the capture forgot the ledger, so that first tier is bought clean.
 fnc_zone_garrison_fortify = {
 	params ["_zoneKey", ["_reason", ""]];
-	if ([_zoneKey] call fnc_zone_bluforHeld) exitWith {
-		["INFO", "ZONES", format ["%1 tier raise refused (%2): held by BLUFOR", _zoneKey, _reason]] call fnc_log;
-		-1
-	};
 	private _old = [_zoneKey] call fnc_zone_tier;
 	private _new = (_old + 1) min (count DUWS_zoneSpawnTiers);
 	if (_new == _old) exitWith { _old };
+	private _side = [_zoneKey] call DUWS_fnc_garrisonSideOf;
 	missionNamespace setVariable [format ["DUWS_zoneTier_%1", _zoneKey], _new];
-	private _x1 = [_new] call DUWS_fnc_zoneSpawnList;
-	[_zoneKey, [_old] call DUWS_fnc_zoneSpawnList, _x1] call DUWS_fnc_garrisonBuyTier;
+	private _x1 = [_new, _side] call DUWS_fnc_zoneSpawnList;
+	[_zoneKey, [_old, _side] call DUWS_fnc_zoneSpawnList, _x1] call DUWS_fnc_garrisonBuyTier;
 	// No thread adopts a zone's tier the way the town garrison thread does, so the buy re-stands it here.
 	if ([_zoneKey] call DUWS_fnc_garrisonHeld) then { [_zoneKey, _x1] call DUWS_fnc_garrisonRestand };
 	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
@@ -195,12 +197,14 @@ DUWS_fnc_garrisonGroupCount = {
 	count _grps
 };
 
-// Every OPFOR group anywhere -- the global throttle input. Against the 144-per-side cap, not a zone's
-// own count: hardpoints and town garrisons raise their own groups on their own rules and are not
+// Every group one side holds anywhere -- the global throttle input. Against the 144-per-side cap, not a
+// zone's own count: hardpoints and town garrisons raise their own groups on their own rules and are not
 // pooled or per-zone bounded, but they do count here, so a dense field pushes zones to back off and
-// leave the engine headroom.
-DUWS_fnc_opforGroupCount = {
-	count (allGroups select { side _x == east })
+// leave the engine headroom. The cap is per side, so BLUFOR's count carries the player's own squads.
+DUWS_fnc_sideGroupCount = {
+	params [["_side", "OPF"]];
+	private _army = [east, west] select (_side isEqualTo "BLU");
+	count (allGroups select { side _x == _army })
 };
 
 // Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
@@ -244,7 +248,10 @@ fnc_zone_control_set = {
 			[WARCOM_zones_controled_by_OPFOR, _zonePos] call _fnc_dropFrom;
 			amount_zones_captured = amount_zones_captured + 1;
 			zoneundercontrolblu = zoneundercontrolblu + 1;
+			// Tier and ledger go together, or the player's first bought tier would come back already
+			// mauled by the fight they just won -- and BLUFOR inherit nothing.
 			missionNamespace setVariable [format ["DUWS_zoneTier_%1", [_zonePos] call fnc_zone_key], 0];
+			[[_zonePos] call fnc_zone_key] call DUWS_fnc_garrisonForget;
 			// Position is the only stable zone id here: the capture path never receives the
 			// generation index, and the prefab name it does carry is not unique.
 			["INFO", "ZONES", format ["captured by BLUFOR at %1, now holding %2",
