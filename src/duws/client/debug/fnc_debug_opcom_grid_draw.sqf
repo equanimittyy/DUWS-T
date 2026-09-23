@@ -11,8 +11,9 @@ params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []], ["_wps", [
 
 private _half = _cell / 2;
 private _eps = 0.05;
-private _coverOn = missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true];
-private _needOn = missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false];
+// Off by default: the overlay's first read is the lattice, the force colours and the unit boxes. Text on every
+// cell buries all three, so numbers are opt-in from the Views page.
+private _labels = missionNamespace getVariable ["DUWS_dbgOpcomLabelsOn", false];
 
 // Fixed grid width means the cell count only changes on a first draw or a name-clash guard.
 private _sig = [count _cells];
@@ -58,7 +59,7 @@ private _sample = "";
             if (_e > _f) then { _col = "#(1,0.3,0.3,1)" };
         };
         _dm setMarkerColorLocal _col;
-        _dm setMarkerTextLocal (format ["%1/%2", _f toFixed 1, _e toFixed 1]);
+        _dm setMarkerTextLocal (["", format ["%1/%2", _f toFixed 1, _e toFixed 1]] select _labels);
     } else {
         if ((getMarkerType _dm) isNotEqualTo "") then { deleteMarkerLocal _dm };
     };
@@ -67,7 +68,7 @@ private _sample = "";
     // A never-/long-unseen cell reads -1 (age past the span, collapsed server-side), so the layer is legibly
     // alive before any sweep -- a blank map would read as broken, not as "no coverage yet".
     private _sm = format ["duws_opcom_stale_%1", _i];
-    if (_coverOn) then {
+    if (_labels) then {
         if ((getMarkerType _sm) isEqualTo "") then {
             createMarkerLocal [_sm, [_c select 0, (_c select 1) + _cell * 0.3]];
             _sm setMarkerShapeLocal "ICON";
@@ -82,7 +83,7 @@ private _sample = "";
     };
 
     private _nm = format ["duws_opcom_need_%1", _i];
-    if (_needOn && {_need > _eps || {_cov > 0} || {_traf > _eps}}) then {
+    if (_labels && {_need > _eps || {_cov > 0} || {_traf > _eps}}) then {
         if ((getMarkerType _nm) isEqualTo "") then {
             createMarkerLocal [_nm, [_c select 0, (_c select 1) - _cell * 0.3]];
             _nm setMarkerShapeLocal "ICON";
@@ -111,7 +112,7 @@ private _belN = missionNamespace getVariable ["DUWS_dbgOpcomBelN", 0];
     } else {
         _nm setMarkerPosLocal [_p select 0, _p select 1];
     };
-    _nm setMarkerTextLocal format ["threat %1 · %2t", _str, _age];
+    _nm setMarkerTextLocal (["", format ["threat %1 · %2t", _str, _age]] select _labels);
 } forEach _bel;
 for "_i" from (count _bel) to (_belN - 1) do { deleteMarkerLocal format ["duws_opcom_bel_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomBelN", count _bel];
@@ -131,7 +132,7 @@ private _taskN = missionNamespace getVariable ["DUWS_dbgOpcomTaskN", 0];
     _nm setMarkerTypeLocal _icon;
     _nm setMarkerColorLocal "#(0.9,0.2,0.2,1)";
     _nm setMarkerSizeLocal [0.9, 0.9];
-    _nm setMarkerTextLocal _ttxt;
+    _nm setMarkerTextLocal (["", _ttxt] select _labels);
 } forEach _tasks;
 for "_i" from (count _tasks) to (_taskN - 1) do { deleteMarkerLocal format ["duws_opcom_task_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomTaskN", count _tasks];
@@ -151,7 +152,7 @@ private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
     } else {
         _nm setMarkerPosLocal _wp;
     };
-    _nm setMarkerTextLocal _wtxt;
+    _nm setMarkerTextLocal (["", _wtxt] select _labels);
 } forEach _wps;
 for "_i" from (count _wps) to (_wpN - 1) do { deleteMarkerLocal format ["duws_opcom_wp_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomWpN", count _wps];

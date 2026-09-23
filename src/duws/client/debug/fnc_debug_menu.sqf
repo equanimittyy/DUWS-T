@@ -155,13 +155,9 @@ switch (_page) do {
             DBG_BACK("root"),
             ["AoI reaches", count (missionNamespace getVariable ["DUWS_dbgAoiMarkers", []]) > 0, fnc_debug_aoi_view] call _toggle,
             ["OPCOM grid", missionNamespace getVariable ["DUWS_dbgOpcomOn", false], fnc_debug_opcom_view] call _toggle,
-            ["Staleness labels", missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true], {
-                DUWS_dbgOpcomCoverOn = !(missionNamespace getVariable ["DUWS_dbgOpcomCoverOn", true]);
-                hint format ["OPCOM grid: staleness labels %1.", ["off", "on"] select DUWS_dbgOpcomCoverOn];
-            }] call _toggle,
-            ["Need & cover labels", missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false], {
-                DUWS_dbgOpcomNeedOn = !(missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false]);
-                hint format ["OPCOM grid: need (N), cover (C) and traffic (T) labels %1.", ["off", "on"] select DUWS_dbgOpcomNeedOn];
+            ["OPCOM grid labels", missionNamespace getVariable ["DUWS_dbgOpcomLabelsOn", false], {
+                DUWS_dbgOpcomLabelsOn = !(missionNamespace getVariable ["DUWS_dbgOpcomLabelsOn", false]);
+                hint format ["OPCOM grid: numbers and unit tags %1.\n\nForce per cell, staleness (t), need (N),\ncover (C), traffic (T), threat stamps and\nthe tasking tag on each unit and endpoint.", ["off", "on"] select DUWS_dbgOpcomLabelsOn];
             }] call _toggle,
             ["OPCOM AI overlay", missionNamespace getVariable ["DUWS_dbgOpcomAiOn", false], fnc_debug_opcom_ai_overlay] call _toggle
         ]] call fnc_open_action_menu;
