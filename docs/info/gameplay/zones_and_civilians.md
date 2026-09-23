@@ -466,7 +466,9 @@ unit inside the town radius, the garrison beaten to 15 %, and BLUFOR outnumberin
 town's streaming ring, all held for `DUWS_captureHold`. As at a zone, each town asks it from its own
 trigger every 0.5 s, with the sides swapped when the town is BLUFOR's — its garrison is cleared by
 OPFOR on the same terms. The trigger asks only at tier I or above, because a tier 0 town garrisons
-nobody and has nothing to clear.
+nobody and has nothing to clear. OPFOR do not wait to be walked into either: OPCOM's Attack targets a
+garrisoned BLUFOR town alongside its zones, and marches a unit at it
+([`../../plans/opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md#appraisal)).
 
 A cleared BLUFOR town files back to tier 0, not tier I, and its ledger is forgotten: nobody hands BLUFOR
 a first tier, so a beaten garrison cannot leave them one. The reputation step is toward neutral either

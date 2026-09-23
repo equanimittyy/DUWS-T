@@ -36,30 +36,44 @@ DUWS_fnc_opcom_sendRun = {
     true
 };
 
-// One attacker per zone at a time: a second sent after the first dribbles men into a fight no-retreat turns into
+// One attacker per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
 // defeat in detail, which Phase 5's muster exists to prevent.
+//
+// Zones and towns on the same terms. What differs is how the ground answers: a zone flips on presence, a town only
+// by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
+// reputation rather than a fight is what owns it.
 DUWS_fnc_opcom_attackSweep = {
     private _units = [false] call DUWS_fnc_opcom_freeCombatants;
     private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
     private _out = [];
     private _blocked = [];
     private _riders = [];
+    // _to scores the send and prices a lift; _at is the order's own target, which a zone reads off the site store
+    // because a held position and the one its trigger filed differ in z.
+    private _fnc_consider = {
+        params ["_key", "_to", "_at", "_label"];
+        if (_key in _busy) exitWith {};
+        private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
+        private _best = [_to, _worth, _units] call DUWS_fnc_opcom_bestSend;
+        if (_best isEqualTo []) exitWith { _blocked pushBack [_to, _worth] };
+        _best params ["_t", "_v", "_pw", "_c"];
+        _out pushBack [[_t get "id", "capture", _at, _pw * _v], 0,
+            format ["Attack %1 with %2 %3", _label, _t get "menu", _t get "id"], _v, _pw, _c];
+        _riders pushBack [_t, _to, _pw * _v];
+    };
     {
-        private _zp = _x;
-        private _zk = [_zp] call fnc_zone_key;
-        if !(_zk in _busy) then {
-            private _worth = [_zk] call DUWS_fnc_opcom_siteWorth;
-            private _best = [_zp, _worth, _units] call DUWS_fnc_opcom_bestSend;
-            if (_best isEqualTo []) then {
-                _blocked pushBack [_zp, _worth];
-            } else {
-                _best params ["_t", "_v", "_pw", "_c"];
-                _out pushBack [[_t get "id", "capture", ([_zk] call fnc_site_at) get "pos", _pw * _v], 0,
-                    format ["Attack %1 with %2 %3", [_zk] call DUWS_fnc_opcom_zoneLabel, _t get "menu", _t get "id"], _v, _pw, _c];
-                _riders pushBack [_t, _zp, _pw * _v];
+        private _zk = [_x] call fnc_zone_key;
+        [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
+    } forEach WARCOM_zones_controled_by_BLUFOR;
+    {
+        private _i = _forEachIndex;
+        if (_x > 0 && {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) then {
+            private _tp = [_i] call DUWS_fnc_opcom_townPos;
+            if (_tp isNotEqualTo []) then {
+                [[_i] call fnc_town_site_key, _tp, _tp, [_i] call DUWS_fnc_opcom_townLabel] call _fnc_consider;
             };
         };
-    } forEach WARCOM_zones_controled_by_BLUFOR;
+    } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     [_out, _blocked, _riders]
 };
 
