@@ -28,7 +28,7 @@ engine-contact behaviours only settle by running the core.
 
 **Every wired action is scored before any new one is written**: an unappraised row returns its price and scores
 break-even, so a half-appraised picker quietly favours whatever it cannot yet judge, and adding actions into that
-only widens the blind spot. The archetype is last of all — it multiplies a class's scores, so it has nothing to
+only widens the blind spot. The archetype is last of all — it multiplies each action's scores, so it has nothing to
 tilt until the scores mean something.
 
 ## Shipped: the substrate the loop drives
@@ -71,7 +71,7 @@ lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
 may yield. One pick every other tick by default (0.5 picks per tick); the difficulty setting changes the rate
 ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
-action's class, targets, gate, price and execute, and from 4C.2 its Value and Cost.
+action's id, targets, gate, price and execute, and from 4C.2 its Value and Cost.
 
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
   they drive — and spends as the weighted commander will. Nothing is weighted: the pick draws an action with a legal
@@ -79,8 +79,8 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
   Debug menu's OPCOM page ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)); the mode is `off` by
   default. Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
 - **4C — Weighting.** The score, the shortlist and the roll are built (4C.2), and every wired row carries a Value.
-  `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) multiplies a whole class's scores, which is the
-  only change it makes; it is wired, and Balanced holds it at 1. 4C.1 comes last and adds the other archetypes and
+  `archWeight[archetype][action]` ([§Archetype](#archetype)) multiplies each action's scores, which is the only
+  change it makes; it is wired, and Balanced holds it at 1. 4C.1 comes last and adds the other archetypes and
   the setting that picks one.
 
 The rows run in the order listed, which is not their chunk number: the Values were finished before new actions were
@@ -98,11 +98,11 @@ written, and the archetype comes last.
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
 ```
-score = archWeight[archetype][actionClass] × P(win) × Value / Cost
+score = archWeight[archetype][action] × P(win) × Value / Cost
 ```
 
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight`, the playing archetype's `actionWeight`,
-tilts by action class ([§Archetype](#archetype)); `P(win)` scales to the expected return.
+tilts by action ([§Archetype](#archetype)); `P(win)` scales to the expected return.
 
 **Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Scout and Arty. A purchase
 does not: Reinforce, Fortify, Build, Rapport and Recruit stock ground OPCOM already holds, and their site is gated
@@ -343,7 +343,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   The rebuy prices the whole stake at every ratio, never the expected losses. The square law has a win at ratio `r`
   keep √(1 − 1/r²) of the force, so a Cost of expected losses would score a 3:1 attack 12 times above an even one,
   where the whole stake scores it 1.8 times above. That steep a preference has OPCOM attack only at crushing odds,
-  which is no fight for the players. How often OPCOM attacks is the offensive `archWeight`'s job, not the Cost's.
+  which is no fight for the players. How often OPCOM attacks is Attack's `archWeight`'s job, not the Cost's.
 
 ### Gate and the savings goal
 
@@ -508,23 +508,23 @@ tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1
 shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs on its own clock. Spends call
 `["OPF", -_cost, _reason] call fnc_ap_adjust` (server-side, single writer, no race).
 
-| Action | Class | Target | Sink | Taskings |
-|---|---|---|---|---|
-| Attack | offensive | a BLU-held zone | tasking-spawn | 1–N (band → template) |
-| Intercept (QRF) | defensive | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1–N |
-| Rapport | offensive | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
-| Recruit | buildup | an open zone, one action per menu row | tasking-spawn | 1 (`garrison`, resting) |
-| Reinforce | defensive | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
-| Scout | recon | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
-| Arty | indirect | an observed target in gun range | bought fire mission | 0 |
-| Fortify | defensive | an own town / zone | tier purchase | 0 zone / 1 truck town |
-| Build | defensive | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
-| Tower Build | buildup | a band cell | hardpoint build | 1 truck |
-| OP Build | recon | a band cell | hardpoint build | 1 truck |
-| Mortar Build | indirect | a band cell | hardpoint build | 1 truck |
-| Battery Build | indirect | a band cell | hardpoint build | 1 truck |
-| Minefield | defensive | a band cell (AT, AP) | mine lay | 1 truck |
-| Bank | bank | — | none | 0 |
+| Action | Target | Sink | Taskings |
+|---|---|---|---|
+| Attack | a BLU-held zone | tasking-spawn | 1–N (band → template) |
+| Intercept (QRF) | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1–N |
+| Rapport | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
+| Recruit | an open zone, one action per menu row | tasking-spawn | 1 (`garrison`, resting) |
+| Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
+| Scout | a `recon` unit's route over stale valuable cells | tasking-spawn | 1 |
+| Arty | an observed target in gun range | bought fire mission | 0 |
+| Fortify | an own town / zone | tier purchase | 0 zone / 1 truck town |
+| Build | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
+| Tower Build | a band cell | hardpoint build | 1 truck |
+| OP Build | a band cell | hardpoint build | 1 truck |
+| Mortar Build | a band cell | hardpoint build | 1 truck |
+| Battery Build | a band cell | hardpoint build | 1 truck |
+| Minefield | a band cell (AT, AP) | mine lay | 1 truck |
+| Bank | — | none | 0 |
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
   strikes, and a lost unit is lost standing strength. It scores **once per recruit-menu row**, each valued as
@@ -700,14 +700,16 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 **WIP.**
 
 One archetype per campaign, a campaign setting chosen at start (Defensive, Balanced, Aggressive or Random), sets the
-`archWeight[archetype][actionClass]` factor — it weights an action class's draw in 4C.1 and *multiplies* its score
-from 4C.2, never removes an action, and cannot override the ladder (an Aggressive commander with no armour tier
-fields none). It is stored in the persistence snapshot and never re-rolled. A Random pick stays hidden: the config
-diary note shows "Random", and nothing in play reveals it. The OPCOM debug page overrides it for testing. It is not
-difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included: bank, defensive,
-offensive, buildup, recon and indirect, the guns' own class, so an archetype leans on indirect fire with no per-type
-table; further leans (armour) become rows. The table is each record's `actionWeight`, and it is relative: weighting
-every class alike changes no pick, so Balanced's 1 in every class is the baseline. 4C.1 builds the setting.
+`archWeight[archetype][action]` factor — it *multiplies* an action's score, never removes an action, and cannot
+override the ladder (an Aggressive commander with no armour tier fields none). It is stored in the persistence
+snapshot and never re-rolled. A Random pick stays hidden: the config diary note shows "Random", and nothing in play
+reveals it. The OPCOM debug page overrides it for testing. It is not difficulty (`opfor_ai_skill` sets aim). The
+table is each record's `actionWeight`, one flat weight per action id (`fnc_opcom_actions`), Bank included. No class
+groups the actions, because a class ties together actions an archetype must weigh apart: one that attacks often but
+spends its units on build-up needs Attack high and Intercept and Rapport low. The table is relative: weighting every
+action alike changes no pick, so Balanced's 1 everywhere is the baseline. A build or recruit row's weight compounds
+with its type's mix ([§Value](#value)): the mix still pulls the type toward its share, so the weight moves where the
+proportion settles and does not override it. 4C.1 builds the setting.
 
 | Archetype | Weights toward |
 |---|---|
@@ -718,7 +720,7 @@ every class alike changes no pick, so Balanced's 1 in every class is the baselin
 Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_archetypes.sqf`) holding its
 `actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the one the commander
 plays. Only Balanced's record stands until 4C.1 adds the others and sets the archetype from the campaign setting; an
-archetype with no record weighs every class at 1 and builds and hires with no mix.
+archetype with no record weighs every action at 1 and builds and hires with no mix.
 
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
