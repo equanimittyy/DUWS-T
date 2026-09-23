@@ -63,16 +63,16 @@ A `MINEFIELD` also comes from the debug hardpoint spawner
 (`client/debug/fnc_debug_hardpoint_menu.sqf`), from the Eliminate Recon Patrol side mission, which
 registers it as a standalone hardpoint, and from the Clear Minefield civilian mission, which registers a
 thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission_catalogue.md)).
-OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), under caps that count
-every standing OPFOR hardpoint, seeded ones included, and every build still siting or on its truck
-(`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5),
-`MORTAR` at `OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG`, `OP` and `MINEFIELD`
-cap at their `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no
-cap of their own. All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (10)
-times the zone count. The per-zone caps scale because the seed does, at about 7 hardpoints a zone. Within the
-caps, a build's Value leans toward the archetype's row of `OPCOM_HP_MIX`, where a type's share is its weight over
-the row's sum: a type past its share of the standing hardpoints of the row's types builds less, and one short of it
-builds more. A type outside the row builds with no lean. Campaign generation rolls every type and caps none.
+OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), under caps that count every
+standing OPFOR hardpoint, seeded ones included, and every build still siting or on its truck
+(`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at
+`OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG`, `OP` and `MINEFIELD` cap at their
+`OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
+All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (10) times the zone count. The
+per-zone caps scale because the seed does, at about 7 hardpoints a zone. Within the caps, a build's Value leans toward
+the archetype's `hpMix` (`appraisal/fnc_opcom_archetypes.sqf`), where a type's share is its weight over the mix's sum:
+a type past its share of the standing hardpoints of the mix's types builds less, and one short of it builds more. A
+type outside the mix builds with no lean. Campaign generation rolls every type and caps none.
 
 Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
 composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).

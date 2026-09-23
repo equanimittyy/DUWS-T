@@ -7,8 +7,6 @@ DUWS_opcom_pickOnce = "";
 // Carried as a debt, so a rate below 1 picks once every few ticks.
 DUWS_opcom_picksPerTick = 0.5;
 DUWS_opcom_pickDebt = 0;
-// The row every per-archetype table is read at (OPCOM_HP_MIX).
-DUWS_opcom_archetype = "balanced";
 DUWS_opcom_aiEvents = [];
 DUWS_opcom_aiSeq = 0;
 

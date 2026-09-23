@@ -111,13 +111,14 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
-// appraisal\: executed to define the score and its terms (value\, one file per term), the picker's state, the site
-// queries, the asset tables, supply trucks, the siting pass, the roster, the commit, recruit, fire, holding and build
-// actions, and the action list. siting reads the Value functions into its table at load, the commit and demand tables read
-// theirs, and the action list reads every row's functions into its own.
+// appraisal\: executed to define the score and its terms (value\, one file per term), the picker's state, the
+// archetypes, the site queries, the asset tables, supply trucks, the siting pass, the roster, the commit, recruit, fire,
+// holding and build actions, and the action list. siting reads the Value functions into its table at load, the commit
+// and demand tables read theirs, and the action list reads every row's functions into its own.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_tick_cache.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_score.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick_state.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_archetypes.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_sites.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_exposure.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_pwin.sqf";
