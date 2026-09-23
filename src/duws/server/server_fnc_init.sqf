@@ -1091,6 +1091,9 @@ fnc_class_rows_fill = compile preprocessFileLineNumbers "duws\shared\functions\f
 publicVariable "fnc_class_rows_fill";
 fnc_cs = compile preprocessFileLineNumbers "duws\shared\functions\fnc_cs.sqf";
 publicVariable "fnc_cs";
+// Broadcast: the depot carry's collision shield runs on every machine, each shielding its own units.
+fnc_depot_carry_shield = compile preprocessFileLineNumbers "duws\shared\functions\fnc_depot_carry_shield.sqf";
+publicVariable "fnc_depot_carry_shield";
 fnc_gm_occupant = compile preprocessFileLineNumbers "duws\shared\functions\fnc_gm_occupant.sqf";
 publicVariable "fnc_gm_occupant";
 fnc_mission_gate_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_gate_left.sqf";publicVariable "fnc_mission_gate_left";

@@ -3,6 +3,7 @@
 //
 // allowDamage is machine-local and does not follow R3F's ownership grab, so invulnerability is
 // re-asserted here; fnc_depot_place_finish restores damage after the server reclaims the vehicle.
+// The placing flag is public because fnc_depot_carry_shield reads it on every machine.
 // With _baseBound, release only takes inside the base-keep ring -- a drop outside it is eaten by the
 // cleanup sweep. A vendor sale clears it: the buyer stands in a town, not at a base.
 if (!hasInterface) exitWith {};
@@ -14,7 +15,8 @@ if (isNull _veh) exitWith {};
 closeDialog 0;
 
 _veh allowDamage false;
-_veh setVariable ["DUWS_depot_placing", true];
+_veh setVariable ["DUWS_depot_placing", true, true];
+[_vehNet, netId player] remoteExec ["fnc_depot_carry_shield", 0];
 
 // R3F's carry returns only after a 5s settle; announce each drop once so the wait doesn't read as a failed retrieve.
 [_veh] spawn {
@@ -44,7 +46,7 @@ while { !_placed && alive player } do {
     };
 };
 
-_veh setVariable ["DUWS_depot_placing", false];
+_veh setVariable ["DUWS_depot_placing", false, true];
 _veh allowDamage true;
 [_vehNet] remoteExec ["fnc_depot_place_finish", 2];
 
