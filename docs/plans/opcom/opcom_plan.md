@@ -151,7 +151,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Town Reinforce | each OPFOR-band town below full strength | 4B.2 |
 | Town Fortify | each OPFOR-band town below tier IV | 4B.2 |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) | 4B.2 |
-| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it, and a truck held as stock goes to a random open zone | 4B.3 |
+| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it, and a truck held as stock goes to a random open zone; every row but a `noncombat` one skips a zone at its garrison cap ([§Caps](#caps)) | 4B.3 |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) | 4B.2 |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long | 4B.2 |
@@ -333,7 +333,8 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 - **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. A supply-gated action drops only when no truck idles
   and the wallet cannot cover the action plus a hire. A commit action drops when no eligible unit is free, and no
-  pool draws a unit garrisoned in a contested zone. The random draw drops any action the wallet cannot cover. From
+  pool draws a unit garrisoned in a contested zone. An action past one of OPCOM's caps drops too
+  ([§Caps](#caps)). The random draw drops any action the wallet cannot cover. From
   4C.2, an offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; a mustering one checks the floor at
   launch ([§Commitment](#commitment-intents-are-sticky)).
 - **From 4C.2, an unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
@@ -348,6 +349,30 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   weight sets how thrifty the commander is; from 4C.2 it is `OPCOM_BANK_SCORE`, a flat score below the break-even of an
   action that returns exactly what it costs, so it wins when nothing on the shortlist pays for itself, or when a
   savings goal stands.
+
+### Caps
+
+A flush wallet otherwise stacks units, trucks and hardpoints without bound, because a buy's Value shrinks as its
+site fills but never reaches 0. A capped action returns no targets, so it is never scored and never a savings goal.
+The debug harness spends outside the pick and is not capped.
+
+| Cap | Drops | Counts |
+|---|---|---|
+| `OPCOM_CAP_UNITS` (50) | every Recruit row except the truck | every OPCOM unit alive except the supply trucks |
+| `OPCOM_CAP_GARRISON` (10) | a Recruit row's zone, except for a `noncombat` row | the combatants homed at that zone, the set its reserve pool fields |
+| `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
+| `OPCOM_CAP_HP_PER_ZONE` (10) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
+| per type × zones | a Build or Minefield of that type | the same, by type ([§What the commander builds](#what-the-commander-builds)) |
+
+- **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight, and the truck-stock Value
+  keeps the idle ones at one or two. If the trucks counted, a full roster would stop every supply action.
+- **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
+  one that garrisons it ([§Templates](#templates-phase-5)).
+- **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
+  grows with the zones, at about 7 a zone. A flat cap would sit under the seed of a 40-zone campaign and far over
+  that of a 10-zone one.
+- **Difficulty sets the caps.** The OPCOM difficulty setting sets the pick rate and these caps together. Today the
+  debug page steps only the pick rate ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)).
 
 ### OPCOM debug page and overlay
 
@@ -532,7 +557,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
 ([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
 whichever source costs less. A town takes one supply truck at a time: while one drives to it, no supply action
-targets it. The AP is paid at commit but the result lands only when the *specific* bound truck
+targets it. At most `OPCOM_CAP_SUPPLY` (10) trucks are out on an errand at once ([§Caps](#caps)). The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). **Arrival is the
 only test**: the contest gate keeps OPCOM from ordering a buy into a fight, but a truck already driving is never
 recalled, so a town that turns contested behind it still takes the delivery. A Reinforce landing there returns its
@@ -565,8 +590,8 @@ costs its stream ring and not its length ([`hardpoints.md`](../../info/gameplay/
 
 Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build that
 finds no ground is refunded, in full, its truck included. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`,
-which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; each cap counts a build still on
-its truck:
+which climbs the earned-AP rungs (`DUWS_ap_tier_rungs`), never the spendable wallet; each cap counts a seeded
+hardpoint and a build still on its truck:
 
 | Tier (earned AP) | Types a build may place |
 |---|---|
@@ -575,6 +600,11 @@ its truck:
 | 3 Mechanised (150) | + GMG, AA, mortar pit (max 2 alive) |
 | 4 Armour (350) | + artillery battery (max 1 alive) |
 | 5 Jets (600) | nothing new |
+
+The tower, the mortar pit and the battery cap flat: the tower cap is also the reputation amplifier's, and the guns'
+is the resident AI's. AT, AA and OP cap at 2 a campaign zone, GMG and minefield at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
+MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
+`OPCOM_CAP_HP_PER_ZONE` (10) a zone ([§Caps](#caps)).
 
 Hardpoint garrisons stay fixed per type (`DUWS_hardpointGarrison`). Knobs (all tune): seed subset 2–3 at init; no
 live cap (bounded by player proximity).
