@@ -9,7 +9,7 @@ DUWS_fnc_opcom_hpPrice = {
 
 DUWS_fnc_opcom_zoneBuildTargets = {
     params ["_type"];
-    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
+    if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
     private _out = [];
     {
         _x params ["_zk", "_zs", "", "_worth", "_exp", "_tier"];
@@ -26,7 +26,7 @@ DUWS_fnc_opcom_zoneBuildTargets = {
 
 DUWS_fnc_opcom_standaloneBuildTargets = {
     params ["_type"];
-    if ((DUWS_hardpointTier getOrDefault [_type, 99]) > WARCOM_opfor_tier) exitWith { [] };
+    if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
     private _st = ["STANDALONE"] call DUWS_fnc_opcom_siteTruck;
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
@@ -36,7 +36,7 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
 
 DUWS_fnc_opcom_assetTargets = {
     params ["_type"];
-    if !([_type] call DUWS_fnc_opcom_assetOpen) exitWith { [] };
+    if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
     private _st = [_type] call DUWS_fnc_opcom_siteTruck;
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
@@ -48,7 +48,7 @@ DUWS_fnc_opcom_assetTargets = {
 // pick weighs is the price of the belt it would actually lay.
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
-    if ((DUWS_hardpointTier getOrDefault ["MINEFIELD", 99]) > WARCOM_opfor_tier) exitWith { [] };
+    if !(["MINEFIELD"] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
     private _st = ["MINE"] call DUWS_fnc_opcom_siteTruck;
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];

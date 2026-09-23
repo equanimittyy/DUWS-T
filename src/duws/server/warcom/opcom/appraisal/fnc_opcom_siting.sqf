@@ -48,7 +48,7 @@ DUWS_fnc_opcom_siteAll = {
     {
         private _type = _x;
         _y params ["_valueFn", "_keep"];
-        if ([_type] call DUWS_fnc_opcom_assetOpen) then {
+        if ([_type] call DUWS_fnc_opcom_hpOpen) then {
             private _others = [_type] call DUWS_fnc_opcom_assetsOf;
             private _stamp = [DUWS_opcom_needSig, _others];
             private _memo = DUWS_opcom_siteMemo getOrDefault [_type, [[], createHashMap]];
@@ -74,9 +74,10 @@ DUWS_fnc_opcom_siteAll = {
     DUWS_opcom_sites = _sites;
 };
 
-// -> [point, Value discounted by the drive, truck], or [] with no site or no truck.
+// -> [point, Value discounted by the drive, truck], or [] with no site, no truck or the supply cap full.
 DUWS_fnc_opcom_siteTruck = {
     params ["_key"];
+    if (call DUWS_fnc_opcom_supplyFull) exitWith { [] };
     private _site = DUWS_opcom_sites getOrDefault [_key, []];
     if (_site isEqualTo []) exitWith { [] };
     _site params ["_at", "_v"];

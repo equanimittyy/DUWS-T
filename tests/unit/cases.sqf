@@ -1875,6 +1875,7 @@ OPCOM_AP_PER_KM = 0.5;
 // Two sources, so each town takes its own: sqf-vm aborts on one array held twice in a result.
 DUWS_fnc_opcom_truckSources = { [[["truck", 7], [0, 0, 0], 0], [["hire", "z"], [3000, 0, 0], 0]] };
 DUWS_fnc_opcom_townsSupplied = { [1] };
+DUWS_fnc_opcom_supplyFull = { false };
 fnc_town_site_key = { params ["_i"]; format ["town_%1", _i] };
 DUWS_fnc_opcom_siteContested = { params ["_k"]; _k isEqualTo "town_2" };
 DUWS_fnc_opcom_townPos = { params ["_i"]; [1000 * _i, 0, 0] };
@@ -1888,3 +1889,6 @@ private _towns = ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_
 ["townTargets: the Value is discounted by the drive", _towns apply { _x select 3 }, [2, 2]] call fnc_assertEq;
 DUWS_fnc_opcom_truckSources = { [] };
 ["townTargets: no truck is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
+DUWS_fnc_opcom_truckSources = { [[["truck", 7], [0, 0, 0], 0], [["hire", "z"], [3000, 0, 0], 0]] };
+DUWS_fnc_opcom_supplyFull = { true };
+["townTargets: a full supply cap is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;

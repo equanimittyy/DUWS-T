@@ -86,6 +86,7 @@ DUWS_fnc_opcom_rapportOffer = {
 // -> [[[errand, town, truck source], price, label, Value], ...].
 DUWS_fnc_opcom_townTargets = {
     params ["_errand", "_listVar", "_offer"];
+    if (call DUWS_fnc_opcom_supplyFull) exitWith { [] };
     private _sources = call DUWS_fnc_opcom_truckSources;
     private _busy = call DUWS_fnc_opcom_townsSupplied;
     private _out = [];

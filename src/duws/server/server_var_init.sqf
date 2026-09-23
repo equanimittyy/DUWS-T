@@ -751,6 +751,17 @@ OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 1], ["ARTY", 2]];
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
+// These types, and all types together, cap per campaign zone with the seeded hardpoints counted: the seed
+// grows with the zone count, so a flat cap would sit under a large campaign's seed and far over a small one's.
+OPCOM_CAP_HP_PER_ZONE = 10;
+OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
+    ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD", 1]
+];
+// Supply trucks sit outside OPCOM_CAP_UNITS: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
+// roster stall every supply buy.
+OPCOM_CAP_UNITS = 50;
+OPCOM_CAP_GARRISON = 10;
+OPCOM_CAP_SUPPLY = 10;
 // Fixed per type: a gun's true range is the faction gun's, known only at fire time.
 OPCOM_MORTAR_REACH = 5000;
 OPCOM_ARTY_REACH = 20000;
