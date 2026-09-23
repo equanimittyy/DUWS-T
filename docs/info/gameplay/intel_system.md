@@ -112,8 +112,8 @@ already found.
 every call, so the last zone being found silently turns the coin flip into towns-only and nothing latches.
 When both halves come up empty the payout speaks *"Nothing we don't already know"* itself rather than
 returning quietly: four of the six side-mission sites hand their result to a `remoteExec` and never see the
-return value, so a line spoken at each faucet is a line four of them cannot say. It goes to the earner where
-there is one, and from Overlord to everyone where there is not, because a mission completing is everyone's news.
+return value, so a line spoken at each faucet is a line four of them cannot say. It is a searcher's report of
+their own search, so it goes to the earner alone, and a faucet with no earner behind it stays quiet.
 
 Hardpoints and contacts are what OPFOR keep producing during play
 ([§What is hidden](#what-is-hidden-depends-on-when-it-came-into-existence)). Zones and towns are generated
@@ -129,7 +129,7 @@ quietly running on two different rules is worse than it paying a zone instead.
 ## Four sources, four prices
 
 Proximity, the body search, the civilian menu and the Intelligence Center are not redundant: proximity costs
-the walk in, the body search costs a firefight, the menu costs coins and a town's patience, and the centre
+the walk in, the body search costs a firefight, the menu costs coins and a town's patience, and the center
 costs CP and AP once and then pays on a clock. Four prices for one commodity is the point — a hardcore
 player out of one currency still has a route.
 
@@ -152,7 +152,7 @@ last hidden position is found however that happened. A fourth source therefore s
 than enriching it, and the Intelligence Center is that fourth source knowingly: it is paid for, it is the
 only source that pays while the player does nothing else, and a faster route through the hidden map is
 exactly what the purchase buys. What keeps it from being only that is the contact bucket, which refills — a
-centre standing over a mapped campaign still has the enemy's movements to report.
+center standing over a mapped campaign still has the enemy's movements to report.
 
 Side missions are uncapped *and* unrolled. The old design put a campaign-wide throttle in front of them, so a
 mission completed during another source's cooldown paid nothing and said nothing about why; worse, the roll
@@ -327,7 +327,7 @@ worse value than the one below it, and the top two were never worth buying. The 
 what the levels cost, so the ladder reads as an investment rather than a tax.
 
 A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays both halves
-on the same terms every other source gets: one hidden position, and whatever OPCOM has moving. The centre is a faucet, never a
+on the same terms every other source gets: one hidden position, and whatever OPCOM has moving. The center is a faucet, never a
 channel of its own — giving it private payouts is how "one place decides what intel is worth" stops being
 true.
 
