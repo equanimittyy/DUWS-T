@@ -49,7 +49,7 @@ while {true} do {
         };
         // BLUFOR task-force upkeep rides this tick rather than a timer of its own; last, so a fault costs OPCOM nothing.
         "taskforces" call _enter; call fnc_taskforce_tick;
-        // The Intelligence Centre's faucet, for the same reason and after it: the contacts it plots are read off
+        // The Intelligence Center's faucet, for the same reason and after it: the contacts it plots are read off
         // this loop's own tasking store, so it rolls on the clock that moved them. Odds are the levels bought, and
         // a hit pays through the one intel payout point rather than a channel of its own. Silent on a dry pool --
         // a support standing for hours cannot report "nothing" each time it rolls, where a player who searched a

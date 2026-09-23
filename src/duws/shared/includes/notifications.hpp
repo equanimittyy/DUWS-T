@@ -478,7 +478,7 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_GARAGE4";
     };
 
-    // The four Intelligence Centre rungs wear the head glyph the laser designator item wears: the
+    // The four Intelligence Center rungs wear the head glyph the laser designator item wears: the
     // closest stock icon to an observer, and what the centre buys is being told where the enemy is.
     class unlock_intel1 : SupportUnlock
     {

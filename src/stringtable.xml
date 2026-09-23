@@ -4316,20 +4316,20 @@
                 <English>BLUFOR has upgraded to Vehicle Garage IV</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_INTEL1">
-                <Original>BLUFOR has upgraded to Intelligence Centre I</Original>
-                <English>BLUFOR has upgraded to Intelligence Centre I</English>
+                <Original>BLUFOR has upgraded to Intelligence Center I</Original>
+                <English>BLUFOR has upgraded to Intelligence Center I</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_INTEL2">
-                <Original>BLUFOR has upgraded to Intelligence Centre II</Original>
-                <English>BLUFOR has upgraded to Intelligence Centre II</English>
+                <Original>BLUFOR has upgraded to Intelligence Center II</Original>
+                <English>BLUFOR has upgraded to Intelligence Center II</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_INTEL3">
-                <Original>BLUFOR has upgraded to Intelligence Centre III</Original>
-                <English>BLUFOR has upgraded to Intelligence Centre III</English>
+                <Original>BLUFOR has upgraded to Intelligence Center III</Original>
+                <English>BLUFOR has upgraded to Intelligence Center III</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_INTEL4">
-                <Original>BLUFOR has upgraded to Intelligence Centre IV</Original>
-                <English>BLUFOR has upgraded to Intelligence Centre IV</English>
+                <Original>BLUFOR has upgraded to Intelligence Center IV</Original>
+                <English>BLUFOR has upgraded to Intelligence Center IV</English>
             </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
@@ -6804,21 +6804,21 @@
                 <Original>Vehicle Garage IV</Original>
                 <English>Vehicle Garage IV</English>
             </Key>
-            <Key ID="STR_DUWS_T_intel_centre_1">
-                <Original>Intelligence Centre I</Original>
-                <English>Intelligence Centre I</English>
+            <Key ID="STR_DUWS_T_intel_center_1">
+                <Original>Intelligence Center I</Original>
+                <English>Intelligence Center I</English>
             </Key>
-            <Key ID="STR_DUWS_T_intel_centre_2">
-                <Original>Intelligence Centre II</Original>
-                <English>Intelligence Centre II</English>
+            <Key ID="STR_DUWS_T_intel_center_2">
+                <Original>Intelligence Center II</Original>
+                <English>Intelligence Center II</English>
             </Key>
-            <Key ID="STR_DUWS_T_intel_centre_3">
-                <Original>Intelligence Centre III</Original>
-                <English>Intelligence Centre III</English>
+            <Key ID="STR_DUWS_T_intel_center_3">
+                <Original>Intelligence Center III</Original>
+                <English>Intelligence Center III</English>
             </Key>
-            <Key ID="STR_DUWS_T_intel_centre_4">
-                <Original>Intelligence Centre IV</Original>
-                <English>Intelligence Centre IV</English>
+            <Key ID="STR_DUWS_T_intel_center_4">
+                <Original>Intelligence Center IV</Original>
+                <English>Intelligence Center IV</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>

@@ -42,13 +42,13 @@ fnc_support_catalogue = {
 		["garage3",   "PERM", 40, "support_garage3_available",     "STR_DUWS_T_garage_exp3_row",      "",           false, 15],
 		["garage4",   "PERM", 50, "support_garage4_available",     "STR_DUWS_T_garage_exp4_row",      "",           false, 25],
 
-		// Intelligence Centre: each level raises the odds of the OPCOM tick's intel roll
+		// Intelligence Center: each level raises the odds of the OPCOM tick's intel roll
 		// (server/warcom/opcom/belief/fnc_opcom_perception_run.sqf), which pays through the one intel
 		// payout point. No comm item -- the centre runs on that clock, so there is nothing to fire.
-		["intel1",    "PERM", 10, "support_intel1_available",      "STR_DUWS_T_intel_centre_1",       "",           false],
-		["intel2",    "PERM", 20, "support_intel2_available",      "STR_DUWS_T_intel_centre_2",       "",           false,  5],
-		["intel3",    "PERM", 40, "support_intel3_available",      "STR_DUWS_T_intel_centre_3",       "",           false, 15],
-		["intel4",    "PERM", 50, "support_intel4_available",      "STR_DUWS_T_intel_centre_4",       "",           false, 25],
+		["intel1",    "PERM", 10, "support_intel1_available",      "STR_DUWS_T_intel_center_1",       "",           false],
+		["intel2",    "PERM", 15, "support_intel2_available",      "STR_DUWS_T_intel_center_2",       "",           false, 15],
+		["intel3",    "PERM", 25, "support_intel3_available",      "STR_DUWS_T_intel_center_3",       "",           false, 20],
+		["intel4",    "PERM", 30, "support_intel4_available",      "STR_DUWS_T_intel_center_4",       "",           false, 25],
 
 		// Slot only -- the team already paid for Mobile HQ at the permanent row, so this costs 0 CP.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
@@ -108,7 +108,7 @@ fnc_support_defs = {
 		if (_key == "garage2" && {!(["support_garage1_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "garage3" && {!(["support_garage2_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "garage4" && {!(["support_garage3_available"] call fnc_support_owned)}) then { _keep = false };
-		// Intelligence Centre levels unlock in order too, on the radio ladder's reasoning: the roll
+		// Intelligence Center levels unlock in order too, on the radio ladder's reasoning: the roll
 		// odds climb one step at a time rather than being bought outright at the top.
 		if (_key == "intel2" && {!(["support_intel1_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "intel3" && {!(["support_intel2_available"] call fnc_support_owned)}) then { _keep = false };
@@ -130,7 +130,7 @@ fnc_support_cost_bracket = {
 // AP tier per support key; unlisted = tier 1 (always available). Mirrors the vehicle tier rungs, so
 // radio towers and garage expansions are earned in lockstep with the strikes/vehicles their tier unlocks.
 DUWS_support_tiers = [
-	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
+	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
 	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3], ["offensive_heavy", 3],
 	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4], ["intel3", 4],
 	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5], ["intel4", 5]

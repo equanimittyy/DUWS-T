@@ -881,7 +881,7 @@ DUWS_econ_period = 1800;
 // OPFOR's last economy payout, 0 until the first, so OPCOM sets no savings goal before it knows its income.
 WARCOM_opfor_lastIncome = 0;
 
-// The Intelligence Centre's odds per level owned, rolled once per OPCOM tick, and how long a plotted
+// The Intelligence Center's odds per level owned, rolled once per OPCOM tick, and how long a plotted
 // OPCOM contact stands before its markers are pulled. Server-only: both the roll and the markers are
 // server work.
 //
