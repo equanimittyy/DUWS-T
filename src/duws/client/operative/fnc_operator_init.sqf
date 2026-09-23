@@ -9,7 +9,7 @@ duws_operator_list=[
 [0.33,0.29,0.33,0.37,0.41,0.21,"Medic","Ready","Julius 'Jester' Graves","jester",blufor_SPECOPS_MEDIC_X,"H_Bandanna_camo",0,50],		
 [0.64,0.26,0.55,0.25,0.46,0.31,"Marksman","Ready","Gregory Rasputin","rasputin",blufor_SPECOPS_MARK_X,"H_Watchcap_blk",0,50],			
 [0.68,0.22,0.58,0.28,0.31,0.21,"Sniper","Ready","Darius Lupea","lupey",blufor_SPECOPS_SNIPER_X,"H_Booniehat_grn",0,50],					
-[0.38,0.41,0.42,0.29,0.33,0.36,"Sabotuer (EXP)","Ready","S.D. 'Snake' Plissken","snake",blufor_SPECOPS_EXP_X,"H_MilCap_gry",0,50],		
+[0.38,0.41,0.42,0.29,0.33,0.36,"Saboteur (EXP)","Ready","S.D. 'Snake' Plissken","snake",blufor_SPECOPS_EXP_X,"H_MilCap_gry",0,50],		
 [0.31,0.33,0.37,0.36,0.41,0.29,"Engineer","Ready","Timo 'Joker' Jokinen","joker",blufor_SPECOPS_ENG_X,"H_Watchcap_blk",0,50],			
 [0.58,0.40,0.49,0.41,0.24,0.44,"Rifle Scout","Ready","Mario 'Spook' Lopez","spook",blufor_SPECOPS_X,"H_Booniehat_grn",0,50],			
 [0.49,0.35,0.30,0.36,0.44,0.51,"Grenadier","Ready","Frederick Krueger","freddy",blufor_SPECOPS_GL_X,"H_Cap_oli_hs",0,50],				
@@ -19,7 +19,7 @@ duws_operator_list=[
 [0.40,0.21,0.32,0.39,0.45,0.21,"Medic","Ready","Anton Kozlowski","kozlowski",blufor_SPECOPS_MEDIC_X,"H_HelmetB_camo",0,50],				
 [0.62,0.25,0.57,0.29,0.30,0.27,"Marksman","Ready","Raymond Washington","rayray",blufor_SPECOPS_MARK_X,"H_Shemag_olive_hs",0,50],		
 [0.41,0.45,0.68,0.27,0.30,0.24,"Sniper","Ready","Ernst Blofeld","blofeld",blufor_SPECOPS_SNIPER_X,"H_Beret_red",0,50],					
-[0.45,0.32,0.55,0.66,0.61,0.24,"Sabotuer (EXP)","Ready","Francisco 'Scar' Scaramanga","scar",blufor_SPECOPS_EXP_X,"H_Beret_02",0,50],	
+[0.45,0.32,0.55,0.66,0.61,0.24,"Saboteur (EXP)","Ready","Francisco 'Scar' Scaramanga","scar",blufor_SPECOPS_EXP_X,"H_Beret_02",0,50],	
 [0.47,0.33,0.48,0.59,0.55,0.36,"Engineer","Ready","Victor Kolesov","kolesov",blufor_SPECOPS_ENG_X,"H_MilCap_gry",0,50]				
 ];
 
@@ -32,16 +32,15 @@ duws_operator_list=[
 4: communications
 5: reload speed
 6: role
-7: status (always "Ready")
+7: status
 8: name
 9: CfgIdentity class
 10: soldier class
 11: hat
-12: time before heal
+12: seconds before heal
 13: available spendable points
 */
 
-// init functions for adding skills
 DUWS_operator_add_aim = {
 	_selected_index = lbCurSel 1500;
 	_selected_soldier = duws_operator_list select _selected_index;	

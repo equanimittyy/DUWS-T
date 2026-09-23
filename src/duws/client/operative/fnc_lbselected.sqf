@@ -14,7 +14,7 @@ _selected_soldier_reload = (_selected_soldier select 5)*100;
 _selected_soldier_spendable_pts = (_selected_soldier select 13);
 
 
-_selected_soldier_timeheal = round ((_selected_soldier select 12)/60);
+_selected_soldier_timeheal = _selected_soldier select 12;
 
 
 _selected_soldier_role = _selected_soldier select 6;
@@ -31,7 +31,7 @@ _selected_soldier_status = _selected_soldier select 7;
 
  ctrlSetText [1014, format["%1",_selected_soldier_role]];
  ctrlSetText [1013, format["%1",_selected_soldier_status]];
- ctrlSetText [1016, format["%1 minutes",_selected_soldier_timeheal]];
+ ctrlSetText [1016, format["%1 seconds",_selected_soldier_timeheal]];
  
 
 private _statusColor = [1, 1, 1, 1];
@@ -43,13 +43,13 @@ switch (_selected_soldier_status) do
   };
   
   case "Injured": {
-	buttonSetAction [1601, "hint ""You can't deploy this operative, he must be fully healed first"""]; 
+	buttonSetAction [1601, "hint ""This operative must be fully healed before deploying."""]; 
 	ctrlSetText [1601, "CANNOT DEPLOY"];	
 	_statusColor = [1, 0, 0, 1];
   };
   
   case "Operating": {
-	buttonSetAction [1601, "hint ""This operative is already active in this theatre of operation"""]; 
+	buttonSetAction [1601, "hint ""This operative is already deployed."""]; 
 	ctrlSetText [1601, "ALREADY DEPLOYED"];	
 	_statusColor = [0, 1, 0, 1];
   };

@@ -55,7 +55,7 @@ duws_operator_list select lbCurSel 1500 set [7,"Operating"];
 ctrlSetText [1013, "Operating"];
 ((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor [0, 1, 0, 1];
 
-buttonSetAction [1601, "hint ""This operative is already active in this theatre of operation"""]; 
+buttonSetAction [1601, "hint ""This operative is already deployed."""]; 
 ctrlSetText [1601, "ALREADY DEPLOYED"];	
 
 

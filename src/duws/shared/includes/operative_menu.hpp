@@ -157,7 +157,7 @@ class operative_reload_txt: RscTextWhite
 	y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
 	w = 6.5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
-	tooltip = "How quickly the operative reload and switch weapons";
+	tooltip = "How quickly the operative reloads and switches weapons";
 };
 class operative_aiming_value: RscTextWhite
 {
@@ -217,7 +217,7 @@ class operative_reload_value: RscTextWhite
 	y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
 	w = 5 * GUI_GRID_W;
 	h = 1 * GUI_GRID_H;
-	tooltip = "How quickly the operative reload and switch weapons";
+	tooltip = "How quickly the operative reloads and switches weapons";
 };
 class operative_role_frame: RscFrame
 {
