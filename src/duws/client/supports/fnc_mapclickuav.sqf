@@ -17,7 +17,7 @@ if (commandpointsblu1 < _cost) exitWith {
 // _cost rides the binary form so the handler can read the price out of _this. It releases
 // before closing the map, because the banner the release clears lives on the map display. The
 // request/copy/tasking exchange all run server-side in fnc_uav_scanner once this hands off.
-if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
+if (!(["UAV", "[_pos,750,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	clicked=true;
 	['UAV'] call fnc_mapclick_release;
 	openMap false", _cost] call fnc_mapclick_claim)) exitWith {

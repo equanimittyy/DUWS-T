@@ -49,7 +49,7 @@ switch (VERSION_X) do {
 		_vec =[random [-1,0,1], random [-1,0,1], 0];
 		_dist = 200;
 		_spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
-		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+500];
+		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+750];
 		_grouptype = ["B_UAV_02_dynamicLoadout_F"];
 	};
 };
@@ -63,6 +63,7 @@ _pilot disableAI "Target";
 _pilot disableAI "AUTOTARGET";
 _group setCombatMode "BLUE";
 _vehicle engineOn true;
+_vehicle flyInHeight 750;
 
 
 onStation = false;
@@ -76,7 +77,7 @@ _wp1 setWaypointStatements ["true", "onStation = true"];
 _wp2 = _group addWaypoint [_centerPos, 0];
 _wp2 setWaypointType "LOITER";
 _wp2 setWaypointBehaviour "CARELESS";
-_wp2 setWaypointLoiterRadius 400;
+_wp2 setWaypointLoiterRadius 600;
 
 sleep 8;
 switch (VERSION_X) do {
@@ -86,8 +87,6 @@ switch (VERSION_X) do {
 };
 
 waitUntil {sleep 0.5;onStation||!alive _vehicle};
-// The UAV is killable, so death before it reaches station is a real path:
-// report the loss and tidy the search-area marker and dead group.
 if (!alive _vehicle) exitWith {
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
 	{ deleteVehicle _x } forEach units _group;
@@ -101,7 +100,7 @@ _message = localize "STR_DUWS_T_uavscancall";
 sleep 5;
 
 
-// Live recon feed. Two EmptyDetector triggers keep a continuously-updated PRESENT
+// Live recon feed. Three EmptyDetector triggers keep a continuously-updated PRESENT
 // list of each side in the scan area, so the position markers can be refreshed on a
 // fixed cadence and follow units as they move, rather than freezing at one arrival
 // snapshot. The feed runs until the drone is destroyed or its on-station time ends;
@@ -120,6 +119,12 @@ _trgwest setTriggerArea [_checkedRadius, _checkedRadius, 0, false];
 _trgwest setTriggerActivation ["WEST", "PRESENT", false];
 _trgwest setTriggerStatements ["this", "", ""];
 _trgwest setTriggerTimeout [0, 0, 0, true];
+
+_trgguer = createTrigger ["EmptyDetector", _centerPos];
+_trgguer setTriggerArea [_checkedRadius, _checkedRadius, 0, false];
+_trgguer setTriggerActivation ["GUER", "PRESENT", false];
+_trgguer setTriggerStatements ["this", "", ""];
+_trgguer setTriggerTimeout [0, 0, 0, true];
 
 // Let the engine evaluate the fresh triggers once so the first pass has a real
 // PRESENT list; without this the arrival tick reads empty.
@@ -147,7 +152,7 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 			};
 			_seen pushBack _mk;
 		} forEach _units;
-	} forEach [[list _trg, "e", "ColorRed"], [list _trgwest, "w", "ColorBlue"]];
+	} forEach [[list _trg, "e", "ColorRed"], [list _trgwest, "w", "ColorBlue"], [list _trgguer, "i", "ColorGUER"]];
 	{
 		if !(_x in _seen) then { deleteMarker _x; _reconMarkers deleteAt _x };
 	} forEach keys _reconMarkers;
@@ -156,14 +161,12 @@ while {alive _vehicle && _elapsed < _scanDuration} do {
 	_elapsed = _elapsed + _scanInterval;
 };
 
-// Feed ended (drone destroyed or station time up): pull the live markers, the search
-// circle and the triggers now -- the scan is over however the drone leaves.
 { deleteMarker _x } forEach keys _reconMarkers;
 deleteMarker str(_markername);
 deleteVehicle _trg;
 deleteVehicle _trgwest;
+deleteVehicle _trgguer;
 
-// Shot down before the feed ended: Overlord reports the loss and the wreck/group go now.
 if (!alive _vehicle) exitWith {
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
 	{ deleteVehicle _x } forEach units _group;
