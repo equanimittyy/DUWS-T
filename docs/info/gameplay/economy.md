@@ -149,7 +149,7 @@ One catalogue, `fnc_support_catalogue` in `client/supports/fnc_supports_init.sqf
 request menu's support list in display order, and the `PERM`/`CONS` column decides everything the two
 mechanisms differ in:
 
-| | Permanent (17 rows) | Consumable (18 rows) |
+| | Permanent (19 rows) | Consumable (18 rows) |
 |---|---|---|
 | Bought for | the whole team, once | the buyer alone |
 | Slot | none | one of `support_max_slots` |
@@ -167,8 +167,12 @@ before.
 
 Some consumable rows wait on a permanent one. `fnc_support_defs` hides the supply drop, the vehicle
 drop, the helicopter taxi, the heavy heli vehicle transport and the boat taxi until the team owns
-`logistics` (Logistical Supports, 10 CP). It hides the Mobile HQ designation until the team owns the
-Mobile HQ. It hides the rally point from any player outside `Squad_Leaders`.
+`logistics` (Logistical Supports, 10 CP). It hides the mortar and the mortar smoke until the team
+owns `offensive_light` (Light Supports, 10 CP and 10 AP). It hides the JDAM, the laser-guided
+bomb, the artillery, the cluster bomb, the napalm and both High Command air rows until the team owns
+`offensive_heavy` (Heavy Supports, 25 CP and 30 AP). The heavy row itself stays hidden until
+the team owns the light one. It hides the Mobile HQ designation until the team owns the Mobile HQ. It
+hides the rally point from any player outside `Squad_Leaders`.
 
 **Row order is the catalogue's, not a literal.** Both the list build (`fnc_support_list_fill`) and
 the buy/refund handler read the same array and index it the same way, and the listbox keeps a

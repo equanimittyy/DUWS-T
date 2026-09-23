@@ -10,9 +10,8 @@
 // the menu build and buy/refund handler use the filtered fnc_support_defs below.
 //
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
-// Column 8 is the AP half of a dual price (indirect-fire/air-strike rows, and HALO plus the upper
-// two radio towers among the permanent unlocks). Absent (reads as 0 via `param [7, 0]`) elsewhere,
-// which pays CP only.
+// Column 8 is the AP half of a dual price (indirect-fire/air-strike rows and the advanced permanent
+// unlocks). Absent (reads as 0 via `param [7, 0]`) elsewhere, which pays CP only.
 //
 // A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>.
 fnc_support_catalogue = {
@@ -26,6 +25,9 @@ fnc_support_catalogue = {
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false],
 		["logistics", "PERM", 10, "support_logistics_available",   "STR_DUWS_T_logistics_row",        "",           false],
+		["offensive_light", "PERM", 10, "support_offensive_light_available", "STR_DUWS_T_offensive_light_row", "", false, 10],
+		// Insurgent-blocked because every strike it opens is: in that mode it would buy nothing.
+		["offensive_heavy", "PERM", 25, "support_offensive_heavy_available", "STR_DUWS_T_offensive_heavy_row", "", true,  30],
 
 		// Radio towers: each tier a permanent +1 to BLUFOR rep drift (DUWS_bluforRadioLevel). No comm
 		// item -- owned outright once bought, mirroring the enemy's amplifier without a structure.
@@ -89,6 +91,12 @@ fnc_support_defs = {
 		if (_key in ["supply", "veh_drop", "helotaxi", "helolift", "boattaxi"] && {!(["support_logistics_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
+		if (_key in ["mortar", "mortar_smoke", "offensive_heavy"] && {!(["support_offensive_light_available"] call fnc_support_owned)}) then {
+			_keep = false;
+		};
+		if (_key in ["jdam", "laser", "arty", "cluster", "napalm", "hcAttChop", "hcCAS"] && {!(["support_offensive_heavy_available"] call fnc_support_owned)}) then {
+			_keep = false;
+		};
 		if (_key == "rally" && {!((vehicleVarName player) in Squad_Leaders)}) then { _keep = false };
 		// Radio tiers unlock in order: each hidden until the one below it is owned, so the player cannot
 		// skip to III and the drift amplifier only ever climbs one step at a time.
@@ -122,8 +130,8 @@ fnc_support_cost_bracket = {
 // AP tier per support key; unlisted = tier 1 (always available). Mirrors the vehicle tier rungs, so
 // radio towers and garage expansions are earned in lockstep with the strikes/vehicles their tier unlocks.
 DUWS_support_tiers = [
-	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2],
-	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3],
+	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
+	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3], ["offensive_heavy", 3],
 	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4], ["intel3", 4],
 	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5], ["intel4", 5]
 ];

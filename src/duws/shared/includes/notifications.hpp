@@ -411,6 +411,18 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_LOGISTICS";
     };
 
+    class unlock_offensive_light : SupportUnlock
+    {
+        iconPicture = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\mortar_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_OFFENSIVE_LIGHT";
+    };
+
+    class unlock_offensive_heavy : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\CommunicationMenu\cas_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_OFFENSIVE_HEAVY";
+    };
+
     // The combined vehicle depot (repair + recycle) wears the engine's repair action icon: no stock
     // glyph depicts recycling, and repair is the closer of the pair. Class name matches the "repair"
     // support key's successor -- the perm-grant card is raised as unlock_<key>.

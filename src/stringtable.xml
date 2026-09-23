@@ -4275,6 +4275,14 @@
                 <Original>BLUFOR has unlocked Logistical Supports</Original>
                 <English>BLUFOR has unlocked Logistical Supports</English>
             </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_OFFENSIVE_LIGHT">
+                <Original>BLUFOR has unlocked Light Supports</Original>
+                <English>BLUFOR has unlocked Light Supports</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_OFFENSIVE_HEAVY">
+                <Original>BLUFOR has unlocked Heavy Supports</Original>
+                <English>BLUFOR has unlocked Heavy Supports</English>
+            </Key>
             <Key ID="STR_DUWS_T_UNLOCK_REPAIR">
                 <Original>BLUFOR has unlocked the Vehicle Depot</Original>
                 <English>BLUFOR has unlocked the Vehicle Depot</English>
@@ -6760,6 +6768,14 @@
                 <Original>Logistical Supports</Original>
                 <English>Logistical Supports</English>
             </Key>
+            <Key ID="STR_DUWS_T_offensive_light_row">
+                <Original>Light Supports</Original>
+                <English>Light Supports</English>
+            </Key>
+            <Key ID="STR_DUWS_T_offensive_heavy_row">
+                <Original>Heavy Supports</Original>
+                <English>Heavy Supports</English>
+            </Key>
             <Key ID="STR_DUWS_T_radio_tower_1">
                 <Original>Radio Tower I</Original>
                 <English>Radio Tower I</English>
@@ -8047,6 +8063,14 @@
                 <Original>Unlocks the supply drop, vehicle drop, helicopter taxi, heavy heli vehicle transport and boat taxi.</Original>
                 <English>Unlocks the supply drop, vehicle drop, helicopter taxi, heavy heli vehicle transport and boat taxi.</English>
             </Key>
+            <Key ID="STR_DUWS_T_sdesc_offensive_light">
+                <Original>Unlocks the mortar and mortar smoke.</Original>
+                <English>Unlocks the mortar and mortar smoke.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_offensive_heavy">
+                <Original>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS; requires Light Supports.</Original>
+                <English>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS; requires Light Supports.</English>
+            </Key>
             <Key ID="STR_DUWS_T_sdesc_radio1">
                 <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</Original>
                 <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</English>
@@ -8120,40 +8144,40 @@
                 <English>A boat team moves your squad (can be buggy); requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_arty">
-                <Original>Off-map 155mm guns shell your mark for one minute.</Original>
-                <English>Off-map 155mm guns shell your mark for one minute.</English>
+                <Original>Off-map 155mm guns shell your mark for one minute; requires Heavy Supports.</Original>
+                <English>Off-map 155mm guns shell your mark for one minute; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_mortar">
-                <Original>An off-map mortar team shells your mark for one minute.</Original>
-                <English>An off-map mortar team shells your mark for one minute.</English>
+                <Original>An off-map mortar team shells your mark for one minute; requires Light Supports.</Original>
+                <English>An off-map mortar team shells your mark for one minute; requires Light Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_mortar_smoke">
-                <Original>An off-map mortar team lays a smoke screen on your mark.</Original>
-                <English>An off-map mortar team lays a smoke screen on your mark.</English>
+                <Original>An off-map mortar team lays a smoke screen on your mark; requires Light Supports.</Original>
+                <English>An off-map mortar team lays a smoke screen on your mark; requires Light Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_jdam">
-                <Original>One JDAM bomb on your mark.</Original>
-                <English>One JDAM bomb on your mark.</English>
+                <Original>One JDAM bomb on your mark; requires Heavy Supports.</Original>
+                <English>One JDAM bomb on your mark; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_laser">
-                <Original>One laser-guided bomb; keep the designator on target throughout.</Original>
-                <English>One laser-guided bomb; keep the designator on target throughout.</English>
+                <Original>One laser-guided bomb; keep the designator on target throughout; requires Heavy Supports.</Original>
+                <English>One laser-guided bomb; keep the designator on target throughout; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_cluster">
-                <Original>One Mk.20 cluster bomb for wide-area damage on your mark.</Original>
-                <English>One Mk.20 cluster bomb for wide-area damage on your mark.</English>
+                <Original>One Mk.20 cluster bomb for wide-area damage on your mark; requires Heavy Supports.</Original>
+                <English>One Mk.20 cluster bomb for wide-area damage on your mark; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_napalm">
-                <Original>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding.</Original>
-                <English>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding.</English>
+                <Original>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding; requires Heavy Supports.</Original>
+                <English>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_hcAttChop">
-                <Original>Adds one attack helicopter to your High Command; no recall until it is destroyed.</Original>
-                <English>Adds one attack helicopter to your High Command; no recall until it is destroyed.</English>
+                <Original>Adds one attack helicopter to your High Command; no recall until it is destroyed; requires Heavy Supports.</Original>
+                <English>Adds one attack helicopter to your High Command; no recall until it is destroyed; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_hcCAS">
-                <Original>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed.</Original>
-                <English>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed.</English>
+                <Original>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed; requires Heavy Supports.</Original>
+                <English>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_paradrop">
                 <Original>An infantry squad drops around you and joins your squad.</Original>
