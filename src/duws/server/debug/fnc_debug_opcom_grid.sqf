@@ -60,6 +60,7 @@ private _bel = [];
 // the icon still gives the domain silhouette. ID is the tasking id, keeping two of one kind apart. [*] = a live
 // unit (pos frozen at its de-virt cell); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for one.
 private _tasks = [];
+private _wps = [];
 {
     private _mt = _x get "moveType";
     private _icon = switch (_mt) do {
@@ -77,9 +78,15 @@ private _tasks = [];
     private _tag = format ["%1%2:%3%4", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code, toUpper (_x get "order"), _flag];
     private _p = _x get "pos";
     _tasks pushBack [[_p select 0, _p select 1], _icon, _tag];
+    // From the current leg: a walked leg sits behind the unit box and only clutters the chain.
+    private _route = _x get "route";
+    for "_i" from (_x get "leg") to (count _route - 1) do {
+        private _rp = _route select _i;
+        _wps pushBack [_rp select 0, _rp select 1];
+    };
 } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
 
-["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings -> %4", count _cells, count _bel, count _tasks, _requester]] call fnc_log;
+["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings, %4 waypoints -> %5", count _cells, count _bel, count _tasks, count _wps, _requester]] call fnc_log;
 
 // Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
-[_cells, _bel, _cell, _tasks] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
+[_cells, _bel, _cell, _tasks, _wps] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
