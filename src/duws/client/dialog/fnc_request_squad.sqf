@@ -10,7 +10,7 @@ if (_data == "") exitWith {hint localize "STR_DUWS_T_9607znvh"};
 _parts = _data splitString ":";
 _row = [_parts select 1] call DUWS_fnc_squadRow;
 if (_row isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};
-_row params ["", "_globalName", "_HCsquadtype", "", "_tier"];
+_row params ["", "_globalName", "_HCsquadtype", "_labelKey", "_tier"];
 
 _squad = missionNamespace getVariable [_globalName, []];
 if (count _squad < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
@@ -40,7 +40,4 @@ if !(_bought) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 // hcSetGroup back here, since that needs this machine's own player.
 [_spawnPos, _grouptype, _HCsquadtype, player] remoteExec ["fnc_HCsquad_spawn", 2];
 
-hint localize "STR_DUWS_T_gu6cbc5f";
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+hint format [localize "STR_DUWS_T_PURCHASED_UNIT", localize _labelKey];

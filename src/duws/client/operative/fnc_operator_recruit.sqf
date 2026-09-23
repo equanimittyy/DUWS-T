@@ -46,6 +46,7 @@ _soldier setskill ["commanding",_selected_soldier_comms];
 // The soldier's stored hat (index 11 of duws_operator_list) is not applied; recruited operatives spawn bare-headed.
 
 {[_x] joinSilent (group player)} forEach units _group;
+hint format [localize "STR_DUWS_T_PURCHASED_UNIT", _selected_soldier_name];
 
 _selected_index = lbCurSel 1500;
 lbSetColor [1500, _selected_index, [0, 1, 0, 1]];

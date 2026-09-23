@@ -6950,19 +6950,9 @@
                 <Original>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</Original>
                 <English>All available intel from the marked position is on your map. The UAV is breaking station and returning to base. Allseer, out.</English>
             </Key>
-            <Key ID="STR_DUWS_T_unitready">
-                <Spanish>"Overlord 1-1" al Action Squad, refuerzos de personal han llegado.</Spanish>
-                <German>"Overlord 1-1" an Action Squad, Personalverstärkung ist eingetroffen.</German>
-                <Chinesesimp>行动组，人员补充已经到达。</Chinesesimp>
-                <Original>To Alpha 1-1, reinforcements on site.</Original>
-                <English>To Alpha 1-1, reinforcements on site.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_squadready">
-                <Spanish>Action Squad, este es "Overlord 1-1": nuevas unidades de combate están acercándose.</Spanish>
-                <German>Action Squad, hier ist "Overlord 1-1": neue Kampfkräfte kommen ein.</German>
-                <Chinesesimp>行动组。新的作战单位正在进场。</Chinesesimp>
-                <Original>Alpha 1-1. New combat elements inbound.</Original>
-                <English>Alpha 1-1. New combat elements inbound.</English>
+            <Key ID="STR_DUWS_T_PURCHASED_UNIT">
+                <Original>Purchased unit:\n\n%1</Original>
+                <English>Purchased unit:\n\n%1</English>
             </Key>
             <Key ID="STR_DUWS_T_iv3s5xlc">
                 <Spanish>Un vehículo de emergencia ha sido soltado cerca de su locación</Spanish>
