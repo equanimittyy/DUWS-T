@@ -265,6 +265,17 @@ so it moves no faster than a truck delivers.
   standalone gun nest answers. It leans on the traffic layer harder than any other build — a field on a road
   nobody drives is worth nothing, and one on the route BLUFOR take every trip is the cheapest ground denial
   OPCOM can buy.
+- **The mix steers the build types toward a target share.** Every Build and Minefield Value above is × its type's
+  mix, (target + 1) ÷ (standing + 1). The target is the type's share × every hardpoint of the types in the row,
+  seeded ones and builds on their way included; the standing count is the type's own. The share is the type's
+  weight over the sum of its archetype's row of `OPCOM_HP_MIX`, so 1 in every type spreads evenly and a 2 makes a
+  type twice as common as a 1. Balanced's row is MG 2, roadblock 2, AT 1, AA 1, OP 1, GMG 1, and AT and AP
+  minefield 0.5 each. A minefield is counted by variant, which OPCOM records for each belt it lays; a field it did
+  not lay carries no variant on record and stays out of the mix, though it counts against the caps. The mix reads 1
+  at the target, below 1 past it and above 1 short of it, so a cheap type cannot fill the caps ahead of the rest.
+  It tilts the pick and never sets a quota: a type past its share still builds where its Value is high enough. The
+  +1 keeps a type with none standing finite. A type outside the row reads 1, and random mode ignores Value, so it
+  ignores the mix too.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
   not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every
@@ -578,9 +589,9 @@ init and through the Build actions.
 existing in-zone draw; a standalone one takes its spot from the shared terrain siting around the band cell its truck
 delivers to (`fnc_hardpoint_spawn_sited`). Every unlocked type is its own action row and no type is rolled before the
 pick, so the pick draws "an AT nest" or "a battery", never "a build", and the archetype and the score weigh one
-against the other. The weight tables —
-`DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` for the standalone rows — are the
-per-type prior the 4C.1 weight multiplies; campaign generation still rolls them. An asset hardpoint is its own
+against the other. The per-type prior the 4C.1 weight multiplies is the mix (`OPCOM_HP_MIX`, [§Value](#value));
+campaign generation rolls its own weight tables, `DUWS_hardpointWeightZone` for a ring and `DUWS_hardpointWeightSolo`
+for the standalone lines. An asset hardpoint is its own
 candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
 minefield is laid, not built: a belt of 50 m squares per action (`fnc_hardpoint_minefield_grid`), AT and AP each
 their own candidate, with the size rolled onto the target so the price the pick weighs is the belt's own footprint.
@@ -697,6 +708,10 @@ table; further leans (armour) become rows. 4C.1 builds the setting and the table
 | Defensive | Fortify, Reinforce, Build, Recruit, Intercept |
 | Balanced | no strong lean — the baseline |
 | Aggressive | Attack, Rapport; leaves ground thin |
+
+Each archetype carries its own row of `OPCOM_HP_MIX` ([§Value](#value)), read at `DUWS_opcom_archetype`. Only
+Balanced's row stands until 4C.1 adds the others and sets the archetype from the campaign setting; an archetype
+with no row builds with no mix.
 
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
