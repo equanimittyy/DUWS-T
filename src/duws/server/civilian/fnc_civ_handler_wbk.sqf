@@ -101,7 +101,7 @@ if (_mode == "spawn") then {
     // civilian towns dropped, because a horde that thins out as it is cut down is the mode. It
     // takes the density setting unscaled: the default lands within a handful of the retired
     // per-visit cap, so the crowd size a WBK town opens with is unchanged.
-    private _density = missionNamespace getVariable ["civ_density", 15];
+    private _density = missionNamespace getVariable ["civ_density", 10];
     private _spawnCount = [_density, _locIndex] call fnc_civ_liveTarget;
     private _remaining = (_targetPop - _spawnCount) max 0;
     missionNamespace setVariable [format ["civ_remaining_%1", _locIndex], _remaining];

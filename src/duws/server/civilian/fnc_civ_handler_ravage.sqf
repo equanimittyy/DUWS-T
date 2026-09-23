@@ -122,7 +122,7 @@ if (_mode == "spawn") then {
     ([_locIndex, _centerPos, _triggerRadius, "CIV"] call fnc_civ_mode_spawnGate) params ["_gateOk", "_targetPop"];
     if (!_gateOk) exitWith {};
 
-    private _density = missionNamespace getVariable ["civ_density", 15];
+    private _density = missionNamespace getVariable ["civ_density", 10];
     private _spawnCount = [_density, _locIndex] call fnc_civ_liveTarget;
     if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1: pop %2, live target %3", _locIndex, _targetPop, _spawnCount]] call fnc_log; };
 

@@ -69,7 +69,7 @@ publicVariable "chosen_hq_placement";
 // server_var_init's "none".
 dynamic_weather_enable = false;
 time_of_day = 6;
-civ_density = 15;
+civ_density = 10;
 enable_fast_travel = true;
 ZeusStatus = 1;
 escalation_enabled = true;

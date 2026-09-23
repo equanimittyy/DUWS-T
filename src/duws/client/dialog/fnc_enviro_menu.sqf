@@ -39,7 +39,7 @@ time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
 private _civDensityValues = [5, 10, 15, 20];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
-    if (_x == 15) then { [2102, _index] call _setDefault; };
+    if (_x == 10) then { [2102, _index] call _setDefault; };
 } forEach _civDensityValues;
 
 index_fast_travel_true = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg2"];

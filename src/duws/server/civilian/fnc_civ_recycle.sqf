@@ -39,7 +39,7 @@ private _radius = (missionNamespace getVariable ["civ_radii", []]) param [_locIn
 private _inTown = allPlayers select { alive _x && {_x distance2D _centerPos < _radius} };
 if (_inTown isEqualTo []) exitWith {};
 
-private _density = missionNamespace getVariable ["civ_density", 15];
+private _density = missionNamespace getVariable ["civ_density", 10];
 private _target = [_density, _locIndex] call fnc_civ_liveTarget;
 
 // The crowd goes into the buildings nearest a player, not across the whole disc: a town's radius grows

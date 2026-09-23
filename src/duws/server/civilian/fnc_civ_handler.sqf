@@ -62,7 +62,7 @@ private _fnc_fill = {
     private _civArray = missionNamespace getVariable ["civ_array", []];
     // Read at fill time, so the throttle sees whichever towns are occupied at this moment. It
     // reads occupancy from civ_spawned_<n>, which the poller sets as it dispatches this.
-    private _target = [missionNamespace getVariable ["civ_density", 15], _locIndex] call fnc_civ_liveTarget;
+    private _target = [missionNamespace getVariable ["civ_density", 10], _locIndex] call fnc_civ_liveTarget;
     private _maxOutdoorDist = _radius * 0.8;
     private _outdoorRange = 100 min _maxOutdoorDist;
 

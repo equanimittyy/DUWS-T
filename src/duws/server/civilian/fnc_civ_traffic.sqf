@@ -20,7 +20,7 @@ if (_pool isEqualTo []) exitWith {};
 private _roads = nearestTerrainObjects [_centerPos, ["MAIN ROAD", "ROAD", "TRACK"], _radius max 150, false, true];
 if (_roads isEqualTo []) exitWith {};
 
-private _density = missionNamespace getVariable ["civ_density", 15];
+private _density = missionNamespace getVariable ["civ_density", 10];
 private _nDrive = floor (_density / 5);
 private _nPark  = floor (_density / 2);
 
