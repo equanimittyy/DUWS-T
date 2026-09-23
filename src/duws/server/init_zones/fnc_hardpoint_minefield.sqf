@@ -21,10 +21,10 @@ DUWS_mineSquare = 50;
 
 // A streamed square's mines are made inside the first distance and deleted past the second. The in-ring
 // must cover a vehicle crossing a whole site poll (SITE_TICK, 10 s) at speed, or a driver reaches ground
-// whose mines do not exist yet; the gap between the two is hysteresis, so a man on the edge does not
-// re-lay the same square every pass.
+// whose mines do not exist yet. The 100 m between the two is hysteresis: somebody holding station on that
+// edge would otherwise re-lay and clear the same square every pass.
 DUWS_mineStreamIn = 350;
-DUWS_mineStreamOut = 550;
+DUWS_mineStreamOut = 450;
 
 // [variant, classes, mines per cell]. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
@@ -173,7 +173,10 @@ fnc_hardpoint_minefield_cycle = {
             };
         };
 
-        private _d = if (_players isEqualTo []) then { 1e9 } else { selectMin (_players apply { _x distance2D _c }) };
+        // Walked rather than mapped through apply: a belt is up to 90 squares and this runs every pass,
+        // so an allocation per square to find one number is the loop's whole cost.
+        private _d = 1e9;
+        { private _pd = _x distance2D _c; if (_pd < _d) then { _d = _pd } } forEach _players;
         if (_objs isEqualTo [] && {_plan isNotEqualTo []} && {_d < DUWS_mineStreamIn}) then {
             private _made = [_plan, _key] call fnc_hardpoint_minefield_make;
             // Not JIP-queued: these objects live only while somebody is near, and a queue entry per square

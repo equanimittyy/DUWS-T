@@ -154,7 +154,7 @@ debug spawner's fields register through `fnc_hardpoint_minefield_stream` instead
 is stored as squares of `[centre, plan, objects]`, where the plan is the positions the square still owes
 and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
 hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
-`DUWS_mineStreamOut` (550 m), so a belt costs its stream ring rather than its length. The in-ring covers a
+`DUWS_mineStreamOut` (450 m), so a belt costs its stream ring rather than its length. The in-ring covers a
 vehicle crossing one 10 s site poll at speed. Each pass first prunes every standing square back to the
 mines still armed, dropping a spent mine's position with it, so ground the player cleared stays clear
 across a stow. `fnc_hardpoint_minefield_ring` gives the site radius such a field registers with — half its
