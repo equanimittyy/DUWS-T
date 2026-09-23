@@ -916,5 +916,15 @@ Squad_Leaders = [
 	"player17",
 	"player18",
 	"player19",
-	"player20"
+	"player20",
+	"player21",
+	"player22",
+	"player23",
+	"player24",
+	"player25",
+	"player26",
+	"player27",
+	"player28",
+	"player29",
+	"player30"
 ]; publicVariable "Squad_Leaders";
