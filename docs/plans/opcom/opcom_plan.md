@@ -321,8 +321,9 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   0, 0.5, 0.75, 0.875, so a new hardpoint adds half of what each cell in its reach still lacks. Every type shares
   that reach. A build still siting or on its truck counts, as an asset does
   against its cap, so the siting pass never sends a second truck to ground the first is still driving to.
-- **The grid overlay shows all three.** The Views page's Need & cover labels toggle draws each cell's need, cover
-  and traffic, so the fields can be checked in play before a Value leans on them.
+- **The grid overlay shows all three.** The Views page's OPCOM grid labels toggle draws each cell's need, cover
+  and traffic, so the fields can be checked in play before a Value leans on them. The toggle is off by default:
+  the overlay opens as the lattice, the force colours and the tasking units alone.
 - A first hardpoint at a frontline zone worth 40 earns about 10, beside that zone's Reinforce at 15; one beside
   other hardpoints earns little.
 
