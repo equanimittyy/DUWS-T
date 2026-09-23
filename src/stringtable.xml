@@ -5661,8 +5661,8 @@
                 <English>Rally Point Placed</English>
             </Key>
             <Key ID="STR_DUWS_T_RALLY_PLACED_MSG">
-                <Original>BLUFOR now has access to temporary respawn</Original>
-                <English>BLUFOR now has access to temporary respawn</English>
+                <Original>BLUFOR can fast travel to the rally point</Original>
+                <English>BLUFOR can fast travel to the rally point</English>
             </Key>
             <Key ID="STR_DUWS_T_RALLY_LOST_TITLE">
                 <Original>Rally Point Lost</Original>
@@ -7495,8 +7495,8 @@
                 <English>Fast travel is disabled.</English>
             </Key>
             <Key ID="STR_DUWS_T_s4i32jjh">
-                <Original>You have arrived at the FOB.</Original>
-                <English>You have arrived at the FOB.</English>
+                <Original>You have arrived at %1.</Original>
+                <English>You have arrived at %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_z54ibhvi">
                 <German>Drücke OK um zu entfernen, oder Abbrechen</German>
@@ -7572,22 +7572,8 @@
                 <German>Schnellreise</German>
                 <Chinesesimp>快速移动</Chinesesimp>
                 <Spanish>Viaje rápido</Spanish>
-                <Original>Fast travel</Original>
-                <English>Fast travel</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rn16iv0r">
-                <German>Nutze die Schnellreise zwischen FOBs und dem HQ</German>
-                <Chinesesimp>在FOB和基地之间快速移动</Chinesesimp>
-                <Spanish>Viaje rápido entre puestos de avanzada y la base</Spanish>
-                <Original>Fast travel between FOBs and the base</Original>
-                <English>Fast travel between FOBs and the base</English>
-            </Key>
-            <Key ID="STR_DUWS_T_bdykrtui">
-                <German>Wähle eine FOB aus</German>
-                <Chinesesimp>选择一个FOB</Chinesesimp>
-                <Spanish>Seleccione un puesto de avanzada</Spanish>
-                <Original>Select a FOB</Original>
-                <English>Select a FOB</English>
+                <Original>Fast Travel</Original>
+                <English>Fast Travel</English>
             </Key>
             <Key ID="STR_DUWS_T_hq4mvl3z">
                 <German>Verlasse den FOB Manager</German>
@@ -8174,8 +8160,8 @@
                 <English>An infantry squad drops around you and joins your squad.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_rally">
-                <Original>Plants a flag the team can respawn at 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</Original>
-                <English>Plants a flag the team can respawn at 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</English>
+                <Original>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</Original>
+                <English>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>

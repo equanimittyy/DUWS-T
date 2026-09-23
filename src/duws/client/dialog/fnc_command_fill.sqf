@@ -11,7 +11,7 @@
     Row shape: [label, code, args, closes, colour], stashed for fnc_command_select because a control's
     action is a string and CODE cannot ride in the button.
 
-    `closes` is set only on the three entries that open a dialog of their own, which would otherwise
+    `closes` is set only on the four entries that open a dialog of their own, which would otherwise
     stack on this one; everything else leaves the menu up, so buying two things in a row needs no walk
     back to the HQ prop. `colour` marks what an entry costs -- orange is the same "costs money, not
     yet yours" signal the supports catalogue paints unbought permanents with. The garbage cleanup is
@@ -38,8 +38,9 @@ _rows pushBack [localize "STR_DUWS_T_iggpsdqo", { [] call fnc_FOBmanager }, [], 
 
 _rows pushBack [localize "STR_DUWS_T_0dlbonpc", { [] call fnc_operator_open }, [], true];
 
-// Directly under the operatives it reads the take from: the analysis is what turns what they and
-// everyone else brought back into CP, so the two are one errand.
+_rows pushBack [localize "STR_DUWS_T_uwdgfnbc", { [] call fnc_fast_travel }, [], true];
+
+// HQ only: a FOB is a forward post with nobody to hand the take to.
 if (!_isFob) then {
     _rows pushBack [localize "STR_DUWS_T_INTEL_ANALYSIS_ACTION", { [player] remoteExec ["fnc_intelAnalysis", 2] }, []];
 };

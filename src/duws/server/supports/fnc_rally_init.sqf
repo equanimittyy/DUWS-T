@@ -3,22 +3,22 @@
 //
 // One rally point stands at a time. The comm item defers its consume to here, so a placement the
 // lockout refuses hands the item back instead of spending it.
+//
+// The flag is a fast-travel destination, not a respawn position: the trip is taken deliberately from
+// a base, so the player arrives kitted and with their squad instead of naked off a death.
 if (!isServer) exitWith {};
 
-#define RALLY_SPAWNS 10
+#define RALLY_TRAVELS 10
 #define RALLY_LOCKOUT 600
 #define RALLY_CLEAR_RADIUS 200
 
 DUWS_rally_tent = objNull;
-DUWS_rally_respawn = [];
-DUWS_rally_spawns = 0;
+DUWS_rally_travels = 0;
 DUWS_rally_unlockAt = 0;
 DUWS_rally_id = 0;
 
 fnc_rally_remove = {
-    if (DUWS_rally_respawn isEqualTo []) exitWith {};
-    DUWS_rally_respawn call BIS_fnc_removeRespawnPosition;
-    DUWS_rally_respawn = [];
+    if (isNull DUWS_rally_tent) exitWith {};
     deleteVehicle DUWS_rally_tent;
     DUWS_rally_tent = objNull; publicVariable "DUWS_rally_tent";
     deleteMarker "duws_rally";
@@ -39,14 +39,14 @@ fnc_rally_place = {
     private _tent = createVehicle ["Land_TentA_F", _pos, [], 0, "CAN_COLLIDE"];
     _tent setDir getDir _caller;
     DUWS_rally_tent = _tent; publicVariable "DUWS_rally_tent";
-    DUWS_rally_respawn = [west, _tent, localize "STR_DUWS_T_RALLY_POINT"] call BIS_fnc_addRespawnPosition;
-    DUWS_rally_spawns = RALLY_SPAWNS;
+    // Broadcast: the fast-travel menu prints what is left beside the destination.
+    DUWS_rally_travels = RALLY_TRAVELS; publicVariable "DUWS_rally_travels";
     DUWS_rally_id = DUWS_rally_id + 1;
 
     private _marker = createMarker ["duws_rally", _pos];
     _marker setMarkerType "hd_flag_noShadow";
     _marker setMarkerColor "ColorBLUFOR";
-    _marker setMarkerText format [localize "STR_DUWS_T_RALLY_MARKER", RALLY_SPAWNS];
+    _marker setMarkerText format [localize "STR_DUWS_T_RALLY_MARKER", RALLY_TRAVELS];
 
     ["INFO", "SUPPORT", format ["rally point placed at %1 by %2", _pos, name _caller]] call fnc_log;
     ["rally_placed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
@@ -69,11 +69,12 @@ fnc_rally_place = {
     };
 };
 
-fnc_rally_spawned = {
+fnc_rally_travelled = {
     params ["_tent"];
-    // Null once replaced or lost: that respawn is not the new rally's to pay.
+    // Null once replaced or lost: that trip is not the new rally's to pay.
     if (isNull _tent) exitWith {};
-    DUWS_rally_spawns = DUWS_rally_spawns - 1;
-    if (DUWS_rally_spawns <= 0) exitWith { [] call fnc_rally_remove };
-    "duws_rally" setMarkerText format [localize "STR_DUWS_T_RALLY_MARKER", DUWS_rally_spawns];
+    DUWS_rally_travels = DUWS_rally_travels - 1;
+    publicVariable "DUWS_rally_travels";
+    if (DUWS_rally_travels <= 0) exitWith { [] call fnc_rally_remove };
+    "duws_rally" setMarkerText format [localize "STR_DUWS_T_RALLY_MARKER", DUWS_rally_travels];
 };

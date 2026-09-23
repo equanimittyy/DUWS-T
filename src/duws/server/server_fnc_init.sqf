@@ -915,7 +915,7 @@ fnc_groupReset = compile preprocessFileLineNumbers "duws\client\dialog\fnc_group
 fnc_rest_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_rest_menu.sqf";publicVariable "fnc_rest_menu";
 fnc_FOBmanager = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOBmanager.sqf";publicVariable "fnc_FOBmanager";
 fnc_FOB_remove = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_remove.sqf";publicVariable "fnc_FOB_remove";
-fnc_FOB_fast_travel = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_fast_travel.sqf";publicVariable "fnc_FOB_fast_travel";
+fnc_fast_travel = compile preprocessFileLineNumbers "duws\client\dialog\fnc_fast_travel.sqf";publicVariable "fnc_fast_travel";
 fnc_MHQ_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_MHQ_select.sqf";publicVariable "fnc_MHQ_select";
 fnc_vehicle_depot_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_vehicle_depot_menu.sqf";
 publicVariable "fnc_vehicle_depot_menu";

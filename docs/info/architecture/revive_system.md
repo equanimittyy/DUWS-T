@@ -18,8 +18,10 @@ Base-side healing (the rearm/rest actions) is separate from the revive framework
 Revive template — there is no `respawnTemplates[]`, `ReviveMode`, or `ReviveRequiredItems`. Revive is
 scripted (AIS) or off, never the engine's own revive. BASE respawn returns the player to the
 `respawn_west` marker, which the HQ repositions
-([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ, FOBs, the rally
-point and the two killhouse entrances add further respawn points via `BIS_fnc_addRespawnPosition`.
+([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ, FOBs and the two
+killhouse entrances add further respawn points via `BIS_fnc_addRespawnPosition`. The rally point is not
+one of them: it is a fast-travel destination
+([`fnc_rally_init.sqf`](../../../src/duws/server/supports/fnc_rally_init.sqf)).
 The killhouse entries stand on open ground at the HQ, because a respawn position aimed at the floating
 course does not land the player on it. [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) moves a
 player who arrives on one of them up to that entrance.
@@ -59,6 +61,7 @@ ACE-specific mission logic beyond handing control over and stocking ACE's gear.
 |---|---|---|
 | Revive select | [`initPlayerLocal.sqf`](../../../src/initPlayerLocal.sqf) | Forces the no-revive branch (ACE owns wounding). |
 | AIS shutdown | [`AIS/Core/fn_preinit.sqf`](../../../src/modules/AIS/Core/fn_preinit.sqf), [`fn_postinit.sqf`](../../../src/modules/AIS/Core/fn_postinit.sqf), [`fn_aisInitPlayer.sqf`](../../../src/modules/AIS/Core/fn_aisInitPlayer.sqf) | AIS sets `ais_ace_shutDown`/`AIS_noReviveInit` and never installs its handlers. |
+| Operative recruit | [`client/operative/fnc_operator_recruit.sqf`](../../../src/duws/client/operative/fnc_operator_recruit.sqf) | Skips `AIS_System_fnc_loadAIS`, so ACE keeps the operative's damage handler. |
 | Rest & heal | [`server/dialog/fnc_rest_heal.sqf`](../../../src/duws/server/dialog/fnc_rest_heal.sqf) | Adds `ace_medical_treatment_fnc_fullHealLocal` on top of `setDamage 0`. |
 | Arsenal medical | [`server/arsenal/fnc_create_ammo_lists.sqf`](../../../src/duws/server/arsenal/fnc_create_ammo_lists.sqf) | Stocks ACE medical items, tools, and rations. |
 
@@ -68,7 +71,10 @@ AIS shuts itself off on three paths so nothing survives to fight ACE for the dam
 `fn_preinit.sqf` sets the server-wide `ais_ace_shutDown` flag; `fn_postinit.sqf` early-exits on it; and
 `fn_aisInitPlayer.sqf` sets `AIS_noReviveInit` per client. (`ais_ace_shutDown` and the lower-case
 `ais_ace_shutdown` used in `fn_postinit.sqf` are the same variable — SQF identifiers are
-case-insensitive.)
+case-insensitive.) `AIS_System_fnc_loadAIS` does not check `ais_ace_shutDown`. It honors only the unit's own
+`AIS_noReviveInit`, which the ACE shutdown sets on the player alone. On any other unit it strips every
+`HandleDamage` handler, ACE's included. A caller that enrolls a unit after boot must therefore skip the
+call under ACE itself.
 
 ### ACE-aware healing
 
@@ -110,7 +116,9 @@ a dynamically-spawned unit:
 - An **explicit `AIS_System_fnc_loadAIS` call**. DUWS makes this in only two places: the player
   (`initPlayerLocal.sqf`) and a recruited operative
   ([`client/operative/fnc_operator_recruit.sqf`](../../../src/duws/client/operative/fnc_operator_recruit.sqf),
-  which also `addSwitchableUnit`s them into the player's roster).
+  which also `addSwitchableUnit`s them into the player's roster). The operative call is skipped when
+  `Revive` is `0` or ACE is loaded, so the operative dies outright or is left to ACE. Under `Revive` `2`
+  the operative still gets AIS.
 
 Everything the war spawns — zone garrisons, patrols, hardpoint crews, enemy waves, mission-specific AI,
 civilians — is therefore **outside AIS**: it dies normally and carries whatever event handlers its spawner

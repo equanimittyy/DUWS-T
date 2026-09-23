@@ -798,10 +798,17 @@ unit never has to arrive.
 
 **That generalises into the one thing that would break these guards.** Every presence test here
 assumes the player *approaches* — that they cross the ring from outside before they reach the middle.
-Any instant insertion defeats that assumption, and fast travel is the mechanic that does it. It is
-safe today only because it targets FOBs and the HQ, neither of which streams. A fast-travel
-destination that ever lands inside a zone or a town radius would need the same treatment the retake
-case got: re-latch on arrival, and wait for the ring to clear.
+Any instant insertion defeats that assumption, and fast travel is the mechanic that does it. The HQ
+and the FOBs are safe because neither streams.
+
+The rally point is the one destination that can stand anywhere, so it is the one that can land inside
+a zone or a town radius. What bounds it is the rally's own clearance rule rather than a latch: the
+flag is deleted as soon as a hostile is within 200 m of it
+([`fnc_rally_init.sqf`](../../../src/duws/server/supports/fnc_rally_init.sqf)), so a rally cannot stand
+where a woken garrison already rendered, and a garrison that streams in behind a traveller does so from
+at least that far off. The latch is deliberately *not* re-armed on arrival: holding the garrison down
+until the ring cleared would hand the traveller the zone uncontested, which is worse than the pop-in
+it would hide.
 
 HALO and paradrop do not have this problem, and it is worth knowing why rather than assuming.
 `fnc_duws_bluforNear` measures in three dimensions — `nearEntities` is a sphere and `distance` is 3D
