@@ -154,7 +154,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it, and a truck held as stock goes to a random open zone | 4B.3 |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) | 4B.2 |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
-| Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, one 50 m square | 4B.2 |
+| Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
 | Attack | each BLUFOR-held zone, and each town they have garrisoned | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
@@ -508,7 +508,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 | Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 8, MG 12, GMG 16, AT 16, AA 20 |
 | Standalone hardpoint | as a zone hardpoint, plus the truck's source cost |
 | Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus the truck's source cost |
-| Minefield | `OPCOM_AP_MINEFIELD` 15 per 50 m square, plus the truck's source cost |
+| Minefield | `OPCOM_AP_MINEFIELD` 1 per 50 m square, so 30 to 90 for a belt, plus the truck's source cost |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
 | Truck source | the hire price (3), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
 | Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
@@ -557,8 +557,10 @@ against the other. The weight tables —
 `DUWS_hardpointWeightZone` (MG, AT, GMG, roadblock) for a ring, `DUWS_hardpointWeightSolo` for the standalone rows — are the
 per-type prior the 4C.1 weight multiplies; campaign generation still rolls them. An asset hardpoint is its own
 candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
-minefield is laid, not built: one 50 m square per action (`fnc_hardpoint_minefield_grid`), AT and AP each their own
-candidate, with the size on the target so a deeper belt costs by its footprint. A build cannot be a *typed* counter
+minefield is laid, not built: a belt of 50 m squares per action (`fnc_hardpoint_minefield_grid`), AT and AP each
+their own candidate, with the size rolled onto the target so the price the pick weighs is the belt's own footprint.
+Its squares are planned rather than laid, and made and unmade by the site poller as players reach them, so a belt
+costs its stream ring and not its length ([`hardpoints.md`](../../info/gameplay/hardpoints.md#siting)). A build cannot be a *typed* counter
 (AT under armour) until belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build that
