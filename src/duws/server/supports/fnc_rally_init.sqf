@@ -57,7 +57,13 @@ fnc_rally_place = {
             isNull _flag || {(_flag nearEntities [["CAManBase", "LandVehicle"], RALLY_CLEAR_RADIUS])
                 findIf { alive _x && {((side _x) getFriend west) < 0.6} } >= 0}
         };
-        if (_id == DUWS_rally_id) then { [] call fnc_rally_remove };
+        if (_id != DUWS_rally_id) exitWith {};
+        // A live flag here means the loop broke on the enemy test, not on the rally already being gone.
+        private _overrun = !isNull _flag;
+        [] call fnc_rally_remove;
+        if (_overrun) then {
+            ["rally_lost"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+        };
     };
 };
 

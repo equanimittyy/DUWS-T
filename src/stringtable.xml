@@ -5664,6 +5664,14 @@
                 <Original>BLUFOR now has access to temporary respawn</Original>
                 <English>BLUFOR now has access to temporary respawn</English>
             </Key>
+            <Key ID="STR_DUWS_T_RALLY_LOST_TITLE">
+                <Original>Rally Point Lost</Original>
+                <English>Rally Point Lost</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RALLY_LOST_MSG">
+                <Original>Enemies overran the rally point</Original>
+                <English>Enemies overran the rally point</English>
+            </Key>
             <Key ID="STR_DUWS_T_RALLY_LOCKED">
                 <Original>New rally point locked for %1 min.</Original>
                 <English>New rally point locked for %1 min.</English>

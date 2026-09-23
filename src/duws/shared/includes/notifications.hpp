@@ -355,6 +355,20 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // Loss twin of rally_placed. Raised only when enemies overran the flag: a rally spent to its last
+    // spawn, or replaced by a newer one, is not news.
+    class rally_lost
+    {
+        title = "$STR_DUWS_T_RALLY_LOST_TITLE";
+        iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_RALLY_LOST_MSG";
+        color[] = {1,0.2,0.2,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class SupportUnlock
     {
         title = "$STR_DUWS_T_SUPPORT_UNLOCK_TITLE";
