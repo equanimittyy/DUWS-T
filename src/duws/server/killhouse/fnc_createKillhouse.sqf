@@ -239,10 +239,20 @@ killhouse_srv_start_run = {
     private _occupied = (call killhouse_srv_occupants) apply { getPosWorld _x };
     // One row per contact, so nothing spawns on top of another -- and why the total is capped at the row count instead of wrapping.
     // Shuffled from a copy because BIS_fnc_arrayShuffle works in place, which would eat the master row list a run at a time.
-    private _slots = ((+_allSlots) call BIS_fnc_arrayShuffle) select {
-        _x params ["_class", "_dX", "_dY", "_dZ"];
-        private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
-        (_occupied findIf { _x distance _pos < killhouse_min_spawn_dist }) == -1
+    private _slots = (+_allSlots) call BIS_fnc_arrayShuffle;
+    if !(_occupied isEqualTo []) then {
+        // Nearest player first, so a run fills the rooms ahead of whoever started it; the shuffle above survives as the tie-break.
+        private _ranked = [];
+        {
+            _x params ["_class", "_dX", "_dY", "_dZ"];
+            private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
+            private _near = selectMin (_occupied apply { _x distance _pos });
+            if (_near >= killhouse_min_spawn_dist) then {
+                _ranked pushBack [_near, _forEachIndex];
+            };
+        } forEach _slots;
+        _ranked sort true;
+        _slots = _ranked apply { _slots select (_x select 1) };
     };
     _slots = _slots select [0, [killhouse_total_challenge, killhouse_total_training] select (_mode == "TRAINING")];
     private _total = count _slots;
