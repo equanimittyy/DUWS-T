@@ -56,7 +56,7 @@ while {true} do {
         // body asked the question and is owed the answer.
         "intel" call _enter;
         private _intelLevel = missionNamespace getVariable ["DUWS_intelLevel", 0];
-        if (_intelLevel > 0 && {random 1 < (_intelLevel * DUWS_intel_roll_per_level)}) then {
+        if (random 1 < (DUWS_intel_roll_by_level param [_intelLevel, 0])) then {
             [[], objNull, true] call fnc_intel_payout;
         };
 

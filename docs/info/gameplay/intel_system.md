@@ -315,14 +315,16 @@ than incrementing a counter — gated buying means the count equals the level, s
 restored record restores the level with it. That is the same shape `DUWS_bluforRadioLevel` uses.
 
 **The OPCOM tick rolls it**, as a stage of `fnc_opcom_perception_run` after the task-force upkeep:
-`DUWS_intelLevel * DUWS_intel_roll_per_level` against `random 1`, every `OPCOM_TICK_PERIOD`. It rides that
+`DUWS_intel_roll_by_level` indexed by `DUWS_intelLevel` against `random 1`, every `OPCOM_TICK_PERIOD`. It rides that
 loop rather than the economy tick because the contacts it plots are read off that loop's own tasking store,
 so the intel is sampled on the clock that moved the units. Last in the tick for the same reason the task
 forces are: a fault there costs OPCOM's own stages nothing, and the loop's per-tick `catch` names the stage.
 
-The roll is per five seconds, so the constant is small and the mean wait is the figure to tune by — 111,
-56, 37 and 28 minutes at levels I to IV. Deliberately slower than the sources a player fights for, because
-this is the one that pays while they do nothing.
+The roll is per five seconds, so the table's figures are small and the mean wait is what to tune by — 60,
+30, 16 and 10 minutes at levels I to IV. It is a table rather than one rate multiplied by the level,
+because that curve bought 4x the find rate for 8x the cumulative price: every level after the first was
+worse value than the one below it, and the top two were never worth buying. The table's rate climbs with
+what the levels cost, so the ladder reads as an investment rather than a tax.
 
 A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays both halves
 on the same terms every other source gets: one hidden position, and whatever OPCOM has moving. The centre is a faucet, never a
