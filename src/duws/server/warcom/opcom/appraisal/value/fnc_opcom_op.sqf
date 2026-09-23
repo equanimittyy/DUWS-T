@@ -6,22 +6,19 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_opUnwatched = {
     params ["_c", "_ops"];
     private _w = DUWS_opcom_grid_w;
-    private _cx = _c mod _w;
-    private _cy = floor (_c / _w);
     private _others = _ops apply { [_x mod _w, floor (_x / _w)] };
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _land = 0;
     private _free = 0;
-    for "_iy" from ((_cy - OP_OBSERVE_K) max _minCy) to ((_cy + OP_OBSERVE_K) min _maxCy) do {
-        for "_ix" from ((_cx - OP_OBSERVE_K) max _minCx) to ((_cx + OP_OBSERVE_K) min _maxCx) do {
-            if (DUWS_opcom_grid_land select (_iy * _w + _ix)) then {
-                _land = _land + 1;
-                if ((_others findIf { ((abs ((_x select 0) - _ix)) max (abs ((_x select 1) - _iy))) <= OP_OBSERVE_K }) < 0) then {
-                    _free = _free + 1;
-                };
+    {
+        if (DUWS_opcom_grid_land select _x) then {
+            _land = _land + 1;
+            private _ix = _x mod _w;
+            private _iy = floor (_x / _w);
+            if ((_others findIf { ((abs ((_x select 0) - _ix)) max (abs ((_x select 1) - _iy))) <= OP_OBSERVE_K }) < 0) then {
+                _free = _free + 1;
             };
         };
-    };
+    } forEach ([_c, OP_OBSERVE_K] call DUWS_fnc_opcom_blockCells);
     if (_land == 0) exitWith { 0 };
     _free / _land
 };

@@ -156,6 +156,29 @@ DUWS_fnc_opcom_despawn = {
     deleteGroup _grp;
 };
 
+// effForceLive counts only the living, so a wiped group weighs 0 and drops out the same tick.
+DUWS_fnc_opcom_bookkeep = {
+    {
+        private _grp = groupFromNetId (_x get "grp");
+        // A ferry rider is strength-frozen from board order to full dismount: its live count is falling only
+        // because it board-despawns man by man, so a live read here would bleed the snapshot toward zero.
+        if (!isNull _grp && {!(_x getOrDefault ["ferryFrozen", false])}) then {
+            _x set ["pos", getPosASL (leader _grp)];
+            _x set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
+        } else {
+            // Embarked rider (no group of its own): track its point to the live hull it rides, so the grid
+            // reads its frozen force at the hull's spot, not a tick behind the transport. effForce stays frozen.
+            if ((_x getOrDefault ["ridingOn", -1]) >= 0) then {
+                private _tr = [_x get "ridingOn"] call DUWS_fnc_opcom_byId;
+                if (!isNil "_tr" && {_tr getOrDefault ["embarked", false]}) then {
+                    private _tg = groupFromNetId (_tr get "grp");
+                    if (!isNull _tg) then { _x set ["pos", getPosASL (leader _tg)] };
+                };
+            };
+        };
+    } forEach DUWS_opcom_taskings;
+};
+
 // Bank surviving strength, take the leader's position, delete the group and its hulls; clear the route to replan.
 DUWS_fnc_opcom_reVirt = {
     params ["_t"];

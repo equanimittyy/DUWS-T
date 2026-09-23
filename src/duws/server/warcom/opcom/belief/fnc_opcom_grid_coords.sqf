@@ -18,6 +18,22 @@ DUWS_fnc_opcom_c2w = {
     [((_ci mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_ci / _w)) + 0.5) * OPCOM_GRID_CELL, 0]
 };
 
+// Clipped to the play box, so a block at its edge holds fewer cells.
+DUWS_fnc_opcom_blockCells = {
+    params ["_c", "_k"];
+    private _w = DUWS_opcom_grid_w;
+    private _cx = _c mod _w;
+    private _cy = floor (_c / _w);
+    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    private _out = [];
+    for "_iy" from ((_cy - _k) max _minCy) to ((_cy + _k) min _maxCy) do {
+        for "_ix" from ((_cx - _k) max _minCx) to ((_cx + _k) min _maxCx) do {
+            _out pushBack (_iy * _w + _ix);
+        };
+    };
+    _out
+};
+
 DUWS_fnc_opcom_nearestWater = {
     params ["_pos"];
     private _best = _pos;

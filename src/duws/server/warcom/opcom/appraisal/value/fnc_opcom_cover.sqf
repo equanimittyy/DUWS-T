@@ -11,19 +11,9 @@ DUWS_fnc_opcom_coverCountsSweep = {
         (_x getOrDefault ["errand", []]) params [["_kind", ""], ["_to", []]];
         if (_kind in ["build", "mine"]) then { _pos pushBack _to };
     } forEach DUWS_opcom_taskings;
-    private _w = DUWS_opcom_grid_w;
-    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _n = createHashMap;
     {
-        private _c = [_x] call DUWS_fnc_opcom_w2c;
-        private _cx = _c mod _w;
-        private _cy = floor (_c / _w);
-        for "_iy" from ((_cy - OPCOM_BLOCK_K) max _minCy) to ((_cy + OPCOM_BLOCK_K) min _maxCy) do {
-            for "_ix" from ((_cx - OPCOM_BLOCK_K) max _minCx) to ((_cx + OPCOM_BLOCK_K) min _maxCx) do {
-                private _i = _iy * _w + _ix;
-                _n set [_i, (_n getOrDefault [_i, 0]) + 1];
-            };
-        };
+        { _n set [_x, (_n getOrDefault [_x, 0]) + 1] } forEach ([[_x] call DUWS_fnc_opcom_w2c, OPCOM_BLOCK_K] call DUWS_fnc_opcom_blockCells);
     } forEach _pos;
     _n
 };
@@ -38,17 +28,9 @@ DUWS_fnc_opcom_coverAt = {
 // A new hardpoint adds half of what each cell in its reach still lacks, so one beside others earns little.
 DUWS_fnc_opcom_coverValue = {
     params ["_at"];
-    private _w = DUWS_opcom_grid_w;
-    private _c = [_at] call DUWS_fnc_opcom_w2c;
-    private _cx = _c mod _w;
-    private _cy = floor (_c / _w);
-    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _sum = 0;
-    for "_iy" from ((_cy - OPCOM_BLOCK_K) max _minCy) to ((_cy + OPCOM_BLOCK_K) min _maxCy) do {
-        for "_ix" from ((_cx - OPCOM_BLOCK_K) max _minCx) to ((_cx + OPCOM_BLOCK_K) min _maxCx) do {
-            private _i = _iy * _w + _ix;
-            _sum = _sum + ([_i] call DUWS_fnc_opcom_needAt) * 0.5 * (1 - ([_i] call DUWS_fnc_opcom_coverAt));
-        };
-    };
+    {
+        _sum = _sum + ([_x] call DUWS_fnc_opcom_needAt) * 0.5 * (1 - ([_x] call DUWS_fnc_opcom_coverAt));
+    } forEach ([[_at] call DUWS_fnc_opcom_w2c, OPCOM_BLOCK_K] call DUWS_fnc_opcom_blockCells);
     _sum
 };

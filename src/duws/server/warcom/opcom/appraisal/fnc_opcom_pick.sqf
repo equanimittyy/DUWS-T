@@ -27,13 +27,12 @@ private _row = [];
 private _cand = [];
 private _score = -1;
 if (_mode isEqualTo "weighted") then {
-    // Cost floors at 1: a free action would divide by zero, and its Value is already its score.
     private _all = [];
     {
         _x params ["_r", "_ts"];
         {
             private _price = _x select 1;
-            _all pushBack [(_x param [4, 1]) * (_x param [3, _price]) / ((_x param [5, _price]) max 1), _r, _x];
+            _all pushBack [[_x param [3, _price], _x param [4, 1], _x param [5, _price]] call DUWS_fnc_opcom_score, _r, _x];
         } forEach _ts;
     } forEach _live;
 

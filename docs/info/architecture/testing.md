@@ -57,7 +57,11 @@ devcontainer, where the current official build needs glibc 2.38+. Because 1.3.2 
 false-positives) — the python balancer is used instead. It also returns an empty array for
 `array select [start]` with the count omitted, so pass the count explicitly in code you intend to
 exercise here. Its `sin` and `cos` take radians where Arma takes degrees (`sin 90` is 0.894), so a
-case that turns by a bearing asserts only at bearing 0, the one angle both read alike.
+case that turns by a bearing asserts only at bearing 0, the one angle both read alike. It has no `continue`: it
+reads the word as an undefined variable, warns, and runs the rest of the iteration, so a function that skips with
+`continue` returns wrong results here without failing; nest the branch instead in code you intend to exercise. It also
+aborts with "Array recursion detected" when a result holds the same array twice, which Arma allows, so give such a
+case distinct inputs.
 
 The unit tests avoid drift by **extracting the function under test from real source at run time**
 (`lib/extract_fn.py`) rather than copying it, so they always exercise current code.

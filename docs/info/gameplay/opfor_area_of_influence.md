@@ -130,7 +130,7 @@ AA net, the observation-post net and the roadblock net ([`hardpoints.md`](hardpo
 the passes and their counts).
 
 After generation, only OPCOM's standalone, asset and minefield builds add to the band
-(`appraisal/fnc_opcom_actions.sqf`). They do not draw from `DUWS_fnc_aoi_bandPos`. Each pick,
+(`appraisal/fnc_opcom_buy_build.sqf`). They do not draw from `DUWS_fnc_aoi_bandPos`. Each pick,
 `DUWS_fnc_opcom_siteAll` (`appraisal/fnc_opcom_siting.sqf`) samples `OPCOM_SITE_SAMPLES` band cells from the
 band mask the need field keeps (`appraisal/value/fnc_opcom_need.sqf`), and each build type takes the best of
 them by its own Value. A

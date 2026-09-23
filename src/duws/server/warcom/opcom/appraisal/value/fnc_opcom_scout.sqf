@@ -11,8 +11,6 @@ DUWS_fnc_opcom_stalenessAt = {
 // for the reason the delay discount measures straight: no candidate may plan a route inside the pick's pass.
 DUWS_fnc_opcom_scoutCells = {
     params ["_from", "_to", "_k"];
-    private _w = DUWS_opcom_grid_w;
-    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _steps = (ceil ((_from distance2D _to) / (OPCOM_GRID_CELL / 2))) max 1;
     private _line = [];
     for "_i" from 0 to _steps do {
@@ -22,13 +20,7 @@ DUWS_fnc_opcom_scoutCells = {
     };
     private _cells = [];
     {
-        private _cx = _x mod _w;
-        private _cy = floor (_x / _w);
-        for "_iy" from ((_cy - _k) max _minCy) to ((_cy + _k) min _maxCy) do {
-            for "_ix" from ((_cx - _k) max _minCx) to ((_cx + _k) min _maxCx) do {
-                _cells pushBackUnique (_iy * _w + _ix);
-            };
-        };
+        { _cells pushBackUnique _x } forEach ([_x, _k] call DUWS_fnc_opcom_blockCells);
     } forEach _line;
     _cells
 };

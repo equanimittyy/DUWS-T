@@ -4,20 +4,12 @@ if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_blockForce = {
     params ["_pos"];
-    private _w = DUWS_opcom_grid_w;
-    private _c = [_pos] call DUWS_fnc_opcom_w2c;
-    private _cx = _c mod _w;
-    private _cy = floor (_c / _w);
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _fri = 0;
     private _ene = 0;
-    for "_iy" from ((_cy - 1) max _minCy) to ((_cy + 1) min _maxCy) do {
-        for "_ix" from ((_cx - 1) max _minCx) to ((_cx + 1) min _maxCx) do {
-            private _i = _iy * _w + _ix;
-            _fri = _fri + (DUWS_opcom_grid_fri select _i);
-            _ene = _ene + (DUWS_opcom_grid_ene select _i);
-        };
-    };
+    {
+        _fri = _fri + (DUWS_opcom_grid_fri select _x);
+        _ene = _ene + (DUWS_opcom_grid_ene select _x);
+    } forEach ([[_pos] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells);
     [_fri, _ene]
 };
 

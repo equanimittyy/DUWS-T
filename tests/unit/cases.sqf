@@ -1622,6 +1622,20 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 ["pWinAt: outnumbered two to one is a long shot",
     (([8, 15] call DUWS_fnc_opcom_pWinAt) toFixed 2), "0.20"] call fnc_assertEq;
 
+// --- DUWS_fnc_opcom_score: P(win) x Value / Cost, what the pick ranks by ---
+["score: Value at even odds over its cost", [20, 0.5, 4] call DUWS_fnc_opcom_score, 2.5] call fnc_assertClose;
+["score: a free action scores its Value", [7, 1, 0] call DUWS_fnc_opcom_score, 7] call fnc_assertClose;
+["score: a cost under 1 floors at 1", [7, 1, 0.25] call DUWS_fnc_opcom_score, 7] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_blockCells: the cells within k of a cell, clipped to the play box ---
+DUWS_opcom_grid_w = 10;
+DUWS_opcom_box = [0, 0, 9, 9];
+["blockCells: k 1 about an inner cell is its 3x3", [55, 1] call DUWS_fnc_opcom_blockCells, [44, 45, 46, 54, 55, 56, 64, 65, 66]] call fnc_assertEq;
+["blockCells: k 0 is the cell alone", [55, 0] call DUWS_fnc_opcom_blockCells, [55]] call fnc_assertEq;
+["blockCells: a corner block keeps only its cells inside", [0, 1] call DUWS_fnc_opcom_blockCells, [0, 1, 10, 11]] call fnc_assertEq;
+DUWS_opcom_box = [2, 2, 7, 7];
+["blockCells: the play box clips inside the grid", count ([22, 2] call DUWS_fnc_opcom_blockCells), 9] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_opUnwatched: the share of a new OP's land block no other OP watches ---
 OP_OBSERVE_K = 2;
 DUWS_opcom_grid_w = 10;
@@ -1785,6 +1799,14 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
 ["hireDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
 ["hireDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_hireDefense, 40] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_hireDemand: the best role a hire fills ---
+DUWS_opcom_hireDemands = [{ [2, [1]] }, { [5, [2]] }, { [5, [3]] }, { [0, []] }];
+["hireDemand: the best role wins, and a tie keeps the earlier one", [] call DUWS_fnc_opcom_hireDemand, [5, [2]]] call fnc_assertEq;
+DUWS_opcom_hireDemands = [{ params ["_flags"]; [[0, 3] select ("supply" in _flags), [9]] }];
+["hireDemand: each role reads the hire's own fields", [["supply"]] call DUWS_fnc_opcom_hireDemand, [3, [9]]] call fnc_assertEq;
+DUWS_opcom_hireDemands = [{ [0, []] }];
+["hireDemand: a hire no role wants serves nothing", [] call DUWS_fnc_opcom_hireDemand, [0, []]] call fnc_assertEq;
+
 // --- DUWS_fnc_opcom_taxiWorth: what a lift adds by landing the same Value sooner ---
 OPCOM_VALUE_HALFLIFE = 360;
 ["taxiWorth: a lift that saves a half-life doubles what the order returns", [10, 720, 360] call DUWS_fnc_opcom_taxiWorth, 10] call fnc_assertClose;
@@ -1847,3 +1869,22 @@ zone_meta_array = [[1, [0, 0, 0], 200]];
 ["aoi_in_any_zone: 250 m past the edge is out with no margin", [[450, 0, 0]] call fnc_aoi_in_any_zone, false] call fnc_assertEq;
 ["aoi_in_any_zone: 250 m past the edge is in with a 300 m margin", [[450, 0, 0], 300] call fnc_aoi_in_any_zone, true] call fnc_assertEq;
 ["aoi_in_any_zone: 350 m past the edge is out with a 300 m margin", [[550, 0, 0], 300] call fnc_aoi_in_any_zone, false] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_townTargets: the towns a supply truck can serve with an errand ---
+OPCOM_AP_PER_KM = 0.5;
+// Two sources, so each town takes its own: sqf-vm aborts on one array held twice in a result.
+DUWS_fnc_opcom_truckSources = { [[["truck", 7], [0, 0, 0], 0], [["hire", "z"], [3000, 0, 0], 0]] };
+DUWS_fnc_opcom_townsSupplied = { [1] };
+fnc_town_site_key = { params ["_i"]; format ["town_%1", _i] };
+DUWS_fnc_opcom_siteContested = { params ["_k"]; _k isEqualTo "town_2" };
+DUWS_fnc_opcom_townPos = { params ["_i"]; [1000 * _i, 0, 0] };
+DUWS_fnc_opcom_truckDelay = { 0.5 };
+test_townList = [5, 5, 5, 0, 5];
+private _townOffer = { params ["_i", "_tier"]; if (_tier < 1) exitWith { [] }; [10, format ["T%1", _i], 4] };
+private _towns = ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets;
+["townTargets: a served, contested or refused town is passed over", _towns apply { _x select 0 },
+    [["reinforce", 0, ["truck", 7]], ["reinforce", 4, ["hire", "z"]]]] call fnc_assertEq;
+["townTargets: the price carries the nearest truck's drive", _towns apply { _x select 1 }, [10, 11]] call fnc_assertEq;
+["townTargets: the Value is discounted by the drive", _towns apply { _x select 3 }, [2, 2]] call fnc_assertEq;
+DUWS_fnc_opcom_truckSources = { [] };
+["townTargets: no truck is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;

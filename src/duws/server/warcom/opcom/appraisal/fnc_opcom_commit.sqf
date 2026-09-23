@@ -15,11 +15,25 @@ DUWS_fnc_opcom_bestSend = {
         if (_pw >= OPCOM_PWIN_FLOOR) then {
             private _v = _value * ([_x, _to] call DUWS_fnc_opcom_unitDelay);
             private _c = [_x] call DUWS_fnc_opcom_commitCost;
-            private _s = _pw * _v / (_c max 1);
+            private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
             if (_s > _bs) then { _bs = _s; _best = [_x, _v, _pw, _c] };
         };
     } forEach _units;
     _best
+};
+
+// The target carries the unit, its order and the order's own target: the pick hands an execute nothing else.
+DUWS_fnc_opcom_sendRun = {
+    params ["_target"];
+    _target params ["_id", "_order", "_to", "_exp"];
+    private _t = [_id] call DUWS_fnc_opcom_byId;
+    if (isNil "_t") exitWith { false };
+    if !([_t, _order, _to] call fnc_opcom_task) exitWith { false };
+    // What the order is worth once committed: a lift is priced against it, stranded at a water leg or taxied over
+    // dry ground (fnc_opcom_taxi, fnc_opcom_hire).
+    _t set ["expValue", _exp];
+    [_t] call DUWS_fnc_opcom_taxiBind;
+    true
 };
 
 // One attacker per zone at a time: a second sent after the first dribbles men into a fight no-retreat turns into
@@ -40,29 +54,13 @@ DUWS_fnc_opcom_attackSweep = {
                 _blocked pushBack [_zp, _worth];
             } else {
                 _best params ["_t", "_v", "_pw", "_c"];
-                _out pushBack [[_zk, _t get "id", _pw * _v], 0,
+                _out pushBack [[_t get "id", "capture", ([_zk] call fnc_site_at) get "pos", _pw * _v], 0,
                     format ["Attack %1 with %2 %3", [_zk] call DUWS_fnc_opcom_zoneLabel, _t get "menu", _t get "id"], _v, _pw, _c];
                 _riders pushBack [_t, _zp, _pw * _v];
             };
         };
     } forEach WARCOM_zones_controled_by_BLUFOR;
     [_out, _blocked, _riders]
-};
-
-DUWS_fnc_opcom_attackTargets = { (["attackSweep", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) select 0 };
-DUWS_fnc_opcom_attackBlocked = { (["attackSweep", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) select 1 };
-
-DUWS_fnc_opcom_attackRun = {
-    params ["_target"];
-    _target params ["_zk", "_id", "_exp"];
-    private _t = [_id] call DUWS_fnc_opcom_byId;
-    if (isNil "_t") exitWith { false };
-    if !([_t, "capture", ([_zk] call fnc_site_at) get "pos"] call fnc_opcom_task) exitWith { false };
-    // What the order is worth once committed: a lift is priced against it, stranded at a water leg or taxied over
-    // dry ground (fnc_opcom_taxi, fnc_opcom_hire).
-    _t set ["expValue", _exp];
-    [_t] call DUWS_fnc_opcom_taxiBind;
-    true
 };
 
 // One interceptor per sighting, for the reason one attacker goes at a zone.
@@ -82,27 +80,13 @@ DUWS_fnc_opcom_interceptSweep = {
                 _blocked pushBack [_bp, _v];
             } else {
                 _best params ["_t", "_bv", "_pw", "_c"];
-                _out pushBack [[_key, _t get "id", _pw * _bv], 0,
+                _out pushBack [[_t get "id", "intercept", _key, _pw * _bv], 0,
                     format ["Intercept at %1 with %2 %3", mapGridPosition _bp, _t get "menu", _t get "id"], _bv, _pw, _c];
                 _riders pushBack [_t, _bp, _pw * _bv];
             };
         };
     } forEach DUWS_opcom_belief_key;
     [_out, _blocked, _riders]
-};
-
-DUWS_fnc_opcom_interceptTargets = { (["interceptSweep", DUWS_fnc_opcom_interceptSweep] call DUWS_fnc_opcom_tickCached) select 0 };
-DUWS_fnc_opcom_interceptBlocked = { (["interceptSweep", DUWS_fnc_opcom_interceptSweep] call DUWS_fnc_opcom_tickCached) select 1 };
-
-DUWS_fnc_opcom_interceptRun = {
-    params ["_target"];
-    _target params ["_key", "_id", "_exp"];
-    private _t = [_id] call DUWS_fnc_opcom_byId;
-    if (isNil "_t") exitWith { false };
-    if !([_t, "intercept", _key] call fnc_opcom_task) exitWith { false };
-    _t set ["expValue", _exp];
-    [_t] call DUWS_fnc_opcom_taxiBind;
-    true
 };
 
 // Every recon weighs the same few destinations, drawn from the cells the need field lights: the sample is the Scout's
@@ -129,13 +113,13 @@ DUWS_fnc_opcom_scoutSweep = {
             if (_pw >= OPCOM_PWIN_FLOOR) then {
                 _taken set [_forEachIndex, true];
                 private _v = ([_t get "pos", _x, _k] call DUWS_fnc_opcom_scoutValue) * ([_t, _x] call DUWS_fnc_opcom_unitDelay);
-                private _s = _pw * _v / (_c max 1);
+                private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
                 if (_s > _bs) then { _bs = _s; _best = [_x, _v, _pw] };
             };
         } forEach _dests;
         if (_best isNotEqualTo []) then {
             _best params ["_to", "_v", "_pw"];
-            _out pushBack [[_t get "id", _to, _pw * _v], 0,
+            _out pushBack [[_t get "id", "move", _to, _pw * _v], 0,
                 format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
             _riders pushBack [_t, _to, _pw * _v];
         };
@@ -145,23 +129,25 @@ DUWS_fnc_opcom_scoutSweep = {
     [_out, _blocked, _riders]
 };
 
-DUWS_fnc_opcom_scoutTargets = { (["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 0 };
-DUWS_fnc_opcom_scoutBlocked = { (["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 1 };
+// Recruit reads every sweep's blocked targets and riders off this table, so a new commit order registers here and
+// nothing downstream names it.
+DUWS_opcom_commitSweeps = createHashMapFromArray [
+    ["attackSweep", DUWS_fnc_opcom_attackSweep],
+    ["interceptSweep", DUWS_fnc_opcom_interceptSweep],
+    ["scoutSweep", DUWS_fnc_opcom_scoutSweep]
+];
+
+DUWS_fnc_opcom_commitSweep = {
+    params ["_key"];
+    [_key, DUWS_opcom_commitSweeps get _key] call DUWS_fnc_opcom_tickCached
+};
+
+DUWS_fnc_opcom_commitTargets = { params ["_key"]; ([_key] call DUWS_fnc_opcom_commitSweep) select 0 };
+DUWS_fnc_opcom_commitBlocked = { params ["_key"]; ([_key] call DUWS_fnc_opcom_commitSweep) select 1 };
 
 // -> [[tasking, destination, Value], ...]: each order the pick may commit this tick.
 DUWS_fnc_opcom_pendingRiders = {
-    ((["attackSweep", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) select 2)
-    + ((["interceptSweep", DUWS_fnc_opcom_interceptSweep] call DUWS_fnc_opcom_tickCached) select 2)
-    + ((["scoutSweep", DUWS_fnc_opcom_scoutSweep] call DUWS_fnc_opcom_tickCached) select 2)
-};
-
-DUWS_fnc_opcom_scoutRun = {
-    params ["_target"];
-    _target params ["_id", "_to", "_exp"];
-    private _t = [_id] call DUWS_fnc_opcom_byId;
-    if (isNil "_t") exitWith { false };
-    if !([_t, "move", _to] call fnc_opcom_task) exitWith { false };
-    _t set ["expValue", _exp];
-    [_t] call DUWS_fnc_opcom_taxiBind;
-    true
+    private _out = [];
+    { _out append (([_x] call DUWS_fnc_opcom_commitSweep) select 2) } forEach DUWS_opcom_commitSweeps;
+    _out
 };

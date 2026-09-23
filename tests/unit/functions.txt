@@ -75,11 +75,14 @@ duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty
 duws/server/warcom/opcom/appraisal/fnc_opcom_supply.sqf::DUWS_fnc_opcom_truckFor
+duws/server/warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf::DUWS_fnc_opcom_townTargets
 duws/server/warcom/opcom/appraisal/fnc_opcom_siting.sqf::DUWS_fnc_opcom_argMax
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_exposure.sqf::DUWS_fnc_opcom_exposureAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinAt
+duws/server/warcom/opcom/appraisal/fnc_opcom_score.sqf::DUWS_fnc_opcom_score
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_op.sqf::DUWS_fnc_opcom_opUnwatched
 duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_landAt
+duws/server/warcom/opcom/belief/fnc_opcom_grid_coords.sqf::DUWS_fnc_opcom_blockCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_gun.sqf::DUWS_fnc_opcom_gunShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_tower.sqf::DUWS_fnc_opcom_towerReach
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_exposure.sqf::DUWS_fnc_opcom_defendAt
@@ -98,6 +101,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDemand
 duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_artySpread

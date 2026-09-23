@@ -29,29 +29,9 @@ while {true} do {
         "decay" call _enter;     call fnc_opcom_decay;
         "prune" call _enter;     call fnc_opcom_belief_prune;
         "contested" call _enter; call DUWS_fnc_opcom_contestedUpdate;
-        // Refresh live taskings' strength/position before the grid reads them: grid_rebuild runs ahead of
-        // task_step (which needs the fresh grid), so a kill would otherwise reach the grid a tick late.
-        // effForceLive counts only the living, so a wiped group weighs 0 and drops out the same tick.
-        "bookkeep" call _enter;
-        {
-            private _grp = groupFromNetId (_x get "grp");
-            // A ferry rider is strength-frozen from board order to full dismount: its live count is falling only
-            // because it board-despawns man by man, so a live read here would bleed the snapshot toward zero.
-            if (!isNull _grp && {!(_x getOrDefault ["ferryFrozen", false])}) then {
-                _x set ["pos", getPosASL (leader _grp)];
-                _x set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
-            } else {
-                // Embarked rider (no group of its own): track its point to the live hull it rides, so the grid
-                // reads its frozen force at the hull's spot, not a tick behind the transport. effForce stays frozen.
-                if ((_x getOrDefault ["ridingOn", -1]) >= 0) then {
-                    private _tr = [_x get "ridingOn"] call DUWS_fnc_opcom_byId;
-                    if (!isNil "_tr" && {_tr getOrDefault ["embarked", false]}) then {
-                        private _tg = groupFromNetId (_tr get "grp");
-                        if (!isNull _tg) then { _x set ["pos", getPosASL (leader _tg)] };
-                    };
-                };
-            };
-        } forEach DUWS_opcom_taskings;
+        // Refresh live taskings before the grid reads them: grid_rebuild runs ahead of task_step (which needs the
+        // fresh grid), so a kill would otherwise reach the grid a tick late.
+        "bookkeep" call _enter;  call DUWS_fnc_opcom_bookkeep;
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;

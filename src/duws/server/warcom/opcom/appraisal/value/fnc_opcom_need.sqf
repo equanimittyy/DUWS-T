@@ -10,19 +10,15 @@ DUWS_fnc_opcom_spread = {
     private _w = DUWS_opcom_grid_w;
     private _cx = _c mod _w;
     private _cy = floor (_c / _w);
-    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _cells = [];
     private _sum = 0;
-    for "_iy" from ((_cy - OPCOM_NEED_K) max _minCy) to ((_cy + OPCOM_NEED_K) min _maxCy) do {
-        for "_ix" from ((_cx - OPCOM_NEED_K) max _minCx) to ((_cx + OPCOM_NEED_K) min _maxCx) do {
-            private _i = _iy * _w + _ix;
-            if (DUWS_opcom_grid_land select _i) then {
-                private _wt = OPCOM_NEED_K + 1 - ((abs (_ix - _cx)) max (abs (_iy - _cy)));
-                _cells pushBack [_i, _wt];
-                _sum = _sum + _wt;
-            };
+    {
+        if (DUWS_opcom_grid_land select _x) then {
+            private _wt = OPCOM_NEED_K + 1 - ((abs ((_x mod _w) - _cx)) max (abs (floor (_x / _w) - _cy)));
+            _cells pushBack [_x, _wt];
+            _sum = _sum + _wt;
         };
-    };
+    } forEach ([_c, OPCOM_NEED_K] call DUWS_fnc_opcom_blockCells);
     if (_sum == 0) exitWith {};
     { _x params ["_i", "_wt"]; _layer set [_i, (_layer select _i) + _amount * _wt / _sum] } forEach _cells;
 };

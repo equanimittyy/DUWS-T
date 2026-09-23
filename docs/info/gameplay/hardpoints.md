@@ -57,7 +57,7 @@ crewed in place rather than dropped and settled, because it already sits on its 
 but is seeded standalone at generation, one per zone on a coin flip
 ([Observation posts](#observation-posts)). `MORTAR`, `ARTY` and `MINEFIELD` are fully implemented —
 composition, garrison, streaming, clearance — but campaign generation never places them. All three come
-from OPCOM's standalone builds (`appraisal/fnc_opcom_actions.sqf`), which lay a `MINEFIELD` one 50 m square at a
+from OPCOM's standalone builds (`appraisal/fnc_opcom_buy_build.sqf`), which lay a `MINEFIELD` one 50 m square at a
 time, AT or AP. A `MINEFIELD` also comes from the debug hardpoint spawner
 (`client/debug/fnc_debug_hardpoint_menu.sqf`), from the Eliminate Recon Patrol side mission, which
 registers it as a standalone hardpoint, and from the Clear Minefield civilian mission, which registers a
