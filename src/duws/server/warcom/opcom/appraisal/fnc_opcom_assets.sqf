@@ -46,7 +46,7 @@ DUWS_fnc_opcom_assetsOf = {
 
 DUWS_fnc_opcom_hpMix = {
     params ["_key"];
-    private _row = ["hpMix"] call DUWS_fnc_opcom_archetypeMix;
+    private _row = ["hpMix"] call DUWS_fnc_opcom_archetypeTable;
     [_row, (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 1, _key, keys _row]
         call DUWS_fnc_opcom_mixFactor
 };

@@ -64,7 +64,7 @@ DUWS_fnc_opcom_recruitTargets = {
     if (_zones isEqualTo []) exitWith { [] };
     ([_flags, _force, _moveType, _zones, _row] call DUWS_fnc_opcom_hireDemand) params ["_demand", "_at"];
     private _roster = ["roster", DUWS_fnc_opcom_rosterSweep] call DUWS_fnc_opcom_tickCached;
-    private _mix = [["recruitMix"] call DUWS_fnc_opcom_archetypeMix, _roster select 0, _row, _roster select 1]
+    private _mix = [["recruitMix"] call DUWS_fnc_opcom_archetypeTable, _roster select 0, _row, _roster select 1]
         call DUWS_fnc_opcom_mixFactor;
 
     if ("noncombat" in _flags || {"recon" in _flags}) exitWith {

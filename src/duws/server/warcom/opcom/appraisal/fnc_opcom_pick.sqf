@@ -27,12 +27,15 @@ private _row = [];
 private _cand = [];
 private _score = -1;
 if (_mode isEqualTo "weighted") then {
+    private _weights = ["actionWeight"] call DUWS_fnc_opcom_archetypeTable;
     private _all = [];
     {
         _x params ["_r", "_ts"];
+        private _w = _weights getOrDefault [_r select 1, 1];
         {
             private _price = _x select 1;
-            _all pushBack [[_x param [3, _price], _x param [4, 1], _x param [5, _price]] call DUWS_fnc_opcom_score, _r, _x];
+            private _s = [_x param [3, _price], _x param [4, 1], _x param [5, _price]] call DUWS_fnc_opcom_score;
+            _all pushBack [_w * _s, _r, _x];
         } forEach _ts;
     } forEach _live;
 
