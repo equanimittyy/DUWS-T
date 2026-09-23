@@ -12,8 +12,7 @@ if (missionNamespace getVariable ["HQ_redeploy_busy", false]) exitWith {
 };
 
 if (commandpointsblu1 < 2) exitWith {
-    ["info", [localize "STR_DUWS_T_REDEPLOY_COST_TITLE",
-        format [localize "STR_DUWS_T_REDEPLOY_COST", 2]]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+    [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", [0,-2] select isDedicated];
 };
 
 // Raised before the charge, so the flag is already up when the next request arrives -- the same

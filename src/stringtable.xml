@@ -1829,13 +1829,6 @@
                 <Original>The zones are being generated. If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete.</Original>
                 <English>The zones are being generated. If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete.</English>
             </Key>
-            <Key ID="STR_DUWS_T_3kascuws">
-                <German>Die Zonen werden generiert. Bitte ware bis die Initialisierung der Mission abgeschlossen wurde.</German>
-                <Spanish>Las zonas están siendo generadas. Por favor espere a que la inicialización se complete.</Spanish>
-                <Chinesesimp>战区正在生成。请等待任务初始化完成。</Chinesesimp>
-                <Original>The zones are being generated. Please wait for mission initialization to complete.</Original>
-                <English>The zones are being generated. Please wait for mission initialization to complete.</English>
-            </Key>
             <Key ID="STR_DUWS_T_8q8zqlf0">
                 <German>ZONEN DISTANZ FILTER WURDE ANGEWENDET.</German>
                 <Spanish>FILTRO DE DISTANCIA DE ZONA APLICADO.</Spanish>
@@ -1993,11 +1986,6 @@
                 <English>Changing pylon loadout costs 5 CP each time</English>
                 <Chinese>每次更改挂架内容消耗 5 CP。</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_PYLON_NO_CP">
-                <Original>Not enough Command Points. You need %1 CP.</Original>
-                <English>Not enough Command Points. You need %1 CP.</English>
-                <Chinese>指挥点不足，需要 %1 点CP。</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_PYLON_SET_SUCCESS">
                 <Original>Pylon loadout changed. Cost: %1 CP.</Original>
                 <English>Pylon loadout changed. Cost: %1 CP.</English>
@@ -2007,11 +1995,6 @@
                 <Original>No weapons available for this pylon</Original>
                 <English>No weapons available for this pylon</English>
                 <Chinese>此挂架无可用武器。</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_vehicle_garage_no_vehicle">
-                <Original>No air vehicle on the helipad. Park one on the pad first.</Original>
-                <English>No air vehicle on the helipad. Park one on the pad first.</English>
-                <Chinese>停机坪上没有飞行载具，请先停放一辆飞行载具在停机坪上。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_vehicle_appearance">
                 <Original>Appearance</Original>
@@ -2085,21 +2068,6 @@
                 <Original>Redeploy Base Units (2 CP)</Original>
                 <English>Redeploy Base Units (2 CP)</English>
                 <Chinesesimp>重新部署基地单位 (2CP)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_REDEPLOY_COST_TITLE">
-                <Original>Not enough CP.</Original>
-                <English>Not enough CP.</English>
-                <Chinesesimp>指挥点不足</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_REDEPLOY_COST">
-                <Original>You need %1 CP to redeploy.</Original>
-                <English>You need %1 CP to redeploy.</English>
-                <Chinesesimp>重新部署需要 %1 指挥点。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_REDEPLOY_NO_CP">
-                <Original>Not enough CP (need %1).</Original>
-                <English>Not enough CP (need %1).</English>
-                <Chinesesimp>指挥点不足 (需要 %1)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_SUCCESS">
                 <Original>Base units have been redeployed.</Original>
@@ -2381,11 +2349,6 @@
                 <English>Repair</English>
                 <Chinesesimp>修理并加油</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_repair_no_vehicle">
-                <Original>No vehicle on the helipad.</Original>
-                <English>No vehicle on the helipad.</English>
-                <Chinesesimp>停机坪上没有载具。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_repair_too_many">
                 <Original>Too many vehicles on the helipad. Only one vehicle allowed at a time.</Original>
                 <English>Too many vehicles on the helipad. Only one vehicle allowed at a time.</English>
@@ -2395,11 +2358,6 @@
                 <Original>Repaired, rearmed and refueled. Cost: %1 CP.</Original>
                 <English>Repaired, rearmed and refueled. Cost: %1 CP.</English>
                 <Chinesesimp>载具的严重受损部位已修理至可用的最低水平并加油，消耗2CP。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_repair_not_enough_cp">
-                <Original>Not enough Command Points (need %1 CP).</Original>
-                <English>Not enough Command Points (need %1 CP).</English>
-                <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_437x650k">
                 <German>Die Zeit wurde 3 Stunden vorgespult und alle Teammitglieder wurden vollständig geheilt</German>
@@ -5546,13 +5504,6 @@
                 <Original>HALO Group (AI Only)</Original>
                 <English>HALO Group (AI Only)</English>
             </Key>
-            <Key ID="STR_DUWS_T_recycleempty">
-                <German>Kein Fahrzeug in der Fahrzeugrecyclingstation.</German>
-                <Spanish>No hay vehículo dentro de la Estación de Reciclaje de Vehículos.</Spanish>
-                <Chinesesimp>载具回收站内没有载具。</Chinesesimp>
-                <Original>There's no vehicle in the Vehicle Recycling Station.</Original>
-                <English>There's no vehicle in the Vehicle Recycling Station.</English>
-            </Key>
             <Key ID="STR_DUWS_T_OPERATOR_HEALED">
                 <Original>Operator Healed</Original>
                 <English>Operator Healed</English>
@@ -5564,9 +5515,9 @@
                 <Original>Recycle Vehicle</Original>
                 <English>Recycle Vehicle</English>
             </Key>
-            <Key ID="STR_DUWS_T_GARAGE_NONE_SELECTED">
-                <Original>No vehicle selected.</Original>
-                <English>No vehicle selected.</English>
+            <Key ID="STR_DUWS_T_DEPOT_VEHICLE_GONE">
+                <Original>That vehicle no longer exists.</Original>
+                <English>That vehicle no longer exists.</English>
             </Key>
             <Key ID="STR_DUWS_T_GARAGE_CREWED">
                 <Original>Empty the vehicle before storing it.</Original>
@@ -7225,27 +7176,6 @@
                 <Original>Squad disbanded.</Original>
                 <English>Squad disbanded.</English>
             </Key>
-            <Key ID="STR_DUWS_T_ixyfae8b">
-                <German>Du hast %1 Sekunden um eine High Command Gruppe auszuwählen</German>
-                <Spanish>Tiene %1 segundos para elegir un escuadrón del Alto Mando</Spanish>
-                <Chinesesimp>你有 %1 秒来选择一个高级指挥模式的小队</Chinesesimp>
-                <Original>You have %1 seconds to select a High Command squad.</Original>
-                <English>You have %1 seconds to select a High Command squad.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_4l2mz3f7">
-                <German>Du hast keine High Command Gruppe ausgewählt</German>
-                <Spanish>No tiene ningún escuadrón del Alto Mando seleccionado</Spanish>
-                <Chinesesimp>你没有选择任何高级指挥模式的小队</Chinesesimp>
-                <Original>No High Command squad selected.</Original>
-                <English>No High Command squad selected.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_nq46erul">
-                <German>Du kannst nur eine Gruppe auswählen</German>
-                <Spanish>Debe seleccionar solo 1 escuadrón</Spanish>
-                <Chinesesimp>你只能选择一个小队</Chinesesimp>
-                <Original>You must select exactly one squad.</Original>
-                <English>You must select exactly one squad.</English>
-            </Key>
             <Key ID="STR_DUWS_T_twmowx0v">
                 <German>Gruppe umbenannt in:\n%1</German>
                 <Spanish>Escuadrón renombrado como: \n%1</Spanish>
@@ -7534,10 +7464,6 @@
             <Key ID="STR_DUWS_T_operative_stats_next_deploy">
                 <Original>New stats will apply the next time this operative deploys.</Original>
                 <English>New stats will apply the next time this operative deploys.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_operative_no_cp">
-                <Original>You don't have enough Command Points.</Original>
-                <English>You don't have enough Command Points.</English>
             </Key>
 </Container>
         <Container name="FOB Management">
@@ -8364,13 +8290,6 @@
                 <Chinesesimp>没有足够的指挥点(CP)。</Chinesesimp>
                 <Original>Not enough Command Points.</Original>
                 <English>Not enough Command Points.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_p6sb3ply">
-                <German>Nicht genug Command Points (%1CP benötigt)</German>
-                <Spanish>No posee suficientes puntos de comando (se requieren %1)</Spanish>
-                <Chinesesimp>没有足够的指挥点(还需要%1CP)</Chinesesimp>
-                <Original>Not enough Command Points (%1 CP required)</Original>
-                <English>Not enough Command Points (%1 CP required)</English>
             </Key>
             <Key ID="STR_DUWS_T_9607znvh">
                 <German>Bitte wähle etwas aus!</German>

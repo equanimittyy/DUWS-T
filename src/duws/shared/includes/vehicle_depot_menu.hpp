@@ -84,13 +84,13 @@ class vehicledepotmenu
         {
             idc = 2015;
             x = 7.3 * GUI_GRID_W + GUI_GRID_X;
-            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _v = objectFromNetId (lbData [2011, _i]); if (!isNull _v) then { closeDialog 0; [_v] call fnc_veh_pylons_dialog }";
+            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_9607znvh' }; private _v = objectFromNetId (lbData [2011, _i]); if (isNull _v) exitWith { hint localize 'STR_DUWS_T_DEPOT_VEHICLE_GONE' }; closeDialog 0; [_v] call fnc_veh_pylons_dialog";
         };
         class toolAppearance: toolRepair
         {
             idc = 2014;
             x = 13.3 * GUI_GRID_W + GUI_GRID_X;
-            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _v = objectFromNetId (lbData [2011, _i]); if (!isNull _v) then { closeDialog 0; [_v] call fnc_veh_appearance_dialog }";
+            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_9607znvh' }; private _v = objectFromNetId (lbData [2011, _i]); if (isNull _v) exitWith { hint localize 'STR_DUWS_T_DEPOT_VEHICLE_GONE' }; closeDialog 0; [_v] call fnc_veh_appearance_dialog";
         };
         class padList: RscListBox
         {
@@ -109,7 +109,7 @@ class vehicledepotmenu
             y = 20.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
-            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_check_status', 2] }";
+            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_9607znvh' }; private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_veh_repair_check_status', 2] }";
         };
         class padRecycle: padCheckStatus
         {
@@ -185,7 +185,7 @@ class vehicledepotmenu
             w = 5.7 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_GARAGE_STORE_TIP";
-            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_GARAGE_NONE_SELECTED' }; private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_garage_store', 2] }";
+            action = "private _i = lbCurSel 2011; if (_i < 0) exitWith { hint localize 'STR_DUWS_T_9607znvh' }; private _n = lbData [2011, _i]; if (_n != '') then { [player, _n] remoteExec ['fnc_garage_store', 2] }";
         };
         class garRetrieve: garStore
         {

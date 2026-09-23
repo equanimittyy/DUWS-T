@@ -1,4 +1,4 @@
-// Pylon loadout purchase and its two client-side hints.
+// Pylon loadout purchase and its client-side success hint.
 //
 // Executed by the registry rather than stored as one function: this file defines several.
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
@@ -16,7 +16,7 @@ fnc_pylon_set_with_cost = {
     if (isNull _player) exitWith { ["ERROR", "BOOT", "fnc_pylon_set_with_cost: player not found"] call fnc_log;};
 
     if (commandpointsblu1 < _cost) exitWith {
-        [_cost] remoteExec ["fnc_pylon_hint_nocp", _player];
+        [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", _player];
     };
 
     // call, not remoteExec to self: a queued debit runs a frame later, leaving the check
@@ -28,11 +28,6 @@ fnc_pylon_set_with_cost = {
     _veh setPylonLoadout [_pylonIndex, _magazine, true, _turret];
 
     [_cost] remoteExec ["fnc_pylon_hint_success", _player];
-};
-
-fnc_pylon_hint_nocp = {
-    params ["_cost"];
-    hint format [localize "STR_DUWS_T_PYLON_NO_CP", _cost];
 };
 
 fnc_pylon_hint_success = {

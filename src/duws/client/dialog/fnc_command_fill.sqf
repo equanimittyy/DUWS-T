@@ -62,7 +62,7 @@ if (_isFob) then {
 } else {
     _rows pushBack [localize "STR_DUWS_T_REDEPLOY_ACTION", {
         // Advisory only; fnc_redeployHQUnits checks and charges on the server.
-        if (commandpointsblu1 < 2) exitWith { hint format [localize "STR_DUWS_T_REDEPLOY_NO_CP", 2]; };
+        if (commandpointsblu1 < 2) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; };
         [player] remoteExec ["fnc_redeployHQUnits", 2];
     }, [], false, COST_COLOUR];
 };

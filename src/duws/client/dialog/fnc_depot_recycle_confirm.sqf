@@ -3,10 +3,10 @@
 // confirms before committing; the server re-derives the reward at commit, so the quote cannot drift.
 if (!hasInterface) exitWith {};
 private _sel = lbCurSel 2011;
-if (_sel < 0) exitWith { hint localize "STR_DUWS_T_GARAGE_NONE_SELECTED"; };
+if (_sel < 0) exitWith { hint localize "STR_DUWS_T_9607znvh"; };
 private _nid = lbData [2011, _sel];
 private _veh = objectFromNetId _nid;
-if (isNull _veh) exitWith { hint localize "STR_DUWS_T_recycleempty"; };
+if (isNull _veh) exitWith { hint localize "STR_DUWS_T_DEPOT_VEHICLE_GONE"; };
 
 private _name = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
 private _reward = [_veh] call DUWS_fnc_vehicleRecycleReward;

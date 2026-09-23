@@ -4,12 +4,12 @@ if (isNil "fnc_veh_repair_action") then {
     fnc_veh_repair_action = {
         params ["_caller", "_vehNetId"];
         private _veh = objectFromNetId _vehNetId;
-        if (isNull _veh) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
+        if (isNull _veh) exitWith { [localize "STR_DUWS_T_DEPOT_VEHICLE_GONE"] remoteExec ["hint", _caller]; };
 
         // A third of the recycle reward, rounded up: a service always undercuts scrap-and-rebuy, and
         // ceil of a >=1 reward needs no separate floor.
         private _repairCost = ceil (([_veh] call DUWS_fnc_vehicleRecycleReward) * 0.33);
-        if (commandpointsblu1 < _repairCost) exitWith { [format [localize "STR_DUWS_T_repair_not_enough_cp", _repairCost]] remoteExec ["hint", _caller]; };
+        if (commandpointsblu1 < _repairCost) exitWith { [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", _caller]; };
         // call, not remoteExec to self: a queued debit runs a frame later and splits the
         // check above from the deduction.
         [-_repairCost, "repair_station"] call fnc_cp_adjust;
@@ -29,7 +29,7 @@ if (isNil "fnc_veh_repair_check_status") then {
         params ["_caller", "_vehNetId"];
         if (!isServer) exitWith {};
         private _veh = objectFromNetId _vehNetId;
-        if (isNull _veh) exitWith { [localize "STR_DUWS_T_repair_no_vehicle"] remoteExec ["hint", _caller]; };
+        if (isNull _veh) exitWith { [localize "STR_DUWS_T_DEPOT_VEHICLE_GONE"] remoteExec ["hint", _caller]; };
         private _vehName = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
 
         private _hitPoints = [];

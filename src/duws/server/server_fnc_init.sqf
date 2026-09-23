@@ -269,7 +269,6 @@ publicVariable "DUWS_fnc_deriveShell";
 publicVariable "fnc_wbk_survivorKilled_server";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_pylon_init.sqf";
 publicVariable "fnc_pylon_set_with_cost";
-publicVariable "fnc_pylon_hint_nocp";
 publicVariable "fnc_pylon_hint_success";
 // Broadcast like the pylon purchase above: the depot menu only
 // ever remoteExecs these to the server, but keeping them defined everywhere matches the pattern.

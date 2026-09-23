@@ -5,7 +5,7 @@
 // and rebuilds.
 params ["_fob"];
 
-if (commandpointsblu1 < 2) exitWith { hint format [localize "STR_DUWS_T_REDEPLOY_NO_CP", 2]; };
+if (commandpointsblu1 < 2) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; };
 
 playSound "loadgun";
 

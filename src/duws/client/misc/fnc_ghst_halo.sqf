@@ -129,7 +129,7 @@ private _cost = _jumpers * ceil (_distKm / 5);
 // Advisory read before the confirm, so the player is not asked to fund a jump they cannot
 // afford. fnc_pool_spend below stays the authoritative gate against a mid-window change.
 if (commandpointsblu1 < _cost) exitWith {
-    hint format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    hint localize "STR_DUWS_T_e95mc4lv";
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 
@@ -139,7 +139,7 @@ if !([format [localize "STR_DUWS_T_halo_confirm", _jumpers, _distKm, _cost], loc
 };
 
 if !(["CP", _cost] call fnc_pool_spend) exitWith {
-    hint format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    hint localize "STR_DUWS_T_e95mc4lv";
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 

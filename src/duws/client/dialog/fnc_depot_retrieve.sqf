@@ -3,9 +3,9 @@
 if (!hasInterface) exitWith {};
 
 private _g = uiNamespace getVariable ["DUWS_depotMenu_activeGarage", -1];
-if (_g < 0) exitWith { hint localize "STR_DUWS_T_GARAGE_NONE_SELECTED"; };
+if (_g < 0) exitWith { hint localize "STR_DUWS_T_9607znvh"; };
 private _sel = lbCurSel _g;
-if (_sel < 0) exitWith { hint localize "STR_DUWS_T_GARAGE_NONE_SELECTED"; };
+if (_sel < 0) exitWith { hint localize "STR_DUWS_T_9607znvh"; };
 private _index = parseNumber (lbData [_g, _sel]);
 private _padNet = uiNamespace getVariable ["DUWS_depotMenu_ctx", ""];
 

@@ -13,7 +13,7 @@ fnc_garage_store = {
     if (!isServer) exitWith {};
     params ["_caller", "_vehNetId"];
     private _veh = objectFromNetId _vehNetId;
-    if (isNull _veh) exitWith { [localize "STR_DUWS_T_GARAGE_NONE_SELECTED"] remoteExec ["hint", _caller]; };
+    if (isNull _veh) exitWith { [localize "STR_DUWS_T_DEPOT_VEHICLE_GONE"] remoteExec ["hint", _caller]; };
     if (count crew _veh > 0) exitWith { [localize "STR_DUWS_T_GARAGE_CREWED"] remoteExec ["hint", _caller]; };
 
     private _domain = [typeOf _veh] call DUWS_fnc_vehDomain;
@@ -55,7 +55,7 @@ fnc_garage_retrieve = {
     if (!isServer) exitWith {};
     params ["_caller", "_index", "_padNet"];
     private _stored = missionNamespace getVariable ["DUWS_garage_stored", []];
-    if (_index < 0 || _index >= count _stored) exitWith { [localize "STR_DUWS_T_GARAGE_NONE_SELECTED"] remoteExec ["hint", _caller]; };
+    if (_index < 0 || _index >= count _stored) exitWith { [localize "STR_DUWS_T_9607znvh"] remoteExec ["hint", _caller]; };
 
     private _pad = objectFromNetId _padNet;
     private _spawnPos = if (isNull _pad) then { PosOfBLUHQ } else { getPosATL _pad };

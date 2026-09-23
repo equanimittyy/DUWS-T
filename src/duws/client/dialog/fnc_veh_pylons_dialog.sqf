@@ -1,10 +1,7 @@
 // Locality: client -- the pylon-mounting dialog (costs 5 CP per mount), opened by the depot menu on
-// the vehicle the player selected. Hoisted out of the old repair scroll action so it takes an
-// explicit target vehicle rather than resolving one from a trigger; the dialog's internals are
-// otherwise unchanged.
+// the vehicle the player selected.
 if (!hasInterface) exitWith {};
 params ["_veh"];
-if (isNull _veh) exitWith { hint localize "STR_DUWS_T_vehicle_garage_no_vehicle"; };
 
 disableSerialization;
 private _display = createDialog ["RscDisplayEmpty", false];
@@ -26,7 +23,6 @@ _display setVariable ["garage_veh", _veh];
 private _pylonNamesRaw = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "pylonTopCover");
 private _pylonNames = if (_pylonNamesRaw != "") then { _pylonNamesRaw splitString ";" } else { [] };
 
-// helper: pylon turret path, defaulting to the vehicle body []
 private _fnc_getPylonTurret = {
     params ["_veh", "_pylonIndex"];
     private _pylonConfig = configFile >> "CfgVehicles" >> typeOf _veh >> "Components" >> "TransportPylonsComponent" >> "Pylons" >> format ["Pylon%1", _pylonIndex];
@@ -38,7 +34,6 @@ private _fnc_getPylonTurret = {
     };
 };
 
-// core refresh: left list plus right-hand compatible list
 private _fnc_refreshAll = {
     private _veh = _display getVariable "garage_veh";
     if (isNull _veh) exitWith {};

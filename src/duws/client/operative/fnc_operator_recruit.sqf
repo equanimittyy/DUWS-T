@@ -17,7 +17,7 @@ _selected_soldier_class = _selected_soldier select 10;
 
 // Re-deploying a healed operative is free, so only "Ready" costs CP. The guard must stay at top
 // level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
-if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_operative_no_cp"};
+if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,200,15,0.3] call fnc_safe_pos;

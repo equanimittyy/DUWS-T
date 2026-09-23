@@ -1,10 +1,7 @@
 // Locality: client -- the vehicle-appearance (skin + user animations) dialog, opened by the depot
-// menu on the vehicle the player selected. Hoisted out of the old repair scroll action so it takes
-// an explicit target vehicle rather than resolving one from a trigger; the dialog's internals are
-// otherwise unchanged.
+// menu on the vehicle the player selected.
 if (!hasInterface) exitWith {};
 params ["_veh"];
-if (isNull _veh) exitWith { hint localize "STR_DUWS_T_vehicle_garage_no_vehicle"; };
 
 disableSerialization;
 private _display = createDialog ["RscDisplayEmpty", false];
@@ -37,7 +34,6 @@ _display setVariable ["garage_veh", _veh];
 _display setVariable ["garage_animList", _animations];
 _display setVariable ["garage_textureList", _textures];
 
-// Apply button: refresh the list without closing
 private _applyBtn = _display ctrlCreate ["RscButton", 1600];
 _applyBtn ctrlSetText "Apply";
 _applyBtn ctrlSetPosition [0.35, 0.67, 0.1, 0.05];

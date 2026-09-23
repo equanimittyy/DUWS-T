@@ -48,7 +48,7 @@ while {!(["ZONES", "chosen_settings from the callsign screen",
 if (zones_max_dist_from_hq > 10000) then {
 	[{hint localize "STR_DUWS_T_eggxrcci"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 } else {
-	[{hint localize "STR_DUWS_T_3kascuws"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+	[{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 private _tStage = diag_tickTime;
 {

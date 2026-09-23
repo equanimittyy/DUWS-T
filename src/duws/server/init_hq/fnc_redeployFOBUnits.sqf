@@ -1,9 +1,7 @@
 // Locality: server -- the action remoteExecs to target 2, the way the HQ's redeploy does.
 //
-// One entry point for both halves of a FOB's upkeep, checked and charged once. This was two
-// actions costing 15 CP and 5 CP, each charged on the acting client before the request travelled;
-// the HQ rebuilds everything it owns from one action for 2 CP, and a FOB's garrison is the same job
-// on a smaller base.
+// One entry point for both halves of a FOB's upkeep, checked and charged once: a FOB's garrison is
+// the same job as the HQ's one-action rebuild, on a smaller base.
 if (!isServer) exitWith {};
 
 params ["_fob"];
@@ -17,8 +15,7 @@ if ((_fob getVariable ["FOB_guard_busy", false]) || {_fob getVariable ["FOB_fort
 };
 
 if (commandpointsblu1 < 2) exitWith {
-    ["info", [localize "STR_DUWS_T_REDEPLOY_COST_TITLE",
-        format [localize "STR_DUWS_T_REDEPLOY_COST", 2]]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+    [localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", [0,-2] select isDedicated];
 };
 
 // Lock before charging. The two builders raise these flags too, but they run a frame later as
