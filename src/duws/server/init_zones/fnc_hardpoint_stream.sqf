@@ -447,7 +447,10 @@ fnc_hardpoint_register = {
     // kilometres, and the poller only looks at a site somebody is already inside.
     if (_ring > 0) then { _radius = _ring };
     [_key, _pos, _radius, "stream"] call fnc_site_register;
-    private _occ = [_key, "garrison", EAST, 0, _grace, true, true] call fnc_site_occupant_register;
+    // The latch holds a site false until BLUFOR leave its ring. A field has no garrison to hold back, and
+    // its ring is the belt's whole length, so latching left one laid near BLUFOR inert for good.
+    private _latch = _type isNotEqualTo "MINEFIELD";
+    private _occ = [_key, "garrison", EAST, 0, _grace, _latch, true] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
     _occ set ["hpGarrison", DUWS_hardpointGarrison getOrDefault [_type, ""]];
     _occ set ["hpType", _type];

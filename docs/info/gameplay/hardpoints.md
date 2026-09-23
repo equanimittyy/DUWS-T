@@ -161,7 +161,11 @@ is stored as squares of `[centre, plan, objects]`, where the plan is the positio
 and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
 hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
 `DUWS_mineStreamOut` (450 m), so a belt costs its stream ring rather than its length. The in-ring covers a
-vehicle crossing one 10 s site poll at speed. Each pass first prunes every standing square back to the
+vehicle crossing one 10 s site poll at speed. A square with somebody inside `MINE_NO_POP` (50 m) of its
+centre waits until they move off, so a mine never appears under the player it would kill. Such a field also
+registers unlatched, unlike every other site: the arrival latch reads false until BLUFOR have once been
+outside the ring, and a belt's ring is its whole length, so a field laid near the player stayed inert
+until they walked a kilometre off it. Each pass first prunes every standing square back to the
 mines still armed, dropping a spent mine's position with it, so ground the player cleared stays clear
 across a stow. `fnc_hardpoint_minefield_ring` gives the site radius such a field registers with — half its
 long side plus the stream-out distance — since the poller only looks at a site somebody is already

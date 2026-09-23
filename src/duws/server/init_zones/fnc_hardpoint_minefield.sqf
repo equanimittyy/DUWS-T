@@ -16,6 +16,8 @@
 // A mine may land this far from its cell's centre, 5 m past the cell edge, so neighbouring cells overlap
 // and the field clumps and gaps like a hand-laid one instead of tiling evenly.
 #define MINE_SPREAD 10
+// Half a square's diagonal plus the spread past its edge: no mine is made under somebody standing there.
+#define MINE_NO_POP 50
 
 DUWS_mineSquare = 50;
 
@@ -181,7 +183,7 @@ fnc_hardpoint_minefield_cycle = {
         // so an allocation per square to find one number is the loop's whole cost.
         private _d = 1e9;
         { private _pd = _x distance2D _c; if (_pd < _d) then { _d = _pd } } forEach _players;
-        if (_objs isEqualTo [] && {_plan isNotEqualTo []} && {_d < DUWS_mineStreamIn}) then {
+        if (_objs isEqualTo [] && {_plan isNotEqualTo []} && {_d < DUWS_mineStreamIn} && {_d > MINE_NO_POP}) then {
             private _made = [_plan, _key] call fnc_hardpoint_minefield_make;
             // Not JIP-queued: these objects live only while somebody is near, and a queue entry per square
             // per pass would outlive them. A client joining onto a standing square reveals on its next lay.
