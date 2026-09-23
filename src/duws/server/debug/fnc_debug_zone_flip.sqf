@@ -41,6 +41,12 @@ if (_toBlufor) then {
 	// Men only: a real capture leaves the emplacements and vehicles to the player.
 	{ _x setDamage 1 } forEach (([_key] call fnc_zone_roster) select { alive _x });
 	[_key, 0] call DUWS_fnc_garrisonSeed;
+	// A ring hardpoint's men sit off the zone roster, so the kill above misses them; they still count against the capture's numbers test.
+	{
+		private _hpKey = _x select 0;
+		{ { _x setDamage 1 } forEach (([_hpKey, _x] call fnc_site_roster) select { alive _x }) } forEach ["garrison", "crew"];
+		[_hpKey, [_hpKey, "garrison"] call fnc_site_occupant] call DUWS_fnc_hardpointClear;
+	} forEach (DUWS_hardpoints select { (_x select 4) isEqualTo _key });
 };
 
 // The trigger's armed statement, not a hand-built call: it carries the next handler and its args, so a forced flip cannot drift from an earned one.
@@ -50,6 +56,6 @@ private _side = ["OPFOR", "BLUFOR"] select _toBlufor;
 ["INFO", "ZONES", format ["debug flip: %1 handed to %2", _name, _side]] call fnc_log;
 private _detail = [
 	"Dev tool: runs the zone's armed loss handler, so the zone\nreseeds at tier I as it does in play.",
-	"Dev tool: the garrison is killed, its reserve cleared and\nevery token filed lost, then the zone's armed capture handler\nruns -- so AP, CP, markers and notifications land as in play."
+	"Dev tool: the garrison and ring hardpoints are killed, its\nreserve cleared and every token filed lost, then the zone's\narmed capture handler runs -- so AP, CP, markers and\nnotifications land as in play."
 ] select _toBlufor;
 [format ["%1 handed to %2.\n\n%3", _name, _side, _detail]] remoteExec ["hint", _caller];
