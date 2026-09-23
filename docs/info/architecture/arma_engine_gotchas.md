@@ -114,6 +114,10 @@ A `$STR_` reference in config (`CfgDebriefing`, action names, `displayName`) is 
 
 `localize` only translates a stringtable ID; handed anything else it treats the string as a key, misses, logs `String <text> not found`, and returns nothing. `fnc_mission_finish` localises its line argument, so a caller handing it a finished sentence goes silent. Fix: a line needing a runtime `%N` is finished text — build and speak it at the call site (`fnc_duws_dialogue`) and hand finish `[]`.
 
+## `GIF pre stack size violation` means `if` got no value
+
+`if` needs a Boolean on the stack; a condition that returns nothing leaves the stack empty, and the engine logs this cryptic line instead of a type error. The usual source is a function that returns nothing. `fnc_pos_near_enemy.sqf` wrapped its body in `fnc_pos_near_enemy = {...}` while `server_fnc_init.sqf` compiled the file into that same name, so the first call on each machine only ran the assignment and returned nothing, and the FOB request died on its first check. Fix: a file loaded with `compile preprocessFileLineNumbers` is the function body itself — never assign the function's own name inside it.
+
 ## A code block sees no locals from where it was written unless it is `call`ed
 
 SQF blocks are not closures — a block sees the privates of whatever `call`ed it and nothing else; run it via `spawn`/`execVM` and every enclosing private is gone. `fnc_civ_garrison.sqf` `spawn`ed a block reading `_centre`/`_radius` from around it; both were nil in the new thread, so the town got no garrison (correct form: `[_i, _centre, _radius] spawn _fnc_fill` read with `params`, as `fnc_civ_handler.sqf` does). This is why the launcher blocks in `shared/includes/mission_types.hpp` each carry a hard-coded index — an index is the one thing such a block can hold without capturing. Fix: pass everything a `spawn`ed block needs through `_this`/`params`, or `call` it; when a fix would delete a global a deferred block reads, preserve the deferral, not just the value.
