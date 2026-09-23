@@ -31,10 +31,12 @@ OPFOR build during play stays hidden in both.
 | Normal hardpoints, generated at start | visible from the start | hidden |
 | Normal hardpoints, built in play | **hidden** | **hidden** |
 | Enemy elements on missions | **hidden** | **hidden** |
+| OPCOM units under orders | **hidden** | **hidden** |
 
 So normal mode has a live intel channel answering "what has changed", and hardcore has that plus
-everything generation produced, answering "where is the war". Of normal mode's two payouts, only
-hardpoints built in play exist today, so outside hardcore the reveal pool holds nothing until OPFOR builds one.
+everything generation produced, answering "where is the war". Normal mode's channel is the two kinds
+OPFOR produce during play — a hardpoint it builds, and a unit it puts under orders — so outside
+hardcore the pool holds only what the enemy is doing right now.
 
 **The mode changes what is hidden and nothing else.** Every mechanic runs the same in both — same flag
 rates, same action, same payout table, same substitute when intel comes up dry. Only how often each branch
@@ -61,6 +63,7 @@ player, because the position lands on every player's map.
 | Zone | a *Zone Discovered* card, and an Overlord line naming the zone and the nearest settlement (`fnc_place_name`) |
 | Town | a *Town Discovered* card naming the town |
 | Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
+| Contact | an Allseer line naming the settlement it was fixed near (`fnc_place_name`) |
 
 `fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
 caller: the recon mission marks its target under its own confirm line rather than beneath a second
@@ -84,14 +87,17 @@ nothing left rather than silently awarding nothing.
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
 | An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
-| An unrevealed enemy patrol | — | waiting on [`../opcom/opcom_plan.md`](../../plans/opcom/opcom_plan.md) |
+| An OPCOM unit under orders | at random, from the virtual ones not already plotted | built ([§A contact is a snapshot](#a-contact-is-a-snapshot)) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
 random is right — ranked by distance it would march them outward in a spiral. A town is somewhere the
 player goes to *do* something, so one on the far side of the map is worth no more to them than nothing
-happening, and nearest wins. One merged pool would force a single rule on both. The consequence to know
-when tuning: in hardcore both buckets usually hold stock, so roughly half of all intel goes to towns.
+happening, and nearest wins. A contact takes the zone's rule rather than the town's: what it is worth is
+knowing where the enemy is moving, which the nearest march answers no better than any other, and ranked by
+distance the bucket would report the same home sector on every roll. One merged pool would force a single
+rule on all three. The consequence to know when tuning: in hardcore every bucket usually holds stock, so
+roughly half of all intel goes to towns.
 
 Every bucket draws from the unrevealed set rather than from everything and filtering after the draw.
 Drawing from every zone and then testing whether it happened to be hidden — the shape this replaced —
@@ -105,9 +111,10 @@ quietly: four of the six side-mission sites hand their result to a `remoteExec` 
 value, so a line spoken at each faucet is a line four of them cannot say. It goes to the earner where there
 is one, and from Overlord to everyone where there is not, because a mission completing is everyone's news.
 
-Only hardpoints can refill a dry pool — they are the one kind OPFOR build during play
+Hardpoints and contacts are what refill a dry pool, being the two kinds OPFOR produce during play
 ([§What is hidden](#what-is-hidden-depends-on-when-it-came-into-existence)). Zones and towns are generated
-once, so once found they are found for the campaign, and today that means the pool goes dry permanently.
+once, so once found they are found for the campaign. A campaign that has been mapped therefore still has a
+bucket with stock in it, as long as the enemy is moving.
 
 The town bucket needs somewhere to measure from, so every faucet passes an origin in. The body search and
 the four hold-action sites have a player to ask; the two rescue missions pay out from a server thread that
@@ -115,11 +122,12 @@ has none, so they pass the mission site, the ground the rescue was fought over. 
 falls back to the HQ. With neither, the bucket sits out the draw rather than picking at random — one feature
 quietly running on two different rules is worse than it paying a zone instead.
 
-## Three sources, three prices
+## Four sources, four prices
 
-Proximity, the body search and the civilian menu all stay, and they are not redundant: proximity costs the
-walk in, the body search costs a firefight, and the menu costs coins and a town's patience. Three prices for
-one commodity is the point — a hardcore player out of one currency still has a route.
+Proximity, the body search, the civilian menu and the Intelligence Centre are not redundant: proximity costs
+the walk in, the body search costs a firefight, the menu costs coins and a town's patience, and the centre
+costs CP and AP once and then pays on a clock. Four prices for one commodity is the point — a hardcore
+player out of one currency still has a route.
 
 | Source | Capped |
 |---|---|
@@ -127,6 +135,7 @@ one commodity is the point — a hardcore player out of one currency still has a
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
+| Intelligence Centre | by the odds its levels buy — one roll per OPCOM tick ([§The Intelligence Centre](#the-intelligence-centre)) |
 
 **A third of a combat group is searchable, so a fight is a reliable route to intel rather than a lottery.**
 A much lower rate read in play as a broken action: a player who cleared a position and found no prompt on
@@ -134,9 +143,12 @@ any body had no way to tell a cold roll from a feature that never worked. What k
 collapsing into a kill count is its payout table, where intel is one kind of four, not its flag rate — so
 a combat group pays *something* most of the time and pays intel far less often than that.
 
-The sources draw from one finite pool, so they compete rather than stack, and the hidden-map phase ends when
-the last hidden position is found however that happened. That is the intended arc — but it means adding a
-fourth source shortens hardcore rather than enriching it.
+The sources draw from one pool, so they compete rather than stack, and the hidden-map phase ends when the
+last hidden position is found however that happened. A fourth source therefore shortens that phase rather
+than enriching it, and the Intelligence Centre is that fourth source knowingly: it is paid for, it is the
+only source that pays while the player does nothing else, and a faster route through the hidden map is
+exactly what the purchase buys. What keeps it from being only that is the contact bucket, which refills — a
+centre standing over a mapped campaign still has the enemy's movements to report.
 
 Side missions are uncapped *and* unrolled. The old design put a campaign-wide throttle in front of them, so a
 mission completed during another source's cooldown paid nothing and said nothing about why; worse, the roll
@@ -242,6 +254,69 @@ more often than one on a distant object — the player is never out of range of 
 dying and the engine goes on evaluating the conditions of actions on any object near a player, so a corpse left
 carrying this one polls the whole condition for the rest of the campaign — one more per death, forever, which
 is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips every action from the body.
+
+## A contact is a snapshot
+
+An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marches a route every OPCOM tick
+and only becomes real men when a player comes near. A contact is what intel makes of one: two global markers
+on the position that record held at the moment the intel landed, and nothing after that.
+
+`server/search/fnc_intel_contact_init.sqf` draws both. The icon is the OPFOR unit set
+(`o_inf`, `o_armor`, `o_recon`, `o_air`, `o_naval`, and the rest — [`../external/arma3_markers.md`](../external/arma3_markers.md)),
+so the shape names the type; a second marker is an arrow (`mil_arrow_noShadow`) standing 120 m off along the
+unit's heading, rotated with `setMarkerDir`; and the icon's text is the order. Three facts, one glance.
+
+The icon is keyed by the OPCOM recruit-menu row, not by the record's `moveType` as the debug overlay is. A
+recon car and a supply truck are both `wheeled`, and telling a scout from a supply run is most of what the
+contact is worth.
+
+**The order label is a precedence, not a field.** Every errand rides a `move` order, so the errand outranks
+the order that carries it — a truck driving to a town to buy its loyalty reads *Rapport*, not *Move*. A
+`capture` or an `intercept` outranks everything including the recon flag, because a scout sent to hunt a
+BLUFOR group is hunting whatever it was hired as. `DUWS_fnc_intel_contactRead` holds that ladder and hands
+back a stringtable key, so the line it resolves to is the stringtable's business and the ladder stays one
+readable switch.
+
+**The markers never move, and that is the feature.** A tracker would cost one marker update per contact per
+tick for the whole team, and it would make intel a live feed about ground the player has not taken — the
+thing [§What intel is for](#what-intel-is-for) rules out. So the contact ages: the unit marches on, and what
+the player holds is a last known position. `DUWS_intel_contact_life` (900 s) is how long that stands before
+the markers are pulled, on a thread per contact holding nothing but the tasking id.
+
+Only virtual taskings under `move`, `capture` or `intercept` are eligible. A streamed one stands inside a
+player's bubble already, and its record's position is frozen at the cell it de-virted in, so plotting it
+would mark ground the player is standing on with a figure that is wrong twice over. A garrison is not
+eligible either: it is the content of a zone, and the zone reveal is what puts that on the map.
+`DUWS_intel_contactIds` holds what is plotted right now, so the draw never re-plots a unit whose markers
+still stand.
+
+## The Intelligence Centre
+
+Four permanent support levels, `intel1` to `intel4`, gated in order like the radio towers and the vehicle
+garage, on the AP tier ladder at 2/3/4/5. Each level is bought once for the team and never refunds.
+
+`fnc_support_perm_grant` recomputes `DUWS_intelLevel` from `DUWS_support_permanent` on every unlock, rather
+than incrementing a counter — gated buying means the count equals the level, so it cannot drift, and a
+restored record restores the level with it. That is the same shape `DUWS_bluforRadioLevel` uses.
+
+**The OPCOM tick rolls it**, as a stage of `fnc_opcom_perception_run` after the task-force upkeep:
+`DUWS_intelLevel * DUWS_intel_roll_per_level` against `random 1`, every `OPCOM_TICK_PERIOD`. It rides that
+loop rather than the economy tick because the contacts it plots are read off that loop's own tasking store,
+so the intel is sampled on the clock that moved the units. Last in the tick for the same reason the task
+forces are: a fault there costs OPCOM's own stages nothing, and the loop's per-tick `catch` names the stage.
+
+The roll is per five seconds, so the constant is small and the mean wait is the figure to tune by — 111,
+56, 37 and 28 minutes at levels I to IV. Deliberately slower than the sources a player fights for, because
+this is the one that pays while they do nothing.
+
+A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays whatever the
+campaign still has hidden, on the same table every other source draws from. The centre is a faucet, never a
+channel of its own — giving it private payouts is how "one place decides what intel is worth" stops being
+true.
+
+It rolls silently on a dry pool. A support that rolls every five seconds for hours cannot answer
+*"Nothing we don't already know"* each time; a player who searched a body asked the question and is owed
+the answer.
 
 ## Persistence
 

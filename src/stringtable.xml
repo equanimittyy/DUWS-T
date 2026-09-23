@@ -4057,6 +4057,46 @@
                 <Original>Be advised, we have intel on an enemy %1 near %2. Check your map.</Original>
                 <English>Be advised, we have intel on an enemy %1 near %2. Check your map.</English>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE">
+                <Original>Be advised, we have a fix on an enemy element near %1. Last known position, check your map.</Original>
+                <English>Be advised, we have a fix on an enemy element near %1. Last known position, check your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_move">
+                <Original>Move</Original>
+                <English>Move</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_recon">
+                <Original>Recon</Original>
+                <English>Recon</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_attack">
+                <Original>Attack</Original>
+                <English>Attack</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_intercept">
+                <Original>Intercept</Original>
+                <English>Intercept</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_rapport">
+                <Original>Rapport</Original>
+                <English>Rapport</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_reinforce">
+                <Original>Resupply</Original>
+                <English>Resupply</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_fortify">
+                <Original>Fortify</Original>
+                <English>Fortify</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_build">
+                <Original>Build</Original>
+                <English>Build</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_contact_redeploy">
+                <Original>Redeploy</Original>
+                <English>Redeploy</English>
+            </Key>
         </Container>
         <Container name="Kill Rewards &amp; Bonuses">
             <Key ID="STR_DUWS_T_RARE_ZOMBIE_KILL_TITLE">
@@ -4282,8 +4322,8 @@
                 <English>BLUFOR has unlocked the Vehicle Depot</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_RADIO1">
-                <Original>BLUFOR has built a Radio Tower</Original>
-                <English>BLUFOR has built a Radio Tower</English>
+                <Original>BLUFOR has upgraded to Radio Tower I</Original>
+                <English>BLUFOR has upgraded to Radio Tower I</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_RADIO2">
                 <Original>BLUFOR has upgraded to Radio Tower II</Original>
@@ -4294,8 +4334,8 @@
                 <English>BLUFOR has upgraded to Radio Tower III</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE1">
-                <Original>BLUFOR has upgraded to Vehicle Garage</Original>
-                <English>BLUFOR has upgraded to Vehicle Garage</English>
+                <Original>BLUFOR has upgraded to Vehicle Garage I</Original>
+                <English>BLUFOR has upgraded to Vehicle Garage I</English>
             </Key>
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE2">
                 <Original>BLUFOR has upgraded to Vehicle Garage II</Original>
@@ -4308,6 +4348,22 @@
             <Key ID="STR_DUWS_T_UNLOCK_GARAGE4">
                 <Original>BLUFOR has upgraded to Vehicle Garage IV</Original>
                 <English>BLUFOR has upgraded to Vehicle Garage IV</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_INTEL1">
+                <Original>BLUFOR has upgraded to Intelligence Centre I</Original>
+                <English>BLUFOR has upgraded to Intelligence Centre I</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_INTEL2">
+                <Original>BLUFOR has upgraded to Intelligence Centre II</Original>
+                <English>BLUFOR has upgraded to Intelligence Centre II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_INTEL3">
+                <Original>BLUFOR has upgraded to Intelligence Centre III</Original>
+                <English>BLUFOR has upgraded to Intelligence Centre III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_INTEL4">
+                <Original>BLUFOR has upgraded to Intelligence Centre IV</Original>
+                <English>BLUFOR has upgraded to Intelligence Centre IV</English>
             </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
@@ -6754,8 +6810,8 @@
                 <English>Logistical Supports</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_1">
-                <Original>Radio Tower</Original>
-                <English>Radio Tower</English>
+                <Original>Radio Tower I</Original>
+                <English>Radio Tower I</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_2">
                 <Original>Radio Tower II</Original>
@@ -6766,20 +6822,36 @@
                 <English>Radio Tower III</English>
             </Key>
             <Key ID="STR_DUWS_T_garage_exp1_row">
-                <Original>Garage Expansion I</Original>
-                <English>Garage Expansion I</English>
+                <Original>Vehicle Garage I</Original>
+                <English>Vehicle Garage I</English>
             </Key>
             <Key ID="STR_DUWS_T_garage_exp2_row">
-                <Original>Garage Expansion II</Original>
-                <English>Garage Expansion II</English>
+                <Original>Vehicle Garage II</Original>
+                <English>Vehicle Garage II</English>
             </Key>
             <Key ID="STR_DUWS_T_garage_exp3_row">
-                <Original>Garage Expansion III</Original>
-                <English>Garage Expansion III</English>
+                <Original>Vehicle Garage III</Original>
+                <English>Vehicle Garage III</English>
             </Key>
             <Key ID="STR_DUWS_T_garage_exp4_row">
-                <Original>Garage Expansion IV</Original>
-                <English>Garage Expansion IV</English>
+                <Original>Vehicle Garage IV</Original>
+                <English>Vehicle Garage IV</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_centre_1">
+                <Original>Intelligence Centre I</Original>
+                <English>Intelligence Centre I</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_centre_2">
+                <Original>Intelligence Centre II</Original>
+                <English>Intelligence Centre II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_centre_3">
+                <Original>Intelligence Centre III</Original>
+                <English>Intelligence Centre III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_intel_centre_4">
+                <Original>Intelligence Centre IV</Original>
+                <English>Intelligence Centre IV</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>
@@ -8050,32 +8122,48 @@
                 <English>Unlocks the supply drop, vehicle drop, helicopter taxi, heavy heli vehicle transport and boat taxi.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio1">
-                <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</Original>
-                <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</English>
+                <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</Original>
+                <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio2">
-                <Original>A stronger reputation amplifier across covered towns (tier II); requires tier I.</Original>
-                <English>A stronger reputation amplifier across covered towns (tier II); requires tier I.</English>
+                <Original>A stronger reputation amplifier across covered towns (level II); requires level I.</Original>
+                <English>A stronger reputation amplifier across covered towns (level II); requires level I.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio3">
-                <Original>The strongest reputation amplifier across covered towns (tier III); requires tier II.</Original>
-                <English>The strongest reputation amplifier across covered towns (tier III); requires tier II.</English>
+                <Original>The strongest reputation amplifier across covered towns (level III); requires level II.</Original>
+                <English>The strongest reputation amplifier across covered towns (level III); requires level II.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_garage1">
-                <Original>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (expansion I); requires the depot.</Original>
-                <English>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (expansion I); requires the depot.</English>
+                <Original>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (level I); requires the depot.</Original>
+                <English>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (level I); requires the depot.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_garage2">
-                <Original>Raises the storage caps to 10 land, 5 air, 10 boat (expansion II); requires expansion I.</Original>
-                <English>Raises the storage caps to 10 land, 5 air, 10 boat (expansion II); requires expansion I.</English>
+                <Original>Raises the storage caps to 10 land, 5 air, 10 boat (level II); requires level I.</Original>
+                <English>Raises the storage caps to 10 land, 5 air, 10 boat (level II); requires level I.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_garage3">
-                <Original>Raises the storage caps to 15 land, 8 air, 15 boat (expansion III); requires expansion II.</Original>
-                <English>Raises the storage caps to 15 land, 8 air, 15 boat (expansion III); requires expansion II.</English>
+                <Original>Raises the storage caps to 15 land, 8 air, 15 boat (level III); requires level II.</Original>
+                <English>Raises the storage caps to 15 land, 8 air, 15 boat (level III); requires level II.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_garage4">
-                <Original>Raises the storage caps to 25 land, 15 air, 25 boat (expansion IV); requires expansion III.</Original>
-                <English>Raises the storage caps to 25 land, 15 air, 25 boat (expansion IV); requires expansion III.</English>
+                <Original>Raises the storage caps to 25 land, 15 air, 25 boat (level IV); requires level III.</Original>
+                <English>Raises the storage caps to 25 land, 15 air, 25 boat (level IV); requires level III.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_intel1">
+                <Original>A standing signals cell that keeps rolling to turn up something hidden: an enemy zone, a town, a hardpoint, or an enemy unit on the move, plotted where it was found (level I).</Original>
+                <English>A standing signals cell that keeps rolling to turn up something hidden: an enemy zone, a town, a hardpoint, or an enemy unit on the move, plotted where it was found (level I).</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_intel2">
+                <Original>Better odds on the same roll (level II); requires level I.</Original>
+                <English>Better odds on the same roll (level II); requires level I.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_intel3">
+                <Original>Better odds again (level III); requires level II.</Original>
+                <English>Better odds again (level III); requires level II.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_intel4">
+                <Original>The best odds on the intel roll (level IV); requires level III.</Original>
+                <English>The best odds on the intel roll (level IV); requires level III.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_mhq_slot">
                 <Original>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</Original>

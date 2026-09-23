@@ -18,6 +18,10 @@ publicVariable "DUWS_support_permanent";
 // reads it. Not a radio grant leaves it untouched.
 DUWS_bluforRadioLevel = { _x in ["radio1", "radio2", "radio3"] } count DUWS_support_permanent;
 
+// The Intelligence Centre's level count, recomputed from the record for the same reason and read by
+// the OPCOM tick's intel roll. Server-only, like that roll.
+DUWS_intelLevel = { _x in ["intel1", "intel2", "intel3", "intel4"] } count DUWS_support_permanent;
+
 // Announced from here rather than from the buyer's own purchase: this is the one place that runs
 // exactly once per unlock, so the two players who reach a row in the same frame raise one card
 // between them. A permanent row is bought for the whole team, so the whole team is told.

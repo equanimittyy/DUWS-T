@@ -881,6 +881,16 @@ DUWS_econ_period = 1800;
 // OPFOR's last economy payout, 0 until the first, so OPCOM sets no savings goal before it knows its income.
 WARCOM_opfor_lastIncome = 0;
 
+// The Intelligence Centre's odds per level owned, rolled once per OPCOM tick, and how long a plotted
+// OPCOM contact stands before its markers are pulled. Server-only: both the roll and the markers are
+// server work.
+//
+// Per OPCOM tick, so the figure is small and the mean wait is what to read it by: at
+// OPCOM_TICK_PERIOD 5 the four levels average a find every 111 / 56 / 37 / 28 minutes. Deliberately
+// slower than the sources a player fights for, because this one pays while they do nothing.
+DUWS_intel_roll_per_level = 0.00075;
+DUWS_intel_contact_life = 900;
+
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference
 // size rather than linearly. 1 until WARCOM init sets it, so the default six-zone campaign is unthrottled.

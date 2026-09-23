@@ -466,6 +466,32 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_GARAGE4";
     };
 
+    // The four Intelligence Centre rungs wear the head glyph the laser designator item wears: the
+    // closest stock icon to an observer, and what the centre buys is being told where the enemy is.
+    class unlock_intel1 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_INTEL1";
+    };
+
+    class unlock_intel2 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_INTEL2";
+    };
+
+    class unlock_intel3 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_INTEL3";
+    };
+
+    class unlock_intel4 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_INTEL4";
+    };
+
     class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

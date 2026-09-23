@@ -149,7 +149,7 @@ One catalogue, `fnc_support_catalogue` in `client/supports/fnc_supports_init.sqf
 request menu's support list in display order, and the `PERM`/`CONS` column decides everything the two
 mechanisms differ in:
 
-| | Permanent (13 rows) | Consumable (18 rows) |
+| | Permanent (17 rows) | Consumable (18 rows) |
 |---|---|---|
 | Bought for | the whole team, once | the buyer alone |
 | Slot | none | one of `support_max_slots` |

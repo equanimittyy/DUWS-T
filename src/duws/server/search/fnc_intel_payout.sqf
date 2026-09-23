@@ -21,7 +21,7 @@ private _audience = if (isNull _earner) then { 0 } else { _earner };
 // pool is empty never enters the draw, and a campaign late enough to have found everything
 // reports that instead of silently awarding nothing. They stay separate buckets rather than one
 // merged pool because each picks its member on a different rule, not merely because they live in
-// different arrays. Enemy patrols join the draw when the system behind them exists.
+// different arrays.
 private _kinds = [];
 
 private _hiddenZones = zone_namePOS_pairs select {!(_x select 2)};
@@ -58,6 +58,17 @@ private _hiddenHPs = DUWS_hardpoints select {
     !(_x select 5) && { (_x select 4) isEqualTo "" || {(_x select 4) in _revealedZoneKeys} }
 };
 if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
+
+// A marching OPCOM unit, plotted where the intel found it. Virtual taskings only: a streamed one
+// stands inside a player's bubble already, and its record's position is frozen at the cell it
+// de-virted in, so plotting it would mark stale ground the player is standing on. A unit already on
+// the map is out too, or one contact would be re-plotted while its own markers still stand.
+private _contacts = DUWS_opcom_taskings select {
+    ((_x get "order") in ["move", "capture", "intercept"])
+    && {(_x get "grp") isEqualTo ""}
+    && {!((_x get "id") in DUWS_intel_contactIds)}
+};
+if !(_contacts isEqualTo []) then { _kinds pushBack "PATROL" };
 
 // The dry-pool line lives here rather than at each faucet because four of the six side-mission
 // sites hand their result to a remoteExec and never see the return value, so they could not speak
@@ -101,6 +112,13 @@ switch (selectRandom _kinds) do {
     // campaign points the player at, not a place they are measured a distance from.
     case "HP": {
         _awarded = ["ONE", (selectRandom _hiddenHPs) select 0] call fnc_hardpoint_reveal;
+    };
+
+    // Random, on the zone bucket's rule rather than the town's. What a contact is worth is knowing
+    // where the enemy is moving, and the nearest march answers that no better than any other; ranked
+    // by distance the bucket would report the same home sector every time the clock rolled it.
+    case "PATROL": {
+        _awarded = [selectRandom _contacts] call DUWS_fnc_intel_contactReveal;
     };
 
 };

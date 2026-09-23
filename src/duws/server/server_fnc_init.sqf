@@ -225,6 +225,9 @@ publicVariable "fnc_hardpoint_minefield_reveal";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\hardpoint_compositions.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_place.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_stream.sqf";
+// The intel system's contact half: the icon table, the pure read over a tasking record and the
+// reveal that plots one. Definitions only, so it needs nothing loaded before it.
+[] call compile preprocessFileLineNumbers "duws\server\search\fnc_intel_contact_init.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\faction_lib\fnc_faction_backfill.sqf";
 // The vanilla stand-in mop-up that runs after backfill for a preset or pasted faction's leftover keys.
