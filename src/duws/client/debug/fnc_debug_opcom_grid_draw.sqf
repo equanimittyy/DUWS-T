@@ -7,7 +7,7 @@ if (!hasInterface) exitWith {};
 // A draw lands a round-trip after its request, so one queued before toggle-off arrives past teardown and
 // would rebuild the whole lattice -- the overlay reappears after being cleared.
 if (!(missionNamespace getVariable ["DUWS_dbgOpcomOn", false])) exitWith {};
-params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []], ["_wps", []]];
+params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []], ["_wps", []], ["_path", []]];
 
 private _half = _cell / 2;
 private _eps = 0.05;
@@ -23,6 +23,7 @@ if (_rebuild) then {
     missionNamespace setVariable ["DUWS_dbgOpcomBelN", 0];
     missionNamespace setVariable ["DUWS_dbgOpcomTaskN", 0];
     missionNamespace setVariable ["DUWS_dbgOpcomWpN", 0];
+    missionNamespace setVariable ["DUWS_dbgOpcomPathN", 0];
 };
 
 private _sample = "";
@@ -135,9 +136,7 @@ private _taskN = missionNamespace getVariable ["DUWS_dbgOpcomTaskN", 0];
 for "_i" from (count _tasks) to (_taskN - 1) do { deleteMarkerLocal format ["duws_opcom_task_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomTaskN", count _tasks];
 
-// One endpoint per tasking: drawing the whole leg chain cost more markers than
-// every other layer together, and the destination plus what lands there is the part that reads. Texted with
-// the same code as its unit box, so an endpoint is traceable to the tasking that drew it.
+// Texted with the same code as its unit box, so an endpoint is traceable to the tasking that drew it.
 private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
 {
     _x params ["_wp", "_wtxt"];
@@ -157,7 +156,25 @@ private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
 for "_i" from (count _wps) to (_wpN - 1) do { deleteMarkerLocal format ["duws_opcom_wp_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomWpN", count _wps];
 
-["DEBUG", "OPCOM", format ["overlay %1: %2 cells, %3 belief, %4 taskings, %5 waypoints", ["refresh", "rebuild"] select _rebuild, count _cells, count _bel, count _tasks, count _wps]] call fnc_log;
+// Untexted and fainter than the endpoint, so the chain reads as the way there, not as stops.
+private _pathN = missionNamespace getVariable ["DUWS_dbgOpcomPathN", 0];
+{
+    private _nm = format ["duws_opcom_path_%1", _forEachIndex];
+    if (_forEachIndex >= _pathN) then {
+        createMarkerLocal [_nm, _x];
+        _nm setMarkerShapeLocal "ICON";
+        _nm setMarkerTypeLocal "waypoint";
+        _nm setMarkerColorLocal "#(1,0.3,0.5,1)";
+        _nm setMarkerSizeLocal [0.6, 0.6];
+        _nm setMarkerAlphaLocal 0.5;
+    } else {
+        _nm setMarkerPosLocal _x;
+    };
+} forEach _path;
+for "_i" from (count _path) to (_pathN - 1) do { deleteMarkerLocal format ["duws_opcom_path_%1", _i] };
+missionNamespace setVariable ["DUWS_dbgOpcomPathN", count _path];
+
+["DEBUG", "OPCOM", format ["overlay %1: %2 cells, %3 belief, %4 taskings, %5 waypoints, %6 path", ["refresh", "rebuild"] select _rebuild, count _cells, count _bel, count _tasks, count _wps, count _path]] call fnc_log;
 
 // Engine truth on a rebuild: a marker that never registered, or a create that returned "" on a name clash,
 // is invisible with no error. Sample one border back to catch a bad pos/colour/size; refresh ticks skip it.
