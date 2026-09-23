@@ -16,7 +16,7 @@ private _live = [];
 isNil {
     {
         private _row = _x;
-        private _targets = (_row param [4, []]) call (_row select 2);
+        private _targets = (_row param [3, []]) call (_row select 1);
         if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
         if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
     } forEach DUWS_opcom_actions;
@@ -31,7 +31,7 @@ if (_mode isEqualTo "weighted") then {
     private _all = [];
     {
         _x params ["_r", "_ts"];
-        private _w = _weights getOrDefault [_r select 1, 1];
+        private _w = _weights getOrDefault [_r select 0, 1];
         {
             private _price = _x select 1;
             private _s = [_x param [3, _price], _x param [4, 1], _x param [5, _price]] call DUWS_fnc_opcom_score;
@@ -83,7 +83,7 @@ if (_mode isEqualTo "weighted") then {
 };
 if (_row isEqualTo []) exitWith {};
 
-_row params ["_id", "", "", "_execute"];
+_row params ["_id", "", "_execute"];
 _cand params ["_target", "_price", "_label"];
 // Re-checked: the wallet can drop after the snapshot, and fnc_ap_adjust would clamp the overdraft to a free buy.
 private _ok = WARCOM_opfor_ap >= _price && {[_target, _price] call _execute};
