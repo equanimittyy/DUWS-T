@@ -30,11 +30,23 @@ private _fnc_hand = {
 switch (toUpper _row) do {
 
     // fnc_intel_payout decides what one piece of intel is worth for every source in the mission,
-    // and speaks its own result -- including having nothing left to give. The position is what
-    // its town bucket ranks by, so it has to be the asking player's and not the civilian's.
+    // and speaks its own result -- including having nothing left to give.
+    //
+    // Reach is twice the town's area of influence, measured from the town: a local knows the
+    // checkpoint down the road, not a zone across the island. Unscoped, one guaranteed reveal per
+    // player per economy tick made this free source beat the Intelligence Center's second rung.
+    // Twice the influence rather than the influence itself, because the town's own ground is what
+    // the player can already see. RAVAGE and WBK civilians register no town, hence the fallback.
     case "INTEL": {
         [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocyes"] remoteExec ["fnc_duws_dialogue", _caller];
-        [getPos _caller, _caller] call fnc_intel_payout;
+        private _li = _civilian getVariable ["civ_locIndex", -1];
+        private _locs = missionNamespace getVariable ["civ_locations", []];
+        private _sited = _li >= 0 && {_li < count _locs};
+        private _townPos = if (_sited) then { getPos (_locs select _li) } else { getPos _caller };
+        private _townRadius = if (_sited) then {
+            (missionNamespace getVariable ["civ_radii", []]) param [_li, 200]
+        } else { 200 };
+        [_townPos, _caller, false, (_townRadius + AOI_TOWN_REACH) * 2] call fnc_intel_payout;
     };
 
     // Dressings alongside the medikit: a medikit is unusable without the medic trait, so a squad

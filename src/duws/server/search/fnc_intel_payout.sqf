@@ -13,9 +13,20 @@
 //
 // _silent drops the dry answer, for a caller that pays something else on a decline and would
 // otherwise announce an empty search and then hand over a document.
-params [["_origin", []], ["_earner", objNull], ["_silent", false]];
+//
+// _radius is how far the source's knowledge reaches, 0 for the whole map. A source that knows only
+// its own ground passes one and takes whatever falls inside it, including nothing.
+params [["_origin", []], ["_earner", objNull], ["_silent", false], ["_radius", 0]];
 
 if (!isServer) exitWith {false};
+
+// Measured from _origin, never from the _from fallback below: that one stands in the HQ when there
+// is no origin, which is not where the source is. A reach with nothing to measure from therefore
+// reaches nothing rather than quietly reaching everywhere.
+private _fnc_inReach = {
+    params ["_pos"];
+    _radius <= 0 || {count _origin >= 2 && {(_origin distance2D _pos) <= _radius}}
+};
 
 private _awarded = false;
 
@@ -27,7 +38,7 @@ private _awarded = false;
 // different arrays.
 private _kinds = [];
 
-private _hiddenZones = zone_namePOS_pairs select {!(_x select 2)};
+private _hiddenZones = zone_namePOS_pairs select {!(_x select 2) && {[_x select 1] call _fnc_inReach}};
 if !(_hiddenZones isEqualTo []) then { _kinds pushBack "ZONE" };
 
 // The town bucket ranks by distance, so it needs somewhere to measure from: where the intel was
@@ -43,7 +54,9 @@ private _towns = missionNamespace getVariable ["civ_locations", []];
 private _hiddenTowns = [];
 if (count _from >= 2) then {
     {
-        if (!_x) then { _hiddenTowns pushBack _forEachIndex };
+        if (!_x && {[getPos (_towns select _forEachIndex)] call _fnc_inReach}) then {
+            _hiddenTowns pushBack _forEachIndex;
+        };
     } forEach (missionNamespace getVariable ["civ_visible", []]);
 };
 if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
@@ -59,6 +72,7 @@ private _revealedZoneKeys = [];
 } forEach zone_namePOS_pairs;
 private _hiddenHPs = DUWS_hardpoints select {
     !(_x select 5) && { (_x select 4) isEqualTo "" || {(_x select 4) in _revealedZoneKeys} }
+    && {[_x select 1] call _fnc_inReach}
 };
 if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
 
@@ -120,6 +134,7 @@ if (_knownOpfor) then {
         ((_x get "order") in ["move", "capture", "intercept"])
         && {(_x get "grp") isEqualTo ""}
         && {!((_x get "id") in DUWS_intel_contactIds)}
+        && {[_x get "pos"] call _fnc_inReach}
     };
     // Uniform over 0 to all of them. Zero is a real answer -- a sector with nothing moving in it --
     // and it costs the payout nothing, because the pool half has already paid.

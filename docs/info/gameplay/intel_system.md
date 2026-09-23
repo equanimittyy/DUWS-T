@@ -87,6 +87,14 @@ the war*, and *what is the enemy doing right now* — so making them compete for
 starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
 only when both do.
 
+**A source can be scoped to its own ground.** `_radius` limits both halves to what lies within reach of
+where the intel was earned. Zero is the whole map, and every faucet but the civilian menu passes zero. The
+menu passes twice the town's area of influence, measured from the town rather than from the asking player:
+a local knows the checkpoint down the road, not a zone on the far side of Altis. Twice the influence rather
+than the influence itself, because the town's own ground is the part the player can already see. Unscoped
+it was the cheapest source in the mission — one guaranteed reveal per player per economy tick, which beat
+the Intelligence Center's second rung for free.
+
 The pool half picks a *kind* at random from the buckets holding something, then lets that kind pick its
 own member.
 
@@ -129,7 +137,8 @@ quietly running on two different rules is worse than it paying a zone instead.
 ## Four sources, four prices
 
 Proximity, the body search, the civilian menu and the Intelligence Center are not redundant: proximity costs
-the walk in, the body search costs a firefight, the menu costs coins and a town's patience, and the center
+the walk in, the body search costs a firefight, the menu costs coins, a town's patience and reaches only
+that town's own district, and the center
 costs CP and AP once and then pays on a clock. Four prices for one commodity is the point — a hardcore
 player out of one currency still has a route.
 
