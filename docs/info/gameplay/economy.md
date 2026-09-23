@@ -170,9 +170,8 @@ drop, the helicopter taxi, the heavy heli vehicle transport and the boat taxi un
 `logistics` (Logistical Supports, 10 CP). It hides the mortar and the mortar smoke until the team
 owns `offensive_light` (Light Supports, 10 CP and 10 AP). It hides the JDAM, the laser-guided
 bomb, the artillery, the cluster bomb, the napalm and both High Command air rows until the team owns
-`offensive_heavy` (Heavy Supports, 25 CP and 30 AP). The heavy row itself stays hidden until
-the team owns the light one. It hides the Mobile HQ designation until the team owns the Mobile HQ. It
-hides the rally point from any player outside `Squad_Leaders`.
+`offensive_heavy` (Heavy Supports, 25 CP and 30 AP). It hides the Mobile HQ designation until the
+team owns the Mobile HQ. It hides the rally point from any player outside `Squad_Leaders`.
 
 **Row order is the catalogue's, not a literal.** Both the list build (`fnc_support_list_fill`) and
 the buy/refund handler read the same array and index it the same way, and the listbox keeps a

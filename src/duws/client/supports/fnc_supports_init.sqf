@@ -91,7 +91,7 @@ fnc_support_defs = {
 		if (_key in ["supply", "veh_drop", "helotaxi", "helolift", "boattaxi"] && {!(["support_logistics_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
-		if (_key in ["mortar", "mortar_smoke", "offensive_heavy"] && {!(["support_offensive_light_available"] call fnc_support_owned)}) then {
+		if (_key in ["mortar", "mortar_smoke"] && {!(["support_offensive_light_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
 		if (_key in ["jdam", "laser", "arty", "cluster", "napalm", "hcAttChop", "hcCAS"] && {!(["support_offensive_heavy_available"] call fnc_support_owned)}) then {

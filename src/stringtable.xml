@@ -8072,8 +8072,8 @@
                 <English>Unlocks the mortar and mortar smoke.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_offensive_heavy">
-                <Original>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS; requires Light Supports.</Original>
-                <English>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS; requires Light Supports.</English>
+                <Original>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS.</Original>
+                <English>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio1">
                 <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</Original>
