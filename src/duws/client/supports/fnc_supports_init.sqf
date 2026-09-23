@@ -59,17 +59,17 @@ fnc_support_catalogue = {
 		["helotaxi",  "CONS",  1, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
 		["helolift",  "CONS",  2, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
 		["boattaxi",  "CONS",  1, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
-		["arty",      "CONS", 15, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  25],
-		["mortar",    "CONS",  8, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  8],
+		["arty",      "CONS", 15, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  15],
+		["mortar",    "CONS",  3, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  5],
 		["mortar_smoke","CONS",3, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
-		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
-		// Same warhead as JDAM (identical scripted damage in fnc_arty) but 2 AP cheaper: the discount is
+		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,   8],
+		// Same warhead as JDAM (identical scripted damage in fnc_arty) but 3 AP cheaper: the discount is
 		// earned by painting and holding the target, where JDAM is fire-and-forget on map coordinates.
-		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
-		["cluster",   "CONS", 18, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  30],
-		["napalm",    "CONS", 12, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  18],
-		["hcAttChop", "CONS", 15, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  15],
-		["hcCAS",     "CONS", 30, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  25],
+		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   5],
+		["cluster",   "CONS", 15, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  25],
+		["napalm",    "CONS", 15, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  20],
+		["hcAttChop", "CONS", 10, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  15],
+		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  20],
 		// Priced a shade over the 12-CP High Command rifle squad it mirrors -- same headcount, the
 		// premium being the air insertion.
 		["paradrop",  "CONS", 15, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
