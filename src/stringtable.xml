@@ -4023,42 +4023,6 @@
                 <Original>Be advised, we have fixes on %1 enemy elements. Last known positions, check your map.</Original>
                 <English>Be advised, we have fixes on %1 enemy elements. Last known positions, check your map.</English>
             </Key>
-            <Key ID="STR_DUWS_T_intel_contact_move">
-                <Original>Move</Original>
-                <English>Move</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_recon">
-                <Original>Recon</Original>
-                <English>Recon</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_attack">
-                <Original>Attack</Original>
-                <English>Attack</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_intercept">
-                <Original>Intercept</Original>
-                <English>Intercept</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_rapport">
-                <Original>Rapport</Original>
-                <English>Rapport</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_reinforce">
-                <Original>Resupply</Original>
-                <English>Resupply</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_fortify">
-                <Original>Fortify</Original>
-                <English>Fortify</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_build">
-                <Original>Build</Original>
-                <English>Build</English>
-            </Key>
-            <Key ID="STR_DUWS_T_intel_contact_redeploy">
-                <Original>Redeploy</Original>
-                <English>Redeploy</English>
-            </Key>
         </Container>
         <Container name="Kill Rewards &amp; Bonuses">
             <Key ID="STR_DUWS_T_RARE_ZOMBIE_KILL_TITLE">

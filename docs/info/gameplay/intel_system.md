@@ -82,7 +82,7 @@ the map.
 search, all six side-mission sites, the civilian menu when it lands, and the Intelligence Center's clock.
 
 **A payout has two halves and pays both.** The pool half reveals one hidden position; the contact half
-plots a random number of OPCOM units where they are marching. They answer different questions — *where is
+plots every eligible OPCOM unit where it is marching. They answer different questions — *where is
 the war*, and *what is the enemy doing right now* — so making them compete for a single draw only ever
 starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
 only when both do.
@@ -271,42 +271,37 @@ is the per-object cost this shape exists to avoid. `onPlayerKilled.sqf` strips e
 ## A contact is a snapshot
 
 An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marches a route every OPCOM tick
-and only becomes real men when a player comes near. A contact is what intel makes of one: two global markers
+and only becomes real men when a player comes near. A contact is what intel makes of one: one global marker
 on the position that record held at the moment the intel landed, and nothing after that.
 
-`server/search/fnc_intel_contact_init.sqf` draws both. The icon is the OPFOR unit set
-(`o_inf`, `o_armor`, `o_recon`, `o_air`, `o_naval`, and the rest — [`../external/arma3_markers.md`](../external/arma3_markers.md)),
-so the shape names the type; a second marker is an arrow (`mil_arrow_noShadow`) standing 120 m off along the
-unit's heading, rotated with `setMarkerDir`; and the icon's text is the order. Three facts, one glance.
+`server/search/fnc_intel_contact_init.sqf` draws it. The marker is an arrow (`mil_arrow_noShadow`) on the
+unit's position, rotated to its heading with `setMarkerDir` — the leg it is walking now, or the target once
+the route is spent, because a route bends around terrain and its last point is not where the unit is headed
+next.
 
-The icon is keyed by the OPCOM recruit-menu row, not by the record's `moveType` as the debug overlay is. A
-recon car and a supply truck are both `wheeled`, and telling a scout from a supply run is most of what the
-contact is worth.
+**The arrow is the whole contact: where it was, and which way it was going.** A type icon and an order label
+stood on it before, and both answer what the enemy *is doing* — a live readout of a unit the player has not
+found, which is what [§What intel is for](#what-intel-is-for) rules out. A fix reports a sighting, so two of
+the three facts were the wrong kind. A tasking with nowhere left to go therefore plots nothing rather than an
+arrow pointing at random.
 
-**The order label is a precedence, not a field.** Every errand rides a `move` order, so the errand outranks
-the order that carries it — a truck driving to a town to buy its loyalty reads *Rapport*, not *Move*. A
-`capture` or an `intercept` outranks everything including the recon flag, because a scout sent to hunt a
-BLUFOR group is hunting whatever it was hired as. `DUWS_fnc_intel_contactRead` holds that ladder and hands
-back a stringtable key, so the line it resolves to is the stringtable's business and the ladder stays one
-readable switch.
-
-**The markers never move, and that is the feature.** A tracker would cost one marker update per contact per
-tick for the whole team, and it would make intel a live feed about ground the player has not taken — the
-thing [§What intel is for](#what-intel-is-for) rules out. So the contact ages: the unit marches on, and what
-the player holds is a last known position. `DUWS_intel_contact_life` (900 s) is how long that stands before
-the markers are pulled, on a thread per contact holding nothing but the tasking id.
+**The marker never moves, and that is the feature.** A tracker would cost one marker update per contact per
+tick for the whole team. So the contact ages: the unit marches on, and what the player holds is a last known
+position. `DUWS_intel_contact_life` (900 s) is how long that stands before the marker is pulled, on a thread
+per contact holding nothing but the tasking id.
 
 Only virtual taskings under `move`, `capture` or `intercept` are eligible. A streamed one stands inside a
 player's bubble already, and its record's position is frozen at the cell it de-virted in, so plotting it
 would mark ground the player is standing on with a figure that is wrong twice over. A garrison is not
 eligible either: it is the content of a zone, and the zone reveal is what puts that on the map.
-`DUWS_intel_contactIds` holds what is plotted right now, so a payout never re-plots a unit whose markers
-still stand.
+`DUWS_intel_contactIds` holds what is plotted right now, so a payout never re-plots a unit whose marker
+still stands.
 
-**One payout plots a random number of them, uniform over zero to every eligible unit.** Zero is a real
-answer — a sector with nothing moving in it — and it costs the payout nothing, because the pool half has
-already paid. The batch is announced once rather than per contact: eight Allseer lines queued behind each
-other would still be arriving minutes later, and only a single-contact batch has one place worth naming.
+**One payout plots every eligible unit.** It drew a random count between zero and all of them before, which
+made two identical payouts worth anything from nothing to the whole picture and read as an unreliable source
+rather than as a quiet sector. A payout hands over what the source knows. The batch is announced once rather
+than per contact: eight Allseer lines queued behind each other would still be arriving minutes later, and
+only a single-contact batch has one place worth naming.
 
 **The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
 ground whose owner they have never found names nothing, and in hardcore that blank map is the opening the

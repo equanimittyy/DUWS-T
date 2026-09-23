@@ -3,7 +3,7 @@
 // piece of intel is worth is decided in one file rather than at each faucet.
 //
 // A payout has two halves and pays both. The pool half reveals one position out of what is still
-// hidden; the contact half plots a random number of OPCOM units where they are marching. They answer
+// hidden; the contact half plots every eligible OPCOM unit where it is marching. They answer
 // different questions -- where the war is, and what the enemy is doing right now -- so making them
 // compete for one draw only ever starved whichever mattered more that hour.
 //
@@ -136,17 +136,22 @@ if (_knownOpfor) then {
         && {!((_x get "id") in DUWS_intel_contactIds)}
         && {[_x get "pos"] call _fnc_inReach}
     };
-    // Uniform over 0 to all of them. Zero is a real answer -- a sector with nothing moving in it --
-    // and it costs the payout nothing, because the pool half has already paid.
-    private _plotted = (_contacts call BIS_fnc_arrayShuffle) select [0, floor (random ((count _contacts) + 1))];
+    // Every eligible unit, not a sample of them: a sample made the same payout worth anything from
+    // nothing to the whole picture, which reads as an unreliable source rather than as a quiet sector.
+    private _firstPos = [];
     private _n = 0;
-    { if ([_x] call DUWS_fnc_intel_contactReveal) then { _n = _n + 1 } } forEach _plotted;
+    {
+        if ([_x] call DUWS_fnc_intel_contactReveal) then {
+            _n = _n + 1;
+            if (_n == 1) then { _firstPos = _x get "pos" };
+        };
+    } forEach _contacts;
     if (_n > 0) then {
         _awarded = true;
         // One line for the batch: a line per contact would queue eight of them behind each other,
         // and only the single-contact case has one place worth naming.
         private _line = if (_n == 1) then {
-            format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE", [(_plotted select 0) get "pos"] call fnc_place_name]
+            format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE", [_firstPos] call fnc_place_name]
         } else {
             format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY", _n]
         };
