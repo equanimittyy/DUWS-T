@@ -757,6 +757,15 @@ OPCOM_CAP_HP_PER_ZONE = 10;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
     ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD", 1]
 ];
+// Per archetype, the share of its row's hardpoints OPCOM steers each type toward: its weight over the row's sum, so 1
+// everywhere spreads evenly and a 2 is twice as common as a 1. A type past its share builds less and one short of it
+// more, so the cheap types cannot fill the caps ahead of the rest. A tilt, never a quota.
+OPCOM_HP_MIX = createHashMapFromArray [
+    ["balanced", createHashMapFromArray [
+        ["MG", 2], ["ROADBLOCK", 2], ["AT", 1], ["AA", 1], ["OP", 1], ["GMG", 1],
+        ["MINEFIELD_AT", 0.5], ["MINEFIELD_AP", 0.5]
+    ]]
+];
 // Supply trucks sit outside OPCOM_CAP_UNITS: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
 // roster stall every supply buy.
 OPCOM_CAP_UNITS = 50;

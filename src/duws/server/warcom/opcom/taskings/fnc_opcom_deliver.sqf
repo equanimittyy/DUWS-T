@@ -4,6 +4,9 @@ if (!isServer) exitWith {};
 // [key, type, zoneKey, pos] per build still siting, so a Build cannot overfill a zone's slots or an asset's cap.
 DUWS_opcom_buildsPending = [];
 
+// Key -> "AT" / "AP" per field OPCOM lays: the registry row carries no variant, and the build mix weighs them apart.
+DUWS_opcom_mineVariants = createHashMap;
+
 // Half a cell around the truck's drop, so a build stands where it was delivered; it faces where BLUFOR come from.
 DUWS_fnc_opcom_buildCand = {
     private _at = _this select 0;
@@ -79,6 +82,7 @@ DUWS_fnc_opcom_mineBuild = {
         if (_laid < 1) exitWith { call _fnc_noGround };
         [_centres, _dir, _key] call fnc_hardpoint_minefield_signs;
         [_key, "MINEFIELD", _at, "opfor", "", _dir, _size call fnc_hardpoint_minefield_ring] call fnc_hardpoint_register;
+        DUWS_opcom_mineVariants set [_key, _variant];
         ["INFO", "OPCOM", format ["mine: %1 belt %2 planned as %3 near %4: %5 mines over %6 of %7 squares",
             _variant, _size, _key, _at apply { round _x }, _laid, count _centres,
             (_size select 0) * (_size select 1)]] call fnc_log;

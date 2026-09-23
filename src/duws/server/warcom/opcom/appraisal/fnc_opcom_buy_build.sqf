@@ -10,6 +10,7 @@ DUWS_fnc_opcom_hpPrice = {
 DUWS_fnc_opcom_zoneBuildTargets = {
     params ["_type"];
     if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
+    private _mix = [_type] call DUWS_fnc_opcom_hpMix;
     private _out = [];
     {
         _x params ["_zk", "_zs", "", "_worth", "_exp", "_tier"];
@@ -18,7 +19,7 @@ DUWS_fnc_opcom_zoneBuildTargets = {
         if ((([_zk, _zs] call fnc_hardpoint_zone_cap) - _standing - _pending) > 0) then {
             _out pushBack [[_zk, _type], [_type] call DUWS_fnc_opcom_hpPrice,
                 format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], [_zk] call DUWS_fnc_opcom_zoneLabel],
-                [_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone", _tier] call DUWS_fnc_opcom_holdValue];
+                _mix * ([_worth, _exp, [_type] call DUWS_fnc_hpForce, "zone", _tier] call DUWS_fnc_opcom_holdValue)];
         };
     } forEach (call DUWS_fnc_opcom_zonesOpen);
     _out
@@ -31,7 +32,8 @@ DUWS_fnc_opcom_standaloneBuildTargets = {
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
     [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
+        _v * ([_type] call DUWS_fnc_opcom_hpMix)]]
 };
 
 DUWS_fnc_opcom_assetTargets = {
@@ -41,7 +43,8 @@ DUWS_fnc_opcom_assetTargets = {
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
     [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
+        _v * ([_type] call DUWS_fnc_opcom_hpMix)]]
 };
 
 // Fixed depth, length rolled per field, both in 50 m squares. The roll rides the target, so the price the
@@ -57,7 +60,7 @@ DUWS_fnc_opcom_mineBuildTargets = {
     private _size = [_lo + floor random (_hi - _lo + 1), round (OPCOM_MINE_DEPTH / DUWS_mineSquare)];
     [[[_variant, _size, _at, _truck select 0],
         ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
-        format ["Lay %1 mines at %2", _variant, mapGridPosition _at], _v]]
+        format ["Lay %1 mines at %2", _variant, mapGridPosition _at], _v * ([format ["MINEFIELD_%1", _variant]] call DUWS_fnc_opcom_hpMix)]]
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.
