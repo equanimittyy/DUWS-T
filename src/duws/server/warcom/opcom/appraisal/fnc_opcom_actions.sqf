@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The action list the pick stage (fnc_opcom_pick) draws from.
-// DUWS_opcom_actions row: [id, targets, execute, arg].
+// DUWS_opcom_actions row: [id, targets, execute, arg, weight].
 //   arg call targets -> [[target, price, label, value, pWin, cost], ...], the action's legal targets now. `arg` is
 //     the row's fixed argument: the hardpoint type or mine variant for a build row, the sweep for a commit row, the
 //     errand and its offer for a town row, and [] elsewhere. Runs inside isNil, so it never suspends. `value` is the
@@ -8,6 +8,10 @@
 //     ground OPCOM already holds and leaves it out. `cost` is what the score divides by, the price when omitted; a
 //     commit order pays no AP but stakes a unit, so it names both.
 //   [target, price] call execute -> true when the action landed; the pick charges the price only then.
+//   weight is the row's actionWeight key, the id when omitted. Every zone, standalone and mine build shares "build"
+//     and every Recruit row "recruit", so the archetype weighs building and hiring whole and its mix alone picks the
+//     type: a per-type weight would fight the mix for the same lean. An asset build keeps its own key and stays out
+//     of the mix: its cap, not a share, bounds how many stand, so its weight sets how soon it builds.
 if (!isServer) exitWith {};
 
 DUWS_opcom_actions = [
@@ -31,11 +35,11 @@ DUWS_opcom_actions = [
 // for it and leave the archetype nothing to lean on (4C.1).
 {
     DUWS_opcom_actions pushBack [format ["zone_build_%1", toLower _x],
-        DUWS_fnc_opcom_zoneBuildTargets, DUWS_fnc_opcom_zoneBuildRun, [_x]];
+        DUWS_fnc_opcom_zoneBuildTargets, DUWS_fnc_opcom_zoneBuildRun, [_x], "build"];
 } forEach (keys DUWS_hardpointWeightZone);
 {
     DUWS_opcom_actions pushBack [format ["standalone_build_%1", toLower _x],
-        DUWS_fnc_opcom_standaloneBuildTargets, DUWS_fnc_opcom_standaloneBuildRun, [_x]];
+        DUWS_fnc_opcom_standaloneBuildTargets, DUWS_fnc_opcom_standaloneBuildRun, [_x], "build"];
 } forEach (keys DUWS_hardpointWeightSolo);
 {
     DUWS_opcom_actions pushBack [format ["%1_build", toLower _x],
@@ -43,5 +47,5 @@ DUWS_opcom_actions = [
 } forEach ["RADIO", "OP", "MORTAR", "ARTY"];
 {
     DUWS_opcom_actions pushBack [format ["mine_build_%1", toLower _x],
-        DUWS_fnc_opcom_mineBuildTargets, DUWS_fnc_opcom_mineBuildRun, [_x]];
+        DUWS_fnc_opcom_mineBuildTargets, DUWS_fnc_opcom_mineBuildRun, [_x], "build"];
 } forEach ["AT", "AP"];

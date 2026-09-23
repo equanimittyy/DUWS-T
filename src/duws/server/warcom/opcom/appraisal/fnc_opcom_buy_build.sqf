@@ -43,8 +43,7 @@ DUWS_fnc_opcom_assetTargets = {
     if (_st isEqualTo []) exitWith { [] };
     _st params ["_at", "_v", "_truck"];
     [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
-        _v * ([_type] call DUWS_fnc_opcom_hpMix)]]
+        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
 };
 
 // Fixed depth, length rolled per field, both in 50 m squares. The roll rides the target, so the price the

@@ -31,7 +31,7 @@ if (_mode isEqualTo "weighted") then {
     private _all = [];
     {
         _x params ["_r", "_ts"];
-        private _w = _weights getOrDefault [_r select 0, 1];
+        private _w = _weights getOrDefault [_r param [4, _r select 0], 1];
         {
             private _price = _x select 1;
             private _s = [_x param [3, _price], _x param [4, 1], _x param [5, _price]] call DUWS_fnc_opcom_score;
