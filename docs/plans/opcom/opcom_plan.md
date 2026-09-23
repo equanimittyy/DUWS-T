@@ -156,7 +156,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) | 4B.2 |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, one 50 m square | 4B.2 |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence | 4B.3 |
-| Attack | each BLUFOR-held zone | 4B.3 |
+| Attack | each BLUFOR-held zone, and each town they have garrisoned | 4B.3 |
 | Scout | each `recon` unit's route over stale cells | 4B.3 |
 | Arty | each fresh belief sighting in range of an owned gun off cooldown | 4B.4 |
 
@@ -435,7 +435,11 @@ even when the muster ends in another band.
   trigger; a virtual attacker flips it on the OPCOM tick against stored state once it has held the radius for
   `DUWS_captureHold`, **and only at tier 0** — a zone the player has garrisoned has to be beaten, and the site
   poller standing those men up is what renders the attacker to fight them. OPCOM sends that attack's contact
-  report itself. The attacker garrisons the zone once it is virtual. **Intercept** — at the sighting's last known position the unit
+  report itself. The attacker garrisons the zone once it is virtual.
+  A **town** is attacked on the same terms with one difference: it changes hands only by having its garrison
+  cleared through its own trigger, so it has no virtual shortcut and no undefended case — a town with no tier is
+  never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
+  ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to. **Intercept** — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
 
@@ -690,9 +694,6 @@ Not built:
   the price is the caller's, as it is for OPCOM. Only the debug surface calls them for BLUFOR today, so the
   currency, the price and where the player spends it are open. OPCOM's own candidate lists skip BLUFOR-held sites,
   so nothing it buys can reach them.
-- **Attacking a BLUFOR town.** Attack targets BLUFOR-held zones only, so a town the player has garrisoned is
-  cleared only by OPFOR who happen to be standing in it. Whether a friendly town is worth a commit, and what it
-  scores against a zone, belongs with the Attack targeting it would extend.
 
 ## Random events: what a turned town does
 
