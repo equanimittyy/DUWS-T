@@ -276,6 +276,11 @@ so it moves no faster than a truck delivers.
   It tilts the pick and never sets a quota: a type past its share still builds where its Value is high enough. The
   +1 keeps a type with none standing finite. A type outside the row reads 1, and random mode ignores Value, so it
   ignores the mix too.
+- **Recruit takes the same mix over the roster.** A Recruit row's Value is × its row's factor off
+  `OPCOM_RECRUIT_MIX`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The
+  shares are taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing
+  can fill, and push every other row over its own. Balanced's row is 1 for every menu row, an even spread over what
+  the faction can field.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
   not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every
@@ -709,9 +714,9 @@ table; further leans (armour) become rows. 4C.1 builds the setting and the table
 | Balanced | no strong lean — the baseline |
 | Aggressive | Attack, Rapport; leaves ground thin |
 
-Each archetype carries its own row of `OPCOM_HP_MIX` ([§Value](#value)), read at `DUWS_opcom_archetype`. Only
-Balanced's row stands until 4C.1 adds the others and sets the archetype from the campaign setting; an archetype
-with no row builds with no mix.
+Each archetype carries its own row of `OPCOM_HP_MIX` and of `OPCOM_RECRUIT_MIX` ([§Value](#value)), read at
+`DUWS_opcom_archetype`. Only Balanced's rows stand until 4C.1 adds the others and sets the archetype from the
+campaign setting; an archetype with no row builds and hires with no mix.
 
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
