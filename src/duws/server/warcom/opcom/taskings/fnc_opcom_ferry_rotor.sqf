@@ -62,7 +62,8 @@ DUWS_opcom_ferryHulls set ["rotor", createHashMapFromArray [
         _rider set ["pos", _tpos];
         if ((_t getOrDefault ["ferryLZ", []]) isEqualTo []) then { [_t get "target"] call DUWS_fnc_opcom_ferryRotorLeg };   // live spell resumed mid-carry
         if (([getPosASL _veh, _t get "ferryLZ"] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
-            if (call DUWS_fnc_opcom_ferryDropBoard) then { _veh land "GET OUT" };
+            if !(call DUWS_fnc_opcom_ferryDropBoard) exitWith {};
+            _veh land "GET OUT";
             ["dropland"] call DUWS_fnc_opcom_ferrySetPhase;
         };
     }],

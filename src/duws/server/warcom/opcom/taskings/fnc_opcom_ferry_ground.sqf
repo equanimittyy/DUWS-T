@@ -43,7 +43,7 @@ DUWS_opcom_ferryHulls set ["ground", createHashMapFromArray [
         if ((_t getOrDefault ["ferryLZ", []]) isEqualTo []) then { call DUWS_fnc_opcom_ferryGroundDropLeg };   // live spell resumed mid-carry
         if ((_veh distance2D (_t get "ferryLZ")) < OPCOM_FERRY_BOARD_GROUND) then {
             call DUWS_fnc_opcom_ferryHoldHull;
-            call DUWS_fnc_opcom_ferryDropBoard;
+            if !(call DUWS_fnc_opcom_ferryDropBoard) exitWith {};
             ["dropunload"] call DUWS_fnc_opcom_ferrySetPhase;
             [false] call DUWS_fnc_opcom_ferryUnloadPaced;
         };
