@@ -149,8 +149,9 @@ given width and depth. Squares laid under one site key add to one mine list, so 
 The debug hardpoint spawner lays a field from three map clicks: both ends of the front, then the depth.
 It snaps each measure to the nearest whole square, with one square as the minimum.
 
-**A long field streams square by square.** A 1.5 km belt is hundreds of mines, so OPCOM's belts and the
-debug spawner's fields register through `fnc_hardpoint_minefield_stream` instead of being laid: the field
+**A long field streams square by square.** A 1.5 km belt is hundreds of mines, so OPCOM's belts, the recon
+ambush field and the debug spawner's fields register through `fnc_hardpoint_minefield_stream` instead of
+being laid: the field
 is stored as squares of `[centre, plan, objects]`, where the plan is the positions the square still owes
 and an empty object list means the square is off the map. `fnc_hardpoint_minefield_cycle`, run from the
 hardpoint tick, makes a square's mines inside `DUWS_mineStreamIn` (350 m) and deletes them past
@@ -160,7 +161,7 @@ mines still armed, dropping a spent mine's position with it, so ground the playe
 across a stow. `fnc_hardpoint_minefield_ring` gives the site radius such a field registers with — half its
 long side plus the stream-out distance — since the poller only looks at a site somebody is already
 inside, and the type table's 600 m ring covers one emplacement, not a belt. Short fields (a civilian job,
-a recon ambush) skip all of this and are laid whole through `fnc_hardpoint_minefield`.
+a civilian job) skip all of this and are laid whole through `fnc_hardpoint_minefield`.
 
 **Standalone band and radio towers.** Most standalone hardpoints are sited by sampling the OPFOR-positive
 area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to

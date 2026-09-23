@@ -76,11 +76,7 @@ DUWS_fnc_opcom_mineBuild = {
         private _key = format ["hpopcom_%1", _seq];
         // Planned, not laid: the squares are made and unmade by the site poller as players reach them.
         private _laid = [_centres, _dir, _variant, _key] call fnc_hardpoint_minefield_stream;
-        if (_laid < 1) exitWith {
-            missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], nil];
-            missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], nil];
-            call _fnc_noGround;
-        };
+        if (_laid < 1) exitWith { call _fnc_noGround };
         [_centres, _dir, _key] call fnc_hardpoint_minefield_signs;
         [_key, "MINEFIELD", _at, "opfor", "", _dir, _size call fnc_hardpoint_minefield_ring] call fnc_hardpoint_register;
         ["INFO", "OPCOM", format ["mine: %1 belt %2 planned as %3 near %4: %5 mines over %6 of %7 squares",

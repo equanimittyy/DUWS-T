@@ -6,7 +6,7 @@
 // long, which is hundreds of mines if every square exists at once, so for those the plan is the
 // field's real state: a square within reach of a player holds objects, every other square holds only the
 // positions it will put back, and a mine the player took off the map leaves the plan rather than a list
-// of handles. A short field (a civilian job, a recon ambush) is laid whole and skips all of it.
+// of handles. A short field (a civilian job) is laid whole and skips all of it.
 //
 // Vanilla mine classes only: the same footing as the Land_* props the compositions use, so nothing
 // here forces a mod. east revealMine marks each mine as OPFOR-laid, which keeps OPFOR AI off its own
@@ -128,8 +128,12 @@ fnc_hardpoint_minefield_stream = {
         _total = _total + count _plan;
         _squares pushBack [_x, _plan, []];
     } forEach _centres;
-    missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], _squares];
-    missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], _total];
+    // Nothing filed when nothing was planned: a key holding an empty square list reads as a field whose
+    // every mine is gone, and the next clearance pass would clear a field that was never laid.
+    if (_total > 0) then {
+        missionNamespace setVariable [format ["DUWS_hpMineSquares_%1", _key], _squares];
+        missionNamespace setVariable [format ["DUWS_hpMineLaid_%1", _key], _total];
+    };
     _total
 };
 

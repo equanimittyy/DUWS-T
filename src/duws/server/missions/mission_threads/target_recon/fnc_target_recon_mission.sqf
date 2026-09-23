@@ -3,7 +3,8 @@ params ["_MissionPos", "_mission_name"];
 private _requester = remoteExecutedOwner;
 
 #define RECON_MINE_CHANCE  0.33
-#define RECON_MINE_MAX     3      // squares a side, so 150 m across and deep at most
+#define RECON_MINE_COLS    10     // 500 m of front
+#define RECON_MINE_ROWS    2      // 100 m deep
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
@@ -29,9 +30,10 @@ private _build = {
     _grp setBehaviour "STEALTH";
     { _x setWaypointBehaviour "STEALTH" } forEach (waypoints _grp);
 
-    // AP minefield opposite the patrol (so no mine spawns on the team), a third of the time, at
-    // the far ring edge. Skipped near another minefield (<1 km); a square near a road (<100 m) or on water
-    // is dropped. A standalone hardpoint, not a mission prop, so it outlives the mission.
+    // AP belt opposite the patrol (so no mine spawns on the team), a third of the time, at the far ring
+    // edge. Skipped near another minefield (<1 km); a square near a road (<100 m) or on water is dropped.
+    // Streamed rather than laid: a standalone hardpoint, not a mission prop, so it outlives the mission
+    // and at this size would otherwise stand as hundreds of permanent mines.
     if (random 1 < RECON_MINE_CHANCE) then {
         private _fieldPos = _targetpos getPos [_radius * 0.85, (_targetpos getDir _spawnPos) + 180];
         private _clash = DUWS_hardpoints findIf {
@@ -42,13 +44,12 @@ private _build = {
             private _seq = missionNamespace getVariable ["DUWS_hpReconSeq", 0];
             missionNamespace setVariable ["DUWS_hpReconSeq", _seq + 1];
             private _key = format ["hprecon_%1", _seq];
-            private _mines = [];
-            private _squares = ([_fieldPos, _dir, 1 + floor random RECON_MINE_MAX, 1 + floor random RECON_MINE_MAX]
+            private _squares = ([_fieldPos, _dir, RECON_MINE_COLS, RECON_MINE_ROWS]
                 call fnc_hardpoint_minefield_grid) select { !surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []} };
-            { _mines append ([_x, _dir, "AP", _key] call fnc_hardpoint_minefield) } forEach _squares;
-            if (_mines isNotEqualTo []) then {
+            if (([_squares, _dir, "AP", _key] call fnc_hardpoint_minefield_stream) > 0) then {
                 [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
-                [_key, "MINEFIELD", _fieldPos, "opfor", "", _dir] call fnc_hardpoint_register;
+                [_key, "MINEFIELD", _fieldPos, "opfor", "", _dir,
+                    [RECON_MINE_COLS, RECON_MINE_ROWS] call fnc_hardpoint_minefield_ring] call fnc_hardpoint_register;
             };
         };
     };
