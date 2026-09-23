@@ -13,7 +13,7 @@ if (_addAction == "select") then {
 	waitUntil {!isNil "MHQ1"};
 	if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
-	[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
+	[MHQ1, _markerType, "ColorBlue", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
 
 	// The persistence ring, following the MHQ because it drives. Fixed name rather than one derived
 	// from a position that changes, and only from the server: this branch is remoteExec'd to 2, and

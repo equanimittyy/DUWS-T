@@ -21,7 +21,7 @@ if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
 [MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,false];
 sleep 0.2;
-[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
+[MHQ1, _markerType, "ColorBlue", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,"duws_mhq_marker"];
 
 if (isServer) then {
     if (!isNil "MHQ_respawn") then {

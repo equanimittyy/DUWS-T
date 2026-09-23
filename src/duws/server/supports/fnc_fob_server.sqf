@@ -9,7 +9,6 @@ _markername = format["fob%1%2",round (_foundPickupPos select 0),round (_foundPic
 _markerstr = createMarker [str(_markername), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markername) setMarkerType "loc_Bunker";
-str(_markername) setMarkerColor "ColorBLUFOR";
 str(_markername) setMarkerColor "ColorBlue";
 str(_markername) setMarkerText format["FOB %1",_fobname];
 str(_markername) setMarkerSize [2.5, 2.5];
