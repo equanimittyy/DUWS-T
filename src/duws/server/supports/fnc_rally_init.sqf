@@ -9,7 +9,7 @@ if (!isServer) exitWith {};
 #define RALLY_LOCKOUT 600
 #define RALLY_CLEAR_RADIUS 200
 
-DUWS_rally_flag = objNull;
+DUWS_rally_tent = objNull;
 DUWS_rally_respawn = [];
 DUWS_rally_spawns = 0;
 DUWS_rally_unlockAt = 0;
@@ -19,8 +19,8 @@ fnc_rally_remove = {
     if (DUWS_rally_respawn isEqualTo []) exitWith {};
     DUWS_rally_respawn call BIS_fnc_removeRespawnPosition;
     DUWS_rally_respawn = [];
-    deleteVehicle DUWS_rally_flag;
-    DUWS_rally_flag = objNull; publicVariable "DUWS_rally_flag";
+    deleteVehicle DUWS_rally_tent;
+    DUWS_rally_tent = objNull; publicVariable "DUWS_rally_tent";
     deleteMarker "duws_rally";
 };
 
@@ -34,10 +34,12 @@ fnc_rally_place = {
     DUWS_rally_unlockAt = time + RALLY_LOCKOUT;
     [] call fnc_rally_remove;
 
-    private _pos = _caller getRelPos [1, 0];
-    private _flag = createVehicle ["FlagChecked_F", _pos, [], 0, "CAN_COLLIDE"];
-    DUWS_rally_flag = _flag; publicVariable "DUWS_rally_flag";
-    DUWS_rally_respawn = [west, _flag, localize "STR_DUWS_T_RALLY_POINT"] call BIS_fnc_addRespawnPosition;
+    // Far enough ahead that the tent's hull does not spawn on top of the player who placed it.
+    private _pos = _caller getRelPos [4, 0];
+    private _tent = createVehicle ["Land_TentA_F", _pos, [], 0, "CAN_COLLIDE"];
+    _tent setDir getDir _caller;
+    DUWS_rally_tent = _tent; publicVariable "DUWS_rally_tent";
+    DUWS_rally_respawn = [west, _tent, localize "STR_DUWS_T_RALLY_POINT"] call BIS_fnc_addRespawnPosition;
     DUWS_rally_spawns = RALLY_SPAWNS;
     DUWS_rally_id = DUWS_rally_id + 1;
 
@@ -50,16 +52,16 @@ fnc_rally_place = {
     ["rally_placed"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
     // The id tells a replacement, whose own rally must survive, from a loss.
-    [_flag, DUWS_rally_id] spawn {
-        params ["_flag", "_id"];
+    [_tent, DUWS_rally_id] spawn {
+        params ["_tent", "_id"];
         waitUntil {
             sleep 5;
-            isNull _flag || {(_flag nearEntities [["CAManBase", "LandVehicle"], RALLY_CLEAR_RADIUS])
+            isNull _tent || {(_tent nearEntities [["CAManBase", "LandVehicle"], RALLY_CLEAR_RADIUS])
                 findIf { alive _x && {((side _x) getFriend west) < 0.6} } >= 0}
         };
         if (_id != DUWS_rally_id) exitWith {};
-        // A live flag here means the loop broke on the enemy test, not on the rally already being gone.
-        private _overrun = !isNull _flag;
+        // A live tent here means the loop broke on the enemy test, not on the rally already being gone.
+        private _overrun = !isNull _tent;
         [] call fnc_rally_remove;
         if (_overrun) then {
             ["rally_lost"] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
@@ -68,9 +70,9 @@ fnc_rally_place = {
 };
 
 fnc_rally_spawned = {
-    params ["_flag"];
+    params ["_tent"];
     // Null once replaced or lost: that respawn is not the new rally's to pay.
-    if (isNull _flag) exitWith {};
+    if (isNull _tent) exitWith {};
     DUWS_rally_spawns = DUWS_rally_spawns - 1;
     if (DUWS_rally_spawns <= 0) exitWith { [] call fnc_rally_remove };
     "duws_rally" setMarkerText format [localize "STR_DUWS_T_RALLY_MARKER", DUWS_rally_spawns];

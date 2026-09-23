@@ -1,9 +1,9 @@
 #include "duws\shared\includes\action_style.hpp"
 
 sleep 1;
-// The respawn menu does not report which position was picked, so arriving beside the flag is what
+// The respawn menu does not report which position was picked, so arriving beside the tent is what
 // spends a rally respawn.
-private _rally = missionNamespace getVariable ["DUWS_rally_flag", objNull];
+private _rally = missionNamespace getVariable ["DUWS_rally_tent", objNull];
 if (!isNull _rally && {player distance _rally < 20}) then { [_rally] remoteExec ["fnc_rally_spawned", 2] };
 
 // Explicit strip: the engine dresses a respawned unit in its class kit, free gear on every death.
