@@ -36,8 +36,8 @@ tilt until the scores mean something.
 The code under `src/duws/server/warcom/opcom/` holds it: `belief/` the perception, the influence grid, whose
 layers `_fri` (known OPFOR) and `_ene` (believed BLUFOR) the scoring reads, the traffic layer and the observation
 tracker the guns are gated on; `taskings/` the orders, streaming, the carry (ferry and taxi) and the fire mission;
-`appraisal/` the action list, supply trucks, the roster, the commit orders, the Recruit rows, the Arty action, the
-siting pass and the pick; and
+`appraisal/` the action list, the holding and build buys, supply trucks, the roster, the commit orders,
+the Recruit rows, the Arty action, the siting pass, the score and the pick; and
 `appraisal/value/` the score's terms, one file each — every Value, the need and cover fields, `P(win)` and the delay. The debug harness (`fnc_opcom_debug_task.sqf` and the
 Debug menu's OPCOM pages) runs the orders by hand and spends no AP. New work holds to:
 
