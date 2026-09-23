@@ -65,11 +65,11 @@ Two terms carry one meaning each throughout:
 **WIP.** 4B is shipped and 4C.1 remains. Every weight, Value, price and constant here is a first pass and changes
 as it is played.
 
-Each tick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
+On each pick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
 lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget,
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
-may yield. One pick per tick by default; the difficulty setting changes the rate
+may yield. One pick every other tick by default (0.5 picks per tick); the difficulty setting changes the rate
 ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's class, targets, gate, price and execute, and from 4C.2 its Value and Cost.
 
@@ -120,7 +120,7 @@ on being uncontested, so the term would read 1 wherever it was legal to spend. A
 
 ### The pick
 
-From 4C.2 the pick is three steps, run each tick over the gated candidates.
+From 4C.2 the pick is three steps over the gated candidates.
 
 1. Score every survivor by the formula above.
 2. Keep the top `OPCOM_PICK_TOP` (10) by score and drop the rest.
