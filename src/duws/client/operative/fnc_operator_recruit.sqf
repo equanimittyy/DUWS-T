@@ -51,7 +51,8 @@ _selected_index = lbCurSel 1500;
 lbSetColor [1500, _selected_index, [0, 1, 0, 1]];
 
 duws_operator_list select lbCurSel 1500 set [7,"Operating"];
-ctrlSetText [1013, format["%1",_selected_soldier_status]];
+ctrlSetText [1013, "Operating"];
+((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor [0, 1, 0, 1];
 
 buttonSetAction [1601, "hint ""This operative is already active in this theatre of operation"""]; 
 ctrlSetText [1601, "ALREADY DEPLOYED"];	

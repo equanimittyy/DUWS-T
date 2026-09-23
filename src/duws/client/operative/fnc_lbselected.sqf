@@ -1,4 +1,4 @@
-// Locality: client -- wired to onLBSelChanged in shared/includes/operative_menu.hpp:70, which
+// Locality: client -- wired to onLBSelChanged in shared/includes/operative_menu.hpp, which
 // spells it fnc_LBselected.
 _selected_index = lbCurSel 1500;
 
@@ -34,6 +34,7 @@ _selected_soldier_status = _selected_soldier select 7;
  ctrlSetText [1016, format["%1 minutes",_selected_soldier_timeheal]];
  
 
+private _statusColor = [1, 1, 1, 1];
 switch (_selected_soldier_status) do
 {
   case "Ready": {
@@ -44,11 +45,13 @@ switch (_selected_soldier_status) do
   case "Injured": {
 	buttonSetAction [1601, "hint ""You can't deploy this operative, he must be fully healed first"""]; 
 	ctrlSetText [1601, "CANNOT DEPLOY"];	
+	_statusColor = [1, 0, 0, 1];
   };
   
   case "Operating": {
 	buttonSetAction [1601, "hint ""This operative is already active in this theatre of operation"""]; 
 	ctrlSetText [1601, "ALREADY DEPLOYED"];	
+	_statusColor = [0, 1, 0, 1];
   };
   
   case "Healed": {
@@ -56,5 +59,6 @@ switch (_selected_soldier_status) do
 	ctrlSetText [1601, "REDEPLOY (0 CP)"];	
   };  
 };
+((uiNamespace getVariable ["duws_operative_display", displayNull]) displayCtrl 1013) ctrlSetTextColor _statusColor;
 
 
