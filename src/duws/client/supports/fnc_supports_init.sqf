@@ -130,7 +130,7 @@ fnc_support_cost_bracket = {
 // AP tier per support key; unlisted = tier 1 (always available). Mirrors the vehicle tier rungs, so
 // radio towers and garage expansions are earned in lockstep with the strikes/vehicles their tier unlocks.
 DUWS_support_tiers = [
-	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
+	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
 	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3], ["offensive_heavy", 3],
 	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4], ["intel3", 4],
 	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5], ["intel4", 5]
