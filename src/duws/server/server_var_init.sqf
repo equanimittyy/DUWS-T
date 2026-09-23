@@ -766,6 +766,13 @@ OPCOM_HP_MIX = createHashMapFromArray [
         ["MINEFIELD_AT", 0.5], ["MINEFIELD_AP", 0.5]
     ]]
 ];
+// Per archetype, the share of OPCOM's live units each recruit-menu row is steered toward, read as OPCOM_HP_MIX is.
+OPCOM_RECRUIT_MIX = createHashMapFromArray [
+    ["balanced", createHashMapFromArray [
+        ["rifles", 1], ["weapons_team", 1], ["recon_foot", 1], ["truck", 1], ["recon_car", 1], ["boat", 1],
+        ["apc", 1], ["ifv", 1], ["mbt", 1], ["recon_heli", 1], ["trans_heli", 1], ["attack_heli", 1], ["jet", 1]
+    ]]
+];
 // Supply trucks sit outside OPCOM_CAP_UNITS: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
 // roster stall every supply buy.
 OPCOM_CAP_UNITS = 50;

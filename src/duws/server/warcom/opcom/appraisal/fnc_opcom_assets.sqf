@@ -44,18 +44,11 @@ DUWS_fnc_opcom_assetsOf = {
     ((["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 0) getOrDefault [_type, []]
 };
 
-// -> a build's Value factor: the mix key's target count over its standing count, each +1 so a key with none standing
-// reads finite, and 1 outside the archetype's mix.
 DUWS_fnc_opcom_hpMix = {
     params ["_key"];
-    private _mix = OPCOM_HP_MIX getOrDefault [DUWS_opcom_archetype, createHashMap];
-    private _w = _mix getOrDefault [_key, 0];
-    if (_w <= 0) exitWith { 1 };
-    private _counts = (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 1;
-    private _wSum = 0;
-    private _n = 0;
-    { _wSum = _wSum + _y; _n = _n + (_counts getOrDefault [_x, 0]) } forEach _mix;
-    (_n * _w / _wSum + 1) / ((_counts getOrDefault [_key, 0]) + 1)
+    private _row = OPCOM_HP_MIX getOrDefault [DUWS_opcom_archetype, createHashMap];
+    [_row, (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 1, _key, keys _row]
+        call DUWS_fnc_opcom_mixFactor
 };
 
 DUWS_fnc_opcom_hpOpen = {

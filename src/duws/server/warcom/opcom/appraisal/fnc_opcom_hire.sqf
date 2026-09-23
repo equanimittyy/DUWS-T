@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The Recruit rows, one per recruit-menu row (opcom_plan.md §Appraisal): a
-// combatant row offers every open zone under its garrison cap, a recon or transport row the open zone nearest the demand
-// blocking it.
+// combatant row offers every open zone under its garrison cap, a recon or transport row the open zone nearest the
+// demand blocking it.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_nearestOpen = {
@@ -25,6 +25,22 @@ DUWS_fnc_opcom_homedSweep = {
     _out
 };
 
+// -> [menu row -> live units, the rows the faction can field now]. The mix is shared out over the fieldable rows only:
+// a row the faction cannot hire would hold a share nothing can fill, and push every other row over its own.
+DUWS_fnc_opcom_rosterSweep = {
+    private _counts = createHashMap;
+    {
+        if ((_x get "status") isNotEqualTo "dead") then {
+            private _r = _x get "menu";
+            _counts set [_r, (_counts getOrDefault [_r, 0]) + 1];
+        };
+    } forEach DUWS_opcom_taskings;
+    private _open = (keys DUWS_opcom_recruitMenu) select {
+        (((DUWS_opcom_recruitMenu get _x) select 0) findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" }) < 0
+    };
+    [_counts, _open]
+};
+
 DUWS_fnc_opcom_recruitTargets = {
     params ["_row"];
     private _menu = DUWS_opcom_recruitMenu getOrDefault [_row, []];
@@ -47,12 +63,16 @@ DUWS_fnc_opcom_recruitTargets = {
     };
     if (_zones isEqualTo []) exitWith { [] };
     ([_flags, _force, _moveType, _zones, _row] call DUWS_fnc_opcom_hireDemand) params ["_demand", "_at"];
+    private _roster = ["roster", DUWS_fnc_opcom_rosterSweep] call DUWS_fnc_opcom_tickCached;
+    private _mix = [OPCOM_RECRUIT_MIX getOrDefault [DUWS_opcom_archetype, createHashMap], _roster select 0, _row,
+        _roster select 1] call DUWS_fnc_opcom_mixFactor;
 
     if ("noncombat" in _flags || {"recon" in _flags}) exitWith {
         private _z = if (_demand <= 0) then { [] } else { [_at, _zones] call DUWS_fnc_opcom_nearestOpen };
         if (_z isEqualTo []) then { [] } else {
             private _zk = _z select 0;
-            [[[_row, _zk], _price, format ["Recruit %1 at %2", _row, [_zk] call DUWS_fnc_opcom_zoneLabel], _demand]]
+            [[[_row, _zk], _price, format ["Recruit %1 at %2", _row, [_zk] call DUWS_fnc_opcom_zoneLabel],
+                _mix * _demand]]
         }
     };
 
@@ -60,7 +80,8 @@ DUWS_fnc_opcom_recruitTargets = {
     _zones apply {
         _x params ["_zk", "", "", "_worth", "_exp"];
         [[_row, _zk], _price, format ["Recruit %1 at %2", _row, [_zk] call DUWS_fnc_opcom_zoneLabel],
-            _demand max ([_worth, _exp, _force, [_zk] call DUWS_fnc_opcom_zoneForce] call DUWS_fnc_opcom_hireDefense)]
+            _mix * (_demand max
+                ([_worth, _exp, _force, [_zk] call DUWS_fnc_opcom_zoneForce] call DUWS_fnc_opcom_hireDefense))]
     }
 };
 
