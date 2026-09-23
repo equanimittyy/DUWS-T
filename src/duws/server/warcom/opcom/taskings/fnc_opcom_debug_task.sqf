@@ -117,8 +117,9 @@ switch (_verb) do {
     case "list": {
         ["INFO", "OPCOMDBG", format ["%1 tasking(s):", count DUWS_opcom_taskings]] call fnc_log;
         {
-            ["INFO", "OPCOMDBG", format ["  id %1 %2/%3 pos %4 eff %5/%6 leg %7/%8 %9",
-                _x get "id", _x get "order", _x get "status",
+            ["INFO", "OPCOMDBG", format ["  id %1 %2 %3/%4 pos %5 eff %6/%7 leg %8/%9 %10",
+                _x get "id", toUpper (_x getOrDefault ["menu", [(_x get "comp") param [0, ""]] call DUWS_fnc_tokenName]),
+                _x get "order", _x get "status",
                 (_x get "pos") apply { round _x },
                 round (_x get "effForce"), round (_x get "fullForce"),
                 _x get "leg", count (_x get "route"), _x get "moveType"]] call fnc_log;

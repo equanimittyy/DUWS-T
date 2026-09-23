@@ -135,21 +135,24 @@ private _taskN = missionNamespace getVariable ["DUWS_dbgOpcomTaskN", 0];
 for "_i" from (count _tasks) to (_taskN - 1) do { deleteMarkerLocal format ["duws_opcom_task_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomTaskN", count _tasks];
 
-// Tasking red at half alpha, untexted: a route chain reads as subordinate to the unit box it runs from,
-// and stays legible where two cross.
+// One endpoint per tasking, tasking red at half alpha: drawing the whole leg chain cost more markers than
+// every other layer together, and the destination plus what lands there is the part that reads. Texted with
+// the same code as its unit box, so an endpoint is traceable to the tasking that drew it.
 private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
 {
+    _x params ["_wp", "_wtxt"];
     private _nm = format ["duws_opcom_wp_%1", _forEachIndex];
     if (_forEachIndex >= _wpN) then {
-        createMarkerLocal [_nm, _x];
+        createMarkerLocal [_nm, _wp];
         _nm setMarkerShapeLocal "ICON";
-        _nm setMarkerTypeLocal "waypoint";
+        _nm setMarkerTypeLocal "selector_selectable";
         _nm setMarkerColorLocal "#(0.9,0.2,0.2,1)";
         _nm setMarkerSizeLocal [0.6, 0.6];
         _nm setMarkerAlphaLocal 0.5;
     } else {
-        _nm setMarkerPosLocal _x;
+        _nm setMarkerPosLocal _wp;
     };
+    _nm setMarkerTextLocal _wtxt;
 } forEach _wps;
 for "_i" from (count _wps) to (_wpN - 1) do { deleteMarkerLocal format ["duws_opcom_wp_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomWpN", count _wps];

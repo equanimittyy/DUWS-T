@@ -75,14 +75,33 @@ private _wps = [];
         case ((_x get "ridingOn") >= 0 || {(_x getOrDefault ["strandTicks", 0]) > 0}): {" [R]"};
         default {""};
     };
-    private _tag = format ["%1%2:%3%4", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code, toUpper (_x get "order"), _flag];
+    // What lands on arrival, in the tag and again on the endpoint: the order alone never says whether a MOVE
+    // ends in a garrison, a build or a delivery.
+    private _errand = _x getOrDefault ["errand", []];
+    private _intent = switch (true) do {
+        case (_errand isNotEqualTo []): {
+            private _kind = toUpper (_errand select 0);
+            switch (_kind) do {
+                case "BUILD": {format ["BUILD %1", _errand param [2, "?"]]};
+                case "MINE": {format ["MINE %1", (_errand param [2, []]) param [0, "?"]]};
+                default {format ["%1 t%2", _kind, _errand param [1, "?"]]};
+            };
+        };
+        case ((_x getOrDefault ["returnZone", ""]) isNotEqualTo ""): {format ["GARRISON %1", _x get "returnZone"]};
+        case ((_x getOrDefault ["targetZone", ""]) isNotEqualTo ""): {format ["TAKE %1", _x get "targetZone"]};
+        case ((_x getOrDefault ["interceptKey", ""]) isNotEqualTo ""): {format ["HUNT %1", _x get "interceptKey"]};
+        case ((_x get "order") isEqualTo "guard"): {"HOLD"};
+        default {""};
+    };
+    private _tag = format ["%1%2:%3%4%5", ["", "[*]"] select ((_x get "grp") isNotEqualTo ""), _code,
+        toUpper (_x get "order"), ["", " " + _intent] select (_intent isNotEqualTo ""), _flag];
     private _p = _x get "pos";
     _tasks pushBack [[_p select 0, _p select 1], _icon, _tag];
-    // From the current leg: a walked leg sits behind the unit box and only clutters the chain.
+    // Endpoint only, and none once the route is walked out: the leg chain was the overlay's heaviest layer.
     private _route = _x get "route";
-    for "_i" from (_x get "leg") to (count _route - 1) do {
-        private _rp = _route select _i;
-        _wps pushBack [_rp select 0, _rp select 1];
+    if ((_x get "leg") < count _route) then {
+        private _rp = _route select (count _route - 1);
+        _wps pushBack [[_rp select 0, _rp select 1], [_code, format ["%1 %2", _code, _intent]] select (_intent isNotEqualTo "")];
     };
 } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
 
