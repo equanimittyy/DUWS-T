@@ -57,7 +57,7 @@ carried unused for exactly this reason and has since been dropped.
 The `freeze` disposal mode (`server/misc/fnc_site_stream_init.sqf`) stops simulating a base's
 occupants — a FOB's twelve soldiers and its turret ring, and the HQ's garrison — once no player has
 been within `base_garrison_sleep_range` for `base_garrison_sleep_delay`. Nothing culled them
-before, so the count grew with the campaign: the FOB cap is `floor(zones x 0.7)`, which is 168
+before, so the count grew with the campaign: the FOB cap is `floor(zones / 2)`, which is 120
 permanently-simulated soldiers on a 20-zone map.
 
 **Frozen, not deleted, which is the one place this departs from zone streaming.** A zone garrison is

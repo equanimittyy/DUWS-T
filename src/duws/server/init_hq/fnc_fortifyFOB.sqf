@@ -187,7 +187,7 @@ _fob setVariable ["FOB_turrets", _turrets];
 
 // Filed under the site as its emplacement occupant, so the freeze reaches the ring and not only the
 // guards beside it. A turret is a vehicle with a full FSM, so five per FOB at up to
-// floor(zones x 0.7) FOBs is the larger half of what an idle base costs.
+// floor(zones / 2) FOBs is the larger half of what an idle base costs.
 //
 // The FOB building and its props are deliberately not registered: freezing a static building buys
 // almost nothing, and it's the object carrying the base's action menu and respawn point -- a saving

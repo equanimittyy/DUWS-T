@@ -7544,6 +7544,10 @@
                 <Original>FOB Manager</Original>
                 <English>FOB Manager</English>
             </Key>
+            <Key ID="STR_DUWS_T_fob_manager_count">
+                <Original>FOB Manager (%1/%2)</Original>
+                <English>FOB Manager (%1/%2)</English>
+            </Key>
             <Key ID="STR_DUWS_T_naaz6hhb">
                 <German>Entferne eine FOB</German>
                 <Chinesesimp>移除一个FOB</Chinesesimp>
