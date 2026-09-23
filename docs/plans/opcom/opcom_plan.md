@@ -78,9 +78,10 @@ action's class, targets, gate, price and execute, and from 4C.2 its Value and Co
   target uniformly at random, then one of its targets uniformly. It runs only in `random` mode, switched on from the
   Debug menu's OPCOM page ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)); the mode is `off` by
   default. Prices are the first-pass figures ([§What AP buys](#what-ap-buys)).
-- **4C — Weighting.** The score, the shortlist and the roll are built with `archWeight` held at 1 (4C.2), and every
-  wired row carries a Value. 4C.1 comes last and adds the archetype on top: `archWeight[archetype][actionClass]`
-  ([§Archetype](#archetype)) multiplies a whole class's scores, which is the only change it makes.
+- **4C — Weighting.** The score, the shortlist and the roll are built (4C.2), and every wired row carries a Value.
+  `archWeight[archetype][actionClass]` ([§Archetype](#archetype)) multiplies a whole class's scores, which is the
+  only change it makes; it is wired, and Balanced holds it at 1. 4C.1 comes last and adds the other archetypes and
+  the setting that picks one.
 
 The rows run in the order listed, which is not their chunk number: the Values were finished before new actions were
 written, and the archetype comes last.
@@ -92,7 +93,7 @@ written, and the archetype comes last.
 | **4C.2** Balance | **Shipped** (`appraisal/`) — the score, the shortlist and the roll; `P(win)`; every wired row's Value; the traffic, need and cover fields on the grid overlay; the delay discount; the savings goal; the siting pass; the difficulty setting on the OPCOM debug page. The commit Cost landed with 4B.3, the first chunk to stake a unit | `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`; `OPCOM_BANK_SCORE`; `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`; where a mortar pit or artillery battery sites (the gun reach and standoff); the zone prices; whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce buys back the rest; the exposure distances (5 / 10 km, 0.2 floor); `OPCOM_SAVE_HORIZON`; the town worth factor (5); `OPCOM_AP_PER_KM` and `OPCOM_AP_RAPPORT`; `OPCOM_VALUE_HALFLIFE`; `OPCOM_NEED_BASE_RATIO` (2.5) and `OPCOM_AP_PER_FORCE` (1); the asset prices; what a radio's reach, an OP's eyes and a gun's fire missions are worth, in place of the coverage stand-ins, and the radio's defend ramp (`OPCOM_DEFEND_NEAR` 500 m, `OPCOM_DEFEND_FAR` 2 km) against its reach; whether belief carries a threat category, so a build sites a typed counter (AT under armour, AA under air); `OPCOM_PWIN_FLOOR`; `OPCOM_GRID_ZONE_ENEMY_FORCE` (8), the force OPCOM believes every BLUFOR zone holds, which sets its baseline caution; what the commander does with a surplus, and whether it must spend rather than only can (absorbers: combatant Recruit, reinforcing over upgrading, mustering); `OPCOM_SCOUT_SHARE`; `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)) |
 | **4B.3** Attack, QRF, Scout | **Shipped** (`appraisal/`, `taskings/`) — the roster and the free-unit check, the commit Cost, Attack, Intercept (QRF), Scout, one Recruit row per menu row, and land-taxi | `OPCOM_COMMIT_HOLD`; `OPCOM_GARRISON_HEAL_RATE`; whether the player can see the commander act on stale belief, and whether the intel system surfaces it; whether a fast airborne player crosses a recon's K between its once-per-tick samples unsensed, fixed by a larger K against airborne players if it does; whether one attacker per zone is too thin once Phase 5 can muster; whether a taxi should set its riders down short of the target rather than on it; whether a ground taxi needs its pickup drive timed out, which no carry phase does today; `OPCOM_FERRY_BOARD_GROUND`; `OPCOM_ROAD_DETOUR` |
 | **4B.4** One-gun Arty | **Shipped** (`appraisal/`) — the Arty action over the shipped fire mission: the belief target sweep, the clustered-force Value, the spread, the cooldown, the HQ and own-ground exclusions and the telegraph ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | How often a sighting is fresh enough and close enough to shell at all, now that belief is the only channel; how bunched BLUFOR actually stands in play, since that is what the Value now turns on — an emplacement fields three pieces, so a pit covers 69 m on a low draw for 12 AP and a battery 127 m for 36, which puts a mortar over Bank on a lone squad and a battery over it only from two squads together, and `OPCOM_ARTY_LETHAL` and `OPCOM_ARTY_ROUNDS` are the levers; whether weighting by the clustered share of all fresh belief double-counts what the score already does, because a dispersed BLUFOR raises every Attack and Intercept candidate by itself; whether the random rounds draw should stand at all, because a high draw widens the cover but costs in step, so it only pays when the extra ground holds more force; whether the telegraph's `OPCOM_ARTY_WARN` gives the players enough to move on. The creep is not this chunk's: a walked barrage needs an assault to walk it for, so it lands with the `arty` template in Phase 5 |
-| **4C.1** Archetype | The campaign setting, the weight table and the archetype override on the OPCOM debug page | Each archetype's weights, Bank's included |
+| **4C.1** Archetype | The campaign setting, the other archetypes' records and the archetype override on the OPCOM debug page; the weight table is wired as each record's `actionWeight` | Each archetype's weights, Bank's included |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
 
@@ -100,8 +101,8 @@ From 4C.2, the score is one number — expected AP returned per AP spent:
 score = archWeight[archetype][actionClass] × P(win) × Value / Cost
 ```
 
-`Value` and `Cost` are both Army Power, so the units agree; `archWeight` tilts by action class
-([§Archetype](#archetype)); `P(win)` scales to the expected return.
+`Value` and `Cost` are both Army Power, so the units agree; `archWeight`, the playing archetype's `actionWeight`,
+tilts by action class ([§Archetype](#archetype)); `P(win)` scales to the expected return.
 
 **Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Scout and Arty. A purchase
 does not: Reinforce, Fortify, Build, Rapport and Recruit stock ground OPCOM already holds, and their site is gated
@@ -705,7 +706,8 @@ fields none). It is stored in the persistence snapshot and never re-rolled. A Ra
 diary note shows "Random", and nothing in play reveals it. The OPCOM debug page overrides it for testing. It is not
 difficulty (`opfor_ai_skill` sets aim). A single authored per-class table, Bank included: bank, defensive,
 offensive, buildup, recon and indirect, the guns' own class, so an archetype leans on indirect fire with no per-type
-table; further leans (armour) become rows. 4C.1 builds the setting and the table.
+table; further leans (armour) become rows. The table is each record's `actionWeight`, and it is relative: weighting
+every class alike changes no pick, so Balanced's 1 in every class is the baseline. 4C.1 builds the setting.
 
 | Archetype | Weights toward |
 |---|---|
@@ -714,9 +716,9 @@ table; further leans (armour) become rows. 4C.1 builds the setting and the table
 | Aggressive | Attack, Rapport; leaves ground thin |
 
 Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_archetypes.sqf`) holding its
-`hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the one the commander plays. Only
-Balanced's record stands until 4C.1 adds the others and sets the archetype from the campaign setting; an archetype
-with no record builds and hires with no mix.
+`actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the one the commander
+plays. Only Balanced's record stands until 4C.1 adds the others and sets the archetype from the campaign setting; an
+archetype with no record weighs every class at 1 and builds and hires with no mix.
 
 Beyond `archWeight`, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
