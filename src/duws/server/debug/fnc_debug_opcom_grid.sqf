@@ -5,7 +5,7 @@
 if (!isServer) exitWith {};
 params ["_requester"];
 
-#define PATH_STRIDE 10
+#define PATH_STRIDE 5
 // The zone-port map is OPCOM init's last store, so its presence means every store below is built.
 if (isNil "DUWS_opcom_zonePort") exitWith {
     ["DEBUG", "OPCOM", "overlay gather: OPCOM init not finished, nothing sent"] call fnc_log;
@@ -106,7 +106,7 @@ private _path = [];
         private _rp = _route select (count _route - 1);
         _wps pushBack [[_rp select 0, _rp select 1], [_code, format ["%1 %2", _code, _intent]] select (_intent isNotEqualTo "")];
     };
-    // Every tenth leg, never the whole chain: that was the overlay's heaviest layer. Stepped by route index rather
+    // Every fifth leg, never the whole chain: that was the overlay's heaviest layer. Stepped by route index rather
     // than from the current leg, so a marker holds still while the unit walks toward it.
     for "_i" from (ceil (_leg / PATH_STRIDE) * PATH_STRIDE) to (count _route - 2) step PATH_STRIDE do {
         private _rp = _route select _i;

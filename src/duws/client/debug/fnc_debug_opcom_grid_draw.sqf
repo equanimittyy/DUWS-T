@@ -145,7 +145,7 @@ private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
         createMarkerLocal [_nm, _wp];
         _nm setMarkerShapeLocal "ICON";
         _nm setMarkerTypeLocal "selector_selectable";
-        _nm setMarkerColorLocal "#(1,0.3,0.5,1)";
+        _nm setMarkerColorLocal "#(0.6,0.05,0.1,1)";
         _nm setMarkerSizeLocal [0.6, 0.6];
         _nm setMarkerAlphaLocal 0.8;
     } else {
@@ -156,7 +156,7 @@ private _wpN = missionNamespace getVariable ["DUWS_dbgOpcomWpN", 0];
 for "_i" from (count _wps) to (_wpN - 1) do { deleteMarkerLocal format ["duws_opcom_wp_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomWpN", count _wps];
 
-// Untexted and fainter than the endpoint, so the chain reads as the way there, not as stops.
+// Untexted, so the chain reads as the way there, not as stops.
 private _pathN = missionNamespace getVariable ["DUWS_dbgOpcomPathN", 0];
 {
     private _nm = format ["duws_opcom_path_%1", _forEachIndex];
@@ -164,9 +164,9 @@ private _pathN = missionNamespace getVariable ["DUWS_dbgOpcomPathN", 0];
         createMarkerLocal [_nm, _x];
         _nm setMarkerShapeLocal "ICON";
         _nm setMarkerTypeLocal "waypoint";
-        _nm setMarkerColorLocal "#(1,0.3,0.5,1)";
+        _nm setMarkerColorLocal "#(0.6,0.05,0.1,1)";
         _nm setMarkerSizeLocal [0.6, 0.6];
-        _nm setMarkerAlphaLocal 0.5;
+        _nm setMarkerAlphaLocal 0.8;
     } else {
         _nm setMarkerPosLocal _x;
     };
