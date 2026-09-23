@@ -7,8 +7,11 @@
 // The AI threshold is a parameter because raising a position and holding one differ: two AI to
 // bring it up, one to keep it there. That hysteresis stops a zone flickering off around the
 // edges of the force that just took it.
+//
+// _playersOnly drops the AI arm, for ground BLUFOR hold: the garrison on it is friendly AI inside its own
+// ring, and a site held awake by its own men never sleeps, so it never re-raises for a returning player.
 if (!isServer) exitWith { false };
-params ["_pos", "_radius", ["_minAI", 2]];
+params ["_pos", "_radius", ["_minAI", 2], ["_playersOnly", false]];
 
 // Nobody flying raises a site: a jet crosses several rings a minute and a helicopter orbits them,
 // each one a full composition placed for someone who never landed. What is being carried decides it
@@ -20,14 +23,16 @@ private _arrived = {
 };
 
 private _men = [];
-{
-	if (_x call _arrived) then {
-		if (_x isKindOf "CAManBase") then {
-			if (side _x == WEST) then { _men pushBackUnique _x };
-		} else {
-			{ if (side _x == WEST) then { _men pushBackUnique _x } } forEach crew _x;
+if (!_playersOnly) then {
+	{
+		if (_x call _arrived) then {
+			if (_x isKindOf "CAManBase") then {
+				if (side _x == WEST) then { _men pushBackUnique _x };
+			} else {
+				{ if (side _x == WEST) then { _men pushBackUnique _x } } forEach crew _x;
+			};
 		};
-	};
-} forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
+	} forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
+};
 if (count _men >= _minAI) exitWith { true };
 ((call BIS_fnc_ListPlayers) findIf { (_pos distance _x) < _radius && {_x call _arrived} }) >= 0

@@ -23,8 +23,9 @@
 // Both sides spell a role the same way in the same position, so a composition names a role bare and
 // the side supplies the man (DUWS_teamRosters). The four shared sections hold matching keys in
 // matching order, which lets the confirmation screen put a role on one line across two columns.
-// SPECIAL is what genuinely belongs to one side (BLUFOR's boat taxi and rescue pilot, OPFOR's supply
-// trucks and mission-thread roles); filing those shared would gap the other column at every row below.
+// SPECIAL is what does not line up across the two sides (BLUFOR's boat taxi and rescue pilot, OPFOR's
+// supply and mission-thread roles); filing those shared would gap the other column at every row below.
+// Transport trucks sit there on both sides: OPFOR's pair has ammo and repair beside it and BLUFOR's does not.
 //
 // The request-menu catalogues (blufor_RQST_UNITS / blufor_RQST_VEHICLES) are absent on purpose:
 // variable-length ordered lists with no OPFOR counterpart, fnc_faction_rqst_list already has
@@ -131,6 +132,10 @@ if (_side == "opfor") exitWith {[
     ["blufor_SPECOPS_SNIPER_X",    "OPERATORS",   "man",        true,    "B_sniper_F"],
     ["blufor_SPECOPS_EXP_X",       "OPERATORS",   "man",        true,    "B_recon_exp_F"],
     ["blufor_SPECOPS_ENG_X",       "OPERATORS",   "man",        true,    "B_engineer_F"],
+
+    // What a friendly garrison's reserve wave rides in. Optional and vanilla-defaulted: no BLUFOR file names one.
+    ["blufor_COVERED_TRUCK_X",     "SPECIAL",     "vehicle",    false,   "B_Truck_01_covered_F"],
+    ["blufor_TRANS_TRUCK_X",       "SPECIAL",     "vehicle",    false,   "B_Truck_01_transport_F"],
 
     ["blufor_HELI_PILOT_X",        "SPECIAL",     "man",        true,    "B_Helipilot_F"],
     ["blufor_BOAT_ARMED_X",        "SPECIAL",     "vehicle",    true,    "B_Boat_Armed_01_minigun_F"],

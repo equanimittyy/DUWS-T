@@ -16,7 +16,7 @@ private _admit = {
     params ["_rec"];
     if (_rec isEqualTo []) exitWith {};
     _rec params ["_key", "_isStatic", "_layer", "_pos", "_weight", "_reach"];
-    if (!_isStatic) exitWith { DUWS_opcom_gridAwake set [_key, [_pos, _reach]] };
+    if (!_isStatic) exitWith { DUWS_opcom_gridAwake set [_key, [_pos, _reach, _layer]] };
     if (_weight > 0) then {
         [[_layer] call _static, _pos, _weight, _reach] call DUWS_fnc_opcom_deposit;
         DUWS_opcom_gridSrc set [_key, [_layer, _pos, _weight, _reach]];
@@ -49,8 +49,8 @@ if (DUWS_opcom_gridDirtyAll) then {
 private _fri = +DUWS_opcom_gridStaticFri;
 private _ene = +DUWS_opcom_gridStaticEne;
 {
-    _y params ["_pos", "_reach"];
-    [_fri, _pos, [_x] call DUWS_fnc_garrisonForce, _reach] call DUWS_fnc_opcom_deposit;
+    _y params ["_pos", "_reach", ["_layer", "fri"]];
+    [[_fri, _ene] select (_layer isEqualTo "ene"), _pos, [_x] call DUWS_fnc_garrisonForce, _reach] call DUWS_fnc_opcom_deposit;
 } forEach DUWS_opcom_gridAwake;
 [_fri, _ene] call DUWS_fnc_opcom_gridMobile;
 DUWS_opcom_grid_fri = _fri;

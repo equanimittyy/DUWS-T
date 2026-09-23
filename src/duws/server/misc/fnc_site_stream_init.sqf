@@ -244,14 +244,27 @@ fnc_site_near = {
 // passes neither, to catch any jet at cruise. Both match the poller's prebuilt committed-air list, so
 // wake and re-confirmation can't disagree.
 fnc_site_bluforOrAir = {
-    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0], ["_playerAir", false]];
-    if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0], ["_playerAir", false], ["_playersOnly", false]];
+    if ([_pos, _ring, _minAI, _playersOnly] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
     ((_pos nearEntities [["Air"], _airRing]) findIf {
         ({ side _x == WEST } count (crew _x)) > 0
         && {_airSpeed <= 0 || {speed _x < _airSpeed}}
         && {!_playerAir || {unitIsUAV _x || {(crew _x) findIf { isPlayer _x } >= 0}}}
     }) >= 0
+};
+
+// Whether an attacker is in reach: live OPFOR, or an OPCOM tasking still virtual, which stands on no unit
+// list. Unguarded -- a caller holding a prebuilt position list gates on that before asking.
+fnc_site_hostileNear = {
+    params ["_pos", "_ring"];
+    if (([_pos, _ring, EAST] call fnc_side_count_at) > 0) exitWith { true };
+    if (isNil "DUWS_opcom_taskings") exitWith { false };
+    private _near = false;
+    {
+        if (!_near && {(_y get "grp") isEqualTo ""} && {((_y get "pos") distance2D _pos) < _ring}) then { _near = true };
+    } forEach DUWS_opcom_taskings;
+    _near
 };
 
 // Replaces a thread per zone plus a sleeper per FOB plus two town loops with one. The saving is the
@@ -273,6 +286,7 @@ fnc_site_poller = {
         // within reach of the site being asked about.
         // side group, not side: a disguised player is captive, and a captive unit reads CIVILIAN.
         private _west = (allUnits select { side group _x == WEST }) apply { getPosATL _x };
+        private _playerPos = _players apply { getPosATL _x };
         // WEST aircraft positions for occupant-declared air rings, off the vehicle list (not
         // allUnits): one entry per aircraft, not per crew seat, and far shorter to walk.
         // _westAir: every WEST aircraft, for an AA ring that must catch any jet, AI-flown included.
@@ -319,6 +333,8 @@ fnc_site_poller = {
                 // fraction of a second apart from it.
                 if (_o getOrDefault ["driven", false]) then { continue };
                 private _ring = _radius + (_o get "buffer");
+                private _bluHolds = (_o getOrDefault ["enemyAware", false])
+                    && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"};
                 private _here = if (_o get "aiAware") then {
                     // Fewer AI hold a site than raise one -- hysteresis that stops a zone flickering
                     // off around the edges of the force that just took it.
@@ -327,8 +343,9 @@ fnc_site_poller = {
                     } else { _o get "minAI" };
                     // Gates the expensive helper rather than replacing it: fnc_duws_bluforNear still
                     // decides every ground arrival, so zones and towns keep deciding it the same way.
-                    private _ground = (_west findIf { _x distance _pos < _ring }) >= 0
-                        && { [_pos, _ring, _min] call fnc_duws_bluforNear };
+                    private _cheap = if (_bluHolds) then { _playerPos } else { _west };
+                    private _ground = (_cheap findIf { _x distance _pos < _ring }) >= 0
+                        && { [_pos, _ring, _min, _bluHolds] call fnc_duws_bluforNear };
                     // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring, only for
                     // occupants that declare one (AA, or a zone), against the prebuilt list --
                     // bluforNear discounts anything airborne, so this is a site's whole reach against
@@ -357,12 +374,10 @@ fnc_site_poller = {
 
                 // The test above watches for BLUFOR, which on BLUFOR ground would leave an assault walking
                 // into an empty site and taking it off men who never rendered.
-                if (!_here && {_o getOrDefault ["enemyAware", false]}
-                    && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"}) then {
-                    // A virtual attacker has no unit to count, so its stored position is the whole answer.
-                    _here = ((_eastVirt findIf { _x distance2D _pos < _ring }) >= 0)
-                        || {((_east findIf { _x distance _pos < _ring }) >= 0)
-                            && {([_pos, _ring, EAST] call fnc_side_count_at) > 0}};
+                if (!_here && {_bluHolds}
+                    && {((_east findIf { _x distance _pos < _ring }) >= 0)
+                        || {(_eastVirt findIf { _x distance2D _pos < _ring }) >= 0}}) then {
+                    _here = [_pos, _ring] call fnc_site_hostileNear;
                 };
 
                 // Latch-clear and wake happen on different passes: the arrival test can't distinguish

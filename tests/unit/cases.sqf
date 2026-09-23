@@ -976,12 +976,14 @@ private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_facti
      "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_HMG",
      "opfor_TURRET_GMG", "opfor_TURRET_MORTAR"]] call fnc_assertEq;
 // The keys no shipped faction file defines -- the three roles the shared rosters name that BLUFOR
-// has never had, and the statics and the gun added after the faction files were written. Marking one
-// required fails every paste a player already has, including one copied out of factions/MODERN/.
+// has never had, the statics and the gun added after the faction files were written, and the BLUFOR
+// transport trucks a friendly garrison reinforces in. Marking one required fails every paste a player
+// already has, including one copied out of factions/MODERN/.
 ["faction_schema: the keys no faction file defines are optional",
     (_rows select {!(_x select 3)} apply {_x select 0}),
     ["blufor_AA_SOLDIER_X", "blufor_AT_SOLDIER_X", "blufor_SNIPER_SOLDIER_X",
-     "blufor_MEDIC_X", "blufor_TURRET_MORTAR", "opfor_MEDIC_X", "opfor_TURRET_AA",
+     "blufor_MEDIC_X", "blufor_TURRET_MORTAR", "blufor_COVERED_TRUCK_X", "blufor_TRANS_TRUCK_X",
+     "opfor_MEDIC_X", "opfor_TURRET_AA",
      "opfor_TURRET_AT", "opfor_TURRET_GMG", "opfor_TURRET_MORTAR", "opfor_ARTY_X",
      "opfor_BOAT_ARMED_X"]] call fnc_assertEq;
 

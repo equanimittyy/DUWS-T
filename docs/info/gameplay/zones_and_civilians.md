@@ -626,7 +626,7 @@ about.
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the garrison is raised: the tier composition less its lost tokens | tier + bar |
 | You leave for 2 min | The zone's own men deleted by roster, props stowed. Losses are already on the ledger | tier + the bar it will return at |
 | You stand inside the radius, beat it to 15 % **and** outnumber OPFOR over radius + 400 m, all for 20 s | Ownership flips. First-capture bonus, AP swings. Tier drops to 0 and the ledger is forgotten. Survivors fight on where they stand and are collected once no player is within 500 m. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
-| You buy a tier on it | Tier I, a tenth of its tokens fielded and the rest owed. Your garrison raises when you next come within radius + 400 m, and wears down on the same ledger | tier + bar |
+| You buy a tier on it | Tier I, a tenth of its tokens fielded and the rest owed. Your garrison raises when you next come within radius + 400 m, crews the prefab's guns, and wears down on the same ledger | tier + bar |
 | OPFOR retake (`DUWS_fnc_siteTaken`) | OPFOR stand inside the radius and outnumber BLUFOR over radius + 400 m for 20 s, players inside or not — and beat your garrison first, if you built one. Tier reset to I, a tenth of its tokens kept, rounded up. Streaming re-latches | **`Mobilising`** |
 | Either commander spends | Fortify buys composition, reinforce buys strength — the same two sinks a town has, landed with no truck. Whoever holds the ground may buy for it | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at | tier + bar |
@@ -771,12 +771,20 @@ does — the same latch, the same grace, the same worker. It takes no holds: tho
 arrive on ground they already own, and a BLUFOR garrison never arrives, it is built
 ([§BLUFOR inherits nothing](#blufor-inherits-nothing)). There is nothing to defer.
 
-**One test had to widen for it.** The shared presence answer watches for BLUFOR, which on BLUFOR ground
-would leave an assault walking into an empty site and taking it off men who never rendered. A site
-declaring `enemyAware` also wakes, while its ground is BLUFOR's, for an attacker inside the ring —
-including a virtual OPCOM one, which stands on no unit list and would otherwise be invisible to it.
-That wake is also what renders the attacker: `fnc_opcom_task_step` renders a tasking within K of any
-live WEST group, so the garrison standing up is what brings the fight into the world.
+**One test had to widen for it, and one had to narrow.** The shared presence answer watches for BLUFOR,
+which on BLUFOR ground would leave an assault walking into an empty site and taking it off men who never
+rendered. A site declaring `enemyAware` also wakes, while its ground is BLUFOR's, for an attacker inside
+the ring — including a virtual OPCOM one, which stands on no unit list and would otherwise be invisible
+to it (`fnc_site_hostileNear`, the one place that question is answered). That wake is also what renders
+the attacker: `fnc_opcom_task_step` renders a tasking within K of any live WEST group, so the garrison
+standing up is what brings the fight into the world.
+
+The narrowing is the friendly half. On ground BLUFOR hold, presence counts **players only** — a garrison
+the player built is friendly AI standing inside its own ring, so the AI arm of `fnc_duws_bluforNear`
+would read it as an arrival and hold the site awake for the rest of the campaign. A site that never
+sleeps never re-raises, which is how the player would come back to an empty town. The helper takes a
+`_playersOnly` flag for it, and the poller, the zone raise worker and the town raise worker all set it
+off the same owner derivation.
 
 **Bases are a special case, and fast travel is why.** The `freeze` disposal mode freezes their garrisons
 rather than deleting it, and the usual reason given — that rebuilding would hand back every soldier

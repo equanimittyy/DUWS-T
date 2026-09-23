@@ -38,10 +38,13 @@ if (_kind isEqualTo "zone") then {
 	private _key = [_epos] call fnc_zone_key;
 	private _reach = round ((_pick select 2) + OPCOM_GRID_SPREAD);
 	if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _epos) < 1}) >= 0) then {
+		private _tag = ["ledger", "live"] select ([_key] call DUWS_fnc_garrisonHeld);
 		_lines = [
 			format ["[FORCE EMISSION] %1", _key],
 			"  BLU-held zone -> enemy layer",
-			format ["  emitting: %1 force (nominal)", OPCOM_GRID_ZONE_ENEMY_FORCE],
+			format ["  emitting: %1 force (%2, floor %3)",
+				round (([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE),
+				_tag, OPCOM_GRID_ZONE_ENEMY_FORCE],
 			format ["  reach: %1 m   dist: %2 m", _reach, round _best]
 		];
 	} else {

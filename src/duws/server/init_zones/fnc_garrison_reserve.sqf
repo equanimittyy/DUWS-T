@@ -307,8 +307,7 @@ DUWS_fnc_classIsArmed = {
 // Resolved through tokenClass so a pooled auto-detected variant draws the same as a hand-written class;
 // empties dropped. Weighted toward an unarmed hull -- a taxi needs no gunner and can't be held up trading
 // fire on the run in -- so armed is only drawn when the faction offers nothing else. "" when the side
-// defines neither key; the caller then walks the squad in. BLUFOR is that side today -- no faction file
-// names a BLUFOR truck -- so a garrison the player owns reinforces on foot.
+// defines neither key; the caller then walks the squad in.
 DUWS_fnc_reserveTruckClass = {
     params [["_side", "OPF"]];
     private _opts = ["truck", "transport"] apply { [_x, _side] call DUWS_fnc_tokenClass };

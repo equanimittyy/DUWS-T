@@ -51,10 +51,11 @@ DUWS_fnc_opcom_gridZone = {
     params ["_zp", "_zs"];
     private _key = [_zp] call fnc_zone_key;
     private _reach = _zs + OPCOM_GRID_SPREAD;
-    // BLU-held ground is known enemy ground, a territorial fact the commander has for free, so it deposits a baseline
-    // even unsighted.
+    // Known enemy ground, a territorial fact the commander has for free, read at the true force of whatever the
+    // player built on it. The nominal is the floor, for ground holding no garrison.
     if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) exitWith {
-        [_key, true, "ene", _zp, OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
+        [_key, !([_key] call DUWS_fnc_garrisonHeld), "ene", _zp,
+            ([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
     };
     // Live men and a deployed centre's statics die between ticks with no ledger write.
     [_key, !([_key] call DUWS_fnc_garrisonHeld) && {_key in DUWS_stowed}, "fri", _zp, [_key] call DUWS_fnc_garrisonForce, _reach]
@@ -67,10 +68,10 @@ DUWS_fnc_opcom_gridTown = {
     private _key = [_i] call fnc_town_site_key;
     private _pos = getPos ((missionNamespace getVariable ["civ_locations", []]) select _i);
     private _reach = ((missionNamespace getVariable ["civ_radii", []]) param [_i, 500]) + OPCOM_GRID_SPREAD;
-    // A town BLUFOR garrison is enemy ground on the same terms a BLU-held zone is: known to be held, read at
-    // the nominal rather than at its true force, which the commander has no way to see.
+    // A BLUFOR town garrison is enemy ground on the same terms a BLU-held zone is, read at its true force.
     if (([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU") exitWith {
-        [_key, true, "ene", _pos, OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
+        [_key, !([_key] call DUWS_fnc_garrisonHeld), "ene", _pos,
+            ([_key] call DUWS_fnc_garrisonForce) max OPCOM_GRID_ZONE_ENEMY_FORCE, _reach]
     };
     [_key, !([_key] call DUWS_fnc_garrisonHeld), "fri", _pos, [_key] call DUWS_fnc_garrisonForce, _reach]
 };

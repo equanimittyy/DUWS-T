@@ -91,7 +91,7 @@ DUWS_fnc_manStatics = {
             // Replaced rather than abandoned: the gun is a defence the zone still counts on, and the
             // man may have been shot over the seconds the drops take.
             if (!alive _unit) then {
-                _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
+                _unit = _grp createUnit [[opfor_SOLDIER_X, blufor_SOLDIER_X] select (side _grp == WEST), getPos _gun, [], 0, "NONE"];
             };
             private _placed = ((vectorUp _gun) select 2) > STATIC_STANDING_DOT
                 && {[_gun, _unit] call DUWS_fnc_seatStatic};
@@ -136,10 +136,14 @@ DUWS_fnc_crewCompositionStatics = {
 };
 
 // The prefab crews guns at build time and never runs again, so a stowed-then-redeployed composition
-// comes back with empty guns unless re-crewed here. Skipped once BLUFOR holds the zone: the emplacements are then the player's, the same reason zone compositions persist rather than release on capture.
+// comes back with empty guns unless re-crewed here. Crewed for whoever holds the zone: the emplacements
+// go with the ground, and only a raise reaches this, so BLUFOR man them exactly when they have a garrison.
 DUWS_fnc_zoneManStatics = {
     params ["_pos", "_key"];
-    if !(_pos in WARCOM_zones_controled_by_OPFOR) exitWith {};
+    private _side = [_key] call DUWS_fnc_garrisonSideOf;
+    private _army = [EAST, WEST] select (_side isEqualTo "BLU");
+    private _man = [opfor_SOLDIER_X, blufor_SOLDIER_X] select (_side isEqualTo "BLU");
+    private _skill = [opfor_ai_skill, blufor_ai_skill] select (_side isEqualTo "BLU");
     private _roster = [_key] call fnc_zone_roster;
     private _statics = (DUWS_compositions getOrDefault [_key, []]) select {
         !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"}
@@ -153,10 +157,10 @@ DUWS_fnc_zoneManStatics = {
     if (count _guns == 0) exitWith {};
     // Every empty gun is crewed regardless of attrition: attrition thins what a garrison can field
     // (men, vehicles), and a static weapon is neither -- it's already standing. A worn-down zone therefore keeps the same guns and fewer of everything else.
-    private _types = _guns apply {opfor_SOLDIER_X};
-    private _spawn = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
+    private _types = _guns apply {_man};
+    private _spawn = _pos findEmptyPosition [0, 30, _man];
     if (count _spawn == 0) then { _spawn = _pos };
-    private _grp = [_spawn, EAST, _types, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+    private _grp = [_spawn, _army, _types, [], [], _skill] call BIS_fnc_spawnGroup;
     _grp deleteGroupWhenEmpty true;
     [_guns, _grp] call DUWS_fnc_manStatics;
     // Appended to the roster like everything DUWS_fnc_raiseGarrison raises: a blunt radius sweep has
@@ -217,11 +221,10 @@ DUWS_fnc_zoneRaiseWorker = {
     // a patrol that turns back doesn't trigger a full rebuild for someone already leaving. Air uses the same terms the poller's wake does: a committed aircraft holds the raise, where discounting anything airborne would confirm an air wake straight back off.
     sleep 5;
     private _reach = _size + DUWS_streamArrivalMargin;
-    private _confirmed = [_pos, _reach, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true] call fnc_site_bluforOrAir;
     // The same second reading the poller's wake took, so the two cannot disagree and strand the site.
-    if (!_confirmed && {([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU"}) then {
-        _confirmed = ([_pos, _reach, EAST] call fnc_side_count_at) > 0;
-    };
+    private _blu = ([_key] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU";
+    private _confirmed = [_pos, _reach, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true, _blu] call fnc_site_bluforOrAir;
+    if (!_confirmed && _blu) then { _confirmed = [_pos, _reach] call fnc_site_hostileNear };
     if (!_confirmed) exitWith {
         missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
     };

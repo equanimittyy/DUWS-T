@@ -180,6 +180,8 @@ DUWS_spawnVehicles = [
 // own bare name and reaches createVehicle as a class that does not exist.
 // --DUWS-UNITCOMP BEGIN name="BLUFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=blufor_--
 DUWS_spawnVehiclesBlu = [
+    ["truck",      "blufor_COVERED_TRUCK_X",  "", 0],
+    ["transport",  "blufor_TRANS_TRUCK_X",    "", 0],
     ["car",        "blufor_ARMED_CAR1_X",     "", 60],
     ["at_car",     "blufor_ARMED_CAR1_X",     "", 60],
     ["aa_car",     "blufor_ARMED_CAR1_X",     "", 60],

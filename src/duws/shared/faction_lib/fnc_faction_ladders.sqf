@@ -121,6 +121,9 @@ fnc_faction_ladders = {
         ["blufor_SPECOPS_EXP_X",      [_spec_exp, _exp, _eng, _grunt, _infantry]],
         ["blufor_SPECOPS_ENG_X",      [_spec_eng, _eng, _exp, _grunt, _infantry]],
 
+        ["blufor_COVERED_TRUCK_X",    [_carTransport, _carArmed]],
+        ["blufor_TRANS_TRUCK_X",      [_carTransport, _carArmed]],
+
         ["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt]],
         ["blufor_BOAT_ARMED_X",       [_boatArmed]],
         ["blufor_BOAT_CREW_X",        [_crew]],

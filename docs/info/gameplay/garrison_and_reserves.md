@@ -21,6 +21,12 @@ The model is one side's or the other's, never both. `DUWS_fnc_garrisonSideOf {ke
 ledger call, composition filter and raise below: a zone answers to `WARCOM_zones_controled_by_BLUFOR`,
 a town to the reputation bands (`fnc_civ_townOwner`), and anything else answers `"OPF"`.
 
+A garrison crews whatever the ground carries, so a zone the player holds mans its prefab's guns with their
+own men; only a raise reaches that pass, which is why it happens exactly when they have a garrison and not
+before. OPCOM reads a BLUFOR garrison at its **true force**, not a nominal — the commander is omniscient
+about what the player has built, and the territorial figure it used to read is now only the floor for
+BLUFOR ground carrying no garrison.
+
 Both sides field the **same tier rows**. A token resolves through the asking side's vehicle table
 (`DUWS_spawnVehicles` / `DUWS_spawnVehiclesBlu`) and its own earned Army Power, so one row raises either
 army out of its own hulls. Both tables are fenced, and the composition lint fails a vehicle token only
@@ -35,6 +41,7 @@ What differs is how a garrison comes to exist, and it is the one asymmetry in th
 | Inherited on a flip | nothing — the ledger is forgotten and the tier zeroed | nothing, same rule |
 | Beaten town garrison | files back to tier I, unrefunded | files back to tier 0 |
 | Mobilising hold | held, because OPFOR arrive on ground they already own | none: a BLUFOR garrison never arrives, it is built |
+| Who wakes the site | any BLUFOR, players and AI alike | players, and the attacker — a friendly garrison is AI inside its own ring, and counting it would pin the site awake for good |
 
 A flip in either direction zeroes the tier and forgets the ledger, so neither side is ever handed the
 other's attrition or their spending. Survivors of the beaten garrison fight on where they stand
@@ -187,8 +194,8 @@ sorts the candidates by player count present, most-crowded first; and spawns
 pool and delivers them until the site's group count reaches its ceiling, the pool empties, or the
 global throttle is hit. Infantry tokens now ride in trucks, batched — consecutive squads share one
 until it's at least half full, then it's dispatched — rather than walking in on foot; a vehicle
-token drives itself in, unbatched. The truck is drawn from the site's own side, and no BLUFOR faction
-file names one, so a BLUFOR wave walks.
+token drives itself in, unbatched. The truck is drawn from the site's own side; BLUFOR's pair of transport
+keys is vanilla-defaulted, since no faction file names one, so a friendly wave still rides.
 
 Two triggers fire the pass: a 5-minute heartbeat (`DUWS_fnc_garrisonReserveLoop`,
 `DUWS_zoneReservePollPeriod = 300`) for the steady grind, and a debounced

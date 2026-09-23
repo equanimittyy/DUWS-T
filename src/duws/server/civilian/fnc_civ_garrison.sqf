@@ -36,10 +36,9 @@ private _fnc_raise = {
     // A town BLUFOR hold woke for its attacker as readily as for its owner, so it re-tests for either.
     sleep 5;
     private _reach = _radius + ((DUWS_streamProfiles get "town_gar") select 0);
-    private _confirmed = [_centre, _reach] call fnc_duws_bluforNear;
-    if (!_confirmed && {_side isEqualTo "BLU"}) then {
-        _confirmed = ([_centre, _reach, EAST] call fnc_side_count_at) > 0;
-    };
+    private _blu = _side isEqualTo "BLU";
+    private _confirmed = [_centre, _reach, 2, _blu] call fnc_duws_bluforNear;
+    if (!_confirmed && _blu) then { _confirmed = [_centre, _reach] call fnc_site_hostileNear };
     if (!_confirmed) exitWith {
         missionNamespace setVariable [RAISE_SLOT(_i), []];
     };
