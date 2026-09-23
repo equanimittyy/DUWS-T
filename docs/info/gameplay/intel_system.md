@@ -56,14 +56,15 @@ map and the array disagreeing, and both return whether they changed anything so 
 "revealed something" from "that was already on the map".
 
 The writers also make the announcement, so every source reports a reveal the same way. It goes to every
-player, because the position lands on every player's map.
+player, because the position lands on every player's map. Contacts are the exception: a payout plots a
+batch of them at once, so their line is spoken by the payout rather than by the writer.
 
 | Kind | Announcement |
 |---|---|
 | Zone | a *Zone Discovered* card, and an Overlord line naming the zone and the nearest settlement (`fnc_place_name`) |
 | Town | a *Town Discovered* card naming the town |
 | Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
-| Contact | an Allseer line naming the settlement it was fixed near (`fnc_place_name`) |
+| Contact | an Allseer line, one for the whole batch: the settlement it was fixed near (`fnc_place_name`) for a single contact, the count for several |
 
 `fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
 caller: the recon mission marks its target under its own confirm line rather than beneath a second
@@ -78,26 +79,29 @@ and their towns still have to be revealable. In the other direction `fnc_civ_tow
 the map.
 
 **`fnc_intel_payout` is the single point where intel becomes something.** Every faucet calls it: the body
-search, all six side-mission sites, and the civilian menu when it lands. It picks a *kind* at random from
-those holding something right now, then lets that kind pick its own member, and reports that it had
-nothing left rather than silently awarding nothing.
+search, all six side-mission sites, the civilian menu when it lands, and the Intelligence Center's clock.
+
+**A payout has two halves and pays both.** The pool half reveals one hidden position; the contact half
+plots a random number of OPCOM units where they are marching. They answer different questions — *where is
+the war*, and *what is the enemy doing right now* — so making them compete for a single draw only ever
+starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
+only when both do.
+
+The pool half picks a *kind* at random from the buckets holding something, then lets that kind pick its
+own member.
 
 | Kind | Picks | State |
 |---|---|---|
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
 | An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
-| An OPCOM unit under orders | at random, from the virtual ones not already plotted | built ([§A contact is a snapshot](#a-contact-is-a-snapshot)) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
 zone is a target the campaign points the player at, so which one comes next is a strategic question and
 random is right — ranked by distance it would march them outward in a spiral. A town is somewhere the
 player goes to *do* something, so one on the far side of the map is worth no more to them than nothing
-happening, and nearest wins. A contact takes the zone's rule rather than the town's: what it is worth is
-knowing where the enemy is moving, which the nearest march answers no better than any other, and ranked by
-distance the bucket would report the same home sector on every roll. One merged pool would force a single
-rule on all three. The consequence to know when tuning: in hardcore every bucket usually holds stock, so
-roughly half of all intel goes to towns.
+happening, and nearest wins. One merged pool would force a single rule on both. The consequence to know
+when tuning: in hardcore both buckets usually hold stock, so roughly half of the pool half goes to towns.
 
 Every bucket draws from the unrevealed set rather than from everything and filtering after the draw.
 Drawing from every zone and then testing whether it happened to be hidden — the shape this replaced —
@@ -106,15 +110,15 @@ already found.
 
 **A dry bucket drops out of the draw, not out of the feature.** `_kinds` is rebuilt from what has stock on
 every call, so the last zone being found silently turns the coin flip into towns-only and nothing latches.
-When every bucket is empty the payout speaks *"Nothing we don't already know"* itself rather than returning
-quietly: four of the six side-mission sites hand their result to a `remoteExec` and never see the return
-value, so a line spoken at each faucet is a line four of them cannot say. It goes to the earner where there
-is one, and from Overlord to everyone where there is not, because a mission completing is everyone's news.
+When both halves come up empty the payout speaks *"Nothing we don't already know"* itself rather than
+returning quietly: four of the six side-mission sites hand their result to a `remoteExec` and never see the
+return value, so a line spoken at each faucet is a line four of them cannot say. It goes to the earner where
+there is one, and from Overlord to everyone where there is not, because a mission completing is everyone's news.
 
-Hardpoints and contacts are what refill a dry pool, being the two kinds OPFOR produce during play
+Hardpoints and contacts are what OPFOR keep producing during play
 ([§What is hidden](#what-is-hidden-depends-on-when-it-came-into-existence)). Zones and towns are generated
-once, so once found they are found for the campaign. A campaign that has been mapped therefore still has a
-bucket with stock in it, as long as the enemy is moving.
+once, so once found they are found for the campaign, and a fully mapped campaign pays the pool half nothing
+for the rest of its run — the contact half still has the enemy's movements to report.
 
 The town bucket needs somewhere to measure from, so every faucet passes an origin in. The body search and
 the four hold-action sites have a player to ask; the two rescue missions pay out from a server thread that
@@ -124,7 +128,7 @@ quietly running on two different rules is worse than it paying a zone instead.
 
 ## Four sources, four prices
 
-Proximity, the body search, the civilian menu and the Intelligence Centre are not redundant: proximity costs
+Proximity, the body search, the civilian menu and the Intelligence Center are not redundant: proximity costs
 the walk in, the body search costs a firefight, the menu costs coins and a town's patience, and the centre
 costs CP and AP once and then pays on a clock. Four prices for one commodity is the point — a hardcore
 player out of one currency still has a route.
@@ -135,7 +139,7 @@ player out of one currency still has a route.
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
-| Intelligence Centre | by the odds its levels buy — one roll per OPCOM tick ([§The Intelligence Centre](#the-intelligence-centre)) |
+| Intelligence Center | by the odds its levels buy — one roll per OPCOM tick ([§The Intelligence Center](#the-intelligence-center)) |
 
 **A third of a combat group is searchable, so a fight is a reliable route to intel rather than a lottery.**
 A much lower rate read in play as a broken action: a player who cleared a position and found no prompt on
@@ -145,7 +149,7 @@ a combat group pays *something* most of the time and pays intel far less often t
 
 The sources draw from one pool, so they compete rather than stack, and the hidden-map phase ends when the
 last hidden position is found however that happened. A fourth source therefore shortens that phase rather
-than enriching it, and the Intelligence Centre is that fourth source knowingly: it is paid for, it is the
+than enriching it, and the Intelligence Center is that fourth source knowingly: it is paid for, it is the
 only source that pays while the player does nothing else, and a faster route through the hidden map is
 exactly what the purchase buys. What keeps it from being only that is the contact bucket, which refills — a
 centre standing over a mapped campaign still has the enemy's movements to report.
@@ -287,10 +291,21 @@ Only virtual taskings under `move`, `capture` or `intercept` are eligible. A str
 player's bubble already, and its record's position is frozen at the cell it de-virted in, so plotting it
 would mark ground the player is standing on with a figure that is wrong twice over. A garrison is not
 eligible either: it is the content of a zone, and the zone reveal is what puts that on the map.
-`DUWS_intel_contactIds` holds what is plotted right now, so the draw never re-plots a unit whose markers
+`DUWS_intel_contactIds` holds what is plotted right now, so a payout never re-plots a unit whose markers
 still stand.
 
-## The Intelligence Centre
+**One payout plots a random number of them, uniform over zero to every eligible unit.** Zero is a real
+answer — a sector with nothing moving in it — and it costs the payout nothing, because the pool half has
+already paid. The batch is announced once rather than per contact: eight Allseer lines queued behind each
+other would still be arriving minutes later, and only a single-contact batch has one place worth naming.
+
+**The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
+ground whose owner they have never found names nothing, and in hardcore that blank map is the opening the
+first zone is there to end — intel that jumped straight to enemy movements would answer a question the
+player has not yet earned the right to ask. The gate reads the revealed flag in `zone_namePOS_pairs`
+against `WARCOM_zones_controled_by_OPFOR`, so a zone the player has taken does not hold it open.
+
+## The Intelligence Center
 
 Four permanent support levels, `intel1` to `intel4`, gated in order like the radio towers and the vehicle
 garage, on the AP tier ladder at 2/3/4/5. Each level is bought once for the team and never refunds.
@@ -309,8 +324,8 @@ The roll is per five seconds, so the constant is small and the mean wait is the 
 56, 37 and 28 minutes at levels I to IV. Deliberately slower than the sources a player fights for, because
 this is the one that pays while they do nothing.
 
-A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays whatever the
-campaign still has hidden, on the same table every other source draws from. The centre is a faucet, never a
+A winning roll calls `fnc_intel_payout` with no origin and no earner, which is to say it pays both halves
+on the same terms every other source gets: one hidden position, and whatever OPCOM has moving. The centre is a faucet, never a
 channel of its own — giving it private payouts is how "one place decides what intel is worth" stops being
 true.
 

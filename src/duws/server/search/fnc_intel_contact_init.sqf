@@ -57,6 +57,9 @@ DUWS_fnc_intel_contactRead = {
 // Plots one tasking and returns whether it plotted anything, the same contract fnc_zone_reveal and
 // fnc_hardpoint_reveal keep, so fnc_intel_payout can tell a reveal from a no-op. Markers are global
 // (created on the server, no *Local): a contact lands on every player's map, so the team is told.
+//
+// It does not announce, where the other reveal writers do: one payout plots a whole batch, and a line
+// per contact would queue eight of them behind each other. The batch line is spoken at the payout.
 DUWS_fnc_intel_contactReveal = {
     params ["_t"];
     private _id = _t get "id";
@@ -90,8 +93,6 @@ DUWS_fnc_intel_contactReveal = {
     };
 
     DUWS_intel_contactIds pushBack _id;
-    [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE",
-        [_pos] call fnc_place_name]] remoteExec ["fnc_duws_dialogue", 0];
     ["INFO", "INTEL", format ["contact plotted: tasking %1 (%2, %3) at %4",
         _id, _t getOrDefault ["menu", "?"], _labelKey, mapGridPosition _pos]] call fnc_log;
 
