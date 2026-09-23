@@ -9,7 +9,7 @@ clicked = false;
 // Advisory only -- it skips a map-click window the player cannot pay for. fnc_uav_scanner
 // makes the real decision on the server, up to 60 s later.
 if (commandpointsblu1 < _cost) exitWith {
-	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+	hint localize "STR_DUWS_T_e95mc4lv";
 	sleep 30;
 	["uav_recon"] call fnc_support_comm_add;
 };
@@ -29,16 +29,15 @@ if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 // other click mode: as a hint it was only ever readable in the gap before the player opened
 // the map themselves, and not at all if they called this with the map already up.
 openMap true;
-// A future gamemode adds its own case above the default. The brief sits in the default rather
-// than in a "MODERN" case so that mode inherits one: now that this forces the map open, a
-// version with no line of its own would strand the player on a map saying nothing.
+// The brief sits in the default, not a "MODERN" case: the map is forced open, so a gamemode with
+// no line of its own would strand the player on a map saying nothing.
 switch (VERSION_X) do {
 	default { [localize "STR_DUWS_T_01np5zjk"] call fnc_map_prompt; };
 };
 
-// Closing the map is how the player backs out now that this opens it, so the wait ends there
-// too rather than holding the click slot for the rest of the timer. Tested after the sleep:
-// visibleMap does not read true on the frame openMap is issued.
+// Closing the map is how the player backs out, so the wait ends there rather than holding the
+// click slot for the rest of the timer. Tested after the sleep: visibleMap does not read true on
+// the frame openMap is issued.
 while {_timer>0 AND !clicked} do {
 	_timer = _timer-1;
 	sleep 1;

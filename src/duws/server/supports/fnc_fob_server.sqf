@@ -18,9 +18,6 @@ str(_markername) setMarkerSize [2.5, 2.5];
 [_foundPickupPos] call fnc_baseRangeMarker;
 
 sleep 5;
-_speaker = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_fobcall";
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 // A FOB is a building and a ring of fortifications appearing out of nothing, and anyone stood on
 // that ground sees it pop in around them.
@@ -59,14 +56,14 @@ if (count _fadePlayers > 0) then {
 	["IN", _fadePlayers] call fnc_baseFade;
 };
 
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_26nbk6p8"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_fobcall", _fobname]] remoteExec ["fnc_duws_dialogue", 0];
 
 // The garrison, and the one patrol that walks the perimeter with it -- no extra taskPatrol groups:
 // they scattered the FOB's infantry across 170 m of open ground on separate random routes, and the
 // reguard action rebuilt none of them, so a FOB that lost them never got them back.
 
-// Registered as a frozen site rather than given a watcher thread of its own. A ten-FOB campaign
-// carried ten permanent sleepers; they are one pass of the shared poller now.
+// Registered as a frozen site, not given a watcher thread of its own: ten FOBs would be ten
+// permanent sleepers, where the shared poller covers them in one pass.
 // The same key fnc_fortifyFOB files its turret ring under.
 private _fobKey = format ["FOB_%1", netId _fob];
 _fob setVariable ["DUWS_siteKey", _fobKey];

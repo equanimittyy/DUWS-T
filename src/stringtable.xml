@@ -6235,13 +6235,6 @@
                 <Original>Rounds ready. Splash in 30 seconds.</Original>
                 <English>Rounds ready. Splash in 30 seconds.</English>
             </Key>
-            <Key ID="STR_DUWS_T_26nbk6p8">
-                <German>Die FOB wurde errichtet.</German>
-                <Spanish>El PdA ha sido desplegado.</Spanish>
-                <Chinesesimp>FOB已经建立。</Chinesesimp>
-                <Original>The FOB has been deployed.</Original>
-                <English>The FOB has been deployed.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplydropcall">
                 <German>Action Squad an "Overlord 1-1" – Supply-Drop an meiner Position angefordert, over.</German>
                 <Spanish>Action Squad a "Overlord 1-1" – solicito supply drop en mi posición, over.</Spanish>
@@ -6268,8 +6261,8 @@
                 <German>"Overlord 1-1" an Action Squad – wir haben gerade eine Voroperationsbasis im AO eingerichtet. Geht dort vorbei und macht eine Pause, solange ihr bereitsteht.</German>
                 <Spanish>"Overlord 1-1" a Action Squad – acabamos de establecer una base operativa avanzada en el AO. Pásate por allí y reposa mientras estás en espera.</Spanish>
                 <Chinesesimp>行动组，我们刚刚在战区部署了前线作战基地。待命的时候去那里坐坐吧。</Chinesesimp>
-                <Original>To Alpha 1-1, we've established a forward operating base in the AO. Use it to regroup while you stand by.</Original>
-                <English>To Alpha 1-1, we've established a forward operating base in the AO. Use it to regroup while you stand by.</English>
+                <Original>To all units, be advised, we've established a forward operating base in the AO. FOB %1 is now available for staging and re-arm.</Original>
+                <English>To all units, be advised, we've established a forward operating base in the AO. FOB %1 is now available for staging and re-arm.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropcall">
                 <German>Hier ist "Overlord 1-1" – Achtung, eine Fallschirmjägertruppe steht Ihnen jetzt untergeordnet.</German>
@@ -6912,22 +6905,22 @@
                 <Spanish>Solicito un Puesto de avanzada en mi posición...</Spanish>
                 <German>Fordere FOB auf meiner Position an...</German>
                 <Chinesesimp>申请一个FOB在我的位置...</Chinesesimp>
-                <Original>Requesting a FOB on my position...</Original>
-                <English>Requesting a FOB on my position...</English>
+                <Original>Overlord, this is Alpha 1-1. Requesting the deployment of a FOB on my position.</Original>
+                <English>Overlord, this is Alpha 1-1. Requesting the deployment of a FOB on my position.</English>
             </Key>
             <Key ID="STR_DUWS_T_8zn96920">
                 <Spanish>Solicitud denegada. Hay enemigos demaciado cerca de la posición.</Spanish>
                 <German>Anforderung abgelehnt. Es befinden sich Feinde in der Nähe der Position.</German>
                 <Chinesesimp>申请拒绝，附近还有敌人。</Chinesesimp>
-                <Original>Request denied. Enemies are too close to this position.</Original>
-                <English>Request denied. Enemies are too close to this position.</English>
+                <Original>Request denied Alpha 1-1. Enemies are too close to your position.</Original>
+                <English>Request denied Alpha 1-1. Enemies are too close to your position.</English>
             </Key>
             <Key ID="STR_DUWS_T_1k60dqrv">
                 <Spanish>Recibido, el PdA está siendo desplegado...</Spanish>
                 <German>Verstanden, FOB wird errichtet...</German>
                 <Chinesesimp>收到，FOB正在部署。</Chinesesimp>
-                <Original>Roger that, the FOB is being deployed...</Original>
-                <English>Roger that, the FOB is being deployed...</English>
+                <Original>Request received Alpha 1-1. A FOB is being deployed to your location.</Original>
+                <English>Request received Alpha 1-1. A FOB is being deployed to your location.</English>
             </Key>
             <Key ID="STR_DUWS_T_45np59yv">
                 <Spanish>El VANT ha sido enviado a las coordenadas designadas, por favor espere para más inteligencia.</Spanish>
@@ -7582,19 +7575,12 @@
                 <Original>Leave the FOB manager</Original>
                 <English>Leave the FOB manager</English>
             </Key>
-            <Key ID="STR_DUWS_T_m7h89a4s">
-                <Spanish>Demaciados PdA</Spanish>
-                <German>Zu viele FOBs</German>
-                <Chinesesimp>FOB太多了</Chinesesimp>
-                <Original>Too many FOBs</Original>
-                <English>Too many FOBs</English>
-            </Key>
             <Key ID="STR_DUWS_T_6vjxo4eb">
                 <Spanish>PdA máximos: %1 (50%2 de las zonas enemigas) - Intenta borrar alguno.</Spanish>
                 <German>Maximale FOBs: %1 (50%2 der Feindzonen) - Versuche vorher eine zu löschen.</German>
                 <Chinesesimp>最大FOB数是: %1 (敌区的50%2) - 试试去掉一个。</Chinesesimp>
-                <Original>Maximum FOBs: %1 (50%2 of enemy zones) - try deleting one.</Original>
-                <English>Maximum FOBs: %1 (50%2 of enemy zones) - try deleting one.</English>
+                <Original>Maximum FOBs: %1 - try deleting one.</Original>
+                <English>Maximum FOBs: %1 - try deleting one.</English>
             </Key>
         </Container>
         <Container name="Special Modes (Ravage / WBK)">

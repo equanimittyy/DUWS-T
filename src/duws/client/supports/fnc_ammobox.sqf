@@ -10,7 +10,7 @@ _location = getpos _target;
 
 if !(["CP", _cost] call fnc_pool_spend) exitWith  
 {
-  ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+  hint localize "STR_DUWS_T_e95mc4lv";
 };
 
 _speaker = localize "STR_DUWS_T_actionteam";
@@ -24,7 +24,6 @@ _delivery = [_location, 1600] call fnc_spawn_delivery_transport;
 _group = _delivery select 0;
 _vehicle = _delivery select 1;
 
-// state kept on the vehicle rather than a global onStation
 _vehicle setVariable ["DUWS_onStation", false];
 
 	

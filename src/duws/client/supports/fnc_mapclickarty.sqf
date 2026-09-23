@@ -33,7 +33,7 @@ _fnc_restoreCommMenu = {
 // Advisory only -- it skips a map-click window the player cannot pay for. fnc_arty makes
 // the real decision, up to 45 s later.
 if (commandpointsblu1 < _cost) exitWith {
-	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+	hint localize "STR_DUWS_T_e95mc4lv";
 	sleep 30;
 	call _fnc_restoreCommMenu;
 };
@@ -47,10 +47,8 @@ if !([_supportype] call fnc_support_claim) exitWith {
 	call _fnc_restoreCommMenu;
 };
 
-// Laser no longer needs a map designation: the jet loiters over the caller and drops on the
-// player's own laser. Skip the click flow and commit at the caller's position. fnc_arty owns the
-// slot release; here we only mirror the click path's in-range reset and the cooldown before the
-// menu entry comes back.
+// Laser skips the click flow: the jet loiters over the caller and drops on the player's own laser.
+// fnc_arty owns the slot release, so this path only mirrors the click path's in-range reset and cooldown.
 if (_supportype == 4) exitWith {
 	[getPos player, _salvos, _radius, _interval, _rps, _supportype, _cost, _ammotype] spawn fnc_arty;
 	waitUntil {sleep 0.5; !isNil "arty_Blufor_close"};
@@ -73,9 +71,9 @@ if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = t
 openMap true;
 [localize "STR_DUWS_T_4sqljq58"] call fnc_map_prompt;
 
-// Closing the map is how the player backs out now that this opens it, so the wait ends there
-// too rather than holding the click slot for the rest of the timer. Tested after the sleep:
-// visibleMap does not read true on the frame openMap is issued.
+// Closing the map is how the player backs out, so the wait ends there rather than holding the
+// click slot for the rest of the timer. Tested after the sleep: visibleMap does not read true on
+// the frame openMap is issued.
 while {_timer > 0 AND !clicked} do {
 
 	_timer = _timer - 1;
@@ -90,7 +88,6 @@ openMap false;
 // paths it reaches instead -- and the slot expires on its own besides, so a caller that drops
 // out between the two cannot strand its support type for the rest of the campaign.
 if (clicked) then {
-	// make sure blufor has someone in range
 	waitUntil {sleep 0.5;!isNil "arty_Blufor_close"};
 	if !(arty_Blufor_close) exitWith {
 		[_supportype] remoteExec ["fnc_support_release", 2];
@@ -98,7 +95,6 @@ if (clicked) then {
 		arty_Blufor_close = nil;
 	};
 	arty_Blufor_close = nil;
-	// 5 min until next request
 	sleep 300;
 } else {
 	[_supportype] remoteExec ["fnc_support_release", 2];

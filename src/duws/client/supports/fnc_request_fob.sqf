@@ -15,7 +15,7 @@ if ([_position] call fnc_pos_near_enemy) exitWith {
 // Advisory only -- it saves a player with no CP the 10 s site survey below. The charge
 // itself is the server's call, once a site has been cleared.
 if (commandpointsblu1 < _cost) exitWith {
-  ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+  hint localize "STR_DUWS_T_e95mc4lv";
   sleep 15;
   ["fob_support"] call fnc_support_comm_add;
 };
@@ -23,7 +23,7 @@ if (commandpointsblu1 < _cost) exitWith {
 _tooMany = false;
 private _maxFOB = floor(amount_zones_created * 0.7);
 if (count Array_of_FOBS >= _maxFOB) then {
-    ["info",[localize "STR_DUWS_T_m7h89a4s",format[localize "STR_DUWS_T_6vjxo4eb",_maxFOB,"%"]]] call bis_fnc_showNotification;
+    hint format [localize "STR_DUWS_T_6vjxo4eb", _maxFOB, "%"];
     sleep 15;
     ["fob_support"] call fnc_support_comm_add;
     _tooMany = true;
@@ -54,7 +54,7 @@ _foundPickupPos = _newpos;
 // The survey above takes 10 s, so the balance read at the top of this file is long stale
 // by now; this is the read that decides.
 if !(["CP", _cost] call fnc_pool_spend) exitWith {
-  ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+  hint localize "STR_DUWS_T_e95mc4lv";
   sleep 15;
   ["fob_support"] call fnc_support_comm_add;
 };

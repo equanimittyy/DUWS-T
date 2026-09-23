@@ -5,7 +5,7 @@ _location = getpos _target;
 
 if !(["CP", _cost] call fnc_pool_spend) exitWith  
 {
-  ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+  hint localize "STR_DUWS_T_e95mc4lv";
 };
 
 _speaker = localize "STR_DUWS_T_actionteam";
@@ -16,7 +16,6 @@ _message = localize "STR_DUWS_T_paradropcall";
 sleep 8;
 [_speaker1, localize "STR_DUWS_T_paradropinbound"] remoteExec ["fnc_duws_dialogue", 0];
 
-// mission-namespace variable instead of a global onStation
 missionNamespace setVariable ["PARADROP_onStation", false];
 
 _delivery = [_location, 3100] call fnc_spawn_delivery_transport;
@@ -34,7 +33,6 @@ _wp2 setWaypointBehaviour "CARELESS";
 
 sleep 40;
 
-// first check: plane destroyed while waiting?
 if (!alive _vehicle) exitWith {
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];
@@ -44,7 +42,6 @@ if (!alive _vehicle) exitWith {
 
 waitUntil {sleep 0.5; missionNamespace getVariable "PARADROP_onStation" || !alive _vehicle};
 
-// second check: plane destroyed before arrival?
 if (!alive _vehicle) exitWith {
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_paradropdown"] remoteExec ["fnc_duws_dialogue", 0];
     missionNamespace setVariable ["PARADROP_onStation", nil];

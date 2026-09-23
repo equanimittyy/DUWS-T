@@ -55,7 +55,7 @@ private _cost = [_class] call DUWS_fnc_vehPrice;
 // Gate descriptor: the server re-derives this vehicle's tier from _class and refuses the debit if
 // unearned, so the ladder holds even if this client's row-grey was bypassed.
 if !(["CP", _cost, ["veh", _class]] call fnc_pool_spend) exitWith {
-    ["info", [localize "STR_DUWS_T_e95mc4lv", format [localize "STR_DUWS_T_p6sb3ply", _cost]]] call bis_fnc_showNotification;
+    hint localize "STR_DUWS_T_e95mc4lv";
     ["veh_drop"] call fnc_support_comm_add;
 };
 

@@ -11,7 +11,7 @@ _caller = _this param [3, objNull];
 // rather than remoteExec to self so the two do not land in different frames.
 if (commandpointsblu1 < _cost) exitWith {
 	if (!isNull _caller) then {
-		["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] remoteExec ["bis_fnc_showNotification", _caller];
+		[localize "STR_DUWS_T_e95mc4lv"] remoteExec ["hint", _caller];
 	};
 };
 [-_cost, "uav_scan"] call fnc_cp_adjust;
@@ -86,7 +86,7 @@ switch (VERSION_X) do {
 };
 
 waitUntil {sleep 0.5;onStation||!alive _vehicle};
-// The UAV is now killable, so death before it reaches station is a real path:
+// The UAV is killable, so death before it reaches station is a real path:
 // report the loss and tidy the search-area marker and dead group.
 if (!alive _vehicle) exitWith {
 	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_uavscandown"] remoteExec ["fnc_duws_dialogue", 0];
