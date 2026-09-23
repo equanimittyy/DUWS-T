@@ -71,7 +71,7 @@ lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
 may yield. One pick every other tick by default (0.5 picks per tick); the difficulty setting changes the rate
 ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
-action's id, targets, gate, price and execute, and from 4C.2 its Value and Cost.
+action's id, targets, gate, price, execute and weight key, and from 4C.2 its Value and Cost.
 
 - **4B — The picker.** Every action is wired to the pick — its targets, gate, price and execute, and every thread
   they drive — and spends as the weighted commander will. Nothing is weighted: the pick draws an action with a legal
@@ -266,16 +266,19 @@ so it moves no faster than a truck delivers.
   standalone gun nest answers. It leans on the traffic layer harder than any other build — a field on a road
   nobody drives is worth nothing, and one on the route BLUFOR take every trip is the cheapest ground denial
   OPCOM can buy.
-- **The mix steers the build types toward a target share.** Every Build and Minefield Value above is × its type's mix,
-  (target + 1) ÷ (standing + 1). The target is the type's share × every hardpoint of the types in the mix, seeded ones
-  and builds on their way included; the standing count is the type's own. The share is the type's weight over the sum
-  of its archetype's `hpMix` ([§Archetype](#archetype)), so 1 in every type spreads evenly and a 2 makes a type twice
-  as common as a 1. Balanced's `hpMix` is MG 2, roadblock 2, AT 1, AA 1, OP 1, GMG 1, and AT and AP minefield 0.5
-  each. A minefield is counted by variant, which OPCOM records for each belt it lays; a field it did not lay carries
-  no variant on record and stays out of the mix, though it counts against the caps. The mix reads 1 at the target,
-  below 1 past it and above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts the pick
-  and never sets a quota: a type past its share still builds where its Value is high enough. The +1 keeps a type with
-  none standing finite. A type outside the mix reads 1, and random mode ignores Value, so it ignores the mix too.
+- **The mix steers the build types toward a target share.** Every zone and standalone Build and every Minefield Value
+  above is × its type's mix, (target + 1) ÷ (standing + 1). The target is the type's share × every hardpoint of the
+  types in the mix, seeded ones and builds on their way included; the standing count is the type's own. The share is
+  the type's weight over the sum of its archetype's `hpMix` ([§Archetype](#archetype)), so 1 in every type spreads
+  evenly and a 2 makes a type twice as common as a 1. Balanced's `hpMix` is MG 2, roadblock 2, AT 1, AA 1, GMG 1, and
+  AT and AP minefield 0.5 each. The asset builds (tower, OP, mortar and battery) stay out of the mix and weigh each by
+  its own action weight ([§Archetype](#archetype)): a cap, not a share, bounds how many stand, and a flat-capped type
+  in the mix would hold a share its cap never fills, which pushes every other type over its own. A minefield is
+  counted by variant, which OPCOM records for each belt it lays; a field it did not lay carries no variant on record
+  and stays out of the mix, though it counts against the caps. The mix reads 1 at the target, below 1 past it and
+  above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts the pick and never sets a
+  quota: a type past its share still builds where its Value is high enough. The +1 keeps a type with none standing
+  finite. A type outside the mix reads 1, and random mode ignores Value, so it ignores the mix too.
 - **Recruit takes the same mix over the roster.** A Recruit row's Value is × its row's factor off its archetype's
   `recruitMix`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The shares are
   taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing can fill, and
@@ -528,8 +531,9 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 
 - **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
   strikes, and a lost unit is lost standing strength. It scores **once per recruit-menu row**, each valued as
-  [§Value](#value) sets out, so it hires what it is short of and the archetype can lean on a kind (4C.1) rather
-  than on hiring in general. A row the faction cannot field now scores nothing.
+  [§Value](#value) sets out, so it hires what it is short of. The archetype leans on a kind through its
+  `recruitMix` and on hiring as a whole through its `recruit` weight ([§Archetype](#archetype)). A row the faction
+  cannot field now scores nothing.
   Units spawn only from OPFOR-held ground; taking the zone cuts what it can raise.
 - **A unit's force is a token composition** — a row in `DUWS_opcom_recruitMenu` (`fnc_opcom_tasking_init.sqf`): an
   id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. `OPCOM_AP_UNIT`
@@ -593,16 +597,17 @@ init and through the Build actions.
 **Build is scored like any other action** ([§Value](#value)). A zone hardpoint builds in the zone's ring through the
 existing in-zone draw; a standalone one takes its spot from the shared terrain siting around the band cell its truck
 delivers to (`fnc_hardpoint_spawn_sited`). Every unlocked type is its own action row and no type is rolled before the
-pick, so the pick draws "an AT nest" or "a battery", never "a build", and the archetype and the score weigh one
-against the other. The per-type prior the 4C.1 weight multiplies is the archetype's `hpMix` ([§Value](#value));
-campaign generation rolls its own weight tables, `DUWS_hardpointWeightZone` for a ring and `DUWS_hardpointWeightSolo`
-for the standalone lines. An asset hardpoint is its own
-candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset siting](#asset-siting)). A
-minefield is laid, not built: a belt of 50 m squares per action (`fnc_hardpoint_minefield_grid`), AT and AP each
-their own candidate, with the size rolled onto the target so the price the pick weighs is the belt's own footprint.
-Its squares are planned rather than laid, and made and unmade by the site poller as players reach them, so a belt
-costs its stream ring and not its length ([`hardpoints.md`](../../info/gameplay/hardpoints.md#siting)). A build cannot be a *typed* counter
-(AT under armour) until belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
+pick, so the pick draws "an AT nest" or "a battery", never "a build", and the score weighs one against the other. The
+per-type prior is the archetype's `hpMix` ([§Value](#value)), and its one `build` weight scales every type in it
+alike, where an asset build keeps its own weight ([§Archetype](#archetype)); campaign generation rolls its own weight
+tables, `DUWS_hardpointWeightZone` for a ring and `DUWS_hardpointWeightSolo` for the standalone lines. An asset
+hardpoint is its own candidate, never stands in a zone's ring, and picks its band cell by its own rule ([§Asset
+siting](#asset-siting)). A minefield is laid, not built: a belt of 50 m squares per action
+(`fnc_hardpoint_minefield_grid`), AT and AP each their own candidate, with the size rolled onto the target so the
+price the pick weighs is the belt's own footprint. Its squares are planned rather than laid, and made and unmade by
+the site poller as players reach them, so a belt costs its stream ring and not its length
+([`hardpoints.md`](../../info/gameplay/hardpoints.md#siting)). A build cannot be a *typed* counter (AT under armour)
+until belief carries threat category, which 4C.2 settles ([§Appraisal](#appraisal-phase-4)).
 
 Construction is an AP sink; a cleared build refunds nothing (clearing pays the player CP only), and only a build that
 finds no ground is refunded, in full, its truck included. Unlocks (`DUWS_hardpointTier`) key off `WARCOM_opfor_tier`,
@@ -704,12 +709,14 @@ One archetype per campaign, a campaign setting chosen at start (Defensive, Balan
 override the ladder (an Aggressive commander with no armour tier fields none). It is stored in the persistence
 snapshot and never re-rolled. A Random pick stays hidden: the config diary note shows "Random", and nothing in play
 reveals it. The OPCOM debug page overrides it for testing. It is not difficulty (`opfor_ai_skill` sets aim). The
-table is each record's `actionWeight`, one flat weight per action id (`fnc_opcom_actions`), Bank included. No class
+table is each record's `actionWeight`, one flat weight per action (`fnc_opcom_actions`), Bank included. No class
 groups the actions, because a class ties together actions an archetype must weigh apart: one that attacks often but
-spends its units on build-up needs Attack high and Intercept and Rapport low. The table is relative: weighting every
-action alike changes no pick, so Balanced's 1 everywhere is the baseline. A build or recruit row's weight compounds
-with its type's mix ([§Value](#value)): the mix still pulls the type toward its share, so the weight moves where the
-proportion settles and does not override it. 4C.1 builds the setting.
+spends its units on build-up needs Attack high and Intercept and Rapport low. Every zone, standalone and minefield
+build shares one weight, `build`, and every Recruit row one, `recruit`: the weight sets how often OPCOM builds or
+hires, and the `hpMix` or `recruitMix` alone picks the type ([§Value](#value)), because a per-type weight would fight
+the mix for the same lean. A tower, OP, mortar or battery build keeps its own weight and stays out of the mix, so its
+weight sets how soon it builds. The table is relative: weighting every action alike changes no pick, so Balanced's 1
+everywhere is the baseline. 4C.1 builds the setting.
 
 | Archetype | Weights toward |
 |---|---|
