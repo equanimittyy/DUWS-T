@@ -38,22 +38,19 @@ fell to a quarter of their starting count — which for a zone the player never 
 `fnc_duws_bluforNear` is the shape done right, and answers a comparable question per site off the
 spatial index instead — behind a player-list pre-gate, so a site nobody is near pays nothing.
 
-## AI caching ships disabled, and re-enabling it is not a one-line change
+## Site streaming owns AI despawn, so a caching layer cannot simply be added
 
-`modules/zbe_cache/` is present and complete, and the call that would start it is commented out at
-`src/duws/server/server_var_init.sqf:251-254`. Distant AI are therefore fully simulated for as long as
-they exist.
-
-Caching is normally the largest single lever in a dynamic Arma campaign, so the temptation is to
-switch it on. The reason not to do that blind: `src/duws/server/misc/fnc_site_stream_init.sqf` already
-implements a coarser version of the same idea, one pass for every site. It waits for BLUFOR within the
-zone radius plus 400 m, holds the zone spawned for a grace period after they leave, and then
-**deletes** the units outright (`:144-155`).
+Caching is normally the largest single lever in a dynamic Arma campaign, so bolting a caching module
+on is a standing temptation. `src/duws/server/misc/fnc_site_stream_init.sqf` already implements a
+coarser version of the same idea, one pass for every site. It waits for BLUFOR within the zone radius
+plus 400 m, holds the zone spawned for a grace period after they leave, and then **deletes** the units
+outright (`:144-155`).
 
 Two systems that both despawn and restore AI, one deleting and one caching, do not compose. The
-failure modes to check for before enabling anything are a zone that never repopulates because the
-cache restored units the zone logic had already deleted, and a garrison that doubles because both
-systems restored it. Any evaluation has to decide which system owns zone AI, not run both.
+failure modes to check for are a zone that never repopulates because the cache restored units the zone
+logic had already deleted, and a garrison that doubles because both systems restored it. Any
+evaluation has to decide which system owns zone AI, not run both. A bundled ZBE caching module was
+carried unused for exactly this reason and has since been dropped.
 
 ## A base garrison sleeps rather than despawning
 

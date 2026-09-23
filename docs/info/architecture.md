@@ -7,7 +7,7 @@ Orientation map for the unpacked mission source under `src/`. For the unpack/rep
 
 DUWS_T is a fork chain: Kibot's original DUWS → Killa Tomata's DUWS_X → 5U5's DUWS_T. The practical
 consequence for a maintainer is that provenance is not uniform: older English-commented DUWS-era code
-sits alongside 5U5's Chinese-commented additions, and three third-party AI/logistics/medical frameworks
+sits alongside 5U5's Chinese-commented additions, and two third-party logistics and medical frameworks
 are embedded wholesale. Treat each subsystem on its own terms rather than assuming one authorship or
 style.
 
@@ -15,7 +15,7 @@ style.
 
 | Path | Contents | Ownership |
 |---|---|---|
-| `src/modules/` | `AIS`, `R3F_LOG`, `taw_vd`, `zbe_cache` | Vendored third-party — **frozen** |
+| `src/modules/` | `AIS`, `R3F_LOG` | Vendored third-party — **frozen** |
 | `src/duws/` | `server`, `client`, `shared` | DUWS_T (Kibot/Tomata/5U5 lineage) |
 | `src/` (root) | `mission.sqm`, `description.ext`, `stringtable.xml`, root event scripts, `duws_t.jpg` | Engine-pinned |
 
@@ -43,8 +43,7 @@ smoke-tested in Arma; grep-verifying zero residual paths is necessary but not su
 Two function-loading mechanisms coexist, which is not inferable from any single file:
 
 - **Vendored frameworks** register through `CfgFunctions` in
-  [`src/description.ext`](../../src/description.ext), producing namespaced globals (`AIS_*_fnc_*`,
-  `TAWVD_fnc_*`, `VCM_fnc_*`).
+  [`src/description.ext`](../../src/description.ext), producing namespaced globals (`AIS_*_fnc_*`).
 - **The DUWS core** compiles its `fnc_*` globals from a hand-maintained registry in
   `src/duws/server/server_fnc_init.sqf` (~310 entries). There is no manifest of these functions beyond
   that file.
@@ -136,7 +135,7 @@ does not imply server-only.
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
 | Scroll-menu actions | `addAction` / `BIS_fnc_holdActionAdd` / `fnc_open_action_menu` call sites across `client/`, `server/` and `shared/` | Every entry DUWS adds, its priority/colour bucket (`shared/includes/action_style.hpp`) and the broadcast rules, in [`player_text_style_guide.md`](gameplay/player_text_style_guide.md) |
 | Player-facing text | `stringtable.xml`, `fnc_cs` | English `<Original>`/`<English>` is the source of truth; the localised tags lag it deliberately, and any key naming the player callsign must go through `fnc_cs`. Style guide: [`player_text_style_guide.md`](gameplay/player_text_style_guide.md) |
-| Performance | `modules/taw_vd`, `server/misc/fnc_site_stream_init.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | View-distance control, one poller streaming every site's AI and props, and aggressive cleanup keep a whole-map persistent war affordable. `modules/zbe_cache` ships **disabled**; why re-enabling it is not a one-line change is in [`performance.md`](architecture/performance.md) |
+| Performance | `server/misc/fnc_site_stream_init.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | One poller streaming every site's AI and props, plus aggressive cleanup, keep a whole-map persistent war affordable. See [`performance.md`](architecture/performance.md) |
 | Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`client/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `server/init_zones/`, `server/missions/`, `server/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`server/init_zones/fnc_zone_reveal.sqf`). See [`intel_system.md`](gameplay/intel_system.md) |
 
 ## Vendored frameworks — `modules/`
@@ -145,5 +144,3 @@ does not imply server-only.
 |---|---|---|
 | `AIS` | Advanced Injury System — revive/medical, an alternative to ACE or vanilla. Who it manages (players + their AI only), the `Revive` param, the ACE handoff, and the HandleDamage/unconscious traps are in [`revive_system.md`](architecture/revive_system.md) | Active |
 | `R3F_LOG` | R3F Logistics — vehicle/object lift, tow, load, and factory building | Active |
-| `taw_vd` | TAW View Distance control | Active |
-| `zbe_cache` | ZBE caching — despawns distant AI for performance | Present but disabled; zone streaming owns AI despawn instead |
