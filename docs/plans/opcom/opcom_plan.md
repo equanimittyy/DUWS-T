@@ -282,8 +282,9 @@ so it moves no faster than a truck delivers.
 - **Recruit takes the same mix over the roster.** A Recruit row's Value is × its row's factor off its archetype's
   `recruitMix`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The shares are
   taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing can fill, and
-  push every other row over its own. Balanced's `recruitMix` is 1 for every menu row, an even spread over what the
-  faction can field.
+  push every other row over its own. Balanced's `recruitMix` is rifles 8, weapons team 4, truck 3, APC 3, IFV 2, foot
+  and car recon 2 each, MBT, boat, recon and transport helicopter 1 each, attack helicopter 0.5 and jet 0.25: an even
+  spread would field as many jets as rifle squads.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
   not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every
