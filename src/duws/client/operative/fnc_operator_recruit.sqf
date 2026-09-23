@@ -24,7 +24,10 @@ _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,200,15,0.3] call f
 _group = [_spawnPos, WEST, [_selected_soldier_class]] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 _soldier = units _group select 0;
-[_soldier] call AIS_System_fnc_loadAIS;
+// loadAIS ignores AIS's own ACE shutdown and strips every HandleDamage handler, ACE medical's included.
+if (!ais_ace_shutDown && {(["Revive", 1] call BIS_fnc_getParamValue) != 0}) then {
+	[_soldier] call AIS_System_fnc_loadAIS;
+};
 
 addswitchableUnit _soldier;
 
