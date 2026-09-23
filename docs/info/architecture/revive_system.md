@@ -20,6 +20,9 @@ scripted (AIS) or off, never the engine's own revive. BASE respawn returns the p
 `respawn_west` marker, which the HQ repositions
 ([`fnc_BluHQinit.sqf`](../../../src/duws/server/init_hq/fnc_BluHQinit.sqf)); deployed MHQ, FOBs, the rally
 point and the two killhouse entrances add further respawn points via `BIS_fnc_addRespawnPosition`.
+The killhouse entries stand on open ground at the HQ, because a respawn position aimed at the floating
+course does not land the player on it. [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) moves a
+player who arrives on one of them up to that entrance.
 
 A respawned player starts naked: [`onPlayerRespawn.sqf`](../../../src/onPlayerRespawn.sqf) sets an empty
 loadout, because the engine otherwise dresses the new unit in its class kit. The dead body keeps the old

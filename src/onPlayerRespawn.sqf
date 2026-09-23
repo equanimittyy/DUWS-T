@@ -1,6 +1,14 @@
 #include "duws\shared\includes\action_style.hpp"
 
 sleep 1;
+{
+    _x params ["_anchor", "_tp"];
+    if (player distance2D _anchor < 4) exitWith {
+        player setPosWorld _tp;
+        hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
+    };
+} forEach (missionNamespace getVariable ["killhouse_respawns", []]);
+
 // The respawn menu does not report which position was picked, so arriving beside the tent is what
 // spends a rally respawn.
 private _rally = missionNamespace getVariable ["DUWS_rally_tent", objNull];
