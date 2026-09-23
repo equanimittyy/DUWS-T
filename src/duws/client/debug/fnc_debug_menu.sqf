@@ -95,6 +95,11 @@ switch (_page) do {
                 [getPos player] remoteExec ["fnc_duws_toggleNearestZone", 2];
                 hint "Composition streaming: toggling the nearest zone.\n\nStowed compositions are deleted and rebuilt from a record,\nso destroyed parts stay gone and crates keep what is left\nin them. Refused while a gun still has its gunner.";
             }, [], DBG_ACTION],
+            ["Flip zone owner (click map)", {
+                ["Click a zone to hand it to the other side.",
+                    "Dev tool: beats the garrison first, then fires the zone's armed capture handler -- AP, CP and notifications land as in play.",
+                    { params ["_pos"]; [_pos, player] remoteExec ["fnc_debug_zone_flip", 2] }] call fnc_debug_map_click;
+            }, [], DBG_MAP],
             ["Build zone garrison (click map)", {
                 ["Click a zone to buy its holder a tier.",
                     "Dev tool: the zone buys are the only way BLUFOR ground gets a garrison -- tier I is where a captured zone starts.",
