@@ -24,8 +24,8 @@ DUWS_opcom_archetypes = createHashMapFromArray [
             ["MG", 2], ["ROADBLOCK", 2], ["AT", 1], ["AA", 1], ["GMG", 1], ["MINEFIELD_AT", 0.5], ["MINEFIELD_AP", 0.5]
         ]],
         ["recruitMix", createHashMapFromArray [
-            ["rifles", 1], ["weapons_team", 1], ["recon_foot", 1], ["truck", 1], ["recon_car", 1], ["boat", 1],
-            ["apc", 1], ["ifv", 1], ["mbt", 1], ["recon_heli", 1], ["trans_heli", 1], ["attack_heli", 1], ["jet", 1]
+            ["rifles", 8], ["weapons_team", 4], ["recon_foot", 2], ["truck", 3], ["recon_car", 2], ["boat", 1],
+            ["apc", 3], ["ifv", 2], ["mbt", 1], ["recon_heli", 1], ["trans_heli", 1], ["attack_heli", 0.5], ["jet", 0.25]
         ]]
     ]]
 ];
