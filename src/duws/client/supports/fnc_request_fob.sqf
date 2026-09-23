@@ -21,7 +21,7 @@ if (commandpointsblu1 < _cost) exitWith {
 };
 
 _tooMany = false;
-private _maxFOB = floor(amount_zones_created / 2);
+private _maxFOB = [] call fnc_fob_max;
 if (count Array_of_FOBS >= _maxFOB) then {
     hint format [localize "STR_DUWS_T_6vjxo4eb", _maxFOB, "%"];
     sleep 15;
