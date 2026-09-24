@@ -102,6 +102,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_st
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolCells
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_regarrison.sqf::DUWS_fnc_opcom_regarrisonValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDemand
 duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone

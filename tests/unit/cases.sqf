@@ -1808,6 +1808,15 @@ OPCOM_PATROL_SHARE = 0.2;
 ["hireDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
 ["hireDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_hireDefense, 40] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_regarrisonValue: what sending a worn unit home is worth ---
+OPCOM_AP_PER_FORCE = 1;
+["regarrisonValue: a wrecked unit is worth the rebuy its heal recovers",
+    [8, 2, 0, 1, 0] call DUWS_fnc_opcom_regarrisonValue, 6] call fnc_assertClose;
+["regarrisonValue: an unworn unit is worth only the defense it adds",
+    [8, 8, 40, 1, 0] call DUWS_fnc_opcom_regarrisonValue, 40] call fnc_assertClose;
+["regarrisonValue: the larger of the two, never the sum",
+    [10, 9, 4, 0.2, 36] call DUWS_fnc_opcom_regarrisonValue, 1] call fnc_assertClose;
+
 // --- DUWS_fnc_opcom_hireDemand: the best role a hire fills ---
 DUWS_opcom_hireDemands = [{ [2, [1]] }, { [5, [2]] }, { [5, [3]] }, { [0, []] }];
 ["hireDemand: the best role wins, and a tie keeps the earlier one", [] call DUWS_fnc_opcom_hireDemand, [5, [2]]] call fnc_assertEq;

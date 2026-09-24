@@ -170,12 +170,60 @@ DUWS_fnc_opcom_patrolSweep = {
     [_out, _blocked, []]
 };
 
+// Every worn unit left standing forward, one row apiece: only `garrison` heals, so a unit holding where its last order
+// ended keeps its losses until something sends it home (opcom_orders_and_regarrison.md). The target follows from the
+// unit, so there is no contest to resolve and no second row on the same zone to crowd the shortlist.
+DUWS_fnc_opcom_regarrisonSweep = {
+    private _zones = call DUWS_fnc_opcom_zonesOpen;
+    if (_zones isEqualTo []) exitWith { [[], [], []] };
+    private _units = (call DUWS_fnc_opcom_free) select {
+        (_x get "order") isEqualTo "guard"
+            && {(_x getOrDefault ["errand", []]) isEqualTo []}
+            && {(_x get "effForce") < OPCOM_REGARRISON_FRAC * (_x get "fullForce")}
+    };
+    private _out = [];
+    private _riders = [];
+    {
+        private _t = _x;
+        private _hz = _t get "homeZone";
+        private _i = _zones findIf { (_x select 0) isEqualTo _hz };
+        private _z = if (_i >= 0) then { _zones select _i } else { [_t get "pos", _zones] call DUWS_fnc_opcom_nearestOpen };
+        if (_z isNotEqualTo []) then {
+            _z params ["_zk", "", "_zp", "", "_exposure"];
+            private _v = ([_t get "fullForce", _t get "effForce", [_zk] call DUWS_fnc_opcom_siteWorth, _exposure,
+                [_zk] call DUWS_fnc_opcom_zoneForce] call DUWS_fnc_opcom_regarrisonValue)
+                * ([_t, _zp] call DUWS_fnc_opcom_unitDelay);
+            private _c = [_t] call DUWS_fnc_opcom_commitCost;
+            // P(win) 1: a withdrawal fights for nothing, and the row still has to name its Cost past it.
+            _out pushBack [[_t get "id", _zp, _zk, _v], 0,
+                format ["Re-garrison %1 %2 at %3", _t get "menu", _t get "id", [_zk] call DUWS_fnc_opcom_zoneLabel],
+                _v, 1, _c];
+            _riders pushBack [_t, _zp, _v];
+        };
+    } forEach _units;
+    // No blocked targets: no hire stands in for the unit OPCOM already owns, so this sweep values no Recruit row.
+    [_out, [], _riders]
+};
+
+// Its own run: sendRun hands fnc_opcom_task no site key, and a return without one is refused.
+DUWS_fnc_opcom_regarrisonRun = {
+    params ["_target"];
+    _target params ["_id", "_to", "_zk", "_exp"];
+    private _t = [_id] call DUWS_fnc_opcom_byId;
+    if (isNil "_t") exitWith { false };
+    if !([_t, "return", _to, _zk] call fnc_opcom_task) exitWith { false };
+    _t set ["expValue", _exp];
+    [_t] call DUWS_fnc_opcom_taxiBind;
+    true
+};
+
 // Recruit reads every sweep's blocked targets and riders off this table, so a new commit order registers here and
 // nothing downstream names it.
 DUWS_opcom_commitSweeps = createHashMapFromArray [
     ["attackSweep", DUWS_fnc_opcom_attackSweep],
     ["interceptSweep", DUWS_fnc_opcom_interceptSweep],
-    ["patrolSweep", DUWS_fnc_opcom_patrolSweep]
+    ["patrolSweep", DUWS_fnc_opcom_patrolSweep],
+    ["regarrisonSweep", DUWS_fnc_opcom_regarrisonSweep]
 ];
 
 DUWS_fnc_opcom_commitSweep = {
