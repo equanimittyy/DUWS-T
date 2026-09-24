@@ -925,15 +925,19 @@ ammo truck by Reinforce.
 ([`campaign_persistence_plan.md`](../campaign_persistence_plan.md)); this section is the contract it writes against.
 Every field is a number, string or array.
 
+The snapshot's own keys, and what a restore has to clear before it replays them, are
+[`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
+
 The phase ends in play rather than in code: a campaign is run past a save and a reload, and the commander has to
 pick up where it left off. That play pass is also what settles Phase 4's tuning list
 ([§Settles in play](#settles-in-play)), which is why nothing after this phase is worth building first.
 
 | Saved | Holds |
 |---|---|
-| **Archetype** (input) | Fed back before the loop, never re-rolled |
-| **Standing units & orders** (outcome) | One row per unit: world position; order, target, home and return zone, route mode; `strength`; class — the composition tokens and `spawnClass`, the hull drawn once at hire, so a restored vehicle keeps its hull. Restored as data, streaming to a live group on approach at saved strength |
-| **Clock and flags** | `DUWS_opcom_tick`, the count of ticks since the campaign began, which every stored time counts against — a commit `hold` restored against a counter reset to 0 would hold its unit for hours — and the HQ reveal flag |
+| **Archetype** (input) | `DUWS_opcom_archetype`, fed back before the loop and never re-rolled |
+| **Taskings** (outcome) | `DUWS_opcom_taskings` with `DUWS_opcom_taskSeq`: the whole record per unit — position, order and target, home and return zone, route and mode, `fullForce` and `effForce`, the composition tokens and the `spawnClass` drawn once at hire, so a restored vehicle keeps its hull. Restored as data and streamed to a live group on approach at its saved `effForce`, with `grp`, `status` and every carry binding cleared |
+| **Clock and flags** (outcome) | `DUWS_opcom_tick`, the count of ticks since the campaign began, which every stored time counts against — a commit `hold` restored against a counter reset to 0 would hold its unit for hours — and `DUWS_opcom_hqKnown` |
+| **Mine variants** (outcome) | `DUWS_opcom_mineVariants` with `DUWS_hpOpcomSeq`: the hardpoint registry carries no variant, and the build mix weighs AT and AP apart |
 | **Inputs owned elsewhere** | Tiers (`WARCOM_opfor_tier` and the earned counter, the economy's); zone and town owners, which exposure and the candidate sweep read (the campaign snapshot's BLUFOR-held zone positions and town reputation) |
 
 - **Belief sightings are not saved.** Belief is keyed by group `netId`, which resolves to nothing after a restart,

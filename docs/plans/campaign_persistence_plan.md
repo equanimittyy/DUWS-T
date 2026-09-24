@@ -201,9 +201,9 @@ optimisation here; without it a dedicated server loses the campaign every time t
 **Dedicated server, `persistent = 1`.** The mission keeps running with nobody connected. That is
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
-spawning waves, the side-mission generator keeps rolling and expiring missions, and — once the
-[OPCOM](opcom/opcom_plan.md#what-ap-buys) lands — the enemy keeps
-buying garrisons and hardpoints against a player who is asleep.
+spawning waves, the side-mission generator keeps rolling and expiring missions, and the
+[OPCOM](opcom/opcom_plan.md#what-ap-buys) keeps buying garrisons and hardpoints against a player who is
+asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
 poorer wallet and a fully upgraded enemy has lost ground by not playing, which is not a mechanic
@@ -270,6 +270,8 @@ correct for a fresh campaign, and each is resolved in the design below.
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/arsenal/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
 | Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
+| `fnc_opcom_belief_init` assigns `DUWS_opcom_tick` 0 and `DUWS_opcom_hqKnown` false at boot | `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Every commit hold, staleness stamp and gun cooldown is a count against that tick, so a restored clock reset to 0 holds units for hours and hides an HQ the commander had found |
+| A tasking's `grp` is a live group's netId, and the ferry binds a carry by tasking id | `server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf` | Restoring a record unchanged points it at a group that no longer exists, and a carry bound at the write holds a rider that was never spawned |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
 (`:5`) and hands it to `fnc_FOBactions.sqf:3`, which reads it and never uses it. Restore needs no
@@ -477,12 +479,53 @@ side's would hand one army the other's men.
 outcome the same way a town's is — it is bought, and a restore that dropped it would take back every
 garrison the player paid for.
 
-**The commander's own state is deferred with the commander.** The archetype, its standing orders
-(taskings) and — if it is ever wanted — its belief store are snapshot content only once OPCOM exists,
-and their persistable shape and serialisation contract are
-[`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-5)'s to define, not this plan's. The
-snapshot is a name-keyed hashmap ([§The snapshot](#the-snapshot)), so it gains those keys when the
-commander lands and omitting them until then costs a restore nothing.
+### The commander
+
+OPCOM is shipped, so its store is snapshot content now rather than deferred. The contract — which fields,
+and why belief is not among them — is [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-5)'s to
+define; these are the keys the snapshot carries for it.
+
+| Group | Kind | Contents |
+|---|---|---|
+| Archetype | input | `DUWS_opcom_archetype`, fed back before the loop and never re-rolled |
+| Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
+| Clock and flags | outcome | `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` |
+| Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
+
+**A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
+only, and `grp` is a live group's netId rather than a handle
+(`server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf`). What a restore has to clear is the live half:
+`grp` back to `""`, `status` to `virtual`, and `carrying`, `ridingOn` and `embarked` reset. The groups those
+bound are gone, and a half-bound carry would hold its rider for the rest of the campaign, since a bound
+record refuses every new order.
+
+**`DUWS_opcom_taskSeq` rides with the taskings.** The id is what every binding uses — a ferry pairs a
+transport to its rider by id, not by handle — so a counter restored to 0 hands the next hire an id a
+standing unit already holds.
+
+**The tick is the clock every stored time counts against.** A commit `hold`, the staleness layer and a gun's
+cooldown are all tick counts, so `fnc_opcom_belief_init` must initialise `DUWS_opcom_tick` and
+`DUWS_opcom_hqKnown` only when they are nil. It assigns both unconditionally today, which resets a restored
+campaign's clock and re-hides an HQ the commander had already found.
+
+**A minefield's variant lives outside the hardpoint registry.** `DUWS_opcom_mineVariants` maps a build key to
+`AT` or `AP` because the registry row carries no variant, and the build mix weighs the two apart, so a restore
+without it lays the wrong mix for the rest of the campaign. `DUWS_hpOpcomSeq` is the key counter behind those
+keys and collides the same way `taskSeq` does.
+
+**A saved `spawnClass` is a hull, not a contract.** It is stored because `DUWS_fnc_tokenClass` redraws a
+random model per spawn, so a restored vehicle would otherwise swap hulls. A class the loaded mods no longer
+define is rerolled from its token with a WARN, and a token the current faction cannot field at all drops the
+unit — the faction rule of [§Decided trade-offs](#decided-trade-offs) applied one unit at a time.
+
+**Belief is not saved, and neither is the influence grid.** Belief is keyed by group netId, which resolves to
+nothing after a restart, and a restart also loses the headless clients and returns players to HQ, so the
+sightings would describe a battlefield that no longer exists. The grid layers, the coverage layer and the
+contested set rebuild on the first sensor pass, and the traffic layer refills as sightings land.
+
+**The commander's mode and pick rate are not its state.** `DUWS_opcom_aiMode` and `DUWS_opcom_picksPerTick`
+belong to the debug page today and come back at their defaults. Once the difficulty setting drives them they
+restore with the settings group, not here.
 
 ### The players
 
@@ -760,6 +803,11 @@ Session-scoped locks go with them and must come back clear: the per-support fire
 per-FOB rebuild busy flags, `Mission_available`, and the JIP queue entries. A lock restored as held
 is a support nobody can ever call again.
 
+OPCOM's own units are the same shape: a tasking restores as data and streams to a live group on
+approach, so the groups it had rendered at the write are not saved. A hardpoint still siting on a
+delivered truck (`DUWS_opcom_buildsPending`) dies with its spawned builder, and the AP that bought it
+is the reconciliation pass's to fold back ([§What live state costs](#what-live-state-costs-and-who-pays-it-back)).
+
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
 map and dropped when it returns
 ([§Map object count](../info/architecture/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
@@ -773,8 +821,8 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 
 Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
 the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
-a campaign of restarts that is a slow leak out of both economies, and it gets worse once the
-[OPCOM](opcom/opcom_plan.md#what-ap-buys) is buying continuously.
+a campaign of restarts that is a slow leak out of both economies, and the
+[OPCOM](opcom/opcom_plan.md#what-ap-buys) buying continuously is what makes it a leak worth plugging.
 
 Antistasi reconciles this at save time rather than living with it: before writing, it walks live
 vehicles and units and folds their value back into the pools it is about to save — a full refund
@@ -809,6 +857,8 @@ refund attached to the one restore that consumes it.
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/chatter/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
+| `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Initialise `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` only when they are nil, so a restored clock and a found HQ survive boot. |
+| `server/warcom/opcom/appraisal/fnc_opcom_archetypes.sqf` | `DUWS_opcom_archetype` set from the restored snapshot on a load, in place of the campaign setting's roll. |
 | `client/client_init.sqf:377` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
@@ -828,6 +878,7 @@ refund attached to the one restore that consumes it.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
+- [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
 - [ ] Add the vehicle persistence zone. Verify: a vehicle parked at a FOB returns with its damage, fuel, cargo and paint; a FOB's turret ring is not duplicated; the cap drops the furthest vehicle and logs it.
 - [ ] Add the MHQ. Verify: a deployed MHQ comes back deployed, with a working respawn point and one ammo box.
 - [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action; a rejoining player's restored kill tally survives their reconnect instead of being zeroed by the connect handler.
