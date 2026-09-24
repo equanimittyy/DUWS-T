@@ -6,47 +6,49 @@ An order is the `order` key on a tasking record. The step stage dispatches throu
 action, and the action's run hands `fnc_opcom_task` the order that carries it
 ([opcom_plan.md §Appraisal](opcom_plan.md#appraisal-phase-4)).
 
-The first half is the flat list of orders, three of which the shipped code still encodes as keys on `move`. The
-second is the action that reads against it: sending a worn unit home to heal, which nothing does today.
+The first half is the flat list of orders. The second is the action that reads against it: sending a worn unit home
+to heal.
 
 ## Orders
 
-One flat list: every action a unit can be doing, one order apiece. `Today` says how the shipped code encodes it,
-since three of these are not orders yet.
+One flat list: every action a unit can be doing, one order apiece, each a row in `DUWS_opcom_orders`.
 
-| Order | What the unit does | Ends on | Today |
-|---|---|---|---|
-| `garrison` | rests virtual at its home site, healing, and fields its force through that site's reserve pool | a draw, its home flipping (`siteLost`), or its reserve group being wiped (`defenderLost`) | shipped |
-| `guard` | holds the point it stands on. No heal, no route | the next action that draws it | shipped |
-| `patrol` | walks a line over stale ground, stamping the staleness layer as it goes (`fnc_opcom_patrol_sense`) | arrival: settles to `guard` | `move` with neither key set |
-| `move` | repositions to a point and holds it | arrival: settles to `guard` | shipped; after the split it is the debug page's manual order and nothing else |
-| `return` | marches to a site and joins its garrison | arrival: `garrisonInto` | `move` + `returnZone` |
-| `errand` | carries goods to a drop and spends them there | delivery: the unit despawns and its record reads `done` | `move` + `errand` |
-| `capture` | marches on a BLUFOR-held zone or garrisoned town | the ground changing hands (`captureEnd`): virtual, it garrisons what it took; live, it guards and garrisons when it stows; a cleared town keeps no garrison, so it only guards | shipped |
-| `intercept` | follows a belief row's position, re-planning past one cell, and hunts what the arrival look finds | nothing within `OPCOM_INTERCEPT_K`: guards and drops the row (`interceptGuard`) | shipped |
-| `ferry` | fetches a bound rider, carries it over the leg it could not cross, unloads it, then goes home | release (`ferryRelease`): `return` to the nearest uncontested held zone, else `guard` | `move` + `carrying`, stepped outside the order table |
+| Order | What the unit does | Ends on |
+|---|---|---|
+| `garrison` | rests virtual at its home site, healing, and fields its force through that site's reserve pool | a draw, its home flipping (`siteLost`), or its reserve group being wiped (`defenderLost`) |
+| `guard` | holds the point it stands on. No heal, no route | the next action that draws it |
+| `patrol` | walks a line over stale ground, stamping the staleness layer as it goes (`fnc_opcom_patrol_sense`) | arrival: settles to `guard` |
+| `move` | repositions to a point and holds it. It neither heals nor sweeps, which is exactly what a staging leg needs, so Phase 7's buildup is its caller ([opcom_plan.md §Orchestration](opcom_plan.md#orchestration-phase-7)). Until 5.2 only the debug page issues one | arrival: settles to `guard` |
+| `return` | marches to a site and joins its garrison | arrival: `garrisonInto` |
+| `errand` | carries goods to a drop and spends them there | delivery: the unit despawns and its record reads `done` |
+| `capture` | marches on a BLUFOR-held zone or garrisoned town | the ground changing hands (`captureEnd`): virtual, it garrisons what it took; live, it guards and garrisons when it stows; a cleared town keeps no garrison, so it only guards |
+| `intercept` | follows a belief row's position, re-planning past one cell, and hunts what the arrival look finds | nothing within `OPCOM_INTERCEPT_K`: guards and drops the row (`interceptGuard`) |
+| `ferry` | fetches a bound rider, carries it over the leg it could not cross, unloads it, then goes home | release (`ferryRelease`): `return` to the nearest uncontested held zone, else `guard` |
 
 **Riding is a binding, not an order.** A rider keeps whatever order it was given and adds `ridingOn`; `task_step`
 skips it while it is bound, and the drop resumes its own order. Making it an order would mean stashing the order it
 must come back to, which is the binding again by another name.
 
-### Why the three splits
+### Why patrol, return, errand and ferry are their own orders
 
-- **`move` means four different things today.** Plain, `returnZone`, `errand` — `stepMove` reads the keys and
-  branches, so the order tells a reader nothing and every caller has to know the key protocol
-  (`fnc_opcom_task.sqf:5`). One order, one step, one meaning.
-- **A carrying transport's order key is a lie.** `carryBind` writes `move`, but `fnc_opcom_task_step.sqf:137`
-  short-circuits on `carrying` and hands the record to `ferryTick`, so the order it holds is never dispatched. The
-  phase the hull is actually in lives in `ferryPhase` (`topickup` / `carry`).
-- **Per-order gating is already written as order-string lists**, and they read wrong once these exist by name:
-  `drawable` is `["guard", "garrison"]` and land-taxi's rider check is `["move", "capture", "intercept"]`
-  (`fnc_opcom_taxi.sqf:22`), which today silently covers Patrol because Patrol issues `move`. After the split that
-  list says `capture`, `intercept` and `return` — a patrol is kept off the taxi deliberately, since covering ground
-  is the point of it.
+- **One order, one meaning.** `move` used to carry a site key or an errand and mean three different things, so
+  `stepMove` branched on the keys and every caller had to know the key protocol rather than the order. Each of the
+  three now has its own step and `fnc_opcom_task` refuses the mismatch: a `return` with no site, an `errand` with no
+  goods.
+- **A carry is dispatched outside the table.** `fnc_opcom_task_step.sqf:137` short-circuits on `carrying` and hands
+  the record to `ferryTick`, so a carrying hull's order is never stepped. It reads `ferry` so the debug pages, the
+  map and the roster say what the hull is doing; the phase it is in lives in `ferryPhase` (`topickup` / `carry`).
+- **Per-order gating is written as order-string lists**, and they now say what they mean. Land-taxi's rider check
+  reads `capture`, `intercept` and `return` (`fnc_opcom_taxi.sqf:22`) — a patrol is deliberately off a lift, since
+  covering ground is the point of one, and before the split it was silently on it because Patrol issued `move`.
+  `applyOrder` profiles a courier apart from the rest on the same list (`fnc_opcom_stream.sqf:8`), so the `_supply`
+  flag it needed is gone.
+- **Out on the ground is the complement of the two rests**, not a list of names: `DUWS_fnc_opcom_marching` is
+  `!(order in ["guard", "garrison"])`, so an order added to the table is out by default rather than forgotten by the
+  overlay and the intel payout that read it.
 
-The split buys naming and dispatch, not behaviour: `patrol` and `move` step identically, and `return` and `errand`
-are the two branches `stepMove` already has, lifted into their own steps over the shared march
-(`fnc_opcom_movement_core.sqf`).
+The split bought naming and dispatch, not behaviour: `patrol` steps as `move` does, and `return` and `errand` are
+the two branches `stepMove` had, lifted into their own steps over the shared march (`fnc_opcom_movement_core.sqf`).
 
 - **Only `guard` and `garrison` are drawable** (`fnc_opcom_tasking_init.sqf:80`), and the roster's free list is
   drawable units alone (`appraisal/fnc_opcom_roster.sqf:6`). A unit mid-march is a candidate for nothing: every
@@ -71,7 +73,7 @@ are the two branches `stepMove` already has, lifted into their own steps over th
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
-| **4B.8** Order split | `patrol`, `return`, `errand` and `ferry` as rows in `DUWS_opcom_orders`, `stepMove` split over them against the shared march, `fnc_opcom_task`'s whitelist and its `_returnZone` / `_errand` arguments folded into the order itself, `carryBind` writing `ferry`, and the order strings the Patrol row, `captureEnd`, `ferryHome`, `siteLost`, land-taxi, the debug pages and the map overlay carry | Whether `move` keeps any caller but the debug page, and is worth keeping if not; whether `ferry` as an order should also take the dispatch back from the `carrying` short-circuit, or stay a stage the table merely names |
+| **4B.8** Order split | **Shipped** (`taskings/`, `appraisal/`, `debug/`) — `patrol`, `return`, `errand` and `ferry` as rows of their own, `stepMove` split into `stepMove` / `stepReturn` / `stepErrand`, `fnc_opcom_task` refusing a `return` with no site or an `errand` with no goods, `applyOrder` profiling each and dropping its `_supply` flag, `DUWS_fnc_opcom_marching` in place of the order-name lists the overlay and the intel payout carried, and the order strings the Patrol row, `captureEnd`, `ferryHome`, `carryBind`, land-taxi and both debug pages issue | Whether `ferry` should take the dispatch back from the `carrying` short-circuit, or stay a stage the table merely names |
 
 ## Re-garrison (4B.9)
 
@@ -81,9 +83,9 @@ because only `garrison` heals and only the home zone's reserve pool can field it
 therefore decays monotonically between hires: it can buy strength but never recover it. This chunk adds the action
 that recovers it, and it answers the question 4B.5–6 left open — whether a screen left standing needs a way home.
 
-**The order already exists**, as `return` once 4B.8 names it and as a `move` with a `returnZone` before that: the
-arrival settles into `garrison` (`settleMove`), which is how a capture walks its taker home. So this is an appraisal
-chunk — a sweep, a Value and a row — and it needs no tasking code of its own either way.
+**The order already exists.** A `return` settles into `garrison` on arrival (`DUWS_fnc_opcom_stepReturn`), which is
+how a capture walks its taker home, so this is an appraisal chunk: a sweep, a Value and a row, with no tasking code
+of its own.
 
 ### Shape
 
@@ -117,4 +119,4 @@ healed.
 
 | Chunk | Builds | Settles in play |
 |---|---|---|
-| **4B.9** Re-garrison | the `regarrison` row and its sweep, the Value above in `appraisal/value/fnc_opcom_regarrison.sqf`, `OPCOM_REGARRISON_FRAC`, and the `regarrison` weight key on each archetype | `OPCOM_REGARRISON_FRAC` (0.6), and whether the pool floor is needed at all once the score's own slope is played; whether a worn unit crowds the shortlist when a whole wave comes back battered, the fallback shape being the best few rows rather than one per unit; whether paying a lift to carry a broken squad home is worth it, or a re-garrison should ride `sendRun` and walk; whether a withdrawal across believed force needs a `P(win)` after all, since a unit sent home through a BLUFOR advance is worse off than one holding; whether the reserve pool fielding a worn unit's full composition should scale to `effForce` instead, which would make resting a cost rather than a free repair; whether a `guard` unit far from any open zone should be left where it stands |
+| **4B.9** Re-garrison | **Shipped** (`appraisal/`) — the `regarrison` row, its sweep and its own run, the Value in `appraisal/value/fnc_opcom_regarrison.sqf`, `OPCOM_REGARRISON_FRAC` and the `regarrison` weight key | `OPCOM_REGARRISON_FRAC` (0.6), and whether the pool floor is needed at all once the score's own slope is played; whether a worn unit crowds the shortlist when a whole wave comes back battered, the fallback shape being the best few rows rather than one per unit; whether paying a lift to carry a broken squad home is worth it, or a re-garrison should ride `sendRun` and walk; whether a withdrawal across believed force needs a `P(win)` after all, since a unit sent home through a BLUFOR advance is worse off than one holding; whether the reserve pool fielding a worn unit's full composition should scale to `effForce` instead, which would make resting a cost rather than a free repair; whether a `guard` unit far from any open zone should be left where it stands |
