@@ -77,11 +77,10 @@ simple_zones_enable = false;
 moreUrban = 1;
 CIV_PRESENCE = "med";
 hardcore_mode_enable = false;
-restricted_arsenal = true;
 { publicVariable _x; } forEach [
     "dynamic_weather_enable", "time_of_day", "civ_density", "enable_fast_travel", "ZeusStatus",
     "escalation_enabled", "simple_zones_enable", "moreUrban", "CIV_PRESENCE",
-    "hardcore_mode_enable", "restricted_arsenal"
+    "hardcore_mode_enable"
 ];
 
 // Campaign-screen defaults (fnc_process_campaign_menu.sqf), including the values that screen derives

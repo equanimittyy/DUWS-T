@@ -113,8 +113,6 @@ switch (_index) do
     case index_hardcore_true: { hardcore_mode_enable = true; publicVariable "hardcore_mode_enable"; };
 };
 
-restricted_arsenal = true;
-
 publicVariable "weather_type";
 publicVariable "time_of_day";
 publicVariable "enable_fast_travel";
@@ -122,6 +120,5 @@ publicVariable "ZeusStatus";
 publicVariable "simple_zones_enable";
 publicVariable "moreUrban";
 publicVariable "CIV_PRESENCE";
-publicVariable "restricted_arsenal";
 
 [] spawn fnc_campaign_menu;

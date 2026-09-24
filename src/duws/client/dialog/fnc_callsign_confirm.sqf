@@ -55,7 +55,7 @@ chosen_settings = true;publicVariable "chosen_settings";
     "commandpointsblu1", "WARCOM_blufor_ap", "WARCOM_opfor_ap", "cp_reward_multiplier",
     "DUWSMP_CP_death_cost", "blufor_ai_skill", "opfor_ai_skill", "enemyunitMultiplier", "garrison_density",
     "HeavyArmor", "AttackHeli",
-    "weather_type", "dynamic_weather_enable", "restricted_arsenal", "escalation_enabled",
+    "weather_type", "dynamic_weather_enable", "escalation_enabled",
     "hardcore_mode_enable", "insurgent_mode_enable", "enable_fast_travel",
     "CIV_PRESENCE", "ZeusStatus", "time_of_day", "player_fatigue"
 ];

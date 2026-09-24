@@ -170,7 +170,6 @@ private _forcesBody = ("FORCES, ECONOMY &amp; WORLD" call _hdr)
     ["Fast Travel", ["enable_fast_travel"] call _yn],
     ["Hardcore Mode", ["hardcore_mode_enable"] call _yn],
     ["Insurgent Mode", ["insurgent_mode_enable"] call _yn],
-    ["Restricted Arsenal", ["restricted_arsenal"] call _yn],
     ["Preset", _preset]
 ] apply {_x call _row} joinString "<br/>");
 
