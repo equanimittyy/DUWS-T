@@ -64,6 +64,7 @@ class CfgMagazines
 #include "duws\shared\includes\vendor_catalogue.hpp"
 #include "duws\shared\includes\veh_drop_menu.hpp"
 #include "duws\shared\includes\rest_menu.hpp"
+#include "duws\shared\includes\compositions.hpp"
 
 #include "duws\shared\includes\params_modern.hpp"
 #include "duws\shared\includes\supports_radio_modern.hpp"

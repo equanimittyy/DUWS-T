@@ -136,7 +136,7 @@ fnc_static_baseZ = {
 
 // [_row, _origin, _side, _key, _mode, _resolved] call fnc_static_place -- returns the object.
 //
-// _row      [class, offsetX, offsetY, offsetZ, dir, role], role optional; the shape both fences use
+// _row      [class, offsetX, offsetY, offsetZ, dir, role], role optional
 // _origin   [x, y]; z unused -- in "world" mode a weapon's height comes from the terrain under the gun
 // _key      the site key the object is filed under for teardown
 // _mode     "world" when the row states a height, "pos" when its Z means ground
@@ -146,12 +146,12 @@ fnc_static_baseZ = {
 // zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
 fnc_static_place = {
     params ["_row", "_origin", "_side", "_key", ["_mode", "pos"], ["_resolved", ""]];
-    // Index 5 is the isWeapon flag on zone-prefab and hardpoint rows, and absent or "" on the HQ/FOB
-    // fences, whose arrays are pre-split into turrets and walls. Neither is a role name -- every row
-    // resolves by class through the table below -- but the bool must not reach _role, where it would
-    // be read as a key name. Coerced by hand rather than by a [""] params template: that template
-    // rejects the bool the same way but logs the mismatch to the RPT before falling back, once per gun
-    // per site, spamming an expected case. The _role override stays for a caller that wants to force one.
+    // Index 5 is the isWeapon flag on a composition row, and "" on the HQ's own gun rows. Neither is a
+    // role name -- every row resolves by class through the table below -- but the bool must not reach
+    // _role, where it would be read as a key name. Coerced by hand rather than by a [""] params
+    // template: that template rejects the bool the same way but logs the mismatch to the RPT before
+    // falling back, once per gun per site, spamming an expected case. The _role override stays for a
+    // caller that wants to force one.
     _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", ""]];
     if !(_role isEqualType "") then { _role = "" };
 

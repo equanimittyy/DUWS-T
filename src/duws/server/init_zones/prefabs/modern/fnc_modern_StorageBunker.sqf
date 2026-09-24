@@ -11,47 +11,7 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
-// --DUWS-COMPOSITION BEGIN name="Storage Bunker" schema=A--
-private _allObjectsData = [
-    ["Land_HouseWallRuin_Corner_01_F", 0.231201, -4.93799, 1.04363, 0, false],
-    ["Land_HouseWallRuin_Door_01_F", -6.0481, -0.19043, 1.07816, 90, false],
-    ["Land_HouseWallRuin_Corner_02_F", 0.201904, 5.05957, 1.03211, 180, false],
-    ["Land_DirtPatch_05_F", 2.3269, 5.43457, 0.000695229, 0, false],
-    ["Land_DirtPatch_05_F", 1.2019, -5.69043, 0.000695229, 0, false],
-    ["Land_DirtPatch_05_F", -4.4231, -1.81543, 0.000695229, 0, false],
-    ["CraterLong_02_small_F", 4.2019, -5.56543, 0.0456567, 0, false],
-    ["Land_Barricade_01_10m_F", 3.5769, 0.43457, 0.000695229, 270, false],
-    ["Land_BagFence_Long_F", 3.8269, 1.18457, 0.420007, 90, false],
-    ["Land_BagFence_Short_F", 3.8269, -1.19043, 0.414979, 90, false],
-    ["VirtualReammoBox_small_F", 1.8894, 0.702148, 0.210738, 109.3, false],
-    ["Land_Ammobox_rounds_F", 1.8269, 1.43457, 0.106058, 158.9, false],
-    ["Land_WoodenCrate_01_F", 2.18994, 3.15771, 0.450754, 279.7, false],
-    ["Land_WoodenCrate_01_stack_x3_F", 2.30737, 6.19238, 0.708568, 258.5, false],
-    ["Land_Plank_01_4m_F", 2.3269, 4.43457, 0.0444102, 0, false],
-    ["VirtualReammoBox_small_F", 1.84058, 2.22949, 0.210738, 89.8, false],
-    ["Land_Ammobox_rounds_F", 1.49866, 5.16504, 0.106058, 327.6, false],
-    ["Land_Ammobox_rounds_F", 1.38013, 5.4707, 0.106058, 177.8, false],
-    ["Land_SlumWall_01_s_4m_F", 3.3269, -0.0654297, 0.37972, 270, false],
-    ["Land_ChairWood_F", 0.847412, 6.60693, 3.86238E-05, 24.6, false],
-    ["Land_Plank_01_4m_F", 1.40112, -5.87793, 0.0444102, 240.9, false],
-    ["VirtualReammoBox_small_F", 0.174561, -6.56152, 0.210738, 75.9, false],
-    ["Land_FoodContainer_01_F", 1.66577, 3.96094, 0.228501, 157.1, false],
-    ["Land_EmergencyBlanket_01_discarded_F", 1.36011, -5.81689, 0.0458388, 231.8, false],
-    ["Land_EmergencyBlanket_01_stack_F", 0.810913, -6.1665, 0.308418, 144.699, false],
-    ["Land_TinContainer_F", 1.79041, 5.03809, 0.100071, 34.7, false],
-    ["Land_BagFence_Long_F", -4.30981, 7.80957, 0.420007, 180, false],
-    ["Land_Garbage_line_F", -0.13208, -6.05127, 0.0508471, 240.3, false],
-    ["Land_Pallets_stack_F", -4.79224, -4.02979, 0.430264, 0, false],
-    ["CamoNet_BLUFOR_open_F", -1.17505, 0.842773, 1.16854, 89.3, false],
-    ["I_HMG_01_high_F", -4.46375, -6.54639, 1.66099, 215.244, true],
-    ["I_GMG_01_high_F", -4.12036, 6.13232, 1.66083, 0, true],
-    ["Land_BagFence_Long_F", -6.67151, -0.193848, 0.420007, 271.6, false],
-    ["Box_NATO_AmmoVeh_F", -0.919189, 6.41699, 0.790504, 0, false],
-    ["Land_BagFence_Round_F", -5.07495, -7.72119, 0.420007, 25.2, false],
-    ["I_HMG_01_high_F", -4.98328, 0.135742, 1.66099, 272.861, true]
-];
-// --DUWS-COMPOSITION END--
+private _allObjectsData = ["duws_zone_storage_bunker"] call fnc_composition_rows;
 
 private _tiltTypes = [
     "Land_HouseWallRuin_Corner_01_F", "Land_HouseWallRuin_Corner_02_F",

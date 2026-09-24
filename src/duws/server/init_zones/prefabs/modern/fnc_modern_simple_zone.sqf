@@ -8,11 +8,9 @@ private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-// --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=A--
 _staticsArray = [
 	["CamoNet_INDP_open_F", 0, 0, 0, 0]
 ];
-// --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {

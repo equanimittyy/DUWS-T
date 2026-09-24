@@ -34,35 +34,9 @@ private _build = {
         private _cx = _campPos select 0;
         private _cy = _campPos select 1;
 
-        // Camp composition (Eden-authored). Rows are [class, offX, offY, offZ, dir, isWeapon] from the camp
-        // centre; offZ unused (props seat on terrain). Left simulated, not hardened: the smoke-column
-        // particle on the campfire is the beacon, and a particle source needs simulation to emit.
-        // --DUWS-COMPOSITION BEGIN name="Mission: Patrol Camp" schema=A--
-        private _staticsArray = [
-            ["Land_TentDome_F", -3.95898, 3.27539, -5.90000000000312E-05, 45, false],
-            ["Land_TentDome_F", 3, 2, -5.90000000000312E-05, 315,  false],
-            ["Land_TentDome_F", -0.728516, -3.83398, -5.90000000000312E-05, 180, false],
-            ["Land_CampingTable_F", 5.71484, -0.441406, -0.207753, 44.8096, false],
-            ["Land_BagBunker_Small_F", 4.51172, -10.6426, 0.346326, 345.614, false],
-            ["Land_BagFence_Long_F", 6.11133, -0.015625, -0.199993, 44.7205, false],
-            ["Land_WoodPile_F", -5.94141, -3.69336, -0.35937, 122.244, false],
-            ["Land_WoodPile_large_F", 2.04102, -11.5586, -0.250585, 163.572, false],
-            ["Land_CampingChair_V2_F", -6.32227, -1.58203, -0.112819, 91.7357, false],
-            ["Land_BagFence_Long_F", -7.23828, 1.02148, -0.199993, 277.736, false],
-            ["Land_CampingTable_F", -6.66406, 0.666016, -0.207753, 98.212, false],
-            ["Land_Garbage_square5_F", -3.29297, -5.99219, -0.5798689, 0, false],
-            ["Land_Garbage_square3_F", 6.37305, -2.90625, -0.5673886, 47.4125, false],
-            ["Land_Garbage_line_F", 3.86328, -7.67188, -0.5691529, 0, false],
-            ["Land_BarrelEmpty_F", -6.58398, 2.23828, -0.214552, 0, false],
-            ["Land_Ammobox_rounds_F", 2.86328, -9.74609, -0.513942, 313.351, false],
-            ["Land_Ammobox_rounds_F", 2.66016, -9.45117, -0.513942, 250.36, false],
-            ["Land_BagFence_Round_F", -7.42969, -1.82031, -0.199993, 74.2054, false],
-            ["Land_CratesWooden_F", 2.33398, 5.09961, 0.119695, 253.913, false],
-            ["Land_BagFence_Long_F", -4.20898, 7.19922, -0.199993, 162.012, false],
-            ["Land_BagFence_Long_F", -1.41602, 8.18359, -0.199993, 162.012, false],
-            ["Land_Campfire_F", -0.136719, -0.171875, -0.399721, 0, false]
-    ];
-        // --DUWS-COMPOSITION END--
+        // Left simulated, not hardened: the smoke-column particle on the campfire is the beacon, and a
+        // particle source needs simulation to emit.
+        private _staticsArray = ["duws_mission_patrol_camp"] call fnc_composition_rows;
         private _props = [_staticsArray, [_cx, _cy], "mission_patrol_camp", [0, [], []]] call fnc_composition_place;
 
         // Wood-smoke column on the campfire as the beacon -- inflame gives only a weak low wisp. Built per

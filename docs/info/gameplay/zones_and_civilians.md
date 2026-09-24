@@ -191,7 +191,7 @@ A zone is described by two arrays that never meet in source, and the tier reache
 | | Holds | Tiered | Where |
 |---|---|---|---|
 | Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers` |
-| Prefab | one row per object — sandbags, wire, bunkers, towers and the guns alike | no, drawn by weighted roll at zone creation (`fnc_createzone.sqf:130-140`) | the `--DUWS-COMPOSITION--` fence in each `init_zones/prefabs/modern/fnc_modern_*.sqf` |
+| Prefab | one row per object — sandbags, wire, bunkers, towers and the guns alike | no, drawn by weighted roll at zone creation (`fnc_createzone.sqf:130-140`) | the Eden composition each `init_zones/prefabs/modern/fnc_modern_*.sqf` reads (`duws_zone_*` in `src/duws/compositions/`) |
 
 **A prefab object cannot carry a posture, because a posture is an order and there is no group to
 give it to.** What carries one is whatever occupies the object, and every occupancy is discovered at

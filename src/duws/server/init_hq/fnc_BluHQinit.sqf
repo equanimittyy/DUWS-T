@@ -11,19 +11,6 @@
 
 if (isNil "PosOfBLUHQ") exitWith {};
 
-private _hqInCompX = 10.0413;
-private _hqInCompY = 11.3066;
-private _compCenterX = 1041.4962;
-private _compCenterY = 6115.1133;
-
-private _offsetX = _compCenterX - _hqInCompX;
-private _offsetY = _compCenterY - _hqInCompY;
-
-private _spawnBaseX = (PosOfBLUHQ select 0) + _offsetX;
-private _spawnBaseY = (PosOfBLUHQ select 1) + _offsetY;
-private _newCenterZ = getTerrainHeightASL [_spawnBaseX, _spawnBaseY];
-if (_newCenterZ <= 0) then { _newCenterZ = 0; };
-
 private _hqObj = objNull;
 private _supplyCrate = objNull;
 private _mapBoard = objNull;
@@ -34,171 +21,23 @@ private _repairDepot = objNull;
 private _helipad = objNull;
 private _allTowersList = [];
 
-// Format: [class, world X, world Y, world Z ASL, dir deg, isWeapon]
-// --DUWS-COMPOSITION BEGIN name="HQ Main Base" schema=A anchor=hqInComp--
-private _allObjectsData = [
-    ["Land_TimberPile_05_F", 11.47421, 19.76128, 0.595282, 75.9751, false],
-    ["Land_Cargo_HQ_V1_F", 10.0413, 11.3066, 3.87609, 165.875, false],
-    ["Land_PortableLight_double_F", 6.49291, -19.1948, 1.057, 214.375, false],
-    ["Land_PortableLight_double_F", -1.1664, 16.88726, 1.08975, 258.484, false],
-    ["Land_PortableLight_double_F", 33.754, -6.1701, 1.08523, 167.475, false],
-    ["Land_PortableLight_double_F", 33.6973, -20.2924, 1.07915, 121.275, false],
-    ["TargetP_Zom_F", 40.1207, 7.67251, 0.881256, 76.0751, false],
-    ["TargetP_Zom_F", 40.4091, 6.45274, 0.881256, 76.0751, false],
-    ["TargetP_Zom_F", 40.6674, 5.3873, 0.881256, 76.0751, false],
-    ["TargetP_Zom_F", 39.8571, 8.7538, 0.881256, 76.0751, false],
-    ["Land_HelipadSquare_F", 12.5887, -10.1014, -0.0168171, 256.075, false],
-    ["Land_PortableLight_double_F", 36.2363, 23.4904, 1.107, 2.57507, false],
-    ["Land_MedicalTent_01_NATO_generic_inner_F", 39.737, -9.6138, 1.38285, 166.275, false],
-    ["Land_Sleeping_bag_F", 41.1145, -5.3468, 0.0404491, 77.8753, false],
-    ["Land_Sleeping_bag_brown_F", 43.1083, -12.6526, 0.0329342, 81.2751, false],
-    ["Land_Sleeping_bag_blue_F", 41.5577, -6.9902, 0.0384483, 71.4753, false],
-    ["Land_Sleeping_bag_F", 41.9901, -8.591, 0.0373268, 78.7751, false],
-    ["Land_Sleeping_bag_blue_F", 42.3839, -10.1021, 0.0362072, 71.4752, false],
-    ["MapBoard_altis_F", 30.1609, 9.96962, 0.982065, 10.9751, false],
-    ["Land_RepairDepot_01_green_F", 12.94407, 1.42687, 2.41118, 256.075, false],
-    ["Land_ClothesLine_01_F", 18.69283, -25.1009, 1.23125, 346.875, false],
-    ["Land_ParkingMeter_01_F", 9.113384, -24.1112, 0.459938, 46.2751, false],
-    ["RoadBarrier_F", 8.11852, -22.4627, 0.529808, 256.075, false],
-    ["Land_dirt_road_damage_long_02_F", 15.29007, -20.6055, -0.0241928, 256.075, false],
-    ["Land_WoodenBox_02_F", 9.410007, -1.5098, 0.476482, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 27.5942, -24.138, 0.785501, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 21.7958, -25.5952, 0.777208, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 10.205074, -28.4865, 0.770662, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 6.67176, -26.1756, 0.770651, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 5.22842, -20.3912, 0.775724, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 3.77573, -14.5858, 0.775928, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 2.3733, -8.8688, 0.783493, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 0.935879999999999, -3.0313, 0.785723, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", -0.489600000000001, 2.74379, 0.792898, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", -1.9382, 8.56297, 0.795723, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 33.4135, -22.7093, 0.793774, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 39.2424, -21.2737, 0.799475, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 45.0573, -19.8669, 0.796333, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 47.3774, -16.3057, 0.802462, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 45.9141, -10.4976, 0.810328, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 43.0389, 1.1264, 0.825724, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 41.5617, 6.93462, 0.825724, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 40.1282, 12.75794, 0.825724, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 38.6685, 18.55386, 0.825724, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 37.2252, 24.3622, 0.825724, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 33.6599, 26.6974, 0.825724, 166.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 16.309, 22.4576, 0.817297, 166.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", 10.514518, 21.01012, 0.815723, 166.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_v1_F", -1.1127, 18.10729, 0.81123, 166.075, false],
-    ["Land_CamoConcreteWall_01_pole_v1_F", 30.6458, 25.9673, 0.748152, 346.075, false],
-    ["Land_CamoConcreteWall_01_pole_v1_F", -4.1169, 17.33939, 0.737411, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_d_v2_F", -3.0222, 14.49482, 0.780607, 76.0751, false],
-    ["Land_CamoConcreteWall_01_l_4m_d_v2_F", 44.1017, -4.756, 0.796289, 256.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_d_v1_F", 15.92204, -26.6372, 0.750999, 346.075, false],
-    ["Land_CamoConcreteWall_01_l_4m_d_v1_F", 4.82164, 19.14093, 0.788137, 166.075, false],
-    ["Land_GuardTower_02_F", 34.4535, 24.0735, 3.44459, 31.0751, false],
-    ["Land_GuardTower_02_F", -0.6534, 15.37403, 3.42285, 301.075, false],
-    ["Land_GuardTower_02_F", 9.411693, -25.8396, 3.39288, 211.075, false],
-    ["Land_GuardTower_02_F", 44.7722, -17.1174, 3.42253, 121.075, false],
-    ["CamoNet_BLUFOR_open_F", 32.1902, 4.96532, 1.18102, 346.075, false],
-    ["Land_GuardBox_01_brown_F", 19.57593, 25.8494, 0.888489, 166.075, false],
-    ["Land_CzechHedgehog_01_old_F", 17.25506, 29.2232, 0.721874, 346.075, false],
-    ["Land_CzechHedgehog_01_old_F", 14.12179, 25.0153, 0.715223, 211.075, false],
-    ["Land_CzechHedgehog_01_old_F", 30.9747, 32.7124, 0.721872, 301.075, false],
-    ["Land_CzechHedgehog_01_old_F", 33.6794, 33.458, 0.721872, 256.075, false],
-    ["Land_SandbagBarricade_01_half_F", 30.9767, 30.9314, 0.692169, 345.575, false],
-    ["Land_SandbagBarricade_01_half_F", 18.84211, 28.2144, 0.692169, 345.575, false],
-    ["Land_SandbagBarricade_01_half_F", 16.8831, 27.7156, 0.692169, 345.575, false],
-    ["Land_SandbagBarricade_01_half_F", 16.31234, 24.6207, 0.687159, 255.775, false],
-    ["Land_SandbagBarricade_01_F", 15.88874, 26.6352, 1.30664, 255.875, false],
-    ["Land_SandbagBarricade_01_half_F", 16.51917, 23.8557, 0.686167, 255.875, false],
-    ["Land_SandbagBarricade_01_hole_F", 32.77, 31.316, 1.31141, 345.375, false],
-    ["Land_SandbagBarricade_01_F", 34.5608, 31.6642, 1.30891, 347.075, false],
-    ["Land_SandbagBarricade_01_F", 35.6205, 31.1583, 1.30891, 77.0751, false],
-    ["Land_SandbagBarricade_01_F", 36.9243, 27.9941, 1.30891, 76.3751, false],
-    ["Land_SandbagBarricade_01_hole_F", 36.2596, 29.5755, 1.31141, 53.8751, false],
-    ["Land_SandbagBarricade_01_half_F", 34.3436, 12.34787, 0.686457, 345.575, false],
-    ["Land_SandbagBarricade_01_F", 32.535, 11.80649, 1.30047, 166.075, false],
-    ["Land_SandbagBarricade_01_F", 29.0571, 10.966094, 1.29891, 166.075, false],
-    ["Land_SandbagBarricade_01_hole_F", 30.7999, 11.545669, 1.30141, 345.375, false],
-    ["Land_SandbagBarricade_01_half_F", 27.1423, 10.652983, 0.682169, 345.575, false],
-    ["Land_SandbagBarricade_01_half_F", 35.6999, 13.33288, 0.689411, 76.0751, false],
-    ["Land_SandbagBarricade_01_half_F", 35.0279, 15.01155, 0.691362, 254.175, false],
-    ["Land_SandbagBarricade_01_F", 35.5168, 16.30207, 1.30891, 345.575, false],
-    ["Land_BagFence_End_F", 37.2348, 26.7301, 0.432846, 346.075, false],
-    ["Land_TTowerSmall_1_F", 27.8059, -0.954800000000001, 4.98351, 161.775, false],
-    ["Land_Loudspeakers_F", 8.25946, 0.3407, 3.49475, 346.075, false],
-    ["Land_BagFence_Short_F", 44.6967, -6.8756, 0.429829, 76.0751, false],
-    ["Land_BagFence_Short_F", 44.3391, -5.2124, 0.432096, 256.075, false],
-    ["Land_BagFence_Round_F", 17.04625, 3.56396, 0.415043, 241.375, false],
-    ["Land_BagFence_End_F", 15.85629, 4.53854, 0.405699, 5.77509, false],
-    ["Land_GarbageBarrel_02_F", 17.13978, 1.48183, 0.594526, 204.575, false],
-    ["Land_CzechHedgehog_01_old_F", 2.83962, 20.0776, 0.710775, 116.975, false],
-    ["Oil_Spill_F", 31.0784, -21.4511, -0.00919914, 255.975, false],
-    ["Land_Tank_rust_F", 28.0179, -22.4232, 1.34365, 165.975, false],
-    ["Land_CampingChair_V2_F", 26.377, 6.67981, 0.516781, 223.975, false],
-    ["Land_TablePlastic_01_F", 28.1604, 7.26084, 0.456594, 195.175, false],
-    ["Land_CampingChair_V2_F", 26.9629, 6.15923, 0.516567, 206.375, false],
-    ["Land_CampingChair_V2_F", 27.7407, 5.9109, 0.516977, 195.675, false],
-    ["Land_CampingChair_V2_F", 28.8266, 5.78745, 0.517908, 191.475, false],
-    ["Land_CampingChair_V2_F", 26.7364, 7.92646, 0.519119, 296.675, false],
-    ["Land_Portable_generator_F", 17.9526, 1.84223, 0.353132, 302.775, false],
-    ["WaterPump_01_forest_F", 38.7457, 11.663749, 1.09222, 330.275, false],
-    ["Land_ShootingPos_Roof_01_F", 5.83547, -2.9029, 1.00015, 165.875, false],
-    ["Land_Pallet_vertical_F", 8.18671, -2.53, 0.722336, 74.6752, false],
-    ["Land_PalletTrolley_01_khaki_F", 5.07381, -3.7015, 0.530968, 256.475, false],
-    ["Land_GarbageBarrel_02_F", 30.2847, -20.1657, 0.593351, 215.175, false],
-    ["Land_GarbageBarrel_02_F", 31.0533, -19.9143, 0.594543, 3.47507, false],
-    ["Land_GarbageBarrel_02_buried_F", 30.9098, 26.7942, 0.406921, 317.275, false],
-    ["Land_GarbageBarrel_02_buried_F", 40.9711, 4.03607, 0.406921, 317.275, false],
-    ["Land_WoodenCrate_01_F", 9.907725, -2.705, 0.336653, 346.075, false],
-    ["Land_WoodenCrate_01_stack_x3_F", 15.71863, 21.18984, 0.721056, 346.075, false],
-    ["Land_WoodenCrate_01_F", 17.28733, 21.5078, 0.362463, 166.075, false],
-    ["Land_WoodenCrate_01_stack_x5_F", 7.1473, -2.5296, 0.947853, 346.075, false],
-    ["Land_LampShabby_F", 19.12027, 23.1654, 3.79081, 346.075, false],
-    ["Land_LampShabby_F", -0.251300000000001, 2.74443, 3.76233, 256.075, false],
-    ["Land_LampShabby_F", 18.96417, -26.2963, 3.74521, 166.075, false],
-    ["Land_LampShabby_F", 43.7006, -1.6835, 3.79462, 76.0751, false],
-    ["Land_LampShabby_F", 37.8922, 21.5025, 3.79521, 76.0751, false],
-    ["Land_LampShabby_F", 39.2588, -21.2613, 3.76895, 166.075, false],
-    ["Land_LampShabby_F", 1.74789, 18.64984, 3.78255, 346.075, false],
-    ["Land_Bench_F", 15.75287, 9.09223, 0.249794, 346.075, false],
-    ["Land_Pallet_F", 3.27926, -3.2974, 0.084219, 166.075, false],
-    ["Box_Syndicate_Ammo_F", 4.99193, -3.5859, 0.193226, 346.075, false],
-    ["Box_IED_Exp_F", 2.98574, -3.6417, 0.193712, 346.075, false],
-    ["Box_Syndicate_WpsLaunch_F", 3.52433, -3.2864, 0.163168, 255.575, false],
-    ["Land_Ammobox_rounds_F", 3.85288, -3.1443, 0.0885448, 346.809, false],
-    ["Land_Ammobox_rounds_F", 3.93312, -3.4488, 0.0885448, 166.809, false],
-    ["Land_FireExtinguisher_F", 25.6747, 10.26125, 0.39834, 303.475, false],
-    ["Land_FireExtinguisher_F", 16.01377, 7.65429, 0.386269, 303.475, false],
-    ["Land_WaterBottle_01_pack_F", 27.3972, 7.22295, 0.142988, 249.175, false],
-    ["Land_BarGate_F", 25.4348, 26.6798, 4.07346, 345.275, false],
-    ["B_supplyCrate_F", 29.4458, -1.4788, 0.893028, 12.9751, false]
-];
-// --DUWS-COMPOSITION END--
+// Offsets from the HQ building, which stands at PosOfBLUHQ.
+private _allObjectsData = ["duws_hq"] call fnc_composition_rows;
 
-// The base's guns, in the same frame as the walls around them but on their own fence, not merged into
-// the composition above, because the two halves have different lifetimes: props are built once, guns
-// are replaced on every redeploy (init_hq/fnc_redeployHQUnits.sqf replays these rows alone through
-// fnc_placeHQUnits). The Eden export emits nothing past the heading column, so a permanent/rebuilt
-// flag on one merged array would survive only by being hand-carried back across 135 prop rows every
-// round trip. Do not merge them: the zone prefabs' single-fence-plus-isWeapon shape works there only
-// because a prefab is built once and never rebuilt. (The guns were originally placed off model-space
-// offsets, which is why the composition above holds 135 props and no weapon -- importing it showed a
-// firing position with no gun.)
+// The base's guns, in the same frame as the walls around them but kept in code rather than in the
+// composition: guns are replaced on every redeploy (init_hq/fnc_redeployHQUnits.sqf replays these rows
+// alone through fnc_placeHQUnits), and half of each row is placement data Eden cannot hold.
 //
-// Height is the one thing that cannot be a row: a row's Z is discarded (the placement loop below
-// snaps every prop to the terrain), and these two sit above it by a measured amount taken against an
-// anchor's getPosWorld, because a building's own modelToWorld Z is unusable
-// (init_hq/fnc_placeHQUnits.sqf). So the last two columns name the anchor class and the offset,
-// resolved by whatever object of that class is nearest the row -- move the gun in Eden and its height
-// follows the thing it stands on.
+// Height is that data: these two sit above an anchor by a measured amount taken against its
+// getPosWorld, because a building's own modelToWorld Z is unusable (init_hq/fnc_placeHQUnits.sqf). So the
+// last two columns name the anchor class and the offset, resolved by whatever object of that class is
+// nearest the row -- move the anchor and the gun's height follows it. Z is unused.
 //
-// Column 5 is the faction role holding the classname, or "" for a gun resolved by its class. The
-// column 0 class is what the role resolves to on the stock faction, so the import draws the right
-// silhouette whether or not a mod is loaded.
-// --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
+// Column 5 is the faction role holding the classname, or "" for a gun resolved by its class.
 private _weaponData = [
-    ["I_HMG_02_high_F", 31.26595, 28.56276, 0, 352.975, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
-    ["B_static_AA_F",   10.54204, 10.59272, 0, 165.875, "",                  "Land_Cargo_HQ_V1_F",              1.252556]
+    ["I_HMG_02_high_F", 21.22465, 17.25616, 0, 352.975, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
+    ["B_static_AA_F",   0.50074, -0.71388, 0, 165.875, "",                  "Land_Cargo_HQ_V1_F",              1.252556]
 ];
-// --DUWS-COMPOSITION END--
 
 private _lightTypes = ["Land_PortableLight_double_F", "Land_LampShabby_F"];
 
@@ -243,8 +82,8 @@ private _invulnerableTypes = [
     _x params ["_class","_origX","_origY","_origZ","_dir","_isWeapon"];
     if (_isWeapon) then { continue; };
     
-    private _newX = _spawnBaseX + (_origX - _compCenterX);
-    private _newY = _spawnBaseY + (_origY - _compCenterY);
+    private _newX = (PosOfBLUHQ select 0) + _origX;
+    private _newY = (PosOfBLUHQ select 1) + _origY;
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
     [_obj, "HQ"] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
@@ -286,11 +125,11 @@ publicVariable "bluHQ_object";
 // call rather than beside each spawn so the rebuild -- which has nothing but the namespace to work
 // from -- places its units off exactly the data this build used.
 
-// The guns, resolved out of their fence into the world positions the rebuild works from. Anchors
+// The guns, resolved out of their rows into the world positions the rebuild works from. Anchors
 // travel as a class and a position rather than as an object reference: an anchor destroyed between
 // build and rebuild would leave a null behind, where the class is re-found against whatever is
 // standing there now.
-// Resolved here rather than by fnc_static_place: this fence's product is data, not objects. The
+// Resolved here rather than by fnc_static_place: these rows' product is data, not objects. The
 // rebuild runs it again against whatever is standing on the anchors now, so the class is decided
 // once per build and carried, and an unroled row is decided by its class through the same table
 // every zone prefab uses.
@@ -298,7 +137,7 @@ missionNamespace setVariable ["HQ_redeploy_weaponData", _weaponData apply {
     _x params ["_class", "_origX", "_origY", "", "_dir", "_role", "_anchorClass", "_hOffset"];
     [
         [_class, "blufor", _role] call fnc_static_resolve,
-        [_spawnBaseX + (_origX - _compCenterX), _spawnBaseY + (_origY - _compCenterY)],
+        [(PosOfBLUHQ select 0) + _origX, (PosOfBLUHQ select 1) + _origY],
         _dir, _anchorClass, _hOffset
     ]
 }, true];
@@ -312,7 +151,7 @@ missionNamespace setVariable ["HQ_redeploy_guardTypes", _baseGuardTypes, true];
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];
 
 // Door pair: model XY, height offset, facing offset from the HQ building heading, anim.
-// The facing is relative to the building, not absolute: re-exporting the composition rotates the
+// The facing is relative to the building, not absolute: re-saving the composition in Eden can turn the
 // whole frame, and an absolute facing stays behind and ends up turning the pair inward.
 missionNamespace setVariable ["HQ_redeploy_hqGuardsData", [
     [[-5.49573, -0.923828], -4.10893, -90, "STAND"],
@@ -348,7 +187,7 @@ _officer allowDamage false;  // the proximity monitor below flips this true only
 // simulating a unit hard-placed at an absolute Z and renders it falling.
 _officer enableSimulationGlobal false;
 _officer setPosWorld _worldPos;
-_officer setDir ((getDir _hqObj) - 90);  // outward, relative to the building so a re-exported frame carries it
+_officer setDir ((getDir _hqObj) - 90);  // outward, relative to the building so a re-saved frame carries it
 _officer setBehaviour "CARELESS";
 _officer setCombatMode "BLUE";
 _officer disableAI "TARGET"; _officer disableAI "AUTOTARGET";
@@ -418,8 +257,8 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     [_u, "acts_StandingSpeakingUnarmed"] remoteExec ["switchMove", 0, format ["hq_pose_%1", netId _u]];
 };
 
-private _barrierPosX = _spawnBaseX + (-22.2731 - _compCenterX);
-private _barrierPosY = _spawnBaseY + (21.2998 - _compCenterY);
+private _barrierPosX = (PosOfBLUHQ select 0) - 32.3144;
+private _barrierPosY = (PosOfBLUHQ select 1) + 9.9932;
 private _barrier = nearestObject [[_barrierPosX, _barrierPosY, 0] apply { _x + 0 }, "RoadBarrier_F"];
 if (!isNull _barrier) then {
     private _xyWorld = _barrier modelToWorld [2.41602, 0.460938, 0];

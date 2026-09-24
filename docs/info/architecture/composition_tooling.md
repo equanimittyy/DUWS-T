@@ -1,144 +1,109 @@
-# The composition TUI
+# Composition tooling
 
-`scripts/duws_eden.ps1`, launched by double-clicking `duws_eden.cmd` at the repo root or by:
+The mission has two kinds of composition, and each is edited where it can be seen.
+
+| Kind | Where it lives | How it is edited |
+|---|---|---|
+| **Static** — object layouts (HQ, FOB, zone prefabs, hardpoints, mission sites, killhouse) | `src/duws/compositions/<name>/composition.sqe`, read at runtime by `fnc_composition_rows` | in Eden, saved as a custom composition |
+| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the static-weapon role map) | `--DUWS-UNITCOMP--` fences in the source | in the composition TUI, which writes rows back to the source |
+
+Static compositions are *layout*, so the file is the one the 3D editor saves. Unit compositions are
+*data*, and there is nothing to look at in Eden.
+
+The TUI is `scripts/duws_eden.ps1`, launched by double-clicking `duws_eden.cmd` at the repo root or by:
 
 ```text
 powershell -ExecutionPolicy Bypass -File scripts\duws_eden.ps1
 ```
 
-The mission has two kinds of composition and both used to be hand-edited in source. The tool covers
-both over one idea: a **marker fence** in the source that the tool parses and Arma's preprocessor
-discards, so marking something up is data-only and costs no runtime.
+## Static compositions: edited in Eden
 
-The top menu is the two kinds, with the unit half split by what a row *is* — a composition or a
-token.
+Each composition is one folder, `src/duws/compositions/<name>/`, which holds the `composition.sqe` and
+`header.sqe` that Eden writes. `src/duws/shared/includes/compositions.hpp` gives each one a class under
+`CfgCompositions`, and `description.ext` includes that file, so the engine parses every composition
+once at mission load. `<name>` is the Eden composition name, the folder name and the class name.
+Keep it `lower_snake_case` with no spaces: Eden URL-encodes the name into the folder name, so a space
+becomes `%20` and the three names stop matching.
 
-| Kind | Marker | What the tool does |
-|---|---|---|
-| **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | emits a paste-ready Eden import; writes a new fence from rows pasted back |
-| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the static-weapon role map) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source; adds rows and whole tables |
+`[_name, _layer] call fnc_composition_rows` (`server/placement/fnc_composition_rows.sqf`) turns a
+composition into rows `[class, X, Y, Z, dir°, isWeapon]`, the shape every placer already takes.
+`isWeapon` is derived from the class against `DUWS_staticRoles`, which is the mission's own answer to
+which classes are guns. The reader keeps only objects: Eden saves the crew of a static weapon as a
+`Group` and a module as a `Logic`, and both are dropped
+([§Module rows](arma_engine_gotchas.md#an-eden-module-in-a-composition-is-a-logic-a-placer-cannot-build)).
 
-Static compositions round-trip through the 3D editor because they are *layout* — you want to see
-them. Unit compositions are *data*, so there is nothing to look at in Eden and the tool edits them
-directly.
+A name with no class, a layer the composition does not hold, and a composition without both markers
+all place nothing. The reader logs an `ERROR` for the first and the last, but only when that site is
+built, so `tests/lint/check_eden_compositions.py` checks all three before the mission ships.
 
-## Static compositions: the Eden round-trip
+### Editing one
 
-The load-bearing trap: `create3DENEntity` **only runs in Eden's own debug console** — the `{ }`
-console in the 3D editor toolbar, not the in-game debug console. Run it in-game and it silently
-no-ops.
+1. Link once: `1` on the TUI's top menu lists the Arma profiles under Documents. Pick the one Eden
+   runs under, and the tool creates a directory junction for each composition in that profile's
+   `Compositions` folder. Eden then lists the mission's compositions with its custom compositions, and
+   a save writes into `src/`. A name already taken in the profile is skipped, not replaced.
+2. In Eden, place the composition on flat ground and edit it.
+3. Select everything, including both markers, and use "Save composition" with the same name.
+4. Review the diff and repack.
 
-Objects take their heading from the yaw slot of the `rotation` attribute (`[pitch, roll, yaw]`,
-degrees) — a bare number sets pitch, not heading. Pick a flat `_origin`; it only decides where the
-composition lands.
-
-**Import** — select a composition and the tool normalizes the rows, writes `temp\eden_import.sqf` and
-copies the import to the clipboard. Paste that into the Eden console. It reports `created N of M
-objects` and warns if any row-like line failed to parse, so a silent drop is visible. There is also a
-"paste your own array" option.
-
-The origin is one coordinate for the whole run, shown at the top of the menu and changed with `O`
-(default `23100 18700`; it accepts `X Y` or a pasted `[x,y,z]`, whose Z is ignored). It is session
-state rather than a per-import prompt because the export subtracts the same origin back out — answer
-it differently on a second import and the rows come back offset by the difference.
+A new composition starts as a copy of an existing one, so that it carries both markers: place one,
+replace its objects, save it under a new name, and move the new folder from the profile into
+`src/duws/compositions/`. Then add its class to `compositions.hpp`, call the reader where it is built,
+and link again.
 
 ### The two markers
 
-The import raises two `FlagPole_F` objects that are not part of the composition: **`DUWS_FRONT`**,
-standing clear of the layout along **+Y**, and **`DUWS_ORIGIN`**, standing at the origin itself.
+Every composition holds two `FlagPole_F` objects that are not part of the layout: **`DUWS_ORIGIN`**
+at the origin, and **`DUWS_FRONT`** clear of the layout along **+Y**. The reader finds both by
+variable name, drops them from the rows, and measures every row from the origin in the frame that the
+front marker points down. `center[]` in the file only records where Eden saved, so a layout that was
+dragged or turned before the save reads back the same rows.
 
-A composition's rows are offsets in a frame whose +Y is the way the whole thing faces once placed,
-and nothing else in the 3D view shows where that frame points. `DUWS_FRONT` *is* that frame's +Y: the
-export reads its bearing off `DUWS_ORIGIN` and takes it back out of every row's offset and heading, so
-the rows land in the composition's own frame however the layout was turned. Its distance is measured
-from the composition rather than fixed: the furthest row's offset plus 15 m, so a 300-object base and
-a five-prop outpost each get a marker that reads as *outside* rather than as one more prop.
+Keep both markers selected with everything else when you save. To *re-face* a composition, turn the
+layout relative to `DUWS_FRONT`, or point `DUWS_FRONT` the new way: the rows then come back rotated,
+which is what was asked for. A composition may hold a flagpole of its own, because a marker is known
+by its name, not by its class.
 
-`DUWS_ORIGIN` is the frame's other half, and it is what the export measures position against. **Keep
-both selected with everything else.** Move the layout and the markers travel with it, so the offsets
-still come out in the composition's own terms; leave one behind and the export loses that half of the
-frame. Rotating the whole selection — layout and both markers together — is now rotation-proof: the
-front turns with it and the export takes the turn back out, so nothing changes. To *re-face* a
-composition, turn it relative to the front marker — rotate the layout while `DUWS_FRONT` stays put, or
-point `DUWS_FRONT` the new way — and the rows come back rotated, which is what was asked for.
+### Layers
 
-**Neither is part of the composition, and the export drops both by name.** So `Ctrl+A` is safe —
-select everything and the poles still will not reach the array. The filter matches the names rather
-than `FlagPole_F` because a composition may legitimately hold a flagpole and the killhouse already
-carries a flag; the name is a marker's identity, its class is not.
+A composition read in halves splits them into top-level Eden layers, and the SQF asks for a layer by
+name. The FOB (`perimeter`, `turrets`) splits because the halves have different lifetimes: the
+perimeter stands for good, while a refortify replaces every turret. The killhouse (`objects`,
+`targets`) splits because the targets are stored for the run functions, not built. An object outside
+the named layers is never read by a consumer that asks for a layer.
 
-That makes the marker safe to leave in place while rearranging, which is the point — it has to stay
-visible for as long as you are working, and a marker you must remember to delete is one that ends up
-in a source array putting a flagpole in every zone that builds that prefab.
+### Heights
 
-Two constraints the scan imposes on where a composition may live, both of which fail by finding
-nothing rather than by erroring:
+Eden saves each position as `[x, height, y]`, and the height is the model centre over the ground under
+that object, not over `center[]`. Two sources agree on it: a `Land_HBarrier_1_F` reads 0.702 in
+Eden-saved files and in the rows the mission once measured with `getPosWorld`, and an object on a
+table carries its full height in `position[]` with the table's height repeated in `atlOffset`, which
+the reader ignores. The reader passes the height through, measured from the base of `DUWS_ORIGIN`
+(the pole's centre sits 3.9775 m above its base), so a layout built off the ground keeps its own datum.
 
-- **It enumerates `*.sqf` only.** A composition moved into an `.hpp` becomes invisible to the tool,
-  so a data file split out of a builder has to keep the `.sqf` extension even when it holds nothing
-  but an array. `server/killhouse/killhouse_composition.sqf` is named that way for this reason.
-- **`zbase=` is resolved by regex against the file holding the fence.** The constant it names has to
-  be declared in that same file. Split the array away from its `_centerSpawnZ` and the attribute
-  matches nothing, the origin silently falls back to zero, and the import lands on the terrain
-  instead of at altitude — a round trip that looks like it worked.
+Each consumer decides what the height means:
 
-### Marking a static composition
-
-```sqf
-// --DUWS-COMPOSITION BEGIN name="My Thing" schema=A--
-private _allObjectsData = [ ... ];
-// --DUWS-COMPOSITION END--
-```
-
-| Attr | Meaning |
+| Consumer | Row Z |
 |---|---|
-| `name="..."` | label shown in the TUI |
-| `schema=A` | the row format; the only one there is |
-| `anchor=hqInComp` | HQ only: its array stores original composition coords, so the tool subtracts `_hqInCompX/Y`. Omit elsewhere (offsets are already relative to `[0,0]`) |
-| `z=snap\|keep` | optional; default `snap` |
-| `zbase=<var>` | reads that source constant as the origin's Z, so the composition keeps its native altitude instead of ground. Killhouse uses `zbase=_centerSpawnZ` |
+| Props through `fnc_composition_place`, and the HQ's props | Discarded: each prop is snapped to the terrain. |
+| Weapon rows through `fnc_static_place` in `"world"` mode | The gun's centre over the ground under it, so a gun on a roof holds its height. |
+| FOB perimeter (`fnc_fortifyFOB.sqf:42`) | The prop's centre over the ground under it. |
+| FOB turrets (`fnc_fortifyFOB.sqf:68`) | Ignored: the ring's guns stand on the ground. |
+| Killhouse | An offset from the floor at `_centerSpawnZ` (1000 m). |
 
-Every row is `[class, X, Y, Z, dir°]`, degrees, position flat at indices 1-3. A row may carry extra
-trailing fields for its own consumer — the HQ and zone prefabs append `isWeapon` — and the tool
-ignores anything past index 4.
+Place a composition on flat ground in Eden, so that what the 3D view shows is what the mission builds.
 
-`snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z. The
-killhouse is a multi-floor structure that would collapse if snapped, so it declares `z=keep`
-alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
-
-**Under `snap`, weapon rows are the exception and keep their height**, because the mission treats
-them that way: a prop's Z is discarded at spawn and a weapon's is the one number read off the row.
-Snapping them too is what put roof guns inside the building they were meant to stand on. They are
-placed against the terrain at the *origin* rather than the ground beneath each gun, which is the
-datum `fnc_static_place` uses, and corrected by reading `getPosWorld` back — the position attribute
-moves a model's base while the mission writes its centre, so setting one and trusting the other
-leaves a gun half its own height high.
-
-Prop Z stays discarded on both sides. It is not a placement height: `getPosWorld` reports a model's
-centre, so a barrier resting flat on the ground already carries 0.74 in that column and a loudspeaker
-pole 3.50. Honouring those would float every prop by half itself.
-
-**What the offsets mean once the composition is placed.** X is metres east and Y metres north of the
-site's centre, in the frame the front marker above points down. Z is read only for the rows a
-consumer treats as weapons: the zone prefabs hand those to `fnc_static_place` in `"world"` mode,
-where Z is height above the terrain *at the site centre* and is written absolutely — nothing
-re-snaps it, and the object is frozen until its gunner is seated. Every other row is ground-snapped
-and its Z discarded. So a gun authored to stand on a roof holds its height against the centre while
-the building beneath it finds its own ground, and on a slope the two part company.
-
-**Crew placed in Eden is ignored.** Statics arrive in the editor with gunners; the export writes
-five columns and crew is not one of them, and each prefab spawns and seats its own at build time
-(`fnc_modern_FieldHospital.sqf:142-153`), then the zone re-seats them every streaming cycle.
-Deleting them or leaving them changes nothing.
+### Static weapons
 
 **A static weapon's class is a role token at runtime, not the gun that gets placed.**
 `fnc_static_resolve` (`shared/functions/fnc_static_roles.sqf`) reads the class off the row, looks it
 up in `DUWS_staticRoles`, and stands whatever the placing side's faction fields for that role — so
 swapping a Mk6 mortar for an HMG in Eden changes the role every faction fills there, not just the
 silhouette in the 3D view. Rearranging and rotating are free; retyping a class is a design change.
-The class still decides what the import draws, which is the point of keeping a vanilla one in the
-row: the layout is arranged against the right silhouettes whether or not a mod is loaded. A class
-the table does not carry is placed as itself, so an unmapped gun is quietly no longer faction-aware.
+The class still decides what Eden draws, which is the point of keeping a vanilla one: the layout is
+arranged against the right silhouettes whether or not a mod is loaded. A class the table does not
+carry is placed as itself, so an unmapped gun is quietly no longer faction-aware, and it is not a
+weapon row.
 
 **Place the high-mount HMG and GMG, never the crouch-height one.** `DUWS_staticRoles` maps both
 mounts of a family to one role, so which one stands is the faction's choice and not the author's —
@@ -148,149 +113,36 @@ of the 255 faction files name `TURRET_HMG` by hand and none would name the new k
 fall back to the gun it already has. The heights those files actually name spread wider than one
 mount does anyway, from a low `CUP_O_DSHKM_SLA` tripod to `rhs_KORD_high_MSV`.
 
-**Export** — `E` on the static menu writes `temp\eden_export.sqf` and copies the snippet to the
-clipboard, the way an import is handed over. Select the composition in Eden (`Ctrl+A` is safe, the
-marker is dropped by name), run it in the same console, and it copies schema-agnostic
-`[class, dx, dy, dz, dir°]` rows — offsets from the import origin.
-
-**It takes its origin from the `DUWS_ORIGIN` marker and its facing from `DUWS_FRONT`**, not from a
-coordinate. That is what makes the round trip survive being moved *or turned*: an origin typed at
-import time is only true until the layout is dragged, and a world-axis heading only until it is
-rotated — after either, every row silently carries the difference. Measuring position and facing from
-markers that travel with the composition removes the whole class of mistake. With no `DUWS_FRONT` in
-the selection the export falls back to world axes and says so in `systemChat`: right only if the
-layout still faces north.
-
-Its X and Y are exact, and so is its Z. `getPosWorld` reports a bounding-box centre, so the pole
-reads about 4 m high — but the export drops the origin to the pole's base before measuring, so every
-row comes back as its height over the ground: origin at ground, the same datum the import and the
-mission read a row's Z against. The pole can therefore stay tall enough to see while you work rather
-than being traded for a flat marker nobody can spot.
-
-If no marker is found the snippet falls back to the coordinate baked in at generation (session X/Y,
-and the Z of the last import so a `zbase=` layout subtracts its own altitude) and **says so in
-`systemChat`**. That path is only right if nothing has moved since the import.
-
-`getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
-round-trips. `Copied N objects` should match what the import reported; a mismatch means rows were
-added or lost in Eden, since the marker is already excluded.
-
-**Update** — `U` on the static menu folds pasted rows back into an existing fence. It reconciles by
-index against what is already there and reports what it finds before writing anything: rows whose
-class does not line up, a heading delta the whole paste shares, and a constant Z delta it offers to
-subtract. Comment lines inside the array are not carried over, and it says how many it dropped.
-
-**A paste that lines up with nothing is a replace, and it asks before writing.** A stub fence — one
-placeholder row, written so a layout can be imported and its markers raised before the layout
-exists — pairs with no pasted row, and neither does a paste dropped into the wrong composition. The
-rows cannot tell those two apart, so the question is put rather than answered.
-
-Trailing columns (`isWeapon`) come across from the row at the same index, which is the author's own
-answer. A row that does not line up has none to inherit, and **the flag is derived from the class
-against `DUWS_staticRoles`** rather than asked about — that table is the mission's own answer to
-which classes are guns, and it agrees with every flag the shipped compositions already carry. What
-was derived is listed before the write, since a class the table does not know reads as scenery.
-
-Writing the row short is not an option: with column 6 missing, `_isWeapon` is nil, both of a prefab's
-guards evaluate to nothing, and neither pass skips the row — so the object is built twice, once
-ground-snapped as a prop and once through `fnc_static_place` as a resolved gun with a gunner in it.
-
-A heading delta shared by the whole paste is reported rather than repaired: it means the layout was
-turned *relative to the front marker* — a deliberate re-face, since a whole-selection turn normalises
-away — and only the person who turned it knows whether it was meant. **X/Y measured against a stale
-origin cannot be detected at all**, which is why the export reads `DUWS_ORIGIN` for position and
-`DUWS_FRONT` for facing instead of being told a coordinate. A paste taken without those markers in the
-selection is not recoverable from the rows alone.
-
-Folding back by hand, if you would rather, by these rules:
-
-- **Match by order.** The export returns rows in creation order, so line them up 1:1 with the
-  existing array by index, confirm the class matches at each row, and change only the rows whose X/Y
-  or dir actually moved.
-- **X/Y and direction** drop straight in. For the **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y —
-  its array stores original composition coordinates, not offsets.
-- **Exported Z drops straight in.** The export datums off the marker's base, so a row's Z is its
-  height over the ground — what the mission reads a weapon row's Z as, and what a prop row's would
-  mean if it were not discarded at spawn. A gun raised onto a roof keeps that height through the
-  round trip. The **killhouse** rides the same rule at altitude: under `z=keep` its rows datum to
-  `_centerSpawnZ` (1000) and the floor offsets come back raw.
-- **Keep the trailing fields.** Carry each row's `isWeapon` flag over; a rearrange never changes it
-  and the export does not emit it.
-
-Verify once by import → export → re-import and confirming the layout is identical.
-
-### Creating one
-
-**New composition** on the static menu takes the same export rows and writes the fence itself: name,
-variable, target file, then the pasted rows. The file may be one that already exists or one the tool
-creates.
-
-Two things it refuses rather than corrects, both because the failure is silent otherwise:
-
-- **A target the scan above cannot reach**, which would be a fence invisible to the tool that wrote
-  it — indistinguishable from the write having done nothing.
-- **A name another composition already holds.** The menu selects by name, so a duplicate is an entry
-  nobody can open on purpose.
-
-The variable decides who can read the array: a leading underscore makes it a file-scope local, which
-only an `#include` can reach — what the killhouse does — and anything else is a global a placer in
-another file can read. The suggestion is a global.
-
-**The export writes five columns and no more.** A consumer wanting an `isWeapon` flag or a faction
-role reads those off positions the export never emitted, so those columns are added by hand
-afterwards and survive later round trips by the match-by-order rule above.
+**Crew placed in Eden is ignored.** Each prefab crews its own guns at build time
+(`DUWS_fnc_crewCompositionStatics`, called at `fnc_modern_FieldHospital.sqf:40`), then the zone
+re-seats them every streaming cycle.
 
 ## Editing the HQ layout
 
 The player's Main Base (`src/duws/server/init_hq/fnc_BluHQinit.sqf`, compiled at
-`server_fnc_init.sqf:35`, spawned at `server_init.sqf:192`) anchors on `PosOfBLUHQ`, the spot chosen at
-placement (`fnc_HQ_random_place.sqf:38` or `fnc_HQ_manual_place.sqf:42`). It is the static-composition
-workflow's one outlier: two fenced compositions share this file, both keyed to a runtime position
-instead of `[0,0]`. Small nudges — shifting a tent, rotating a wall — are safe to hand-edit as row
-numbers directly, per the hand-fold rules above; a real re-layout goes through the Eden round-trip like
-any other composition.
+`server_fnc_init.sqf:486`, spawned at `server_init.sqf:192`) anchors on `PosOfBLUHQ`, the spot chosen
+at placement (`fnc_HQ_random_place.sqf:38` or `fnc_HQ_manual_place.sqf:42`). The `duws_hq`
+composition's `DUWS_ORIGIN` stands on the HQ building (`Land_Cargo_HQ_V1_F`), so every row is an
+offset from the building and each prop goes to `PosOfBLUHQ + row`.
 
-**Two fences, not one.** `_allObjectsData` (`:38-176`, name `"HQ Main Base"`) holds every static prop —
-walls, towers, tents, crates — and its own placement loop (`:243-281`) ground-snaps each one via
-`setPosATL [X, Y, 0]` (`:251`), the way `snap` mode always does. `_weaponData` (`:198-203`, name
-`"HQ Turrets"`) holds just the two static guns; it plays no part in that loop and is resolved separately
-(`:298-305`) for `fnc_placeHQUnits.sqf` to place. Both carry `anchor=hqInComp` and both round-trip
-through the workflow above — pick either composition by name.
+**Props from the composition, guns from code.** `_allObjectsData` (`:25`) holds every static prop —
+walls, towers, tents, crates — and its loop (`:81-119`) snaps each one to the terrain. `_weaponData`
+(`:37`) holds the two static guns in the same frame. They stay in SQF because half of each row is
+placement data Eden cannot hold, and because the guns are replaced on every redeploy while the props
+are built once. The loop skips a weapon row (`:83`), so a gun saved into `duws_hq` is never built;
+the HQ's guns belong in `_weaponData`.
 
-**Why `anchor=hqInComp`.** The array stores original composition coordinates, not offsets from `[0,0]`,
-because every row is placed at runtime against the HQ building's own row (`Land_Cargo_HQ_V1_F`, `:41`):
+**A gun's height comes from its anchor, not its row.** Z is unused in `_weaponData`. The trailing
+`anchorClass`/`hOffset` columns are resolved against `nearestObject` of that class at placement
+(`fnc_placeHQUnits.sqf:64-68`), because a building's own `modelToWorld` Z is unusable. Move the gun's
+row and only its X/Y/heading change; move its anchor structure and the height follows.
 
-```text
-object world pos = PosOfBLUHQ + (row X/Y - _hqInCompX/Y)
-```
-
-`_hqInCompX/_hqInCompY` (`:14-15`) must equal that row's X/Y — drift them apart and the whole base
-mis-anchors. `_compCenterX/_compCenterY` (`:16-17`) look load-bearing but cancel out of the same math;
-they only need to stay in lockstep with `_hqInCompX/Y`, not carry independent meaning.
-
-**Z is real for one fence and not the other.** `_allObjectsData` discards it like any `snap`
-composition — every prop lands on the terrain regardless of the row. `_weaponData` writes a literal `0`
-in every row because it too is never read: a gun's height instead comes from its trailing
-`anchorClass`/`hOffset` columns, resolved against `nearestObject` of that class at placement
-(`fnc_placeHQUnits.sqf:60-86`). Move the gun's row and only its X/Y/heading change; move its anchor
-structure (the sandbag, the HQ building) and the height follows.
-
-**`_allObjectsData` still carries an `isWeapon` column and a matching skip in its loop (`:245`), but no
-row sets it true.** Weapons used to live here as flagged rows; they moved into `_weaponData` because the
-export has no room for a role and an anchor on a row already spoken for by `isWeapon`. The skip is dead
-code kept for the reconciliation logic above, not a live path.
-
-**What neither fence governs.** The garrison — tower guards, the door pairs, the sentry, the patrol, the
-officer — is placed by `fnc_placeHQUnits.sqf`, called once at build (`:340`) and again on redeploy
-(`fnc_redeployHQUnits.sqf:47`), from `modelToWorld` offsets measured against a spawned structure, not
-array rows. Move a guard by moving its anchor structure in a fence (dependents follow) or by editing the
-offset in `fnc_placeHQUnits.sqf` directly. Both fences feed the redeploy path automatically —
-`fnc_BluHQinit.sqf` resolves them into `HQ_redeploy_*` mission-namespace variables at build time, and the
-rebuild reads those rather than a second copy of the layout.
-
-Player-deployed FOBs use the same two-fence split (`fnc_fortifyFOB.sqf`, `"FOB Perimeter"` and
-`"FOB Turrets"`), offset from the FOB's own centre rather than anchored to a building row — no
-`anchor=hqInComp` needed there.
+**What neither governs.** The garrison — tower guards, the door pairs, the sentry, the patrol, the
+officer — is placed by `fnc_placeHQUnits.sqf`, called once at build (`:175`) and again on redeploy
+(`fnc_redeployHQUnits.sqf:56`), from `modelToWorld` offsets measured against a spawned structure.
+Move a guard by moving its anchor structure in the composition (dependents follow) or by editing the
+offset in `fnc_placeHQUnits.sqf`. The redeploy path reads the `HQ_redeploy_*` variables that
+`fnc_BluHQinit.sqf` sets at build time, not a second copy of the layout.
 
 ## Unit compositions: edited in place
 

@@ -74,8 +74,9 @@ the archetype's `hpMix` (`appraisal/fnc_opcom_archetypes.sqf`), where a type's s
 a type past its share of the standing hardpoints of the mix's types builds less, and one short of it builds more. A
 type outside the mix builds with no lean. Campaign generation rolls every type and caps none.
 
-Compositions are fenced `--DUWS-COMPOSITION--` arrays, one per type, authored in Eden through the
-composition TUI ([`composition_tooling.md#static-compositions-the-eden-round-trip`](../architecture/composition_tooling.md#static-compositions-the-eden-round-trip)).
+Each type's layout is the Eden composition `duws_hp_<type>` (`src/duws/compositions/`), which
+`hardpoint_compositions.sqf` reads into `DUWS_hardpointComp_<TYPE>`
+([`composition_tooling.md`](../architecture/composition_tooling.md#static-compositions-edited-in-eden)).
 Offsets sit in a frame whose +Y is the hardpoint's facing, so a heading rotates cover and core
 together rather than turning the core inside a fixed ring of props.
 

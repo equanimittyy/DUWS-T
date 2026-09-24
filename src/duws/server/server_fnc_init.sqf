@@ -65,6 +65,8 @@ publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 // After fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_composition_place.sqf";
+// Reads the layouts the placer above builds; server-only, so not broadcast.
+[] call compile preprocessFileLineNumbers "duws\server\placement\fnc_composition_rows.sqf";
 // Settled-object counterpart to fnc_composition_place: seats simulated pieces (loot, live props) at rest
 // instead of freezing them. After fnc_duws_keep, which it calls; server-only, so not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_place_settled.sqf";

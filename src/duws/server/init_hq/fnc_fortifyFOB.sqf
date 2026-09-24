@@ -24,78 +24,15 @@ playSound "loadgun";
 // ring to the cleanup at once -- the turrets and the sandbags around them alike.
 _fobKey = format ["FOB_%1", netId _fob];
 
-// Two fences, not one: the halves have different lifetimes. The perimeter is placed on first fortify and
-// left standing; a refortify replaces every turret. A merged array would need a permanent/rebuilt flag per
-// row, but the Eden export emits nothing past the heading column, so the flag would survive only by being
-// hand-carried across 43 rows every round trip -- lose it and a refortify duplicates the walls or stops
-// replacing the guns. (The zone prefabs' single-fence shape works only because a prefab is never rebuilt.)
-//
-// Rows are [class, X, Y, Z, heading], offsets from the FOB centre -- what lets the layout round-trip
-// through the 3D editor (docs/info/architecture/composition_tooling.md).
-// --DUWS-COMPOSITION BEGIN name="FOB Perimeter" schema=A--
-private _perimeterData = [
-	["Land_HBarrier_1_F",         -10.0,   4.5, 0,  0.0],
-	["Land_HBarrier_1_F",         -10.0,   3.0, 0,  0.0],
-	["Land_HBarrier_1_F",         -10.0,   1.5, 0,  0.0],
-	["Land_HBarrier_1_F",         -10.0,   0.0, 0,  0.0],
-	["Land_HBarrier_1_F",         -10.0,  -6.0, 0,  0.0],
-	["Land_HBarrier_1_F",         -10.0,  -7.5, 0,  0.0],
-	["Land_HBarrier_1_F",          -6.0, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",          -4.5, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",          -3.0, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",          -1.5, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           0.0, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           1.5, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           3.0, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           4.5, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           6.0, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",           7.5, -11.5, 0, 90.0],
-	["Land_HBarrier_1_F",          11.0,  -7.0, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,  -5.5, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,  -4.0, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,  -2.5, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,  -1.0, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,   0.5, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,   2.0, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,   3.5, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,   5.0, 0,  0.0],
-	["Land_HBarrier_1_F",          11.0,   6.5, 0,  0.0],
-	["Land_HBarrier_1_F",           6.5,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",           5.0,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",           3.5,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",           2.0,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",           0.5,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",          -1.0,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",          -5.5,  10.0, 0, 90.0],
-	["Land_HBarrier_1_F",          -7.0,  10.0, 0, 90.0],
-	["Land_Camping_Light_F",        5.5,  -5.5, 0,  0.0],
-	["Land_Camping_Light_F",       -5.5,   3.5, 0,  0.0],
-	["Land_Camping_Light_F",        5.5,   3.5, 0,  0.0],
-	["Land_Camping_Light_F",       -5.5,  -5.5, 0,  0.0],
-	["Land_Camping_Light_F",       -2.75, -2.75, 0, 0.0],
-	["Land_Camping_Light_F",       -2.75,  2.75, 0, 0.0],
-	["Land_Camping_Light_F",        2.75,  2.75, 0, 0.0],
-	["Land_Camping_Light_F",        2.75,  2.75, 1, 0.0]
-];
-// --DUWS-COMPOSITION END--
+// Two layers of one composition, not one list: the halves have different lifetimes. The perimeter is
+// placed on first fortify and left standing; a refortify replaces every turret. Offsets are from the FOB
+// centre.
+private _perimeterData = ["duws_fob", "perimeter"] call fnc_composition_rows;
 
-// Column 5 is the faction role holding the classname; column 0 is what it resolves to on the stock faction.
-// fnc_static_resolve prefers the role (so a mod's own GMG stands here, not a vanilla one) and the class is
-// what the Eden import draws, so the ring rearranges against the right silhouettes. A role the faction
-// never fields falls to its MG nest, then to its own class, keeping this mod-free. A gun added in Eden
-// carries no role column and resolves by class instead.
-//
-// Headings are rows, not computed radially from the centre: the export emits a heading per object,
-// and a computed heading would bring a turret turned in the 3D editor back facing wherever the
-// formula put it, silently dropping half the edit on round-trip.
-// --DUWS-COMPOSITION BEGIN name="FOB Turrets" schema=A--
-private _turretData = [
-	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5],
-	["B_GMG_01_high_F",  -8.5,   7.5, 0, 311.4],
-	["B_static_AT_F",    -8.0,  -9.0, 0, 221.6],
-	["B_HMG_01_high_F",   9.5,  -9.5, 0, 135.0]
-];
-// --DUWS-COMPOSITION END--
+// A gun's class is a placeholder: fnc_static_resolve stands whatever the faction fields for its role, so the
+// ring is arranged in Eden against vanilla silhouettes and stays mod-free. Headings are rows, not computed
+// radially from the centre, so a turret turned in Eden keeps its heading.
+private _turretData = ["duws_fob", "turrets"] call fnc_composition_rows;
 
 // One perimeter row, one object -- the turrets go through fnc_static_place instead: a wall is the
 // same wall whoever built it, while a gun is whatever the faction fields; the perimeter stays
@@ -105,13 +42,16 @@ private _turretData = [
 private _fnc_place = {
 	params ["_row", "_key"];
 	_row params ["_class", "_ox", "_oy", "_oz", "_dir"];
-	private _pos = [(_centerPos select 0) + _ox, (_centerPos select 1) + _oy, _oz];
+	private _px = (_centerPos select 0) + _ox;
+	private _py = (_centerPos select 1) + _oy;
+	// A row's Z is the model centre over the ground, as Eden saves it.
+	private _pos = [_px, _py, (getTerrainHeightASL [_px, _py]) + _oz];
 	private _obj = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
 	[_obj, _key] call fnc_duws_keep;
 	_obj allowDamage false;
-	_obj setPos _pos;
+	_obj setPosWorld _pos;
 	_obj setDir _dir;
-	_obj setPos _pos;
+	_obj setPosWorld _pos;
 	_obj setDamage 0;
 	_obj
 };
@@ -123,6 +63,9 @@ switch (VERSION_X) do {
 			// Invulnerable from the moment it stands up, not from when its gunner arrives -- which is
 			// why the caller applies this and the placer does not: the ring is what the player paid
 			// for, and the perimeter and roof AA below want their own answers.
+			// The ring's guns stand on the ground: "pos" mode reads Z as the base's height, and a row carries
+			// the model centre's.
+			_x set [3, 0];
 			private _turret = [_x, _centerPos, "blufor", _fobKey, "pos"] call fnc_static_place;
 			_turret allowDamage false;
 			_turret setDamage 0;

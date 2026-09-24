@@ -6,7 +6,10 @@ if (!isServer) exitWith {};
 private _centerSpawnX = worldSize * 0.05;
 private _centerSpawnY = worldSize * 0.05;
 
-#include "killhouse_composition.sqf"
+// The composition's heights are offsets from this floor.
+private _centerSpawnZ = 1000;
+private _objectsData = ["duws_killhouse", "objects"] call fnc_composition_rows;
+private _targetsData = ["duws_killhouse", "targets"] call fnc_composition_rows;
 
 // Broadcast: clients test their own distance for contact markers and the death-penalty exemption
 // in client_init; targetData/run_active stay server-local, and reads of those elsewhere silently fail except on a hosting player's machine, which is also the server.

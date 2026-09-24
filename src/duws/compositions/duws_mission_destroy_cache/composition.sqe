@@ -1,0 +1,276 @@
+version=54;
+center[]={0,0,0};
+class items
+{
+	items=17;
+	class Item0
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={0.942383,1.16854,-0.640625};
+			angles[]={0,5.9690959,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=0;
+		type="CamoNet_INDP_open_F";
+	};
+	class Item1
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-1.71191,0.07052,-1.54443};
+			angles[]={0,1.6315635,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=1;
+		type="Land_GarbageHeap_02_F";
+	};
+	class Item2
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-1.27148,0.7397,2.11084};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=2;
+		type="Land_CratesWooden_F";
+	};
+	class Item3
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-2.4165,0.51297,-0.706543};
+			angles[]={0,1.5873543,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=3;
+		type="Land_GarbageHeap_04_F";
+	};
+	class Item4
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={1.46631,0.7397,-3.19775};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=4;
+		type="Land_CratesWooden_F";
+	};
+	class Item5
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-6.48291,0.74121,-3.77783};
+			angles[]={0,0.8643516,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=5;
+		type="Land_HBarrier_5_F";
+	};
+	class Item6
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-8.11426,0.74121,1.68848};
+			angles[]={0,1.5512556,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=6;
+		type="Land_HBarrier_5_F";
+	};
+	class Item7
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={1.94653,0.74121,-8.04492};
+			angles[]={0,0.0090815,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=7;
+		type="Land_HBarrier_5_F";
+	};
+	class Item8
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-0.718384,0.74121,8.46387};
+			angles[]={0,3.2069552,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=8;
+		type="Land_HBarrier_5_F";
+	};
+	class Item9
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={3.80957,0.74121,6.41455};
+			angles[]={0,0.7901263,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=9;
+		type="Land_HBarrier_5_F";
+	};
+	class Item10
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={9.2251,0.74121,-1.25684};
+			angles[]={0,4.7035053,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=10;
+		type="Land_HBarrier_5_F";
+	};
+	class Item11
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-7.08691,0.96633,7.32031};
+			angles[]={0,2.3432965,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=11;
+		type="Land_BagBunker_Small_F";
+	};
+	class Item12
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={8.24512,0.96633,-6.67188};
+			angles[]={0,5.4911025,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=12;
+		type="Land_BagBunker_Small_F";
+	};
+	class Item13
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={-6.99316,1.66099,7.51807};
+			angles[]={0,5.4841387,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=13;
+		type="O_HMG_01_high_F";
+	};
+	class Item14
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={8.30847,1.66099,-6.73242};
+			angles[]={0,2.3859174,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+		};
+		id=14;
+		type="O_HMG_01_high_F";
+	};
+	class Item15
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={0,3.9775,0};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+			name="DUWS_ORIGIN";
+		};
+		id=15;
+		type="FlagPole_F";
+	};
+	class Item16
+	{
+		dataType="Object";
+		class PositionInfo
+		{
+			position[]={0,3.9775,25.69};
+		};
+		side="Empty";
+		flags=4;
+		class Attributes
+		{
+			name="DUWS_FRONT";
+		};
+		id=16;
+		type="FlagPole_F";
+	};
+};
