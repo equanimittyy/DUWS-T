@@ -8,21 +8,20 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_applyOrder = {
     params ["_grp", "_order", "_target", ["_supply", false]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
-    _grp setSpeedMode (["FULL", "LIMITED"] select _supply);
     switch (_order) do {
         case "capture";
         case "intercept": {
-            _grp setBehaviour "AWARE"; _grp setCombatMode "RED";
+            _grp setBehaviour "AWARE"; _grp setCombatMode "RED"; _grp setSpeedMode "FULL";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
         };
         case "move": {
-            _grp setBehaviour "AWARE";
+            _grp setBehaviour "AWARE"; _grp setSpeedMode "NORMAL";
             // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
             _grp setCombatMode (["YELLOW", "BLUE"] select _supply);
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
         default {
-            _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW";
+            _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
         };
     };
 };
