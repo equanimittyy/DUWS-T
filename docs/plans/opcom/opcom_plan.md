@@ -54,10 +54,10 @@ New work holds to:
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 - **A lift is the commander's call, not the rider's.** A water crossing borrows a boat or a helicopter at the shore
-  (`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, an APC, an IFV or a transport helicopter at commit, when the
-  pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry. Only an Attack, an
-  Intercept, a Re-garrison or a debug Move binds a land-taxi, so no lift is hired on a Patrol, though a patrol still
-  borrows a ferry at a water leg.
+  (`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, a car, an APC, an IFV or a transport helicopter at commit,
+  when the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry. Only an Attack,
+  an Intercept, a Re-garrison or a debug Move binds a land-taxi, so no lift is hired on a Patrol, though a patrol
+  still borrows a ferry at a water leg.
   Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
@@ -341,9 +341,9 @@ so it moves no faster than a truck delivers.
 - **Recruit takes the same mix over the roster.** A Recruit row's Value is × its row's factor off its archetype's
   `recruitMix`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The shares are
   taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing can fill, and
-  push every other row over its own. Balanced's `recruitMix` is rifles 8, weapons team 4, truck 3, APC 3, IFV 2, foot
-  and car recon 2 each, MBT, boat, recon and transport helicopter 1 each, attack helicopter 0.5 and jet 0.25: an even
-  spread would field as many jets as rifle squads.
+  push every other row over its own. Balanced's `recruitMix` is rifles 8, weapons team 4, truck 3, APC 3, IFV 2,
+  car, foot recon and car recon 2 each, MBT, boat, recon and transport helicopter 1 each, attack helicopter 0.5 and
+  jet 0.25: an even spread would field as many jets as rifle squads.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
   not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every
@@ -692,7 +692,7 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 
 | Purchase | Price |
 |---|---|
-| Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 10, weapons team 5, recon foot 5, truck 3, recon car 10, boat 3, APC 15, IFV 25, MBT 40, recon helicopter 20, transport helicopter 10, attack helicopter 50, jet 80 |
+| Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 10, weapons team 5, recon foot 5, truck 3, recon car 10, boat 3, car 5, APC 15, IFV 25, MBT 40, recon helicopter 20, transport helicopter 10, attack helicopter 50, jet 80 |
 | Zone Reinforce / Fortify | `OPCOM_AP_REINFORCE` 15 / `OPCOM_AP_FORTIFY` 25, flat |
 | Town Reinforce / Fortify | the same flat price, plus the truck's source cost |
 | Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 8, MG 12, GMG 16, AT 16, AA 20 |
