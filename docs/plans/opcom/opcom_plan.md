@@ -11,25 +11,28 @@ One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the en
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
 Phases 1–3, 4A, 4B and 4C are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
-them. This doc specifies what remains: orchestration, then persistence, then the archetype. The sections marked
-**WIP** are first-pass decisions: they change as each chunk is built and played.
+them. This doc specifies what remains: hiring on demand, then orchestration, then persistence, then the archetype.
+The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
-| 5 — Orchestration: a buildup and execution spine, multi-unit templates, and threat-aware routes where a role asks for one | [§Orchestration](#orchestration-phase-5) — **next** |
+| 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick, and the Recruit rows retire | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **next** |
+| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — WIP |
 | 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — WIP |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
-**Orchestration comes first**: it is the last phase that adds state worth saving — the intent records and their
-role bindings — and a save contract written before it would be written twice, once for taskings and again for
-intents. It is also the phase that changes how the enemy fights, which is what a play-test is for. The cost is
-accepted rather than overlooked: until persistence lands, every tuning pass runs inside one session.
+**Hiring on demand comes first**: an orchestrated role binds its unit through the sourcing 4D builds, so a role
+written before it would bind from a roster that Recruit fills ahead of need. **Orchestration follows**: it is the
+last phase that adds state worth saving — the intent records and their role bindings — and a save contract
+written before it would be written twice, once for taskings and again for intents. It is also the phase that
+changes how the enemy fights, which is what a play-test is for. The cost is accepted rather than overlooked: until
+persistence lands, every tuning pass runs inside one session.
 **Persistence comes next**, and the archetype last, because the archetype leans on manoeuvres as well as on
-actions, and the templates it leans on do not exist until orchestration writes them: a set of one cannot be
+actions, and the manoeuvres it leans between do not exist until orchestration writes them: a set of one cannot be
 weighted. Orchestration musters against one global pair of muster bars in the meantime, which the archetype later
 splits per record. Do not pre-build later phases: the tuning constants and engine-contact behaviours only settle
 by running the core.
@@ -53,11 +56,12 @@ New work holds to:
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
-- **A lift is the commander's call, not the rider's.** A water crossing borrows a boat or a helicopter at the shore
-  (`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, a car, an APC, an IFV or a transport helicopter at commit,
-  when the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry. Only an Attack,
-  an Intercept, a Re-garrison or a debug Move binds a land-taxi, so no lift is hired on a Patrol, though a patrol
-  still borrows a ferry at a water leg.
+- **A lift is the commander's call, not the rider's.** A unit stopped at a water leg waits on a Ferry, a boat or a
+  helicopter (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an IFV or a transport helicopter —
+  is sourced with the order it carries, when the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`).
+  Either lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Both run the one carry. Only
+  an Attack, an Intercept, a Re-garrison or a debug Move takes a land-taxi, so no lift carries a Patrol, though a
+  patrol stopped at a water leg still waits on a Ferry.
   Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
@@ -91,11 +95,11 @@ score = archWeight[archetype][action] × P(win) × Value / Cost
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight`, the playing archetype's `actionWeight`,
 tilts by action ([§Archetype](#archetype-phase-7)); `P(win)` scales to the expected return.
 
-**Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Patrol and Arty. A purchase
-does not: Reinforce, Fortify, Build, Rapport and Recruit stock ground OPCOM already holds, and their site is gated
-on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores `Value / Cost`. A commit
-order that fights for nothing names 1 rather than leaving the term out, since its row still has to name its Cost past
-it: Re-garrison withdraws.
+**Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Patrol and the two fire
+missions. A purchase does not: Reinforce, Fortify, Build and Rapport stock ground OPCOM already holds, and their
+site is gated on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores
+`Value / Cost`. A commit order that fights for nothing names 1 rather than leaving the term out, since its row still
+has to name its Cost past it: Re-garrison withdraws, a Ferry carries, and a Probe observes.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)`, with `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over the target's
   3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0.
@@ -104,9 +108,9 @@ it: Re-garrison withdraws.
   guns on top of their garrison, so `r` reads a dug-in site above its headcount. Infantry in cover counts 1 a man,
   and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
   `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
-- **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
-  probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
-  once, at commit ([§Orchestration](#orchestration-phase-5)).
+- **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` assault, flank or
+  encircle, `0.5–1` muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band
+  picks once, at commit ([§Orchestration](#orchestration-phase-5)).
 
 ### Settles in play
 
@@ -126,7 +130,7 @@ rather than designed:
   zone holds, which sets its baseline caution. Whether belief should carry a threat category, so that a build sites a
   typed counter: AT under armour, AA under air.
 - **A surplus.** What the commander does with one, and whether it must spend rather than only can. The absorbers are
-  combatant Recruit, reinforcing over upgrading, and mustering.
+  reinforcing over upgrading, and mustering, which hires the roles the roster lacks.
 - **Commit and carry.** `OPCOM_COMMIT_HOLD`, `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
   `OPCOM_ROAD_DETOUR`. Whether a taxi should set its riders down short of the target rather than on it; whether a
   ground taxi needs its pickup drive timed out, which no carry phase does today; whether one attacker per holding is
@@ -135,9 +139,8 @@ rather than designed:
   hull patrols as readily as a squad. Whether a combatant's staleness stamp should count for less than a recon's,
   since it suppresses re-scouting for up to `OPCOM_BELIEF_EXPIRE` without having learned anything certain there;
   whether a resting unit should stamp at all, since it keeps its own ground off the patrol list while it sits;
-  whether a combatant patrol crowds the recon rows out of the hire; whether patrol needs a cap on the units out at
-  once, the fallback being a count per campaign zone; whether a patrol left standing is walked on by the next pick or
-  holds.
+  whether patrol needs a cap on the units out at once, the fallback being a count per campaign zone; whether a
+  patrol left standing is walked on by the next pick or holds.
 - **Re-garrison.** `OPCOM_REGARRISON_FRAC` (0.6), and whether the pool floor is needed at all once the score's own
   slope is played. Whether the reserve pool should field a worn unit at its `effForce` rather than at its whole
   composition, which would make resting a cost rather than a free repair.
@@ -183,15 +186,20 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Town Reinforce | each OPFOR-band town below full strength |
 | Town Fortify | each OPFOR-band town below tier IV |
 | Rapport | each town above −15 and below +10 that OPFOR's area of influence covers (`fnc_aoi_opfor_covers`) |
-| Recruit | one action per recruit-menu row: a combatant row's targets are every open zone, a recon or transport row's is the open zone nearest the demand that blocks it, and a truck held as stock goes to a random open zone; every row but a `noncombat` one skips a zone at its garrison cap ([§Caps](#caps)) |
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence |
-| Attack | each BLUFOR-held zone, and each town they have garrisoned |
-| Patrol | each sampled stale cell, one unit apiece, taken by the free recon or land combatant that scores best |
-| Re-garrison | each free `guard` unit under `OPCOM_REGARRISON_FRAC` of the force it was raised with, one row apiece, its target its own home or the nearest open zone |
-| Arty | each fresh belief sighting in range of an owned gun off cooldown |
+| Attack | each BLUFOR-held zone, each town they have garrisoned, and each open role of an Attack still in buildup ([§Orchestration](#orchestration-phase-5)) |
+| Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
+| Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, one unit apiece, sourced from Patrol's rows |
+| Re-garrison | each free `guard` unit under `OPCOM_REGARRISON_FRAC` of the force it was raised with, one row apiece, its target its own home or, past the garrison cap, the nearest open zone under it ([§Caps](#caps)) |
+| Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
+
+An action that needs a unit offers each target with the best source for it, a free unit or a hire
+([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
+| Arty saturate | each fresh belief sighting in range of an owned gun off cooldown |
+| Arty creeping | each offensive intent in buildup or execution whose target an owned gun off cooldown reaches |
 
 ### Value
 
@@ -227,47 +235,38 @@ so it moves no faster than a truck delivers.
 | OP | build price × the share of its 5×5 block (`OP_OBSERVE_K`) that no other OP watches, sea excluded |
 | Mortar pit, artillery battery | build price × the share of its reach that is OPFOR ground no gun of its own type reaches |
 | Rapport | town worth × skew × 3/10, with skew = max(0.1, 1 − \|rep\| ÷ 10) |
-| Recruit, specialist (`recon`) | its demand: `P(win)` × the Value of the best action blocked for want of it, scored as if the hire already stood at that target |
-| Recruit, combatant | the larger of that demand and home-zone worth × exposure × unitForce ÷ (the zone's current force + unitForce) |
-| Recruit, `transport` | the lift it would give; a combatant hull takes the larger of that and its defense |
-| Recruit, truck | the larger of its lift and its stock: the truck hire price ÷ (idle supply trucks + 1) |
 | Intercept (QRF) | Σ need over the sighting's 7×7 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Re-garrison | the larger of the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`, and the defense it adds at the site it returns to — a unit counts once |
-| Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
+| Ferry | the stopped unit's committed Value (`expValue`), since its whole order waits on the crossing |
+| Probe | staleness over the target's 3×3 block × the Attack `Cost` at that target × `OPCOM_PROBE_SHARE` |
+| Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
+| Arty creeping | the parent offensive's staked force × `OPCOM_AP_PER_FORCE` × `OPCOM_ARTY_CREEP_SHARE`, since a creep buys that wave's survival rather than kills |
 
 - **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
   step barely moves one near +10. The skew is 1 at 0, 0.5 at ±5 and 0.1 from ±9 out, so a town between −15 and −10
   scores at the floor; a town at +10 or more is BLUFOR-held and no target.
-- **A combatant counts once.** It joins its zone's reserve pool on hire, so it defends at once; its Value is the
-  larger of demand and defense, not the sum, because one unit serves one role at a time. Its gain shrinks as the
-  zone stacks up, so combatants gather where exposure is high and a QRF pool forms there with no roster table.
-- **A transport row is worth the lift it would give.** That is the Value a rider stranded at a water leg is
-  waiting on, or the time land-taxi would save an order the pick may commit — the same Value landing sooner, priced
-  by the delay discount (`DUWS_fnc_opcom_taxiWorth`), less what the best hull on hand already saves it. Land-taxi
-  binds only at commit, so the lift is priced on the orders not yet sent, never on a unit already marching.
-- **The lift rows compete for each ride on lift less price.** Only the row with the best net claims a ride, so a
-  transport helicopter takes the long rides its time saving pays for and a truck keeps the short ones. On score
-  alone the truck would take every ride, because its lift is more than a third of the helicopter's at under a
-  third of the price. A ground hull's drive is priced at `OPCOM_ROAD_DETOUR` (1.3) × the straight line, since it
-  keeps to the roads a helicopter flies over. With a 2 km pickup the helicopter wins from a ride of about 8.5 km
-  for an order worth 40, 14 km for 20 and 21.5 km for 10. A row the wallet cannot pay beats no other row, so a
-  long ride still offers a truck when the helicopter is out of reach, and the helicopter stays on the shortlist
-  for the savings goal.
-- **A truck is also worth its stock.** An idle truck spares the next supply buy its hire price, and that saving
-  splits across the trucks already idle, so the stock settles at one or two, where the hire's score meets Bank's.
-  A supply action still hires its own truck in the same commit when none idles, so no action is ever blocked for
-  want of one.
+- **A probe buys belief, not ground.** `_ene` decays, so a stale objective yields a wrong `r`, and every figure
+  read off it — `P(win)`, the band and both muster bars — is wrong with it. A probe closes on the objective until its
+  3×3 block reads fresh, which is the whole of its resolve: it takes no ground, holds none, and names a `P(win)` of
+  1. Its Value is the error it removes, so it scales with the stake about to be laid on that reading and is worth
+  nothing where belief is already fresh. Recon wins the row with no preference written into it: `OPCOM_RECON_K` reads
+  the block from further out and a `noncombat` unit or a hire abandons no defense, so recon buys the same reading at
+  a lower Cost. A land combatant has to close, and against a dug-in garrison it draws fire and often dies — which
+  still bought the reading, and is the only way to read a garrison that observation from outside cannot see. Patrol
+  is the standing sweep over stale valuable ground; a Probe is one objective, refreshed now.
+- **A land-taxi is worth the time it saves.** That is the order's Value landing sooner, priced by the delay discount
+  (`DUWS_fnc_opcom_taxiWorth`). The lift is sourced with the order at commit, so it is priced on an order not yet
+  sent, never on a unit already marching.
+- **Lift sources compete on saving less Cost.** Only the lift with the best net carries a rider, so a transport
+  helicopter takes the long rides its time saving pays for and a truck keeps the short ones. On score alone the truck
+  would take every ride, because its lift is more than a third of the helicopter's at under a third of the price. A
+  ground hull's drive is priced at `OPCOM_ROAD_DETOUR` (1.3) × the straight line, since it keeps to the roads a
+  helicopter flies over. With a 2 km pickup the helicopter wins from a ride of about 8.5 km for an order worth 40,
+  14 km for 20 and 21.5 km for 10.
 - **The QRF share** is how much of the local defense the sighted group can overwhelm. `P(win)` says whether the QRF
   can win, so a platoon is worth stopping but a small QRF is not thrown at it.
-- **A blocked target is what Recruit reads.** Each commit sweep returns the targets no free unit could take
-  beside its candidates, so a hire is valued on the best of them whatever order the action list runs in. A target
-  is blocked when no unit is free for it, or when none clears `OPCOM_PWIN_FLOOR` — so OPCOM never hires for a fight
-  it could not win even with the hire standing there. A sweep also returns each unit it would send, with the
-  destination and the Value, which a transport row's lift is priced on. Patrol's blocked list holds only the cells no
-  free *recon* took, because it is what values a recon hire: a combatant patrol stamps the same timer but brings back
-  no certainty, so ground it swept is still ground a recon would have read.
 - **Staleness** is min(1, ticks since the cell's last sweep in `DUWS_opcom_grid_seen` ÷ `OPCOM_BELIEF_EXPIRE`).
   The share holds Patrol below the ground it sweeps, since a patrol takes and protects nothing itself.
 - **Every unit on patrol resets the staleness timer, omniscient or not.** Staleness asks when OPCOM last looked at a
@@ -338,7 +337,7 @@ so it moves no faster than a truck delivers.
   above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts the pick and never sets a
   quota: a type past its share still builds where its Value is high enough. The +1 keeps a type with none standing
   finite. A type outside the mix reads 1, and random mode ignores Value, so it ignores the mix too.
-- **Recruit takes the same mix over the roster.** A Recruit row's Value is × its row's factor off its archetype's
+- **A hire takes the same mix over the roster.** A hire source's Value is × its row's factor off its archetype's
   `recruitMix`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The shares are
   taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing can fill, and
   push every other row over its own. Balanced's `recruitMix` is rifles 8, weapons team 4, truck 3, APC 3, IFV 2,
@@ -346,11 +345,11 @@ so it moves no faster than a truck delivers.
   jet 0.25: an even spread would field as many jets as rifle squads.
 - **Delay.** Value that lands later counts for less: Value × 0.5 ^ (ETA ÷ `OPCOM_VALUE_HALFLIFE`, 360 ticks), with
   ETA in ticks from the straight-line distance and the unit's per-cell speed (`DUWS_opcom_speed`). The distance is
-  not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every
-  supply-truck action takes the discount on its drive from the truck's source; a zone action's ETA is 0.
+  not the route's, since planning a route per candidate would not fit the pick's unscheduled pass. Every action
+  that needs a unit takes the discount from where its source starts; a zone action's ETA is 0.
 - **No route-risk discount, no emergency reserve.** A truck's odds en route would read threat, so the risk stays
-  with the player as counterplay. A QRF stakes roster units, not AP, and combatant Recruit keeps a pool at the
-  exposed zones.
+  with the player as counterplay. A QRF is a free combatant or one hired at the open zone nearest the sighting, and
+  no unit is hired to wait for one ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
 
 ### Need and cover fields
 
@@ -388,9 +387,11 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 ### Cost
 
-- **Spend** actions (Recruit, Reinforce, Fortify, Build, Rapport, Arty) pay fresh AP at the prices in
-  [§What AP buys](#what-ap-buys); a supply-gated one adds its truck's source cost.
-- **Commit** actions (Attack, Intercept, Patrol, Re-garrison) stake roster units: `Cost` = the AP to rebuy the force
+- **Spend** actions (Reinforce, Fortify, Build, Rapport, Arty) pay fresh AP at the prices in
+  [§What AP buys](#what-ap-buys); a supply-gated one adds its truck's source Cost
+  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
+- **Commit** actions (Attack, Intercept, Patrol, Probe, Re-garrison, Ferry) stake units. A hire's `Cost` is its
+  price ([§Sourcing](#sourcing-hire-on-demand-phase-4d)); a free unit's is the AP to rebuy the force
   (`Σ effForce × OPCOM_AP_PER_FORCE`) plus the defense the unit abandons, read off the grid at its home cell with no
   counterfactual rebuild:
 
@@ -411,15 +412,18 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 
 ### Gate and the savings goal
 
-- **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. A supply-gated action drops only when no truck idles
-  and the wallet cannot cover the action plus a hire. A commit action drops when no eligible unit is free, and no
-  pool draws a unit garrisoned in a contested zone. Patrol draws every free unit carrying the `recon` flag, the
-  helicopter included and `noncombat` or not, and every free **land** combatant — infantry, wheeled and tracked.
+- **Gate.** A zone or town action drops while that site is contested — the same rule and the same reach for both, so a garrison buy reads one answer wherever it lands. An action that needs a unit drops a
+  target with no source: no eligible unit free, and no eligible row the faction can field under the unit cap
+  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). No action draws a unit garrisoned in a contested zone. Patrol
+  draws, free or hired, every unit carrying the `recon` flag, the helicopter included and `noncombat` or not, and
+  every **land** combatant — infantry, wheeled and tracked.
   A `noncombat` row that is not recon stays out, and so does combat air: the faction's air scout is the recon
-  helicopter, and an attack helicopter or a jet crosses the ground it would sweep faster than a tick. Re-garrison
+  helicopter, and an attack helicopter or a jet crosses the ground it would sweep faster than a tick. Probe draws
+  that same pool and drops a target whose block already reads fresh or that holds a bound probe, so one reading is
+  never bought twice. Re-garrison
   draws the free `guard` units under `OPCOM_REGARRISON_FRAC` of the force they were raised with, an errand excepted:
   goods are delivered before anything goes home. An action past one of OPCOM's caps drops too ([§Caps](#caps)). The
-  random draw drops any action the wallet cannot cover. From
+  random draw drops any action the wallet cannot cover.
   An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; one in buildup checks the floor at
   launch ([§Commitment](#commitment-intents-are-sticky)).
 - **An unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
@@ -442,14 +446,14 @@ The debug harness spends outside the pick and is not capped.
 
 | Cap | Drops | Counts |
 |---|---|---|
-| `OPCOM_CAP_UNITS` (50) | every Recruit row except the truck | every OPCOM unit alive except the supply trucks |
-| `OPCOM_CAP_GARRISON` (10) | a Recruit row's zone, except for a `noncombat` row | the combatants homed at that zone, the set its reserve pool fields |
+| `OPCOM_CAP_UNITS` (50) | every hire source except a truck | every OPCOM unit alive except the supply trucks |
+| `OPCOM_CAP_GARRISON` (10) | a Re-garrison's home zone, so the unit returns to the nearest open zone under the cap | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
 | per type × zones | a Build or Minefield of that type | the same, by type ([§What the commander builds](#what-the-commander-builds)) |
 
-- **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight, and the truck-stock Value
-  keeps the idle ones at one or two. If the trucks counted, a full roster would stop every supply action.
+- **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight. If the trucks counted, a
+  full roster would stop every supply action.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
   one that garrisons it ([§Orchestration](#orchestration-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
@@ -470,16 +474,94 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 | Archetype | Overrides the campaign's archetype (7.1) |
 | Difficulty | Steps the picks per tick through 0.25, 0.5, 1 and 2, carried as a debt so a rate below 1 picks once every few ticks. Shipped |
 
+## Sourcing: hire on demand (Phase 4D)
+
+**WIP.**
+
+OPCOM hires a unit only for the action that sends it. An action that needs a unit weighs, in the pick, each free
+unit it may draw against a hire of each row that can do the job, and offers each target with the source that scores
+best. A unit exists because an action sent it, and it stays drawable once that order ends. Nothing is hired ahead of
+need, so the Recruit rows retire, and with them every standing Value a hire carried: a combatant's zone defense, a
+truck's stock, and the demands that valued a recon or lift hire on the targets no free unit could take.
+
+| Source | Starts at | Price, charged | Cost, scored |
+|---|---|---|---|
+| Free unit | its own position | 0 | its stake ([§Cost](#cost)) + `OPCOM_AP_PER_KM` × distance |
+| Hire | the open zone nearest the target that can raise the row, a boat at that zone's port | the row's `OPCOM_AP_UNIT` | the price + `OPCOM_AP_PER_KM` × distance |
+
+The distance runs from where the source starts to where the action needs it: the target, or the rider for a lift.
+
+- **One score picks the source.** Each source scores as its action would with that unit sent: `P(win)` with the
+  source's force added at the target (`DUWS_fnc_opcom_pWinWith`), the Value discounted by the delay from where the
+  source starts ([§Value](#value)), and the action's own Cost plus the source's. A hire's Value is also × its row's
+  `recruitMix` factor, so the mix tilts both which row is hired and whether a hire beats a free unit.
+- **Distance is scored, never charged.** `OPCOM_AP_PER_KM` (0.5) is what makes a near hire beat a far free unit. A
+  free truck stakes its force, 2, against a 3 AP hire, so, the mix aside, a hire takes the errand once the free
+  truck stands more than 2 km further off. A supply truck no longer pays for its drive.
+- **A source under the floor is no source.** A source whose `P(win)` at the target is below `OPCOM_PWIN_FLOOR`
+  drops, a hire as a free unit does, so OPCOM never hires for a fight it could not win even with the hire standing
+  there.
+- **A source the wallet cannot pay beats no other.** A target offers the best source the wallet covers. When a
+  dearer source outscores it, the target also offers that one, so it can stand as the savings goal
+  ([§Gate and the savings goal](#gate-and-the-savings-goal)).
+- **The execute raises and routes every hire before it gives an order.** It hires through `fnc_opcom_recruit` with
+  `_pay` false, since the candidate's price already carries the hire, as a supply hire does today
+  (`DUWS_fnc_opcom_supplyRun`). A hire that cannot route is dismissed and the execute returns false, so the pick
+  charges nothing and no order stands half-given.
+- **The unit cap drops hire sources, never free units.** At `OPCOM_CAP_UNITS` an action draws only what stands; a
+  truck hire stays outside the cap ([§Caps](#caps)).
+
+| Action | Sources, free or hired |
+|---|---|
+| Attack | land combatants: rows with neither `recon` nor `noncombat`, on foot, wheels or tracks |
+| Intercept (QRF) | combatants, air included |
+| Patrol, Probe | `recon` rows, the helicopter included, and land combatants |
+| Rapport, town Reinforce / Fortify, standalone and asset Build, Minefield | `supply` rows |
+| A land-taxi for an Attack, an Intercept or a Re-garrison | `transport` rows on wheels, tracks or a rotor |
+| Ferry | `transport` rows on water or a rotor |
+
+Re-garrison sends the worn unit it names, and a fire mission fires the guns OPCOM owns, so neither sources a unit.
+
+- **A land-taxi is sourced with the order it carries.** When a commit's unit is `transportable`, the sweep weighs
+  walking against each lift source, free hull or hire, on its saving less its Cost (`DUWS_fnc_opcom_taxiSaving`).
+  The best lift adds its saving to the candidate's Value, its price to the price and its Cost to the Cost. The
+  execute routes the rider and the lift before it gives either an order, and commits neither when either fails, so
+  a lift that cannot reach its rider charges nothing. The bind (`DUWS_fnc_opcom_taxiBind`) takes the lift the sweep
+  priced; only a debug Move still binds the best free hull, since the harness spends no AP.
+- **A Ferry is what a unit stopped at a water leg waits on.** Its source is a free boat or helicopter or a hire of
+  one, weighed like any other; its `P(win)` is 1 and its Value the stopped unit's committed Value. The shore borrow
+  (`DUWS_fnc_opcom_borrowFerry`) retires, so a crossing waits for the pick like every other lift.
+- **Zones keep no hired defenders.** A zone holds its garrison, its hardpoints and the OPCOM units that rest there
+  after an order, which still feed its reserve pool (`fnc_opcom_garrison.sqf`).
+- **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
+- **Only the pick hires.** The runner never spends: a manoeuvre sources each role it can fill when the pick commits
+  it, and a role it commits without stays a target of its Attack until a later pick fills it, from a free unit or a
+  hire ([§Orchestration](#orchestration-phase-5)).
+- **`fnc_opcom_recruit` stays the one hire.** Every source hires through it, and the debug page's Recruit list still
+  calls it by hand.
+
+| Chunk | Builds |
+|---|---|
+| **4D.1** Sources | the source list and its score, shared by every action. The supply actions move onto it: a free truck at its stake, and the per-km scored and no longer charged. The truck-stock Value retires |
+| **4D.2** Commit hires | Attack, Intercept and Patrol offer a hire of each eligible row beside the free units, the execute raising and then tasking it. The combatant defense Value, the combat and recon demands and each sweep's blocked list retire, and the garrison cap moves to Re-garrison ([§Caps](#caps)) |
+| **4D.3** Lifts | the land-taxi sourced with its order, and the Ferry action in place of the shore borrow. The lift and strand demands and each sweep's rider list retire, and with them the Recruit rows and the `recruit` action weight |
+
+Each chunk deletes the Recruit role it replaces, so no chunk scores a hire twice.
+
+Phase 4D settles in play `OPCOM_AP_PER_KM` against the delay for a unit that marches rather than drives, whether
+Patrol should hire land combatants or only recon, and whether zones with no hired defenders need Reinforce weighted
+up to match.
+
 ## Commitment: intents are sticky
 
 A chosen action becomes an intent record — same shape at every granularity, `roles` empty (economic), one entry
-(simple tasking) or several (a template):
+(simple tasking) or several (a manoeuvre):
 
 | Field | Holds |
 |---|---|
 | type / target | the action id; the objective (registry index or cell) |
 | roles | `[role, unitRef, status, release, λ]` bindings drawn from the roster |
-| rally | the staging point a buildup holds at, short of the target |
+| rally | the staging cells a buildup holds at, short of the target — one per role |
 | hold | `DUWS_opcom_tick` at commit + `OPCOM_COMMIT_HOLD` — earliest tick OPCOM may re-issue this unit's order |
 | state | buildup / execution / done ([§Orchestration](#orchestration-phase-5)) |
 
@@ -491,23 +573,25 @@ A chosen action becomes an intent record — same shape at every granularity, `r
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
 - **A multi-unit assault musters, then launches as one wave** (Phase 5, WIP). A muster is what buildup does: it binds
-  force across ticks at a safe rally short of the target, then advances all together — it never dribbles units into contact,
+  force across ticks at a safe rally short of the target, one cell a role, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
   **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
   it holds at least the archetype's **minimum** (0.75:1 baseline), and is otherwise abandoned, its units returning to
   rest, so a player who keeps reinforcing cannot hold it forever. The baseline sits below an attacker's usual 3:1
   because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
   for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
-  reinforcement raises them. An action in buildup checks `OPCOM_PWIN_FLOOR` at launch, against its archetype's
+  reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
+  ([§Value](#value)). An action in buildup checks `OPCOM_PWIN_FLOOR` at launch, against its archetype's
   minimum, because it commits below the odds it launches at. Buildup is also how a force-short action waits for
-  units — from the roster or from Recruit.
+  units: each open role stays a target of its action, and a later pick fills it from a free unit or a hire
+  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
 
 ## Orchestration (Phase 5)
 
 **WIP.**
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
-already ship. A template is therefore data rather than behaviour — which roles it binds, where each one stages, which
+already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
 order each one gets and what releases it — so a coordinated attack adds no tasking code. Today's one-unit Attack is
 the degenerate case: one role, an empty buildup, straight to `capture`.
 
@@ -518,7 +602,7 @@ the degenerate case: one role, an empty buildup, straight to `capture`.
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
-force-short action sits in buildup while the roster or Recruit fills it.
+force-short action sits in buildup until later picks fill its open roles.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order, so the order stays in the table with
@@ -529,7 +613,7 @@ order).
 `dead` or lost → **abort** (release the survivors, no AP refund); else test the current state's transition, and each
 unreleased role's own. The runner sequences the states; the route and streaming machinery moves the units. There is
 no planner, and a simple tasking is the one-role, empty-buildup case, so a coordinated behaviour is a bigger
-template rather than a new subsystem.
+manoeuvre rather than a new subsystem.
 
 ### Ownership: the roster has to skip a bound unit
 
@@ -540,44 +624,46 @@ somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its i
 is an anti-flap lock of a fixed span, and a buildup outlives it.
 
 One unit, one owner. Binding pulls a unit from the pool and a `garrison`ed draw strips that zone's reinforcement;
-release returns it. A template applies only when its band fits, enough roles fill and the geometry holds; short a
+release returns it. A manoeuvre applies only when its band fits, enough roles fill and the geometry holds; short a
 role, it commits in buildup and waits.
 
 ### Release: the stagger lives on the role, not in a third state
 
 Buildup ends for the intent, but execution starts per role. Each role carries a **release predicate**, and a role
 that has not released holds `guard` at its rally. The default is release on entering execution, which covers every
-template but the two that sequence their roles: a `flank` is worth nothing if the maneuver element arrives before
+manoeuvre but the two that sequence their roles: a `flank` is worth nothing if the enveloping element arrives before
 the defenders are committed to the front.
 
-A per-role gate rather than a third state, because the alternative is one phase list per template and a runner that
+A per-role gate rather than a third state, because the alternative is one phase list per manoeuvre and a runner that
 has to know all of them.
 
-| Template | Picked when | Roles | Release |
+| Manoeuvre | Picked when | Roles | Release |
 |---|---|---|---|
-| `assault` | band ≥ 2 | `attacker` ×1+ | every role at once — one wave, never a dribble |
-| `flank` | band 1–2, ≥2 mobile, a reachable flank cell | `fix` ×1, `maneuver` ×1+ | `fix` at once; `maneuver` once `fix` reads `engaged` |
-| `encircle` | band 1–2, the target pocketed, ≥3 mobile | `blockers` ×N (one per escape corridor), `crushers` ×1–2 | `blockers` at once; `crushers` once every blocker holds its corridor |
-| `probe` | band 0.5–1 | `prober` ×1 (the cheapest expendable; never armour, air or recon) | at once |
-| `rapport` | a `supply` truck, a Rapport candidate town ([§Candidates](#candidates)) | `courier` ×1 | at once |
-| `patrol` | a free recon or land combatant, a stale valuable area | `patroller` ×1 | at once |
-| `arty` | a fresh belief sighting in range of an owned gun off cooldown | the owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | at once |
+| `assault` | band ≥ 1 | `attacker` ×1–3, one per rally cell | every role at once — one wave, never a dribble |
+| `flank` | band 1–2, ≥2 mobile, a reachable side bearing | `fix` ×1, `maneuver` ×1–2 | `fix` at once; `maneuver` once `fix` reads `engaged` |
+| `encircle` | band 1–2, ≥2 mobile, a reachable rear bearing | `fix` ×1, `rear` ×1–2 | `fix` at once; `rear` once `fix` reads `engaged` |
 
-- **The band picks the template once, at commit**, and a buildup launches the template it picked whatever `r` it
-  reaches, so a plan never flips mid-buildup even when the muster ends in another band. Where the band leaves more
-  than one template legal, the archetype's `manoeuvreWeight` picks between them on the same weighted roll the action
-  pick uses ([§Archetype](#archetype-phase-7)); until Phase 7 the survivors weigh alike.
-- **`arty` has no buildup.** A gun neither stages nor moves, so the intent enters execution at commit and its
-  execution is the shipped fire mission's own loop — mark, salvo over standing force or creeping ahead of a bound
-  assault, then assess and re-fire or finish — rather than a set of orders
-  ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)).
-- **`patrol` needs no release either**, and its execution is the `patrol` order itself: the sweep stamps the
-  staleness timer as it goes, a recon's detection stamps belief with it, and the unit settles to `guard` where it
-  was sent.
-- **`probe` is disposable recon-by-fire** — no-retreat forbids poke-and-withdraw, so it converts uncertain belief
-  into observed defender strength by drawing fire, reaching what recon cannot (a dug-in town garrison). It minimises
-  stake, the inverse of every other commit, which gathers force toward the odds it launches at.
-- **Escape corridors** (`encircle`): the target cell's neighbours whose enemy-influence gradient points outward.
+Three manoeuvres, all offensive. Every other action has one shape and picks no manoeuvre: Intercept, Patrol, Probe,
+Rapport, Re-garrison, Ferry and both fire missions each commit as a one-role intent with an empty buildup.
+
+- **A role stages on a bearing measured from the target.** `assault` puts every attacker on one bearing, so the wave
+  arrives on a single axis and needs no sequencing. `flank` holds `fix` on the direct bearing and stages `maneuver` at
+  ±90°. `encircle` stages `rear` at 180° and routes it wide, its rally at least `OPCOM_ENVELOP_STANDOFF` from the
+  target, so the march goes around the fight rather than through its edge. Every role then collapses on the target.
+- **`flank` and `encircle` are one mechanism.** Both bind a `fix` that holds the defenders' front and one to two
+  enveloping roles released once it reads `engaged`, and they differ only in bearing offset and standoff. One
+  implementation, two rows, so the archetype can lean between them with no second code path.
+- **`assault` stages across 1–3 adjacent cells,** one role a cell, which at `OPCOM_GRID_CELL` 500 m is a 500 m to
+  1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
+  attackers no frontage to advance on.
+- **`assault` is legal from band 1, not 2.** Its band has to overlap the enveloping pair's, or the archetype's lean
+  toward it never bites: a manoeuvre weight only chooses among what a band leaves legal
+  ([§Archetype](#archetype-phase-7)). Above band 2 it is the only legal manoeuvre, because at crushing odds an
+  envelopment buys a setup leg and nothing else.
+- **The band picks the manoeuvre once, at commit**, and a buildup launches the one it picked whatever `r` it reaches,
+  so a plan never flips mid-buildup even when the muster ends in another band. Where the band leaves more than one
+  legal, the archetype's `manoeuvreWeight` picks between them on the same weighted roll the action pick uses; until
+  Phase 7 the survivors weigh alike.
 - **`resolve`** is the transition that frees the units and writes the outcome, one predicate per action
   ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
@@ -591,7 +677,24 @@ has to know all of them.
   never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
   ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to. **Intercept** — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
-  guards once none remain. It never returns to garrison. **Rapport** — courier delivers or dies.
+  guards once none remain. It never returns to garrison. **Probe** — the target's 3×3 block reads fresh, at which
+  point the unit drops to `guard` where it stands. **Rapport** — courier delivers or dies.
+
+### Chained fires: an intent may name a parent
+
+`arty_creeping` cannot stand alone: a creep is a barrage walked ahead of someone, so it needs an offensive to walk it
+for. An intent may therefore name a **parent** intent and a predicate on the parent's state, which is the per-role
+release predicate lifted one level. A creep binds when an offensive intent holds its target in buildup or execution,
+and its rounds walk ahead of that intent's advance.
+
+`arty_saturate` needs no parent. Where it fires for a muster the two overlap rather than sequence: the offensive
+gathers while the rounds land, and the fires lift as it launches, because fires that stop before the wave starts hand
+the players a window to reposition in.
+
+Nothing else chains. A Probe that refreshes belief at an objective moves that objective's muster bars by itself, since
+both bars read believed force ([§Commitment](#commitment-intents-are-sticky)), so no edge is needed to sequence one
+ahead of an offensive and the commit-time manoeuvre pick stands. Each link pays its own price at its own commit, so a
+chain that runs out of AP, or whose next gate has lapsed, stops where it is.
 
 ### Routes: threat is what a role asks for
 
@@ -603,17 +706,18 @@ run `capture` and take opposite values.
 | Role or order | λ | Why |
 |---|---|---|
 | `capture` — an `assault` attacker, and `flank`'s `fix` | 0 | the fight is the point of the march |
-| `capture` — `flank`'s `maneuver` | high | arriving unseen is the whole worth of the role |
+| `capture` — `flank`'s `maneuver` and `encircle`'s `rear` | high | arriving unseen is the whole worth of the role |
 | `intercept` | 0 | the threat is the target |
 | `patrol` | 0 | ground is often stale because it is dangerous, so avoidance defeats the sweep |
+| `probe` | 0 | closing is how the block gets read |
 | `errand` | high | a truck lost is the goods lost, and no `P(win)` prices that risk |
 | `return` | high | a worn unit going home to heal has nothing to win from contact |
 | `move` | its role's own | a staging leg inherits what the role will need |
 
 - **Negative λ is not available.** The cell chain's octile heuristic is admissible only at λ ≥ 0
   (`taskings/fnc_opcom_route.sqf`): a negative edge weight stops A* returning the best path and leaves the pop cap as
-  the only bound on a pathological re-open. A `probe` that has to find contact gets it by choosing a believed cell as
-  its target, never by pricing threat below 0.
+  the only bound on a pathological re-open. A `probe` needs no such price: closing at λ 0 until the block reads fresh
+  already walks it into whatever is there.
 - **A `return` at high λ is the cheap half of an open question.** Re-garrison asks whether a withdrawal needs a
   `P(win)` of its own, since a unit sent home through a BLUFOR advance is worse off than one holding. Routing around
   the advance answers it without a second odds term.
@@ -635,35 +739,40 @@ threat that appears after. Today the road branch is threat-blind and every calle
 | Chunk | Builds |
 |---|---|
 | **5.1** Intents and ownership | the intent record, `boundTo` honoured by `DUWS_fnc_opcom_freeSweep`, and every shipped commit action wrapped as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
-| **5.2** Buildup | the rally point, `move` staging carrying `expValue` so a lift still prices a leg the unit cannot walk, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
-| **5.3** Multi-role templates | `assault` at ×N first, since it releases every role at once, then `flank` and `encircle` over their release predicates |
+| **5.2** Buildup | the rally cells, `move` staging with each role's land-taxi sourced for its staging leg, each open role offered to later picks as an Attack target, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
+| **5.3** Manoeuvres | `assault` across its 1–3 cells first, since it releases every role at once, then the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
+| **5.5** Probe | the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
+| **5.6** Chained fires | Arty split into `arty_saturate`, which is today's action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
-Phase 5 settles in play the band thresholds, each role's λ and how often a route is re-planned, `OPCOM_ROUTE_OFFROAD`
-and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, and how far short of the target a
-rally has to sit to be safe enough to be worth the extra march.
+Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
+`OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
+short of the target a rally has to sit to be safe enough to be worth the extra march, `OPCOM_ENVELOP_STANDOFF`, the
+frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE` and `OPCOM_ARTY_CREEP_SHARE`.
 
 ## What AP buys
 
 **WIP.**
 
 Three levels: **Action** (what AP commits to, scored and held), **Sink** (how it's paid — tier / strength / build /
-tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1 simple, N template). One actor
+tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1 simple, N a manoeuvre). One actor
 shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs on its own clock. Spends call
 `["OPF", -_cost, _reason] call fnc_ap_adjust` (server-side, single writer, no race).
 
 | Action | Target | Sink | Taskings |
 |---|---|---|---|
-| Attack | a BLU-held zone | tasking-spawn | 1–N (band → template) |
-| Intercept (QRF) | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1–N |
+| Attack | a BLU-held zone | tasking-spawn | 1–N (band → manoeuvre) |
+| Intercept (QRF) | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1 |
 | Rapport | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
-| Recruit | an open zone, one action per menu row | tasking-spawn | 1 (`garrison`, resting) |
 | Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
+| Probe | an Attack target whose block reads stale | tasking-spawn | 1 |
 | Re-garrison | a worn `guard` unit's march home | tasking-spawn | 1 |
-| Arty | an observed target in gun range | bought fire mission | 0 |
+| Ferry | a unit stopped at a water leg | tasking-spawn | 1 lift |
+| Arty saturate | an observed target in gun range | bought fire mission | 0 |
+| Arty creeping | a bound offensive's target in gun range | bought fire mission | 0 |
 | Fortify | an own town / zone | tier purchase | 0 zone / 1 truck town |
 | Build | an own zone ring or band cell, one action per unlocked type | hardpoint build | 0 zone / 1 truck standalone |
 | Tower Build | a band cell | hardpoint build | 1 truck |
@@ -673,11 +782,10 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Minefield | a band cell (AT, AP) | mine lay | 1 truck |
 | Bank | — | none | 0 |
 
-- **Recruit fills the roster; every other unit-dispatching action drains it** — so OPCOM must build up before it
-  strikes, and a lost unit is lost standing strength. It scores **once per recruit-menu row**, each valued as
-  [§Value](#value) sets out, so it hires what it is short of. The archetype leans on a kind through its
-  `recruitMix` and on hiring as a whole through its `recruit` weight ([§Archetype](#archetype-phase-7)). A row the faction
-  cannot field now scores nothing.
+- **A unit is hired for the action that sends it** — a tasking-spawn sink hires only when no free unit scores
+  better ([§Sourcing](#sourcing-hire-on-demand-phase-4d)), so OPCOM builds up in AP rather than in units, and a lost
+  unit is lost AP. The archetype leans on a kind through its `recruitMix`. A row the faction cannot field now is no
+  source.
   Units spawn only from OPFOR-held ground; taking the zone cuts what it can raise.
 - **A unit's force is a token composition** — a row in `DUWS_opcom_recruitMenu` (`fnc_opcom_tasking_init.sqf`): an
   id, a **bare**-token composition (`none` posture, so OPCOM commands it), and capability flags. `OPCOM_AP_UNIT`
@@ -694,13 +802,13 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
 |---|---|
 | Unit hire | `OPCOM_AP_UNIT` by menu row: rifles 10, weapons team 5, recon foot 5, truck 3, recon car 10, boat 3, car 5, APC 15, IFV 25, MBT 40, recon helicopter 20, transport helicopter 10, attack helicopter 50, jet 80 |
 | Zone Reinforce / Fortify | `OPCOM_AP_REINFORCE` 15 / `OPCOM_AP_FORTIFY` 25, flat |
-| Town Reinforce / Fortify | the same flat price, plus the truck's source cost |
+| Town Reinforce / Fortify | the same flat price, plus its truck's source price |
 | Zone hardpoint | `OPCOM_AP_HARDPOINT`: roadblock 8, MG 12, GMG 16, AT 16, AA 20 |
-| Standalone hardpoint | as a zone hardpoint, plus the truck's source cost |
-| Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus the truck's source cost |
-| Minefield | `OPCOM_AP_MINEFIELD` 1 per 50 m square, so 30 to 90 for a belt, plus the truck's source cost |
-| Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus the truck's source cost |
-| Truck source | the hire price (3), or 0 for an idle truck on hand, plus `OPCOM_AP_PER_KM` 0.5 × distance; the lowest wins |
+| Standalone hardpoint | as a zone hardpoint, plus its truck's source price |
+| Radio tower / OP / mortar pit / artillery battery | `OPCOM_AP_TOWER` 30 / `OPCOM_AP_OP` 15 / `OPCOM_AP_MORTAR` 25 / `OPCOM_AP_ARTY` 50, plus its truck's source price |
+| Minefield | `OPCOM_AP_MINEFIELD` 1 per 50 m square, so 30 to 90 for a belt, plus its truck's source price |
+| Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus its truck's source price |
+| Unit source | a hire's `OPCOM_AP_UNIT`, or 0 for a free unit; `OPCOM_AP_PER_KM` 0.5 × distance is scored on every source and charged on none ([§Sourcing](#sourcing-hire-on-demand-phase-4d)) |
 | Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
 
 - **A garrison step is flat-priced.** Reinforce and Fortify cost the same wherever they land and whatever they buy
@@ -714,14 +822,14 @@ Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per
   score outright — with price equal to force, a garrison action's `gain ÷ price` cancelled to worth × exposure ÷
   full force, so every zone action tied at every zone and the archetype had nothing to tilt. Infantry is cheap so
   the commander can always hold ground, every hull carries a premium and air the steepest.
-- **Force still converts to AP in three places** — the `Cost` of staking a unit on a commitment, Arty's Value in
+- **Force still converts to AP in three places** — the `Cost` of staking a unit on a commitment, the fire missions' Value in
   kills, and the traffic layer's contribution to need. `OPCOM_AP_PER_FORCE` is 1, infantry's rate and the cheapest
   force OPCOM buys.
 
 **Supply gates the town-side builds.** A `supply` truck drives from OPFOR ground to its target and is spent on
 arrival, behind four actions: Rapport, standalone Build, and *town* Reinforce / Fortify
-([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes an idle truck on hand, or hires one and tasks it in the same commit,
-whichever source costs less. A town takes one supply truck at a time: while one drives to it, no supply action
+([§Shipped](#shipped-the-substrate-the-loop-drives)). The action takes a free truck, or hires one and tasks it in the same commit,
+whichever source scores better ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A town takes one supply truck at a time: while one drives to it, no supply action
 targets it. At most `OPCOM_CAP_SUPPLY` (10) trucks are out on an errand at once ([§Caps](#caps)). The AP is paid at commit but the result lands only when the *specific* bound truck
 arrives — **kill it en route and the order fails, no refund** (interdiction is the counterplay). **Arrival is the
 only test**: the contest gate keeps OPCOM from ordering a buy into a fight, but a truck already driving is never
@@ -811,7 +919,7 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 | Cooldown | 4–8 rounds, then 25–40 min | 6–10 rounds, then 40–60 min |
 | Spread | tighter (base 50 m) | wider (base 100 m) |
 
-- **A fire mission is the Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
+- **A fire mission is an Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
   fires; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
   range is the availability gate, nothing more. **AP is the ammunition** — the guns rest empty and are loaded per
   mission, so there is no finite store and the wallet is the only limit.
@@ -835,10 +943,12 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   respawn into the circle), and re-checked against the circle immediately before firing.
 - **Spread** is the radius the action hands the shipped saturate: base by type, +25 m per km range, never below
   `OPCOM_ARTY_MIN_SPREAD`.
-- **The one-gun action only ever saturates.** A creep is a barrage walked ahead of someone, so it is worth firing
-  only when there is an assault to walk it for, and that pairing is the `arty` template's job
-  ([§Orchestration](#orchestration-phase-5)). Until then the shipped fire mission's creep stays reachable from the debug
-  step, which is where a walked pattern is asked for by hand.
+- **Two actions over one implementation.** `arty_saturate` fires on a fresh sighting and is what ships;
+  `arty_creeping` walks its rounds ahead of a bound offensive, so it gates on that offensive standing and takes a
+  parent intent ([§Chained fires](#chained-fires-an-intent-may-name-a-parent)). They score apart because they buy
+  different things — saturate buys kills, a creep buys the wave's survival — and one Value cannot price both. Until
+  creeping lands, the shipped fire mission's creep stays reachable from the debug step, which is where a walked
+  pattern is asked for by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
   timed off `getArtilleryETA`.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
@@ -857,25 +967,26 @@ reveals it. The OPCOM debug page overrides it for testing. It is not difficulty 
 table is each record's `actionWeight`, one flat weight per action (`fnc_opcom_actions`), Bank included. No class
 groups the actions, because a class ties together actions an archetype must weigh apart: one that attacks often but
 spends its units on build-up needs Attack high and Intercept and Rapport low. Every zone, standalone and minefield
-build shares one weight, `build`, and every Recruit row one, `recruit`: the weight sets how often OPCOM builds or
-hires, and the `hpMix` or `recruitMix` alone picks the type ([§Value](#value)), because a per-type weight would fight
-the mix for the same lean. A tower, OP, mortar or battery build keeps its own weight and stays out of the mix, so its
-weight sets how soon it builds. The table is relative: weighting every action alike changes no pick, so Balanced's 1
-everywhere is the baseline. 7.1 builds the setting.
+build shares one weight, `build`: the weight sets how often OPCOM builds, and the `hpMix` alone picks the type
+([§Value](#value)), because a per-type weight would fight the mix for the same lean. A hire has no weight of its own:
+it scores inside the action that sends it, under that action's weight, and the `recruitMix` alone leans on its row.
+A tower, OP, mortar or battery build keeps its own weight and stays out of the mix, so its weight sets how soon it
+builds. The table is relative: weighting every action alike changes no pick, so Balanced's 1 everywhere is the
+baseline. 7.1 builds the setting.
 
 | Archetype | Weights toward | Manoeuvres |
 |---|---|---|
-| Defensive | Fortify, Reinforce, Build, Recruit, Intercept, Patrol, Re-garrison | `probe` and `flank`: buy information, stake little |
+| Defensive | Fortify, Reinforce, Build, Intercept, Patrol, Probe, Re-garrison | `flank`: shape the fight, stake little |
 | Balanced | no strong lean — the baseline | no lean — the baseline |
-| Aggressive | Attack, Rapport; leaves ground thin | `assault`: direct, no setup leg |
+| Aggressive | Attack, Rapport, Arty saturate; leaves ground thin | `assault`: direct, no setup leg |
 
-**An archetype weighs manoeuvres as well as actions.** `manoeuvreWeight` keys the templates
+**An archetype weighs manoeuvres as well as actions.** `manoeuvreWeight` keys the manoeuvres
 ([§Orchestration](#orchestration-phase-5)) and picks between the ones the band leaves legal, on the same weighted
 roll as the action pick. The band is the gate and the weight is the lean, so a weight neither makes an illegal
-template legal nor takes a legal one away: every template keeps a weight above 0, because a band whose legal
-templates all weigh 0 has no pick left to make. The table keys only the manoeuvres that compete — `assault`,
-`flank`, `encircle` and `probe` — since `rapport`, `patrol` and `arty` are the one shape their own action has, and
-a weight on those would never bite. Two weights rather than one, because an archetype that attacks often can still
+manoeuvre legal nor takes a legal one away: every manoeuvre keeps a weight above 0, because a band whose legal
+manoeuvres all weigh 0 has no pick left to make. The table keys the three that compete — `assault`, `flank` and
+`encircle`. Every other action has one shape, so a manoeuvre weight on it would never bite, and `assault` is legal
+from band 1 for that same reason: a weight can only choose among what a band leaves legal. Two weights rather than one, because an archetype that attacks often can still
 attack cautiously: the `attack` action weight sets how often it goes, the manoeuvre weight sets how it goes. Only
 the band overlap gives the weight room, so the band thresholds and the weights settle against each other in play.
 
@@ -893,7 +1004,7 @@ properly executed manoeuvre; a flexible, aggressive one launches sooner at lesse
 | Chunk | Builds |
 |---|---|
 | **7.1** Records and the setting | the campaign setting, the records the other archetypes need, the debug-page override, and `DUWS_opcom_archetype` set from the setting. The action table is already wired as each record's `actionWeight` |
-| **7.2** Manoeuvres and patience | `manoeuvreWeight` on each record and the template pick reading it; then the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
+| **7.2** Manoeuvres and patience | `manoeuvreWeight` on each record and the manoeuvre pick reading it; then the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
 
 Phase 7 settles in play each archetype's action weights, Bank's included, its manoeuvre weights against the band
 thresholds Phase 5 sets, the patience figures, and the set of archetypes itself, which is not final. Phase 5 ships
@@ -935,7 +1046,7 @@ WARCOM's three OPFOR threads (roaming patrols, attack waves, random air) are del
 reproduce their shape**: `CYCLE` routes that never despawned, unconditional cadence, AP read but never spent, and
 spawns over 1500 m from every player, so contact happened only when a player drove into them. One of their
 behaviours is still worth rebuilding as a commander decision: **dismounts**, a second infantry team `joinSilent`ed
-into a vehicle group, which belongs in a composition Recruit buys. Target selection is replaced by belief, and the
+into a vehicle group, which belongs in a composition a hire raises. Target selection is replaced by belief, and the
 ammo truck by Reinforce.
 
 ## Persistence (Phase 6)
