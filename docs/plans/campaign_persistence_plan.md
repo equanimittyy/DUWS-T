@@ -508,7 +508,7 @@ multiplier and the loss condition together.
 | Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) and whose it is (`DUWS_townGarrisonOwner`) |
 | Zone garrisons | outcome | purchased tier per zone (`DUWS_zoneTier_<key>`) |
 | Garrison strength | outcome | per site, `DUWS_garrisonFull_<key>` and `DUWS_garrisonLost_<key>` — the full token multiset and the lost ledger against it |
-| Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array`, the `zone_hp_left_<n>` counters |
+| Hardpoints | input | `DUWS_hardpoints`, one row per standing emplacement: `[key, pos, type, side, zoneKey, shown, dir]` |
 
 Hardpoints are an input for the same reason zones are:
 [`info/hardpoints.md`](../info/gameplay/hardpoints.md#siting) sites them in a generation phase after zone
@@ -517,6 +517,22 @@ fresh positions, or a restore moves every hardpoint and orphans its cleared stat
 standalone hardpoints run in that one phase and share the one registry, so a single guard covers
 both. Cores and garrison groups are live objects rebuilt on approach from the stored composition,
 so they stay out of the save.
+
+**The registry is the whole hardpoint state, because presence is liveness.** A cleared hardpoint is
+deleted from `DUWS_hardpoints` rather than flagged
+(`server/init_zones/fnc_hardpoint_stream.sqf:185-189`), so what was cleared needs no key of its own —
+it is what the saved array does not hold. Reveal rides the row's `shown` field, whose sole writer is
+`fnc_hardpoint_reveal`, keyed by the row's own key, which is why the hardpoint half of reveal is not
+in [§The team](#the-team): restoring the rows restores it, provided the siting pass takes them
+whole rather than rebuilding rows around the saved positions. Facing rides the row too, so a restored
+emplacement points where it pointed.
+
+The per-key variables beside the registry are session state and stay out. `DUWS_hpPeak_<key>` is
+re-anchored every time a hardpoint raises and cleared when it stows, and `DUWS_hpMines_<key>`,
+`DUWS_hpMineSquares_<key>` and `DUWS_hpMineLaid_<key>` are made and unmade with the mines a streamed
+belt lays. A restored minefield lays its belt again on the next raise, which is the same path a fresh
+campaign takes. What the snapshot does carry for them is the variant, because the registry row does
+not name it ([§The commander](#the-commander)).
 
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
 moment a town crosses `-10` into the OPFOR band, independently of the commander
@@ -597,7 +613,7 @@ restore with the settings group, not here.
 | Group | Kind | Contents |
 |---|---|---|
 | Support unlocks | input | `DUWS_support_permanent`, the team's permanent unlocks in purchase order |
-| Reveal | outcome | positions of revealed zones and revealed towns, indices of revealed normal hardpoints |
+| Reveal | outcome | positions of revealed zones and revealed towns |
 
 **Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
 what a player bought. Consumable unlocks were already out for exactly this reason — they are
@@ -629,9 +645,10 @@ reason as Ownership.
 
 Storing the state rather than how it was reached is what keeps this to a flat list of positions: a
 zone the player walked into, bought from a local, or found on a dead officer all restore
-identically, because by then they are one flag. Whether a hardpoint has been revealed is
-separate state on the same footing, because intel can uncover one without its parent zone. Details
-in [`info/intel_system.md`](../info/gameplay/intel_system.md#persistence).
+identically, because by then they are one flag. A hardpoint's reveal is the same kind of state —
+intel can uncover one without its parent zone — but it is not stored here: it is a field on the
+hardpoint's own registry row and comes back with it ([§The enemy](#the-enemy)). Details in
+[`info/intel_system.md`](../info/gameplay/intel_system.md#persistence).
 
 **Reveal is team state today and stays that way.** `zone_namePOS_pairs` and `civ_visible` are
 shared arrays and the markers they drive are global, so there is no per-player reveal to persist.
