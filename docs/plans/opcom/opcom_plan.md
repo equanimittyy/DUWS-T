@@ -51,8 +51,8 @@ pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the 
 same orchestrator — with a drop the taxi latches at the bind where a crossing scans for its far shore. The live
 carry has three shapes: a rotor lands and walks its squad aboard, a ground hull stops beside the squad and walks
 it aboard the same way, and a boat swaps the whole group at once. Drawing a combatant hull onto taxi duty empties
-its post, like any other order that takes a garrisoned unit out. A recon never takes a land-taxi, because its Value
-is the band its own march sweeps; it still borrows a ferry at a water leg.
+its post, like any other order that takes a garrisoned unit out. Only an Attack or an Intercept binds a land-taxi,
+so no lift is hired on a Scout; a scout still borrows a ferry at a water leg.
 
 Two terms carry one meaning each throughout:
 
