@@ -131,7 +131,7 @@ if (_knownOpfor) then {
     // position is frozen at the cell it de-virted in, so plotting it would mark stale ground the
     // player is standing on. One already plotted is out, or its own markers would be redrawn.
     private _contacts = DUWS_opcom_taskings select {
-        ((_x get "order") in ["move", "capture", "intercept"])
+        ([_x] call DUWS_fnc_opcom_marching)
         && {(_x get "grp") isEqualTo ""}
         && {!((_x get "id") in DUWS_intel_contactIds)}
         && {[_x get "pos"] call _fnc_inReach}

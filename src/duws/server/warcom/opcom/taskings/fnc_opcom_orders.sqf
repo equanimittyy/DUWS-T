@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. The table fnc_opcom_task_step dispatches through, the re-garrison a settle
-// or a capture ends on, and guard and garrison, which are too small to earn a file. Move, capture and intercept
-// carry their own, so the table is the only place that knows every order. A handler never asks whether the
-// tasking is live: the step context normalises that away.
+// or a capture ends on, and guard and garrison, which are too small to earn a file. The marching orders, capture
+// and intercept carry their own, so the table is the only place that knows every order. A handler never asks whether
+// the tasking is live: the step context normalises that away.
 //
 // DUWS_opcom_orders row: [_refresh, _step].
 //   [_t, _live] call _refresh -> "arrived" / "water" / "moving" for a virtual tasking, "" for a live one the
@@ -37,10 +37,17 @@ DUWS_fnc_opcom_stepGarrison = {
     true
 };
 
+// `patrol` steps as a plain `move` does: what the split buys is the taxi, the debug pages and the map reading it by
+// name (opcom_orders_and_regarrison.md). A carry is owned by the ferry stage, which takes the record before this
+// table is reached (fnc_opcom_task_step), so `ferry` holds here -- a hull holding it with no rider was released.
 DUWS_opcom_orders = createHashMapFromArray [
     ["move",      [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepMove]],
+    ["patrol",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepMove]],
+    ["return",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepReturn]],
+    ["errand",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepErrand]],
     ["capture",   [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepCapture]],
     ["intercept", [DUWS_fnc_opcom_refreshIntercept, DUWS_fnc_opcom_stepIntercept]],
+    ["ferry",     [DUWS_fnc_opcom_refreshHold,      DUWS_fnc_opcom_stepGuard]],
     ["guard",     [DUWS_fnc_opcom_refreshHold,      DUWS_fnc_opcom_stepGuard]],
     ["garrison",  [DUWS_fnc_opcom_refreshHold,      DUWS_fnc_opcom_stepGarrison]]
 ];

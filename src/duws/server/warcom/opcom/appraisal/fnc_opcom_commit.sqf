@@ -162,7 +162,7 @@ DUWS_fnc_opcom_patrolSweep = {
         if (!_reconFree) then { _blocked pushBack _to };
         if (_best isNotEqualTo []) then {
             _best params ["_t", "_v", "_pw", "_c"];
-            _out pushBack [[_t get "id", "move", _to, _pw * _v], 0,
+            _out pushBack [[_t get "id", "patrol", _to, _pw * _v], 0,
                 format ["Patrol %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
         };
     } forEach _dests;

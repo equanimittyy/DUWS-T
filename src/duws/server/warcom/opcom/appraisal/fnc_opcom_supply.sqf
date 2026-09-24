@@ -63,7 +63,7 @@ DUWS_fnc_opcom_supplyRun = {
         [_ref] call DUWS_fnc_opcom_byId
     };
     if (isNil "_t") exitWith { false };
-    private _ok = [_t, "move", _dest, "", _errand] call fnc_opcom_task;
+    private _ok = [_t, "errand", _dest, "", _errand] call fnc_opcom_task;
     if (!_ok && {_kind isEqualTo "hire"}) then {
         DUWS_opcom_taskings = DUWS_opcom_taskings - [_t];
         [_ref] call DUWS_fnc_opcom_zoneReserveSync;

@@ -8,7 +8,7 @@ if (isNull _caller) exitWith {};
 
 private _active = createHashMap;
 {
-    if ((_x get "order") in ["move", "capture", "intercept"]) then {
+    if ([_x] call DUWS_fnc_opcom_marching) then {
         private _errand = (_x getOrDefault ["errand", []]) param [0, ""];
         private _zk = _x getOrDefault ["settleZone", ""];
         private _tgt = _x get "target";

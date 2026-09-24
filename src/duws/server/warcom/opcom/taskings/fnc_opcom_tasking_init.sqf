@@ -85,4 +85,8 @@ DUWS_fnc_opcom_drawable = {
     && {!(((_t get "order") isEqualTo "garrison") && {[_t get "homeZone"] call DUWS_fnc_opcom_siteContested})}
 };
 
+// The complement of the two rests, never a list of names: an order added to the table is out on the ground by
+// default rather than forgotten by its readers (fnc_debug_opcom_ai, fnc_intel_payout).
+DUWS_fnc_opcom_marching = { params ["_t"]; !((_t get "order") in ["guard", "garrison"]) };
+
 call DUWS_fnc_opcom_ports_init;

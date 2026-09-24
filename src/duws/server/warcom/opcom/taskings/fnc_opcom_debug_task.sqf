@@ -3,8 +3,8 @@
 // first, so hand-driving re-tasks on demand where the automated loop would wait it out.
 //   ["menu"]                        -- list the recruit rows and their live prices
 //   ["recruit", row, pos, zoneKey]  -- hire a row; returns the tasking id (or -1)
-//   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target
-//   ["garrison", id, siteKey]       -- send `id` to a zone or town; it settles into that garrison on arrival
+//   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target ("move", "patrol", "capture")
+//   ["garrison", id, siteKey]       -- return `id` to a zone or town; it settles into that garrison on arrival
 //   ["supply", id, targetPos, errand] -- send `id` on a supply run; its errand lands on arrival (fnc_opcom_task)
 //   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
 //   ["intercept", id, rowKey]       -- send `id` after a belief row (a BLUFOR group's netId)
@@ -51,7 +51,7 @@ switch (_verb) do {
                 ["WARN", "OPCOMDBG", format ["garrison: no site %1", _b]] call fnc_log; false
             } else {
                 _t set ["hold", 0];
-                [_t, "move", _pos, _b] call fnc_opcom_task
+                [_t, "return", _pos, _b] call fnc_opcom_task
             };
         };
     };
@@ -65,7 +65,7 @@ switch (_verb) do {
                 ["WARN", "OPCOMDBG", format ["supply: tasking %1 needs an errand", _a]] call fnc_log; false
             };
             _t set ["hold", 0];
-            [_t, "move", _b, "", _c] call fnc_opcom_task
+            [_t, "errand", _b, "", _c] call fnc_opcom_task
         };
     };
     case "intercept": {

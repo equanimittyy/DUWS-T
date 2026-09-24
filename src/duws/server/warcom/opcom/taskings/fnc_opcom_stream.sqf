@@ -6,7 +6,7 @@ if (!isServer) exitWith {};
 
 // Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.)
 DUWS_fnc_opcom_applyOrder = {
-    params ["_grp", "_order", "_target", ["_supply", false]];
+    params ["_grp", "_order", "_target"];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
     switch (_order) do {
         case "capture";
@@ -14,10 +14,16 @@ DUWS_fnc_opcom_applyOrder = {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED"; _grp setSpeedMode "FULL";
             (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
         };
-        case "move": {
-            _grp setBehaviour "AWARE"; _grp setSpeedMode "NORMAL";
-            // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
-            _grp setCombatMode (["YELLOW", "BLUE"] select _supply);
+        // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
+        case "errand": {
+            _grp setBehaviour "AWARE"; _grp setCombatMode "BLUE"; _grp setSpeedMode "NORMAL";
+            (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
+        };
+        // The ferry stages ask for "move" by hand to march a hull or a rider to a shore, whatever order it holds.
+        case "move";
+        case "patrol";
+        case "return": {
+            _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
         };
         default {
@@ -58,7 +64,7 @@ DUWS_fnc_opcom_reOrderLive = {
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
-    [_grp, _order, _t get "target", (_t getOrDefault ["errand", []]) isNotEqualTo []] call DUWS_fnc_opcom_applyOrder;
+    [_grp, _order, _t get "target"] call DUWS_fnc_opcom_applyOrder;
 };
 
 // OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.

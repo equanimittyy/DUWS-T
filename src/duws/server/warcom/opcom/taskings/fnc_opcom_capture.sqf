@@ -44,7 +44,7 @@ DUWS_fnc_opcom_captureEnd = {
     _t deleteAt "inZoneAt";
     if ((_pos distance2D (_site get "pos")) > (_site get "radius")) exitWith {
         _t set ["hold", 0];
-        if !([_t, "move", _site get "pos", _zk] call fnc_opcom_task) then { [_t, "guard"] call fnc_opcom_task };
+        if !([_t, "return", _site get "pos", _zk] call fnc_opcom_task) then { [_t, "guard"] call fnc_opcom_task };
         false
     };
     private _home = ([_zk] call DUWS_fnc_opcom_captureTown) < 0;

@@ -49,12 +49,12 @@ DUWS_fnc_opcom_ferryPool = {
 };
 
 // Bind a rider to a transport, which owns it until the drop. `_drop` latches a taxi's drop point; [] leaves a water
-// crossing to find its far shore at the board. A garrisoned pick is flipped to `move` so its carry turn runs.
+// crossing to find its far shore at the board. A garrisoned pick is flipped to `ferry` so its carry turn runs.
 DUWS_fnc_opcom_carryBind = {
     params ["_tr", "_rider", ["_drop", []]];
     // A combatant lift (an APC, an IFV) leaves its post: field nothing in its place while it drives.
     if ((_tr get "order") isEqualTo "garrison" && {!("noncombat" in (_tr get "flags"))}) then { [_tr] call DUWS_fnc_opcom_drawOut };
-    _tr set ["order", "move"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
+    _tr set ["order", "ferry"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
     _tr set ["ferryPhase", "topickup"]; _tr set ["ferryWait", 0]; _tr set ["ferryLZ", []];
     _rider set ["ridingOn", _tr get "id"];
     _rider set ["taxiDrop", _drop];
@@ -103,7 +103,7 @@ DUWS_fnc_opcom_ferryHome = {
         };
     } forEach WARCOM_zones_controled_by_OPFOR;
     _t set ["hold", 0];   // a release is no OPCOM commit: a hold left from before the borrow must not refuse it
-    if (_key isEqualTo "" || {!([_t, "move", _zpos, _key] call fnc_opcom_task)}) then { [_t, "guard"] call fnc_opcom_task };
+    if (_key isEqualTo "" || {!([_t, "return", _zpos, _key] call fnc_opcom_task)}) then { [_t, "guard"] call fnc_opcom_task };
 };
 
 // Free a transport from a carry -- the rider is gone, or the crossing is done -- and send it home. A boat backs off

@@ -17,7 +17,7 @@ switch (_mode) do {
         if (_key isEqualType "") exitWith { [_key, "firemission"] call fnc_debug_opcom_step };
         // An errand is an order in its own right here: the move that carries it is implied, not picked first.
         [format ["Tasking %1: order", _key], [
-            ["capture", "capture"], ["move", "move"], ["guard", "guard"], ["garrison", "garrison"],
+            ["capture", "capture"], ["move", "move"], ["patrol", "patrol"], ["guard", "guard"], ["garrison", "garrison"],
             ["reinforce a town", "reinforce"], ["fortify a town", "fortify"], ["rapport a town", "rapport"],
             ["build a hardpoint", "build"], ["intercept", "intercept"], ["teleport", "teleport"]
         ] apply {
@@ -26,6 +26,7 @@ switch (_mode) do {
         }] call fnc_open_action_menu;
     };
     case "capture";
+    case "patrol";
     case "move": {
         [_key, _mode] spawn {
             params ["_id", "_o"];

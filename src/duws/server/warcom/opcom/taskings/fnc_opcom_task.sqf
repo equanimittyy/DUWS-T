@@ -1,30 +1,39 @@
 // Locality: server. Give a tasking an active order and target: plan the route, arm the commit hold. Returns
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
-//   _order: "capture"/"move"/"guard" (guard holds where it stands, ignores _target). A capture takes the BLUFOR-held
+//   _order: one of the orders below (opcom_orders_and_regarrison.md). `guard` holds where it stands and ignores
+//     _target; `move` and `patrol` march to _target and settle to guard there. A `capture` takes the BLUFOR-held
 //     holding at _target -- a zone, or a town they have garrisoned -- and aims at its centre; it ends when the ground
-//     is no longer theirs (fnc_opcom_task_step). An intercept's
-//     _target is a belief row key (a BLUFOR group's netId); it follows the row's believed position.
-//   _returnZone: `move` only -- the site key, zone or town, it settles into as a garrison on arrival. Exclusive
-//     with _errand. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
-//   _errand: `move` only -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex],
+//     is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR group's
+//     netId); it follows the row's believed position.
+//   _returnZone: `return` only, and required by it -- the site key, zone or town, whose garrison it joins on
+//     arrival. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
+//   _errand: `errand` only, and required by it -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex],
 //     ["build", pos, type, refund] or ["mine", pos, [variant, [cols, rows]], refund], delivered on arrival
 //     (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent. A build that finds no ground pays refund
 //     back.
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["capture", "move", "guard", "intercept"])) exitWith {
+if (!(_order in ["capture", "move", "patrol", "return", "errand", "guard", "intercept"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
+};
+private _isReturn = _order isEqualTo "return";
+private _isErrand = _order isEqualTo "errand";
+if (_isReturn && {_returnZone isEqualTo ""}) exitWith {
+    ["WARN", "OPCOM", format ["task: a return needs a site to garrison into (tasking %1)", _t get "id"]] call fnc_log; false
+};
+if (_isErrand && {_errand isEqualTo []}) exitWith {
+    ["WARN", "OPCOM", format ["task: an errand needs goods to carry (tasking %1)", _t get "id"]] call fnc_log; false
 };
 if (_order isNotEqualTo "guard" && {_target isEqualTo []}) exitWith {
     ["WARN", "OPCOM", format ["task: order %1 needs a target", _order]] call fnc_log; false
 };
-if (_errand isNotEqualTo [] && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build", "mine"])}) exitWith {
+if (_isErrand && {!((_errand param [0, ""]) in ["reinforce", "fortify", "rapport", "build", "mine"])}) exitWith {
     ["WARN", "OPCOM", format ["task: unknown errand %1", _errand]] call fnc_log; false
 };
 // An errand is goods spent on arrival, so it rides a supply unit (docs/plans/opcom/opcom_plan.md, What AP buys).
-if (_errand isNotEqualTo [] && {!("supply" in (_t get "flags"))}) exitWith {
+if (_isErrand && {!("supply" in (_t get "flags"))}) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 carries no supply -- errand %2 refused", _t get "id", _errand]] call fnc_log; false
 };
 private _ik = "";
@@ -72,10 +81,8 @@ if (_live && {((_t getOrDefault ["carrying", -1]) >= 0) || {(_t getOrDefault ["r
 if (DUWS_opcom_tick < (_t get "hold")) exitWith {
     ["INFO", "OPCOM", format ["task: tasking %1 held until tick %2 (now %3)", _t get "id", _t get "hold", DUWS_opcom_tick]] call fnc_log; false
 };
-private _isMove = _order isEqualTo "move";
-private _errandSet = _isMove && {_errand isNotEqualTo []};
-private _rz = ["", _returnZone] select (_isMove && {!_errandSet});
-private _boatHome = _rz isNotEqualTo "" && {(_t get "moveType") isEqualTo "boat"};
+private _rz = ["", _returnZone] select _isReturn;
+private _boatHome = _isReturn && {(_t get "moveType") isEqualTo "boat"};
 private _port = [_rz] call DUWS_fnc_opcom_portOf;
 if (_boatHome && {_port < 0}) exitWith {
     ["INFO", "OPCOM", format ["task: site %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
@@ -100,8 +107,8 @@ if (_order isEqualTo "guard") then {
     _t set ["route", _pts];
     _t set ["routeMode", _mode];
 };
-// Cleared off a non-move so a recycled record carries no stale re-garrison / supply mark; exclusive on a move.
-_t set ["errand", [[], _errand] select _errandSet];
+// Cleared off every other order so a recycled record carries no stale supply mark.
+_t set ["errand", [[], _errand] select _isErrand];
 _t set ["returnZone", _rz];
 _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
 _t set ["interceptKey", _ik];
