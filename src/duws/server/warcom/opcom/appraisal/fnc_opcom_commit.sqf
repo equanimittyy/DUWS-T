@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The commit actions, which stake a roster unit rather than AP: which unit goes
-// and what its target is worth (opcom_plan.md §Appraisal). One unit per order until Phase 5's templates muster several.
+// and what its target is worth (opcom_plan.md §Appraisal). One unit per order until Phase 5's manoeuvres muster several.
 // Each sweep returns [candidates, blocked, riders] through the tick cache, so Recruit reads the blocked targets and
 // the units a lift would carry whatever order the rows run in (fnc_opcom_hire).
 if (!isServer) exitWith {};
