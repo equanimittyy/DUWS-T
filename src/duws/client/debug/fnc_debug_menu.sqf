@@ -148,17 +148,25 @@ switch (_page) do {
 
     case "views": {
         private _toggle = {
-            params ["_label", "_on", "_code"];
-            [format ["%1 [%2]", _label, ["off", "on"] select _on], _code, [], [DBG_OFF, DBG_ON] select _on]
+            params ["_label", "_on", "_code", ["_args", []]];
+            [format ["%1 [%2]", _label, ["off", "on"] select _on], _code, _args, [DBG_OFF, DBG_ON] select _on]
+        };
+        private _gridLayer = {
+            params ["_label", "_var", "_hint"];
+            [_label, missionNamespace getVariable [_var, false], {
+                params ["_var", "_hint"];
+                private _on = !(missionNamespace getVariable [_var, false]);
+                missionNamespace setVariable [_var, _on];
+                hint format [_hint, ["off", "on"] select _on];
+            }, [_var, _hint]] call _toggle
         };
         ["Views", [
             DBG_BACK("root"),
             ["AoI reaches", count (missionNamespace getVariable ["DUWS_dbgAoiMarkers", []]) > 0, fnc_debug_aoi_view] call _toggle,
             ["OPCOM grid", missionNamespace getVariable ["DUWS_dbgOpcomOn", false], fnc_debug_opcom_view] call _toggle,
-            ["OPCOM grid labels", missionNamespace getVariable ["DUWS_dbgOpcomLabelsOn", false], {
-                DUWS_dbgOpcomLabelsOn = !(missionNamespace getVariable ["DUWS_dbgOpcomLabelsOn", false]);
-                hint format ["OPCOM grid: numbers and unit tags %1.\n\nForce per cell, staleness (t), need (N),\ncover (C), traffic (T), threat stamps and\nthe tasking tag on each unit and endpoint.", ["off", "on"] select DUWS_dbgOpcomLabelsOn];
-            }] call _toggle,
+            ["OPCOM force dots", "DUWS_dbgOpcomForceOn", "OPCOM grid: force dots %1.\n\nOPFOR/BLUFOR force per cell; yellow marks the front."] call _gridLayer,
+            ["OPCOM staleness", "DUWS_dbgOpcomStaleOn", "OPCOM grid: staleness %1.\n\nTicks since each cell was last seen (t);\n-1 is never or long unseen."] call _gridLayer,
+            ["OPCOM need/cover/traffic", "DUWS_dbgOpcomNeedOn", "OPCOM grid: need, cover and traffic %1.\n\nNeed (N), hardpoint cover (C) and\nBLUFOR traffic (T) per cell."] call _gridLayer,
             ["OPCOM AI overlay", missionNamespace getVariable ["DUWS_dbgOpcomAiOn", false], fnc_debug_opcom_ai_overlay] call _toggle
         ]] call fnc_open_action_menu;
     };
