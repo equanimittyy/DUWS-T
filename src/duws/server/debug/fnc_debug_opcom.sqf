@@ -180,8 +180,8 @@ switch (_verb) do {
         (_lines joinString "\n") remoteExec ["hint", _caller];
     };
     case "ferry": {
-        // The ferry fields "list" omits: live carry bindings and the free-lift pool. No excluded id, so the
-        // pool is the exact set borrowFerry would pick from.
+        // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so each
+        // pool is the exact set borrowFerry or taxiBind would pick from.
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
         private _carries = DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 || {(_x getOrDefault ["ridingOn", -1]) >= 0} };
         private _lines = [];
@@ -193,7 +193,8 @@ switch (_verb) do {
                     _x get "id", _x get "moveType", _x getOrDefault ["carrying", -1], _x getOrDefault ["ridingOn", -1], _x getOrDefault ["embarked", false], _x get "leg", count (_x get "route")];
             } forEach _carries;
         };
-        _lines pushBack format ["Free lift pool: %1", ([] call DUWS_fnc_opcom_ferryPool) apply { format ["%1(%2)", _x get "id", _x get "moveType"] }];
+        _lines pushBack format ["Water lift pool: %1", ([] call DUWS_fnc_opcom_ferryPool) apply { format ["%1(%2)", _x get "id", _x get "moveType"] }];
+        _lines pushBack format ["Land lift pool: %1", ([] call DUWS_fnc_opcom_taxiPool) apply { format ["%1(%2)", _x get "id", _x get "moveType"] }];
         { diag_log format ["[OPCOMDBG] ferry: %1", _x] } forEach _lines;
         (_lines joinString "\n") remoteExec ["hint", _caller];
     };
