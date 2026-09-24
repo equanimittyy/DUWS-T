@@ -1794,20 +1794,20 @@ OPCOM_PATROL_SHARE = 0.2;
     [[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_patrolValue, 4.8] call fnc_assertClose;
 
 
-// --- DUWS_fnc_opcom_hireDefense: the defense a hire adds at the zone that raises it ---
-["hireDefense: a hire doubling a thin zone is worth half its worth", [40, 1, 10, 10] call DUWS_fnc_opcom_hireDefense, 20] call fnc_assertClose;
-["hireDefense: the same hire at a stacked zone is worth a tenth", [40, 1, 10, 90] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
-["hireDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_hireDefense, 4] call fnc_assertClose;
-["hireDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_hireDefense, 40] call fnc_assertClose;
+// --- DUWS_fnc_opcom_garrisonDefense: the defense a unit adds at the zone it rests in ---
+["garrisonDefense: a unit doubling a thin zone is worth half its worth", [40, 1, 10, 10] call DUWS_fnc_opcom_garrisonDefense, 20] call fnc_assertClose;
+["garrisonDefense: the same unit at a stacked zone is worth a tenth", [40, 1, 10, 90] call DUWS_fnc_opcom_garrisonDefense, 4] call fnc_assertClose;
+["garrisonDefense: a rear zone keeps only its exposure floor", [40, 0.2, 10, 10] call DUWS_fnc_opcom_garrisonDefense, 4] call fnc_assertClose;
+["garrisonDefense: the first man at an empty zone takes the whole worth", [40, 1, 10, 0] call DUWS_fnc_opcom_garrisonDefense, 40] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_regarrisonValue: what sending a worn unit home is worth ---
+// --- DUWS_fnc_opcom_garrisonValue: what banking a unit in a zone is worth ---
 OPCOM_AP_PER_FORCE = 1;
-["regarrisonValue: a wrecked unit is worth the rebuy its heal recovers",
-    [8, 2, 0, 1, 0] call DUWS_fnc_opcom_regarrisonValue, 6] call fnc_assertClose;
-["regarrisonValue: an unworn unit is worth only the defense it adds",
-    [8, 8, 40, 1, 0] call DUWS_fnc_opcom_regarrisonValue, 40] call fnc_assertClose;
-["regarrisonValue: the larger of the two, never the sum",
-    [10, 9, 4, 0.2, 36] call DUWS_fnc_opcom_regarrisonValue, 1] call fnc_assertClose;
+["garrisonValue: a wrecked unit is worth the rebuy its heal recovers",
+    [8, 2, 0, 1, 0] call DUWS_fnc_opcom_garrisonValue, 6] call fnc_assertClose;
+["garrisonValue: an unworn unit is worth only the defense it adds",
+    [8, 8, 40, 1, 0] call DUWS_fnc_opcom_garrisonValue, 40] call fnc_assertClose;
+["garrisonValue: the larger of the two, never the sum",
+    [10, 9, 4, 0.2, 36] call DUWS_fnc_opcom_garrisonValue, 1] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_hireDemand: the best role a hire fills ---
 DUWS_opcom_hireDemands = [{ [2, [1]] }, { [5, [2]] }, { [5, [3]] }, { [0, []] }];
@@ -1961,3 +1961,19 @@ DUWS_fnc_opcom_unitCount = { 50 };
     [["hire", "truck", "za"]]] call fnc_assertEq;
 ["hireSources: with no zone to raise at there is no hire",
     [{ true }, [1000, 0, 0], []] call DUWS_fnc_opcom_hireSources, []] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_isCombatant / isPatroller: which rows and units a job may source ---
+["isCombatant: a noncombat hull is none", [["transport", "noncombat"], "wheeled"] call DUWS_fnc_opcom_isCombatant, false] call fnc_assertEq;
+["isCombatant: a recon is kept for Patrol", [["recon"], "inf"] call DUWS_fnc_opcom_isCombatant, false] call fnc_assertEq;
+["isCombatant: an attack helicopter fights", [[], "rotary"] call DUWS_fnc_opcom_isCombatant, true] call fnc_assertEq;
+["isCombatant: air stays out when only land is asked for", [[], "rotary", false] call DUWS_fnc_opcom_isCombatant, false] call fnc_assertEq;
+["isCombatant: an APC is a land combatant", [["transport"], "tracked", false] call DUWS_fnc_opcom_isCombatant, true] call fnc_assertEq;
+["isPatroller: the recon helicopter patrols", [["recon", "noncombat"], "rotary"] call DUWS_fnc_opcom_isPatroller, true] call fnc_assertEq;
+["isPatroller: combat air does not", [[], "fixed"] call DUWS_fnc_opcom_isPatroller, false] call fnc_assertEq;
+["isPatroller: a rifle squad does", [["transportable"], "inf"] call DUWS_fnc_opcom_isPatroller, true] call fnc_assertEq;
+["isPatroller: a supply truck does not", [["supply", "transport", "noncombat"], "wheeled"] call DUWS_fnc_opcom_isPatroller, false] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_patrolScale: a recon at face value, a combatant by the threat it walks with ---
+OPCOM_PATROL_FORCE_REF = 8;
+["patrolScale: a recon scales 1 whatever its force", [["recon"], 3] call DUWS_fnc_opcom_patrolScale, 1] call fnc_assertClose;
+["patrolScale: a half-squad combatant scales a half", [[], 4] call DUWS_fnc_opcom_patrolScale, 0.5] call fnc_assertClose;

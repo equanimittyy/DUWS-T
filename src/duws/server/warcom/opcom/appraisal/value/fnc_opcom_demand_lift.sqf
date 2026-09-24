@@ -70,3 +70,19 @@ DUWS_fnc_opcom_demandTaxi = {
     } forEach (call DUWS_fnc_opcom_pendingRiders);
     [_best, _at]
 };
+
+// Each role reads [flags, force, moveType, zones, row] and answers [Value, the rider's position], [0, []] where the
+// hire serves nothing. On a tie the earlier role keeps the target.
+DUWS_opcom_hireDemands = [
+    DUWS_fnc_opcom_demandStrand,
+    DUWS_fnc_opcom_demandTaxi
+];
+
+DUWS_fnc_opcom_hireDemand = {
+    private _best = [0, []];
+    {
+        private _d = _this call _x;
+        if ((_d select 0) > (_best select 0)) then { _best = _d };
+    } forEach DUWS_opcom_hireDemands;
+    _best
+};

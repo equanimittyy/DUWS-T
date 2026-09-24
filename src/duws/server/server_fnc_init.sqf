@@ -136,8 +136,7 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_intercept.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_patrol.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_demand_lift.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_demand.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_regarrison.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_garrison.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_fire.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_assets.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_supply.sqf";

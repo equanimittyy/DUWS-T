@@ -823,10 +823,6 @@ OPCOM_PATROL_SHARE = 0.2;
 // every patrol to the cheapest infantry (fnc_opcom_patrol).
 OPCOM_PATROL_FORCE_REF = 8;
 
-// A unit under this share of the force it was raised with is worn enough to be worth sending home to heal. A floor on
-// the pool, not the lever: the Value's own slope decides when one actually goes (fnc_opcom_regarrison).
-OPCOM_REGARRISON_FRAC = 0.6;
-
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;
 OPCOM_PICK_SHARPNESS = 2;

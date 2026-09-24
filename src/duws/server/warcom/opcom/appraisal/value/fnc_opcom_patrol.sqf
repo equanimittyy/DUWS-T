@@ -40,16 +40,15 @@ DUWS_fnc_opcom_patrolValue = {
 // narrower ground it can fight over, scaled by the threat it walks with. Cost already prices the force staked, so
 // unscaled it would leave every patrol to the cheapest infantry and the hulls parked.
 DUWS_fnc_opcom_patrolReach = {
-    params ["_t"];
-    private _mt = _t get "moveType";
-    if ("recon" in (_t get "flags")) then {
-        OPCOM_RECON_K getOrDefault [_mt, 1]
+    params ["_flags", "_moveType"];
+    if ("recon" in _flags) then {
+        OPCOM_RECON_K getOrDefault [_moveType, 1]
     } else {
-        DUWS_opcom_streamK getOrDefault [_mt, 1]
+        DUWS_opcom_streamK getOrDefault [_moveType, 1]
     }
 };
 
 DUWS_fnc_opcom_patrolScale = {
-    params ["_t"];
-    if ("recon" in (_t get "flags")) then { 1 } else { (_t get "effForce") / OPCOM_PATROL_FORCE_REF }
+    params ["_flags", "_force"];
+    if ("recon" in _flags) then { 1 } else { _force / OPCOM_PATROL_FORCE_REF }
 };

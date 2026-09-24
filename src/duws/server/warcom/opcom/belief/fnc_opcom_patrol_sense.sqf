@@ -44,7 +44,7 @@ private _wcells = [];
         } else {
             _x get "pos"
         };
-        private _k = [_x] call DUWS_fnc_opcom_patrolReach;
+        private _k = [_flags, _x get "moveType"] call DUWS_fnc_opcom_patrolReach;
         [_pos, _k] call fnc_opcom_cover_stamp;
 
         if (_isRecon) then {

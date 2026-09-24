@@ -1,45 +1,38 @@
-// Locality: server, [] call'd at load. The commit actions, which stake a roster unit rather than AP: which unit goes
-// and what its target is worth (opcom_plan.md §Appraisal). One unit per order until Phase 5's manoeuvres muster several.
-// Each sweep returns [candidates, blocked, riders] through the tick cache, so Recruit reads the blocked targets and
-// the units a lift would carry whatever order the rows run in (fnc_opcom_hire).
+// Locality: server, [] call'd at load. The commit actions, which stake a unit rather than AP (opcom_plan.md §Sourcing).
+// Each sweep returns [candidates, riders] through the tick cache, so Recruit reads the units a lift would carry whatever
+// order the rows run in (fnc_opcom_hire).
 if (!isServer) exitWith {};
 
-// The free unit that scores best sent at _to, any below OPCOM_PWIN_FLOOR dropped. -> [tasking, Value, P(win), Cost], or
-// [] when none clears the floor.
-DUWS_fnc_opcom_bestSend = {
-    params ["_to", "_value", "_units"];
-    private _best = [];
-    private _bs = -1;
-    {
-        private _pw = [_to, _x get "pos", _x get "effForce"] call DUWS_fnc_opcom_pWinSend;
-        if (_pw >= OPCOM_PWIN_FLOOR) then {
-            private _v = _value * ([_x, _to] call DUWS_fnc_opcom_unitDelay);
-            private _c = [_x] call DUWS_fnc_opcom_commitCost;
-            private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
-            if (_s > _bs) then { _bs = _s; _best = [_x, _v, _pw, _c] };
-        };
-    } forEach _units;
-    _best
-};
-
-// The target carries the unit, its order and the order's own target: the pick hands an execute nothing else.
-DUWS_fnc_opcom_sendRun = {
+// -> the tasking sent, or nil; a hire whose order is refused is dismissed, so no unpaid unit stands.
+DUWS_fnc_opcom_send = {
     params ["_target"];
-    _target params ["_id", "_order", "_to", "_exp"];
-    private _t = [_id] call DUWS_fnc_opcom_byId;
-    if (isNil "_t") exitWith { false };
-    if !([_t, _order, _to] call fnc_opcom_task) exitWith { false };
+    _target params ["_ref", "_order", "_to", "_exp"];
+    private _t = [_ref] call DUWS_fnc_opcom_raise;
+    if (isNil "_t") exitWith { nil };
+    if !([_t, _order, _to] call fnc_opcom_task) exitWith { [_ref, _t] call DUWS_fnc_opcom_dismiss; nil };
     // What the order is worth once committed: a lift is priced against it, stranded at a water leg or taxied over
     // dry ground (fnc_opcom_taxi, fnc_opcom_hire).
     _t set ["expValue", _exp];
-    true
+    _t
+};
+
+DUWS_fnc_opcom_sendRun = {
+    params ["_target"];
+    private _t = [_target] call DUWS_fnc_opcom_send;
+    !isNil "_t"
 };
 
 DUWS_fnc_opcom_sendTaxiableRun = {
     params ["_target"];
-    if !([_target] call DUWS_fnc_opcom_sendRun) exitWith { false };
-    [[_target select 0] call DUWS_fnc_opcom_byId] call DUWS_fnc_opcom_taxiBind;
+    private _t = [_target] call DUWS_fnc_opcom_send;
+    if (isNil "_t") exitWith { false };
+    [_t] call DUWS_fnc_opcom_taxiBind;
     true
+};
+
+DUWS_fnc_opcom_riderOf = {
+    params ["_ref", "_to", "_exp", "_riders"];
+    if ((_ref select 0) isEqualTo "free") then { _riders pushBack [[_ref select 1] call DUWS_fnc_opcom_byId, _to, _exp] };
 };
 
 // One attacker per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
@@ -49,10 +42,11 @@ DUWS_fnc_opcom_sendTaxiableRun = {
 // by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
 // reputation rather than a fight is what owns it.
 DUWS_fnc_opcom_attackSweep = {
-    private _units = [false] call DUWS_fnc_opcom_freeCombatants;
+    private _fits = { params ["_f", "_m"]; [_f, _m, false] call DUWS_fnc_opcom_isCombatant };
+    private _free = ([false] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
+    private _zones = call DUWS_fnc_opcom_zonesOpen;
     private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
     private _out = [];
-    private _blocked = [];
     private _riders = [];
     // _to scores the send and prices a lift; _at is the order's own target, which a zone reads off the site store
     // because a held position and the one its trigger filed differ in z.
@@ -60,12 +54,14 @@ DUWS_fnc_opcom_attackSweep = {
         params ["_key", "_to", "_at", "_label"];
         if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
-        private _best = [_to, _worth, _units] call DUWS_fnc_opcom_bestSend;
-        if (_best isEqualTo []) exitWith { _blocked pushBack [_to, _worth] };
-        _best params ["_t", "_v", "_pw", "_c"];
-        _out pushBack [[_t get "id", "capture", _at, _pw * _v], 0,
-            format ["Attack %1 with %2 %3", _label, _t get "menu", _t get "id"], _v, _pw, _c];
-        _riders pushBack [_t, _to, _pw * _v];
+        private _offers = (_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
+        {
+            _x params ["_src", "_v", "_pw", "_c", "_p"];
+            private _ref = _src select 0;
+            _out pushBack [[_ref, "capture", _at, _pw * _v], _p,
+                format ["Attack %1 with %2", _label, [_ref] call DUWS_fnc_opcom_sourceName], _v, _pw, _c];
+            [_ref, _to, _pw * _v, _riders] call DUWS_fnc_opcom_riderOf;
+        } forEach ([_offers, _to, true] call DUWS_fnc_opcom_bestSources);
     };
     {
         private _zk = [_x] call fnc_zone_key;
@@ -80,150 +76,144 @@ DUWS_fnc_opcom_attackSweep = {
             };
         };
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
-    [_out, _blocked, _riders]
+    [_out, _riders]
 };
 
 // One interceptor per sighting, for the reason one attacker goes at a zone.
 DUWS_fnc_opcom_interceptSweep = {
-    private _units = [true] call DUWS_fnc_opcom_freeCombatants;
+    private _free = ([true] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
+    private _zones = call DUWS_fnc_opcom_zonesOpen;
     private _busy = (DUWS_opcom_taskings select { (_x get "order") isEqualTo "intercept" }) apply { _x getOrDefault ["interceptKey", ""] };
     private _out = [];
-    private _blocked = [];
     private _riders = [];
     {
         private _key = _x;
         private _bp = DUWS_opcom_belief_pos select _forEachIndex;
         if ([_key] call DUWS_fnc_opcom_beliefIsSighting && {!(_key in _busy)} && {[_bp] call fnc_aoi_opfor_covers}) then {
             private _v = [_bp, DUWS_opcom_belief_str select _forEachIndex] call DUWS_fnc_opcom_interceptValue;
-            private _best = [_bp, _v, _units] call DUWS_fnc_opcom_bestSend;
-            if (_best isEqualTo []) then {
-                _blocked pushBack [_bp, _v];
-            } else {
-                _best params ["_t", "_bv", "_pw", "_c"];
-                _out pushBack [[_t get "id", "intercept", _key, _pw * _bv], 0,
-                    format ["Intercept at %1 with %2 %3", mapGridPosition _bp, _t get "menu", _t get "id"], _bv, _pw, _c];
-                _riders pushBack [_t, _bp, _pw * _bv];
-            };
+            private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _bp, _zones] call DUWS_fnc_opcom_hireSources))
+                apply { [_x, _v] };
+            {
+                _x params ["_src", "_bv", "_pw", "_c", "_p"];
+                private _ref = _src select 0;
+                _out pushBack [[_ref, "intercept", _key, _pw * _bv], _p,
+                    format ["Intercept at %1 with %2", mapGridPosition _bp, [_ref] call DUWS_fnc_opcom_sourceName], _bv, _pw, _c];
+                [_ref, _bp, _pw * _bv, _riders] call DUWS_fnc_opcom_riderOf;
+            } forEach ([_offers, _bp, true] call DUWS_fnc_opcom_bestSources);
         };
     } forEach DUWS_opcom_belief_key;
-    [_out, _blocked, _riders]
+    [_out, _riders]
 };
 
-// Every free unit weighs the same few destinations, drawn from the cells the need field lights: the sample is the
-// Patrol's siting pass, and a unit already out is on a move order and out of the roster. Behind the recon rows stands
-// every free land combatant, air excepted, which cannot hold the ground it swept. The two kinds scale on different
-// axes, a recon on the reach of its certain bubble and a combatant on the threat it walks with (fnc_opcom_patrol).
-//
-// One patrol per destination, for the reason one attacker goes at a zone: the best unit takes it, and a second row on
-// the same ground would only crowd the shortlist with the same sweep twice.
+// One patrol per destination, for the reason one attacker goes at a zone: a second row on the same ground would only
+// crowd the shortlist with the same sweep twice.
 DUWS_fnc_opcom_patrolSweep = {
-    private _recon = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
-    private _units = _recon + ([false] call DUWS_fnc_opcom_freeCombatants);
-    if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], [], []] };
+    if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], []] };
+    private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isPatroller })
+        apply { [_x] call DUWS_fnc_opcom_freeSource };
+    private _zones = call DUWS_fnc_opcom_zonesOpen;
     private _pool = +DUWS_opcom_needCells;
     private _dests = [];
     for "_i" from 1 to (OPCOM_SITE_SAMPLES min count _pool) do {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
     };
     private _out = [];
-    private _blocked = [];
-    // Hoisted out of the pairwise loop the widened pool runs units x destinations times: none of these vary by it.
-    private _costs = _units apply { [_x] call DUWS_fnc_opcom_commitCost };
-    private _reaches = _units apply { [_x] call DUWS_fnc_opcom_patrolReach };
-    private _scales = _units apply { [_x] call DUWS_fnc_opcom_patrolScale };
-    private _cells = _units apply { [_x get "pos"] call DUWS_fnc_opcom_w2c };
     {
         private _to = _x;
-        // A garrison's units all stand on its one point, so one line serves many: memoised per origin cell and reach.
+        // Sources that start on one point share its line: a garrison's units, or every hire raised at one zone.
         private _lines = createHashMap;
-        private _best = [];
-        private _bs = -1;
-        // Blocked stays the recon shortfall: it is what values a recon hire (fnc_opcom_demand), and ground a
-        // combatant swept without certainty is still ground a recon would have read.
-        private _reconFree = false;
-        {
-            private _t = _x;
-            private _pw = [_to, _t get "pos", _t get "effForce"] call DUWS_fnc_opcom_pWinSend;
-            if (_pw >= OPCOM_PWIN_FLOOR) then {
-                if ("recon" in (_t get "flags")) then { _reconFree = true };
-                private _k = _reaches select _forEachIndex;
-                private _key = format ["%1:%2", _cells select _forEachIndex, _k];
-                private _sweep = _lines getOrDefault [_key, -1];
-                if (_sweep < 0) then {
-                    _sweep = [_t get "pos", _to, _k] call DUWS_fnc_opcom_patrolValue;
-                    _lines set [_key, _sweep];
-                };
-                private _v = _sweep * (_scales select _forEachIndex) * ([_t, _to] call DUWS_fnc_opcom_unitDelay);
-                private _c = _costs select _forEachIndex;
-                private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
-                if (_s > _bs) then { _bs = _s; _best = [_t, _v, _pw, _c] };
+        private _offers = (_free + ([DUWS_fnc_opcom_isPatroller, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply {
+            _x params ["", "_from", "_force", "_mt", "_flags"];
+            private _k = [_flags, _mt] call DUWS_fnc_opcom_patrolReach;
+            private _key = format ["%1:%2", [_from] call DUWS_fnc_opcom_w2c, _k];
+            private _sweep = _lines getOrDefault [_key, -1];
+            if (_sweep < 0) then {
+                _sweep = [_from, _to, _k] call DUWS_fnc_opcom_patrolValue;
+                _lines set [_key, _sweep];
             };
-        } forEach _units;
-        if (!_reconFree) then { _blocked pushBack _to };
-        if (_best isNotEqualTo []) then {
-            _best params ["_t", "_v", "_pw", "_c"];
-            _out pushBack [[_t get "id", "patrol", _to, _pw * _v], 0,
-                format ["Patrol %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
+            [_x, _sweep * ([_flags, _force] call DUWS_fnc_opcom_patrolScale)]
         };
+        {
+            _x params ["_src", "_v", "_pw", "_c", "_p"];
+            private _ref = _src select 0;
+            _out pushBack [[_ref, "patrol", _to, _pw * _v], _p,
+                format ["Patrol %1 with %2", mapGridPosition _to, [_ref] call DUWS_fnc_opcom_sourceName], _v, _pw, _c];
+        } forEach ([_offers, _to, true] call DUWS_fnc_opcom_bestSources);
     } forEach _dests;
-    // No riders: a patrol is sent without a taxi (sendRun), so a lift hired on its order would carry no one.
-    [_out, _blocked, []]
+    [_out, []]
 };
 
-// Every worn unit left standing forward, one row apiece: only `garrison` heals, so a unit holding where its last order
-// ended keeps its losses until something sends it home. The target follows from the
-// unit, so there is no contest to resolve and no second row on the same zone to crowd the shortlist.
-DUWS_fnc_opcom_regarrisonSweep = {
-    private _zones = call DUWS_fnc_opcom_zonesOpen;
-    if (_zones isEqualTo []) exitWith { [[], [], []] };
-    private _units = (call DUWS_fnc_opcom_free) select {
-        (_x get "order") isEqualTo "guard"
-            && {(_x getOrDefault ["errand", []]) isEqualTo []}
-            && {(_x get "effForce") < OPCOM_REGARRISON_FRAC * (_x get "fullForce")}
-    };
+// The combatants homed at each zone, the set its reserve pool fields (DUWS_fnc_opcom_zoneReserveSync).
+DUWS_fnc_opcom_homedSweep = {
+    private _out = createHashMap;
+    {
+        if ((_x get "order") isEqualTo "garrison" && {(_x get "status") isNotEqualTo "dead"}
+            && {!("noncombat" in (_x get "flags"))}) then {
+            private _hz = _x get "homeZone";
+            _out set [_hz, (_out getOrDefault [_hz, 0]) + 1];
+        };
+    } forEach DUWS_opcom_taskings;
+    _out
+};
+
+// A unit resting in garrison heals where it is, so healing is no reason to move it. P(win) 1: a unit sent to rest
+// fights for nothing.
+DUWS_fnc_opcom_garrisonSweep = {
+    private _homed = ["homed", DUWS_fnc_opcom_homedSweep] call DUWS_fnc_opcom_tickCached;
+    private _units = [true] call DUWS_fnc_opcom_freeCombatants;
+    private _free = _units apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _out = [];
     private _riders = [];
     {
-        private _t = _x;
-        private _hz = _t get "homeZone";
-        private _i = _zones findIf { (_x select 0) isEqualTo _hz };
-        private _z = if (_i >= 0) then { _zones select _i } else { [_t get "pos", _zones] call DUWS_fnc_opcom_nearestOpen };
-        if (_z isNotEqualTo []) then {
-            _z params ["_zk", "", "_zp", "", "_exposure"];
-            private _v = ([_t get "fullForce", _t get "effForce", [_zk] call DUWS_fnc_opcom_siteWorth, _exposure,
-                [_zk] call DUWS_fnc_opcom_zoneForce] call DUWS_fnc_opcom_regarrisonValue)
-                * ([_t, _zp] call DUWS_fnc_opcom_unitDelay);
-            private _c = [_t] call DUWS_fnc_opcom_commitCost;
-            // P(win) 1: a withdrawal fights for nothing, and the row still has to name its Cost past it.
-            _out pushBack [[_t get "id", _zp, _zk, _v], 0,
-                format ["Re-garrison %1 %2 at %3", _t get "menu", _t get "id", [_zk] call DUWS_fnc_opcom_zoneLabel],
-                _v, 1, _c];
-            _riders pushBack [_t, _zp, _v];
+        _x params ["_zk", "", "_zp", "_worth", "_exp"];
+        if ((_homed getOrDefault [_zk, 0]) < OPCOM_CAP_GARRISON) then {
+            private _zone = _x;
+            private _zf = [_zk] call DUWS_fnc_opcom_zoneForce;
+            private _offers = [];
+            {
+                private _resting = (_x get "order") isEqualTo "garrison";
+                if !(_resting && {(_x get "homeZone") isEqualTo _zk}) then {
+                    private _eff = _x get "effForce";
+                    _offers pushBack [_free select _forEachIndex,
+                        [[_x get "fullForce", _eff] select _resting, _eff, _worth, _exp, _zf] call DUWS_fnc_opcom_garrisonValue];
+                };
+            } forEach _units;
+            {
+                _offers pushBack [_x, [_worth, _exp, _x select 2, _zf] call DUWS_fnc_opcom_garrisonDefense];
+            } forEach ([DUWS_fnc_opcom_isCombatant, _zp, [_zone]] call DUWS_fnc_opcom_hireSources);
+            {
+                _x params ["_src", "_v", "", "_c", "_p"];
+                private _ref = _src select 0;
+                _out pushBack [[_ref, _zp, _zk, _v], _p, format ["Garrison %1 with %2", [_zk] call DUWS_fnc_opcom_zoneLabel,
+                    [_ref] call DUWS_fnc_opcom_sourceName], _v, 1, _c];
+                [_ref, _zp, _v, _riders] call DUWS_fnc_opcom_riderOf;
+            } forEach ([_offers, _zp, false] call DUWS_fnc_opcom_bestSources);
         };
-    } forEach _units;
-    // No blocked targets: no hire stands in for the unit OPCOM already owns, so this sweep values no Recruit row.
-    [_out, [], _riders]
+    } forEach (call DUWS_fnc_opcom_zonesOpen);
+    [_out, _riders]
 };
 
-// Its own run: sendRun hands fnc_opcom_task no site key, and a return without one is refused.
-DUWS_fnc_opcom_regarrisonRun = {
+// Its own run: send hands fnc_opcom_task no site key, and a return without one is refused. A hire is raised into the
+// zone's garrison, so it has nowhere to go.
+DUWS_fnc_opcom_garrisonRun = {
     params ["_target"];
-    _target params ["_id", "_to", "_zk", "_exp"];
-    private _t = [_id] call DUWS_fnc_opcom_byId;
+    _target params ["_ref", "_to", "_zk", "_exp"];
+    private _t = [_ref] call DUWS_fnc_opcom_raise;
     if (isNil "_t") exitWith { false };
+    if ((_ref select 0) isEqualTo "hire") exitWith { true };
     if !([_t, "return", _to, _zk] call fnc_opcom_task) exitWith { false };
     _t set ["expValue", _exp];
     [_t] call DUWS_fnc_opcom_taxiBind;
     true
 };
 
-// Recruit reads every sweep's blocked targets and riders off this table, so a new commit order registers here and
-// nothing downstream names it.
+// Recruit reads every sweep's riders off this table, so a new commit order registers here and nothing downstream
+// names it.
 DUWS_opcom_commitSweeps = createHashMapFromArray [
     ["attackSweep", DUWS_fnc_opcom_attackSweep],
     ["interceptSweep", DUWS_fnc_opcom_interceptSweep],
     ["patrolSweep", DUWS_fnc_opcom_patrolSweep],
-    ["regarrisonSweep", DUWS_fnc_opcom_regarrisonSweep]
+    ["garrisonSweep", DUWS_fnc_opcom_garrisonSweep]
 ];
 
 DUWS_fnc_opcom_commitSweep = {
@@ -232,11 +222,10 @@ DUWS_fnc_opcom_commitSweep = {
 };
 
 DUWS_fnc_opcom_commitTargets = { params ["_key"]; ([_key] call DUWS_fnc_opcom_commitSweep) select 0 };
-DUWS_fnc_opcom_commitBlocked = { params ["_key"]; ([_key] call DUWS_fnc_opcom_commitSweep) select 1 };
 
 // -> [[tasking, destination, Value], ...]: each order the pick may commit this tick.
 DUWS_fnc_opcom_pendingRiders = {
     private _out = [];
-    { _out append (([_x] call DUWS_fnc_opcom_commitSweep) select 2) } forEach DUWS_opcom_commitSweeps;
+    { _out append (([_x] call DUWS_fnc_opcom_commitSweep) select 1) } forEach DUWS_opcom_commitSweeps;
     _out
 };

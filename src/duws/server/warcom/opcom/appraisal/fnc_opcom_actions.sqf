@@ -28,7 +28,7 @@ DUWS_opcom_actions = [
     ["attack", DUWS_fnc_opcom_commitTargets, DUWS_fnc_opcom_sendTaxiableRun, ["attackSweep"]],
     ["intercept", DUWS_fnc_opcom_commitTargets, DUWS_fnc_opcom_sendTaxiableRun, ["interceptSweep"]],
     ["patrol", DUWS_fnc_opcom_commitTargets, DUWS_fnc_opcom_sendRun, ["patrolSweep"]],
-    ["regarrison", DUWS_fnc_opcom_commitTargets, DUWS_fnc_opcom_regarrisonRun, ["regarrisonSweep"]],
+    ["garrison", DUWS_fnc_opcom_commitTargets, DUWS_fnc_opcom_garrisonRun, ["garrisonSweep"]],
     ["arty", DUWS_fnc_opcom_fireTargets, DUWS_fnc_opcom_fireRun]
 ];
 
