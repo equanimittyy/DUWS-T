@@ -745,6 +745,29 @@ needs to bring one in.
   and adds it to the list. Export is not here: a player exporting has a campaign running, so it
   belongs with the in-session save controls.
 
+**The fork goes at the head of the existing chain, not inside it.** Setup runs as one chain on the
+game master's machine today (`client/client_init.sqf:84-98`):
+
+1. `fnc_startup_faction_flow` — faction pick, the custom-faction paste, the confirmation, then HQ
+   placement
+2. the environment menu
+3. the campaign menu
+4. the callsign screen, which sets `chosen_settings` and releases the server
+
+The fork becomes step 0. New Game runs 1 to 4 exactly as they run now. Load runs none of them: the
+early server gate has already published the placement and settings inputs and pre-satisfied the flags
+those screens would have set, so there is nothing left for them to ask. Siting it ahead of the chain
+rather than inside it is what keeps New Game untouched — a fork at step 2 or 3 would have to unwind
+choices the player had already made.
+
+**Back from the first setup screen returns to the fork.** The chain already treats Back as re-entry:
+the paste window and the confirmation both restart `fnc_startup_faction_flow`
+(`client/dialog/fnc_startup_faction_flow.sqf`), and the environment screen routes back into it. The
+fork is one more link at the head, so the first screen's Back opens it instead of dead-ending, and a
+player who picked New Game by accident is one keypress from the list of their campaigns. The faction
+screen's dev-only quickstart button is unaffected: it sits inside the New Game branch, so it is
+reached only once the fork has been answered, and it skips the rest of the chain as it does today.
+
 **New Game destroys nothing, because it writes under a new campaign ID.** That falls out of the
 index shape rather than being designed for: an existing campaign is only ever overwritten by its
 own saves. What the screen needs instead is a delete, so the list cannot grow without bound — one
@@ -761,6 +784,38 @@ closing through a handler that spawns the next step — which is exactly how
 The load screen is one more member of that chain, placed one link earlier, and building it any other
 way means inventing a second setup idiom for one screen. Eating ESC matters more here than on
 the others: escaping this one leaves boot blocked on a question with no answer.
+
+### Telling the player what did not load
+
+Three failures reach the player, at three different moments, because that is when each one is
+discovered.
+
+**The store not reading back is not an empty list.** The scan publishes a status beside the summary —
+saves found, none found, or the store unreadable — because the screen renders the last two
+identically otherwise, and a player told "no saves" starts a new campaign over the one they have.
+Unreadable is also the one case that has to warn on the New Game path: the namespace that will not
+read back is the namespace this session's saves are written to, so the fork says so before the player
+spends an evening on a campaign nothing will keep. That is the dedicated-server failure
+[Prerequisite 1](#prerequisites) exists to rule out, and it needs a name in the interface rather than
+in the log alone.
+
+**A snapshot missing keys loads only when the missing keys are outcomes.** An absent input group is
+fatal: placement, zones and hardpoints are what the builders replay, and a builder handed nothing
+rolls fresh ground, which is a different campaign wearing the same name. That row is disabled with
+the missing group named, like any other validation failure. An absent outcome group is a degraded
+load rather than a refusal — the campaign returns with those pools, flags or ledgers at their boot
+values — so the row stays selectable and the screen names the gap before the player commits to it.
+
+**What only the restore can discover is reported once it has run.** A classname a removed mod
+defined, a token the current faction cannot field, a town position that no longer resolves to a
+Location: each is handled per case already — reroll, drop the unit, discard the entry — and each
+writes a WARN. What is missing is the player's half. Restore counts what it dropped and reports those
+counts once, so a campaign that came back three vehicles and a squad short says so rather than
+leaving the player to find out at the motor pool. The surface is a `hint`, not a notification card:
+the card clips at about 60 characters and a line of counts does not fit, and the style guide takes
+one surface per message rather than both
+([`player_text_style_guide.md`](../info/gameplay/player_text_style_guide.md#notification-card-dialogue-and-the-hint-box)).
+The log keeps the detail; the hint keeps the number.
 
 ### Nobody at the screen
 
@@ -793,9 +848,10 @@ early because the setup gates at `:161,166` block on globals a *client* publishe
 now comes from a player, the gate is three steps rather than one:
 
 1. **Scan.** Read the key, validate version and world, publish the summary the load screen labels
-   its Load control with. An absent or invalid snapshot publishes an *empty* summary rather than
-   nothing at all: the client waits on this variable, and a variable that is never set is
-   indistinguishable from a server still working.
+   its Load control with, and a status beside it — saves found, none found, or the store unreadable
+   ([§Telling the player](#telling-the-player-what-did-not-load)). An absent or invalid snapshot
+   publishes an *empty* summary rather than nothing at all: the client waits on this variable, and a
+   variable that is never set is indistinguishable from a server still working.
 2. **Wait — but only when there is something to load.** On an empty summary the gate returns
    immediately and boot proceeds exactly as today. That is not a micro-optimisation:
    `fnc_moreUrban_locations` is `spawn`ed at `:13` and has been recorded taking 140 s, and today it
@@ -953,7 +1009,7 @@ refund attached to the one restore that consumes it.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
 - [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect, on a `persistent = 0` server as well as a `persistent = 1` one; a connected headless client does not count as a player.
 - [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
-- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts; a campaign that was won or lost is listed as ended and is not what the timeout picks up.
+- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts; a campaign that was won or lost is listed as ended and is not what the timeout picks up; a store that cannot be read back is reported as unreadable rather than as an empty list, and New Game warns before it starts; a snapshot missing an outcome group loads with that group named on the screen, and one missing an input group is disabled; and a restore that dropped classes or units says how many.
 - [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
 - [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
 - [ ] On a dedicated server ([`info/testing.md`](../info/architecture/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
