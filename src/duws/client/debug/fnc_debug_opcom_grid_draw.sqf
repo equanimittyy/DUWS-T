@@ -67,10 +67,9 @@ private _sample = "";
     };
 
     // A real icon type (arma3_markers.md #224), not text-only: the invisible "Empty" type renders no text.
-    // A never-/long-unseen cell reads -1 (age past the span, collapsed server-side), so the layer is legibly
-    // alive before any sweep -- a blank map would read as broken, not as "no coverage yet".
+    // A never-/long-unseen cell reads -1 and draws nothing: that is most of the map, so skipping it is the saving.
     private _sm = format ["duws_opcom_stale_%1", _i];
-    if (_showStale) then {
+    if (_showStale && {_stale >= 0}) then {
         if ((getMarkerType _sm) isEqualTo "") then {
             createMarkerLocal [_sm, [_c select 0, (_c select 1) + _cell * 0.3]];
             _sm setMarkerShapeLocal "ICON";
