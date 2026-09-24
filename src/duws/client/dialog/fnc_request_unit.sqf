@@ -3,8 +3,9 @@ _index = lbCurSel 2100;
 
 _skill = blufor_ai_skill_random;
 
-_spawnPos = getpos player;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],200,150,15,0.3] call fnc_safe_pos;
+// respawn_west stands at the HQ rest tent (fnc_BluHQinit).
+(uiNamespace getVariable ["DUWS_requestMenu_ctx", []]) params ["", ["_isFob", false]];
+_spawnPos = if (_isFob) then {[getPos player select [0, 2], 50] call fnc_safe_pos} else {getMarkerPos "respawn_west"};
 
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 

@@ -19,8 +19,10 @@ _selected_soldier_class = _selected_soldier select 10;
 // level: nested in a switch case, exitWith leaves only the case and the operative deploys unpaid.
 if (_selected_soldier_status == "Ready" && {!(["CP", 8] call fnc_pool_spend)}) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
 
-_spawnPos = getpos player;
-_spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,200,15,0.3] call fnc_safe_pos;
+// The operative menu opens only from the request menu, so its context names the base.
+// respawn_west stands at the HQ rest tent (fnc_BluHQinit).
+(uiNamespace getVariable ["DUWS_requestMenu_ctx", []]) params ["", ["_isFob", false]];
+_spawnPos = if (_isFob) then {[getPos player select [0, 2], 50] call fnc_safe_pos} else {getMarkerPos "respawn_west"};
 _group = [_spawnPos, WEST, [_selected_soldier_class]] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 _soldier = units _group select 0;
