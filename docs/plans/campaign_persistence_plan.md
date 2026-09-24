@@ -343,6 +343,7 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 |---|---|---|
 | Identity | — | format version, `worldName`, campaign start time, UTC write stamp |
 | Server config | input | every global the setup screens broadcast |
+| Mission params | input | the gameplay lobby params of `params_modern.hpp`, applied over the lobby's own picks |
 | Callsign | input | `duws_callsign` |
 | Faction list edits | input | `DUWS_factionListEdits`: the player's main, added and dropped classes per edited vehicle role ([`faction_system.md`](../info/gameplay/faction_system.md#the-confirmation-screen)) |
 
@@ -365,6 +366,26 @@ other.
 
 **The settings group has to be re-broadcast, not just assigned.** Those globals are normally set
 *and* `publicVariable`'d by a client, and restore skips those screens entirely.
+
+**The mission params are campaign rules, so the snapshot outranks the lobby.** `Params`
+(`shared/includes/params_modern.hpp`) is picked per session, so the same campaign reloaded on another
+server, or in a lobby somebody re-configured, changes the rules a player has been playing under for
+hours. The arsenal is the sharpest case: a campaign saved with every class count-tracked comes back
+unlimited, and the pool it was spending against stops meaning anything
+([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)). The saved value therefore wins
+for the arsenal mode and ammo tracking, revive, fatigue, the first-person restriction, rest weather,
+the lose conditions and bandits.
+
+**Five params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
+`DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
+campaign is, and a carried snapshot must not put an admin's old logging level or write cadence back.
+
+**A param is overridable only where it is read once.** `BIS_fnc_getParamValue` always answers from the
+lobby, so a call site that asks it directly cannot be overridden at all: the arsenal shelf re-reads its
+mode on every open (`client/arsenal/fnc_duws_Arsenal.sqf:8`,
+`client/arsenal/fnc_quick_kits_menu.sqf:32`). Each saved param resolves once into one global, the way
+`DUWS_arsenalLimited` and `DUWS_trackAmmo` already do (`server/server_var_init.sqf:65-66`); every call
+site reads that global, and restore assigns and re-broadcasts them with the settings group.
 
 `game_master` and `Squad_Leaders` are deliberately **not** in the group. They are a server's
 permission policy (`server/server_var_init.sqf`), and an admin who trims them between sessions
@@ -581,23 +602,44 @@ shared arrays and the markers they drive are global, so there is no per-player r
 Making reveal personal is a design change to the intel system, not a persistence feature, and it
 would mean per-player markers everywhere.
 
-### The friendly arsenal is not stored; the captured pool will be
+### The arsenal: the shelf is rebuilt, the pool is stored
 
-Faction init rebuilds the friendly virtual cargo from scratch
+Faction init rebuilds the friendly class list from scratch
 (`server/arsenal/fnc_create_ammo_lists.sqf`), so a restore re-resolves it against whatever mods are
 loaded now. Storing those classnames would pin the campaign to the mod set that produced them, which
-is exactly what the no-hard-dependency rule exists to avoid. The friendly shelf therefore stays out
-of the snapshot.
+is exactly what the no-hard-dependency rule exists to avoid. The list therefore stays out of the
+snapshot in every arsenal mode.
 
 The **captured-materiel pool** (`DUWS_capturedPool`, written by the `fnc_captured_pool_*` functions in
-`server/warcom/fnc_economy_init.sqf`) is the opposite case, and is
-the one arsenal state that will be persisted. It is player-earned and scarce — the enemy gear brought
-back and banked — so losing it on reload loses progress, the same argument that puts the garage in
-the snapshot rather than the friendly cargo. Like the garage it is data, one
+`server/warcom/fnc_economy_init.sqf`) is the opposite case, and is the one arsenal state that is
+persisted. It is player-earned and scarce, so losing it on reload loses progress, the same argument
+that puts the garage in the snapshot rather than the friendly cargo. Like the garage it is data, one
 `class -> count` map, and like it, it pins to the mod that produced the classnames: a removed enemy
 mod drops those entries, so restore validates each class and discards the unknown rather than
-restoring a name that resolves to nothing. It joins the snapshot as one key, deferred with the pool
-itself — the group lands when the arsenal work does.
+restoring a name that resolves to nothing. It joins the snapshot as one key.
+
+**What the pool means depends on the arsenal mode,** which is why that param is in the settings group
+([§Identity and settings](#identity-and-settings)) rather than left to the lobby.
+
+| `DUWS_ArsenalMode` | The shelf | The pool holds |
+|---|---|---|
+| Hybrid (default) | the player's own faction unlimited, foreign gear count-tracked | the enemy gear the player banked |
+| Full | everything unlimited | nothing reads it, so it restores inert |
+| Limited | every class count-tracked, no unlimited floor | the whole arsenal, friendly classes included |
+
+**In Limited the friendly counts are campaign progress, not a starting stock.** Boot seeds every class
+of `DUWS_friendlyArsenal` into the pool at `DUWS_limitedSeed` (`fnc_create_ammo_lists.sqf:59-61`), and
+`fnc_captured_pool_setCount` overwrites a class outright rather than filling a gap
+(`fnc_economy_init.sqf:437-447`), so a seed that runs over a restored pool resets a whole campaign's
+spend-down to full stock. The seed therefore covers only the classes the pool does not already name.
+That rule needs no restore branch — on a fresh campaign the pool is empty and every class is seeded —
+and it is also what a mod added between sessions needs, since its classes have no saved count to come
+back to. `fnc_buildQuickKits.sqf:123` and `fnc_scanCivilianGear.sqf:94` already seed newly discovered
+classes alone.
+
+**Ammo tracking rides with the mode.** `DUWS_TrackAmmo` decides whether magazines are pooled at all,
+so a campaign reloaded with it flipped either finds its magazine counts meaningless or starts counting
+rounds it never counted. It is in the settings group for the reason the mode is.
 
 ## Vehicles: the garage
 
@@ -783,6 +825,7 @@ function runs unchanged.
 | `fnc_moreUrban_locations` (`:13`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
 | Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
+| `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the restored pool does not name ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
 | `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
@@ -865,6 +908,9 @@ refund attached to the one restore that consumes it.
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
 | `client/client_init.sqf:84-98` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
+| `server/server_var_init.sqf:65-66` | Every saved param resolved once into a global beside `DUWS_arsenalLimited` and `DUWS_trackAmmo`, and the name list restore iterates. |
+| `client/arsenal/fnc_duws_Arsenal.sqf:8`, `client/arsenal/fnc_quick_kits_menu.sqf:32` | Read the resolved global instead of `BIS_fnc_getParamValue`, or the restored arsenal mode cannot reach the shelf. |
+| `server/arsenal/fnc_create_ammo_lists.sqf:59-61` | Seed a friendly class only when the pool does not already name it, so a restored Limited campaign keeps its spend-down. |
 | `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
 | `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |
 | `description.ext` | `missionGroup = "DUWS_T";` |
@@ -882,6 +928,7 @@ refund attached to the one restore that consumes it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
 - [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
 - [ ] Add the garage. Verify: `DUWS_garage_stored` round-trips; a retrieved vehicle comes back with its damage, fuel, cargo, paint, pylons and ammo fraction; a snapshot holding more than the restored caps allow keeps every vehicle and blocks the next store instead of dropping one.
+- [ ] Add the mission params and the captured pool. The params land with the settings group, and the pool follows faction init because the Limited seed reads it. Verify: a Limited campaign reloaded in a lobby set to Hybrid comes back Limited; a friendly class the player spent down to 3 comes back at 3 rather than reseeded to `DUWS_limitedSeed`; a class added by a mod since the save is seeded rather than missing; a Hybrid campaign's banked foreign gear comes back at its counts; and the host's log level, debug flag, cleanup lifetime, group icons and autosave interval are the lobby's, not the snapshot's.
 - [ ] Add the MHQ, which carries its own spec now that the garage does not hold it. Verify: a deployed MHQ comes back deployed where it stood, with a working respawn point and one ammo box.
 - [ ] Add the reveal state and the permanent support unlocks. Verify: a hardcore campaign's revealed zones, towns and hardpoints come back revealed with their markers repainted; the unlock array replays into every client's flags, a client that joins after the restore included; and the garage's capacity pools come back the size they were bought to.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
