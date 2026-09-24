@@ -445,7 +445,7 @@ The debug harness spends outside the pick and is not capped.
 | `OPCOM_CAP_UNITS` (50) | every Recruit row except the truck | every OPCOM unit alive except the supply trucks |
 | `OPCOM_CAP_GARRISON` (10) | a Recruit row's zone, except for a `noncombat` row | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
-| `OPCOM_CAP_HP_PER_ZONE` (10) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
+| `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
 | per type × zones | a Build or Minefield of that type | the same, by type ([§What the commander builds](#what-the-commander-builds)) |
 
 - **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight, and the truck-stock Value
@@ -770,7 +770,7 @@ hardpoint and a build still on its truck:
 The tower, the mortar pit and the battery cap flat: the tower cap is also the reputation amplifier's, and the guns'
 is the resident AI's. AT, AA and OP cap at 2 a campaign zone, GMG and minefield at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
 MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
-`OPCOM_CAP_HP_PER_ZONE` (10) a zone ([§Caps](#caps)).
+`OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
 
 Hardpoint garrisons stay fixed per type (`DUWS_hardpointGarrison`). Knobs (all tune): seed subset 2–3 at init; no
 live cap (bounded by player proximity).
