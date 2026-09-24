@@ -312,7 +312,7 @@ fnc_site_poller = {
         // and raising the garrison to meet it is what renders it (fnc_opcom_task_step).
         private _eastVirt = [];
         if (!isNil "DUWS_opcom_taskings") then {
-            { if ((_y get "grp") isEqualTo "") then { _eastVirt pushBack (_y get "pos") } } forEach DUWS_opcom_taskings;
+            { if ((_x get "grp") isEqualTo "") then { _eastVirt pushBack (_x get "pos") } } forEach DUWS_opcom_taskings;
         };
         private _now = time;
         private _t0 = diag_tickTime;
