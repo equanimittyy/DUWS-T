@@ -11,7 +11,7 @@ One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the en
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
 Phases 1–3, 4A, 4B and 4C are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
-them. This doc specifies what remains: persistence, then orchestration, then the archetype. The sections marked
+them. This doc specifies what remains: orchestration, then persistence, then the archetype. The sections marked
 **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -19,17 +19,20 @@ them. This doc specifies what remains: persistence, then orchestration, then the
 | Phase | State |
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
-| 5 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-5) — **next** |
-| 6 — Orchestration: a buildup and execution spine, multi-unit templates, and threat-aware routes where a role asks for one | [§Orchestration](#orchestration-phase-6) — WIP |
+| 5 — Orchestration: a buildup and execution spine, multi-unit templates, and threat-aware routes where a role asks for one | [§Orchestration](#orchestration-phase-5) — **next** |
+| 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — WIP |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
-**Persistence comes first**: every phase after it adds state to save, and a campaign has to survive a save before
-its balance is worth tuning at all. **Orchestration comes before the archetype**, because the archetype leans on
-manoeuvres as well as on actions, and the templates it leans on do not exist until orchestration writes them: a set
-of one cannot be weighted. Orchestration musters against one global pair of muster bars in the meantime, which the
-archetype later splits per record. Do not pre-build later phases: the tuning constants and engine-contact
-behaviours only settle by running the core.
+**Orchestration comes first**: it is the last phase that adds state worth saving — the intent records and their
+role bindings — and a save contract written before it would be written twice, once for taskings and again for
+intents. It is also the phase that changes how the enemy fights, which is what a play-test is for. The cost is
+accepted rather than overlooked: until persistence lands, every tuning pass runs inside one session.
+**Persistence comes next**, and the archetype last, because the archetype leans on manoeuvres as well as on
+actions, and the templates it leans on do not exist until orchestration writes them: a set of one cannot be
+weighted. Orchestration musters against one global pair of muster bars in the meantime, which the archetype later
+splits per record. Do not pre-build later phases: the tuning constants and engine-contact behaviours only settle
+by running the core.
 
 **Every wired action is scored before any new one is written**: an unappraised row returns its price and scores
 break-even, so a half-appraised picker quietly favours whatever it cannot yet judge, and adding actions into that
@@ -103,7 +106,7 @@ it: Re-garrison withdraws.
   `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
 - **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault, `1–2` flank/encircle, `0.5–1`
   probe or muster, `<0.5` hold). `P(win)` (whether) and the band (how) are two jobs off one `r`. The band picks
-  once, at commit ([§Orchestration](#orchestration-phase-6)).
+  once, at commit ([§Orchestration](#orchestration-phase-5)).
 
 ### Settles in play
 
@@ -127,7 +130,7 @@ rather than designed:
 - **Commit and carry.** `OPCOM_COMMIT_HOLD`, `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
   `OPCOM_ROAD_DETOUR`. Whether a taxi should set its riders down short of the target rather than on it; whether a
   ground taxi needs its pickup drive timed out, which no carry phase does today; whether one attacker per holding is
-  too thin once Phase 6 can muster.
+  too thin once Phase 5 can muster.
 - **Patrol.** `OPCOM_PATROL_SHARE` and `OPCOM_PATROL_FORCE_REF` (8, a rifle squad's force), which sets whether a
   hull patrols as readily as a squad. Whether a combatant's staleness stamp should count for less than a recon's,
   since it suppresses re-scouting for up to `OPCOM_BELIEF_EXPIRE` without having learned anything certain there;
@@ -448,7 +451,7 @@ The debug harness spends outside the pick and is not capped.
 - **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight, and the truck-stock Value
   keeps the idle ones at one or two. If the trucks counted, a full roster would stop every supply action.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
-  one that garrisons it ([§Orchestration](#orchestration-phase-6)).
+  one that garrisons it ([§Orchestration](#orchestration-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
   grows with the zones, at about 7 a zone. A flat cap would sit under the seed of a 40-zone campaign and far over
   that of a 10-zone one.
@@ -478,7 +481,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 | roles | `[role, unitRef, status, release, λ]` bindings drawn from the roster |
 | rally | the staging point a buildup holds at, short of the target |
 | hold | `DUWS_opcom_tick` at commit + `OPCOM_COMMIT_HOLD` — earliest tick OPCOM may re-issue this unit's order |
-| state | buildup / execution / done ([§Orchestration](#orchestration-phase-6)) |
+| state | buildup / execution / done ([§Orchestration](#orchestration-phase-5)) |
 
 - **The hold is an absolute anti-flap lock** (KISS), not a success deadline: a committed unit is held the full span
   no matter what; a target that dies mid-hold is re-evaluated once it expires. Resting `garrison`/`guard` are
@@ -487,7 +490,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 - **There is no retreat.** The engine owns a group in `COMBAT` and ignores a commanded withdrawal
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
-- **A multi-unit assault musters, then launches as one wave** (Phase 6, WIP). A muster is what buildup does: it binds
+- **A multi-unit assault musters, then launches as one wave** (Phase 5, WIP). A muster is what buildup does: it binds
   force across ticks at a safe rally short of the target, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
   **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
@@ -499,7 +502,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
   minimum, because it commits below the odds it launches at. Buildup is also how a force-short action waits for
   units — from the roster or from Recruit.
 
-## Orchestration (Phase 6)
+## Orchestration (Phase 5)
 
 **WIP.**
 
@@ -519,7 +522,7 @@ force-short action sits in buildup while the roster or Recruit fills it.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order, so the order stays in the table with
-the debug page as its only caller until 6.2 (`taskings/fnc_opcom_orders.sqf` is the table that knows every
+the debug page as its only caller until 5.2 (`taskings/fnc_opcom_orders.sqf` is the table that knows every
 order).
 
 **The runner**, each tick over every live intent with roles: refresh each bound unit's status; a required role
@@ -631,14 +634,14 @@ threat that appears after. Today the road branch is threat-blind and every calle
 
 | Chunk | Builds |
 |---|---|
-| **6.1** Intents and ownership | the intent record, `boundTo` honoured by `DUWS_fnc_opcom_freeSweep`, and every shipped commit action wrapped as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
-| **6.2** Buildup | the rally point, `move` staging carrying `expValue` so a lift still prices a leg the unit cannot walk, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
-| **6.3** Multi-role templates | `assault` at ×N first, since it releases every role at once, then `flank` and `encircle` over their release predicates |
-| **6.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
+| **5.1** Intents and ownership | the intent record, `boundTo` honoured by `DUWS_fnc_opcom_freeSweep`, and every shipped commit action wrapped as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
+| **5.2** Buildup | the rally point, `move` staging carrying `expValue` so a lift still prices a leg the unit cannot walk, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
+| **5.3** Multi-role templates | `assault` at ×N first, since it releases every role at once, then `flank` and `encircle` over their release predicates |
+| **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
 
-6.1 lands alone. Every chunk after it reads the pool it changes.
+5.1 lands alone. Every chunk after it reads the pool it changes.
 
-Phase 6 settles in play the band thresholds, each role's λ and how often a route is re-planned, `OPCOM_ROUTE_OFFROAD`
+Phase 5 settles in play the band thresholds, each role's λ and how often a route is re-planned, `OPCOM_ROUTE_OFFROAD`
 and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, and how far short of the target a
 rally has to sit to be safe enough to be worth the extra march.
 
@@ -834,7 +837,7 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   `OPCOM_ARTY_MIN_SPREAD`.
 - **The one-gun action only ever saturates.** A creep is a barrage walked ahead of someone, so it is worth firing
   only when there is an assault to walk it for, and that pairing is the `arty` template's job
-  ([§Orchestration](#orchestration-phase-6)). Until then the shipped fire mission's creep stays reachable from the debug
+  ([§Orchestration](#orchestration-phase-5)). Until then the shipped fire mission's creep stays reachable from the debug
   step, which is where a walked pattern is asked for by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
   timed off `getArtilleryETA`.
@@ -867,7 +870,7 @@ everywhere is the baseline. 7.1 builds the setting.
 | Aggressive | Attack, Rapport; leaves ground thin | `assault`: direct, no setup leg |
 
 **An archetype weighs manoeuvres as well as actions.** `manoeuvreWeight` keys the templates
-([§Orchestration](#orchestration-phase-6)) and picks between the ones the band leaves legal, on the same weighted
+([§Orchestration](#orchestration-phase-5)) and picks between the ones the band leaves legal, on the same weighted
 roll as the action pick. The band is the gate and the weight is the lean, so a weight neither makes an illegal
 template legal nor takes a legal one away: every template keeps a weight above 0, because a band whose legal
 templates all weigh 0 has no pick left to make. The table keys only the manoeuvres that compete — `assault`,
@@ -885,7 +888,7 @@ no mix.
 Beyond the two weight tables, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
 properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a
-1.5:1 muster ideal, a 0.75:1 minimum) is what Phase 6 musters against, and it applies until 7.2 builds the rest.
+1.5:1 muster ideal, a 0.75:1 minimum) is what Phase 5 musters against, and it applies until 7.2 builds the rest.
 
 | Chunk | Builds |
 |---|---|
@@ -893,9 +896,9 @@ properly executed manoeuvre; a flexible, aggressive one launches sooner at lesse
 | **7.2** Manoeuvres and patience | `manoeuvreWeight` on each record and the template pick reading it; then the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
 
 Phase 7 settles in play each archetype's action weights, Bank's included, its manoeuvre weights against the band
-thresholds Phase 6 sets, the patience figures, and the set of archetypes itself, which is not final. Phase 6 ships
+thresholds Phase 5 sets, the patience figures, and the set of archetypes itself, which is not final. Phase 5 ships
 the muster on one global set of bars, and 7.2 is what splits them per archetype
-([§Orchestration](#orchestration-phase-6)).
+([§Orchestration](#orchestration-phase-5)).
 
 ## Town & zone garrisons
 
@@ -935,16 +938,23 @@ behaviours is still worth rebuilding as a commander decision: **dismounts**, a s
 into a vehicle group, which belongs in a composition Recruit buys. Target selection is replaced by belief, and the
 ammo truck by Reinforce.
 
-## Persistence (Phase 5)
+## Persistence (Phase 6)
 
-**Next.** OPCOM's store is shaped to serialise but implements no save/load, and today persistence is the engine's
+OPCOM's store is shaped to serialise but implements no save/load, and today persistence is the engine's
 `saveGame`. The snapshot owns the save and the load, and the whole contract — which of OPCOM's keys it carries, what
 a restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
+It follows orchestration so the contract is written once. Phase 5 adds the intent records and the `boundTo` key on
+the taskings they own, which are stored state on the same terms as a tasking, so a contract written before it would
+be reopened the moment it landed. An intent is numbers, strings and arrays like everything else here, and its roles
+name their units by tasking id, which the taskings group already restores — so a buildup comes back mid-muster
+rather than collapsing, and what clears on restore is the live half a tasking already clears: the group handle, the
+status and any carry binding.
+
 The phase ends in play rather than in code: a campaign is run past a save and a reload, and the commander has to
 pick up where it left off. That play pass is also what settles Phase 4's tuning list
-([§Settles in play](#settles-in-play)), which is why nothing after this phase is worth building first.
+([§Settles in play](#settles-in-play)) — until it lands, a tuning pass lives and dies inside one session.
 
 ## Naming: OPCOM sits inside WARCOM
 

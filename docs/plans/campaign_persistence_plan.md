@@ -14,7 +14,7 @@ Two rules govern everything below, the features that are not built yet included.
 already satisfy it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly
 do; player fortifications will only if they are designed that way from the start
 ([§Features not built yet](#features-not-built-yet)), and the enemy commander's state carries the
-same contract into [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-5).
+same contract into [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-6).
 
 **Only what outlives a session is stored.** Long-term campaign progress earns a key; a session's own
 bookkeeping does not, however easy it would be to serialise. That is why the snapshot holds the
@@ -564,7 +564,7 @@ stamps `full` and a seed clears `lost`, and both are keyed by a site key that ha
 
 OPCOM is shipped, so its store is snapshot content now rather than deferred. These are the keys the
 snapshot carries for it, and the contract they answer to is this section's; the phase that lands them is
-[`opcom_plan.md` §Persistence](opcom/opcom_plan.md#persistence-phase-5).
+[`opcom_plan.md` §Persistence](opcom/opcom_plan.md#persistence-phase-6).
 
 | Group | Kind | Contents |
 |---|---|---|
@@ -572,6 +572,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
 | Clock and flags | outcome | `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` |
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
+| Intents | outcome | the commander's live intent records and the `boundTo` key on the taskings they own, once orchestration lands |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
@@ -579,6 +580,12 @@ only, and `grp` is a live group's netId rather than a handle
 `grp` back to `""`, `status` to `virtual`, and `carrying`, `ridingOn` and `embarked` reset. The groups those
 bound are gone, and a half-bound carry would hold its rider for the rest of the campaign, since a bound
 record refuses every new order.
+
+**Intents land with orchestration, and they change nothing here.** An intent is the record that binds
+several units to one action, and its roles name their units by tasking id rather than by handle
+([`opcom_plan.md` §Commitment](opcom/opcom_plan.md#commitment-intents-are-sticky)). It therefore
+serialises on the taskings' own terms and restores with them, which is why that phase is built before
+this one rather than after: a contract written first would be reopened the moment intents existed.
 
 **`DUWS_opcom_taskSeq` rides with the taskings.** The id is what every binding uses — a ferry pairs a
 transport to its rider by id, not by handle — so a counter restored to 0 hands the next hire an id a
