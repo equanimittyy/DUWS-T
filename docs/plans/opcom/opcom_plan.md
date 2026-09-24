@@ -50,8 +50,9 @@ New work holds to:
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 - **A lift is the commander's call, not the rider's.** A water crossing borrows a boat or a helicopter at the shore
   (`fnc_opcom_ferry.sqf`), and land-taxi binds a truck, an APC, an IFV or a transport helicopter at commit, when the
-  pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry. Only an Attack or an
-  Intercept binds a land-taxi, so no lift is hired on a Patrol, though a patrol still borrows a ferry at a water leg.
+  pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Both run the one carry. Only an Attack, an
+  Intercept, a Re-garrison or a debug Move binds a land-taxi, so no lift is hired on a Patrol, though a patrol still
+  borrows a ferry at a water leg.
   Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:

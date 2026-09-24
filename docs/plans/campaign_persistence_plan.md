@@ -5,15 +5,22 @@ an external store and, on the next start, rebuilds the world by feeding that sna
 the **existing** builders rather than through a second construction path.
 
 Live units are not persisted. Zones, the HQ and FOBs are rebuilt and re-garrisoned from scratch;
-what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks, and
-the vehicles the player parked at a base.
+what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks, and the
+vehicles the team put in the garage.
 
-One rule governs everything below, including the features that are not built yet: **a thing is
-persistable when a single function can build it from numbers and strings.** Zones already satisfy
-it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly do; player
-fortifications will only if they are designed that way from the start
+Two rules govern everything below, the features that are not built yet included.
+
+**A thing is persistable when a single function can build it from numbers and strings.** Zones
+already satisfy it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly
+do; player fortifications will only if they are designed that way from the start
 ([§Features not built yet](#features-not-built-yet)), and the enemy commander's state carries the
 same contract into [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-5).
+
+**Only what outlives a session is stored.** Long-term campaign progress earns a key; a session's own
+bookkeeping does not, however easy it would be to serialise. That is why the snapshot holds the
+reveal state and the team's permanent unlocks and holds nothing keyed to a player — no loadouts, no
+cooldowns, no unconverted kill tally. A player rejoins a restored campaign the way they join a fresh
+one.
 
 ## Where the save lives
 
@@ -406,7 +413,6 @@ which radii survive. A Location's position comes out of the map's config and doe
 | Town reputation | outcome | `civ_town_rep` and `civ_town_ap` |
 | Escalation | outcome | `escalation_destroyed`. One integer; the census re-runs on the restored world |
 | Tier ratchet | outcome | per-side earned counters `WARCOM_blufor_ap_earned` / `WARCOM_opfor_ap_earned`, and the tiers derived from them (`WARCOM_blufor_tier`, `WARCOM_opfor_tier`) |
-| Kill income | outcome | the per-player kill tally awaiting conversion, keyed by UID, and the CP already banked for players who have left |
 
 **Ownership is stored as held positions and nothing derived from them.** Restore applies each as
 `["BLU", _pos] call fnc_zone_control_set`; that writer moves both side lists and both counters
@@ -427,14 +433,6 @@ counter is the source of truth the save must carry — the tier is re-derivable 
 silently un-unlocking an enemy that had already reached armour — the failure mode
 [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
 describes. Floor shipped these globals broadcast but unsaved; this snapshot is what closes that.
-
-**Kill income needs one existing handler changed to survive a restore.**
-`server/server_init.sqf:315` zeroes a UID's tally on `PlayerConnected` so that a rejoining player
-does not resume a count from earlier in the session; against a restored tally it deletes exactly
-the entries the snapshot was written for. The handler has to skip UIDs the restore has just
-written. The banked total goes in beside the tally because it holds a leaver's unpaid kills
-(`:224`), which makes it the balance most likely to be non-zero at the moment a persistent server
-saves on the last disconnect.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for rebuilding
 derived state. It is a rank within the kept set's building counts, so recomputing it needs the
@@ -458,6 +456,7 @@ multiplier and the loss condition together.
 |---|---|---|
 | Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) and whose it is (`DUWS_townGarrisonOwner`) |
 | Zone garrisons | outcome | purchased tier per zone (`DUWS_zoneTier_<key>`) |
+| Garrison strength | outcome | per site, `DUWS_garrisonFull_<key>` and `DUWS_garrisonLost_<key>` — the full token multiset and the lost ledger against it |
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array`, the `zone_hp_left_<n>` counters |
 
 Hardpoints are an input for the same reason zones are:
@@ -478,6 +477,21 @@ side's would hand one army the other's men.
 **A tier is not only the enemy's any more.** Both sides garrison ground they hold, so a zone's tier is
 outcome the same way a town's is — it is bought, and a restore that dropped it would take back every
 garrison the player paid for.
+
+**Strength is stored beside the tier, because the two answer different questions.** A tier is what a
+site fields at full; strength is how much of that is still standing. Attrition is a ledger of lost
+whole tokens rather than a thinned scalar — destroy one tank and the site comes back missing one tank
+(`server/garrison/fnc_garrison_strength_init.sqf`,
+[`garrison_and_reserves.md`](../info/gameplay/garrison_and_reserves.md)) — so a restore that dropped it
+either repairs every mauled garrison for free, wiping the attrition the players fought for, or zeroes
+one, handing them ground nobody took. Reinforce buys strength back on both sides, which makes it paid
+progress on the same footing as the tier.
+
+Both are flat token lists keyed `zone_<x>_<y>` or `town_<n>`, and a token is a composition name rather
+than a classname, so the group serialises as strings and pins to no mod set. Everything else derives
+from the pair on read: which side holds the site, which tokens sit behind an unearned Army Power rung,
+and what is surviving (full less lost). They are outcomes and go in after the builders, because a raise
+stamps `full` and a seed clears `lost`, and both are keyed by a site key that has to exist first.
 
 ### The commander
 
@@ -527,21 +541,27 @@ contested set rebuild on the first sensor pass, and the traffic layer refills as
 belong to the debug page today and come back at their defaults. Once the difficulty setting drives them they
 restore with the settings group, not here.
 
-### The players
+### The team
 
 | Group | Kind | Contents |
 |---|---|---|
-| Loadouts | — | `getUnitLoadout` per player UID |
-| Support unlocks | input | the server-side mirror, per UID |
+| Support unlocks | input | `DUWS_support_permanent`, the team's permanent unlocks in purchase order |
 | Reveal | outcome | positions of revealed zones and revealed towns, indices of revealed normal hardpoints |
-| Cooldowns | outcome | remaining seconds per player-scoped cooldown, per UID |
 
-Loadouts are already data; what they lack is a stable key. `client/client_init.sqf:377` stores the
-loadout on the player object, which dies with the session, so the mirror keys on UID. One hashmap
-of per-player hashmaps, and the three guards a UID-keyed player save needs — a per-player
-"restored yet" flag, stripping a loadout saved while dead, and deleting the unit whose gear has
-just been banked — are in
-[`campaign_save_format.md`](../info/architecture/campaign_save_format.md#per-player-data).
+**Nothing per-player is saved.** No loadouts, no per-player cooldowns, and no per-player record of
+what a player bought. Consumable unlocks were already out for exactly this reason — they are
+per-player and are lost on death, so a restart costs no more than a firefight does — and the rest
+follows the same rule: a player rejoins a restored campaign and kits out from the arsenal, which the
+restore rebuilds anyway. It also keeps the whole UID-keyed player-save machinery out of the design:
+the per-player "restored yet" flag, stripping a loadout saved while dead, and the bank-then-delete
+order in
+[`campaign_save_format.md`](../info/architecture/campaign_save_format.md#per-player-data) are all
+unbuilt here.
+
+**Permanent unlocks are team state, so one array carries them.** `DUWS_support_permanent` holds them
+in purchase order and each client keeps the individual flags as its fast path, so restore replays the
+array into the flags (Prerequisite 3). The garage's capacity ladder reads those same flags, so its
+pools come back the size the team paid for.
 
 **Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
 towns the player has found, and a replay re-hides both: `fnc_createzone.sqf:16` sets every zone's
@@ -572,71 +592,54 @@ of the snapshot.
 The **captured-materiel pool** (`DUWS_capturedPool`, written by the `fnc_captured_pool_*` functions in
 `server/warcom/fnc_economy_init.sqf`) is the opposite case, and is
 the one arsenal state that will be persisted. It is player-earned and scarce — the enemy gear brought
-back and banked — so losing it on reload loses progress, the same argument that puts the vehicle
-stockpile in the snapshot rather than the friendly cargo. Like the stockpile it is data, one
+back and banked — so losing it on reload loses progress, the same argument that puts the garage in
+the snapshot rather than the friendly cargo. Like the garage it is data, one
 `class -> count` map, and like it, it pins to the mod that produced the classnames: a removed enemy
 mod drops those entries, so restore validates each class and discards the unknown rather than
 restoring a name that resolves to nothing. It joins the snapshot as one key, deferred with the pool
 itself — the group lands when the arsenal work does.
 
-## The vehicle persistence zone
+## Vehicles: the garage
 
-Every base anchor keeps the vehicles parked around it. This is the one part of the plan that
-persists *objects* rather than campaign bookkeeping, and it is worth the exception because
-stockpiling vehicles is a thing players do across sessions and nothing else in the design covers
-it.
+Vehicles persist because the garage already turns them into data. `DUWS_garage_stored` is an array of
+specs written by `fnc_garage_store` and read back by the depot's retrieve path
+(`server/supports/fnc_garage_init.sqf`, `shared/functions/fnc_garage_spec.sqf`), and a spec is exactly
+what this plan asks of everything else: one class string plus numbers and arrays, captured by
+`DUWS_fnc_vehSpecCapture` and re-applied by `DUWS_fnc_vehSpecApply`. It joins the snapshot as one key
+that restore assigns and broadcasts. There is nothing to collect and nothing to respawn, because a
+stored vehicle is not an object until a player retrieves it.
 
-**Anchors and radius.** `PosOfBLUHQ`, every entry of `Array_of_FOBpos`, and the MHQ's position
-when it is deployed. One radius constant, 100 m, in `server/server_var_init.sqf`. Anchors are
-restored before vehicles are — the HQ and FOB builders are deterministic, so the composition a
-vehicle was parked beside is back in the same place before the vehicle returns to it.
-
-**What is collected.** Alive vehicles inside an anchor radius that are not `Man`, not
-`StaticWeapon`, and not tracked in `DUWS_compositions`. The last two exclusions are the ones that
-matter: FOB defence turrets are statics the FOB builder puts back itself, and anything composition-
-tracked is rebuilt with its composition. Without them a restore doubles every FOB's gun ring.
-
-| Field | Read with | Note |
+| Group | Kind | Contents |
 |---|---|---|
-| Type | `typeOf` | |
-| Position | `getPosATL` | |
-| Orientation | `vectorDir`, `vectorUp` | Two number triples; `getDir` alone loses a vehicle parked on a slope |
-| Damage | `damage`, `getAllHitPointsDamage` | Both: hit points restore component damage, the scalar restores the whole |
-| Fuel | `fuel` | |
-| Ammo | `vehicleAmmo` | One fraction, restored with `setVehicleAmmo` |
-| Cargo | `BIS_fnc_saveInventory` | Verify its output is pure data; the fallback is the four explicit cargo getters |
-| Textures | `getObjectTextures` | The customisation the repair action already applies |
-| Animations | `animationPhase` per source | Same feature, `client/supports/fnc_client_addRepairActions.sqf:77` |
-| Pylons | `getPylonMagazines` | Aircraft only; restored with `setPylonLoadout`, already used at `server/supports/fnc_pylon_init.sqf:33` |
-| Locked | `locked` | |
-| MHQ flag | — | Marks which stored vehicle was `MHQ1` |
+| Garage | outcome | `DUWS_garage_stored`: per vehicle its class, textures, pylon loadout, per-hitpoint and overall damage, fuel, the four cargo lists and one ammo fraction |
+| MHQ | outcome | the designated vehicle's spec, whether it was deployed, and where |
 
-Per-turret magazine detail is deliberately dropped in favour of a single ammo fraction. It is a
-stockpile, not a save state of a firefight, and the alternative is a nested structure that has to
-survive a mod set changing under it.
+**A vehicle parked in the world is not saved; a garaged one is.** That is the trade, and it is the
+right one. The capture and apply pair is already written and is exercised every time a player uses the
+depot, and the garage's own capacity ladder bounds it, so persistence needs no radius constant, no
+per-anchor cap, no cull, and no filter to keep a FOB's turret ring out of a collection sweep. What it
+costs is a habit: a player who wants a vehicle to survive a restart garages it first.
 
-**Crews are never stored.** Vehicles restore empty. An AI crewman is a live unit and lives under
-the same rule as every other.
+**The garage's capacity is a permanent support, so the caps restore with the unlocks.**
+`DUWS_fnc_garageCaps` reads the highest owned level's row off `DUWS_garage_tiers`, and ownership is a
+support flag ([§The team](#the-team)). A snapshot holding more vehicles than the restored caps allow is
+over capacity rather than invalid: restore keeps them all and the depot refuses the next store until
+the team is back under.
 
-**The count is capped, and what is dropped is logged.** A per-anchor cap — 15 as the opening
-number, a constant beside the radius — keeps the snapshot bounded and boot-time spawning finite.
-Silently truncating would read to a player as vehicles randomly disappearing, so the cull logs
-what it dropped and why, and drops the furthest from the anchor first.
+**The MHQ needs its own record.** `MHQ1` is whatever vehicle a player designated through the comm menu
+(`client/dialog/fnc_MHQ_select.sqf:20-22`), and it stands in the world rather than in the garage, so
+nothing else carries it. Store its spec beside its deployed state and position. Restore spawns it,
+re-applies the designation and — if it was deployed — replays `fnc_MHQ_deploy`, which rebuilds the
+tent, the ammo box and the respawn point rather than persisting any of them.
 
-**The MHQ is a stockpiled vehicle plus one flag.** `MHQ1` is whatever vehicle a player designated
-through the comm menu (`client/dialog/fnc_MHQ_select.sqf:20-22`), so it needs no separate storage
-path: it is a vehicle in the stockpile carrying a marker, plus its deployed state. On restore, the
-designation is re-applied and — if it was deployed — `fnc_MHQ_deploy` is replayed, which rebuilds
-the tent, the ammo box and the respawn point rather than persisting any of them.
-
-**What is lost.** The restored vehicle is a new object, so anything attached to the old one goes:
-R3F-carried cargo, player-placed objects riding on it, and any per-object variable a subsystem set
-without a registry behind it. That is the price of not persisting object identity, and it is the
-same price zones and FOBs pay.
+**Crews are never stored, and a retrieved vehicle is a new object.** Anything attached to the old one
+goes: R3F-carried cargo, player-placed objects riding on it, and any per-object variable a subsystem
+set without a registry behind it. Zones and FOBs pay the same price.
 
 ## Features not built yet
 
-Four planned features are cheap to persist if they are built as registries and expensive if they
+
+Three planned features are cheap to persist if they are built as registries and expensive if they
 are not. The contract is the same for all three: **the builder takes data and the registry holds
 that data.** Persistence is then a replay, and there is nothing extra to write.
 
@@ -646,17 +649,14 @@ the hardpoint arrays. Built the other way — the player places an object and pe
 the object — restore has to reverse-engineer what was built from what is standing, and every new
 buildable is a new special case.
 
-**Virtualised OPFOR units.** Whatever a virtualisation layer holds must be classnames, positions,
-sides and group names. A layer that caches group or unit handles is not persistable at all, and
-that will not be visible until a restore produces an empty map.
-
 **Civilian vendors.** The vendor registry
 ([`civilian_shops.md`](../info/gameplay/civilian_shops.md#vendor-registry)) holds, per town, each
 vendor's type, building, facing and respawn cooldown. It is an input: restore replays it in place of
 the init-time roll, so every town keeps the same vendors in the same buildings. The building goes in
 by position on the same footing as towns: a terrain building does not move, so the nearest building
-to the stored position is the same one. Shop money needs no entry, because it is the `Money_roll`
-item and is saved with the player's loadout.
+to the stored position is the same one. Shop money has no entry and is lost: it is the carried
+`Money_roll` item, and no player gear is saved ([§The team](#the-team)). Whether a player's cash wants a
+team-level or per-player key of its own is the vendor work's question, not this plan's.
 
 **Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
 rule above.
@@ -799,6 +799,10 @@ garrisons and composition props both spawn and despawn on player distance
 (`server/misc/fnc_site_stream_init.sqf`), so a restored campaign regenerates them the first time a
 player approaches — the same code path a fresh campaign uses.
 
+Player-scoped state goes with them: loadouts, per-player cooldowns, any per-player record of what a
+player bought, and an unconverted kill tally. So does a vehicle left parked in the world rather than
+garaged ([§Vehicles](#vehicles-the-garage)). The snapshot is keyed to no player at all.
+
 Session-scoped locks go with them and must come back clear: the per-support fire-mission locks, the
 per-FOB rebuild busy flags, `Mission_available`, and the JIP queue entries. A lock restored as held
 is a support nobody can ever call again.
@@ -849,19 +853,16 @@ refund attached to the one restore that consumes it.
 | `server/misc/fnc_campaign_save.sqf` | New. Fills the snapshot hashmap from mission state and commits it. |
 | `server/misc/fnc_campaign_restore.sqf` | New. Validates a payload, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
 | `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
-| `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/persistence/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
 | `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)'s business. |
-| `server/server_init.sqf` | Early gate before `:13` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:268`, and stop the connect handler at `:315` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:196`; the engine save is no longer the mechanism. |
+| `server/server_init.sqf` | Early gate before `:13` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:268`. Keep `enableSaving [false,false]` at `:196`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/chatter/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
 | `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Initialise `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` only when they are nil, so a restored clock and a found HQ survive boot. |
 | `server/warcom/opcom/appraisal/fnc_opcom_archetypes.sqf` | `DUWS_opcom_archetype` set from the restored snapshot on a load, in place of the campaign setting's roll. |
-| `client/client_init.sqf:377` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
-| `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
 | `client/client_init.sqf:84-98` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
 | `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
@@ -877,11 +878,12 @@ refund attached to the one restore that consumes it.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
+- [ ] Add the garrison ledger: the purchased tier per zone and town, and the full and lost token multisets behind it. It follows zone and town replay, because every key is a site key. Verify: an OPFOR zone the players mauled but did not take comes back missing exactly what it lost rather than repaired to full; a cleared town comes back at tier I with nothing standing; a zone the players garrisoned comes back theirs at the tier they paid for; and a token behind an unearned rung stays unfielded rather than lost.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
 - [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
-- [ ] Add the vehicle persistence zone. Verify: a vehicle parked at a FOB returns with its damage, fuel, cargo and paint; a FOB's turret ring is not duplicated; the cap drops the furthest vehicle and logs it.
-- [ ] Add the MHQ. Verify: a deployed MHQ comes back deployed, with a working respawn point and one ammo box.
-- [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action; a rejoining player's restored kill tally survives their reconnect instead of being zeroed by the connect handler.
+- [ ] Add the garage. Verify: `DUWS_garage_stored` round-trips; a retrieved vehicle comes back with its damage, fuel, cargo, paint, pylons and ammo fraction; a snapshot holding more than the restored caps allow keeps every vehicle and blocks the next store instead of dropping one.
+- [ ] Add the MHQ, which carries its own spec now that the garage does not hold it. Verify: a deployed MHQ comes back deployed where it stood, with a working respawn point and one ammo box.
+- [ ] Add the reveal state and the permanent support unlocks. Verify: a hardcore campaign's revealed zones, towns and hardpoints come back revealed with their markers repainted; the unlock array replays into every client's flags, a client that joins after the restore included; and the garage's capacity pools come back the size they were bought to.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
 - [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect, on a `persistent = 0` server as well as a `persistent = 1` one; a connected headless client does not count as a player.
 - [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
@@ -936,15 +938,11 @@ object is lost. The alternative is persisting object identity, which vanilla can
 - Whether the edit control survives a full-size snapshot on import, and at what size chunking
   becomes necessary. It bounds the clipboard fallback only — the carry route never builds the string
   — and it cannot be settled on paper.
-- Whether a per-anchor cap of 15 vehicles is generous or stingy. It wants a play-test, not an
-  argument.
 - Where a player who wants to save *now* is sent. SITREP is that control today and it is a radio
   support, which is not where anyone looks after pressing Escape. Singleplayer feels this hardest.
 - Whether a restored campaign should replay anything at all to the player — a one-line "campaign
   resumed, day N" — or come up silent. Silent is the default here because every builder is being
   suppressed anyway.
-- Whether `BIS_fnc_saveInventory` output is pure data on every container type the mission can
-  produce, including modded vehicles.
 - What happens to a save when the mission's own format changes mid-Workshop-release. Refusing it
   is the decided behaviour; whether a migration path is ever worth writing is not decided. The
   datapoint against refusing is that a quarter of Antistasi's save subsystem is converters, carried
