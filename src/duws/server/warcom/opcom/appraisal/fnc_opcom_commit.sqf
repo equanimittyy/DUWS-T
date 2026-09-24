@@ -110,13 +110,13 @@ DUWS_fnc_opcom_interceptSweep = {
 };
 
 // Every free unit weighs the same few destinations, drawn from the cells the need field lights: the sample is the
-// Scout's siting pass, and a unit already out is on a move order and out of the roster. Behind the recon rows stands
-// every free combatant except air, which cannot hold the ground it looked at; what separates the two is the reveal
-// each buys, so the Value is the route for a recon and the arrival block for a combatant (fnc_opcom_scout).
+// Patrol's siting pass, and a unit already out is on a move order and out of the roster. Behind the recon rows stands
+// every free land combatant, air excepted, which cannot hold the ground it swept. The two kinds scale on different
+// axes, a recon on the reach of its certain bubble and a combatant on the threat it walks with (fnc_opcom_patrol).
 //
-// One scout per destination, for the reason one attacker goes at a zone: the best unit takes it, and a second row on
-// the same ground would only crowd the shortlist with the same reveal twice.
-DUWS_fnc_opcom_scoutSweep = {
+// One patrol per destination, for the reason one attacker goes at a zone: the best unit takes it, and a second row on
+// the same ground would only crowd the shortlist with the same sweep twice.
+DUWS_fnc_opcom_patrolSweep = {
     private _recon = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
     private _units = _recon + ([false] call DUWS_fnc_opcom_freeCombatants);
     if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], [], []] };
@@ -127,30 +127,33 @@ DUWS_fnc_opcom_scoutSweep = {
     };
     private _out = [];
     private _blocked = [];
-    // Hoisted out of the pairwise loop, which the widened pool runs units x destinations times: a stake does not
-    // change with the destination, and a combatant's reveal is the arrival block whichever combatant goes.
+    // Hoisted out of the pairwise loop the widened pool runs units x destinations times: none of these vary by it.
     private _costs = _units apply { [_x] call DUWS_fnc_opcom_commitCost };
-    private _looks = _dests apply { [_x] call DUWS_fnc_opcom_lookValue };
+    private _reaches = _units apply { [_x] call DUWS_fnc_opcom_patrolReach };
+    private _scales = _units apply { [_x] call DUWS_fnc_opcom_patrolScale };
+    private _cells = _units apply { [_x get "pos"] call DUWS_fnc_opcom_w2c };
     {
         private _to = _x;
-        private _look = _looks select _forEachIndex;
+        // A garrison's units all stand on its one point, so one line serves many: memoised per origin cell and reach.
+        private _lines = createHashMap;
         private _best = [];
         private _bs = -1;
         // Blocked stays the recon shortfall: it is what values a recon hire (fnc_opcom_demand), and ground a
-        // combatant covered at a fraction of the reveal is still ground a recon would cover better.
+        // combatant swept without certainty is still ground a recon would have read.
         private _reconFree = false;
         {
             private _t = _x;
-            private _isRecon = "recon" in (_t get "flags");
             private _pw = [_to, _t get "pos", _t get "effForce"] call DUWS_fnc_opcom_pWinSend;
             if (_pw >= OPCOM_PWIN_FLOOR) then {
-                if (_isRecon) then { _reconFree = true };
-                private _reveal = if (_isRecon) then {
-                    [_t get "pos", _to, OPCOM_RECON_K getOrDefault [_t get "moveType", 1]] call DUWS_fnc_opcom_scoutValue
-                } else {
-                    _look
+                if ("recon" in (_t get "flags")) then { _reconFree = true };
+                private _k = _reaches select _forEachIndex;
+                private _key = format ["%1:%2", _cells select _forEachIndex, _k];
+                private _sweep = _lines getOrDefault [_key, -1];
+                if (_sweep < 0) then {
+                    _sweep = [_t get "pos", _to, _k] call DUWS_fnc_opcom_patrolValue;
+                    _lines set [_key, _sweep];
                 };
-                private _v = _reveal * ([_t, _to] call DUWS_fnc_opcom_unitDelay);
+                private _v = _sweep * (_scales select _forEachIndex) * ([_t, _to] call DUWS_fnc_opcom_unitDelay);
                 private _c = _costs select _forEachIndex;
                 private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
                 if (_s > _bs) then { _bs = _s; _best = [_t, _v, _pw, _c] };
@@ -160,10 +163,10 @@ DUWS_fnc_opcom_scoutSweep = {
         if (_best isNotEqualTo []) then {
             _best params ["_t", "_v", "_pw", "_c"];
             _out pushBack [[_t get "id", "move", _to, _pw * _v], 0,
-                format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
+                format ["Patrol %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
         };
     } forEach _dests;
-    // No riders: a scout is sent without a taxi (sendRun), so a lift hired on its order would carry no one.
+    // No riders: a patrol is sent without a taxi (sendRun), so a lift hired on its order would carry no one.
     [_out, _blocked, []]
 };
 
@@ -172,7 +175,7 @@ DUWS_fnc_opcom_scoutSweep = {
 DUWS_opcom_commitSweeps = createHashMapFromArray [
     ["attackSweep", DUWS_fnc_opcom_attackSweep],
     ["interceptSweep", DUWS_fnc_opcom_interceptSweep],
-    ["scoutSweep", DUWS_fnc_opcom_scoutSweep]
+    ["patrolSweep", DUWS_fnc_opcom_patrolSweep]
 ];
 
 DUWS_fnc_opcom_commitSweep = {

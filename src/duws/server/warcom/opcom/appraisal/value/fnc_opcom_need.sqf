@@ -75,7 +75,7 @@ DUWS_fnc_opcom_needBuild = {
     };
     DUWS_opcom_needStatic = _need;
     DUWS_opcom_bandCells = _band;
-    // Scout samples its destinations here: ground the field lights is the ground worth looking at.
+    // Patrol samples its destinations here: ground the field lights is the ground worth looking at.
     private _lit = [];
     { if (_x > 0) then { _lit pushBack _forEachIndex } } forEach _need;
     DUWS_opcom_needCells = _lit;

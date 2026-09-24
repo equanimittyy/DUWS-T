@@ -661,9 +661,9 @@ OPCOM_ARTY_WARN = 20;
 OPCOM_ARTY_MARK = 120;
 
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
-// look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way. It is
-// the interceptor's alone -- a hunt needs to find a group that has moved off the fix it was sent to, where a
-// scouting combatant reveals the one cell it stands on (fnc_opcom_look).
+// look like a recon's (fnc_opcom_patrol_sense), but paid for by arriving rather than carried the whole way. It is
+// the interceptor's alone (fnc_opcom_intercept) -- a hunt needs to find a group that has moved off the fix it was
+// sent to, where a patrol without the recon flag stamps that it passed and nothing more.
 OPCOM_INTERCEPT_K = 1;
 
 // Leader within this of a move target counts as arrived, so a live tasking settles to guard/garrison the same
@@ -692,7 +692,7 @@ OPCOM_SENSE_RANGE = 5000;
 OPCOM_SENSE_BATCH = 8;
 
 // A recon-flagged tasking's guaranteed detection reach in Chebyshev grid cells by platform
-// (fnc_opcom_recon_sense), the same cell measure as DUWS_opcom_streamK. Unlike OPCOM_SENSE_RANGE above this
+// (fnc_opcom_patrol_sense), the same cell measure as DUWS_opcom_streamK. Unlike OPCOM_SENSE_RANGE above this
 // is a true sensor bubble, not a scan cap: every BLUFOR group within reach is stamped for certain, virtual
 // or live. Foot and car both sweep the 3x3 around them; a heli buys real reach. Tune.
 OPCOM_RECON_K = createHashMapFromArray [
@@ -817,8 +817,11 @@ OPCOM_BLOCK_K = 2;
 // reach so a holding pulls defense from further out without spacing the standalone builds wider.
 OPCOM_NEED_K = 3;
 
-// A Scout is worth this share of the need it reveals: scouting takes and protects nothing itself.
-OPCOM_SCOUT_SHARE = 0.2;
+// A Patrol is worth this share of the need on the ground it sweeps: a patrol takes and protects nothing itself.
+OPCOM_PATROL_SHARE = 0.2;
+// The force a patrol's threat scale reads 1 at, a rifle squad's: unscaled, Cost pricing the force staked would leave
+// every patrol to the cheapest infantry (fnc_opcom_patrol).
+OPCOM_PATROL_FORCE_REF = 8;
 
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;
@@ -842,7 +845,7 @@ OPCOM_GARRISON_HEAL_RATE = 0.05;
 OPCOM_WATER_MIN_CELLS = 10;
 
 // Flank-route threat-avoidance weight: how hard a lambda=1 grid route (Flank/Encircle) bends around believed
-// enemy force. A direct route (Attack/Scout/Rapport) runs lambda=0 and ignores it. Templates are Phase 5, so
+// enemy force. A direct route (Attack/Patrol/Rapport) runs lambda=0 and ignores it. Templates are Phase 5, so
 // P3 routes direct; the cost-field knob ships wired to the router. Tune.
 OPCOM_ROUTE_LAMBDA = 1;
 

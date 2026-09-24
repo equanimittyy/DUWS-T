@@ -15,7 +15,7 @@ DUWS_fnc_opcom_freeSweep = {
 
 DUWS_fnc_opcom_free = { ["free", DUWS_fnc_opcom_freeSweep] call DUWS_fnc_opcom_tickCached };
 
-// Recon stays out, kept for Scout. Air stays out of an Attack, which must stand in the zone to take it.
+// Recon stays out, kept for Patrol. Air stays out of an Attack, which must stand in the zone to take it.
 DUWS_fnc_opcom_freeCombatants = {
     params [["_air", true]];
     (call DUWS_fnc_opcom_free) select {

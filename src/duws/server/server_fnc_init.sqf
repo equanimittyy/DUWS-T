@@ -132,7 +132,7 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_delay.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_cost.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_intercept.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_scout.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_patrol.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_demand_lift.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_demand.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_fire.sqf";
@@ -782,14 +782,13 @@ fnc_opcom_belief_init = compile preprocessFileLineNumbers "duws\server\warcom\op
 fnc_opcom_belief_upsert = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_upsert.sqf";
 fnc_opcom_belief_deleteAt = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_deleteAt.sqf";
 fnc_opcom_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_sense.sqf";
-fnc_opcom_recon_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_recon_sense.sqf";
+fnc_opcom_patrol_sense = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_patrol_sense.sqf";
 fnc_opcom_decay = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_decay.sqf";
 fnc_opcom_belief_prune = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_belief_prune.sqf";
 fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_init.sqf";
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_rebuild.sqf";
 fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
-fnc_opcom_look = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_look.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
 fnc_opcom_pick = compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";

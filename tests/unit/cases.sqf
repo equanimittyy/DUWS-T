@@ -1774,7 +1774,7 @@ DUWS_fnc_opcom_cellDist = { 1 };
 ["interceptShare: a group a quarter as strong takes a quarter", [5, 20 * (call DUWS_fnc_opcom_blockGain) - 1] call DUWS_fnc_opcom_interceptShare, 0.25] call fnc_assertClose;
 ["interceptShare: past the defense it stops at the whole", [50, 0] call DUWS_fnc_opcom_interceptShare, 1] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_scoutCells: the ground a recon sweeps on its way ---
+// --- DUWS_fnc_opcom_stalenessAt / DUWS_fnc_opcom_patrolCells: the ground a patrol sweeps on its way ---
 OPCOM_BELIEF_EXPIRE = 240;
 DUWS_opcom_grid_seen = [100, -140, 220];
 DUWS_opcom_tick = 220;
@@ -1785,21 +1785,21 @@ OPCOM_GRID_CELL = 500;
 DUWS_opcom_grid_w = 10;
 DUWS_opcom_box = [0, 0, 9, 9];
 DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor ((_p select 0) / 500) };
-["scoutCells: a move inside one cell sweeps its own block",
-    count ([[250, 250, 0], [400, 400, 0], 1] call DUWS_fnc_opcom_scoutCells), 4] call fnc_assertEq;
-["scoutCells: a run of four cells sweeps a band three deep",
-    count ([[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_scoutCells), 12] call fnc_assertEq;
-["scoutCells: a wider reach sweeps a wider band, clipped at the box edge",
-    count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_scoutCells), 28] call fnc_assertEq;
+["patrolCells: a move inside one cell sweeps its own block",
+    count ([[250, 250, 0], [400, 400, 0], 1] call DUWS_fnc_opcom_patrolCells), 4] call fnc_assertEq;
+["patrolCells: a run of four cells sweeps a band three deep",
+    count ([[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_patrolCells), 12] call fnc_assertEq;
+["patrolCells: a wider reach sweeps a wider band, clipped at the box edge",
+    count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_patrolCells), 28] call fnc_assertEq;
 
-// --- DUWS_fnc_opcom_revealValue / _scoutValue / _lookValue: the reveal each unit buys ---
+// --- DUWS_fnc_opcom_patrolValue: what the ground a patrol sweeps is worth ---
 DUWS_opcom_grid_seen = [];
 for "_i" from 1 to 100 do { DUWS_opcom_grid_seen pushBack (DUWS_opcom_tick - OPCOM_BELIEF_EXPIRE) };
-OPCOM_SCOUT_SHARE = 0.2;
-["revealValue: wholly unseen ground pays its need at the share", [[0, 1, 2]] call DUWS_fnc_opcom_revealValue, 1.2] call fnc_assertClose;
-["lookValue: a combatant is worth the one cell it arrives in", [[2250, 2250, 0]] call DUWS_fnc_opcom_lookValue, 0.4] call fnc_assertClose;
-["scoutValue: a recon sweeping the run to the same cell is worth twelve times it",
-    [[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_scoutValue, 4.8] call fnc_assertClose;
+OPCOM_PATROL_SHARE = 0.2;
+["patrolValue: wholly unseen ground pays its need at the share",
+    [[2250, 2250, 0], [2250, 2250, 0], 0] call DUWS_fnc_opcom_patrolValue, 0.4] call fnc_assertClose;
+["patrolValue: a sweep of the run to that cell is worth the twelve cells it covers",
+    [[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_patrolValue, 4.8] call fnc_assertClose;
 
 
 // --- DUWS_fnc_opcom_hireDefense: the defense a hire adds at the zone that raises it ---

@@ -56,8 +56,8 @@ DUWS_fnc_opcom_demandRecon = {
     private _targets = [];
     {
         private _z = [_x, _zones] call DUWS_fnc_opcom_nearestOpen;
-        if (_z isNotEqualTo []) then { _targets pushBack [_x, [_z select 2, _x, _k] call DUWS_fnc_opcom_scoutValue] };
-    } forEach (["scoutSweep"] call DUWS_fnc_opcom_commitBlocked);
+        if (_z isNotEqualTo []) then { _targets pushBack [_x, [_z select 2, _x, _k] call DUWS_fnc_opcom_patrolValue] };
+    } forEach (["patrolSweep"] call DUWS_fnc_opcom_commitBlocked);
     [_targets, _force] call DUWS_fnc_opcom_demandWin
 };
 

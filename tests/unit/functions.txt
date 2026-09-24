@@ -98,11 +98,9 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWin
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_pwin.sqf::DUWS_fnc_opcom_pWinSend
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_abandonAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare
-duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_stalenessAt
-duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutCells
-duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_revealValue
-duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_scoutValue
-duws/server/warcom/opcom/appraisal/value/fnc_opcom_scout.sqf::DUWS_fnc_opcom_lookValue
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_stalenessAt
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolCells
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDefense
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_demand.sqf::DUWS_fnc_opcom_hireDemand
 duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth

@@ -23,7 +23,7 @@ while {true} do {
     };
     try {
         "sense" call _enter;     call fnc_opcom_sense;
-        "recon" call _enter;     call fnc_opcom_recon_sense;
+        "patrol" call _enter;    call fnc_opcom_patrol_sense;
         // OP posts' recon screen, driven on OPCOM's tick beside the belief sensors (defined in fnc_hardpoint_stream).
         "opsense" call _enter;   call DUWS_fnc_hardpointOPSense;
         "decay" call _enter;     call fnc_opcom_decay;
