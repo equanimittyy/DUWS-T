@@ -114,9 +114,9 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
 // appraisal\: executed to define the score and its terms (value\, one file per term), the picker's state, the
-// archetypes, the site queries, the asset tables, supply trucks, the siting pass, the roster, the sources, the commit,
-// recruit, fire, holding and build actions, and the action list. siting reads the Value functions into its table at
-// load, the commit and demand tables read theirs, and the action list reads every row's functions into its own.
+// archetypes, the site queries, the asset tables, supply trucks, the siting pass, the roster, the sources, the lifts, the
+// commit, fire, holding and build actions, and the action list. siting reads the Value functions into its table at
+// load, and the action list reads every row's functions into its own.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_tick_cache.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_score.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick_state.sqf";
@@ -135,7 +135,6 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_cost.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_intercept.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_patrol.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_demand_lift.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_garrison.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\value\fnc_opcom_fire.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_assets.sqf";
@@ -143,8 +142,8 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_siting.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_roster.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_sources.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_lift.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_commit.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_hire.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_fire.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_buy_holding.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_buy_build.sqf";

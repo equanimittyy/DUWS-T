@@ -180,8 +180,8 @@ switch (_verb) do {
         (_lines joinString "\n") remoteExec ["hint", _caller];
     };
     case "ferry": {
-        // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so each
-        // pool is the exact set borrowFerry or taxiBind would pick from.
+        // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so the land
+        // pool is the exact set a debug Move's taxiBind picks from.
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
         private _carries = DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 || {(_x getOrDefault ["ridingOn", -1]) >= 0} };
         private _lines = [];

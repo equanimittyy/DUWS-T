@@ -1,8 +1,8 @@
-// Locality: server, [] call'd at load. The ferry orchestrator and borrow lifecycle: a transportable unit stopped at
-// a water leg borrows the nearest free compatible transport, which carries it across and then garrisons the nearest
-// held zone. `ferryTick` steps the bound crossing through fnc_opcom_ferry_virt or fnc_opcom_ferry_devirt as the hull
-// streams, holding the binding across the boundary; task_step decides the streaming, as for every tasking. The rider
-// owns its route; the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own --
+// Locality: server, [] call'd at load. The ferry orchestrator and carry lifecycle: a transportable unit stopped at a
+// water leg is bound to the lift a Ferry pick sources (fnc_opcom_lift), which carries it across and then garrisons the
+// nearest held zone. `ferryTick` steps the bound crossing through fnc_opcom_ferry_virt or fnc_opcom_ferry_devirt as the
+// hull streams, holding the binding across the boundary; task_step decides the streaming, as for every tasking. The
+// rider owns its route; the carrier is fetched by it, never commanded, and a bound rider takes no turn of its own --
 // task_step skips it (docs/plans/opcom/opcom_plan.md §Shipped).
 if (!isServer) exitWith {};
 
@@ -35,8 +35,8 @@ DUWS_fnc_opcom_ferryApproach = {
     if ((_t get "moveType") isEqualTo "boat") then { [_landPt] call DUWS_fnc_opcom_nearestWater } else { _landPt }
 };
 
-// Shared by the borrow and the debug inspector so the two never drift. _excludeId drops one id (a rider never
-// borrows itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
+// Shared by a debug Move's taxi bind and the debug inspector so the two never drift. _excludeId drops one id (a rider
+// never lifts itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
 // re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.
 DUWS_fnc_opcom_ferryPool = {
     params [["_excludeId", -1], ["_moveTypes", ["boat", "rotary"]]];
@@ -60,20 +60,6 @@ DUWS_fnc_opcom_carryBind = {
     _rider set ["taxiDrop", _drop];
     // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.
     if ((_rider get "grp") isNotEqualTo "") then { [_rider] call DUWS_fnc_opcom_reOrderLive };
-};
-
-// Borrow the nearest free compatible transport for a rider at a water leg; returns it, or nil if none is free.
-DUWS_fnc_opcom_borrowFerry = {
-    params ["_rider"];
-    private _rpos = _rider get "pos";
-    private _pool = [_rider get "id"] call DUWS_fnc_opcom_ferryPool;
-    if (_pool isEqualTo []) exitWith { nil };
-    private _best = 1e12; private _pick = -1;
-    { private _dd = (_x get "pos") distance2D _rpos; if (_dd < _best) then { _best = _dd; _pick = _forEachIndex } } forEach _pool;
-    private _tr = _pool select _pick;
-    [_tr, _rider] call DUWS_fnc_opcom_carryBind;
-    ["INFO", "OPCOM", format ["ferry: tasking %1 borrows %2 transport %3 for a water leg", _rider get "id", _tr get "moveType", _tr get "id"]] call fnc_log;
-    _tr
 };
 
 // Detach a rider from its lift and put it back on its own route: a drop spawn runs deVirt's reOrderLive while the

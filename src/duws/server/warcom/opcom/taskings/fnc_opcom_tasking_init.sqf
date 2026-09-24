@@ -30,13 +30,6 @@ DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["boat",         [["boat"],      ["transport", "noncombat"]]]
 ];
 
-// One row per menu row, so the pick draws what it hires and the archetype can lean on a kind (4C.1). Pushed here,
-// not with the rest of the action list, which loads before this table exists.
-{
-    DUWS_opcom_actions pushBack [format ["recruit_%1", _x],
-        DUWS_fnc_opcom_recruitTargets, DUWS_fnc_opcom_recruitRun, [_x], "recruit"];
-} forEach (keys DUWS_opcom_recruitMenu);
-
 // Composition's first token -> movement type; a token absent here defaults to "inf".
 DUWS_opcom_moveType = createHashMapFromArray [
     ["squad", "inf"], ["wp_team", "inf"], ["recon", "inf"], ["team", "inf"],

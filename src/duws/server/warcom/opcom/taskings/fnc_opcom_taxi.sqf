@@ -1,6 +1,7 @@
-// Locality: server, [] call'd at load. Land-taxi: a lift over dry ground for a foot unit just given an order, bound
-// at commit when the pickup drive plus the carry beats the walk (opcom_plan.md §Appraisal). The carry itself is the
-// ferry's -- same binding, same orchestrator, same live and virtual steps -- with the drop latched at the bind.
+// Locality: server, [] call'd at load. Land-taxi: a lift over dry ground for a foot unit, which the pick sources with
+// the order it carries (fnc_opcom_lift) and a debug Move binds from the free hulls (opcom_plan.md §Sourcing). The carry
+// itself is the ferry's -- same binding, same orchestrator, same live and virtual steps -- with the drop latched at the
+// bind.
 if (!isServer) exitWith {};
 
 // Ticks to cross a straight-line distance, the measure the delay discount runs on.
@@ -31,7 +32,7 @@ DUWS_fnc_opcom_taxiWorth = {
     _value * ((2 ^ ((_walk - _lift) / OPCOM_VALUE_HALFLIFE)) - 1)
 };
 
-// The rider's fields come loose, so the Recruit rows can price an order the pick has not committed yet.
+// The rider's fields come loose, so the sweep can price an order the pick has not committed yet.
 DUWS_fnc_opcom_taxiSaving = {
     params ["_value", "_rp", "_riderMove", "_to", "_from", "_moveType"];
     private _lift = [(_from distance2D _rp) + (_rp distance2D _to), _moveType] call DUWS_fnc_opcom_moveTicks;

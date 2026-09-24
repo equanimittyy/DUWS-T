@@ -1809,14 +1809,6 @@ OPCOM_AP_PER_FORCE = 1;
 ["garrisonValue: the larger of the two, never the sum",
     [10, 9, 4, 0.2, 36] call DUWS_fnc_opcom_garrisonValue, 1] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_hireDemand: the best role a hire fills ---
-DUWS_opcom_hireDemands = [{ [2, [1]] }, { [5, [2]] }, { [5, [3]] }, { [0, []] }];
-["hireDemand: the best role wins, and a tie keeps the earlier one", [] call DUWS_fnc_opcom_hireDemand, [5, [2]]] call fnc_assertEq;
-DUWS_opcom_hireDemands = [{ params ["_flags"]; [[0, 3] select ("supply" in _flags), [9]] }];
-["hireDemand: each role reads the hire's own fields", [["supply"]] call DUWS_fnc_opcom_hireDemand, [3, [9]]] call fnc_assertEq;
-DUWS_opcom_hireDemands = [{ [0, []] }];
-["hireDemand: a hire no role wants serves nothing", [] call DUWS_fnc_opcom_hireDemand, [0, []]] call fnc_assertEq;
-
 // --- DUWS_fnc_opcom_taxiWorth: what a lift adds by landing the same Value sooner ---
 OPCOM_VALUE_HALFLIFE = 360;
 ["taxiWorth: a lift that saves a half-life doubles what the order returns", [10, 720, 360] call DUWS_fnc_opcom_taxiWorth, 10] call fnc_assertClose;
@@ -1977,3 +1969,44 @@ DUWS_fnc_opcom_unitCount = { 50 };
 OPCOM_PATROL_FORCE_REF = 8;
 ["patrolScale: a recon scales 1 whatever its force", [["recon"], 3] call DUWS_fnc_opcom_patrolScale, 1] call fnc_assertClose;
 ["patrolScale: a half-squad combatant scales a half", [[], 4] call DUWS_fnc_opcom_patrolScale, 0.5] call fnc_assertClose;
+
+// --- DUWS_fnc_opcom_lineDry: whether a hull could keep to the ground a straight line crosses ---
+OPCOM_GRID_CELL = 500;
+DUWS_fnc_opcom_isWaterPt = { params ["_p"]; (_p select 0) > 900 && {(_p select 0) < 1100} };
+["lineDry: a line short of the water is dry", [[0, 0, 0], [800, 0, 0]] call DUWS_fnc_opcom_lineDry, true] call fnc_assertEq;
+["lineDry: a line across it is wet", [[0, 0, 0], [2000, 0, 0]] call DUWS_fnc_opcom_lineDry, false] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_liftFor: the lift a transportable order rides, if any pays ---
+OPCOM_AP_PER_KM = 0.5;
+DUWS_fnc_opcom_zonesOpen = { [] };
+DUWS_fnc_opcom_lineDry = { true };
+DUWS_fnc_opcom_freeTaxis = { [[["free", 5], [0, 0, 0], 2, "wheeled", ["transport"], 0, 2, 1]] };
+DUWS_fnc_opcom_hireSources = { [[["hire", "trans_heli", "z"], [0, 0, 0], 2, "rotary", ["transport"], 10, 10, 1]] };
+DUWS_fnc_opcom_taxiSaving = { params ["_v", "", "", "", "", "_mt"]; _v * ([0.5, 1] select (_mt isEqualTo "rotary")) };
+private _rider = [["free", 1], [0, 0, 0], 8, "inf", ["transportable"], 0, 8, 1];
+["liftFor: a unit that cannot ride takes no lift",
+    [[["free", 2], [0, 0, 0], 8, "tracked", [], 0, 8, 1], [5000, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
+["liftFor: the lift whose saving most exceeds its Cost wins",
+    [_rider, [5000, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, [["hire", "trans_heli", "z"], 20, 10, 10]] call fnc_assertEq;
+["liftFor: a lift the budget cannot pay is passed over",
+    [_rider, [5000, 0, 0], 20, 1, 5] call DUWS_fnc_opcom_liftFor, [["free", 5], 10, 0, 2]] call fnc_assertEq;
+["liftFor: the odds scale the saving, so a long-shot order walks",
+    [_rider, [5000, 0, 0], 20, 0.1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
+DUWS_fnc_opcom_hireSources = { [] };
+DUWS_fnc_opcom_lineDry = { false };
+["liftFor: a hull takes no ride over water", [_rider, [5000, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_liftOffer: a commit candidate, with the lift it rides when one pays ---
+WARCOM_opfor_ap = 100;
+DUWS_fnc_opcom_sourceName = { params ["_ref"]; str (_ref select 1) };
+DUWS_fnc_opcom_liftFor = { [["free", 5], 4, 3, 2] };
+["liftOffer: a lift adds its saving, price and Cost",
+    [[_rider, 10, 0.5, 6, 0], [5000, 0, 0], ["capture", [5000, 0, 0]], "Attack X"] call DUWS_fnc_opcom_liftOffer,
+    [[["free", 1], ["capture", [5000, 0, 0]], 5, [["free", 5], [5000, 0, 0]]], 3, "Attack X with 1 riding 5", 14, 0.5, 8]] call fnc_assertEq;
+["liftOffer: an order with no task takes no lift",
+    [[_rider, 10, 1, 6, 10], [5000, 0, 0], [], "Garrison X"] call DUWS_fnc_opcom_liftOffer,
+    [[["free", 1], [], 10, []], 10, "Garrison X with 1", 10, 1, 6]] call fnc_assertEq;
+DUWS_fnc_opcom_liftFor = { [] };
+["liftOffer: with no lift the unit walks",
+    [[_rider, 10, 0.5, 6, 0], [5000, 0, 0], ["capture", [5000, 0, 0]], "Attack X"] call DUWS_fnc_opcom_liftOffer,
+    [[["free", 1], ["capture", [5000, 0, 0]], 5, []], 0, "Attack X with 1", 10, 0.5, 6]] call fnc_assertEq;

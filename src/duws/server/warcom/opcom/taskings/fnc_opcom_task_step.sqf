@@ -75,9 +75,9 @@ private _stepContext = {
     [_pos, _grp, _live, _engaged, _arrived, _adv]
 };
 
-// A transportable unit at its near shore with a water leg ahead borrows a transport (fnc_opcom_ferry); no lift free,
-// it waits and retries, WARNing every OPCOM_FERRY_STRAND_TICKS. -> true if it bound to a lift this tick.
-// Reads the order off the record, never a copy taken before the step: an intercept that gave up is a guard now.
+// A transportable unit at its near shore with a water leg ahead counts the ticks it waits, which is what offers it to
+// the Ferry action (fnc_opcom_lift), WARNing every OPCOM_FERRY_STRAND_TICKS. Reads the order off the record, never a
+// copy taken before the step: an intercept that gave up is a guard now.
 private _ferryStage = {
     params ["_t", "_ctx"];
     _ctx params ["_pos", "", "_live", "_engaged", "_arrived", "_adv"];
@@ -90,25 +90,18 @@ private _ferryStage = {
         };
         _n
     };
-    if (!_need) exitWith { _t set ["strandTicks", 0]; false };
-    private _tr = [_t] call DUWS_fnc_opcom_borrowFerry;
-    if (!isNil "_tr") exitWith { _t set ["strandTicks", 0]; true };
+    if (!_need) exitWith { _t set ["strandTicks", 0] };
     private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
     _t set ["strandTicks", _s];
     if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
-        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no lift free", _t get "id", _s]] call fnc_log;
+        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no Ferry picked", _t get "id", _s]] call fnc_log;
     };
-    false
 };
 
 private _streamStage = {
-    params ["_t", "_ctx", "_bound"];
+    params ["_t", "_ctx"];
     _ctx params ["", "_grp", "_live", "_engaged"];
-    if (!_live) exitWith {
-        // Skip the stream-in for a rider that just bound to a ferry -- the transport owns it now.
-        if ((_t getOrDefault ["ridingOn", -1]) < 0) then { [_t] call _deVirtIfNear };
-    };
-    if (_bound) exitWith {};
+    if (!_live) exitWith { [_t] call _deVirtIfNear };
     if (([_t, leader _grp, _engaged] call _stowIfFar) && {(_t getOrDefault ["settleZone", ""]) isNotEqualTo ""}) then {
         [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto;
     };
@@ -126,8 +119,8 @@ private _stepOne = {
     };
     private _ctx = [_t, _live, _grp, _adv] call _stepContext;
     if ([_t, _ctx] call (_row select 1)) exitWith {};
-    private _bound = [_t, _ctx] call _ferryStage;
-    [_t, _ctx, _bound] call _streamStage;
+    [_t, _ctx] call _ferryStage;
+    [_t, _ctx] call _streamStage;
 };
 
 {
