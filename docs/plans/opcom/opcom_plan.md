@@ -132,8 +132,9 @@ rather than designed:
   whether a combatant patrol crowds the recon rows out of the hire; whether patrol needs a cap on the units out at
   once, the fallback being a count per campaign zone; whether a patrol left standing is walked on by the next pick or
   holds.
-- **Re-garrison.** `OPCOM_REGARRISON_FRAC` (0.6) and the rest of its list
-  ([opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#re-garrison-4b9)).
+- **Re-garrison.** `OPCOM_REGARRISON_FRAC` (0.6), and whether the pool floor is needed at all once the score's own
+  slope is played. Whether the reserve pool should field a worn unit at its `effForce` rather than at its whole
+  composition, which would make resting a cost rather than a free repair.
 - **Arty.** `OPCOM_ARTY_LETHAL`, `OPCOM_ARTY_ROUNDS` and `OPCOM_ARTY_WARN`: how often a sighting is fresh and close
   enough to shell at all now that belief is the only channel, how bunched BLUFOR actually stands, since that is what
   the Value turns on, whether the random rounds draw pays for the step it costs, and whether the telegraph gives the
@@ -227,7 +228,7 @@ so it moves no faster than a truck delivers.
 | Intercept (QRF) | Σ need over the sighting's 7×7 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
-| Re-garrison | the larger of the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`, and the defense it adds at the site it returns to — a unit counts once ([opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#re-garrison-4b9)) |
+| Re-garrison | the larger of the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`, and the defense it adds at the site it returns to — a unit counts once |
 | Arty | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 
 - **Rapport favours a neutral town.** A town near −10 turns anyway on the free area-of-influence drift, and a −3
@@ -373,9 +374,9 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   0, 0.5, 0.75, 0.875, so a new hardpoint adds half of what each cell in its reach still lacks. Every type shares
   that reach. A build still siting or on its truck counts, as an asset does
   against its cap, so the siting pass never sends a second truck to ground the first is still driving to.
-- **The grid overlay shows all three.** The Views page's OPCOM grid labels toggle draws each cell's need, cover
-  and traffic, so the fields can be checked in play before a Value leans on them. The toggle is off by default:
-  the overlay opens as the lattice, the force colours and the tasking units alone.
+- **The grid overlay shows all three.** The Views page's OPCOM need/cover/traffic toggle draws each cell's need,
+  cover and traffic, so the fields can be checked in play before a Value leans on them. Each grid layer toggle is
+  off by default: the overlay opens as the lattice and the tasking units alone.
 - A first hardpoint at a frontline zone worth 40 earns about 10, beside that zone's Reinforce at 15; one beside
   other hardpoints earns little.
 
@@ -515,8 +516,8 @@ force-short action sits in buildup while the roster or Recruit fills it.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order, so the order stays in the table with
-the debug page as its only caller until 5.2
-([opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#orders)).
+the debug page as its only caller until 5.2 (`taskings/fnc_opcom_orders.sqf` is the table that knows every
+order).
 
 **The runner**, each tick over every live intent with roles: refresh each bound unit's status; a required role
 `dead` or lost → **abort** (release the survivors, no AP refund); else test the current state's transition, and each
@@ -605,10 +606,9 @@ run `capture` and take opposite values.
   (`taskings/fnc_opcom_route.sqf`): a negative edge weight stops A* returning the best path and leaves the pop cap as
   the only bound on a pathological re-open. A `probe` that has to find contact gets it by choosing a believed cell as
   its target, never by pricing threat below 0.
-- **A `return` at high λ is the cheap half of an open question.** Re-garrison asks whether a withdrawal needs a `P(win)` of
-  its own, since a unit sent home through a BLUFOR advance is worse off than one holding
-  ([opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#re-garrison-4b9)). Routing around the advance
-  answers it without a second odds term.
+- **A `return` at high λ is the cheap half of an open question.** Re-garrison asks whether a withdrawal needs a
+  `P(win)` of its own, since a unit sent home through a BLUFOR advance is worse off than one holding. Routing around
+  the advance answers it without a second odds term.
 
 **Routes read threat on the road and off it.** A wheeled or tracked route takes the same threat term as the foot
 cell chain, `OPCOM_ROUTE_LAMBDA` × the role's λ × `_ene`, so a hull takes a flanking road, or leaves the road to
