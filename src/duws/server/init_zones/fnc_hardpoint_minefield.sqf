@@ -197,12 +197,32 @@ fnc_hardpoint_minefield_cycle = {
     } forEach _squares;
 };
 
-// [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, jip] -- marks the mines for BLUFOR through the
-// engine's own map and 3D mine icons. Sent to every machine because revealMine's locality is undocumented,
-// and running it everywhere is correct either way.
+// [_mines] remoteExec ["fnc_hardpoint_minefield_reveal", 0, jip] -- adds the mines to this machine's map icons.
+// Not west revealMine: that also draws the engine's 3D mine icons, at a range only the difficulty's
+// detected-mines option sets. Cost: BLUFOR AI no longer steers clear of a revealed field.
 fnc_hardpoint_minefield_reveal = {
     params ["_mines"];
-    { if (!isNull _x) then { west revealMine _x } } forEach _mines;
+    if (!hasInterface) exitWith {};
+    DUWS_revealedMines = ((missionNamespace getVariable ["DUWS_revealedMines", []]) select { !isNull _x }) + _mines;
+};
+
+// [] spawn fnc_hardpoint_minefield_map_icons -- client. Draws each revealed mine on the main map with the
+// engine's own detected-mine icon.
+fnc_hardpoint_minefield_map_icons = {
+    if (!hasInterface) exitWith {};
+    DUWS_mineIcon = getText (configFile >> "CfgInGameUI" >> "Cursor" >> "explosive");
+    // Config colour entries can be profile-colour expression strings rather than numbers.
+    DUWS_mineIconColour = (getArray (configFile >> "CfgInGameUI" >> "Cursor" >> "explosiveColor"))
+        apply { if (_x isEqualType "") then { call compile _x } else { _x } };
+    waitUntil { !isNull findDisplay 12 };
+    (findDisplay 12 displayCtrl 51) ctrlAddEventHandler ["Draw", {
+        params ["_map"];
+        {
+            if (!isNull _x && {mineActive _x}) then {
+                _map drawIcon [DUWS_mineIcon, DUWS_mineIconColour, getPosATL _x, 24, 24, 0, ""];
+            };
+        } forEach (missionNamespace getVariable ["DUWS_revealedMines", []]);
+    }];
 };
 
 // [_center, _dir, _cols, _rows] call fnc_hardpoint_minefield_grid -> [[x,y], ...] square centres of a

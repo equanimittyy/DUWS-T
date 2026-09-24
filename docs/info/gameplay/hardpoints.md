@@ -298,11 +298,13 @@ revealed zone and a hardpoint row carry.
 
 A minefield is also found when its first mine is gone: set off, disarmed or destroyed. The clear check
 reads its mine list every tick, and reveals the field once fewer mines are armed than were laid. Revealing
-a minefield runs `west revealMine` on every mine, on every machine and in the JIP queue, so the engine
-marks each mine for BLUFOR with its own mine icons, on the map and in 3D, wherever the difficulty's
-detected-mines option allows. BLUFOR AI then also steers clear of the field. Clearing the field removes
-the JIP entry. A streamed field is not JIP-queued: its objects live only while somebody is near, so a
-queue entry would outlive them. The squares standing at the moment of reveal are marked then — a field is
+a minefield sends its mines to every machine and to the JIP queue (`fnc_hardpoint_minefield_reveal`), and
+each player's main map draws every mine with the engine's own detected-mine icon, read from
+`CfgInGameUI >> Cursor >> explosive` (`fnc_hardpoint_minefield_map_icons`). The reveal does not run
+`west revealMine`: that also draws the engine's 3D mine icons, at a range that only the difficulty's
+detected-mines option sets. As a result, BLUFOR AI does not steer clear of a revealed field. Clearing the
+field removes the JIP entry. A streamed field is not JIP-queued: its objects live only while somebody is
+near, so a queue entry would outlive them. The squares standing at the moment of reveal are marked then — a field is
 usually given away by a mine going off under somebody, who is therefore inside one — and every later
 square marks itself as it is made.
 

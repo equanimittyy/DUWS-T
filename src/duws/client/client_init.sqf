@@ -131,6 +131,7 @@ waituntil {sleep 1;WARCOM_init_done;};
 [] call fnc_protect_civ_markers;
 [] call fnc_random_event_ied_markers;
 
+[] spawn fnc_hardpoint_minefield_map_icons;
 
 if (isMultiplayer) then {
 
