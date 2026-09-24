@@ -13,9 +13,9 @@
 // field and leaves BLUFOR to detect and clear it.
 
 #define MINE_CELL 10
-// A mine may land this far from its cell's centre, 5 m past the cell edge, so neighbouring cells overlap
-// and the field clumps and gaps like a hand-laid one instead of tiling evenly.
-#define MINE_SPREAD 10
+// A mine may land this far from its cell's centre, out to the cell edge, which is enough to break up the grid.
+// A spread past the edge let neighbouring cells overlap, and the clumps and gaps it made read as too random.
+#define MINE_SPREAD 5
 // Half a square's diagonal plus the spread past its edge: no mine is made under somebody standing there.
 #define MINE_NO_POP 50
 
@@ -30,12 +30,12 @@ DUWS_mineStreamOut = 450;
 
 // [variant, classes, mines per cell]. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
-// A fractional count is rolled per cell, so AT's 0.3 averages 7.5 mines a square and AP's 0.363 averages 9.075.
+// A fractional count is rolled per cell, so AT's 0.36 averages 9 mines a square and AP's 0.44 averages 11.
 // Thin, because a belt is deep rather than dense: what a vehicle meets is the mines down the whole depth it
 // crosses, so depth buys the same bite for fewer mines standing at once.
 DUWS_mineVariants = [
-    ["AT", ["ATMine"], 0.3],
-    ["AP", ["APERSMine"], 0.363]
+    ["AT", ["ATMine"], 0.36],
+    ["AP", ["APERSMine"], 0.44]
 ];
 
 // [_center, _dir, _variant] call fnc_hardpoint_minefield_plan -> [[[x,y], class], ...]
