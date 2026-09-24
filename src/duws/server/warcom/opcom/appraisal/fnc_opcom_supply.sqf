@@ -2,39 +2,17 @@
 // that sends it (opcom_plan.md §What AP buys).
 if (!isServer) exitWith {};
 
-// -> [[source, pos, cost], ...]: an idle truck at 0, an open zone's hire at the hire price.
-DUWS_fnc_opcom_truckSourcesSweep = {
-    private _out = [];
-    {
-        if ("supply" in (_x get "flags") && {DUWS_opcom_tick >= (_x get "hold")} && {[_x] call DUWS_fnc_opcom_drawable}) then {
-            _out pushBack [["truck", _x get "id"], _x get "pos", 0];
-        };
-    } forEach DUWS_opcom_taskings;
-    private _comp = (DUWS_opcom_recruitMenu get "truck") select 0;
-    private _hire = OPCOM_AP_UNIT getOrDefault ["truck", 0];
-    // A zero price is an unpriced row, not a free truck; an empty class is a faction that cannot field one yet.
-    if (_hire > 0 && {([_comp select 0, "OPF"] call DUWS_fnc_tokenClass) isNotEqualTo ""}) then {
-        {
-            _x params ["_zk"];
-            _out pushBack [["hire", _zk], ([_zk] call fnc_site_at) get "pos", _hire];
-        } forEach (call DUWS_fnc_opcom_zonesOpen);
-    };
-    _out
-};
-
-DUWS_fnc_opcom_truckSources = { ["truckSources", DUWS_fnc_opcom_truckSourcesSweep] call DUWS_fnc_opcom_tickCached };
-
-// -> [source, cost, distance] for the cheapest truck to _dest, or [] with no source.
-DUWS_fnc_opcom_truckFor = {
-    params ["_sources", "_dest"];
-    private _best = [];
-    {
-        _x params ["_src", "_pos", "_base"];
-        private _d = _pos distance2D _dest;
-        private _cost = _base + OPCOM_AP_PER_KM * _d / 1000;
-        if (_best isEqualTo [] || {_cost < (_best select 1)}) then { _best = [_src, _cost, _d] };
-    } forEach _sources;
-    _best
+// -> [[source ref, price, Value, Cost], ...]: the truck that best serves a delivery of _value to _dest, and a dearer one
+// when it outscores that (DUWS_fnc_opcom_bestSources). _price is the goods', which every truck adds its own to.
+DUWS_fnc_opcom_truckOffers = {
+    params ["_dest", "_value", "_price"];
+    private _free = ["freeTrucks", {
+        ((call DUWS_fnc_opcom_free) select { "supply" in (_x get "flags") }) apply { [_x] call DUWS_fnc_opcom_freeSource }
+    }] call DUWS_fnc_opcom_tickCached;
+    private _hires = [{ params ["_flags"]; "supply" in _flags }, _dest, call DUWS_fnc_opcom_zonesOpen]
+        call DUWS_fnc_opcom_hireSources;
+    ([(_free + _hires) apply { [_x, _value] }, _dest, false, _price, _price] call DUWS_fnc_opcom_bestSources)
+        apply { _x params ["_src", "_v", "", "_c", "_p"]; [_src select 0, _p, _v, _c] }
 };
 
 DUWS_fnc_opcom_supplyCount = {
@@ -56,17 +34,9 @@ DUWS_fnc_opcom_townsSupplied = {
 // -> true if the truck set off. A hire the router refuses is dismissed, so a refused action leaves no unpaid truck.
 DUWS_fnc_opcom_supplyRun = {
     params ["_src", "_dest", "_errand"];
-    _src params ["_kind", "_ref"];
-    private _t = if (_kind isEqualTo "hire") then {
-        ["truck", ([_ref] call fnc_site_at) get "pos", _ref, false] call fnc_opcom_recruit
-    } else {
-        [_ref] call DUWS_fnc_opcom_byId
-    };
+    private _t = [_src] call DUWS_fnc_opcom_raise;
     if (isNil "_t") exitWith { false };
     private _ok = [_t, "errand", _dest, "", _errand] call fnc_opcom_task;
-    if (!_ok && {_kind isEqualTo "hire"}) then {
-        DUWS_opcom_taskings = DUWS_opcom_taskings - [_t];
-        [_ref] call DUWS_fnc_opcom_zoneReserveSync;
-    };
+    if (!_ok) then { [_src, _t] call DUWS_fnc_opcom_dismiss };
     _ok
 };

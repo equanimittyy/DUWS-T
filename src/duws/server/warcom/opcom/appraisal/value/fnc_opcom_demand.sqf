@@ -1,4 +1,4 @@
-// Locality: server, [] call'd at load. What a hire is worth: the action it unblocks, the lift or stock it gives, and
+// Locality: server, [] call'd at load. What a hire is worth: the action it unblocks, the lift it gives, and
 // the defense it adds at the zone that raises it (opcom_plan.md §Value). The lift roles are fnc_opcom_demand_lift's.
 // Read from the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
@@ -61,25 +61,13 @@ DUWS_fnc_opcom_demandRecon = {
     [_targets, _force] call DUWS_fnc_opcom_demandWin
 };
 
-// An idle truck spares the next supply buy its hire. The saving splits across the trucks already idle, so the stock
-// settles where the hire's score meets Bank's; it rests at a random open zone, since that buy's target is unknown.
-DUWS_fnc_opcom_demandSupply = {
-    params ["_flags", "", "", "_zones"];
-    if !("supply" in _flags) exitWith { [0, []] };
-    private _idle = { ((_x select 0) select 0) isEqualTo "truck" } count (call DUWS_fnc_opcom_truckSources);
-    private _v = (OPCOM_AP_UNIT getOrDefault ["truck", 0]) / (_idle + 1);
-    if (_v <= 0) exitWith { [0, []] };
-    [_v, (selectRandom _zones) select 2]
-};
-
 // Each role reads [flags, force, moveType, zones, row] and answers [Value, the target's position], [0, []] where the
 // hire serves nothing. On a tie the earlier role keeps the target.
 DUWS_opcom_hireDemands = [
     DUWS_fnc_opcom_demandCombat,
     DUWS_fnc_opcom_demandRecon,
     DUWS_fnc_opcom_demandStrand,
-    DUWS_fnc_opcom_demandTaxi,
-    DUWS_fnc_opcom_demandSupply
+    DUWS_fnc_opcom_demandTaxi
 ];
 
 DUWS_fnc_opcom_hireDemand = {

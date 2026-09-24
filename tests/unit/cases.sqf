@@ -1590,14 +1590,6 @@ private _survivors = call fnc_test_zeroGrid;
 [_survivors, [900, 3800], 2, 1000] call DUWS_fnc_opcom_deposit;
 ["deposit: adds and removes in any order match a build of the survivors", [_mixed, _survivors] call fnc_test_maxGap, 0] call fnc_assertClose;
 
-// --- DUWS_fnc_opcom_truckFor: the cheapest truck source to a destination ---
-OPCOM_AP_PER_KM = 0.5;
-["truck_for: an idle truck beats a hire as far away",
-    [[[["truck", 1], [0, 0, 0], 0], [["hire", "z"], [0, 0, 0], 4]], [1000, 0, 0]] call DUWS_fnc_opcom_truckFor, [["truck", 1], 0.5, 1000]] call fnc_assertEq;
-["truck_for: a near hire beats a far idle truck",
-    [[[["truck", 1], [20000, 0, 0], 0], [["hire", "z"], [1000, 0, 0], 4]], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, [["hire", "z"], 4.5, 1000]] call fnc_assertEq;
-["truck_for: no source is no truck", [[], [0, 0, 0]] call DUWS_fnc_opcom_truckFor, []] call fnc_assertEq;
-
 // --- DUWS_fnc_opcom_argMax: the siting pass's best sample ---
 ["argMax: the largest value's index", [3, 9, 1] call DUWS_fnc_opcom_argMax, 1] call fnc_assertEq;
 ["argMax: a tie keeps the first", [4, 4] call DUWS_fnc_opcom_argMax, 0] call fnc_assertEq;
@@ -1889,24 +1881,83 @@ zone_meta_array = [[1, [0, 0, 0], 200]];
 ["aoi_in_any_zone: 350 m past the edge is out with a 300 m margin", [[550, 0, 0], 300] call fnc_aoi_in_any_zone, false] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_townTargets: the towns a supply truck can serve with an errand ---
-OPCOM_AP_PER_KM = 0.5;
-// Two sources, so each town takes its own: sqf-vm aborts on one array held twice in a result.
-DUWS_fnc_opcom_truckSources = { [[["truck", 7], [0, 0, 0], 0], [["hire", "z"], [3000, 0, 0], 0]] };
+// A fresh source per call, so each town takes its own: sqf-vm aborts on one array held twice in a result.
+DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base, _v * 0.5, _base + 2]] };
 DUWS_fnc_opcom_townsSupplied = { [1] };
 DUWS_fnc_opcom_supplyFull = { false };
 fnc_town_site_key = { params ["_i"]; format ["town_%1", _i] };
 DUWS_fnc_opcom_siteContested = { params ["_k"]; _k isEqualTo "town_2" };
 DUWS_fnc_opcom_townPos = { params ["_i"]; [1000 * _i, 0, 0] };
-DUWS_fnc_opcom_truckDelay = { 0.5 };
 test_townList = [5, 5, 5, 0, 5];
 private _townOffer = { params ["_i", "_tier"]; if (_tier < 1) exitWith { [] }; [10, format ["T%1", _i], 4] };
 private _towns = ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets;
 ["townTargets: a served, contested or refused town is passed over", _towns apply { _x select 0 },
-    [["reinforce", 0, ["truck", 7]], ["reinforce", 4, ["hire", "z"]]]] call fnc_assertEq;
-["townTargets: the price carries the nearest truck's drive", _towns apply { _x select 1 }, [10, 11]] call fnc_assertEq;
-["townTargets: the Value is discounted by the drive", _towns apply { _x select 3 }, [2, 2]] call fnc_assertEq;
-DUWS_fnc_opcom_truckSources = { [] };
+    [["reinforce", 0, ["free", 7]], ["reinforce", 4, ["free", 7]]]] call fnc_assertEq;
+["townTargets: each candidate carries its truck's price, Value and Cost", _towns apply { _x select [1, 5] },
+    [[10, "T0", 2, 1, 12], [10, "T4", 2, 1, 12]]] call fnc_assertEq;
+DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base, _v, _base + 9], [["hire", "truck", "z"], _base + 3, _v, _base + 3]] };
+["townTargets: a town offers a dearer truck beside the best it can pay",
+    (["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets) apply { (_x select 0) select 2 },
+    [["free", 7], ["hire", "truck", "z"], ["free", 7], ["hire", "truck", "z"]]] call fnc_assertEq;
+DUWS_fnc_opcom_truckOffers = { [] };
 ["townTargets: no truck is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
-DUWS_fnc_opcom_truckSources = { [[["truck", 7], [0, 0, 0], 0], [["hire", "z"], [3000, 0, 0], 0]] };
+DUWS_fnc_opcom_truckOffers = { params ["", "_v", "_base"]; [[["free", 7], _base, _v * 0.5, _base + 2]] };
 DUWS_fnc_opcom_supplyFull = { true };
 ["townTargets: a full supply cap is no target", ["reinforce", "test_townList", _townOffer] call DUWS_fnc_opcom_townTargets, []] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_bestSources: the source a target is offered with, free or hired ---
+OPCOM_AP_PER_KM = 0.5;
+OPCOM_PWIN_FLOOR = 0.3;
+WARCOM_opfor_ap = 100;
+DUWS_fnc_opcom_moveDelay = { 1 };
+DUWS_fnc_opcom_pWinWith = { 0.9 };
+DUWS_fnc_opcom_pWinSend = { params ["", "", "_force"]; [0.2, 0.8] select (_force > 1) };
+private _fnc_free = { params ["_x0", "_force"]; [["free", 1], [_x0, 0, 0], _force, "inf", [], 0, 4, 1] };
+private _fnc_hire = { params ["_x0", "_mix"]; [["hire", "rifles", "z"], [_x0, 0, 0], 8, "inf", [], 10, 10, _mix] };
+["bestSources: a near free unit beats a hire, which it outscores on Cost",
+    [[[[0, 4] call _fnc_free, 20], [[0, 1] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources,
+    [[[["free", 1], [0, 0, 0], 4, "inf", [], 0, 4, 1], 20, 1, 4, 0]]] call fnc_assertEq;
+["bestSources: distance is scored, so a near hire beats a free unit 20 km off",
+    ([[[[20000, 4] call _fnc_free, 20], [[0, 1] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources)
+        apply { [(_x select 0) select 0, _x select 3, _x select 4] },
+    [[["hire", "rifles", "z"], 10, 10]]] call fnc_assertEq;
+["bestSources: a free unit under the P(win) floor is no source in a fight",
+    ([[[[0, 1] call _fnc_free, 20], [[0, 1] call _fnc_hire, 20]], [0, 0, 0], true] call DUWS_fnc_opcom_bestSources)
+        apply { [(_x select 0) select 0, _x select 2] },
+    [[["hire", "rifles", "z"], 0.9]]] call fnc_assertEq;
+["bestSources: a hire's Value takes its mix factor",
+    ([[[[0, 0.5] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources) apply { _x select 1 },
+    [10]] call fnc_assertEq;
+["bestSources: the action's own price and Cost add to the source's",
+    ([[[[1000, 4] call _fnc_free, 20]], [0, 0, 0], false, 15, 15] call DUWS_fnc_opcom_bestSources) apply { _x select [3, 2] },
+    [[19.5, 15]]] call fnc_assertEq;
+WARCOM_opfor_ap = 5;
+["bestSources: a dearer source that outscores the best the wallet pays is offered beside it",
+    ([[[[20000, 4] call _fnc_free, 20], [[0, 1] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources)
+        apply { (_x select 0) select 0 },
+    [["free", 1], ["hire", "rifles", "z"]]] call fnc_assertEq;
+["bestSources: with nothing the wallet pays, the best is still offered to save for",
+    ([[[[0, 1] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources) apply { (_x select 0) select 0 },
+    [["hire", "rifles", "z"]]] call fnc_assertEq;
+["bestSources: no source is no offer", [[], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources, []] call fnc_assertEq;
+
+// --- DUWS_fnc_opcom_hireSources: where each row a job takes is hired ---
+DUWS_fnc_opcom_tickCached = { params ["", "_fn"]; call _fn };
+OPCOM_CAP_UNITS = 50;
+DUWS_fnc_opcom_unitCount = { 0 };
+DUWS_fnc_opcom_hireRowsSweep = { [["rifles", [], "inf", 8, 10, 1], ["boat", ["transport"], "boat", 2, 3, 1], ["truck", ["supply"], "wheeled", 2, 3, 1]] };
+DUWS_fnc_opcom_portOf = { params ["_k"]; [-1, 7] select (_k isEqualTo "zb") };
+DUWS_fnc_opcom_c2w = { [4700, 0, 0] };
+private _hireZones = [["za", 0, [0, 0, 0]], ["zb", 0, [5000, 0, 0]]];
+["hireSources: a row is raised at the zone nearest the target",
+    [{ params ["", "_mt"]; _mt isEqualTo "inf" }, [1000, 0, 0], _hireZones] call DUWS_fnc_opcom_hireSources,
+    [[["hire", "rifles", "za"], [0, 0, 0], 8, "inf", [], 10, 10, 1]]] call fnc_assertEq;
+["hireSources: a boat is raised at the nearest zone with a port, and starts at the port",
+    [{ params ["", "_mt"]; _mt isEqualTo "boat" }, [1000, 0, 0], _hireZones] call DUWS_fnc_opcom_hireSources,
+    [[["hire", "boat", "zb"], [4700, 0, 0], 2, "boat", ["transport"], 3, 3, 1]]] call fnc_assertEq;
+DUWS_fnc_opcom_unitCount = { 50 };
+["hireSources: at the unit cap only a truck is hired",
+    ([{ true }, [1000, 0, 0], _hireZones] call DUWS_fnc_opcom_hireSources) apply { _x select 0 },
+    [["hire", "truck", "za"]]] call fnc_assertEq;
+["hireSources: with no zone to raise at there is no hire",
+    [{ true }, [1000, 0, 0], []] call DUWS_fnc_opcom_hireSources, []] call fnc_assertEq;

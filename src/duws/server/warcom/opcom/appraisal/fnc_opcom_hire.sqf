@@ -3,15 +3,6 @@
 // demand blocking it.
 if (!isServer) exitWith {};
 
-DUWS_fnc_opcom_nearestOpen = {
-    params ["_pos", "_zones"];
-    if (_pos isEqualTo []) exitWith { [] };
-    private _best = 1e12;
-    private _pick = [];
-    { private _d = _pos distance2D (_x select 2); if (_d < _best) then { _best = _d; _pick = _x } } forEach _zones;
-    _pick
-};
-
 // The combatants homed at each zone, the set its reserve pool fields (DUWS_fnc_opcom_zoneReserveSync).
 DUWS_fnc_opcom_homedSweep = {
     private _out = createHashMap;
@@ -23,26 +14,6 @@ DUWS_fnc_opcom_homedSweep = {
         };
     } forEach DUWS_opcom_taskings;
     _out
-};
-
-// -> [menu row -> live units, the rows the faction can field now]. The mix is shared out over the fieldable rows only:
-// a row the faction cannot hire would hold a share nothing can fill, and push every other row over its own.
-DUWS_fnc_opcom_rosterSweep = {
-    private _counts = createHashMap;
-    {
-        if ((_x get "status") isNotEqualTo "dead") then {
-            private _r = _x get "menu";
-            _counts set [_r, (_counts getOrDefault [_r, 0]) + 1];
-        };
-    } forEach DUWS_opcom_taskings;
-    private _open = (keys DUWS_opcom_recruitMenu) select {
-        (((DUWS_opcom_recruitMenu get _x) select 0) findIf { ([_x, "OPF"] call DUWS_fnc_tokenClass) isEqualTo "" }) < 0
-    };
-    [_counts, _open]
-};
-
-DUWS_fnc_opcom_unitCount = {
-    { !("supply" in (_x get "flags")) && {(_x get "status") isNotEqualTo "dead"} } count DUWS_opcom_taskings
 };
 
 DUWS_fnc_opcom_recruitTargets = {

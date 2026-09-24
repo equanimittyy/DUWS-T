@@ -83,11 +83,10 @@ DUWS_fnc_opcom_rapportOffer = {
         [[_i] call DUWS_fnc_opcom_townWorth, _rep] call DUWS_fnc_opcom_rapportValue]
 };
 
-// -> [[[errand, town, truck source], price, label, Value], ...].
+// -> [[[errand, town, truck source], price, label, Value, 1, Cost], ...].
 DUWS_fnc_opcom_townTargets = {
     params ["_errand", "_listVar", "_offer"];
     if (call DUWS_fnc_opcom_supplyFull) exitWith { [] };
-    private _sources = call DUWS_fnc_opcom_truckSources;
     private _busy = call DUWS_fnc_opcom_townsSupplied;
     private _out = [];
     {
@@ -95,11 +94,12 @@ DUWS_fnc_opcom_townTargets = {
         if !(_i in _busy || {[[_i] call fnc_town_site_key] call DUWS_fnc_opcom_siteContested}) then {
             private _pos = [_i] call DUWS_fnc_opcom_townPos;
             private _o = [_i, _x, _pos] call _offer;
-            private _truck = if (_o isEqualTo []) then { [] } else { [_sources, _pos] call DUWS_fnc_opcom_truckFor };
-            if !(_truck isEqualTo []) then {
+            if !(_o isEqualTo []) then {
                 _o params ["_base", "_label", "_v"];
-                _out pushBack [[_errand, _i, _truck select 0], ceil (_base + (_truck select 1)), _label,
-                    _v * ([_truck] call DUWS_fnc_opcom_truckDelay)];
+                {
+                    _x params ["_src", "_price", "_tv", "_c"];
+                    _out pushBack [[_errand, _i, _src], _price, _label, _tv, 1, _c];
+                } forEach ([_pos, _v, _base] call DUWS_fnc_opcom_truckOffers);
             };
         };
     } forEach (missionNamespace getVariable [_listVar, []]);

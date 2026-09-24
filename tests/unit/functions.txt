@@ -74,7 +74,9 @@ duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_creepGrid
 duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty
-duws/server/warcom/opcom/appraisal/fnc_opcom_supply.sqf::DUWS_fnc_opcom_truckFor
+duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_nearestOpen
+duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_bestSources
+duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_hireSources
 duws/server/warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf::DUWS_fnc_opcom_townTargets
 duws/server/warcom/opcom/appraisal/fnc_opcom_siting.sqf::DUWS_fnc_opcom_argMax
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_exposure.sqf::DUWS_fnc_opcom_exposureAt

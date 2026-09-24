@@ -8,14 +8,13 @@ DUWS_fnc_opcom_delay = {
     0.5 ^ ((_dist / OPCOM_GRID_CELL) * _ticksPerCell / OPCOM_VALUE_HALFLIFE)
 };
 
-// A delivery's Value lands when the truck arrives.
-DUWS_fnc_opcom_truckDelay = {
-    params ["_truck"];
-    [_truck select 2, DUWS_opcom_speed get (DUWS_opcom_moveType get "truck")] call DUWS_fnc_opcom_delay
+DUWS_fnc_opcom_moveDelay = {
+    params ["_dist", "_moveType"];
+    [_dist, DUWS_opcom_speed getOrDefault [_moveType, 15]] call DUWS_fnc_opcom_delay
 };
 
 // A commit's Value lands when the unit sent reaches its target.
 DUWS_fnc_opcom_unitDelay = {
     params ["_t", "_to"];
-    [(_t get "pos") distance2D _to, DUWS_opcom_speed getOrDefault [_t get "moveType", 15]] call DUWS_fnc_opcom_delay
+    [(_t get "pos") distance2D _to, _t get "moveType"] call DUWS_fnc_opcom_moveDelay
 };

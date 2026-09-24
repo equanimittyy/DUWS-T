@@ -74,14 +74,9 @@ DUWS_fnc_opcom_siteAll = {
     DUWS_opcom_sites = _sites;
 };
 
-// -> [point, Value discounted by the drive, truck], or [] with no site, no truck or the supply cap full.
-DUWS_fnc_opcom_siteTruck = {
+// -> [point, Value], or [] with no site or the supply cap full.
+DUWS_fnc_opcom_siteFor = {
     params ["_key"];
     if (call DUWS_fnc_opcom_supplyFull) exitWith { [] };
-    private _site = DUWS_opcom_sites getOrDefault [_key, []];
-    if (_site isEqualTo []) exitWith { [] };
-    _site params ["_at", "_v"];
-    private _truck = [call DUWS_fnc_opcom_truckSources, _at] call DUWS_fnc_opcom_truckFor;
-    if (_truck isEqualTo []) exitWith { [] };
-    [_at, _v * ([_truck] call DUWS_fnc_opcom_truckDelay), _truck]
+    DUWS_opcom_sites getOrDefault [_key, []]
 };

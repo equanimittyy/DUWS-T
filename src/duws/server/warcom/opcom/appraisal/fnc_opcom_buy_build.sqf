@@ -31,22 +31,23 @@ DUWS_fnc_opcom_zoneBuildTargets = {
 DUWS_fnc_opcom_standaloneBuildTargets = {
     params ["_type"];
     if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
-    private _st = ["STANDALONE"] call DUWS_fnc_opcom_siteTruck;
-    if (_st isEqualTo []) exitWith { [] };
-    _st params ["_at", "_v", "_truck"];
-    [[[_type, _at, _truck select 0], ceil (([_type] call DUWS_fnc_opcom_hpPrice) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at],
-        _v * ([_type] call DUWS_fnc_opcom_hpMix)]]
+    private _site = ["STANDALONE"] call DUWS_fnc_opcom_siteFor;
+    if (_site isEqualTo []) exitWith { [] };
+    _site params ["_at", "_v"];
+    private _label = format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at];
+    ([_at, _v * ([_type] call DUWS_fnc_opcom_hpMix), [_type] call DUWS_fnc_opcom_hpPrice] call DUWS_fnc_opcom_truckOffers)
+        apply { _x params ["_src", "_price", "_tv", "_c"]; [[_type, _at, _src], _price, _label, _tv, 1, _c] }
 };
 
 DUWS_fnc_opcom_assetTargets = {
     params ["_type"];
     if !([_type] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
-    private _st = [_type] call DUWS_fnc_opcom_siteTruck;
-    if (_st isEqualTo []) exitWith { [] };
-    _st params ["_at", "_v", "_truck"];
-    [[[_type, _at, _truck select 0], ceil ((DUWS_opcom_assetPrice get _type) + (_truck select 1)),
-        format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at], _v]]
+    private _site = [_type] call DUWS_fnc_opcom_siteFor;
+    if (_site isEqualTo []) exitWith { [] };
+    _site params ["_at", "_v"];
+    private _label = format ["Build %1 at %2", DUWS_hardpointName getOrDefault [_type, _type], mapGridPosition _at];
+    ([_at, _v, DUWS_opcom_assetPrice get _type] call DUWS_fnc_opcom_truckOffers)
+        apply { _x params ["_src", "_price", "_tv", "_c"]; [[_type, _at, _src], _price, _label, _tv, 1, _c] }
 };
 
 // Fixed depth, length rolled per field, both in 50 m squares. The roll rides the target, so the price the
@@ -54,15 +55,16 @@ DUWS_fnc_opcom_assetTargets = {
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
     if !(["MINEFIELD"] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
-    private _st = ["MINE"] call DUWS_fnc_opcom_siteTruck;
-    if (_st isEqualTo []) exitWith { [] };
-    _st params ["_at", "_v", "_truck"];
+    private _site = ["MINE"] call DUWS_fnc_opcom_siteFor;
+    if (_site isEqualTo []) exitWith { [] };
+    _site params ["_at", "_v"];
     private _lo = round (OPCOM_MINE_LEN_MIN / DUWS_mineSquare);
     private _hi = round (OPCOM_MINE_LEN_MAX / DUWS_mineSquare);
     private _size = [_lo + floor random (_hi - _lo + 1), round (OPCOM_MINE_DEPTH / DUWS_mineSquare)];
-    [[[_variant, _size, _at, _truck select 0],
-        ceil (OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1) + (_truck select 1)),
-        format ["Lay %1 mines at %2", _variant, mapGridPosition _at], _v * ([format ["MINEFIELD_%1", _variant]] call DUWS_fnc_opcom_hpMix)]]
+    private _label = format ["Lay %1 mines at %2", _variant, mapGridPosition _at];
+    ([_at, _v * ([format ["MINEFIELD_%1", _variant]] call DUWS_fnc_opcom_hpMix),
+        OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1)] call DUWS_fnc_opcom_truckOffers)
+        apply { _x params ["_src", "_price", "_tv", "_c"]; [[_variant, _size, _at, _src], _price, _label, _tv, 1, _c] }
 };
 
 // The price rides in the errand, so a build that finds no ground refunds it in full, truck included.

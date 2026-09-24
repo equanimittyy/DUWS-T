@@ -728,7 +728,7 @@ OPCOM_AP_HARDPOINT = createHashMapFromArray [
 OPCOM_AP_REINFORCE = 15;
 OPCOM_AP_FORTIFY = 25;
 
-// Added to a truck's source cost per km driven, so the nearest source wins.
+// Scored per km on every source and charged on none: it is what lets a near hire beat a far free unit.
 OPCOM_AP_PER_KM = 0.5;
 OPCOM_AP_RAPPORT = 10;
 // The reputation a delivered Rapport takes off its town, of the 10 that flip it.
