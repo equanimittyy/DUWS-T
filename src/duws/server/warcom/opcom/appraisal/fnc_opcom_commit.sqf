@@ -103,10 +103,16 @@ DUWS_fnc_opcom_interceptSweep = {
     [_out, _blocked, _riders]
 };
 
-// Every recon weighs the same few destinations, drawn from the cells the need field lights: the sample is the Scout's
-// siting pass, and a recon already out is on a move order and out of the roster.
+// Every free unit weighs the same few destinations, drawn from the cells the need field lights: the sample is the
+// Scout's siting pass, and a unit already out is on a move order and out of the roster. Behind the recon rows stands
+// every free combatant except air, which cannot hold the ground it looked at; what separates the two is the reveal
+// each buys, so the Value is the route for a recon and the arrival block for a combatant (fnc_opcom_scout).
+//
+// One scout per destination, for the reason one attacker goes at a zone: the best unit takes it, and a second row on
+// the same ground would only crowd the shortlist with the same reveal twice.
 DUWS_fnc_opcom_scoutSweep = {
-    private _units = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
+    private _recon = (call DUWS_fnc_opcom_free) select { "recon" in (_x get "flags") };
+    private _units = _recon + ([false] call DUWS_fnc_opcom_freeCombatants);
     if (DUWS_opcom_needCells isEqualTo []) exitWith { [[], [], []] };
     private _pool = +DUWS_opcom_needCells;
     private _dests = [];
@@ -114,32 +120,45 @@ DUWS_fnc_opcom_scoutSweep = {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
     };
     private _out = [];
+    private _blocked = [];
     private _riders = [];
-    private _taken = _dests apply { false };
+    // Hoisted out of the pairwise loop, which the widened pool runs units x destinations times: a stake does not
+    // change with the destination, and a combatant's reveal is the arrival block whichever combatant goes.
+    private _costs = _units apply { [_x] call DUWS_fnc_opcom_commitCost };
+    private _looks = _dests apply { [_x] call DUWS_fnc_opcom_lookValue };
     {
-        private _t = _x;
-        private _k = OPCOM_RECON_K getOrDefault [_t get "moveType", 1];
-        private _c = [_t] call DUWS_fnc_opcom_commitCost;
+        private _to = _x;
+        private _look = _looks select _forEachIndex;
         private _best = [];
         private _bs = -1;
+        // Blocked stays the recon shortfall: it is what values a recon hire (fnc_opcom_demand), and ground a
+        // combatant covered at a fraction of the reveal is still ground a recon would cover better.
+        private _reconFree = false;
         {
-            private _pw = [_x, _t get "pos", _t get "effForce"] call DUWS_fnc_opcom_pWinSend;
+            private _t = _x;
+            private _isRecon = "recon" in (_t get "flags");
+            private _pw = [_to, _t get "pos", _t get "effForce"] call DUWS_fnc_opcom_pWinSend;
             if (_pw >= OPCOM_PWIN_FLOOR) then {
-                _taken set [_forEachIndex, true];
-                private _v = ([_t get "pos", _x, _k] call DUWS_fnc_opcom_scoutValue) * ([_t, _x] call DUWS_fnc_opcom_unitDelay);
+                if (_isRecon) then { _reconFree = true };
+                private _reveal = if (_isRecon) then {
+                    [_t get "pos", _to, OPCOM_RECON_K getOrDefault [_t get "moveType", 1]] call DUWS_fnc_opcom_scoutValue
+                } else {
+                    _look
+                };
+                private _v = _reveal * ([_t, _to] call DUWS_fnc_opcom_unitDelay);
+                private _c = _costs select _forEachIndex;
                 private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
-                if (_s > _bs) then { _bs = _s; _best = [_x, _v, _pw] };
+                if (_s > _bs) then { _bs = _s; _best = [_t, _v, _pw, _c] };
             };
-        } forEach _dests;
+        } forEach _units;
+        if (!_reconFree) then { _blocked pushBack _to };
         if (_best isNotEqualTo []) then {
-            _best params ["_to", "_v", "_pw"];
+            _best params ["_t", "_v", "_pw", "_c"];
             _out pushBack [[_t get "id", "move", _to, _pw * _v], 0,
                 format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
             _riders pushBack [_t, _to, _pw * _v];
         };
-    } forEach _units;
-    private _blocked = [];
-    { if !(_taken select _forEachIndex) then { _blocked pushBack _x } } forEach _dests;
+    } forEach _dests;
     [_out, _blocked, _riders]
 };
 

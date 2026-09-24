@@ -31,6 +31,10 @@ DUWS_fnc_opcom_stepMove = {
     if ([_t, _pos] call DUWS_fnc_opcom_settleMove) then {
         if (_live) then { [_t] call DUWS_fnc_opcom_reVirt };
     } else {
+        // Standing where it was sent buys a non-recon unit its one certain look, the reveal a Scout is valued on:
+        // it saw nothing on the march. Its own cell and no further -- the reach is a recon's whole worth. A recon
+        // stamps belief every tick it travels, so it needs no look at all.
+        if !("recon" in (_t get "flags")) then { [_pos, 0] call fnc_opcom_look };
         if (_live) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
     };
     true

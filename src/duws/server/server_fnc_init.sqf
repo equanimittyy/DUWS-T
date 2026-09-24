@@ -789,6 +789,7 @@ fnc_opcom_grid_init = compile preprocessFileLineNumbers "duws\server\warcom\opco
 fnc_opcom_grid_rebuild = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_rebuild.sqf";
 fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_stamp.sqf";
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
+fnc_opcom_look = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_look.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
 fnc_opcom_pick = compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick.sqf";
 fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";

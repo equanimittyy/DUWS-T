@@ -661,7 +661,9 @@ OPCOM_ARTY_WARN = 20;
 OPCOM_ARTY_MARK = 120;
 
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
-// look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way.
+// look like a recon's (fnc_opcom_recon_sense), but paid for by arriving rather than carried the whole way. It is
+// the interceptor's alone -- a hunt needs to find a group that has moved off the fix it was sent to, where a
+// scouting combatant reveals the one cell it stands on (fnc_opcom_look).
 OPCOM_INTERCEPT_K = 1;
 
 // Leader within this of a move target counts as arrived, so a live tasking settles to guard/garrison the same

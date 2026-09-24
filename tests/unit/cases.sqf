@@ -1792,6 +1792,15 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
 ["scoutCells: a wider reach sweeps a wider band, clipped at the box edge",
     count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_scoutCells), 28] call fnc_assertEq;
 
+// --- DUWS_fnc_opcom_revealValue / _scoutValue / _lookValue: the reveal each unit buys ---
+DUWS_opcom_grid_seen = [];
+for "_i" from 1 to 100 do { DUWS_opcom_grid_seen pushBack (DUWS_opcom_tick - OPCOM_BELIEF_EXPIRE) };
+OPCOM_SCOUT_SHARE = 0.2;
+["revealValue: wholly unseen ground pays its need at the share", [[0, 1, 2]] call DUWS_fnc_opcom_revealValue, 1.2] call fnc_assertClose;
+["lookValue: a combatant is worth the one cell it arrives in", [[2250, 2250, 0]] call DUWS_fnc_opcom_lookValue, 0.4] call fnc_assertClose;
+["scoutValue: a recon sweeping the run to the same cell is worth twelve times it",
+    [[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_scoutValue, 4.8] call fnc_assertClose;
+
 
 // --- DUWS_fnc_opcom_hireDefense: the defense a hire adds at the zone that raises it ---
 ["hireDefense: a hire doubling a thin zone is worth half its worth", [40, 1, 10, 10] call DUWS_fnc_opcom_hireDefense, 20] call fnc_assertClose;

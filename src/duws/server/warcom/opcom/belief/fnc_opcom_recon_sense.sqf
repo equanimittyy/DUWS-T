@@ -3,7 +3,8 @@
 // a live one can be blinded by stealth or line of sight. A recon-flagged tasking instead detects every BLUFOR
 // group within K grid cells of it for certain -- no detection roll, live or virtual -- and stamps belief.
 // That guaranteed reach is the whole worth of a recon element: it buys OPCOM reliable eyes on the ground it
-// sits on, where the ordinary sweep might see nothing.
+// sits on, where the ordinary sweep might see nothing. A combatant sent on the same Scout reveals only the cell it
+// arrives in (fnc_opcom_look), so what separates the two is the reach, never the certainty.
 //
 // Reach is Chebyshev cells, the same measure and w2c cells the streamer uses (fnc_opcom_task_step), by
 // platform since the three recon rows differ only there (opcom_plan.md). Belief is the same store

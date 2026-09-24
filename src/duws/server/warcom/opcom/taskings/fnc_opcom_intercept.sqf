@@ -23,32 +23,11 @@ DUWS_fnc_opcom_interceptGuard = {
     if (!isNull _grp) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
 };
 
-// The interceptor's reveal, taken standing in the cell it was sent to: every BLUFOR group within OPCOM_INTERCEPT_K is
-// stamped for certain, and rows the look disproves clear. -> the netId of the closest group, or "".
-DUWS_fnc_opcom_interceptLook = {
-    params ["_pos"];
-    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_stamp;
-    private _best = "";
-    private _bd = 1e12;
-    {
-        private _l = [_x] call DUWS_fnc_opcom_sightLead;
-        if (!isNull _l) then {
-            private _lp = getPosASL _l;
-            if (([_lp, _pos] call DUWS_fnc_opcom_cellDist) <= OPCOM_INTERCEPT_K) then {
-                [netId _x, [_lp select 0, _lp select 1, 0], [_x] call DUWS_fnc_opcom_sightStr] call fnc_opcom_belief_upsert;
-                private _d = _pos distance2D _lp;
-                if (_d < _bd) then { _bd = _d; _best = netId _x };
-            };
-        };
-    } forEach (allGroups select { side _x == west });
-    [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_cover_clear;
-    _best
-};
-
-// Arrived where it was sent: it hunts the closest group the look found, or guards. -> true if it guarded.
+// Arrived where it was sent: it hunts the closest group the arrival look found (fnc_opcom_look), or guards.
+// -> true if it guarded.
 DUWS_fnc_opcom_interceptArrive = {
     params ["_t", "_pos", "_grp"];
-    private _next = [_pos] call DUWS_fnc_opcom_interceptLook;
+    private _next = [_pos, OPCOM_INTERCEPT_K] call fnc_opcom_look;
     if (_next isEqualTo "") exitWith { [_t, _pos, _grp] call DUWS_fnc_opcom_interceptGuard; true };
     private _switched = _next isNotEqualTo (_t get "interceptKey");
     if (_switched) then {

@@ -1,5 +1,6 @@
-// Locality: server, [] call'd at load. A Scout's Value: the need it reveals along its route, weighted by how long that
-// ground has gone unseen (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may suspend.
+// Locality: server, [] call'd at load. A Scout's Value: the need the unit reveals -- a recon's whole route, a
+// combatant's arrival cell -- weighted by how long that ground has gone unseen (opcom_plan.md §Value). Read from
+// the pick's unscheduled pass, so nothing here may suspend.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_stalenessAt = {
@@ -26,11 +27,24 @@ DUWS_fnc_opcom_scoutCells = {
 };
 
 // The share keeps Scout under the ground it reveals: scouting takes and protects nothing itself.
-DUWS_fnc_opcom_scoutValue = {
-    params ["_from", "_to", "_k"];
+DUWS_fnc_opcom_revealValue = {
+    params ["_cells"];
     private _sum = 0;
     {
         _sum = _sum + ([_x] call DUWS_fnc_opcom_needAt) * ([_x] call DUWS_fnc_opcom_stalenessAt);
-    } forEach ([_from, _to, _k] call DUWS_fnc_opcom_scoutCells);
+    } forEach _cells;
     _sum * OPCOM_SCOUT_SHARE
+};
+
+// A recon stamps belief every tick it travels, so it is worth the whole band its route sweeps.
+DUWS_fnc_opcom_scoutValue = {
+    params ["_from", "_to", "_k"];
+    [[_from, _to, _k] call DUWS_fnc_opcom_scoutCells] call DUWS_fnc_opcom_revealValue
+};
+
+// A combatant sees nothing on the march and its look reaches no further than the cell it stops in
+// (fnc_opcom_look), so it is worth that one cell -- the reveal footprint is the whole lean toward recon.
+DUWS_fnc_opcom_lookValue = {
+    params ["_to"];
+    [[[_to] call DUWS_fnc_opcom_w2c]] call DUWS_fnc_opcom_revealValue
 };
