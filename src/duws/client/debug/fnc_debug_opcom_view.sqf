@@ -31,7 +31,12 @@ DUWS_dbgOpcomGen = _gen;
     params ["_gen"];
     while {DUWS_dbgOpcomOn && {DUWS_dbgOpcomGen == _gen}} do {
         // Grid and belief store live only on the server, so they are gathered there and handed back to draw.
+        // One request in flight: overlapping draws split the scheduler, each ran slower, and they piled up
+        // until the overlay froze. The timeout covers a gather that sends nothing back (OPCOM init not finished).
+        DUWS_dbgOpcomPending = true;
         [player] remoteExec ["fnc_debug_opcom_grid", 2];
+        private _deadline = time + 30;
+        waitUntil { sleep 0.5; !DUWS_dbgOpcomPending || {time > _deadline} };
         sleep 5;
     };
 };

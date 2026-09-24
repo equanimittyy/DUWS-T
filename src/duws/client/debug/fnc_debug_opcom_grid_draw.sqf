@@ -176,6 +176,7 @@ private _pathN = missionNamespace getVariable ["DUWS_dbgOpcomPathN", 0];
 for "_i" from (count _path) to (_pathN - 1) do { deleteMarkerLocal format ["duws_opcom_path_%1", _i] };
 missionNamespace setVariable ["DUWS_dbgOpcomPathN", count _path];
 
+DUWS_dbgOpcomPending = false;
 ["DEBUG", "OPCOM", format ["overlay %1: %2 cells, %3 belief, %4 taskings, %5 waypoints, %6 path", ["refresh", "rebuild"] select _rebuild, count _cells, count _bel, count _tasks, count _wps, count _path]] call fnc_log;
 
 // Engine truth on a rebuild: a marker that never registered, or a create that returned "" on a name clash,
