@@ -10,8 +10,8 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3, 4A, 4B and 4C are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for
-them. This doc specifies what remains: hiring on demand, then orchestration, then persistence, then the archetype.
+Phases 1–4 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
+specifies what remains: orchestration, then persistence, then the archetype.
 The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -19,14 +19,13 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 | Phase | State |
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
-| 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick, and the Recruit rows retire | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **next** |
-| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — WIP |
+| 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
+| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **next** |
 | 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — WIP |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
-**Hiring on demand comes first**: an orchestrated role binds its unit through the sourcing 4D builds, so a role
-written before it would bind from a roster that Recruit fills ahead of need. **Orchestration follows**: it is the
+**Orchestration comes first**: an orchestrated role binds its unit through the 4D sourcing, and it is the
 last phase that adds state worth saving — the intent records and their role bindings — and a save contract
 written before it would be written twice, once for taskings and again for intents. It is also the phase that
 changes how the enemy fights, which is what a play-test is for. The cost is accepted rather than overlooked: until
@@ -47,7 +46,7 @@ leans between manoeuvres it does not write, so it has nothing to tilt until both
 `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose layers `_fri` (known
 OPFOR) and `_ene` (believed BLUFOR) the scoring reads, with the traffic layer and the observation tracker the guns
 are gated on; `taskings/` the orders, streaming, the carry and the fire mission; `appraisal/` the action list, every
-buy, the supply trucks, the roster, the commit orders, the Recruit rows, the siting pass, the score and the pick;
+buy, the supply trucks, the roster, the sources and lifts, the commit orders, the siting pass, the score and the pick;
 and `appraisal/value/` the score's terms, one file each. The debug harness (`fnc_opcom_debug_task.sqf` and the Debug
 menu's OPCOM pages) runs the orders by hand and spends no AP.
 
@@ -477,13 +476,11 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 
 ## Sourcing: hire on demand (Phase 4D)
 
-**WIP.** 4D.1 and 4D.2 are shipped; 4D.3 remains.
-
-OPCOM hires a unit only for the action that sends it. An action that needs a unit weighs, in the pick, each free
-unit it may draw against a hire of each row that can do the job, and offers each target with the source that scores
-best. A unit exists because an action sent it, and it stays drawable once that order ends. Nothing is hired ahead of
-need, so the Recruit rows retire. A combatant's zone defense becomes a job of its own, Garrison; a truck's stock
-retires, and so do the demands that valued a recon or lift hire on the targets no free unit could take.
+OPCOM hires a unit only for the action that sends it (`appraisal/fnc_opcom_sources.sqf`). An action that needs a unit
+weighs, in the pick, each free unit it may draw against a hire of each row that can do the job, and offers each target
+with the source that scores best. A unit exists because an action sent it, and it stays drawable once that order
+ends. Nothing is hired ahead of need, so no hire is a candidate of its own, and a combatant's zone defense is a job of
+its own, Garrison.
 
 | Source | Starts at | Price, charged | Cost, scored |
 |---|---|---|---|
@@ -506,9 +503,8 @@ The distance runs from where the source starts to where the action needs it: the
   dearer source outscores it, the target also offers that one, so it can stand as the savings goal
   ([§Gate and the savings goal](#gate-and-the-savings-goal)).
 - **The execute raises and routes every hire before it gives an order.** It hires through `fnc_opcom_recruit` with
-  `_pay` false, since the candidate's price already carries the hire, as a supply hire does today
-  (`DUWS_fnc_opcom_supplyRun`). A hire that cannot route is dismissed and the execute returns false, so the pick
-  charges nothing and no order stands half-given.
+  `_pay` false, since the candidate's price already carries the hire (`DUWS_fnc_opcom_raise`). A hire that cannot
+  route is dismissed and the execute returns false, so the pick charges nothing and no order stands half-given.
 - **The unit cap drops hire sources, never free units.** At `OPCOM_CAP_UNITS` an action draws only what stands; a
   truck hire stays outside the cap ([§Caps](#caps)).
 
@@ -527,29 +523,26 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   walking against each lift source, free hull or hire, on its saving less its Cost (`DUWS_fnc_opcom_taxiSaving`).
   The best lift adds its saving to the candidate's Value, its price to the price and its Cost to the Cost. The
   execute routes the rider and the lift before it gives either an order, and commits neither when either fails, so
-  a lift that cannot reach its rider charges nothing. The bind (`DUWS_fnc_opcom_taxiBind`) takes the lift the sweep
-  priced; only a debug Move still binds the best free hull, since the harness spends no AP.
+  a lift that cannot reach its rider charges nothing (`appraisal/fnc_opcom_lift.sqf`). Only a debug Move still binds
+  the best free hull (`DUWS_fnc_opcom_taxiBind`), since the harness spends no AP.
+- **A lift never prices an affordable order out of reach.** A lift's price is capped by what the wallet holds past
+  the rider's, so walking stays on offer whenever the rider alone is affordable.
+- **A hull is offered only over a dry straight line**, from the hull to the rider and on to the target. The route
+  cannot be planned inside the pick, and without the test a ground taxi to an island target would score in every
+  pick and fail in every execute, so the order never went. The line reads a bay as wet though a road runs round it,
+  which costs a hull some coastal rides a rotor or the walk then takes.
 - **A Ferry is what a unit stopped at a water leg waits on.** Its source is a free boat or helicopter or a hire of
-  one, weighed like any other; its `P(win)` is 1 and its Value the stopped unit's committed Value. The shore borrow
-  (`DUWS_fnc_opcom_borrowFerry`) retires, so a crossing waits for the pick like every other lift.
-- **Garrison banks units into a zone.** It replaces Re-garrison, and its worn-unit draw (`OPCOM_REGARRISON_FRAC`)
-  retires: any free combatant, healthy or worn, or a hire raised at the zone itself, is a source. The unit rests in
-  `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor of any order is banked
-  when the defense it adds outscores its other jobs, and a worn one heals there.
+  one, weighed like any other; its `P(win)` is 1 and its Value the stopped unit's committed Value. There is no shore
+  borrow, so a crossing waits for the pick like every other lift.
+- **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
+  a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
+  of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
 - **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
 - **Only the pick hires.** The runner never spends: a manoeuvre sources each role it can fill when the pick commits
   it, and a role it commits without stays a target of its Attack until a later pick fills it, from a free unit or a
   hire ([§Orchestration](#orchestration-phase-5)).
 - **`fnc_opcom_recruit` stays the one hire.** Every source hires through it, and the debug page's Recruit list still
   calls it by hand.
-
-| Chunk | Builds |
-|---|---|
-| **4D.1** Sources | **Shipped** (`appraisal/fnc_opcom_sources.sqf`) — the source list and its score, shared by every action. The supply actions are on it: a free truck at its stake, and the per-km scored and no longer charged. The truck-stock Value is retired |
-| **4D.2** Commit hires | **Shipped** (`appraisal/fnc_opcom_commit.sqf`) — Attack, Intercept and Patrol offer a hire of each eligible row beside the free units, the execute raising and then tasking it. Garrison replaces Re-garrison and takes over the combatant defense Value and the garrison cap ([§Caps](#caps)); the combat and recon demands and each sweep's blocked list are retired |
-| **4D.3** Lifts | the land-taxi sourced with its order, and the Ferry action in place of the shore borrow. The lift and strand demands and each sweep's rider list retire, and with them the Recruit rows and the `recruit` action weight |
-
-Each chunk deletes the Recruit role it replaces, so no chunk scores a hire twice.
 
 Phase 4D settles in play `OPCOM_AP_PER_KM` against the delay for a unit that marches rather than drives, whether
 Patrol should hire land combatants or only recon, and whether Garrison hires crowd zone Reinforce out of the
