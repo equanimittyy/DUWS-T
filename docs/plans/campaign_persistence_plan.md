@@ -495,9 +495,9 @@ stamps `full` and a seed clears `lost`, and both are keyed by a site key that ha
 
 ### The commander
 
-OPCOM is shipped, so its store is snapshot content now rather than deferred. The contract — which fields,
-and why belief is not among them — is [`opcom_plan.md`](opcom/opcom_plan.md#persistence-phase-5)'s to
-define; these are the keys the snapshot carries for it.
+OPCOM is shipped, so its store is snapshot content now rather than deferred. These are the keys the
+snapshot carries for it, and the contract they answer to is this section's; the phase that lands them is
+[`opcom_plan.md` §Persistence](opcom/opcom_plan.md#persistence-phase-5).
 
 | Group | Kind | Contents |
 |---|---|---|

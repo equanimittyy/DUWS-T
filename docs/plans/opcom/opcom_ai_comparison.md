@@ -17,9 +17,9 @@ differences below are deliberate, or they are open questions that the plan alrea
 | Belief with decay | Last-known-position tracking in AIs that do not read hidden state | — |
 | `P(win) = r² / (r² + 1)` | The Lanchester square law. Stanescu, Barriga and Buro (AIIDE 2015) used it in an RTS bot to decide attack or retreat, and that bot won more games than its simulator-based version | Their unit strengths are learned from recorded battles. OPCOM's come from the hand-set force table (`belief/fnc_opcom_force.sqf`). The `r² / (r² + 1)` form is the Bradley–Terry model with strength = force² |
 | The commit `hold` ([§Commitment](opcom_plan.md#commitment-intents-are-sticky)) | Inertia: a score bonus for the action already in progress | OPCOM uses a hard lock, which cannot break for an emergency |
-| Orchestration: the runner, buildup and templates ([§Orchestration](opcom_plan.md#orchestration-phase-7)) | Plays in STP (Browning, Bruce, Bowling and Veloso, 2005): a play is a set of roles with preconditions, an abort rule and a termination rule | — |
+| Orchestration: the runner, buildup and templates ([§Orchestration](opcom_plan.md#orchestration-phase-6)) | Plays in STP (Browning, Bruce, Bowling and Veloso, 2005): a play is a set of roles with preconditions, an abort rule and a termination rule | — |
 | The muster to 1.5:1 | Rally-then-attack in RTS bots | The military rule of thumb for an attacker is 3:1. OPCOM musters lower on purpose, because a sighted player already counts as 4 force |
-| The archetype ([§Archetype](opcom_plan.md#archetype-phase-6)) | Personality weights on a utility score | — |
+| The archetype ([§Archetype](opcom_plan.md#archetype-phase-7)) | Personality weights on a utility score, and on the manoeuvre pick | — |
 | The commander as a whole | ALiVE's Military AI Commander for Arma 3, also named OPCOM: virtual unit profiles, and objectives ranked by a strategy rule | ALiVE ranks objectives by a fixed rule. OPCOM scores them against an economy |
 
 ## Two RTS AIs
@@ -37,7 +37,7 @@ describes a commercial RTS: its built-in AI, and the open competition bots writt
 | Retreat | Each unit pulls back below 50% health (a builder below 85%) | Competition bots: retreat when the simulator says the fight is lost | None ([engine gotcha](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)) |
 | Anti-flap | A factory switch waits for a randomised threshold of time and income | A retreat timer that resets while the simulator still says retreat | The commit `hold` |
 | Unseen enemies | The enemy manager keeps each unit's last known position | Competition bots count remembered units that are out of sight | Belief with decay |
-| Pathing | The threat map is a path cost | — | The foot cell chain costs step + λ × `_ene` (`taskings/fnc_opcom_route.sqf`), but every caller passes λ 0 and road routes carry no threat term. Phase 5 adds threat to road segments and off-road flanking legs ([§Orchestration](opcom_plan.md#orchestration-phase-7)) |
+| Pathing | The threat map is a path cost | — | The foot cell chain costs step + λ × `_ene` (`taskings/fnc_opcom_route.sqf`), but every caller passes λ 0 and road routes carry no threat term. Phase 6 adds threat to road segments and off-road flanking legs ([§Orchestration](opcom_plan.md#orchestration-phase-6)) |
 | Counter builds | `response.json`: the odds of building a counter role rise with enemy strength in the role it counters and fall as its own counter force grows, capped at a share of the army | Fixed in each build order | Open in 4C.2: whether belief carries a threat category |
 | Personality and difficulty | Whole config sets per level, including `hard_aggressive` | Built-in AI: personalities. The top levels cheat with map vision and extra income | Archetype weights. OPCOM reads belief and never cheats |
 
