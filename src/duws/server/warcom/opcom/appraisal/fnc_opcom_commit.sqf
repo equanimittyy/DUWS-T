@@ -32,7 +32,13 @@ DUWS_fnc_opcom_sendRun = {
     // What the order is worth once committed: a lift is priced against it, stranded at a water leg or taxied over
     // dry ground (fnc_opcom_taxi, fnc_opcom_hire).
     _t set ["expValue", _exp];
-    [_t] call DUWS_fnc_opcom_taxiBind;
+    true
+};
+
+DUWS_fnc_opcom_sendTaxiableRun = {
+    params ["_target"];
+    if !([_target] call DUWS_fnc_opcom_sendRun) exitWith { false };
+    [[_target select 0] call DUWS_fnc_opcom_byId] call DUWS_fnc_opcom_taxiBind;
     true
 };
 
@@ -121,7 +127,6 @@ DUWS_fnc_opcom_scoutSweep = {
     };
     private _out = [];
     private _blocked = [];
-    private _riders = [];
     // Hoisted out of the pairwise loop, which the widened pool runs units x destinations times: a stake does not
     // change with the destination, and a combatant's reveal is the arrival block whichever combatant goes.
     private _costs = _units apply { [_x] call DUWS_fnc_opcom_commitCost };
@@ -156,10 +161,10 @@ DUWS_fnc_opcom_scoutSweep = {
             _best params ["_t", "_v", "_pw", "_c"];
             _out pushBack [[_t get "id", "move", _to, _pw * _v], 0,
                 format ["Scout %1 with %2 %3", mapGridPosition _to, _t get "menu", _t get "id"], _v, _pw, _c];
-            _riders pushBack [_t, _to, _pw * _v];
         };
     } forEach _dests;
-    [_out, _blocked, _riders]
+    // No riders: a scout is sent without a taxi (sendRun), so a lift hired on its order would carry no one.
+    [_out, _blocked, []]
 };
 
 // Recruit reads every sweep's blocked targets and riders off this table, so a new commit order registers here and
