@@ -1,4 +1,4 @@
-// Locality: server. Phase 3 hand-drive harness: recruit, order and inspect taskings from the server console (the
+// Locality: server. Hand-drive harness: recruit, order and inspect taskings from the server console (the
 // manual stand-in for the decision loop). Logs every verb under "OPCOMDBG". The order verbs zero the commit hold
 // first, so hand-driving re-tasks on demand where the automated loop would wait it out.
 //   ["menu"]                        -- list the recruit rows and their live prices
@@ -36,7 +36,10 @@ switch (_verb) do {
         } else {
             private _t = DUWS_opcom_taskings select _i;
             _t set ["hold", 0];
-            [_t, _b, _c] call fnc_opcom_task
+            private _ok = [_t, _b, _c] call fnc_opcom_task;
+            // A hand order carries no Value; any positive stand-in has taxiBind pick the hull saving the most time.
+            if (_ok && {_b isEqualTo "move"}) then { _t set ["expValue", 1]; [_t] call DUWS_fnc_opcom_taxiBind };
+            _ok
         };
     };
     case "garrison": {

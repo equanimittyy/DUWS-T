@@ -19,7 +19,7 @@ DUWS_fnc_opcom_taxiPool = {
 DUWS_fnc_opcom_taxiFits = {
     params ["_rider", "_moveType"];
     if (!("transportable" in (_rider get "flags")) || {(_rider getOrDefault ["ridingOn", -1]) >= 0}) exitWith { false };
-    if (!((_rider get "order") in ["capture", "intercept", "return"])) exitWith { false };
+    if (!((_rider get "order") in ["capture", "intercept", "return", "move"])) exitWith { false };
     if (_moveType isEqualTo "rotary") exitWith { true };
     ((_rider get "route") findIf { [_x] call DUWS_fnc_opcom_isWaterPt }) < 0
 };
