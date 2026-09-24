@@ -10,7 +10,7 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–3, 4A, 4B and 4C.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of
+Phases 1–3, 4A, 4B.1–4B.7 and 4C.2 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of
 truth for them. This doc specifies what remains. The sections marked **WIP** are first-pass decisions: they change
 as each chunk is built and played.
 
@@ -18,7 +18,8 @@ as each chunk is built and played.
 
 | Phase | State |
 |---|---|
-| 1–3, 4A, 4B, 4C.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's balance | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 1–3, 4A, 4B.1–4B.7, 4C.2 — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's balance | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
+| 4B.8–4B.9 — The order split, giving `patrol`, `return`, `errand` and `ferry` orders of their own, and re-garrison, sending a worn unit home to heal | [opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md) — WIP |
 | 4C — Weighting: the pick scored by Value ÷ Cost, over `P(win)` where an order fights for its target, then the archetype over it | [§Appraisal](#appraisal-phase-4) — WIP |
 | 5 — Orchestration: multi-unit templates, mustering and threat-aware routes | [§Templates](#templates-phase-5) — WIP |
 | 6 — Archetype patience: the muster bars, the savings horizon and the value half-life | [§Archetype](#archetype) — WIP |
@@ -63,7 +64,7 @@ Two terms carry one meaning each throughout:
 
 ## Appraisal (Phase 4)
 
-**WIP.** 4B is shipped; 4C.1 remains. Every weight, Value, price and constant here is a first pass
+**WIP.** 4B.1–4B.7 are shipped; 4B.8, 4B.9 and 4C.1 remain. Every weight, Value, price and constant here is a first pass
 and changes as it is played.
 
 On each pick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
@@ -96,6 +97,8 @@ written, and the archetype comes last.
 | **4B.4** One-gun Arty | **Shipped** (`appraisal/`) — the Arty action over the shipped fire mission: the belief target sweep, the clustered-force Value, the spread, the cooldown, the HQ and own-ground exclusions and the telegraph ([§Indirect-fire hardpoints](#indirect-fire-hardpoints)) | How often a sighting is fresh enough and close enough to shell at all, now that belief is the only channel; how bunched BLUFOR actually stands in play, since that is what the Value now turns on — an emplacement fields three pieces, so a pit covers 69 m on a low draw for 12 AP and a battery 127 m for 36, which puts a mortar over Bank on a lone squad and a battery over it only from two squads together, and `OPCOM_ARTY_LETHAL` and `OPCOM_ARTY_ROUNDS` are the levers; whether weighting by the clustered share of all fresh belief double-counts what the score already does, because a dispersed BLUFOR raises every Attack and Intercept candidate by itself; whether the random rounds draw should stand at all, because a high draw widens the cover but costs in step, so it only pays when the extra ground holds more force; whether the telegraph's `OPCOM_ARTY_WARN` gives the players enough to move on. The creep is not this chunk's: a walked barrage needs an assault to walk it for, so it lands with the `arty` template in Phase 5 |
 | **4B.5–6** Patrol for every combatant | **Shipped** (`appraisal/`, `belief/`, `taskings/`) — the combatant fallback in the sweep, one unit sent per destination and the best one taking it, and the blocked list held to the destinations no free recon took | Whether a combatant patrol crowds the recon rows out of the hire; whether the guards the arrivals leave forward strip their zones too far, and need a cap on the combatants out at once; whether a screen left standing needs a way home, or the next Patrol pick moving it on is enough |
 | **4B.7** Patrol | **Shipped** (`appraisal/`, `belief/`, `taskings/`) — the Scout row renamed `patrol`, one action still, and its helpers with it (`patrolSweep`, `patrolValue`, `patrolCells`, `OPCOM_PATROL_SHARE`). `fnc_opcom_recon_sense` is now `fnc_opcom_patrol_sense`: every combatant tasking stamps the staleness timer over its reach, recon or not, and the belief upsert and the disproof clear stay with the `recon`-flagged ones. The two kinds scale apart, a recon on `OPCOM_RECON_K` at face value and a combatant on `DUWS_opcom_streamK` scaled by its threat over `OPCOM_PATROL_FORCE_REF`. The arrival look went with the split that was not taken: `lookValue` and `fnc_opcom_look` are gone, the look folded back into the interceptor that was its only caller | Whether a combatant's stamp should count for less than a recon's, since it suppresses re-scouting for up to `OPCOM_BELIEF_EXPIRE` without having learned anything certain there; `OPCOM_PATROL_FORCE_REF` (8, a rifle squad's force), which sets whether a hull patrols as readily as a squad; `OPCOM_PATROL_SHARE` now that a combatant reads it too; whether a patrol needs a cap on the units out at once, the fallback shape being a count per campaign zone, or whether the staleness stamp and the abandoned defense bound it; whether a resting unit should stamp at all, since it keeps its own ground off the patrol list for as long as it sits; whether a patrol left standing should be walked on by the next pick or hold |
+| **4B.8** Order split | `patrol`, `return`, `errand` and `ferry` given rows of their own in `DUWS_opcom_orders`, in place of the keys `move` is overloaded with and the `carrying` short-circuit a ferry is stepped by: the flat list and what it touches are in [opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#orders) | With the chunk |
+| **4B.9** Re-garrison | A worn unit ordered home to heal, since only `garrison` heals and nothing sends a unit there: the `regarrison` row, its pool floor and its Value in [opcom_orders_and_regarrison.md](opcom_orders_and_regarrison.md#re-garrison-4b9) | With the chunk |
 | **4C.1** Archetype | The campaign setting, the other archetypes' records and the archetype override on the OPCOM debug page; the weight table is wired as each record's `actionWeight` | Each archetype's weights, Bank's included |
 
 From 4C.2, the score is one number — expected AP returned per AP spent:
@@ -499,7 +502,7 @@ even when the muster ends in another band.
 | `encircle` | band 1–2, target pocketed, ≥3 mobile | `blockers` ×N (per escape corridor), `crushers` ×1–2 | deploy (blockers → corridors) → *(in position)* seal → crush (inward) → resolve |
 | `probe` | band 0.5–1 | `prober` ×1 (cheapest expendable; never armour/air/recon) | approach → make contact → resolve (survives ⇒ soft, escalate; dies ⇒ confirmed, mass/re-target) |
 | `rapport` | a `supply` truck, a Rapport candidate town ([§Candidates](#candidates)) | `courier` ×1 | move → deliver (rep −3) → resolve |
-| `patrol` | a free recon or land combatant, a stale valuable area | `patroller` ×1 | move (plain `move`; the sweep stamps the staleness timer as it goes, and a recon's detection stamps belief with it) → resolve (settles to `guard` where it was sent) |
+| `patrol` | a free recon or land combatant, a stale valuable area | `patroller` ×1 | move (a `move` until 4B.8 gives `patrol` its own order; the sweep stamps the staleness timer as it goes, and a recon's detection stamps belief with it) → resolve (settles to `guard` where it was sent) |
 | `arty` | a fresh belief sighting in range of an owned gun off cooldown | owned `guns` ×1–3 (hardpoints, 0 roster), `spotter` ×0–1 | mark → salvo (saturate standing, creep ahead of a bound assault) → assess (force dropped? re-fire : done) |
 
 - **`probe` is disposable recon-by-fire** — no-retreat forbids poke-and-withdraw, so it converts uncertain belief
