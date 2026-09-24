@@ -171,7 +171,7 @@ DUWS_fnc_opcom_patrolSweep = {
 };
 
 // Every worn unit left standing forward, one row apiece: only `garrison` heals, so a unit holding where its last order
-// ended keeps its losses until something sends it home (opcom_orders_and_regarrison.md). The target follows from the
+// ended keeps its losses until something sends it home. The target follows from the
 // unit, so there is no contest to resolve and no second row on the same zone to crowd the shortlist.
 DUWS_fnc_opcom_regarrisonSweep = {
     private _zones = call DUWS_fnc_opcom_zonesOpen;

@@ -1,5 +1,5 @@
-// Locality: server, [] call'd at load. A Re-garrison's Value: what sending a worn unit home to heal is worth
-// (opcom_orders_and_regarrison.md §Re-garrison). Read from the pick's unscheduled pass, so nothing may suspend.
+// Locality: server, [] call'd at load. A Re-garrison's Value: what sending a worn unit home to heal is worth.
+// Read from the pick's unscheduled pass, so nothing may suspend.
 if (!isServer) exitWith {};
 
 // The larger of the two, never the sum: the unit serves one role at a time, as a combatant hire does. Healing

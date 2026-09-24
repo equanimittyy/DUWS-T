@@ -1,7 +1,7 @@
 // Locality: server. Give a tasking an active order and target: plan the route, arm the commit hold. Returns
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
-//   _order: one of the orders below (opcom_orders_and_regarrison.md). `guard` holds where it stands and ignores
+//   _order: one of the orders below. `guard` holds where it stands and ignores
 //     _target; `move` and `patrol` march to _target and settle to guard there. A `capture` takes the BLUFOR-held
 //     holding at _target -- a zone, or a town they have garrisoned -- and aims at its centre; it ends when the ground
 //     is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR group's

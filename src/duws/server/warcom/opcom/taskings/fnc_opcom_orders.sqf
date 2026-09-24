@@ -38,7 +38,7 @@ DUWS_fnc_opcom_stepGarrison = {
 };
 
 // `patrol` steps as a plain `move` does: what the split buys is the taxi, the debug pages and the map reading it by
-// name (opcom_orders_and_regarrison.md). A carry is owned by the ferry stage, which takes the record before this
+// name. A carry is owned by the ferry stage, which takes the record before this
 // table is reached (fnc_opcom_task_step), so `ferry` holds here -- a hull holding it with no rider was released.
 DUWS_opcom_orders = createHashMapFromArray [
     ["move",      [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepMove]],
