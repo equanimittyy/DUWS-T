@@ -237,7 +237,7 @@ so it moves no faster than a truck delivers.
 | Intercept (QRF) | Σ need over the sighting's 7×7 block × min(1, sighting force ÷ (Σ `_fri` over its 3×3 + 1)) |
 | Attack | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
-| Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE` |
+| Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
 | Ferry | the stopped unit's committed Value (`expValue`), since its whole order waits on the crossing |
 | Probe | staleness over the target's 3×3 block × the Attack `Cost` at that target × `OPCOM_PROBE_SHARE` |
 | Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
@@ -477,7 +477,7 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 
 ## Sourcing: hire on demand (Phase 4D)
 
-**WIP.** 4D.1 is shipped; 4D.2 and 4D.3 remain.
+**WIP.** 4D.1 and 4D.2 are shipped; 4D.3 remains.
 
 OPCOM hires a unit only for the action that sends it. An action that needs a unit weighs, in the pick, each free
 unit it may draw against a hire of each row that can do the job, and offers each target with the source that scores
@@ -546,7 +546,7 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
 | Chunk | Builds |
 |---|---|
 | **4D.1** Sources | **Shipped** (`appraisal/fnc_opcom_sources.sqf`) — the source list and its score, shared by every action. The supply actions are on it: a free truck at its stake, and the per-km scored and no longer charged. The truck-stock Value is retired |
-| **4D.2** Commit hires | Attack, Intercept and Patrol offer a hire of each eligible row beside the free units, the execute raising and then tasking it. Garrison replaces Re-garrison and takes over the combatant defense Value and the garrison cap ([§Caps](#caps)); the combat and recon demands and each sweep's blocked list retire |
+| **4D.2** Commit hires | **Shipped** (`appraisal/fnc_opcom_commit.sqf`) — Attack, Intercept and Patrol offer a hire of each eligible row beside the free units, the execute raising and then tasking it. Garrison replaces Re-garrison and takes over the combatant defense Value and the garrison cap ([§Caps](#caps)); the combat and recon demands and each sweep's blocked list are retired |
 | **4D.3** Lifts | the land-taxi sourced with its order, and the Ferry action in place of the shore borrow. The lift and strand demands and each sweep's rider list retire, and with them the Recruit rows and the `recruit` action weight |
 
 Each chunk deletes the Recruit role it replaces, so no chunk scores a hire twice.
