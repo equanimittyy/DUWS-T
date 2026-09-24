@@ -397,6 +397,7 @@ must not have a snapshot put the old list back.
 |---|---|---|
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
+| Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, names, radii and populations |
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
@@ -410,6 +411,24 @@ rather than before the builders — the boot line would overwrite it. `DUWS_time
 has skipped, the campaign clock's offset over engine `time` — see `fnc_campaign_now`) rides in the
 same group: a plain serializable scalar, stored and re-applied beside `date`, exempt from the
 remaining-duration rule because it is not derived from `time`/`diag_tickTime`.
+
+**A dead officer has to stay dead, and only one lose condition makes that interesting.** Under Full
+or Officer-only, the officer's death ends the campaign and the snapshot header carries that ending
+([§A campaign that has ended](#when-the-save-is-written-and-what-happens-with-nobody-on)). Under
+Escalation-only or Off the campaign continues and the loss is permanent: the request menu refuses to
+open while `hq_blu1` is dead (`client/dialog/fnc_request_menu.sqf:19-20`), so the players spend the
+rest of the campaign unable to buy anything. `fnc_bluHQinit` rebuilds the HQ deterministically and
+spawns the officer alive, which is why one position persists the whole base — and why the flag is an
+outcome applied after it. Without it a reload hands the players their request menu back and erases
+the worst thing that can happen to them short of losing.
+
+**A destroyed FOB does not come back, and the registries already know it.** Both removal paths, the
+player's dialog and the destruction watcher, funnel through `fnc_fob_deregister`
+(`server/init_hq/fnc_fob_deregister.sqf`), which drops the position and the name in lockstep with
+`Array_of_FOBS`. What is saved is therefore the FOBs standing at the write, and replay calls
+`fnc_fob_server` per entry rather than rebuilding what it places. Nothing player-scoped rides along:
+the owner passed at build time is never read (`shared/functions/fnc_FOBactions.sqf:8`), and a FOB's
+garrison and its defences are live state the site streamer regenerates.
 
 **Zone names have to be stored.** They are drawn, not derived: `fnc_zone_name` hands out a
 phonetic-alphabet word at random and records which are spent, so nothing about a zone's index or
@@ -826,7 +845,7 @@ function runs unchanged.
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
 | Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
 | `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the restored pool does not name ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
-| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
+| `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
 | `fnc_intro_heli` (`:433`) | **Skipped** |
@@ -925,7 +944,7 @@ refund attached to the one restore that consumes it.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add the garrison ledger: the purchased tier per zone and town, and the full and lost token multisets behind it. It follows zone and town replay, because every key is a site key. Verify: an OPFOR zone the players mauled but did not take comes back missing exactly what it lost rather than repaired to full; a cleared town comes back at tier I with nothing standing; a zone the players garrisoned comes back theirs at the tier they paid for; and a token behind an unearned rung stays unfielded rather than lost.
-- [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
+- [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, a FOB destroyed before the save stays gone, an officer killed under a non-terminal lose condition comes back dead with the request menu still refusing to open, and the restore replays no FOB radio announcements.
 - [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
 - [ ] Add the garage. Verify: `DUWS_garage_stored` round-trips; a retrieved vehicle comes back with its damage, fuel, cargo, paint, pylons and ammo fraction; a snapshot holding more than the restored caps allow keeps every vehicle and blocks the next store instead of dropping one.
 - [ ] Add the mission params and the captured pool. The params land with the settings group, and the pool follows faction init because the Limited seed reads it. Verify: a Limited campaign reloaded in a lobby set to Hybrid comes back Limited; a friendly class the player spent down to 3 comes back at 3 rather than reseeded to `DUWS_limitedSeed`; a class added by a mod since the save is seeded rather than missing; a Hybrid campaign's banked foreign gear comes back at its counts; and the host's log level, debug flag, cleanup lifetime, group icons and autosave interval are the lobby's, not the snapshot's.
