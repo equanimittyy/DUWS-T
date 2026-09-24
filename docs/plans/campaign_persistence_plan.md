@@ -359,7 +359,7 @@ and `fnc_process_enviro_menu.sqf:88-194` — zone counts and radii, `moreUrban`,
 `AttackHeli`, `HeavyArmor`, `enemyunitMultiplier`, `cp_reward_multiplier`,
 `DUWSMP_CP_death_cost`, `weather_type`, `time_of_day`, `time_Multiplier`, `CIV_PRESENCE`,
 `hardcore_mode_enable`, `escalation_enabled`, `insurgent_mode_enable`, `apocalypse_mode`,
-`simple_zones_enable`, `restricted_arsenal`, `enable_fast_travel`, `ZeusStatus`. A single array of
+`simple_zones_enable`, `enable_fast_travel`, `ZeusStatus`. A single array of
 those names, held in one place, is what both the save and the re-broadcast iterate. Listing them
 individually in two functions guarantees that the next setting added is saved in one and not the
 other.
