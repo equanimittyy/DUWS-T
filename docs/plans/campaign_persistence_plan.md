@@ -399,6 +399,7 @@ must not have a snapshot put the old list back.
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, names, radii and populations |
+| Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
 | Clock | outcome | `date`, `DUWS_timeSkew` |
 
 **The campaign clock is stored because boot sets it unconditionally.**
@@ -437,6 +438,16 @@ zone on the map, and the player's own notes and any dialogue they remember would
 ground. Storing the string costs nothing in translation, which was the old objection: these words
 carry no stringtable key and are the same in every language. The used-name list is restored with
 them, or the allocator would hand a second zone a name already on the map.
+
+**The vendor draft is drawn, not derived, so it is stored like the zone names.**
+`fnc_vendor_init` picks each town's shop types by weighted roll, each shop's spot from that
+building's positions and each facing from the town centre, and it already treats the result as the
+campaign's fixed answer: its own header says a town's shops have to stand in the same place after a
+save and restore, and a killed shop's countdown is held as remaining seconds for that reason
+(`server/vendors/fnc_vendor_init.sqf:170-173`). Re-running the draft would move every shop in every
+town. The registry is keyed by town index, so it restores beside the town list and in the same order
+the towns do; that order is the snapshot's, which is what makes the index stable across a restore
+when `civ_locations` is not.
 
 Towns go in by position even though the runtime keys them by index into `civ_locations`, because
 that index is not stable across a restore: selection's top-up wave shuffles before it draws
@@ -602,6 +613,12 @@ unbuilt here.
 in purchase order and each client keeps the individual flags as its fast path, so restore replays the
 array into the flags (Prerequisite 3). The garage's capacity ladder reads those same flags, so its
 pools come back the size the team paid for.
+
+**Replaying the flags is not enough on its own.** `DUWS_bluforRadioLevel` is counted off the unlock
+array when a support is granted (`server/supports/fnc_support_perm_grant.sqf:19`), and nothing
+recounts it afterwards, so a restore that only sets the flags leaves a team holding its radio unlocks
+with no radio reach. Restore recounts it from the restored array. The OPFOR twin needs no rule:
+`fnc_hardpoint_stream.sqf:21` recounts it from `DUWS_hardpoints`, which the snapshot restores.
 
 **Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
 towns the player has found, and a replay re-hides both: `fnc_createzone.sqf:16` sets every zone's
@@ -930,6 +947,16 @@ approach, so the groups it had rendered at the write are not saved. A hardpoint 
 delivered truck (`DUWS_opcom_buildsPending`) dies with its spawned builder, and the AP that bought it
 is the reconciliation pass's to fold back ([§What live state costs](#what-live-state-costs-and-who-pays-it-back)).
 
+Three counters reset with them and are meant to. `econ_tick` numbers the 30-minute payout and only
+the server's payout caps read it. `WARCOM_opfor_lastIncome` holds OPFOR's last payout, which OPCOM
+divides by the period to read an income rate, so a restored campaign sets no savings goal until its
+first payout lands — what the commander does at the start of every campaign anyway
+([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_lastMissionStartDate`
+stamps the last side mission and gates the next one for three hours
+(`shared/functions/fnc_mission_gate_left.sqf:15`), and it resets with the mission it was stamped for:
+a restore drops live missions, so the wait goes with them rather than being served for a mission the
+player no longer has.
+
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
 map and dropped when it returns
 ([§Map object count](../info/architecture/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
@@ -1000,12 +1027,12 @@ refund attached to the one restore that consumes it.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add the garrison ledger: the purchased tier per zone and town, and the full and lost token multisets behind it. It follows zone and town replay, because every key is a site key. Verify: an OPFOR zone the players mauled but did not take comes back missing exactly what it lost rather than repaired to full; a cleared town comes back at tier I with nothing standing; a zone the players garrisoned comes back theirs at the tier they paid for; and a token behind an unearned rung stays unfielded rather than lost.
-- [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, a FOB destroyed before the save stays gone, an officer killed under a non-terminal lose condition comes back dead with the request menu still refusing to open, and the restore replays no FOB radio announcements.
+- [ ] Add HQ, FOB, vendor and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, every town's shops come back the same types in the same doorways facing the same way and a shop killed before the save is still on its countdown, a FOB destroyed before the save stays gone, an officer killed under a non-terminal lose condition comes back dead with the request menu still refusing to open, and the restore replays no FOB radio announcements.
 - [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
 - [ ] Add the garage. Verify: `DUWS_garage_stored` round-trips; a retrieved vehicle comes back with its damage, fuel, cargo, paint, pylons and ammo fraction; a snapshot holding more than the restored caps allow keeps every vehicle and blocks the next store instead of dropping one.
 - [ ] Add the mission params and the captured pool. The params land with the settings group, and the pool follows faction init because the Limited seed reads it. Verify: a Limited campaign reloaded in a lobby set to Hybrid comes back Limited; a friendly class the player spent down to 3 comes back at 3 rather than reseeded to `DUWS_limitedSeed`; a class added by a mod since the save is seeded rather than missing; a Hybrid campaign's banked foreign gear comes back at its counts; and the host's log level, debug flag, cleanup lifetime, group icons and autosave interval are the lobby's, not the snapshot's.
 - [ ] Add the MHQ, which carries its own spec now that the garage does not hold it. Verify: a deployed MHQ comes back deployed where it stood, with a working respawn point and one ammo box.
-- [ ] Add the reveal state and the permanent support unlocks. Verify: a hardcore campaign's revealed zones, towns and hardpoints come back revealed with their markers repainted; the unlock array replays into every client's flags, a client that joins after the restore included; and the garage's capacity pools come back the size they were bought to.
+- [ ] Add the reveal state and the permanent support unlocks. Verify: a hardcore campaign's revealed zones, towns and hardpoints come back revealed with their markers repainted; the unlock array replays into every client's flags and `DUWS_bluforRadioLevel` comes back counted rather than zero, a client that joins after the restore included; and the garage's capacity pools come back the size they were bought to.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
 - [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect, on a `persistent = 0` server as well as a `persistent = 1` one; a connected headless client does not count as a player.
 - [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
