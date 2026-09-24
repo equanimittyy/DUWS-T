@@ -16,6 +16,7 @@ DUWS_opcom_taskSeq  = 0;
 DUWS_opcom_recruitMenu = createHashMapFromArray [
     ["rifles",       [["squad"],     ["transportable"]]],
     ["weapons_team", [["wp_team"],   ["transportable"]]],
+    ["car",          [["car"],       ["transport"]]],
     ["apc",          [["apc"],       ["transport"]]],
     ["ifv",          [["ifv"],       ["transport"]]],
     ["mbt",          [["tank"],       []]],
