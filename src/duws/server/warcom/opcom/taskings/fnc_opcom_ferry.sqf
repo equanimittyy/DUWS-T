@@ -198,10 +198,12 @@ DUWS_fnc_opcom_ferryStowed = {
     [_t] call DUWS_fnc_opcom_ferryClearPad;
 };
 
-// A hull just streamed live: resume the phase by embarked (pickup before the board, carry after), timer reset.
+// A hull just streamed live: resume the phase by embarked (pickup before the board, carry after), timer reset, and
+// step it at once -- deVirt gives a `ferry` order no waypoint, so the hull would stand idle until the next tick.
 DUWS_fnc_opcom_ferryResume = {
     params ["_t"];
     _t set ["ferryPhase", ["topickup", "carry"] select (_t getOrDefault ["embarked", false])];
     _t set ["ferryWait", 0]; _t set ["ferryLZ", []];
     ["INFO", "OPCOM", format ["ferry: transport %1 (%2) streams live at %3", _t get "id", _t get "moveType", _t get "ferryPhase"]] call fnc_log;
+    [_t, [_t get "carrying"] call DUWS_fnc_opcom_byId] call DUWS_fnc_opcom_ferryStepLive;
 };
