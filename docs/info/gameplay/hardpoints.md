@@ -68,7 +68,7 @@ standing OPFOR hardpoint, seeded ones included, and every build still siting or 
 (`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at
 `OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG`, `OP` and `MINEFIELD` cap at their
 `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
-All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (10) times the zone count. The
+All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (12) times the zone count. The
 per-zone caps scale because the seed does, at about 7 hardpoints a zone. Within the caps, a build's Value leans toward
 the archetype's `hpMix` (`appraisal/fnc_opcom_archetypes.sqf`), where a type's share is its weight over the mix's sum:
 a type past its share of the standing hardpoints of the mix's types builds less, and one short of it builds more. A

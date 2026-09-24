@@ -755,7 +755,7 @@ OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
 // These types, and all types together, cap per campaign zone with the seeded hardpoints counted: the seed
 // grows with the zone count, so a flat cap would sit under a large campaign's seed and far over a small one's.
-OPCOM_CAP_HP_PER_ZONE = 10;
+OPCOM_CAP_HP_PER_ZONE = 12;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
     ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD", 1]
 ];
