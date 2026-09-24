@@ -477,7 +477,7 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 
 ## Sourcing: hire on demand (Phase 4D)
 
-**WIP.**
+**WIP.** 4D.1 is shipped; 4D.2 and 4D.3 remain.
 
 OPCOM hires a unit only for the action that sends it. An action that needs a unit weighs, in the pick, each free
 unit it may draw against a hire of each row that can do the job, and offers each target with the source that scores
@@ -545,7 +545,7 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
 
 | Chunk | Builds |
 |---|---|
-| **4D.1** Sources | the source list and its score, shared by every action. The supply actions move onto it: a free truck at its stake, and the per-km scored and no longer charged. The truck-stock Value retires |
+| **4D.1** Sources | **Shipped** (`appraisal/fnc_opcom_sources.sqf`) — the source list and its score, shared by every action. The supply actions are on it: a free truck at its stake, and the per-km scored and no longer charged. The truck-stock Value is retired |
 | **4D.2** Commit hires | Attack, Intercept and Patrol offer a hire of each eligible row beside the free units, the execute raising and then tasking it. Garrison replaces Re-garrison and takes over the combatant defense Value and the garrison cap ([§Caps](#caps)); the combat and recon demands and each sweep's blocked list retire |
 | **4D.3** Lifts | the land-taxi sourced with its order, and the Ferry action in place of the shore borrow. The lift and strand demands and each sweep's rider list retire, and with them the Recruit rows and the `recruit` action weight |
 
