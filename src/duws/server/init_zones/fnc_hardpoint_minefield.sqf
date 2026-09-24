@@ -214,12 +214,13 @@ fnc_hardpoint_minefield_map_icons = {
     // Config colour entries can be profile-colour expression strings rather than numbers.
     DUWS_mineIconColour = (getArray (configFile >> "CfgInGameUI" >> "Cursor" >> "explosiveColor"))
         apply { if (_x isEqualType "") then { call compile _x } else { _x } };
+    DUWS_mineIconColour set [3, 0.5];
     waitUntil { !isNull findDisplay 12 };
     (findDisplay 12 displayCtrl 51) ctrlAddEventHandler ["Draw", {
         params ["_map"];
         {
             if (!isNull _x && {mineActive _x}) then {
-                _map drawIcon [DUWS_mineIcon, DUWS_mineIconColour, getPosATL _x, 24, 24, 0, ""];
+                _map drawIcon [DUWS_mineIcon, DUWS_mineIconColour, getPosATL _x, 12, 12, 0, ""];
             };
         } forEach (missionNamespace getVariable ["DUWS_revealedMines", []]);
     }];
