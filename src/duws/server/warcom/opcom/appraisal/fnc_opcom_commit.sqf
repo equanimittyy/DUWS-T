@@ -4,7 +4,7 @@
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_sendRun = {
-    params ["_target"];
+    params ["_target", "", "_action"];
     _target params ["_ref", "_task", "_exp", "_lift"];
     private _t = [_ref] call DUWS_fnc_opcom_raise;
     if (isNil "_t") exitWith { false };
@@ -18,6 +18,7 @@ DUWS_fnc_opcom_sendRun = {
     if (!_ok) exitWith { [_ref, _t] call DUWS_fnc_opcom_dismiss; false };
     // What the order is worth once committed, which a Ferry is priced on if the unit stops at a water leg.
     _t set ["expValue", _exp];
+    [_action, _task select 1, [[_action, _t]]] call DUWS_fnc_opcom_intentOpen;
     true
 };
 

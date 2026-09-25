@@ -86,7 +86,7 @@ if (_row isEqualTo []) exitWith {};
 _row params ["_id", "", "_execute"];
 _cand params ["_target", "_price", "_label"];
 // Re-checked: the wallet can drop after the snapshot, and fnc_ap_adjust would clamp the overdraft to a free buy.
-private _ok = WARCOM_opfor_ap >= _price && {[_target, _price] call _execute};
+private _ok = WARCOM_opfor_ap >= _price && {[_target, _price, _id] call _execute};
 if (_ok && {_price > 0}) then { ["OPF", -_price, format ["opcom_%1", _id]] call fnc_ap_adjust };
 
 private _line = format ["%1%2%3%4", _label,

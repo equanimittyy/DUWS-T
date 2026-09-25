@@ -46,7 +46,7 @@ private _t = createHashMapFromArray [
     ["fullForce", _force], ["effForce", _force],
     ["route", []], ["leg", 0], ["routeMode", "grid"],
     ["status", "virtual"], ["grp", ""], ["hold", 0], ["homeZone", _homeZone],
-    ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""]
+    ["carrying", -1], ["ridingOn", -1], ["embarked", false], ["returnZone", ""], ["boundTo", -1]
 ];
 DUWS_opcom_taskings pushBack _t;
 // A garrison never streams; a combatant is fielded only through its zone's reserve pool.

@@ -7,7 +7,7 @@
 //     it, so only an order that fights for its target carries one -- a buy stocks ground OPCOM already holds and leaves
 //     it out. `cost` is what the score divides by, the price when omitted; a commit order pays no AP but stakes a unit,
 //     so it names both.
-//   [target, price] call execute -> true when the action landed; the pick charges the price only then.
+//   [target, price, id] call execute -> true when the action landed; the pick charges the price only then.
 //   weight is the row's actionWeight key, the id when omitted. Every zone, standalone and mine build shares "build",
 //     so the archetype weighs building whole and its mix alone picks the type: a per-type weight would fight the mix
 //     for the same lean. An asset build keeps its own key and stays out of the mix: its cap, not a share, bounds how
