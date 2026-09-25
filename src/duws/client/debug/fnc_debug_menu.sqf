@@ -166,7 +166,7 @@ switch (_page) do {
             ["OPCOM grid", missionNamespace getVariable ["DUWS_dbgOpcomOn", false], fnc_debug_opcom_view] call _toggle,
             ["OPCOM force dots", "DUWS_dbgOpcomForceOn", "OPCOM grid: force dots %1.\n\nOPFOR/BLUFOR force per cell; yellow marks the front.", true] call _gridLayer,
             ["OPCOM staleness", "DUWS_dbgOpcomStaleOn", "OPCOM grid: staleness %1.\n\nTicks since each cell was last seen (t);\nnever or long unseen cells show none.", true] call _gridLayer,
-            ["OPCOM need/cover/traffic", "DUWS_dbgOpcomNeedOn", "OPCOM grid: need, cover and traffic %1.\n\nNeed (N), hardpoint cover (C) and\nBLUFOR traffic (T) per cell."] call _gridLayer,
+            ["OPCOM need/cover/traffic", "DUWS_dbgOpcomNeedOn", "OPCOM grid: need, cover and traffic %1.\n\nNeed/hardpoint cover/BLUFOR traffic\nat the foot of each cell."] call _gridLayer,
             ["OPCOM AI overlay", missionNamespace getVariable ["DUWS_dbgOpcomAiOn", false], fnc_debug_opcom_ai_overlay] call _toggle
         ]] call fnc_open_action_menu;
     };

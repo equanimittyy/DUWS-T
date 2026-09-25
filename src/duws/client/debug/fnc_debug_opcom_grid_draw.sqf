@@ -85,13 +85,13 @@ private _sample = "";
     private _nm = format ["duws_opcom_need_%1", _i];
     if (_showNeed && {_need > _eps || {_cov > 0} || {_traf > _eps}}) then {
         if ((getMarkerType _nm) isEqualTo "") then {
-            createMarkerLocal [_nm, [_c select 0, (_c select 1) - _cell * 0.3]];
+            createMarkerLocal [_nm, [_c select 0, (_c select 1) - _cell * 0.45]];
             _nm setMarkerShapeLocal "ICON";
             _nm setMarkerTypeLocal "mil_dot";
             _nm setMarkerColorLocal "#(0.3,1,0.4,1)";
             _nm setMarkerSizeLocal [0.4, 0.4];
         };
-        _nm setMarkerTextLocal format ["N%1 C%2 T%3", _need toFixed 1, _cov toFixed 2, _traf toFixed 1];
+        _nm setMarkerTextLocal format ["%1/%2/%3", _need toFixed 1, _cov toFixed 2, _traf toFixed 1];
     } else {
         if ((getMarkerType _nm) isNotEqualTo "") then { deleteMarkerLocal _nm };
     };
