@@ -21,7 +21,8 @@ DUWS_fnc_opcom_cellDist = {
 DUWS_fnc_opcom_advance = {
     params ["_t"];
     if ((_t get "route") isEqualTo [] && {(_t get "target") isNotEqualTo []}) then {
-        ([_t get "pos", _t get "target", _t get "moveType", _t getOrDefault ["lambda", 0]] call fnc_opcom_route) params ["_pts", "_mode"];
+        ([_t get "pos", _t get "target", _t get "moveType", _t getOrDefault ["lambda", 0], _t getOrDefault ["avoid", []]]
+            call fnc_opcom_route) params ["_pts", "_mode"];
         _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
     };
     private _route = _t get "route";

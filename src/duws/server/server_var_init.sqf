@@ -854,9 +854,12 @@ OPCOM_MUSTER_HOLD = 0.5;
 OPCOM_ASSAULT_CELLS = 3;
 // The most units one attack binds across all its buckets. Tune.
 OPCOM_ATTACK_UNITS = 10;
-// The least Chebyshev cells from its target's cell an attacker stages at: 2 keeps the rally out of the 3x3 block the
-// muster bars and P(win) read, and out of the fight it is gathering for. Tune.
-OPCOM_RALLY_K = 2;
+// The least Chebyshev cells from its target's cell an attacker stages at: 4 (2 km) keeps the muster well clear of the
+// 3x3 block the muster bars and P(win) read, and of the fight it is gathering for. Tune.
+OPCOM_RALLY_K = 4;
+// Chebyshev cells from its target's cell a flank's hook waits at before it closes: 2 is the nearest ground outside the
+// 3x3 block the fix fights in. Tune.
+OPCOM_HOOK_K = 2;
 // From this ratio up an envelopment buys a setup leg and nothing else, so an Attack only assaults. Tune.
 OPCOM_BAND_CRUSH = 2;
 
@@ -884,6 +887,10 @@ OPCOM_ROUTE_LAMBDA = 200;
 // above any land detour the play box can hold -- so a target across water is reachable, but water is taken
 // only when no land route exists, and among water routes A* still picks the shortest (opcom_plan.md §Shipped).
 OPCOM_ROUTE_LIFT_PENALTY = 1e6;
+
+// Metres a route pays to enter a cell it must go round (a flank's hook round the fight), set far above any detour so
+// the cell is crossed only when no way round exists.
+OPCOM_ROUTE_AVOID_PENALTY = 1e6;
 
 // Throttle for the stranded-rider WARN: with no lift free a rider retries every tick, so it logs only once
 // per this many -- an island-gap deadlock surfaces in the RPT without flooding it (opcom_plan.md §Shipped).

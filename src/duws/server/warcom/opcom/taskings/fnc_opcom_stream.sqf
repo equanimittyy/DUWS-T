@@ -35,13 +35,14 @@ DUWS_fnc_opcom_applyOrder = {
     };
 };
 
-// -> the rest of a threat-bent route as MOVE points a cell apart, [] at lambda 0. One waypoint at the target lets the
-// engine path a live group straight through what the route went around; a cell apart keeps a road route's dense
-// polyline to a handful of waypoints.
+// -> the rest of a bent route as MOVE points a cell apart, [] when nothing bent it (lambda 0, nothing avoided). One
+// waypoint at the target lets the engine path a live group straight through what the route went around; a cell apart
+// keeps a road route's dense polyline to a handful of waypoints.
 DUWS_fnc_opcom_routeVia = {
     params ["_t", "_from"];
     private _route = _t get "route";
-    if ((_t getOrDefault ["lambda", 0]) <= 0 || {count _route < 2}) exitWith { [] };
+    private _bent = (_t getOrDefault ["lambda", 0]) > 0 || {(_t getOrDefault ["avoid", []]) isNotEqualTo []};
+    if (!_bent || {count _route < 2}) exitWith { [] };
     private _near = 0;
     { if ((_x distance2D _from) < ((_route select _near) distance2D _from)) then { _near = _forEachIndex } } forEach _route;
     private _via = [];

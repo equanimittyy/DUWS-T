@@ -3,8 +3,8 @@
 // block. Wheeled/tracked route on roads (fnc_convoy_path's polyline, stepped as one hull -- no convoy driver);
 // infantry/air/boat take an A* cost-field cell chain, cost = stepLen + OPCOM_ROUTE_LAMBDA*_lambda*gridEne. A road
 // step pays the same term pro rata to its length, so a hull at lambda > 0 takes the road around a threat, and past
-// the road's end it takes the cell chain too.
-params ["_startPos", "_destPos", "_moveType", ["_lambda", 0]];
+// the road's end it takes the cell chain too. _avoid: grid cells either branch pays OPCOM_ROUTE_AVOID_PENALTY to enter.
+params ["_startPos", "_destPos", "_moveType", ["_lambda", 0], ["_avoid", []]];
 if (!isServer) exitWith { [[], "grid"] };
 
 // A segment is [points, "road"|"gap"]; a "gap" carries only its two endpoints (a bridge the hull drives itself).
@@ -12,20 +12,23 @@ if (!isServer) exitWith { [[], "grid"] };
 // grid. Water within 50 m of a road is a bridge or the unit's own spot mid-bridge, not a crossing; a stub that could
 // not skirt the sea keeps a wet point well past that.
 if (_moveType in ["wheeled", "tracked"]) exitWith {
-    private _extra = if (_lambda > 0) then {
+    private _bends = _lambda > 0 || {_avoid isNotEqualTo []};
+    private _extra = if (_bends) then {
         [{
-            params ["_lw", "", "_to", "_len"];
-            _lw * (DUWS_opcom_grid_ene select ([_to] call DUWS_fnc_opcom_w2c)) * _len / OPCOM_GRID_CELL
-        }, OPCOM_ROUTE_LAMBDA * _lambda]
+            params ["_arg", "", "_to", "_len"];
+            _arg params ["_lw", "_avoid"];
+            private _c = [_to] call DUWS_fnc_opcom_w2c;
+            _lw * (DUWS_opcom_grid_ene select _c) * _len / OPCOM_GRID_CELL + ([0, OPCOM_ROUTE_AVOID_PENALTY] select (_c in _avoid))
+        }, [OPCOM_ROUTE_LAMBDA * _lambda, _avoid]]
     } else { [] };
     // The straight stub off the road would drive through whatever stands between the road and the dest.
     private _end = _destPos;
     private _tail = [];
-    if (_lambda > 0) then {
+    if (_bends) then {
         private _road = objNull;
         {
             if (isNull _road) then {
-                private _rs = _destPos nearRoads _x;
+                private _rs = (_destPos nearRoads _x) select { !(([getPos _x] call DUWS_fnc_opcom_w2c) in _avoid) };
                 if (_rs isNotEqualTo []) then {
                     _road = _rs select 0;
                     { if ((_x distance2D _destPos) < (_road distance2D _destPos)) then { _road = _x } } forEach _rs;
@@ -34,7 +37,7 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
         } forEach [250, 1000, 3000];
         if (!isNull _road && {([getPos _road, _destPos] call DUWS_fnc_opcom_cellDist) > 0}) then {
             private _rp = [(getPos _road) select 0, (getPos _road) select 1, 0];
-            private _chain = ([_rp, _destPos, "inf", _lambda] call fnc_opcom_route) select 0;
+            private _chain = ([_rp, _destPos, "inf", _lambda, _avoid] call fnc_opcom_route) select 0;
             if ((_chain findIf { [_x] call DUWS_fnc_opcom_isWaterPt }) < 0) then { _end = _rp; _tail = _chain };
         };
     };
@@ -54,7 +57,7 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
     _pts append _tail;
     // A threat-priced search can give up on a long detour and leave the network across water, where the length-only
     // road stays dry: a march through the threat beats no march.
-    if (_wet && {_lambda > 0}) then { [_startPos, _destPos, _moveType, 0] call fnc_opcom_route } else {
+    if (_wet && {_bends}) then { [_startPos, _destPos, _moveType, 0] call fnc_opcom_route } else {
         [[_pts, []] select _wet, "road"]
     }
 };
@@ -130,7 +133,8 @@ while {count _open > 0 && {_guard < _n}} do {
                         private _step = [_cell, _diag] select (_dx != 0 && _dy != 0);
                         // A land type entering navigable water pays the ferry cost, so water is taken only when forced.
                         private _lift = [0, OPCOM_ROUTE_LIFT_PENALTY] select (_water isEqualTo "land" && {(_gwater select _j) >= 0});
-                        private _tentative = (_g select _cur) + _step + _lw * (_ene select _j) + _lift;
+                        private _tentative = (_g select _cur) + _step + _lw * (_ene select _j) + _lift
+                            + ([0, OPCOM_ROUTE_AVOID_PENALTY] select (_j in _avoid));
                         if ((_g select _j) < 0 || {_tentative < (_g select _j)}) then {
                             _g set [_j, _tentative];
                             _from set [_j, _cur];

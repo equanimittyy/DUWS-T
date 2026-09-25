@@ -15,7 +15,8 @@
 //     back.
 //   _lambda: how hard the route bends around believed BLUFOR force, 0 for distance only; -1 takes the order's own.
 //     Kept on the record, so every re-plan of the march bends alike.
-params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []], ["_lambda", -1]];
+//   _avoid: grid cells the route goes round rather than through (fnc_opcom_route), kept on the record as _lambda is.
+params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []], ["_lambda", -1], ["_avoid", []]];
 if (!isServer) exitWith { false };
 
 if (!(_order in ["capture", "move", "patrol", "probe", "return", "errand", "guard", "intercept"])) exitWith {
@@ -95,7 +96,7 @@ if (_boatHome) then { _target = [_port] call DUWS_fnc_opcom_c2w };
 // seeks the threat or reads ground by closing on it.
 if (_lambda < 0) then { _lambda = [0, 1] select (_order in ["errand", "return"]) };
 private _plan = if (_order isEqualTo "guard") then { [[], "grid"] } else {
-    [_t get "pos", _target, _t get "moveType", _lambda] call fnc_opcom_route
+    [_t get "pos", _target, _t get "moveType", _lambda, _avoid] call fnc_opcom_route
 };
 _plan params ["_pts", "_mode"];
 if (_order isNotEqualTo "guard" && {_pts isEqualTo []}) exitWith {
@@ -118,6 +119,7 @@ _t set ["returnZone", _rz];
 _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
 _t set ["interceptKey", _ik];
 _t set ["lambda", _lambda];
+_t set ["avoid", _avoid];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 if (_wasGarrison) then { [_t] call DUWS_fnc_opcom_drawOut };
