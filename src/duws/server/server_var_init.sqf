@@ -834,7 +834,8 @@ OPCOM_PWIN_FLOOR = 0.3;
 OPCOM_COMMIT_HOLD = 6;
 
 // Per-tick fraction of fullForce a garrison-tasking unit regenerates toward full, mirroring the zone
-// reinforce path; guard does not heal. 0.05 restores a unit to full in ~20 ticks (~100 s). Tune.
+// reinforce path; guard does not heal, nor a garrison whose zone is contested. 0.05 restores a unit to full in
+// ~20 ticks (~100 s). Tune.
 OPCOM_GARRISON_HEAL_RATE = 0.05;
 
 // Smallest navigable water body, in grid cells: a connected water component of at least this many cells is a

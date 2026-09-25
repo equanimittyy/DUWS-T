@@ -31,8 +31,10 @@ DUWS_fnc_opcom_stepGuard = { false };
 
 DUWS_fnc_opcom_stepGarrison = {
     params ["_t"];
-    private _full = _t get "fullForce";
-    _t set ["effForce", _full min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
+    if !([_t get "homeZone"] call DUWS_fnc_opcom_siteContested) then {
+        private _full = _t get "fullForce";
+        _t set ["effForce", _full min ((_t get "effForce") + OPCOM_GARRISON_HEAL_RATE * _full)];
+    };
     // True, not false: a garrison rests virtual and defends through its zone's reserve pool, so it never streams.
     true
 };
