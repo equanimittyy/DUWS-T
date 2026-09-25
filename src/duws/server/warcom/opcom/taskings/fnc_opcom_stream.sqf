@@ -4,10 +4,12 @@
 // (fnc_opcom_ferry).
 if (!isServer) exitWith {};
 
-// Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.)
+// Cleared first so a re-spawn inherits no stale waypoint. (Waypoints take only on a server-local group.) _via: MOVE
+// points walked before the order's own waypoint.
 DUWS_fnc_opcom_applyOrder = {
-    params ["_grp", "_order", "_target"];
+    params ["_grp", "_order", "_target", ["_via", []]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
+    { (_grp addWaypoint [_x, 0]) setWaypointType "MOVE" } forEach _via;
     switch (_order) do {
         case "capture";
         case "intercept": {
@@ -31,6 +33,24 @@ DUWS_fnc_opcom_applyOrder = {
             _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
         };
     };
+};
+
+// -> the rest of a threat-bent route as MOVE points a cell apart, [] at lambda 0. One waypoint at the target lets the
+// engine path a live group straight through what the route went around; a cell apart keeps a road route's dense
+// polyline to a handful of waypoints.
+DUWS_fnc_opcom_routeVia = {
+    params ["_t", "_from"];
+    private _route = _t get "route";
+    if ((_t getOrDefault ["lambda", 0]) <= 0 || {count _route < 2}) exitWith { [] };
+    private _near = 0;
+    { if ((_x distance2D _from) < ((_route select _near) distance2D _from)) then { _near = _forEachIndex } } forEach _route;
+    private _via = [];
+    private _last = _from;
+    for "_i" from (_near + 1) to (count _route - 2) do {
+        private _p = _route select _i;
+        if ((_p distance2D _last) >= OPCOM_GRID_CELL) then { _via pushBack _p; _last = _p };
+    };
+    _via
 };
 
 // Near-shore staging point of a route that crosses water: [_crosses, _stage], _stage the last land point before
@@ -65,7 +85,7 @@ DUWS_fnc_opcom_reOrderLive = {
             (_grp addWaypoint [_stage, 0]) setWaypointType "HOLD";
         };
     };
-    [_grp, _order, _t get "target"] call DUWS_fnc_opcom_applyOrder;
+    [_grp, _order, _t get "target", [_t, getPosASL (leader _grp)] call DUWS_fnc_opcom_routeVia] call DUWS_fnc_opcom_applyOrder;
 };
 
 // OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
