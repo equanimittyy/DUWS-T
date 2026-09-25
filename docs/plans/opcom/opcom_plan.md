@@ -658,8 +658,9 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
 - **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
   the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
   no sequencing. `flank` holds `fix` on the direct bearing and stages both `maneuver` slots at +90° or −90°, whichever
-  side is dry. `encircle` stages `rear` at 180° and routes it wide, its rally at least `OPCOM_ENVELOP_STANDOFF` from the
-  target, so the march goes around the fight rather than through its edge. Every role then collapses on the target.
+  side is dry. `encircle` stages `rear` at 180° and routes it wide, its rally at least `OPCOM_ENVELOP_K` (4) cells
+  from the target's, so the march goes around the fight rather than through its edge. Every role then collapses on
+  the target. A rally is a cell centre, and every distance a rally keeps is Chebyshev cells from the target's cell.
 - **`flank` and `encircle` are one mechanism.** Both bind a `fix` that holds the defenders' front and one to two
   enveloping roles released once it reads `engaged`, and they differ only in bearing offset and standoff. One
   implementation, two rows, so the archetype can lean between them with no second code path.
@@ -768,7 +769,7 @@ early.
 | Chunk | Builds |
 |---|---|
 | **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally `OPCOM_RALLY_STANDOFF` (1 km) past the target's edge on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
@@ -778,8 +779,8 @@ early.
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 `OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
-short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_STANDOFF`),
-`OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_STANDOFF`, the
+short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
+`OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_K`, the
 frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
