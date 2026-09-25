@@ -2,7 +2,7 @@
 // bare head. Read from unit config, not a hand-kept list, so it follows the game's own factions.
 if (!isServer) exitWith {};
 
-private _mode = DUWS_paramBandits;
+private _mode = ["DUWS_Bandits", 0] call BIS_fnc_getParamValue;
 
 // [factions, parameter values that withhold them]: 1 No DLC, 2 No Apex DLC, 3 No Contact DLC.
 private _sources = [

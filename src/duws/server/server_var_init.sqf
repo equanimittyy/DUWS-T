@@ -67,7 +67,6 @@ DUWS_paramArsenal = ["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue;publicVar
 DUWS_paramTrackAmmo = ["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTrackAmmo";
 DUWS_paramRestWeather = ["DUWS_RestWeather", 1] call BIS_fnc_getParamValue;publicVariable "DUWS_paramRestWeather";
 DUWS_paramLoseConditions = ["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLoseConditions";
-DUWS_paramBandits = ["DUWS_Bandits", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramBandits";
 
 // Arsenal mode and ammo tracking, so the server-side pool writers and the client shelf logic read one
 // authoritative answer. Limited count-tracks the player's own faction too (no unlimited floor); trackAmmo

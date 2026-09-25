@@ -106,7 +106,7 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
         ["Off", "5 min", "10 min", "15 min", "30 min"], [0,300,600,900,1800]] call _param],
     ["Map Group Icons", ["DUWS_GroupIcons", 0, ["Off", "On"], [0,1]] call _param],
     ["Bandits", ["DUWS_Bandits", 0,
-        ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3], "DUWS_paramBandits"] call _param],
+        ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3]] call _param],
     ["Debug Menu", ["DUWS_Debug", 0, ["Disabled", "Enabled"], [0,1]] call _param],
     ["Logging Level", ["DUWS_LogLevel", 3,
         ["Off", "Errors only", "Errors + warnings", "Normal", "Debug"], [0,1,2,3,4]] call _param]

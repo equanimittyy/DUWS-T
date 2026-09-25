@@ -30,6 +30,7 @@ civilian setFriend [west, 1];
 civilian setFriend [east, 1];
 
 [] call fnc_factions_check;
+[] call fnc_bandit_looks;
 
 sleep 1;
 
@@ -54,7 +55,6 @@ if (isMultiplayer) then {
 
 // A load pre-sets the flags the setup gates below wait on.
 [fnc_moreUrban_locations] call DUWS_fnc_restoreGate;
-[] call fnc_bandit_looks;
 
 // A load resolves once against the saved picks: classnames are re-resolved against the mods loaded now.
 private _fnc_resolveFactions = {
