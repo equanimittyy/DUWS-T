@@ -193,11 +193,11 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
+| Arty saturate | each fresh belief sighting in range of an owned gun not already firing |
+| Arty creeping | each offensive intent in buildup or execution whose target an owned gun not already firing reaches |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
 ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
-| Arty saturate | each fresh belief sighting in range of an owned gun off cooldown |
-| Arty creeping | each offensive intent in buildup or execution whose target an owned gun off cooldown reaches |
 
 ### Value
 
@@ -914,13 +914,13 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 |---|---|---|
 | Core | static `opfor_TURRET_MORTAR` | self-propelled `opfor_ARTY_X` |
 | Unlocks at | tier 3 (150 earned AP) | tier 4 (350 earned AP) |
-| Cooldown | 4–8 rounds, then 25–40 min | 6–10 rounds, then 40–60 min |
+| Rounds per gun | 4–8 | 6–10 |
 | Spread | tighter (base 50 m) | wider (base 100 m) |
 
 - **A fire mission is an Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
-  fires; it fires only when that action wins its phase, never on a schedule. The owned gun off cooldown and in
-  range is the availability gate, nothing more. **AP is the ammunition** — the guns rest empty and are loaded per
-  mission, so there is no finite store and the wallet is the only limit.
+  fires; it fires only when that action wins its phase, never on a schedule. An owned gun in range and not already
+  firing is the availability gate, nothing more: there is no cooldown. **AP is the ammunition** — the guns rest empty
+  and are loaded per mission, so there is no finite store and the wallet is the only limit.
 - **Belief is the only trigger** — a gun fires on a fresh sighting in the belief store and on nothing else. Ground
   OPFOR merely owns eyes near is not a target: an OP post is a sensor like any other, and feeding the guns a channel
   outside belief would make them see what the commander does not. The guns are exactly as blind as the sensors are.
