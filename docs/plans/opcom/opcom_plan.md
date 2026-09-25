@@ -20,7 +20,7 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
-| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **shipped**, but for the off-road layer (5.4) |
+| 5 — Orchestration: a buildup and execution spine, the two manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **shipped**, but for the off-road layer (5.4) |
 | 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — **next** |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
@@ -108,8 +108,8 @@ has to name its Cost past it: a Garrison rests, a Ferry carries, and a Probe obs
   guns on top of their garrison, so `r` reads a dug-in site above its headcount. Infantry in cover counts 1 a man,
   and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
   `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
-- **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault; `0.5–2` assault, flank or
-  encircle; `<0.5` hold). Every offensive then musters to the ideal bar before it launches
+- **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault; `0.5–2` assault or flank; `<0.5`
+  hold). Every offensive then musters to the ideal bar before it launches
   ([§Commitment](#commitment-intents-are-sticky)). `P(win)` (whether) and the band (how) are two jobs off one `r`. The
   band picks once, at commit ([§Orchestration](#orchestration-phase-5)).
 
@@ -645,25 +645,26 @@ has to know all of them.
 | Manoeuvre | Picked when | Roles | Release |
 |---|---|---|---|
 | `assault` | every band from 0.5 | `attacker` ×1–3, one per rally cell | every role at once — one wave, never a dribble |
-| `flank` | band 0.5–2 and a dry side rally | `fix` ×1, `maneuver` ×1–2 | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
-| `encircle` | band 0.5–2 and a dry rear rally | `fix` ×1, `rear` ×1–2 | `fix` at once; `rear` once `fix` reads `engaged` or is lost |
+| `flank` | band 0.5–2 and a dry rally on some side | `fix` ×1, `maneuver` ×1–2, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
 
 The manoeuvres are rows of `DUWS_opcom_manoeuvres` (`orchestration/fnc_opcom_manoeuvres.sqf`). An envelopment needs no
 count of mobile units at commit: its enveloping role is an open slot like any other, filled by a later pick, and one
 never filled leaves the fix to launch alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
 
-Three manoeuvres, all offensive. Every other action has one shape and picks no manoeuvre: Intercept, Patrol, Probe,
+Two manoeuvres, both offensive. Every other action has one shape and picks no manoeuvre: Intercept, Patrol, Probe,
 Garrison and Ferry each commit as a one-role intent with an empty buildup, which resolves when its unit rests again.
 
 - **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
   the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
-  no sequencing. `flank` holds `fix` on the direct bearing and stages both `maneuver` slots at +90° or −90°, whichever
-  side is dry. `encircle` stages `rear` at 180° and routes it wide, its rally at least `OPCOM_ENVELOP_K` (4) cells
-  from the target's, so the march goes around the fight rather than through its edge. Every role then collapses on
-  the target. A rally is a cell centre, and every distance a rally keeps is Chebyshev cells from the target's cell.
-- **`flank` and `encircle` are one mechanism.** Both bind a `fix` that holds the defenders' front and one to two
-  enveloping roles released once it reads `engaged`, and they differ only in bearing offset and standoff. One
-  implementation, two rows, so the archetype can lean between them with no second code path.
+  no sequencing. `flank` holds `fix` on the direct bearing and stages each `maneuver` slot on a side of its own,
+  picked from ±90°, ±135° and 180°. Every role then collapses on the target. A rally is a cell centre at least
+  `OPCOM_RALLY_K` (2) cells from the target's, and every distance a rally keeps is Chebyshev cells from the target's
+  cell.
+- **Belief picks a flank's sides, not a manoeuvre roll.** A side flank and a rear attack differ only in bearing, so
+  `flank` is one manoeuvre whose `maneuver` slots take the dry sides with the least believed BLUFOR in the rally's
+  3×3 block outside the target's, the shorter swing on a tie. The target's own block is left out because it is the
+  fight the fix draws, alike from every side. Two groups can hit two sides, and a rear group keeps the same standoff
+  as any other: its λ route, not a wider rally, takes it around the fight.
 - **`assault` stages across 1–3 adjacent cells,** one role a cell, which at `OPCOM_GRID_CELL` 500 m is a 500 m to
   1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
   attackers no frontage to advance on.
@@ -671,11 +672,11 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
   no one-shot path beside it. When the one unit OPCOM binds already meets the ideal ratio at commit, the assault
   launches with that one unit once it reaches its rally, so every assault keeps one shape. A lone unit below the ideal
   ratio musters like any other assault.
-- **`assault` is legal in every band.** Its band has to overlap the enveloping pair's, or the archetype's lean
+- **`assault` is legal in every band.** Its band has to overlap `flank`'s, or the archetype's lean
   toward it never bites: a manoeuvre weight only chooses among what a band leaves legal
   ([§Archetype](#archetype-phase-7)). From band 2 (`OPCOM_BAND_CRUSH`) it is the only legal manoeuvre, because at
-  crushing odds an envelopment buys a setup leg and nothing else. The muster band, 0.5–1, leaves all three legal,
-  since the muster is what raises the odds before any of them launches.
+  crushing odds an envelopment buys a setup leg and nothing else. The muster band, 0.5–1, leaves both legal,
+  since the muster is what raises the odds before either launches.
 - **The band picks the manoeuvre once, at commit**, and a buildup launches the one it picked whatever `r` it reaches,
   so a plan never flips mid-buildup even when the muster ends in another band. Where the band leaves more than one
   legal, the archetype's `manoeuvreWeight` picks between them on the same weighted roll the action pick uses; until
@@ -728,7 +729,7 @@ The tasking keeps its λ, so every re-plan of the march bends alike, and a lift 
 | Role or order | λ | Why |
 |---|---|---|
 | `capture` — an `assault` attacker, and `flank`'s `fix` | 0 | the fight is the point of the march |
-| `capture` — `flank`'s `maneuver` and `encircle`'s `rear` | high | arriving unseen is the whole worth of the role |
+| `capture` — `flank`'s `maneuver` | high | arriving unseen is the whole worth of the role |
 | `intercept` | 0 | the threat is the target |
 | `patrol` | 0 | ground is often stale because it is dangerous, so avoidance defeats the sweep |
 | `probe` | 0 | closing is how the block gets read |
@@ -770,7 +771,7 @@ early.
 |---|---|
 | **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
 | **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
-| **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and the one mechanism `flank` and `encircle` share, over its release predicate |
+| **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and `flank`, its `maneuver` slots each on the weakest dry side, over its release predicate |
 | **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
@@ -780,7 +781,7 @@ early.
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 `OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
-`OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_K`, the
+`OPCOM_MUSTER_HOLD`, the sides a `flank` picks from and how many it binds, the
 frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
@@ -1014,8 +1015,8 @@ baseline. 7.1 builds the setting.
 ([§Orchestration](#orchestration-phase-5)) and picks between the ones the band leaves legal, on the same weighted
 roll as the action pick. The band is the gate and the weight is the lean, so a weight neither makes an illegal
 manoeuvre legal nor takes a legal one away: every manoeuvre keeps a weight above 0, because a band whose legal
-manoeuvres all weigh 0 has no pick left to make. The table keys the three that compete — `assault`, `flank` and
-`encircle`. Every other action has one shape, so a manoeuvre weight on it would never bite, and `assault` is legal
+manoeuvres all weigh 0 has no pick left to make. The table keys the two that compete, `assault` and `flank`.
+Every other action has one shape, so a manoeuvre weight on it would never bite, and `assault` is legal
 in every band for that same reason: a weight can only choose among what a band leaves legal. Two weights rather than one, because an archetype that attacks often can still
 attack cautiously: the `attack` action weight sets how often it goes, the manoeuvre weight sets how it goes. Only
 the band overlap gives the weight room, so the band thresholds and the weights settle against each other in play.
