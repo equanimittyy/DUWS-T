@@ -590,7 +590,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 
 ## Orchestration (Phase 5)
 
-**WIP.**
+**WIP.** 5.1 is shipped; 5.2 to 5.6 remain.
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
@@ -622,7 +622,7 @@ manoeuvre rather than a new subsystem.
 The free pool is every uncommitted `garrison`ed or `guard` unit, except one garrisoned in a contested zone. A unit
 that reaches its rally settles to `guard`, which puts it straight back in that pool, and the next pick would send it
 somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its intent's id, is what
-`DUWS_fnc_opcom_freeSweep` filters on (`appraisal/fnc_opcom_roster.sqf`). `OPCOM_COMMIT_HOLD` cannot do this job: it
+the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/fnc_opcom_tasking_init.sqf`). `OPCOM_COMMIT_HOLD` cannot do this job: it
 is an anti-flap lock of a fixed span, and a buildup outlives it.
 
 One unit, one owner. Binding pulls a unit from the pool and a `garrison`ed draw strips that zone's reinforcement;
@@ -646,7 +646,7 @@ has to know all of them.
 | `encircle` | band 1–2, ≥2 mobile, a reachable rear bearing | `fix` ×1, `rear` ×1–2 | `fix` at once; `rear` once `fix` reads `engaged` |
 
 Three manoeuvres, all offensive. Every other action has one shape and picks no manoeuvre: Intercept, Patrol, Probe,
-Rapport, Garrison, Ferry and both fire missions each commit as a one-role intent with an empty buildup.
+Garrison and Ferry each commit as a one-role intent with an empty buildup, which resolves when its unit rests again.
 
 - **A role stages on a bearing measured from the target.** `assault` puts every attacker on one bearing, so the wave
   arrives on a single axis and needs no sequencing. `flank` holds `fix` on the direct bearing and stages `maneuver` at
@@ -744,7 +744,7 @@ threat that appears after. Today the road branch is threat-blind and every calle
 
 | Chunk | Builds |
 |---|---|
-| **5.1** Intents and ownership | the intent record, `boundTo` honoured by `DUWS_fnc_opcom_freeSweep`, and every shipped commit action wrapped as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
+| **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
 | **5.2** Buildup | the rally cells, `move` staging with each role's land-taxi sourced for its staging leg, each open role offered to later picks as an Attack target, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
 | **5.3** Manoeuvres | `assault` across its 1–3 cells first, since it releases every role at once, with Attack's one-role 5.1 intent folded into it, then the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
