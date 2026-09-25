@@ -89,49 +89,57 @@ DUWS_opcom_gridAwake = createHashMap;
 DUWS_opcom_gridDirty = createHashMap;
 call DUWS_fnc_opcom_gridDirtyAll;
 
-// Water connectivity, the boat/air domain split: flood-fill the water cells (the mask's complement), size
-// each component, keep only the navigable ones. grid_water >= 0 is navigable water a boat routes and reaches
-// within one component (size >= OPCOM_WATER_MIN_CELLS); a smaller pool and all land read -1, air-only. Bounded
-// to the box so out-of-box cells (land=false by default) are not flooded into one bogus giant water body.
-private _wcomp = []; _wcomp resize _n;
-for "_i" from 0 to (_n - 1) do { _wcomp set [_i, -1] };
-private _wsize = [];
-private _wnext = 0;
-for "_sy" from _minCy to _maxCy do {
-    for "_sx" from _minCx to _maxCx do {
-        private _start = _sy * _w + _sx;
-        if (!(_land select _start) && {(_wcomp select _start) < 0}) then {
-            private _id = _wnext; _wnext = _wnext + 1;
-            private _cnt = 0;
-            private _stack = [_start];
-            while {count _stack > 0} do {
-                private _i = _stack deleteAt (count _stack - 1);
-                if ((_wcomp select _i) < 0) then {
-                    _wcomp set [_i, _id];
-                    _cnt = _cnt + 1;
-                    private _ix = _i mod _w;
-                    private _iy = floor (_i / _w);
-                    for "_dy" from -1 to 1 do {
-                        for "_dx" from -1 to 1 do {
-                            if (_dx != 0 || _dy != 0) then {
-                                private _nx = _ix + _dx;
-                                private _ny = _iy + _dy;
-                                if (_nx >= _minCx && {_nx <= _maxCx} && {_ny >= _minCy} && {_ny <= _maxCy}) then {
-                                    private _j = _ny * _w + _nx;
-                                    if (!(_land select _j) && {(_wcomp select _j) < 0}) then { _stack pushBack _j };
+// Connected components of the cells whose land flag is _want, 8-connected as A* steps. Bounded to the box so out-of-box
+// cells (land=false by default) are not flooded into one bogus giant water body. -> [cell -> component or -1, sizes].
+private _fnc_flood = {
+    params ["_want"];
+    private _comp = []; _comp resize _n;
+    for "_i" from 0 to (_n - 1) do { _comp set [_i, -1] };
+    private _size = [];
+    private _next = 0;
+    for "_sy" from _minCy to _maxCy do {
+        for "_sx" from _minCx to _maxCx do {
+            private _start = _sy * _w + _sx;
+            if ((_land select _start) isEqualTo _want && {(_comp select _start) < 0}) then {
+                private _id = _next; _next = _next + 1;
+                private _cnt = 0;
+                private _stack = [_start];
+                while {count _stack > 0} do {
+                    private _i = _stack deleteAt (count _stack - 1);
+                    if ((_comp select _i) < 0) then {
+                        _comp set [_i, _id];
+                        _cnt = _cnt + 1;
+                        private _ix = _i mod _w;
+                        private _iy = floor (_i / _w);
+                        for "_dy" from -1 to 1 do {
+                            for "_dx" from -1 to 1 do {
+                                if (_dx != 0 || _dy != 0) then {
+                                    private _nx = _ix + _dx;
+                                    private _ny = _iy + _dy;
+                                    if (_nx >= _minCx && {_nx <= _maxCx} && {_ny >= _minCy} && {_ny <= _maxCy}) then {
+                                        private _j = _ny * _w + _nx;
+                                        if ((_land select _j) isEqualTo _want && {(_comp select _j) < 0}) then { _stack pushBack _j };
+                                    };
                                 };
                             };
                         };
                     };
                 };
+                _size set [_id, _cnt];
             };
-            _wsize set [_id, _cnt];
         };
     };
+    [_comp, _size]
 };
+
+// Water connectivity, the boat/air domain split. grid_water >= 0 is navigable water a boat routes and reaches within one
+// component (size >= OPCOM_WATER_MIN_CELLS); a smaller pool and all land read -1, air-only.
+([false] call _fnc_flood) params ["_wcomp", "_wsize"];
 private _water = []; _water resize _n;
 for "_i" from 0 to (_n - 1) do {
     private _c = _wcomp select _i;
     _water set [_i, [-1, _c] select (_c >= 0 && {(_wsize select _c) >= OPCOM_WATER_MIN_CELLS})];
 };
 DUWS_opcom_grid_water = _water;
+// Landmass: ground reaches ground only within one, so an attack across water goes by ferry (fnc_opcom_commit).
+DUWS_opcom_grid_mass = ([true] call _fnc_flood) select 0;

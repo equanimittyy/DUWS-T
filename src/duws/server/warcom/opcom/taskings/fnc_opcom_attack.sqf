@@ -17,17 +17,20 @@ DUWS_opcom_attackRoles = createHashMapFromArray [
     ["flank", [["fix", [0], 1, 1, "", 0], ["maneuver", [90, -90, 135, -135, 180], 5, 1, "fix", 1]]]
 ];
 
-// -> the centre of the first dry cell at least _k cells from _pos's cell along _dir; [] when the two rings past it are
-// water too. The distance bound, not the ring test, ends the walk: past the play box every point clamps to one cell.
+// -> the centre of the first dry cell on _pos's landmass at least _k cells from _pos's cell along _dir; [] when the two
+// rings past it hold none. A rally across water would put the crossing between the muster and the fight, landing the
+// wave a ferry trip at a time. The distance bound, not the ring test, ends the walk: past the play box every point
+// clamps to one cell.
 DUWS_fnc_opcom_rallyAt = {
     params ["_pos", "_dir", "_k"];
+    private _mass = [_pos] call DUWS_fnc_opcom_massAt;
     private _out = [];
     for "_d" from 0 to ((_k + 3) * OPCOM_GRID_CELL * 1.5) step (OPCOM_GRID_CELL / 2) do {
         private _p = _pos getPos [_d, _dir];
         private _ring = [_pos, _p] call DUWS_fnc_opcom_cellDist;
         if (_ring > _k + 2) exitWith {};
         private _c = [[_p] call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
-        if (_ring >= _k && {!(surfaceIsWater _c)}) exitWith { _out = _c };
+        if (_ring >= _k && {!(surfaceIsWater _c)} && {([_c] call DUWS_fnc_opcom_massAt) == _mass}) exitWith { _out = _c };
     };
     _out
 };
@@ -72,7 +75,8 @@ DUWS_fnc_opcom_stageRoles = {
                 if (_n > 0 && {_rally isNotEqualTo []}) then {
                     private _q = [[_rally getPos [OPCOM_GRID_CELL * ceil (_n / 2), _dir + ([90, -90] select (_n mod 2 == 0))]]
                         call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
-                    if (!(surfaceIsWater _q) && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= OPCOM_RALLY_K}) then { _p = _q };
+                    if (!(surfaceIsWater _q) && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= OPCOM_RALLY_K}
+                        && {([_q] call DUWS_fnc_opcom_massAt) == ([_at] call DUWS_fnc_opcom_massAt)}) then { _p = _q };
                 };
                 _out pushBack [_role, _p, _n < _required, _release, _lambda];
             };

@@ -36,6 +36,13 @@ DUWS_fnc_opcom_sendRun = {
 // by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
 // reputation rather than a fight is what owns it.
 //
+// A source across water from its target reaches it only by ferry, which carries men alone, and lands them a trip at a
+// time, which no flank's timing survives: such a source is offered only if it is transportable, and only to assault.
+DUWS_fnc_opcom_acrossWater = {
+    params ["_src", "_mass"];
+    ([_src select 1] call DUWS_fnc_opcom_massAt) != _mass
+};
+
 // A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, roles, kind] commits a new
 // Attack, and ["join", attack id, bucket] adds a unit to a bucket of one still staging. -> kind -> targets, one sweep for both rows.
 DUWS_fnc_opcom_attackSweep = {
@@ -52,13 +59,16 @@ DUWS_fnc_opcom_attackSweep = {
         params ["_key", "_to", "_at", "_label"];
         if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
-        private _offers = (_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
+        private _mass = [_at] call DUWS_fnc_opcom_massAt;
+        private _offers = ((_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources))
+            select { !([_x, _mass] call DUWS_fnc_opcom_acrossWater) || {"transportable" in (_x select 4)} }) apply { [_x, _worth] };
         {
             private _offer = _x;
             private _pw = _x select 2;
             private _bearing = _at getDir ((_x select 0) select 1);
             // From this ratio up a flank buys a setup leg and nothing else.
-            private _kinds = [["assault"], ["assault", "flank"]] select (sqrt (_pw / ((1 - _pw) max 0.001)) < OPCOM_BAND_CRUSH);
+            private _kinds = [["assault"], ["assault", "flank"]] select (sqrt (_pw / ((1 - _pw) max 0.001)) < OPCOM_BAND_CRUSH
+                && {!([_x select 0, _mass] call DUWS_fnc_opcom_acrossWater)});
             {
                 private _kind = _x;
                 private _roles = [_kind, _at, _bearing] call DUWS_fnc_opcom_stageRoles;
@@ -96,7 +106,9 @@ DUWS_fnc_opcom_attackSweep = {
             private _rally = _role get "rally";
             private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
             private _worth = [_attack get "target"] call DUWS_fnc_opcom_siteWorth;
-            private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
+            private _mass = [_at] call DUWS_fnc_opcom_massAt;
+            private _offers = ((_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources))
+                select { !([_x, _mass] call DUWS_fnc_opcom_acrossWater) || {"transportable" in (_x select 4)} }) apply { [_x, _worth] };
             {
                 private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
                     format ["Join the %1 on %2 as %3", _attack get "kind", _attack get "label", _role get "role"]] call DUWS_fnc_opcom_liftOffer;

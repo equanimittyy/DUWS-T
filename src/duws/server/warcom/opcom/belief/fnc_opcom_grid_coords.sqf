@@ -48,6 +48,12 @@ DUWS_fnc_opcom_nearestWater = {
     _best
 };
 
+// -> the landmass id of _pos's cell, -1 on water.
+DUWS_fnc_opcom_massAt = {
+    params ["_pos"];
+    DUWS_opcom_grid_mass select ([_pos] call DUWS_fnc_opcom_w2c)
+};
+
 // Not w2c: it clamps an off-box point onto an edge cell and would read that cell's land.
 DUWS_fnc_opcom_landAt = {
     params ["_pos"];
