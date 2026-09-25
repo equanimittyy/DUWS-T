@@ -24,6 +24,12 @@ DUWS_fnc_opcom_batteryPieces = {
     }
 };
 
+// The stamp rides the piece, which is safe only because MORTAR and ARTY never stream.
+DUWS_fnc_opcom_batteryReady = {
+    params ["_key"];
+    ([_key] call DUWS_fnc_opcom_batteryPieces) select { DUWS_opcom_tick >= (_x getVariable ["DUWS_opcomReadyTick", 0]) }
+};
+
 DUWS_fnc_opcom_batteryUnload = {
     params ["_key"];
     { _x setVehicleAmmo 0 } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
@@ -117,7 +123,7 @@ DUWS_fnc_opcom_fireETA = {
         if (_bears) then { _eta = _gun getArtilleryETA [_pt, _m] };
         _gun setVehicleAmmo 0;
         if (_bears) exitWith {};
-    } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
+    } forEach ([_key] call DUWS_fnc_opcom_batteryReady);
     _eta
 };
 
@@ -138,7 +144,7 @@ DUWS_fnc_opcom_fireMission = {
         } else {
             _guns pushBack [_gun, _m, getText (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _m >> "ammo") >> "simulation")];
         };
-    } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
+    } forEach ([_key] call DUWS_fnc_opcom_batteryReady);
     if (_guns isEqualTo []) exitWith {
         ["INFO", "OPCOM", format ["arty: %1 has no gun bearing on %2", _key, _pt apply { round _x }]] call fnc_log;
         0
@@ -168,6 +174,7 @@ DUWS_fnc_opcom_fireMission = {
             _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift, [0, OPCOM_ARTY_ROCKET_SCATTER] select _rocket] call DUWS_fnc_opcom_fireAim);
         };
         [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket] call DUWS_fnc_opcom_gunFire;
+        _gun setVariable ["DUWS_opcomReadyTick", DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
     } forEach _guns;
     ["INFO", "OPCOM", format ["arty: %1 fires %2 gun(s) x %3 rounds of %4 (%5), %6 at %7", _key, count _guns, _rounds,
         (_guns select 0) select 1, (_guns select 0) select 2, _shape, _pt apply { round _x }]] call fnc_log;

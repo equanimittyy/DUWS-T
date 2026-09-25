@@ -662,6 +662,8 @@ OPCOM_ARTY_HQ_CLEAR = 100;
 // Seconds before the first round lands that the telegraph goes out, and how long its marker then stands.
 OPCOM_ARTY_WARN = 20;
 OPCOM_ARTY_MARK = 120;
+// Ticks a gun rests after it fires, so a full wallet cannot keep a battery shelling without pause.
+OPCOM_ARTY_COOLDOWN = 360;   // 1800s @ 5s tick
 
 // An interceptor's reveal in Chebyshev grid cells, taken once it stands in the cell it was sent to: a guaranteed
 // look like a recon's (fnc_opcom_patrol_sense), but paid for by arriving rather than carried the whole way. It is
@@ -751,7 +753,7 @@ OPCOM_AP_MINEFIELD = 1;
 OPCOM_MINE_DEPTH = 150;
 OPCOM_MINE_LEN_MIN = 500;
 OPCOM_MINE_LEN_MAX = 1500;
-// AP is the ammunition: the guns rest empty and are loaded per mission, so the wallet is the only limit.
+// AP is the ammunition: the guns rest empty and are loaded per mission, so only the wallet and OPCOM_ARTY_COOLDOWN limit them.
 OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 1], ["ARTY", 2]];
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;

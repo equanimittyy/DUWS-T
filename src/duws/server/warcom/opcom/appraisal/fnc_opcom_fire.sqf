@@ -1,7 +1,7 @@
 // Locality: server, [] call'd at load. The Arty actions: what is worth shelling and with what pattern
 // (opcom_plan.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what it is handed. AP
-// is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet is the only limit on how often
-// they speak.
+// is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet and each gun's cooldown are all
+// that limit how often they speak.
 if (!isServer) exitWith {};
 
 // Never aimed at the player HQ, and never onto OPFOR's own zone, which is full of its garrison. Re-read immediately
@@ -54,7 +54,7 @@ DUWS_fnc_opcom_fireTargets = {
     private _out = [];
     {
         _x params ["_key", "_gpos", "_type"];
-        private _guns = count ([_key] call DUWS_fnc_opcom_batteryPieces);
+        private _guns = count ([_key] call DUWS_fnc_opcom_batteryReady);
         if (_guns > 0 && {!([_key] call DUWS_fnc_opcom_batteryBusy)}) then {
             private _range = [OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY");
             private _lethal = OPCOM_ARTY_LETHAL getOrDefault [_type, 20];
@@ -128,7 +128,7 @@ DUWS_fnc_opcom_creepTargets = {
             private _v = ([_attack] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE * OPCOM_ARTY_CREEP_SHARE;
             {
                 _x params ["_key", "_gpos", "_type"];
-                private _guns = count ([_key] call DUWS_fnc_opcom_batteryPieces);
+                private _guns = count ([_key] call DUWS_fnc_opcom_batteryReady);
                 if (_guns > 0 && {!([_key] call DUWS_fnc_opcom_batteryBusy)}
                     && {(_gpos distance2D _pos) <= ([OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY"))}
                     && {[_start] call DUWS_fnc_opcom_fireClear}) then {
