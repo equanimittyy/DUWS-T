@@ -76,10 +76,10 @@ INIT.sqf ── detects role (server / hosted / client / headless)
   └─ both   → modules/R3F_LOG/init.sqf    logistics, after WARCOM is ready
 ```
 
-`server_init.sqf` runs the campaign lifecycle in order: compile the function registry → faction detection
-and BLUFOR/OPFOR init → place HQ (blocks on the player) → generate enemy zones → start the WARCOM AI
-director → register the capture-zones win task → then the ongoing side-mission spawner, cleanup loops and
-event scripts.
+`server_init.sqf` runs the campaign lifecycle in order: compile the function registry and start the road-graph
+build in the background (`fnc_convoy_graph`) → faction detection and BLUFOR/OPFOR init → place HQ (blocks on
+the player) → wait for the road graph → generate enemy zones → start the WARCOM AI director → register the
+capture-zones win task → then the ongoing side-mission spawner, cleanup loops and event scripts.
 
 ## The DUWS engine — `duws/`
 

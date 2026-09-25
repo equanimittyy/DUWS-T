@@ -11,6 +11,8 @@
 ["INFO", "BOOT", "server_fnc_init done"] call fnc_log;
 setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
 [] spawn fnc_moreUrban_locations;
+// Built while the player sits in the setup screens; WARCOM, the first router, waits on it below.
+[] spawn fnc_convoy_graph;
 
 createCenter sideLogic;
 createcenter sideLogic;
@@ -200,6 +202,7 @@ while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call 
 // Weapons list, not items: some factions bork on items.
 while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) > 0}, 180] call fnc_waitLogged)} do {};
 
+while {!(["BOOT", "road graph built", {!isNil "DUWS_convoy_roadNbr"}, 300] call fnc_waitLogged)} do {};
 
 ["INFO", "BOOT", "WARCOM INIT"] call fnc_log;
 [] spawn fnc_init_OPFOR_WARCOM;

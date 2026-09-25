@@ -1,4 +1,4 @@
-// Locality: any (terrain queries only), but the caller (fnc_convoy_drive) is server-side. Pure geometry.
+// Locality: server. Reads the road graph fnc_convoy_graph builds at boot.
 //
 // Builds a drivable polyline from _startPos to _destPos for setDriveOnPath, routed ourselves since native
 // vehicle pathfinding wedges the lead at junctions and on open ground. A* over connected road segments
@@ -23,21 +23,17 @@ private _priced = _extra isNotEqualTo [];
                                // unreachable dest; this only catches a search that somehow neither reaches the
                                // goal nor plateaus.
 #define CP_STALL      2500     // A* fast-bail: give up after this many pops with no closer approach to the dest.
-                               // An unreachable dest (components no CP_BRIDGE hop could join) otherwise pops the
-                               // ENTIRE reachable network before the open set empties -- tens of thousands of
-                               // nodes with an O(open) min-scan each, a multi-second freeze that hangs the convoy
-                               // spawn gated behind this route. A reachable dest keeps pulling its closest
-                               // approach in as A* homes toward it, so only a genuinely stuck search plateaus and
-                               // trips this; the leg then falls through to off-road exactly as an exhausted
-                               // search would. Far above the fruitless streak a legitimate detour (around a bay)
-                               // ever runs, so a reachable route is never cut short.
+                               // An unreachable dest (components no fnc_convoy_graph bridge could join) otherwise
+                               // pops the ENTIRE reachable network before the open set empties -- tens of
+                               // thousands of nodes, a long stall that hangs the convoy spawn gated behind this
+                               // route. A reachable dest keeps pulling its closest approach in as A* homes toward
+                               // it, so only a genuinely stuck search plateaus and trips this; the leg then falls
+                               // through to off-road exactly as an exhausted search would. Far above the fruitless
+                               // streak a legitimate detour (around a bay) ever runs, so a reachable route is never
+                               // cut short.
 #define CP_YIELD      250      // yield to the scheduler every this many expansions, so even a whole-network
                                // search spreads across frames instead of hitching one. The caller (the convoy
                                // driver) holds the column meanwhile, so a long compute reads as a brief halt.
-#define CP_BRIDGE     15       // A* graph repair: at a sparsely connected node, pull in roads within this many
-                               // metres as extra neighbours, to hop the small gaps (dropped junction links, an
-                               // isolated stub end) that otherwise split the network into disconnected components
-                               // and fail the search -- which then sends the whole leg off-road across open field
 #define CP_OFF_STEP   25       // off-road: resample the straight run every this many metres
 #define CP_OFF_PROBE  35       // off-road: lateral offset tried to skirt an obstacle
 #define CP_OFF_WIDEN  4        // off-road: widening lateral probes each side before giving up on a point
@@ -83,40 +79,78 @@ private _fnc_offroad = {
     _pts
 };
 
-// Snap each end onto the network at its NEAREST road. Widen the query only as needed -- a point on/near a
-// road resolves at 60 m (cheap); a remote one escalates, and only a truly roadless end returns null. nearRoads
-// is nearest-first, so `select 0` is the closest, and a 3 km list is never built for a point already on a road.
-private _fnc_nearestRoad = {
+// Snap each end onto the network at its NEAREST road, as a graph node (-1 = none). Widen the query only as needed --
+// a point on/near a road resolves at 60 m (cheap); a remote one escalates, and only a truly roadless end returns -1.
+// nearRoads is nearest-first, so `select 0` is the closest, and a 3 km list is never built for a point already on a
+// road. The key is fnc_convoy_graph's.
+private _fnc_nearestNode = {
     params ["_pos"];
     private _r = objNull;
     { if (isNull _r) then { private _rs = _pos nearRoads _x; if !(_rs isEqualTo []) then { _r = _rs select 0 } } } forEach [60, 250, 1000, CP_ROAD_FIND];
-    _r
+    if (isNull _r) exitWith { -1 };
+    private _p = getPosATL _r;
+    DUWS_convoy_roadIdx getOrDefault [[round (_p select 0), round (_p select 1)], -1]
 };
-private _startRoad = [_startPos] call _fnc_nearestRoad;
-private _destRoad  = [_destPos]  call _fnc_nearestRoad;
+private _startNode = [_startPos] call _fnc_nearestNode;
+private _destNode  = [_destPos]  call _fnc_nearestNode;
+private _rpos = DUWS_convoy_roadPos;
 
-// A* over the road graph, only when BOTH ends reach the network. A key is the segment centre rounded to the
-// metre as a [x, y] pair -- unique per segment (they sit >1 m apart), and a valid hashmap key where the road
-// object is not. A pair, NOT a `format` string: this key is built for every open node on every pop, and the
-// string version's per-call text conversion and allocation dominated the search (a multi-second freeze on a
-// long leg). NOT a single packed number (x * 1e5 + y) either -- a 32-bit float cannot hold two ~30 km coords
-// without rounding distinct segments onto the same key.
+// A* over the road graph, only when BOTH ends reach the network.
 private _chain = [];
 // When A* fails to connect the ends (disconnected road components), _bestNode is the start-component road it
 // got CLOSEST to the dest -- the point the convoy should leave the network to bridge the gap off-road. Its
 // path back to the start road is _bridgeChain, rebuilt below. Both stay empty on a connected or roadless leg.
-private _bestNode = objNull;
+private _bestNode = -1;
 private _bridgeChain = [];
-if !(isNull _startRoad || {isNull _destRoad}) then {
-    private _keyOf = { params ["_r"]; private _p = getPosATL _r; [round (_p select 0), round (_p select 1)] };
-    private _destKey = [_destRoad] call _keyOf;
+if (_startNode >= 0 && {_destNode >= 0}) then {
+    private _nbr    = DUWS_convoy_roadNbr;
+    private _g      = createHashMap;   // node -> best known cost from the start road
+    private _parent = createHashMap;   // node -> the node it was reached from (rebuilds the path)
+    private _closed = createHashMap;   // node -> finalised (its shortest cost is settled)
 
-    private _g      = createHashMap;   // roadKey -> best known cost from the start road
-    private _parent = createHashMap;   // roadKey -> the road it was reached from (rebuilds the path)
-    private _closed = createHashMap;   // roadKey -> finalised (its shortest cost is settled)
-    private _open   = [_startRoad];     // frontier; min-f is picked by a lazy scan (no heap in SQF)
-    _g set [[_startRoad] call _keyOf, 0];
-    private _goal  = objNull;
+    // The frontier: a binary min-heap on f = g + straight-line to the dest, in parallel arrays. A node whose cost
+    // improves is pushed again, and its stale entries are dropped as closed when they surface.
+    private _hf = [(_rpos select _startNode) distance2D _destPos];
+    private _hn = [_startNode];
+    private _fnc_push = {
+        params ["_f", "_n"];
+        private _i = count _hf;
+        _hf pushBack _f;
+        _hn pushBack _n;
+        while {_i > 0} do {
+            private _up = floor ((_i - 1) / 2);
+            if ((_hf select _up) <= _f) exitWith {};
+            _hf set [_i, _hf select _up];
+            _hn set [_i, _hn select _up];
+            _i = _up;
+        };
+        _hf set [_i, _f];
+        _hn set [_i, _n];
+    };
+    private _fnc_pop = {
+        private _top = _hn select 0;
+        private _f = _hf deleteAt (count _hf - 1);
+        private _n = _hn deleteAt (count _hn - 1);
+        private _size = count _hf;
+        if (_size > 0) then {
+            private _i = 0;
+            while {true} do {
+                private _c = 2 * _i + 1;
+                if (_c >= _size) exitWith {};
+                if (_c + 1 < _size && {(_hf select (_c + 1)) < (_hf select _c)}) then { _c = _c + 1 };
+                if ((_hf select _c) >= _f) exitWith {};
+                _hf set [_i, _hf select _c];
+                _hn set [_i, _hn select _c];
+                _i = _c;
+            };
+            _hf set [_i, _f];
+            _hn set [_i, _n];
+        };
+        _top
+    };
+
+    _g set [_startNode, 0];
+    private _goal  = -1;
     private _steps = 0;
     // Closest any popped node has come to the dest, and how many pops since it last improved. A reachable
     // dest keeps pulling _bestH down; an unreachable one plateaus and bails at CP_STALL (see the define).
@@ -125,66 +159,48 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
     // An extra cost sends the search around what it prices, and a detour pops more nodes without closing on the dest.
     private _stallMax = [CP_STALL, CP_STALL * 4] select _priced;
 
-    while { count _open > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
-        _steps = _steps + 1;
-        if (_steps mod CP_YIELD == 0 && {canSuspend}) then { sleep 0 };   // spread a long search across frames
+    // The goal and the fast-bail exitWith leave only the expansion block; the loop condition then ends the search.
+    while { count _hn > 0 && {_goal < 0} && {_stall < _stallMax} && {_steps < CP_MAX_STEPS} } do {
+        private _cur = call _fnc_pop;
+        if !(_closed getOrDefault [_cur, false]) then {
+            _steps = _steps + 1;
+            if (_steps mod CP_YIELD == 0 && {canSuspend}) then { sleep 0 };   // spread a long search across frames
+            if (_cur == _destNode) exitWith { _goal = _cur };
+            _closed set [_cur, true];
 
-        // Pick the open node with least f = g + heuristic (straight-line to the dest). Lazy scan: cheaper than
-        // a hand-rolled heap at this frontier size, and it re-reads g so an improved cost is honoured.
-        private _bestI = 0;
-        private _bestF = 1e12;
-        {
-            private _f = (_g getOrDefault [[_x] call _keyOf, 1e12]) + ((getPosATL _x) distance2D _destPos);
-            if (_f < _bestF) then { _bestF = _f; _bestI = _forEachIndex };
-        } forEach _open;
-        private _cur    = _open deleteAt _bestI;
-        private _curKey = [_cur] call _keyOf;
-        if (_curKey isEqualTo _destKey) exitWith { _goal = _cur };   // isEqualTo: keys are [x,y] arrays, not ==-able
-        _closed set [_curKey, true];
-
-        private _curG   = _g getOrDefault [_curKey, 1e12];
-        private _curPos = getPosATL _cur;
-        // Fast-bail (see _bestH/_stall above and the CP_STALL define): top-level exitWith, matching the goal
-        // break above, so _goal stays null and the leg falls through to off-road exactly as an exhausted
-        // search does.
-        private _h = _curPos distance2D _destPos;
-        if (_h < _bestH) then { _bestH = _h; _bestNode = _cur; _stall = 0 } else { _stall = _stall + 1 };
-        if (_stall >= _stallMax) exitWith {
-            if (duws_log_level >= 4) then {
-                ["DEBUG", "CONVOY", format ["A* bail: closest %1 m after %2 pops, %3 with no gain -- dest unreachable, leg goes off-road",
-                    round _bestH, _steps, _stall]] call fnc_log;
-            };
-        };
-        // Neighbours = the graph-connected roads, plus (only at a sparsely connected node, gated on < 2
-        // connections so the nearRoads cost is paid only at rare fragmentation points) any road within
-        // CP_BRIDGE metres -- see the define for what that hops. The bridged edge costs its real gap length,
-        // so A* stays optimal; a gap wider than CP_BRIDGE still finds no bridge and falls through to off-road.
-        private _neighbours = roadsConnectedTo _cur;
-        if (count _neighbours < 2) then {
-            { if (_x != _cur && {!(_x in _neighbours)}) then { _neighbours pushBack _x } } forEach (_curPos nearRoads CP_BRIDGE);
-        };
-        {
-            private _nk = [_x] call _keyOf;
-            if !(_closed getOrDefault [_nk, false]) then {
-                private _np = getPosATL _x;
-                private _len = _curPos distance2D _np;
-                private _tg = _curG + _len;
-                if (_priced) then { _tg = _tg + ([_extra select 1, _curPos, _np, _len] call (_extra select 0)) };
-                if (_tg < (_g getOrDefault [_nk, 1e12])) then {
-                    _g      set [_nk, _tg];
-                    _parent set [_nk, _cur];
-                    if !(_x in _open) then { _open pushBack _x };
+            private _curG   = _g get _cur;
+            private _curPos = _rpos select _cur;
+            private _h = _curPos distance2D _destPos;
+            if (_h < _bestH) then { _bestH = _h; _bestNode = _cur; _stall = 0 } else { _stall = _stall + 1 };
+            if (_stall >= _stallMax) exitWith {
+                if (duws_log_level >= 4) then {
+                    ["DEBUG", "CONVOY", format ["A* bail: closest %1 m after %2 pops, %3 with no gain -- dest unreachable, leg goes off-road",
+                        round _bestH, _steps, _stall]] call fnc_log;
                 };
             };
-        } forEach _neighbours;
+            {
+                if !(_closed getOrDefault [_x, false]) then {
+                    private _np = _rpos select _x;
+                    private _len = _curPos distance2D _np;
+                    private _tg = _curG + _len;
+                    if (_priced) then { _tg = _tg + ([_extra select 1, _curPos, _np, _len] call (_extra select 0)) };
+                    if (_tg < (_g getOrDefault [_x, 1e12])) then {
+                        _g      set [_x, _tg];
+                        _parent set [_x, _cur];
+                        [_tg + (_np distance2D _destPos), _x] call _fnc_push;
+                    };
+                };
+            } forEach (_nbr select _cur);
+        };
     };
 
-    if (!isNull _goal) then {
+    // Points are copied out: every later search reads the graph's own arrays.
+    if (_goal >= 0) then {
         private _r = _goal;
         private _guard = 0;
-        while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
-            _chain pushBack (getPosATL _r);   // built goal -> start; reversed below (pushBack is O(1), a
-            _r = _parent getOrDefault [[_r] call _keyOf, objNull];   // prepend would be O(n^2) on a long path)
+        while { _r >= 0 && {_guard < CP_MAX_STEPS} } do {
+            _chain pushBack +(_rpos select _r);   // built goal -> start; reversed below (pushBack is O(1), a
+            _r = _parent getOrDefault [_r, -1];   // prepend would be O(n^2) on a long path)
             _guard = _guard + 1;
         };
         reverse _chain;   // -> start .. goal order
@@ -192,12 +208,12 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
         // No through-path: rebuild the road run from the start road to _bestNode (the closest the search came
         // to the dest). That is the leg's road portion on the start side; the gap off it bridges to the dest
         // road. Same reverse-walk as the goal chain.
-        if (!isNull _bestNode) then {
+        if (_bestNode >= 0) then {
             private _r = _bestNode;
             private _guard = 0;
-            while { !isNull _r && {_guard < CP_MAX_STEPS} } do {
-                _bridgeChain pushBack (getPosATL _r);
-                _r = _parent getOrDefault [[_r] call _keyOf, objNull];
+            while { _r >= 0 && {_guard < CP_MAX_STEPS} } do {
+                _bridgeChain pushBack +(_rpos select _r);
+                _r = _parent getOrDefault [_r, -1];
                 _guard = _guard + 1;
             };
             reverse _bridgeChain;
@@ -212,7 +228,7 @@ if (duws_log_level >= 4) then {
     private _straight = _startPos distance2D _destPos;
     ["DEBUG", "CONVOY", format ["path start=[%1,%2] dest=[%3,%4] straight=%5 chainPts=%6 bridgePts=%7 startRoad=%8 destRoad=%9",
         round (_startPos select 0), round (_startPos select 1), round (_destPos select 0), round (_destPos select 1),
-        round _straight, count _chain, count _bridgeChain, !isNull _startRoad, !isNull _destRoad]] call fnc_log;
+        round _straight, count _chain, count _bridgeChain, _startNode >= 0, _destNode >= 0]] call fnc_log;
 };
 
 // Clean a point run: drop consecutive near-duplicates (no zero-length setDriveOnPath hop) and guarantee it
@@ -236,10 +252,10 @@ if (_chain isNotEqualTo []) then {
     _r append ([_chain select (count _chain - 1), _destPos] call _fnc_offroad);
     _segs = [[[_r, _destPos] call _fnc_clean, "road"]];
 } else {
-    if (!isNull _startRoad && {!isNull _destRoad} && {_bridgeChain isNotEqualTo []}) then {
+    if (_startNode >= 0 && {_destNode >= 0} && {_bridgeChain isNotEqualTo []}) then {
         // Disconnected, both ends on roads: road to the exit, a native gap across to the dest road, road out.
         private _exitPos     = _bridgeChain select (count _bridgeChain - 1);
-        private _destRoadPos = getPosATL _destRoad;
+        private _destRoadPos = +(_rpos select _destNode);
         private _r1 = [_startPos];
         _r1 append ([_startPos, _bridgeChain select 0] call _fnc_offroad);
         _r1 append _bridgeChain;                       // ends at the exit road (closest reached to the dest)

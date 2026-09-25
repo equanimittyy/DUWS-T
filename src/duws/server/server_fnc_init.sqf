@@ -402,6 +402,7 @@ fnc_civ_resume = compile preprocessFileLineNumbers "duws\server\civilian\fnc_civ
 // A self-generated road-graph route builder, a slot layout that seats the column ON
 // that route, and a driver that puts every hull on the route with setDriveOnPath (no native lead pathing).
 // Used by the HVT hunt, the deny-armour convoy and the roving vehicle patrol.
+fnc_convoy_graph = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convoy_graph.sqf";
 fnc_convoy_path = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convoy_path.sqf";
 fnc_convoy_slots = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convoy_slots.sqf";
 fnc_convoy_drive = compile preprocessFileLineNumbers "duws\server\convoy\fnc_convoy_drive.sqf";
