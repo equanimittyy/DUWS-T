@@ -593,8 +593,8 @@ binding to their attack record ([§Attack](#attack-phase-5)).
 Attack is the one action that sends more than one unit, and it is three action rows, `attack_assault`, `attack_flank`
 and `attack_qrf` ([§QRF](#qrf-an-attack-on-a-moving-cluster)). Each commits an attack record (`DUWS_opcom_attacks`,
 `taskings/fnc_opcom_attack.sqf`) that runs two phases. **Buildup** places the units; **execution** runs the orders
-that already ship. Assault and flank differ only in data — which roles each binds, where each one stages and what
-releases it (`DUWS_opcom_attackRoles`) — so neither adds tasking code, and the QRF adds only what a moving target
+that already ship. Assault and flank differ only in data — which roles each binds, where each one's lane ends and
+what it waits on (`DUWS_opcom_attackRoles`) — so neither adds tasking code, and the QRF adds only what a moving target
 needs. A one-unit Attack is the smallest `attack_assault`
 ([§Release](#release-the-stagger-lives-on-the-role-not-in-a-third-state)). Every other action sends one unit on one
 order and binds nothing: the order ends on its own predicate, which frees the unit.
@@ -602,20 +602,20 @@ order and binds nothing: the order ends on its own predicate, which frees the un
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
 | `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY` for a QRF ([§Commitment](#commitment-orders-are-sticky)) |
-| `execution` | fighting for the target, once its role is released | `capture`, after `move` up its lane for an `assault`'s side bucket; `intercept` for a QRF | `resolve`: every released unit back at rest, and no side bucket still on its lane |
+| `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF | `resolve`: every bound unit back at rest, and no side bucket still on its lane |
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
 force-short attack sits in buildup until later picks fill its buckets.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
-and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg and an
-`assault`'s lanes are its callers beside the debug page (`taskings/fnc_opcom_orders.sqf` is the table that knows every order).
+and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg and a side
+bucket's lane are its callers beside the debug page (`taskings/fnc_opcom_orders.sqf` is the table that knows every order).
 
 **The runner**, each tick over every live attack (`DUWS_fnc_opcom_attackStep`): refresh each bound
 unit's status; in buildup, any bound unit `dead` or lost → **abort** (release the survivors, no AP refund), because a
 loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish; else test the current
-state's transition, and each unreleased role's own. A unit a hand order takes over from the debug page counts as
+state's transition, and each side bucket's wait and close. A unit a hand order takes over from the debug page counts as
 lost. The runner sequences the states; the route and streaming machinery moves the units. There is
 no planner: a new way to attack is a new entry of roles rather than a new subsystem.
 
@@ -633,10 +633,11 @@ commits in buildup and waits.
 
 ### Release: the stagger lives on the role, not in a third state
 
-Buildup ends for the attack, but execution starts per role. Each role carries a **release predicate**, and a role
-that has not released holds `guard` at its rally. The default is release on entering execution, which covers the
-assault. The flank sequences its roles, since it is worth nothing if the enveloping element arrives before the
-defenders are committed to the front.
+Every bucket sets off at launch, but a side bucket closes on the target per role. A role may name another it
+**waits on**, and a bucket of it holds `guard` at the end of its lane until that role reads `engaged`, has lost every
+unit or has ended its fight (`DUWS_fnc_opcom_converge`). It never waits again after, since a lull in the fix's fight
+would otherwise park a hook at its jump-off. The assault waits on nothing. The flank's `maneuver` waits on `fix`,
+since an envelopment is worth nothing if it arrives before the defenders are committed to the front.
 
 A per-role gate rather than a third state, because the alternative is one phase list per row and a runner that has
 to know all of them.
@@ -644,13 +645,13 @@ to know all of them.
 | Row | Offered when | Roles | Release |
 |---|---|---|---|
 | `attack_assault` | every band from 0.5 | `attacker` in 1–3 buckets on a 3×1 line, one per cell | every bucket at once — one wave, never a dribble |
-| `attack_flank` | band 0.5–2 and a dry rally on some side | `fix` in 1 bucket, `maneuver` in 1–5 buckets, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
+| `attack_flank` | band 0.5–2, a dry rally and a dry jump-off on some side | `fix` at the centre of a 3×1 line, `maneuver` in 1–2 buckets beside it | every bucket at launch; each `maneuver` hooks to its jump-off and closes once `fix` reads `engaged`, is lost or has ended its fight |
 | `attack_qrf` | a sighting cluster with no QRF on it | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
 
 Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/fnc_opcom_attack.sqf`), keyed by the record's
 kind, `assault` or `flank`. A QRF's one bucket is written by its sweep (`DUWS_fnc_opcom_qrfSweep`), since it has no
 rally to stage. A flank needs no count of mobile units at commit: its enveloping
-buckets are filled by later picks like any other, and a flank whose first side stays empty leaves the fix to launch
+buckets are filled by later picks like any other, and a flank whose hooks stay empty leaves the fix to launch
 alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
 
 - **Water decides who goes and how.** Every rally sits on the target's landmass (`DUWS_opcom_grid_mass`, a flood
@@ -674,25 +675,32 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   and Cost are the members' sums. A member that cannot be raised or routed is refunded before the pick charges the
   rest. With nothing affordable the best source is offered alone, so the pick can save toward it.
 
-- **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
-  the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
-  no sequencing. `flank` holds `fix` on the direct bearing and stages each `maneuver` bucket on a side of its own,
-  picked from ±90°, ±135° and 180°. Every role then closes on the target, an `assault`'s side buckets by way of their
-  lanes. A rally is a cell centre at least
-  `OPCOM_RALLY_K` (2) cells from the target's, and every distance a rally keeps is Chebyshev cells from the target's
-  cell.
-- **Belief picks a flank's sides.** A side flank and a rear attack differ only in bearing, so `flank` is one row
-  whose `maneuver` buckets take the dry sides with the least believed BLUFOR in the rally's
-  3×3 block outside the target's, the shorter swing on a tie. The target's own block is left out because it is the
-  fight the fix draws, alike from every side. Up to five buckets can hit five sides, and a rear bucket keeps the same standoff
-  as any other: its λ route, not a wider rally, takes it around the fight.
-- **`assault` stages on a 3×1 line** (`OPCOM_ASSAULT_CELLS`), one bucket a cell across the bearing, which at
-  `OPCOM_GRID_CELL` 500 m is a 1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of
-  ground, and leaves the attackers no frontage to advance on. The line grows a cell at a time from the rally on
-  alternate sides. A side that meets water, another landmass or a cell inside `OPCOM_RALLY_K` closes, and the line
-  grows on along the other, so a blocked side slides the line rather than breaking it. A bucket stacks on the rally
-  only where the ground holds no three cells. A diagonal bearing lays a diagonal line. The buckets fill from the
-  centre out, so an assault of one or two units uses one or two of its cells.
+- **An attack stages on one bearing measured from the target,** 0° being the bearing to the first unit's start, the
+  side the attack comes from, so every bucket starts on the same side of the fight. A rally is a cell centre at least
+  `OPCOM_RALLY_K` (4) cells from the target's, 2 km at `OPCOM_GRID_CELL` 500 m, and every distance a rally keeps is
+  Chebyshev cells from the target's cell.
+- **An attack stages on a 3×1 line**, one bucket a cell across the bearing, which at `OPCOM_GRID_CELL` 500 m is a
+  1.5 km frontage. Its roles take the line's cells in order, centre first: an `assault`'s `attacker` takes all three
+  (`OPCOM_ASSAULT_CELLS`), and a `flank` puts `fix` at the centre and a `maneuver` bucket either side. A single cell
+  holding the whole wave is one fire mission's worth of ground, and leaves the attackers no frontage to advance on.
+  The line grows a cell at a time from the rally on alternate sides. A side that meets water, another landmass or a
+  cell inside `OPCOM_RALLY_K` closes, and the line grows on along the other, so a blocked side slides the line rather
+  than breaking it. A bucket stacks on the rally only where the ground holds no three cells. A diagonal bearing lays
+  a diagonal line. The buckets fill from the centre out, so an assault of one or two units uses one or two of its
+  cells.
+- **A `flank`'s hooks go round the fight.** At launch `fix` goes straight at the target on `capture`, to engage early
+  and hold the defenders there. Each `maneuver` bucket marches on `move` to its jump-off, `OPCOM_HOOK_K` (2) cells
+  abreast of the target on its own side of the line, the nearest ground outside the 3×3 block the fix fights in. Its
+  route pays `OPCOM_ROUTE_AVOID_PENALTY` to enter that block, so it crosses the fight only where no way round exists
+  ([§Routes](#routes-threat-is-what-a-role-asks-for)). It waits at the jump-off on `fix`
+  ([§Release](#release-the-stagger-lives-on-the-role-not-in-a-third-state)), then closes on the target with
+  `capture` once out of contact, as an assault's side bucket does. Leaving at launch lets the longer hook cover
+  ground while the fix closes.
+- **Belief orders a flank's hooks.** The side with the least believed BLUFOR in the 3×3 block about its jump-off,
+  outside the target's, takes the required `maneuver` bucket, so a lone hook goes where the defenders are thinnest.
+  The target's own block is left out because it is the fight the fix draws, alike from every side. A side whose
+  jump-off is water or another landmass gets no hook, and a flank with no dry jump-off is not offered. A line that
+  slides hooks both buckets round its open side, the further one a cell further out.
 - **An `assault` advances as a wave, then converges.** At launch each side bucket marches its own lane on `move`,
   parallel to the centre's advance, to the cell abreast of the target (`DUWS_fnc_opcom_converge`). Closing straight
   from the line would bunch the wave onto one fire mission's worth of ground and leave the cells beside the fight
@@ -714,7 +722,7 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
 - **The pick chooses assault or flank once, at commit**, and a buildup launches what it chose whatever `r` it
   reaches, so a plan never flips mid-buildup even when the muster ends in another band. Where the band offers both,
   they compete on the one weighted roll like any two actions, each under its own `actionWeight`.
-- **`resolve`** is the transition that frees an attack's units: every released unit back at rest and no side bucket
+- **`resolve`** is the transition that frees an attack's units: every bound unit back at rest and no side bucket
   still on its lane, since each order already ends on its own predicate ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
   counting as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
@@ -789,7 +797,7 @@ The tasking keeps its λ, so every re-plan of the march bends alike, and a lift 
 | Role or order | λ | Why |
 |---|---|---|
 | `capture` — an `assault` attacker, and `flank`'s `fix` | 0 | the fight is the point of the march |
-| `capture` — `flank`'s `maneuver` | high | arriving unseen is the whole worth of the role |
+| `move` and `capture` — `flank`'s `maneuver` | high | arriving unseen is the whole worth of the role |
 | `intercept` — a QRF's attacker | 0 | the threat is the target |
 | `patrol` | 0 | ground is often stale because it is dangerous, so avoidance defeats the sweep |
 | `probe` | 0 | closing is how the block gets read |
@@ -797,6 +805,11 @@ The tasking keeps its λ, so every re-plan of the march bends alike, and a lift 
 | `return` | high | a unit going to rest has nothing to win from contact |
 | `move` | its role's own | a staging leg inherits what the role will need |
 
+- **A hook goes round the fight whatever belief holds.** λ bends a route only around force belief already places,
+  and the target's block can read empty before the fix finds its defenders. A `maneuver` hook therefore also names
+  the target's 3×3 block to avoid (`fnc_opcom_task`'s `_avoid`, kept on the tasking as λ is), and the route pays
+  `OPCOM_ROUTE_AVOID_PENALTY` to enter each cell of it: far above any detour, so it is crossed only where no way
+  round exists. A road route pays it on each road step in the block and ends its road leg on a road outside it.
 - **Negative λ is not available.** The cell chain's octile heuristic is admissible only at λ ≥ 0
   (`taskings/fnc_opcom_route.sqf`): a negative edge weight stops A* returning the best path and leaves the pop cap as
   the only bound on a pathological re-open. A `probe` needs no such price: closing at λ 0 until the block reads fresh
@@ -830,21 +843,22 @@ engine paths it. A group in combat ignores a move waypoint, so the route holds o
 | Chunk | Builds |
 |---|---|
 | **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
-| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its up to five `maneuver` buckets each on one of the weakest dry sides, over its release predicate, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
+| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (4) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its `maneuver` buckets waiting on `fix`, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
 | **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, a creep on an attack record and the only chain edge |
 | **5.7** QRF | **Shipped** (`DUWS_fnc_opcom_qrfSweep`) — `attack_qrf` in place of the Intercept action: a sighting cluster as the target, the muster where the units stand over `OPCOM_QRF_EXPIRY`, and release on `intercept` |
 | **5.8** Packages | **Shipped** (`DUWS_fnc_opcom_attackPackage`) — an open or a join sends as many units as the ideal bar needs in one pick, repeat hires included, each staged at the bucket it fills |
 | **5.9** Wave | **Shipped** (`DUWS_fnc_opcom_converge`) — an `assault`'s 3×1 line that slides along a blocked side, and its side buckets marching their own lanes abreast of the target, each closing on it once out of contact |
+| **5.10** Hook | **Shipped** (`DUWS_fnc_opcom_converge`, `fnc_opcom_route`'s `_avoid`) — a `flank` staged on the 3×1 line from one bearing, its `maneuver` buckets hooking round the target's 3×3 block to a jump-off on each side at launch and closing once `fix` engages, and the rally standoff at 4 cells |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
-`OPCOM_MUSTER_HOLD`, the sides a `flank` picks from, `OPCOM_ATTACK_UNITS`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
+`OPCOM_MUSTER_HOLD`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
 
