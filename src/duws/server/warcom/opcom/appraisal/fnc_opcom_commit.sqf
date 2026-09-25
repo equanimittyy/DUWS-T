@@ -30,14 +30,14 @@ DUWS_fnc_opcom_sendRun = {
 
 // One Attack per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
 // defeat in detail. It commits as an assault or a flank, each its own action row, its units stage and launch together
-// (fnc_opcom_attack), and each slot still open is a target of its own, filled by a later pick.
+// (fnc_opcom_attack), and the bucket DUWS_fnc_opcom_joinBucket names is a target of its own, filled by a later pick.
 //
 // Zones and towns on the same terms. What differs is how the ground answers: a zone flips on presence, a town only
 // by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
 // reputation rather than a fight is what owns it.
 //
 // A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, roles, kind] commits a new
-// Attack, and ["join", attack id, slot] fills a slot of one still staging. -> kind -> targets, one sweep for both rows.
+// Attack, and ["join", attack id, bucket] adds a unit to a bucket of one still staging. -> kind -> targets, one sweep for both rows.
 DUWS_fnc_opcom_attackSweep = {
     private _fits = { params ["_f", "_m"]; [_f, _m, false] call DUWS_fnc_opcom_isCombatant };
     private _free = ([false] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
@@ -88,25 +88,21 @@ DUWS_fnc_opcom_attackSweep = {
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     {
         private _attack = _x;
-        private _roles = _attack get "roles";
-        private _slot = _roles findIf { (_x get "unit") < 0 };
-        if ((_attack get "state") isEqualTo "buildup" && {_slot >= 0}) then {
-            private _role = _roles select _slot;
-            private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
-            if ((_role get "required") || {_r < OPCOM_MUSTER_IDEAL}) then {
-                private _at = _attack get "pos";
-                private _base = [_attack] call DUWS_fnc_opcom_boundForce;
-                private _rally = _role get "rally";
-                private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
-                private _worth = [_attack get "target"] call DUWS_fnc_opcom_siteWorth;
-                private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
-                {
-                    private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
-                        format ["Join the %1 on %2 as %3", _attack get "kind", _attack get "label", _role get "role"]] call DUWS_fnc_opcom_liftOffer;
-                    (_c select 0) pushBack ["join", _attack get "id", _slot];
-                    (_out get (_attack get "kind")) pushBack _c;
-                } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
-            };
+        private _slot = [_attack] call DUWS_fnc_opcom_joinBucket;
+        if (_slot >= 0) then {
+            private _role = (_attack get "roles") select _slot;
+            private _at = _attack get "pos";
+            private _base = [_attack] call DUWS_fnc_opcom_boundForce;
+            private _rally = _role get "rally";
+            private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
+            private _worth = [_attack get "target"] call DUWS_fnc_opcom_siteWorth;
+            private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
+            {
+                private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
+                    format ["Join the %1 on %2 as %3", _attack get "kind", _attack get "label", _role get "role"]] call DUWS_fnc_opcom_liftOffer;
+                (_c select 0) pushBack ["join", _attack get "id", _slot];
+                (_out get (_attack get "kind")) pushBack _c;
+            } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
         };
     } forEach DUWS_opcom_attacks;
     _out
@@ -124,13 +120,11 @@ DUWS_fnc_opcom_attackRun = {
         private _i = DUWS_opcom_attacks findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) exitWith { false };
         private _attack = DUWS_opcom_attacks select _i;
-        // Checked before the slot is read: a launch drops the slots it leaves open.
-        if ((_attack get "state") isNotEqualTo "buildup") exitWith { false };
-        private _role = (_attack get "roles") select _b;
-        if ((_role get "unit") >= 0) exitWith { false };
+        // A pick earlier this tick may have met the ideal bar or the unit cap.
+        if (([_attack] call DUWS_fnc_opcom_joinBucket) < 0) exitWith { false };
         private _t = [_target] call DUWS_fnc_opcom_send;
         if (isNil "_t") exitWith { false };
-        [_attack, _role, _t] call DUWS_fnc_opcom_attackBind;
+        [_attack, (_attack get "roles") select _b, _t] call DUWS_fnc_opcom_attackBind;
         true
     };
     private _t = [_target] call DUWS_fnc_opcom_send;

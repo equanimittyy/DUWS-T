@@ -847,8 +847,10 @@ OPCOM_MUSTER_MIN = 0.75;
 OPCOM_MUSTER_EXPIRY = 240;       // ticks; 20 min @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.5;
-// The most attackers an assault binds, one staging cell each.
-OPCOM_ASSAULT_ROLES = 3;
+// The most frontage cells an assault stages across, a bucket of units each.
+OPCOM_ASSAULT_CELLS = 3;
+// The most units one attack binds across all its buckets. Tune.
+OPCOM_ATTACK_UNITS = 10;
 // The least Chebyshev cells from its target's cell an attacker stages at: 2 keeps the rally out of the 3x3 block the
 // muster bars and P(win) read, and out of the fight it is gathering for. Tune.
 OPCOM_RALLY_K = 2;

@@ -118,8 +118,8 @@ DUWS_fnc_opcom_creepTargets = {
             // The wave closes from its first role's rally, or from where that unit stands when it staged in place.
             private _from = (_roles select 0) get "rally";
             if (_from isEqualTo []) then {
-                private _t = [_attack, _roles select 0] call DUWS_fnc_opcom_roleUnit;
-                _from = if (isNil "_t") then { _pos } else { _t get "pos" };
+                private _us = [_attack, _roles select 0] call DUWS_fnc_opcom_roleUnits;
+                _from = if (_us isEqualTo []) then { _pos } else { (_us select 0) get "pos" };
             };
             private _dir = _from getDir _pos;
             private _start = _pos getPos [OPCOM_ARTY_CREEP_LENGTH / 2, _dir + 180];
