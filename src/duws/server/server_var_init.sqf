@@ -861,10 +861,10 @@ OPCOM_GARRISON_HEAL_RATE = 0.05;
 // ponds and narrow rivers. Tune.
 OPCOM_WATER_MIN_CELLS = 10;
 
-// Flank-route threat-avoidance weight: how hard a lambda=1 grid route (Flank/Encircle) bends around believed
-// enemy force. A direct route (Attack/Patrol/Rapport) runs lambda=0 and ignores it. Templates are Phase 5, so
-// P3 routes direct; the cost-field knob ships wired to the router. Tune.
-OPCOM_ROUTE_LAMBDA = 1;
+// Metres a lambda-1 route pays to cross a cell, per unit of believed BLUFOR force there, so it detours around a
+// threat rather than through it. An errand, a return and an enveloping role run lambda 1; every other order runs 0,
+// distance only (fnc_opcom_task). Tune.
+OPCOM_ROUTE_LAMBDA = 200;
 
 // Ferry lift penalty (metres): the cost a land move type pays to step into a navigable-water cell, set far
 // above any land detour the play box can hold -- so a target across water is reachable, but water is taken

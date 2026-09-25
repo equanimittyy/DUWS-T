@@ -33,7 +33,7 @@ DUWS_fnc_opcom_releaseRole = {
     private _t = [_intent, _role] call DUWS_fnc_opcom_roleUnit;
     if (isNil "_t") exitWith {};
     _t set ["hold", 0];
-    if !([_t, "capture", _intent get "pos"] call fnc_opcom_task) then { _t set ["boundTo", -1] };
+    if !([_t, "capture", _intent get "pos", "", [], _role get "lambda"] call fnc_opcom_task) then { _t set ["boundTo", -1] };
 };
 
 // Every role released at launch goes at once, so the attack arrives as one wave; a slot still open is dropped.

@@ -12,7 +12,9 @@
 //     ["build", pos, type, refund] or ["mine", pos, [variant, [cols, rows]], refund], delivered on arrival
 //     (DUWS_fnc_opcom_deliver) in place of a settle, and the truck spent. A build that finds no ground pays refund
 //     back.
-params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []]];
+//   _lambda: how hard the route bends around believed BLUFOR force, 0 for distance only; -1 takes the order's own.
+//     Kept on the record, so every re-plan of the march bends alike.
+params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []], ["_lambda", -1]];
 if (!isServer) exitWith { false };
 
 if (!(_order in ["capture", "move", "patrol", "return", "errand", "guard", "intercept"])) exitWith {
@@ -88,9 +90,11 @@ if (_boatHome && {_port < 0}) exitWith {
     ["INFO", "OPCOM", format ["task: site %1 has no port -- boat %2 refused", _rz, _t get "id"]] call fnc_log; false
 };
 if (_boatHome) then { _target = [_port] call DUWS_fnc_opcom_c2w };
-// Direct route (lambda 0): distance only.
+// A truck lost is the goods lost, and a unit going to rest has nothing to win from contact; every other order either
+// seeks the threat or reads ground by closing on it.
+if (_lambda < 0) then { _lambda = [0, 1] select (_order in ["errand", "return"]) };
 private _plan = if (_order isEqualTo "guard") then { [[], "grid"] } else {
-    [_t get "pos", _target, _t get "moveType", 0] call fnc_opcom_route
+    [_t get "pos", _target, _t get "moveType", _lambda] call fnc_opcom_route
 };
 _plan params ["_pts", "_mode"];
 if (_order isNotEqualTo "guard" && {_pts isEqualTo []}) exitWith {
@@ -112,6 +116,7 @@ _t set ["errand", [[], _errand] select _isErrand];
 _t set ["returnZone", _rz];
 _t set ["targetZone", _zk]; _t set ["settleZone", ""]; _t set ["inZone", false];
 _t set ["interceptKey", _ik];
+_t set ["lambda", _lambda];
 _t set ["leg", 0];
 _t set ["hold", DUWS_opcom_tick + OPCOM_COMMIT_HOLD];
 if (_wasGarrison) then { [_t] call DUWS_fnc_opcom_drawOut };

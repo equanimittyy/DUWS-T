@@ -2,24 +2,26 @@
 // binds, where each stages and what releases it. A manoeuvre is data, so a new one adds no tasking code.
 if (!isServer) exitWith {};
 
-// manoeuvre -> [[role, bearings, slots, required slots, released by, wide], ...]. A role stages on the first bearing,
-// in degrees off the one the attack comes from, whose rally is dry, one cell a slot. "" releases it at launch; a role
-// name releases it once that role's unit reads engaged, since an envelopment arriving before the defenders are
-// committed to the front is worth nothing. A wide role stages at least OPCOM_ENVELOP_STANDOFF out.
+// manoeuvre -> [[role, bearings, slots, required slots, released by, wide, lambda], ...]. A role stages on the first
+// bearing, in degrees off the one the attack comes from, whose rally is dry, one cell a slot. "" releases it at launch;
+// a role name releases it once that role's unit reads engaged, since an envelopment arriving before the defenders are
+// committed to the front is worth nothing. A wide role stages at least OPCOM_ENVELOP_STANDOFF out. Lambda bends its
+// march around believed BLUFOR (fnc_opcom_task): an enveloping role is worth only what it reaches unseen, where the
+// fight is the point of the fix's march.
 DUWS_opcom_manoeuvres = createHashMapFromArray [
-    ["assault", [["attacker", [0], OPCOM_ASSAULT_ROLES, 1, "", false]]],
-    ["flank", [["fix", [0], 1, 1, "", false], ["maneuver", [90, -90], 2, 1, "fix", false]]],
-    ["encircle", [["fix", [0], 1, 1, "", false], ["rear", [180], 2, 1, "fix", true]]]
+    ["assault", [["attacker", [0], OPCOM_ASSAULT_ROLES, 1, "", false, 0]]],
+    ["flank", [["fix", [0], 1, 1, "", false, 0], ["maneuver", [90, -90], 2, 1, "fix", false, 1]]],
+    ["encircle", [["fix", [0], 1, 1, "", false, 0], ["rear", [180], 2, 1, "fix", true, 1]]]
 ];
 
-// -> [[role, rally, required, released by], ...], one a slot, or [] when a role finds no dry rally. An assault
+// -> [[role, rally, required, released by, lambda], ...], one a slot, or [] when a role finds no dry rally. An assault
 // stages where it stands instead, since it has no geometry to lose.
 DUWS_fnc_opcom_manoeuvreRoles = {
     params ["_name", "_at", "_bearing", "_edge"];
     private _out = [];
     private _ok = true;
     {
-        _x params ["_role", "_bearings", "_slots", "_required", "_release", "_wide"];
+        _x params ["_role", "_bearings", "_slots", "_required", "_release", "_wide", "_lambda"];
         private _dist = _edge + OPCOM_RALLY_STANDOFF;
         if (_wide) then { _dist = _dist max OPCOM_ENVELOP_STANDOFF };
         private _dir = _bearing;
@@ -37,7 +39,7 @@ DUWS_fnc_opcom_manoeuvreRoles = {
                 private _q = _rally getPos [OPCOM_GRID_CELL * ceil (_k / 2), _dir + ([90, -90] select (_k mod 2 == 0))];
                 if !(surfaceIsWater _q) then { _p = [_q select 0, _q select 1, 0] };
             };
-            _out pushBack [_role, _p, _k < _required, _release];
+            _out pushBack [_role, _p, _k < _required, _release, _lambda];
         };
     } forEach (DUWS_opcom_manoeuvres get _name);
     [[], _out] select _ok

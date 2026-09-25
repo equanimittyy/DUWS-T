@@ -62,8 +62,8 @@ DUWS_fnc_opcom_attackSweep = {
             private _pw = _x select 2;
             ([sqrt (_pw / ((1 - _pw) max 0.001)), _at, _at getDir ((_x select 0) select 1), _edge] call DUWS_fnc_opcom_manoeuvrePick)
                 params ["_m", "_roles"];
-            private _rally = (_roles select 0) select 1;
-            private _stage = [["move", _rally], []] select (_rally isEqualTo []);
+            (_roles select 0) params ["", "_rally", "", "", "_lambda"];
+            private _stage = [["move", _rally, "", [], _lambda], []] select (_rally isEqualTo []);
             private _c = [_x, [_rally, _to] select (_rally isEqualTo []), _stage, format ["Attack %1 (%2)", _label, _m]]
                 call DUWS_fnc_opcom_liftOffer;
             (_c select 0) pushBack ["open", _key, _at, _label, _roles, _m];
@@ -98,7 +98,7 @@ DUWS_fnc_opcom_attackSweep = {
                     if (!isNil "_t") then { _base = _base + (_t get "effForce") };
                 } forEach _roles;
                 private _rally = _role get "rally";
-                private _stage = [["move", _rally], []] select (_rally isEqualTo []);
+                private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
                 private _worth = [_intent get "target"] call DUWS_fnc_opcom_siteWorth;
                 private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
                 {

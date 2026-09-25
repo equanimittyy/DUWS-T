@@ -56,6 +56,8 @@ DUWS_fnc_opcom_carryBind = {
     if ((_tr get "order") isEqualTo "garrison" && {!("noncombat" in (_tr get "flags"))}) then { [_tr] call DUWS_fnc_opcom_drawOut };
     _tr set ["order", "ferry"]; _tr set ["carrying", _rider get "id"]; _tr set ["embarked", false]; _tr set ["route", []];
     _tr set ["ferryPhase", "topickup"]; _tr set ["ferryWait", 0]; _tr set ["ferryLZ", []];
+    // The lift drives its rider's march, so it bends around threat as the rider's order would.
+    _tr set ["lambda", _rider getOrDefault ["lambda", 0]];
     _rider set ["ridingOn", _tr get "id"];
     _rider set ["taxiDrop", _drop];
     // Live rider: pin it at the pickup on bind -- the task step skips a bound rider after, so this is the one chance.

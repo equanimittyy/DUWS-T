@@ -9,20 +9,20 @@ DUWS_fnc_opcom_intentBind = {
     _t set ["boundTo", _intent get "id"];
 };
 
-// _t takes the first role. _roles: [[role, rally, required, released by], ...], one per unit the intent binds; a role
-// past the first stays open for a later pick to fill. An intent opened in execution has every role released.
+// _t takes the first role. _roles: [[role, rally, required, released by, lambda], ...], one per unit the intent binds;
+// a role past the first stays open for a later pick to fill. An intent opened in execution has every role released.
 DUWS_fnc_opcom_intentOpen = {
     params ["_action", "_target", "_t", ["_roles", []], ["_state", "execution"], ["_pos", []], ["_label", ""]];
-    if (_roles isEqualTo []) then { _roles = [[_action, [], true, ""]] };
+    if (_roles isEqualTo []) then { _roles = [[_action, [], true, "", -1]] };
     private _id = DUWS_opcom_intentSeq;
     DUWS_opcom_intentSeq = _id + 1;
     private _intent = createHashMapFromArray [
         ["id", _id], ["action", _action], ["target", _target], ["pos", _pos], ["label", _label],
         ["state", _state], ["since", DUWS_opcom_tick],
         ["roles", _roles apply {
-            _x params ["_role", "_rally", "_required", "_release"];
+            _x params ["_role", "_rally", "_required", "_release", "_lambda"];
             createHashMapFromArray [["role", _role], ["unit", -1], ["rally", _rally], ["required", _required],
-                ["release", _release], ["released", _state isEqualTo "execution"]]
+                ["release", _release], ["released", _state isEqualTo "execution"], ["lambda", _lambda]]
         }]
     ];
     [_intent, (_intent get "roles") select 0, _t] call DUWS_fnc_opcom_intentBind;

@@ -36,7 +36,7 @@ DUWS_fnc_opcom_interceptFollow = {
     private _bp = DUWS_opcom_belief_pos select _i;
     if (!_force && {([_bp, _t get "target"] call DUWS_fnc_opcom_cellDist) <= 1}) exitWith {};
     _t set ["target", +_bp];
-    ([_t get "pos", _bp, _t get "moveType", 0] call fnc_opcom_route) params ["_pts", "_mode"];
+    ([_t get "pos", _bp, _t get "moveType", _t getOrDefault ["lambda", 0]] call fnc_opcom_route) params ["_pts", "_mode"];
     _t set ["route", _pts]; _t set ["routeMode", _mode]; _t set ["leg", 0];
     if (_live) then { [_t] call DUWS_fnc_opcom_reOrderLive };
 };
