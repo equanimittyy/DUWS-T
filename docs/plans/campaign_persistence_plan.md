@@ -8,6 +8,12 @@ Live units are not persisted. Zones, the HQ and FOBs are rebuilt and re-garrison
 what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks, and the
 vehicles the team put in the garage.
 
+**Shipped.** The store, the snapshot, the fork screen, the restore hooks, the four save triggers, the
+idle gate and the reconciliation pass are built. The code under `src/duws/server/persistence/` is the
+source of truth for them, and the sections below keep the reasons for each shape. One part is not
+built: Back from the first setup screen does not return to the fork
+([§The load screen](#the-load-screen)).
+
 Two rules govern everything below, the features that are not built yet included.
 
 **A thing is persistable when a single function can build it from numbers and strings.** Zones
@@ -59,6 +65,11 @@ mechanism.
 | Copy the file | `DUWS_T.vars.Arma3Profile` out of the profile directory | Different directory on a client and a dedicated server; the player has to find it |
 | Client profile carry | The server hands the snapshot to a connected client, which keeps it in its own `profileNamespace` and offers it back on the load screen | Needs that client connected when the save is taken; validated coming back in, not trusted |
 | Clipboard string | `copyToClipboard` out, paste into an edit control in | One deliberate player action per direction; edit-control length under a full snapshot is untested |
+
+**Where each route lives.** The carry rides SITREP: the server sends the snapshot it has just
+written to the client that asked, and that client keeps it in its own profile. The fork's Export
+copies the selected campaign to the clipboard, and its Import takes a pasted string or, with nothing
+pasted, the last campaign that this profile carried.
 
 All three move the same value, and they cost almost nothing because the snapshot is already a
 single JSON string in the store — `toJSON` on the way out and `fromJSON` on the way back, with no
@@ -175,9 +186,10 @@ recovers it by someone taking that slot.
   anyone was connected is one count. Antistasi's condition is the one to copy — players now *or*
   players at the previous pass — because the first empty tick still writes, which is what banks the
   session on a server that has just emptied.
-- **It does not overlap itself.** A pass that starts while one is in flight skips rather than
-  queues; a queue of stale snapshots is worse than a missed interval, because the last one to land
-  wins and it is the oldest.
+- **It cannot overlap itself.** The whole write runs unscheduled, so no script moves a pool between
+  the reads that make one snapshot, and a second trigger runs after the first has landed rather than
+  interleaving with it. A queue of stale snapshots is worse than a missed interval, because the last
+  one to land wins, and an unscheduled write never leaves one behind.
 - **It rotates `_prev` on every write**, so the fallback is always exactly one interval behind.
 - **It logs what it wrote** — zone count, vehicle count, byte length — through `fnc_log`. A save
   path with no trace in the `.rpt` is one nobody can diagnose after the fact, and this one runs
@@ -241,17 +253,19 @@ the next and wedges whatever it gates for as long as the old session ran. The mi
 carries a monitor that clears future stamps off player objects (`server/server_init.sqf:441-468`);
 that stays as the backstop, and nothing new should need it.
 
-## What the current save does not cover
+## What an engine save could not cover
+
+The engine save was reached from one place, the SITREP support, and it is gone: SITREP now writes the
+snapshot. The rows below are why the engine save could not be the mechanism.
 
 | Problem | Where |
 |---|---|
-| The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/persistence/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:196` |
 | `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/civilian/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](../info/architecture/arma_engine_gotchas.md) |
 | Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
 
-Rows three to five are why an engine save cannot be the mechanism even in the case where it works.
+Rows two to four are why an engine save cannot be the mechanism even in the case where it works.
 A server-side save has no access to unlocks the client paid for and never broadcast; a namespace
 holding Location handles is a serialisation hazard *because* something is trying to serialise it;
 and an object handle restores as `objNull` in a new session, which fails silently rather than
@@ -283,8 +297,10 @@ substitute for it. That dead parameter pre-dates this plan and is left alone her
 
 ## Prerequisites
 
-None of these is persistence work, and all of them must land first. Each is independently worth
-doing.
+Prerequisites 2 and 3 shipped with the snapshot: `fnc_fob_server` takes a name as its fourth argument,
+the dialogue router is muted while a load replays its builders, and a restore replays the unlock
+array into the flags and into the two levels that nothing else recounts. Prerequisite 1 is a check
+on a dedicated server, and the fork warns when the store did not read back.
 
 1. **Confirm the store reads back on our dedicated server.** Dedicated servers historically wrote
    profile-namespace variables to disk correctly and failed to read them back on the next start.
@@ -377,6 +393,12 @@ the lose conditions and bandits.
 `DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
 campaign is, and a carried snapshot must not put an admin's old logging level or write cadence back.
 
+**Revive stays the lobby's too, for a reason of mechanism.** The vendored AIS reads the param at client
+start (`modules/AIS/`), before any snapshot reaches the client, and `modules/` is not edited.
+
+**An AutoDetect RANDOM OPFOR keeps its roll.** The random pick is held in `selectedFaction_OPF` like a
+picked faction, so a load regenerates the faction that the campaign rolled instead of a new one.
+
 **A param is overridable only where it is read once.** `BIS_fnc_getParamValue` always answers from the
 lobby, so a call site that asks it directly cannot be overridden at all: the arsenal shelf re-reads its
 mode on every open (`client/arsenal/fnc_duws_Arsenal.sqf:8`,
@@ -427,6 +449,10 @@ player's dialog and the destruction watcher, funnel through `fnc_fob_deregister`
 `fnc_fob_server` per entry rather than rebuilding what it places. Nothing player-scoped rides along:
 the owner passed at build time is never read (`shared/functions/fnc_FOBactions.sqf:8`), and a FOB's
 garrison and its defences are live state the site streamer regenerates.
+
+**A zone's composition is stored beside its name.** `fnc_createZone` rolls the prefab that it builds,
+so a replay without the kind would stand a field hospital where a comm station stood. The kind goes
+back as the eighth argument of `fnc_createZone`.
 
 **Zone names have to be stored.** They are drawn, not derived: `fnc_zone_name` hands out a
 phonetic-alphabet word at random and records which are spent, so nothing about a zone's index or
@@ -526,9 +552,11 @@ emplacement points where it pointed.
 The per-key variables beside the registry are session state and stay out. `DUWS_hpPeak_<key>` is
 re-anchored every time a hardpoint raises and cleared when it stows, and `DUWS_hpMines_<key>`,
 `DUWS_hpMineSquares_<key>` and `DUWS_hpMineLaid_<key>` are made and unmade with the mines a streamed
-belt lays. A restored minefield lays its belt again on the next raise, which is the same path a fresh
-campaign takes. What the snapshot does carry for them is the variant, because the registry row does
-not name it ([§The commander](#the-commander)).
+belt lays. An OPCOM belt is the exception, because its squares are its whole state and the registry
+row names no geometry: the snapshot stores the centres of the squares that still hold mines and the
+site radius, and the restore plans those squares again. A field that a side mission laid has no belt
+saved and goes with its mission. The variant rides with the commander's keys
+([§The commander](#the-commander)).
 
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
 moment a town crosses `-10` into the OPFOR band, independently of the commander
@@ -572,10 +600,11 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
-(`server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf`). What a restore has to clear is the live half:
-`grp` back to `""`, `status` to `virtual`, and `carrying`, `ridingOn` and `embarked` reset. The groups those
-bound are gone, and a half-bound carry would hold its rider for the rest of the campaign, since a bound
-record refuses every new order.
+(`server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf`). The save clears the live half: `grp` and the
+helipad netId go to `""`, `status` to `virtual`, and a live group's strength and position are read into the
+record the way a stow reads them. The restore releases each carry through `DUWS_fnc_opcom_ferryRelease` and
+unbinds each rider that is left. The groups those bound are gone, and a half-bound carry would hold its
+rider for the rest of the campaign, since a bound record refuses every new order.
 
 **Attack records landed with Phase 5, and they change nothing here.** An attack is the record that binds
 several units to one Attack, and its roles name their units by tasking id rather than by handle
@@ -588,9 +617,9 @@ transport to its rider by id, not by handle — so a counter restored to 0 hands
 standing unit already holds.
 
 **The tick is the clock every stored time counts against.** A commit `hold`, the staleness layer and a gun's
-cooldown are all tick counts, so `fnc_opcom_belief_init` must initialise `DUWS_opcom_tick` and
-`DUWS_opcom_hqKnown` only when they are nil. It assigns both unconditionally today, which resets a restored
-campaign's clock and re-hides an HQ the commander had already found.
+cooldown are all tick counts, so the restore sets `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` inside the OPCOM
+thread, after `fnc_opcom_belief_init` and the tasking init have run and before the first tick. Both inits
+assign them unconditionally, so a restore that ran earlier would be undone.
 
 **A minefield's variant lives outside the hardpoint registry.** `DUWS_opcom_mineVariants` maps a build key to
 `AT` or `AP` because the registry row carries no variant, and the build mix weighs the two apart, so a restore
@@ -687,10 +716,10 @@ restoring a name that resolves to nothing. It joins the snapshot as one key.
 of `DUWS_friendlyArsenal` into the pool at `DUWS_limitedSeed` (`fnc_create_ammo_lists.sqf:59-61`), and
 `fnc_captured_pool_setCount` overwrites a class outright rather than filling a gap
 (`fnc_economy_init.sqf:437-447`), so a seed that runs over a restored pool resets a whole campaign's
-spend-down to full stock. The seed therefore covers only the classes the pool does not already name.
-That rule needs no restore branch — on a fresh campaign the pool is empty and every class is seeded —
-and it is also what a mod added between sessions needs, since its classes have no saved count to come
-back to. `fnc_buildQuickKits.sqf:123` and `fnc_scanCivilianGear.sqf:94` already seed newly discovered
+spend-down to full stock. The seed therefore covers only the classes that the campaign never seeded,
+which a Limited snapshot lists: a class spent down to nothing leaves the pool, so the pool alone cannot
+tell it from a class that a mod added between sessions. The mod's classes have no saved count to come
+back to, so they are seeded. `fnc_buildQuickKits.sqf:123` and `fnc_scanCivilianGear.sqf:94` already seed newly discovered
 classes alone.
 
 **Ammo tracking rides with the mode.** `DUWS_TrackAmmo` decides whether magazines are pooled at all,
@@ -736,10 +765,9 @@ set without a registry behind it. Zones and FOBs pay the same price.
 
 ## Features not built yet
 
-
-Three planned features are cheap to persist if they are built as registries and expensive if they
-are not. The contract is the same for all three: **the builder takes data and the registry holds
-that data.** Persistence is then a replay, and there is nothing extra to write.
+Planned features are cheap to persist if they are built as registries and expensive if they are
+not. The contract is the same for each: **the builder takes data and the registry holds that data.**
+Persistence is then a replay, and there is nothing extra to write.
 
 **Player-built fortifications and BLUFOR hardpoints.** Build them through one function taking
 `[type, position, direction]` and keep a parallel registry of exactly those tuples, on the model of
@@ -747,14 +775,10 @@ the hardpoint arrays. Built the other way — the player places an object and pe
 the object — restore has to reverse-engineer what was built from what is standing, and every new
 buildable is a new special case.
 
-**Civilian vendors.** The vendor registry
-([`civilian_shops.md`](../info/gameplay/civilian_shops.md#vendor-registry)) holds, per town, each
-vendor's type, building, facing and respawn cooldown. It is an input: restore replays it in place of
-the init-time roll, so every town keeps the same vendors in the same buildings. The building goes in
-by position on the same footing as towns: a terrain building does not move, so the nearest building
-to the stored position is the same one. Shop money has no entry and is lost: it is the carried
-`Money_roll` item, and no player gear is saved ([§The team](#the-team)). Whether a player's cash wants a
-team-level or per-player key of its own is the vendor work's question, not this plan's.
+**Shop money.** The vendor registry itself is built and restored ([§World and placement](#world-and-placement)).
+Shop money has no entry and is lost: it is the carried `Money_roll` item, and no player gear is saved
+([§The team](#the-team)). Whether a player's cash wants a team-level or per-player key of its own is the
+vendor work's question, not this plan's.
 
 **Anything with a cooldown or a timer.** Store the remaining duration. See the `diag_tickTime`
 rule above.
@@ -779,8 +803,10 @@ needs to bring one in.
   header: world, day, zones held, CP, and how long ago it was written. It is disabled, with the
   reason on the control, when none of them is loadable here. An unlabelled choice is not a choice.
 - **Import** takes a snapshot from this client's own profile or from a pasted string, validates it,
-  and adds it to the list. Export is not here: a player exporting has a campaign running, so it
-  belongs with the in-session save controls.
+  and adds it to the list.
+- **Export** copies the selected campaign to the clipboard. It is here, not in the session, because
+  the in-session save control is SITREP, and SITREP already carries the campaign to the caller's
+  profile.
 
 **The fork goes at the head of the existing chain, not inside it.** Setup runs as one chain on the
 game master's machine today (`client/client_init.sqf:84-98`):
@@ -797,13 +823,11 @@ those screens would have set, so there is nothing left for them to ask. Siting i
 rather than inside it is what keeps New Game untouched — a fork at step 2 or 3 would have to unwind
 choices the player had already made.
 
-**Back from the first setup screen returns to the fork.** The chain already treats Back as re-entry:
-the paste window and the confirmation both restart `fnc_startup_faction_flow`
-(`client/dialog/fnc_startup_faction_flow.sqf`), and the environment screen routes back into it. The
-fork is one more link at the head, so the first screen's Back opens it instead of dead-ending, and a
-player who picked New Game by accident is one keypress from the list of their campaigns. The faction
-screen's dev-only quickstart button is unaffected: it sits inside the New Game branch, so it is
-reached only once the fork has been answered, and it skips the rest of the chain as it does today.
+**Back from the first setup screen does not return to the fork.** Not built. New Game commits the
+server to a new campaign at its gate, and a fork reached again from the faction screen would need the
+server to go back to that gate. A player who picked New Game by accident restarts the mission. The
+faction screen's dev-only quickstart button sits inside the New Game branch, so it is reached only
+once the fork has been answered.
 
 **New Game destroys nothing, because it writes under a new campaign ID.** That falls out of the
 index shape rather than being designed for: an existing campaign is only ever overwritten by its
@@ -834,7 +858,9 @@ Unreadable is also the one case that has to warn on the New Game path: the names
 read back is the namespace this session's saves are written to, so the fork says so before the player
 spends an evening on a campaign nothing will keep. That is the dedicated-server failure
 [Prerequisite 1](#prerequisites) exists to rule out, and it needs a name in the interface rather than
-in the log alone.
+in the log alone. The scan tells the two apart through a second store: every commit also writes the
+index's row count to `profileNamespace`, so an empty index beside a count above zero reads as a store
+that did not read back.
 
 **A snapshot missing keys loads only when the missing keys are outcomes.** An absent input group is
 fatal: placement, zones and hardpoints are what the builders replay, and a builder handed nothing
@@ -858,10 +884,10 @@ The log keeps the detail; the hint keeps the number.
 
 A dedicated server restarting unattended has no game master connected, and coming back up on its own
 campaign is the checkpoint the whole dedicated story rests on. So the screen has a timeout, on the
-same `fnc_waitLogged` pattern as every other setup gate, and **the timeout loads the newest valid
-snapshot when one exists and starts a new campaign when none does.** The bound is short while no
-player is connected and extends to the setup-screen bound once one is, so an unattended restart is
-not delayed by a screen nobody can see and a host is not raced past by a timer.
+same pattern as every other setup gate, and **the timeout loads the newest valid snapshot that has
+not ended when one exists and starts a new campaign when none does.** The bound is 30 seconds while no
+human is connected and 600 once one is, so an unattended restart is not delayed by a screen nobody can
+see and a host is not raced past by a timer.
 
 Antistasi makes the same timeout a mission parameter defaulting to off (`autoLoadLastGame`,
 `-1` through 600 seconds). Here it defaults to on, because a server that will not restart into its
@@ -879,25 +905,24 @@ of the screen at all — a load satisfies both flags the same way a finished set
 
 ### Hooks, in boot order
 
-**An early gate in `server_init.sqf`, between `:8` and `:13`.** After `server_var_init` so a snapshot
-overwrites the defaults, before the terrain survey so the survey can be skipped. It has to sit this
-early because the setup gates at `:161,166` block on globals a *client* publishes. Because the answer
-now comes from a player, the gate is three steps rather than one:
+**A gate in `server_init.sqf`, after `serverinit_complete`.** After `server_var_init` so a snapshot
+overwrites the defaults, and after `serverinit_complete` because the game master's client waits on
+that flag before it can reach the fork. It sits ahead of the setup gates, which block on globals a
+*client* publishes. Because the answer comes from a player, the gate is three steps rather than one:
 
 1. **Scan.** Read the key, validate version and world, publish the summary the load screen labels
    its Load control with, and a status beside it — saves found, none found, or the store unreadable
    ([§Telling the player](#telling-the-player-what-did-not-load)). An absent or invalid snapshot
    publishes an *empty* summary rather than nothing at all: the client waits on this variable, and a
    variable that is never set is indistinguishable from a server still working.
-2. **Wait — but only when there is something to load.** On an empty summary the gate returns
-   immediately and boot proceeds exactly as today. That is not a micro-optimisation:
-   `fnc_moreUrban_locations` is `spawn`ed at `:13` and has been recorded taking 140 s, and today it
-   runs *while* the player is in the setup screens. Blocking ahead of it on every campaign would move
-   that 140 s out from behind the screens and into the player's wait.
-3. **Apply, on Load only.** Publish the settings and placement inputs, raise `DUWST_restoring` for
-   the later hooks, and set `chosen_hq_placement` and `createzone_server` true — those gates are now
-   `fnc_waitLogged` loops, so satisfying them clears them immediately and nothing has to branch
-   around them. Skip the terrain survey. On New Game none of this happens and the gate is a no-op.
+2. **Wait for the answer.** On an empty summary the terrain survey starts at once and the gate still
+   waits, because Import can add a campaign from the fork. `fnc_moreUrban_locations` has been
+   recorded taking 140 s, so it runs *while* the player is at the screens rather than after them.
+   With saves on the list, the survey starts only once New Game is the answer.
+3. **Apply, on Load only.** Publish the settings and placement inputs, raise `DUWS_restoring` for
+   the later hooks, and set `chosen_hq_placement`, `createzone_server` and `chosen_settings` true —
+   those gates are `fnc_waitLogged` loops, so satisfying them clears them immediately and nothing has
+   to branch around them. Skip the terrain survey. On New Game none of this happens.
 
 The client must **wait** for the summary rather than sample it. A joining client is sent every
 `publicVariable`'d global and then runs its own init over the top
@@ -923,9 +948,11 @@ The locator never runs, so no new placement is rolled. Note that `zones_created`
 (`fnc_locatorzones_random.sqf:203`), so the wait at `fnc_init_OPFOR_WARCOM.sqf:22` only clears
 because the snapshot restored it.
 
-**Ownership and reveal replay, after the `WARCOM_init_done` wait at
-`fnc_init_OPFOR_WARCOM.sqf:97`.** `fnc_WARCOM_init.sqf:38-46` hands every zone back to OPFOR, so
-ownership can only be applied after it has run.
+**Ownership, tiers, ledgers, town state and reveal replay before the site poller starts,** on the
+generation thread in `fnc_init_OPFOR_WARCOM`. A site that the poller raised first would stand up the
+builders' defaults instead of what was saved. `fnc_WARCOM_init` no longer hands every zone back to
+OPFOR: its OPFOR list is every zone that BLUFOR does not hold. The pools and the earned counters
+restore inside `fnc_WARCOM_init`, after it seeds them from the setup values.
 
 Civilians restore inside the same file at `:54`, where `fnc_civ_init_Tomata` is called: the saved
 towns replace the `fnc_civ_selectTowns` roll — which is not deterministic — and the rest of that
@@ -937,15 +964,17 @@ function runs unchanged.
 | `fnc_moreUrban_locations` (`:13`) | **Skipped** — a terrain scan recorded taking 140 s, and placement is already decided |
 | Setup gates, `chosen_hq_placement` / `createzone_server` (`:161,166`) | Pre-satisfied by the gate |
 | Faction init (`:60-156`) | Runs — classnames must be re-resolved against whatever mods are loaded now. Then `fnc_faction_edits_apply` applies the saved faction list edits over the new pools. The restore has to publish the result itself: the loop that broadcasts every schema key and the request-menu catalogue is the setup loop this gate skips, and no faction file runs on a client to fill the gap |
-| `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the restored pool does not name ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
+| `fnc_create_ammo_lists` (`:189`) | Runs — the friendly class list re-resolves against the loaded mods. In Limited its pool seed covers only the classes the campaign never seeded ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)) |
 | `fnc_bluHQinit` (`:192`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough. The officer spawns alive, so a saved officer death applies after this step |
 | `fnc_init_OPFOR_WARCOM` (`:205`) | Runs, with the locator bypassed as above |
 | `fnc_escalation` (`fnc_init_OPFOR_WARCOM.sqf:63`) | Runs the census, then the snapshot restores `escalation_destroyed` |
-| `fnc_intro_heli` (`:433`) | **Skipped** |
+| `fnc_intro_heli` (`:433`) | **Skipped**: the players land at the HQ the way a player joining a running campaign does |
+| OPCOM's thread (`fnc_opcom_perception_run`) | Runs its inits, then the snapshot restores the commander's keys before the first tick |
 
 FOBs restore the same way: call `fnc_fob_server` per saved position — silently, and with the saved
-name — rather than reimplementing what it builds. Vehicles are spawned last, after every anchor is
-standing.
+name — rather than reimplementing what it builds. They are built one at a time, because
+`fnc_fob_server` appends to three index-parallel registries across a suspension. Vehicles are
+spawned last, after every anchor is standing.
 
 ## What is deliberately not saved
 
@@ -1004,6 +1033,12 @@ chose. Scaling by remaining health is the shape to copy — a refund proportiona
 means saving mid-firefight is neither punished nor exploitable. What each unit and vehicle is worth
 is already the price tables the economies buy from, so this is a walk and a sum, not new pricing.
 
+**What the pass refunds.** A recruit in a player's squad or in a player's High Command group, at its
+request price scaled by health, and an OPCOM build still siting, at the refund its delivery carries.
+An OPCOM tasking needs no refund, because it restores as data. A vehicle left parked gets none: the
+garage is how a vehicle survives a restart, and a refund for any vehicle in the world would pay for
+captured ones.
+
 **The refund lands in the snapshot's pools, never in the live ones.** The pass runs on a repeating
 timer for the life of the campaign, so a refund applied through `fnc_ap_adjust` pays for the same
 live wave again at every interval, and on a server that stays up for days the enemy's pool grows
@@ -1014,51 +1049,22 @@ refund attached to the one restore that consumes it.
 
 | File | Change |
 |---|---|
-| `server/misc/fnc_campaign_store.sqf` | New. The container: namespace resolution and flush, the accessor pair, the index, commit and scan. Shape and responsibilities in [`campaign_save_format.md`](../info/architecture/campaign_save_format.md). |
-| `server/misc/fnc_campaign_save.sqf` | New. Fills the snapshot hashmap from mission state and commits it. |
-| `server/misc/fnc_campaign_restore.sqf` | New. Validates a payload, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
-| `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
-| `server/persistence/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
-| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. |
-| `server/server_init.sqf` | Early gate before `:13` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:268`. Keep `enableSaving [false,false]` at `:196`; the engine save is no longer the mechanism. |
-| `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
-| `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
-| `client/chatter/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
-| `server/civilian/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
-| `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Initialise `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` only when they are nil, so a restored clock and a found HQ survive boot. |
-| `server/warcom/opcom/appraisal/fnc_opcom_archetypes.sqf` | `DUWS_opcom_archetype` set from the restored snapshot on a load, in place of the campaign setting's roll. |
-| `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
-| `client/client_init.sqf:84-98` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
-| `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
-| `server/server_var_init.sqf:65-66` | Every saved param resolved once into a global beside `DUWS_arsenalLimited` and `DUWS_trackAmmo`, and the name list restore iterates. |
-| `client/arsenal/fnc_duws_Arsenal.sqf:8`, `client/arsenal/fnc_quick_kits_menu.sqf:32` | Read the resolved global instead of `BIS_fnc_getParamValue`, or the restored arsenal mode cannot reach the shelf. |
-| `server/arsenal/fnc_create_ammo_lists.sqf:59-61` | Seed a friendly class only when the pool does not already name it, so a restored Limited campaign keeps its spend-down. |
-| `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
-| `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |
-| `description.ext` | `missionGroup = "DUWS_T";` |
-| `info/architecture.md:132` | Replace the "vanilla `saveGame` only" persistence row. |
-
-## Task list
-
-- [ ] Prerequisites 1-3 above, each as its own change; land Prerequisite 1's confirmation first.
-- [ ] Write `fnc_campaign_store.sqf`: namespace resolution, accessors, index, commit, scan. Verify: two campaigns written under separate IDs both appear in the index with correct headers; a commit replaces its own row rather than appending; `_prev` holds the previous payload.
-- [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
-- [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
-- [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
-- [ ] Add the garrison ledger: the purchased tier per zone and town, and the full and lost token multisets behind it. It follows zone and town replay, because every key is a site key. Verify: an OPFOR zone the players mauled but did not take comes back missing exactly what it lost rather than repaired to full; a cleared town comes back at tier I with nothing standing; a zone the players garrisoned comes back theirs at the tier they paid for; and a token behind an unearned rung stays unfielded rather than lost.
-- [ ] Add HQ, FOB, vendor and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, every town's shops come back the same types in the same doorways facing the same way and a shop killed before the save is still on its countdown, a FOB destroyed before the save stays gone, an officer killed under a non-terminal lose condition comes back dead with the request menu still refusing to open, and the restore replays no FOB radio announcements.
-- [ ] Add OPCOM's state: the archetype, the taskings with `DUWS_opcom_taskSeq`, the tick and the HQ flag, and the mine variants with `DUWS_hpOpcomSeq`. It follows zone and ownership replay, because `homeZone` and `returnZone` are site keys and a restored garrison re-syncs into its zone's reserve pool. Verify: a restored garrison still fields its reserve token at its own zone; a unit saved mid-march comes back virtual at its saved point with its order and route, and streams to a live group at its saved strength on approach; a commit hold stamped just before the save has roughly its remaining ticks left rather than thousands; a minefield comes back as the variant it was laid as; and nothing in the restored store resolves a netId.
-- [ ] Add the garage. Verify: `DUWS_garage_stored` round-trips; a retrieved vehicle comes back with its damage, fuel, cargo, paint, pylons and ammo fraction; a snapshot holding more than the restored caps allow keeps every vehicle and blocks the next store instead of dropping one.
-- [ ] Add the mission params and the captured pool. The params land with the settings group, and the pool follows faction init because the Limited seed reads it. Verify: a Limited campaign reloaded in a lobby set to Hybrid comes back Limited; a friendly class the player spent down to 3 comes back at 3 rather than reseeded to `DUWS_limitedSeed`; a class added by a mod since the save is seeded rather than missing; a Hybrid campaign's banked foreign gear comes back at its counts; and the host's log level, debug flag, cleanup lifetime, group icons and autosave interval are the lobby's, not the snapshot's.
-- [ ] Add the MHQ, which carries its own spec now that the garage does not hold it. Verify: a deployed MHQ comes back deployed where it stood, with a working respawn point and one ammo box.
-- [ ] Add the reveal state and the permanent support unlocks. Verify: a hardcore campaign's revealed zones, towns and hardpoints come back revealed with their markers repainted; the unlock array replays into every client's flags and `DUWS_bluforRadioLevel` comes back counted rather than zero, a client that joins after the restore included; and the garage's capacity pools come back the size they were bought to.
-- [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
-- [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect, on a `persistent = 0` server as well as a `persistent = 1` one; a connected headless client does not count as a player.
-- [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
-- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts; a campaign that was won or lost is listed as ended and is not what the timeout picks up; a store that cannot be read back is reported as unreadable rather than as an empty list, and New Game warns before it starts; a snapshot missing an outcome group loads with that group named on the screen, and one missing an input group is disabled; and a restore that dropped classes or units says how many.
-- [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
-- [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
-- [ ] On a dedicated server ([`info/testing.md`](../info/architecture/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
+| `server/persistence/fnc_campaign_store.sqf` | The container: namespace and flush, the index, commit, delete, read, scan and the refusal rules, plus the settings and param name lists. Shape in [`campaign_save_format.md`](../info/architecture/campaign_save_format.md) |
+| `server/persistence/fnc_campaign_save.sqf` | The snapshot, its header, the save itself and the autosave loop |
+| `server/persistence/fnc_campaign_reconcile.sqf` | The refunds the save adds to the snapshot's pools |
+| `server/persistence/fnc_campaign_restore.sqf` | The gate, the apply, and every restore hook below |
+| `server/persistence/fnc_autoSave.sqf` | The SITREP save, and the carry to the caller's profile |
+| `server/server_init.sqf` | The gate after `serverinit_complete`; one faction resolution for both paths; the saved date; the last-disconnect and mission-end writes |
+| `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Zone and hardpoint replay in place of the locator and generation; the world outcomes before the site poller; escalation after the census; the economy period counted only while a human is on |
+| `server/warcom/fnc_WARCOM_init.sqf` | Keeps held zones held; restores the ledger after its seed |
+| `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | Restores OPCOM after its inits; idles with nobody on |
+| `server/init_zones/fnc_createzone.sqf` | Takes the saved composition kind |
+| `server/civilian/fnc_civ_init_Tomata.sqf`, `server/vendors/fnc_vendor_init.sqf` | Take the saved towns at their saved radii, and the saved vendor registry |
+| `server/supports/fnc_fob_server.sqf` | Takes a saved name |
+| `client/chatter/fnc_duws_dialogue.sqf` | Muted while a load replays its builders |
+| `server/server_var_init.sqf`, `shared/includes/params_modern.hpp` | The campaign-rule params resolved once into `DUWS_param*`; `DUWS_AutosaveInterval` |
+| `client/client_init.sqf`, `client/dialog/fnc_campaign_*.sqf`, `shared/includes/campaign_load_menu.hpp` | The fork at the head of the game master's setup chain |
+| `description.ext` | `missionGroup = "DUWS_T";` and the fork's dialog |
 
 ## Decided trade-offs
 
@@ -1108,9 +1114,6 @@ object is lost. The alternative is persisting object identity, which vanilla can
   — and it cannot be settled on paper.
 - Where a player who wants to save *now* is sent. SITREP is that control today and it is a radio
   support, which is not where anyone looks after pressing Escape. Singleplayer feels this hardest.
-- Whether a restored campaign should replay anything at all to the player — a one-line "campaign
-  resumed, day N" — or come up silent. Silent is the default here because every builder is being
-  suppressed anyway.
 - What happens to a save when the mission's own format changes mid-Workshop-release. Refusing it
   is the decided behaviour; whether a migration path is ever worth writing is not decided. The
   datapoint against refusing is that a quarter of Antistasi's save subsystem is converters, carried

@@ -10,8 +10,8 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky order.
 
-Phases 1–5 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
-specifies what remains: persistence, then the archetype.
+Phases 1–6 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
+specifies what remains: the archetype.
 The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -21,16 +21,15 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
 | 5 — Attack: a buildup and execution spine, assault, flank and the QRF, threat-aware routes where a role asks for one, the probe, and the fires split | [§Attack](#attack-phase-5) — **shipped** |
-| 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — **next** |
+| 6 — Persistence: OPCOM's store saved and restored with the campaign snapshot | [§Persistence](#persistence-phase-6) — **shipped** |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
 **The Attack comes first**: an attack's role binds its unit through the 4D sourcing, and it is the
 last phase that adds state worth saving — the attack records and their role bindings — and a save contract
 written before it would be written twice, once for taskings and again for attacks. It is also the phase that
-changes how the enemy fights, which is what a play-test is for. The cost is accepted rather than overlooked: until
-persistence lands, every tuning pass runs inside one session.
-**Persistence comes next**, and the archetype last, because the archetype leans between assault and flank, and
+changes how the enemy fights, which is what a play-test is for.
+**Persistence came next**, and the archetype last, because the archetype leans between assault and flank, and
 those rows do not exist until Phase 5 writes them: a set of one cannot be weighted. An attack musters against one
 global pair of muster bars in the meantime, which the archetype later splits per record. Do not pre-build later
 phases: the tuning constants and engine-contact behaviours only settle by running the core.
@@ -1164,23 +1163,24 @@ ammo truck by Reinforce.
 
 ## Persistence (Phase 6)
 
-OPCOM's store is shaped to serialise but implements no save/load, and today persistence is the engine's
-`saveGame`. The snapshot owns the save and the load, and the whole contract — which of OPCOM's keys it carries, what
-a restore clears before it replays them, and why belief is not among them — is
+The campaign snapshot owns the save and the load. The contract — which of OPCOM's keys it carries, what a
+restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
-It follows the Attack so the contract is written once. Phase 5 added the attack records (`DUWS_opcom_attacks`, with
-`DUWS_opcom_attackSeq` beside it) and the `boundTo` key on the taskings they own, which are stored state on the same
-terms as a tasking, so a contract written before it would be reopened the moment it landed. An attack is numbers,
-strings and arrays like everything else here, and its roles name their units by tasking id, which the taskings group
-already restores — so a buildup comes back mid-muster rather than collapsing, and what clears on restore is the live
-half a tasking already clears: the group handle, the status and any carry binding. A tasking's `boundTo` names its
-attack by id, so the attack counter rides with the attacks as `DUWS_opcom_taskSeq` rides with the taskings, and a
-buildup's `since` counts against `DUWS_opcom_tick` as a commit hold does.
-
-The phase ends in play rather than in code: a campaign is run past a save and a reload, and the commander has to
-pick up where it left off. That play pass is also what settles Phase 4's tuning list
-([§Settles in play](#settles-in-play)) — until it lands, a tuning pass lives and dies inside one session.
+- The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
+  `DUWS_opcom_attackSeq`, the tick, `DUWS_opcom_hqKnown`, the mine variants and `DUWS_hpOpcomSeq`.
+- The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
+  strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`).
+- The restore runs inside the OPCOM thread, after `fnc_opcom_belief_init`, `fnc_opcom_grid_init` and
+  `fnc_opcom_tasking_init` and before the first tick (`DUWS_fnc_restoreOpcom`). A `spawnClass` the loaded mods no
+  longer define is redrawn from its token; a token the faction cannot field drops the tasking and its id leaves
+  every attack role. Each carry is released through `DUWS_fnc_opcom_ferryRelease`, and each rider left bound is
+  unbound.
+- A buildup comes back mid-muster: an attack's roles name their units by tasking id, and its `since` counts against
+  the restored tick.
+- A build still siting at the write is refunded into the snapshot's OPFOR pool at the refund its delivery carries
+  (`DUWS_opcom_buildsPending` row, index 4).
+- The tick waits out a server with no human connected, so holds, cooldowns and staleness freeze with it.
 
 ## Naming: OPCOM sits inside WARCOM
 
