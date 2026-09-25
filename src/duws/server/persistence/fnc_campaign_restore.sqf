@@ -258,10 +258,11 @@ DUWS_fnc_restoreTownQueue = {
 
 // fnc_captured's repaint, without its payouts or announcements.
 DUWS_fnc_restorePaintHeld = {
-    params ["_pos"];
-    private _meta = (DUWS_restore get "zones") select { (_x select 2) isEqualTo _pos };
+    params ["_held"];
+    private _key = [_held] call fnc_zone_key;
+    private _meta = (DUWS_restore get "zones") select { ([_x select 2] call fnc_zone_key) isEqualTo _key };
     if (_meta isEqualTo []) exitWith {};
-    (_meta select 0) params ["", "_name", "", "_size", "_points"];
+    (_meta select 0) params ["", "_name", "_pos", "_size", "_points"];
     private _marker = format ["%1%2", round (_pos select 0), round (_pos select 1)];
     str(_marker) setMarkerColor "ColorBlue";
     str(_marker + "ellipse") setMarkerColor "ColorBlue";
@@ -358,7 +359,8 @@ DUWS_fnc_restoreBases = {
 
 // After fnc_WARCOM_init's seed, which would derive the tiers from a wallet since spent down.
 DUWS_fnc_restoreLedger = {
-    (DUWS_restore get "pools") params ["_cp", "_bluAp", "_opfAp", "_bluEarned", "_opfEarned"];
+    (DUWS_restore getOrDefault ["pools", []]) params [["_cp", commandpointsblu1], ["_bluAp", WARCOM_blufor_ap],
+        ["_opfAp", WARCOM_opfor_ap], ["_bluEarned", WARCOM_blufor_ap_earned], ["_opfEarned", WARCOM_opfor_ap_earned]];
     commandpointsblu1 = _cp;
     WARCOM_blufor_ap = _bluAp;
     WARCOM_opfor_ap = _opfAp;

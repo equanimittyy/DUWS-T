@@ -2061,3 +2061,19 @@ WARCOM_opfor_ap = 100;
     [1, 2]] call fnc_assertEq;
 ["attackPackage: a package under the floor is no offer",
     [[[1, 0, 4] call _fnc_unit], _stand, 0.95] call _fnc_pack, []] call fnc_assertEq;
+
+// --- DUWS_fnc_saveStamp: minutes since 2020-01-01 from a systemTimeUTC array ---
+// Differences, not absolute stamps: the harness compares str, and str of a seven-digit float drops digits.
+["saveStamp: the epoch is zero", ([[2020, 1, 1, 0, 0, 0, 0]] call DUWS_fnc_saveStamp), 0] call fnc_assertEq;
+["saveStamp: a day is 1440 minutes",
+    ([[2020, 1, 2, 0, 0]] call DUWS_fnc_saveStamp) - ([[2020, 1, 1, 0, 0]] call DUWS_fnc_saveStamp), 1440] call fnc_assertEq;
+["saveStamp: February 2020 has a 29th",
+    ([[2020, 3, 1, 0, 0]] call DUWS_fnc_saveStamp) - ([[2020, 2, 28, 0, 0]] call DUWS_fnc_saveStamp), 2880] call fnc_assertEq;
+["saveStamp: February 2021 does not",
+    ([[2021, 3, 1, 0, 0]] call DUWS_fnc_saveStamp) - ([[2021, 2, 28, 0, 0]] call DUWS_fnc_saveStamp), 1440] call fnc_assertEq;
+["saveStamp: hours and minutes count within the day",
+    ([[2026, 9, 26, 7, 27]] call DUWS_fnc_saveStamp) - ([[2026, 9, 26, 0, 0]] call DUWS_fnc_saveStamp), 447] call fnc_assertEq;
+["saveStamp: a year boundary is ten minutes wide when it is",
+    ([[2027, 1, 1, 0, 5]] call DUWS_fnc_saveStamp) - ([[2026, 12, 31, 23, 55]] call DUWS_fnc_saveStamp), 10] call fnc_assertEq;
+["saveStamp: 2026-09-26 is day 2460",
+    floor (([[2026, 9, 26, 0, 0]] call DUWS_fnc_saveStamp) / 1440), 2460] call fnc_assertEq;
