@@ -1034,7 +1034,8 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   — saturate buys kills, a creep buys the wave's survival — and one Value cannot price both. The debug step still
   asks for a walked pattern of any size by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
-  timed off `getArtilleryETA`.
+  timed off `getArtilleryETA`. The marker stands until the last round lands: one flight time after the battery's
+  last shot.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
   permanent-crew hardpoints (~6 units that never despawn); making AA resident would add a fourth and needs its own
   cap.
