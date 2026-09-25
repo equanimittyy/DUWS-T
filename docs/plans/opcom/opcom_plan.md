@@ -539,6 +539,10 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
 - **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
   a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
   of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
+- **A unit heals only at rest in its zone.** Only the `garrison` order heals: never on guard, never on the march in,
+  and never while the zone is contested, since a zone under assault is no rest. The heal resumes when the contest
+  lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
+  outside the zone's radius.
 - **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
 - **Only the pick hires.** The runner never spends: a manoeuvre sources each role it can fill when the pick commits
   it, and a role it commits without stays a target of its Attack until a later pick fills it, from a free unit or a
