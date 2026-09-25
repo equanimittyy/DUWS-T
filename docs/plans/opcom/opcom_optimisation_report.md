@@ -12,8 +12,11 @@ the mission generates, so a full-size campaign multiplies each figure rather tha
 
 ## What the play-test measured
 
-The DEBUG line times each stage of the tick in wall milliseconds. The quiet column is the first fifty ticks, before the
-commander bought anything; the play column is the hour's next sixty, once it was hiring, building and shelling.
+The DEBUG line times each stage of the tick in wall milliseconds. The quiet column is the first fifty ticks, while the
+AI mode was `off`, so the pick returned at once; the play column is the next sixty, after the mode was set to
+`weighted`, once the commander was hiring, building and shelling. The quiet column therefore compares the commander
+off with the commander on, not an idle commander with a busy one. Until about tick 68 the difficulty was 0.5 picks a
+tick, so the play column's `pick=0` readings before it are ticks with no pick.
 
 | Stage | Quiet | In play | What it runs |
 |---|---|---|---|
@@ -25,7 +28,7 @@ commander bought anything; the play column is the hour's next sixty, once it was
 | `taskstep` | 0-2 | 30-211 | movement, streaming, status |
 | `attacks` | 0 | 0-1, spikes of 56-521 | attack runner |
 | `need` | 0 | 0-2, one of 39 | need field signature check |
-| `pick` | 0 | 430-6000 | siting, the targets pass, the execute |
+| `pick` | 0 | 430-6000 | siting, the targets pass, the ranking, the execute |
 | `intel` | 0 | 0, one of 85 | the Intelligence Center roll |
 
 The tick period is 5 s nominal (`OPCOM_TICK_PERIOD`) and it measured 5-9 s in play: the sleep follows the work, so the
@@ -38,7 +41,7 @@ Three things decide how to read a figure.
   At the 19 fps the play-test ran at, that is under 60 ms of script time per second for all of them, so a stage that
   needs 50 ms of CPU can read as a second of wall time. Uniform inflation across stages is the contention signature:
   on the tick that read `contested=209 grid=211 taskstep=211`, a need-field rebuild was running in its own thread.
-- **The pick's targets pass is unscheduled**, inside `isNil { }` (`warcom/opcom/appraisal/fnc_opcom_pick.sqf:16-23`).
+- **The pick's targets pass is unscheduled**, inside `isNil { }` (`warcom/opcom/appraisal/fnc_opcom_pick.sqf:31-43`).
   Its wall time is frame time: a 300 ms pass is a 300 ms frame. The PERF line's minimum frame rate dropped to 5-7 fps
   in four of the play minutes.
 - **The debug overlay was open**, so `fnc_debug_opcom_grid` gathered all 2852 box cells and sent them to the client
@@ -46,20 +49,22 @@ Three things decide how to read a figure.
 
 ## Findings
 
-Ranked by expected gain per unit of work. Each names the mechanism, the evidence, the fix and what it should change.
+Each names the mechanism, the evidence, the fix and what it should change. The [plan of action](#plan-of-action) orders
+the work.
 
 ### 1. Split the pick timer, and count frames per stage
 
-The `pick` figure lumps three things of different nature: the siting pass (scheduled,
-`warcom/opcom/appraisal/fnc_opcom_siting.sqf:29-75`), the targets pass (unscheduled, `fnc_opcom_pick.sqf:16-23`) and
-the execute (scheduled, `fnc_opcom_pick.sqf:89`, which hires and routes). A Bank pick executes nothing, and it measured
-430 ms, 741 ms, 1072 ms and 1805 ms, so the first two parts alone cost that much; which of the two, the line cannot
-say.
+The play-test's `pick` figure lumped four things of different nature: the siting pass (scheduled,
+`warcom/opcom/appraisal/fnc_opcom_siting.sqf:29-75`), the targets pass (unscheduled, inside the `isNil` of
+`fnc_opcom_pick.sqf`), the scoring and weighted draw (scheduled) and the execute (scheduled, which hires and routes).
+A Bank pick executes nothing, and it measured 430 ms, 741 ms, 1072 ms and 1805 ms, so the parts before the execute
+alone cost that much; which of them, the line could not say.
 
-**Fix.** Time the three parts in `fnc_opcom_pick` and print them on the DEBUG line, and beside every stage's
-milliseconds print the frames it spanned (`diag_frameNo` delta). A stage with a large wall figure over many frames is
-scheduled work or contention; one over zero or one frame is a frame stall. This is the one finding the rest depend
-on: it turns the estimates below into measurements.
+**Fix.** The DEBUG line now prints every stage as `ms/frames`, splits the pick into `site`, `targets`, `rank` and
+`exec`, and times each action row of the targets pass that takes 1 ms or more
+([`performance.md` §Reading the cost from a playtest](../../info/architecture/performance.md#reading-the-cost-from-a-playtest)).
+The need-field rebuild line names the signature parts that forced the rebuild and the frames it spanned. This is the
+one finding the rest depend on: it turns the estimates below into measurements.
 
 ### 2. The need field rebuilds on every hardpoint build, at 6-13 s each
 
@@ -73,16 +78,27 @@ land cell in the box (`fnc_opcom_need.sqf:66-75`). A hardpoint that is not a rad
 deposit it spreads (`:53-58`), and a spread is 49 cell writes.
 
 **Fix.** Split the signature: a band signature (BLUFOR zones, FOBs, the HQ, banded towns, radio tower keys) and a
-deposit signature (the band signature plus every OPFOR hardpoint key). A deposit-only change keeps
-`DUWS_opcom_bandCells` and re-runs only the spreads and the band base add. That removes four of the five rebuilds seen,
-and the fifth becomes finding 3's.
+deposit signature (the band signature plus every OPFOR hardpoint key). The zone spreads, the town spreads and the band
+base add read only band-signature inputs, so cache them with `DUWS_opcom_bandCells` on the band signature. A
+deposit-only change then adds the hardpoint spreads to that cache, which is cheap enough to run in the tick without a
+thread.
 
-### 3. Coverage is asked point by point; rasterise it once
+Of the five rebuilds seen, the first was the boot build on tick 1, and the second followed a radio tower, which moved
+the band from 466 to 580 cells. The other three followed a mortar, an OP and a second mortar, and the split removes
+them. The OP landed while the mortar's rebuild ran, so it forced a second full rebuild 14 s after the first.
+
+The siting memo (`fnc_opcom_siting.sqf:53`) stamps with the whole need signature, so it also resets on every build.
+A mortar's, a battery's and an OP's Value read only the area of influence and the assets of their own type, so their
+memos can stamp on the band signature and their own assets, and stay warm across the other builds. A radio tower's
+Value multiplies by `DUWS_fnc_opcom_defend`, which reads every OPFOR hardpoint (`value/fnc_opcom_exposure.sqf:49`), so
+its memo keeps the whole signature.
+
+### 3. Coverage is asked point by point
 
 `DUWS_fnc_aoi_covers` (`warcom/fnc_aoi_init.sqf:17-58`) answers one point by walking every emitter: a `findIf` over
 the hardpoints, a `findIf` over the zones that re-resolves each zone's owner with an inner `findIf` over the BLUFOR
-list, the FOB list, and a loop over the towns with a `getPos` per Location. Nothing in it is cached, and OPCOM asks it
-thousands of times a tick:
+list, the FOB list, and a loop over the towns with a `getPos` per banded town. Nothing in it is cached, and OPCOM
+asks it thousands of times a tick:
 
 | Caller | Queries | When |
 |---|---|---|
@@ -94,18 +110,25 @@ thousands of times a tick:
 
 The siting memo (`fnc_opcom_siting.sqf:53-55`) keys by band cell, warms eight random cells a tick out of about 580,
 and resets whenever the need signature or the type's asset list changes, which is what a landed build does. In a
-campaign that builds, it is cold most of the time. That is why the pick cost 700-2500 ms on ticks with no belief, no
-BLUFOR ground and so no attack, QRF, probe or fire targets to score.
+campaign that builds, it is cold most of the time. It is the suspected cause of the 700-2500 ms picks on ticks with
+no belief, no BLUFOR ground and so no attack, QRF, probe or fire targets to score. The patrol sweep and the buy rows
+still ran on those ticks, so the `site` and `rows(…)` figures decide it.
 
-**Fix.** Keep a coverage layer per side on the grid, built per emitter: stamp each emitter's disc onto the layer with
-the bounded loop `DUWS_fnc_opcom_deposit` already uses (`belief/fnc_opcom_grid_sources.sqf:8-26`). That is emitters
-times disc cells, a few thousand writes, against cells times emitters today. Rebuild it in the need thread on the band
-signature from finding 2, and read it at one index per query from the band test, `gunShare`, `towerValue`,
-`rapportOffer` and `qrfSweep`. The layer is 500 m coarse where the point query is exact; the band test and `gunShare`
-already sample cell centres, and for a town centre or a sighting the answer changes only at a band edge.
-`DUWS_fnc_opcom_buildCand` (`taskings/fnc_opcom_deliver.sqf:14`) runs once per build off the tick and keeps the exact
-call. With the layer, a rebuild falls from seconds to the spreads alone, and the siting pass stops paying for a cold
-memo.
+**Fix.** After finding 2, the band test runs only when the band changes, and the gun memos stay warm across the
+other builds. The callers left on every pick are `towerValue`, `rapportOffer` and `qrfSweep`. Two steps, smallest
+first:
+
+1. Build `towerValue`'s town list once per siting pass, not once per sample cell: 19 queries a pass, not up to 152.
+2. For the OPCOM callers, flatten the emitters into one `[position, reach]` list per side, rebuilt on the band
+   signature, so that a query is one `findIf` over that list. The answer stays exact, so `rapportOffer` and
+   `qrfSweep` keep their behaviour.
+
+A coverage layer per side on the grid comes after those two steps, and only if the `site` and `rows(…)` figures still
+ask for it: stamp each emitter's disc with the bounded loop that `DUWS_fnc_opcom_deposit` uses
+(`belief/fnc_opcom_grid_sources.sqf:8-26`), and read one index per query. The layer is 500 m coarse where the point
+query is exact. The band test and `gunShare` sample cell centres, but a town centre or a sighting can read the wrong
+side of a band edge. `DUWS_fnc_opcom_buildCand` (`taskings/fnc_opcom_deliver.sqf:14`) runs once per build off the tick
+and keeps the exact call.
 
 ### 4. A patrol's swept cells are gathered with `pushBackUnique`
 
@@ -113,51 +136,44 @@ memo.
 line cell inserts its k-block into the result with `pushBackUnique`. Each insert scans the whole result, so the cost
 is quadratic in the swept cell count: a 10 km line at k 3 inserts about a thousand cells into a set of a few hundred.
 `DUWS_fnc_opcom_patrolSweep` (`fnc_opcom_commit.sqf:214-248`) runs it once per distinct start cell and reach for each of
-eight destinations, inside the unscheduled pass. It is the largest single term suspected in that pass; finding 1
-confirms or clears it.
+eight destinations, inside the unscheduled pass. It is suspected as the largest single term in that pass; the
+`patrol` row's figure confirms or clears it.
 
-**Fix.** Collect the cells in a hashMap keyed by cell index and return its keys, so an insert is constant time. The
-line sampling and the k-block stay as they are.
+**Fix.** Append each k-block to the result, then remove the duplicates once with `_cells arrayIntersect _cells`, a
+native call. A hashMap is not a sure gain: its insert is still one interpreted command per cell, where the scan in
+`pushBackUnique` is native. The line sampling and the k-block stay as they are.
 
 ### 5. The grid A* keeps its frontier in a flat list
 
-The cell-chain branch of `fnc_opcom_route` (`taskings/fnc_opcom_route.sqf:97-146`) has the shape the road search had
-before the road-graph fix: it initialises two full-grid arrays of 3844 cells per call (`:97-99`), takes the next node
-by a linear scan of the open list (`:116`) and tests membership with `find` (`:137`). It runs for every infantry, air
-and boat order (`fnc_opcom_task.sqf:98`), every replan when a route empties (`fnc_opcom_movement_core.sqf:24`), every
-cell a QRF's sighting moves (`fnc_opcom_intercept.sqf:39`), twice per lift bind (`appraisal/fnc_opcom_lift.sqf:82-83`),
-per taxi bind (`fnc_opcom_taxi.sqf:61`) and for the off-road tail of a threat-priced road route (`fnc_opcom_route.sqf:37`).
-A route at lambda above 0 opens far more cells than a direct one, and every attack launch routes each of its units in
-one tick.
+The cell-chain branch of `fnc_opcom_route` (`taskings/fnc_opcom_route.sqf:100-150`) has the shape the road search had
+before the road-graph fix: it initialises two full-grid arrays of 3844 cells per call (`:100-102`), takes the next
+node by a linear scan of the open list in SQF (`:119`) and tests membership with `find` (`:141`). It runs for every
+infantry, air and boat order (`fnc_opcom_task.sqf:99`), every replan when a route empties
+(`fnc_opcom_movement_core.sqf:24`), every cell a QRF's sighting moves (`fnc_opcom_intercept.sqf:39`), twice per lift
+bind (`appraisal/fnc_opcom_lift.sqf:82-83`), once per lift execute (`:139`), per taxi bind (`fnc_opcom_taxi.sqf:61`)
+and for the off-road tail of a bent road route (`fnc_opcom_route.sqf:40`). A route at lambda above 0 opens far more
+cells than a direct one, and every attack launch routes each of its units in one tick.
 
-**Fix.** The road search's heap, with a visited flag per cell and the cost and predecessor maps kept sparse, so a
-call no longer pays the full-grid initialisation. Scheduled work, so the gain is tick wall time, not frame time.
+**Fix.** Take the next node with `_openF find (selectMin _openF)`, and start `_g` and `_from` as `+` copies of a
+prebuilt array of -1, not with the 3844-step loop. Both are native. The road search's heap is the wrong model here: a
+heap written in SQF runs interpreted steps on every push and pop, and they lose to a native linear scan at open lists
+of a few hundred cells. Scheduled work, so the gain is tick wall time, not frame time.
 
-### 6. The grid stage re-prices every awake site from live objects each tick
-
-`fnc_opcom_grid_rebuild.sqf:51-54` deposits each awake site at `DUWS_fnc_garrisonForce`
-(`garrison/fnc_garrison_strength_init.sqf:74-80`) every tick. That walks the ledger with a quadratic `spawnDiff`,
-counts the live roster with a `getVariable` and a team-row lookup per man, and prices the centre statics by walking the
-whole composition with `alive` and `isKindOf` per object (`belief/fnc_opcom_force.sqf:122-139`), which is 65 or more
-objects for a deployed zone. The cost follows the size of the sites near the player, not what changed on them; the
-grid stage read 35-360 ms in play against 0-2 ms on a quiet map, most of that contention, some of it this.
-
-**Fix.** Cache the static force per key while the site is deployed and clear it from a Killed handler on the pinned
-statics, which `fnc_duws_keep` already pins; recompute the men from the roster, which is the part that changes.
-
-### 7. Per-pick work that repeats the same reads
+### 6. Per-pick work that repeats the same reads
 
 Each of these is small and none is the bottleneck; together they are a steady share of the unscheduled pass.
 
 - `DUWS_fnc_opcom_freeSource` (`appraisal/fnc_opcom_sources.sqf:55-59`) prices each free unit's commit cost with a site
-  read and a nine-cell block sum, and seven sweeps rebuild the same rows each pick (`fnc_opcom_commit.sqf:51`, `:160`,
-  `:216`, `:272`, `:311`, `fnc_opcom_lift.sqf:32`, `fnc_opcom_supply.sqf:9`). One `tickCached` key holds them.
+  read and a nine-cell block sum, and eight call sites rebuild the same rows each pick (`fnc_opcom_commit.sqf:51`,
+  `:160`, `:217`, `:273`, `:311`, `fnc_opcom_lift.sqf:33`, `:110`, `fnc_opcom_supply.sqf:10`). One `tickCached` key
+  holds them.
 - `DUWS_fnc_opcom_zoneSlotsUsed` (`fnc_opcom_buy_build.sqf:10-13`) counts the hardpoint registry per zone, for every
   zone, in each of the five zone-build rows. `DUWS_fnc_opcom_hpSweep` (`fnc_opcom_assets.sqf:17-40`) walks the same
   registry once a pick and can return the per-zone counts.
 - `DUWS_fnc_opcom_zoneFortifyTargets` (`fnc_opcom_buy_holding.sqf:35-39`) diffs two spawn lists per open zone per pick,
-  each a token-class resolution per token. The result depends only on the tier, the multiplier and the earned AP;
-  memoise it as `DUWS_fnc_opcom_tierForce` does (`value/fnc_opcom_holding.sqf:24-41`).
+  each a token-class resolution per token. The owed force depends only on the tier, the multiplier and which tokens
+  the earned AP has unlocked (`DUWS_fnc_tokenLocked`); memoise it on those as `DUWS_fnc_opcom_tierForce` does
+  (`value/fnc_opcom_holding.sqf:24-41`). The label and the hold value still vary per zone.
 - `DUWS_fnc_opcom_rosterSweep` (`fnc_opcom_sources.sqf:27-29`) resolves a token class, faction pick included, for every
   menu row per pick. The open set changes only when the earned AP crosses a rung or a toggle flips.
 - `DUWS_fnc_opcom_batteryPieces` (`taskings/fnc_opcom_fires.sqf:20-25`) reads config per gun on every call, and
@@ -171,28 +187,26 @@ Each of these is small and none is the bottleneck; together they are a steady sh
   fires, the scan shape [`performance.md`](../../info/architecture/performance.md#the-pattern-that-costs-the-most-timed-scans-anchored-on-allunits)
   rules against; `nearEntities` on the post's position answers the same question off the spatial index.
 
-### 8. Small and pervasive: the play box through `missionNamespace`
+### 7. Small and pervasive: the play box through `missionNamespace`
 
 `DUWS_fnc_opcom_w2c` and `DUWS_fnc_opcom_blockCells` (`belief/fnc_opcom_grid_coords.sqf:9`, `:27`) read
 `DUWS_opcom_box` through `missionNamespace getVariable` with a default array on every call. They are the innermost
 calls of the whole appraisal, tens of thousands of calls a pick. `DUWS_opcom_box` exists from `fnc_opcom_grid_init`
-on, and `DUWS_fnc_opcom_deposit` already reads it directly (`fnc_opcom_grid_sources.sqf:13`). A guard on the one call
-site that can run before init is cheaper than the lookup on all of them.
+on, and `DUWS_fnc_opcom_deposit` already reads it directly (`fnc_opcom_grid_sources.sqf:13`).
 
-### 9. The tick period stretches under load
+**Fix.** `fnc_opcom_grid_init.sqf` sets `DUWS_opcom_grid_w` at :17 and `DUWS_opcom_box` at :42, with a town loop
+that can yield between them. Set the box first. The coordinate functions require a caller to guard on
+`isNil "DUWS_opcom_grid_w"` (`fnc_opcom_grid_coords.sqf:2`), so the five reads with a default (these two,
+`fnc_opcom_route.sqf:68`, `fnc_opcom_ports.sqf:14` and `debug/fnc_debug_opcom_grid.sqf:25`) can then read the box
+directly.
 
-`fnc_opcom_perception_run.sqf:82` sleeps `OPCOM_TICK_PERIOD` after the work, so the period is the work plus 5 s; in
-play it measured 5-9 s. `DUWS_fnc_opcom_advance` (`fnc_opcom_movement_core.sqf:32`) moves a virtual unit one cell per
+### 8. The tick period stretches under load
+
+`fnc_opcom_perception_run.sqf:88` sleeps `OPCOM_TICK_PERIOD` after the work, so the period is the work plus 5 s; in
+play it measured 5-9 s. `DUWS_fnc_opcom_advance` (`fnc_opcom_movement_core.sqf:33`) moves a virtual unit one cell per
 `DUWS_opcom_speed` ticks, so its ground speed falls by the same ratio, and every tick-counted span (`OPCOM_COMMIT_HOLD`,
 the muster expiries, belief ageing) stretches with it. This is a consequence of findings 1-5, not a separate fix: a
 shorter sleep under load would add load.
-
-### 10. The plan names a pick deadline the code does not have
-
-[`opcom_plan.md` §Appraisal](opcom_plan.md#appraisal-phase-4) says the targets pass runs "under a wall-clock budget,
-`OPCOM_SCORE_DEADLINE`". No such constant exists, and `fnc_opcom_pick` enumerates every row unbounded. A deadline
-would hide the cost rather than remove it, and a pass cut short biases the draw toward the rows enumerated first.
-Once finding 1 shows the pass fits a frame, drop the sentence from the plan.
 
 ## Checked and dismissed
 
@@ -204,12 +218,40 @@ Once finding 1 shows the pass fits a frame, drop the sentence from the plan.
   one `sleep DUWS_intel_contact_life` thread per plotted contact (`search/fnc_intel_contact_init.sqf:57-59`). They
   sleep; they do not poll.
 - **`fnc_taskforce_tick`** exits on an empty task-force list, which is the whole play-test.
-- **The DEBUG line's own grid scans** are gated on the log level (`fnc_opcom_perception_run.sqf:70`).
+- **The DEBUG line's own grid scans** are gated on the log level (`fnc_opcom_perception_run.sqf:76`).
+- **The grid stage's re-pricing of awake sites** (`fnc_opcom_grid_rebuild.sqf:51-54`, through
+  `DUWS_fnc_garrisonForce`) is linear in the men and objects of the sites near the player: a team-row lookup per man,
+  and an `alive` and `isKindOf` check on each of the 65 or more objects of a deployed zone. A static-force cache cleared
+  by a Killed handler would lose its handler on the next stream cycle: zone statics are streamed, not pinned
+  (`fnc_static_place` files them without the pin, `shared/functions/fnc_static_roles.sqf:169`). The `grid` stage's
+  frame count shows how much of its 35-360 ms is its own work.
 - **The class-power memo and the tier-force memo** already hold; nothing re-prices a class per tick.
 - **The road search** is fixed by the road graph and the heap; the 15-128 s picks in the play-test predate it.
 
-## Order of work
+## Plan of action
 
-Finding 1 first, since it measures the rest. Then finding 2, the smallest change with the largest contention effect,
-and finding 3, which finishes what 2 starts and pays into the siting pass and the unscheduled pass at once. Findings
-4 and 5 follow once the split timer says which of the pass and the execute carries the time.
+Three steps: update the DEBUG lines, measure, review. Finding 1 is the first step.
+
+### Measure
+
+Play-test at DEBUG, with the OPCOM debug overlay closed so that its cell gather adds no contention, in a campaign
+where the commander builds. Each figure settles a question:
+
+| Figure | Question it settles |
+|---|---|
+| `need field rebuilt (…)` | Finding 2: how many rebuilds `hardpoints` alone forced, and how many of their seconds were scheduler wait |
+| `site` | Findings 2 and 3: the siting pass's share of the pick, and so what a warm memo would save |
+| `targets` and `rows(…)` | Findings 3, 4 and 6: which rows carry the unscheduled pass (`patrol` for finding 4, `rapport` and `attack_qrf` for finding 3) |
+| `exec`, `taskstep` and `attacks` | Finding 5: the share of the router, which has no timer of its own |
+| the frame count of `grid` | Whether the re-pricing of awake sites, dismissed above, is its own cost or contention |
+
+### Review
+
+Decide each finding against those figures, and drop any finding whose cost the figures do not show. Where the costs
+are confirmed, the review starts from this order, cheapest change first:
+
+1. Finding 2, with the memo re-key and the cached band base.
+2. Finding 7: set the box before the grid width.
+3. Finding 5: `selectMin` and a template copy.
+4. Finding 3: the town list once per pass, then the flat emitter list.
+5. Findings 4 and 6, for the rows that `rows(…)` names.
