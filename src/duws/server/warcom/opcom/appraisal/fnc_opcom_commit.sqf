@@ -3,47 +3,70 @@
 // needs no order, and lift [] or [lift ref, the rider's destination].
 if (!isServer) exitWith {};
 
-DUWS_fnc_opcom_sendRun = {
-    params ["_target", "", "_action"];
+// -> the unit _target names, raised and given its order; nil when either is refused. A refused hire is dismissed, so
+// no unpaid unit is left standing.
+DUWS_fnc_opcom_send = {
+    params ["_target"];
     _target params ["_ref", "_task", "_exp", "_lift"];
     private _t = [_ref] call DUWS_fnc_opcom_raise;
-    if (isNil "_t") exitWith { false };
-    // A Garrison hire is raised into the zone's garrison, so it has nowhere to go.
-    if (_task isEqualTo []) exitWith { true };
-    private _ok = if (_lift isEqualTo []) then {
-        ([_t] + _task) call fnc_opcom_task
-    } else {
-        [_t, _task, _lift] call DUWS_fnc_opcom_liftRun
+    if (isNil "_t") exitWith { nil };
+    // No order for a Garrison hire, raised into the zone's garrison, or an attacker with no dry ground to stage on.
+    private _ok = switch (true) do {
+        case (_task isEqualTo []): { true };
+        case (_lift isEqualTo []): { ([_t] + _task) call fnc_opcom_task };
+        default { [_t, _task, _lift] call DUWS_fnc_opcom_liftRun };
     };
-    if (!_ok) exitWith { [_ref, _t] call DUWS_fnc_opcom_dismiss; false };
+    if (!_ok) exitWith { [_ref, _t] call DUWS_fnc_opcom_dismiss; nil };
     // What the order is worth once committed, which a Ferry is priced on if the unit stops at a water leg.
     _t set ["expValue", _exp];
-    [_action, _task select 1, [[_action, _t]]] call DUWS_fnc_opcom_intentOpen;
+    _t
+};
+
+DUWS_fnc_opcom_sendRun = {
+    params ["_target", "", "_action"];
+    private _t = [_target] call DUWS_fnc_opcom_send;
+    if (isNil "_t") exitWith { false };
+    private _task = _target select 1;
+    if (_task isNotEqualTo []) then { [_action, _task select 1, _t] call DUWS_fnc_opcom_intentOpen };
     true
 };
 
-// One attacker per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
-// defeat in detail, which Phase 5's muster exists to prevent.
+// One Attack per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
+// defeat in detail. Its units stage at a rally and launch together (fnc_opcom_buildup), and each slot still open is a
+// target of its own, filled by a later pick.
 //
 // Zones and towns on the same terms. What differs is how the ground answers: a zone flips on presence, a town only
 // by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
 // reputation rather than a fight is what owns it.
+//
+// A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, rally] commits a new Attack,
+// and ["join", intent id, slot] fills a slot of one still staging.
 DUWS_fnc_opcom_attackSweep = {
     private _fits = { params ["_f", "_m"]; [_f, _m, false] call DUWS_fnc_opcom_isCombatant };
     private _free = ([false] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
-    private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
+    // A muster commits below the odds it launches at, so only a hopeless one holds.
+    private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
+    private _attacks = DUWS_opcom_intents select { (_x get "action") isEqualTo "attack" };
+    private _busy = (DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] }) + (_attacks apply { _x get "target" });
     private _out = [];
-    // _to scores the send and prices a lift; _at is the order's own target, which a zone reads off the site store
-    // because a held position and the one its trigger filed differ in z.
+    // _to scores the send; _at is the order's own target, which a zone reads off the site store because a held
+    // position and the one its trigger filed differ in z.
     private _fnc_consider = {
         params ["_key", "_to", "_at", "_label"];
         if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
+        private _edge = ([_key] call fnc_site_at) getOrDefault ["radius", 0];
         private _offers = (_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
         {
-            _out pushBack ([_x, _to, ["capture", _at], format ["Attack %1", _label]] call DUWS_fnc_opcom_liftOffer);
-        } forEach ([_offers, _to, true] call DUWS_fnc_opcom_bestSources);
+            private _rally = [_at, _at getDir ((_x select 0) select 1), _edge + OPCOM_RALLY_STANDOFF,
+                _edge + OPCOM_GRID_CELL / 2] call DUWS_fnc_opcom_rallyAt;
+            private _stage = [["move", _rally], []] select (_rally isEqualTo []);
+            private _c = [_x, [_rally, _to] select (_rally isEqualTo []), _stage, format ["Attack %1", _label]]
+                call DUWS_fnc_opcom_liftOffer;
+            (_c select 0) pushBack ["open", _key, _at, _label, _rally];
+            _out pushBack _c;
+        } forEach ([_offers, _to, true, 0, 0, _floor] call DUWS_fnc_opcom_bestSources);
     };
     {
         private _zk = [_x] call fnc_zone_key;
@@ -58,7 +81,58 @@ DUWS_fnc_opcom_attackSweep = {
             };
         };
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
+    {
+        private _intent = _x;
+        private _roles = _intent get "roles";
+        private _slot = _roles findIf { (_x get "unit") < 0 };
+        if ((_intent get "state") isEqualTo "buildup" && {_slot >= 0}) then {
+            private _role = _roles select _slot;
+            private _r = [_intent] call DUWS_fnc_opcom_musterRatio;
+            if ((_role get "required") || {_r < OPCOM_MUSTER_IDEAL}) then {
+                private _at = _intent get "pos";
+                private _base = 0;
+                {
+                    private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
+                    if (!isNil "_t") then { _base = _base + (_t get "effForce") };
+                } forEach _roles;
+                private _rally = _role get "rally";
+                private _stage = [["move", _rally], []] select (_rally isEqualTo []);
+                private _worth = [_intent get "target"] call DUWS_fnc_opcom_siteWorth;
+                private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
+                {
+                    private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
+                        format ["Join the attack on %1", _intent get "label"]] call DUWS_fnc_opcom_liftOffer;
+                    (_c select 0) pushBack ["join", _intent get "id", _slot];
+                    _out pushBack _c;
+                } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
+            };
+        };
+    } forEach _attacks;
     _out
+};
+
+DUWS_fnc_opcom_attackRun = {
+    params ["_target"];
+    (_target select 4) params ["_kind", "_a", "_b", "_label", "_rally"];
+    if (_kind isEqualTo "join") exitWith {
+        private _i = DUWS_opcom_intents findIf { (_x get "id") isEqualTo _a };
+        if (_i < 0) exitWith { false };
+        private _intent = DUWS_opcom_intents select _i;
+        // Checked before the slot is read: a launch drops the slots it leaves open.
+        if ((_intent get "state") isNotEqualTo "buildup") exitWith { false };
+        private _role = (_intent get "roles") select _b;
+        if ((_role get "unit") >= 0) exitWith { false };
+        private _t = [_target] call DUWS_fnc_opcom_send;
+        if (isNil "_t") exitWith { false };
+        [_intent, _role, _t] call DUWS_fnc_opcom_intentBind;
+        true
+    };
+    private _t = [_target] call DUWS_fnc_opcom_send;
+    if (isNil "_t") exitWith { false };
+    private _roles = [];
+    for "_k" from 1 to OPCOM_ASSAULT_ROLES do { _roles pushBack ["attacker", _rally, _k == 1] };
+    ["attack", _a, _t, _roles, "buildup", _b, _label] call DUWS_fnc_opcom_intentOpen;
+    true
 };
 
 // One interceptor per sighting, for the reason one attacker goes at a zone.

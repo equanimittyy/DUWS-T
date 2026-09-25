@@ -828,6 +828,19 @@ OPCOM_PICK_SHARPNESS = 2;
 // An order that fights for its target drops below these odds at commit: one unit sent in on worse is thrown away.
 OPCOM_PWIN_FLOOR = 0.3;
 
+// An Attack musters until the force it binds reaches IDEAL times the believed BLUFOR force at the target. At EXPIRY
+// ticks it launches on MIN or is abandoned, so a player who keeps reinforcing cannot hold it forever. The bars sit
+// below an attacker's usual 3:1 because a sighted player already counts as 1 + OPCOM_PLAYER_WORTH. Tune.
+OPCOM_MUSTER_IDEAL = 1.5;
+OPCOM_MUSTER_MIN = 0.75;
+OPCOM_MUSTER_EXPIRY = 240;       // ticks; 20 min @ 5s tick
+// Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
+OPCOM_MUSTER_HOLD = 0.5;
+// The most attackers an assault binds.
+OPCOM_ASSAULT_ROLES = 3;
+// How far past a target's edge its attackers stage (m), out of the fight they are gathering for. Tune.
+OPCOM_RALLY_STANDOFF = 1000;
+
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are
 // unheld. Six ticks at the 5 s cadence is 30 s.

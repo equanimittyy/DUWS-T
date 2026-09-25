@@ -1,6 +1,7 @@
 // Locality: server. Hand-drive harness: recruit, order and inspect taskings from the server console (the
 // manual stand-in for the decision loop). Logs every verb under "OPCOMDBG". The order verbs zero the commit hold
-// first, so hand-driving re-tasks on demand where the automated loop would wait it out.
+// first, so hand-driving re-tasks on demand where the automated loop would wait it out, and take the unit out of any
+// intent, which would otherwise order it on to its own target.
 //   ["menu"]                        -- list the recruit rows and their live prices
 //   ["recruit", row, pos, zoneKey]  -- hire a row; returns the tasking id (or -1)
 //   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target ("move", "patrol", "capture")
@@ -36,7 +37,7 @@ switch (_verb) do {
             ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false
         } else {
             private _t = DUWS_opcom_taskings select _i;
-            _t set ["hold", 0];
+            _t set ["hold", 0]; _t set ["boundTo", -1];
             private _ok = [_t, _b, _c] call fnc_opcom_task;
             // A hand order carries no Value; any positive stand-in has taxiBind pick the hull saving the most time.
             if (_ok && {_b isEqualTo "move"}) then { _t set ["expValue", 1]; [_t] call DUWS_fnc_opcom_taxiBind };
@@ -54,7 +55,7 @@ switch (_verb) do {
             if (_pos isEqualTo []) then {
                 ["WARN", "OPCOMDBG", format ["garrison: no site %1", _b]] call fnc_log; false
             } else {
-                _t set ["hold", 0];
+                _t set ["hold", 0]; _t set ["boundTo", -1];
                 [_t, "return", _pos, _b] call fnc_opcom_task
             };
         };
@@ -68,7 +69,7 @@ switch (_verb) do {
             if !(_c isEqualType [] && {_c isNotEqualTo []}) exitWith {
                 ["WARN", "OPCOMDBG", format ["supply: tasking %1 needs an errand", _a]] call fnc_log; false
             };
-            _t set ["hold", 0];
+            _t set ["hold", 0]; _t set ["boundTo", -1];
             [_t, "errand", _b, "", _c] call fnc_opcom_task
         };
     };
@@ -76,7 +77,7 @@ switch (_verb) do {
         private _i = DUWS_opcom_taskings findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) exitWith { ["WARN", "OPCOMDBG", format ["no tasking id %1", _a]] call fnc_log; false };
         private _t = DUWS_opcom_taskings select _i;
-        _t set ["hold", 0];
+        _t set ["hold", 0]; _t set ["boundTo", -1];
         [_t, "intercept", _b] call fnc_opcom_task
     };
     case "ferry": {
@@ -125,7 +126,7 @@ switch (_verb) do {
             { if (vehicle _x == _x) then { _x setPos [(_b select 0) + (random 8 - 4), (_b select 1) + (random 8 - 4), 0] } } forEach units _grp;
         };
         // The stale order/target would re-route it back; re-hold on guard (hold zeroed, as the other verbs do).
-        _t set ["hold", 0];
+        _t set ["hold", 0]; _t set ["boundTo", -1];
         [_t, "guard"] call fnc_opcom_task;
         ["INFO", "OPCOMDBG", format ["teleported tasking %1 to %2, holding on guard", _a, _dest apply { round _x }]] call fnc_log;
         true

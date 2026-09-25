@@ -1754,6 +1754,8 @@ DUWS_fnc_opcom_cellDist = { 5 };
     [[0, 0, 0], [0, 0, 0], 20 / (call DUWS_fnc_opcom_blockGain)] call DUWS_fnc_opcom_pWinSend, ([20, 20] call DUWS_fnc_opcom_pWinAt)] call fnc_assertClose;
 DUWS_fnc_opcom_cellDist = { 1 };
 ["pWinSend: a unit already in the block is not counted twice", [[0, 0, 0], [0, 0, 0], 9] call DUWS_fnc_opcom_pWinSend, 0] call fnc_assertClose;
+["pWinSend: force bound outside the block, such as a muster, counts toward the odds",
+    [[0, 0, 0], [0, 0, 0], 9, 20 / (call DUWS_fnc_opcom_blockGain)] call DUWS_fnc_opcom_pWinSend, ([20, 20] call DUWS_fnc_opcom_pWinAt)] call fnc_assertClose;
 
 // --- DUWS_fnc_opcom_abandonAt: the defense a committed unit leaves behind ---
 ["abandonAt: a safe backline costs almost nothing", [40, 40, 0, 10] call DUWS_fnc_opcom_abandonAt, 0.25] call fnc_assertClose;
@@ -1903,7 +1905,7 @@ OPCOM_PWIN_FLOOR = 0.3;
 WARCOM_opfor_ap = 100;
 DUWS_fnc_opcom_moveDelay = { 1 };
 DUWS_fnc_opcom_pWinWith = { 0.9 };
-DUWS_fnc_opcom_pWinSend = { params ["", "", "_force"]; [0.2, 0.8] select (_force > 1) };
+DUWS_fnc_opcom_pWinSend = { params ["", "", "_force", ["_base", 0]]; [0.2, 0.8] select (_force + _base > 1) };
 private _fnc_free = { params ["_x0", "_force"]; [["free", 1], [_x0, 0, 0], _force, "inf", [], 0, 4, 1] };
 private _fnc_hire = { params ["_x0", "_mix"]; [["hire", "rifles", "z"], [_x0, 0, 0], 8, "inf", [], 10, 10, _mix] };
 ["bestSources: a near free unit beats a hire, which it outscores on Cost",
@@ -1917,6 +1919,12 @@ private _fnc_hire = { params ["_x0", "_mix"]; [["hire", "rifles", "z"], [_x0, 0,
     ([[[[0, 1] call _fnc_free, 20], [[0, 1] call _fnc_hire, 20]], [0, 0, 0], true] call DUWS_fnc_opcom_bestSources)
         apply { [(_x select 0) select 0, _x select 2] },
     [[["hire", "rifles", "z"], 0.9]]] call fnc_assertEq;
+["bestSources: a lower floor keeps a long-shot source, as a muster does",
+    ([[[[0, 1] call _fnc_free, 20]], [0, 0, 0], true, 0, 0, 0.1] call DUWS_fnc_opcom_bestSources) apply { _x select 2 },
+    [0.2]] call fnc_assertEq;
+["bestSources: force already bound to the fight lifts a source past the floor",
+    ([[[[0, 1] call _fnc_free, 20]], [0, 0, 0], true, 0, 0, 0.3, 4] call DUWS_fnc_opcom_bestSources) apply { _x select 2 },
+    [0.8]] call fnc_assertEq;
 ["bestSources: a hire's Value takes its mix factor",
     ([[[[0, 0.5] call _fnc_hire, 20]], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources) apply { _x select 1 },
     [10]] call fnc_assertEq;

@@ -47,9 +47,10 @@ DUWS_fnc_opcom_pWinWith = {
     [_fri + _force * (call DUWS_fnc_opcom_blockGain), _ene] call DUWS_fnc_opcom_pWinAt
 };
 
-// The odds with the unit sent added, unless it already stands inside the block and the grid counts it there.
+// The odds with the unit sent added, unless it already stands inside the block and the grid counts it there. _base is
+// force already bound to the same fight outside the block, such as a muster at its rally.
 DUWS_fnc_opcom_pWinSend = {
-    params ["_pos", "_from", "_force"];
+    params ["_pos", "_from", "_force", ["_base", 0]];
     private _add = [0, _force] select (([_pos, _from] call DUWS_fnc_opcom_cellDist) > 1);
-    [_pos, _add] call DUWS_fnc_opcom_pWinWith
+    [_pos, _add + _base] call DUWS_fnc_opcom_pWinWith
 };

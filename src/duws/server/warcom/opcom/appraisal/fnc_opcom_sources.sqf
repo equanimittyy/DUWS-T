@@ -83,9 +83,10 @@ DUWS_fnc_opcom_hireSources = {
 // -> [[source, Value, P(win), Cost, price], ...]: the best of _offers sent at _to, and beside it a dearer one that
 // outscores it, so the pick can bank toward what the wallet cannot pay yet. _offers pairs each source with the Value
 // it returns at _to before the delay; _price and _cost are the action's own, to which each source adds its own.
-// Distance is scored and never charged, which is what lets a near hire beat a far free unit.
+// Distance is scored and never charged, which is what lets a near hire beat a far free unit. A fight drops a source
+// under _floor, and _base is force already bound to it (DUWS_fnc_opcom_pWinSend).
 DUWS_fnc_opcom_bestSources = {
-    params ["_offers", "_to", "_fight", ["_price", 0], ["_cost", 0]];
+    params ["_offers", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_floor", OPCOM_PWIN_FLOOR], ["_base", 0]];
     private _best = [];
     private _bs = -1;
     private _paid = [];
@@ -96,12 +97,12 @@ DUWS_fnc_opcom_bestSources = {
         private _pw = 1;
         if (_fight) then {
             _pw = if ((_ref select 0) isEqualTo "hire") then {
-                [_to, _force] call DUWS_fnc_opcom_pWinWith
+                [_to, _force + _base] call DUWS_fnc_opcom_pWinWith
             } else {
-                [_to, _from, _force] call DUWS_fnc_opcom_pWinSend
+                [_to, _from, _force, _base] call DUWS_fnc_opcom_pWinSend
             };
         };
-        if (_pw >= OPCOM_PWIN_FLOOR) then {
+        if (_pw >= _floor) then {
             private _d = _from distance2D _to;
             private _v = _value * _mix * ([_d, _mt] call DUWS_fnc_opcom_moveDelay);
             private _c = _cost + _stake + OPCOM_AP_PER_KM * _d / 1000;
