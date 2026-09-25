@@ -9,11 +9,13 @@ DUWS_fnc_opcom_intentBind = {
     _t set ["boundTo", _intent get "id"];
 };
 
-// _t takes the first role. _roles: [[role, rally, required, released by, lambda], ...], one per unit the intent binds;
-// a role past the first stays open for a later pick to fill. An intent opened in execution has every role released.
+// _t takes the first role, or is [] for an intent that sends no unit. _roles: [[role, rally, required, released by,
+// lambda], ...], one per unit the intent binds; a role past the first stays open for a later pick to fill. An intent
+// opened in execution has every role released.
 DUWS_fnc_opcom_intentOpen = {
     params ["_action", "_target", "_t", ["_roles", []], ["_state", "execution"], ["_pos", []], ["_label", ""]];
-    if (_roles isEqualTo []) then { _roles = [[_action, [], true, "", -1]] };
+    private _unit = !(_t isEqualType []);
+    if (_unit && {_roles isEqualTo []}) then { _roles = [[_action, [], true, "", -1]] };
     private _id = DUWS_opcom_intentSeq;
     DUWS_opcom_intentSeq = _id + 1;
     private _intent = createHashMapFromArray [
@@ -25,7 +27,7 @@ DUWS_fnc_opcom_intentOpen = {
                 ["release", _release], ["released", _state isEqualTo "execution"], ["lambda", _lambda]]
         }]
     ];
-    [_intent, (_intent get "roles") select 0, _t] call DUWS_fnc_opcom_intentBind;
+    if (_unit) then { [_intent, (_intent get "roles") select 0, _t] call DUWS_fnc_opcom_intentBind };
     DUWS_opcom_intents pushBack _intent;
     _intent
 };
@@ -68,8 +70,10 @@ DUWS_fnc_opcom_executionStep = {
 // After the task step, so an order that ended this tick frees its unit before the pick.
 DUWS_fnc_opcom_intentStep = {
     {
-        if ((_x get "state") isEqualTo "buildup") then { [_x] call DUWS_fnc_opcom_buildupStep } else {
-            [_x] call DUWS_fnc_opcom_executionStep;
+        switch (true) do {
+            case ((_x getOrDefault ["parent", -1]) >= 0): { [_x] call DUWS_fnc_opcom_creepStep };
+            case ((_x get "state") isEqualTo "buildup"): { [_x] call DUWS_fnc_opcom_buildupStep };
+            default { [_x] call DUWS_fnc_opcom_executionStep };
         };
     } forEach DUWS_opcom_intents;
     DUWS_opcom_intents = DUWS_opcom_intents select { (_x get "state") isNotEqualTo "done" };

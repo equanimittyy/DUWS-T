@@ -631,6 +631,11 @@ OPCOM_ARTY_STAGGER = 1;
 
 // Metres of a creep's length, and of each gun's lane across its width, that one round covers (fnc_opcom_fires).
 OPCOM_ARTY_CREEP_STEP = 50;
+// An arty_creeping mission's box (m), walked forward through its offensive's objective, and the share of the force
+// that offensive stakes it is worth: a creep buys the wave's survival, not kills. Tune.
+OPCOM_ARTY_CREEP_WIDTH = 150;
+OPCOM_ARTY_CREEP_LENGTH = 200;
+OPCOM_ARTY_CREEP_SHARE = 0.5;
 
 // Metres a fire mission's pattern may wander per creep row or saturate round, a random walk, so no barrage runs true.
 OPCOM_ARTY_WANDER = 10;

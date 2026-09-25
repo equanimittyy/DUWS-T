@@ -31,7 +31,8 @@ DUWS_opcom_actions = [
     ["probe", DUWS_fnc_opcom_probeSweep, DUWS_fnc_opcom_sendRun],
     ["garrison", DUWS_fnc_opcom_garrisonSweep, DUWS_fnc_opcom_sendRun],
     ["ferry", DUWS_fnc_opcom_ferrySweep, DUWS_fnc_opcom_ferryRun],
-    ["arty", DUWS_fnc_opcom_fireTargets, DUWS_fnc_opcom_fireRun]
+    ["arty_saturate", DUWS_fnc_opcom_fireTargets, DUWS_fnc_opcom_fireRun],
+    ["arty_creeping", DUWS_fnc_opcom_creepTargets, DUWS_fnc_opcom_creepRun]
 ];
 
 // One row per type, never one row offering several: the pick draws an action, so a shared row would decide the type
