@@ -386,12 +386,14 @@ server, or in a lobby somebody re-configured, changes the rules a player has bee
 hours. The arsenal is the sharpest case: a campaign saved with every class count-tracked comes back
 unlimited, and the pool it was spending against stops meaning anything
 ([§The arsenal](#the-arsenal-the-shelf-is-rebuilt-the-pool-is-stored)). The saved value therefore wins
-for the arsenal mode and ammo tracking, revive, fatigue, the first-person restriction, rest weather,
-the lose conditions and bandits.
+for the arsenal mode and ammo tracking, fatigue, the first-person restriction, rest weather and the
+lose conditions.
 
-**Five params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
+**Six params stay the host's.** `DUWS_Debug`, `DUWS_LogLevel`, `DUWS_GroupIcons`,
 `DUWS_CleanupLifetime` and `DUWS_AutosaveInterval` say how a server is being run, not what the
 campaign is, and a carried snapshot must not put an admin's old logging level or write cadence back.
+`DUWS_Bandits` withholds the DLC factions this session's players do not own, so it answers to who is
+playing now, not to the campaign.
 
 **Revive stays the lobby's too, for a reason of mechanism.** The vendored AIS reads the param at client
 start (`modules/AIS/`), before any snapshot reaches the client, and `modules/` is not edited.
