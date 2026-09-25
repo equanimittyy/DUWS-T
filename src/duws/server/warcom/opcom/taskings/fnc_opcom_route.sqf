@@ -2,7 +2,8 @@
 // ([] = none), _mode "road"/"grid". Runs scheduled (the road branch may yield), never in the scoring isNil
 // block. Wheeled/tracked route on roads (fnc_convoy_path's polyline, stepped as one hull -- no convoy driver);
 // infantry/air/boat take an A* cost-field cell chain, cost = stepLen + OPCOM_ROUTE_LAMBDA*_lambda*gridEne. A road
-// step pays the same term pro rata to its length, so a hull at lambda > 0 takes the road around a threat.
+// step pays the same term pro rata to its length, so a hull at lambda > 0 takes the road around a threat, and past
+// the road's end it takes the cell chain too.
 params ["_startPos", "_destPos", "_moveType", ["_lambda", 0]];
 if (!isServer) exitWith { [[], "grid"] };
 
@@ -17,7 +18,27 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
             _lw * (DUWS_opcom_grid_ene select ([_to] call DUWS_fnc_opcom_w2c)) * _len / OPCOM_GRID_CELL
         }, OPCOM_ROUTE_LAMBDA * _lambda]
     } else { [] };
-    private _segs = [_startPos, _destPos, _extra] call fnc_convoy_path;
+    // The straight stub off the road would drive through whatever stands between the road and the dest.
+    private _end = _destPos;
+    private _tail = [];
+    if (_lambda > 0) then {
+        private _road = objNull;
+        {
+            if (isNull _road) then {
+                private _rs = _destPos nearRoads _x;
+                if (_rs isNotEqualTo []) then {
+                    _road = _rs select 0;
+                    { if ((_x distance2D _destPos) < (_road distance2D _destPos)) then { _road = _x } } forEach _rs;
+                };
+            };
+        } forEach [250, 1000, 3000];
+        if (!isNull _road && {([getPos _road, _destPos] call DUWS_fnc_opcom_cellDist) > 0}) then {
+            private _rp = [(getPos _road) select 0, (getPos _road) select 1, 0];
+            private _chain = ([_rp, _destPos, "inf", _lambda] call fnc_opcom_route) select 0;
+            if ((_chain findIf { [_x] call DUWS_fnc_opcom_isWaterPt }) < 0) then { _end = _rp; _tail = _chain };
+        };
+    };
+    private _segs = [_startPos, _end, _extra] call fnc_convoy_path;
     private _pts = [];
     private _wet = false;
     {
@@ -30,6 +51,7 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
         if (_wet) exitWith {};
         { if (_pts isEqualTo [] || {(_pts select (count _pts - 1)) distance2D _x > 1}) then { _pts pushBack _x } } forEach _p;
     } forEach _segs;
+    _pts append _tail;
     // A threat-priced search can give up on a long detour and leave the network across water, where the length-only
     // road stays dry: a march through the threat beats no march.
     if (_wet && {_lambda > 0}) then { [_startPos, _destPos, _moveType, 0] call fnc_opcom_route } else {
