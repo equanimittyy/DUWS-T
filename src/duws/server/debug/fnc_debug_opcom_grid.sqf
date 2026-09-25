@@ -5,7 +5,6 @@
 if (!isServer) exitWith {};
 params ["_requester"];
 
-#define PATH_STRIDE 5
 // The zone-port map is OPCOM init's last store, so its presence means every store below is built.
 if (isNil "DUWS_opcom_zonePort") exitWith {
     ["DEBUG", "OPCOM", "overlay gather: OPCOM init not finished, nothing sent"] call fnc_log;
@@ -63,7 +62,6 @@ private _bel = [];
 // unit (pos frozen at its de-virt cell); trailing [F] = carrying a rider, [R] = riding a lift or waiting at a shore for one.
 private _tasks = [];
 private _wps = [];
-private _path = [];
 {
     private _mt = _x get "moveType";
     private _icon = switch (_mt) do {
@@ -106,15 +104,9 @@ private _path = [];
         private _rp = _route select (count _route - 1);
         _wps pushBack [[_rp select 0, _rp select 1], [_code, format ["%1 %2", _code, _intent]] select (_intent isNotEqualTo "")];
     };
-    // Every fifth leg, never the whole chain: that was the overlay's heaviest layer. Stepped by route index rather
-    // than from the current leg, so a marker holds still while the unit walks toward it.
-    for "_i" from (ceil (_leg / PATH_STRIDE) * PATH_STRIDE) to (count _route - 2) step PATH_STRIDE do {
-        private _rp = _route select _i;
-        _path pushBack [_rp select 0, _rp select 1];
-    };
 } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
 
-["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings, %4 waypoints, %5 path -> %6", count _cells, count _bel, count _tasks, count _wps, count _path, _requester]] call fnc_log;
+["DEBUG", "OPCOM", format ["overlay gather: %1 cells, %2 belief, %3 taskings, %4 waypoints -> %5", count _cells, count _bel, count _tasks, count _wps, _requester]] call fnc_log;
 
 // Cell size travels in the payload: OPCOM_GRID_CELL is a server-only global, nil on the drawing client.
-[_cells, _bel, _cell, _tasks, _wps, _path] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
+[_cells, _bel, _cell, _tasks, _wps] remoteExec ["fnc_debug_opcom_grid_draw", _requester];
