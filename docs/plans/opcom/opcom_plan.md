@@ -591,7 +591,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 
 ## Orchestration (Phase 5)
 
-**WIP.** 5.1 to 5.3 are shipped; 5.4 to 5.6 remain.
+**WIP.** 5.1 to 5.3 are shipped and 5.4 is in part; 5.5 and 5.6 remain.
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
@@ -712,10 +712,12 @@ chain that runs out of AP, or whose next gate has lapsed, stops where it is.
 
 ### Routes: threat is what a role asks for
 
-**Avoiding threat is opt-in.** λ 0 is distance only, which is what ships today and what an assault wants: a detour
-arrives late at the fight the order exists for. λ is therefore a field on the role binding, falling back to the
-order's default, and that default is 0. The order alone cannot carry it, because `flank`'s `fix` and `maneuver` both
-run `capture` and take opposite values.
+**Avoiding threat is opt-in.** λ 0 is distance only, which is what an assault wants: a detour arrives late at the
+fight the order exists for. λ is therefore a field on the role binding (`DUWS_opcom_manoeuvres`), falling back to the
+order's default, which is 1 for an `errand` and a `return` and 0 for every other order (`taskings/fnc_opcom_task.sqf`).
+The order alone cannot carry it, because `flank`'s `fix` and `maneuver` both run `capture` and take opposite values.
+The tasking keeps its λ, so every re-plan of the march bends alike, and a lift takes its rider's. High is λ 1, and
+`OPCOM_ROUTE_LAMBDA` (200 m of detour per unit of believed force in a cell crossed) sets how high that is.
 
 | Role or order | λ | Why |
 |---|---|---|
@@ -736,17 +738,25 @@ run `capture` and take opposite values.
   `P(win)` of its own, since a unit sent to rest through a BLUFOR advance is worse off than one holding. Routing around
   the advance answers it without a second odds term.
 
-**Routes read threat on the road and off it.** A wheeled or tracked route takes the same threat term as the foot
-cell chain, `OPCOM_ROUTE_LAMBDA` × the role's λ × `_ene`, so a hull takes a flanking road, or leaves the road to
-flank, rather than drive through a threatened stretch. One A* runs over road segments and land cells together: a
-road segment costs its length plus the threat term over the cells it crosses, and an off-road step costs its length
-× `OPCOM_ROUTE_OFFROAD` plus the same term. The route leaves or rejoins the road where a segment crosses a cell. An
-off-road stretch is a `gap` segment the hull drives itself, so the water test that rejects a wet gap still applies.
-The off-road layer joins the search only when λ > 0, so a role at λ 0 runs the length-only road search, and the
-convoy side missions, which share `fnc_convoy_path`, route as before. A supply truck's route is planned once, at
-departure, and never re-planned, so the truck skirts only the threat believed when it leaves and drives on into any
-threat that appears after. Today the road branch is threat-blind and every caller passes λ 0
-(`taskings/fnc_opcom_route.sqf`).
+**Routes read threat on the road.** A wheeled or tracked route takes the same threat term as the foot cell chain,
+`OPCOM_ROUTE_LAMBDA` × the role's λ × `_ene`, pro rata to each road step's length, so a hull takes a flanking road
+rather than drive through a threatened stretch. `fnc_convoy_path` takes the term as an optional cost hook, and a route
+at λ 0 passes none, so the convoy side missions route as before. A priced search may pop four times as many nodes
+without closing on the destination before it gives up, since a detour runs away before it turns back, and a priced
+route that ends wet falls back to the length-only road: a march through the threat beats no march. A supply truck's
+route is planned at departure and again only after a stow, so the truck skirts the threat believed then and drives on
+into any threat that appears after.
+
+**Not built: the off-road layer.** One A* would run over road segments and land cells together at λ > 0: a road
+segment costs its length plus the threat term over the cells it crosses, and an off-road step costs its length ×
+`OPCOM_ROUTE_OFFROAD` plus the same term. The route would leave or rejoin the road where a segment crosses a cell, and
+an off-road stretch would be a `gap` segment the hull drives itself, so the water test that rejects a wet gap still
+applies.
+
+**A route steers only the virtual march.** A live unit takes one waypoint at its target and the engine paths it
+(`DUWS_fnc_opcom_applyOrder`), so a role that streams live near the players closes by the engine's path whatever its
+λ. The λ route keeps a unit off believed threat while it is virtual, which is also what keeps it from streaming in
+early.
 
 ### Chunks
 
@@ -755,7 +765,7 @@ threat that appears after. Today the road branch is threat-blind and every calle
 | **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
 | **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally `OPCOM_RALLY_STANDOFF` (1 km) past the target's edge on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and the one mechanism `flank` and `encircle` share, over its release predicate |
-| **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
+| **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
 | **5.5** Probe | the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | Arty split into `arty_saturate`, which is today's action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
 
