@@ -187,8 +187,8 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs another unit; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
-| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs another unit ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
+| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
@@ -196,7 +196,8 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Arty creeping | each attack, assault or flank, in buildup or execution, with no creep yet, whose target an owned battery reaches that is not firing or held by a creep and has a gun off cooldown |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
-([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
+([§Sourcing](#sourcing-hire-on-demand-phase-4d)). An attack offers a package of them instead
+([§Attack](#attack-phase-5)).
 
 ### Value
 
@@ -236,7 +237,7 @@ so it moves no faster than a truck delivers.
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
-| Probe | the mean staleness over the target's 3×3 block × the stake at that target × `OPCOM_PROBE_SHARE` (0.25). The stake is the best Attack source's `Cost` there, or the force a buildup already binds at `OPCOM_AP_PER_FORCE` |
+| Probe | the mean staleness over the target's 3×3 block × the stake at that target × `OPCOM_PROBE_SHARE` (0.25). The stake is the cheapest Attack package's `Cost` there, or the force a buildup already binds at `OPCOM_AP_PER_FORCE` |
 | Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 | Arty creeping | the parent offensive's staked force × `OPCOM_AP_PER_FORCE` × `OPCOM_ARTY_CREEP_SHARE`, since a creep buys that wave's survival rather than kills |
 
@@ -547,9 +548,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
   outside the zone's radius.
 - **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
-- **Only the pick hires.** The runner never spends: an attack sources its first bucket when the pick commits it, and
-  the rest stay a target of its row until later picks fill them, from a free unit or a hire
-  ([§Attack](#attack-phase-5)).
+- **Only the pick hires**, and the ferry stage, which lifts a unit the pick already sent. The attack runner never
+  spends: an open sends a package toward the ideal bar, and an attack still short stays a target of its row until
+  later picks send it more, from free units or hires ([§Attack](#attack-phase-5)).
 - **`fnc_opcom_recruit` stays the one hire.** Every source hires through it, and the debug page's Recruit list still
   calls it by hand.
 
@@ -581,9 +582,9 @@ binding to their attack record ([§Attack](#attack-phase-5)).
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
   ([§Value](#value)). An attack in buildup commits below the odds it launches at, so the minimum bar is its floor
   at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short attack waits for
-  units: each bucket it needs stays a target of its row, and a later pick fills it from a free unit or a hire
-  ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF musters on the same bars, where its units stand and over
-  `OPCOM_QRF_EXPIRY` instead ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
+  units: an attack short of the ideal bar stays a target of its row, and a later pick sends it more from free units
+  and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF musters on the same bars, where its units stand
+  and over `OPCOM_QRF_EXPIRY` instead ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
 
 ## Attack (Phase 5)
 
@@ -663,6 +664,15 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   any odds. Past that, a join comes only while the muster is short of the ideal bar, and goes to the bucket with the
   least force, so the frontage and the sides fill evenly. The ideal bar, not the bucket count, is what sizes an
   attack.
+- **One pick sends a package.** An open or a join sends the best sources in score order until the bound force meets
+  the ideal bar, the attack holds `OPCOM_ATTACK_UNITS`, or the wallet runs out (`DUWS_fnc_opcom_attackPackage`,
+  `appraisal/fnc_opcom_sources.sqf`). One unit per pick left a muster to trickle in over picks that the rest of the
+  action list competes for, and a QRF's window closed first. A hire row is raised again while the wallet and
+  `OPCOM_CAP_UNITS` allow; a free unit serves once, as a member or as another member's lift. Each unit stages at the
+  bucket `DUWS_fnc_opcom_joinBucket` would name for it. The package scores as one candidate: its Value is its weakest
+  member's, since the attack goes only once its last unit is in, its `P(win)` is the whole package's, and its price
+  and Cost are the members' sums. A member that cannot be raised or routed is refunded before the pick charges the
+  rest. With nothing affordable the best source is offered alone, so the pick can save toward it.
 
 - **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
   the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
@@ -684,9 +694,9 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   ratio musters like any other assault.
 - **`attack_assault` is offered in every band.** Its band has to overlap `attack_flank`'s, or the archetype's lean
   toward it never bites: an action weight only scales what the sweep offers ([§Archetype](#archetype-phase-7)).
-  From band 2 (`OPCOM_BAND_CRUSH`) only the assault is offered, because at crushing odds an envelopment buys a setup
-  leg and nothing else. The muster band, 0.5–1, offers both, since the muster is what raises the odds before either
-  launches.
+  From band 2 (`OPCOM_BAND_CRUSH`), read off the package the open sends, only the assault is offered, because at
+  crushing odds an envelopment buys a setup leg and nothing else. The muster band, 0.5–1, offers both, since the
+  muster is what raises the odds before either launches.
 - **The pick chooses assault or flank once, at commit**, and a buildup launches what it chose whatever `r` it
   reaches, so a plan never flips mid-buildup even when the muster ends in another band. Where the band offers both,
   they compete on the one weighted roll like any two actions, each under its own `actionWeight`.
@@ -721,8 +731,8 @@ time, and no-retreat turns that into defeat in detail.
   believed drops a QRF still in buildup. A sighting within a cell of a standing QRF draws no second one.
 - **A QRF musters where its units stand.** A rally about a target that moves is stale before the units reach it.
   It musters on the same bars as any attack, over `OPCOM_QRF_EXPIRY` (6 ticks, 30 s) in place of
-  `OPCOM_MUSTER_EXPIRY`. A cluster that one unit beats at the ideal bar launches with that unit on the next tick,
-  so a lone sighting still draws a one-unit answer.
+  `OPCOM_MUSTER_EXPIRY`. Its open sends a package filled to the ideal bar, so where the sources exist it launches on
+  the next tick, and a cluster one unit beats draws a one-unit answer.
 - **Every unit releases at launch on `intercept`** after the lead sighting. Units arrive in the order of their
   distance: the release does not stagger launches by ETA.
 - **The QRF hunts as one.** Each unit's look on arrival still reads the group nearest it, but the QRF moves only once
@@ -806,12 +816,13 @@ engine paths it. A group in combat ignores a move waypoint, so the route holds o
 | Chunk | Builds |
 |---|---|
 | **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row into the bucket `DUWS_fnc_opcom_joinBucket` names while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its up to five `maneuver` buckets each on one of the weakest dry sides, over its release predicate, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
 | **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, a creep on an attack record and the only chain edge |
 | **5.7** QRF | **Shipped** (`DUWS_fnc_opcom_qrfSweep`) — `attack_qrf` in place of the Intercept action: a sighting cluster as the target, the muster where the units stand over `OPCOM_QRF_EXPIRY`, and release on `intercept` |
+| **5.8** Packages | **Shipped** (`DUWS_fnc_opcom_attackPackage`) — an open or a join sends as many units as the ideal bar needs in one pick, repeat hires included, each staged at the bucket it fills |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
