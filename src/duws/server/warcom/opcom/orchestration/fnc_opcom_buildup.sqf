@@ -26,22 +26,24 @@ DUWS_fnc_opcom_musterRatio = {
     _force * (call DUWS_fnc_opcom_blockGain) / (_ene + 1)
 };
 
-// Every bound unit takes the capture order at once, so the attack arrives as one wave; a slot still open is dropped.
+// A role that cannot take the order leaves the intent, and the execution step drops it.
+DUWS_fnc_opcom_releaseRole = {
+    params ["_intent", "_role"];
+    _role set ["released", true];
+    private _t = [_intent, _role] call DUWS_fnc_opcom_roleUnit;
+    if (isNil "_t") exitWith {};
+    _t set ["hold", 0];
+    if !([_t, "capture", _intent get "pos"] call fnc_opcom_task) then { _t set ["boundTo", -1] };
+};
+
+// Every role released at launch goes at once, so the attack arrives as one wave; a slot still open is dropped.
 DUWS_fnc_opcom_launch = {
     params ["_intent", "_r"];
-    private _roles = [];
-    {
-        private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
-        if (!isNil "_t") then {
-            _t set ["hold", 0];
-            if ([_t, "capture", _intent get "pos"] call fnc_opcom_task) then { _roles pushBack _x } else { _t set ["boundTo", -1] };
-        };
-    } forEach (_intent get "roles");
-    _intent set ["roles", _roles];
-    if (_roles isEqualTo []) exitWith { [_intent, "dropped: no unit could launch"] call DUWS_fnc_opcom_intentClose };
+    _intent set ["roles", (_intent get "roles") select { private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit; !isNil "_t" }];
     _intent set ["state", "execution"];
-    ["INFO", "OPCOM", format ["intent %1 (%2 %3) launches %4 unit(s) at %5:1", _intent get "id", _intent get "action",
-        _intent get "label", count _roles, _r toFixed 2]] call fnc_log;
+    { if ((_x get "release") isEqualTo "") then { [_intent, _x] call DUWS_fnc_opcom_releaseRole } } forEach (_intent get "roles");
+    ["INFO", "OPCOM", format ["intent %1 (%2 %3, %4) launches %5 unit(s) at %6:1", _intent get "id", _intent get "action",
+        _intent get "label", _intent getOrDefault ["manoeuvre", ""], count (_intent get "roles"), _r toFixed 2]] call fnc_log;
 };
 
 DUWS_fnc_opcom_buildupStep = {

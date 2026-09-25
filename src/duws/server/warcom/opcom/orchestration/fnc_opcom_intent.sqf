@@ -9,19 +9,20 @@ DUWS_fnc_opcom_intentBind = {
     _t set ["boundTo", _intent get "id"];
 };
 
-// _t takes the first role. _roles: [[role, rally, required], ...], one per unit the intent binds; a role past the
-// first stays open for a later pick to fill.
+// _t takes the first role. _roles: [[role, rally, required, released by], ...], one per unit the intent binds; a role
+// past the first stays open for a later pick to fill. An intent opened in execution has every role released.
 DUWS_fnc_opcom_intentOpen = {
     params ["_action", "_target", "_t", ["_roles", []], ["_state", "execution"], ["_pos", []], ["_label", ""]];
-    if (_roles isEqualTo []) then { _roles = [[_action, [], true]] };
+    if (_roles isEqualTo []) then { _roles = [[_action, [], true, ""]] };
     private _id = DUWS_opcom_intentSeq;
     DUWS_opcom_intentSeq = _id + 1;
     private _intent = createHashMapFromArray [
         ["id", _id], ["action", _action], ["target", _target], ["pos", _pos], ["label", _label],
         ["state", _state], ["since", DUWS_opcom_tick],
         ["roles", _roles apply {
-            _x params ["_role", "_rally", "_required"];
-            createHashMapFromArray [["role", _role], ["unit", -1], ["rally", _rally], ["required", _required]]
+            _x params ["_role", "_rally", "_required", "_release"];
+            createHashMapFromArray [["role", _role], ["unit", -1], ["rally", _rally], ["required", _required],
+                ["release", _release], ["released", _state isEqualTo "execution"]]
         }]
     ];
     [_intent, (_intent get "roles") select 0, _t] call DUWS_fnc_opcom_intentBind;
@@ -49,18 +50,19 @@ DUWS_fnc_opcom_intentClose = {
         [_intent get "label", _intent get "target"] select ((_intent get "label") isEqualTo ""), _outcome]] call fnc_log;
 };
 
-// A unit lost once the action runs leaves the rest to finish it.
+// A unit lost once the action runs leaves the rest to finish it. A role still held waits at rest on its rally, so only
+// the released ones say whether the action is over.
 DUWS_fnc_opcom_executionStep = {
     params ["_intent"];
-    private _units = [];
-    private _roles = (_intent get "roles") select {
-        private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
-        if (!isNil "_t") then { _units pushBack _t };
-        !isNil "_t"
-    };
+    private _roles = (_intent get "roles") select { private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit; !isNil "_t" };
     _intent set ["roles", _roles];
-    if (_units isEqualTo []) exitWith { [_intent, "aborted: every unit was lost"] call DUWS_fnc_opcom_intentClose };
-    if ((_units findIf { [_x] call DUWS_fnc_opcom_marching }) < 0) then { [_intent, "done"] call DUWS_fnc_opcom_intentClose };
+    if (_roles isEqualTo []) exitWith { [_intent, "aborted: every unit was lost"] call DUWS_fnc_opcom_intentClose };
+    [_intent] call DUWS_fnc_opcom_releaseHeld;
+    private _busy = _roles findIf {
+        private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
+        (_x get "released") && {!isNil "_t"} && {[_t] call DUWS_fnc_opcom_marching}
+    };
+    if (_busy < 0) then { [_intent, "done"] call DUWS_fnc_opcom_intentClose };
 };
 
 // After the task step, so an order that ended this tick frees its unit before the pick.

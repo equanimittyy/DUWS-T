@@ -836,10 +836,15 @@ OPCOM_MUSTER_MIN = 0.75;
 OPCOM_MUSTER_EXPIRY = 240;       // ticks; 20 min @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.5;
-// The most attackers an assault binds.
+// The most attackers an assault binds, one staging cell each.
 OPCOM_ASSAULT_ROLES = 3;
 // How far past a target's edge its attackers stage (m), out of the fight they are gathering for. Tune.
 OPCOM_RALLY_STANDOFF = 1000;
+// From this ratio up an envelopment buys a setup leg and nothing else, so an Attack only assaults. Tune.
+OPCOM_BAND_CRUSH = 2;
+// The least distance (m) from its target an encirclement's rear stages at, so it marches around the fight rather
+// than through its edge. Tune.
+OPCOM_ENVELOP_STANDOFF = 2000;
 
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are

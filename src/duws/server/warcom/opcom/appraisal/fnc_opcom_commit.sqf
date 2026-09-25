@@ -32,15 +32,15 @@ DUWS_fnc_opcom_sendRun = {
 };
 
 // One Attack per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
-// defeat in detail. Its units stage at a rally and launch together (fnc_opcom_buildup), and each slot still open is a
-// target of its own, filled by a later pick.
+// defeat in detail. It commits as a manoeuvre the odds pick (fnc_opcom_manoeuvres), its units stage and launch
+// together (fnc_opcom_buildup), and each slot still open is a target of its own, filled by a later pick.
 //
 // Zones and towns on the same terms. What differs is how the ground answers: a zone flips on presence, a town only
 // by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
 // reputation rather than a fight is what owns it.
 //
-// A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, rally] commits a new Attack,
-// and ["join", intent id, slot] fills a slot of one still staging.
+// A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, roles, manoeuvre] commits a
+// new Attack, and ["join", intent id, slot] fills a slot of one still staging.
 DUWS_fnc_opcom_attackSweep = {
     private _fits = { params ["_f", "_m"]; [_f, _m, false] call DUWS_fnc_opcom_isCombatant };
     private _free = ([false] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
@@ -59,12 +59,14 @@ DUWS_fnc_opcom_attackSweep = {
         private _edge = ([_key] call fnc_site_at) getOrDefault ["radius", 0];
         private _offers = (_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
         {
-            private _rally = [_at, _at getDir ((_x select 0) select 1), _edge + OPCOM_RALLY_STANDOFF,
-                _edge + OPCOM_GRID_CELL / 2] call DUWS_fnc_opcom_rallyAt;
+            private _pw = _x select 2;
+            ([sqrt (_pw / ((1 - _pw) max 0.001)), _at, _at getDir ((_x select 0) select 1), _edge] call DUWS_fnc_opcom_manoeuvrePick)
+                params ["_m", "_roles"];
+            private _rally = (_roles select 0) select 1;
             private _stage = [["move", _rally], []] select (_rally isEqualTo []);
-            private _c = [_x, [_rally, _to] select (_rally isEqualTo []), _stage, format ["Attack %1", _label]]
+            private _c = [_x, [_rally, _to] select (_rally isEqualTo []), _stage, format ["Attack %1 (%2)", _label, _m]]
                 call DUWS_fnc_opcom_liftOffer;
-            (_c select 0) pushBack ["open", _key, _at, _label, _rally];
+            (_c select 0) pushBack ["open", _key, _at, _label, _roles, _m];
             _out pushBack _c;
         } forEach ([_offers, _to, true, 0, 0, _floor] call DUWS_fnc_opcom_bestSources);
     };
@@ -101,7 +103,7 @@ DUWS_fnc_opcom_attackSweep = {
                 private _offers = (_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
                 {
                     private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
-                        format ["Join the attack on %1", _intent get "label"]] call DUWS_fnc_opcom_liftOffer;
+                        format ["Join the attack on %1 as %2", _intent get "label", _role get "role"]] call DUWS_fnc_opcom_liftOffer;
                     (_c select 0) pushBack ["join", _intent get "id", _slot];
                     _out pushBack _c;
                 } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
@@ -113,7 +115,7 @@ DUWS_fnc_opcom_attackSweep = {
 
 DUWS_fnc_opcom_attackRun = {
     params ["_target"];
-    (_target select 4) params ["_kind", "_a", "_b", "_label", "_rally"];
+    (_target select 4) params ["_kind", "_a", "_b", "_label", "_roles", "_m"];
     if (_kind isEqualTo "join") exitWith {
         private _i = DUWS_opcom_intents findIf { (_x get "id") isEqualTo _a };
         if (_i < 0) exitWith { false };
@@ -129,9 +131,7 @@ DUWS_fnc_opcom_attackRun = {
     };
     private _t = [_target] call DUWS_fnc_opcom_send;
     if (isNil "_t") exitWith { false };
-    private _roles = [];
-    for "_k" from 1 to OPCOM_ASSAULT_ROLES do { _roles pushBack ["attacker", _rally, _k == 1] };
-    ["attack", _a, _t, _roles, "buildup", _b, _label] call DUWS_fnc_opcom_intentOpen;
+    (["attack", _a, _t, _roles, "buildup", _b, _label] call DUWS_fnc_opcom_intentOpen) set ["manoeuvre", _m];
     true
 };
 
