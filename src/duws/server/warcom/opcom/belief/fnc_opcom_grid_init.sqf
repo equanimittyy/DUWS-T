@@ -14,7 +14,6 @@ if (!isServer) exitWith {};
 private _cell = OPCOM_GRID_CELL;
 private _w = ceil (worldSize / _cell);
 private _n = _w * _w;
-DUWS_opcom_grid_w = _w;                       // cell width; every reader indexes _cy * _w + _cx
 
 // Play box: grow world bounds by each play feature's own radius, then by the buffer, and snap to cells.
 // Falls back to the whole map if no feature is present (a degenerate mission), so the grid is never empty.
@@ -40,6 +39,8 @@ if (_maxX > _minX) then {
     _maxCy = (floor ((_maxY + _buf) / _cell)) min (_w - 1);
 };
 DUWS_opcom_box = [_minCx, _minCy, _maxCx, _maxCy];
+// After the box: a caller guards on DUWS_opcom_grid_w alone, and the coordinate functions read the box.
+DUWS_opcom_grid_w = _w;                       // cell width; every reader indexes _cy * _w + _cx
 
 DUWS_opcom_grid_fri = []; DUWS_opcom_grid_fri resize _n;
 DUWS_opcom_grid_ene = []; DUWS_opcom_grid_ene resize _n;
@@ -58,6 +59,7 @@ for "_i" from 0 to (_n - 1) do {
     DUWS_opcom_grid_traffic set [_i, 0];
     DUWS_opcom_grid_trafficTick set [_i, 0];
 };
+DUWS_opcom_routeBlank = DUWS_opcom_grid_fri apply { -1 };
 for "_cy" from _minCy to _maxCy do {
     for "_cx" from _minCx to _maxCx do {
         _land set [_cy * _w + _cx, !(surfaceIsWater [(_cx + 0.5) * _cell, (_cy + 0.5) * _cell])];

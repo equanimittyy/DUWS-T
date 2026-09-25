@@ -11,7 +11,7 @@ DUWS_fnc_opcom_portOf = {
 DUWS_fnc_opcom_ports_init = {
     private _ports = createHashMap;
     private _w = DUWS_opcom_grid_w;
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
 
     private _fnc_landAdj = {
         params ["_ni"];

@@ -13,3 +13,4 @@ DUWS_opcom_hqKnown = false;   // one-way, set by fnc_opcom_belief_upsert on the 
 
 DUWS_opcom_tick = 0;
 DUWS_opcom_dbg_fresh = 0;   // groups the sense sweep found freshly-sensed last tick, for the debug line
+DUWS_opcom_dbg_route = [0, 0, 0, 0];   // grid A* runs, cells expanded, seconds and frames this tick, for the debug line

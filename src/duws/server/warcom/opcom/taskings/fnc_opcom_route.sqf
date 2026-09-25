@@ -65,7 +65,7 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
 private _w    = DUWS_opcom_grid_w;
 private _n    = _w * _w;
 // Out-of-box cells are never built, so a neighbour outside the play box is impassable; ends are box-clamped by w2c.
-(missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
+DUWS_opcom_box params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _land = DUWS_opcom_grid_land;
 private _gwater = DUWS_opcom_grid_water;
 private _ene  = DUWS_opcom_grid_ene;
@@ -96,10 +96,11 @@ if (_water isEqualTo "water" && {!((_gwater select _s) >= 0 && {(_gwater select 
 private _cell = OPCOM_GRID_CELL;
 private _diag = _cell * sqrt 2;
 private _lw = OPCOM_ROUTE_LAMBDA * _lambda;
+private _t0 = diag_tickTime;
+private _f0 = diag_frameNo;
 
-private _g = []; _g resize _n;                 // best cost to a cell, -1 = unseen
-private _from = []; _from resize _n;           // predecessor cell, -1 = none
-for "_i" from 0 to (_n - 1) do { _g set [_i, -1]; _from set [_i, -1] };
+private _g = +DUWS_opcom_routeBlank;           // best cost to a cell, -1 = unseen
+private _from = +DUWS_opcom_routeBlank;        // predecessor cell, -1 = none
 _g set [_s, 0];
 
 private _hCost = {                             // octile heuristic to _d, admissible at any lambda >= 0
@@ -115,8 +116,7 @@ private _found = false;
 private _guard = 0;                             // pop cap: bounds a pathological re-open, never hit on a direct route
 while {count _open > 0 && {_guard < _n}} do {
     _guard = _guard + 1;
-    private _bi = 0;
-    for "_k" from 1 to (count _open - 1) do { if ((_openF select _k) < (_openF select _bi)) then { _bi = _k } };
+    private _bi = _openF find (selectMin _openF);
     private _cur = _open deleteAt _bi;
     _openF deleteAt _bi;
     if (_cur == _d) exitWith { _found = true };
@@ -147,6 +147,15 @@ while {count _open > 0 && {_guard < _n}} do {
             };
         };
     };
+};
+
+if (duws_log_level >= 4) then {
+    DUWS_opcom_dbg_route = [
+        (DUWS_opcom_dbg_route select 0) + 1,
+        (DUWS_opcom_dbg_route select 1) + _guard,
+        (DUWS_opcom_dbg_route select 2) + diag_tickTime - _t0,
+        (DUWS_opcom_dbg_route select 3) + diag_frameNo - _f0
+    ];
 };
 
 if (!_found) exitWith {

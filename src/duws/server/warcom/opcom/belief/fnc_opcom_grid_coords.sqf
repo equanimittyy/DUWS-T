@@ -6,7 +6,7 @@ DUWS_fnc_opcom_w2c = {
     params ["_pos"];
     private _w = DUWS_opcom_grid_w;
     // Clamp to the play box: a point outside it resolves to the nearest edge cell, keeping routed/streamed cells inside.
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _cx = (floor ((_pos select 0) / OPCOM_GRID_CELL)) max _minCx min _maxCx;
     private _cy = (floor ((_pos select 1) / OPCOM_GRID_CELL)) max _minCy min _maxCy;
     _cy * _w + _cx
@@ -24,7 +24,7 @@ DUWS_fnc_opcom_blockCells = {
     private _w = DUWS_opcom_grid_w;
     private _cx = _c mod _w;
     private _cy = floor (_c / _w);
-    (missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _out = [];
     for "_iy" from ((_cy - _k) max _minCy) to ((_cy + _k) min _maxCy) do {
         for "_ix" from ((_cx - _k) max _minCx) to ((_cx + _k) min _maxCx) do {

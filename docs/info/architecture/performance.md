@@ -186,7 +186,7 @@ wall time: a scheduled stage that reads long may be waiting on other scripts, no
 
 | Line | Source | What it times |
 |---|---|---|
-| `[OPCOM] grid tick=… ms[…] pick[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick, and the parts of its pick |
+| `[OPCOM] grid tick=… ms[…] pick[…] route[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick, the parts of its pick, and its A* searches |
 | `[OPCOM] need field rebuilt (…)` | `warcom/opcom/appraisal/value/fnc_opcom_need.sqf` | each need-field rebuild, and the signature parts that forced it |
 | `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site |
 | `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 10th pass |
@@ -212,6 +212,10 @@ The `pick[…]` group splits the pick stage (`warcom/opcom/appraisal/fnc_opcom_p
 
 A row's ms includes each tick-cached sweep that the row is the first to ask for. The attack sweep, for example,
 is charged to `attack_assault`, and `attack_flank` and `probe` then read it from the cache.
+
+The `route[…]` group sums the grid A* searches of the tick (`warcom/opcom/taskings/fnc_opcom_route.sqf`), whichever
+stage ran them: `n` searches, the `cells` they expanded, and their wall `ms/frames`. The cell count is work, not
+time, so contention does not inflate it.
 
 ## Checked and dismissed
 

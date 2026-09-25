@@ -22,7 +22,7 @@ private _eps = 0.05;
 // [centre, fri, ene, isFront, isLand, coverAge, need, cover, traffic] per cell, only for the play box (the rest of the lattice is
 // never built). Front = the balance's sign differs from an orthogonal neighbour's: the zero-crossing band
 // between friendly and enemy ground.
-(missionNamespace getVariable ["DUWS_opcom_box", [0, 0, _w - 1, _w - 1]]) params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
+DUWS_opcom_box params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _cells = [];
 for "_iy" from _bMinCy to _bMaxCy do {
     for "_ix" from _bMinCx to _bMaxCx do {

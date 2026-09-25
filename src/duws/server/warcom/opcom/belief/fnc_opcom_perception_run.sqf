@@ -11,6 +11,7 @@ while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
     // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
+    DUWS_opcom_dbg_route = [0, 0, 0, 0];
     private _stage = "";
     // Per-stage wall time for the DEBUG line. Scheduled, so a figure includes any time the scheduler held the stage.
     private _dbg = duws_log_level >= 4;
@@ -73,12 +74,14 @@ while {true} do {
         // format eats its args before fnc_log can drop the line, so these whole-grid count/selectMax scans
         // would run every tick even at the default level; gate them so they cost nothing unless DEBUG is on.
         if (_dbg) then {
-            ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8 ms[%9] pick[%10]",
+            DUWS_opcom_dbg_route params ["_rn", "_rCells", "_rSec", "_rFrames"];
+            ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8 ms[%9] pick[%10] route[n=%11 cells=%12 ms=%13/%14]",
                 DUWS_opcom_tick, DUWS_opcom_grid_w,
                 {_x > 0.05} count DUWS_opcom_grid_fri,
                 {_x > 0.05} count DUWS_opcom_grid_ene,
                 selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
-                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh, _ms joinString " ", DUWS_opcom_dbg_pick joinString " "]] call fnc_log;
+                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh, _ms joinString " ", DUWS_opcom_dbg_pick joinString " ",
+                _rn, _rCells, round (_rSec * 1000), _rFrames]] call fnc_log;
         };
     } catch {
         ["ERROR", "OPCOM", format ["tick %1 threw in %2, thread held alive: %3", DUWS_opcom_tick, _stage, _exception]] call fnc_log;
