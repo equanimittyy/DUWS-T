@@ -11,10 +11,10 @@ params [["_cells", []], ["_bel", []], ["_cell", 500], ["_tasks", []], ["_wps", [
 
 private _half = _cell / 2;
 private _eps = 0.05;
-// Off by default: the overlay's first read is the lattice and the unit boxes. A layer on every cell buries
-// both, so each is opt-in from the Views page.
-private _showForce = missionNamespace getVariable ["DUWS_dbgOpcomForceOn", false];
-private _showStale = missionNamespace getVariable ["DUWS_dbgOpcomStaleOn", false];
+// Need stays opt-in: it marks enough cells to bury the lattice and the unit boxes. The default-on layers mark only
+// cells holding force or recently seen.
+private _showForce = missionNamespace getVariable ["DUWS_dbgOpcomForceOn", true];
+private _showStale = missionNamespace getVariable ["DUWS_dbgOpcomStaleOn", true];
 private _showNeed = missionNamespace getVariable ["DUWS_dbgOpcomNeedOn", false];
 
 // Fixed grid width means the cell count only changes on a first draw or a name-clash guard.
