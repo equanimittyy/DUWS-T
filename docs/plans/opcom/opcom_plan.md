@@ -533,7 +533,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   which costs a hull some coastal rides a rotor or the walk then takes.
 - **A Ferry is what a unit stopped at a water leg waits on.** Its source is a free boat or helicopter or a hire of
   one, weighed like any other; its `P(win)` is 1 and its Value the stopped unit's committed Value. There is no shore
-  borrow, so a crossing waits for the pick like every other lift.
+  borrow, so a crossing waits for the pick like every other lift. The debug page's Ferry a stranded unit binds the
+  nearest free boat or helicopter that reaches the unit by hand, since the harness spends no AP and a hand order
+  carries no committed Value for a Ferry pick to score.
 - **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
   a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
   of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
