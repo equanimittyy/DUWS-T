@@ -92,11 +92,7 @@ DUWS_fnc_opcom_attackSweep = {
             private _r = [_intent] call DUWS_fnc_opcom_musterRatio;
             if ((_role get "required") || {_r < OPCOM_MUSTER_IDEAL}) then {
                 private _at = _intent get "pos";
-                private _base = 0;
-                {
-                    private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
-                    if (!isNil "_t") then { _base = _base + (_t get "effForce") };
-                } forEach _roles;
+                private _base = [_intent] call DUWS_fnc_opcom_boundForce;
                 private _rally = _role get "rally";
                 private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
                 private _worth = [_intent get "target"] call DUWS_fnc_opcom_siteWorth;
@@ -112,6 +108,8 @@ DUWS_fnc_opcom_attackSweep = {
     } forEach _attacks;
     _out
 };
+
+DUWS_fnc_opcom_attackTargets = { ["attack", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached };
 
 DUWS_fnc_opcom_attackRun = {
     params ["_target"];
@@ -192,6 +190,47 @@ DUWS_fnc_opcom_patrolSweep = {
                 format ["Patrol %1 with %2", mapGridPosition _to, [_ref] call DUWS_fnc_opcom_sourceName], _v, _pw, _c];
         } forEach ([_offers, _to, true] call DUWS_fnc_opcom_bestSources);
     } forEach _dests;
+    _out
+};
+
+// A probe buys belief, not ground: its Value is the error it removes from the reading the stake is about to be laid
+// on, so an objective no Attack can source, or one already launched on, is worth none. One probe per objective, for
+// the reason one patrol goes per destination. P(win) 1: it fights for nothing.
+DUWS_fnc_opcom_probeSweep = {
+    private _stakes = createHashMap;
+    {
+        private _atk = (_x select 0) param [4, []];
+        if ((_atk param [0, ""]) isEqualTo "open") then {
+            _atk params ["", "_key", "_at", "_label"];
+            private _c = (_stakes getOrDefault [_key, [1e9]]) select 0;
+            _stakes set [_key, [_c min (_x select 5), _at, _label]];
+        };
+    } forEach (call DUWS_fnc_opcom_attackTargets);
+    private _probed = [];
+    {
+        if ((_x get "action") isEqualTo "probe") then { _probed pushBack (_x get "target") };
+        if ((_x get "action") isEqualTo "attack" && {(_x get "state") isEqualTo "buildup"}) then {
+            _stakes set [_x get "target", [([_x] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE, _x get "pos", _x get "label"]];
+        };
+    } forEach DUWS_opcom_intents;
+    private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isPatroller })
+        apply { [_x] call DUWS_fnc_opcom_freeSource };
+    private _zones = call DUWS_fnc_opcom_zonesOpen;
+    private _out = [];
+    {
+        _y params ["_stake", "_at", "_label"];
+        private _stale = [_at] call DUWS_fnc_opcom_blockStaleness;
+        if (_stale > OPCOM_PROBE_FRESH && {(_probed findIf { _x isEqualTo _at }) < 0}) then {
+            private _v = _stale * _stake * OPCOM_PROBE_SHARE;
+            private _offers = (_free + ([DUWS_fnc_opcom_isPatroller, _at, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _v] };
+            {
+                _x params ["_src", "_sv", "_pw", "_c", "_p"];
+                private _ref = _src select 0;
+                _out pushBack [[_ref, ["probe", _at], _pw * _sv, []], _p,
+                    format ["Probe %1 with %2", _label, [_ref] call DUWS_fnc_opcom_sourceName], _sv, _pw, _c];
+            } forEach ([_offers, _at, false] call DUWS_fnc_opcom_bestSources);
+        };
+    } forEach _stakes;
     _out
 };
 

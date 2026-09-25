@@ -1,5 +1,5 @@
 // Locality: server, [] call'd at load. The marching orders that end by stopping, one step each: `move` and `patrol`
-// share theirs. The march itself is fnc_opcom_movement_core.sqf.
+// share theirs, and `probe` stops early on it. The march itself is fnc_opcom_movement_core.sqf.
 if (!isServer) exitWith {};
 
 // A guard settle re-orders the group so map and group agree.
@@ -10,6 +10,13 @@ DUWS_fnc_opcom_stepMove = {
     _t set ["order", "guard"]; _t set ["target", _pos]; _t set ["route", []];
     if (_live) then { [_grp, "guard", _pos] call DUWS_fnc_opcom_applyOrder };
     true
+};
+
+// Closing is how a probe reads its target, so it stops where it stands once the block reads fresh.
+DUWS_fnc_opcom_stepProbe = {
+    params ["_t", "_ctx"];
+    if (([_t get "target"] call DUWS_fnc_opcom_blockStaleness) <= OPCOM_PROBE_FRESH) then { _ctx set [4, true] };
+    [_t, _ctx] call DUWS_fnc_opcom_stepMove
 };
 
 // A garrison settle despawns -- a combatant's token now sits in the reserve pool, so a live copy would fight twice.

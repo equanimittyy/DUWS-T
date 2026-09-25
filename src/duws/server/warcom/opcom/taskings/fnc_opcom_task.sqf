@@ -2,7 +2,8 @@
 // true if it took. A live unit is re-ordered in place too, except a bound ferry carry (the transport owns it);
 // a re-issue before the commit hold expires is refused.
 //   _order: one of the orders below. `guard` holds where it stands and ignores
-//     _target; `move` and `patrol` march to _target and settle to guard there. A `capture` takes the BLUFOR-held
+//     _target; `move` and `patrol` march to _target and settle to guard there, and `probe` settles sooner, once the
+//     block about _target reads fresh. A `capture` takes the BLUFOR-held
 //     holding at _target -- a zone, or a town they have garrisoned -- and aims at its centre; it ends when the ground
 //     is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR group's
 //     netId); it follows the row's believed position.
@@ -17,7 +18,7 @@
 params ["_t", "_order", ["_target", []], ["_returnZone", ""], ["_errand", []], ["_lambda", -1]];
 if (!isServer) exitWith { false };
 
-if (!(_order in ["capture", "move", "patrol", "return", "errand", "guard", "intercept"])) exitWith {
+if (!(_order in ["capture", "move", "patrol", "probe", "return", "errand", "guard", "intercept"])) exitWith {
     ["WARN", "OPCOM", format ["task: unknown order %1", _order]] call fnc_log; false
 };
 private _isReturn = _order isEqualTo "return";

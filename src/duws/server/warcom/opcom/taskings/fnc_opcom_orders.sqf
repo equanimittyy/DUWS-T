@@ -45,6 +45,7 @@ DUWS_fnc_opcom_stepGarrison = {
 DUWS_opcom_orders = createHashMapFromArray [
     ["move",      [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepMove]],
     ["patrol",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepMove]],
+    ["probe",     [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepProbe]],
     ["return",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepReturn]],
     ["errand",    [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepErrand]],
     ["capture",   [DUWS_fnc_opcom_refreshMarch,     DUWS_fnc_opcom_stepCapture]],

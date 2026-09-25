@@ -25,9 +25,10 @@ DUWS_opcom_actions = [
         ["fortify", "DUWS_townGarrisonTier", DUWS_fnc_opcom_townFortifyOffer]],
     ["rapport", DUWS_fnc_opcom_townTargets, DUWS_fnc_opcom_townRun,
         ["rapport", "civ_town_rep", DUWS_fnc_opcom_rapportOffer]],
-    ["attack", DUWS_fnc_opcom_attackSweep, DUWS_fnc_opcom_attackRun],
+    ["attack", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun],
     ["intercept", DUWS_fnc_opcom_interceptSweep, DUWS_fnc_opcom_sendRun],
     ["patrol", DUWS_fnc_opcom_patrolSweep, DUWS_fnc_opcom_sendRun],
+    ["probe", DUWS_fnc_opcom_probeSweep, DUWS_fnc_opcom_sendRun],
     ["garrison", DUWS_fnc_opcom_garrisonSweep, DUWS_fnc_opcom_sendRun],
     ["ferry", DUWS_fnc_opcom_ferrySweep, DUWS_fnc_opcom_ferryRun],
     ["arty", DUWS_fnc_opcom_fireTargets, DUWS_fnc_opcom_fireRun]

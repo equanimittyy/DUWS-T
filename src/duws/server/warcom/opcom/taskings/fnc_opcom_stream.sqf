@@ -22,6 +22,7 @@ DUWS_fnc_opcom_applyOrder = {
         // The ferry stages ask for "move" by hand to march a hull or a rider to a shore, whatever order it holds.
         case "move";
         case "patrol";
+        case "probe";
         case "return": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
             (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";

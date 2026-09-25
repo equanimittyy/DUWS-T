@@ -7,6 +7,15 @@ DUWS_fnc_opcom_stalenessAt = {
     ((DUWS_opcom_tick - (DUWS_opcom_grid_seen select _c)) / OPCOM_BELIEF_EXPIRE) min 1
 };
 
+// The mean staleness of the 3x3 block about _pos, the block P(win) and the muster bars read.
+DUWS_fnc_opcom_blockStaleness = {
+    params ["_pos"];
+    private _cells = [[_pos] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells;
+    private _sum = 0;
+    { _sum = _sum + ([_x] call DUWS_fnc_opcom_stalenessAt) } forEach _cells;
+    _sum / ((count _cells) max 1)
+};
+
 // The cells a patrol sweeps on the way: every cell within its K of the straight line it walks. The line, not the route,
 // for the reason the delay discount measures straight: no candidate may plan a route inside the pick's pass.
 DUWS_fnc_opcom_patrolCells = {

@@ -821,6 +821,12 @@ OPCOM_PATROL_SHARE = 0.2;
 // every patrol to the cheapest infantry (fnc_opcom_patrol).
 OPCOM_PATROL_FORCE_REF = 8;
 
+// A Probe is worth this share of the stake about to be laid on its reading, a whole-stale block × the Attack's Cost
+// there. It stops the moment its target's 3x3 block reads fresher than OPCOM_PROBE_FRESH, and a block already that
+// fresh offers no Probe. Tune.
+OPCOM_PROBE_SHARE = 0.25;
+OPCOM_PROBE_FRESH = 0.1;
+
 // Sharpness is how decisive the commander reads: 0 draws evenly, 1 in proportion to score, higher takes the top.
 OPCOM_PICK_TOP = 10;
 OPCOM_PICK_SHARPNESS = 2;

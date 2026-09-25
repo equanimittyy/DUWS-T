@@ -14,16 +14,21 @@ DUWS_fnc_opcom_rallyAt = {
     _out
 };
 
-// The force an intent binds over the believed BLUFOR force at its target, both as the 3x3 block reads them.
-DUWS_fnc_opcom_musterRatio = {
+DUWS_fnc_opcom_boundForce = {
     params ["_intent"];
     private _force = 0;
     {
         private _t = [_intent, _x] call DUWS_fnc_opcom_roleUnit;
         if (!isNil "_t") then { _force = _force + (_t get "effForce") };
     } forEach (_intent get "roles");
+    _force
+};
+
+// The force an intent binds over the believed BLUFOR force at its target, both as the 3x3 block reads them.
+DUWS_fnc_opcom_musterRatio = {
+    params ["_intent"];
     ([_intent get "pos"] call DUWS_fnc_opcom_blockForce) params ["", "_ene"];
-    _force * (call DUWS_fnc_opcom_blockGain) / (_ene + 1)
+    ([_intent] call DUWS_fnc_opcom_boundForce) * (call DUWS_fnc_opcom_blockGain) / (_ene + 1)
 };
 
 // A role that cannot take the order leaves the intent, and the execution step drops it.
