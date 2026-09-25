@@ -11,28 +11,29 @@ DUWS_fnc_opcom_argMax = {
     _best
 };
 
-// Per asset type: its Value, called as [point, type], and how near another of its type it may not stand.
+// Per asset type: its Value, called as [point, type], how near another of its type it may not stand, and whether the
+// Value reads every OPFOR hardpoint (a tower's, through DUWS_fnc_opcom_defend), so that any build resets its memo.
 DUWS_opcom_assetSiting = createHashMapFromArray [
-    ["RADIO", [DUWS_fnc_opcom_towerValue, AOI_TOWER_REACH]],
-    ["OP", [DUWS_fnc_opcom_opValue, 0]],
-    ["MORTAR", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF]],
-    ["ARTY", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF]]
+    ["RADIO", [DUWS_fnc_opcom_towerValue, AOI_TOWER_REACH, true]],
+    ["OP", [DUWS_fnc_opcom_opValue, 0, false]],
+    ["MORTAR", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF, false]],
+    ["ARTY", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF, false]]
 ];
 
-// An asset's Value reads only slow state -- the area of influence and its type's own assets -- and a tower's or a gun's
-// runs the area of influence over many points, so a band cell's Value is kept until that state changes and siting
-// costs what changed rather than what exists.
+// An asset's Value reads only slow state, and a tower's or a gun's runs the area of influence over many points, so a
+// band cell's Value is kept until that state changes and siting costs what changed rather than what exists.
 DUWS_opcom_siteMemo = createHashMap;
 
 // Scheduled, before the pick's unscheduled pass: each build type takes the best of a few band cells by its own Value,
-// so the pick weighs the best spot on offer rather than a random one. -> DUWS_opcom_sites, key -> [point, Value].
+// so the pick weighs the best spot on offer rather than a random one. Sets DUWS_opcom_sites, key -> [point, Value];
+// -> the count of Values computed, not read from the memo.
 DUWS_fnc_opcom_siteAll = {
     params ["_samples"];
     private _sites = createHashMap;
     private _pool = +DUWS_opcom_bandCells;
     private _cells = [];
     for "_k" from 1 to (_samples min count _pool) do { _cells pushBack (_pool deleteAt (floor random count _pool)) };
-    if (_cells isEqualTo []) exitWith { DUWS_opcom_sites = _sites };
+    if (_cells isEqualTo []) exitWith { DUWS_opcom_sites = _sites; 0 };
     private _w = DUWS_opcom_grid_w;
     private _pts = _cells apply { [((_x mod _w) + 0.5) * OPCOM_GRID_CELL, ((floor (_x / _w)) + 0.5) * OPCOM_GRID_CELL, 0] };
 
@@ -45,12 +46,13 @@ DUWS_fnc_opcom_siteAll = {
     _i = _denial call DUWS_fnc_opcom_argMax;
     _sites set ["MINE", [_pts select _i, _cover select _i]];
 
+    private _computed = 0;
     {
         private _type = _x;
-        _y params ["_valueFn", "_keep"];
+        _y params ["_valueFn", "_keep", "_readsAll"];
         if ([_type] call DUWS_fnc_opcom_hpOpen) then {
             private _others = [_type] call DUWS_fnc_opcom_assetsOf;
-            private _stamp = [DUWS_opcom_needSig, _others];
+            private _stamp = [DUWS_opcom_bandSig, _others, [[], DUWS_opcom_depositSig] select _readsAll];
             private _memo = DUWS_opcom_siteMemo getOrDefault [_type, [[], createHashMap]];
             if !((_memo select 0) isEqualTo _stamp) then { _memo = [_stamp, createHashMap]; DUWS_opcom_siteMemo set [_type, _memo] };
             private _vals = [];
@@ -63,6 +65,7 @@ DUWS_fnc_opcom_siteAll = {
                     if (_v < 0) then {
                         _v = [_p, _type] call _valueFn;
                         (_memo select 1) set [_c, _v];
+                        _computed = _computed + 1;
                     };
                 };
                 _vals pushBack _v;
@@ -72,6 +75,7 @@ DUWS_fnc_opcom_siteAll = {
         };
     } forEach DUWS_opcom_assetSiting;
     DUWS_opcom_sites = _sites;
+    _computed
 };
 
 // -> [point, Value], or [] with no site or the supply cap full.

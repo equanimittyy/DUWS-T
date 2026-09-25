@@ -79,9 +79,11 @@ private _forceLand = {
 
 DUWS_opcom_grid_land = _land;
 DUWS_opcom_needStatic = _land apply { 0 };
+DUWS_opcom_needBase = _land apply { 0 };
 DUWS_opcom_bandCells = [];
 DUWS_opcom_needCells = [];
-DUWS_opcom_needSig = [];
+DUWS_opcom_bandSig = [];
+DUWS_opcom_depositSig = [];
 DUWS_opcom_needBuilding = false;
 
 DUWS_opcom_gridStaticFri = +DUWS_opcom_grid_fri;

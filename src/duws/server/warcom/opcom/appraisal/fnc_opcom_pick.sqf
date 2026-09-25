@@ -19,8 +19,9 @@ private _split = {
 };
 
 // Random mode sites on one band cell, so the control stays an unscored draw.
-[[OPCOM_SITE_SAMPLES, 1] select (_mode isNotEqualTo "weighted")] call DUWS_fnc_opcom_siteAll;
+private _siteValues = [[OPCOM_SITE_SAMPLES, 1] select (_mode isNotEqualTo "weighted")] call DUWS_fnc_opcom_siteAll;
 "site" call _split;
+if (_dbg) then { DUWS_opcom_dbg_pick pushBack format ["siteValues=%1", _siteValues] };
 
 private _live = [];
 private _rowMs = [];

@@ -174,10 +174,12 @@ above 0.05 names the cell.
 
 The appraisal follows the same rule. The need field's holdings and band base
 (`warcom/opcom/appraisal/value/fnc_opcom_need.sqf`) rebuild in a spawned thread only when a signature of their
-inputs changes, because the band test runs the area of influence over every land cell in the box. The
-siting pass (`DUWS_fnc_opcom_siteAll`, `appraisal/fnc_opcom_siting.sqf`) runs scheduled, before the pick's
-unscheduled pass. It keeps each band cell's asset Value until that signature or the type's own assets change,
-so a tick scores only the sampled cells it has not scored before.
+inputs changes, because the band test runs the area of influence over every land cell in the box. The area of
+influence reads no hardpoint but a radio tower, so any other build only re-spreads the hardpoint deposits over the
+cached base, inside the tick. The siting pass (`DUWS_fnc_opcom_siteAll`, `appraisal/fnc_opcom_siting.sqf`) runs
+scheduled, before the pick's unscheduled pass. It keeps each band cell's asset Value until the band signature or
+the type's own assets change, so a tick scores only the sampled cells it has not scored before. A tower's Value
+also reads every OPFOR hardpoint, so its memo resets on any build.
 
 ## Reading the cost from a playtest
 
@@ -187,7 +189,7 @@ wall time: a scheduled stage that reads long may be waiting on other scripts, no
 | Line | Source | What it times |
 |---|---|---|
 | `[OPCOM] grid tick=… ms[…] pick[…] route[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick, the parts of its pick, and its A* searches |
-| `[OPCOM] need field rebuilt (…)` | `warcom/opcom/appraisal/value/fnc_opcom_need.sqf` | each need-field rebuild, and the signature parts that forced it |
+| `[OPCOM] need field rebuilt (…)`, `need deposits re-spread` | `warcom/opcom/appraisal/value/fnc_opcom_need.sqf` | each band rebuild and the signature parts that forced it; each deposit-only re-spread |
 | `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site |
 | `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 10th pass |
 | `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, entity counts, and the five most numerous scheduled scripts by file |
@@ -205,6 +207,7 @@ The `pick[…]` group splits the pick stage (`warcom/opcom/appraisal/fnc_opcom_p
 | Part | What it times |
 |---|---|
 | `site` | the siting pass, scheduled |
+| `siteValues` | the asset Values the siting pass computed, not read from its memo |
 | `targets` | the targets pass, unscheduled inside `isNil`, so it spans 0 frames and its ms is frame time |
 | `rows(…)` | each action row of the targets pass that took 1 ms or more |
 | `rank` | the scoring and the weighted draw, scheduled |
