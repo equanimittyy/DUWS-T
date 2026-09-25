@@ -703,7 +703,8 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
   ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to. **QRF** (`intercept`) — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
-  guards once none remain. It never returns to garrison. **Probe** — the target's 3×3 block reads fresher than
+  guards once none remain, until its QRF moves on to another group ([§QRF](#qrf-an-attack-on-a-moving-cluster)). It
+  never returns to garrison. **Probe** — the target's 3×3 block reads fresher than
   `OPCOM_PROBE_FRESH`, at which point the unit drops to `guard` where it stands (`DUWS_fnc_opcom_stepProbe`), or it
   arrives. **Rapport** — courier delivers or dies.
 
@@ -724,6 +725,10 @@ time, and no-retreat turns that into defeat in detail.
   so a lone sighting still draws a one-unit answer.
 - **Every unit releases at launch on `intercept`** after the lead sighting. Units arrive in the order of their
   distance: the release does not stagger launches by ETA.
+- **The QRF hunts as one.** Each unit's look on arrival still reads the group nearest it, but the QRF moves only once
+  a look disproves the lead. The group a unit found then becomes the whole QRF's target, and every unit re-keys onto
+  it, one already back on `guard` included (`DUWS_fnc_opcom_qrfRekey`). While the lead stands, a unit that finds a
+  nearer group fights it, because pulling it back would re-order the QRF every tick two units' looks disagree.
 - **Air joins a QRF** and not an assault, because it hunts a group in the open rather than holding ground. A land
   unit across water from the cluster stays out: a ferry lands men a trip at a time, and the target moves.
 - **No creep and no probe.** A creep's box is laid at commit on an objective that stands still, and a probe's stake is
