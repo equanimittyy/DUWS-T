@@ -594,8 +594,8 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
-order each one gets and what releases it — so a coordinated attack adds no tasking code. Today's one-unit Attack is
-the degenerate case: one role, an empty buildup, straight to `capture`.
+order each one gets and what releases it — so a coordinated attack adds no tasking code. Today's one-unit Attack
+becomes the smallest `assault` ([§Release](#release-the-stagger-lives-on-the-role-not-in-a-third-state)).
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
@@ -658,6 +658,10 @@ Rapport, Garrison, Ferry and both fire missions each commit as a one-role intent
 - **`assault` stages across 1–3 adjacent cells,** one role a cell, which at `OPCOM_GRID_CELL` 500 m is a 500 m to
   1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
   attackers no frontage to advance on.
+- **A lone attacker at the ideal ratio launches alone.** `assault` absorbs today's one-unit Attack, so Attack keeps
+  no one-shot path beside it. When the one unit OPCOM binds already meets the ideal ratio at commit, the assault
+  launches with that one unit once it reaches its rally, so every assault keeps one shape. A lone unit below the ideal
+  ratio musters like any other assault.
 - **`assault` is legal from band 1, not 2.** Its band has to overlap the enveloping pair's, or the archetype's lean
   toward it never bites: a manoeuvre weight only chooses among what a band leaves legal
   ([§Archetype](#archetype-phase-7)). Above band 2 it is the only legal manoeuvre, because at crushing odds an
@@ -742,7 +746,7 @@ threat that appears after. Today the road branch is threat-blind and every calle
 |---|---|
 | **5.1** Intents and ownership | the intent record, `boundTo` honoured by `DUWS_fnc_opcom_freeSweep`, and every shipped commit action wrapped as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
 | **5.2** Buildup | the rally cells, `move` staging with each role's land-taxi sourced for its staging leg, each open role offered to later picks as an Attack target, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
-| **5.3** Manoeuvres | `assault` across its 1–3 cells first, since it releases every role at once, then the one mechanism `flank` and `encircle` share, over its release predicate |
+| **5.3** Manoeuvres | `assault` across its 1–3 cells first, since it releases every role at once, with Attack's one-role 5.1 intent folded into it, then the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
 | **5.5** Probe | the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | Arty split into `arty_saturate`, which is today's action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
