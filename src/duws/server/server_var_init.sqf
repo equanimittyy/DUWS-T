@@ -854,9 +854,6 @@ OPCOM_ASSAULT_ROLES = 3;
 OPCOM_RALLY_K = 2;
 // From this ratio up an envelopment buys a setup leg and nothing else, so an Attack only assaults. Tune.
 OPCOM_BAND_CRUSH = 2;
-// The least Chebyshev cells from its target's cell an encirclement's rear stages at, so it marches around the fight
-// rather than through its edge. Tune.
-OPCOM_ENVELOP_K = 4;
 
 // Order-sticky hold in ticks: once OPCOM issues an order it may not re-issue for this many ticks -- an
 // anti-flap lock against fast re-scoring, not a success deadline. Resting garrison/guard taskings are

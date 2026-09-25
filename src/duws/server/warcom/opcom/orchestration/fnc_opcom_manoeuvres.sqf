@@ -2,17 +2,27 @@
 // binds, where each stages and what releases it. A manoeuvre is data, so a new one adds no tasking code.
 if (!isServer) exitWith {};
 
-// manoeuvre -> [[role, bearings, slots, required slots, released by, wide, lambda], ...]. A role stages on the first
-// bearing, in degrees off the one the attack comes from, whose rally is dry, one cell a slot. "" releases it at launch;
-// a role name releases it once that role's unit reads engaged, since an envelopment arriving before the defenders are
-// committed to the front is worth nothing. A wide role stages at least OPCOM_ENVELOP_K cells out. Lambda bends its
-// march around believed BLUFOR (fnc_opcom_task): an enveloping role is worth only what it reaches unseen, where the
-// fight is the point of the fix's march.
+// manoeuvre -> [[role, bearings, slots, required slots, released by, lambda], ...], bearings in degrees off the one the
+// attack comes from. A role with one bearing widens its frontage a cell a slot; one with several stages each slot on
+// its own side, the weakest first, so a flank hits where the defenders are thinnest. "" releases it at launch; a role
+// name releases it once that role's unit reads engaged, since an envelopment arriving before the defenders are
+// committed to the front is worth nothing. Lambda bends its march around believed BLUFOR (fnc_opcom_task): an
+// enveloping role is worth only what it reaches unseen, where the fight is the point of the fix's march.
 DUWS_opcom_manoeuvres = createHashMapFromArray [
-    ["assault", [["attacker", [0], OPCOM_ASSAULT_ROLES, 1, "", false, 0]]],
-    ["flank", [["fix", [0], 1, 1, "", false, 0], ["maneuver", [90, -90], 2, 1, "fix", false, 1]]],
-    ["encircle", [["fix", [0], 1, 1, "", false, 0], ["rear", [180], 2, 1, "fix", true, 1]]]
+    ["assault", [["attacker", [0], OPCOM_ASSAULT_ROLES, 1, "", 0]]],
+    ["flank", [["fix", [0], 1, 1, "", 0], ["maneuver", [90, -90, 135, -135, 180], 2, 1, "fix", 1]]]
 ];
+
+// Believed BLUFOR in a rally's block, less the target's own: that block is the fight the fix draws, alike from every side.
+DUWS_fnc_opcom_sideForce = {
+    params ["_at", "_rally"];
+    private _fight = [[_at] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells;
+    private _ene = 0;
+    {
+        if !(_x in _fight) then { _ene = _ene + (DUWS_opcom_grid_ene select _x) };
+    } forEach ([[_rally] call DUWS_fnc_opcom_w2c, 1] call DUWS_fnc_opcom_blockCells);
+    _ene
+};
 
 // -> [[role, rally, required, released by, lambda], ...], one a slot, or [] when a role finds no dry rally. An assault
 // stages where it stands instead, since it has no geometry to lose.
@@ -21,25 +31,32 @@ DUWS_fnc_opcom_manoeuvreRoles = {
     private _out = [];
     private _ok = true;
     {
-        _x params ["_role", "_bearings", "_slots", "_required", "_release", "_wide", "_lambda"];
-        private _k = [OPCOM_RALLY_K, OPCOM_ENVELOP_K] select _wide;
-        private _dir = _bearing;
-        private _rally = [];
-        {
-            _dir = _bearing + _x;
-            _rally = [_at, _dir, _k] call DUWS_fnc_opcom_rallyAt;
-            if (_rally isNotEqualTo []) exitWith {};
-        } forEach (_bearings call BIS_fnc_arrayShuffle);
-        if (_rally isEqualTo [] && {_name isNotEqualTo "assault"}) exitWith { _ok = false };
-        for "_n" from 0 to (_slots - 1) do {
-            // Each slot past the first steps a cell aside, alternating sides, so the frontage widens a cell a slot.
-            private _p = _rally;
-            if (_n > 0 && {_rally isNotEqualTo []}) then {
-                private _q = [[_rally getPos [OPCOM_GRID_CELL * ceil (_n / 2), _dir + ([90, -90] select (_n mod 2 == 0))]]
-                    call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
-                if (!(surfaceIsWater _q) && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= _k}) then { _p = _q };
+        _x params ["_role", "_bearings", "_slots", "_required", "_release", "_lambda"];
+        if (count _bearings > 1) then {
+            private _rallies = _bearings apply { [_at, _bearing + _x, OPCOM_RALLY_K] call DUWS_fnc_opcom_rallyAt };
+            private _sides = [];
+            {
+                // Equal belief goes to the shorter swing, then to either side at random.
+                if (_x isNotEqualTo []) then {
+                    _sides pushBack [[_at, _x] call DUWS_fnc_opcom_sideForce, abs (_bearings select _forEachIndex), random 1, _forEachIndex];
+                };
+            } forEach _rallies;
+            _sides sort true;
+            if (count _sides < _required) then { _ok = false };
+            { _out pushBack [_role, _rallies select (_x select 3), _forEachIndex < _required, _release, _lambda] } forEach (_sides select [0, _slots]);
+        } else {
+            private _dir = _bearing + (_bearings select 0);
+            private _rally = [_at, _dir, OPCOM_RALLY_K] call DUWS_fnc_opcom_rallyAt;
+            if (_rally isEqualTo [] && {_name isNotEqualTo "assault"}) then { _ok = false };
+            for "_n" from 0 to (_slots - 1) do {
+                private _p = _rally;
+                if (_n > 0 && {_rally isNotEqualTo []}) then {
+                    private _q = [[_rally getPos [OPCOM_GRID_CELL * ceil (_n / 2), _dir + ([90, -90] select (_n mod 2 == 0))]]
+                        call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
+                    if (!(surfaceIsWater _q) && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= OPCOM_RALLY_K}) then { _p = _q };
+                };
+                _out pushBack [_role, _p, _n < _required, _release, _lambda];
             };
-            _out pushBack [_role, _p, _n < _required, _release, _lambda];
         };
     } forEach (DUWS_opcom_manoeuvres get _name);
     [[], _out] select _ok
@@ -53,7 +70,7 @@ DUWS_fnc_opcom_manoeuvrePick = {
     {
         private _roles = [_x, _at, _bearing] call DUWS_fnc_opcom_manoeuvreRoles;
         if (_roles isNotEqualTo []) then { _options pushBack [_x, _roles] };
-    } forEach ([["assault"], ["assault", "flank", "encircle"]] select (_r < OPCOM_BAND_CRUSH));
+    } forEach ([["assault"], ["assault", "flank"]] select (_r < OPCOM_BAND_CRUSH));
     selectRandom _options
 };
 
