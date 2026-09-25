@@ -10,8 +10,8 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky order.
 
-Phases 1–5 are shipped, but for 5.4's off-road layer, and the code under `src/duws/server/warcom/opcom/` is the source
-of truth for them. This doc specifies what remains: that layer, then persistence, then the archetype.
+Phases 1–5 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
+specifies what remains: persistence, then the archetype.
 The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -20,7 +20,7 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
-| 5 — Attack: a buildup and execution spine, assault and flank, threat-aware routes where a role asks for one, the probe, and the fires split | [§Attack](#attack-phase-5) — **shipped**, but for the off-road layer (5.4) |
+| 5 — Attack: a buildup and execution spine, assault and flank, threat-aware routes where a role asks for one, the probe, and the fires split | [§Attack](#attack-phase-5) — **shipped** |
 | 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — **next** |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
@@ -188,7 +188,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence |
-| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each open role of an attack of the row's kind still in buildup; flank only below band 2 ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs another unit; flank only below band 2 ([§Attack](#attack-phase-5)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each Attack target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
@@ -545,8 +545,8 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
   outside the zone's radius.
 - **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
-- **Only the pick hires.** The runner never spends: an attack sources its first role when the pick commits it, and
-  each role after stays a target of its row until a later pick fills it, from a free unit or a hire
+- **Only the pick hires.** The runner never spends: an attack sources its first bucket when the pick commits it, and
+  the rest stay a target of its row until later picks fill them, from a free unit or a hire
   ([§Attack](#attack-phase-5)).
 - **`fnc_opcom_recruit` stays the one hire.** Every source hires through it, and the debug page's Recruit list still
   calls it by hand.
@@ -569,7 +569,7 @@ binding to their attack record ([§Attack](#attack-phase-5)).
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
 - **An attack musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
-  force across ticks at a safe rally short of the target, one cell a role, then advances all together — it never dribbles units into contact,
+  force across ticks at a safe rally short of the target, one cell a bucket, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
   **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
   it holds at least the archetype's **minimum** (0.75:1 baseline), and is otherwise abandoned, its units returning to
@@ -579,12 +579,12 @@ binding to their attack record ([§Attack](#attack-phase-5)).
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
   ([§Value](#value)). An attack in buildup commits below the odds it launches at, so the minimum bar is its floor
   at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short attack waits for
-  units: each open role stays a target of its row, and a later pick fills it from a free unit or a hire
+  units: each bucket it needs stays a target of its row, and a later pick fills it from a free unit or a hire
   ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
 
 ## Attack (Phase 5)
 
-**Shipped**, but for 5.4's off-road layer.
+**Shipped**.
 
 Attack is the one action that sends more than one unit, and it is two action rows, `attack_assault` and
 `attack_flank`. Both commit an attack record (`DUWS_opcom_attacks`, `taskings/fnc_opcom_attack.sqf`) that runs two
@@ -596,12 +596,12 @@ order and binds nothing: the order ends on its own predicate, which frees the un
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
-| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required role bound, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-orders-are-sticky)) |
+| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-orders-are-sticky)) |
 | `execution` | fighting for the target, once its role is released | `capture` | `resolve`: every released unit back at rest |
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
-force-short attack sits in buildup until later picks fill its open roles.
+force-short attack sits in buildup until later picks fill its buckets.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg is its caller
@@ -638,26 +638,33 @@ to know all of them.
 
 | Row | Offered when | Roles | Release |
 |---|---|---|---|
-| `attack_assault` | every band from 0.5 | `attacker` ×1–3, one per rally cell | every role at once — one wave, never a dribble |
-| `attack_flank` | band 0.5–2 and a dry rally on some side | `fix` ×1, `maneuver` ×1–2, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
+| `attack_assault` | every band from 0.5 | `attacker` in 1–3 buckets, one per frontage cell | every bucket at once — one wave, never a dribble |
+| `attack_flank` | band 0.5–2 and a dry rally on some side | `fix` in 1 bucket, `maneuver` in 1–5 buckets, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
 
 Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/fnc_opcom_attack.sqf`), keyed by the record's
-kind, `assault` or `flank`. A flank needs no count of mobile units at commit: its enveloping role is an open slot like any other, filled by a later pick, and one
-never filled leaves the fix to launch alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
+kind, `assault` or `flank`. A flank needs no count of mobile units at commit: its enveloping
+buckets are filled by later picks like any other, and a flank whose first side stays empty leaves the fix to launch
+alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
+
+- **A role is a bucket of units.** A bucket stages at one rally and holds any number of units, up to
+  `OPCOM_ATTACK_UNITS` (10) across the attack (`DUWS_fnc_opcom_joinBucket`). An empty required bucket takes a join at
+  any odds. Past that, a join comes only while the muster is short of the ideal bar, and goes to the bucket with the
+  least force, so the frontage and the sides fill evenly. The ideal bar, not the bucket count, is what sizes an
+  attack.
 
 - **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
   the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
-  no sequencing. `flank` holds `fix` on the direct bearing and stages each `maneuver` slot on a side of its own,
+  no sequencing. `flank` holds `fix` on the direct bearing and stages each `maneuver` bucket on a side of its own,
   picked from ±90°, ±135° and 180°. Every role then collapses on the target. A rally is a cell centre at least
   `OPCOM_RALLY_K` (2) cells from the target's, and every distance a rally keeps is Chebyshev cells from the target's
   cell.
 - **Belief picks a flank's sides.** A side flank and a rear attack differ only in bearing, so `flank` is one row
-  whose `maneuver` slots take the dry sides with the least believed BLUFOR in the rally's
+  whose `maneuver` buckets take the dry sides with the least believed BLUFOR in the rally's
   3×3 block outside the target's, the shorter swing on a tie. The target's own block is left out because it is the
-  fight the fix draws, alike from every side. Two groups can hit two sides, and a rear group keeps the same standoff
+  fight the fix draws, alike from every side. Up to five buckets can hit five sides, and a rear bucket keeps the same standoff
   as any other: its λ route, not a wider rally, takes it around the fight.
-- **`assault` stages across 1–3 adjacent cells,** one role a cell, which at `OPCOM_GRID_CELL` 500 m is a 500 m to
-  1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
+- **`assault` stages across 1–3 adjacent cells** (`OPCOM_ASSAULT_CELLS`), one bucket a cell, which at
+  `OPCOM_GRID_CELL` 500 m is a 500 m to 1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
   attackers no frontage to advance on.
 - **A lone attacker at the ideal ratio launches alone.** `attack_assault` is also the one-unit Attack, so Attack keeps
   no one-shot path beside it. When the one unit OPCOM binds already meets the ideal ratio at commit, the assault
@@ -744,35 +751,35 @@ route that ends wet falls back to the length-only road: a march through the thre
 route is planned at departure and again only after a stow, so the truck skirts the threat believed then and drives on
 into any threat that appears after.
 
-**Not built: the off-road layer.** One A* would run over road segments and land cells together at λ > 0: a road
-segment costs its length plus the threat term over the cells it crosses, and an off-road step costs its length ×
-`OPCOM_ROUTE_OFFROAD` plus the same term. The route would leave or rejoin the road where a segment crosses a cell, and
-an off-road stretch would be a `gap` segment the hull drives itself, so the water test that rejects a wet gap still
-applies.
+**A hull leaves the road only where the road ends.** At λ > 0 a hull's road leg stops at the road nearest its
+destination, and the leg past it takes the threat-priced cell chain a foot unit uses instead of a straight stub
+(`taskings/fnc_opcom_route.sqf`). A chain that crosses navigable water leaves the straight stub in place, because no
+lift carries a hull. A hull never leaves the road mid-route to go around a threat: the road term already prices a
+threatened stretch.
 
-**A route steers only the virtual march.** A live unit takes one waypoint at its target and the engine paths it
-(`DUWS_fnc_opcom_applyOrder`), so a role that streams live near the players closes by the engine's path whatever its
-λ. The λ route keeps a unit off believed threat while it is virtual, which is also what keeps it from streaming in
-early.
+**A live group walks its route at λ > 0.** It takes a `MOVE` waypoint a cell apart along the rest of its route before
+its order's own waypoint (`DUWS_fnc_opcom_routeVia`, `taskings/fnc_opcom_stream.sqf`), so a role that streams live
+near the players still closes by the route its λ bent. At λ 0 a live group takes one waypoint at its target and the
+engine paths it. A group in combat ignores a move waypoint, so the route holds only on the approach.
 
 ### Chunks
 
 | Chunk | Builds |
 |---|---|
 | **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
-| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its `maneuver` slots each on the weakest dry side, over its release predicate |
-| **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
+| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row into the bucket `DUWS_fnc_opcom_joinBucket` names while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its up to five `maneuver` buckets each on one of the weakest dry sides, over its release predicate |
+| **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, a creep on an attack record and the only chain edge |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
-`OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
+the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
-`OPCOM_MUSTER_HOLD`, the sides a `flank` picks from and how many it binds, the
-frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
+`OPCOM_MUSTER_HOLD`, the sides a `flank` picks from, `OPCOM_ATTACK_UNITS`, the
+frontage an `assault` wants at each unit count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
 
