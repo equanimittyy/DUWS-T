@@ -7,9 +7,11 @@
 if (!isServer) exitWith {};
 
 // kind -> [[role, bearings, buckets, required buckets, released by, lambda], ...], bearings in degrees off the one the
-// attack comes from. A bucket holds any number of units at one rally. A role with one bearing lays its buckets a cell
-// apart across its frontage; one with several stages each bucket on its own side, the weakest first, so a flank hits
-// where the defenders are thinnest. "" releases it at launch; a role
+// attack comes from. A bucket holds any number of units at one rally. A role with one bearing lays its buckets in one
+// unbroken line across its frontage, and each side bucket marches its own lane to the cell abreast of the target
+// before it closes: buckets closing straight from the line would bunch onto one fire mission's worth of ground and
+// leave the cells beside the fight unswept. A role with several bearings stages each bucket on its own side, the
+// weakest first, so a flank hits where the defenders are thinnest. "" releases it at launch; a role
 // name releases it once that role's unit reads engaged, since an envelopment arriving before the defenders are
 // committed to the front is worth nothing. Lambda bends its march around believed BLUFOR (fnc_opcom_task): an
 // enveloping role is worth only what it reaches unseen, where the fight is the point of the fix's march.
@@ -47,8 +49,9 @@ DUWS_fnc_opcom_sideForce = {
     _ene
 };
 
-// -> [[role, rally, required, released by, lambda], ...], one a bucket, or [] when a role finds no dry rally. An assault
-// stages where it stands instead, since it has no geometry to lose.
+// -> [[role, rally, required, released by, lambda, lane], ...], one a bucket, or [] when a role finds no dry rally. An
+// assault stages where it stands instead, since it has no geometry to lose. A lane is [] for a bucket that goes straight
+// at the target.
 DUWS_fnc_opcom_stageRoles = {
     params ["_kind", "_at", "_bearing"];
     private _out = [];
@@ -66,20 +69,46 @@ DUWS_fnc_opcom_stageRoles = {
             } forEach _rallies;
             _sides sort true;
             if (count _sides < _required) then { _ok = false };
-            { _out pushBack [_role, _rallies select (_x select 3), _forEachIndex < _required, _release, _lambda] } forEach (_sides select [0, _buckets]);
+            { _out pushBack [_role, _rallies select (_x select 3), _forEachIndex < _required, _release, _lambda, []] } forEach (_sides select [0, _buckets]);
         } else {
             private _dir = _bearing + (_bearings select 0);
             private _rally = [_at, _dir, OPCOM_RALLY_K] call DUWS_fnc_opcom_rallyAt;
             if (_rally isEqualTo [] && {_kind isNotEqualTo "assault"}) then { _ok = false };
+            private _mass = [_at] call DUWS_fnc_opcom_massAt;
+            // Snapped to the grid's eight directions, so a line on a diagonal bearing still steps a whole cell.
+            private _perp = 45 * round ((_dir + 90) / 45);
+            private _across = {
+                params ["_p", "_i"];
+                [(_p select 0) + _i * OPCOM_GRID_CELL * round (sin _perp), (_p select 1) + _i * OPCOM_GRID_CELL * round (cos _perp), 0]
+            };
+            private _onMass = { params ["_p"]; !(surfaceIsWater _p) && {([_p] call DUWS_fnc_opcom_massAt) == _mass} };
+            // A blocked side slides the line rather than breaking it; a bucket past what the ground holds stacks on
+            // the rally.
+            private _line = [0];
+            private _edge = [1, -1];
+            while {_rally isNotEqualTo [] && {count _line < _buckets} && {_edge isNotEqualTo [0, 0]}} do {
+                {
+                    if (_x != 0 && {count _line < _buckets}) then {
+                        private _q = [_rally, _x] call _across;
+                        if ([_q] call _onMass && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= OPCOM_RALLY_K}) then {
+                            _line pushBack _x;
+                            _edge set [_forEachIndex, _x + ([-1, 1] select (_x > 0))];
+                        } else {
+                            _edge set [_forEachIndex, 0];
+                        };
+                    };
+                } forEach +_edge;
+            };
             for "_n" from 0 to (_buckets - 1) do {
+                private _i = _line param [_n, 0];
                 private _p = _rally;
-                if (_n > 0 && {_rally isNotEqualTo []}) then {
-                    private _q = [[_rally getPos [OPCOM_GRID_CELL * ceil (_n / 2), _dir + ([90, -90] select (_n mod 2 == 0))]]
-                        call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
-                    if (!(surfaceIsWater _q) && {([_at, _q] call DUWS_fnc_opcom_cellDist) >= OPCOM_RALLY_K}
-                        && {([_q] call DUWS_fnc_opcom_massAt) == ([_at] call DUWS_fnc_opcom_massAt)}) then { _p = _q };
+                private _lane = [];
+                if (_i != 0) then {
+                    _p = [_rally, _i] call _across;
+                    _lane = [_at, _i] call _across;
+                    if !([_lane] call _onMass) then { _lane = [] };
                 };
-                _out pushBack [_role, _p, _n < _required, _release, _lambda];
+                _out pushBack [_role, _p, _n < _required, _release, _lambda, _lane];
             };
         };
     } forEach (DUWS_opcom_attackRoles get _kind);
@@ -101,9 +130,9 @@ DUWS_fnc_opcom_attackOpen = {
         ["id", _id], ["kind", _kind], ["target", _target], ["pos", _pos], ["label", _label],
         ["state", "buildup"], ["since", DUWS_opcom_tick], ["creep", []],
         ["roles", _roles apply {
-            _x params ["_role", "_rally", "_required", "_release", "_lambda"];
+            _x params ["_role", "_rally", "_required", "_release", "_lambda", "_lane"];
             createHashMapFromArray [["role", _role], ["units", []], ["rally", _rally], ["required", _required],
-                ["release", _release], ["released", false], ["lambda", _lambda]]
+                ["release", _release], ["released", false], ["lambda", _lambda], ["lane", _lane]]
         }]
     ];
     DUWS_opcom_attacks pushBack _attack;
@@ -213,11 +242,13 @@ DUWS_fnc_opcom_joinBucket = {
     (_least select 0) select 1
 };
 
-// A unit that cannot take the order leaves the attack, and the execution step drops it.
+// A unit that cannot take the order leaves the attack, and the execution step drops it. A bucket with a lane marches
+// it first, and DUWS_fnc_opcom_converge releases it again onto the target.
 DUWS_fnc_opcom_releaseRole = {
     params ["_attack", "_role"];
     _role set ["released", true];
     private _order = [["capture", _attack get "pos"], ["intercept", _attack get "target"]] select ((_attack get "kind") isEqualTo "qrf");
+    if ((_role get "lane") isNotEqualTo []) then { _order = ["move", _role get "lane"] };
     {
         _x set ["hold", 0];
         if !(([_x] + _order + ["", [], _role get "lambda"]) call fnc_opcom_task) then { _x set ["boundTo", -1] };
@@ -239,6 +270,23 @@ DUWS_fnc_opcom_releaseHeld = {
             };
         };
     } forEach _roles;
+};
+
+// A bucket closes on the target once every unit of it stands on its lane out of contact. The engine's read of the fight,
+// not belief, since only recon clears a sighting, and a stale one in the lane's cell would park the bucket until it
+// expired. A virtual unit renders near any real BLUFOR, so one standing unrendered has no fight in its cell.
+DUWS_fnc_opcom_converge = {
+    params ["_attack"];
+    {
+        private _role = _x;
+        if ((_role get "released") && {(_role get "lane") isNotEqualTo []}
+            && {(([_attack, _role] call DUWS_fnc_opcom_roleUnits) findIf {
+                ([_x] call DUWS_fnc_opcom_marching) || {(_x get "status") isEqualTo "engaged"}
+            }) < 0}) then {
+            _role set ["lane", []];
+            [_attack, _role] call DUWS_fnc_opcom_releaseRole;
+        };
+    } forEach (_attack get "roles");
 };
 
 // Every bucket released at launch goes at once, so the attack arrives as one wave; a bucket still empty is dropped.
@@ -281,7 +329,7 @@ DUWS_fnc_opcom_buildupStep = {
 };
 
 // A unit lost once the attack runs leaves the rest to finish it. A bucket still held waits at rest on its rally, so
-// only the released ones say whether the attack is over.
+// only the released ones say whether the attack is over, and one still on its lane has yet to close.
 DUWS_fnc_opcom_executionStep = {
     params ["_attack"];
     {
@@ -297,9 +345,11 @@ DUWS_fnc_opcom_executionStep = {
         [_attack] call DUWS_fnc_opcom_qrfFollow;
     };
     [_attack] call DUWS_fnc_opcom_releaseHeld;
+    [_attack] call DUWS_fnc_opcom_converge;
     if ((_attack get "creep") isNotEqualTo []) then { [_attack] call DUWS_fnc_opcom_creepStep };
     private _busy = _roles findIf {
-        (_x get "released") && {(([_attack, _x] call DUWS_fnc_opcom_roleUnits) findIf { [_x] call DUWS_fnc_opcom_marching }) >= 0}
+        (_x get "released") && {(_x get "lane") isNotEqualTo []
+            || {(([_attack, _x] call DUWS_fnc_opcom_roleUnits) findIf { [_x] call DUWS_fnc_opcom_marching }) >= 0}}
     };
     if (_busy < 0) then { [_attack, "done"] call DUWS_fnc_opcom_attackClose };
 };

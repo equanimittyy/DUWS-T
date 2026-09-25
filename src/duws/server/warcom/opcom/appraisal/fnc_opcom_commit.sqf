@@ -197,7 +197,7 @@ DUWS_fnc_opcom_qrfSweep = {
         if ((_taken findIf { ([_x, _at] call DUWS_fnc_opcom_cellDist) <= 1 }) < 0) then {
             _taken pushBack _at;
             private _label = format ["QRF at %1", mapGridPosition _at];
-            [_at, [[[], true, 0, 0, 0]], 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0]], "qrf"]] call _fnc_offer;
+            [_at, [[[], true, 0, 0, 0]], 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0, []]], "qrf"]] call _fnc_offer;
         };
     } forEach _sightings;
     {
