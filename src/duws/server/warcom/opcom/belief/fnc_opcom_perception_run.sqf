@@ -9,6 +9,9 @@ call fnc_opcom_tasking_init;
 if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreOpcom };
 
 while {true} do {
+    // Idle with nobody on: holds, cooldowns and staleness all count in ticks, so a frozen clock is a paused commander
+    // rather than one that spends a night buying against a player who is asleep.
+    waitUntil { sleep OPCOM_TICK_PERIOD; ([] call DUWS_fnc_humanCount) > 0 };
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the
     // stage in the catch so the RPT says what broke; the tick's work is dropped and retried next pass.
     DUWS_opcom_tick = DUWS_opcom_tick + 1;
@@ -87,6 +90,4 @@ while {true} do {
     } catch {
         ["ERROR", "OPCOM", format ["tick %1 threw in %2, thread held alive: %3", DUWS_opcom_tick, _stage, _exception]] call fnc_log;
     };
-
-    sleep OPCOM_TICK_PERIOD;
 };

@@ -17,15 +17,24 @@ if (DUWS_campaignLoaded) then {
 };
 
 //Execution Order requires zone bonus and reward before WARCOM INIT
-// Spawned exactly once, so territory income does not stack per zone captured.
+// Spawned exactly once, so territory income does not stack per zone captured. The period counts only time a human
+// is on: a campaign left running overnight must not pay out, or arm the enemy, against nobody.
 [] spawn {
+    private _elapsed = 0;
+    private _last = time;
     while {true} do {
         // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup).
         try {
-            sleep DUWS_econ_period;
-            call fnc_zonesundercontrol;
+            sleep 10;
+            if (([] call DUWS_fnc_humanCount) > 0) then { _elapsed = _elapsed + (time - _last) };
+            _last = time;
+            if (_elapsed >= DUWS_econ_period) then {
+                _elapsed = 0;
+                call fnc_zonesundercontrol;
+            };
         } catch {
             ["ERROR", "ECON", format ["econ tick threw, thread held alive: %1", _exception]] call fnc_log;
+            _last = time;
             sleep 10;
         };
     };
