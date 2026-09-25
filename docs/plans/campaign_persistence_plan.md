@@ -572,7 +572,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
 | Clock and flags | outcome | `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` |
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
-| Intents | outcome | the commander's live intent records and the `boundTo` key on the taskings they own, once orchestration lands |
+| Intents | outcome | `DUWS_opcom_intents`, one hashmap per intent, with `DUWS_opcom_intentSeq` beside it, and the `boundTo` key on the taskings they own |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
@@ -581,7 +581,7 @@ only, and `grp` is a live group's netId rather than a handle
 bound are gone, and a half-bound carry would hold its rider for the rest of the campaign, since a bound
 record refuses every new order.
 
-**Intents land with orchestration, and they change nothing here.** An intent is the record that binds
+**Intents landed with orchestration, and they change nothing here.** An intent is the record that binds
 several units to one action, and its roles name their units by tasking id rather than by handle
 ([`opcom_plan.md` §Commitment](opcom/opcom_plan.md#commitment-intents-are-sticky)). It therefore
 serialises on the taskings' own terms and restores with them, which is why that phase is built before

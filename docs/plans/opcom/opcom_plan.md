@@ -10,8 +10,8 @@ game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_com
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
 
-Phases 1–4 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
-specifies what remains: orchestration, then persistence, then the archetype.
+Phases 1–5 are shipped, but for 5.4's off-road layer, and the code under `src/duws/server/warcom/opcom/` is the source
+of truth for them. This doc specifies what remains: that layer, then persistence, then the archetype.
 The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -20,8 +20,8 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
-| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **next** |
-| 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — WIP |
+| 5 — Orchestration: a buildup and execution spine, the three manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **shipped**, but for the off-road layer (5.4) |
+| 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — **next** |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
@@ -45,9 +45,10 @@ leans between manoeuvres it does not write, so it has nothing to tilt until both
 
 `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose layers `_fri` (known
 OPFOR) and `_ene` (believed BLUFOR) the scoring reads, with the traffic layer and the observation tracker the guns
-are gated on; `taskings/` the orders, streaming, the carry and the fire mission; `appraisal/` the action list, every
-buy, the supply trucks, the roster, the sources and lifts, the commit orders, the siting pass, the score and the pick;
-and `appraisal/value/` the score's terms, one file each. The debug harness (`fnc_opcom_debug_task.sqf` and the Debug
+are gated on; `taskings/` the orders, streaming, the carry and the fire mission; `orchestration/` the intents and
+their runner, the buildup and the manoeuvres; `appraisal/` the action list, every buy, the supply trucks, the roster,
+the sources and lifts, the commit orders, the siting pass, the score and the pick; and `appraisal/value/` the score's
+terms, one file each. The debug harness (`fnc_opcom_debug_task.sqf` and the Debug
 menu's OPCOM pages) runs the orders by hand and spends no AP.
 
 New work holds to:
@@ -94,8 +95,8 @@ score = archWeight[archetype][action] × P(win) × Value / Cost
 `Value` and `Cost` are both Army Power, so the units agree; `archWeight`, the playing archetype's `actionWeight`,
 tilts by action ([§Archetype](#archetype-phase-7)); `P(win)` scales to the expected return.
 
-**Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Patrol and the two fire
-missions. A purchase does not: Reinforce, Fortify, Build and Rapport stock ground OPCOM already holds, and their
+**Only an order that fights for its target carries a `P(win)`** — Attack, Intercept, Patrol and `arty_saturate`.
+`arty_creeping` names none: its objective stands still where a sighting drifts, so there are no odds that it moved. A purchase does not: Reinforce, Fortify, Build and Rapport stock ground OPCOM already holds, and their
 site is gated on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores
 `Value / Cost`. A commit order that fights for nothing names 1 rather than leaving the term out, since its row still
 has to name its Cost past it: a Garrison rests, a Ferry carries, and a Probe observes.
@@ -193,8 +194,8 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
-| Arty saturate | each fresh belief sighting in range of an owned gun not already firing |
-| Arty creeping | each offensive intent in buildup or execution whose target an owned gun not already firing reaches |
+| Arty saturate | each fresh belief sighting in range of an owned gun not already firing or held by a creep |
+| Arty creeping | each offensive intent in buildup or execution, with no creep yet, whose target an owned gun not already firing or held by a creep reaches |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
 ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
@@ -575,7 +576,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 - **There is no retreat.** The engine owns a group in `COMBAT` and ignores a commanded withdrawal
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
-- **A multi-unit assault musters, then launches as one wave** (Phase 5, WIP). A muster is what buildup does: it binds
+- **A multi-unit assault musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
   force across ticks at a safe rally short of the target, one cell a role, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
   **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
@@ -591,7 +592,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 
 ## Orchestration (Phase 5)
 
-**WIP.** 5.1 to 5.3 and 5.5 are shipped and 5.4 is in part; 5.6 remains.
+**Shipped**, but for 5.4's off-road layer.
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
@@ -700,7 +701,10 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
 `arty_creeping` cannot stand alone: a creep is a barrage walked ahead of someone, so it needs an offensive to walk it
 for. An intent may therefore name a **parent** intent and a predicate on the parent's state, which is the per-role
 release predicate lifted one level. A creep binds when an offensive intent holds its target in buildup or execution,
-and its rounds walk ahead of that intent's advance.
+and its rounds walk ahead of that intent's advance (`DUWS_fnc_opcom_creepTargets`, `appraisal/fnc_opcom_fire.sqf`): an
+`OPCOM_ARTY_CREEP_WIDTH` × `OPCOM_ARTY_CREEP_LENGTH` box (150 × 200 m) walked forward through the objective along the
+wave's approach. The creep holds its battery from commit, so no Saturate finds its guns mid-mission, and fires once
+the parent launches and the guns are free. A parent that ends first takes the creep with it, its AP spent.
 
 `arty_saturate` needs no parent. Where it fires for a muster the two overlap rather than sequence: the offensive
 gathers while the rounds land, and the fires lift as it launches, because fires that stop before the wave starts hand
@@ -768,7 +772,7 @@ early.
 | **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
-| **5.6** Chained fires | Arty split into `arty_saturate`, which is today's action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
+| **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
@@ -776,7 +780,7 @@ Phase 5 settles in play the band thresholds and their overlap, each role's λ an
 `OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_STANDOFF`),
 `OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_STANDOFF`, the
-frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH` and `OPCOM_ARTY_CREEP_SHARE`.
+frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
 
@@ -969,12 +973,11 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   respawn into the circle), and re-checked against the circle immediately before firing.
 - **Spread** is the radius the action hands the shipped saturate: base by type, +25 m per km range, never below
   `OPCOM_ARTY_MIN_SPREAD`.
-- **Two actions over one implementation.** `arty_saturate` fires on a fresh sighting and is what ships;
-  `arty_creeping` walks its rounds ahead of a bound offensive, so it gates on that offensive standing and takes a
-  parent intent ([§Chained fires](#chained-fires-an-intent-may-name-a-parent)). They score apart because they buy
-  different things — saturate buys kills, a creep buys the wave's survival — and one Value cannot price both. Until
-  creeping lands, the shipped fire mission's creep stays reachable from the debug step, which is where a walked
-  pattern is asked for by hand.
+- **Two actions over one implementation.** `arty_saturate` fires on a fresh sighting; `arty_creeping` walks its
+  rounds ahead of a bound offensive, so it gates on that offensive standing and takes a parent intent
+  ([§Chained fires](#chained-fires-an-intent-may-name-a-parent)). They score apart because they buy different things
+  — saturate buys kills, a creep buys the wave's survival — and one Value cannot price both. The debug step still
+  asks for a walked pattern of any size by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
   timed off `getArtilleryETA`.
 - **Capped campaign-wide** — one battery and two mortar pits alive at once across the map. These are the only
@@ -1082,12 +1085,14 @@ OPCOM's store is shaped to serialise but implements no save/load, and today pers
 a restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
-It follows orchestration so the contract is written once. Phase 5 adds the intent records and the `boundTo` key on
-the taskings they own, which are stored state on the same terms as a tasking, so a contract written before it would
-be reopened the moment it landed. An intent is numbers, strings and arrays like everything else here, and its roles
-name their units by tasking id, which the taskings group already restores — so a buildup comes back mid-muster
-rather than collapsing, and what clears on restore is the live half a tasking already clears: the group handle, the
-status and any carry binding.
+It follows orchestration so the contract is written once. Phase 5 added the intent records (`DUWS_opcom_intents`, with
+`DUWS_opcom_intentSeq` beside it) and the `boundTo` key on the taskings they own, which are stored state on the same
+terms as a tasking, so a contract written before it would be reopened the moment it landed. An intent is numbers,
+strings and arrays like everything else here, and its roles name their units by tasking id, which the taskings group
+already restores — so a buildup comes back mid-muster rather than collapsing, and what clears on restore is the live
+half a tasking already clears: the group handle, the status and any carry binding. A creep names its parent by
+intent id, so the intent counter rides with the intents as `DUWS_opcom_taskSeq` rides with the taskings, and a
+buildup's `since` counts against `DUWS_opcom_tick` as a commit hold does.
 
 The phase ends in play rather than in code: a campaign is run past a save and a reload, and the commander has to
 pick up where it left off. That play pass is also what settles Phase 4's tuning list
