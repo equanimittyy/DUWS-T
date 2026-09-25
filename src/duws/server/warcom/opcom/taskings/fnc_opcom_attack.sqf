@@ -2,7 +2,8 @@
 // binds in role buckets, where each bucket stages, the muster that launches them together and what releases each. No-retreat turns
 // a force dribbled into contact into defeat in detail, so the units stage short of the target and go at once. A bound
 // unit that settles at its rally rests, so only its binding keeps the next pick off it. A role names its unit by
-// tasking id, never the record, so an attack serialises on the taskings' own terms.
+// tasking id, never the record, so an attack serialises on the taskings' own terms. A QRF is an attack on a sighting
+// cluster: its target moves, so it lays no rally, musters where its units stand and releases them on intercept.
 if (!isServer) exitWith {};
 
 // kind -> [[role, bearings, buckets, required buckets, released by, lambda], ...], bearings in degrees off the one the
@@ -123,6 +124,15 @@ DUWS_fnc_opcom_roleUnits = {
     _out
 };
 
+// -> false once the QRF's lead sighting is no longer believed; else moves the attack onto it.
+DUWS_fnc_opcom_qrfFollow = {
+    params ["_attack"];
+    private _i = DUWS_opcom_belief_key findIf { _x isEqualTo (_attack get "target") };
+    if (_i < 0) exitWith { false };
+    _attack set ["pos", +(DUWS_opcom_belief_pos select _i)];
+    true
+};
+
 // Marks rather than removes: the runner calls this mid-pass over the store. A creep still unfired is lost with its
 // attack, the AP spent at commit as a lost truck's is.
 DUWS_fnc_opcom_attackClose = {
@@ -175,9 +185,10 @@ DUWS_fnc_opcom_joinBucket = {
 DUWS_fnc_opcom_releaseRole = {
     params ["_attack", "_role"];
     _role set ["released", true];
+    private _order = [["capture", _attack get "pos"], ["intercept", _attack get "target"]] select ((_attack get "kind") isEqualTo "qrf");
     {
         _x set ["hold", 0];
-        if !([_x, "capture", _attack get "pos", "", [], _role get "lambda"] call fnc_opcom_task) then { _x set ["boundTo", -1] };
+        if !(([_x] + _order + ["", [], _role get "lambda"]) call fnc_opcom_task) then { _x set ["boundTo", -1] };
     } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
 };
 
@@ -212,7 +223,11 @@ DUWS_fnc_opcom_launch = {
 
 DUWS_fnc_opcom_buildupStep = {
     params ["_attack"];
-    if !([_attack get "target"] call DUWS_fnc_opcom_captureHolds) exitWith {
+    private _qrf = (_attack get "kind") isEqualTo "qrf";
+    if (_qrf && {!([_attack] call DUWS_fnc_opcom_qrfFollow)}) exitWith {
+        [_attack, "dropped: the sighting is no longer believed"] call DUWS_fnc_opcom_attackClose;
+    };
+    if (!_qrf && {!([_attack get "target"] call DUWS_fnc_opcom_captureHolds)}) exitWith {
         [_attack, "dropped: the target is no longer BLUFOR's"] call DUWS_fnc_opcom_attackClose;
     };
     private _units = [];
@@ -228,7 +243,7 @@ DUWS_fnc_opcom_buildupStep = {
     private _ready = ((_attack get "roles") findIf { (_x get "required") && {(_x get "units") isEqualTo []} }) < 0
         && {(_units findIf { [_x] call DUWS_fnc_opcom_marching }) < 0};
     if (_ready && {_r >= OPCOM_MUSTER_IDEAL}) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
-    if (DUWS_opcom_tick - (_attack get "since") < OPCOM_MUSTER_EXPIRY) exitWith {};
+    if (DUWS_opcom_tick - (_attack get "since") < ([OPCOM_MUSTER_EXPIRY, OPCOM_QRF_EXPIRY] select _qrf)) exitWith {};
     if (_r >= OPCOM_MUSTER_MIN) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
     [_attack, format ["abandoned at %1:1, short of the minimum", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;
 };
@@ -237,6 +252,8 @@ DUWS_fnc_opcom_buildupStep = {
 // only the released ones say whether the attack is over.
 DUWS_fnc_opcom_executionStep = {
     params ["_attack"];
+    // Its units chase on their own intercepts; following the lead keeps the next QRF off the same cluster.
+    if ((_attack get "kind") isEqualTo "qrf") then { [_attack] call DUWS_fnc_opcom_qrfFollow };
     {
         private _role = _x;
         _role set ["units", ([_attack, _role] call DUWS_fnc_opcom_roleUnits) apply { _x get "id" }];

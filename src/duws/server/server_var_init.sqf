@@ -845,6 +845,8 @@ OPCOM_PWIN_FLOOR = 0.3;
 OPCOM_MUSTER_IDEAL = 1.5;
 OPCOM_MUSTER_MIN = 0.75;
 OPCOM_MUSTER_EXPIRY = 240;       // ticks; 20 min @ 5s tick
+// A QRF's muster window: its target moves, so it goes on what it has by then. Tune.
+OPCOM_QRF_EXPIRY = 6;            // ticks; 30 s @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.
 OPCOM_MUSTER_HOLD = 0.5;
 // The most frontage cells an assault stages across, a bucket of units each.

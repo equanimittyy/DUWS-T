@@ -1,5 +1,5 @@
-// Locality: server, [] call'd at load. An Intercept's Value: the need around a sighting x the share of the local defense
-// the sighted group can overwhelm (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may
+// Locality: server, [] call'd at load. A QRF's Value: the need around a sighting cluster x the share of the local
+// defense the cluster can overwhelm (opcom_plan.md §Value). Read from the pick's unscheduled pass, so nothing here may
 // suspend.
 if (!isServer) exitWith {};
 

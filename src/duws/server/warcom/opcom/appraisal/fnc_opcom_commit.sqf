@@ -98,7 +98,8 @@ DUWS_fnc_opcom_attackSweep = {
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     {
         private _attack = _x;
-        private _slot = [_attack] call DUWS_fnc_opcom_joinBucket;
+        // A QRF draws on air as well, so DUWS_fnc_opcom_qrfSweep fills its own.
+        private _slot = if ((_attack get "kind") isEqualTo "qrf") then { -1 } else { [_attack] call DUWS_fnc_opcom_joinBucket };
         if (_slot >= 0) then {
             private _role = (_attack get "roles") select _slot;
             private _at = _attack get "pos";
@@ -145,25 +146,61 @@ DUWS_fnc_opcom_attackRun = {
     true
 };
 
-// One interceptor per sighting, for the reason one attacker goes at a zone.
-DUWS_fnc_opcom_interceptSweep = {
+// A QRF goes at a cluster, every sighting within a cell of the strongest: that block is the force its P(win) and muster
+// read, so one QRF masses on it where lone interceptors would arrive one at a time. Air joins, as it cannot join an
+// assault, since it hunts a group in the open rather than ground it must stand on. A ground unit across water stays
+// out: a ferry lands men a trip at a time, and the target moves. -> targets as DUWS_fnc_opcom_attackSweep's.
+DUWS_fnc_opcom_qrfSweep = {
     private _free = ([true] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
     private _zones = call DUWS_fnc_opcom_zonesOpen;
-    private _busy = (DUWS_opcom_taskings select { (_x get "order") isEqualTo "intercept" }) apply { _x getOrDefault ["interceptKey", ""] };
-    private _out = [];
+    private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
+    private _sightings = [];
     {
-        private _key = _x;
         private _bp = DUWS_opcom_belief_pos select _forEachIndex;
-        if ([_key] call DUWS_fnc_opcom_beliefIsSighting && {!(_key in _busy)} && {[_bp] call fnc_aoi_opfor_covers}) then {
-            private _v = [_bp, DUWS_opcom_belief_str select _forEachIndex] call DUWS_fnc_opcom_interceptValue;
-            private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _bp, _zones] call DUWS_fnc_opcom_hireSources))
-                apply { [_x, _v] };
-            {
-                _out pushBack ([_x, _bp, ["intercept", _key], format ["Intercept at %1", mapGridPosition _bp]]
-                    call DUWS_fnc_opcom_liftOffer);
-            } forEach ([_offers, _bp, true] call DUWS_fnc_opcom_bestSources);
+        if ([_x] call DUWS_fnc_opcom_beliefIsSighting && {[_bp] call fnc_aoi_opfor_covers}) then {
+            _sightings pushBack [DUWS_opcom_belief_str select _forEachIndex, _forEachIndex];
         };
     } forEach DUWS_opcom_belief_key;
+    _sightings sort false;
+    private _fnc_value = {
+        params ["_at"];
+        private _str = 0;
+        {
+            if (([DUWS_opcom_belief_pos select (_x select 1), _at] call DUWS_fnc_opcom_cellDist) <= 1) then { _str = _str + (_x select 0) };
+        } forEach _sightings;
+        [_at, _str] call DUWS_fnc_opcom_interceptValue
+    };
+    private _out = [];
+    private _fnc_offer = {
+        params ["_at", "_base", "_label", "_atk"];
+        private _v = [_at] call _fnc_value;
+        private _mass = [_at] call DUWS_fnc_opcom_massAt;
+        private _offers = ((_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
+            ((DUWS_opcom_moveWater get (_x select 3)) isNotEqualTo "land") || {!([_x, _mass] call DUWS_fnc_opcom_acrossWater)}
+        }) apply { [_x, _v] };
+        {
+            private _c = [_x, _at, [], _label] call DUWS_fnc_opcom_liftOffer;
+            (_c select 0) pushBack _atk;
+            _out pushBack _c;
+        } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
+    };
+    private _qrfs = DUWS_opcom_attacks select { (_x get "kind") isEqualTo "qrf" };
+    private _taken = _qrfs apply { _x get "pos" };
+    {
+        private _key = DUWS_opcom_belief_key select (_x select 1);
+        private _at = DUWS_opcom_belief_pos select (_x select 1);
+        if ((_taken findIf { ([_x, _at] call DUWS_fnc_opcom_cellDist) <= 1 }) < 0) then {
+            _taken pushBack _at;
+            private _label = format ["QRF at %1", mapGridPosition _at];
+            [_at, 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0]], "qrf"]] call _fnc_offer;
+        };
+    } forEach _sightings;
+    {
+        private _slot = [_x] call DUWS_fnc_opcom_joinBucket;
+        if (_slot >= 0) then {
+            [_x get "pos", [_x] call DUWS_fnc_opcom_boundForce, format ["Join the %1", _x get "label"], ["join", _x get "id", _slot]] call _fnc_offer;
+        };
+    } forEach _qrfs;
     _out
 };
 
@@ -206,8 +243,9 @@ DUWS_fnc_opcom_patrolSweep = {
 };
 
 // A probe buys belief, not ground: its Value is the error it removes from the reading the stake is about to be laid
-// on, so an objective no Attack can source, or one already launched on, is worth none. One probe per objective, for
-// the reason one patrol goes per destination. P(win) 1: it fights for nothing.
+// on, so an objective no Attack can source, or one already launched on, is worth none, and a QRF's none: its target is
+// a sighting, belief already fresh. One probe per objective, for the reason one patrol goes per destination. P(win) 1:
+// it fights for nothing.
 DUWS_fnc_opcom_probeSweep = {
     private _stakes = createHashMap;
     {
@@ -221,7 +259,7 @@ DUWS_fnc_opcom_probeSweep = {
         } forEach _y;
     } forEach (["attack", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached);
     {
-        if ((_x get "state") isEqualTo "buildup") then {
+        if ((_x get "state") isEqualTo "buildup" && {(_x get "kind") isNotEqualTo "qrf"}) then {
             _stakes set [_x get "target", [([_x] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE, _x get "pos", _x get "label"]];
         };
     } forEach DUWS_opcom_attacks;

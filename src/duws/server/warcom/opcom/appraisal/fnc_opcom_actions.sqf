@@ -27,7 +27,7 @@ DUWS_opcom_actions = [
         ["rapport", "civ_town_rep", DUWS_fnc_opcom_rapportOffer]],
     ["attack_assault", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun, ["assault"]],
     ["attack_flank", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun, ["flank"]],
-    ["intercept", DUWS_fnc_opcom_interceptSweep, DUWS_fnc_opcom_sendRun],
+    ["attack_qrf", DUWS_fnc_opcom_qrfSweep, DUWS_fnc_opcom_attackRun],
     ["patrol", DUWS_fnc_opcom_patrolSweep, DUWS_fnc_opcom_sendRun],
     ["probe", DUWS_fnc_opcom_probeSweep, DUWS_fnc_opcom_sendRun],
     ["garrison", DUWS_fnc_opcom_garrisonSweep, DUWS_fnc_opcom_sendRun],
