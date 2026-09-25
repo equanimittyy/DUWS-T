@@ -341,7 +341,7 @@ the answer.
 
 ## Persistence
 
-A hardcore campaign's entire progress is which zones and towns it has revealed, and none of it survives a
-restore today. The shape it needs — revealed state as an outcome applied after build-out, the same as zone
-ownership — is specified in
-[`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#the-snapshot), which is unbuilt.
+A hardcore campaign's entire progress is which zones and towns it has revealed, so the campaign snapshot
+stores the revealed zones by position and the revealed towns by index, and applies both after build-out, the
+same as zone ownership ([`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#the-team)).
+A hardpoint's reveal rides its own registry row and comes back with it.

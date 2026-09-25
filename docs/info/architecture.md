@@ -118,7 +118,8 @@ does not imply server-only.
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, rally point, transport |
 | `warcom/` | War Command — the OPFOR commander (OPCOM, `warcom/opcom/`), spawned after generation; no BLUFOR director and no live assault/patrol waves |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
-| `misc/` | Autosave, civilian/informant system, intel-on-death, AI master control |
+| `misc/` | Civilian/informant system, intel-on-death, AI master control |
+| `persistence/` | The campaign snapshot: its store, the save and its triggers, the load screen's server half and the restore hooks |
 | `sounds/` | Ambient music loop |
 | `operative/` | Operative recruit/deploy menu |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |
@@ -129,7 +130,7 @@ does not imply server-only.
 | System | Where | Note |
 |---|---|---|
 | Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions, plus per-town reputation. Writers, faucets and sinks in [`economy.md`](gameplay/economy.md) |
-| Persistence | `server/persistence/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
+| Persistence | `server/persistence/` | A data-only snapshot in `missionProfileNamespace`, fed back through the existing builders on load; the engine save stays off. Container: [`campaign_save_format.md`](architecture/campaign_save_format.md); contents and restore order: [`campaign_persistence_plan.md`](../plans/campaign_persistence_plan.md) |
 | Unit spawning | `server/placement/fnc_spawn_team.sqf`, `fnc_spawn_vehicle.sqf`, `shared/functions/fnc_spawn_vocab.sqf` | Three systems, chosen by what is raised: the token spawner (rosters as data, one call for side/skill/loot/posture) for teams that patrol or garrison; static crewing for a gunner on an emplaced weapon; direct `BIS_fnc_spawnGroup` for bespoke one-offs that share no team shape. Which is which, and why they are not interchangeable, are in [`unit_spawning.md`](architecture/unit_spawning.md) |
 | Faction detection | `shared/faction_lib/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](gameplay/faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |

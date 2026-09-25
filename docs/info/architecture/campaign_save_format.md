@@ -19,10 +19,11 @@ has no share-alike, so it adds nothing beyond carrying that notice (in `src/THIR
 
 Techniques borrowed without their code -- the arsenal count overlay in
 [`fnc_arsenal_counts.sqf`](../../../src/duws/client/arsenal/fnc_arsenal_counts.sqf) -- copy nothing
-copyrightable and need only the courtesy credit already carried in its comment. This save container
-is the one place DUWS_T adopts a substantial portion: when the `Save/` functions land under `src/`,
-carry the Antistasi MIT notice with them -- add it to `src/THIRD_PARTY_NOTICES.md` (which ships
-with the packed mission), or a per-file header on each adopted file.
+copyrightable and need only the courtesy credit already carried in its comment. The save container
+under `src/duws/server/persistence/` is the same case: it is written from the shapes this document
+describes and copies none of the `Save/` functions, so this document is its credit. A later port of
+their code would carry the Antistasi MIT notice into `src/THIRD_PARTY_NOTICES.md`, which ships with
+the packed mission.
 
 ## Two layers: an index and a payload
 
@@ -60,8 +61,8 @@ So the namespace is read from **one function and flushed through one function**,
 in the mission names either command:
 
 ```sqf
-// fnc_save_namespace  -> missionProfileNamespace or profileNamespace
-// fnc_save_flush      -> saveMissionProfileNamespace or saveProfileNamespace
+DUWS_fnc_saveNamespace = { missionProfileNamespace };   // or profileNamespace
+DUWS_fnc_saveFlush = { saveMissionProfileNamespace };   // or saveProfileNamespace
 ```
 
 Antistasi retrofitted this and pays for it: the same
@@ -103,18 +104,13 @@ stamp saved in one session sits in the future in the next and wedges whatever it
 is left: `["nextTick", nextTick - time]` on the way out, `nextTick = time + _value` on the way in
 (`fn_saveLoop.sqf`, `fn_loadStat.sqf:55`).
 
-## The accessor pair
+## One writer and one reader
 
-Every subsystem reads and writes the save through two functions and never touches the namespace:
-
-```sqf
-["zone_bounties", _bounties] call fnc_save_set;     // -> the in-flight hashmap
-private _bounties = "zone_bounties" call fnc_save_get;
-```
-
-During a save the hashmap accumulates and is serialised once at the end; during a restore it is
-the deserialised payload. The namespace is touched exactly twice per campaign lifetime step: once
-by the write path, once by the scan.
+No subsystem touches the namespace. `DUWS_fnc_campaignSnapshot` reads mission state into one hashmap,
+which is serialised once at the end of the save. A restore keeps the deserialised payload in
+`DUWS_restore`, and each restore hook reads its keys from there with `getOrDefault`, so a key that an
+older or damaged snapshot lacks falls back to the builder's own value. The namespace is touched by the
+write path, the scan, a delete and the one read of a chosen payload.
 
 This is where DUWS_T drops the most Antistasi machinery. Their equivalents
 (`fn_setStatVariable.sqf`, `fn_returnSavedStat.sqf`) each carry three backends — the in-flight
@@ -127,24 +123,35 @@ saves that already exist. A mission with none does not inherit it.
 
 One function assembles and commits, on the model of `fn_finalizeSave.sqf`:
 
-1. Build the header from the payload's own fields — format version, world, write stamp, campaign
-   day, zones held, CP, detected factions — and `toJSON` it.
+1. Build the header from the payload's own fields — format version, world, write stamp and its
+   minute count, campaign day, zones held and total, CP, the faction picks, the ending, and the
+   list of keys the payload holds — and `toJSON` it.
 2. Rotate the current payload key to `_prev`.
 3. Write the payload string, insert or replace the index row for this campaign ID, flush.
 
 **Insert or replace, keyed by campaign ID** (`fn_finalizeSave.sqf:42-44`): a save that appends
 unconditionally grows the index by one row per write.
 
-**A single-variable writeback exists for one-off flags.** Marking a campaign ended, or renaming
-it, should not require a full snapshot. Antistasi's `fn_writebackSaveVar.sqf` loads the payload,
-sets one key, and re-commits; its own header calls it slow and says to use it only for operations
-that must be ensured. Its one caller is the campaign-end check.
+**There is no single-variable writeback.** Antistasi's `fn_writebackSaveVar.sqf` loads a payload,
+sets one key and re-commits, for the campaign-end flag. DUWS_T writes a whole snapshot marked ended
+instead, from the campaign-end check just before the mission ends, since everything else in it is
+current at that moment too.
+
+**The write stamp orders saves as a minute count.** `systemTimeUTC` becomes minutes since
+2020-01-01 (`DUWS_fnc_saveStamp`): SQF numbers are single floats, which hold whole minutes exactly
+for decades from that epoch, where seconds since 1970 do not.
 
 ## Read path
 
-The scan reads the index, filters rows by world and format version, and publishes the headers for
-the load screen. Nothing deserialises a payload until a campaign is chosen. On choice the payload
-is `fromJSON`'d into the hashmap the accessors read, and the restore replays builders against it.
+The scan reads the index, checks each header against this session, and publishes the rows for the
+load screen as `DUWS_saveList`: `[id, header pairs, refusal key]` per campaign, newest first, with the
+header as pairs so the broadcast stays plain arrays. Nothing deserialises a payload until a campaign
+is chosen. On choice the payload is `fromJSON`'d into `DUWS_restore`, and the restore replays the
+builders against it.
+
+**`DUWS_saveStatus` tells an empty store from one that did not read back.** Every commit also writes
+the index's row count to `profileNamespace`, a second store. An empty index beside a count above zero
+reads as `unreadable`, and the load screen warns before New Game writes to the same store.
 
 **Publish an empty result rather than nothing when there is no valid save.** The load screen waits
 on that variable, and a variable that is never set is indistinguishable from a server still
@@ -182,8 +189,9 @@ copy is per-entry reconciliation against the live world, not an all-or-nothing m
 
 ## Per-player data
 
-One hashmap inside the payload, keyed by player UID, holding one hashmap per player. Player
-objects do not survive a session; UIDs do.
+DUWS_T stores nothing per player ([`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#the-team)).
+This section is what a per-player store would need: one hashmap inside the payload, keyed by player
+UID, holding one hashmap per player. Player objects do not survive a session; UIDs do.
 
 Three guards that are not obvious until they bite:
 

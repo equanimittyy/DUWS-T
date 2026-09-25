@@ -102,8 +102,8 @@ The `<name>.<world>.pbo` filename is load-bearing — Arma reads the terrain out
 `repack.cmd` output goes across unrenamed.
 
 **Choose the profile directory deliberately.** It is where the server writes its own
-`.vars.Arma3Profile`, which is where campaign saves will live once
-[`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md) lands: the directory you back up
+`.vars.Arma3Profile`, which is where campaign saves live
+([`../campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md)): the directory you back up
 and copy a save out of. **Then keep `-profiles=` and `-name=` identical on every restart.** The
 profile namespace is read back for the profile that wrote it, so a server whose profile identity
 moves between starts files each session's save under a different one and finds nothing on the next

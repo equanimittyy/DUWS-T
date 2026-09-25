@@ -258,8 +258,8 @@ inside the base-keep ring.
 cooldown seconds]`. The records are plain values only, with no unit, group or terrain-object handle,
 because a persistable thing must rebuild from numbers and strings. The building is stored by
 position. `fnc_vendor_live` finds a live vendor on the site roster by its `DUWS_vendor_slot`.
-Saving and replaying the registry is in
-[`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#features-not-built-yet).
+The campaign snapshot saves the registry and a load replays it over the fresh draft, so every shop stands
+where it stood ([`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#world-and-placement)).
 
 The unit broadcasts `DUWS_vendor_type`, `DUWS_vendor_town` and `DUWS_vendor_townName`, because the
 catalogue on the buyer's machine needs them and `civ_locations` is server-only.
