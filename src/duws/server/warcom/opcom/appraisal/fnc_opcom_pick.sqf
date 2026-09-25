@@ -7,20 +7,40 @@ if (DUWS_opcom_pickOnce isNotEqualTo "") then {
 };
 if (_mode isEqualTo "off") exitWith {};
 
+private _dbg = duws_log_level >= 4;
+private _lap = diag_tickTime;
+private _frame = diag_frameNo;
+private _split = {
+    if (_dbg) then {
+        DUWS_opcom_dbg_pick pushBack format ["%1=%2/%3", _this, round ((diag_tickTime - _lap) * 1000), diag_frameNo - _frame]
+    };
+    _lap = diag_tickTime;
+    _frame = diag_frameNo;
+};
+
 // Random mode sites on one band cell, so the control stays an unscored draw.
 [[OPCOM_SITE_SAMPLES, 1] select (_mode isNotEqualTo "weighted")] call DUWS_fnc_opcom_siteAll;
+"site" call _split;
 
 private _live = [];
+private _rowMs = [];
 // Unscheduled so every action reads one wallet and one store. The execute runs after, scheduled, because an order
 // plans a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
 isNil {
     {
         private _row = _x;
+        private _t0 = diag_tickTime;
         private _targets = (_row param [3, []]) call (_row select 1);
         if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
         if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
+        if (_dbg) then {
+            private _rms = round ((diag_tickTime - _t0) * 1000);
+            if (_rms > 0) then { _rowMs pushBack format ["%1=%2", _row select 0, _rms] };
+        };
     } forEach DUWS_opcom_actions;
 };
+"targets" call _split;
+if (_rowMs isNotEqualTo []) then { DUWS_opcom_dbg_pick pushBack format ["rows(%1)", _rowMs joinString " "] };
 if (_live isEqualTo []) exitWith {};
 
 private _row = [];
@@ -81,12 +101,14 @@ if (_mode isEqualTo "weighted") then {
     _row = _r;
     _cand = selectRandom _ts;
 };
+"rank" call _split;
 if (_row isEqualTo []) exitWith {};
 
 _row params ["_id", "", "_execute"];
 _cand params ["_target", "_price", "_label"];
 // Re-checked: the wallet can drop after the snapshot, and fnc_ap_adjust would clamp the overdraft to a free buy.
 private _ok = WARCOM_opfor_ap >= _price && {[_target, _price] call _execute};
+"exec" call _split;
 if (_ok && {_price > 0}) then { ["OPF", -_price, format ["opcom_%1", _id]] call fnc_ap_adjust };
 
 private _line = format ["%1%2%3%4", _label,

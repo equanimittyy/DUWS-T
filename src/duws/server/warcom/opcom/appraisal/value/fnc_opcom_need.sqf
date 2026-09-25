@@ -86,13 +86,21 @@ DUWS_fnc_opcom_needRefresh = {
     if (DUWS_opcom_needBuilding) exitWith {};
     private _sig = call DUWS_fnc_opcom_needSig;
     if (_sig isEqualTo DUWS_opcom_needSig) exitWith {};
+    private _why = [];
+    // In DUWS_fnc_opcom_needSig's part order.
+    {
+        if ((_sig select _forEachIndex) isNotEqualTo (DUWS_opcom_needSig param [_forEachIndex, []])) then { _why pushBack _x };
+    } forEach ["zones", "fobs", "hq", "towns", "hardpoints"];
     DUWS_opcom_needSig = _sig;
     DUWS_opcom_needBuilding = true;
-    [] spawn {
+    [_why joinString ","] spawn {
+        params ["_why"];
         private _t = diag_tickTime;
+        private _f = diag_frameNo;
         call DUWS_fnc_opcom_needBuild;
         DUWS_opcom_needBuilding = false;
-        ["DEBUG", "OPCOM", format ["need field rebuilt: %1 band cells in %2 s", count DUWS_opcom_bandCells, (diag_tickTime - _t) toFixed 1]] call fnc_log;
+        ["DEBUG", "OPCOM", format ["need field rebuilt (%1): %2 band cells in %3 s over %4 frames",
+            _why, count DUWS_opcom_bandCells, (diag_tickTime - _t) toFixed 1, diag_frameNo - _f]] call fnc_log;
     };
 };
 

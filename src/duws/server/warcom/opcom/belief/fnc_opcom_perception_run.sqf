@@ -16,10 +16,14 @@ while {true} do {
     private _dbg = duws_log_level >= 4;
     private _ms = [];
     private _lap = diag_tickTime;
+    private _frame = diag_frameNo;
     private _enter = {
-        if (_dbg && {_stage != ""}) then { _ms pushBack format ["%1=%2", _stage, round ((diag_tickTime - _lap) * 1000)] };
+        if (_dbg && {_stage != ""}) then {
+            _ms pushBack format ["%1=%2/%3", _stage, round ((diag_tickTime - _lap) * 1000), diag_frameNo - _frame]
+        };
         _stage = _this;
         _lap = diag_tickTime;
+        _frame = diag_frameNo;
     };
     try {
         "sense" call _enter;     call fnc_opcom_sense;
@@ -40,6 +44,7 @@ while {true} do {
         "need" call _enter;      call DUWS_fnc_opcom_needRefresh;
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;
+        DUWS_opcom_dbg_pick = [];
         DUWS_opcom_pickDebt = DUWS_opcom_pickDebt + DUWS_opcom_picksPerTick;
         private _picks = floor DUWS_opcom_pickDebt;
         DUWS_opcom_pickDebt = DUWS_opcom_pickDebt - _picks;
@@ -68,12 +73,12 @@ while {true} do {
         // format eats its args before fnc_log can drop the line, so these whole-grid count/selectMax scans
         // would run every tick even at the default level; gate them so they cost nothing unless DEBUG is on.
         if (_dbg) then {
-            ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8 ms[%9]",
+            ["DEBUG", "OPCOM", format ["grid tick=%1 w=%2 friCells=%3 eneCells=%4 maxFri=%5 maxEne=%6 belief=%7 fresh=%8 ms[%9] pick[%10]",
                 DUWS_opcom_tick, DUWS_opcom_grid_w,
                 {_x > 0.05} count DUWS_opcom_grid_fri,
                 {_x > 0.05} count DUWS_opcom_grid_ene,
                 selectMax DUWS_opcom_grid_fri, selectMax DUWS_opcom_grid_ene,
-                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh, _ms joinString " "]] call fnc_log;
+                count DUWS_opcom_belief_pos, DUWS_opcom_dbg_fresh, _ms joinString " ", DUWS_opcom_dbg_pick joinString " "]] call fnc_log;
         };
     } catch {
         ["ERROR", "OPCOM", format ["tick %1 threw in %2, thread held alive: %3", DUWS_opcom_tick, _stage, _exception]] call fnc_log;
