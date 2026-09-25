@@ -1,7 +1,7 @@
 // Locality: server. Hand-drive harness: recruit, order and inspect taskings from the server console (the
 // manual stand-in for the decision loop). Logs every verb under "OPCOMDBG". The order verbs zero the commit hold
 // first, so hand-driving re-tasks on demand where the automated loop would wait it out, and take the unit out of any
-// intent, which would otherwise order it on to its own target.
+// attack, which would otherwise order it on to its own target.
 //   ["menu"]                        -- list the recruit rows and their live prices
 //   ["recruit", row, pos, zoneKey]  -- hire a row; returns the tasking id (or -1)
 //   ["task", id, order, targetPos]  -- give tasking `id` an active order to a target ("move", "patrol", "capture")

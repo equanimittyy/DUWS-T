@@ -129,7 +129,6 @@ DUWS_fnc_opcom_ferryRun = {
         false
     };
     [_tr, _r] call DUWS_fnc_opcom_carryBind;
-    ["ferry", _rid, [["ferry", _tr]]] call DUWS_fnc_opcom_intentOpen;
     _r set ["strandTicks", 0];
     ["INFO", "OPCOM", format ["ferry: tasking %1 takes %2 transport %3 for a water leg", _rid, _tr get "moveType",
         _tr get "id"]] call fnc_log;

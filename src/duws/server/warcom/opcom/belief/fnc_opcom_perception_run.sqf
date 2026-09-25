@@ -35,7 +35,7 @@ while {true} do {
         "grid" call _enter;      call fnc_opcom_grid_rebuild;
         // Task step after the rebuild, so it reads the grid this tick just refreshed.
         "taskstep" call _enter;  call fnc_opcom_task_step;
-        "intents" call _enter;   call DUWS_fnc_opcom_intentStep;
+        "attacks" call _enter;   call DUWS_fnc_opcom_attackStep;
         "need" call _enter;      call DUWS_fnc_opcom_needRefresh;
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;

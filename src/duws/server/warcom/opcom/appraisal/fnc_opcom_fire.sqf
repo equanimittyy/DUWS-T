@@ -42,7 +42,7 @@ DUWS_fnc_opcom_batteryFiring = {
 DUWS_fnc_opcom_batteryBusy = {
     params ["_key"];
     [_key] call DUWS_fnc_opcom_batteryFiring
-        || {(DUWS_opcom_intents findIf { (_x get "action") isEqualTo "arty_creeping" && {(_x get "target") isEqualTo _key} }) >= 0}
+        || {(DUWS_opcom_attacks findIf { ((_x get "creep") param [0, ""]) isEqualTo _key }) >= 0}
 };
 
 DUWS_fnc_opcom_fireTargets = {
@@ -109,25 +109,23 @@ DUWS_fnc_opcom_fireRun = {
 // rather than kills: worth a share of the force the offensive stakes, and scored without odds, since its objective
 // stands still where a sighting drifts. One creep per offensive.
 DUWS_fnc_opcom_creepTargets = {
-    private _crept = (DUWS_opcom_intents select { (_x get "action") isEqualTo "arty_creeping" }) apply { _x get "parent" };
     private _out = [];
     {
-        private _intent = _x;
-        private _roles = _intent get "roles";
-        if ((_intent get "action") isEqualTo "attack" && {(_intent get "state") in ["buildup", "execution"]}
-            && {!((_intent get "id") in _crept)} && {_roles isNotEqualTo []}) then {
-            private _pos = _intent get "pos";
+        private _attack = _x;
+        private _roles = _attack get "roles";
+        if ((_attack get "creep") isEqualTo [] && {_roles isNotEqualTo []}) then {
+            private _pos = _attack get "pos";
             // The wave closes from its first role's rally, or from where that unit stands when it staged in place.
             private _from = (_roles select 0) get "rally";
             if (_from isEqualTo []) then {
-                private _t = [_intent, _roles select 0] call DUWS_fnc_opcom_roleUnit;
+                private _t = [_attack, _roles select 0] call DUWS_fnc_opcom_roleUnit;
                 _from = if (isNil "_t") then { _pos } else { _t get "pos" };
             };
             private _dir = _from getDir _pos;
             private _start = _pos getPos [OPCOM_ARTY_CREEP_LENGTH / 2, _dir + 180];
             _start = [_start select 0, _start select 1, 0];
             private _shape = ["creep", OPCOM_ARTY_CREEP_WIDTH, OPCOM_ARTY_CREEP_LENGTH, _dir];
-            private _v = ([_intent] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE * OPCOM_ARTY_CREEP_SHARE;
+            private _v = ([_attack] call DUWS_fnc_opcom_boundForce) * OPCOM_AP_PER_FORCE * OPCOM_ARTY_CREEP_SHARE;
             {
                 _x params ["_key", "_gpos", "_type"];
                 private _guns = count ([_key] call DUWS_fnc_opcom_batteryPieces);
@@ -135,40 +133,34 @@ DUWS_fnc_opcom_creepTargets = {
                     && {(_gpos distance2D _pos) <= ([OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY"))}
                     && {[_start] call DUWS_fnc_opcom_fireClear}) then {
                     ([_shape, _guns] call DUWS_fnc_opcom_creepGrid) params ["_rows", "_perRow"];
-                    _out pushBack [[_key, _intent get "id", _start, _shape],
+                    _out pushBack [[_key, _attack get "id", _start, _shape],
                         _rows * _perRow * _guns * (OPCOM_AP_PER_ROUND getOrDefault [_type, 2]),
-                        format ["Creep %1 ahead of the attack on %2", DUWS_hardpointName getOrDefault [_type, _type], _intent get "label"],
+                        format ["Creep %1 ahead of the %2 on %3", DUWS_hardpointName getOrDefault [_type, _type], _attack get "kind", _attack get "label"],
                         _v];
                 };
             } forEach ([] call DUWS_fnc_opcom_batteries);
         };
-    } forEach DUWS_opcom_intents;
+    } forEach DUWS_opcom_attacks;
     _out
 };
 
 // The creep holds its battery until its offensive launches; the runner fires it then (DUWS_fnc_opcom_creepStep).
 DUWS_fnc_opcom_creepRun = {
     params ["_target"];
-    _target params ["_key", "_pid", "_start", "_shape"];
-    private _i = DUWS_opcom_intents findIf { (_x get "id") isEqualTo _pid };
-    if (_i < 0 || {!(((DUWS_opcom_intents select _i) get "state") in ["buildup", "execution"])}) exitWith { false };
-    private _intent = ["arty_creeping", _key, [], [], "buildup", _start, (DUWS_opcom_intents select _i) get "label"]
-        call DUWS_fnc_opcom_intentOpen;
-    _intent set ["parent", _pid];
-    _intent set ["shape", _shape];
+    _target params ["_key", "_aid", "_start", "_shape"];
+    private _i = DUWS_opcom_attacks findIf { (_x get "id") isEqualTo _aid };
+    if (_i < 0 || {((DUWS_opcom_attacks select _i) get "creep") isNotEqualTo []}) exitWith { false };
+    (DUWS_opcom_attacks select _i) set ["creep", [_key, _start, _shape]];
     true
 };
 
-// The only chain edge (opcom_plan.md §Chained fires): the creep fires once its offensive launches and its guns are
-// free. An offensive that ends first takes the creep with it, the AP spent at commit as a lost truck's is.
+// Called each tick of a launched attack (opcom_plan.md §Chained fires).
 DUWS_fnc_opcom_creepStep = {
-    params ["_intent"];
-    private _i = DUWS_opcom_intents findIf { (_x get "id") isEqualTo (_intent get "parent") };
-    private _state = if (_i < 0) then { "done" } else { (DUWS_opcom_intents select _i) get "state" };
-    if (_state isEqualTo "done") exitWith { [_intent, "dropped: its offensive ended before it launched"] call DUWS_fnc_opcom_intentClose };
-    if (_state isNotEqualTo "execution" || {[_intent get "target"] call DUWS_fnc_opcom_batteryFiring}) exitWith {};
-    private _shape = _intent get "shape";
-    private _ok = [[_intent get "target", "", _intent get "pos", 0, _shape, (_shape select 2) max ((_shape select 1) / 2)]]
-        call DUWS_fnc_opcom_fireRun;
-    [_intent, ["dropped: no gun could fire", "fired"] select _ok] call DUWS_fnc_opcom_intentClose;
+    params ["_attack"];
+    (_attack get "creep") params ["_key", "_start", "_shape"];
+    if ([_key] call DUWS_fnc_opcom_batteryFiring) exitWith {};
+    private _ok = [[_key, "", _start, 0, _shape, (_shape select 2) max ((_shape select 1) / 2)]] call DUWS_fnc_opcom_fireRun;
+    _attack set ["creep", []];
+    ["INFO", "OPCOM", format ["attack %1 (%2 %3) creep %4", _attack get "id", _attack get "kind", _attack get "label",
+        ["dropped: no gun could fire", "fired"] select _ok]] call fnc_log;
 };

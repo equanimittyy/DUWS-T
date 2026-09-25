@@ -7,8 +7,8 @@ if (!isServer) exitWith {};
 
 DUWS_opcom_taskings = [];
 DUWS_opcom_taskSeq  = 0;
-DUWS_opcom_intents = [];
-DUWS_opcom_intentSeq = 0;
+DUWS_opcom_attacks = [];
+DUWS_opcom_attackSeq = 0;
 
 // The one buyable-unit table (docs/plans/opcom/opcom_plan.md): row -> [composition, flags]. Bare tokens resolve
 // to the "none" posture, so the unit takes OPCOM's order, not a standing circuit. No price column -- OPCOM_AP_UNIT
@@ -72,7 +72,7 @@ DUWS_fnc_opcom_byId = {
     DUWS_opcom_taskings select _i
 };
 
-// A resting unit an order may draw on -- never one an intent still binds, nor one garrisoned in a contested zone,
+// A resting unit an order may draw on -- never one an attack still binds, nor one garrisoned in a contested zone,
 // which holds ground under assault.
 DUWS_fnc_opcom_drawable = {
     params ["_t"];

@@ -91,7 +91,7 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_traffic.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_sources.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
-// taskings\: streaming, the movement core, the ferry (orchestrator, virtual, live, one table per lift type), garrison, ports, delivery, fires, the order bodies and the order table executed to
+// taskings\: streaming, the movement core, the ferry (orchestrator, virtual, live, one table per lift type), garrison, ports, delivery, fires, the order bodies, the order table and the Attack runner executed to
 // define them; the store init, router, recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
@@ -113,10 +113,7 @@ fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
-// orchestration\: the intent store and its per-tick runner, an Attack's buildup, and the manoeuvres it commits as.
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\orchestration\fnc_opcom_intent.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\orchestration\fnc_opcom_buildup.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\orchestration\fnc_opcom_manoeuvres.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_attack.sqf";
 // appraisal\: executed to define the score and its terms (value\, one file per term), the picker's state, the
 // archetypes, the site queries, the asset tables, supply trucks, the siting pass, the roster, the sources, the lifts, the
 // commit, fire, holding and build actions, and the action list. siting reads the Value functions into its table at

@@ -7,7 +7,7 @@
 //     it, so only an order that fights for its target carries one -- a buy stocks ground OPCOM already holds and leaves
 //     it out. `cost` is what the score divides by, the price when omitted; a commit order pays no AP but stakes a unit,
 //     so it names both.
-//   [target, price, id] call execute -> true when the action landed; the pick charges the price only then.
+//   [target, price] call execute -> true when the action landed; the pick charges the price only then.
 //   weight is the row's actionWeight key, the id when omitted. Every zone, standalone and mine build shares "build",
 //     so the archetype weighs building whole and its mix alone picks the type: a per-type weight would fight the mix
 //     for the same lean. An asset build keeps its own key and stays out of the mix: its cap, not a share, bounds how
@@ -25,7 +25,8 @@ DUWS_opcom_actions = [
         ["fortify", "DUWS_townGarrisonTier", DUWS_fnc_opcom_townFortifyOffer]],
     ["rapport", DUWS_fnc_opcom_townTargets, DUWS_fnc_opcom_townRun,
         ["rapport", "civ_town_rep", DUWS_fnc_opcom_rapportOffer]],
-    ["attack", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun],
+    ["attack_assault", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun, ["assault"]],
+    ["attack_flank", DUWS_fnc_opcom_attackTargets, DUWS_fnc_opcom_attackRun, ["flank"]],
     ["intercept", DUWS_fnc_opcom_interceptSweep, DUWS_fnc_opcom_sendRun],
     ["patrol", DUWS_fnc_opcom_patrolSweep, DUWS_fnc_opcom_sendRun],
     ["probe", DUWS_fnc_opcom_probeSweep, DUWS_fnc_opcom_sendRun],
