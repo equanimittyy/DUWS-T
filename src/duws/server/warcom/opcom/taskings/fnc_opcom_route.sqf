@@ -1,8 +1,8 @@
 // Locality: server. Plans a tasking's route: [_pts, _mode] -- _pts an [x,y,z] chain ending at the target
 // ([] = none), _mode "road"/"grid". Runs scheduled (the road branch may yield), never in the scoring isNil
 // block. Wheeled/tracked route on roads (fnc_convoy_path's polyline, stepped as one hull -- no convoy driver);
-// infantry/air/boat take an A* cost-field cell chain, cost = stepLen + OPCOM_ROUTE_LAMBDA*_lambda*gridEne.
-// Road routing is threat-blind: the lambda term steers only the cell chain, never which road a hull takes.
+// infantry/air/boat take an A* cost-field cell chain, cost = stepLen + OPCOM_ROUTE_LAMBDA*_lambda*gridEne. A road
+// step pays the same term pro rata to its length, so a hull at lambda > 0 takes the road around a threat.
 params ["_startPos", "_destPos", "_moveType", ["_lambda", 0]];
 if (!isServer) exitWith { [[], "grid"] };
 
@@ -11,7 +11,13 @@ if (!isServer) exitWith { [[], "grid"] };
 // grid. Water within 50 m of a road is a bridge or the unit's own spot mid-bridge, not a crossing; a stub that could
 // not skirt the sea keeps a wet point well past that.
 if (_moveType in ["wheeled", "tracked"]) exitWith {
-    private _segs = [_startPos, _destPos] call fnc_convoy_path;
+    private _extra = if (_lambda > 0) then {
+        [{
+            params ["_lw", "", "_to", "_len"];
+            _lw * (DUWS_opcom_grid_ene select ([_to] call DUWS_fnc_opcom_w2c)) * _len / OPCOM_GRID_CELL
+        }, OPCOM_ROUTE_LAMBDA * _lambda]
+    } else { [] };
+    private _segs = [_startPos, _destPos, _extra] call fnc_convoy_path;
     private _pts = [];
     private _wet = false;
     {
@@ -24,7 +30,11 @@ if (_moveType in ["wheeled", "tracked"]) exitWith {
         if (_wet) exitWith {};
         { if (_pts isEqualTo [] || {(_pts select (count _pts - 1)) distance2D _x > 1}) then { _pts pushBack _x } } forEach _p;
     } forEach _segs;
-    [[_pts, []] select _wet, "road"]
+    // A threat-priced search can give up on a long detour and leave the network across water, where the length-only
+    // road stays dry: a march through the threat beats no march.
+    if (_wet && {_lambda > 0}) then { [_startPos, _destPos, _moveType, 0] call fnc_opcom_route } else {
+        [[_pts, []] select _wet, "road"]
+    }
 };
 
 private _w    = DUWS_opcom_grid_w;

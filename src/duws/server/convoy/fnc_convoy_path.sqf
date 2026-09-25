@@ -9,8 +9,11 @@
 //
 // Returns SEGMENTS tagged "road" or "gap" (a gap is a disconnected stretch the driver crosses natively),
 // joined end-to-start from _startPos to _destPos.
-// [_startPos, _destPos] -> [[[x,y,z], ...], "road"|"gap"], ...]   // >= 1 segment, each >= 2 points
-params ["_startPos", "_destPos"];
+// [_startPos, _destPos, _extra] -> [[[x,y,z], ...], "road"|"gap"], ...]   // >= 1 segment, each >= 2 points
+// _extra: [] for length only, or [code, arg], [arg, from, to, length] call code adding a cost >= 0 to each road step,
+// which keeps the straight-line heuristic admissible.
+params ["_startPos", "_destPos", ["_extra", []]];
+private _priced = _extra isNotEqualTo [];
 
 #define CP_ROAD_FIND  3000     // snap each end to its nearest road within this (m). Generous so we prefer the
                                // network and drive off-road only the unavoidable stub; only a truly roadless
@@ -119,6 +122,8 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
     // dest keeps pulling _bestH down; an unreachable one plateaus and bails at CP_STALL (see the define).
     private _bestH = 1e12;
     private _stall = 0;
+    // An extra cost sends the search around what it prices, and a detour pops more nodes without closing on the dest.
+    private _stallMax = [CP_STALL, CP_STALL * 4] select _priced;
 
     while { count _open > 0 && {isNull _goal} && {_steps < CP_MAX_STEPS} } do {
         _steps = _steps + 1;
@@ -144,7 +149,7 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
         // search does.
         private _h = _curPos distance2D _destPos;
         if (_h < _bestH) then { _bestH = _h; _bestNode = _cur; _stall = 0 } else { _stall = _stall + 1 };
-        if (_stall >= CP_STALL) exitWith {
+        if (_stall >= _stallMax) exitWith {
             if (duws_log_level >= 4) then {
                 ["DEBUG", "CONVOY", format ["A* bail: closest %1 m after %2 pops, %3 with no gain -- dest unreachable, leg goes off-road",
                     round _bestH, _steps, _stall]] call fnc_log;
@@ -161,7 +166,10 @@ if !(isNull _startRoad || {isNull _destRoad}) then {
         {
             private _nk = [_x] call _keyOf;
             if !(_closed getOrDefault [_nk, false]) then {
-                private _tg = _curG + (_curPos distance2D (getPosATL _x));
+                private _np = getPosATL _x;
+                private _len = _curPos distance2D _np;
+                private _tg = _curG + _len;
+                if (_priced) then { _tg = _tg + ([_extra select 1, _curPos, _np, _len] call (_extra select 0)) };
                 if (_tg < (_g getOrDefault [_nk, 1e12])) then {
                     _g      set [_nk, _tg];
                     _parent set [_nk, _cur];
