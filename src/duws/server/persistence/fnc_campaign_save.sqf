@@ -16,8 +16,8 @@ DUWS_fnc_campaignDay = {
     1 + floor ((((_d select 0) - 2035) + dateToNumber _d - dateToNumber [2035, 8, 3, 0, 0]) * 365)
 };
 
-// A tasking holds no handle, only a group's netId and a helipad's, and neither resolves in the next session. A
-// live group is read the way a stow reads it, so the unit comes back at the strength it had rather than at hire.
+// A tasking holds no handle, only netIds (its group, a helipad, the group an intercept hunts), and none resolves in
+// the next session. A live group is read the way a stow reads it, so the unit comes back at the strength it had.
 DUWS_fnc_campaignTaskings = {
     (missionNamespace getVariable ["DUWS_opcom_taskings", []]) apply {
         private _t = +_x;
@@ -29,6 +29,9 @@ DUWS_fnc_campaignTaskings = {
         };
         _t set ["grp", ""];
         _t set ["ferryPad", ""];
+        if ("interceptKey" in _t) then { _t set ["interceptKey", ""] };
+        // A mission-time stamp would sit in the next session's future and hold the capture for as long as this one ran.
+        _t deleteAt "inZoneAt";
         if !((_t getOrDefault ["status", ""]) in ["dead", "done"]) then { _t set ["status", "virtual"] };
         _t
     }
