@@ -66,32 +66,32 @@ alone cost that much; which of them, the line could not say.
 The need-field rebuild line names the signature parts that forced the rebuild and the frames it spanned. This is the
 one finding the rest depend on: it turns the estimates below into measurements.
 
-### 2. The need field rebuilds on every hardpoint build, at 6-13 s each
+### 2. The need field rebuilt on every hardpoint build, at 6-13 s each
 
-`DUWS_fnc_opcom_needSig` (`warcom/opcom/appraisal/value/fnc_opcom_need.sqf:27-35`) includes every OPFOR hardpoint key,
-so a mortar pit, an OP post or a minefield the commander builds changes the signature and `DUWS_fnc_opcom_needRefresh`
-spawns a full rebuild. The play-test rebuilt five times in eleven minutes, at 6.1 s, 9.5 s, 6.3 s, 13.5 s and 9.6 s
-of wall time, and every other stage inflated while each one ran.
+In the play-test, the need signature included every OPFOR hardpoint key, so a mortar pit, an OP post or a minefield
+the commander built changed it, and `DUWS_fnc_opcom_needRefresh` spawned a full rebuild. The play-test rebuilt five
+times in eleven minutes, at 6.1 s, 9.5 s, 6.3 s, 13.5 s and 9.6 s of wall time, and every other stage inflated while
+each one ran.
 
-The band test is what costs: `DUWS_fnc_opcom_needBuild` runs `fnc_aoi_field_at` and `fnc_aoi_in_any_zone` over every
-land cell in the box (`fnc_opcom_need.sqf:66-75`). A hardpoint that is not a radio tower changes no coverage, only the
-deposit it spreads (`:53-58`), and a spread is 49 cell writes.
+The band test is what costs: it runs `fnc_aoi_field_at` and `fnc_aoi_in_any_zone` over every land cell in the box
+(`warcom/opcom/appraisal/value/fnc_opcom_need.sqf:66-75`). A hardpoint that is not a radio tower changes no coverage,
+only the deposit it spreads (`:81-87`), and a spread is 49 cell writes.
 
-**Fix.** Split the signature: a band signature (BLUFOR zones, FOBs, the HQ, banded towns, radio tower keys) and a
-deposit signature (the band signature plus every OPFOR hardpoint key). The zone spreads, the town spreads and the band
-base add read only band-signature inputs, so cache them with `DUWS_opcom_bandCells` on the band signature. A
-deposit-only change then adds the hardpoint spreads to that cache, which is cheap enough to run in the tick without a
-thread.
+**Fix.** The signature is split (`fnc_opcom_need.sqf:27-42`): a band signature (BLUFOR zones, FOBs, the HQ reveal,
+banded towns, radio tower keys) and a deposit signature (every OPFOR hardpoint key). The zone spreads, the town
+spreads and the band base add read only band-signature inputs, so `DUWS_fnc_opcom_needBandBuild` caches them with
+`DUWS_opcom_bandCells`. A deposit-only change then re-spreads the hardpoint deposits over that cache inside the tick,
+with no thread.
 
 Of the five rebuilds seen, the first was the boot build on tick 1, and the second followed a radio tower, which moved
 the band from 466 to 580 cells. The other three followed a mortar, an OP and a second mortar, and the split removes
 them. The OP landed while the mortar's rebuild ran, so it forced a second full rebuild 14 s after the first.
 
-The siting memo (`fnc_opcom_siting.sqf:53`) stamps with the whole need signature, so it also resets on every build.
-A mortar's, a battery's and an OP's Value read only the area of influence and the assets of their own type, so their
-memos can stamp on the band signature and their own assets, and stay warm across the other builds. A radio tower's
+The siting memo stamped with the whole need signature, so it also reset on every build. A mortar's, a battery's and
+an OP's Value read only the area of influence and the assets of their own type, so their memos now stamp on the band
+signature and their own assets (`fnc_opcom_siting.sqf:55`), and stay warm across the other builds. A radio tower's
 Value multiplies by `DUWS_fnc_opcom_defend`, which reads every OPFOR hardpoint (`value/fnc_opcom_exposure.sqf:49`), so
-its memo keeps the whole signature.
+its memo also stamps on the deposit signature.
 
 ### 3. Coverage is asked point by point
 
@@ -108,9 +108,9 @@ asks it thousands of times a tick:
 | `DUWS_fnc_opcom_rapportOffer` (`fnc_opcom_buy_holding.sqf:81`) | one per town | each pick, unscheduled |
 | `DUWS_fnc_opcom_qrfSweep` (`fnc_opcom_commit.sqf:166`) | one per sighting | each pick, unscheduled |
 
-The siting memo (`fnc_opcom_siting.sqf:53-55`) keys by band cell, warms eight random cells a tick out of about 580,
-and resets whenever the need signature or the type's asset list changes, which is what a landed build does. In a
-campaign that builds, it is cold most of the time. It is the suspected cause of the 700-2500 ms picks on ticks with
+The siting memo (`fnc_opcom_siting.sqf:55-57`) keys by band cell and warms eight random cells a tick out of about
+580. In the play-test it reset on every landed build, so in a campaign that builds it was cold most of the time. It
+is the suspected cause of the 700-2500 ms picks on ticks with
 no belief, no BLUFOR ground and so no attack, QRF, probe or fire targets to score. The patrol sweep and the buy rows
 still ran on those ticks, so the `site` and `rows(…)` figures decide it.
 
@@ -143,19 +143,20 @@ eight destinations, inside the unscheduled pass. It is suspected as the largest 
 native call. A hashMap is not a sure gain: its insert is still one interpreted command per cell, where the scan in
 `pushBackUnique` is native. The line sampling and the k-block stay as they are.
 
-### 5. The grid A* keeps its frontier in a flat list
+### 5. The grid A* kept its frontier in a flat list
 
-The cell-chain branch of `fnc_opcom_route` (`taskings/fnc_opcom_route.sqf:100-150`) has the shape the road search had
-before the road-graph fix: it initialises two full-grid arrays of 3844 cells per call (`:100-102`), takes the next
-node by a linear scan of the open list in SQF (`:119`) and tests membership with `find` (`:141`). It runs for every
+In the play-test, the cell-chain branch of `fnc_opcom_route` (`taskings/fnc_opcom_route.sqf`) had the shape the road
+search had before the road-graph fix: it filled two full-grid arrays of 3844 cells per call and took the next node by
+a linear scan of the open list in SQF. It runs for every
 infantry, air and boat order (`fnc_opcom_task.sqf:99`), every replan when a route empties
 (`fnc_opcom_movement_core.sqf:24`), every cell a QRF's sighting moves (`fnc_opcom_intercept.sqf:39`), twice per lift
 bind (`appraisal/fnc_opcom_lift.sqf:82-83`), once per lift execute (`:139`), per taxi bind (`fnc_opcom_taxi.sqf:61`)
 and for the off-road tail of a bent road route (`fnc_opcom_route.sqf:40`). A route at lambda above 0 opens far more
 cells than a direct one, and every attack launch routes each of its units in one tick.
 
-**Fix.** Take the next node with `_openF find (selectMin _openF)`, and start `_g` and `_from` as `+` copies of a
-prebuilt array of -1, not with the 3844-step loop. Both are native. The road search's heap is the wrong model here: a
+**Fix.** The search takes the next node with `_openF find (selectMin _openF)`, and starts `_g` and `_from` as `+`
+copies of `DUWS_opcom_routeBlank`, an array of -1 built once at grid init. Both are native, and the pop still takes
+the first minimum, so routes are unchanged. The road search's heap is the wrong model here: a
 heap written in SQF runs interpreted steps on every push and pop, and they lose to a native linear scan at open lists
 of a few hundred cells. Scheduled work, so the gain is tick wall time, not frame time.
 
@@ -189,16 +190,15 @@ Each of these is small and none is the bottleneck; together they are a steady sh
 
 ### 7. Small and pervasive: the play box through `missionNamespace`
 
-`DUWS_fnc_opcom_w2c` and `DUWS_fnc_opcom_blockCells` (`belief/fnc_opcom_grid_coords.sqf:9`, `:27`) read
-`DUWS_opcom_box` through `missionNamespace getVariable` with a default array on every call. They are the innermost
+In the play-test, `DUWS_fnc_opcom_w2c` and `DUWS_fnc_opcom_blockCells` (`belief/fnc_opcom_grid_coords.sqf:9`, `:27`)
+read `DUWS_opcom_box` through `missionNamespace getVariable` with a default array on every call. They are the innermost
 calls of the whole appraisal, tens of thousands of calls a pick. `DUWS_opcom_box` exists from `fnc_opcom_grid_init`
 on, and `DUWS_fnc_opcom_deposit` already reads it directly (`fnc_opcom_grid_sources.sqf:13`).
 
-**Fix.** `fnc_opcom_grid_init.sqf` sets `DUWS_opcom_grid_w` at :17 and `DUWS_opcom_box` at :42, with a town loop
-that can yield between them. Set the box first. The coordinate functions require a caller to guard on
-`isNil "DUWS_opcom_grid_w"` (`fnc_opcom_grid_coords.sqf:2`), so the five reads with a default (these two,
-`fnc_opcom_route.sqf:68`, `fnc_opcom_ports.sqf:14` and `debug/fnc_debug_opcom_grid.sqf:25`) can then read the box
-directly.
+**Fix.** `fnc_opcom_grid_init.sqf` set `DUWS_opcom_grid_w` before the box, with a town loop that can yield between
+them; it now sets the box first. The coordinate functions require a caller to guard on `isNil "DUWS_opcom_grid_w"`
+(`fnc_opcom_grid_coords.sqf:2`), so the five reads that had a default (these two, `fnc_opcom_route.sqf`,
+`fnc_opcom_ports.sqf` and `debug/fnc_debug_opcom_grid.sqf`) read the box directly.
 
 ### 8. The tick period stretches under load
 
@@ -230,7 +230,9 @@ shorter sleep under load would add load.
 
 ## Plan of action
 
-Three steps: update the DEBUG lines, measure, review. Finding 1 is the first step.
+Three steps: update the DEBUG lines, measure, review. The first step is finding 1, and it also carries findings 2, 5
+and 7: the play-test already shows the cost of finding 2, and findings 5 and 7 change no behaviour, so the
+measurement checks those three rather than decides them.
 
 ### Measure
 
@@ -239,19 +241,16 @@ where the commander builds. Each figure settles a question:
 
 | Figure | Question it settles |
 |---|---|
-| `need field rebuilt (…)` | Finding 2: how many rebuilds `hardpoints` alone forced, and how many of their seconds were scheduler wait |
-| `site` | Findings 2 and 3: the siting pass's share of the pick, and so what a warm memo would save |
+| `need field rebuilt (…)`, `need deposits re-spread` | Finding 2: that only a band input still forces a rebuild, and what a re-spread costs |
+| `site` and `siteValues` | Findings 2 and 3: the siting pass's share of the pick, and how many Values a pass still computes |
 | `targets` and `rows(…)` | Findings 3, 4 and 6: which rows carry the unscheduled pass (`patrol` for finding 4, `rapport` and `attack_qrf` for finding 3) |
-| `exec`, `taskstep` and `attacks` | Finding 5: the share of the router, which has no timer of its own |
+| `route[…]` | Finding 5: the A* searches of a tick, the cells they expand and their ms/frames |
 | the frame count of `grid` | Whether the re-pricing of awake sites, dismissed above, is its own cost or contention |
 
 ### Review
 
-Decide each finding against those figures, and drop any finding whose cost the figures do not show. Where the costs
-are confirmed, the review starts from this order, cheapest change first:
+Decide each open finding against those figures, and drop any finding whose cost the figures do not show. Where the
+costs are confirmed, the review starts from this order, cheapest change first:
 
-1. Finding 2, with the memo re-key and the cached band base.
-2. Finding 7: set the box before the grid width.
-3. Finding 5: `selectMin` and a template copy.
-4. Finding 3: the town list once per pass, then the flat emitter list.
-5. Findings 4 and 6, for the rows that `rows(…)` names.
+1. Finding 3: the town list once per pass, then the flat emitter list.
+2. Findings 4 and 6, for the rows that `rows(…)` names.

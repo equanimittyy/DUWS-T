@@ -78,8 +78,8 @@ On each pick, enumerate candidate `[action, target]` pairs, gate them cheaply, w
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
 lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) and enumerates every row with no deadline: a
 deadline would hide the cost, not remove it, and a pass cut short biases the draw toward the rows enumerated first.
-The pick executes after it in scheduled space, because an order plans a route and the router may yield. One pick a tick by default (1 pick per tick); the difficulty setting changes the rate
-([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
+The pick executes after it in scheduled space, because an order plans a route and the router may yield. One pick a
+tick by default (1 pick per tick); the difficulty setting changes the rate ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's id, targets, gate, price, execute, weight key, Value and Cost.
 
 `random` mode, switched on from the Debug menu's OPCOM page, is the unscored control it was built as: it draws an
@@ -369,8 +369,10 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   site by their own rules ([§Asset siting](#asset-siting)), so the cover network builds up around them into the
   gaps.
 - **The holdings and the band base rebuild only when their inputs change** — BLUFOR's zones and FOBs, the HQ
-  reveal, a town crossing a band, an OPFOR hardpoint built or cleared. The band test runs the area of influence over
+  reveal, a town crossing a band, a radio tower built or cleared. The band test runs the area of influence over
   every land cell in the box, so the rebuild runs in its own spawned thread and swaps the field whole when done.
+  Any other OPFOR hardpoint built or cleared changes only the deposits, so the tick re-spreads them over the cached
+  base.
 - **Traffic** (force), a belief layer. Each sighting raises its cell to the larger of the cell's current value and
   the sighting's force; the value halves every `OPCOM_TRAFFIC_HALFLIFE` (360 ticks, 30 min), so a cell BLUFOR
   crosses once fades within the hour and a route they use every trip stays lit. The decay is applied when a cell is
@@ -999,7 +1001,8 @@ Each build type picks its band cell by the rule below, which ranks cells on the 
 `OPCOM_SITE_SAMPLES` (8) band cells from the need field's band mask ([§Need and cover fields](#need-and-cover-fields)),
 and every type takes the best of the same sample; `random` mode samples one, so it stays the unscored draw. The pass
 runs scheduled, ahead of the pick's unscheduled pass, and keeps a cell's tower and gun Value until the
-area-of-influence inputs or the type's own assets change. The truck drives to the cell's centre, and inside the cell
+area-of-influence inputs or the type's own assets change. A tower's Value reads every OPFOR hardpoint through
+defend, so its memo also resets on any build. The truck drives to the cell's centre, and inside the cell
 the shared terrain siting picks the spot (`fnc_hardpoint_score`,
 [`info/hardpoints.md`](../../info/gameplay/hardpoints.md#siting)).
 
