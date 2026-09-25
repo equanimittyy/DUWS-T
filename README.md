@@ -79,9 +79,7 @@ sets one up from the executable already in your Arma install.
 Static checks (SQF syntax + path resolution) and pure-function unit tests live in
 [`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/info/architecture/testing.md`](docs/info/architecture/testing.md).
 
-Neither layer can see a running mission. What still needs an in-game pass, what is known
-broken, and what the previous developer worked around rather than fixed are listed in
-[`KNOWN_ISSUES.md`](KNOWN_ISSUES.md).
+Neither layer can see a running mission.
 
 ## Conventions
 

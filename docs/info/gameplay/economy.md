@@ -7,8 +7,7 @@ spent from the menus — on advanced supports today, with combat vehicles priced
 moment. Town reputation is a third pool, per town rather than campaign-wide, and its band routes a
 town's passive income to a side: CP to a BLUFOR town, AP to an OPFOR one. Vehicle prices come from
 `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over the shipped `blufor_RQST_*` tables —
-see [`faction_system.md`](faction_system.md). The full reroute and the work still open on it are
-[`../economy_second_pass.md`](../../plans/economy_second_pass.md).
+see [`faction_system.md`](faction_system.md).
 
 ## Authority: one server-side writer per pool
 
@@ -274,15 +273,10 @@ The Debug menu's Economy dialog has a *Fire economy tick* button that runs one e
 | Operatives | `client/operative/fnc_operator_recruit.sqf:20` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
-| Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
+| Base repair, HQ and FOB redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf` | 2 / 2 / 2 |
 | Death | `client/client_init.sqf:156,171` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
 | Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR and Everything lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |
-
-Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
-inflation and the bribe figures — are in
-[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#economy-balance); the reroute that put AP on the menus
-and the work still open on it are [`../economy_second_pass.md`](../../plans/economy_second_pass.md).
 
 ## Who may spend
 

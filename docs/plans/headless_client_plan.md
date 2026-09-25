@@ -153,6 +153,6 @@ there shows up immediately instead of being blamed on locality later.
 
 **This cannot be validated on a hosted session.** A hosting player is both server and client, so
 locality mistakes work perfectly for the tester and silently do nothing for everyone else. The
-mission has already been bitten by exactly that (`KNOWN_ISSUES.md:25-39`), and the dedicated-plus-HC
-test rig does not currently exist (`:13-17`). Standing that rig up is a prerequisite of this
+mission has already been bitten by exactly that, and the dedicated-plus-HC
+test rig does not currently exist. Standing that rig up is a prerequisite of this
 plan, not a step inside it.

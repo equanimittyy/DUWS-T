@@ -6,14 +6,13 @@ never shrinks*, which does not. This doc covers both, and the design decisions t
 Most of it was read out of the source rather than profiled in-engine, so treat sizes as reasoning
 about how often code runs and what it touches; a figure that was measured says so.
 
-Two of the three growth terms this tree carried are gone now, and the shape of the fix is worth
+All three growth terms this tree carried are gone now, and the shape of the fix is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
 with no single call to point at. The original BLUFOR task forces — the player-directed assault force and the
 waypoint slot it wrote — were removed entirely, so neither the permanently simulated AI an ignored
 one left standing beside the base, nor that waypoint list only index 0 was ever read from,
-accumulates any longer. The third, the enemy gear scan, still runs for the whole session, and why a
-convergence ceiling is not the fix for it is in
-[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#the-enemy-gear-scan-runs-for-the-whole-session).
+accumulates any longer. The enemy gear scan no longer hooks every created unit for the session: it
+builds `DUWS_enemyKit` once from the OPFOR roster (`server/disguise/fnc_scanEnemyGear.sqf`).
 
 ## The pattern that costs the most: timed scans anchored on `allUnits`
 

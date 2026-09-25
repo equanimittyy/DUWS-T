@@ -189,9 +189,6 @@ Each machine writes its own `.rpt`, and the `SRV` / `CLI` machine tag in each li
 emitted it. `duws_log_level = 4` in the debug console raises the level to DEBUG from that point on
 (there is no lobby parameter for it despite `INIT.sqf` looking for one, so the default is 3).
 
-The checklist of what to verify is in
-[`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#jip-queue-keyed-not-yet-exercised).
-
 ## Runtime logging: reading the `.rpt`
 
 Arma writes one `.rpt` per launch (`%LOCALAPPDATA%\Arma 3\` on Windows; a dedicated server writes its

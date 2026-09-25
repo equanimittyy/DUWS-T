@@ -2,7 +2,7 @@
 
 OPCOM is one server-side actor that turns the enemy's Army Power into pressure: it garrisons towns, tasks
 squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet and faucets are the economy's
-([`economy_second_pass.md`](../economy_second_pass.md#army-power)); the hardpoint mechanics it draws from are
+([`info/economy.md`](../../info/gameplay/economy.md#faucets)); the hardpoint mechanics it draws from are
 [`info/hardpoints.md`](../../info/gameplay/hardpoints.md); the standalone-siting economics are
 [`info/opfor_area_of_influence.md`](../../info/gameplay/opfor_area_of_influence.md#band-siting). The published
 game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_comparison.md).

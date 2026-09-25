@@ -7,8 +7,7 @@ index-aligned with the launcher block); this doc is the reasoning behind those n
 copy of them.
 
 The reward *pipeline* (how a base CP/AP payout is multiplied and credited) is not restated here --
-see [`economy.md`](economy.md#faucets) and
-[`economy_second_pass.md`](../../plans/economy_second_pass.md). In short: a thread's base CP/AP
+see [`economy.md`](economy.md#faucets). In short: a thread's base CP/AP
 (`mission_types.hpp`) is scaled by `cp_reward_multiplier` (campaign 1-5), a ×1.5 civs-off CP lift,
 and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited in
 `src/duws/server/missions/fnc_mission_reward.sqf`. This catalogue only sets the **base** numbers.

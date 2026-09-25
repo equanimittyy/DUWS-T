@@ -47,8 +47,7 @@ mission's state risks another's.
 
 `saveGame` is not a candidate at all. It saves a whole session rather than a data snapshot, so it
 cannot be replayed through the builders, which is what the restore below depends on. That holds
-whether or not it works in multiplayer, which is
-[still unestablished](../../KNOWN_ISSUES.md#does-a-multiplayer-save-happen-at-all).
+whether or not it works in multiplayer, which is still unestablished.
 
 ### Transferring a save between machines
 
@@ -162,11 +161,9 @@ than an unlock, and `client/client_init.sqf:383` grants it to the singleplayer p
 the game master. What Off actually costs is the crash case — an ALT-F4 or a hang loses the whole
 session instead of one interval.
 
-One limit of the manual path is temporary. SITREP costs 1 CP today, so a player spent down to
-nothing cannot save at all — and that price is being removed, with a cooldown in its place
-([`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)). Off is a second reason for that
-change to land rather than a reason to withhold the option, because it promotes the manual save
-from a convenience to the only in-session one. The grant itself follows the `game_master` slot
+SITREP is free (`server/supports/fnc_sitrep_support.sqf`), so a player spent down to nothing can
+still save. That matters more under Off, because Off promotes the manual save from a convenience
+to the only in-session one. The grant itself follows the `game_master` slot
 rather than the person (`server/server_var_init.sqf`), so a co-op team whose game master leaves
 recovers it by someone taking that slot.
 
@@ -481,9 +478,8 @@ capture bounty this row used to carry is retired with the town→CP reroute.)
 counter that only ever rises (`WARCOM_*_ap_earned`), never from the spendable wallet, so the earned
 counter is the source of truth the save must carry — the tier is re-derivable from it on load
 (`DUWS_fnc_ap_tier`). Deriving the tier from the live wallet instead reads a number since spent down,
-silently un-unlocking an enemy that had already reached armour — the failure mode
-[`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
-describes. Floor shipped these globals broadcast but unsaved; this snapshot is what closes that.
+silently un-unlocking an enemy that had already reached armour. Floor shipped these globals
+broadcast but unsaved; this snapshot is what closes that.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for rebuilding
 derived state. It is a rank within the kept set's building counts, so recomputing it needs the
@@ -1023,7 +1019,7 @@ refund attached to the one restore that consumes it.
 | `server/misc/fnc_campaign_restore.sqf` | New. Validates a payload, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
 | `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
 | `server/persistence/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
-| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)'s business. |
+| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. |
 | `server/server_init.sqf` | Early gate before `:13` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:268`. Keep `enableSaving [false,false]` at `:196`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
@@ -1041,7 +1037,6 @@ refund attached to the one restore that consumes it.
 | `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |
 | `description.ext` | `missionGroup = "DUWS_T";` |
 | `info/architecture.md:132` | Replace the "vanilla `saveGame` only" persistence row. |
-| `KNOWN_ISSUES.md` | Drop the save/reload row once it passes. |
 
 ## Task list
 

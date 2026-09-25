@@ -178,7 +178,7 @@ Scheduled SQF is cooperative — control passes only at a suspension point (`sle
 
 ## A joining client is sent every `publicVariable`'d global, then its own init overwrites them
 
-`publicVariable` is JIP-persistent — the engine delivers the last broadcast value to a joining client *before* the mission's own client init runs, so a per-client init that then assigns the same global unconditionally clobbers it, silently. Invisible on a host or in SP. Fix: guard every client-side init of a broadcast global with `if (isNil "x") then {x = default};` — assigning unconditionally is correct only for never-broadcast globals, so keep the decision to `publicVariable` and to initialise in step by hand (`client/includes/supports_init.hpp` guards three flags and assigns three unconditionally while `fnc_request_support.sqf` broadcasts all six, [`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#open-defects)).
+`publicVariable` is JIP-persistent — the engine delivers the last broadcast value to a joining client *before* the mission's own client init runs, so a per-client init that then assigns the same global unconditionally clobbers it, silently. Invisible on a host or in SP. Fix: guard every client-side init of a broadcast global with `if (isNil "x") then {x = default};` — assigning unconditionally is correct only for never-broadcast globals, so keep the decision to `publicVariable` and to initialise in step by hand (`client/includes/supports_init.hpp` guards three flags and assigns three unconditionally while `fnc_request_support.sqf` broadcasts all six).
 
 ## Weather set on the server synchronises itself, so mirroring it into a global is dead state
 

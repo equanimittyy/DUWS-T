@@ -10,8 +10,7 @@ dependency runs one way.
   persistent civilian population. Purely civilian — not an objective.
 
 Both are server-only and run near campaign start; civilians are registered once zone build-out has
-finished. For the boot order see [`architecture.md`](../architecture.md#boot-flow); siting defects are
-catalogued in [`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
+finished. For the boot order see [`architecture.md`](../architecture.md#boot-flow).
 The shopkeepers that stand in the civilian towns are in [`civilian_shops.md`](civilian_shops.md).
 
 ## Enemy zone siting ("More Urban")
@@ -1160,9 +1159,8 @@ reputation term in the amount would count it twice.
 | Toolkit | 2 |
 | Arrest | — |
 
-**These are placeholders chosen to make the framework testable, not balanced figures**
-([`../../KNOWN_ISSUES.md`](../../../KNOWN_ISSUES.md#economy-balance)). They are anchored on the black
-market, which is the price scale the player already reads — goggles at 1, pistol and optic at 5 — so
-intel sits between the two. An unrecognised row returns a negative price, and callers treat that as a
-reject: rows only ever come off the wire, so that is the fail-closed edge for a client sending one the
-menu never offered.
+**These are placeholders chosen to make the framework testable, not balanced figures.** They are
+anchored on the black market, which is the price scale the player already reads — goggles at 1,
+pistol and optic at 5 — so intel sits between the two. An unrecognised row returns a negative price,
+and callers treat that as a reject: rows only ever come off the wire, so that is the fail-closed edge
+for a client sending one the menu never offered.
