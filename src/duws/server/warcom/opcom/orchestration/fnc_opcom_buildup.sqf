@@ -3,13 +3,17 @@
 // §Commitment). A bound unit that settles at its rally rests, so only its binding keeps the next pick off it.
 if (!isServer) exitWith {};
 
-// -> the point _dist from _pos toward _dir, pulled in toward _edge until it is dry; [] when all of it is water.
+// -> the centre of the first dry cell at least _k cells from _pos's cell along _dir; [] when the two rings past it are
+// water too. The distance bound, not the ring test, ends the walk: past the play box every point clamps to one cell.
 DUWS_fnc_opcom_rallyAt = {
-    params ["_pos", "_dir", "_dist", "_edge"];
+    params ["_pos", "_dir", "_k"];
     private _out = [];
-    for "_d" from _dist to _edge step -(OPCOM_GRID_CELL / 2) do {
+    for "_d" from 0 to ((_k + 3) * OPCOM_GRID_CELL * 1.5) step (OPCOM_GRID_CELL / 2) do {
         private _p = _pos getPos [_d, _dir];
-        if !(surfaceIsWater _p) exitWith { _out = [_p select 0, _p select 1, 0] };
+        private _ring = [_pos, _p] call DUWS_fnc_opcom_cellDist;
+        if (_ring > _k + 2) exitWith {};
+        private _c = [[_p] call DUWS_fnc_opcom_w2c] call DUWS_fnc_opcom_c2w;
+        if (_ring >= _k && {!(surfaceIsWater _c)}) exitWith { _out = _c };
     };
     _out
 };

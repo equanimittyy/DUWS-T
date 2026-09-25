@@ -56,11 +56,10 @@ DUWS_fnc_opcom_attackSweep = {
         params ["_key", "_to", "_at", "_label"];
         if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
-        private _edge = ([_key] call fnc_site_at) getOrDefault ["radius", 0];
         private _offers = (_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _worth] };
         {
             private _pw = _x select 2;
-            ([sqrt (_pw / ((1 - _pw) max 0.001)), _at, _at getDir ((_x select 0) select 1), _edge] call DUWS_fnc_opcom_manoeuvrePick)
+            ([sqrt (_pw / ((1 - _pw) max 0.001)), _at, _at getDir ((_x select 0) select 1)] call DUWS_fnc_opcom_manoeuvrePick)
                 params ["_m", "_roles"];
             (_roles select 0) params ["", "_rally", "", "", "_lambda"];
             private _stage = [["move", _rally, "", [], _lambda], []] select (_rally isEqualTo []);
