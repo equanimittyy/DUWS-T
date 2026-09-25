@@ -293,6 +293,19 @@ DUWS_fnc_restoreWorld = {
     DUWS_zone_first_captured = +(_r getOrDefault ["firstCaptured", []]);
 
     { missionNamespace setVariable [format ["DUWS_zoneTier_%1", _x select 0], _x select 1] } forEach (_r getOrDefault ["zoneTiers", []]);
+    // A site the save held no ledger for had forgotten it, as a capture does; fnc_createZone has since stamped a
+    // fresh OPFOR one over every zone, which would hand a held zone the enemy's garrison.
+    if ("garrisons" in _r) then {
+        private _saved = (_r get "garrisons") apply { _x select 0 };
+        private _sites = (_r get "zones") apply { [_x select 2] call fnc_zone_key };
+        for "_i" from 0 to (count (_r getOrDefault ["towns", []]) - 1) do { _sites pushBack ([_i] call fnc_town_site_key) };
+        {
+            if !(_x in _saved) then {
+                missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _x], nil];
+                missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _x], nil];
+            };
+        } forEach _sites;
+    };
     {
         _x params ["_key", "_full", "_lost"];
         missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], _full];
