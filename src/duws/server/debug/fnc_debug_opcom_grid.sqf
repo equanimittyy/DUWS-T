@@ -3,7 +3,7 @@
 // the way fnc_debug_aoi_circles answers for the AoI reaches. Every cell is emitted, not just those carrying
 // force, so the client can paint the full-map lattice.
 if (!isServer) exitWith {};
-params ["_requester"];
+params ["_requester", ["_forceOn", false], ["_staleOn", false], ["_needOn", false]];
 
 // The zone-port map is OPCOM init's last store, so its presence means every store below is built.
 if (isNil "DUWS_opcom_zonePort") exitWith {
@@ -19,34 +19,45 @@ private _seen = DUWS_opcom_grid_seen;
 private _tick = DUWS_opcom_tick;
 private _eps = 0.05;
 
-// [centre, fri, ene, isFront, isLand, coverAge, need, cover, traffic] per cell, only for the play box (the rest of the lattice is
+// [centre, fri, ene, isFront, isLand, coverAge] per cell, only for the play box (the rest of the lattice is
 // never built). Front = the balance's sign differs from an orthogonal neighbour's: the zero-crossing band
-// between friendly and enemy ground.
+// between friendly and enemy ground. A layer the requester hides is not read: its fields go as no force and age -1,
+// which draw nothing, and need, cover and traffic are left off the row.
 DUWS_opcom_box params ["_bMinCx", "_bMinCy", "_bMaxCx", "_bMaxCy"];
 private _cells = [];
 for "_iy" from _bMinCy to _bMaxCy do {
     for "_ix" from _bMinCx to _bMaxCx do {
         private _i = _iy * _w + _ix;
-        private _f = _fri select _i;
-        private _e = _ene select _i;
-        private _bal = _f - _e;
+        private _f = 0;
+        private _e = 0;
         private _front = false;
-        if (abs _bal > _eps) then {
-            {
-                _x params ["_dx", "_dy"];
-                private _nx = _ix + _dx;
-                private _ny = _iy + _dy;
-                if (_nx >= _bMinCx && {_nx <= _bMaxCx} && {_ny >= _bMinCy} && {_ny <= _bMaxCy}) then {
-                    private _nbal = (_fri select (_ny * _w + _nx)) - (_ene select (_ny * _w + _nx));
-                    if (_nbal * _bal < 0) then { _front = true };
-                };
-            } forEach [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        if (_forceOn) then {
+            _f = _fri select _i;
+            _e = _ene select _i;
+            private _bal = _f - _e;
+            if (abs _bal > _eps) then {
+                {
+                    _x params ["_dx", "_dy"];
+                    private _nx = _ix + _dx;
+                    private _ny = _iy + _dy;
+                    if (_nx >= _bMinCx && {_nx <= _bMaxCx} && {_ny >= _bMinCy} && {_ny <= _bMaxCy}) then {
+                        private _nbal = (_fri select (_ny * _w + _nx)) - (_ene select (_ny * _w + _nx));
+                        if (_nbal * _bal < 0) then { _front = true };
+                    };
+                } forEach [[1, 0], [-1, 0], [0, 1], [0, -1]];
+            };
         };
         // Collapse to -1 past the span so never-seen and long-expired read alike and the client needs no span.
-        private _age = _tick - (_seen select _i);
-        if (_age >= OPCOM_COVER_SPAN) then { _age = -1 };
-        _cells pushBack [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i, _age,
-            [_i] call DUWS_fnc_opcom_needAt, [_i] call DUWS_fnc_opcom_coverAt, [_i] call DUWS_fnc_opcom_trafficAt];
+        private _age = -1;
+        if (_staleOn) then {
+            _age = _tick - (_seen select _i);
+            if (_age >= OPCOM_COVER_SPAN) then { _age = -1 };
+        };
+        private _row = [[(_ix + 0.5) * _cell, (_iy + 0.5) * _cell], _f, _e, _front, _land select _i, _age];
+        if (_needOn) then {
+            _row append [[_i] call DUWS_fnc_opcom_needAt, [_i] call DUWS_fnc_opcom_coverAt, [_i] call DUWS_fnc_opcom_trafficAt];
+        };
+        _cells pushBack _row;
     };
 };
 

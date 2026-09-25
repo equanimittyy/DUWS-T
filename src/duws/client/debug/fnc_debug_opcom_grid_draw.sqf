@@ -30,7 +30,7 @@ if (_rebuild) then {
 
 private _sample = "";
 {
-    _x params ["_c", "_f", "_e", "_front", "_land", "_stale", "_need", "_cov", "_traf"];
+    _x params ["_c", "_f", "_e", "_front", "_land", "_stale", ["_need", 0], ["_cov", 0], ["_traf", 0]];
     private _i = _forEachIndex;
 
     if (_rebuild) then {
