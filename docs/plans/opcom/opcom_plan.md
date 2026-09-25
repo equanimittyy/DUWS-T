@@ -190,7 +190,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence |
 | Attack | each BLUFOR-held zone, each town they have garrisoned, and each open role of an Attack still in buildup ([§Orchestration](#orchestration-phase-5)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
-| Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, one unit apiece, sourced from Patrol's rows |
+| Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
 | Arty saturate | each fresh belief sighting in range of an owned gun not already firing |
@@ -238,7 +238,7 @@ so it moves no faster than a truck delivers.
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
 | Ferry | the stopped unit's committed Value (`expValue`), since its whole order waits on the crossing |
-| Probe | staleness over the target's 3×3 block × the Attack `Cost` at that target × `OPCOM_PROBE_SHARE` |
+| Probe | the mean staleness over the target's 3×3 block × the stake at that target × `OPCOM_PROBE_SHARE` (0.25). The stake is the best Attack source's `Cost` there, or the force a buildup already binds at `OPCOM_AP_PER_FORCE` |
 | Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 | Arty creeping | the parent offensive's staked force × `OPCOM_AP_PER_FORCE` × `OPCOM_ARTY_CREEP_SHARE`, since a creep buys that wave's survival rather than kills |
 
@@ -420,8 +420,8 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   every **land** combatant — infantry, wheeled and tracked.
   A `noncombat` row that is not recon stays out, and so does combat air: the faction's air scout is the recon
   helicopter, and an attack helicopter or a jet crosses the ground it would sweep faster than a tick. Probe draws
-  that same pool and drops a target whose block already reads fresh or that holds a bound probe, so one reading is
-  never bought twice. Garrison draws every free combatant, healthy or worn, except one already homed at the target
+  that same pool and drops a target whose block already reads fresher than `OPCOM_PROBE_FRESH` (0.1) or that holds a
+  bound probe, so one reading is never bought twice. Garrison draws every free combatant, healthy or worn, except one already homed at the target
   zone. An action past one of OPCOM's caps drops too ([§Caps](#caps)). The random draw drops any action the wallet
   cannot cover.
   An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit. An Attack musters, so its source drops
@@ -591,7 +591,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 
 ## Orchestration (Phase 5)
 
-**WIP.** 5.1 to 5.3 are shipped and 5.4 is in part; 5.5 and 5.6 remain.
+**WIP.** 5.1 to 5.3 and 5.5 are shipped and 5.4 is in part; 5.6 remains.
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
@@ -691,8 +691,9 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
   never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
   ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to. **Intercept** — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
-  guards once none remain. It never returns to garrison. **Probe** — the target's 3×3 block reads fresh, at which
-  point the unit drops to `guard` where it stands. **Rapport** — courier delivers or dies.
+  guards once none remain. It never returns to garrison. **Probe** — the target's 3×3 block reads fresher than
+  `OPCOM_PROBE_FRESH`, at which point the unit drops to `guard` where it stands (`DUWS_fnc_opcom_stepProbe`), or it
+  arrives. **Rapport** — courier delivers or dies.
 
 ### Chained fires: an intent may name a parent
 
@@ -766,7 +767,7 @@ early.
 | **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally `OPCOM_RALLY_STANDOFF` (1 km) past the target's edge on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
-| **5.5** Probe | the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
+| **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | Arty split into `arty_saturate`, which is today's action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
@@ -775,7 +776,7 @@ Phase 5 settles in play the band thresholds and their overlap, each role's λ an
 `OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_STANDOFF`),
 `OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_STANDOFF`, the
-frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE` and `OPCOM_ARTY_CREEP_SHARE`.
+frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH` and `OPCOM_ARTY_CREEP_SHARE`.
 
 ## What AP buys
 
