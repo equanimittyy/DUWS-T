@@ -57,6 +57,7 @@ switch (_mode) do {
     case "supply_town": { ["supply", _ctx select 0, [], [_ctx select 1, _key], player] remoteExec ["fnc_debug_opcom", 2] };
     case "intercept": { ["sightinglist", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "intercept_row": { ["intercept", _ctx, _key, "", player] remoteExec ["fnc_debug_opcom", 2] };
+    case "ferry_rider": { ["ferrybind", _key, "", "", player] remoteExec ["fnc_debug_opcom", 2] };
     case "teleport": {
         [_key] spawn {
             params ["_id"];

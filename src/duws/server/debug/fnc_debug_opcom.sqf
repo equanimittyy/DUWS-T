@@ -100,6 +100,12 @@ switch (_verb) do {
         _rows sort true;
         ["Intercept which sighting?", _rows apply { [_x select 1, _x select 2] }, "intercept_row", _a] remoteExec ["fnc_debug_opcom_pick", _caller];
     };
+    case "strandlist": {
+        private _rows = (DUWS_opcom_taskings select { (_x getOrDefault ["strandTicks", 0]) > 0 && {(_x getOrDefault ["ridingOn", -1]) < 0} })
+            apply { [_x get "id", format ["id %1  %2  %3  (stranded %4 ticks)", _x get "id", _x get "menu", _x get "order", _x get "strandTicks"]] };
+        if (_rows isEqualTo []) exitWith { "No unit is stopped at a water leg." remoteExec ["hint", _caller] };
+        ["Ferry which unit?", _rows, "ferry_rider", ""] remoteExec ["fnc_debug_opcom_pick", _caller];
+    };
     case "recruit": {
         // _a = row, _b = zone key. Site at the zone centre and home the unit there, so homeZone drives the
         // garrison-reserve coupling.
@@ -126,6 +132,10 @@ switch (_verb) do {
     case "fire": {
         private _n = ["fire", _a, _b, _c] call fnc_opcom_debug_task;
         (if (_n > 0) then { format ["%1 fires %2 rounds at %3.", _a, _n, _b apply { round _x }] } else { format ["%1 has no gun bearing on that. See the log.", _a] }) remoteExec ["hint", _caller];
+    };
+    case "ferrybind": {
+        private _ok = ["ferry", _a] call fnc_opcom_debug_task;
+        (if (_ok) then { format ["Tasking %1 is ferried by the nearest free lift.", _a] } else { format ["Ferry refused for %1 (not at a water leg / no free boat or helicopter reaches it). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "intercept": {
         private _ok = ["intercept", _a, _b] call fnc_opcom_debug_task;
@@ -180,8 +190,8 @@ switch (_verb) do {
         (_lines joinString "\n") remoteExec ["hint", _caller];
     };
     case "ferry": {
-        // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so the land
-        // pool is the exact set a debug Move's taxiBind picks from.
+        // The ferry fields "list" omits: live carry bindings and the free-lift pools. No excluded id, so each pool is
+        // the exact set a debug bind picks from.
         if (DUWS_opcom_taskings isEqualTo []) exitWith { "No taskings." remoteExec ["hint", _caller] };
         private _carries = DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 || {(_x getOrDefault ["ridingOn", -1]) >= 0} };
         private _lines = [];

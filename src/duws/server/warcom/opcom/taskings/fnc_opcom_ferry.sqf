@@ -35,7 +35,7 @@ DUWS_fnc_opcom_ferryApproach = {
     if ((_t get "moveType") isEqualTo "boat") then { [_landPt] call DUWS_fnc_opcom_nearestWater } else { _landPt }
 };
 
-// Shared by a debug Move's taxi bind and the debug inspector so the two never drift. _excludeId drops one id (a rider
+// Shared by the debug binds and the debug inspector so the two never drift. _excludeId drops one id (a rider
 // never lifts itself), -1 none. Idle is by order, not streaming: a live idle hull is lendable too (it flies off and
 // re-virtualises elsewhere). A fighting hull is skipped -- a hull lost mid-trip strands its bound rider.
 DUWS_fnc_opcom_ferryPool = {

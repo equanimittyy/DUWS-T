@@ -16,5 +16,6 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         ["Select a tasking unit.", "Dev tool: the nearest tasking's type, strength and order.",
             { params ["_pos"]; ["unitstatus", _pos, "", "", player] remoteExec ["fnc_debug_opcom", 2] }] call fnc_debug_map_click;
     }, [], DBG_MAP],
+    ["Ferry a stranded unit", { ["strandlist", "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION],
     ["Ferry status",        { ["ferry",       "", "", "", player] remoteExec ["fnc_debug_opcom", 2] }, [], DBG_ACTION]
 ]] call fnc_open_action_menu;

@@ -8,6 +8,7 @@
 //   ["supply", id, targetPos, errand] -- send `id` on a supply run; its errand lands on arrival (fnc_opcom_task)
 //   ["zone", "reinforce" | "fortify" | "build", zoneKey, type] -- a zone buy, landed this call (type: build only)
 //   ["intercept", id, rowKey]       -- send `id` after a belief row (a BLUFOR group's netId)
+//   ["ferry", id]                   -- lift `id`, stopped at a water leg, on the nearest free boat or helicopter
 //   ["fire", hpKey, targetPos, [rounds, shape]] -- a fire mission from a mortar pit or battery; returns rounds ordered
 //                                   (shape ["saturate", radius] | ["creep", width, length, bearing]; a creep ignores rounds)
 //   ["teleport", id, pos]           -- snap `id` (stored point + live group) to a pos, then hold on guard there
@@ -77,6 +78,18 @@ switch (_verb) do {
         private _t = DUWS_opcom_taskings select _i;
         _t set ["hold", 0];
         [_t, "intercept", _b] call fnc_opcom_task
+    };
+    case "ferry": {
+        private _r = [_a] call DUWS_fnc_opcom_byId;
+        if (isNil "_r" || {(_r getOrDefault ["strandTicks", 0]) <= 0}) exitWith {
+            ["WARN", "OPCOMDBG", format ["ferry: tasking %1 is not stopped at a water leg", _a]] call fnc_log; false
+        };
+        // Past the nearest: a boat on another body of water has no route to the rider.
+        private _pool = ([_a] call DUWS_fnc_opcom_ferryPool) apply { [(_x get "pos") distance2D (_r get "pos"), _x get "id"] };
+        _pool sort true;
+        private _ok = (_pool findIf { [[["free", _x select 1], _a]] call DUWS_fnc_opcom_ferryRun }) >= 0;
+        if (!_ok) then { ["WARN", "OPCOMDBG", format ["ferry: no free boat or helicopter reaches tasking %1", _a]] call fnc_log };
+        _ok
     };
     case "fire": {
         _c params ["_rounds", "_shape"];
