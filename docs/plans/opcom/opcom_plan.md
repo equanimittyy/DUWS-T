@@ -188,7 +188,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence |
-| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs another unit; flank only below band 2 ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs another unit; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each Attack target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
@@ -646,6 +646,12 @@ kind, `assault` or `flank`. A flank needs no count of mobile units at commit: it
 buckets are filled by later picks like any other, and a flank whose first side stays empty leaves the fix to launch
 alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
 
+- **Water decides who goes and how.** Every rally sits on the target's landmass (`DUWS_opcom_grid_mass`, a flood
+  fill over the grid's land cells at init), so no bucket stages across water from its fight and a flank never takes
+  a side the water cuts off. A source across water from its target reaches it only by ferry, which carries men alone
+  and lands them a trip at a time, so it is offered only if it is transportable, and only to `attack_assault`: a
+  flank's timing does not survive a landing by trips. An island with no dry cell on its landmass `OPCOM_RALLY_K`
+  cells out gives no rally, so its assault stages where its units stand and crosses at launch.
 - **A role is a bucket of units.** A bucket stages at one rally and holds any number of units, up to
   `OPCOM_ATTACK_UNITS` (10) across the attack (`DUWS_fnc_opcom_joinBucket`). An empty required bucket takes a join at
   any odds. Past that, a join comes only while the muster is short of the ideal bar, and goes to the bucket with the
@@ -768,7 +774,7 @@ engine paths it. A group in combat ignores a move waypoint, so the route holds o
 |---|---|
 | **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
 | **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row into the bucket `DUWS_fnc_opcom_joinBucket` names while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
-| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its up to five `maneuver` buckets each on one of the weakest dry sides, over its release predicate |
+| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its up to five `maneuver` buckets each on one of the weakest dry sides, over its release predicate, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
 | **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
 | **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, a creep on an attack record and the only chain edge |
