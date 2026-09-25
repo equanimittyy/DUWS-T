@@ -153,7 +153,7 @@ if (_knownOpfor) then {
         private _line = if (_n == 1) then {
             format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE", [_firstPos] call fnc_place_name]
         } else {
-            format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY", _n]
+            localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY"
         };
         [localize "STR_DUWS_T_ALLSEER", _line] remoteExec ["fnc_duws_dialogue", 0];
     };

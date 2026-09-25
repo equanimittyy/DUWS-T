@@ -64,7 +64,7 @@ batch of them at once, so their line is spoken by the payout rather than by the 
 | Zone | a *Zone Discovered* card, and an Overlord line naming the zone and the nearest settlement (`fnc_place_name`) |
 | Town | a *Town Discovered* card naming the town |
 | Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
-| Contact | an Allseer line, one for the whole batch: the settlement it was fixed near (`fnc_place_name`) for a single contact, the count for several |
+| Contact | an Allseer line, one for the whole batch: the settlement it was fixed near (`fnc_place_name`) for a single contact, no count for several |
 
 `fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
 caller: the recon mission marks its target under its own confirm line rather than beneath a second
