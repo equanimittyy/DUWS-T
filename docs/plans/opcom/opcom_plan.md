@@ -132,8 +132,7 @@ rather than designed:
   reinforcing over upgrading, Garrison hires, and mustering, which hires the roles the roster lacks.
 - **Commit and carry.** `OPCOM_COMMIT_HOLD`, `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
   `OPCOM_ROAD_DETOUR`. Whether a taxi should set its riders down short of the target rather than on it; whether a
-  ground taxi needs its pickup drive timed out, which no carry phase does today; whether one attacker per holding is
-  too thin once Phase 5 can muster.
+  ground taxi needs its pickup drive timed out, which no carry phase does today.
 - **Patrol.** `OPCOM_PATROL_SHARE` and `OPCOM_PATROL_FORCE_REF` (8, a rifle squad's force), which sets whether a
   hull patrols as readily as a squad. Whether a combatant's staleness stamp should count for less than a recon's,
   since it suppresses re-scouting for up to `OPCOM_BELIEF_EXPIRE` without having learned anything certain there;
@@ -424,8 +423,9 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   never bought twice. Garrison draws every free combatant, healthy or worn, except one already homed at the target
   zone. An action past one of OPCOM's caps drops too ([§Caps](#caps)). The random draw drops any action the wallet
   cannot cover.
-  An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit; one in buildup checks the floor at
-  launch ([§Commitment](#commitment-intents-are-sticky)).
+  An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit. An Attack musters, so its source drops
+  only below `OPCOM_MUSTER_HOLD` (0.5:1), and the minimum bar is its floor at launch
+  ([§Commitment](#commitment-intents-are-sticky)).
 - **An unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
   tick; an action that outscores it later, such as a QRF, still commits. Past the horizon it drops, and the pick
@@ -583,14 +583,14 @@ A chosen action becomes an intent record — same shape at every granularity, `r
   because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
   for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
-  ([§Value](#value)). An action in buildup checks `OPCOM_PWIN_FLOOR` at launch, against its archetype's
-  minimum, because it commits below the odds it launches at. Buildup is also how a force-short action waits for
+  ([§Value](#value)). An action in buildup commits below the odds it launches at, so the minimum bar is its floor
+  at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short action waits for
   units: each open role stays a target of its action, and a later pick fills it from a free unit or a hire
   ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
 
 ## Orchestration (Phase 5)
 
-**WIP.** 5.1 is shipped; 5.2 to 5.6 remain.
+**WIP.** 5.1 and 5.2 are shipped; 5.3 to 5.6 remain.
 
 Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
 already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
@@ -599,7 +599,7 @@ becomes the smallest `assault` ([§Release](#release-the-stagger-lives-on-the-ro
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
-| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required role bound and in position, or the muster bars at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-intents-are-sticky)) |
+| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required role bound, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-intents-are-sticky)) |
 | `execution` | doing the action's own work, once its role is released | the action's own order — `capture`, `intercept`, `errand`, `patrol` | the action's `resolve` predicate |
 | `done` | released back to the roster | — | — |
 
@@ -607,13 +607,14 @@ Buildup is where a muster happens: the ideal and minimum ratios and the expiry a
 force-short action sits in buildup until later picks fill its open roles.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
-and without stamping the staleness layer, which is `move` and no other order, so the order stays in the table with
-the debug page as its only caller until 5.2 (`taskings/fnc_opcom_orders.sqf` is the table that knows every
-order).
+and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg is its caller
+beside the debug page (`taskings/fnc_opcom_orders.sqf` is the table that knows every order).
 
-**The runner**, each tick over every live intent with roles: refresh each bound unit's status; a required role
-`dead` or lost → **abort** (release the survivors, no AP refund); else test the current state's transition, and each
-unreleased role's own. The runner sequences the states; the route and streaming machinery moves the units. There is
+**The runner**, each tick over every live intent with roles (`orchestration/fnc_opcom_intent.sqf`): refresh each bound
+unit's status; in buildup, any bound unit `dead` or lost → **abort** (release the survivors, no AP refund), because a
+loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish; else test the current
+state's transition, and each unreleased role's own. A unit a hand order takes over from the debug page counts as
+lost. The runner sequences the states; the route and streaming machinery moves the units. There is
 no planner, and a simple tasking is the one-role, empty-buildup case, so a coordinated behaviour is a bigger
 manoeuvre rather than a new subsystem.
 
@@ -745,7 +746,7 @@ threat that appears after. Today the road branch is threat-blind and every calle
 | Chunk | Builds |
 |---|---|
 | **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
-| **5.2** Buildup | the rally cells, `move` staging with each role's land-taxi sourced for its staging leg, each open role offered to later picks as an Attack target, the launch predicate, `OPCOM_MUSTER_EXPIRY`, and abort on a lost required role |
+| **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally `OPCOM_RALLY_STANDOFF` (1 km) past the target's edge on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Manoeuvres | `assault` across its 1–3 cells first, since it releases every role at once, with Attack's one-role 5.1 intent folded into it, then the one mechanism `flank` and `encircle` share, over its release predicate |
 | **5.4** Route λ | the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, then the threat term on road segments and the off-road layer |
 | **5.5** Probe | the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
@@ -755,7 +756,8 @@ threat that appears after. Today the road branch is threat-blind and every calle
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 `OPCOM_ROUTE_OFFROAD` and the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, how far
-short of the target a rally has to sit to be safe enough to be worth the extra march, `OPCOM_ENVELOP_STANDOFF`, the
+short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_STANDOFF`),
+`OPCOM_MUSTER_HOLD`, `OPCOM_ENVELOP_STANDOFF`, the
 frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE` and `OPCOM_ARTY_CREEP_SHARE`.
 
 ## What AP buys
