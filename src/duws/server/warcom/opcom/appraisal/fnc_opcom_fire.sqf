@@ -88,8 +88,11 @@ DUWS_fnc_opcom_fireWarn = {
     _mk setMarkerBrush "DiagGrid";
     _mk setMarkerColor "ColorRed";
     _mk setMarkerSize [_spread, _spread];
-    [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_ARTY_INBOUND", [_pt] call DUWS_fnc_hardpointNearestPlace]]
+    private _place = [_pt] call DUWS_fnc_hardpointNearestPlace;
+    [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_ARTY_INBOUND", _place]]
         remoteExec ["fnc_duws_dialogue", 0];
+    ["critical", [localize "STR_DUWS_T_OPCOM_ARTY_INBOUND_TITLE", format [localize "STR_DUWS_T_OPCOM_ARTY_INBOUND_MSG", _place]]]
+        remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
     // The battery stops firing as its last round leaves the tube, which lands a flight time later.
     waitUntil { sleep 1; !([_key] call DUWS_fnc_opcom_batteryFiring) };
     private _last = 0;

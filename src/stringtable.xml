@@ -5468,8 +5468,16 @@
                 <English>Your position was revealed to OPFOR due to an enemy recon post</English>
             </Key>
             <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND">
-                <Original>Enemy guns are firing on %1. Rounds land in seconds, get off that ground.</Original>
-                <English>Enemy guns are firing on %1. Rounds land in seconds, get off that ground.</English>
+                <Original>Be advised, enemy guns are firing on %1. Rounds will land soon. Clear the area.</Original>
+                <English>Be advised, enemy guns are firing on %1. Rounds will land soon. Clear the area.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND_TITLE">
+                <Original>Incoming Fire</Original>
+                <English>Incoming Fire</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPCOM_ARTY_INBOUND_MSG">
+                <Original>Enemy guns are firing on %1</Original>
+                <English>Enemy guns are firing on %1</English>
             </Key>
 </Container>
         <Container name="Support &amp; Radio">
