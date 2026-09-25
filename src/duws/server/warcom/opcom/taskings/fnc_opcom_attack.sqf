@@ -133,6 +133,31 @@ DUWS_fnc_opcom_qrfFollow = {
     true
 };
 
+// Once a look disproves the lead, the group a unit's look found instead becomes the whole QRF's, a unit back on guard
+// included, so the QRF hunts on as one. A unit that finds a nearer group while the lead stands is left to fight it:
+// pulling it back would re-order the QRF every tick two units' looks disagree.
+DUWS_fnc_opcom_qrfRekey = {
+    params ["_attack"];
+    private _believed = { params ["_key"]; (DUWS_opcom_belief_key findIf { _x isEqualTo _key }) >= 0 };
+    if ([_attack get "target"] call _believed) exitWith {};
+    private _units = [];
+    { _units append ([_attack, _x] call DUWS_fnc_opcom_roleUnits) } forEach (_attack get "roles");
+    private _i = _units findIf { (_x get "order") isEqualTo "intercept" && {[_x get "interceptKey"] call _believed} };
+    if (_i < 0) exitWith {};
+    private _key = (_units select _i) get "interceptKey";
+    _attack set ["target", _key];
+    ["INFO", "OPCOM", format ["attack %1 (%2 %3) hunts %4", _attack get "id", _attack get "kind", _attack get "label", _key]] call fnc_log;
+    {
+        private _role = _x;
+        {
+            if ((_x get "interceptKey") isNotEqualTo _key) then {
+                _x set ["hold", 0];
+                if !([_x, "intercept", _key, "", [], _role get "lambda"] call fnc_opcom_task) then { _x set ["boundTo", -1] };
+            };
+        } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
+    } forEach (_attack get "roles");
+};
+
 // Marks rather than removes: the runner calls this mid-pass over the store. A creep still unfired is lost with its
 // attack, the AP spent at commit as a lost truck's is.
 DUWS_fnc_opcom_attackClose = {
@@ -252,8 +277,6 @@ DUWS_fnc_opcom_buildupStep = {
 // only the released ones say whether the attack is over.
 DUWS_fnc_opcom_executionStep = {
     params ["_attack"];
-    // Its units chase on their own intercepts; following the lead keeps the next QRF off the same cluster.
-    if ((_attack get "kind") isEqualTo "qrf") then { [_attack] call DUWS_fnc_opcom_qrfFollow };
     {
         private _role = _x;
         _role set ["units", ([_attack, _role] call DUWS_fnc_opcom_roleUnits) apply { _x get "id" }];
@@ -261,6 +284,11 @@ DUWS_fnc_opcom_executionStep = {
     private _roles = (_attack get "roles") select { (_x get "units") isNotEqualTo [] };
     _attack set ["roles", _roles];
     if (_roles isEqualTo []) exitWith { [_attack, "aborted: every unit was lost"] call DUWS_fnc_opcom_attackClose };
+    if ((_attack get "kind") isEqualTo "qrf") then {
+        [_attack] call DUWS_fnc_opcom_qrfRekey;
+        // Following the lead keeps the next QRF off the same cluster.
+        [_attack] call DUWS_fnc_opcom_qrfFollow;
+    };
     [_attack] call DUWS_fnc_opcom_releaseHeld;
     if ((_attack get "creep") isNotEqualTo []) then { [_attack] call DUWS_fnc_opcom_creepStep };
     private _busy = _roles findIf {
