@@ -55,13 +55,13 @@ New work holds to:
 - **Belief, never truth.** The commander plans against belief; only the sensors read live player state.
 - **The engine resolves every fight**, and `P(win)` never dices one.
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
-- **A lift is the commander's call, not the rider's.** A unit stopped at a water leg waits on a Ferry, a boat or a
-  helicopter (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an IFV or a transport helicopter —
-  is sourced with the order it carries, when the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`).
-  Either lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Both run the one carry. Only
-  an assault's or a flank's staging leg, a Garrison or a debug Move takes a land-taxi, so no lift carries a Patrol or
-  a QRF, though a patrol stopped at a water leg still waits on a Ferry.
-  Drawing a combatant hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
+- **A lift is the commander's call, not the rider's.** A unit stopped at a water leg takes a ferry, a boat or a
+  helicopter, the tick one is free or affordable (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an
+  IFV or a transport helicopter — is sourced with the order it carries, when the pickup drive plus the carry beats the
+  walk (`fnc_opcom_taxi.sqf`). Either lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
+  Both run the one carry. Only an assault's or a flank's staging leg, a Garrison or a debug Move takes a land-taxi, so
+  no lift carries a Patrol or a QRF, though a patrol stopped at a water leg still takes a ferry. Drawing a combatant
+  hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
 
@@ -78,7 +78,7 @@ On each pick, enumerate candidate `[action, target]` pairs, gate them cheaply, w
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
 lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) under a wall-clock budget,
 `OPCOM_SCORE_DEADLINE`; the pick executes after it in scheduled space, because an order plans a route and the router
-may yield. One pick every other tick by default (0.5 picks per tick); the difficulty setting changes the rate
+may yield. One pick a tick by default (1 pick per tick); the difficulty setting changes the rate
 ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's id, targets, gate, price, execute, weight key, Value and Cost.
 
@@ -98,7 +98,7 @@ tilts by action ([§Archetype](#archetype-phase-7)); `P(win)` scales to the expe
 `arty_creeping` names none: its objective stands still where a sighting drifts, so there are no odds that it moved. A purchase does not: Reinforce, Fortify, Build and Rapport stock ground OPCOM already holds, and their
 site is gated on being uncontested, so the term would read 1 wherever it was legal to spend. A buy scores
 `Value / Cost`. A commit order that fights for nothing names 1 rather than leaving the term out, since its row still
-has to name its Cost past it: a Garrison rests, a Ferry carries, and a Probe observes.
+has to name its Cost past it: a Garrison rests and a Probe observes.
 
 - **`P(win)` — Lanchester-square.** `P(win) = r² / (r² + 1)`, with `r` = Σ`_fri` ÷ (Σ`_ene` + 1) over the target's
   3×3 block. Parity is a coin-flip, a 2:1 edge ≈ 0.8, a hopeless ratio floors near 0.
@@ -192,7 +192,6 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
-| Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
 | Arty saturate | each fresh belief sighting in range of an owned gun not already firing or held by a creep |
 | Arty creeping | each attack, assault or flank, in buildup or execution, with no creep yet, whose target an owned gun not already firing or held by a creep reaches |
 
@@ -237,7 +236,6 @@ so it moves no faster than a truck delivers.
 | Attack assault, Attack flank | the zone's `_points` |
 | Patrol | Σ need × staleness over the unique cells within its reach of the line it walks, × its scale, × `OPCOM_PATROL_SHARE` (0.2). A recon's reach is `OPCOM_RECON_K` and its scale 1; a combatant's reach is its engage reach (`DUWS_opcom_streamK`) and its scale its threat, `effForce` ÷ `OPCOM_PATROL_FORCE_REF` |
 | Garrison | the defense the unit adds at the zone, worth × exposure × unitForce ÷ (the zone's current force + unitForce); for a worn free unit on `guard`, the larger of that and the rebuy its heal recovers, `(fullForce − effForce) × OPCOM_AP_PER_FORCE`. A unit already resting in `garrison` heals where it stands, so its heal is no reason to move it |
-| Ferry | the stopped unit's committed Value (`expValue`), since its whole order waits on the crossing |
 | Probe | the mean staleness over the target's 3×3 block × the stake at that target × `OPCOM_PROBE_SHARE` (0.25). The stake is the best Attack source's `Cost` there, or the force a buildup already binds at `OPCOM_AP_PER_FORCE` |
 | Arty saturate | net `effForce` killed × `OPCOM_AP_PER_FORCE`: believed force within `lethal × √rounds` of the aim point, less OPFOR's own force inside the spread, × that force's share of all fresh belief |
 | Arty creeping | the parent offensive's staked force × `OPCOM_AP_PER_FORCE` × `OPCOM_ARTY_CREEP_SHARE`, since a creep buys that wave's survival rather than kills |
@@ -392,7 +390,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
 - **Spend** actions (Reinforce, Fortify, Build, Rapport, Arty) pay fresh AP at the prices in
   [§What AP buys](#what-ap-buys); a supply-gated one adds its truck's source Cost
   ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
-- **Commit** actions (the three Attack rows, Patrol, Probe, Garrison, Ferry) stake units. A hire's `Cost` is its
+- **Commit** actions (the three Attack rows, Patrol, Probe, Garrison) stake units. A hire's `Cost` is its
   price ([§Sourcing](#sourcing-hire-on-demand-phase-4d)); a free unit's is the AP to rebuy the force
   (`Σ effForce × OPCOM_AP_PER_FORCE`) plus the defense the unit abandons, read off the grid at its home cell with no
   counterfactual rebuild:
@@ -518,7 +516,7 @@ The distance runs from where the source starts to where the action needs it: the
 | Patrol, Probe | `recon` rows, the helicopter included, and land combatants |
 | Rapport, town Reinforce / Fortify, standalone and asset Build, Minefield | `supply` rows |
 | A land-taxi for an assault's or a flank's staging leg, or a Garrison | `transport` rows on wheels, tracks or a rotor |
-| Ferry | `transport` rows on water or a rotor |
+| A ferry | `transport` rows on water or a rotor |
 
 A fire mission fires the guns OPCOM owns, so it sources no unit.
 
@@ -534,11 +532,13 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   cannot be planned inside the pick, and without the test a ground taxi to an island target would score in every
   pick and fail in every execute, so the order never went. The line reads a bay as wet though a road runs round it,
   which costs a hull some coastal rides a rotor or the walk then takes.
-- **A Ferry is what a unit stopped at a water leg waits on.** Its source is a free boat or helicopter or a hire of
-  one, weighed like any other; its `P(win)` is 1 and its Value the stopped unit's committed Value. There is no shore
-  borrow, so a crossing waits for the pick like every other lift. The debug page's Ferry a stranded unit binds the
-  nearest free boat or helicopter that reaches the unit by hand, since the harness spends no AP and a hand order
-  carries no committed Value for a Ferry pick to score.
+- **A ferry spends no pick.** The crossing belongs to an order the pick already bought, and a scored Ferry row spent
+  a pick of its own and could leave a low-value rider stranded for many ticks. Each tick, after the task step, every
+  stranded unit takes the best lift it can have now (`DUWS_fnc_opcom_ferryDispatch`): a free boat or helicopter, or a
+  hire of one that the wallet covers, ranked on the unit's committed Value. With neither, it asks again next tick, so
+  a rider stranded at 0 AP crosses the tick the wallet covers a boat. The stage is off while the pick is, so a
+  commander switched off spends nothing. The debug page's Ferry binds a stranded unit to the nearest free boat or
+  helicopter that reaches it, by hand.
 - **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
   a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
   of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
@@ -827,7 +827,8 @@ frontage an `assault` wants at each unit count, `OPCOM_PROBE_SHARE`, `OPCOM_PROB
 
 Three levels: **Action** (what AP commits to, scored and held), **Sink** (how it's paid — tier / strength / build /
 tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1 simple, N an Attack). One actor
-shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs on its own clock. Spends call
+shares `WARCOM_opfor_ap`; every sink competes in the one appraisal, except a ferry, which finishes an order the
+appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spends call
 `["OPF", -_cost, _reason] call fnc_ap_adjust` (server-side, single writer, no race).
 
 | Action | Target | Sink | Taskings |
@@ -839,7 +840,7 @@ shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs
 | Patrol | a recon's or a land combatant's line over stale valuable cells | tasking-spawn | 1 |
 | Probe | an Attack target whose block reads stale | tasking-spawn | 1 |
 | Garrison | an open zone under the garrison cap | tasking-spawn | 1 |
-| Ferry | a unit stopped at a water leg | tasking-spawn | 1 lift |
+| Ferry, automatic | a unit stopped at a water leg | tasking-spawn | 1 lift |
 | Arty saturate | an observed target in gun range | bought fire mission | 0 |
 | Arty creeping | a bound offensive's target in gun range | bought fire mission | 0 |
 | Fortify | an own town / zone | tier purchase | 0 zone / 1 truck town |
