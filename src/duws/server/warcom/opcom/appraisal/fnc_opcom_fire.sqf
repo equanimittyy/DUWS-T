@@ -1,11 +1,8 @@
-// Locality: server, [] call'd at load. The Arty action: what is worth shelling, with what pattern, and the rest the
-// gun takes after (opcom_plan.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what
-// it is handed. AP is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet is the only
-// limit on how often they speak.
+// Locality: server, [] call'd at load. The Arty action: what is worth shelling and with what pattern
+// (opcom_plan.md §Indirect-fire hardpoints). The mission itself is fnc_opcom_fires, which fires what it is handed. AP
+// is the ammunition -- the guns rest empty and are loaded per mission -- so the wallet is the only limit on how often
+// they speak.
 if (!isServer) exitWith {};
-
-// Tick each emplacement is loaded again, keyed by hardpoint.
-DUWS_opcom_gunReady = createHashMap;
 
 // Never aimed at the player HQ, and never onto OPFOR's own zone, which is full of its garrison. Re-read immediately
 // before the guns fire: the point is latched at order time, so nothing may walk into the circle behind it.
@@ -44,8 +41,10 @@ DUWS_fnc_opcom_fireTargets = {
     private _out = [];
     {
         _x params ["_key", "_gpos", "_type"];
-        private _guns = count ([_key] call DUWS_fnc_opcom_batteryPieces);
-        if (_guns > 0 && {DUWS_opcom_tick >= (DUWS_opcom_gunReady getOrDefault [_key, 0])}) then {
+        private _pieces = [_key] call DUWS_fnc_opcom_batteryPieces;
+        private _guns = count _pieces;
+        // A firing battery sits out: the first mission's end would strip a second's Fired handler and empty its gun.
+        if (_guns > 0 && {(_pieces findIf { (_x getVariable ["DUWS_opcomFireEH", -1]) >= 0 }) < 0}) then {
             private _range = [OPCOM_MORTAR_REACH, OPCOM_ARTY_REACH] select (_type isEqualTo "ARTY");
             private _lethal = OPCOM_ARTY_LETHAL getOrDefault [_type, 20];
             private _perRound = OPCOM_AP_PER_ROUND getOrDefault [_type, 2];
@@ -86,12 +85,10 @@ DUWS_fnc_opcom_fireWarn = {
 
 DUWS_fnc_opcom_fireRun = {
     params ["_target"];
-    _target params ["_key", "_type", "_pt", "_rounds", "_shape", "_spread"];
+    _target params ["_key", "", "_pt", "_rounds", "_shape", "_spread"];
     if !([_pt] call DUWS_fnc_opcom_fireClear) exitWith { false };
     private _eta = [_key, _pt] call DUWS_fnc_opcom_fireETA;
     if (([_key, _pt, _rounds, _shape] call DUWS_fnc_opcom_fireMission) <= 0) exitWith { false };
-    (OPCOM_ARTY_COOLDOWN getOrDefault [_type, [300, 480]]) params ["_lo", "_hi"];
-    DUWS_opcom_gunReady set [_key, DUWS_opcom_tick + _lo + floor random (_hi - _lo + 1)];
     // One mission per emplacement per tick, so the tick and the key name the marker uniquely.
     [_pt, _spread, _eta, format ["opcom_arty_%1_%2", _key, DUWS_opcom_tick]] spawn DUWS_fnc_opcom_fireWarn;
     true

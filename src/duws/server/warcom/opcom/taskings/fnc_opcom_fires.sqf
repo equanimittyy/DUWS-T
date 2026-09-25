@@ -2,7 +2,7 @@
 // doArtilleryFire must issue where the gun is local, and every OPFOR gun is server-spawned. A standing battery holds
 // no ammunition: its guns are emptied at register and loaded only for the mission they are given, so a crew never
 // shells anything on its own. This is the dumb half of the Arty action -- it fires the mission it is handed; what is
-// worth shelling, the shape and its size, the cooldown and the HQ exclusion are the scored action's
+// worth shelling, the shape and its size, and the HQ exclusion are the scored action's
 // (docs/plans/opcom/opcom_plan.md).
 if (!isServer) exitWith {};
 

@@ -62,11 +62,6 @@ private _slotsCap = 0;
     _slotsCap = _slotsCap + _cap;
     _slotsUsed = _slotsUsed + (([_zk] call DUWS_fnc_opcom_zoneSlotsUsed) min _cap);
 } forEach _open;
-private _locked = ((keys DUWS_hardpointTier) select { (DUWS_hardpointTier get _x) > WARCOM_opfor_tier })
-    apply { DUWS_hardpointName getOrDefault [_x, _x] };
-_locked sort true;
-private _reloading = 0;
-{ if (_y > DUWS_opcom_tick) then { _reloading = _reloading + 1 } } forEach DUWS_opcom_gunReady;
 
 // A [label, count, cap] item is drawn red once full; a string is drawn as it stands.
 private _limits = [
@@ -77,8 +72,7 @@ private _limits = [
     [["Hardpoints", _hpAll, OPCOM_CAP_HP_PER_ZONE * count zone_meta_array], ["Zone slots", _slotsUsed, _slotsCap]],
     [["Radio", "RADIO"] call _hpItem, ["OP", "OP"] call _hpItem, ["Mortar", "MORTAR"] call _hpItem, ["Arty", "ARTY"] call _hpItem],
     [["AT", "AT"] call _hpItem, ["AA", "AA"] call _hpItem, ["GMG", "GMG"] call _hpItem, ["Mines", "MINEFIELD"] call _hpItem],
-    [[format ["Tier %1 locks %2", WARCOM_opfor_tier, _locked joinString ", "], format ["Tier %1 locks nothing", WARCOM_opfor_tier]]
-        select (_locked isEqualTo []), format ["Guns reloading %1", _reloading]]
+    [format ["Tier %1", WARCOM_opfor_tier]]
 ];
 
 private _header = format ["OPCOM AI  %1   %2   tick %3", toUpper DUWS_opcom_aiMode, DUWS_opcom_archetype, DUWS_opcom_tick];

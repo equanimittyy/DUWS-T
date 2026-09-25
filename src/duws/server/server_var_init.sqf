@@ -648,10 +648,8 @@ OPCOM_ARTY_ROCKET_SCATTER = 75;
 // further the gun shoots.
 OPCOM_ARTY_SPREAD = createHashMapFromArray [["MORTAR", 50], ["ARTY", 100]];
 OPCOM_ARTY_SPREAD_PER_KM = 25;
-// Rounds a saturate lays per gun, and the ticks the emplacement rests after any mission: a pit answers again in
-// 25-40 min, a battery in 40-60. A creep's rounds follow from its size instead.
+// Rounds a saturate lays per gun. A creep's rounds follow from its size instead.
 OPCOM_ARTY_ROUNDS = createHashMapFromArray [["MORTAR", [4, 8]], ["ARTY", [6, 10]]];
-OPCOM_ARTY_COOLDOWN = createHashMapFromArray [["MORTAR", [300, 480]], ["ARTY", [480, 720]]];
 // The radius a round kills inside: what the pattern's saturation, and so the mission's Value in kills, is measured on.
 OPCOM_ARTY_LETHAL = createHashMapFromArray [["MORTAR", 20], ["ARTY", 30]];
 // No mission is aimed inside this of the player HQ (rounds may still stray there from a barrage aimed elsewhere).
