@@ -56,14 +56,14 @@ DUWS_fnc_opcom_liftFor = {
 };
 
 // The saving joins the Value, the lift's price the price and its Cost the Cost. expValue stays the walk's: a Ferry
-// prices the order, not the ride.
+// prices the order, not the ride. _wallet is what the lift is priced against, less what a package already spends.
 DUWS_fnc_opcom_liftOffer = {
-    params ["_best", "_to", "_task", "_label"];
+    params ["_best", "_to", "_task", "_label", ["_wallet", WARCOM_opfor_ap]];
     _best params ["_src", "_v", "_pw", "_c", "_p"];
     private _ref = _src select 0;
     private _name = format ["%1 with %2", _label, [_ref] call DUWS_fnc_opcom_sourceName];
     private _lift = if (_task isEqualTo []) then { [] } else {
-        [_src, _to, _v, _pw, (WARCOM_opfor_ap - _p) max 0] call DUWS_fnc_opcom_liftFor
+        [_src, _to, _v, _pw, (_wallet - _p) max 0] call DUWS_fnc_opcom_liftFor
     };
     if (_lift isEqualTo []) exitWith { [[_ref, _task, _pw * _v, []], _p, _name, _v, _pw, _c] };
     _lift params ["_lref", "_s", "_lp", "_lc"];

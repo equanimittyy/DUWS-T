@@ -80,11 +80,28 @@ DUWS_fnc_opcom_hireSources = {
     _out
 };
 
+// -> [source, Value, P(win), Cost, price] for _src sent at _to, the row every source is ranked on. _value is what it
+// returns at _to before the delay; _price and _cost are the action's own, to which the source adds its own. Distance is
+// scored and never charged, which is what lets a near hire beat a far free unit. _base is force already bound to the
+// fight (DUWS_fnc_opcom_pWinSend).
+DUWS_fnc_opcom_sourceRow = {
+    params ["_src", "_value", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_base", 0]];
+    _src params ["_ref", "_from", "_force", "_mt", "", "_sp", "_stake", "_mix"];
+    private _pw = 1;
+    if (_fight) then {
+        _pw = if ((_ref select 0) isEqualTo "hire") then {
+            [_to, _force + _base] call DUWS_fnc_opcom_pWinWith
+        } else {
+            [_to, _from, _force, _base] call DUWS_fnc_opcom_pWinSend
+        };
+    };
+    private _d = _from distance2D _to;
+    [_src, _value * _mix * ([_d, _mt] call DUWS_fnc_opcom_moveDelay), _pw, _cost + _stake + OPCOM_AP_PER_KM * _d / 1000, _price + _sp]
+};
+
 // -> [[source, Value, P(win), Cost, price], ...]: the best of _offers sent at _to, and beside it a dearer one that
-// outscores it, so the pick can bank toward what the wallet cannot pay yet. _offers pairs each source with the Value
-// it returns at _to before the delay; _price and _cost are the action's own, to which each source adds its own.
-// Distance is scored and never charged, which is what lets a near hire beat a far free unit. A fight drops a source
-// under _floor, and _base is force already bound to it (DUWS_fnc_opcom_pWinSend).
+// outscores it, so the pick can bank toward what the wallet cannot pay yet. _offers pairs each source with its Value;
+// the rest are DUWS_fnc_opcom_sourceRow's. A fight drops a source under _floor.
 DUWS_fnc_opcom_bestSources = {
     params ["_offers", "_to", "_fight", ["_price", 0], ["_cost", 0], ["_floor", OPCOM_PWIN_FLOOR], ["_base", 0]];
     private _best = [];
@@ -92,29 +109,110 @@ DUWS_fnc_opcom_bestSources = {
     private _paid = [];
     private _ps = -1;
     {
-        _x params ["_src", "_value"];
-        _src params ["_ref", "_from", "_force", "_mt", "", "_sp", "_stake", "_mix"];
-        private _pw = 1;
-        if (_fight) then {
-            _pw = if ((_ref select 0) isEqualTo "hire") then {
-                [_to, _force + _base] call DUWS_fnc_opcom_pWinWith
-            } else {
-                [_to, _from, _force, _base] call DUWS_fnc_opcom_pWinSend
-            };
-        };
+        private _row = [_x select 0, _x select 1, _to, _fight, _price, _cost, _base] call DUWS_fnc_opcom_sourceRow;
+        _row params ["", "_v", "_pw", "_c", "_p"];
         if (_pw >= _floor) then {
-            private _d = _from distance2D _to;
-            private _v = _value * _mix * ([_d, _mt] call DUWS_fnc_opcom_moveDelay);
-            private _c = _cost + _stake + OPCOM_AP_PER_KM * _d / 1000;
             private _s = [_v, _pw, _c] call DUWS_fnc_opcom_score;
-            private _row = [_src, _v, _pw, _c, _price + _sp];
             if (_s > _bs) then { _bs = _s; _best = _row };
-            if ((_price + _sp) <= WARCOM_opfor_ap && {_s > _ps}) then { _ps = _s; _paid = _row };
+            if (_p <= WARCOM_opfor_ap && {_s > _ps}) then { _ps = _s; _paid = _row };
         };
     } forEach _offers;
     if (_best isEqualTo []) exitWith { [] };
     if (_paid isEqualTo [] || {_ps >= _bs}) exitWith { [_best] };
     [_paid, _best]
+};
+
+// -> [members, price, Value, P(win), Cost, names]: the units one pick sends into an attack, [] when they fall under
+// _floor. No-retreat punishes a muster that trickles in, so sources join best score first, a hire again for as long as
+// the wallet and OPCOM_CAP_UNITS allow, until the bound force meets the ideal bar or the attack holds
+// OPCOM_ATTACK_UNITS. A member is [unit target, bucket, price], staged at the bucket DUWS_fnc_opcom_joinBucket would
+// name. A free unit serves once, as a member or as another's lift. The Value is the weakest member's, since the attack
+// goes only once its last unit is in. With nothing affordable the best source goes alone, so the pick can save for it.
+// _buckets: [[rally, required, force, units, lambda], ...] as they stand (DUWS_fnc_opcom_attackBuckets).
+DUWS_fnc_opcom_attackPackage = {
+    params ["_offers", "_to", "_at", "_value", "_floor", "_buckets", "_base", "_label"];
+    _buckets = +_buckets;
+    private _rows = _offers apply { [_x, _value, _to, true, 0, 0, _base] call DUWS_fnc_opcom_sourceRow };
+    private _rank = [];
+    { _rank pushBack [[_x select 1, _x select 2, _x select 3] call DUWS_fnc_opcom_score, _forEachIndex] } forEach _rows;
+    _rank sort false;
+    private _ene = ([_at] call DUWS_fnc_opcom_blockForce) select 1;
+    private _gain = call DUWS_fnc_opcom_blockGain;
+    private _hires = OPCOM_CAP_UNITS - (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached);
+    private _room = OPCOM_ATTACK_UNITS;
+    { _room = _room - (_x select 3) } forEach _buckets;
+    private _members = [];
+    private _names = [];
+    private _used = [];
+    private _price = 0;
+    private _cost = 0;
+    private _v = 1e12;
+    private _force = _base;
+    private _add = _base;
+    private _fnc_bucket = {
+        private _b = _buckets findIf { (_x select 1) && {(_x select 3) == 0} };
+        if (_b >= 0) exitWith { _b };
+        private _least = [];
+        { _least pushBack [_x select 2, _forEachIndex] } forEach _buckets;
+        _least sort true;
+        (_least select 0) select 1
+    };
+    // A lift another member already takes is dropped, so the unit walks.
+    private _fnc_member = {
+        params ["_row", "_b", "_wallet"];
+        (_buckets select _b) params ["_rally", "", "", "", "_lambda"];
+        private _task = [["move", _rally, "", [], _lambda], []] select (_rally isEqualTo []);
+        private _c = [_row, [_rally, _at] select (_rally isEqualTo []), _task, _label, _wallet] call DUWS_fnc_opcom_liftOffer;
+        if ((((_c select 0) select 3) param [0, []]) in _used) then {
+            _row params ["_src", "_rv", "_rpw", "_rc", "_rp"];
+            _c = [[_src select 0, _task, _rpw * _rv, []], _rp, "", _rv, _rpw, _rc];
+        };
+        _c
+    };
+    private _fnc_take = {
+        params ["_src", "_b", "_c"];
+        private _ref = _src select 0;
+        private _hire = (_ref select 0) isEqualTo "hire";
+        // Copied: a hire taken again shares its source's arrays.
+        _members pushBack [+(_c select 0), _b, _c select 1];
+        _names pushBack ([_ref] call DUWS_fnc_opcom_sourceName);
+        _price = _price + (_c select 1);
+        _cost = _cost + (_c select 5);
+        _v = _v min (_c select 3);
+        _force = _force + (_src select 2);
+        // As DUWS_fnc_opcom_pWinSend: a free unit already inside the block is counted there by the grid.
+        if (_hire || {([_to, _src select 1] call DUWS_fnc_opcom_cellDist) > 1}) then { _add = _add + (_src select 2) };
+        private _bk = _buckets select _b;
+        _bk set [2, (_bk select 2) + (_src select 2)];
+        _bk set [3, (_bk select 3) + 1];
+        _room = _room - 1;
+        private _lift = ((_c select 0) select 3) param [0, []];
+        if ((_lift param [0, ""]) isEqualTo "free") then { _used pushBack _lift };
+        if (_hire) then { _hires = _hires - 1 } else { _used pushBack _ref };
+    };
+    private _k = 0;
+    while { _room > 0 && {_k < count _rank} && {_force * _gain / (_ene + 1) < OPCOM_MUSTER_IDEAL} } do {
+        private _row = _rows select ((_rank select _k) select 1);
+        private _src = _row select 0;
+        private _hire = ((_src select 0) select 0) isEqualTo "hire";
+        private _b = call _fnc_bucket;
+        private _c = [_row, _b, WARCOM_opfor_ap - _price] call _fnc_member;
+        if ((_hire && {_hires <= 0}) || {(_src select 0) in _used} || {(_price + (_c select 1)) > WARCOM_opfor_ap}) then {
+            _k = _k + 1;
+        } else {
+            [_src, _b, _c] call _fnc_take;
+            if (!_hire) then { _k = _k + 1 };
+        };
+    };
+    if (_members isEqualTo [] && {count _rank > 0}) then {
+        private _row = _rows select ((_rank select 0) select 1);
+        private _b = call _fnc_bucket;
+        [_row select 0, _b, [_row, _b, WARCOM_opfor_ap] call _fnc_member] call _fnc_take;
+    };
+    if (_members isEqualTo []) exitWith { [] };
+    private _pw = [_to, _add] call DUWS_fnc_opcom_pWinWith;
+    if (_pw < _floor) exitWith { [] };
+    [_members, _price, _v, _pw, _cost, _names joinString ", "]
 };
 
 // -> the tasking _ref names, hired first when it is a hire; nil when the hire is refused. The candidate's price

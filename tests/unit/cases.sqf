@@ -2018,3 +2018,46 @@ DUWS_fnc_opcom_liftFor = { [] };
 ["liftOffer: with no lift the unit walks",
     [[_rider, 10, 0.5, 6, 0], [5000, 0, 0], ["capture", [5000, 0, 0]], "Attack X"] call DUWS_fnc_opcom_liftOffer,
     [[["free", 1], ["capture", [5000, 0, 0]], 5, []], 0, "Attack X with 1", 10, 0.5, 6]] call fnc_assertEq;
+DUWS_fnc_opcom_liftFor = { params ["", "", "", "", "_budget"]; [["free", 5], _budget, 0, 0] };
+["liftOffer: a lift is priced against the wallet it is handed, less the rider's price",
+    ([[_rider, 10, 1, 6, 10], [5000, 0, 0], ["capture", [5000, 0, 0]], "Attack X", 30] call DUWS_fnc_opcom_liftOffer) select 3,
+    30] call fnc_assertEq;
+DUWS_fnc_opcom_liftFor = { [] };
+
+// --- DUWS_fnc_opcom_attackPackage: the units one pick sends into an attack ---
+OPCOM_MUSTER_IDEAL = 1.5;
+OPCOM_ATTACK_UNITS = 10;
+DUWS_fnc_opcom_unitCount = { 0 };
+DUWS_fnc_opcom_blockGain = { 1 };
+DUWS_fnc_opcom_cellDist = { 9 };
+test_ene = 4;
+DUWS_fnc_opcom_blockForce = { [0, test_ene] };
+private _fnc_unit = { params ["_id", "_x0", "_force"]; [["free", _id], [_x0, 0, 0], _force, "inf", [], 0, 4, 1] };
+private _row = [["hire", "rifles", "z"], [0, 0, 0], 8, "inf", [], 10, 10, 1];
+private _stand = [[[], true, 0, 0, 0]];
+private _fnc_pack = {
+    params ["_offers", ["_buckets", [[[], true, 0, 0, 0]]], ["_floor", 0]];
+    [_offers, [0, 0, 0], [0, 0, 0], 20, _floor, _buckets, 0, "Assault X"] call DUWS_fnc_opcom_attackPackage
+};
+WARCOM_opfor_ap = 100;
+["attackPackage: the best sources join in score order until the ideal bar",
+    [[[1, 1000, 4] call _fnc_unit, [2, 0, 4] call _fnc_unit, [3, 5000, 4] call _fnc_unit]] call _fnc_pack,
+    [[[[["free", 2], [], 16, []], 0, 0], [[["free", 1], [], 16, []], 0, 0]], 0, 20, 0.9, 8.5, "2, 1"]] call fnc_assertEq;
+test_ene = 20;
+WARCOM_opfor_ap = 25;
+["attackPackage: a hire is raised again for as long as the wallet pays",
+    ([[_row]] call _fnc_pack) select [0, 2] apply { if (_x isEqualType []) then { count _x } else { _x } }, [2, 20]] call fnc_assertEq;
+["attackPackage: a free unit serves once",
+    count (([[[1, 0, 1] call _fnc_unit]] call _fnc_pack) select 0), 1] call fnc_assertEq;
+WARCOM_opfor_ap = 5;
+["attackPackage: with nothing affordable the best source goes alone, to save for",
+    ([[_row]] call _fnc_pack) select [0, 2] apply { if (_x isEqualType []) then { count _x } else { _x } }, [1, 10]] call fnc_assertEq;
+WARCOM_opfor_ap = 100;
+["attackPackage: units already bound count toward OPCOM_ATTACK_UNITS",
+    count (([[[1, 0, 1] call _fnc_unit, [2, 0, 1] call _fnc_unit], [[[], true, 0, 9, 0]]] call _fnc_pack) select 0), 1] call fnc_assertEq;
+["attackPackage: an empty required bucket takes the first unit, then the bucket with the least force",
+    (([[[1, 0, 4] call _fnc_unit, [2, 1000, 4] call _fnc_unit],
+        [[[], false, 5, 1, 0], [[], true, 0, 0, 0], [[], false, 0, 0, 0]]] call _fnc_pack) select 0) apply { _x select 1 },
+    [1, 2]] call fnc_assertEq;
+["attackPackage: a package under the floor is no offer",
+    [[[1, 0, 4] call _fnc_unit], _stand, 0.95] call _fnc_pack, []] call fnc_assertEq;

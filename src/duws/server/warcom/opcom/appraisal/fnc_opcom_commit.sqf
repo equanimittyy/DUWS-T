@@ -43,8 +43,9 @@ DUWS_fnc_opcom_acrossWater = {
     ([_src select 1] call DUWS_fnc_opcom_massAt) != _mass
 };
 
-// A target is [source ref, task, expValue, lift, attack]: attack ["open", key, target, label, roles, kind] commits a new
-// Attack, and ["join", attack id, bucket] adds a unit to a bucket of one still staging. -> kind -> targets, one sweep for both rows.
+// A target is [members, attack]: members as DUWS_fnc_opcom_attackPackage, each unit's target [source ref, task,
+// expValue, lift]; attack ["open", key, target, label, roles, kind] commits a new Attack, and ["join", attack id] adds
+// to one still staging. -> kind -> targets, one sweep for both rows.
 DUWS_fnc_opcom_attackSweep = {
     private _fits = { params ["_f", "_m"]; [_f, _m, false] call DUWS_fnc_opcom_isCombatant };
     private _free = ([false] call DUWS_fnc_opcom_freeCombatants) apply { [_x] call DUWS_fnc_opcom_freeSource };
@@ -53,35 +54,37 @@ DUWS_fnc_opcom_attackSweep = {
     private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
     private _busy = (DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] }) + (DUWS_opcom_attacks apply { _x get "target" });
     private _out = createHashMapFromArray [["assault", []], ["flank", []]];
+    private _fnc_sources = {
+        params ["_at", "_near", "_flank"];
+        private _mass = [_at] call DUWS_fnc_opcom_massAt;
+        (_free + ([_fits, _near, _zones] call DUWS_fnc_opcom_hireSources)) select {
+            !([_x, _mass] call DUWS_fnc_opcom_acrossWater) || {!_flank && {"transportable" in (_x select 4)}}
+        }
+    };
     // _to scores the send; _at is the order's own target, which a zone reads off the site store because a held
     // position and the one its trigger filed differ in z.
     private _fnc_consider = {
         params ["_key", "_to", "_at", "_label"];
         if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
-        private _mass = [_at] call DUWS_fnc_opcom_massAt;
-        private _offers = ((_free + ([_fits, _to, _zones] call DUWS_fnc_opcom_hireSources))
-            select { !([_x, _mass] call DUWS_fnc_opcom_acrossWater) || {"transportable" in (_x select 4)} }) apply { [_x, _worth] };
+        private _lead = [([_at, _to, false] call _fnc_sources) apply { [_x, _worth] }, _to, true, 0, 0, 0] call DUWS_fnc_opcom_bestSources;
+        if (_lead isEqualTo []) exitWith {};
+        private _bearing = _at getDir (((_lead select 0) select 0) select 1);
         {
-            private _offer = _x;
-            private _pw = _x select 2;
-            private _bearing = _at getDir ((_x select 0) select 1);
-            // From this ratio up a flank buys a setup leg and nothing else.
-            private _kinds = [["assault"], ["assault", "flank"]] select (sqrt (_pw / ((1 - _pw) max 0.001)) < OPCOM_BAND_CRUSH
-                && {!([_x select 0, _mass] call DUWS_fnc_opcom_acrossWater)});
-            {
-                private _kind = _x;
-                private _roles = [_kind, _at, _bearing] call DUWS_fnc_opcom_stageRoles;
-                if (_roles isNotEqualTo []) then {
-                    (_roles select 0) params ["", "_rally", "", "", "_lambda"];
-                    private _stage = [["move", _rally, "", [], _lambda], []] select (_rally isEqualTo []);
-                    private _c = [_offer, [_rally, _to] select (_rally isEqualTo []), _stage,
-                        format ["%1 %2", ["Assault", "Flank"] select (_kind isEqualTo "flank"), _label]] call DUWS_fnc_opcom_liftOffer;
-                    (_c select 0) pushBack ["open", _key, _at, _label, _roles, _kind];
-                    (_out get _kind) pushBack _c;
+            private _kind = _x;
+            private _roles = [_kind, _at, _bearing] call DUWS_fnc_opcom_stageRoles;
+            if (_roles isNotEqualTo []) then {
+                private _title = format ["%1 %2", ["Assault", "Flank"] select (_kind isEqualTo "flank"), _label];
+                ([[_at, _to, _kind isEqualTo "flank"] call _fnc_sources, _to, _at, _worth, _floor,
+                    _roles apply { [_x select 1, _x select 2, 0, 0, _x select 4] }, 0, _title] call DUWS_fnc_opcom_attackPackage)
+                    params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
+                // From this ratio up a flank buys a setup leg and nothing else.
+                if (_members isNotEqualTo [] && {_kind isEqualTo "assault" || {sqrt (_pw / ((1 - _pw) max 0.001)) < OPCOM_BAND_CRUSH}}) then {
+                    (_out get _kind) pushBack [[_members, ["open", _key, _at, _label, _roles, _kind]], _price,
+                        format ["%1 with %2", _title, _names], _v, _pw, _c];
                 };
-            } forEach _kinds;
-        } forEach ([_offers, _to, true, 0, 0, _floor] call DUWS_fnc_opcom_bestSources);
+            };
+        } forEach ["assault", "flank"];
     };
     {
         private _zk = [_x] call fnc_zone_key;
@@ -98,24 +101,18 @@ DUWS_fnc_opcom_attackSweep = {
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
     {
         private _attack = _x;
+        private _kind = _attack get "kind";
         // A QRF draws on air as well, so DUWS_fnc_opcom_qrfSweep fills its own.
-        private _slot = if ((_attack get "kind") isEqualTo "qrf") then { -1 } else { [_attack] call DUWS_fnc_opcom_joinBucket };
-        if (_slot >= 0) then {
-            private _role = (_attack get "roles") select _slot;
+        if (_kind isNotEqualTo "qrf" && {([_attack] call DUWS_fnc_opcom_joinBucket) >= 0}) then {
             private _at = _attack get "pos";
-            private _base = [_attack] call DUWS_fnc_opcom_boundForce;
-            private _rally = _role get "rally";
-            private _stage = [["move", _rally, "", [], _role get "lambda"], []] select (_rally isEqualTo []);
-            private _worth = [_attack get "target"] call DUWS_fnc_opcom_siteWorth;
-            private _mass = [_at] call DUWS_fnc_opcom_massAt;
-            private _offers = ((_free + ([_fits, _at, _zones] call DUWS_fnc_opcom_hireSources))
-                select { !([_x, _mass] call DUWS_fnc_opcom_acrossWater) || {"transportable" in (_x select 4)} }) apply { [_x, _worth] };
-            {
-                private _c = [_x, [_rally, _at] select (_rally isEqualTo []), _stage,
-                    format ["Join the %1 on %2 as %3", _attack get "kind", _attack get "label", _role get "role"]] call DUWS_fnc_opcom_liftOffer;
-                (_c select 0) pushBack ["join", _attack get "id", _slot];
-                (_out get (_attack get "kind")) pushBack _c;
-            } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
+            private _title = format ["Join the %1 on %2", _kind, _attack get "label"];
+            ([[_at, _at, _kind isEqualTo "flank"] call _fnc_sources, _at, _at, [_attack get "target"] call DUWS_fnc_opcom_siteWorth,
+                _floor, [_attack] call DUWS_fnc_opcom_attackBuckets, [_attack] call DUWS_fnc_opcom_boundForce, _title]
+                call DUWS_fnc_opcom_attackPackage) params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
+            if (_members isNotEqualTo []) then {
+                (_out get _kind) pushBack [[_members, ["join", _attack get "id"]], _price, format ["%1 with %2", _title, _names],
+                    _v, _pw, _c];
+            };
         };
     } forEach DUWS_opcom_attacks;
     _out
@@ -126,23 +123,32 @@ DUWS_fnc_opcom_attackTargets = {
     (["attack", DUWS_fnc_opcom_attackSweep] call DUWS_fnc_opcom_tickCached) get _kind
 };
 
+// A member that cannot be raised or routed is refunded before the pick charges the package, so it pays only for the
+// units that went; an open commits its record on the first that does.
 DUWS_fnc_opcom_attackRun = {
     params ["_target"];
-    (_target select 4) params ["_how", "_a", "_b", "_label", "_roles", "_kind"];
-    if (_how isEqualTo "join") exitWith {
+    _target params ["_members", "_atk"];
+    _atk params ["_how", "_a", "_b", "_label", "_roles", "_kind"];
+    private _attack = [];
+    if (_how isEqualTo "join") then {
         private _i = DUWS_opcom_attacks findIf { (_x get "id") isEqualTo _a };
-        if (_i < 0) exitWith { false };
-        private _attack = DUWS_opcom_attacks select _i;
         // A pick earlier this tick may have met the ideal bar or the unit cap.
-        if (([_attack] call DUWS_fnc_opcom_joinBucket) < 0) exitWith { false };
-        private _t = [_target] call DUWS_fnc_opcom_send;
-        if (isNil "_t") exitWith { false };
-        [_attack, (_attack get "roles") select _b, _t] call DUWS_fnc_opcom_attackBind;
-        true
+        if (_i >= 0 && {([DUWS_opcom_attacks select _i] call DUWS_fnc_opcom_joinBucket) >= 0}) then { _attack = DUWS_opcom_attacks select _i };
     };
-    private _t = [_target] call DUWS_fnc_opcom_send;
-    if (isNil "_t") exitWith { false };
-    [_kind, _a, _b, _label, _roles, _t] call DUWS_fnc_opcom_attackOpen;
+    if (_how isEqualTo "join" && {_attack isEqualTo []}) exitWith { false };
+    private _landed = 0;
+    private _refund = 0;
+    {
+        _x params ["_unit", "_bucket", "_price"];
+        private _t = [_unit] call DUWS_fnc_opcom_send;
+        if (isNil "_t") then { _refund = _refund + _price } else {
+            if (_attack isEqualTo []) then { _attack = [_kind, _a, _b, _label, _roles] call DUWS_fnc_opcom_attackOpen };
+            [_attack, (_attack get "roles") select _bucket, _t] call DUWS_fnc_opcom_attackBind;
+            _landed = _landed + 1;
+        };
+    } forEach _members;
+    if (_landed == 0) exitWith { false };
+    if (_refund > 0) then { ["OPF", _refund, "opcom_attack_refund"] call fnc_ap_adjust };
     true
 };
 
@@ -172,17 +178,16 @@ DUWS_fnc_opcom_qrfSweep = {
     };
     private _out = [];
     private _fnc_offer = {
-        params ["_at", "_base", "_label", "_atk"];
-        private _v = [_at] call _fnc_value;
+        params ["_at", "_buckets", "_base", "_label", "_atk"];
         private _mass = [_at] call DUWS_fnc_opcom_massAt;
-        private _offers = ((_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
+        private _offers = (_free + ([DUWS_fnc_opcom_isCombatant, _at, _zones] call DUWS_fnc_opcom_hireSources)) select {
             ((DUWS_opcom_moveWater get (_x select 3)) isNotEqualTo "land") || {!([_x, _mass] call DUWS_fnc_opcom_acrossWater)}
-        }) apply { [_x, _v] };
-        {
-            private _c = [_x, _at, [], _label] call DUWS_fnc_opcom_liftOffer;
-            (_c select 0) pushBack _atk;
-            _out pushBack _c;
-        } forEach ([_offers, _at, true, 0, 0, _floor, _base] call DUWS_fnc_opcom_bestSources);
+        };
+        ([_offers, _at, _at, [_at] call _fnc_value, _floor, _buckets, _base, _label] call DUWS_fnc_opcom_attackPackage)
+            params [["_members", []], "_price", "_v", "_pw", "_c", "_names"];
+        if (_members isNotEqualTo []) then {
+            _out pushBack [[_members, _atk], _price, format ["%1 with %2", _label, _names], _v, _pw, _c];
+        };
     };
     private _qrfs = DUWS_opcom_attacks select { (_x get "kind") isEqualTo "qrf" };
     private _taken = _qrfs apply { _x get "pos" };
@@ -192,13 +197,13 @@ DUWS_fnc_opcom_qrfSweep = {
         if ((_taken findIf { ([_x, _at] call DUWS_fnc_opcom_cellDist) <= 1 }) < 0) then {
             _taken pushBack _at;
             private _label = format ["QRF at %1", mapGridPosition _at];
-            [_at, 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0]], "qrf"]] call _fnc_offer;
+            [_at, [[[], true, 0, 0, 0]], 0, _label, ["open", _key, _at, _label, [["attacker", [], true, "", 0]], "qrf"]] call _fnc_offer;
         };
     } forEach _sightings;
     {
-        private _slot = [_x] call DUWS_fnc_opcom_joinBucket;
-        if (_slot >= 0) then {
-            [_x get "pos", [_x] call DUWS_fnc_opcom_boundForce, format ["Join the %1", _x get "label"], ["join", _x get "id", _slot]] call _fnc_offer;
+        if (([_x] call DUWS_fnc_opcom_joinBucket) >= 0) then {
+            [_x get "pos", [_x] call DUWS_fnc_opcom_attackBuckets, [_x] call DUWS_fnc_opcom_boundForce, format ["Join the %1", _x get "label"],
+                ["join", _x get "id"]] call _fnc_offer;
         };
     } forEach _qrfs;
     _out
@@ -250,7 +255,7 @@ DUWS_fnc_opcom_probeSweep = {
     private _stakes = createHashMap;
     {
         {
-            private _atk = (_x select 0) param [4, []];
+            private _atk = (_x select 0) param [1, []];
             if ((_atk param [0, ""]) isEqualTo "open") then {
                 _atk params ["", "_key", "_at", "_label"];
                 private _c = (_stakes getOrDefault [_key, [1e9]]) select 0;

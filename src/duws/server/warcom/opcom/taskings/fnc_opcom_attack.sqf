@@ -92,9 +92,9 @@ DUWS_fnc_opcom_attackBind = {
     _t set ["boundTo", _attack get "id"];
 };
 
-// _t takes the first bucket; the rest stay open for later picks to fill. _roles as DUWS_fnc_opcom_stageRoles.
+// _roles as DUWS_fnc_opcom_stageRoles; the caller binds the units.
 DUWS_fnc_opcom_attackOpen = {
-    params ["_kind", "_target", "_pos", "_label", "_roles", "_t"];
+    params ["_kind", "_target", "_pos", "_label", "_roles"];
     private _id = DUWS_opcom_attackSeq;
     DUWS_opcom_attackSeq = _id + 1;
     private _attack = createHashMapFromArray [
@@ -106,7 +106,6 @@ DUWS_fnc_opcom_attackOpen = {
                 ["release", _release], ["released", false], ["lambda", _lambda]]
         }]
     ];
-    [_attack, (_attack get "roles") select 0, _t] call DUWS_fnc_opcom_attackBind;
     DUWS_opcom_attacks pushBack _attack;
     _attack
 };
@@ -173,6 +172,14 @@ DUWS_fnc_opcom_bucketForce = {
     private _force = 0;
     { _force = _force + (_x get "effForce") } forEach ([_attack, _role] call DUWS_fnc_opcom_roleUnits);
     _force
+};
+
+// -> [[rally, required, force, units, lambda], ...], each bucket as it stands (DUWS_fnc_opcom_attackPackage).
+DUWS_fnc_opcom_attackBuckets = {
+    params ["_attack"];
+    (_attack get "roles") apply {
+        [_x get "rally", _x get "required", [_attack, _x] call DUWS_fnc_opcom_bucketForce, count (_x get "units"), _x get "lambda"]
+    }
 };
 
 DUWS_fnc_opcom_boundForce = {
