@@ -34,7 +34,9 @@ fnc_factionGen = {
 };
 
 
-selectRandom factionList select 1 call fnc_factionGen;
+// Held in selectedFaction_OPF like a picked faction, so a saved campaign reloads the faction it rolled.
+if (isNil "selectedFaction_OPF") then { selectedFaction_OPF = (selectRandom factionList) select 1 };
+selectedFaction_OPF call fnc_factionGen;
 
 
 o_arraysToRandomize = (["opfor"] call fnc_faction_schema) apply {_x select 0};

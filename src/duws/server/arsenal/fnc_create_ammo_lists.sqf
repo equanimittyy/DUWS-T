@@ -55,9 +55,13 @@ _snapFriendly = {
     DUWS_friendlyArsenal = _s arrayIntersect _s;
     publicVariable "DUWS_friendlyArsenal";
     // Limited has no unlimited floor, so stock the whole standard-issue set into the pool at boot.
-    // Magazines are seeded too; the seed is simply unused while ammo is untracked.
+    // Magazines are seeded too; the seed is simply unused while ammo is untracked. A loaded campaign's
+    // counts are its progress, so only a class it never seeded is stocked.
     if (DUWS_arsenalLimited) then {
-        { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount; } forEach DUWS_friendlyArsenal;
+        private _seeded = createHashMapFromArray (DUWS_limitedSeeded apply { [_x, true] });
+        {
+            if !(_x in _seeded) then { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount };
+        } forEach DUWS_friendlyArsenal;
         publicVariable "DUWS_capturedPool";
     };
     ["INFO", "GEAR", format ["Friendly arsenal snapshot: %1 classes", count DUWS_friendlyArsenal]] call fnc_log;

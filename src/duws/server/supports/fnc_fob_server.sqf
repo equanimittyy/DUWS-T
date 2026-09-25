@@ -3,7 +3,8 @@
 _foundPickupPos = _this select 0;
 _fob_owner = _this select 2;
 
-_fobname = [1] call fnc_random_name;
+_fobname = _this param [3, ""];
+if (_fobname isEqualTo "") then { _fobname = [1] call fnc_random_name };
 
 _markername = format["fob%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)];
 _markerstr = createMarker [str(_markername), _foundPickupPos];

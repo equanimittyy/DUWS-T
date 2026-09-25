@@ -6,6 +6,7 @@ if (!isServer) exitWith {};
 call fnc_opcom_belief_init;
 call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
+if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreOpcom };
 
 while {true} do {
     // A throw would kill this daemon for the whole session (see fnc_repetitive_cleanup). _stage names the

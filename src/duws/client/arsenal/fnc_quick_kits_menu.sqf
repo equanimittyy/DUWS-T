@@ -29,7 +29,7 @@ if (_loadouts isEqualTo []) exitWith { hint localize "STR_DUWS_T_QUICK_KITS_NONE
                 // it adds (capped at stock), and replies the overdraw to strip off the equipped kit, so a
                 // depleted pool yields a partial kit, never free gear. Full (mode 1) never touches the
                 // pool. Same path as DUWS_fnc_arsenal_unstock.
-                if ((["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue) != 1) then {
+                if ((missionNamespace getVariable ["DUWS_paramArsenal", 0]) != 1) then {
                     private _new = getUnitLoadout player;
                     duws_pool_seq = (missionNamespace getVariable ["duws_pool_seq", 0]) + 1;
                     private _replyVar = format ["duws_pool_reply_%1", duws_pool_seq];

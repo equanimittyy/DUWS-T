@@ -5,6 +5,9 @@ author = "5U5, equanimity";
 overviewText = "DUWS_T is a spiritual successor to DUWS_X, created by Killa Tomata. A long-term, persistent scenario: players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones, achieving total victory.";
 overviewPicture = "duws\shared\media\images\duws_t.jpg";
 LoadScreen = "duws\shared\media\images\duws_t.jpg";
+// Names the campaign store file (DUWS_T.vars.Arma3Profile) after the mission rather than its folder, so a map
+// port or a Workshop version bump reads the same saves (server/persistence/fnc_campaign_store.sqf).
+missionGroup = "DUWS_T";
 
 // AIS INJURY
 respawn = 3;
@@ -51,6 +54,7 @@ class CfgMagazines
 #include "duws\shared\includes\enviro_menu.hpp"
 #include "duws\shared\includes\campaign_menu.hpp"
 #include "duws\shared\includes\callsign_menu.hpp"
+#include "duws\shared\includes\campaign_load_menu.hpp"
 #include "duws\shared\includes\faction_screen.hpp"
 #include "duws\shared\includes\hq_placement.hpp"
 #include "duws\shared\includes\sounds.hpp"

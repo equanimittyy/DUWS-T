@@ -1,0 +1,444 @@
+// Locality: server. Each hook sets state and calls the builder a fresh campaign calls, so there is one code path
+// that builds a zone, a town or a base. Order: docs/plans/campaign_persistence_plan.md#restore. DUWS_restoring
+// blocks every save until the last hook has run: a snapshot taken mid-replay would describe half a campaign.
+if (!isServer) exitWith {};
+
+DUWS_campaignLoaded = false;
+DUWS_restoring = false;
+
+DUWS_fnc_restoreCheck = {
+    params ["_d"];
+    if !(_d isEqualType createHashMap) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };
+    if ((_d getOrDefault ["version", -1]) isNotEqualTo DUWS_saveFormat) exitWith { "STR_DUWS_T_LOAD_BAD_VERSION" };
+    if ((_d getOrDefault ["world", ""]) isNotEqualTo worldName) exitWith { "STR_DUWS_T_LOAD_BAD_WORLD" };
+    private _types = [
+        ["settings", createHashMap], ["factions", createHashMap], ["hq", []], ["zones", []], ["hardpoints", []]
+    ];
+    if ((_types findIf { !((_d getOrDefault [_x select 0, 0]) isEqualType (_x select 1)) }) >= 0) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };
+    if (count (_d get "hq") < 2 || {(_d get "zones") isEqualTo []}) exitWith { "STR_DUWS_T_LOAD_BAD_INPUT" };
+    ""
+};
+
+// The fork's answer: [] for a new campaign, [id, usePrev] to load one.
+DUWS_fnc_saveChoose = {
+    params [["_choice", []]];
+    if (!isNil "DUWS_loadChoice") exitWith {};
+    DUWS_loadChoice = _choice;
+    ["INFO", "SAVE", format ["fork answered: %1", ["new campaign", format ["load %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;
+};
+
+DUWS_fnc_saveDeleteRequest = {
+    params ["_id"];
+    [_id] call DUWS_fnc_saveDelete;
+    call DUWS_fnc_saveScan;
+};
+
+// A new ID, never the payload's own, so an import cannot overwrite a campaign already on this machine.
+DUWS_fnc_saveImport = {
+    params ["_json"];
+    private _d = if (_json isEqualType "") then { [fromJSON _json] param [0, 0] } else { 0 };
+    private _why = [_d] call DUWS_fnc_restoreCheck;
+    if (_why isNotEqualTo "") exitWith {
+        ["WARN", "SAVE", format ["import refused (%1), %2 characters", _why, count _json]] call fnc_log;
+        ["refused", _why] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
+    };
+    private _id = call DUWS_fnc_saveNewID;
+    [_id, _json, [_d] call DUWS_fnc_campaignHeader] call DUWS_fnc_saveCommit;
+    ["INFO", "SAVE", format ["imported a campaign as %1, %2 characters", _id, count _json]] call fnc_log;
+    call DUWS_fnc_saveScan;
+};
+
+// Sent back to the machine that asked: copyToClipboard writes the clipboard of the machine it runs on.
+DUWS_fnc_saveExport = {
+    params ["_id"];
+    private _json = (call DUWS_fnc_saveNamespace) getVariable [format ["DUWST_save_%1", _id], ""];
+    if (_json isEqualTo "") exitWith {};
+    ["export", _json] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
+};
+
+// With nothing saved the terrain survey starts under the fork, so no new campaign waits on the screen. The bound
+// is short while nobody is connected, so an unattended restart comes back up on its own campaign.
+DUWS_fnc_restoreGate = {
+    params ["_fnc_survey"];
+    call DUWS_fnc_saveScan;
+    private _survey = if (DUWS_saveList isEqualTo []) then { [] spawn _fnc_survey } else { scriptNull };
+    DUWS_setupPhase = "choose";
+    publicVariable "DUWS_setupPhase";
+    private _start = time;
+    waitUntil {
+        sleep 1;
+        !isNil "DUWS_loadChoice" || {time - _start > ([30, 600] select (([] call DUWS_fnc_humanCount) > 0))}
+    };
+    private _choice = missionNamespace getVariable ["DUWS_loadChoice", nil];
+    if (isNil "_choice") then {
+        private _i = DUWS_saveList findIf {
+            (_x select 2) isEqualTo "" && {((createHashMapFromArray (_x select 1)) getOrDefault ["ended", ""]) isEqualTo ""}
+        };
+        _choice = if (_i < 0) then { [] } else { [(DUWS_saveList select _i) select 0, false] };
+        ["INFO", "SAVE", format ["fork unanswered after %1 s: %2", round (time - _start),
+            ["new campaign", format ["loading the newest campaign %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;
+        DUWS_loadChoice = _choice;
+    };
+    private _data = if (_choice isEqualTo []) then { nil } else { _choice call DUWS_fnc_saveRead };
+    // Writes are not atomic, so a payload that does not parse falls back to the one written an interval before.
+    if (isNil "_data" && {_choice isNotEqualTo []} && {!(_choice select 1)}) then {
+        _data = [_choice select 0, true] call DUWS_fnc_saveRead;
+        if (!isNil "_data") then { ["WARN", "SAVE", format ["campaign %1 did not parse; loading the save before it", _choice select 0]] call fnc_log };
+    };
+    private _why = if (isNil "_data") then { "STR_DUWS_T_LOAD_BAD_INPUT" } else { [_data] call DUWS_fnc_restoreCheck };
+    if (_choice isNotEqualTo [] && {_why isNotEqualTo ""}) then {
+        ["ERROR", "SAVE", format ["campaign %1 could not be loaded (%2); starting a new campaign", _choice, _why]] call fnc_log;
+    };
+    if (_choice isEqualTo [] || {_why isNotEqualTo ""}) exitWith {
+        DUWS_campaignID = call DUWS_fnc_saveNewID;
+        DUWS_campaignStarted = systemTimeUTC;
+        DUWS_campaignEnded = "";
+        if (isNull _survey) then { [] spawn _fnc_survey };
+        DUWS_setupPhase = "new";
+        publicVariable "DUWS_setupPhase";
+        ["INFO", "SAVE", format ["new campaign %1", DUWS_campaignID]] call fnc_log;
+    };
+    if (!isNull _survey) then { terminate _survey };
+    [_choice select 0, _data] call DUWS_fnc_restoreApply;
+    DUWS_setupPhase = "load";
+    publicVariable "DUWS_setupPhase";
+};
+
+DUWS_fnc_restoreApply = {
+    params ["_id", "_d"];
+    DUWS_restore = _d;
+    DUWS_restoring = true;
+    DUWS_campaignLoaded = true;
+    DUWS_restoreDropped = createHashMapFromArray [["units", 0], ["vehicles", 0], ["gear", 0]];
+    DUWS_restorePending = ["bases", "opcom"];
+    DUWS_dialogueMuted = true;
+    publicVariable "DUWS_dialogueMuted";
+    DUWS_campaignID = _id;
+    DUWS_campaignStarted = _d getOrDefault ["started", systemTimeUTC];
+    DUWS_campaignEnded = _d getOrDefault ["ended", ""];
+
+    // Re-broadcast, not only assigned: a client set these and published them, and every client needs them.
+    { missionNamespace setVariable [_x, _y, true] } forEach (_d get "settings");
+    private _params = _d getOrDefault ["params", createHashMap];
+    {
+        _x params ["_param", "_global"];
+        missionNamespace setVariable [_global, _params getOrDefault [_param, missionNamespace getVariable _global], true];
+    } forEach DUWS_campaignParams;
+    DUWS_arsenalLimited = DUWS_paramArsenal == 2; publicVariable "DUWS_arsenalLimited";
+    DUWS_trackAmmo = DUWS_paramTrackAmmo == 1; publicVariable "DUWS_trackAmmo";
+
+    private _f = _d get "factions";
+    BLUFOR_FactionFile_X = _f getOrDefault ["blu", BLUFOR_FactionFile_X]; publicVariable "BLUFOR_FactionFile_X";
+    OPFOR_FactionFile_X = _f getOrDefault ["opf", OPFOR_FactionFile_X]; publicVariable "OPFOR_FactionFile_X";
+    BLUfactionDataTemp = _f getOrDefault ["bluData", ""]; publicVariable "BLUfactionDataTemp";
+    OPFfactionDataTemp = _f getOrDefault ["opfData", ""]; publicVariable "OPFfactionDataTemp";
+    // Only a class this install defines: the AutoDetect wrappers generate from whatever these name.
+    {
+        _x params ["_var", "_sel"];
+        if (_sel isEqualType "" && {isClass (configFile >> "CfgFactionClasses" >> _sel)}) then { missionNamespace setVariable [_var, _sel, true] };
+    } forEach [["selectedFaction_BLU", _f getOrDefault ["bluSel", ""]], ["selectedFaction_OPF", _f getOrDefault ["opfSel", ""]]];
+
+    PosOfBLUHQ = _d get "hq"; publicVariable "PosOfBLUHQ";
+    AO_direction = _d getOrDefault ["ao", []]; publicVariable "AO_direction";
+    manually_chosen = false; publicVariable "manually_chosen";
+    (_d getOrDefault ["clock", [date, 0]]) params ["_date", "_skew"];
+    DUWS_restoreDate = _date;
+    DUWS_timeSkew = _skew; publicVariable "DUWS_timeSkew";
+
+    // Nothing else recounts the levels, and a radio flag without its level is a tower with no reach.
+    DUWS_support_permanent = +(_d getOrDefault ["unlocks", []]);
+    publicVariable "DUWS_support_permanent";
+    private _catalogue = [] call fnc_support_catalogue;
+    {
+        private _key = _x;
+        private _i = _catalogue findIf { (_x select 0) isEqualTo _key };
+        if (_i >= 0) then { missionNamespace setVariable [(_catalogue select _i) select 3, true, true] };
+    } forEach DUWS_support_permanent;
+    DUWS_bluforRadioLevel = { _x in ["radio1", "radio2", "radio3"] } count DUWS_support_permanent;
+    DUWS_intelLevel = { _x in ["intel1", "intel2", "intel3", "intel4"] } count DUWS_support_permanent;
+
+    // Classes a removed mod defined are dropped here rather than restored as names that spawn nothing.
+    private _garage = (_d getOrDefault ["garage", []]) select { isClass (configFile >> "CfgVehicles" >> (_x param [0, ""])) };
+    DUWS_restoreDropped set ["vehicles", count (_d getOrDefault ["garage", []]) - count _garage];
+    DUWS_garage_stored = _garage; publicVariable "DUWS_garage_stored";
+    private _pool = (_d getOrDefault ["capturedPool", []]) select {
+        private _c = _x param [0, ""];
+        isClass (configFile >> "CfgWeapons" >> _c) || {isClass (configFile >> "CfgMagazines" >> _c)}
+            || {isClass (configFile >> "CfgVehicles" >> _c)} || {isClass (configFile >> "CfgGlasses" >> _c)}
+    };
+    DUWS_restoreDropped set ["gear", count (_d getOrDefault ["capturedPool", []]) - count _pool];
+    DUWS_capturedPool = _pool; publicVariable "DUWS_capturedPool";
+    DUWS_limitedSeeded = _d getOrDefault ["seeded", []];
+
+    // A lost campaign's ending is stored nowhere else; restored as live it would play on a flattened map.
+    if (DUWS_campaignEnded isEqualTo "lost") then {
+        (_d getOrDefault ["lost", ["", ""]]) params ["_body", "_ending"];
+        campaign_lost = true;
+        campaign_lost_body = [_body, "STR_DUWS_T_CAMPAIGN_LOST"] select (_body isEqualTo "");
+        campaign_lost_ending = [_ending, "island_ruined"] select (_ending isEqualTo "");
+        publicVariable "campaign_lost";
+        publicVariable "campaign_lost_body";
+    };
+    // The one setting whose effect is terrain, and terrain resets with the session.
+    if (missionNamespace getVariable ["apocalypse_mode", false]) then { [] spawn fnc_apocalypse_buildings };
+
+    chosen_hq_placement = true; publicVariable "chosen_hq_placement";
+    createzone_server = true; publicVariable "createzone_server";
+    chosen_settings = true; publicVariable "chosen_settings";
+    ["INFO", "SAVE", format ["loading campaign %1, saved %2, day %3", _id, _d get "saved",
+        (_d getOrDefault ["clock", [[2035, 8, 3]]]) select 0]] call fnc_log;
+};
+
+// The used names go back too, or a later zone could draw a name already on the map.
+DUWS_fnc_restoreZones = {
+    missionNamespace setVariable ["DUWS_zoneNames", +(DUWS_restore getOrDefault ["zoneNames", []])];
+    {
+        _x params ["_num", "_name", "_pos", "_size", "_points", "_fortified", "_prefab", ["_kind", ""]];
+        [_name, _points, _size, _pos, _fortified, _prefab, _num, _kind] spawn fnc_createZone;
+        sleep 0.5;
+    } forEach (DUWS_restore get "zones");
+    serv_zones_array = +(DUWS_restore getOrDefault ["zoneOrder", (DUWS_restore get "zones") apply { _x select 2 }]);
+    publicVariable "serv_zones_array";
+};
+
+// A fresh roll would move every hardpoint and orphan what the players cleared. A side mission's minefield has no
+// belt saved and goes with its mission.
+DUWS_fnc_restoreHardpoints = {
+    {
+        missionNamespace setVariable [format ["DUWS_hpCap_%1", [_x select 2] call fnc_zone_key], (round ((_x select 3) / 250)) max 1];
+    } forEach (DUWS_restore get "zones");
+    missionNamespace setVariable ["DUWS_radioSeq", DUWS_restore getOrDefault ["radioSeq", 0]];
+    private _belts = createHashMapFromArray ((DUWS_restore getOrDefault ["belts", []]) apply { [_x select 0, [_x select 1, _x select 2]] });
+    private _variants = (DUWS_restore getOrDefault ["opcom", createHashMap]) getOrDefault ["mineVariants", createHashMap];
+    private _rows = DUWS_restore get "hardpoints";
+    {
+        _x params ["_key", "_pos", "_type", "_side", "_zoneKey", "_shown", ["_dir", 0]];
+        [format ["Restoring hardpoints...<br/>%1 of %2", _forEachIndex + 1, count _rows]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        private _built = false;
+        if (_type isEqualTo "MINEFIELD") then {
+            (_belts getOrDefault [_key, []]) params [["_centres", []], ["_ring", 0]];
+            if (_centres isNotEqualTo [] && {([_centres, _dir, _variants getOrDefault [_key, "AT"], _key] call fnc_hardpoint_minefield_stream) > 0}) then {
+                [_centres, _dir, _key] call fnc_hardpoint_minefield_signs;
+                [_key, _type, _pos, _side, _zoneKey, _dir, _ring] call fnc_hardpoint_register;
+                _built = true;
+            };
+        } else {
+            if (([_type, _pos, _dir, _side, _key] call fnc_hardpoint_build) isNotEqualTo []) then {
+                [_key, _type, _pos, _side, _zoneKey, _dir] call fnc_hardpoint_register;
+                _built = true;
+            };
+        };
+        // Registration stamps generation's reveal rule; the snapshot's flag is what the players had found.
+        private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+        if (_built && {_i >= 0}) then {
+            (DUWS_hardpoints select _i) set [5, _shown];
+            (format ["hpm_%1", _key]) setMarkerAlpha ([0, 1] select _shown);
+        };
+        if (!_built) then { ["INFO", "SAVE", format ["hardpoint %1 (%2) not restored", _key, _type]] call fnc_log };
+    } forEach _rows;
+    publicVariable "DUWS_hardpoints";
+    [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    ["INFO", "SAVE", format ["%1 of %2 hardpoints restored", count DUWS_hardpoints, count _rows]] call fnc_log;
+};
+
+// A position the map no longer names a town at gets a Location of its own: every town record downstream is keyed
+// by its index in this list.
+DUWS_fnc_restoreTownQueue = {
+    private _types = ["NameCityCapital", "NameCity", "NameVillage", "NameLocal"];
+    [(DUWS_restore getOrDefault ["towns", []]) apply {
+        _x params ["_pos", "_radius", "_pop"];
+        private _loc = (nearestLocations [_pos, _types, 50]) param [0, locationNull];
+        if (isNull _loc || {((getPos _loc) distance2D _pos) > 1}) then {
+            ["WARN", "SAVE", format ["no town at %1 on this map; standing one in", _pos]] call fnc_log;
+            _loc = createLocation ["NameVillage", _pos, _radius, _radius];
+        };
+        [_loc, _pop, false, [getPos _loc, 2, 350] call fnc_usableBuildings, _radius]
+    }, []]
+};
+
+// fnc_captured's repaint, without its payouts or announcements.
+DUWS_fnc_restorePaintHeld = {
+    params ["_pos"];
+    private _meta = (DUWS_restore get "zones") select { (_x select 2) isEqualTo _pos };
+    if (_meta isEqualTo []) exitWith {};
+    (_meta select 0) params ["", "_name", "", "_size", "_points"];
+    private _marker = format ["%1%2", round (_pos select 0), round (_pos select 1)];
+    str(_marker) setMarkerColor "ColorBlue";
+    str(_marker + "ellipse") setMarkerColor "ColorBlue";
+    str(_marker + "port") setMarkerColor "ColorBlue";
+    private _flg = missionNamespace getVariable [format ["flag_%1_%2", floor abs (_pos select 0), floor abs (_pos select 1)], objNull];
+    if (!isNull _flg) then {
+        _flg setFlagTexture "\A3\Data_F\Flags\flag_blue_CO.paa";
+        [_flg, true] call fnc_zone_flag_logistics;
+    };
+    private _trg = missionNamespace getVariable [format ["trigger_%1_%2", floor abs (_pos select 0), floor abs (_pos select 1)], objNull];
+    if (!isNull _trg) then {
+        _trg setTriggerStatements ["[thisTrigger getVariable 'DUWS_zoneKey', 'zone', EAST, WEST] call DUWS_fnc_siteTaken",
+            format ["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _name, _points, _marker, _marker + "ellipse", _pos, _size, 0], ""];
+    };
+};
+
+// The outcomes, on the generation thread once zones, hardpoints and towns are built and before the site poller
+// starts: a site the poller raised first would stand up the builders' defaults instead of what was saved.
+DUWS_fnc_restoreWorld = {
+    private _r = DUWS_restore;
+
+    private _held = _r getOrDefault ["held", []];
+    WARCOM_zones_controled_by_BLUFOR = +_held;
+    publicVariable "WARCOM_zones_controled_by_BLUFOR";
+    amount_zones_captured = count _held; publicVariable "amount_zones_captured";
+    zoneundercontrolblu = count _held; publicVariable "zoneundercontrolblu";
+    { [_x] call DUWS_fnc_restorePaintHeld } forEach _held;
+    DUWS_zone_first_captured = +(_r getOrDefault ["firstCaptured", []]);
+
+    { missionNamespace setVariable [format ["DUWS_zoneTier_%1", _x select 0], _x select 1] } forEach (_r getOrDefault ["zoneTiers", []]);
+    {
+        _x params ["_key", "_full", "_lost"];
+        missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], _full];
+        missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost];
+    } forEach (_r getOrDefault ["garrisons", []]);
+
+    private _rep = _r getOrDefault ["townRep", []];
+    if (!isNil "civ_town_rep" && {count _rep isEqualTo count civ_town_rep}) then {
+        civ_town_rep = +_rep;
+        civ_town_ap = +(_r getOrDefault ["townAp", civ_town_ap]);
+        (_r getOrDefault ["townGarrison", [DUWS_townGarrisonTier, DUWS_townGarrisonOwner]]) params ["_tiers", "_owners"];
+        DUWS_townGarrisonTier = +_tiers;
+        DUWS_townGarrisonOwner = +_owners;
+        for "_i" from 0 to (count civ_town_rep - 1) do {
+            [_i] call fnc_civ_townRender;
+            { [_i, _forEachIndex] call fnc_vendor_markerPaint } forEach ([_i] call fnc_vendor_recs);
+        };
+        [] call fnc_enemy_towns_refresh;
+    };
+
+    { ["ONE", _x, true] call fnc_zone_reveal } forEach (_r getOrDefault ["revealedZones", []]);
+    { [_x, true] call fnc_civ_town_reveal } forEach (_r getOrDefault ["revealedTowns", []]);
+
+    // Deleted rather than killed: the officer's watcher would announce the death and judge the lose condition
+    // again, and a campaign that ended on it is already carried as ended.
+    if !(_r getOrDefault ["officerAlive", true]) then {
+        DUWS_officerLost = true;
+        deleteVehicle hq_blu1;
+    };
+    if ("vehicle_depot" in DUWS_support_permanent) then {
+        [] call fnc_activateBaseRepairStation;
+        [] call fnc_activateBaseRecycleStation;
+    };
+    [] spawn DUWS_fnc_restoreBases;
+    ["INFO", "SAVE", format ["world restored: %1 zones held, %2 zones and %3 towns revealed", count _held,
+        count (_r getOrDefault ["revealedZones", []]), count (_r getOrDefault ["revealedTowns", []])]] call fnc_log;
+};
+
+// One FOB at a time: fnc_fob_server appends to three index-parallel registries across a suspension, and two
+// builds in flight could interleave them. Vehicles last, once every anchor stands.
+DUWS_fnc_restoreBases = {
+    { _x params ["_pos", "_name"]; [_pos, 0, "", _name] call fnc_fob_server } forEach (DUWS_restore getOrDefault ["fobs", []]);
+
+    (DUWS_restore getOrDefault ["mhq", [[], false, [], 0, 0]]) params ["_spec", "_deployed", "_pos", "_dir", "_lockout"];
+    if (_lockout > 0) then { MHQ_lockout_until = time + _lockout; publicVariable "MHQ_lockout_until" };
+    if (_spec isNotEqualTo []) then {
+        if !(isClass (configFile >> "CfgVehicles" >> (_spec select 0))) exitWith {
+            DUWS_restoreDropped set ["vehicles", (DUWS_restoreDropped get "vehicles") + 1];
+        };
+        private _veh = createVehicle [_spec select 0, _pos, [], 0, "NONE"];
+        _veh setDir _dir;
+        _veh setPosATL _pos;
+        [_veh, _spec] call DUWS_fnc_vehSpecApply;
+        _veh setVehicleVarName "MHQ1";
+        MHQ1 = _veh;
+        publicVariable "MHQ1";
+        ["select"] call fnc_MHQ_addActions;
+        ["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated, "duws_mhq_actions"];
+        MHQ1 forceFlagTexture "\A3\Data_F\Flags\flag_blue_CO.paa";
+        if (_deployed) then { [] call fnc_MHQ_deploy };
+    };
+    ["bases"] call DUWS_fnc_restoreStepDone;
+};
+
+// After fnc_WARCOM_init's seed, which would derive the tiers from a wallet since spent down.
+DUWS_fnc_restoreLedger = {
+    (DUWS_restore get "pools") params ["_cp", "_bluAp", "_opfAp", "_bluEarned", "_opfEarned"];
+    commandpointsblu1 = _cp;
+    WARCOM_blufor_ap = _bluAp;
+    WARCOM_opfor_ap = _opfAp;
+    WARCOM_blufor_ap_earned = _bluEarned;
+    WARCOM_opfor_ap_earned = _opfEarned;
+    WARCOM_blufor_tier = [_bluEarned] call DUWS_fnc_ap_tier;
+    WARCOM_opfor_tier = [_opfEarned] call DUWS_fnc_ap_tier;
+    {
+        publicVariable _x;
+    } forEach ["commandpointsblu1", "WARCOM_blufor_ap", "WARCOM_opfor_ap", "WARCOM_blufor_ap_earned",
+        "WARCOM_opfor_ap_earned", "WARCOM_blufor_tier", "WARCOM_opfor_tier"];
+};
+
+// After the census, which counts the same total on the same world, so one integer reproduces the level.
+DUWS_fnc_restoreEscalation = {
+    if (isNil "escalation_tier") exitWith {};
+    escalation_destroyed = DUWS_restore getOrDefault ["escalation", 0];
+    [true] call fnc_escalation_apply;
+};
+
+// Before OPCOM's first tick. A carry is released: its hulls are gone, and a half-bound rider would refuse every
+// order for the rest of the campaign.
+DUWS_fnc_restoreOpcom = {
+    private _o = DUWS_restore getOrDefault ["opcom", createHashMap];
+    DUWS_opcom_archetype = _o getOrDefault ["archetype", DUWS_opcom_archetype];
+    DUWS_opcom_tick = _o getOrDefault ["tick", 0];
+    DUWS_opcom_hqKnown = _o getOrDefault ["hqKnown", false];
+    DUWS_opcom_taskSeq = _o getOrDefault ["taskSeq", 0];
+    DUWS_opcom_attackSeq = _o getOrDefault ["attackSeq", 0];
+    DUWS_opcom_mineVariants = _o getOrDefault ["mineVariants", createHashMap];
+    missionNamespace setVariable ["DUWS_hpOpcomSeq", _o getOrDefault ["hpSeq", 0]];
+
+    private _saved = _o getOrDefault ["taskings", []];
+    DUWS_opcom_taskings = _saved select {
+        private _token = (_x getOrDefault ["comp", []]) param [0, ""];
+        private _cls = _x getOrDefault ["spawnClass", ""];
+        if (_cls isEqualTo "" || {isClass (configFile >> "CfgVehicles" >> _cls)} || {([[_token] call DUWS_fnc_tokenName] call DUWS_fnc_teamRow) isNotEqualTo []}) then {
+            true
+        } else {
+            private _new = [_token, "OPF"] call DUWS_fnc_tokenClass;
+            ["WARN", "SAVE", format ["tasking %1: %2 is not loaded, %3", _x get "id", _cls,
+                ["redrawn as " + _new, "dropped"] select (_new isEqualTo "")]] call fnc_log;
+            _x set ["spawnClass", _new];
+            _new isNotEqualTo ""
+        }
+    };
+    DUWS_restoreDropped set ["units", count _saved - count DUWS_opcom_taskings];
+    private _ids = DUWS_opcom_taskings apply { _x get "id" };
+    DUWS_opcom_attacks = _o getOrDefault ["attacks", []];
+    { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach DUWS_opcom_attacks;
+
+    { if ((_x getOrDefault ["carrying", -1]) >= 0) then { [_x] call DUWS_fnc_opcom_ferryRelease } } forEach DUWS_opcom_taskings;
+    { if ((_x getOrDefault ["ridingOn", -1]) >= 0) then { [_x] call DUWS_fnc_opcom_ferryUnbind } } forEach DUWS_opcom_taskings;
+    ["INFO", "SAVE", format ["OPCOM restored at tick %1: %2 taskings, %3 attacks", DUWS_opcom_tick,
+        count DUWS_opcom_taskings, count DUWS_opcom_attacks]] call fnc_log;
+    ["opcom"] call DUWS_fnc_restoreStepDone;
+};
+
+// The two late hooks run on their own threads; whichever finishes second closes the restore.
+DUWS_fnc_restoreStepDone = {
+    params ["_step"];
+    private _last = false;
+    isNil {
+        DUWS_restorePending = DUWS_restorePending - [_step];
+        _last = DUWS_restorePending isEqualTo [];
+    };
+    if (_last) then { call DUWS_fnc_restoreFinish };
+};
+
+// A hint rather than a card: a line of counts does not fit the card's 60 characters. Silent when nothing was lost.
+DUWS_fnc_restoreFinish = {
+    DUWS_restore = nil;
+    DUWS_restoring = false;
+    DUWS_dialogueMuted = false;
+    publicVariable "DUWS_dialogueMuted";
+    if (missionNamespace getVariable ["support_FOB_available", false]) then { ["fob_support"] remoteExec ["fnc_support_comm_add", 0] };
+    private _lost = values DUWS_restoreDropped;
+    if ((_lost findIf { _x > 0 }) >= 0) then {
+        [format [localize "STR_DUWS_T_LOAD_DROPPED", DUWS_restoreDropped get "units", DUWS_restoreDropped get "vehicles",
+            DUWS_restoreDropped get "gear"]] remoteExec ["hint", [0,-2] select isDedicated];
+    };
+    ["INFO", "SAVE", format ["restore of campaign %1 complete, not restored: %2", DUWS_campaignID, DUWS_restoreDropped]] call fnc_log;
+};

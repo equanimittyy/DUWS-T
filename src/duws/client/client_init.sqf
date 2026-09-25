@@ -83,11 +83,16 @@ if (isMultiplayer) then {
 
 if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 
+	// Waited for, not sampled: this client can get here before the server has published it.
+	while {!(["BOOT", "DUWS_setupPhase from the server", {!isNil "DUWS_setupPhase"}, 300] call fnc_waitLogged)} do {};
+	if (DUWS_setupPhase isEqualTo "choose") then { [] call fnc_campaign_fork };
+	while {!(["BOOT", "the server's answer to the load screen", {DUWS_setupPhase isNotEqualTo "choose"}, 600] call fnc_waitLogged)} do {};
+
 	// Faction + HQ placement + custom-faction paste + environment menu are owned
 	// by fnc_startup_faction_flow (called at the enviro spawn point below) so the
 	// environment screen's Back button can re-enter them to re-pick faction/HQ.
 
-	if (!zones_created) then {
+	if (!zones_created && {DUWS_setupPhase isEqualTo "new"}) then {
 
 		if (!zones_created) then {
 			sleep 0.1;
@@ -179,14 +184,14 @@ player addEventHandler ["GetInMan", {
 
 // Stamina/fatigue from the lobby param (default on). Drives the player here and the AI units
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
-player_fatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;
+player_fatigue = missionNamespace getVariable ["DUWS_paramFatigue", 1];
 player enableStamina (player_fatigue != 0);
 
 // First-person restriction from the lobby param (default off). Camera view is local, so the
 // watch runs here on each client. The inner wait for mode 2 is load-bearing: without it, sitting
 // in permitted vehicle third person would spin the loop every frame (outer waitUntil keeps
 // returning while cameraView stays EXTERNAL). isNull objectParent player == on foot.
-private _restrict1P = ["DUWS_RestrictFirstPerson", 0] call BIS_fnc_getParamValue;
+private _restrict1P = missionNamespace getVariable ["DUWS_paramFirstPerson", 0];
 if (_restrict1P > 0) then {
 	[_restrict1P] spawn {
 		params ["_mode"];

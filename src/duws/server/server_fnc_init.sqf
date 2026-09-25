@@ -706,6 +706,11 @@ fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\
 // =========================================================================================================
 // server/persistence
 // =========================================================================================================
+// Executed: each defines several functions. The store first, since the save and the restore both call into it.
+[] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_store.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_save.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_reconcile.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_restore.sqf";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\persistence\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 
 // =========================================================================================================
@@ -880,6 +885,11 @@ fnc_campaign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_ca
 fnc_startup_preset_apply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_preset_apply.sqf";publicVariable "fnc_startup_preset_apply";
 fnc_process_campaign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_process_campaign_menu.sqf";publicVariable "fnc_process_campaign_menu";
 fnc_callsign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_menu.sqf";publicVariable "fnc_callsign_menu";
+fnc_campaign_fork = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork.sqf";publicVariable "fnc_campaign_fork";
+fnc_campaign_fork_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork_fill.sqf";publicVariable "fnc_campaign_fork_fill";
+fnc_campaign_fork_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork_select.sqf";publicVariable "fnc_campaign_fork_select";
+fnc_campaign_fork_action = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_fork_action.sqf";publicVariable "fnc_campaign_fork_action";
+fnc_campaign_reply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_reply.sqf";publicVariable "fnc_campaign_reply";
 fnc_callsign_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_back.sqf";publicVariable "fnc_callsign_back";
 fnc_callsign_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_confirm.sqf";publicVariable "fnc_callsign_confirm";
 fnc_process_enviro_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_process_enviro_menu.sqf";publicVariable "fnc_process_enviro_menu";

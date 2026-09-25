@@ -43,7 +43,7 @@ publicVariable "DUWS_timeSkew";
 { [_x] call fnc_disguise_resetCooldown } forEach (call BIS_fnc_ListPlayers);
 
 // Gated server-side too, so the parameter holds even if a client sent weather values anyway.
-if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
+if (DUWS_paramRestWeather == 1) then {
     // Rain renders only over overcast >= 0.5, so floor it when rain is wanted (guards a direct call
     // that skips the menu's slider coupling). Rain is set after the forced overcast, not before.
     if (_rain > 0) then { _overcast = _overcast max 0.5 };

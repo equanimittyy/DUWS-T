@@ -159,6 +159,11 @@ for "_i" from 0 to (_count - 1) do {
     } forEach (_draft select _i);
     _registry pushBack _recs;
 };
+// A restore keeps every shop where it stood; the registry is index-parallel to the towns, so only a matching one.
+if (DUWS_campaignLoaded) then {
+    private _saved = DUWS_restore getOrDefault ["vendors", []];
+    if (count _saved isEqualTo _count) then { _registry = +_saved };
+};
 missionNamespace setVariable ["DUWS_vendors", _registry];
 
 // The poller runs this per site on one thread against a ~3 ms budget, so it gates and does nothing

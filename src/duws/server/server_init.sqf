@@ -10,7 +10,6 @@
 [] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
 ["INFO", "BOOT", "server_fnc_init done"] call fnc_log;
 setGroupIconsVisible [(["DUWS_GroupIcons", 0] call BIS_fnc_getParamValue) == 1, false];
-[] spawn fnc_moreUrban_locations;
 // Built while the player sits in the setup screens; WARCOM, the first router, waits on it below.
 [] spawn fnc_convoy_graph;
 
@@ -31,7 +30,6 @@ civilian setFriend [west, 1];
 civilian setFriend [east, 1];
 
 [] call fnc_factions_check;
-[] call fnc_bandit_looks;
 
 sleep 1;
 
@@ -54,17 +52,12 @@ if (isMultiplayer) then {
 	};
 };
 
-// Answers the confirmation screen and can't wait for the commit, since it's the last point the
-// player can change a pick. Loop, not once: stepping back re-enters faction selection and asks
-// again -- faction inits and all three AutoDetect wrappers tolerate being re-called.
-// Condition reads globals only: fnc_waitLogged runs the block in its own scope, so a private
-// captured here would be undefined by the time it runs.
-while {!createzone_server} do {
-	while {!(["BOOT", "duws_faction_preview_request (confirmation screen opened)",
-		{duws_faction_preview_request > duws_faction_preview_ready || createzone_server}, 600] call fnc_waitLogged)} do {};
-	if (createzone_server) exitWith {};
-	private _serving = duws_faction_preview_request;
+// A load pre-sets the flags the setup gates below wait on.
+[fnc_moreUrban_locations] call DUWS_fnc_restoreGate;
+[] call fnc_bandit_looks;
 
+// A load resolves once against the saved picks: classnames are re-resolved against the mods loaded now.
+private _fnc_resolveFactions = {
 	["INFO", "BOOT", "Server waiting for BLU faction Data Temp"] call fnc_log;
 	if (BLUFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 	if (OPFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
@@ -152,6 +145,20 @@ while {!createzone_server} do {
 		} forEach ([_side] call fnc_faction_schema);
 	} forEach ["blufor", "opfor"];
 	publicVariable "DUWS_factionPreviewPools";
+};
+if (DUWS_campaignLoaded) then { call _fnc_resolveFactions };
+
+// Answers the confirmation screen and can't wait for the commit, since it's the last point the
+// player can change a pick. Loop, not once: stepping back re-enters faction selection and asks
+// again -- faction inits and all three AutoDetect wrappers tolerate being re-called.
+// Condition reads globals only: fnc_waitLogged runs the block in its own scope, so a private
+// captured here would be undefined by the time it runs.
+while {!createzone_server} do {
+	while {!(["BOOT", "duws_faction_preview_request (confirmation screen opened)",
+		{duws_faction_preview_request > duws_faction_preview_ready || createzone_server}, 600] call fnc_waitLogged)} do {};
+	if (createzone_server) exitWith {};
+	private _serving = duws_faction_preview_request;
+	call _fnc_resolveFactions;
 
 	// Answers the request by number, so the screen can tell this round's rows from the last one's.
 	duws_faction_preview_ready = _serving;
@@ -173,6 +180,8 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 // re-expanding from the representative would undo the player's list edits: drops come back, adds go.
 // Only a commit with no table, the debug quickstart, still needs the pass.
 if (duws_faction_locked isEqualTo []) then { [] call fnc_faction_augment; };
+// A load has no locked table: its edits are the saved intent, laid over what this install detected.
+if (DUWS_campaignLoaded) then { [(DUWS_restore get "factions") getOrDefault ["edits", []]] call fnc_faction_edits_apply };
 
 // A side with no static MG leaves each composition's vanilla placeholder standing instead -- the
 // one case where a zone garrisons itself with the wrong side's gun. Checked here, not at each
@@ -268,7 +277,7 @@ if (ZeusStatus != 0) then {
 };
 
 // Set the date/time AFTER setting the current weather
-setDate [2035, 8, 3, time_of_day, 0];
+if (DUWS_campaignLoaded) then { setDate DUWS_restoreDate } else { setDate [2035, 8, 3, time_of_day, 0] };
 
 if (CIV_PRESENCE == "RAVAGE") then {
     [] spawn fnc_night_horde_event;
@@ -327,7 +336,13 @@ if (isServer) then {
         private _kills = playerKillCount getOrDefault [_uid, 0];
         departedKillCP = departedKillCP + (floor (_kills / kill_cp_kills)) * kill_cp_award;
         playerKillCount deleteAt _uid;
+        // Inline: on a default dedicated server the mission ends in the frame the last player leaves, so a
+        // spawned save may never run. The leaver can still be in allPlayers here, so it is excluded by UID.
+        if (([_uid] call DUWS_fnc_humanCount) == 0) then { ["last player left"] call DUWS_fnc_campaignSave };
     }];
+
+    addMissionEventHandler ["Ended", { ["mission end"] call DUWS_fnc_campaignSave }];
+    addMissionEventHandler ["MPEnded", { ["mission end"] call DUWS_fnc_campaignSave }];
 
     // Paid in one periodic sweep rather than per kill: a tally the player watches build reads as
     // campaign economy, where a payout per body reads as a score feed. Defined here beside the
@@ -419,6 +434,7 @@ waitUntil { sleep 1.0; HQ_pos_found_generated };
 // in while the campaign is still being built around them.
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
+[] spawn DUWS_fnc_autosaveLoop;
 // Paced, not idle: generation signs off by typing across every screen and hinting the settings
 // summary (warcom/fnc_init_OPFOR_WARCOM.sqf) the instant mission_init_complete goes up, and the
 // intro's first act is to black the screen over them. Flying as soon as clients were ready cut the

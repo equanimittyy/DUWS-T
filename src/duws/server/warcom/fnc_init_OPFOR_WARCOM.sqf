@@ -2,15 +2,19 @@
 if (!isServer) exitWith {};
 ["INFO", "WARCOM", format ["Opfor Warcom Start Zone Placement. Manual: %1",  manually_chosen]] call fnc_log;
 
- if (!manually_chosen) then {
-	if (!zones_created) then {
-		[50,0.2] spawn fnc_locatorZones_random; 
-    };
- } else {
-    if (!zones_created) then {
-		[50,0.2] remoteExec ["fnc_locatorZones_manual", player1, false];
-    };
- };
+if (DUWS_campaignLoaded) then {
+	call DUWS_fnc_restoreZones;
+} else {
+	if (!manually_chosen) then {
+		if (!zones_created) then {
+			[50,0.2] spawn fnc_locatorZones_random;
+		};
+	} else {
+		if (!zones_created) then {
+			[50,0.2] remoteExec ["fnc_locatorZones_manual", player1, false];
+		};
+	};
+};
 
 //Execution Order requires zone bonus and reward before WARCOM INIT
 // Spawned exactly once, so territory income does not stack per zone captured.
@@ -67,67 +71,73 @@ sleep 1;
     // fixed before laying any of it, so the banner counts hardpoints toward a real total, not zones.
     // Radio is rolled here so the seed call and the plan total share it.
     // The roadblock net comes back pre-expanded to a [zonePos, endpointPos] target per block.
-    private _radioN = 1 + floor random 2;
-    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
-    private _aaN = count serv_zones_array;
-    private _hpDone = 0;
-    // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
-    // down rather than jumping a whole pass's batch at once. _hpDone is read live off this scope (dynamic
-    // scope holds across the call chain) and holds what prior passes finished, so _hpDone + _this is the
-    // absolute number of the emplacement just laid; each pass then advances _hpDone by its own plan.
-    private _tick = {
-        private _msg = format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal];
-        [_msg] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-        // Same climb in text chat, for when the map is closed and the overlay is unseen -- the mirror
-        // zone generation runs (fnc_locatorzones_random). globalChat must run where player is local, so
-        // it fires client-side via BIS_fnc_Spawn; the spawned code can only reach globals, so the line
-        // crosses as a publicVariable rather than a captured local. Chat drops the <br/> the overlay uses.
-        DUWS_hpChatMsg = format ["Placing hardpoint %1 of %2...", _hpDone + _this, _hpTotal];
-        publicVariable "DUWS_hpChatMsg";
-        [{player globalChat DUWS_hpChatMsg}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+    if (DUWS_campaignLoaded) then {
+        call DUWS_fnc_restoreHardpoints;
+    } else {
+        private _radioN = 1 + floor random 2;
+        ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadTargets", "_obsN", "_hpTotal"];
+        private _aaN = count serv_zones_array;
+        private _hpDone = 0;
+        // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
+        // down rather than jumping a whole pass's batch at once. _hpDone is read live off this scope (dynamic
+        // scope holds across the call chain) and holds what prior passes finished, so _hpDone + _this is the
+        // absolute number of the emplacement just laid; each pass then advances _hpDone by its own plan.
+        private _tick = {
+            private _msg = format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal];
+            [_msg] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+            // Same climb in text chat, for when the map is closed and the overlay is unseen -- the mirror
+            // zone generation runs (fnc_locatorzones_random). globalChat must run where player is local, so
+            // it fires client-side via BIS_fnc_Spawn; the spawned code can only reach globals, so the line
+            // crosses as a publicVariable rather than a captured local. Chat drops the <br/> the overlay uses.
+            DUWS_hpChatMsg = format ["Placing hardpoint %1 of %2...", _hpDone + _this, _hpTotal];
+            publicVariable "DUWS_hpChatMsg";
+            [{player globalChat DUWS_hpChatMsg}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+        };
+        // Opening frame so the banner is not blank through the first zone's crew drop; the first tick
+        // redraws the same "1 of N".
+        1 call _tick;
+
+        // Zone rings first: each zone's own fortification, capped by its radius and tier.
+        {
+            _x params ["", "_hpPos", "_hpSize"];
+            [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
+            _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
+        } forEach zone_meta_array;
+
+        // Then the standalone passes across the area of influence -- the countryside the enemy holds outside
+        // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
+        // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
+        // the zones and the HQ alone -- towns are neutral and emit nothing yet.
+        //
+        // Radio towers first: their coverage widens the band the rest spread into, and each raises the OPFOR
+        // rep amplifier so the reputation war opens on the enemy's terms.
+        [_radioN, _tick] call fnc_hardpoint_seed_radio;
+        _hpDone = _hpDone + _radioN;
+
+        // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
+        // offset from the zones rather than ringing them. The observation posts below site off the same draw.
+        private _bandPts = call fnc_hardpoint_band_pool;
+        [_backline, false, _bandPts, _tick] call fnc_hardpoint_site_flank;
+        _hpDone = _hpDone + _backline;
+        [_frontline, true, _bandPts, _tick] call fnc_hardpoint_site_flank;
+        _hpDone = _hpDone + _frontline;
+
+        // AA through the countryside to deny the airspace; the net reuses the band sampler with an AA-only mix.
+        [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
+        _hpDone = _hpDone + _aaN;
+        // Observation posts -- eyes on the countryside between the zones, manned by a loose team but carrying no
+        // gun. A per-zone coin flip rolled in fnc_hardpoint_plan_counts.
+        [_obsN, _bandPts, _tick] call fnc_hardpoint_site_obs;
+        _hpDone = _hpDone + _obsN;
+        [_roadTargets, _tick] call fnc_hardpoint_site_roadblocks;
+        _hpDone = _hpDone + count _roadTargets;
+
+        [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     };
-    // Opening frame so the banner is not blank through the first zone's crew drop; the first tick
-    // redraws the same "1 of N".
-    1 call _tick;
-
-    // Zone rings first: each zone's own fortification, capped by its radius and tier.
-    {
-        _x params ["", "_hpPos", "_hpSize"];
-        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
-        _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
-    } forEach zone_meta_array;
-
-    // Then the standalone passes across the area of influence -- the countryside the enemy holds outside
-    // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
-    // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
-    // the zones and the HQ alone -- towns are neutral and emit nothing yet.
-    //
-    // Radio towers first: their coverage widens the band the rest spread into, and each raises the OPFOR
-    // rep amplifier so the reputation war opens on the enemy's terms.
-    [_radioN, _tick] call fnc_hardpoint_seed_radio;
-    _hpDone = _hpDone + _radioN;
-
-    // Flank lines: gun nests in the half of the band farther from HQ (backline) and nearer to it (frontline),
-    // offset from the zones rather than ringing them. The observation posts below site off the same draw.
-    private _bandPts = call fnc_hardpoint_band_pool;
-    [_backline, false, _bandPts, _tick] call fnc_hardpoint_site_flank;
-    _hpDone = _hpDone + _backline;
-    [_frontline, true, _bandPts, _tick] call fnc_hardpoint_site_flank;
-    _hpDone = _hpDone + _frontline;
-
-    // AA through the countryside to deny the airspace; the net reuses the band sampler with an AA-only mix.
-    [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
-    _hpDone = _hpDone + _aaN;
-    // Observation posts -- eyes on the countryside between the zones, manned by a loose team but carrying no
-    // gun. A per-zone coin flip rolled in fnc_hardpoint_plan_counts.
-    [_obsN, _bandPts, _tick] call fnc_hardpoint_site_obs;
-    _hpDone = _hpDone + _obsN;
-    [_roadTargets, _tick] call fnc_hardpoint_site_roadblocks;
-    _hpDone = _hpDone + count _roadTargets;
-
-    [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
+
+    if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreWorld };
 
     // The one thread that services every site, started once every site a campaign begins with has
     // registered itself. Outside the civilian gate above and after it deliberately: civilian init
@@ -153,6 +163,7 @@ sleep 1;
     // civilian system. Only the town reputation charge inside it does, and with civilians off
     // that degrades to charging nothing.
     [] call fnc_escalation;
+    if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreEscalation };
 
     // After generation, not racing it: the OPCOM director WARCOM launches must read a fully built map.
     // Fire-and-forget -- mission_init_complete below must release the start even if WARCOM stalls.

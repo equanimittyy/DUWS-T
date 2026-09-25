@@ -49,7 +49,7 @@ sliderSetRange [8703, 3, 24];
 sliderSetPosition [8703, 3];
 
 private _disp = uiNamespace getVariable ["DUWS_rest_disp", displayNull];
-if ((["DUWS_RestWeather", 1] call BIS_fnc_getParamValue) == 1) then {
+if ((missionNamespace getVariable ["DUWS_paramRestWeather", 1]) == 1) then {
     (_disp displayCtrl 8719) ctrlShow false;
     // Default to the current sky, so leaving the weather sliders put is a no-op rather than a jump.
     sliderSetRange [8712, 0, 1];

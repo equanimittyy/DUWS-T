@@ -4,7 +4,7 @@
 //
 // Returns true only when this call changed something, so a caller can tell "revealed a town"
 // from "that town was already on the map".
-params ["_townIndex"];
+params ["_townIndex", ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -26,6 +26,8 @@ _vis set [_townIndex, true];
     ([_townIndex, _forEachIndex] call fnc_vendor_markerName) setMarkerAlpha 1;
 } forEach ([_townIndex] call fnc_vendor_recs);
 
-["town_discovered", [text ((missionNamespace getVariable ["civ_locations", []]) select _townIndex)]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+if (!_quiet) then {
+    ["town_discovered", [text ((missionNamespace getVariable ["civ_locations", []]) select _townIndex)]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+};
 
 true

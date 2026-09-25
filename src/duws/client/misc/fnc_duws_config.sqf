@@ -43,8 +43,8 @@ private _S = {
 };
 // Lobby parameter to its chosen row text, indexed by the committed value.
 private _param = {
-    params ["_class", "_default", "_texts", "_values"];
-    private _v = [_class, _default] call BIS_fnc_getParamValue;
+    params ["_class", "_default", "_texts", "_values", ["_global", ""]];
+    private _v = if (_global isEqualTo "") then { [_class, _default] call BIS_fnc_getParamValue } else { missionNamespace getVariable [_global, _default] };
     private _i = _values find _v;
     if (_i < 0) then { str _v } else { _texts select _i }
 };
@@ -91,20 +91,22 @@ private _faction = {
 private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Revive", ["Revive", 0,
         ["None", "AIS (drag/carry)", "Vanilla"], [0,1,2]] call _param],
-    ["Fatigue", ["DUWS_Fatigue", 1, ["Off", "On"], [0,1]] call _param],
+    ["Fatigue", ["DUWS_Fatigue", 1, ["Off", "On"], [0,1], "DUWS_paramFatigue"] call _param],
     ["Restrict to 1P", ["DUWS_RestrictFirstPerson", 0,
-        ["Off", "On (all)", "Vehicle 3P"], [0,1,2]] call _param],
+        ["Off", "On (all)", "Vehicle 3P"], [0,1,2], "DUWS_paramFirstPerson"] call _param],
     ["Arsenal Mode", ["DUWS_ArsenalMode", 0,
-        ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2]] call _param],
-    ["Arsenal - Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1]] call _param],
-    ["Rest Weather", ["DUWS_RestWeather", 1, ["Off", "On"], [0,1]] call _param],
+        ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2], "DUWS_paramArsenal"] call _param],
+    ["Arsenal - Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1], "DUWS_paramTrackAmmo"] call _param],
+    ["Rest Weather", ["DUWS_RestWeather", 1, ["Off", "On"], [0,1], "DUWS_paramRestWeather"] call _param],
     ["Lose Conditions", ["DUWS_LoseConditions", 0,
-        ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3]] call _param],
+        ["Full", "Officer death only", "Escalation only", "Off"], [0,1,2,3], "DUWS_paramLoseConditions"] call _param],
     ["Default Garbage Lifetime", format ["%1 min",
         (["DUWS_CleanupLifetime", 300] call BIS_fnc_getParamValue) / 60]],
+    ["Autosave", ["DUWS_AutosaveInterval", 900,
+        ["Off", "5 min", "10 min", "15 min", "30 min"], [0,300,600,900,1800]] call _param],
     ["Map Group Icons", ["DUWS_GroupIcons", 0, ["Off", "On"], [0,1]] call _param],
     ["Bandits", ["DUWS_Bandits", 0,
-        ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3]] call _param],
+        ["Full", "No DLC", "No Apex DLC", "No Contact DLC"], [0,1,2,3], "DUWS_paramBandits"] call _param],
     ["Debug Menu", ["DUWS_Debug", 0, ["Disabled", "Enabled"], [0,1]] call _param],
     ["Logging Level", ["DUWS_LogLevel", 3,
         ["Off", "Errors only", "Errors + warnings", "Normal", "Debug"], [0,1,2,3,4]] call _param]

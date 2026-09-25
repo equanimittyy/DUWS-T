@@ -111,6 +111,6 @@ switch (toLower _mode) do {
         };
         escalation_destroyed = (escalation_destroyed + _delta) max 0;
         ["INFO", "ECON", format ["Escalation set to %1 destroyed (debug menu)", escalation_destroyed]] call fnc_log;
-        call fnc_escalation_apply;
+        [] call fnc_escalation_apply;
     };
 };

@@ -80,6 +80,10 @@ sleep 10;
 // names the class that matches its ending; the fallback covers a loss published without one.
 private _ending = [missionNamespace getVariable ["campaign_lost_ending", "island_ruined"],
     "island_captured_win"] select _won;
+// Written ended before the mission goes: the load screen's timeout passes over an ended campaign, where one
+// written live would be reloaded into its own ending on every unattended restart.
+DUWS_campaignEnded = ["lost", "won"] select _won;
+["campaign ended"] call DUWS_fnc_campaignSave;
 // Two-argument form: the one-argument call defaults victory to true, which would end a
 // flattened Altis on the winning card.
 [_ending, _won] call BIS_fnc_endMissionServer;

@@ -26,7 +26,7 @@ private _fnc_finish = {
 // Banner first: the caller cleared the map before handing over, and selection cannot ping its
 // own progress until it has enumerated the map's towns.
 [localize "STR_DUWS_T_civ_gen_placing"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-([] call fnc_civ_selectTowns) params [["_queue", []], ["_spare", []]];
+([] call ([fnc_civ_selectTowns, DUWS_fnc_restoreTownQueue] select DUWS_campaignLoaded)) params [["_queue", []], ["_spare", []]];
 
 // The base composition spans about 30 m; the rest is margin for its guards, patrols and
 // spawn points. Enemy zones are deliberately not gated -- a contested town is the point --
@@ -47,7 +47,7 @@ private _done = 0;
 while { count _queue > 0 } do {
     // The building list rides along from selection: it is the heaviest engine call in this pass,
     // and running it again per town entry would repeat it for the whole campaign.
-    (_queue deleteAt 0) params ["_loc", "_buildingCount", ["_hqQuota", false], ["_usable", []]];
+    (_queue deleteAt 0) params ["_loc", "_buildingCount", ["_hqQuota", false], ["_usable", []], ["_savedRadius", 0]];
     private _pos = getPos _loc;
     private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
     _done = _done + 1;
@@ -55,7 +55,8 @@ while { count _queue > 0 } do {
     [format [localize "STR_DUWS_T_civ_gen_progress", _done, _done + count _queue]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-    private _radius = (_buildingCount * 10) min 500 max 100;
+    // A restored town keeps its final radius, so the overlap cull below finds nothing left to trim.
+    private _radius = if (_savedRadius > 0) then { _savedRadius } else { (_buildingCount * 10) min 500 max 100 };
     private _hqDist = if (count _hqPos > 0) then { _pos distance2D _hqPos } else { -1 };
 
     // Areas, not centres: a civilian disc that merely reaches the HQ's still spawns civilians

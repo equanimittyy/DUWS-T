@@ -16,8 +16,8 @@ missionNamespace setVariable ["intro_heli_executed", true, true];
 
 // Publishing done with nobody boarded routes every client through client_init's
 // intro_completed==false fallback, which teleports them to base.
-if (missionNamespace getVariable ["DUWS_debug_skip_intro", false]) exitWith {
-    ["INFO", "INTRO", "Debug quickstart: skipping insertion flight."] call fnc_log;
+if (missionNamespace getVariable ["DUWS_debug_skip_intro", false] || DUWS_campaignLoaded) exitWith {
+    ["INFO", "INTRO", "Skipping insertion flight (debug quickstart or loaded campaign)."] call fnc_log;
     missionNamespace setVariable ["intro_heli_done", true, true];
     publicVariable "intro_heli_done";
 };

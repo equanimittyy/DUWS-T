@@ -1,3 +1,6 @@
+// A loaded campaign keeps its own value for Fatigue through Bandits, since those are the rules it was played
+// under; Revive and the host rows (lifetime, icons, autosave, debug, logging) stay the lobby's
+// (server/persistence/fnc_campaign_store.sqf).
 class Params {
 
     class Revive {
@@ -28,8 +31,8 @@ class Params {
     };
 
     // Hybrid keeps the player's own faction unlimited but count-tracks captured foreign gear against
-    // the banked pool; Full restores the legacy everything-unlimited arsenal. Read on the machine that
-    // opens the arsenal (client/arsenal/fnc_duws_Arsenal.sqf), so every opener reads the same value.
+    // the banked pool; Full restores the legacy everything-unlimited arsenal. Resolved once into
+    // DUWS_paramArsenal (server_var_init.sqf), which every arsenal opener reads.
     class DUWS_ArsenalMode {
         title = "Arsenal";
         values[] = {0,1,2};
@@ -76,6 +79,15 @@ class Params {
         values[] = {300,600,900,1200};
         texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes"};
         default = 300;
+    };
+
+    // The most progress a crash can cost: the server writes the campaign snapshot this often while anybody is
+    // on. Off leaves the SITREP save, the last-player-out save and the mission-end save.
+    class DUWS_AutosaveInterval {
+        title = "Autosave";
+        values[] = {0,300,600,900,1800};
+        texts[] = {"Off","5 minutes","10 minutes","15 minutes","30 minutes"};
+        default = 900;
     };
 
     // Toggles map group icons (setGroupIconsVisible). Friendly groups always show; enemy groups show

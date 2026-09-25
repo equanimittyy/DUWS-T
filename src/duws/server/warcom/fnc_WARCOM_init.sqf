@@ -26,6 +26,7 @@ publicVariable "WARCOM_opfor_ap_earned";
 publicVariable "WARCOM_blufor_tier";
 publicVariable "WARCOM_opfor_tier";
 publicVariable "WARCOM_blu_hq_pos";
+if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreLedger };
 
 sleep 5;
 
@@ -40,11 +41,9 @@ private _k = 0.5;
 DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
 ["INFO", "ECON", format ["econ throttle %1 for %2 zones", DUWS_econ_throttle, count WARCOM_createdZones]] call fnc_log;
 
-WARCOM_zones_controled_by_BLUFOR = [];
 publicVariable "WARCOM_zones_controled_by_BLUFOR";
-
-_WARCOM_zones_controled_by_OPFOR = WARCOM_createdZones;
-WARCOM_zones_controled_by_OPFOR = [] + _WARCOM_zones_controled_by_OPFOR;
+// A loaded campaign's captures are already in the BLUFOR list here.
+WARCOM_zones_controled_by_OPFOR = WARCOM_createdZones select { !([[_x] call fnc_zone_key] call fnc_zone_bluforHeld) };
 publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

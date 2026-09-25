@@ -7,6 +7,7 @@ _zonePos = _this select 3;
 _fortified = _this select 4;
 _prefab = _this select 5;
 _zone_num = _this select 6;
+private _kind = _this param [7, ""];
 // Named here, not by the locator that sited it: locators run on different localities (client
 // map-click vs server allocator); an empty name means "give next", so _zone_num stays just an array index.
 if (_name == "") then { _name = [] call fnc_zone_name };
@@ -103,7 +104,8 @@ if (_prefab) then {
 	// Flattened into selectRandomWeighted's [item, weight, ...] form over the whole list (not a fixed count), so an era set of any length picks correctly.
 	private _weighted = [];
 	{ _weighted append [_x, _x select 3] } forEach _array_of_prefabs;
-	_prefab_array = selectRandomWeighted _weighted;
+	private _saved = _array_of_prefabs findIf { (_x select 0) isEqualTo _kind };
+	_prefab_array = if (_saved >= 0) then { _array_of_prefabs select _saved } else { selectRandomWeighted _weighted };
 
 	// Composition kind (not the zone name) drives the marker/readout label; radio traffic uses the callsign alone --
 	// a player repeats that back, and "Comm Station" names a building, not a place.

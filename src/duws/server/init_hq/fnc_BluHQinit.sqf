@@ -230,10 +230,11 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
         hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS, EAST] call fnc_side_count_at) > 0);
         sleep 1;
     };
+    if (DUWS_officerLost) exitWith {};
     ["alert", [localize "STR_DUWS_T_OFFICER_KILLED_TITLE", localize "STR_DUWS_T_OFFICER_KILLED"]]
         remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
     // Lose conditions Full (0) or Officer Death Only (1).
-    if !((["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 1]) exitWith {
+    if !(DUWS_paramLoseConditions in [0, 1]) exitWith {
         ["INFO", "WARCOM", "Commanding officer killed: lose condition disabled"] call fnc_log;
     };
 

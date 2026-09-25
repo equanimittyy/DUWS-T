@@ -14,6 +14,7 @@
 params [["_speaker", ""], ["_text", ""], ["_channel", ""], ["_caller", ""]];
 
 if (!hasInterface) exitWith {};
+if (missionNamespace getVariable ["DUWS_dialogueMuted", false]) exitWith {};
 
 // Built on first use, not at init: this function is publicVariable'd from the server and a
 // JIP client can be handed a line before any init hook of its own has run.

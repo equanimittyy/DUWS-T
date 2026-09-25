@@ -98,12 +98,14 @@ fnc_escalation_report = {
     if !(missionNamespace getVariable ["escalation_enabled", true]) exitWith {};
 
     escalation_destroyed = escalation_destroyed + 1;
-    call fnc_escalation_apply;
+    [] call fnc_escalation_apply;
 };
 
 // Walks the level down as well as up: the debug menu can take houses back, and the multiplier must
-// follow them.
+// follow them. _quiet re-derives a level a restore already knew: no card, and an ending it reached is
+// carried as ended.
 fnc_escalation_apply = {
+    params [["_quiet", false]];
     // Clamped: with the ending off, the ceiling is a plateau, not prices climbing without limit.
     private _level = (floor (escalation_destroyed / escalation_tier)) min ESCALATION_MAX_LEVEL;
     if (_level == escalation_level) exitWith {};
@@ -115,13 +117,13 @@ fnc_escalation_apply = {
     ["INFO", "ECON", format ["Escalation level %1 (%2 destroyed of %3), prices x%4",
         _level, escalation_destroyed, escalation_budget, escalation_multiplier]] call fnc_log;
 
-    if (!_raised) exitWith {};
+    if (!_raised || _quiet) exitWith {};
 
     if (_level >= ESCALATION_MAX_LEVEL) exitWith {
         ["alert", [localize "STR_DUWS_T_escalation_title", localize "STR_DUWS_T_escalation_max"]]
             remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
         // Lose conditions Full (0) or Escalation Only (2).
-        if ((["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue) in [0, 2]) then {
+        if (DUWS_paramLoseConditions in [0, 2]) then {
             campaign_lost = true;
             campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST";
             campaign_lost_ending = "island_ruined";

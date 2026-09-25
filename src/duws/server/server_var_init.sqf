@@ -59,15 +59,27 @@ chosen_settings = false;publicVariable "chosen_settings";
 // and each re-broadcasts after a change; clients read it as a view to stock the arsenal shelf.
 DUWS_capturedPool = [];publicVariable "DUWS_capturedPool";
 
-// Arsenal mode and ammo tracking, resolved once from the lobby params so the server-side pool writers
-// and the client shelf logic read one authoritative answer. Limited count-tracks the player's own
-// faction too (no unlimited floor); trackAmmo folds magazines into whatever the mode tracks.
-DUWS_arsenalLimited = (["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue) == 2;publicVariable "DUWS_arsenalLimited";
-DUWS_trackAmmo = (["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue) == 1;publicVariable "DUWS_trackAmmo";
+// The lobby params that are campaign rules, each resolved once into the global every reader takes, so a loaded
+// campaign's own rules can replace the lobby's (server/persistence/fnc_campaign_restore.sqf).
+DUWS_paramFatigue = ["DUWS_Fatigue", 1] call BIS_fnc_getParamValue;publicVariable "DUWS_paramFatigue";
+DUWS_paramFirstPerson = ["DUWS_RestrictFirstPerson", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramFirstPerson";
+DUWS_paramArsenal = ["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramArsenal";
+DUWS_paramTrackAmmo = ["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramTrackAmmo";
+DUWS_paramRestWeather = ["DUWS_RestWeather", 1] call BIS_fnc_getParamValue;publicVariable "DUWS_paramRestWeather";
+DUWS_paramLoseConditions = ["DUWS_LoseConditions", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramLoseConditions";
+DUWS_paramBandits = ["DUWS_Bandits", 0] call BIS_fnc_getParamValue;publicVariable "DUWS_paramBandits";
+
+// Arsenal mode and ammo tracking, so the server-side pool writers and the client shelf logic read one
+// authoritative answer. Limited count-tracks the player's own faction too (no unlimited floor); trackAmmo
+// folds magazines into whatever the mode tracks.
+DUWS_arsenalLimited = DUWS_paramArsenal == 2;publicVariable "DUWS_arsenalLimited";
+DUWS_trackAmmo = DUWS_paramTrackAmmo == 1;publicVariable "DUWS_trackAmmo";
 
 // Limited's starting armoury: every standard-issue class is seeded into the pool at this count at
 // boot, since Limited removes the unlimited friendly floor. Tunable; a playtest value.
 DUWS_limitedSeed = 100;
+// The classes a loaded campaign already seeded, so a count it spent to nothing is not stocked again.
+DUWS_limitedSeeded = [];
 
 // The faction confirmation screen's handshake. Request and ready are counters, not flags: a flag
 // cleared by the server can race a fresh request, so the screen waits for ready to reach the number
@@ -293,6 +305,9 @@ DUWS_lastMissionStartDate = 0;publicVariable "DUWS_lastMissionStartDate";
 // adds it so a rest expires live mission deadlines; bumped by skiptime in fnc_rest_heal.
 DUWS_timeSkew = 0;publicVariable "DUWS_timeSkew";
 
+// A loaded campaign's officer came back dead: his watcher must not announce it or judge the lose condition again.
+DUWS_officerLost = false;
+
 MissionLocations = [];publicVariable "MissionLocations";
 
 moreUrban = 1;publicVariable "moreUrban";
@@ -328,10 +343,11 @@ WARCOM_blufor_tier = 0;publicVariable "WARCOM_blufor_tier";
 WARCOM_opfor_tier = 0;publicVariable "WARCOM_opfor_tier";
 WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 
-// Declared here, not just in fnc_WARCOM_init: the area-of-influence read (DUWS_fnc_aoi_covers /
+// Declared here, not in fnc_WARCOM_init: the area-of-influence read (DUWS_fnc_aoi_covers /
 // _bandPos) resolves zone control off this list, and hardpoint generation samples the band a full
 // phase before fnc_WARCOM_init runs. Undefined there, every band draw threw and the flank/AA/roadblock
-// passes placed nothing. Empty = every zone OPFOR, which is the truth at hour zero; WARCOM_init resets it.
+// passes placed nothing. Empty = every zone OPFOR, which is the truth at hour zero; a loaded campaign's
+// restore fills it before the site poller starts (server/persistence/fnc_campaign_restore.sqf).
 WARCOM_zones_controled_by_BLUFOR = [];
 
 // choose between "none" - "tropical" - "arid" - "temperate" - "temperate_cold" - "mediterranean"

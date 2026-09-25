@@ -77,3 +77,5 @@ if (isNil "support_radio3_available") then {
 // The Mobile HQ has no twin here: its unlock opens the mhq_slot row instead, which is what stops
 // the team being locked out for good when the one player holding a handed-out token leaves.
 "support_FOB_available" addPublicVariableEventHandler { ["fob_support"] call fnc_support_comm_add };
+// The handler misses a broadcast that landed before it, so a player joining after the unlock gets the item here.
+if (support_FOB_available) then { ["fob_support"] call fnc_support_comm_add };

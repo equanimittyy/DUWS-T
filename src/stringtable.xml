@@ -1083,6 +1083,138 @@
                 <Original>Next</Original>
                 <English>Next</English>
             </Key>
+            <Key ID="STR_DUWS_T_fork_frame">
+                <Original>Campaign</Original>
+                <English>Campaign</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_intro">
+                <Original>Start a new campaign, or continue one this server has saved.</Original>
+                <English>Start a new campaign, or continue one this server has saved.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_new">
+                <Original>NEW GAME</Original>
+                <English>NEW GAME</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_new_tip">
+                <Original>Run the setup screens for a new campaign. Saved campaigns are kept.</Original>
+                <English>Run the setup screens for a new campaign. Saved campaigns are kept.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_load">
+                <Original>LOAD</Original>
+                <English>LOAD</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_load_tip">
+                <Original>Continue the selected campaign</Original>
+                <English>Continue the selected campaign</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_delete">
+                <Original>DELETE</Original>
+                <English>DELETE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_delete_tip">
+                <Original>Delete the selected campaign from this server</Original>
+                <English>Delete the selected campaign from this server</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_delete_confirm">
+                <Original>Delete %1? It cannot be recovered.</Original>
+                <English>Delete %1? It cannot be recovered.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_import">
+                <Original>IMPORT</Original>
+                <English>IMPORT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_import_tip">
+                <Original>Add the campaign pasted below, or with nothing pasted, the last one this profile carried from a SITREP</Original>
+                <English>Add the campaign pasted below, or with nothing pasted, the last one this profile carried from a SITREP</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_export">
+                <Original>EXPORT</Original>
+                <English>EXPORT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_export_tip">
+                <Original>Copy the selected campaign to the clipboard</Original>
+                <English>Copy the selected campaign to the clipboard</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_paste">
+                <Original>Paste a campaign here to import it</Original>
+                <English>Paste a campaign here to import it</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_none">
+                <Original>No saved campaigns.</Original>
+                <English>No saved campaigns.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_row">
+                <Original>Day %1  |  %2  |  %3/%4 zones  |  %5 CP  |  %6</Original>
+                <English>Day %1  |  %2  |  %3/%4 zones  |  %5 CP  |  %6</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_age_min">
+                <Original>%1 min ago</Original>
+                <English>%1 min ago</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_age_hours">
+                <Original>%1 h ago</Original>
+                <English>%1 h ago</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_age_days">
+                <Original>%1 days ago</Original>
+                <English>%1 days ago</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_detail">
+                <Original>Day %1 on %2&lt;br/&gt;Zones held: %3 of %4&lt;br/&gt;CP: %5&lt;br/&gt;&lt;br/&gt;BLUFOR: %6&lt;br/&gt;OPFOR: %7</Original>
+                <English>Day %1 on %2&lt;br/&gt;Zones held: %3 of %4&lt;br/&gt;CP: %5&lt;br/&gt;&lt;br/&gt;BLUFOR: %6&lt;br/&gt;OPFOR: %7</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_ended_won">
+                <Original>This campaign was won.</Original>
+                <English>This campaign was won.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_ended_lost">
+                <Original>This campaign was lost.</Original>
+                <English>This campaign was lost.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_missing">
+                <Original>Loads without: %1.</Original>
+                <English>Loads without: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_unreadable">
+                <Original>The save store did not read back, so a campaign started now may not be kept</Original>
+                <English>The save store did not read back, so a campaign started now may not be kept</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_unreadable_confirm">
+                <Original>This server's save store did not read back, so this campaign may not be saved. Start anyway?</Original>
+                <English>This server's save store did not read back, so this campaign may not be saved. Start anyway?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_import_empty">
+                <Original>Nothing to import. Paste a campaign, or SITREP on a server first so this profile carries one.</Original>
+                <English>Nothing to import. Paste a campaign, or SITREP on a server first so this profile carries one.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_import_refused">
+                <Original>Import refused: %1.</Original>
+                <English>Import refused: %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fork_exported">
+                <Original>Campaign copied to the clipboard.</Original>
+                <English>Campaign copied to the clipboard.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_BAD_VERSION">
+                <Original>Saved by another version of the mission</Original>
+                <English>Saved by another version of the mission</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_BAD_WORLD">
+                <Original>Saved on another map</Original>
+                <English>Saved on another map</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_BAD_INPUT">
+                <Original>The save is incomplete or damaged</Original>
+                <English>The save is incomplete or damaged</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_BAD_FACTION">
+                <Original>A faction it uses is not loaded</Original>
+                <English>A faction it uses is not loaded</English>
+            </Key>
+            <Key ID="STR_DUWS_T_LOAD_DROPPED">
+                <Original>Campaign loaded. Not restored: %1 enemy units, %2 vehicles, %3 captured gear types.</Original>
+                <English>Campaign loaded. Not restored: %1 enemy units, %2 vehicles, %3 captured gear types.</English>
+            </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
                 <Spanish>DEFINE LOS PARÁMETROS AMBIENTALES</Spanish>
@@ -4417,13 +4549,6 @@
                 <Chinesesimp>==发现情报==\n\n地图上显示了所有战区。</Chinesesimp>
                 <Original>==INTEL RECOVERED==\n\nAll Zones have been revealed on the map.</Original>
                 <English>==INTEL RECOVERED==\n\nAll Zones have been revealed on the map.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_vmhut3p1">
-                <German>Speichern aktiviert</German>
-                <Spanish>Guardado activado</Spanish>
-                <Chinesesimp>启用保存</Chinesesimp>
-                <Original>Saving Enabled.</Original>
-                <English>Saving Enabled.</English>
             </Key>
             <Key ID="STR_DUWS_T_92465yls">
                 <German>
