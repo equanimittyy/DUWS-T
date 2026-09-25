@@ -81,7 +81,7 @@ DUWS_fnc_opcom_fireTargets = {
 // The telegraph: an Allseer call and a marker on the ground about OPCOM_ARTY_WARN seconds out, so a barrage is
 // something players can walk out of rather than a death from nowhere.
 DUWS_fnc_opcom_fireWarn = {
-    params ["_pt", "_spread", "_eta", "_name"];
+    params ["_key", "_pt", "_spread", "_eta", "_name"];
     sleep ((_eta - OPCOM_ARTY_WARN) max 0);
     private _mk = createMarker [_name, _pt];
     _mk setMarkerShape "ELLIPSE";
@@ -90,7 +90,11 @@ DUWS_fnc_opcom_fireWarn = {
     _mk setMarkerSize [_spread, _spread];
     [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_OPCOM_ARTY_INBOUND", [_pt] call DUWS_fnc_hardpointNearestPlace]]
         remoteExec ["fnc_duws_dialogue", 0];
-    sleep OPCOM_ARTY_MARK;
+    // The battery stops firing as its last round leaves the tube, which lands a flight time later.
+    waitUntil { sleep 1; !([_key] call DUWS_fnc_opcom_batteryFiring) };
+    private _last = 0;
+    { _last = _last max (_x getVariable ["DUWS_opcomShotAt", 0]) } forEach ([_key] call DUWS_fnc_opcom_batteryPieces);
+    sleep ((_last + _eta - time) max 0);
     deleteMarker _mk;
 };
 
@@ -101,7 +105,7 @@ DUWS_fnc_opcom_fireRun = {
     private _eta = [_key, _pt] call DUWS_fnc_opcom_fireETA;
     if (([_key, _pt, _rounds, _shape] call DUWS_fnc_opcom_fireMission) <= 0) exitWith { false };
     // One mission per emplacement per tick, so the tick and the key name the marker uniquely.
-    [_pt, _spread, _eta, format ["opcom_arty_%1_%2", _key, DUWS_opcom_tick]] spawn DUWS_fnc_opcom_fireWarn;
+    [_key, _pt, _spread, _eta, format ["opcom_arty_%1_%2", _key, DUWS_opcom_tick]] spawn DUWS_fnc_opcom_fireWarn;
     true
 };
 

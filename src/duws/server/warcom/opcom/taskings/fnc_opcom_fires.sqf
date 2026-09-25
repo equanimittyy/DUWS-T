@@ -85,6 +85,7 @@ DUWS_fnc_opcom_gunFire = {
     _gun setVariable ["DUWS_opcomFireEH", _gun addEventHandler ["Fired", {
         params ["_g"];
         _g setVariable ["DUWS_opcomFired", (_g getVariable ["DUWS_opcomFired", 0]) + 1];
+        _g setVariable ["DUWS_opcomShotAt", time];
         _g setVehicleAmmo 1;
     }]];
     [_gun, _mag, _pts, _delay, _jitter] spawn {

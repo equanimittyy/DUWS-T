@@ -659,9 +659,8 @@ OPCOM_ARTY_ROUNDS = createHashMapFromArray [["MORTAR", [4, 8]], ["ARTY", [6, 10]
 OPCOM_ARTY_LETHAL = createHashMapFromArray [["MORTAR", 20], ["ARTY", 30]];
 // No mission is aimed inside this of the player HQ (rounds may still stray there from a barrage aimed elsewhere).
 OPCOM_ARTY_HQ_CLEAR = 100;
-// Seconds before the first round lands that the telegraph goes out, and how long its marker then stands.
+// Seconds before the first round lands that the telegraph goes out.
 OPCOM_ARTY_WARN = 20;
-OPCOM_ARTY_MARK = 120;
 // Ticks a gun rests after it fires, so a full wallet cannot keep a battery shelling without pause.
 OPCOM_ARTY_COOLDOWN = 360;   // 1800s @ 5s tick
 
