@@ -8,7 +8,7 @@ squads, builds hardpoints, and lets low-reputation towns fight back. Its wallet 
 game AI methods behind the design are in [`opcom_ai_comparison.md`](opcom_ai_comparison.md).
 
 One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the enemy's belief about BLUFOR,
-**appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky intent.
+**appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky order.
 
 Phases 1–5 are shipped, but for 5.4's off-road layer, and the code under `src/duws/server/warcom/opcom/` is the source
 of truth for them. This doc specifies what remains: that layer, then persistence, then the archetype.
@@ -20,33 +20,32 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 |---|---|
 | 1–3, 4A, 4B, 4C — Perception, recruitment and tasking, orders driven by hand, the random picker with every action wired, and the weighted commander's score, shortlist and roll | [§Shipped](#shipped-the-substrate-the-loop-drives) — **shipped** |
 | 4D — Hire on demand: every unit an action needs is a free unit or a hire, weighed in the pick | [§Sourcing](#sourcing-hire-on-demand-phase-4d) — **shipped** |
-| 5 — Orchestration: a buildup and execution spine, the two manoeuvres, threat-aware routes where a role asks for one, the probe, and the fires split | [§Orchestration](#orchestration-phase-5) — **shipped**, but for the off-road layer (5.4) |
+| 5 — Attack: a buildup and execution spine, assault and flank, threat-aware routes where a role asks for one, the probe, and the fires split | [§Attack](#attack-phase-5) — **shipped**, but for the off-road layer (5.4) |
 | 6 — Persistence: OPCOM's store saved and restored, then a campaign played across a save | [§Persistence](#persistence-phase-6) — **next** |
-| 7 — Archetype: the campaign setting, the records the other archetypes need, the manoeuvre weights and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
+| 7 — Archetype: the campaign setting, the records the other archetypes need, and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
-**Orchestration comes first**: an orchestrated role binds its unit through the 4D sourcing, and it is the
-last phase that adds state worth saving — the intent records and their role bindings — and a save contract
-written before it would be written twice, once for taskings and again for intents. It is also the phase that
+**The Attack comes first**: an attack's role binds its unit through the 4D sourcing, and it is the
+last phase that adds state worth saving — the attack records and their role bindings — and a save contract
+written before it would be written twice, once for taskings and again for attacks. It is also the phase that
 changes how the enemy fights, which is what a play-test is for. The cost is accepted rather than overlooked: until
 persistence lands, every tuning pass runs inside one session.
-**Persistence comes next**, and the archetype last, because the archetype leans on manoeuvres as well as on
-actions, and the manoeuvres it leans between do not exist until orchestration writes them: a set of one cannot be
-weighted. Orchestration musters against one global pair of muster bars in the meantime, which the archetype later
-splits per record. Do not pre-build later phases: the tuning constants and engine-contact behaviours only settle
-by running the core.
+**Persistence comes next**, and the archetype last, because the archetype leans between assault and flank, and
+those rows do not exist until Phase 5 writes them: a set of one cannot be weighted. An attack musters against one
+global pair of muster bars in the meantime, which the archetype later splits per record. Do not pre-build later
+phases: the tuning constants and engine-contact behaviours only settle by running the core.
 
 **Every wired action is scored before any new one is written**: an unappraised row returns its price and scores
 break-even, so a half-appraised picker quietly favours whatever it cannot yet judge, and adding actions into that
-only widens the blind spot. The archetype is last for the same reason: it multiplies scores it does not set and
-leans between manoeuvres it does not write, so it has nothing to tilt until both are there.
+only widens the blind spot. The archetype is last for the same reason: it multiplies scores it does not set, so
+it has nothing to tilt until every row it weighs is there.
 
 ## Shipped: the substrate the loop drives
 
 `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose layers `_fri` (known
 OPFOR) and `_ene` (believed BLUFOR) the scoring reads, with the traffic layer and the observation tracker the guns
-are gated on; `taskings/` the orders, streaming, the carry and the fire mission; `orchestration/` the intents and
-their runner, the buildup and the manoeuvres; `appraisal/` the action list, every buy, the supply trucks, the roster,
+are gated on; `taskings/` the orders, streaming, the carry, the fire mission and the attack record and its runner;
+`appraisal/` the action list, every buy, the supply trucks, the roster,
 the sources and lifts, the commit orders, the siting pass, the score and the pick; and `appraisal/value/` the score's
 terms, one file each. The debug harness (`fnc_opcom_debug_task.sqf` and the Debug
 menu's OPCOM pages) runs the orders by hand and spends no AP.
@@ -108,10 +107,10 @@ has to name its Cost past it: a Garrison rests, a Ferry carries, and a Probe obs
   guns on top of their garrison, so `r` reads a dug-in site above its headcount. Infantry in cover counts 1 a man,
   and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
   `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
-- **The band** reads the same `r` to pick *how* an offensive runs (`≥2` assault; `0.5–2` assault or flank; `<0.5`
+- **The band** reads the same `r` to gate *how* an offensive runs (`≥2` assault; `0.5–2` assault or flank; `<0.5`
   hold). Every offensive then musters to the ideal bar before it launches
-  ([§Commitment](#commitment-intents-are-sticky)). `P(win)` (whether) and the band (how) are two jobs off one `r`. The
-  band picks once, at commit ([§Orchestration](#orchestration-phase-5)).
+  ([§Commitment](#commitment-orders-are-sticky)). `P(win)` (whether) and the band (how) are two jobs off one `r`. The
+  band gates once, at commit ([§Attack](#attack-phase-5)).
 
 ### Settles in play
 
@@ -169,7 +168,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
   every survivor hands a long tail of poor actions a real share of the picks. Cutting to ten first bounds that tail,
   then the exponent shapes the choice among candidates that are all worth taking.
 - **A candidate is an `[action, target]` pair,** so one action's targets can fill several of the ten slots. That is
-  the intent: with a score to rank them, a zone that needs reinforcing three places over is three good buys, not one
+  the point: with a score to rank them, a zone that needs reinforcing three places over is three good buys, not one
   action crowding the list.
 - **`random` mode stays the unscored draw** — uniform over the actions, then over the chosen action's
   targets, never over a shortlist — so the debug page keeps a control to compare the weighted commander against.
@@ -189,13 +188,13 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
 | Intercept (QRF) | each BLUFOR sighting inside OPFOR's area of influence |
-| Attack | each BLUFOR-held zone, each town they have garrisoned, and each open role of an Attack still in buildup ([§Orchestration](#orchestration-phase-5)) |
+| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each open role of an attack of the row's kind still in buildup; flank only below band 2 ([§Attack](#attack-phase-5)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
-| Probe | each Attack target whose 3×3 block reads stale and holds no bound probe, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
+| Probe | each Attack target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Ferry | each unit stopped at a water leg with no lift bound, one row apiece |
 | Arty saturate | each fresh belief sighting in range of an owned gun not already firing or held by a creep |
-| Arty creeping | each offensive intent in buildup or execution, with no creep yet, whose target an owned gun not already firing or held by a creep reaches |
+| Arty creeping | each attack, assault or flank, in buildup or execution, with no creep yet, whose target an owned gun not already firing or held by a creep reaches |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
 ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
@@ -427,7 +426,7 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   cannot cover.
   An offensive that does not muster drops below `OPCOM_PWIN_FLOOR` at commit. An Attack musters, so its source drops
   only below `OPCOM_MUSTER_HOLD` (0.5:1), and the minimum bar is its floor at launch
-  ([§Commitment](#commitment-intents-are-sticky)).
+  ([§Commitment](#commitment-orders-are-sticky)).
 - **An unaffordable action is still scored.** When the top scorer is unaffordable and its ETA,
   `(price − wallet) ÷ income rate`, is inside `OPCOM_SAVE_HORIZON`, it is the savings goal and OPCOM banks that
   tick; an action that outscores it later, such as a QRF, still commits. Past the horizon it drops, and the pick
@@ -457,7 +456,7 @@ The debug harness spends outside the pick and is not capped.
 - **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
 - **The garrison cap is a zone's.** Only a zone homes an OPCOM unit: a town is taken by a unit that guards it, never
-  one that garrisons it ([§Orchestration](#orchestration-phase-5)).
+  one that garrisons it ([§Attack](#attack-phase-5)).
 - **The hardpoint caps scale with the campaign's zone count,** because the seeded hardpoints count and the seed
   grows with the zones, at about 7 a zone. A flat cap would sit under the seed of a 40-zone campaign and far over
   that of a 10-zone one.
@@ -546,9 +545,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
   outside the zone's radius.
 - **OPCOM builds up in AP, not in units.** Bank and the savings goal hold the AP an attack will hire with.
-- **Only the pick hires.** The runner never spends: a manoeuvre sources each role it can fill when the pick commits
-  it, and a role it commits without stays a target of its Attack until a later pick fills it, from a free unit or a
-  hire ([§Orchestration](#orchestration-phase-5)).
+- **Only the pick hires.** The runner never spends: an attack sources its first role when the pick commits it, and
+  each role after stays a target of its row until a later pick fills it, from a free unit or a hire
+  ([§Attack](#attack-phase-5)).
 - **`fnc_opcom_recruit` stays the one hire.** Every source hires through it, and the debug page's Recruit list still
   calls it by hand.
 
@@ -556,18 +555,11 @@ Phase 4D settles in play `OPCOM_AP_PER_KM` against the delay for a unit that mar
 Patrol should hire land combatants or only recon, and whether Garrison hires crowd zone Reinforce out of the
 defense AP.
 
-## Commitment: intents are sticky
+## Commitment: orders are sticky
 
-A chosen action becomes an intent record — same shape at every granularity, `roles` empty (economic), one entry
-(simple tasking) or several (a manoeuvre):
-
-| Field | Holds |
-|---|---|
-| type / target | the action id; the objective (registry index or cell) |
-| roles | `[role, unitRef, status, release, λ]` bindings drawn from the roster |
-| rally | the staging cells a buildup holds at, short of the target — one per role |
-| hold | `DUWS_opcom_tick` at commit + `OPCOM_COMMIT_HOLD` — earliest tick OPCOM may re-issue this unit's order |
-| state | buildup / execution / done ([§Orchestration](#orchestration-phase-5)) |
+A chosen action lands as a buy, or as an order on the unit it sends. The order carries a `hold`, `DUWS_opcom_tick` at
+commit + `OPCOM_COMMIT_HOLD`, the earliest tick OPCOM may re-issue that unit's order. An Attack's units also carry a
+binding to their attack record ([§Attack](#attack-phase-5)).
 
 - **The hold is an absolute anti-flap lock** (KISS), not a success deadline: a committed unit is held the full span
   no matter what; a target that dies mid-hold is re-evaluated once it expires. Resting `garrison`/`guard` are
@@ -576,7 +568,7 @@ A chosen action becomes an intent record — same shape at every granularity, `r
 - **There is no retreat.** The engine owns a group in `COMBAT` and ignores a commanded withdrawal
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
-- **A multi-unit assault musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
+- **An attack musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
   force across ticks at a safe rally short of the target, one cell a role, then advances all together — it never dribbles units into contact,
   which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
   **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
@@ -585,74 +577,73 @@ A chosen action becomes an intent record — same shape at every granularity, `r
   because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
   for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
-  ([§Value](#value)). An action in buildup commits below the odds it launches at, so the minimum bar is its floor
-  at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short action waits for
-  units: each open role stays a target of its action, and a later pick fills it from a free unit or a hire
+  ([§Value](#value)). An attack in buildup commits below the odds it launches at, so the minimum bar is its floor
+  at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short attack waits for
+  units: each open role stays a target of its row, and a later pick fills it from a free unit or a hire
   ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
 
-## Orchestration (Phase 5)
+## Attack (Phase 5)
 
 **Shipped**, but for 5.4's off-road layer.
 
-Every orchestrated action runs the same two phases. **Buildup** places the units; **execution** runs the orders that
-already ship. A manoeuvre is therefore data rather than behaviour — which roles it binds, where each one stages, which
-order each one gets and what releases it — so a coordinated attack adds no tasking code. Today's one-unit Attack
-becomes the smallest `assault` ([§Release](#release-the-stagger-lives-on-the-role-not-in-a-third-state)).
+Attack is the one action that sends more than one unit, and it is two action rows, `attack_assault` and
+`attack_flank`. Both commit an attack record (`DUWS_opcom_attacks`, `taskings/fnc_opcom_attack.sqf`) that runs two
+phases. **Buildup** places the units; **execution** runs the orders that already ship. The two rows differ only in
+data — which roles each binds, where each one stages and what releases it (`DUWS_opcom_attackRoles`) — so neither
+adds tasking code. A one-unit Attack is the smallest `attack_assault`
+([§Release](#release-the-stagger-lives-on-the-role-not-in-a-third-state)). Every other action sends one unit on one
+order and binds nothing: the order ends on its own predicate, which frees the unit.
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
-| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required role bound, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-intents-are-sticky)) |
-| `execution` | doing the action's own work, once its role is released | the action's own order — `capture`, `intercept`, `errand`, `patrol` | the action's `resolve` predicate |
+| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival | the launch predicate: every required role bound, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY` ([§Commitment](#commitment-orders-are-sticky)) |
+| `execution` | fighting for the target, once its role is released | `capture` | `resolve`: every released unit back at rest |
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
-force-short action sits in buildup until later picks fill its open roles.
+force-short attack sits in buildup until later picks fill its open roles.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg is its caller
 beside the debug page (`taskings/fnc_opcom_orders.sqf` is the table that knows every order).
 
-**The runner**, each tick over every live intent with roles (`orchestration/fnc_opcom_intent.sqf`): refresh each bound
+**The runner**, each tick over every live attack (`DUWS_fnc_opcom_attackStep`): refresh each bound
 unit's status; in buildup, any bound unit `dead` or lost → **abort** (release the survivors, no AP refund), because a
 loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish; else test the current
 state's transition, and each unreleased role's own. A unit a hand order takes over from the debug page counts as
 lost. The runner sequences the states; the route and streaming machinery moves the units. There is
-no planner, and a simple tasking is the one-role, empty-buildup case, so a coordinated behaviour is a bigger
-manoeuvre rather than a new subsystem.
+no planner: a new way to attack is a new entry of roles rather than a new subsystem.
 
 ### Ownership: the roster has to skip a bound unit
 
 The free pool is every uncommitted `garrison`ed or `guard` unit, except one garrisoned in a contested zone. A unit
 that reaches its rally settles to `guard`, which puts it straight back in that pool, and the next pick would send it
-somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its intent's id, is what
+somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its attack's id, is what
 the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/fnc_opcom_tasking_init.sqf`). `OPCOM_COMMIT_HOLD` cannot do this job: it
 is an anti-flap lock of a fixed span, and a buildup outlives it.
 
 One unit, one owner. Binding pulls a unit from the pool and a `garrison`ed draw strips that zone's reinforcement;
-release returns it. A manoeuvre applies only when its band fits, enough roles fill and the geometry holds; short a
-role, it commits in buildup and waits.
+release returns it. An attack row is offered only when its band fits and the geometry holds; short a role, it
+commits in buildup and waits.
 
 ### Release: the stagger lives on the role, not in a third state
 
-Buildup ends for the intent, but execution starts per role. Each role carries a **release predicate**, and a role
-that has not released holds `guard` at its rally. The default is release on entering execution, which covers every
-manoeuvre but the two that sequence their roles: a `flank` is worth nothing if the enveloping element arrives before
-the defenders are committed to the front.
+Buildup ends for the attack, but execution starts per role. Each role carries a **release predicate**, and a role
+that has not released holds `guard` at its rally. The default is release on entering execution, which covers the
+assault. The flank sequences its roles, since it is worth nothing if the enveloping element arrives before the
+defenders are committed to the front.
 
-A per-role gate rather than a third state, because the alternative is one phase list per manoeuvre and a runner that
-has to know all of them.
+A per-role gate rather than a third state, because the alternative is one phase list per row and a runner that has
+to know all of them.
 
-| Manoeuvre | Picked when | Roles | Release |
+| Row | Offered when | Roles | Release |
 |---|---|---|---|
-| `assault` | every band from 0.5 | `attacker` ×1–3, one per rally cell | every role at once — one wave, never a dribble |
-| `flank` | band 0.5–2 and a dry rally on some side | `fix` ×1, `maneuver` ×1–2, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
+| `attack_assault` | every band from 0.5 | `attacker` ×1–3, one per rally cell | every role at once — one wave, never a dribble |
+| `attack_flank` | band 0.5–2 and a dry rally on some side | `fix` ×1, `maneuver` ×1–2, one side each | `fix` at once; `maneuver` once `fix` reads `engaged` or is lost |
 
-The manoeuvres are rows of `DUWS_opcom_manoeuvres` (`orchestration/fnc_opcom_manoeuvres.sqf`). An envelopment needs no
-count of mobile units at commit: its enveloping role is an open slot like any other, filled by a later pick, and one
+Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/fnc_opcom_attack.sqf`), keyed by the record's
+kind, `assault` or `flank`. A flank needs no count of mobile units at commit: its enveloping role is an open slot like any other, filled by a later pick, and one
 never filled leaves the fix to launch alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
-
-Two manoeuvres, both offensive. Every other action has one shape and picks no manoeuvre: Intercept, Patrol, Probe,
-Garrison and Ferry each commit as a one-role intent with an empty buildup, which resolves when its unit rests again.
 
 - **A role stages on a bearing measured from the target,** 0° being the bearing to the first unit's start, the side
   the attack comes from. `assault` puts every attacker on one bearing, so the wave arrives on a single axis and needs
@@ -660,29 +651,28 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
   picked from ±90°, ±135° and 180°. Every role then collapses on the target. A rally is a cell centre at least
   `OPCOM_RALLY_K` (2) cells from the target's, and every distance a rally keeps is Chebyshev cells from the target's
   cell.
-- **Belief picks a flank's sides, not a manoeuvre roll.** A side flank and a rear attack differ only in bearing, so
-  `flank` is one manoeuvre whose `maneuver` slots take the dry sides with the least believed BLUFOR in the rally's
+- **Belief picks a flank's sides.** A side flank and a rear attack differ only in bearing, so `flank` is one row
+  whose `maneuver` slots take the dry sides with the least believed BLUFOR in the rally's
   3×3 block outside the target's, the shorter swing on a tie. The target's own block is left out because it is the
   fight the fix draws, alike from every side. Two groups can hit two sides, and a rear group keeps the same standoff
   as any other: its λ route, not a wider rally, takes it around the fight.
 - **`assault` stages across 1–3 adjacent cells,** one role a cell, which at `OPCOM_GRID_CELL` 500 m is a 500 m to
   1.5 km frontage. A single cell holding the whole wave is one fire mission's worth of ground, and leaves the
   attackers no frontage to advance on.
-- **A lone attacker at the ideal ratio launches alone.** `assault` absorbs today's one-unit Attack, so Attack keeps
+- **A lone attacker at the ideal ratio launches alone.** `attack_assault` is also the one-unit Attack, so Attack keeps
   no one-shot path beside it. When the one unit OPCOM binds already meets the ideal ratio at commit, the assault
   launches with that one unit once it reaches its rally, so every assault keeps one shape. A lone unit below the ideal
   ratio musters like any other assault.
-- **`assault` is legal in every band.** Its band has to overlap `flank`'s, or the archetype's lean
-  toward it never bites: a manoeuvre weight only chooses among what a band leaves legal
-  ([§Archetype](#archetype-phase-7)). From band 2 (`OPCOM_BAND_CRUSH`) it is the only legal manoeuvre, because at
-  crushing odds an envelopment buys a setup leg and nothing else. The muster band, 0.5–1, leaves both legal,
-  since the muster is what raises the odds before either launches.
-- **The band picks the manoeuvre once, at commit**, and a buildup launches the one it picked whatever `r` it reaches,
-  so a plan never flips mid-buildup even when the muster ends in another band. Where the band leaves more than one
-  legal, the archetype's `manoeuvreWeight` picks between them on the same weighted roll the action pick uses; until
-  Phase 7 the survivors weigh alike.
-- **`resolve`** is the transition that frees the units: every released unit back at rest, since each order already
-  ends on its action's own predicate ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
+- **`attack_assault` is offered in every band.** Its band has to overlap `attack_flank`'s, or the archetype's lean
+  toward it never bites: an action weight only scales what the sweep offers ([§Archetype](#archetype-phase-7)).
+  From band 2 (`OPCOM_BAND_CRUSH`) only the assault is offered, because at crushing odds an envelopment buys a setup
+  leg and nothing else. The muster band, 0.5–1, offers both, since the muster is what raises the odds before either
+  launches.
+- **The pick chooses assault or flank once, at commit**, and a buildup launches what it chose whatever `r` it
+  reaches, so a plan never flips mid-buildup even when the muster ends in another band. Where the band offers both,
+  they compete on the one weighted roll like any two actions, each under its own `actionWeight`.
+- **`resolve`** is the transition that frees an attack's units: every released unit back at rest, since each order
+  already ends on its own predicate ([§Shipped](#shipped-the-substrate-the-loop-drives)): **Attack** — OPFOR take the zone by the mirror of BLUFOR's capture rule
   (`DUWS_fnc_siteTaken`): an OPFOR unit inside the radius, the zone's BLUFOR garrison beaten, tier 0 (none built)
   counting as beaten, and OPFOR outnumbering BLUFOR over the streaming ring, all for `DUWS_captureHold`. A live fight flips through the retake
   trigger; a virtual attacker flips it on the OPCOM tick against stored state once it has held the radius for
@@ -698,29 +688,29 @@ Garrison and Ferry each commit as a one-role intent with an empty buildup, which
   `OPCOM_PROBE_FRESH`, at which point the unit drops to `guard` where it stands (`DUWS_fnc_opcom_stepProbe`), or it
   arrives. **Rapport** — courier delivers or dies.
 
-### Chained fires: an intent may name a parent
+### Chained fires: a creep rides an attack
 
-`arty_creeping` cannot stand alone: a creep is a barrage walked ahead of someone, so it needs an offensive to walk it
-for. An intent may therefore name a **parent** intent and a predicate on the parent's state, which is the per-role
-release predicate lifted one level. A creep binds when an offensive intent holds its target in buildup or execution,
-and its rounds walk ahead of that intent's advance (`DUWS_fnc_opcom_creepTargets`, `appraisal/fnc_opcom_fire.sqf`): an
+`arty_creeping` cannot stand alone: a creep is a barrage walked ahead of someone, so it needs an attack to walk it
+for, an assault or a flank alike. A creep is therefore a field on the attack record rather than a record of its own.
+The row offers each attack in buildup or execution with no creep yet, and its rounds walk ahead of that attack's
+advance (`DUWS_fnc_opcom_creepTargets`, `appraisal/fnc_opcom_fire.sqf`): an
 `OPCOM_ARTY_CREEP_WIDTH` × `OPCOM_ARTY_CREEP_LENGTH` box (150 × 200 m) walked forward through the objective along the
 wave's approach. The creep holds its battery from commit, so no Saturate finds its guns mid-mission, and fires once
-the parent launches and the guns are free. A parent that ends first takes the creep with it, its AP spent.
+the attack launches and the guns are free. An attack that ends first takes the creep with it, its AP spent.
 
 `arty_saturate` needs no parent. Where it fires for a muster the two overlap rather than sequence: the offensive
 gathers while the rounds land, and the fires lift as it launches, because fires that stop before the wave starts hand
 the players a window to reposition in.
 
 Nothing else chains. A Probe that refreshes belief at an objective moves that objective's muster bars by itself, since
-both bars read believed force ([§Commitment](#commitment-intents-are-sticky)), so no edge is needed to sequence one
-ahead of an offensive and the commit-time manoeuvre pick stands. Each link pays its own price at its own commit, so a
+both bars read believed force ([§Commitment](#commitment-orders-are-sticky)), so no edge is needed to sequence one
+ahead of an offensive and the row chosen at commit stands. Each link pays its own price at its own commit, so a
 chain that runs out of AP, or whose next gate has lapsed, stops where it is.
 
 ### Routes: threat is what a role asks for
 
 **Avoiding threat is opt-in.** λ 0 is distance only, which is what an assault wants: a detour arrives late at the
-fight the order exists for. λ is therefore a field on the role binding (`DUWS_opcom_manoeuvres`), falling back to the
+fight the order exists for. λ is therefore a field on the role binding (`DUWS_opcom_attackRoles`), falling back to the
 order's default, which is 1 for an `errand` and a `return` and 0 for every other order (`taskings/fnc_opcom_task.sqf`).
 The order alone cannot carry it, because `flank`'s `fix` and `maneuver` both run `capture` and take opposite values.
 The tasking keeps its λ, so every re-plan of the march bends alike, and a lift takes its rider's. High is λ 1, and
@@ -769,12 +759,12 @@ early.
 
 | Chunk | Builds |
 |---|---|
-| **5.1** Intents and ownership | **Shipped** (`orchestration/fnc_opcom_intent.sqf`) — the intent record, `boundTo` honoured by `DUWS_fnc_opcom_drawable`, and Attack, Intercept, Patrol, Garrison and Ferry each committed as a one-role intent with an empty buildup. Nothing changes in play, which is the check: this chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`orchestration/fnc_opcom_buildup.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
-| **5.3** Manoeuvres | **Shipped** (`orchestration/fnc_opcom_manoeuvres.sqf`) — `assault` across its 1–3 cells, with Attack's one-role 5.1 intent folded into it, and `flank`, its `maneuver` slots each on the weakest dry side, over its release predicate |
+| **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
+| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (2) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, each open slot offered to later picks as a Join row while the bound force is short of the ideal bar, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its `maneuver` slots each on the weakest dry side, over its release predicate |
 | **5.4** Route λ | **Shipped in part** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, and the threat term on road segments. The off-road layer is not built |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
-| **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, whose parent-intent predicate is the only chain edge |
+| **5.6** Chained fires | **Shipped** (`appraisal/fnc_opcom_fire.sqf`) — Arty split into `arty_saturate`, the shipped action renamed, and `arty_creeping`, a creep on an attack record and the only chain edge |
 
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
@@ -789,13 +779,13 @@ frontage an `assault` wants at each role count, `OPCOM_PROBE_SHARE`, `OPCOM_PROB
 **WIP.**
 
 Three levels: **Action** (what AP commits to, scored and held), **Sink** (how it's paid — tier / strength / build /
-tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1 simple, N a manoeuvre). One actor
+tasking-spawn / bought fire mission), **Tasking** (orders emitted: 0 economic, 1 simple, N an Attack). One actor
 shares `WARCOM_opfor_ap`; every sink competes in the one appraisal — none runs on its own clock. Spends call
 `["OPF", -_cost, _reason] call fnc_ap_adjust` (server-side, single writer, no race).
 
 | Action | Target | Sink | Taskings |
 |---|---|---|---|
-| Attack | a BLU-held zone | tasking-spawn | 1–N (band → manoeuvre) |
+| Attack | a BLU-held zone | tasking-spawn | 1–N (assault or flank) |
 | Intercept (QRF) | a BLUFOR sighting inside OPFOR's area of influence | tasking-spawn | 1 |
 | Rapport | a town above −15 and below +10 inside OPFOR's area of influence (needs `supply`) | tasking-spawn | 1 courier |
 | Reinforce | an own depleted zone / town garrison | strength purchase | 0 zone / 1 truck town |
@@ -976,8 +966,8 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 - **Spread** is the radius the action hands the shipped saturate: base by type, +25 m per km range, never below
   `OPCOM_ARTY_MIN_SPREAD`.
 - **Two actions over one implementation.** `arty_saturate` fires on a fresh sighting; `arty_creeping` walks its
-  rounds ahead of a bound offensive, so it gates on that offensive standing and takes a parent intent
-  ([§Chained fires](#chained-fires-an-intent-may-name-a-parent)). They score apart because they buy different things
+  rounds ahead of a bound offensive, so it gates on that offensive standing and rides its attack record
+  ([§Chained fires](#chained-fires-a-creep-rides-an-attack)). They score apart because they buy different things
   — saturate buys kills, a creep buys the wave's survival — and one Value cannot price both. The debug step still
   asks for a walked pattern of any size by hand.
   Telegraph: an Allseer line and a marker on the aim point `OPCOM_ARTY_WARN` seconds before the first round lands,
@@ -1005,42 +995,39 @@ A tower, OP, mortar or battery build keeps its own weight and stays out of the m
 builds. The table is relative: weighting every action alike changes no pick, so Balanced's 1 everywhere is the
 baseline. 7.1 builds the setting.
 
-| Archetype | Weights toward | Manoeuvres |
+| Archetype | Weights toward | Attack lean |
 |---|---|---|
-| Defensive | Fortify, Reinforce, Build, Intercept, Patrol, Probe, Garrison | `flank`: shape the fight, stake little |
+| Defensive | Fortify, Reinforce, Build, Intercept, Patrol, Probe, Garrison | `attack_flank`: shape the fight, stake little |
 | Balanced | no strong lean — the baseline | no lean — the baseline |
-| Aggressive | Attack, Rapport, Arty saturate; leaves ground thin | `assault`: direct, no setup leg |
+| Aggressive | Attack, Rapport, Arty saturate; leaves ground thin | `attack_assault`: direct, no setup leg |
 
-**An archetype weighs manoeuvres as well as actions.** `manoeuvreWeight` keys the manoeuvres
-([§Orchestration](#orchestration-phase-5)) and picks between the ones the band leaves legal, on the same weighted
-roll as the action pick. The band is the gate and the weight is the lean, so a weight neither makes an illegal
-manoeuvre legal nor takes a legal one away: every manoeuvre keeps a weight above 0, because a band whose legal
-manoeuvres all weigh 0 has no pick left to make. The table keys the two that compete, `assault` and `flank`.
-Every other action has one shape, so a manoeuvre weight on it would never bite, and `assault` is legal
-in every band for that same reason: a weight can only choose among what a band leaves legal. Two weights rather than one, because an archetype that attacks often can still
-attack cautiously: the `attack` action weight sets how often it goes, the manoeuvre weight sets how it goes. Only
-the band overlap gives the weight room, so the band thresholds and the weights settle against each other in play.
+**An archetype leans between assault and flank through their action weights.** `attack_assault` and
+`attack_flank` are two rows of the action table ([§Attack](#attack-phase-5)), so their sum against the rest sets how
+often OPCOM attacks and their ratio sets how. The band is the gate and the weight is the lean, so a weight neither
+offers a row the band withholds nor takes an offered one away, and `attack_assault` is offered in every band for that
+reason. Only the band overlap gives the ratio room, so the band thresholds and the two weights settle against each
+other in play.
 
 Each archetype is one record in `DUWS_opcom_archetypes` (`appraisal/fnc_opcom_archetypes.sqf`) holding its
-`actionWeight`, `manoeuvreWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the
+`actionWeight`, `hpMix` and `recruitMix` ([§Value](#value)), and `DUWS_opcom_archetype` names the
 one the commander plays. Only Balanced's record stands until 7.1 adds the others and sets the archetype from the
-campaign setting; an archetype with no record weighs every action and every manoeuvre at 1 and builds and hires with
+campaign setting; an archetype with no record weighs every action at 1 and builds and hires with
 no mix.
 
-Beyond the two weight tables, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
+Beyond its weights and mixes, an archetype sets the commander's patience: the muster ideal, minimum and expiry,
 `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE`. A patient, strategic commander musters and saves longer for a
-properly executed manoeuvre; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a
+properly executed attack; a flexible, aggressive one launches sooner at lesser odds. The Balanced baseline (a
 1.5:1 muster ideal, a 0.75:1 minimum) is what Phase 5 musters against, and it applies until 7.2 builds the rest.
 
 | Chunk | Builds |
 |---|---|
 | **7.1** Records and the setting | the campaign setting, the records the other archetypes need, the debug-page override, and `DUWS_opcom_archetype` set from the setting. The action table is already wired as each record's `actionWeight` |
-| **7.2** Manoeuvres and patience | `manoeuvreWeight` on each record and the manoeuvre pick reading it; then the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
+| **7.2** Patience | the muster ideal, minimum and expiry per archetype, and `OPCOM_SAVE_HORIZON` and `OPCOM_VALUE_HALFLIFE` per archetype in place of the one global figure |
 
-Phase 7 settles in play each archetype's action weights, Bank's included, its manoeuvre weights against the band
+Phase 7 settles in play each archetype's action weights, Bank's included, its assault and flank weights against the band
 thresholds Phase 5 sets, the patience figures, and the set of archetypes itself, which is not final. Phase 5 ships
 the muster on one global set of bars, and 7.2 is what splits them per archetype
-([§Orchestration](#orchestration-phase-5)).
+([§Attack](#attack-phase-5)).
 
 ## Town & zone garrisons
 
@@ -1087,13 +1074,13 @@ OPCOM's store is shaped to serialise but implements no save/load, and today pers
 a restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
-It follows orchestration so the contract is written once. Phase 5 added the intent records (`DUWS_opcom_intents`, with
-`DUWS_opcom_intentSeq` beside it) and the `boundTo` key on the taskings they own, which are stored state on the same
-terms as a tasking, so a contract written before it would be reopened the moment it landed. An intent is numbers,
+It follows the Attack so the contract is written once. Phase 5 added the attack records (`DUWS_opcom_attacks`, with
+`DUWS_opcom_attackSeq` beside it) and the `boundTo` key on the taskings they own, which are stored state on the same
+terms as a tasking, so a contract written before it would be reopened the moment it landed. An attack is numbers,
 strings and arrays like everything else here, and its roles name their units by tasking id, which the taskings group
 already restores — so a buildup comes back mid-muster rather than collapsing, and what clears on restore is the live
-half a tasking already clears: the group handle, the status and any carry binding. A creep names its parent by
-intent id, so the intent counter rides with the intents as `DUWS_opcom_taskSeq` rides with the taskings, and a
+half a tasking already clears: the group handle, the status and any carry binding. A tasking's `boundTo` names its
+attack by id, so the attack counter rides with the attacks as `DUWS_opcom_taskSeq` rides with the taskings, and a
 buildup's `since` counts against `DUWS_opcom_tick` as a commit hold does.
 
 The phase ends in play rather than in code: a campaign is run past a save and a reload, and the commander has to

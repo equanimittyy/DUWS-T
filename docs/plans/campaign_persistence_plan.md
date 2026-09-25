@@ -572,7 +572,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 | Taskings | outcome | `DUWS_opcom_taskings`, one hashmap per unit, with `DUWS_opcom_taskSeq` beside it |
 | Clock and flags | outcome | `DUWS_opcom_tick` and `DUWS_opcom_hqKnown` |
 | Mine variants | outcome | `DUWS_opcom_mineVariants`, with `DUWS_hpOpcomSeq` beside it |
-| Intents | outcome | `DUWS_opcom_intents`, one hashmap per intent, with `DUWS_opcom_intentSeq` beside it, and the `boundTo` key on the taskings they own |
+| Attacks | outcome | `DUWS_opcom_attacks`, one hashmap per attack, with `DUWS_opcom_attackSeq` beside it, and the `boundTo` key on the taskings they own |
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
@@ -581,11 +581,11 @@ only, and `grp` is a live group's netId rather than a handle
 bound are gone, and a half-bound carry would hold its rider for the rest of the campaign, since a bound
 record refuses every new order.
 
-**Intents landed with orchestration, and they change nothing here.** An intent is the record that binds
-several units to one action, and its roles name their units by tasking id rather than by handle
-([`opcom_plan.md` §Commitment](opcom/opcom_plan.md#commitment-intents-are-sticky)). It therefore
-serialises on the taskings' own terms and restores with them, which is why that phase is built before
-this one rather than after: a contract written first would be reopened the moment intents existed.
+**Attack records landed with Phase 5, and they change nothing here.** An attack is the record that binds
+several units to one Attack, and its roles name their units by tasking id rather than by handle
+([`opcom_plan.md` §Attack](opcom/opcom_plan.md#attack-phase-5)). It therefore serialises on the
+taskings' own terms and restores with them, which is why that phase is built before this one rather than
+after: a contract written first would be reopened the moment attack records existed.
 
 **`DUWS_opcom_taskSeq` rides with the taskings.** The id is what every binding uses — a ferry pairs a
 transport to its rider by id, not by handle — so a counter restored to 0 hands the next hire an id a
