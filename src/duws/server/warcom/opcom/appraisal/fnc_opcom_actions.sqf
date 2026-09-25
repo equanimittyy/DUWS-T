@@ -31,7 +31,6 @@ DUWS_opcom_actions = [
     ["patrol", DUWS_fnc_opcom_patrolSweep, DUWS_fnc_opcom_sendRun],
     ["probe", DUWS_fnc_opcom_probeSweep, DUWS_fnc_opcom_sendRun],
     ["garrison", DUWS_fnc_opcom_garrisonSweep, DUWS_fnc_opcom_sendRun],
-    ["ferry", DUWS_fnc_opcom_ferrySweep, DUWS_fnc_opcom_ferryRun],
     ["arty_saturate", DUWS_fnc_opcom_fireTargets, DUWS_fnc_opcom_fireRun],
     ["arty_creeping", DUWS_fnc_opcom_creepTargets, DUWS_fnc_opcom_creepRun]
 ];

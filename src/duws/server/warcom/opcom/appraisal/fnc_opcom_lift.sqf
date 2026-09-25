@@ -1,6 +1,6 @@
 // Locality: server, [] call'd at load. The lifts, sourced like any other unit (opcom_plan.md §Sourcing): a land-taxi
-// priced with the order it carries, and the Ferry a unit stopped at a water leg waits on. Read from the pick's
-// unscheduled pass, so nothing here may suspend; the runs route, so they execute after it.
+// priced with the order it carries, and the ferry a unit stopped at a water leg takes as soon as one is free or
+// affordable. The source reads run unscheduled, so nothing in them may suspend; the runs route, so they execute after.
 if (!isServer) exitWith {};
 
 DUWS_fnc_opcom_isTaxi = {
@@ -92,28 +92,40 @@ DUWS_fnc_opcom_liftRun = {
     true
 };
 
-// P(win) 1: a lift fights for nothing, and the order it unblocks is what it is worth.
-DUWS_fnc_opcom_ferrySweep = {
-    private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isFerry })
-        apply { [_x] call DUWS_fnc_opcom_freeSource };
-    private _zones = call DUWS_fnc_opcom_zonesOpen;
-    private _out = [];
+// The crossing is part of an order already committed, so it spends no pick: each tick a stranded unit takes the best
+// lift it can have now, a free hull or an affordable hire, and with neither it asks again next tick. Off with the pick,
+// so a commander switched off spends nothing.
+DUWS_fnc_opcom_ferryDispatch = {
+    if (DUWS_opcom_aiMode isEqualTo "off") exitWith {};
+    // A hire joins the store mid-pass, so the pass walks its own list.
+    private _stranded = DUWS_opcom_taskings select {
+        (_x getOrDefault ["strandTicks", 0]) > 0 && {(_x getOrDefault ["ridingOn", -1]) < 0} && {(_x get "status") isNotEqualTo "dead"}
+    };
     {
         private _r = _x;
-        if ((_r getOrDefault ["strandTicks", 0]) > 0 && {(_r getOrDefault ["ridingOn", -1]) < 0}
-            && {(_r get "status") isNotEqualTo "dead"}) then {
+        private _lift = [];
+        isNil {
             private _rp = _r get "pos";
-            private _v = _r getOrDefault ["expValue", 0];
-            private _offers = (_free + ([DUWS_fnc_opcom_isFerry, _rp, _zones] call DUWS_fnc_opcom_hireSources)) apply { [_x, _v] };
-            {
-                _x params ["_src", "_fv", "", "_c", "_p"];
-                private _ref = _src select 0;
-                _out pushBack [[_ref, _r get "id"], _p, format ["Ferry %1 %2 with %3", _r get "menu", _r get "id",
-                    [_ref] call DUWS_fnc_opcom_sourceName], _fv, 1, _c];
-            } forEach ([_offers, _rp, false] call DUWS_fnc_opcom_bestSources);
+            private _free = ((call DUWS_fnc_opcom_free) select { [_x get "flags", _x get "moveType"] call DUWS_fnc_opcom_isFerry })
+                apply { [_x] call DUWS_fnc_opcom_freeSource };
+            private _offers = (_free + ([DUWS_fnc_opcom_isFerry, _rp, call DUWS_fnc_opcom_zonesOpen] call DUWS_fnc_opcom_hireSources))
+                apply { [_x, _r getOrDefault ["expValue", 0]] };
+            private _rows = [_offers, _rp, false] call DUWS_fnc_opcom_bestSources;
+            private _i = _rows findIf { (_x select 4) <= WARCOM_opfor_ap };
+            if (_i >= 0) then { _lift append (_rows select _i) };
         };
-    } forEach DUWS_opcom_taskings;
-    _out
+        if (_lift isNotEqualTo []) then {
+            private _ref = (_lift select 0) select 0;
+            private _price = _lift select 4;
+            if (WARCOM_opfor_ap >= _price && {[[_ref, _r get "id"]] call DUWS_fnc_opcom_ferryRun}) then {
+                if (_price > 0) then { ["OPF", -_price, "opcom_ferry"] call fnc_ap_adjust };
+                [format ["Ferry %1 %2 with %3%4", _r get "menu", _r get "id", [_ref] call DUWS_fnc_opcom_sourceName,
+                    [format ["  %1 AP", _price], ""] select (_price == 0)]] call DUWS_fnc_opcom_aiEvent;
+                // The hull is spent and a hire counts toward the cap, so the next stranded unit reads fresh sources.
+                call DUWS_fnc_opcom_tickCacheReset;
+            };
+        };
+    } forEach _stranded;
 };
 
 DUWS_fnc_opcom_ferryRun = {

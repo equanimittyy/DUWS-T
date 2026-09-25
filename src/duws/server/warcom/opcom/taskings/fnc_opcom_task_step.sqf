@@ -75,9 +75,9 @@ private _stepContext = {
     [_pos, _grp, _live, _engaged, _arrived, _adv]
 };
 
-// A transportable unit at its near shore with a water leg ahead counts the ticks it waits, which is what offers it to
-// the Ferry action (fnc_opcom_lift), WARNing every OPCOM_FERRY_STRAND_TICKS. Reads the order off the record, never a
-// copy taken before the step: an intercept that gave up is a guard now.
+// A transportable unit at its near shore with a water leg ahead counts the ticks it waits, which is what the ferry
+// dispatch lifts it on (DUWS_fnc_opcom_ferryDispatch), WARNing every OPCOM_FERRY_STRAND_TICKS. Reads the order off the
+// record, never a copy taken before the step: an intercept that gave up is a guard now.
 private _ferryStage = {
     params ["_t", "_ctx"];
     _ctx params ["_pos", "", "_live", "_engaged", "_arrived", "_adv"];
@@ -94,7 +94,7 @@ private _ferryStage = {
     private _s = (_t getOrDefault ["strandTicks", 0]) + 1;
     _t set ["strandTicks", _s];
     if ((_s mod OPCOM_FERRY_STRAND_TICKS) == 0) then {
-        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no Ferry picked", _t get "id", _s]] call fnc_log;
+        ["WARN", "OPCOM", format ["ferry: tasking %1 stranded %2 ticks at a water leg -- no hull free or affordable", _t get "id", _s]] call fnc_log;
     };
 };
 
