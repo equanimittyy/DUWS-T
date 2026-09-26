@@ -10,9 +10,7 @@ vehicles the team put in the garage.
 
 **Shipped.** The store, the snapshot, the fork screen, the restore hooks, the four save triggers, the
 idle gate and the reconciliation pass are built. The code under `src/duws/server/persistence/` is the
-source of truth for them, and the sections below keep the reasons for each shape. One part is not
-built: Back from the first setup screen does not return to the fork
-([§The load screen](#the-load-screen)).
+source of truth for them, and the sections below keep the reasons for each shape.
 
 Two rules govern everything below, the features that are not built yet included.
 
@@ -556,8 +554,10 @@ re-anchored every time a hardpoint raises and cleared when it stows, and `DUWS_h
 `DUWS_hpMineSquares_<key>` and `DUWS_hpMineLaid_<key>` are made and unmade with the mines a streamed
 belt lays. An OPCOM belt is the exception, because its squares are its whole state and the registry
 row names no geometry: the snapshot stores the centres of the squares that still hold mines and the
-site radius, and the restore plans those squares again. A field that a side mission laid has no belt
-saved and goes with its mission. The variant rides with the commander's keys
+site radius, and the restore plans those squares again. The recon mission's field is a streamed belt of
+the same kind and comes back the same way. A civilian job's field is laid whole as the job's prop, so it
+has no belt saved and goes with its job. Each belt's variant is saved beside its squares, read off a
+planned mine, because only OPCOM's belts are in `DUWS_opcom_mineVariants`
 ([§The commander](#the-commander)).
 
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
@@ -825,11 +825,14 @@ those screens would have set, so there is nothing left for them to ask. Siting i
 rather than inside it is what keeps New Game untouched — a fork at step 2 or 3 would have to unwind
 choices the player had already made.
 
-**Back from the first setup screen does not return to the fork.** Not built. New Game commits the
-server to a new campaign at its gate, and a fork reached again from the faction screen would need the
-server to go back to that gate. A player who picked New Game by accident restarts the mission. The
-faction screen's dev-only quickstart button sits inside the New Game branch, so it is reached only
-once the fork has been answered.
+**Back from the first setup screen returns to the fork.** The faction screen's Back asks the server
+to reopen it (`DUWS_fnc_saveReopen`), which it does for as long as nothing is built: until the callsign
+screen's commit sets `createzone_server`. The server's boot thread is waiting in the faction screens'
+loop by then, so a load chosen there applies on the reopen's own thread, and the load's setup flags end
+that loop. Any table a confirmation had locked is cleared first, or it would be laid over the load.
+New Game re-enters the setup chain at its head and keeps the campaign ID it already drew. The faction
+screen's dev-only quickstart button sits inside the New Game branch, so it is reached only once the
+fork has been answered.
 
 **New Game destroys nothing, because it writes under a new campaign ID.** That falls out of the
 index shape rather than being designed for: an existing campaign is only ever overwritten by its
