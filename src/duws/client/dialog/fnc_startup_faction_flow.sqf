@@ -1,7 +1,8 @@
 // Locality: client -- inherited from client/dialog/fnc_startup_enviro_closed.sqf.
 // Faction pick -> custom-faction paste (if any) -> faction confirmation -> HQ placement ->
-// environment menu. Runs on first setup (from client_init) and whenever the environment screen's
-// Back button routes back here to re-pick faction and HQ.
+// environment menu. Runs on first setup (from client_init), whenever the environment screen's
+// Back button routes back here to re-pick faction and HQ, and when the load screen that this screen's
+// Back reopens is answered with New Game (fnc_campaign_fork_reopen.sqf).
 //
 // Placement is last of the faction steps rather than first: a Back out of the confirmation screen
 // re-picks factions, and a base already placed would have been sited against a roster the player
@@ -19,6 +20,7 @@ player_is_choosing_hqpos = false;
 random_placement = false;
 duws_custom_faction_back = false;   // set by the paste screen's Back button
 duws_debug_quickstart = false;      // set by the faction screen's dev-only one-click button
+duws_faction_screen_back = false;   // set by the faction screen's Back button
 
 // Cleared network-wide, unlike the flags above: the AutoDetect wrappers wait on these, and on a
 // re-entry the server would otherwise resolve against the previous round's pick before the picker
@@ -27,6 +29,8 @@ missionNamespace setVariable ["selectedFaction_BLU", nil, true];
 missionNamespace setVariable ["selectedFaction_OPF", nil, true];
 
 [] call fnc_HQ_faction_dialog;
+
+if (duws_faction_screen_back) exitWith { [] spawn fnc_campaign_fork_reopen; };
 
 // Debug one-click start (the faction screen's dev-only button): skip the confirmation, HQ
 // placement and parameter screens and commit with every screen's own defaults.

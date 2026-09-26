@@ -56,6 +56,39 @@ DUWS_fnc_saveExport = {
     ["export", _json] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
 };
 
+// -> true when the answer loaded a campaign.
+DUWS_fnc_restoreAnswer = {
+    params ["_choice"];
+    private _data = if (_choice isEqualTo []) then { nil } else { _choice call DUWS_fnc_saveRead };
+    // Writes are not atomic, so a payload that does not parse falls back to the one written an interval before.
+    if (isNil "_data" && {_choice isNotEqualTo []} && {!(_choice select 1)}) then {
+        _data = [_choice select 0, true] call DUWS_fnc_saveRead;
+        if (!isNil "_data") then { ["WARN", "SAVE", format ["campaign %1 did not parse; loading the save before it", _choice select 0]] call fnc_log };
+    };
+    private _why = if (isNil "_data") then { "STR_DUWS_T_LOAD_BAD_INPUT" } else { [_data] call DUWS_fnc_restoreCheck };
+    if (_choice isNotEqualTo [] && {_why isNotEqualTo ""}) then {
+        ["ERROR", "SAVE", format ["campaign %1 could not be loaded (%2); starting a new campaign", _choice, _why]] call fnc_log;
+    };
+    if (_choice isEqualTo [] || {_why isNotEqualTo ""}) exitWith {
+        if (isNil "DUWS_campaignID") then {
+            DUWS_campaignID = call DUWS_fnc_saveNewID;
+            DUWS_campaignStarted = systemTimeUTC;
+            DUWS_campaignEnded = "";
+            ["INFO", "SAVE", format ["new campaign %1", DUWS_campaignID]] call fnc_log;
+        };
+        DUWS_setupPhase = "new";
+        publicVariable "DUWS_setupPhase";
+        false
+    };
+    // Reached from the faction screen's Back, a table a confirmation locked would otherwise be laid over the load.
+    duws_faction_locked = [];
+    publicVariable "duws_faction_locked";
+    [_choice select 0, _data] call DUWS_fnc_restoreApply;
+    DUWS_setupPhase = "load";
+    publicVariable "DUWS_setupPhase";
+    true
+};
+
 // With nothing saved the terrain survey starts under the fork, so no new campaign waits on the screen. The bound
 // is short while nobody is connected, so an unattended restart comes back up on its own campaign.
 DUWS_fnc_restoreGate = {
@@ -79,29 +112,24 @@ DUWS_fnc_restoreGate = {
             ["new campaign", format ["loading the newest campaign %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;
         DUWS_loadChoice = _choice;
     };
-    private _data = if (_choice isEqualTo []) then { nil } else { _choice call DUWS_fnc_saveRead };
-    // Writes are not atomic, so a payload that does not parse falls back to the one written an interval before.
-    if (isNil "_data" && {_choice isNotEqualTo []} && {!(_choice select 1)}) then {
-        _data = [_choice select 0, true] call DUWS_fnc_saveRead;
-        if (!isNil "_data") then { ["WARN", "SAVE", format ["campaign %1 did not parse; loading the save before it", _choice select 0]] call fnc_log };
-    };
-    private _why = if (isNil "_data") then { "STR_DUWS_T_LOAD_BAD_INPUT" } else { [_data] call DUWS_fnc_restoreCheck };
-    if (_choice isNotEqualTo [] && {_why isNotEqualTo ""}) then {
-        ["ERROR", "SAVE", format ["campaign %1 could not be loaded (%2); starting a new campaign", _choice, _why]] call fnc_log;
-    };
-    if (_choice isEqualTo [] || {_why isNotEqualTo ""}) exitWith {
-        DUWS_campaignID = call DUWS_fnc_saveNewID;
-        DUWS_campaignStarted = systemTimeUTC;
-        DUWS_campaignEnded = "";
+    if ([_choice] call DUWS_fnc_restoreAnswer) then {
+        if (!isNull _survey) then { terminate _survey };
+    } else {
         if (isNull _survey) then { [] spawn _fnc_survey };
-        DUWS_setupPhase = "new";
-        publicVariable "DUWS_setupPhase";
-        ["INFO", "SAVE", format ["new campaign %1", DUWS_campaignID]] call fnc_log;
     };
-    if (!isNull _survey) then { terminate _survey };
-    [_choice select 0, _data] call DUWS_fnc_restoreApply;
-    DUWS_setupPhase = "load";
+};
+
+// The faction screen's Back, for as long as nothing is built. A load chosen here applies on this thread; the boot
+// thread is waiting in the faction screens' loop and leaves it once the load sets createzone_server.
+DUWS_fnc_saveReopen = {
+    if (DUWS_setupPhase isNotEqualTo "new" || {createzone_server}) exitWith {};
+    DUWS_loadChoice = nil;
+    call DUWS_fnc_saveScan;
+    DUWS_setupPhase = "choose";
     publicVariable "DUWS_setupPhase";
+    private _start = time;
+    waitUntil { sleep 1; !isNil "DUWS_loadChoice" || {time - _start > 600} };
+    [missionNamespace getVariable ["DUWS_loadChoice", []]] call DUWS_fnc_restoreAnswer;
 };
 
 DUWS_fnc_restoreApply = {

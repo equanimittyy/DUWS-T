@@ -67,5 +67,19 @@ class startup_faction_next_dialog
 			tooltip = "$STR_DUWS_T_faction_debug_quickstart_tt";
 			action = "duws_debug_quickstart = true; duws_faction_screen_next = true;";
 		};
+		// Ends the screen the way BUILD FACTIONS does; the flow reads duws_faction_screen_back and returns to the load screen.
+		class faction_back_button: RscButton
+		{
+			idc = 1602;
+			text = "$STR_DUWS_T_startup_back";
+			x = 29.75 * GUI_GRID_W + GUI_GRID_X;
+			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+			w = 6.5 * GUI_GRID_W;
+			h = 2 * GUI_GRID_H;
+			sizeEx = 0.04;
+			colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+			tooltip = "$STR_DUWS_T_faction_screen_back_tt";
+			action = "duws_faction_screen_back = true; duws_faction_screen_next = true;";
+		};
 	};
 };

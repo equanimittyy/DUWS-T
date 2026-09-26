@@ -146,7 +146,6 @@ private _fnc_resolveFactions = {
 	} forEach ["blufor", "opfor"];
 	publicVariable "DUWS_factionPreviewPools";
 };
-if (DUWS_campaignLoaded) then { call _fnc_resolveFactions };
 
 // Answers the confirmation screen and can't wait for the commit, since it's the last point the
 // player can change a pick. Loop, not once: stepping back re-enters faction selection and asks
@@ -164,6 +163,8 @@ while {!createzone_server} do {
 	duws_faction_preview_ready = _serving;
 	publicVariable "duws_faction_preview_ready";
 };
+// After the loop, not before: a load chosen from the reopened load screen ends it partway through setup.
+if (DUWS_campaignLoaded) then { call _fnc_resolveFactions };
 
 // HQ build stays behind the commit so Back navigation still finds nothing built to unwind.
 // Everything below consumes only PosOfBLUHQ (set at placement) until this gate.
