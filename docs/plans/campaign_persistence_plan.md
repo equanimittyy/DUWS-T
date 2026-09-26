@@ -604,9 +604,15 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 only, and `grp` is a live group's netId rather than a handle
 (`server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf`). The save clears the live half: `grp` and the
 helipad netId go to `""`, `status` to `virtual`, and a live group's strength and position are read into the
-record the way a stow reads them. The restore releases each carry through `DUWS_fnc_opcom_ferryRelease` and
-unbinds each rider that is left. The groups those bound are gone, and a half-bound carry would hold its
-rider for the rest of the campaign, since a bound record refuses every new order.
+record the way a stow reads them. Two riders are the exceptions. A rider that is boarding keeps the strength it
+froze at, because its men despawn as they board. A rider waiting for its lift keeps its route, because the lift
+reads the far shore from that route.
+
+**A carry is a standing order, so it resumes.** The restore hands every carry to the virtual ferry step
+(`DUWS_fnc_restoreOpcom`). A pickup that was in progress starts over. A drop that the save cut off plays
+out again from the carry, so the rider is bound to its lift again and its `unloading` flag is cleared: a
+rider left `unloading` would never step again after it streamed in. A rider whose lift did not come back is
+unbound, because a bound record refuses every new order.
 
 **Attack records landed with Phase 5, and they change nothing here.** An attack is the record that binds
 several units to one Attack, and its roles name their units by tasking id rather than by handle

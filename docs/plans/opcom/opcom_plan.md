@@ -1170,12 +1170,13 @@ restore clears before it replays them, and why belief is not among them — is
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
   `DUWS_opcom_attackSeq`, the tick, `DUWS_opcom_hqKnown`, the mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
-  strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`).
+  strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
+  boarding rider keeps its frozen strength, and a bound rider keeps its route.
 - The restore runs inside the OPCOM thread, after `fnc_opcom_belief_init`, `fnc_opcom_grid_init` and
   `fnc_opcom_tasking_init` and before the first tick (`DUWS_fnc_restoreOpcom`). A `spawnClass` the loaded mods no
   longer define is redrawn from its token; a token the faction cannot field drops the tasking and its id leaves
-  every attack role. Each carry is released through `DUWS_fnc_opcom_ferryRelease`, and each rider left bound is
-  unbound.
+  every attack role. Each carry resumes on the virtual ferry step. A pickup starts over, a drop the save cut off
+  plays out again from the carry, and a rider whose lift did not come back is unbound.
 - A buildup comes back mid-muster: an attack's roles name their units by tasking id, and its `since` counts against
   the restored tick.
 - A build still siting at the write is refunded into the snapshot's OPFOR pool at the refund its delivery carries
