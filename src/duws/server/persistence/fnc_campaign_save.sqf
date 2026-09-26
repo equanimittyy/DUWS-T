@@ -22,10 +22,12 @@ DUWS_fnc_campaignTaskings = {
     (missionNamespace getVariable ["DUWS_opcom_taskings", []]) apply {
         private _t = +_x;
         private _grp = groupFromNetId (_t getOrDefault ["grp", ""]);
-        if (!isNull _grp && {count units _grp > 0}) then {
+        // A frozen rider's men despawn as they board, so a live read loses the ones aboard.
+        if (!isNull _grp && {count units _grp > 0} && {!(_t getOrDefault ["ferryFrozen", false])}) then {
             _t set ["effForce", [_grp] call DUWS_fnc_opcom_effForceLive];
             _t set ["pos", getPosASL (leader _grp)];
-            _t set ["route", []];
+            // The lift reads a bound rider's drop off its route.
+            if ((_t getOrDefault ["ridingOn", -1]) < 0) then { _t set ["route", []] };
         };
         _t set ["grp", ""];
         _t set ["ferryPad", ""];

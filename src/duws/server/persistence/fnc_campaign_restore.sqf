@@ -421,8 +421,8 @@ DUWS_fnc_restoreEscalation = {
     [true] call fnc_escalation_apply;
 };
 
-// Before OPCOM's first tick. A carry is released: its hulls are gone, and a half-bound rider would refuse every
-// order for the rest of the campaign.
+// Before OPCOM's first tick. A rider left bound to no carry refuses every order, and one left unloading never steps
+// again once it streams in.
 DUWS_fnc_restoreOpcom = {
     private _o = DUWS_restore getOrDefault ["opcom", createHashMap];
     DUWS_opcom_archetype = _o getOrDefault ["archetype", DUWS_opcom_archetype];
@@ -452,8 +452,21 @@ DUWS_fnc_restoreOpcom = {
     DUWS_opcom_attacks = _o getOrDefault ["attacks", []];
     { { _x set ["units", (_x get "units") select { _x in _ids }] } forEach (_x get "roles") } forEach DUWS_opcom_attacks;
 
-    { if ((_x getOrDefault ["carrying", -1]) >= 0) then { [_x] call DUWS_fnc_opcom_ferryRelease } } forEach DUWS_opcom_taskings;
-    { if ((_x getOrDefault ["ridingOn", -1]) >= 0) then { [_x] call DUWS_fnc_opcom_ferryUnbind } } forEach DUWS_opcom_taskings;
+    {
+        private _r = [_x get "carrying"] call DUWS_fnc_opcom_byId;
+        if (!isNil "_r") then {
+            _r set ["ridingOn", _x get "id"];
+            _r set ["unloading", false];
+            if !(_x getOrDefault ["embarked", false]) then { _r set ["ferryFrozen", false] };
+        };
+    } forEach (DUWS_opcom_taskings select { (_x getOrDefault ["carrying", -1]) >= 0 });
+    {
+        private _tr = [_x get "ridingOn"] call DUWS_fnc_opcom_byId;
+        if (isNil "_tr" || {(_tr getOrDefault ["carrying", -1]) != (_x get "id")}) then {
+            _x set ["unloading", false];
+            [_x] call DUWS_fnc_opcom_ferryUnbind;
+        };
+    } forEach (DUWS_opcom_taskings select { (_x getOrDefault ["ridingOn", -1]) >= 0 });
     ["INFO", "SAVE", format ["OPCOM restored at tick %1: %2 taskings, %3 attacks", DUWS_opcom_tick,
         count DUWS_opcom_taskings, count DUWS_opcom_attacks]] call fnc_log;
     ["opcom"] call DUWS_fnc_restoreStepDone;
