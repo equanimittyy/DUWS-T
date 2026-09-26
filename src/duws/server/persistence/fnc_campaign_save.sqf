@@ -38,13 +38,16 @@ DUWS_fnc_campaignTaskings = {
 };
 
 // A streamed belt's squares are its whole state: the registry row names no geometry, and a field restored
-// without them would read as cleared on the first pass. Only squares still holding mines are kept.
+// without them would read as cleared on the first pass. Only squares still holding mines are kept. The variant is
+// read off a planned mine, since only OPCOM's belts are in DUWS_opcom_mineVariants.
 DUWS_fnc_campaignBelts = {
     (DUWS_hardpoints select { (_x select 2) isEqualTo "MINEFIELD" }) apply {
         private _key = _x select 0;
-        private _squares = missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []];
-        [_key, (_squares select { (_x select 1) isNotEqualTo [] }) apply { _x select 0 },
-            ([_key] call fnc_site_at) getOrDefault ["radius", 0]]
+        private _held = (missionNamespace getVariable [format ["DUWS_hpMineSquares_%1", _key], []]) select { (_x select 1) isNotEqualTo [] };
+        private _class = if (_held isEqualTo []) then { "" } else { (((_held select 0) select 1) select 0) select 1 };
+        private _v = DUWS_mineVariants findIf { _class in (_x select 1) };
+        [_key, _held apply { _x select 0 }, ([_key] call fnc_site_at) getOrDefault ["radius", 0],
+            if (_v < 0) then { "AT" } else { (DUWS_mineVariants select _v) select 0 }]
     } select { (_x select 1) isNotEqualTo [] }
 };
 

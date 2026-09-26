@@ -201,23 +201,22 @@ DUWS_fnc_restoreZones = {
     publicVariable "serv_zones_array";
 };
 
-// A fresh roll would move every hardpoint and orphan what the players cleared. A side mission's minefield has no
-// belt saved and goes with its mission.
+// A fresh roll would move every hardpoint and orphan what the players cleared. A civilian job's field is laid whole
+// as the job's prop, so it has no belt saved and goes with its job.
 DUWS_fnc_restoreHardpoints = {
     {
         missionNamespace setVariable [format ["DUWS_hpCap_%1", [_x select 2] call fnc_zone_key], (round ((_x select 3) / 250)) max 1];
     } forEach (DUWS_restore get "zones");
     missionNamespace setVariable ["DUWS_radioSeq", DUWS_restore getOrDefault ["radioSeq", 0]];
-    private _belts = createHashMapFromArray ((DUWS_restore getOrDefault ["belts", []]) apply { [_x select 0, [_x select 1, _x select 2]] });
-    private _variants = (DUWS_restore getOrDefault ["opcom", createHashMap]) getOrDefault ["mineVariants", createHashMap];
+    private _belts = createHashMapFromArray ((DUWS_restore getOrDefault ["belts", []]) apply { [_x select 0, _x select [1, 3]] });
     private _rows = DUWS_restore get "hardpoints";
     {
         _x params ["_key", "_pos", "_type", "_side", "_zoneKey", "_shown", ["_dir", 0]];
         [format ["Restoring hardpoints...<br/>%1 of %2", _forEachIndex + 1, count _rows]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
         private _built = false;
         if (_type isEqualTo "MINEFIELD") then {
-            (_belts getOrDefault [_key, []]) params [["_centres", []], ["_ring", 0]];
-            if (_centres isNotEqualTo [] && {([_centres, _dir, _variants getOrDefault [_key, "AT"], _key] call fnc_hardpoint_minefield_stream) > 0}) then {
+            (_belts getOrDefault [_key, []]) params [["_centres", []], ["_ring", 0], ["_variant", "AT"]];
+            if (_centres isNotEqualTo [] && {([_centres, _dir, _variant, _key] call fnc_hardpoint_minefield_stream) > 0}) then {
                 [_centres, _dir, _key] call fnc_hardpoint_minefield_signs;
                 [_key, _type, _pos, _side, _zoneKey, _dir, _ring] call fnc_hardpoint_register;
                 _built = true;
