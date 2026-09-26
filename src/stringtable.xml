@@ -8501,114 +8501,33 @@
                 <Original>Nothing we don't already know.</Original>
                 <English>Nothing we don't already know.</English>
             </Key>
-            <Key ID="STR_DUWS_T_jjl0pm74">
-                <German>
-					SITREP:
-					\n\nEINHEITEN GESAMT: %1
-					\nGEPANZERTE FAHRZEUGE: %5
-					\nLUFTFAHRZEUGE: %6
-					\n\nDu hast %2 Command Points
-					\n\nSpieler Ansehen: %9
-					\nVerbündete Army Power: %3
-					\nFeindliche Army Power: %4
-					\n\nBLUFOR Zonen: %7
-					\nOPFOR Zonen: %8
-					\nPrimärziel: %10
-					\n\nWetter: %11
-					\nUhrzeit: %12
-					\nTaxi Schnellreise: %13
-					\nFOB Schnellreise: %14
-					\nZeus Sichtbarkeit: %15
-					\nAusdauer: %16
-					\nVCOM AI: %17
-					\nZeit Mult: %18
-					\nSimple Zonen: %19
-					\nZivile Präsenz: %20
-				</German>
-                <Spanish>
-					REPSIT:
-					\n\nUNIDADES TOTALES: %1
-					\nVEHÍCULOS BLINDADOS: %5
-					\nVEHÍCULOS ÁEREOS: %6
-					\n\nTiene %2 puntos de comando
-					\n\nReputación del jugador: %9
-					\nPoder miliatr aliado: %3
-					\nPoder militar enemigo: %4
-					\n\nZonas de BLUFOR: %7
-					\nZonas de OPFOR: %8
-					\nObjetivo primario: %10
-					\n\nClima: %11
-					\nHora del día: %12
-					\nViaje rápido en taxi: %13
-					\nViaje rápido entre PdA: %14
-					\nVisibilidad Zeus: %15
-					\nAguante: %16
-					\nduws VCOM: %17
-					\nMultiplicador de tiempo: %18
-					\nZonas simples: %19
-					\nPresencia civil: %20
-				</Spanish>
-                <Chinesesimp>
-					报告:
-					\n\n总单位数: %1
-					\n装甲载具: %5
-					\n空军: %6
-					\n\n你有 %2 指挥点
-					\n\n玩家声誉: %9
-					\n友军军力: %3
-					\n敌军军力: %4
-					\n\n蓝方战区: %7
-					\n敌方战区: %8
-					\n主要目标: %10
-					\n\n天气: %11
-					\n时间: %12
-					\n快速运输: %13
-					\nFOB快速移动: %14
-					\n宙斯可见度: %15
-					\n体力: %16
-					\nduws VCOM: %17
-					\n时间倍数: %18
-					\n简易战区: %19
-					\n平民类型: %20
-				</Chinesesimp>
-                <Original>SITREP:
-					\n\nTOTAL UNITS: %1
-					\nARMORED VEHICLES: %5
-					\nAIRCRAFT: %6
-					\n\nYou Have %2 Command Points
-					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3 (Tier %19)
-					\nEnemy Army Power: %4 (Tier %20)
-					\n\nBLUFOR Zones: %7
-					\nOPFOR Zones: %8
-					\nPrimary Target: %10
-					\n\nWeather: %11
-					\nTime of Day: %12
-					\nFast Travel: %14
-					\nZeus Visibility: %15
-					\nStamina: %16
-					\nSimple Zones: %17
-					\nCiv Presence: %18
-				</Original>
-                <English>SITREP:
-					\n\nTOTAL UNITS: %1
-					\nARMORED VEHICLES: %5
-					\nAIRCRAFT: %6
-					\n\nYou Have %2 Command Points
-					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3 (Tier %19)
-					\nEnemy Army Power: %4 (Tier %20)
-					\n\nBLUFOR Zones: %7
-					\nOPFOR Zones: %8
-					\nPrimary Target: %10
-					\n\nWeather: %11
-					\nTime of Day: %12
-					\nFast Travel: %14
-					\nZeus Visibility: %15
-					\nStamina: %16
-					\nSimple Zones: %17
-					\nCiv Presence: %18
-				</English>
+            <Key ID="STR_DUWS_T_SITREP_TITLE">
+                <Original>SITREP, day %1</Original>
+                <English>SITREP, day %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_ZONES">
+                <Original>Zones held: %1 of %2</Original>
+                <English>Zones held: %1 of %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_TOWNS">
+                <Original>Towns: %1 friendly, %2 hostile, %3 neutral</Original>
+                <English>Towns: %1 friendly, %2 hostile, %3 neutral</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_CP">
+                <Original>Command Points: %1</Original>
+                <English>Command Points: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_AP">
+                <Original>Army Power: %1 (%2)</Original>
+                <English>Army Power: %1 (%2)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_ENEMY">
+                <Original>Enemy strength: %1</Original>
+                <English>Enemy strength: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SITREP_ESCALATION">
+                <Original>Escalation: level %1</Original>
+                <English>Escalation: level %1</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncooldown">
                 <German>Einsatztrupp an "Overlord", wir sind wieder kampfbereit und warten an der Basis.</German>

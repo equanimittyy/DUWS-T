@@ -8,9 +8,7 @@
 [] remoteExec ["fnc_autoSave", 2];
 ["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", localize "STR_DUWS_T_biham0s3"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-// Through the server rather than broadcast straight to fnc_sitrep_display: the hint's reputation
-// line is per player, and only the server can resolve it.
-[] remoteExec ["fnc_sitrep_fanout", 2];
+[] remoteExec ["fnc_sitrep_display", 0];
 
 [] remoteExec ["fnc_bottom_right_message", 0];
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_sitrep"] remoteExec ["fnc_duws_dialogue", 0];

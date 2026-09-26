@@ -55,15 +55,14 @@ There is no campaign-wide figure to sum into. Every caller resolves its town thr
 and a `-1` delta is dropped: harm done where no town can see it costs nothing. Consumers that only
 need a number read `fnc_civ_repAt`, which answers neutral for the same three cases — a consumer that
 has to tell "neutral" from "not modelled" reads `civ_town_rep` directly, the way `fnc_map_readout_query`
-and `fnc_sitrep_fanout` do.
+does.
 
 **No call site prints a reputation total, and neither does the map.** A caller computes its figure
 before the write lands, and the clamp means the writer may apply less than was asked, so any number a
 caller names is a prediction. A town's standing reaches the player as marker *colour* alone —
 `fnc_civ_townRender` sets colour and alpha, the markers are created without text
-(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP prints the standing
-of the town the reading player is stood in, resolved per player by `fnc_sitrep_fanout` because that
-array never leaves the server.
+(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP counts towns by band
+instead, off the broadcast `DUWS_blufor_town_pos` and `DUWS_enemy_town_pos`, and names no town's figure.
 
 ## Authority: the server decides a purchase, not the buyer
 

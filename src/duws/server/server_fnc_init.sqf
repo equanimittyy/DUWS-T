@@ -709,6 +709,8 @@ fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\
 // Executed: each defines several functions. The store first, since the save and the restore both call into it.
 [] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_store.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_save.sqf";
+// The SITREP readout prints the campaign day on every client.
+publicVariable "DUWS_fnc_campaignDay";
 [] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_reconcile.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\persistence\fnc_campaign_restore.sqf";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\persistence\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
@@ -750,7 +752,6 @@ fnc_sitrep_support = compile preprocessFileLineNumbers "duws\server\supports\fnc
 fnc_helolift_spawnHeli = compile preprocessFileLineNumbers "duws\server\supports\fnc_helolift_spawnHeli.sqf";
 fnc_helolift_ropes = compile preprocessFileLineNumbers "duws\server\supports\fnc_helolift_ropes.sqf";
 fnc_helolift_waypoints = compile preprocessFileLineNumbers "duws\server\supports\fnc_helolift_waypoints.sqf";
-fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\supports\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRecycleStation.sqf";
 publicVariable "fnc_activateBaseRecycleStation";
