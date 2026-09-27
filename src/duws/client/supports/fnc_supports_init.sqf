@@ -13,7 +13,8 @@
 // Column 8 is the AP half of a dual price (indirect-fire/air-strike rows and the advanced permanent
 // unlocks). Absent (reads as 0 via `param [7, 0]`) elsewhere, which pays CP only.
 //
-// A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>.
+// A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>;
+// a ladder has one only on its level I row.
 fnc_support_catalogue = {
 	[
 		["armory",    "PERM", 20, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],

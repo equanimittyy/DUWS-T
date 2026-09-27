@@ -25,10 +25,13 @@ private _sec = {
 // The supports list, generated from the catalogue (client/supports/fnc_supports_init.sqf) so a
 // price change there is the only edit -- name, the shared cost bracket and a keyed description
 // (STR_DUWS_T_sdesc_<key>) per row, permanent then squad. Reads the raw catalogue, not the menu's
-// filtered view, so rows still locked at mission start are listed all the same.
+// filtered view, so rows still locked at mission start are listed all the same. A ladder lists once,
+// as its level I row: its later levels are the only catalogue keys ending in 2-4.
 private _supportRows = {
     params ["_kind", "_colour"];
-    (([] call fnc_support_catalogue) select { (_x select 1) == _kind }) apply {
+    (([] call fnc_support_catalogue) select {
+        (_x select 1) == _kind && {!(((_x select 0) select [count (_x select 0) - 1]) in ["2", "3", "4"])}
+    }) apply {
         _x params ["_key", "", "_cost", "", "_labelKey"];
         format ["<font color='%1'>%2</font>%3: %4",
             _colour, localize _labelKey,
@@ -81,16 +84,8 @@ private _economyBody = ("duws_t_man_economy.jpg" call _bnr) + ([
     ["STR_DUWS_T_MAN_L_VENDORS", "STR_DUWS_T_MAN_B_VENDORS"] call _sec
 ] joinString "<br/><br/>");
 
-private _opcomBody = ("duws_t_man_opcom.jpg" call _bnr) + (localize "STR_DUWS_T_MAN_OPCOM_BODY") + "<br/><br/>" + ([
-    ["STR_DUWS_T_MAN_L_TARGETING",     "STR_DUWS_T_MAN_B_TARGETING"] call _sec,
-    ["STR_DUWS_T_MAN_L_BUDGET",        "STR_DUWS_T_MAN_B_BUDGET"] call _sec,
-    ["STR_DUWS_T_MAN_L_GARRISONS",     "STR_DUWS_T_MAN_B_GARRISONS"] call _sec,
-    ["STR_DUWS_T_MAN_L_COUNTERATTACK", "STR_DUWS_T_MAN_B_COUNTERATTACK"] call _sec,
-    ["STR_DUWS_T_MAN_L_HARDPOINTS",    "STR_DUWS_T_MAN_B_HARDPOINTS"] call _sec,
-    ["STR_DUWS_T_MAN_L_MINEFIELDS",    "STR_DUWS_T_MAN_B_MINEFIELDS"] call _sec,
-    ["STR_DUWS_T_MAN_L_INFLUENCE",     "STR_DUWS_T_MAN_B_INFLUENCE"] call _sec,
-    ["STR_DUWS_T_MAN_L_TIERS",         "STR_DUWS_T_MAN_B_TIERS"] call _sec
-] joinString "<br/><br/>");
+private _opcomBody = ("duws_t_man_opcom.jpg" call _bnr) + (localize "STR_DUWS_T_MAN_OPCOM_BODY") + "<br/><br/>"
+    + (["STR_DUWS_T_MAN_L_HARDPOINTS", "STR_DUWS_T_MAN_B_HARDPOINTS"] call _sec);
 
 private _civBody = ("duws_t_man_civilian.jpg" call _bnr) + (localize "STR_DUWS_T_MAN_CIV_BODY") + "<br/><br/>" + ([
     ["STR_DUWS_T_MAN_L_CIVTALK",     "STR_DUWS_T_MAN_B_CIVTALK"] call _sec,
