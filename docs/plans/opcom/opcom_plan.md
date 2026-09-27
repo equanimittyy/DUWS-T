@@ -454,7 +454,7 @@ The debug harness spends outside the pick and is not capped.
 
 | Cap | Drops | Counts |
 |---|---|---|
-| `OPCOM_CAP_UNITS` (50) | every hire source except a truck | every OPCOM unit alive except the supply trucks |
+| `OPCOM_CAP_UNITS_PER_ZONE` (8) × zones | every hire source except a truck | every OPCOM unit alive except the supply trucks |
 | `OPCOM_CAP_GARRISON` (10) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
@@ -513,7 +513,7 @@ The distance runs from where the source starts to where the action needs it: the
 - **The execute raises and routes every hire before it gives an order.** It hires through `fnc_opcom_recruit` with
   `_pay` false, since the candidate's price already carries the hire (`DUWS_fnc_opcom_raise`). A hire that cannot
   route is dismissed and the execute returns false, so the pick charges nothing and no order stands half-given.
-- **The unit cap drops hire sources, never free units.** At `OPCOM_CAP_UNITS` an action draws only what stands; a
+- **The unit cap drops hire sources, never free units.** At the unit cap an action draws only what stands; a
   truck hire stays outside the cap ([§Caps](#caps)).
 
 | Action | Sources, free or hired |
@@ -715,7 +715,7 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   the ideal bar, the attack holds `OPCOM_ATTACK_UNITS`, or the wallet runs out (`DUWS_fnc_opcom_attackPackage`,
   `appraisal/fnc_opcom_sources.sqf`). One unit per pick left a muster to trickle in over picks that the rest of the
   action list competes for, and a QRF's window closed first. A hire row is raised again while the wallet and
-  `OPCOM_CAP_UNITS` allow; a free unit serves once, as a member or as another member's lift. Each unit stages at the
+  the unit cap allow; a free unit serves once, as a member or as another member's lift. Each unit stages at the
   bucket `DUWS_fnc_opcom_joinBucket` would name for it. The package scores as one candidate: its Value is its weakest
   member's, since the attack goes only once its last unit is in, its `P(win)` is the whole package's, and its price
   and Cost are the members' sums. A member that cannot be raised or routed is refunded before the pick charges the
