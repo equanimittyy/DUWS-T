@@ -25,6 +25,10 @@ Modified for DUWS_T:
   `modules/R3F_LOG/usine_creation/revendre_direct.sqf` (2026-09-27): the direct sale of a zone,
   HQ or FOB build accepts only the factory that made it, from anywhere in its site, instead of
   the nearest factory within 20 m.
+- `modules/R3F_LOG/usine_creation/revendre_direct.sqf` and
+  `modules/R3F_LOG/usine_creation/revendre_selection.sqf` (2026-09-28): a sale reads a factory
+  without cargo, such as a zone flag, as holding nothing, so the sale completes instead of leaving
+  the build marked as in transit.
 - `modules/R3F_LOG/systeme_protection_blessures.sqf` (2026-09-11): the carry injury shield
   was widened from the host player's group to all local units, so a hand-carried vehicle
   cannot ram and kill unshielded AI.

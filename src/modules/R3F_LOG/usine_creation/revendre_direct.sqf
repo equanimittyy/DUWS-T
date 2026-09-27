@@ -9,10 +9,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Modified 2026-09-27 for DUWS_T: the direct sale of a zone, HQ or FOB build accepts only the
- * factory that made it, from anywhere in its site, instead of the nearest factory within 22 m.
- * A build whose only crew is friendly AI outside every player's group can be sold, and the server
- * deletes that crew first. (GPLv3 section 5a modification notice.)
+ * Modified for DUWS_T (GPLv3 section 5a modification notice):
+ * - 2026-09-27: the direct sale of a zone, HQ or FOB build accepts only the factory that made it,
+ *   from anywhere in its site, instead of the nearest factory within 22 m. A build whose only crew
+ *   is friendly AI outside every player's group can be sold, and the server deletes that crew first.
+ * - 2026-09-28: the sale reads a factory without cargo, such as a zone flag, as holding nothing,
+ *   so the sale completes instead of leaving the build marked as in transit.
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -63,7 +65,7 @@ else
 							sleep 2;
 							
 							// Gestion conflit d'accès
-							if (_objet getVariable "R3F_LOG_est_transporte_par" == _usine && !(_objet in (_usine getVariable "R3F_LOG_objets_charges"))) then
+							if (_objet getVariable "R3F_LOG_est_transporte_par" == _usine && !(_objet in (_usine getVariable ["R3F_LOG_objets_charges", []]))) then
 							{
 								// Suppression de l'équipage IA dans le cas d'un drone
 								if (getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1) then

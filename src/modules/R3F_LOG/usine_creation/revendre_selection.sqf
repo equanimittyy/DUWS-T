@@ -8,6 +8,10 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-28 for DUWS_T: the sale reads a factory without cargo, such as a zone flag, as
+ * holding nothing, so the sale completes instead of leaving the build marked as in transit.
+ * (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -42,7 +46,7 @@ else
 							sleep 2;
 							
 							// Gestion conflit d'accès
-							if (_objet getVariable "R3F_LOG_est_transporte_par" == _usine && !(_objet in (_usine getVariable "R3F_LOG_objets_charges"))) then
+							if (_objet getVariable "R3F_LOG_est_transporte_par" == _usine && !(_objet in (_usine getVariable ["R3F_LOG_objets_charges", []]))) then
 							{
 								// Suppression de l'équipage IA dans le cas d'un drone
 								if (getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1) then
