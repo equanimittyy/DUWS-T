@@ -640,8 +640,9 @@ OPCOM_REVIRT_GRACE = 6;      // 30s @ 5s tick
 // Unbroken ticks with BLUFOR within K before a virtual tasking spawns, so a jet crossing the ring on one tick spawns nothing.
 OPCOM_DEVIRT_BUFFER = 2;
 
-// How far a de-virtualising hull may shift onto ground it fits on, clear of other hulls (fnc_opcom_stream); tight, so it stands near the leg it reached.
-OPCOM_DEVIRT_CLEAR_R = 100;
+// How far a streamed-in tasking spawns from its banked point, a hull onto ground it fits on (fnc_opcom_stream): taskings
+// that march together bank one point and would otherwise spawn in one heap. Tight, so it stands near the leg it reached.
+OPCOM_DEVIRT_SPREAD_R = 100;
 
 // Seconds one round may take before it is written off and its AP refunded (fnc_opcom_fires).
 OPCOM_ARTY_ROUND_SECS = 10;

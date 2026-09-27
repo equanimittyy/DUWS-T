@@ -110,11 +110,18 @@ DUWS_fnc_opcom_reOrderLive = {
 
 // OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
 DUWS_fnc_opcom_spawnComp = {
-    params ["_token", "_pos", ["_class", ""], ["_dir", 0]];
+    params ["_token", "_pos", ["_class", ""], ["_dir", 0], ["_spread", false]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        private _g = [_token, _pos, 100, "none", _pos] call fnc_spawn_team;
+        private _at = _pos;
+        if (_spread) then {
+            for "_i" from 1 to 16 do {
+                private _p = _pos getPos [random OPCOM_DEVIRT_SPREAD_R, random 360];
+                if !(surfaceIsWater _p) exitWith { _at = [_p select 0, _p select 1, _pos select 2] };
+            };
+        };
+        private _g = [_token, _at, 100, "none", _at] call fnc_spawn_team;
         // Posture "none" drops the team on one point; scatter <20 m so it still reads as one group in the stream radius.
-        { _x setPos (_pos getPos [4 + random 12, random 360]) } forEach units _g;
+        { _x setPos (_at getPos [4 + random 12, random 360]) } forEach units _g;
         _g
     };
     // Empty only for a record raised before spawnClass existed (hot-reloaded campaign): draw fresh.
@@ -130,13 +137,14 @@ DUWS_fnc_opcom_spawnComp = {
         private _boat = _class isKindOf "Ship";
         private _spot = [];
         for "_i" from 0 to 15 do {
-            private _p = if (_i == 0) then { _g } else { _g getPos [random OPCOM_DEVIRT_CLEAR_R, random 360] };
+            private _p = if (_i == 0 && {!_spread}) then { _g } else { _g getPos [random OPCOM_DEVIRT_SPREAD_R, random 360] };
             if ((surfaceIsWater _p) isEqualTo _boat && {[_class, _p, _dir] call fnc_vehicle_spot_clear}) exitWith {
                 _spot = [_p select 0, _p select 1];
             };
         };
         if (_spot isEqualTo []) then { grpNull } else { [_class, _g, 100, "none", _spot] call fnc_spawn_vehicle }
     };
+    if (_spread) then { _pos = _pos getPos [random OPCOM_DEVIRT_SPREAD_R, random 360] };
     private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
     _created params ["_veh", "_crew", "_grp"];
     if (isNull _grp || {_crew isEqualTo []}) exitWith {
@@ -160,13 +168,14 @@ DUWS_fnc_opcom_spawnComp = {
 };
 
 // Spawn the composition at its world point, matched to stored strength, and order it. One hull/team, never a column.
+// _spread false for a ferry drop, which must land on the point it is handed.
 DUWS_fnc_opcom_deVirt = {
-    params ["_t"];
+    params ["_t", ["_spread", true]];
     private _token = (_t get "comp") param [0, ""];
     private _pos = _t get "pos";
     private _tgt = _t get "target";
     private _dir = if (_tgt isEqualTo []) then { 0 } else { _pos getDir _tgt };
-    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""], _dir] call DUWS_fnc_opcom_spawnComp;
+    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""], _dir, _spread] call DUWS_fnc_opcom_spawnComp;
     if (isNull _grp) exitWith {
         ["ERROR", "OPCOM", format ["de-virt spawn failed for tasking %1 token %2", _t get "id", _token]] call fnc_log;
         false

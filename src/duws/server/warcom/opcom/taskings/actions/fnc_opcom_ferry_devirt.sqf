@@ -150,7 +150,7 @@ DUWS_fnc_opcom_ferryDropSpawn = {
     if (_alt > 0) then { _p = [_p select 0, _p select 1, _alt] };
     _rider set ["pos", _p];
     _rider set ["route", []]; _rider set ["leg", 0];
-    [_rider] call DUWS_fnc_opcom_deVirt;
+    [_rider, false] call DUWS_fnc_opcom_deVirt;
 };
 
 // Seat the men before a rotor calls its landing: "GET OUT" keeps the engine turning where "LAND" shuts it down, but
