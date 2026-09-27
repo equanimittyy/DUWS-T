@@ -344,6 +344,18 @@ DUWS_fnc_opcom_executionStep = {
         // Following the lead keeps the next QRF off the same cluster.
         [_attack] call DUWS_fnc_opcom_qrfFollow;
     };
+    private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
+    if (_r < OPCOM_ATTACK_BREAK) exitWith {
+        // Off capture, or its target stays busy to the attack sweep. Guard, not return: an engaged group ignores a
+        // move order (arma_engine_gotchas.md).
+        {
+            {
+                _x set ["hold", 0];
+                [_x, "guard"] call fnc_opcom_task;
+            } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
+        } forEach _roles;
+        [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;
+    };
     [_attack] call DUWS_fnc_opcom_converge;
     if ((_attack get "creep") isNotEqualTo []) then { [_attack] call DUWS_fnc_opcom_creepStep };
     private _busy = _roles findIf {
