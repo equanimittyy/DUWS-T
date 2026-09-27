@@ -731,7 +731,8 @@ OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 
 // What OPCOM pays, keyed by the thing it buys: a DUWS_opcom_recruitMenu row id here, a hardpoint type below. Never
 // off the composition or its force -- that tied two rows sharing a composition to one price, and made the same order
-// cost different amounts at different sites. Set against an OPFOR income near 40-80 AP per 30 min.
+// cost different amounts at different sites. Set against an OPFOR zone and town income near 40-80 AP per 30 min, before
+// OPCOM's drip (OPCOM_AP_DRIP_TICKS).
 OPCOM_AP_UNIT = createHashMapFromArray [
     ["rifles", 10], ["weapons_team", 5], ["recon_foot", 5],
     ["truck", 3], ["recon_car", 10], ["boat", 3],
@@ -945,7 +946,7 @@ publicVariable "DUWS_base_keep_radius";
 econ_tick = 0;
 // Seconds between economy ticks; OPCOM's savings goal divides a payout by it to read an income rate.
 DUWS_econ_period = 1800;
-// OPFOR's last economy payout, 0 until the first, so OPCOM sets no savings goal before it knows its income.
+// OPFOR's last economy payout, 0 until the first. OPCOM's savings goal adds it to the drip to read an income rate.
 WARCOM_opfor_lastIncome = 0;
 
 // The Intelligence Center's odds by level owned, rolled once per OPCOM tick, and how long a plotted
@@ -964,11 +965,11 @@ DUWS_intel_contact_life = 900;
 // size rather than linearly. 1 until WARCOM init sets it, so the default six-zone campaign is unthrottled.
 DUWS_econ_throttle = 1;
 
-// OPFOR's flat AP floor, per economy tick, independent of what it holds. Insurance for a director
-// that has lost its towns, not the faucet that paces escalation -- town income outweighs it several
-// times over while the enemy holds its zone-adjacent towns. Credits the tier with the rest of OPFOR
-// income; unthrottled, being a floor rather than a faucet. Server; tuning.
-opfor_flat_ap_income = 2;
+// OPCOM ticks per 1 AP of drip to OPFOR, on top of the 30-minute payout. The payout lands as one lump
+// that the commander spends within a minute, so without a drip it can only bank or move free units for
+// the rest of the period. Wallet only: it never credits the earned counter, so it never moves OPFOR's
+// tier. Ticks per AP rather than AP per tick, because fnc_ap_adjust keeps the pool whole. Server; tuning.
+OPCOM_AP_DRIP_TICKS = 5;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

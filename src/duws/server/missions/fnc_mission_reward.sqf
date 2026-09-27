@@ -9,7 +9,7 @@ _mission_name = _this select 2;
 // town faucet (server/warcom/fnc_zonesundercontrol.sqf). Missions exist in every configuration, so
 // the substitute rides them: mission CP lifts when the faucet is absent, restoring its rough share
 // through a route that is always there. Gated on civ_town_rep being empty, not on the mode name, so
-// a fourth mode added later inherits it. BLUFOR only -- OPFOR keeps its flat floor and a symmetric
+// a fourth mode added later inherits it. BLUFOR only -- OPFOR keeps its OPCOM drip and a symmetric
 // lift would over-pay it; AP is untouched, coming from zones every configuration has.
 private _civsOffLift = if ((count (missionNamespace getVariable ["civ_town_rep", []])) == 0) then { 1.5 } else { 1 };
 // Difficulty bonus: the hard offers -- seated deep in enemy territory -- carry a per-mission multiplier

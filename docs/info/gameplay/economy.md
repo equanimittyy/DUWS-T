@@ -208,7 +208,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
 | Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
 | Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
-| OPFOR flat income | `server/warcom/fnc_zonesundercontrol.sqf:75` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
+| OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, so every 25 s; unthrottled, wallet only |
 | OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
@@ -240,16 +240,22 @@ ground fought over repeatedly is no less strategically valuable, so its AP must 
 
 **The passive-hold loop is the campaign's single economy clock.** It is spawned exactly once
 (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:17`), so income does not stack per zone captured, and every
-passive faucet — the zone AP trickle both sides, BLUFOR town CP, OPFOR town AP, the OPFOR flat floor
-and kill income — is paid from the same 30-minute iteration. Equal nominal periods are not one clock:
+passive faucet — the zone AP trickle both sides, BLUFOR town CP, OPFOR town AP and kill income — is
+paid from the same 30-minute iteration. Equal nominal periods are not one clock:
 a suspended thread resumes when the scheduler reaches it, so separate loops accrue their own slop and
 walk apart. No faucet is gated on holdings — a side with no towns or zones simply computes 0 from
-them, and OPFOR's flat floor still pays — because the enemy banking its towns while the player holds
+them — because the enemy banking its towns while the player holds
 nothing is exactly the case the town economy exists to model. The tick reports BLUFOR's take in one
 Overlord line (town CP and zone AP), and cards the throttle percentage beside it when campaign size
 is cutting the faucets. Kill income rides the same tick but is kept out of that line and announced
 only to the player who earned it: naming attrition in a campaign-wide report would advertise kill
 farming as an income route.
+
+**OPCOM's drip is the one faucet off this clock.** The payout lands as one lump, and the commander
+spends it within a minute, so for the rest of the period it could only bank or move free units.
+One AP is therefore paid every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, which is up to 72 AP per 30
+minutes, and it stops while no human is connected, as the tick does. It pays the wallet only: it
+never credits `WARCOM_opfor_ap_earned`, so it never moves OPFOR's tier.
 
 Each iteration bumps `econ_tick`, the clock's sequence number. Anything wanting a "once per payout
 window" cap keys off that rather than starting a timer of its own — `fnc_civ_healed.sqf` is the one

@@ -54,9 +54,10 @@ fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	// _earned credits the one-way earned counter (never the ladder wallet), so it is passed only by
 	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
-	// first-capture bonus; OPFOR's town, zone and flat income. Spends, swings, consolation and refunds
-	// leave it 0, so ground regained and money spent never move the ladder.
-	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0]];
+	// first-capture bonus; OPFOR's town and zone income. Spends, swings, consolation, refunds and
+	// OPCOM's drip leave it 0, so ground regained and money spent never move the ladder.
+	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every 25 s.
+	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0], ["_level", "INFO"]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
 	};
@@ -75,7 +76,7 @@ fnc_ap_adjust = {
 					["tier_up_opfor", [[_t] call DUWS_fnc_tierName]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 				};
 			};
-			["INFO", "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;
+			[_level, "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;
 		};
 		case "BLU": {
 			WARCOM_blufor_ap = round ((WARCOM_blufor_ap + _delta) max 0); publicVariable "WARCOM_blufor_ap";
@@ -92,7 +93,7 @@ fnc_ap_adjust = {
 					"boots" remoteExec ["playSound", [0,-2] select isDedicated];
 				};
 			};
-			["INFO", "ECON", format ["BLU AP %1 -> %2 (%3)", _delta, WARCOM_blufor_ap, _reason]] call fnc_log;
+			[_level, "ECON", format ["BLU AP %1 -> %2 (%3)", _delta, WARCOM_blufor_ap, _reason]] call fnc_log;
 		};
 		default { ["ERROR", "ECON", format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]] call fnc_log; };
 	};

@@ -47,6 +47,8 @@ while {true} do {
         "ferries" call _enter;   call DUWS_fnc_opcom_ferryDispatch;
         "attacks" call _enter;   call DUWS_fnc_opcom_attackStep;
         "need" call _enter;      call DUWS_fnc_opcom_needRefresh;
+        "drip" call _enter;
+        if (DUWS_opcom_tick mod OPCOM_AP_DRIP_TICKS == 0) then { ["OPF", 1, "opcom_drip", 0, "DEBUG"] call fnc_ap_adjust };
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;
         DUWS_opcom_dbg_pick = [];

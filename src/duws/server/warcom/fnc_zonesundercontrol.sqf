@@ -1,15 +1,15 @@
 if (!isServer) exitWith {};
 /*
     The campaign economy tick: one pass paying the zone AP trickle (both sides), town income
-    (BLUFOR CP, OPFOR AP), the OPFOR flat floor and kill income together, run every 30 minutes by the
-    one clock WARCOM init spawns. One clock, not one timer per faucet of the same nominal period: a
+    (BLUFOR CP, OPFOR AP) and kill income together, run every 30 minutes by the one clock
+    WARCOM init spawns. One clock, not one timer per faucet of the same nominal period: a
     suspended thread resumes only when the scheduler reaches it, so separate loops accrue their own
     slop and walk apart over a session. Driven from WARCOM init because that runs unconditionally,
     while the civilian economy only runs when CIV_PRESENCE is not "NONE" -- driving the tick from there
     would delete zone income on a civs-off campaign. Civs off leaves the town arrays empty,
-    so town income pays nobody, but the zone trickle and the OPFOR flat floor still pay: neither
-    reads a town. BLUFOR's passive CP therefore goes to zero on civs-off, which the mission-CP lift
-    restores (server/missions/fnc_mission_reward.sqf).
+    so town income pays nobody, but the zone trickle still pays: it reads no town. BLUFOR's
+    passive CP therefore goes to zero on civs-off, which the mission-CP lift restores
+    (server/missions/fnc_mission_reward.sqf).
 
     Returns [towns, bluTownCP, bluZoneAP, opfTownAP, opfZoneAP, killCP] for the Debug menu's readout,
     towns holding one [oldRep, newRep, opforCovers, bluforCovers, push] per town.
@@ -65,14 +65,13 @@ private _towns = [];
 // Every passive faucet is scaled by the same shared campaign-size throttle (DUWS_econ_throttle)
 // and rounded once, after scaling, so no fraction reaches a pool writer. Town income routes per
 // side (BLUFOR CP, OPFOR AP); the zone trickle pays both sides AP for the ground each holds, on
-// that one throttle; OPFOR also draws a flat floor, unscaled, as insurance for a director that has
-// lost its towns. OPFOR carries no per-side income handicap -- it opens holding every zone, but
+// that one throttle. OPFOR carries no per-side income handicap -- it opens holding every zone, but
 // that head start is answered by the BLUFOR capture bounty (below), not by penalising its faucet.
 private _bluCP    = round (_bluTownWorth * DUWS_econ_throttle);
 private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
 private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
 private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle);
-private _opfAP = _opfTownAP + _opfZoneAP + opfor_flat_ap_income;
+private _opfAP = _opfTownAP + _opfZoneAP;
 WARCOM_opfor_lastIncome = _opfAP;
 
 // One call per pool per side, not one per town: fnc_ap_adjust/fnc_cp_adjust publicVariable and
@@ -81,7 +80,7 @@ WARCOM_opfor_lastIncome = _opfAP;
 // credit this frame where remoteExec [...,2] queues it for the next.
 if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
 // The 4th arg is the tier-crediting portion, and each side credits the whole of what it earns:
-// BLUFOR its zone trickle, OPFOR all of town + zone + flat. OPFOR's zone income does front-load
+// BLUFOR its zone trickle, OPFOR all of town + zone. OPFOR's zone income does front-load
 // its tier from the ground it starts on -- the BLUFOR capture bounty (zone_first_capture_ap) is
 // what balances that, climbing the player's own tier as they take the same ground.
 if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };

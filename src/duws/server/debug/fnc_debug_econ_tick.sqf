@@ -10,8 +10,8 @@ private _rows = [
 	"pools",
 	["BLU CP", format ["+%1", _bluCP + _killCP], format ["town %1, kills %2, now %3", _bluCP, _killCP, commandpointsblu1]],
 	["BLU AP", format ["+%1", _bluZoneAP], format ["zone trickle, now %1", WARCOM_blufor_ap]],
-	["OPF AP", format ["+%1", _opfTownAP + _opfZoneAP + opfor_flat_ap_income],
-		format ["town %1, zone %2, flat %3, now %4", _opfTownAP, _opfZoneAP, opfor_flat_ap_income, WARCOM_opfor_ap]],
+	["OPF AP", format ["+%1", _opfTownAP + _opfZoneAP],
+		format ["town %1, zone %2, now %3", _opfTownAP, _opfZoneAP, WARCOM_opfor_ap]],
 	"aoi drift",
 	["Push when covering", format ["OPF -%1, BLU +%2", 1 + DUWS_opforRadioLevel, DUWS_bluforRadioLevel],
 		format ["OPF 1 + %1 radio towers, BLU radio tier %2", DUWS_opforRadioLevel, DUWS_bluforRadioLevel]]
