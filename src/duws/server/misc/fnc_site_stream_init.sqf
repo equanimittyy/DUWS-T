@@ -260,11 +260,7 @@ fnc_site_hostileNear = {
     params ["_pos", "_ring"];
     if (([_pos, _ring, EAST] call fnc_side_count_at) > 0) exitWith { true };
     if (isNil "DUWS_opcom_taskings") exitWith { false };
-    private _near = false;
-    {
-        if (!_near && {(_y get "grp") isEqualTo ""} && {((_y get "pos") distance2D _pos) < _ring}) then { _near = true };
-    } forEach DUWS_opcom_taskings;
-    _near
+    (DUWS_opcom_taskings findIf { (_x get "grp") isEqualTo "" && {((_x get "pos") distance2D _pos) < _ring} }) >= 0
 };
 
 // Replaces a thread per zone plus a sleeper per FOB plus two town loops with one. The saving is the
