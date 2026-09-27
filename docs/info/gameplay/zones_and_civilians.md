@@ -143,12 +143,10 @@ the whole garrison, so what a tier IV zone is reads off one line instead of bein
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
 
-**Tier moves the whole fight, dug-in half included.** A repeated entry is how a tier fields two of
+**Tier moves the whole fight, dug-in slots included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
-campaign's enemy multiplier — scales whole cards and applies to every zone alike. Most of the
-ladder's weight is in the dug-in half — the `garrison:garrison_element` slots — which climbs from two slots
-at tier I to six at tier IV: about thirty men at tier I against about seventy at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
-is a minority of a zone's men.
+campaign's enemy multiplier — scales whole cards and applies to every zone alike. The dug-in slots,
+`garrison:garrison_element`, climb from none at tier I to three at tier IV, so only a heavier zone digs in.
 `fnc_zone_tier_roll` refuses to roll twice, and tests for a missing tier rather than a positive one, so a
 stored 0 never re-rolls. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -160,7 +158,7 @@ the strength it had rather than silently halving.
 raises the tier by one, clamped at IV whatever the zone rolled, and re-stamps the full potential; the
 zone's hardpoint cap rises with it (`fnc_hardpoint_zone_cap`). The buy fields only a tenth of the tokens
 the new tier adds, rounded up, and files the rest as lost (`DUWS_fnc_garrisonBuyTier`), so the commander
-must reinforce to field the whole tier. At multiplier 1 a step adds at most seven tokens, so a fortify
+must reinforce to field the whole tier. At multiplier 1 a step adds at most six tokens, so a fortify
 fields one of them until a reinforcement buys the rest back.
 `fnc_zone_garrison_reinforce` buys back one `0.3` step through the shared ledger
 (`DUWS_fnc_garrisonReinforce`, the step a town takes). On a standing garrison both re-stand it
@@ -561,8 +559,8 @@ thread rather than in the commander's appraisal: a purchase made while the playe
 otherwise still pop its men in the moment they walked back.
 
 **It is units only — no static emplacements and no prefab**, because built defences are what make a
-zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark — six
-squads holding six buildings — by occupying buildings instead.
+zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark — three
+squads holding three buildings — by occupying buildings instead.
 
 **Clearing destroys the purchase, not the ownership.** The tier files back down to I rather than to
 0 — the town is still enemy ground, and what was beaten is the commander's spending, not the enemy's
@@ -820,7 +818,7 @@ more usefully — **which of them cannot be moved alone.**
 
 - **The OPFOR cap seed sits at the break line.** A site OPFOR have just taken keeps a tenth of its
   tier I tokens, rounded up, which is at or under the `0.15` line at every multiplier except a tier I
-  town at multiplier 1 (one token of five). Such a site reads beaten from its first raise, and only
+  zone or town at multiplier 1 (one token of five). Such a site reads beaten from its first raise, and only
   the count over the ring holds it until the commander reinforces. Moving either number changes that
   for every capture at once.
 - **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+10` takes
@@ -830,10 +828,10 @@ more usefully — **which of them cannot be moved alone.**
   deadline further out than the hold as one a previous session wrote. Add a longer hold without
   moving that bound and a genuine deadline gets discarded as stale.
 
-**Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty groups,
-which is the campaign's spawn ceiling — raising it raises what every tier IV zone on the map costs
-the server, not just the one in front of the player. And a town's tier IV carries six `garrison:team`
-slots to match the six `garrison:garrison_element` on the zone's tier IV row; changing one without the other
+**Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty-two groups,
+which at full garrison density is also the site's group ceiling — raising it raises what every tier IV zone on the map costs
+the server, not just the one in front of the player. And a town's tier IV carries three `garrison:garrison_element`
+slots to match the three on the zone's tier IV row; changing one without the other
 makes "tier IV reaches the zone benchmark" untrue.
 
 ### BLUFOR inherits nothing
