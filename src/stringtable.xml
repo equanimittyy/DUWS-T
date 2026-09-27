@@ -2035,6 +2035,10 @@
                 <Original>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB.</Original>
                 <English>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB.</English>
             </Key>
+            <Key ID="STR_DUWS_T_zonebuild_placement_refunded">
+                <Original>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB. Its points are refunded.</Original>
+                <English>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB. Its points are refunded.</English>
+            </Key>
             <Key ID="STR_DUWS_T_bldv_base_refused">
                 <Original>Placement failed. The builder vehicle cannot fortify inside an HQ or FOB perimeter.</Original>
                 <English>Placement failed. The builder vehicle cannot fortify inside an HQ or FOB perimeter.</English>
@@ -2044,8 +2048,8 @@
                 <English>Clear Fortifications</English>
             </Key>
             <Key ID="STR_DUWS_T_zonebuild_clear_confirm">
-                <Original>Remove every fortification built from this flag? Its points are refunded in full.</Original>
-                <English>Remove every fortification built from this flag? Its points are refunded in full.</English>
+                <Original>Remove every fortification built from this factory? Its points are refunded in full.</Original>
+                <English>Remove every fortification built from this factory? Its points are refunded in full.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonebuild_cleared">
                 <Original>Fortifications cleared.</Original>

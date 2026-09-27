@@ -375,17 +375,20 @@ builds go to the sweep when the FOB is dismantled or destroyed (`fnc_fob_deregis
 **A build must stay within 100 m of its site's centre.** R3F reports each carried object when it settles after a
 drop (`deplacer.sqf`). If a site's build settles more than 100 m from the centre, the server moves it back to its
 last good position and tells the carrier. A new build and a build unloaded from a vehicle both start as a carry,
-so the one check covers creation, unloading and moving.
+so the one check covers creation, unloading and moving. A new build that never settled in reach has no good
+position, because R3F creates it high in the sky before the carry. So the server deletes it and refunds its full
+cost to the factory that made it (`DUWS_buildFactory`).
 
 **The builder vehicle cannot fortify a base.** R3F's client-side factory condition (`config.sqf`) refuses the
 builder vehicle's factory while the vehicle stands inside the ring of the HQ or a FOB (`DUWS_base_keep_radius`,
 250 m, the ring on the map). The drop check also moves a builder-vehicle build that settles inside a ring back to
-its last good position. So only a base's own budget fortifies it. The ring is wider than the 100 m reach of a
+its last good position. It deletes a new one without a refund, because the builder vehicle builds for free. So only a
+base's own budget fortifies it. The ring is wider than the 100 m reach of a
 base's builds, so no factory can build between 100 m and 250 m from a base.
 
 **Clear Fortifications removes every build of that factory at once** and refunds the full cost of each one that is
-intact. A wreck refunds nothing, as a sale of it would not. The action shows only while the factory is open. It
-leaves a build that a player carries or a vehicle holds.
+intact. A wreck refunds nothing, as a sale of it would not. The action sits directly under R3F's "Open the creation
+factory" action and shows under the same condition. It leaves a build that a player carries or a vehicle holds.
 
 **A sale refunds 100%.** `R3F_LOG_CFG_CF_sell_back_bargain_rate` is 1 for every factory
 (`config_creation_factory.sqf`), and R3F still reduces the refund by the object's damage. A deploy rebuilds each

@@ -2,7 +2,7 @@
 // fortifications (docs/info/gameplay/zones_and_civilians.md).
 //
 // A factory's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and the
-// callers add an allowance and a clear's refund. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
+// callers add an allowance and the refund of a clear or of a rejected new build. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
 // beside the site's own key, so a clear takes them without touching the site's composition.
 
 #define BUILD_REACH 100
@@ -19,17 +19,21 @@ DUWS_fnc_siteBuildArm = {
     [[_factory, _categories], {
         params ["_factory", "_categories"];
         if (!hasInterface || isNull _factory) exitWith {};
-        [_factory, 0, west, _categories] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
-        _factory addAction [localize "STR_DUWS_T_zonebuild_clear",
+        waitUntil { !isNil "R3F_LOG_active" };
+        if (!R3F_LOG_active) exitWith {};
+        [_factory, 0, west, _categories] call R3F_LOG_FNCT_usine_init;
+        // Equal priorities list in the order they are added, so this sits right under R3F's Open action. Its condition
+        // is that action's own: a distance to the model centre never shows on a building as big as the HQ.
+        _factory addAction ["<t color=""#ff9600"">" + localize "STR_DUWS_T_zonebuild_clear" + "</t>",
             {
                 // hideOnUse off so a cancel keeps the action.
                 if ([localize "STR_DUWS_T_zonebuild_clear_confirm", localize "STR_DUWS_T_zonebuild_clear", true, true] call BIS_fnc_guiMessage) then {
                     [_this select 0] remoteExec ["DUWS_fnc_siteBuildClear", 2];
                 };
             },
-            [], 1.4, false, false, "",
-            "_this distance _target < 6 && {!(_target getVariable ['R3F_LOG_CF_disabled', true])}"];
-    }] remoteExec ["call", 0, format ["DUWS_siteBuild_%1", netId _factory]];
+            [], 5, false, false, "",
+            "!R3F_LOG_mutex_local_verrou && R3F_LOG_objet_addAction == _target && R3F_LOG_action_ouvrir_usine_valide"];
+    }] remoteExec ["spawn", 0, format ["DUWS_siteBuild_%1", netId _factory]];
 };
 
 // A base is BLUFOR's for as long as it stands, so its factory opens at once with the whole allowance.
@@ -102,6 +106,20 @@ DUWS_fnc_buildDropped = {
         (_obj distance2D (([_site] call fnc_site_at) get "pos")) > BUILD_REACH
     };
     if (!_bad) exitWith { _obj setVariable ["DUWS_buildLastGood", getPosATL _obj] };
-    _obj setPosATL (_obj getVariable "DUWS_buildLastGood");
-    (localize (["STR_DUWS_T_zonebuild_placement_failed", "STR_DUWS_T_bldv_base_refused"] select _bldv)) remoteExec ["hint", remoteExecutedOwner];
+    private _lastGood = _obj getVariable "DUWS_buildLastGood";
+    private _msg = ["STR_DUWS_T_zonebuild_placement_failed", "STR_DUWS_T_bldv_base_refused"] select _bldv;
+    // A new build has no good spot to go back to: R3F makes it far up in the sky before the carry.
+    if (isNil "_lastGood") then {
+        private _factory = _obj getVariable ["DUWS_buildFactory", objNull];
+        // -1 is R3F's unlimited balance, which the builder vehicle's factory has on the clients only.
+        private _credits = _factory getVariable ["R3F_LOG_CF_credits", -1];
+        if (_credits != -1) then {
+            _factory setVariable ["R3F_LOG_CF_credits", _credits + ([typeOf _obj] call DUWS_fnc_buildCost), true];
+            _msg = "STR_DUWS_T_zonebuild_placement_refunded";
+        };
+        deleteVehicle _obj;
+    } else {
+        _obj setPosATL _lastGood;
+    };
+    (localize _msg) remoteExec ["hint", remoteExecutedOwner];
 };

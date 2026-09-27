@@ -30,18 +30,13 @@ DUWS_fnc_builderEnlist = {
 // DUWS_buildKey, so a build is its factory's wherever it is carried.
 DUWS_fnc_buildRegister = {
     params ["_obj", "_factory"];
-    if (_factory getVariable ["DUWS_campaignFactory", false]) exitWith {
-        DUWS_builds pushBack _obj;
-        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
-    };
+    _obj setVariable ["DUWS_buildFactory", _factory];
+    if (_factory getVariable ["DUWS_campaignFactory", false]) exitWith { DUWS_builds pushBack _obj };
     private _key = _factory getVariable ["DUWS_buildKey", ""];
     if (_key == "") exitWith {};
     // A build landing after its mission released the key would revive it, and nothing would release it again.
     if (_key in DUWS_retired) exitWith { [_obj] call fnc_duws_disposeAfter };
     [_obj, _key] call fnc_duws_keep;
     private _site = _factory getVariable ["DUWS_buildSite", ""];
-    if (_site != "") then {
-        _obj setVariable ["DUWS_buildSite", _site];
-        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
-    };
+    if (_site != "") then { _obj setVariable ["DUWS_buildSite", _site] };
 };
