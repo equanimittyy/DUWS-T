@@ -19,10 +19,16 @@ DUWS_fnc_restoreCheck = {
     ""
 };
 
-// The fork's answer: [] for a new campaign, [id, usePrev] to load one.
+// The fork's answer: [] for a new campaign, [id, usePrev] to load one. A load that fails leaves the fork open, so
+// only the timeout's own pick falls through to a new campaign.
 DUWS_fnc_saveChoose = {
     params [["_choice", []]];
     if (!isNil "DUWS_loadChoice") exitWith {};
+    private _why = if (_choice isEqualTo []) then { "" } else { (_choice call DUWS_fnc_restoreRead) select 1 };
+    if (_why isNotEqualTo "") exitWith {
+        ["ERROR", "SAVE", format ["campaign %1 could not be loaded (%2); the load screen stays open", _choice, _why]] call fnc_log;
+        ["loadRefused", _why] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
+    };
     DUWS_loadChoice = _choice;
     ["INFO", "SAVE", format ["fork answered: %1", ["new campaign", format ["load %1", _choice]] select (_choice isNotEqualTo [])]] call fnc_log;
 };
@@ -56,17 +62,24 @@ DUWS_fnc_saveExport = {
     ["export", _json] remoteExec ["fnc_campaign_reply", remoteExecutedOwner];
 };
 
+// -> [payload, refusal key]; the payload is 0 when neither save parses.
+DUWS_fnc_restoreRead = {
+    params ["_id", "_prev"];
+    private _data = [_id, _prev] call DUWS_fnc_saveRead;
+    // Writes are not atomic, so a payload that does not parse falls back to the one written an interval before.
+    if (isNil "_data" && {!_prev}) then {
+        _data = [_id, true] call DUWS_fnc_saveRead;
+        if (!isNil "_data") then { ["WARN", "SAVE", format ["campaign %1 did not parse; loading the save before it", _id]] call fnc_log };
+    };
+    if (isNil "_data") exitWith { [0, "STR_DUWS_T_LOAD_BAD_INPUT"] };
+    [_data, [_data] call DUWS_fnc_restoreCheck]
+};
+
 // -> true when the answer loaded a campaign.
 DUWS_fnc_restoreAnswer = {
     params ["_choice"];
-    private _data = if (_choice isEqualTo []) then { nil } else { _choice call DUWS_fnc_saveRead };
-    // Writes are not atomic, so a payload that does not parse falls back to the one written an interval before.
-    if (isNil "_data" && {_choice isNotEqualTo []} && {!(_choice select 1)}) then {
-        _data = [_choice select 0, true] call DUWS_fnc_saveRead;
-        if (!isNil "_data") then { ["WARN", "SAVE", format ["campaign %1 did not parse; loading the save before it", _choice select 0]] call fnc_log };
-    };
-    private _why = if (isNil "_data") then { "STR_DUWS_T_LOAD_BAD_INPUT" } else { [_data] call DUWS_fnc_restoreCheck };
-    if (_choice isNotEqualTo [] && {_why isNotEqualTo ""}) then {
+    (if (_choice isEqualTo []) then { [0, ""] } else { _choice call DUWS_fnc_restoreRead }) params ["_data", "_why"];
+    if (_why isNotEqualTo "") then {
         ["ERROR", "SAVE", format ["campaign %1 could not be loaded (%2); starting a new campaign", _choice, _why]] call fnc_log;
     };
     if (_choice isEqualTo [] || {_why isNotEqualTo ""}) exitWith {

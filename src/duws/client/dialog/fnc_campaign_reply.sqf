@@ -2,6 +2,11 @@
 params ["_kind", "_arg"];
 switch (_kind) do {
 	case "refused": { hint format [localize "STR_DUWS_T_fork_import_refused", localize _arg] };
+	case "loadRefused": {
+		hint format [localize "STR_DUWS_T_fork_load_refused", localize _arg];
+		{ ctrlEnable [_x, true] } forEach [9807, 9810];
+		[] call fnc_campaign_fork_select;
+	};
 	case "export": {
 		copyToClipboard _arg;
 		hint localize "STR_DUWS_T_fork_exported";

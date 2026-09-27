@@ -146,8 +146,9 @@ for decades from that epoch, where seconds since 1970 do not.
 The scan reads the index, checks each header against this session, and publishes the rows for the
 load screen as `DUWS_saveList`: `[id, header pairs, refusal key]` per campaign, newest first, with the
 header as pairs so the broadcast stays plain arrays. Nothing deserialises a payload until a campaign
-is chosen. On choice the payload is `fromJSON`'d into `DUWS_restore`, and the restore replays the
-builders against it.
+is chosen. On choice the server parses and checks the payload before it accepts the answer
+(`DUWS_fnc_saveChoose`), so a payload that fails leaves the load screen open. The restore then parses
+it again into `DUWS_restore` and replays the builders against it.
 
 **`DUWS_saveStatus` tells an empty store from one that did not read back.** Every commit also writes
 the index's row count to `profileNamespace`, a second store. An empty index beside a count above zero

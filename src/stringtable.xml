@@ -1199,6 +1199,10 @@
                 <Original>Import refused: %1.</Original>
                 <English>Import refused: %1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_fork_load_refused">
+                <Original>Campaign not loaded. %1.</Original>
+                <English>Campaign not loaded. %1.</English>
+            </Key>
             <Key ID="STR_DUWS_T_fork_exported">
                 <Original>Campaign copied to the clipboard.</Original>
                 <English>Campaign copied to the clipboard.</English>
