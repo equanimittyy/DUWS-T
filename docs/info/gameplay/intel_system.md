@@ -277,7 +277,8 @@ on the position that record held at the moment the intel landed, and nothing aft
 `server/search/fnc_intel_contact_init.sqf` draws it. The marker is a half-size arrow (`mil_arrow_noShadow`) on the
 unit's position, rotated to its heading with `setMarkerDir` — the leg it is walking now, or the target once
 the route is spent, because a route bends around terrain and its last point is not where the unit is headed
-next.
+next. A streamed unit plots at its group leader and heads for the group's current waypoint instead, because
+its record's leg stops advancing once the group walks its own waypoints.
 
 **The arrow is the whole contact: where it was, and which way it was going.** A type icon and an order label
 stood on it before, and both answer what the enemy *is doing* — a live readout of a unit the player has not
@@ -291,12 +292,13 @@ position. The arrow starts fully opaque and fades out over `DUWS_intel_contact_l
 marker is deleted. One thread per contact holds only the tasking id and the marker name. The fade goes in 20
 steps rather than smoothly, because each `setMarkerAlpha` on a global marker is a network broadcast.
 
-Only virtual taskings under `move`, `capture` or `intercept` are eligible. A streamed one stands inside a
-player's bubble already, and its record's position is frozen at the cell it de-virted in, so plotting it
-would mark ground the player is standing on with a figure that is wrong twice over. A garrison is not
-eligible either: it is the content of a zone, and the zone reveal is what puts that on the map.
-`DUWS_intel_contactIds` holds what is plotted right now, so a payout never re-plots a unit whose marker
-still stands.
+Every tasking whose order is not `guard` or `garrison` is eligible, virtual or streamed. A garrison is not
+eligible: it is the content of a zone, and the zone reveal is what puts that on the map.
+
+**A unit that is already plotted is plotted again.** The payout deletes its old marker and draws a fresh one
+at the unit's current position, and the fade starts again. `DUWS_intel_contacts` maps each tasking id to the
+marker that plots it now. Each plot takes a new marker name, so the thread of a replaced marker sees that it
+no longer owns the unit and stops.
 
 **One payout plots a random share of the eligible units, from 20% to all of them, rounded up.** The share
 is drawn again for each payout, and the units in it are picked at random. The floor matters because an older

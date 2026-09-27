@@ -127,14 +127,8 @@ private _knownOpfor = false;
 } forEach zone_namePOS_pairs;
 
 if (_knownOpfor) then {
-    // Virtual taskings only: a streamed one stands inside a player's bubble already, and its record's
-    // position is frozen at the cell it de-virted in, so plotting it would mark stale ground the
-    // player is standing on. One already plotted is out, or its own markers would be redrawn.
     private _contacts = DUWS_opcom_taskings select {
-        ([_x] call DUWS_fnc_opcom_marching)
-        && {(_x get "grp") isEqualTo ""}
-        && {!((_x get "id") in DUWS_intel_contactIds)}
-        && {[_x get "pos"] call _fnc_inReach}
+        ([_x] call DUWS_fnc_opcom_marching) && {[_x get "pos"] call _fnc_inReach}
     };
     // Floored above zero: a draw from zero could pay nothing while there was something to find, which
     // reads as an unreliable source rather than as a quiet sector. Walked rather than cut to length, so
