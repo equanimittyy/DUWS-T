@@ -86,7 +86,8 @@ tick by default (1 pick per tick); the difficulty setting changes the rate ([§O
 action's id, targets, gate, price, execute, weight key, Value and Cost.
 
 `random` mode, switched on from the Debug menu's OPCOM page, is the unscored control it was built as: it draws an
-action with a legal target uniformly, then one of its targets uniformly. The mode is `off` by default.
+action with a legal target uniformly, then one of its targets uniformly. The mode is `weighted` by default, and
+`off` when the `DUWS_Debug` mission param is on (`fnc_opcom_pick_state.sqf`).
 
 The score is one number — expected AP returned per AP spent:
 
