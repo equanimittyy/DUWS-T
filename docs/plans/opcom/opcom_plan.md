@@ -1083,6 +1083,9 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   and are loaded per mission, so there is no finite store.
 - **A mission fires every ready gun or none.** `Cost` counts every ready gun, so when one of them cannot reach the
   aim point the mission is refused rather than fired thinned at the full price.
+- **A round a gun has not fired within `OPCOM_ARTY_ROUND_SECS` (10 s) is written off and its AP refunded**, and the
+  gun is ordered its next round. A gun destroyed mid-mission refunds nothing, and the unpaid debug `fire` verb
+  refunds nothing.
 - **Each gun rests `OPCOM_ARTY_COOLDOWN` after it fires** — 360 ticks (30 min), saturate and creep alike, so a full
   wallet cannot keep a battery shelling without pause. The debug `fire` verb zeroes the cooldown before it fires,
   and refuses a battery that is still firing its last mission.
