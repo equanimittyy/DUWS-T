@@ -73,8 +73,9 @@ publicVariable "fnc_duws_deploy";
 // Both feed the placer below, so loaded ahead of it; server-only, not broadcast.
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_catalog.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_grid.sqf";
-// Footprint probe shared by the room pass below and the vehicle spawn-spot check; server-only, not broadcast.
+// Footprint probe shared by the room pass below, the vehicle spawn-spot check and the zone flag; server-only, not broadcast.
 fnc_class_half_extents = compile preprocessFileLineNumbers "duws\server\placement\fnc_class_half_extents.sqf";
+fnc_footprint_clear = compile preprocessFileLineNumbers "duws\server\placement\fnc_footprint_clear.sqf";
 fnc_vehicle_spot_clear = compile preprocessFileLineNumbers "duws\server\placement\fnc_vehicle_spot_clear.sqf";
 // One furnished room, spawned per room by the placer below; loaded after place_settled/grid/catalog it calls.
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_furnish_room.sqf";

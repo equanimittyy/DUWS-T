@@ -225,11 +225,13 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 	if (isNull (missionNamespace getVariable [_flagVarName, objNull])) then {
 		// Not BIS_fnc_findSafePos: its 3 m search failed on any slope and returned a random map position, flinging the
 		// flag off its zone (the [0,0,0] guard never caught that far fallback).
+		(["FlagPole_F"] call fnc_class_half_extents) params ["", "", "_poleH"];
 		private _cands = [];
 		for "_i" from 1 to 16 do { private _t = _zonePos getPos [8 + random 18, random 360]; _t set [2, 0]; _cands pushBack _t; };
+		// The footprint rays stop at 1.2 m, so a roof or overhang over the spot is left to the mast ray.
 		private _idx = _cands findIf {
-			(nearestObjects [_x, [], 2, true]) isEqualTo []
-			&& {(nearestTerrainObjects [_x, ["BUILDING", "HOUSE", "ROCK", "ROCKS"], 2.5]) isEqualTo []}
+			(lineIntersectsSurfaces [AGLToASL (_x vectorAdd [0, 0, 0.2]), AGLToASL (_x vectorAdd [0, 0, _poleH]), objNull, objNull, true, 1, "GEOM"]) isEqualTo []
+			&& {["FlagPole_F", _x, 0] call fnc_footprint_clear}
 		};
 		private _flagPos = _cands select (_idx max 0);
 		private _flg = createVehicle ["FlagPole_F", _flagPos, [], 0, "CAN_COLLIDE"];

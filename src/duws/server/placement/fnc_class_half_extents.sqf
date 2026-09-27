@@ -1,4 +1,4 @@
-// Locality: server. [_class] -> [hx, hy], the footprint half-extents along model X and Y.
+// Locality: server. [_class] -> [hx, hy, h], the footprint half-extents along model X and Y, and the model height.
 // boundingBoxReal is model-space, so a throwaway probe's box equals the placed object's: measured once per
 // class (cached mission-wide), a footprint is known before spawning instead of spawning and then rejecting
 // on overlap. Each axis takes the larger of min and max, since a model's origin need not sit mid-box.
@@ -10,7 +10,8 @@ private _p = createVehicleLocal [_class, [0, 0, 0], [], 0, "CAN_COLLIDE"];
 private _bb = boundingBoxReal _p;
 deleteVehicle _p;
 _d = [(abs ((_bb select 0) select 0)) max (abs ((_bb select 1) select 0)),
-      (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1))];
+      (abs ((_bb select 0) select 1)) max (abs ((_bb select 1) select 1)),
+      ((_bb select 1) select 2) - ((_bb select 0) select 2)];
 _cache set [_class, _d];
 missionNamespace setVariable ["DUWS_classHalfExtents", _cache];
 _d
