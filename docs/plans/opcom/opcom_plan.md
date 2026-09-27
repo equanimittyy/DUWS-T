@@ -1011,9 +1011,9 @@ the shared terrain siting picks the spot (`fnc_hardpoint_score`,
 
 | Build | Band cell |
 |---|---|
-| Radio tower | the most town worth brought newly under OPFOR's area of influence × defend, outside every other tower's `AOI_TOWER_REACH` (the campaign-generation rule, `fnc_hardpoint_seed_radio`) |
+| Radio tower | the most town worth brought newly under OPFOR's area of influence × defend, more than `AOI_TOWER_REACH` in grid cells (10) from every other tower |
 | OP | the most cells within `OP_OBSERVE_K` that no other OP's ring already covers |
-| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (5 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF` (1 km) |
+| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (5 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF_K` (1) cells |
 | Artillery battery | the same over `OPCOM_ARTY_REACH` (20 km), against the other batteries |
 | Standalone hardpoint | the most cover Value: need × the cover it adds over its 5×5 block |
 | Minefield | the band cell holding the most traffic, cover Value breaking a tie, since a field is worth what it denies and denies nothing on ground nobody crosses |
