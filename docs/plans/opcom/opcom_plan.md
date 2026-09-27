@@ -605,6 +605,9 @@ commit + the order's re-issue span, the earliest tick the pick may draw the unit
   units: an attack short of the ideal bar stays a target of its row, and a later pick sends it more from free units
   and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF launches at the ideal bar, or at the minimum
   once `OPCOM_QRF_EXPIRY` runs out, where its units stand ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
+- **An assault or flank moves virtually as one column.** Each marching member, and the hull carrying one, crosses a
+  cell at the slowest marching member's `DUWS_opcom_speed`, a rider at its carrier's (`DUWS_fnc_opcom_attackPace`),
+  so a fast hull reaches neither its rally nor the fight ahead of the rest. A live group moves at the engine's pace.
 
 ### Re-issue: a span per order
 
