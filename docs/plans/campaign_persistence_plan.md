@@ -784,9 +784,8 @@ tent, the ammo box and the respawn point rather than persisting any of them.
 client-local R3F init, not a property of the vehicle, so the garage cannot carry it. The write saves
 `BLD1` only after the steal_builder win has handed it over through `DUWS_fnc_builderEnlist`, which
 marks it, so a builder vehicle still waiting at an active mission is not saved. Restore spawns it,
-names it `BLD1` again so the mission refuses a second one, and calls `DUWS_fnc_builderEnlist`. A
-garaged builder vehicle comes back from the garage as a plain truck, because the retrieve path does
-not call that function.
+names it `BLD1` again so the mission refuses a second one, and calls `DUWS_fnc_builderEnlist`. The
+garage refuses to store it, because a stored spec does not carry the factory role.
 
 **Crews are never stored, and a retrieved vehicle is a new object.** Anything attached to the old one
 goes: R3F-carried cargo, player-placed objects riding on it, and any per-object variable a subsystem
