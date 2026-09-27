@@ -93,7 +93,7 @@ the refill ceiling to the standing template's count plus the OPCOM units already
 site, and re-syncs OPCOM's homed units.
 
 The sync, `DUWS_fnc_opcom_zoneReserveSync {key}`
-(`src/duws/server/warcom/opcom/taskings/fnc_opcom_garrison.sqf:11`), compares the homed units with the
+(`src/duws/server/warcom/opcom/taskings/orders/fnc_opcom_garrison.sqf:11`), compares the homed units with the
 tokens it added this awake session (`DUWS_zoneReserveOpcom_<key>`), not with the pool. A unit already
 drawn onto the ground is out of the pool but still homed, and adding its token again would field it
 twice. The sync adds a token for each newly homed unit, removes the token of a unit that left, and

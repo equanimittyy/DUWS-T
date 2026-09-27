@@ -70,8 +70,8 @@ duws/server/missions/fnc_time_expired.sqf::*fnc_time_expired
 duws/shared/functions/fnc_stealth_coef.sqf::*fnc_stealth_coef
 duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_rotate
 duws/server/init_zones/fnc_hardpoint_place.sqf::fnc_hardpoint_build
-duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_creepGrid
-duws/server/warcom/opcom/taskings/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
+duws/server/warcom/opcom/taskings/actions/fnc_opcom_fires.sqf::DUWS_fnc_opcom_creepGrid
+duws/server/warcom/opcom/taskings/actions/fnc_opcom_fires.sqf::DUWS_fnc_opcom_fireAim
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_deposit
 duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf::DUWS_fnc_opcom_gridDirty
 duws/server/warcom/opcom/appraisal/fnc_opcom_sources.sqf::DUWS_fnc_opcom_nearestOpen
@@ -107,7 +107,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_pa
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_garrison.sqf::DUWS_fnc_opcom_garrisonDefense
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_garrison.sqf::DUWS_fnc_opcom_garrisonValue
-duws/server/warcom/opcom/taskings/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
+duws/server/warcom/opcom/taskings/actions/fnc_opcom_taxi.sqf::DUWS_fnc_opcom_taxiWorth
 duws/server/warcom/fnc_aoi_init.sqf::fnc_aoi_in_any_zone
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_artySpread
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_fire.sqf::DUWS_fnc_opcom_artyReach

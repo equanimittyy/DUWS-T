@@ -92,29 +92,31 @@ fnc_vehicle_spot_clear = compile preprocessFileLineNumbers "duws\server\placemen
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_traffic.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_grid_sources.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_contested.sqf";
-// taskings\: streaming, the movement core, the ferry (orchestrator, virtual, live, one table per lift type), garrison, ports, delivery, fires, the order bodies, the order table and the Attack runner executed to
-// define them; the store init, router, recruit/task primitives, per-tick step and hand-drive harness compiled to names the loop and harness call.
+// taskings\ in three layers: taskings\ the record and what every order shares, orders\ each order's step and the table
+// that dispatches them, actions\ what binds several taskings or none (the Attack runner, the carry, delivery, fires).
+// Executed to define them, except the store init, router, recruit/task primitives, per-tick step and hand-drive harness,
+// compiled to names the loop and harness call.
 // strength (belief\, above) loads before stream, whose deVirt calls matchStrength.
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_stream.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_movement_core.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_virt.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_devirt.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_stream.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_movement_core.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry_virt.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry_devirt.sqf";
 // The lift tables fill DUWS_opcom_ferryHulls, which ferry_devirt creates.
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_rotor.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_boat.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ferry_ground.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_taxi.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_garrison.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_ports.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_deliver.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_fires.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_intercept.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_capture.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_move.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry_rotor.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry_boat.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_ferry_ground.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_taxi.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\orders\fnc_opcom_garrison.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_ports.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_deliver.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_fires.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\orders\fnc_opcom_intercept.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\orders\fnc_opcom_capture.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\orders\fnc_opcom_move.sqf";
 // orders last of the executed set: its table stores the handler values, so every one must already be defined.
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_orders.sqf";
-[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_attack.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\orders\fnc_opcom_orders.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\actions\fnc_opcom_attack.sqf";
 // appraisal\: executed to define the score and its terms (value\, one file per term), the picker's state, the
 // archetypes, the site queries, the asset tables, supply trucks, the siting pass, the roster, the sources, the lifts, the
 // commit, fire, holding and build actions, and the action list. siting reads the Value functions into its table at
@@ -803,12 +805,12 @@ fnc_opcom_cover_stamp = compile preprocessFileLineNumbers "duws\server\warcom\op
 fnc_opcom_cover_clear = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_cover_clear.sqf";
 fnc_opcom_perception_run = compile preprocessFileLineNumbers "duws\server\warcom\opcom\belief\fnc_opcom_perception_run.sqf";
 fnc_opcom_pick = compile preprocessFileLineNumbers "duws\server\warcom\opcom\appraisal\fnc_opcom_pick.sqf";
-fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_tasking_init.sqf";
-fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_route.sqf";
-fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_recruit.sqf";
-fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_task.sqf";
-fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_task_step.sqf";
-fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\fnc_opcom_debug_task.sqf";
+fnc_opcom_tasking_init = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_tasking_init.sqf";
+fnc_opcom_route = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_route.sqf";
+fnc_opcom_recruit = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_recruit.sqf";
+fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_task.sqf";
+fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_task_step.sqf";
+fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_debug_task.sqf";
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_zonesundercontrol.sqf";
 // Server-only: remoteExec'd to 2 by the OPCOM debug view, it gathers the AoI reach circles and hands
 // them back to the caller to draw. Read-only, so an accidental client call fails loud, not harmfully.

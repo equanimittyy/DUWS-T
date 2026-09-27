@@ -215,7 +215,7 @@ The `pick[…]` group splits the pick stage (`warcom/opcom/appraisal/fnc_opcom_p
 A row's ms includes each tick-cached sweep that the row is the first to ask for. The attack sweep, for example,
 is charged to `attack_assault`, and `attack_flank` and `probe` then read it from the cache.
 
-The `route[…]` group sums the grid A* searches of the tick (`warcom/opcom/taskings/fnc_opcom_route.sqf`), whichever
+The `route[…]` group sums the grid A* searches of the tick (`warcom/opcom/taskings/taskings/fnc_opcom_route.sqf`), whichever
 stage ran them: `n` searches, the `cells` they expanded, and their wall `ms/frames`. The cell count is work, not
 time, so contention does not inflate it.
 
