@@ -39,7 +39,7 @@ switch (_verb) do {
 		_line = if (_new <= _old) then {
 			format ["%1 is already at the top tier.", _name]
 		} else {
-			format ["%1 bought tier %2 for %3.\n\nA tier buy fields a tenth of what it adds; the rest is owed,\nand reinforcement is what pays it off.", _name, _new, _side]
+			format ["%1 bought tier %2 for %3.", _name, _new, _side]
 		};
 	};
 	case "reinforce": {
@@ -47,7 +47,7 @@ switch (_verb) do {
 		_line = if (_new < 0) then {
 			format ["%1 holds no garrison to reinforce. Buy a tier first.", _name]
 		} else {
-			format ["%1 reinforced to %2 strength for %3.\n\nThe men walk in on the next reserve wave.", _name, round (_new * 100), _side]
+			format ["%1 reinforced to %2%3 strength for %4.", _name, round (_new * 100), "%", _side]
 		};
 	};
 };

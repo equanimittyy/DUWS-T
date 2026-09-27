@@ -102,12 +102,12 @@ switch (_page) do {
             }, [], DBG_MAP],
             ["Build zone garrison (click map)", {
                 ["Click a zone to buy its holder a tier.",
-                    "Dev tool: the zone buys are the only way BLUFOR ground gets a garrison -- tier I is where a captured zone starts.",
+                    "Dev tool: one tier up.",
                     { params ["_pos"]; [_pos, "fortify", player] remoteExec ["fnc_debug_zone_garrison", 2] }] call fnc_debug_map_click;
             }, [], DBG_MAP],
             ["Reinforce zone garrison (click map)", {
                 ["Click a zone to buy its holder a reinforcement.",
-                    "Dev tool: buys back a third of the tokens the garrison has lost, which the next reserve wave walks in.",
+                    "Dev tool: buys back up to 30% of full strength.",
                     { params ["_pos"]; [_pos, "reinforce", player] remoteExec ["fnc_debug_zone_garrison", 2] }] call fnc_debug_map_click;
             }, [], DBG_MAP],
             ["Spawn OPFOR hardpoint >", fnc_debug_hardpoint_menu, "opfor",  DBG_PAGE],
