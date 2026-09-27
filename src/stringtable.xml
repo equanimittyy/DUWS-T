@@ -2031,6 +2031,22 @@
                 <Original>Flagpole placement failed. It must be within 50 meters of the zone center.</Original>
                 <English>Flagpole placement failed. It must be within 50 meters of the zone center.</English>
             </Key>
+            <Key ID="STR_DUWS_T_zonebuild_placement_failed">
+                <Original>Fortification placement failed. It must be within 100 meters of the zone center.</Original>
+                <English>Fortification placement failed. It must be within 100 meters of the zone center.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_zonebuild_clear">
+                <Original>Clear Fortifications</Original>
+                <English>Clear Fortifications</English>
+            </Key>
+            <Key ID="STR_DUWS_T_zonebuild_clear_confirm">
+                <Original>Remove every fortification built from this flag? Its points are refunded in full.</Original>
+                <English>Remove every fortification built from this flag? Its points are refunded in full.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_zonebuild_cleared">
+                <Original>Fortifications cleared.</Original>
+                <English>Fortifications cleared.</English>
+            </Key>
 </Container>
         <Container name="Killhouse Training">
             <Key ID="STR_DUWS_KILLHOUSE_EXIT_TRAINING">

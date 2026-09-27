@@ -411,6 +411,9 @@ DUWS_hardpointStreaming = createHashMapFromArray [
 DUWS_zoneAirRing = 1500;
 DUWS_zoneAirCommitSpeed = 250;   // km/h
 
+// A held zone's flag factory allowance in R3F credits, by garrison tier 0-IV (fnc_zone_build.sqf).
+DUWS_zoneBuildPoints = [0, 500, 750, 1000, 1250];
+
 // The radio tower's mast: the one composition member left simulated and damageable, and the object
 // fnc_hardpoint_stream watches to clear the tower -- destroying it takes the hardpoint, not beating its
 // garrison. The rest of the base stays frozen invulnerable cover.

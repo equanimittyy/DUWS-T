@@ -1,4 +1,4 @@
-// Locality: server. Gates a zone flagpole's R3F carry on ownership and tethers it to the zone.
+// Locality: server. Gates a zone flagpole's R3F carry and factory on ownership and tethers it to the zone.
 //
 // FlagPole_F is already an R3F movable class (inherits FlagCarrierCore), so R3F's own scanner attaches
 // the carry action -- this only decides when it is live (R3F_LOG_disabled) and reins the pole in on drop.
@@ -15,6 +15,8 @@ if (isNull _flg) exitWith {};
 // R3F disables objects by default and refuses every logistics action on a disabled one, so this flag is
 // the whole BLUFOR-only restriction. Broadcast so every client and late joiner agrees.
 _flg setVariable ["R3F_LOG_disabled", !_movable, true];
+_flg setVariable ["R3F_LOG_CF_disabled", !_movable, true];
+[_flg] call DUWS_fnc_zoneBuildCredits;
 
 // Below arms the pole once; the capture handlers call back only to flip the gate above.
 if (_flg getVariable ["DUWS_flagLogInit", false]) exitWith {};

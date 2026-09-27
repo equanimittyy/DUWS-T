@@ -317,6 +317,12 @@ informant alive when the defend window elapses, plus +3 REP to the nearest town.
 thread (`fnc_protect_civ.sqf`) carries the tunables, and the AIS opt-out it needs is in
 [`revive_system.md`](../architecture/revive_system.md#ais-traps).
 
+The crate names its composition key in `DUWS_buildKey`, and `DUWS_fnc_buildRegister` files each build from the
+crate under the mission key, wherever the player carries it. The teardown releases that key, so every build goes
+with the mission, and a build that another factory made near the crate stays. A build that R3F reports after the
+release goes to the sweep, because filing it would revive the retired key. A sale at the crate refunds 100% of
+the cost, less the object's damage.
+
 ### Destroy Air Asset
 
 `mission_threads/destroy_air/`. A moving-target intercept: a lone OPFOR gunship loiters over a 5 km ring

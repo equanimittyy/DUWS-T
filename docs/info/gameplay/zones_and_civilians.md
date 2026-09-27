@@ -309,6 +309,53 @@ The capture trigger is created **server-local**, unlike the notification trigger
 the condition reads a server-side global. That also settles the evaluation-locality question the
 capture handlers previously guarded against with an `isServer` assert.
 
+### Fortifying a held zone
+
+A zone's flag is an R3F creation factory for the `Fortifications` category (`init_zones/fnc_zone_build.sqf`). The
+player opens it with R3F's own "Open the creation factory" action at the flag. Only a zone with a flag has one, so
+the feature needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
+
+**The factory follows ownership.** `fnc_zone_flag_logistics` sets the factory gate (`R3F_LOG_CF_disabled`) with
+the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds stay
+and OPFOR can fight from them. When BLUFOR take the zone back, the builds count against the flag again.
+
+**The credits are derived, not stored.** A flag's credits are the allowance of the zone's tier
+(`DUWS_zoneBuildPoints`, `server_var_init.sqf`) minus the R3F cost of each build that stands or is stowed.
+`DUWS_fnc_zoneBuildCredits` recomputes them on a build, a clear, a tier purchase, a capture and a zone wake. A
+clear, a sale or a destroyed build therefore frees its full cost at the next recompute.
+
+| Tier | 0 | I | II | III | IV |
+|---|---|---|---|---|---|
+| Allowance (R3F credits) | 0 | 500 | 750 | 1000 | 1250 |
+
+Tier 0 has no allowance, and a capture resets the tier to 0, so the player must buy a garrison tier before
+they can fortify a zone.
+
+**A build belongs to the flag that made it.** R3F reports each build to `DUWS_fnc_buildRegister`, which files it
+under the flag's own key, `<zoneKey>_builds`. That key is separate from the zone's key, so a clear removes the
+builds and leaves the prefab. The zone's wake and sleep hooks deploy and stow the key with the zone
+(`fnc_zone_stream_init.sqf`). The sleep does not stow it while a build is carried or loaded in a vehicle,
+because a stow deletes the object from R3F's hands.
+
+**A build must stay within 100 m of the zone centre.** R3F reports each carried object when it settles after a
+drop (`deplacer.sqf`). If a zone's build settles more than 100 m from the zone centre, the server moves it back
+to its last good position and tells the carrier. A new build and a build unloaded from a vehicle both start as a
+carry, so the one check covers creation, unloading and moving.
+
+**Clear Fortifications removes every build of that flag at once**, and the recompute refunds their cost in full.
+The action shows only while BLUFOR hold the zone and the flag has builds. It leaves a build that a player carries
+or a vehicle holds.
+
+**A sale refunds 100%.** `R3F_LOG_CFG_CF_sell_back_bargain_rate` is 1 for every factory
+(`config_creation_factory.sqf`), and R3F still reduces the refund by the object's damage. A stow rebuilds each
+build as a new object, so the zone wake sets R3F's factory marker (`R3F_LOG_CF_depuis_usine`) again. Without the
+marker, a redeployed build cannot be sold.
+
+**The builds are saved; the credits are not.** The snapshot key `zoneBuilds` holds each zone's builds as a class,
+a world position and an orientation
+([`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#world-and-placement)). The restore
+derives the credits again from the restored tier and builds.
+
 ## Civilian town selection
 
 Selects real map towns near the fighting and gives each a persistent civilian population with map

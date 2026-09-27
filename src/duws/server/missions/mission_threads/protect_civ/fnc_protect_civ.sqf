@@ -30,11 +30,9 @@ private _tn            = format ["protectciv_%1_%2", round (_MissionPos select 0
 private _skipVar       = format ["%1_skip", _tn];
 private _skipAssaultVar = format ["%1_skipAssault", _tn];   // DEBUG: end the hold early as a win
 private _prepActiveVar = format ["%1_prepActive", _tn];
-private _liveVar       = format ["%1_live", _tn];        // spawn -> teardown
 private _defendVar     = format ["%1_defend", _tn];      // defend phase only
 missionNamespace setVariable [_skipAssaultVar, false];
 missionNamespace setVariable [_skipVar, false];
-missionNamespace setVariable [_liveVar, true];
 missionNamespace setVariable [_defendVar, false];
 missionNamespace setVariable [_prepActiveVar, true, true];
 
@@ -82,6 +80,7 @@ private _crate = createVehicle ["Box_NATO_Support_F", _cratePos, [], 0, "CAN_COL
 _crate setPosATL _cratePos;
 DUWS_pc_crate = _crate; publicVariable "DUWS_pc_crate";
 [_crate, "mission_protect_civ"] call fnc_duws_keep;
+_crate setVariable ["DUWS_buildKey", "mission_protect_civ"];
 
 // Reposition the build point with R3F's own carry routine (the crate is crewless, so R3F accepts it).
 [_crate, [localize "STR_DUWS_T_pc_move_crate",
@@ -102,19 +101,6 @@ private _crateJip = format ["DUWS_pcFactory_%1", netId _crate];
     params ["_crate", "_crateJip"];
     waitUntil { sleep 5; isNull _crate || !alive _crate };
     remoteExec ["", _crateJip];
-};
-
-// Enrol only this crate's built objects under the mission key: R3F flags factory-made objects
-// (R3F_LOG_CF_depuis_usine) beside the factory, so a near-crate poll excludes a builder vehicle's props.
-[_crate, _liveVar] spawn {
-    params ["_crate", "_liveVar"];
-    private _seen = [];
-    while { (missionNamespace getVariable [_liveVar, false]) && { !isNull _crate } } do {
-        uiSleep 2;
-        {
-            if !(_x in _seen) then { _seen pushBack _x; [_x, "mission_protect_civ"] call fnc_duws_keep };
-        } forEach ((_crate nearObjects 60) select { (_x getVariable ["R3F_LOG_CF_depuis_usine", false]) && { _x != _crate } });
-    };
 };
 
 private _marker = [_MissionPos, RADIUS, _tn, localize "STR_DUWS_T_protectciv", _mission_name, "defend",
@@ -148,7 +134,6 @@ waitUntil {
 
 if ([_deadline] call fnc_time_expired && !(call _fnArrived) && !(missionNamespace getVariable [_skipVar, false])) exitWith {
     // Never engaged -> shared timeout notice, no death asserted.
-    missionNamespace setVariable [_liveVar, false];
     missionNamespace setVariable [_prepActiveVar, false, true];
     DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
     DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";
@@ -377,7 +362,6 @@ private _defendEnd = time + DEFEND_TIME;
 waitUntil { sleep 1; !alive _inf || { time >= _defendEnd } || { missionNamespace getVariable [_skipAssaultVar, false] } };
 
 missionNamespace setVariable [_defendVar, false];
-missionNamespace setVariable [_liveVar, false];
 if (!isNull DUWS_pc_crate) then { DUWS_pc_crate setVariable ["R3F_LOG_CF_credits", 0, true] };   // halt building
 DUWS_float_informant = objNull; publicVariable "DUWS_float_informant";
 DUWS_pc_crate = objNull; publicVariable "DUWS_pc_crate";

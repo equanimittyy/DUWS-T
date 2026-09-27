@@ -552,6 +552,8 @@ fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc
 fnc_capture_zones_task = compile preprocessFileLineNumbers "duws\server\misc\fnc_capture_zones_task.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_zone_flag_logistics = compile preprocessFileLineNumbers "duws\server\misc\fnc_zone_flag_logistics.sqf";
+// Not broadcast: R3F's drop report and the flag's Clear action remoteExec to the server.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_build.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.

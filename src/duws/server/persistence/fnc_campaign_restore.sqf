@@ -329,10 +329,19 @@ DUWS_fnc_restoreWorld = {
     publicVariable "WARCOM_zones_controled_by_BLUFOR";
     amount_zones_captured = count _held; publicVariable "amount_zones_captured";
     zoneundercontrolblu = count _held; publicVariable "zoneundercontrolblu";
+    { missionNamespace setVariable [format ["DUWS_zoneTier_%1", _x select 0], _x select 1] } forEach (_r getOrDefault ["zoneTiers", []]);
+    // Ahead of the repaint, whose flag gate derives each factory's credits from the tier and the builds.
+    {
+        _x params ["_zoneKey", "_rows"];
+        DUWS_stowed set [format ["%1_builds", _zoneKey], _rows apply {
+            _x params ["_class", "_pos", "_dirUp"];
+            [_class, _pos, _dirUp, true, true, [], 0]
+        }];
+        if !(_zoneKey in DUWS_stowed) then { [_zoneKey] call DUWS_fnc_zoneBuildWake };
+    } forEach (_r getOrDefault ["zoneBuilds", []]);
     { [_x] call DUWS_fnc_restorePaintHeld } forEach _held;
     DUWS_zone_first_captured = +(_r getOrDefault ["firstCaptured", []]);
 
-    { missionNamespace setVariable [format ["DUWS_zoneTier_%1", _x select 0], _x select 1] } forEach (_r getOrDefault ["zoneTiers", []]);
     // A site the save held no ledger for had forgotten it, as a capture does; fnc_createZone has since stamped a
     // fresh OPFOR one over every zone, which would hand a held zone the enemy's garrison.
     if ("garrisons" in _r) then {

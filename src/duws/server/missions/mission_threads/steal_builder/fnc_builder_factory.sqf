@@ -25,8 +25,20 @@ DUWS_fnc_builderEnlist = {
     [_bld, "captured_builder"] call fnc_duws_keep;
 };
 
-// R3F's creer_objet calls this on every factory build. A mission crate's builds are that mission's and go with it.
+// R3F's creer_objet calls this on every factory build. Any other factory names the composition its builds join in
+// DUWS_buildKey, so a build is its factory's wherever it is carried.
 DUWS_fnc_buildRegister = {
     params ["_obj", "_factory"];
-    if (_factory getVariable ["DUWS_campaignFactory", false]) then { DUWS_builds pushBack _obj };
+    if (_factory getVariable ["DUWS_campaignFactory", false]) exitWith { DUWS_builds pushBack _obj };
+    private _key = _factory getVariable ["DUWS_buildKey", ""];
+    if (_key == "") exitWith {};
+    // A build landing after its mission released the key would revive it, and nothing would release it again.
+    if (_key in DUWS_retired) exitWith { [_obj] call fnc_duws_disposeAfter };
+    [_obj, _key] call fnc_duws_keep;
+    private _zoneKey = _factory getVariable ["DUWS_zoneKey", ""];
+    if (_zoneKey != "") then {
+        _obj setVariable ["DUWS_buildZone", _zoneKey];
+        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
+        [_factory] call DUWS_fnc_zoneBuildCredits;
+    };
 };
