@@ -143,8 +143,9 @@ sampled destination, inside the unscheduled pass: eight in the stress tests, now
 
 **Fix.** A half-cell step moves the line at most one cell, so the line's rows run unbroken and its cells in each row
 form one span. `DUWS_fnc_opcom_patrolCells` keeps one span per line row and builds the k-band as one span per band
-row, with no dedupe; the cell set is the same. `DUWS_fnc_opcom_sweepWeights` takes need × staleness for every cell
-once a pick through `tickCached`, so `DUWS_fnc_opcom_patrolValue` reads one array index per swept cell.
+row, with no dedupe; the cell set is the same. `DUWS_fnc_opcom_sweepWeights` holds need × staleness per cell for the
+pick through `tickCached`: `DUWS_fnc_opcom_patrolValue` weighs a cell the first time a line crosses it and reads the
+stored figure after that, so a pick weighs only the cells its lines cross, not the whole grid.
 
 ### 5. The grid A* kept its frontier in a flat list
 
