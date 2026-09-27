@@ -1220,8 +1220,8 @@
                 <English>A faction it uses is not loaded</English>
             </Key>
             <Key ID="STR_DUWS_T_LOAD_DROPPED">
-                <Original>Campaign loaded. Not restored: %1 enemy units, %2 vehicles, %3 captured gear types.</Original>
-                <English>Campaign loaded. Not restored: %1 enemy units, %2 vehicles, %3 captured gear types.</English>
+                <Original>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types</Original>
+                <English>Campaign loaded.\n\nNot restored:\n%1 enemy units\n%2 vehicles\n%3 captured gear types</English>
             </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
