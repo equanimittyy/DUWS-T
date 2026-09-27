@@ -1017,9 +1017,9 @@ is the reconciliation pass's to fold back ([§What live state costs](#what-live-
 
 Three counters reset with them and are meant to. `econ_tick` numbers the 30-minute payout and only
 the server's payout caps read it. `WARCOM_opfor_lastIncome` holds OPFOR's last payout, which OPCOM
-divides by the period to read an income rate, so a restored campaign sets no savings goal until its
-first payout lands — what the commander does at the start of every campaign anyway
-([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_lastMissionStartDate`
+divides by the period and adds to its drip to read an income rate, so a restored campaign reads
+the drip alone until its first payout lands — what the commander does at the start of every campaign
+anyway ([`opcom_plan.md`](opcom/opcom_plan.md#gate-and-the-savings-goal)). `DUWS_lastMissionStartDate`
 stamps the last side mission and gates the next one for three hours
 (`shared/functions/fnc_mission_gate_left.sqf:15`), and it resets with the mission it was stamped for:
 a restore drops live missions, so the wait goes with them rather than being served for a mission the

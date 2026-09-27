@@ -438,9 +438,9 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   tick; an action that outscores it later, such as a QRF, still commits. Past the horizon it drops, and the pick
   runs over the affordable top `OPCOM_PICK_TOP`. Without the goal, cheap actions spend every refill and a better,
   dearer one never becomes affordable. The income rate is OPFOR's last economy payout ÷ the economy period
-  (`DUWS_econ_period`, 30 min), so no goal stands before the first payout. The horizon starts at one economy
-  period, 360 ticks, since income lands in lumps and a shorter horizon would rarely hold a payout. Random mode
-  still draws only what the wallet covers.
+  (`DUWS_econ_period`, 30 min), plus the drip (1 AP per `OPCOM_AP_DRIP_TICKS` ticks), so a goal can stand before
+  the first payout. The horizon starts at one economy period, 360 ticks, since income lands in lumps and a shorter
+  horizon would rarely hold a payout. Random mode still draws only what the wallet covers.
 - **Bank** is a candidate, not a policy: `OPCOM_BANK_SCORE`, a flat score below the break-even of an action that
   returns exactly what it costs, so it wins when nothing on the shortlist pays for itself, or when a savings goal
   stands. Its archetype weight is what sets how thrifty the commander is (7.1).
@@ -950,7 +950,8 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
   unit, `transportable` → ride a ferry across water; `noncombat` keeps a row out of a zone's reserve pool
   (regardless of armament — the boat is armed). A row may carry several.
 
-Prices, first-pass defaults set against OPFOR's income of roughly 40–80 AP per 30 min (`fnc_zonesundercontrol.sqf`):
+Prices, first-pass defaults set against OPFOR's zone and town income of roughly 40–80 AP per 30 min
+(`fnc_zonesundercontrol.sqf`), before the drip (`OPCOM_AP_DRIP_TICKS`, up to 72 AP per 30 min):
 
 | Purchase | Price |
 |---|---|
