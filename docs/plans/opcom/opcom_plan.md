@@ -198,7 +198,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
 | Arty saturate | each fresh belief sighting in range of an owned battery that is not firing or held by a creep and has a gun off cooldown |
-| Arty creeping | each attack, assault or flank, in buildup or execution, with no creep yet, whose target an owned battery reaches that is not firing or held by a creep and has a gun off cooldown |
+| Arty creeping | each attack, assault or flank, in buildup with no creep yet, whose target an owned battery reaches that is not firing or held by a creep and has a gun off cooldown |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
 ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). An attack offers a package of them instead
@@ -820,7 +820,8 @@ time, and no-retreat turns that into defeat in detail.
 
 `arty_creeping` cannot stand alone: a creep is a barrage walked ahead of someone, so it needs an attack to walk it
 for, an assault or a flank alike, never a QRF. A creep is therefore a field on the attack record rather than a record
-of its own. The row offers each attack in buildup or execution with no creep yet, and its rounds walk ahead of that
+of its own. The row offers each attack in buildup with no creep yet, so an offensive gets one at most: the creep's
+slot empties when it fires at launch. Its rounds walk ahead of that
 attack's advance (`DUWS_fnc_opcom_creepTargets`, `appraisal/fnc_opcom_fire.sqf`): an `OPCOM_ARTY_CREEP_WIDTH` ×
 `OPCOM_ARTY_CREEP_LENGTH` box (150 × 200 m) walked forward through the objective along the wave's approach. The creep
 holds its battery from commit, so no Saturate finds its guns mid-mission, and fires once the attack launches and the
