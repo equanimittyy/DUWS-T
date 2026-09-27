@@ -218,7 +218,7 @@ DUWS_fnc_opcom_patrolSweep = {
     private _zones = call DUWS_fnc_opcom_zonesOpen;
     private _pool = +DUWS_opcom_needCells;
     private _dests = [];
-    for "_i" from 1 to (OPCOM_SITE_SAMPLES min count _pool) do {
+    for "_i" from 1 to (OPCOM_PATROL_SAMPLES min count _pool) do {
         _dests pushBack ([_pool deleteAt (floor random count _pool)] call DUWS_fnc_opcom_c2w);
     };
     private _out = [];

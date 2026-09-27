@@ -793,6 +793,8 @@ OPCOM_ARTY_REACH = 15000;
 OPCOM_GUN_STANDOFF_K = 1;
 // Band cells each build type weighs per pick, the best by its own Value taken.
 OPCOM_SITE_SAMPLES = 8;
+// Need cells a Patrol weighs per pick. Each sweeps a line per candidate unit, the pick's costliest row.
+OPCOM_PATROL_SAMPLES = 3;
 
 // OPCOM appraisal (Phase 4C). Every figure below is a stand-in to be tuned in play, not a balance decision.
 
