@@ -43,26 +43,6 @@ private _build = {
     _bld1
 };
 
-// On win: register the recovered vehicle as an R3F mobile factory + BLD-V marker -- both client-local, so this
-// runs everywhere and persists as a JIP order for late joiners. Keyed by netId and carrying the vehicle itself
-// (not the reused BLD1 global) so a later win can't clobber it; dropped on the vehicle's death so it never leaks.
-private _onWin = {
-    private _bld = BLD1;
-    if (isNull _bld) exitWith {};
-    private _jipId = format ["DUWS_bldFactory_%1", netId _bld];
-    [_bld, {
-        params ["_bld"];
-        if (!hasInterface || isNull _bld) exitWith {};
-        [_bld, -1, west, "LIGHT"] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
-        [_bld, "mil_triangle", "ColorBlue", "2", "2", "BLD-V"] call kndr_assignMarker;
-    }] remoteExec ["call", 0, _jipId];
-    [_bld, _jipId] spawn {
-        params ["_bld", "_jipId"];
-        waitUntil { sleep 5; isNull _bld || !alive _bld };
-        remoteExec ["", _jipId];
-    };
-};
-
 // Win: the recovered builder vehicle reaches BLUFOR HQ intact. Early-lose: it is destroyed (the _done
 // test requires it alive, so win and loss stay mutually exclusive).
 private _done = { alive (_this) && ((_this) distance PosOfBLUHQ) < 100 };
@@ -99,12 +79,7 @@ if (!(_handles call _done) && [_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _taskId, "FAILED", _targetpos, _radius, [_marker], [], false, "mission_steal_builder"] call fnc_mission_finish;
 };
 
-[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"], true, "mission_steal_builder", false, false, _onWin, _handles] call fnc_mission_finish;
+[_mission_name, _taskId, "SUCCEEDED", _targetpos, _radius, [_marker], ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_builderwin"], true, "mission_steal_builder", false, false] call fnc_mission_finish;
 
-// A captured builder is a standing player asset, so re-file it persistent -- but after finish, whose
-// release of mission_steal_builder would otherwise strip the keep along with the dressing. Killed
-// retires the key so the record does not outlive the wreck.
-if (alive BLD1) then {
-    BLD1 addEventHandler ["Killed", { ["captured_builder"] call fnc_duws_release }];
-    [BLD1, "captured_builder"] call fnc_duws_keep;
-};
+// After finish, whose release of mission_steal_builder would otherwise strip the builder's keep along with the dressing.
+if (alive BLD1) then { [BLD1] call DUWS_fnc_builderEnlist };

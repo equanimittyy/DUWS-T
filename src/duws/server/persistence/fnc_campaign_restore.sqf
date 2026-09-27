@@ -389,16 +389,23 @@ DUWS_fnc_restoreWorld = {
 DUWS_fnc_restoreBases = {
     { _x params ["_pos", "_name"]; [_pos, 0, "", _name] call fnc_fob_server } forEach (DUWS_restore getOrDefault ["fobs", []]);
 
-    (DUWS_restore getOrDefault ["mhq", [[], false, [], 0, 0]]) params ["_spec", "_deployed", "_pos", "_dir", "_lockout"];
-    if (_lockout > 0) then { MHQ_lockout_until = time + _lockout; publicVariable "MHQ_lockout_until" };
-    if (_spec isNotEqualTo []) then {
+    private _fnc_spawnSpec = {
+        params ["_spec", "_pos", "_dir"];
         if !(isClass (configFile >> "CfgVehicles" >> (_spec select 0))) exitWith {
             DUWS_restoreDropped set ["vehicles", (DUWS_restoreDropped get "vehicles") + 1];
+            objNull
         };
         private _veh = createVehicle [_spec select 0, _pos, [], 0, "NONE"];
         _veh setDir _dir;
         _veh setPosATL _pos;
         [_veh, _spec] call DUWS_fnc_vehSpecApply;
+        _veh
+    };
+
+    (DUWS_restore getOrDefault ["mhq", [[], false, [], 0, 0]]) params ["_spec", "_deployed", "_pos", "_dir", "_lockout"];
+    if (_lockout > 0) then { MHQ_lockout_until = time + _lockout; publicVariable "MHQ_lockout_until" };
+    private _veh = if (_spec isEqualTo []) then { objNull } else { [_spec, _pos, _dir] call _fnc_spawnSpec };
+    if (!isNull _veh) then {
         _veh setVehicleVarName "MHQ1";
         MHQ1 = _veh;
         publicVariable "MHQ1";
@@ -407,6 +414,26 @@ DUWS_fnc_restoreBases = {
         MHQ1 forceFlagTexture "\A3\Data_F\Flags\flag_blue_CO.paa";
         if (_deployed) then { [] call fnc_MHQ_deploy };
     };
+
+    (DUWS_restore getOrDefault ["builder", []]) params [["_bSpec", []], ["_bPos", []], ["_bDir", 0]];
+    private _bld = if (_bSpec isEqualTo []) then { objNull } else { [_bSpec, _bPos, _bDir] call _fnc_spawnSpec };
+    if (!isNull _bld) then {
+        _bld setVehicleVarName "BLD1";
+        BLD1 = _bld;
+        publicVariable "BLD1";
+        [_bld] call DUWS_fnc_builderEnlist;
+    };
+    // The factory flag is what lets a player sell a build back.
+    {
+        _x params ["_class", "_posASL", "_vDir", "_vUp"];
+        if (isClass (configFile >> "CfgVehicles" >> _class)) then {
+            private _obj = createVehicle [_class, ASLToAGL _posASL, [], 0, "CAN_COLLIDE"];
+            _obj setPosASL _posASL;
+            _obj setVectorDirAndUp [_vDir, _vUp];
+            _obj setVariable ["R3F_LOG_CF_depuis_usine", true, true];
+            DUWS_builds pushBack _obj;
+        };
+    } forEach (DUWS_restore getOrDefault ["builds", []]);
     ["bases"] call DUWS_fnc_restoreStepDone;
 };
 

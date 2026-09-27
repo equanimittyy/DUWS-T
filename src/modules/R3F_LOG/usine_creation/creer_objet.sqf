@@ -93,6 +93,8 @@ else
 						
 						// Mémoriser que cet objet a été créé depuis une usine
 						_objet setVariable ["R3F_LOG_CF_depuis_usine", true, true];
+						// DUWS: the campaign save keeps what a builder vehicle makes (fnc_builder_factory.sqf).
+						[_objet, _usine] remoteExec ["DUWS_fnc_buildRegister", 2];
 						
 						[_objet, player] call R3F_LOG_FNCT_definir_proprietaire_verrou;
 						

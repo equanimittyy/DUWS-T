@@ -662,6 +662,7 @@ fnc_protect_civ_skip = compile preprocessFileLineNumbers "duws\server\missions\m
 // Broadcast: the informant's DEBUG: Skip Assault action remoteExecs this from clients.
 fnc_protect_civ_skip_assault = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\protect_civ\fnc_protect_civ_skip_assault.sqf";publicVariable "fnc_protect_civ_skip_assault";
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_builder_factory.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
 fnc_deny_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\deny_armor\fnc_deny_armor_mission.sqf";
 fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_mission.sqf";

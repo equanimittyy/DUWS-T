@@ -146,6 +146,15 @@ DUWS_fnc_campaignSnapshot = {
     } else {
         [[], false, [], 0, _lockout]
     }];
+    _s set ["builder", if (!isNil "BLD1" && {alive BLD1} && {BLD1 getVariable ["DUWS_campaignFactory", false]}) then {
+        [[BLD1] call DUWS_fnc_vehSpecCapture, getPosATL BLD1, getDir BLD1]
+    } else {
+        []
+    }];
+    // An attached build rides a player's carry or a vehicle's cargo, and neither is saved.
+    _s set ["builds", (DUWS_builds select { alive _x && {isNull attachedTo _x} }) apply {
+        [typeOf _x, getPosASL _x, vectorDir _x, vectorUp _x]
+    }];
     _s set ["capturedPool", DUWS_capturedPool];
     // A spent-down class leaves the pool, so what was seeded is kept to tell it from a class a mod added since.
     if (DUWS_arsenalLimited) then { _s set ["seeded", missionNamespace getVariable ["DUWS_friendlyArsenal", []]] };
