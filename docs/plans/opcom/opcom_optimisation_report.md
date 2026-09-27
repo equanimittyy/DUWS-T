@@ -41,9 +41,10 @@ Three things decide how to read a figure.
   At the 19 fps the play-test ran at, that is under 60 ms of script time per second for all of them, so a stage that
   needs 50 ms of CPU can read as a second of wall time. Uniform inflation across stages is the contention signature:
   on the tick that read `contested=209 grid=211 taskstep=211`, a need-field rebuild was running in its own thread.
-- **The pick's targets pass is unscheduled**, inside `isNil { }` (`warcom/opcom/appraisal/fnc_opcom_pick.sqf:31-43`).
-  Its wall time is frame time: a 300 ms pass is a 300 ms frame. The PERF line's minimum frame rate dropped to 5-7 fps
-  in four of the play minutes.
+- **The pick's targets pass was unscheduled**, in one `isNil { }`. Its wall time was frame time: a 300 ms pass was a
+  300 ms frame. The PERF line's minimum frame rate dropped to 5-7 fps in four of the play minutes. The pass now runs
+  each row unscheduled, in slices of about 10 ms with a frame between (`warcom/opcom/appraisal/fnc_opcom_pick.sqf`), so
+  one row's ms in `rows(…)` is frame time and the `targets` total is not.
 - **The debug overlay was open**, so `fnc_debug_opcom_grid` gathered all 2852 box cells and sent them to the client
   every 5-6 s for the whole session. That is a contention source the shipped mission does not carry.
 
@@ -132,16 +133,18 @@ and keeps the exact call.
 
 ### 4. A patrol's swept cells are gathered with `pushBackUnique`
 
-`DUWS_fnc_opcom_patrolCells` (`value/fnc_opcom_patrol.sqf:21-35`) samples the straight line every 250 m, then for each
-line cell inserts its k-block into the result with `pushBackUnique`. Each insert scans the whole result, so the cost
-is quadratic in the swept cell count: a 10 km line at k 3 inserts about a thousand cells into a set of a few hundred.
-`DUWS_fnc_opcom_patrolSweep` (`fnc_opcom_commit.sqf:214-248`) runs it once per distinct start cell and reach for each of
-eight destinations, inside the unscheduled pass. It is suspected as the largest single term in that pass; the
-`patrol` row's figure confirms or clears it.
+`DUWS_fnc_opcom_patrolCells` (`value/fnc_opcom_patrol.sqf`) sampled the straight line every 250 m, then for each line
+cell inserted its k-block into the result with `pushBackUnique`. Each insert scans the whole result, so the cost was
+quadratic in the swept cell count: a 10 km line at k 3 inserts about a thousand cells into a set of a few hundred.
+`DUWS_fnc_opcom_patrolValue` then called `DUWS_fnc_opcom_needAt` and `DUWS_fnc_opcom_stalenessAt` for every swept
+cell. `DUWS_fnc_opcom_patrolSweep` (`fnc_opcom_commit.sqf`) runs it once per distinct start cell and reach for each of
+eight destinations, inside the unscheduled pass. A later stress test confirmed it as the largest row: `patrol` read
+50 ms early in the session and 350 ms after an hour, of a 150-550 ms targets pass.
 
-**Fix.** Append each k-block to the result, then remove the duplicates once with `_cells arrayIntersect _cells`, a
-native call. A hashMap is not a sure gain: its insert is still one interpreted command per cell, where the scan in
-`pushBackUnique` is native. The line sampling and the k-block stay as they are.
+**Fix.** A half-cell step moves the line at most one cell, so the line's rows run unbroken and its cells in each row
+form one span. `DUWS_fnc_opcom_patrolCells` keeps one span per line row and builds the k-band as one span per band
+row, with no dedupe; the cell set is the same. `DUWS_fnc_opcom_sweepWeights` takes need × staleness for every cell
+once a pick through `tickCached`, so `DUWS_fnc_opcom_patrolValue` reads one array index per swept cell.
 
 ### 5. The grid A* kept its frontier in a flat list
 

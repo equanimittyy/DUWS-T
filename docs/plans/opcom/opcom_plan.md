@@ -79,8 +79,9 @@ Every weight, Value, price and constant here is a first pass and changes as it i
 
 On each pick, enumerate candidate `[action, target]` pairs, gate them cheaply, weight the survivors, shortlist the
 best, and pick one by weighted random (`selectRandomWeighted`, the `fnc_createzone.sqf:117` idiom). No search or
-lookahead. The pick pass runs inside `isNil { }` (unscheduled, no `sleep`) and enumerates every row with no deadline: a
-deadline would hide the cost, not remove it, and a pass cut short biases the draw toward the rows enumerated first.
+lookahead. The pick pass runs each row inside `isNil { }` (unscheduled, no `sleep`) and enumerates every row with no
+deadline: a deadline would hide the cost, not remove it, and a pass cut short biases the draw toward the rows enumerated
+first. The rows run in slices of about 10 ms with a frame between, so the longest frame the pass holds is about one row.
 The pick executes after it in scheduled space, because an order plans a route and the router may yield. One pick a
 tick by default (1 pick per tick); the difficulty setting changes the rate ([§OPCOM debug page and overlay](#opcom-debug-page-and-overlay)). The action list (`fnc_opcom_actions`) holds each
 action's id, targets, gate, price, execute, weight key, Value and Cost.
