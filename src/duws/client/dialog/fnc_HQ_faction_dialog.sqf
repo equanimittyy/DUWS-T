@@ -26,12 +26,12 @@ _backdropTop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdropTop ctrlCommit 0;
 
 _backdrop = _display ctrlCreate ["RscText", 1013];
-_backdrop ctrlSetPosition [0.075, 0.276, 0.85, 0.342];
+_backdrop ctrlSetPosition [0.075, 0.368, 0.85, 0.342];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.566];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.658];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -46,12 +46,12 @@ _HQtext ctrlCommit 0;
 // The last of the three questions, so the two sit under the mode row. One row: same width, same
 // baseline, split down the middle, each in the frame that names its side.
 _frameBLU = _display ctrlCreate ["RscFrame", 1010];
-_frameBLU ctrlSetPosition [0.1, 0.500, 0.3925, 0.1];
+_frameBLU ctrlSetPosition [0.1, 0.592, 0.3925, 0.1];
 _frameBLU ctrlSetText localize "STR_DUWS_T_rqdziaei";
 _frameBLU ctrlCommit 0;
 
 _dropdownBLU = _display ctrlCreate ["RscCombo", 1001];
-_dropdownBLU ctrlSetPosition [0.1125, 0.540, 0.3675, 0.04];
+_dropdownBLU ctrlSetPosition [0.1125, 0.632, 0.3675, 0.04];
 _dropdownBLU ctrlCommit 0;
 
 {
@@ -68,12 +68,12 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 }];
 
 _frameOPF = _display ctrlCreate ["RscFrame", 1011];
-_frameOPF ctrlSetPosition [0.5075, 0.500, 0.3925, 0.1];
+_frameOPF ctrlSetPosition [0.5075, 0.592, 0.3925, 0.1];
 _frameOPF ctrlSetText localize "STR_DUWS_T_1m1bl9nd";
 _frameOPF ctrlCommit 0;
 
 _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
-_dropdownOPF ctrlSetPosition [0.52, 0.540, 0.3675, 0.04];
+_dropdownOPF ctrlSetPosition [0.52, 0.632, 0.3675, 0.04];
 _dropdownOPF ctrlCommit 0;
 
 // Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place. The
@@ -125,18 +125,18 @@ if (isNil "duws_gamemode") then { duws_gamemode = "duws"; };
 // faction row keeps the order of the screen readable: the mode is answered first and narrows what
 // the factions may be.
 _frameMode = _display ctrlCreate ["RscFrame", 1005];
-_frameMode ctrlSetPosition [0.1, 0.348, 0.8, 0.14];
+_frameMode ctrlSetPosition [0.1, 0.440, 0.8, 0.14];
 _frameMode ctrlSetText localize "STR_DUWS_T_gamemode";
 _frameMode ctrlCommit 0;
 
 _dropdownMode = _display ctrlCreate ["RscCombo", 1004];
-_dropdownMode ctrlSetPosition [0.1125, 0.384, 0.775, 0.04];
+_dropdownMode ctrlSetPosition [0.1125, 0.476, 0.775, 0.04];
 _dropdownMode ctrlCommit 0;
 
 // Structured for the reason the advice line is: the longest mode description is 145 characters and
 // wants two lines of the box rather than one line with its end cut off.
 _modeDesc = _display ctrlCreate ["RscStructuredText", 1006];
-_modeDesc ctrlSetPosition [0.1125, 0.432, 0.775, 0.052];
+_modeDesc ctrlSetPosition [0.1125, 0.524, 0.775, 0.052];
 _modeDesc ctrlCommit 0;
 
 // Cleared before the dialog opens, because a click is live the moment the button exists.
@@ -147,7 +147,7 @@ duws_faction_screen_next = false;
 // Created last of all so both draw over the panel behind them, ctrlCreate order being draw order.
 
 _rule = _display ctrlCreate ["RscText", 1009];
-_rule ctrlSetPosition [0.1, 0.334, 0.8, 0.0025];
+_rule ctrlSetPosition [0.1, 0.426, 0.8, 0.0025];
 _rule ctrlSetBackgroundColor [1, 1, 1, 0.25];
 _rule ctrlCommit 0;
 
@@ -155,7 +155,7 @@ _rule ctrlCommit 0;
 // ctrlSetStyle, so a plain control cannot be centred after the fact. The alignment is in the markup
 // and not left to the class, for the reason the pin below states.
 _placeText = _display ctrlCreate ["RscStructuredText", 1012];
-_placeText ctrlSetPosition [0.1, 0.288, 0.8, 0.034];
+_placeText ctrlSetPosition [0.1, 0.380, 0.8, 0.034];
 _placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'>%1</t>",
 	localize "STR_DUWS_T_faction_screen_next"];
 _placeText ctrlCommit 0;

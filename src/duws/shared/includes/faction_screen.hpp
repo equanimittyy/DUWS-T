@@ -34,7 +34,7 @@ class startup_faction_next_dialog
 			x = 3 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.3 * GUI_GRID_H + GUI_GRID_Y;
 			w = 34 * GUI_GRID_W;
-			h = 2.6 * GUI_GRID_H;
+			h = 4.9 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
 		class faction_next_button: RscButton
@@ -72,9 +72,9 @@ class startup_faction_next_dialog
 		{
 			idc = 1602;
 			text = "$STR_DUWS_T_faction_screen_back";
-			x = 27.75 * GUI_GRID_W + GUI_GRID_X;
-			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
-			w = 8.5 * GUI_GRID_W;
+			x = 13 * GUI_GRID_W + GUI_GRID_X;
+			y = 6.9 * GUI_GRID_H + GUI_GRID_Y;
+			w = 14 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 0.03;
 			colorBackground[] = {0.35, 0.35, 0.35, 0.5};
