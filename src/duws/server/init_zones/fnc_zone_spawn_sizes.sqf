@@ -18,8 +18,8 @@
 // Radius does not scale this: a zone is its tier, so scaling by radius would put two zones the map
 // reports at the same tier on the ground at different strengths for no reason the player can read.
 //
-// Garrison (dug-in) slots climb from none at tier I to six at tier IV -- balance choice, so the
-// lightest zone stays all mobile and only the heavier ones dig in.
+// Tier I has no garrison (dug-in) slots -- balance choice, so the lightest zone stays all mobile and
+// only the heavier ones dig in.
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
     ["widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
