@@ -416,6 +416,7 @@ must not have a snapshot put the old list back.
 |---|---|---|
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
+| Builds | outcome | per object that the captured builder vehicle made: its class, position and orientation |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, names, radii and populations |
 | Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
@@ -449,6 +450,16 @@ player's dialog and the destruction watcher, funnel through `fnc_fob_deregister`
 `fnc_fob_server` per entry rather than rebuilding what it places. Nothing player-scoped rides along:
 the owner passed at build time is never read (`shared/functions/fnc_FOBactions.sqf:8`), and a FOB's
 garrison and its defences are live state the site streamer regenerates.
+
+**The builder vehicle's builds are a registry of objects, read to data at the write.** R3F's
+`creer_objet` reports each factory build to `DUWS_fnc_buildRegister`, which files it in `DUWS_builds`
+only when the factory is a captured builder vehicle
+(`server/missions/mission_threads/steal_builder/fnc_builder_factory.sqf`). The registry holds the
+object and not a `[class, position, orientation]` row, because R3F lets a player carry, load or tow a
+build at any time after it is made. The write reads each standing build to its class, ASL position
+and direction and up vectors. A build that is attached at the write, to a player's carry or to a
+vehicle's cargo, tow or sling, is not saved. Restore creates each build where it stood and sets the
+R3F factory flag again, so a player can still sell it back to a factory.
 
 **A zone's composition is stored beside its name.** `fnc_createZone` rolls the prefab that it builds,
 so a replay without the kind would stand a field hospital where a comm station stood. The kind goes
@@ -749,6 +760,7 @@ stored vehicle is not an object until a player retrieves it.
 |---|---|---|
 | Garage | outcome | `DUWS_garage_stored`: per vehicle its class, textures, pylon loadout, per-hitpoint and overall damage, fuel, the four cargo lists and one ammo fraction |
 | MHQ | outcome | the designated vehicle's spec, whether it was deployed, and where |
+| Builder | outcome | the captured builder vehicle's spec and where it stands |
 
 **A vehicle parked in the world is not saved; a garaged one is.** That is the trade, and it is the
 right one. The capture and apply pair is already written and is exercised every time a player uses the
@@ -768,6 +780,14 @@ nothing else carries it. Store its spec beside its deployed state and position. 
 re-applies the designation and — if it was deployed — replays `fnc_MHQ_deploy`, which rebuilds the
 tent, the ammo box and the respawn point rather than persisting any of them.
 
+**The captured builder vehicle needs its own record for the same reason.** Its factory role is a
+client-local R3F init, not a property of the vehicle, so the garage cannot carry it. The write saves
+`BLD1` only after the steal_builder win has handed it over through `DUWS_fnc_builderEnlist`, which
+marks it, so a builder vehicle still waiting at an active mission is not saved. Restore spawns it,
+names it `BLD1` again so the mission refuses a second one, and calls `DUWS_fnc_builderEnlist`. A
+garaged builder vehicle comes back from the garage as a plain truck, because the retrieve path does
+not call that function.
+
 **Crews are never stored, and a retrieved vehicle is a new object.** Anything attached to the old one
 goes: R3F-carried cargo, player-placed objects riding on it, and any per-object variable a subsystem
 set without a registry behind it. Zones and FOBs pay the same price.
@@ -778,9 +798,9 @@ Planned features are cheap to persist if they are built as registries and expens
 not. The contract is the same for each: **the builder takes data and the registry holds that data.**
 Persistence is then a replay, and there is nothing extra to write.
 
-**Player-built fortifications and BLUFOR hardpoints.** Build them through one function taking
-`[type, position, direction]` and keep a parallel registry of exactly those tuples, on the model of
-the hardpoint arrays. Built the other way — the player places an object and persistence serialises
+**BLUFOR hardpoints, and fortifications that no R3F factory makes.** Build them through one function
+taking `[type, position, direction]` and keep a parallel registry of exactly those tuples, on the
+model of the hardpoint arrays. Built the other way — the player places an object and persistence serialises
 the object — restore has to reverse-engineer what was built from what is standing, and every new
 buildable is a new special case.
 
@@ -1010,6 +1030,10 @@ Session-scoped locks go with them and must come back clear: the per-support fire
 per-FOB rebuild busy flags, `Mission_available`, and the JIP queue entries. A lock restored as held
 is a support nobody can ever call again.
 
+A factory build that the captured builder vehicle did not make is not saved: a mission crate's builds belong to
+that mission and go with it. Neither is a build that is attached at the write
+([§World and placement](#world-and-placement)).
+
 OPCOM's own units are the same shape: a tasking restores as data and streams to a live group on
 approach, so the groups it had rendered at the write are not saved. A hardpoint still siting on a
 delivered truck (`DUWS_opcom_buildsPending`) dies with its spawned builder, and the AP that bought it
@@ -1080,6 +1104,7 @@ refund attached to the one restore that consumes it.
 | `server/init_zones/fnc_createzone.sqf` | Takes the saved composition kind |
 | `server/civilian/fnc_civ_init_Tomata.sqf`, `server/vendors/fnc_vendor_init.sqf` | Take the saved towns at their saved radii, and the saved vendor registry |
 | `server/supports/fnc_fob_server.sqf` | Takes a saved name |
+| `server/missions/mission_threads/steal_builder/fnc_builder_factory.sqf`, `modules/R3F_LOG/usine_creation/creer_objet.sqf` | The builder vehicle's factory role, shared by the mission win and the restore; the registry of its builds and the R3F call that fills it |
 | `client/chatter/fnc_duws_dialogue.sqf` | Muted while a load replays its builders |
 | `server/server_var_init.sqf`, `shared/includes/params_modern.hpp` | The campaign-rule params resolved once into `DUWS_param*`; `DUWS_AutosaveInterval` |
 | `client/client_init.sqf`, `client/dialog/fnc_campaign_*.sqf`, `shared/includes/campaign_load_menu.hpp` | The fork at the head of the game master's setup chain |
