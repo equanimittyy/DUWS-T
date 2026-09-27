@@ -601,6 +601,8 @@ OPCOM_GRID_SPREAD = 1000;
 // cannot sit just outside it unseen.
 OP_OBSERVE_K = 2;
 
+OPCOM_HQ_REVEAL_K = 2;
+
 // The grid is built, rebuilt, routed and drawn only inside a box around the play area (every zone, town and
 // the HQ grown by its radius plus this buffer) -- OPCOM never calculates the empty rest of the map. Counted
 // in cells, not metres, so it holds if the cell size changes. Must exceed the largest deposit reach in cells
@@ -787,7 +789,7 @@ OPCOM_CAP_SUPPLY = 10;
 OPCOM_MORTAR_REACH = 5000;
 OPCOM_ARTY_REACH = 20000;
 // No gun sites this close to another of its type, so two pits never share one hill.
-OPCOM_GUN_STANDOFF = 1000;
+OPCOM_GUN_STANDOFF_K = 1;
 // Band cells each build type weighs per pick, the best by its own Value taken.
 OPCOM_SITE_SAMPLES = 8;
 

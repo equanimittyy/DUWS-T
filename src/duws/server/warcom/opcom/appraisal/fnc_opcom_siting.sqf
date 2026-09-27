@@ -11,13 +11,13 @@ DUWS_fnc_opcom_argMax = {
     _best
 };
 
-// Per asset type: its Value, called as [point, type], how near another of its type it may not stand, and whether the
+// Per asset type: its Value, called as [point, type], its spacing in cells from another of its type, and whether the
 // Value reads every OPFOR hardpoint (a tower's, through DUWS_fnc_opcom_defend), so that any build resets its memo.
 DUWS_opcom_assetSiting = createHashMapFromArray [
-    ["RADIO", [DUWS_fnc_opcom_towerValue, AOI_TOWER_REACH, true]],
-    ["OP", [DUWS_fnc_opcom_opValue, 0, false]],
-    ["MORTAR", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF, false]],
-    ["ARTY", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF, false]]
+    ["RADIO", [DUWS_fnc_opcom_towerValue, round (AOI_TOWER_REACH / OPCOM_GRID_CELL), true]],
+    ["OP", [DUWS_fnc_opcom_opValue, -1, false]],
+    ["MORTAR", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF_K, false]],
+    ["ARTY", [DUWS_fnc_opcom_gunValue, OPCOM_GUN_STANDOFF_K, false]]
 ];
 
 // An asset's Value reads only slow state, and a tower's or a gun's runs the area of influence over many points, so a
@@ -59,7 +59,7 @@ DUWS_fnc_opcom_siteAll = {
             {
                 private _p = _x;
                 private _v = -1;
-                if ((_others findIf { (_x distance2D _p) < _keep }) < 0) then {
+                if ((_others findIf { ([_x, _p] call DUWS_fnc_opcom_cellDist) <= _keep }) < 0) then {
                     private _c = _cells select _forEachIndex;
                     _v = (_memo select 1) getOrDefault [_c, -1];
                     if (_v < 0) then {

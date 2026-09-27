@@ -12,7 +12,7 @@ DUWS_fnc_opcom_ferryStep = {
     };
     if (!(_t get "embarked")) then {
         _t set ["target", [_t, _rider get "pos"] call DUWS_fnc_opcom_ferryApproach];
-        if (((_t get "pos") distance2D (_t get "target")) <= OPCOM_GRID_CELL) then {
+        if (([_t get "pos", _t get "target"] call DUWS_fnc_opcom_cellDist) <= OPCOM_FERRY_LAND_K) then {
             // Nobody watches the virtual carry, so board-despawn the rider as it embarks (the live path renders boarding).
             private _rg = groupFromNetId (_rider get "grp");
             if (!isNull _rg) then {

@@ -26,7 +26,7 @@ if (_i < 0) then {
 
 // Until BLUFOR is seen near it the HQ pulls no defense toward itself, so the opening campaign defends evenly
 // instead of massing on a base the commander has no business knowing. One-way: a base found once stays found.
-if (!DUWS_opcom_hqKnown && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []} && {(_pos distance2D PosOfBLUHQ) < OPCOM_GRID_CELL * 2}) then {
+if (!DUWS_opcom_hqKnown && {!isNil "PosOfBLUHQ"} && {PosOfBLUHQ isNotEqualTo []} && {([_pos, PosOfBLUHQ] call DUWS_fnc_opcom_cellDist) <= OPCOM_HQ_REVEAL_K}) then {
     DUWS_opcom_hqKnown = true;
     ["INFO", "OPCOM", "player HQ revealed by a sighting near it"] call fnc_log;
 };
