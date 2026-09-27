@@ -192,7 +192,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | each BLUFOR-held zone and each town they have garrisoned that is not on an attack cooldown, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned and the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, that is not on an attack cooldown, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
@@ -214,7 +214,7 @@ so it moves no faster than a truck delivers.
 
 - **Worth** is a holding's fixed AP figure. A zone's is `_points`, its radius ÷ 10 (35–50 at the default radii). A
   town's is its level `civ_town_ap` (1–5, the figure its income pays) × a tunable 5, so 5–25 and always below a
-  zone.
+  zone. The found HQ's is `OPCOM_HQ_WORTH` (50), the top of a zone's range.
 - **Exposure** (0–1) is how close the holding sits to BLUFOR-held ground: 1 within 5 km, falling in a straight line
   to 0.2 at 10 km. OPCOM knows every zone and town owner for free, so exposure moves only when ground changes hands.
   OPCOM holds the player HQ's position from the start behind a hidden flag, and a hidden HQ counts toward nothing;
@@ -780,7 +780,10 @@ alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
   A **town** is attacked on the same terms with one difference: it changes hands only by having its garrison
   cleared through its own trigger, so it has no virtual shortcut and no undefended case — a town with no tier is
   never a target, since reputation rather than a fight is what owns it. The attacker that takes one guards the
-  ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to. **QRF** (`intercept`) — at the sighting's last known position the unit
+  ground instead of garrisoning into it, because the clear took the tier with it and left no pool to home to.
+  The **HQ** is attacked on a town's terms: no virtual shortcut, and no pool for OPFOR to home to. It never changes
+  hands, so it falls with its officer (`hq_blu1`), and every attacker then guards where it stands, inside the radius
+  or short of it. **QRF** (`intercept`) — at the sighting's last known position the unit
   reads truth within its own K: nothing there, it drops to `guard` in place; BLUFOR there, it fights them live and
   guards once none remain, until its QRF moves on to another group ([§QRF](#qrf-an-attack-on-a-moving-cluster)). It
   never returns to garrison. **Probe** — the target's 3×3 block reads fresher than
@@ -1108,7 +1111,8 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
   OPCOM's own units inside the pattern comes off the Value, so the commander does not shell its own men.
 - **HQ exclusion** — no mission *aimed* inside 100 m of `PosOfBLUHQ` (rounds may still stray there from a barrage
   aimed elsewhere). The target grid is latched `[x,y,0]` at order time (never an object ref that would follow a
-  respawn into the circle), and re-checked against the circle immediately before firing.
+  respawn into the circle), and re-checked against the circle immediately before firing. No creep rides an attack
+  whose objective is inside the circle.
 - **Spread** is the radius the action hands the shipped saturate: base by type, +25 m per km range, never below
   `OPCOM_ARTY_MIN_SPREAD`.
 - **Two actions over one implementation.** `arty_saturate` fires on a fresh sighting; `arty_creeping` walks its
