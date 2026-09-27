@@ -2,7 +2,7 @@
 // AI overlay reads.
 if (!isServer) exitWith {};
 
-DUWS_opcom_aiMode = "off";
+DUWS_opcom_aiMode = ["weighted", "off"] select ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1);
 DUWS_opcom_pickOnce = "";
 // Carried as a debt, so a rate below 1 picks once every few ticks.
 DUWS_opcom_picksPerTick = 1;
