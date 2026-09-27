@@ -297,7 +297,7 @@ substitute for it. That dead parameter pre-dates this plan and is left alone her
 
 Prerequisites 2 and 3 shipped with the snapshot: `fnc_fob_server` takes a name as its fourth argument,
 the dialogue router is muted while a load replays its builders, and a restore replays the unlock
-array into the flags and into the two levels that nothing else recounts. Prerequisite 1 is a check
+array into the flags and into the three levels that nothing else recounts. Prerequisite 1 is a check
 on a dedicated server, and the fork warns when the store did not read back.
 
 1. **Confirm the store reads back on our dedicated server.** Dedicated servers historically wrote
@@ -701,7 +701,8 @@ pools come back the size the team paid for.
 **Replaying the flags is not enough on its own.** `DUWS_bluforRadioLevel` is counted off the unlock
 array when a support is granted (`server/supports/fnc_support_perm_grant.sqf:19`), and nothing
 recounts it afterwards, so a restore that only sets the flags leaves a team holding its radio unlocks
-with no radio reach. Restore recounts it from the restored array. The OPFOR twin needs no rule:
+with no radio reach. Restore recounts it from the restored array, and `DUWS_intelLevel` and `DUWS_fortLevel`
+the same way. The OPFOR twin needs no rule:
 `fnc_hardpoint_stream.sqf:21` recounts it from `DUWS_hardpoints`, which the snapshot restores.
 
 **Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
