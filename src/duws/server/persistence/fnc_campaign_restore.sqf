@@ -430,6 +430,7 @@ DUWS_fnc_restoreOpcom = {
     DUWS_opcom_hqKnown = _o getOrDefault ["hqKnown", false];
     DUWS_opcom_taskSeq = _o getOrDefault ["taskSeq", 0];
     DUWS_opcom_attackSeq = _o getOrDefault ["attackSeq", 0];
+    DUWS_opcom_attackCooldown = _o getOrDefault ["attackCooldown", createHashMap];
     DUWS_opcom_mineVariants = _o getOrDefault ["mineVariants", createHashMap];
     missionNamespace setVariable ["DUWS_hpOpcomSeq", _o getOrDefault ["hpSeq", 0]];
 

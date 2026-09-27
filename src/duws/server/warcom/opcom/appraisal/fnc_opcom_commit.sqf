@@ -65,7 +65,7 @@ DUWS_fnc_opcom_attackSweep = {
     // position and the one its trigger filed differ in z.
     private _fnc_consider = {
         params ["_key", "_to", "_at", "_label"];
-        if (_key in _busy) exitWith {};
+        if (_key in _busy || {(DUWS_opcom_attackCooldown getOrDefault [_key, 0]) > DUWS_opcom_tick}) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
         private _lead = [([_at, _to, false] call _fnc_sources) apply { [_x, _worth] }, _to, true, 0, 0, 0] call DUWS_fnc_opcom_bestSources;
         if (_lead isEqualTo []) exitWith {};

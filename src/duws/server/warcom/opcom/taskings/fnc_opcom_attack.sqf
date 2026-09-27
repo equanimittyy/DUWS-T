@@ -195,6 +195,17 @@ DUWS_fnc_opcom_attackClose = {
         ["", ", its creep unfired"] select ((_attack get "creep") isNotEqualTo [])]] call fnc_log;
 };
 
+DUWS_fnc_opcom_attackFail = {
+    params ["_attack", "_outcome"];
+    if ((_attack get "kind") isNotEqualTo "qrf") then {
+        OPCOM_ATTACK_COOLDOWN params ["_min", "_max"];
+        private _n = _min + floor random (_max - _min + 1);
+        DUWS_opcom_attackCooldown set [_attack get "target", DUWS_opcom_tick + _n];
+        _outcome = format ["%1; no attack on its target for %2 ticks", _outcome, _n];
+    };
+    [_attack, _outcome] call DUWS_fnc_opcom_attackClose;
+};
+
 DUWS_fnc_opcom_bucketForce = {
     params ["_attack", "_role"];
     private _force = 0;
@@ -338,7 +349,7 @@ DUWS_fnc_opcom_executionStep = {
     } forEach (_attack get "roles");
     private _roles = (_attack get "roles") select { (_x get "units") isNotEqualTo [] };
     _attack set ["roles", _roles];
-    if (_roles isEqualTo []) exitWith { [_attack, "aborted: every unit was lost"] call DUWS_fnc_opcom_attackClose };
+    if (_roles isEqualTo []) exitWith { [_attack, "aborted: every unit was lost"] call DUWS_fnc_opcom_attackFail };
     if ((_attack get "kind") isEqualTo "qrf") then {
         [_attack] call DUWS_fnc_opcom_qrfRekey;
         // Following the lead keeps the next QRF off the same cluster.
@@ -354,7 +365,7 @@ DUWS_fnc_opcom_executionStep = {
                 [_x, "guard"] call fnc_opcom_task;
             } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
         } forEach _roles;
-        [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;
+        [_attack, format ["failed at %1:1, below the break-off bar", _r toFixed 2]] call DUWS_fnc_opcom_attackFail;
     };
     [_attack] call DUWS_fnc_opcom_converge;
     if ((_attack get "creep") isNotEqualTo []) then { [_attack] call DUWS_fnc_opcom_creepStep };

@@ -134,6 +134,7 @@ DUWS_fnc_campaignSnapshot = {
         ["archetype", DUWS_opcom_archetype],
         ["taskings", call DUWS_fnc_campaignTaskings], ["taskSeq", missionNamespace getVariable ["DUWS_opcom_taskSeq", 0]],
         ["attacks", missionNamespace getVariable ["DUWS_opcom_attacks", []]], ["attackSeq", missionNamespace getVariable ["DUWS_opcom_attackSeq", 0]],
+        ["attackCooldown", missionNamespace getVariable ["DUWS_opcom_attackCooldown", createHashMap]],
         ["tick", missionNamespace getVariable ["DUWS_opcom_tick", 0]], ["hqKnown", missionNamespace getVariable ["DUWS_opcom_hqKnown", false]],
         ["mineVariants", DUWS_opcom_mineVariants], ["hpSeq", missionNamespace getVariable ["DUWS_hpOpcomSeq", 0]]
     ]];
