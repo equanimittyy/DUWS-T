@@ -984,12 +984,14 @@ DUWS_econ_throttle = 1;
 
 // OPCOM ticks per 1 AP of drip to OPFOR while it holds every zone, on top of the 30-minute payout. The payout
 // lands as one lump that the commander spends within a minute, so without a drip it can only bank or move free
-// units for the rest of the period. Wallet only: it never credits the earned counter, so it never moves OPFOR's
-// tier. Server; tuning.
+// units for the rest of the period. Server; tuning.
 OPCOM_AP_DRIP_TICKS = 2;
 // The share of the drip OPFOR keeps with no zone left; the rest scales with the share of zones it holds. A capture
 // has to cost the commander income, but one down to its last zone must still be able to buy a fight back.
 OPCOM_AP_DRIP_FLOOR = 0.5;
+// The share of the drip that also climbs OPFOR's tier, scaled by DUWS_econ_throttle like the payout's. The rest is
+// wallet only: the drip is most of what OPCOM earns, and all of it would reach jets in under half the tuned time.
+OPCOM_AP_DRIP_TIER = 0.25;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

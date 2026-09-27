@@ -8,8 +8,9 @@ call fnc_opcom_grid_init;
 call fnc_opcom_tasking_init;
 if (DUWS_campaignLoaded) then { call DUWS_fnc_restoreOpcom };
 
-// The drip's fraction of an AP, paid out whole because fnc_ap_adjust keeps the pool whole.
+// The drip's fractions of an AP, to the wallet and to the tier, paid out whole because fnc_ap_adjust keeps both whole.
 private _dripCarry = 0;
+private _tierCarry = 0;
 while {true} do {
     // Idle with nobody on: holds, cooldowns and staleness all count in ticks, so a frozen clock is a paused commander
     // rather than one that spends a night buying against a player who is asleep.
@@ -54,7 +55,10 @@ while {true} do {
         if (_dripCarry >= 1) then {
             private _ap = floor _dripCarry;
             _dripCarry = _dripCarry - _ap;
-            ["OPF", _ap, "opcom_drip", 0, "DEBUG"] call fnc_ap_adjust;
+            _tierCarry = _tierCarry + _ap * OPCOM_AP_DRIP_TIER * DUWS_econ_throttle;
+            private _earned = floor _tierCarry;
+            _tierCarry = _tierCarry - _earned;
+            ["OPF", _ap, "opcom_drip", _earned, "DEBUG"] call fnc_ap_adjust;
         };
         // Pick after the step, so it sees this tick's arrivals and deaths.
         "pick" call _enter;

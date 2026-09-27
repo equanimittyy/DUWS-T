@@ -35,7 +35,8 @@ fnc_cp_adjust = {
 // The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a one-way
 // ratchet (earned only ever rises; spending never touches it), so a spent-down wallet cannot drop the tier.
 // Capability sites read the earned counter directly; this integer is only the readout/save summary.
-// Five tiers, steepening past tier 2 against OPFOR's ~94 AP/hr from six zones (motorised ~0.6 h to jets ~6.4 h).
+// Five tiers, steepening past tier 2 against OPFOR's ~160 AP/hr from six zones at the ~7 s OPCOM ticks seen in play,
+// a quarter of its drip included (motorised ~0.4 h to jets ~3.8 h).
 DUWS_ap_tier_rungs = [60, 150, 350, 600]; publicVariable "DUWS_ap_tier_rungs";
 // Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {
@@ -59,8 +60,8 @@ fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	// _earned credits the one-way earned counter (never the ladder wallet), so it is passed only by
 	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
-	// first-capture bonus; OPFOR's town and zone income. Spends, swings, consolation, refunds and
-	// OPCOM's drip leave it 0, so ground regained and money spent never move the ladder.
+	// first-capture bonus; OPFOR's town and zone income and a share of OPCOM's drip. Spends, swings,
+	// consolation and refunds leave it 0, so ground regained and money spent never move the ladder.
 	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every few ticks.
 	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0], ["_level", "INFO"]];
 	if (_delta != round _delta) then {
@@ -70,9 +71,13 @@ fnc_ap_adjust = {
 		case "OPF": {
 			WARCOM_opfor_ap = round ((WARCOM_opfor_ap + _delta) max 0); publicVariable "WARCOM_opfor_ap";
 			if (_earned > 0) then {
+				private _was = WARCOM_opfor_ap_earned;
 				WARCOM_opfor_ap_earned = round (WARCOM_opfor_ap_earned + _earned); publicVariable "WARCOM_opfor_ap_earned";
-				// Every garrison's full reads its token locks off this counter, so any site's weight can move.
-				call DUWS_fnc_opcom_gridDirtyAll;
+				// Every garrison's full reads its token locks off this counter, so a crossed lock can move any site's
+				// weight. Only a crossing rebuilds: a full rebuild costs about a second of the tick, and the drip credits often.
+				if ((DUWS_spawnVehicles findIf { (_x select 3) > _was && {(_x select 3) <= WARCOM_opfor_ap_earned} }) >= 0) then {
+					call DUWS_fnc_opcom_gridDirtyAll;
+				};
 				private _t = [WARCOM_opfor_ap_earned] call DUWS_fnc_ap_tier;
 				if (_t != WARCOM_opfor_tier) then {
 					WARCOM_opfor_tier = _t; publicVariable "WARCOM_opfor_tier";
