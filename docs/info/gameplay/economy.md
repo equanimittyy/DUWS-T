@@ -249,7 +249,8 @@ nothing is exactly the case the town economy exists to model. A tick that pays B
 hints every player a ledger readout (`server/warcom/fnc_ledger_hint.sqf`): the town
 CP and zone AP taken, with each pool's total; the throttle cut as the subtitle when campaign size is
 cutting the faucets; and each revealed town whose reputation rose, with BLUFOR's radio push and the
-town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Kill
+town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Allseer
+cues it on SUB-NET with a line that carries no figures, so the tick is not announced twice. Kill
 income rides the same tick but is kept out of the readout and announced only to the player who earned
 it: naming attrition in a campaign-wide report would advertise kill farming as an income route.
 

@@ -4484,8 +4484,12 @@
                 <Chinesesimp>"霸王1-1"，我们到了。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_econ_hint_title">
-                <Original>Territory Income</Original>
-                <English>Territory Income</English>
+                <Original>Income Report</Original>
+                <English>Income Report</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_report_line">
+                <Original>Be advised, we've received supplies from command due to held territory.</Original>
+                <English>Be advised, we've received supplies from command due to held territory.</English>
             </Key>
             <Key ID="STR_DUWS_T_econ_hint_cp">
                 <Original>CP from towns</Original>

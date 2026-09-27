@@ -117,4 +117,6 @@ if (_bluCP > 0 || {_bluZoneAP > 0}) then {
         _subtitle = format [localize "STR_DUWS_T_econ_reduced_desc", round ((1 - DUWS_econ_throttle) * 100), "%"];
     };
     [localize "STR_DUWS_T_econ_hint_title", _subtitle, _rows, [0, -2] select isDedicated] call fnc_ledger_hint;
+    // A cue with no figures: the hint carries them, and a line repeating them would announce the tick twice.
+    [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_econ_report_line"] remoteExec ["fnc_duws_dialogue", 0];
 };
