@@ -134,20 +134,29 @@ DUWS_fnc_opcom_fireMission = {
     params ["_key", "_target", ["_rounds", 4], ["_shape", ["saturate", 0]]];
     private _pt = [_target select 0, _target select 1, 0];
     private _guns = [];
+    private _short = objNull;
     {
         private _gun = _x;
         // Loaded before the range test: an empty gun reports no artillery magazine to fire or to measure with.
         _gun setVehicleAmmo 1;
         private _m = (getArtilleryAmmo [_gun]) param [0, ""];
+        private _crewed = _m isNotEqualTo "" && {!isNull (gunner _gun)};
         // Target left, guns in the array -- the mirror of doArtilleryFire; transposed it throws and kills the loop.
-        if (_m isEqualTo "" || {isNull (gunner _gun)} || {!(_pt inRangeOfArtillery [[_gun], _m])}) then {
-            _gun setVehicleAmmo 0;
-        } else {
+        if (_crewed && {_pt inRangeOfArtillery [[_gun], _m]}) then {
             _guns pushBack [_gun, _m, getText (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _m >> "ammo") >> "simulation")];
+        } else {
+            if (_crewed) then { _short = _gun };
+            _gun setVehicleAmmo 0;
         };
     } forEach ([_key] call DUWS_fnc_opcom_batteryReady);
     if (_guns isEqualTo []) exitWith {
-        ["INFO", "OPCOM", format ["arty: %1 has no gun bearing on %2", _key, _pt apply { round _x }]] call fnc_log;
+        if (isNull _short) then {
+            ["INFO", "OPCOM", format ["arty: %1 has no crewed, loaded gun for %2", _key, _pt apply { round _x }]] call fnc_log;
+        } else {
+            private _d = round (_short distance2D _pt);
+            ["WARN", "OPCOM", format ["arty: %1 (%2) out of range of %3 at %4 m", _key, typeOf _short, _pt apply { round _x }, _d]] call fnc_log;
+            [format ["%1 out of range of %2 at %3 m", typeOf _short, mapGridPosition _pt, _d]] call DUWS_fnc_opcom_aiEvent;
+        };
         0
     };
     private _steps = _rounds;

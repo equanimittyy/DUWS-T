@@ -786,8 +786,8 @@ OPCOM_CAP_UNITS = 50;
 OPCOM_CAP_GARRISON = 10;
 OPCOM_CAP_SUPPLY = 10;
 // Fixed per type: a gun's true range is the faction gun's, known only at fire time.
-OPCOM_MORTAR_REACH = 5000;
-OPCOM_ARTY_REACH = 20000;
+OPCOM_MORTAR_REACH = 4000;
+OPCOM_ARTY_REACH = 15000;
 // No gun sites this close to another of its type, so two pits never share one hill.
 OPCOM_GUN_STANDOFF_K = 1;
 // Band cells each build type weighs per pick, the best by its own Value taken.
