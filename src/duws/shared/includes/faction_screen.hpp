@@ -75,7 +75,7 @@ class startup_faction_next_dialog
 			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
 			w = 15.7 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
-			sizeEx = 0.03;
+			sizeEx = 0.05;
 			colorBackground[] = {0.35, 0.35, 0.35, 0.5};
 			tooltip = "$STR_DUWS_T_faction_screen_back_tt";
 			action = "duws_faction_screen_back = true; duws_faction_screen_next = true;";
