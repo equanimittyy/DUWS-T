@@ -16,6 +16,20 @@ DUWS_fnc_opcom_cellDist = {
     (abs ((_ca mod _w) - (_cb mod _w))) max (abs (floor (_ca / _w) - floor (_cb / _w)))
 };
 
+DUWS_fnc_opcom_pace = {
+    params ["_t"];
+    private _own = DUWS_opcom_speed getOrDefault [_t get "moveType", 30];
+    private _id = _t getOrDefault ["boundTo", -1];
+    if (_id < 0 && {_t getOrDefault ["embarked", false]}) then {
+        private _r = [_t get "carrying"] call DUWS_fnc_opcom_byId;
+        if (!isNil "_r") then { _id = _r getOrDefault ["boundTo", -1] };
+    };
+    if (_id < 0) exitWith { _own };
+    private _i = DUWS_opcom_attacks findIf { (_x get "id") == _id };
+    if (_i < 0 || {((DUWS_opcom_attacks select _i) get "kind") isEqualTo "qrf"}) exitWith { _own };
+    _own max ([DUWS_opcom_attacks select _i] call DUWS_fnc_opcom_attackPace)
+};
+
 // Returns "arrived", "water" (a transportable unit stopped at a ferry leg's near shore), "blocked" (a replan found
 // no dry route for a hull), or "moving". Replans when the route chain is empty.
 DUWS_fnc_opcom_advance = {
@@ -30,7 +44,7 @@ DUWS_fnc_opcom_advance = {
     private _leg = _t get "leg";
     private _pos = _t get "pos";
     private _transportable = "transportable" in (_t get "flags");
-    private _remain = OPCOM_GRID_CELL / (DUWS_opcom_speed getOrDefault [_t get "moveType", 30]);
+    private _remain = OPCOM_GRID_CELL / ([_t] call DUWS_fnc_opcom_pace);
     private _water = false;
     while {_remain > 0 && {_leg < count _route} && {!_water}} do {
         private _wp = _route select _leg;

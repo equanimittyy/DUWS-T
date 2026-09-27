@@ -221,6 +221,23 @@ DUWS_fnc_opcom_attackBuckets = {
     }
 };
 
+// An assault or flank moves virtually as one column, so a fast hull reaches neither its rally nor the fight ahead.
+DUWS_fnc_opcom_attackPace = {
+    params ["_attack"];
+    private _pace = 0;
+    {
+        {
+            if ([_x] call DUWS_fnc_opcom_marching) then {
+                private _mt = _x get "moveType";
+                private _tr = [_x getOrDefault ["ridingOn", -1]] call DUWS_fnc_opcom_byId;
+                if (!isNil "_tr") then { _mt = _tr get "moveType" };
+                _pace = _pace max (DUWS_opcom_speed getOrDefault [_mt, 30]);
+            };
+        } forEach ([_attack, _x] call DUWS_fnc_opcom_roleUnits);
+    } forEach (_attack get "roles");
+    _pace
+};
+
 DUWS_fnc_opcom_boundForce = {
     params ["_attack"];
     private _force = 0;
