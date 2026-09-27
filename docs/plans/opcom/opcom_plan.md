@@ -1084,7 +1084,8 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 - **A mission fires every ready gun or none.** `Cost` counts every ready gun, so when one of them cannot reach the
   aim point the mission is refused rather than fired thinned at the full price.
 - **Each gun rests `OPCOM_ARTY_COOLDOWN` after it fires** — 360 ticks (30 min), saturate and creep alike, so a full
-  wallet cannot keep a battery shelling without pause. The debug `fire` verb zeroes the cooldown before it fires.
+  wallet cannot keep a battery shelling without pause. The debug `fire` verb zeroes the cooldown before it fires,
+  and refuses a battery that is still firing its last mission.
 - **Belief is the only trigger** — a gun fires on a fresh sighting in the belief store and on nothing else. Ground
   OPFOR merely owns eyes near is not a target: an OP post is a sensor like any other, and feeding the guns a channel
   outside belief would make them see what the commander does not. The guns are exactly as blind as the sensors are.
