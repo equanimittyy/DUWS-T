@@ -24,10 +24,13 @@ DUWS_fnc_opcom_batteryPieces = {
     }
 };
 
-// The stamp rides the piece, which is safe only because MORTAR and ARTY never stream.
+// The stamp rides the piece, which is safe only because MORTAR and ARTY never stream. A gun with no live gunner is out
+// of the fight, so it must not hold a mission to its reach.
 DUWS_fnc_opcom_batteryReady = {
     params ["_key"];
-    ([_key] call DUWS_fnc_opcom_batteryPieces) select { DUWS_opcom_tick >= (_x getVariable ["DUWS_opcomReadyTick", 0]) }
+    ([_key] call DUWS_fnc_opcom_batteryPieces) select {
+        DUWS_opcom_tick >= (_x getVariable ["DUWS_opcomReadyTick", 0]) && {alive (gunner _x)}
+    }
 };
 
 DUWS_fnc_opcom_batteryUnload = {
@@ -120,7 +123,7 @@ DUWS_fnc_opcom_fireETA = {
         private _gun = _x;
         _gun setVehicleAmmo 1;
         private _m = (getArtilleryAmmo [_gun]) param [0, ""];
-        private _bears = _m isNotEqualTo "" && {!isNull (gunner _gun)} && {_pt inRangeOfArtillery [[_gun], _m]};
+        private _bears = _m isNotEqualTo "" && {_pt inRangeOfArtillery [[_gun], _m]};
         if (_bears) then { _eta = _gun getArtilleryETA [_pt, _m] };
         _gun setVehicleAmmo 0;
         if (_bears) exitWith {};
@@ -129,7 +132,8 @@ DUWS_fnc_opcom_fireETA = {
 };
 
 // _shape is ["saturate", radius] about _target or ["creep", width, length, bearing] walking forward from it. _rounds is
-// a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). -> rounds ordered, 0 if no gun bears.
+// a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). -> rounds ordered, 0 unless every ready
+// gun bears, since the pick priced the mission on them all.
 DUWS_fnc_opcom_fireMission = {
     params ["_key", "_target", ["_rounds", 4], ["_shape", ["saturate", 0]]];
     private _pt = [_target select 0, _target select 1, 0];
@@ -140,15 +144,18 @@ DUWS_fnc_opcom_fireMission = {
         // Loaded before the range test: an empty gun reports no artillery magazine to fire or to measure with.
         _gun setVehicleAmmo 1;
         private _m = (getArtilleryAmmo [_gun]) param [0, ""];
-        private _crewed = _m isNotEqualTo "" && {!isNull (gunner _gun)};
         // Target left, guns in the array -- the mirror of doArtilleryFire; transposed it throws and kills the loop.
-        if (_crewed && {_pt inRangeOfArtillery [[_gun], _m]}) then {
+        if (_m isNotEqualTo "" && {_pt inRangeOfArtillery [[_gun], _m]}) then {
             _guns pushBack [_gun, _m, getText (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _m >> "ammo") >> "simulation")];
         } else {
-            if (_crewed) then { _short = _gun };
+            if (_m isNotEqualTo "") then { _short = _gun };
             _gun setVehicleAmmo 0;
         };
     } forEach ([_key] call DUWS_fnc_opcom_batteryReady);
+    if (!isNull _short) then {
+        { (_x select 0) setVehicleAmmo 0 } forEach _guns;
+        _guns = [];
+    };
     if (_guns isEqualTo []) exitWith {
         if (isNull _short) then {
             ["INFO", "OPCOM", format ["arty: %1 has no crewed, loaded gun for %2", _key, _pt apply { round _x }]] call fnc_log;

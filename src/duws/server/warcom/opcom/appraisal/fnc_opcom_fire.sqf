@@ -169,5 +169,5 @@ DUWS_fnc_opcom_creepStep = {
     private _ok = [[_key, "", _start, 0, _shape, (_shape select 2) max ((_shape select 1) / 2)]] call DUWS_fnc_opcom_fireRun;
     _attack set ["creep", []];
     ["INFO", "OPCOM", format ["attack %1 (%2 %3) creep %4", _attack get "id", _attack get "kind", _attack get "label",
-        ["dropped: no gun could fire", "fired"] select _ok]] call fnc_log;
+        ["dropped: not every gun could fire", "fired"] select _ok]] call fnc_log;
 };
