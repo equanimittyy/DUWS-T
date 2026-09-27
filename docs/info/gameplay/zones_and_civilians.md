@@ -121,6 +121,11 @@ records nothing against the ledger the flip has just reseeded. They fight on, an
 in the retake test. `DUWS_fnc_garrisonLeftoverSweep`, run on every zone and town tick, deletes each
 one once no player is within 500 m. A town clear releases its survivors the same way.
 
+**A flip removes every OPCOM unit garrisoned at the site** (`DUWS_fnc_opcom_siteLost`), combatants
+included. The break line lets a garrison fall with OPCOM tokens still unspawned in the reserve pool. A
+combatant released instead would stand up inside ground that OPFOR no longer hold. A defender already on
+the ground is a garrison group, so it stays as a survivor, as above.
+
 ### Zone tiers
 
 Every zone rolls a tier I to IV when it is generated. The tier belongs to whoever holds the ground, and a
@@ -537,8 +542,8 @@ and a town lifted out of the band while its garrison lives has it cleared off th
 
 `fnc_town_rep_adjust` applies a crossing when it writes the reputation, through `DUWS_town_band`
 (`fnc_civ_garrison`), so the tier changes with the map colour and not on the next poller pass. Leaving
-the band forgets the town's ledger and releases OPCOM's units bound to it, whether or not a garrison
-stands. The next garrison tick then collects any men still standing.
+the band forgets the town's ledger, removes OPCOM's units garrisoned there and releases the rest bound to
+it, whether or not a garrison stands. The next garrison tick then collects any men still standing.
 
 ### What clearing a garrison actually buys
 

@@ -62,10 +62,9 @@ DUWS_fnc_opcom_defenderLost = {
     ["INFO", "OPCOM", format ["tasking %1 died defending %2", _t get "id", _key]] call fnc_log;
 };
 
-// A site flipped -- a zone captured, a town's garrison cleared or worked back out of the band. Its resting
-// non-combatants die with it (attached, never defenders; one borrowed onto ferry duty has left and survives), and
-// every other order tied to the site drops to guard where it stands: a garrison homed there, a unit still walking in
-// to settle, an errand carrying goods to it. Combatants are left to the mechanic that fought them.
+// A site flipped -- a zone captured, a town's garrison cleared or worked back out of the band. Every unit garrisoned
+// there dies, combatants included: the break line lets a garrison fall with tokens still unspawned in the reserve
+// pool, and one turned loose would stand up inside ground OPFOR no longer hold.
 DUWS_fnc_opcom_siteLost = {
     params ["_key"];
     if (isNil "DUWS_opcom_taskings") exitWith {};
@@ -73,13 +72,11 @@ DUWS_fnc_opcom_siteLost = {
     private _doomed = [];
     {
         private _t = _x;
-        private _homed = (_t get "homeZone") isEqualTo _key && {(_t get "order") isEqualTo "garrison"};
-        if (_homed && {"noncombat" in (_t get "flags")}) then {
+        if ((_t get "homeZone") isEqualTo _key && {(_t get "order") isEqualTo "garrison"}) then {
             _doomed pushBack _t;
         } else {
             private _errand = _t getOrDefault ["errand", []];
-            private _bound = _homed
-                || {(_t getOrDefault ["returnZone", ""]) isEqualTo _key}
+            private _bound = (_t getOrDefault ["returnZone", ""]) isEqualTo _key
                 || {(_t getOrDefault ["settleZone", ""]) isEqualTo _key}
                 || {_town >= 0 && {(_errand param [0, ""]) in ["reinforce", "fortify", "rapport"]} && {(_errand param [1, -1]) isEqualTo _town}};
             if (_bound) then {
