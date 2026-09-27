@@ -118,10 +118,11 @@ DUWS_fnc_opcom_gridMobile = {
         private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
         [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
     } forEach DUWS_opcom_belief_pos;
-    // A tasking's group is in no holdings scan, so this is where its force enters the grid at all.
+    // A tasking's group is in no holdings scan, so this is where its force enters the grid at all -- except a standing
+    // defender, which its zone's live garrison force already holds.
     {
         private _ef = _x get "effForce";
-        if (_ef > 0) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit };
+        if (_ef > 0 && {!([_x] call DUWS_fnc_opcom_defenderStanding)}) then { [_fri, _x get "pos", _ef, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit };
     } forEach (missionNamespace getVariable ["DUWS_opcom_taskings", []]);
 };
 

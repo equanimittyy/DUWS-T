@@ -36,6 +36,20 @@ DUWS_fnc_opcom_reserveToken = {
     format ["opcomdef%1:%2", _t get "id", [(_t get "comp") select 0] call DUWS_fnc_tokenName]
 };
 
+// An infantry defender on its zone's roster, which DUWS_fnc_garrisonMen counts man by man while the garrison is live.
+// A token out of the pool stands: a wiped defender's tasking is dead, and an unplaced one is refunded to the pool.
+DUWS_fnc_opcom_defenderStanding = {
+    params ["_t"];
+    private _hz = _t get "homeZone";
+    (_t get "order") isEqualTo "garrison" && {[_hz] call DUWS_fnc_garrisonHeld}
+        && {!(([(_t get "comp") select 0] call DUWS_fnc_teamRow) isEqualTo [])}
+        && {
+            private _tok = [_t] call DUWS_fnc_opcom_reserveToken;
+            _tok in (missionNamespace getVariable [format ["DUWS_zoneReserveOpcom_%1", _hz], []])
+                && {!(_tok in ([_hz] call DUWS_fnc_garrisonReserve))}
+        }
+};
+
 // Draw a homed unit out of its zone: delete the defender its reserve token stands as, then re-sync so the pool and
 // the ceiling drop by it. A unit going mobile must not also stand in the wave.
 DUWS_fnc_opcom_drawOut = {
