@@ -965,7 +965,7 @@ Prices, first-pass defaults set against OPFOR's zone and town income of roughly 
 | Minefield | `OPCOM_AP_MINEFIELD` 1 per 50 m square, so 30 to 90 for a belt, plus its truck's source price |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus its truck's source price |
 | Unit source | a hire's `OPCOM_AP_UNIT`, or 0 for a free unit; `OPCOM_AP_PER_KM` 0.5 × distance is scored on every source and charged on none ([§Sourcing](#sourcing-hire-on-demand-phase-4d)) |
-| Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
+| Fire mission | `OPCOM_AP_PER_ROUND` per round: 2 for a mortar, 3 for a battery |
 
 - **A garrison step is flat-priced.** Reinforce and Fortify cost the same wherever they land and whatever they buy
   back, and a zone and a town charge the same rate for the same order; a town adds only its truck, which is the
@@ -1061,8 +1061,8 @@ the shared terrain siting picks the spot (`fnc_hardpoint_score`,
 | Minefield | the band cell holding the most traffic, cover Value breaking a tie, since a field is worth what it denies and denies nothing on ground nobody crosses |
 
 A gun's true range depends on the faction's gun and is read only at fire time (`inRangeOfArtillery`), so siting and
-Value both use a fixed reach per type. A mission inside the fixed reach that the gun cannot reach is refused, with a
-WARN line in the RPT and on the AI overlay.
+Value both use a fixed reach per type. A mission inside the fixed reach that any ready gun cannot reach is refused
+whole, with a WARN line in the RPT and on the AI overlay.
 
 ### Indirect-fire hardpoints
 
@@ -1079,12 +1079,12 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 
 - **A fire mission is an Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
   fires; it fires only when that action wins its phase, never on a schedule. An owned gun in range, not already
-  firing and off cooldown is the availability gate. **AP is the ammunition** — the guns rest empty and are loaded per
-  mission, so there is no finite store.
+  firing, off cooldown and with a live gunner is the availability gate. **AP is the ammunition** — the guns rest empty
+  and are loaded per mission, so there is no finite store.
+- **A mission fires every ready gun or none.** `Cost` counts every ready gun, so when one of them cannot reach the
+  aim point the mission is refused rather than fired thinned at the full price.
 - **Each gun rests `OPCOM_ARTY_COOLDOWN` after it fires** — 360 ticks (30 min), saturate and creep alike, so a full
-  wallet cannot keep a battery shelling without pause. The cooldown is per gun: a gun that did not bear on the
-  mission stays ready, and the next mission's `Cost` counts only the guns that are ready. The debug `fire` verb zeroes
-  the cooldown before it fires.
+  wallet cannot keep a battery shelling without pause. The debug `fire` verb zeroes the cooldown before it fires.
 - **Belief is the only trigger** — a gun fires on a fresh sighting in the belief store and on nothing else. Ground
   OPFOR merely owns eyes near is not a target: an OP post is a sensor like any other, and feeding the guns a channel
   outside belief would make them see what the commander does not. The guns are exactly as blind as the sensors are.
