@@ -150,8 +150,9 @@
 
   // GARRISON DENSITY -- the share of a zone's mobile garrison that stands up at once; the rest wait as
   // reserve. Value labels carry the percentage; the data carries the fraction.
-  [2114, "50%", "0.5"] call _addOpt;
-  private _defGarrison = [2114, "80%", "0.8"] call _addOpt;
+  [2114, "25%", "0.25"] call _addOpt;
+  private _defGarrison = [2114, "50%", "0.5"] call _addOpt;
+  [2114, "75%", "0.75"] call _addOpt;
   [2114, "100%", "1"] call _addOpt;
   [2114, _defGarrison] call _setDefault;
 

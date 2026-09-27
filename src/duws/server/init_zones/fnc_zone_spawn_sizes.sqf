@@ -287,7 +287,7 @@ DUWS_fnc_zoneSpawnOne = {
 // strongpoint. Trimmed patrols fall to the reserve pool rather than vanish, lowering the group
 // ceiling so even a x1 site reinforces back up to the reduced count. Thinned evenly across the
 // patrols rather than off the tail, so the standing force keeps the composition's mix instead of
-// shedding every vehicle first. Density 1 (default) returns x1 unchanged.
+// shedding every vehicle first.
 DUWS_fnc_zoneDensityStand = {
 	params ["_x1"];
 	private _d = ((missionNamespace getVariable ["garrison_density", 1]) max 0) min 1;
