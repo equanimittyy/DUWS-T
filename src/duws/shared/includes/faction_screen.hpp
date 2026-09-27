@@ -41,9 +41,9 @@ class startup_faction_next_dialog
 		{
 			idc = 1600;
 			text = "$STR_DUWS_T_faction_screen_resolve";
-			x = 11 * GUI_GRID_W + GUI_GRID_X;
+			x = 13 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
-			w = 18 * GUI_GRID_W;
+			w = 14 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 0.05;
 			colorBackground[] = {1, 0, 0, 0.5};
@@ -71,12 +71,12 @@ class startup_faction_next_dialog
 		class faction_back_button: RscButton
 		{
 			idc = 1602;
-			text = "$STR_DUWS_T_startup_back";
-			x = 29.75 * GUI_GRID_W + GUI_GRID_X;
+			text = "$STR_DUWS_T_faction_screen_back";
+			x = 27.75 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
-			w = 6.5 * GUI_GRID_W;
+			w = 8.5 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
-			sizeEx = 0.04;
+			sizeEx = 0.03;
 			colorBackground[] = {0.35, 0.35, 0.35, 0.5};
 			tooltip = "$STR_DUWS_T_faction_screen_back_tt";
 			action = "duws_faction_screen_back = true; duws_faction_screen_next = true;";

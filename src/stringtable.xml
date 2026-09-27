@@ -1083,6 +1083,10 @@
                 <Original>Next</Original>
                 <English>Next</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_screen_back">
+                <Original>BACK TO CAMPAIGNS</Original>
+                <English>BACK TO CAMPAIGNS</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_screen_back_tt">
                 <Original>Return to the campaign list</Original>
                 <English>Return to the campaign list</English>
