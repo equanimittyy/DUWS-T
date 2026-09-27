@@ -15,6 +15,8 @@ fnc_garage_store = {
     private _veh = objectFromNetId _vehNetId;
     if (isNull _veh) exitWith { [localize "STR_DUWS_T_DEPOT_VEHICLE_GONE"] remoteExec ["hint", _caller]; };
     if (count crew _veh > 0) exitWith { [localize "STR_DUWS_T_GARAGE_CREWED"] remoteExec ["hint", _caller]; };
+    // The factory role is not in the spec, so a stored builder would come back a plain truck.
+    if (_veh getVariable ["DUWS_campaignFactory", false]) exitWith { [localize "STR_DUWS_T_GARAGE_BUILDER"] remoteExec ["hint", _caller]; };
 
     private _domain = [typeOf _veh] call DUWS_fnc_vehDomain;
     private _di = [_domain] call DUWS_fnc_garageDomainIndex;

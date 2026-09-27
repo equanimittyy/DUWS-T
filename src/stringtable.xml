@@ -5640,6 +5640,10 @@
                 <Original>Empty the vehicle before storing it.</Original>
                 <English>Empty the vehicle before storing it.</English>
             </Key>
+            <Key ID="STR_DUWS_T_GARAGE_BUILDER">
+                <Original>The builder vehicle cannot be stored.</Original>
+                <English>The builder vehicle cannot be stored.</English>
+            </Key>
             <Key ID="STR_DUWS_T_GARAGE_POOL_FULL">
                 <Original>That storage pool is full.</Original>
                 <English>That storage pool is full.</English>
