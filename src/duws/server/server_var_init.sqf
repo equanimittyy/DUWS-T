@@ -873,12 +873,15 @@ OPCOM_PICK_SHARPNESS = 2;
 // An order that fights for its target drops below these odds at commit: one unit sent in on worse is thrown away.
 OPCOM_PWIN_FLOOR = 0.3;
 
-// An Attack musters until the force it binds reaches IDEAL times the believed BLUFOR force at the target. At EXPIRY
-// ticks it launches on MIN or is abandoned, so a player who keeps reinforcing cannot hold it forever. The bars sit
-// below an attacker's usual 3:1 because a sighted player already counts as 1 + OPCOM_PLAYER_WORTH. Tune.
+// An Attack sends for units until the force it binds reaches IDEAL times the believed BLUFOR force at the target. An
+// assault or flank launches once every unit stands on its rally at MIN; short of MIN it waits STAGED ticks after the
+// last arrival, and at EXPIRY it goes wherever its units stand, so a player who keeps reinforcing cannot hold it
+// forever. Either timeout abandons it under OPCOM_ATTACK_BREAK instead, which would fail it on its first step. The bars
+// sit below an attacker's usual 3:1 because a sighted player already counts as 1 + OPCOM_PLAYER_WORTH. Tune.
 OPCOM_MUSTER_IDEAL = 1.5;
 OPCOM_MUSTER_MIN = 0.75;
-OPCOM_MUSTER_EXPIRY = 240;       // ticks; 20 min @ 5s tick
+OPCOM_MUSTER_STAGED = 60;        // ticks; 5 min @ 5s tick
+OPCOM_MUSTER_EXPIRY = 360;       // ticks; 30 min @ 5s tick
 // A QRF's muster window: its target moves, so it goes on what it has by then. Tune.
 OPCOM_QRF_EXPIRY = 6;            // ticks; 30 s @ 5s tick
 // Below this ratio of force to believed BLUFOR force an offensive holds rather than musters.

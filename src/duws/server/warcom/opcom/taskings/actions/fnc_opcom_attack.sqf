@@ -127,7 +127,7 @@ DUWS_fnc_opcom_attackOpen = {
     DUWS_opcom_attackSeq = _id + 1;
     private _attack = createHashMapFromArray [
         ["id", _id], ["kind", _kind], ["target", _target], ["pos", _pos], ["label", _label],
-        ["state", "buildup"], ["since", DUWS_opcom_tick], ["creep", []],
+        ["state", "buildup"], ["since", DUWS_opcom_tick], ["staged", -1], ["creep", []],
         ["roles", _roles apply {
             _x params ["_role", "_rally", "_required", "_waits", "_lambda", "_lane"];
             createHashMapFromArray [["role", _role], ["units", []], ["rally", _rally], ["required", _required],
@@ -333,10 +333,19 @@ DUWS_fnc_opcom_buildupStep = {
     private _r = [_attack] call DUWS_fnc_opcom_musterRatio;
     private _ready = ((_attack get "roles") findIf { (_x get "required") && {(_x get "units") isEqualTo []} }) < 0
         && {(_units findIf { [_x] call DUWS_fnc_opcom_marching }) < 0};
-    if (_ready && {_r >= OPCOM_MUSTER_IDEAL}) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
-    if (DUWS_opcom_tick - (_attack get "since") < ([OPCOM_MUSTER_EXPIRY, OPCOM_QRF_EXPIRY] select _qrf)) exitWith {};
-    if (_r >= OPCOM_MUSTER_MIN) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
-    [_attack, format ["abandoned at %1:1, short of the minimum", _r toFixed 2]] call DUWS_fnc_opcom_attackClose;
+    if (_ready && {_r >= ([OPCOM_MUSTER_MIN, OPCOM_MUSTER_IDEAL] select _qrf)}) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
+    // A unit sent to join restarts the wait, since it is what a muster short of the minimum waits for.
+    private _staged = -1;
+    if (_ready && {!_qrf}) then {
+        _staged = _attack getOrDefault ["staged", -1];
+        if (_staged < 0) then { _staged = DUWS_opcom_tick };
+    };
+    _attack set ["staged", _staged];
+    if (DUWS_opcom_tick - (_attack get "since") < ([OPCOM_MUSTER_EXPIRY, OPCOM_QRF_EXPIRY] select _qrf)
+        && {_staged < 0 || {DUWS_opcom_tick - _staged < OPCOM_MUSTER_STAGED}}) exitWith {};
+    private _bar = [OPCOM_ATTACK_BREAK, OPCOM_MUSTER_MIN] select _qrf;
+    if (_r >= _bar) exitWith { [_attack, _r] call DUWS_fnc_opcom_launch };
+    [_attack, format ["abandoned at %1:1, short of %2:1", _r toFixed 2, _bar]] call DUWS_fnc_opcom_attackClose;
 };
 
 // A unit lost once the attack runs leaves the rest to finish it. A bucket still on its lane has yet to close, so it keeps
