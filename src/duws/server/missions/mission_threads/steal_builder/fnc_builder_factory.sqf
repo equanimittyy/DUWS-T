@@ -39,6 +39,5 @@ DUWS_fnc_buildRegister = {
     if (_zoneKey != "") then {
         _obj setVariable ["DUWS_buildZone", _zoneKey];
         _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
-        [_factory] call DUWS_fnc_zoneBuildCredits;
     };
 };

@@ -146,7 +146,7 @@ fnc_zone_garrison_fortify = {
 	[_zoneKey, [_old, _side] call DUWS_fnc_zoneSpawnList, _x1] call DUWS_fnc_garrisonBuyTier;
 	// No thread adopts a zone's tier the way the town garrison thread does, so the buy re-stands it here.
 	if ([_zoneKey] call DUWS_fnc_garrisonHeld) then { [_zoneKey, _x1] call DUWS_fnc_garrisonRestand };
-	[[_zoneKey] call DUWS_fnc_zoneFlag] call DUWS_fnc_zoneBuildCredits;
+	[_zoneKey, _old, _new] call DUWS_fnc_zoneBuildGrant;
 	["INFO", "ZONES", format ["%1 tier %2 -> %3 (%4)", _zoneKey, _old, _new, _reason]] call fnc_log;
 	_new
 };

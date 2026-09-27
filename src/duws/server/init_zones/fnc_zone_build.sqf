@@ -1,8 +1,8 @@
 // Locality: server. A held zone's flag is an R3F factory for fortifications (docs/info/gameplay/zones_and_civilians.md).
 //
-// The flag's credits are derived, never stored: the tier's allowance minus the cost of every build still standing or
-// stowed, so a clear, a sale or a wreck frees its points at the next recompute. Builds are filed under their own
-// key beside the zone's, so a clear takes them without touching the prefab, and they stream with the zone.
+// The flag's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and this
+// file adds a tier purchase's allowance and a clear's refund. A destroyed build is lost. Builds are filed under their
+// own key beside the zone's, so a clear takes them without touching the prefab, and they stream with the zone.
 
 #define BUILD_REACH 100
 
@@ -33,22 +33,18 @@ DUWS_fnc_zoneBuildArm = {
                 };
             },
             [], 1.4, false, false, "",
-            "_this distance _target < 6 && {!(_target getVariable ['R3F_LOG_disabled', true])} && {(_target getVariable ['DUWS_zoneBuildCount', 0]) > 0}"];
+            "_this distance _target < 6 && {!(_target getVariable ['R3F_LOG_disabled', true])}"];
     }] remoteExec ["call", 0, _flg];
 };
 
-DUWS_fnc_zoneBuildCredits = {
-    params ["_flg"];
-    private _zoneKey = _flg getVariable ["DUWS_zoneKey", ""];
-    if (_zoneKey == "") exitWith {};
-    private _key = _flg getVariable "DUWS_buildKey";
-    private _classes = ((DUWS_compositions getOrDefault [_key, []]) select { alive _x }) apply { typeOf _x };
-    _classes append ((DUWS_stowed getOrDefault [_key, []]) apply { _x select 0 });
-    private _used = 0;
-    { _used = _used + ([_x] call DUWS_fnc_buildCost) } forEach _classes;
-    private _cap = if ([_zoneKey] call fnc_zone_bluforHeld) then { DUWS_zoneBuildPoints select ([_zoneKey] call fnc_zone_tier) } else { 0 };
-    _flg setVariable ["R3F_LOG_CF_credits", (_cap - _used) max 0, true];
-    _flg setVariable ["DUWS_zoneBuildCount", count _classes, true];
+// OPFOR buy tiers on their own ground too, and those grant nothing.
+DUWS_fnc_zoneBuildGrant = {
+    params ["_zoneKey", "_old", "_new"];
+    if !([_zoneKey] call fnc_zone_bluforHeld) exitWith {};
+    private _flg = [_zoneKey] call DUWS_fnc_zoneFlag;
+    if (isNull _flg) exitWith {};
+    _flg setVariable ["R3F_LOG_CF_credits", (_flg getVariable ["R3F_LOG_CF_credits", 0])
+        + (DUWS_zoneBuildPoints select _new) - (DUWS_zoneBuildPoints select _old), true];
 };
 
 // A piece in someone's hands or in a vehicle's cargo is left: deleting it would strand R3F's carry or cargo state.
@@ -59,10 +55,15 @@ DUWS_fnc_zoneBuildClear = {
     if (_key == "") exitWith {};
     private _members = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _held = _members select { !isNull attachedTo _x };
-    { deleteVehicle _x } forEach (_members - _held);
+    private _gone = _members - _held;
+    private _refund = 0;
+    // A wreck refunds nothing, as R3F's own sale scales its refund by damage.
+    { if (alive _x) then { _refund = _refund + ([typeOf _x] call DUWS_fnc_buildCost) } } forEach _gone;
+    { _refund = _refund + ([_x select 0] call DUWS_fnc_buildCost) } forEach (DUWS_stowed getOrDefault [_key, []]);
+    { deleteVehicle _x } forEach _gone;
     if (_held isEqualTo []) then { DUWS_compositions deleteAt _key } else { DUWS_compositions set [_key, _held] };
     DUWS_stowed deleteAt _key;
-    [_flg] call DUWS_fnc_zoneBuildCredits;
+    _flg setVariable ["R3F_LOG_CF_credits", (_flg getVariable ["R3F_LOG_CF_credits", 0]) + _refund, true];
     (localize "STR_DUWS_T_zonebuild_cleared") remoteExec ["hint", remoteExecutedOwner];
 };
 
@@ -70,15 +71,13 @@ DUWS_fnc_zoneBuildClear = {
 DUWS_fnc_zoneBuildWake = {
     params ["_zoneKey"];
     private _key = format ["%1_builds", _zoneKey];
-    if (_key in DUWS_stowed) then {
-        [_key] call fnc_duws_deploy;
-        {
-            _x setVariable ["R3F_LOG_CF_depuis_usine", true, true];
-            _x setVariable ["DUWS_buildZone", _zoneKey];
-            _x setVariable ["DUWS_buildLastGood", getPosATL _x];
-        } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
-    };
-    [[_zoneKey] call DUWS_fnc_zoneFlag] call DUWS_fnc_zoneBuildCredits;
+    if !(_key in DUWS_stowed) exitWith {};
+    [_key] call fnc_duws_deploy;
+    {
+        _x setVariable ["R3F_LOG_CF_depuis_usine", true, true];
+        _x setVariable ["DUWS_buildZone", _zoneKey];
+        _x setVariable ["DUWS_buildLastGood", getPosATL _x];
+    } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
 };
 
 // A stow would delete a piece out of someone's hands or a vehicle's cargo, so the lot waits for the next sleep.

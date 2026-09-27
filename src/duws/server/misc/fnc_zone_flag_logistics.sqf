@@ -16,7 +16,8 @@ if (isNull _flg) exitWith {};
 // the whole BLUFOR-only restriction. Broadcast so every client and late joiner agrees.
 _flg setVariable ["R3F_LOG_disabled", !_movable, true];
 _flg setVariable ["R3F_LOG_CF_disabled", !_movable, true];
-[_flg] call DUWS_fnc_zoneBuildCredits;
+// A capture resets the tier to 0, and the factory's balance restarts with it: BLUFOR inherit nothing.
+if (_movable) then { _flg setVariable ["R3F_LOG_CF_credits", 0, true] };
 
 // Below arms the pole once; the capture handlers call back only to flip the gate above.
 if (_flg getVariable ["DUWS_flagLogInit", false]) exitWith {};

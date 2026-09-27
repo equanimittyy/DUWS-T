@@ -319,17 +319,17 @@ the feature needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
 the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds stay
 and OPFOR can fight from them. When BLUFOR take the zone back, the builds count against the flag again.
 
-**The credits are derived, not stored.** A flag's credits are the allowance of the zone's tier
-(`DUWS_zoneBuildPoints`, `server_var_init.sqf`) minus the R3F cost of each build that stands or is stowed.
-`DUWS_fnc_zoneBuildCredits` recomputes them on a build, a clear, a tier purchase, a capture and a zone wake. A
-clear, a sale or a destroyed build therefore frees its full cost at the next recompute.
+**The credits are R3F's own running balance.** R3F spends the flag's credits on a build and refunds them on a
+sale. A tier purchase adds the difference between the two tiers' allowances (`DUWS_zoneBuildPoints`,
+`server_var_init.sqf`; `DUWS_fnc_zoneBuildGrant`), and a capture sets the balance to 0 with the tier. A
+destroyed build is lost: nothing refunds it.
 
 | Tier | 0 | I | II | III | IV |
 |---|---|---|---|---|---|
 | Allowance (R3F credits) | 0 | 500 | 750 | 1000 | 1250 |
 
-Tier 0 has no allowance, and a capture resets the tier to 0, so the player must buy a garrison tier before
-they can fortify a zone.
+The table gives the total allowance at each tier. Tier 0 has no allowance, so the player must buy a garrison
+tier before they can fortify a zone.
 
 **A build belongs to the flag that made it.** R3F reports each build to `DUWS_fnc_buildRegister`, which files it
 under the flag's own key, `<zoneKey>_builds`. That key is separate from the zone's key, so a clear removes the
@@ -342,19 +342,18 @@ drop (`deplacer.sqf`). If a zone's build settles more than 100 m from the zone c
 to its last good position and tells the carrier. A new build and a build unloaded from a vehicle both start as a
 carry, so the one check covers creation, unloading and moving.
 
-**Clear Fortifications removes every build of that flag at once**, and the recompute refunds their cost in full.
-The action shows only while BLUFOR hold the zone and the flag has builds. It leaves a build that a player carries
-or a vehicle holds.
+**Clear Fortifications removes every build of that flag at once** and refunds the full cost of each one that is
+intact. A wreck refunds nothing, as a sale of it would not. The action shows only while BLUFOR hold the zone. It
+leaves a build that a player carries or a vehicle holds.
 
 **A sale refunds 100%.** `R3F_LOG_CFG_CF_sell_back_bargain_rate` is 1 for every factory
 (`config_creation_factory.sqf`), and R3F still reduces the refund by the object's damage. A stow rebuilds each
 build as a new object, so the zone wake sets R3F's factory marker (`R3F_LOG_CF_depuis_usine`) again. Without the
 marker, a redeployed build cannot be sold.
 
-**The builds are saved; the credits are not.** The snapshot key `zoneBuilds` holds each zone's builds as a class,
-a world position and an orientation
-([`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#world-and-placement)). The restore
-derives the credits again from the restored tier and builds.
+**The builds and the balance are saved.** The snapshot key `zoneBuilds` holds each zone's balance and its builds
+as a class, a world position and an orientation
+([`campaign_persistence_plan.md`](../../plans/campaign_persistence_plan.md#world-and-placement)).
 
 ## Civilian town selection
 
