@@ -56,11 +56,12 @@ New work holds to:
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 - **A lift is the commander's call, not the rider's.** A unit stopped at a water leg takes a ferry, a boat or a
   helicopter, the tick one is free or affordable (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an
-  IFV or a transport helicopter — is sourced with the order it carries, when the pickup drive plus the carry beats the
-  walk (`fnc_opcom_taxi.sqf`). Either lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)).
-  Both run the one carry. Only an assault's or a flank's staging leg, a Garrison or a debug Move takes a land-taxi, so
-  no lift carries a Patrol or a QRF, though a patrol stopped at a water leg still takes a ferry. Drawing a combatant
-  hull onto taxi duty empties its post, like any other order that takes a garrisoned unit out.
+  IFV or a transport helicopter — is sourced with the order it carries, when the target lies more than
+  `OPCOM_TAXI_MIN_K` (2) cells away and the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Either
+  lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Both run the one carry. Only an
+  assault's or a flank's staging leg, a Garrison or a debug Move takes a land-taxi, so no lift carries a Patrol or a
+  QRF, though a patrol stopped at a water leg still takes a ferry. Drawing a combatant hull onto taxi duty empties its
+  post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
 
@@ -534,6 +535,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   cannot be planned inside the pick, and without the test a ground taxi to an island target would score in every
   pick and fail in every execute, so the order never went. The line reads a bay as wet though a road runs round it,
   which costs a hull some coastal rides a rotor or the walk then takes.
+- **A land-taxi carries a rider only beyond the 5x5 block round it.** A target at most `OPCOM_TAXI_MIN_K` (2) cells
+  away walks, in the pick (`DUWS_fnc_opcom_liftFor`) and the debug Move (`DUWS_fnc_opcom_taxiBind`) alike. The saving
+  prices the drive alone, so a short hop would score a lift that the pickup, board and drop eat.
 - **A ferry spends no pick.** The crossing belongs to an order the pick already bought, and a scored Ferry row spent
   a pick of its own and could leave a low-value rider stranded for many ticks. Each tick, after the task step, every
   stranded unit takes the best lift it can have now (`DUWS_fnc_opcom_ferryDispatch`): a free boat or helicopter, or a
