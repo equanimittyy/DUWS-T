@@ -17,10 +17,13 @@ DUWS_fnc_zoneBuildGrant = {
         + (DUWS_zoneBuildPoints select _new) - (DUWS_zoneBuildPoints select _old), true];
 };
 
-// A stow would delete a piece out of someone's hands or a vehicle's cargo, so the lot waits for the next sleep.
+// A stow would delete a piece out of someone's hands or a vehicle's cargo, or a gun a player's squadmate mans, so
+// the lot waits for the next sleep.
 DUWS_fnc_zoneBuildSleep = {
     params ["_zoneKey"];
     private _key = format ["%1_builds", _zoneKey];
-    if (((DUWS_compositions getOrDefault [_key, []]) findIf { !isNull attachedTo _x }) >= 0) exitWith {};
+    if (((DUWS_compositions getOrDefault [_key, []]) findIf {
+        !isNull attachedTo _x || {({alive _x} count crew _x) > 0}
+    }) >= 0) exitWith {};
     [_key] call fnc_duws_stow;
 };

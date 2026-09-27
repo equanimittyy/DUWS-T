@@ -13,13 +13,13 @@ DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\dete
 // The factory role is client-local, so it and the Clear action ride one JIP order. A string id, because an object-keyed
 // one would evict another order keyed to the same object (a FOB's actions).
 DUWS_fnc_siteBuildArm = {
-    params ["_factory", "_siteKey"];
+    params ["_factory", "_siteKey", ["_categories", ["Fortifications"]]];
     _factory setVariable ["DUWS_buildSite", _siteKey];
     _factory setVariable ["DUWS_buildKey", format ["%1_builds", _siteKey]];
-    [_factory, {
-        params ["_factory"];
+    [[_factory, _categories], {
+        params ["_factory", "_categories"];
         if (!hasInterface || isNull _factory) exitWith {};
-        [_factory, 0, west, ["Fortifications"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+        [_factory, 0, west, _categories] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
         _factory addAction [localize "STR_DUWS_T_zonebuild_clear",
             {
                 // hideOnUse off so a cancel keeps the action.

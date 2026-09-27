@@ -320,9 +320,15 @@ capture handlers previously guarded against with an `isServer` assert.
 
 ### Fortifying a held zone, the HQ and a FOB
 
-A zone's flag, the HQ building and each FOB building are R3F creation factories for the `Fortifications` category
-(`placement/fnc_site_build.sqf`). The player opens one with R3F's own "Open the creation factory" action. Only a
-zone with a flag has one, so a zone's factory needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
+A zone's flag, the HQ building and each FOB building are R3F creation factories (`placement/fnc_site_build.sqf`).
+A zone's flag builds from the `Fortifications` and `Static` categories. The HQ and a FOB build from `Fortifications`
+only. The player opens a factory with R3F's own "Open the creation factory" action. Only a zone with a flag has one,
+so a zone's factory needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
+
+**A built static weapon stands empty.** The zone's garrison mans only the zone's own guns, not its builds, so a
+player or a squadmate crews a built gun. A zone does not stow its builds while a squadmate mans one of them
+(`DUWS_fnc_zoneBuildSleep`), because a stow would delete the gun with its crew. The `Static` category holds only the
+statics whose config names it as their `vehicleClass`, so a mod's statics show only if the mod uses that category.
 
 **A zone's factory follows ownership.** `fnc_zone_flag_logistics` sets the factory gate (`R3F_LOG_CF_disabled`)
 with the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds
