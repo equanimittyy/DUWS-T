@@ -275,7 +275,7 @@ An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marche
 and only becomes real men when a player comes near. A contact is what intel makes of one: one global marker
 on the position that record held at the moment the intel landed, and nothing after that.
 
-`server/search/fnc_intel_contact_init.sqf` draws it. The marker is a half-size arrow (`mil_arrow_noShadow`) on the
+`server/search/fnc_intel_contact_init.sqf` draws it. The marker is a 0.8-size arrow (`mil_arrow_noShadow`) on the
 unit's position, rotated to its heading with `setMarkerDir` — the leg it is walking now, or the target once
 the route is spent, because a route bends around terrain and its last point is not where the unit is headed
 next. A streamed unit plots at its group leader and heads for the group's current waypoint instead, because

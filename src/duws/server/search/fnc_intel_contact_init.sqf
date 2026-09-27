@@ -54,7 +54,7 @@ DUWS_fnc_intel_contactReveal = {
     _mk setMarkerShape "ICON";
     _mk setMarkerType "mil_arrow_noShadow";
     _mk setMarkerColor "ColorOPFOR";
-    _mk setMarkerSize [0.5, 0.5];
+    _mk setMarkerSize [0.8, 0.8];
     _mk setMarkerDir _dir;
 
     DUWS_intel_contacts set [_id, _mk];
