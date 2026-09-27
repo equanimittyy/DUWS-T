@@ -412,7 +412,7 @@ DUWS_zoneAirRing = 1500;
 DUWS_zoneAirCommitSpeed = 250;   // km/h
 
 // A held zone's flag factory allowance in R3F credits, by garrison tier 0-IV (fnc_zone_build.sqf).
-DUWS_zoneBuildPoints = [0, 500, 750, 1000, 1250];
+DUWS_zoneBuildPoints = [0, 250, 500, 1000, 2000];
 // The HQ's and each FOB's, granted once when the base is built.
 DUWS_baseBuildPoints = 1250;
 

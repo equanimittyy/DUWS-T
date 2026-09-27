@@ -340,7 +340,7 @@ sale. A destroyed build is lost: nothing refunds it. What adds credits depends o
 
 | Zone tier | 0 | I | II | III | IV |
 |---|---|---|---|---|---|
-| Allowance (R3F credits) | 0 | 500 | 750 | 1000 | 1250 |
+| Allowance (R3F credits) | 0 | 250 | 500 | 1000 | 2000 |
 
 The zone table gives the total allowance at each tier. Tier 0 has no allowance, so the player must buy a garrison
 tier before they can fortify a zone.
