@@ -66,9 +66,10 @@ batch of them at once, so their line is spoken by the payout rather than by the 
 | Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
 | Contact | an Allseer line, one for the whole batch, that names no place and no count |
 
-`fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
-caller: the recon mission marks its target under its own confirm line rather than beneath a second
-announcement.
+`fnc_zone_reveal`, `fnc_civ_town_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands
+the reporting to the caller: the recon mission marks its target under its own confirm line rather than
+beneath a second announcement, and a hidden town that enters the BLUFOR band is announced by its band card
+alone (`fnc_town_rep_adjust`).
 
 Two functions rather than one switched writer, because the two arrays are keyed differently — a zone by
 position compared through `str`, since that array carries no index; a town by index — and their markers

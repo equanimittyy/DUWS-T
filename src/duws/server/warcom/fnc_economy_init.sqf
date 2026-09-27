@@ -183,6 +183,9 @@ fnc_town_rep_adjust = {
 	if (((_old <= -10) != (_new <= -10)) || {(_old >= 10) != (_new >= 10)}) then {
 		[] call fnc_enemy_towns_refresh;
 		{ [_townIndex, _forEachIndex] call fnc_vendor_markerPaint } forEach ([_townIndex] call fnc_vendor_recs);
+		// A town siding with BLUFOR is the player's ground, so it goes on the map. Quiet, because the band
+		// card below names it and a Town Discovered card beside it would announce one event twice.
+		if (_new >= 10) then { [_townIndex, true] call fnc_civ_town_reveal };
 		// A town hardcore still hides gets no card: naming it would reveal ground the map does not show.
 		if ((missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true]) then {
 			private _name = text ((missionNamespace getVariable ["civ_locations", []]) param [_townIndex, locationNull]);

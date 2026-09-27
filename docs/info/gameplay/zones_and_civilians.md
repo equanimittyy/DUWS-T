@@ -383,8 +383,9 @@ markers, the income and the garrison cannot disagree about which side a town is 
 A town that enters a new band posts a card to every player, as a zone capture does: `town_blufor`,
 `town_opfor` or `town_neutral` (`fnc_town_rep_adjust`). The card fires even when the passive AoI drift
 causes the crossing, because a crossing is rare and the drift's own reputation cards are silenced. A
-town that hardcore still hides gets no card, because the card would name ground that the map does not
-show.
+hidden town that enters the BLUFOR band is revealed first, quietly, so its `town_blufor` card is the
+only announcement. A hidden town that enters another band gets no card, because the card would name
+ground that the map does not show.
 
 ### Garrison tiers 0 to IV
 
