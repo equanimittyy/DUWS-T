@@ -300,7 +300,7 @@ so it moves no faster than a truck delivers.
   the first one's ground scores nothing and the commander spreads its assets rather than stacking them. A radio's
   towns, an OP's cells and a gun's reach are properties of the ground an asset overlooks, not of the cell it stands
   on, so no asset reads the need field. A gun's reach is sampled at 81 lattice points, since testing every cell of a
-  20 km disc against the area of influence would not fit the pick's unscheduled pass, and the whole disc is the
+  15 km disc against the area of influence would not fit the pick's unscheduled pass, and the whole disc is the
   share's denominator, so reach over sea, BLUFOR ground or past the play box counts against a site. Overlap counts
   against the asset's own type: a pit answers a contact in seconds where a battery shells across the map, so neither
   does the other's job. An asset still siting or on its truck counts as standing, as it counts against its type's
@@ -1042,13 +1042,14 @@ the shared terrain siting picks the spot (`fnc_hardpoint_score`,
 |---|---|
 | Radio tower | the most town worth brought newly under OPFOR's area of influence × defend, more than `AOI_TOWER_REACH` in grid cells (10) from every other tower |
 | OP | the most cells within `OP_OBSERVE_K` that no other OP's ring already covers |
-| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (5 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF_K` (1) cells |
-| Artillery battery | the same over `OPCOM_ARTY_REACH` (20 km), against the other batteries |
+| Mortar pit | the most OPFOR ground within `OPCOM_MORTAR_REACH` (4 km) that no other mortar reaches, with no pit within `OPCOM_GUN_STANDOFF_K` (1) cells |
+| Artillery battery | the same over `OPCOM_ARTY_REACH` (15 km), against the other batteries |
 | Standalone hardpoint | the most cover Value: need × the cover it adds over its 5×5 block |
 | Minefield | the band cell holding the most traffic, cover Value breaking a tie, since a field is worth what it denies and denies nothing on ground nobody crosses |
 
 A gun's true range depends on the faction's gun and is read only at fire time (`inRangeOfArtillery`), so siting and
-Value both use a fixed reach per type.
+Value both use a fixed reach per type. A mission inside the fixed reach that the gun cannot reach is refused, with a
+WARN line in the RPT and on the AI overlay.
 
 ### Indirect-fire hardpoints
 
