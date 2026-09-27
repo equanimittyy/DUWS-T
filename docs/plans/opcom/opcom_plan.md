@@ -338,11 +338,11 @@ so it moves no faster than a truck delivers.
   AT and AP minefield 0.5 each. The asset builds (tower, OP, mortar and battery) stay out of the mix and weigh each by
   its own action weight ([§Archetype](#archetype-phase-7)): a cap, not a share, bounds how many stand, and a flat-capped type
   in the mix would hold a share its cap never fills, which pushes every other type over its own. A minefield is
-  counted by variant, which OPCOM records for each belt it lays; a field it did not lay carries no variant on record
-  and stays out of the mix, though it counts against the caps. The mix reads 1 at the target, below 1 past it and
-  above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts the pick and never sets a
-  quota: a type past its share still builds where its Value is high enough. The +1 keeps a type with none standing
-  finite. A type outside the mix reads 1, and random mode ignores Value, so it ignores the mix too.
+  counted by variant, which OPCOM's belts, the recon mission's field and a debug field record; a Clear Minefield
+  job's thinned field records none, so it stays out of the mix and the variant caps. The mix reads 1 at the
+  target, below 1 past it and above 1 short of it, so a cheap type cannot fill the caps ahead of the rest. It tilts
+  the pick and never sets a quota: a type past its share still builds where its Value is high enough. The +1 keeps a
+  type with none standing finite. A type outside the mix reads 1, and random mode ignores Value, so it ignores the mix too.
 - **A hire takes the same mix over the roster.** A hire source's Value is × its row's factor off its archetype's
   `recruitMix`, the same formula counted over OPCOM's live units by menu row, supply trucks included. The shares are
   taken over only the rows the faction can field now: a row it cannot hire would hold a share nothing can fill, and
@@ -459,7 +459,7 @@ The debug harness spends outside the pick and is not capped.
 | `OPCOM_CAP_GARRISON` (10) | a Garrison's zone | the combatants homed at that zone, the set its reserve pool fields |
 | `OPCOM_CAP_SUPPLY` (10) | every supply action | the trucks out on an errand |
 | `OPCOM_CAP_HP_PER_ZONE` (12) × zones | every Build and Minefield | every standing OPFOR hardpoint of every type, towers, OPs and guns included, seeded ones included, and every build still siting or on its truck |
-| per type × zones | a Build or Minefield of that type | the same, by type ([§What the commander builds](#what-the-commander-builds)) |
+| per type × zones | a Build or Minefield of that type | the same, by type, and by variant for a minefield ([§What the commander builds](#what-the-commander-builds)) |
 
 - **Supply trucks sit outside the unit cap.** The supply cap bounds the trucks in flight. If the trucks counted, a
   full roster would stop every supply action.
@@ -1033,7 +1033,8 @@ hardpoint and a build still on its truck:
 | 5 Jets (600) | nothing new |
 
 The tower, the mortar pit and the battery cap flat: the tower cap is also the reputation amplifier's, and the guns'
-is the resident AI's. AT, AA and OP cap at 2 a campaign zone, GMG and minefield at 1 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
+is the resident AI's. AT, AA and OP cap at 2 a campaign zone, GMG, AT minefield and AP minefield at 1 each
+(`OPCOM_CAP_HP_TYPE_PER_ZONE`).
 MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
 `OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
 

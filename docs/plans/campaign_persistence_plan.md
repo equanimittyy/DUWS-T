@@ -584,7 +584,7 @@ row names no geometry: the snapshot stores the centres of the squares that still
 site radius, and the restore plans those squares again. The recon mission's field is a streamed belt of
 the same kind and comes back the same way. A civilian job's field is laid whole as the job's prop, so it
 has no belt saved and goes with its job. Each belt's variant is saved beside its squares, read off a
-planned mine, because only OPCOM's belts are in `DUWS_opcom_mineVariants`
+planned mine, so a belt missing from `DUWS_opcom_mineVariants` still restores as what it is
 ([§The commander](#the-commander)).
 
 Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
@@ -657,10 +657,10 @@ cooldown are all tick counts, so the restore sets `DUWS_opcom_tick` and `DUWS_op
 thread, after `fnc_opcom_belief_init` and the tasking init have run and before the first tick. Both inits
 assign them unconditionally, so a restore that ran earlier would be undone.
 
-**A minefield's variant lives outside the hardpoint registry.** `DUWS_opcom_mineVariants` maps a build key to
-`AT` or `AP` because the registry row carries no variant, and the build mix weighs the two apart, so a restore
-without it lays the wrong mix for the rest of the campaign. `DUWS_hpOpcomSeq` is the key counter behind those
-keys and collides the same way `taskSeq` does.
+**A minefield's variant lives outside the hardpoint registry.** `DUWS_opcom_mineVariants` maps a field's key to
+`AT` or `AP` because the registry row carries no variant, and the build mix and the caps weigh the two apart, so a
+restore without it lays the wrong mix and fills the wrong cap for the rest of the campaign. `DUWS_hpOpcomSeq` is the
+key counter behind OPCOM's keys and collides the same way `taskSeq` does.
 
 **A saved `spawnClass` is a hull, not a contract.** It is stored because `DUWS_fnc_tokenClass` redraws a
 random model per spawn, so a restored vehicle would otherwise swap hulls. A class the loaded mods no longer
