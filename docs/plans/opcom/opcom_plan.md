@@ -113,7 +113,7 @@ has to name its Cost past it: a Garrison rests and a Probe observes.
   and no posture factor is planned: a higher bar only makes attacks fewer and larger. A sighted player adds
   `OPCOM_PLAYER_WORTH` (3) to their group's firepower, because a player can turn a fight that headcount says is lost.
 - **The band** reads the same `r` to gate *how* an offensive runs (`≥2` assault; `0.5–2` assault or flank; `<0.5`
-  hold). Every offensive then musters to the ideal bar before it launches
+  hold). Every offensive then musters before it launches
   ([§Commitment](#commitment-orders-are-sticky)). `P(win)` (whether) and the band (how) are two jobs off one `r`. The
   band gates once, at commit ([§Attack](#attack-phase-5)).
 
@@ -590,18 +590,21 @@ commit + the order's re-issue span, the earliest tick the pick may draw the unit
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
 - **An attack musters, then launches as one wave** (Phase 5). A muster is what buildup does: it binds
   force across ticks at a safe rally short of the target, one cell a bucket, then advances all together — it never dribbles units into contact,
-  which no-retreat would turn into defeat in detail. It launches the tick its bound force reaches the archetype's
-  **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline). At `OPCOM_MUSTER_EXPIRY` it launches if
-  it holds at least the archetype's **minimum** (0.75:1 baseline), and is otherwise abandoned, its units returning to
-  rest, so a player who keeps reinforcing cannot hold it forever. The baseline sits below an attacker's usual 3:1
+  which no-retreat would turn into defeat in detail. It sends for units until its bound force reaches the archetype's
+  **ideal** ratio over believed BLUFOR force at the target (1.5:1 baseline), and launches the tick every unit it holds
+  stands on its rally at the archetype's **minimum** (0.75:1 baseline) or better. Short of the minimum, it waits
+  `OPCOM_MUSTER_STAGED` (60 ticks, 5 min) after the last unit arrives for one more to join, and a unit sent to join
+  restarts that wait. At `OPCOM_MUSTER_EXPIRY` (360 ticks, 30 min) it launches wherever its units stand, so a player
+  who keeps reinforcing cannot hold it forever. Either timeout abandons it instead when it holds less than
+  `OPCOM_ATTACK_BREAK`, the bar it would fail on at its first step, and its units return to rest. The baseline sits below an attacker's usual 3:1
   because a sighted player already counts as 1 + `OPCOM_PLAYER_WORTH`, so a believed 1.5:1 is already a hard fight
   for the players, and a 3:1 wave is one they can only survive. Both bars read believed force, so a mid-muster
   reinforcement raises them, and a Probe that refreshes the target moves them to whatever is actually there
   ([§Value](#value)). An attack in buildup commits below the odds it launches at, so the minimum bar is its floor
   at launch and `OPCOM_MUSTER_HOLD` (0.5:1) its floor at commit. Buildup is also how a force-short attack waits for
   units: an attack short of the ideal bar stays a target of its row, and a later pick sends it more from free units
-  and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF musters on the same bars, where its units stand
-  and over `OPCOM_QRF_EXPIRY` instead ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
+  and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF launches at the ideal bar, or at the minimum
+  once `OPCOM_QRF_EXPIRY` runs out, where its units stand ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
 
 ### Re-issue: a span per order
 
@@ -643,11 +646,11 @@ order and binds nothing: the order ends on its own predicate, which frees the un
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
-| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY` for a QRF ([§Commitment](#commitment-orders-are-sticky)) |
+| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the minimum bar met; or `OPCOM_MUSTER_STAGED` after that last arrival, or `OPCOM_MUSTER_EXPIRY`, at `OPCOM_ATTACK_BREAK` or better. A QRF needs the ideal bar, or the minimum at `OPCOM_QRF_EXPIRY` ([§Commitment](#commitment-orders-are-sticky)) |
 | `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF | `resolve`: every bound unit back at rest, and no side bucket still on its lane; or the break: the bound force below `OPCOM_ATTACK_BREAK` (0.2:1) of the believed BLUFOR force at the target, read as the muster bars read it, and every survivor drops to `guard` where it stands |
 | `done` | released back to the roster | — | — |
 
-Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
+Buildup is where a muster happens: the minimum ratio and the two timeouts are its launch predicate, and a
 force-short attack sits in buildup until later picks fill its buckets.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
@@ -699,7 +702,7 @@ Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/actions/fnc
 kind, `assault` or `flank`. A QRF's one bucket is written by its sweep (`DUWS_fnc_opcom_qrfSweep`), since it has no
 rally to stage. A flank needs no count of mobile units at commit: its enveloping
 buckets are filled by later picks like any other, and a flank whose hooks stay empty leaves the fix to launch
-alone on the minimum bar at `OPCOM_MUSTER_EXPIRY`.
+alone at `OPCOM_MUSTER_EXPIRY`.
 
 - **Water decides who goes and how.** Every rally sits on the target's landmass (`DUWS_opcom_grid_mass`, a flood
   fill over the grid's land cells at init), so no bucket stages across water from its fight and a flank never takes
@@ -894,7 +897,7 @@ its target and the engine paths it. A group in combat ignores a move waypoint, s
 | Chunk | Builds |
 |---|---|
 | **5.1** Ownership | **Shipped** (`taskings/actions/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`taskings/actions/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (4) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.2** Buildup | **Shipped** (`taskings/actions/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (4) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_STAGED` (60 ticks) and `OPCOM_MUSTER_EXPIRY` (360 ticks), and abort on a unit lost while staging |
 | **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its `maneuver` buckets waiting on `fix`, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
 | **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |
