@@ -550,6 +550,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
 - **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
   a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
   of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
+- **A flip removes every unit garrisoned at the site.** `DUWS_fnc_opcom_siteLost` deletes each `garrison` tasking
+  homed at a zone or town that leaves OPFOR hands, combatant or `noncombat`. A unit still marching in to settle, or on
+  an errand to the site, drops to `guard` where it stands.
 - **A unit heals only at rest in its zone.** Only the `garrison` order heals: never on guard, never on the march in,
   and never while the zone is contested, since a zone under assault is no rest. The heal resumes when the contest
   lifts, and the contested ticks bank nothing. A boat rests and heals at its zone's port, even where the port lies
