@@ -392,8 +392,13 @@ factory" action and shows under the same condition. It leaves a build that a pla
 
 **A sale refunds 100%.** `R3F_LOG_CFG_CF_sell_back_bargain_rate` is 1 for every factory
 (`config_creation_factory.sqf`), and R3F still reduces the refund by the object's damage. A deploy rebuilds each
-build as a new object, so `DUWS_fnc_siteBuildDeploy` sets R3F's factory marker (`R3F_LOG_CF_depuis_usine`) again.
-Without the marker, a redeployed build cannot be sold.
+build as a new object, so `DUWS_fnc_siteBuildDeploy` sets R3F's factory marker (`R3F_LOG_CF_depuis_usine`) and the
+build's site (`DUWS_buildSite`) again. Without the marker, a redeployed build cannot be sold.
+
+**A site's build sells back to its own factory from anywhere in the site.** R3F's direct sale ("Send back to the
+factory" on the build) asks `DUWS_fnc_canSellTo` which factories accept the build. A build with a site
+(`DUWS_buildSite`, broadcast) goes only to the factory of the same site, at any distance, because the drop check
+already holds it within 100 m of that site. Every other build keeps R3F's rule: the nearest factory within 20 m.
 
 **The builds and the balances are saved.** The snapshot key `zoneBuilds` holds each zone's balance and builds, and
 `baseBuilds` holds the HQ's and each FOB's, as a class, a world position and an orientation per build

@@ -6,6 +6,9 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: each new build is reported to the server, which files it under
+ * its factory for the campaign save. (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then

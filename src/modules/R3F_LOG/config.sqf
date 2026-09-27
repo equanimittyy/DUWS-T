@@ -17,6 +17,11 @@
  * NOTE IMPORTANTE : lorsqu'une fonctionnalité logistique est accordée à un nom de classe d'objet/véhicule, les classes
  *                   héritant de cette classe mère/générique (selon le CfgVehicles) se verront également dotées de cette fonctionnalité.
  *                   Exemple d'arborescence du CfgVehicles : http://madbull.arma.free.fr/A3_stable_1.20.124746_CfgVehicles_tree.html
+ * 
+ * Modified for DUWS_T (GPLv3 section 5a modification notice):
+ * - 2026-08-13: logistics is off by default (R3F_LOG_CFG_disabled_by_default), so each object opts in.
+ * - 2026-09-27: the creation factory condition refuses the captured builder vehicle inside an HQ or
+ *   FOB ring.
  */
 
 /**

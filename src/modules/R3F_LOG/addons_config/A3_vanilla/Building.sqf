@@ -1,3 +1,8 @@
+/**
+ * Modified 2026-09-07 for DUWS_T: FlagCarrierCore is no longer vehicle cargo, so a zone's flagpole
+ * cannot leave its zone in a vehicle. (GPLv3 section 5a modification notice.)
+ */
+
 R3F_LOG_CFG_can_tow = R3F_LOG_CFG_can_tow +
 [
 ];

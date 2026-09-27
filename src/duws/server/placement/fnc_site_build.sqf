@@ -1,5 +1,5 @@
-// Locality: server, except DUWS_fnc_inBaseRing. A held zone's flag, the HQ and each FOB are R3F factories for
-// fortifications (docs/info/gameplay/zones_and_civilians.md).
+// Locality: server, except DUWS_fnc_inBaseRing and DUWS_fnc_canSellTo. A held zone's flag, the HQ and each FOB are
+// R3F factories for fortifications (docs/info/gameplay/zones_and_civilians.md).
 //
 // A factory's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and the
 // callers add an allowance and the refund of a clear or of a rejected new build. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
@@ -14,7 +14,7 @@ DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\dete
 // one would evict another order keyed to the same object (a FOB's actions).
 DUWS_fnc_siteBuildArm = {
     params ["_factory", "_siteKey", ["_categories", ["Fortifications"]]];
-    _factory setVariable ["DUWS_buildSite", _siteKey];
+    _factory setVariable ["DUWS_buildSite", _siteKey, true];
     _factory setVariable ["DUWS_buildKey", format ["%1_builds", _siteKey]];
     [[_factory, _categories], {
         params ["_factory", "_categories"];
@@ -81,7 +81,7 @@ DUWS_fnc_siteBuildDeploy = {
     [_key] call fnc_duws_deploy;
     {
         _x setVariable ["R3F_LOG_CF_depuis_usine", true, true];
-        _x setVariable ["DUWS_buildSite", _siteKey];
+        _x setVariable ["DUWS_buildSite", _siteKey, true];
         _x setVariable ["DUWS_buildLastGood", getPosATL _x];
     } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
 };
@@ -90,6 +90,15 @@ DUWS_fnc_siteBuildDeploy = {
 DUWS_fnc_inBaseRing = {
     params ["_pos"];
     ((Array_of_FOBpos + [PosOfBLUHQ]) findIf { (_x distance2D _pos) <= DUWS_base_keep_radius }) >= 0
+};
+
+// Broadcast: R3F's direct sale runs it on every client. A site's build needs no range, as the drop check already holds
+// it within reach of its site.
+DUWS_fnc_canSellTo = {
+    params ["_obj", "_factory", "_range"];
+    private _site = _obj getVariable ["DUWS_buildSite", ""];
+    if (_site == "") exitWith { _obj distance _factory < _range };
+    _factory getVariable ["DUWS_buildSite", ""] == _site
 };
 
 // R3F reports every carried object once it has settled after a drop (deplacer.sqf). A site's build must stay within

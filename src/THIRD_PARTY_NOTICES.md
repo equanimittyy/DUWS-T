@@ -11,10 +11,27 @@ License, version 3 or later. The original notice and full terms ship in
 
 Modified for DUWS_T:
 
+- `modules/R3F_LOG/addons_config/A3_vanilla/Building.sqf` (2026-09-07): `FlagCarrierCore` is
+  no longer vehicle cargo, so a zone's flagpole cannot leave its zone in a vehicle.
+- `modules/R3F_LOG/config.sqf` (2026-08-13, 2026-09-27): logistics is off by default, so each
+  object opts in; the creation factory condition refuses the captured builder vehicle inside an
+  HQ or FOB ring.
+- `modules/R3F_LOG/config_creation_factory.sqf` (2026-09-27): the sell-back rate is 1 instead
+  of 0.75.
+- `modules/R3F_LOG/objet_deplacable/deplacer.sqf` (2026-09-27): each object that settles after
+  a drop is reported to the server, which holds a factory build within reach of its site and a
+  builder-vehicle build out of every base ring.
+- `modules/R3F_LOG/surveiller_conditions_actions_menu.sqf` and
+  `modules/R3F_LOG/usine_creation/revendre_direct.sqf` (2026-09-27): the direct sale of a zone,
+  HQ or FOB build accepts only the factory that made it, from anywhere in its site, instead of
+  the nearest factory within 20 m.
 - `modules/R3F_LOG/systeme_protection_blessures.sqf` (2026-09-11): the carry injury shield
   was widened from the host player's group to all local units, so a hand-carried vehicle
-  cannot ram and kill unshielded AI. The change is also marked in that file's header, per
-  GPLv3 §5(a).
+  cannot ram and kill unshielded AI.
+- `modules/R3F_LOG/usine_creation/creer_objet.sqf` (2026-09-27): each new build is reported to
+  the server, which files it under its factory for the campaign save.
+
+Each change is also marked in its file's header, per GPLv3 §5(a).
 
 ## A3 Wounding System (AIS) — `modules/AIS/`
 

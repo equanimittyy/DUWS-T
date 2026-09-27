@@ -10,6 +10,10 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: each object that settles after a drop is reported to the server,
+ * which holds a factory build within reach of its site and a builder-vehicle build out of every
+ * base ring. (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then

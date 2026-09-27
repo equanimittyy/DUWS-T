@@ -552,10 +552,11 @@ fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc
 fnc_capture_zones_task = compile preprocessFileLineNumbers "duws\server\misc\fnc_capture_zones_task.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_zone_flag_logistics = compile preprocessFileLineNumbers "duws\server\misc\fnc_zone_flag_logistics.sqf";
-// Not broadcast: R3F's drop report and a factory's Clear action remoteExec to the server. The base-ring test is
-// the exception, for R3F's client-side factory condition.
+// Not broadcast: R3F's drop report and a factory's Clear action remoteExec to the server. The base-ring and sale
+// tests are the exceptions, for R3F's client-side factory and sale conditions.
 [] call compile preprocessFileLineNumbers "duws\server\placement\fnc_site_build.sqf";
 publicVariable "DUWS_fnc_inBaseRing";
+publicVariable "DUWS_fnc_canSellTo";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_build.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";

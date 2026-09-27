@@ -8,6 +8,10 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: the direct sale of a zone, HQ or FOB build accepts only the
+ * factory that made it, from anywhere in its site, instead of any factory within 20 m.
+ * (GPLv3 section 5a modification notice.)
  */
 
 private ["_joueur", "_vehicule_joueur", "_cursorTarget_distance", "_objet_pointe", "_objet_pas_en_cours_de_deplacement", "_fonctionnalites", "_pas_de_hook"];
@@ -221,7 +225,8 @@ while {true} do
 			isNull R3F_LOG_joueur_deplace_objet && isNull (_objet_pointe getVariable ["R3F_LOG_est_transporte_par", objNull]) &&
 			_objet_pas_en_cours_de_deplacement &&
 			{
-				_objet_pointe distance _x < 20 && !(_x getVariable "R3F_LOG_CF_disabled") &&
+				// DUWS: a site's build goes back to its own factory from anywhere in the site (fnc_site_build.sqf).
+				[_objet_pointe, _x, 20] call DUWS_fnc_canSellTo && !(_x getVariable "R3F_LOG_CF_disabled") &&
 				_x getVariable ["R3F_LOG_CF_side_addAction", side group _joueur] == side group _joueur
 			} count R3F_LOG_CF_liste_usines != 0;
 		

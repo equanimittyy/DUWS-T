@@ -8,6 +8,10 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: the direct sale of a zone, HQ or FOB build accepts only the
+ * factory that made it, from anywhere in its site, instead of the nearest factory within 22 m.
+ * (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -27,7 +31,8 @@ else
 	_distance_usine = 1E39;
 	{
 		if (
-			_objet distance _x < 22 && !(_x getVariable "R3F_LOG_CF_disabled") &&
+			// DUWS: a site's build goes back to its own factory from anywhere in the site (fnc_site_build.sqf).
+			[_objet, _x, 22] call DUWS_fnc_canSellTo && !(_x getVariable "R3F_LOG_CF_disabled") &&
 			_x getVariable ["R3F_LOG_CF_side_addAction", side group player] == side group player &&
 			_objet distance _x < _distance_usine
 		) then
@@ -45,7 +50,7 @@ else
 			{
 				if (count crew _objet == 0 || getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1) then
 				{
-					if (_objet distance _usine <= 30) then
+					if ([_objet, _usine, 30] call DUWS_fnc_canSellTo) then
 					{
 						if (count (_objet getVariable ["R3F_LOG_objets_charges", []]) == 0) then
 						{

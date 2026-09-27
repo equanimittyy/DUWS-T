@@ -38,5 +38,5 @@ DUWS_fnc_buildRegister = {
     if (_key in DUWS_retired) exitWith { [_obj] call fnc_duws_disposeAfter };
     [_obj, _key] call fnc_duws_keep;
     private _site = _factory getVariable ["DUWS_buildSite", ""];
-    if (_site != "") then { _obj setVariable ["DUWS_buildSite", _site] };
+    if (_site != "") then { _obj setVariable ["DUWS_buildSite", _site, true] };
 };

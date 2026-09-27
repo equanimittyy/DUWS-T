@@ -23,6 +23,9 @@
  * Pour comprendre le système de white/black list, consultez les paramètres requis par USER_FUNCT\init_creation_factory.sqf
  * Il y a trois white list "FULL", "MEDIUM" and "LIGHT", et une black list.
  * La black list est utilisée si aucune white list n'est mentionnée lors de l'appel de USER_FUNCT\init_creation_factory.sqf.
+ * 
+ * Modified 2026-09-27 for DUWS_T: the sell-back rate is 1 instead of 0.75, so a sale refunds the
+ * full price, less damage. (GPLv3 section 5a modification notice.)
  */
 
 /**
