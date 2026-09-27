@@ -124,7 +124,7 @@ rather than designed:
 
 - **Prices.** `OPCOM_AP_UNIT`, `OPCOM_AP_HARDPOINT`, `OPCOM_AP_REINFORCE`, `OPCOM_AP_FORTIFY`, the zone and asset
   prices, `OPCOM_AP_PER_KM`, `OPCOM_AP_RAPPORT` and `OPCOM_AP_PER_FORCE` (1), against the drip (`OPCOM_AP_DRIP_TICKS`,
-  `OPCOM_AP_DRIP_FLOOR`). Whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce
+  `OPCOM_AP_DRIP_FLOOR`, `OPCOM_AP_DRIP_TIER`). Whether a Fortify is priced on the whole tier or on the tenth it fields, since a Reinforce
   buys back the rest.
 - **The score's shape.** `OPCOM_BANK_SCORE`, `OPCOM_PICK_TOP` and `OPCOM_PICK_SHARPNESS` ([§The pick](#the-pick)),
   `OPCOM_VALUE_HALFLIFE`, `OPCOM_SAVE_HORIZON`, `OPCOM_TRAFFIC_HALFLIFE` and `OPCOM_TRAFFIC_SHARE`,
