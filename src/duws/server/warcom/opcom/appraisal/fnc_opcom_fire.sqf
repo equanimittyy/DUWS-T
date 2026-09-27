@@ -117,15 +117,16 @@ DUWS_fnc_opcom_fireRun = {
 
 // A creep walks its rounds forward through an offensive's objective ahead of the wave, so it buys that wave's survival
 // rather than kills: worth a share of the force the offensive stakes, and scored without odds, since its objective
-// stands still where a sighting drifts, which is why a QRF takes none. One creep per offensive.
+// stands still where a sighting drifts, which is why a QRF takes none. Offered only in buildup: the creep's slot empties
+// once it fires at launch, so a later offer would buy the offensive a second.
 DUWS_fnc_opcom_creepTargets = {
     private _out = [];
     {
         private _attack = _x;
         private _roles = _attack get "roles";
         // Its rows walk through the objective, so an objective inside the HQ circle is aimed at the HQ.
-        if ((_attack get "creep") isEqualTo [] && {_roles isNotEqualTo []} && {(_attack get "kind") isNotEqualTo "qrf"}
-            && {[_attack get "pos"] call DUWS_fnc_opcom_fireClear}) then {
+        if ((_attack get "state") isEqualTo "buildup" && {(_attack get "creep") isEqualTo []} && {_roles isNotEqualTo []}
+            && {(_attack get "kind") isNotEqualTo "qrf"} && {[_attack get "pos"] call DUWS_fnc_opcom_fireClear}) then {
             private _pos = _attack get "pos";
             // The wave closes from its first role's rally, or from where that unit stands when it staged in place.
             private _from = (_roles select 0) get "rally";
