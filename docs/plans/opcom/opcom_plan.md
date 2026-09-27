@@ -188,7 +188,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | each BLUFOR-held zone and each town they have garrisoned that is not on an attack cooldown, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each sampled stale cell, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
@@ -549,7 +549,9 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   helicopter that reaches it, by hand.
 - **Garrison banks units into a zone.** Any free combatant, healthy or worn, or a hire raised at the zone itself, is
   a source. The unit rests in `garrison` and feeds the zone's reserve pool (`fnc_opcom_garrison.sqf`), so a survivor
-  of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there.
+  of any order is banked when the defense it adds outscores its other jobs, and a worn one heals there. An infantry
+  unit the pool fields at a live zone deposits no `effForce` while it stands (`DUWS_fnc_opcom_defenderStanding`): the
+  zone's own deposit counts its men off the roster.
 - **A flip removes every unit garrisoned at the site.** `DUWS_fnc_opcom_siteLost` deletes each `garrison` tasking
   homed at a zone or town that leaves OPFOR hands, combatant or `noncombat`. A unit still marching in to settle, or on
   an errand to the site, drops to `guard` where it stands.
@@ -638,7 +640,7 @@ order and binds nothing: the order ends on its own predicate, which frees the un
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
 | `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the ideal bar met, or the minimum bar at `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY` for a QRF ([§Commitment](#commitment-orders-are-sticky)) |
-| `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF | `resolve`: every bound unit back at rest, and no side bucket still on its lane |
+| `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF | `resolve`: every bound unit back at rest, and no side bucket still on its lane; or the break: the bound force below `OPCOM_ATTACK_BREAK` (0.2:1) of the believed BLUFOR force at the target, read as the muster bars read it, and every survivor drops to `guard` where it stands |
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the ideal and minimum ratios and the expiry are its launch predicate, and a
@@ -650,10 +652,14 @@ bucket's lane are its callers beside the debug page (`taskings/fnc_opcom_orders.
 
 **The runner**, each tick over every live attack (`DUWS_fnc_opcom_attackStep`): refresh each bound
 unit's status; in buildup, any bound unit `dead` or lost → **abort** (release the survivors, no AP refund), because a
-loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish; else test the current
-state's transition, and each side bucket's wait and close. A unit a hand order takes over from the debug page counts as
-lost. The runner sequences the states; the route and streaming machinery moves the units. There is
-no planner: a new way to attack is a new entry of roles rather than a new subsystem.
+loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish, unless the bound force
+falls below `OPCOM_ATTACK_BREAK` → **fail** (every survivor to `guard` where it stands, so the target is free for a
+new attack); else test the current state's transition, and each side bucket's wait and close. A unit a hand order
+takes over from the debug page counts as lost. An assault or a flank that fails in execution, below
+`OPCOM_ATTACK_BREAK` or with every unit lost, puts its target on a cooldown rolled from `OPCOM_ATTACK_COOLDOWN`
+(240–720 ticks, 20–60 min), and the attack sweep offers no attack on it until the cooldown ends
+(`DUWS_opcom_attackCooldown`, `DUWS_fnc_opcom_attackFail`). A QRF sets none, because its target is a sighting. The
+runner sequences the states; the route and streaming machinery moves the units. There is no planner: a new way to attack is a new entry of roles rather than a new subsystem.
 
 ### Ownership: the roster has to skip a bound unit
 
@@ -895,7 +901,7 @@ the engine paths it. A group in combat ignores a move waypoint, so the route hol
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
 the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
-`OPCOM_MUSTER_HOLD`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
+`OPCOM_MUSTER_HOLD`, `OPCOM_ATTACK_BREAK`, `OPCOM_ATTACK_COOLDOWN`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
 ## What AP buys
 
@@ -1205,7 +1211,8 @@ restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
-  `DUWS_opcom_attackSeq`, the tick, `DUWS_opcom_hqKnown`, the mine variants and `DUWS_hpOpcomSeq`.
+  `DUWS_opcom_attackSeq`, the attack cooldowns (`DUWS_opcom_attackCooldown`), the tick, `DUWS_opcom_hqKnown`, the
+  mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
   boarding rider keeps its frozen strength, and a bound rider keeps its route.
