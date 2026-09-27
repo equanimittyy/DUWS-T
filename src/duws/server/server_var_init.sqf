@@ -958,7 +958,7 @@ WARCOM_opfor_lastIncome = 0;
 // one rate times the level, because that curve paid 4x the rate for 8x the cumulative price and the
 // top two levels were never worth buying; this one climbs with what they cost.
 DUWS_intel_roll_by_level = [0, 0.0014, 0.0028, 0.0052, 0.0083];
-DUWS_intel_contact_life = 900;
+DUWS_intel_contact_life = 600;
 
 // Campaign-size throttle on every passive faucet (zone AP trickle, town income, both sides). Computed
 // once from the actual zone count (fnc_WARCOM_init), so income grows as sqrt(zones) above the reference

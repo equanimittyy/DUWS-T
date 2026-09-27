@@ -82,7 +82,7 @@ the map.
 search, all six side-mission sites, the civilian menu when it lands, and the Intelligence Center's clock.
 
 **A payout has two halves and pays both.** The pool half reveals one hidden position; the contact half
-plots every eligible OPCOM unit where it is marching. They answer different questions — *where is
+plots a random share of the eligible OPCOM units where they are marching. They answer different questions — *where is
 the war*, and *what is the enemy doing right now* — so making them compete for a single draw only ever
 starved whichever mattered more that hour. Either half can come up empty; the payout reports having nothing
 only when both do.
@@ -274,7 +274,7 @@ An OPCOM unit is a virtual record (`DUWS_opcom_taskings`), a hashMap that marche
 and only becomes real men when a player comes near. A contact is what intel makes of one: one global marker
 on the position that record held at the moment the intel landed, and nothing after that.
 
-`server/search/fnc_intel_contact_init.sqf` draws it. The marker is an arrow (`mil_arrow_noShadow`) on the
+`server/search/fnc_intel_contact_init.sqf` draws it. The marker is a half-size arrow (`mil_arrow_noShadow`) on the
 unit's position, rotated to its heading with `setMarkerDir` — the leg it is walking now, or the target once
 the route is spent, because a route bends around terrain and its last point is not where the unit is headed
 next.
@@ -287,8 +287,9 @@ arrow pointing at random.
 
 **The marker never moves, and that is the feature.** A tracker would cost one marker update per contact per
 tick for the whole team. So the contact ages: the unit marches on, and what the player holds is a last known
-position. `DUWS_intel_contact_life` (900 s) is how long that stands before the marker is pulled, on a thread
-per contact holding nothing but the tasking id.
+position. The arrow starts fully opaque and fades out over `DUWS_intel_contact_life` (600 s), then the
+marker is deleted. One thread per contact holds only the tasking id and the marker name. The fade goes in 20
+steps rather than smoothly, because each `setMarkerAlpha` on a global marker is a network broadcast.
 
 Only virtual taskings under `move`, `capture` or `intercept` are eligible. A streamed one stands inside a
 player's bubble already, and its record's position is frozen at the cell it de-virted in, so plotting it
@@ -297,10 +298,12 @@ eligible either: it is the content of a zone, and the zone reveal is what puts t
 `DUWS_intel_contactIds` holds what is plotted right now, so a payout never re-plots a unit whose marker
 still stands.
 
-**One payout plots every eligible unit.** It drew a random count between zero and all of them before, which
-made two identical payouts worth anything from nothing to the whole picture and read as an unreliable source
-rather than as a quiet sector. A payout hands over what the source knows. The batch is announced once rather
-than per contact: eight Allseer lines queued behind each other would still be arriving minutes later.
+**One payout plots a random share of the eligible units, from 20% to all of them, rounded up.** The share
+is drawn again for each payout, and the units in it are picked at random. The floor matters because an older
+draw started at zero: two identical payouts could then be worth anything from nothing to the whole picture,
+which read as an unreliable source rather than as a quiet sector. A unit that plots nothing does not use up a
+place in the share. The batch is announced once rather than per contact: eight Allseer lines queued behind
+each other would still be arriving minutes later.
 
 **The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
 ground whose owner they have never found names nothing, and in hardcore that blank map is the opening the

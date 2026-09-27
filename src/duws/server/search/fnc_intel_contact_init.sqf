@@ -44,20 +44,26 @@ DUWS_fnc_intel_contactReveal = {
     _mk setMarkerShape "ICON";
     _mk setMarkerType "mil_arrow_noShadow";
     _mk setMarkerColor "ColorOPFOR";
-    _mk setMarkerSize [1, 1];
+    _mk setMarkerSize [0.5, 0.5];
     _mk setMarkerDir _dir;
 
     DUWS_intel_contactIds pushBack _id;
     ["INFO", "INTEL", format ["contact plotted: tasking %1 (%2) at %3",
         _id, _t getOrDefault ["menu", "?"], mapGridPosition _pos]] call fnc_log;
 
-    // One thread per contact, each holding only an id: the alternative is a sweep on a clock this
-    // system does not otherwise need. The tasking may die, arrive or be re-ordered inside the window
-    // and the marker stays put -- last known position is what it says.
-    [_id] spawn {
-        params ["_id"];
-        sleep DUWS_intel_contact_life;
-        deleteMarker (format ["intel_contact_%1", _id]);
+    // One thread per contact, each holding only its id and marker: the alternative is a sweep on a
+    // clock this system does not otherwise need. The tasking may die, arrive or be re-ordered inside
+    // the window and the marker stays put -- last known position is what it says. Twenty fade steps,
+    // not a smooth fade: each setMarkerAlpha on a global marker is a network broadcast.
+    [_id, _mk] spawn {
+        params ["_id", "_mk"];
+        private _step = DUWS_intel_contact_life / 20;
+        for "_i" from 1 to 19 do {
+            sleep _step;
+            _mk setMarkerAlpha (1 - _i / 20);
+        };
+        sleep _step;
+        deleteMarker _mk;
         DUWS_intel_contactIds = DUWS_intel_contactIds - [_id];
     };
     true

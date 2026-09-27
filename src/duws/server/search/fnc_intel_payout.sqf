@@ -3,9 +3,9 @@
 // piece of intel is worth is decided in one file rather than at each faucet.
 //
 // A payout has two halves and pays both. The pool half reveals one position out of what is still
-// hidden; the contact half plots every eligible OPCOM unit where it is marching. They answer
-// different questions -- where the war is, and what the enemy is doing right now -- so making them
-// compete for one draw only ever starved whichever mattered more that hour.
+// hidden; the contact half plots a random share of the eligible OPCOM units where they are
+// marching. They answer different questions -- where the war is, and what the enemy is doing right
+// now -- so making them compete for one draw only ever starved whichever mattered more that hour.
 //
 // Takes the position the intel was earned at, which only the town bucket uses, and who earned it,
 // who is the only one told when there is nothing left. Returns true if either half paid. A pool reveal is
@@ -136,9 +136,15 @@ if (_knownOpfor) then {
         && {!((_x get "id") in DUWS_intel_contactIds)}
         && {[_x get "pos"] call _fnc_inReach}
     };
-    // Every eligible unit, not a sample of them: a sample made the same payout worth anything from
-    // nothing to the whole picture, which reads as an unreliable source rather than as a quiet sector.
-    private _n = { [_x] call DUWS_fnc_intel_contactReveal } count _contacts;
+    // Floored above zero: a draw from zero could pay nothing while there was something to find, which
+    // reads as an unreliable source rather than as a quiet sector. Walked rather than cut to length, so
+    // a unit that plots nothing does not use up a place in the share.
+    private _want = ceil ((0.2 + random 0.8) * count _contacts);
+    private _n = 0;
+    {
+        if (_n >= _want) exitWith {};
+        if ([_x] call DUWS_fnc_intel_contactReveal) then { _n = _n + 1 };
+    } forEach (_contacts call BIS_fnc_arrayShuffle);
     if (_n > 0) then {
         _awarded = true;
         // One line for the batch: a line per contact would queue eight of them behind each other.
