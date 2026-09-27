@@ -310,7 +310,7 @@ A single MOVE waypoint is reached, marked complete, and — with nothing queued 
 
 ## Deleting waypoints does not move `currentWaypoint`
 
-`deleteWaypoint` removes waypoints but leaves the group's current-waypoint index where it was. A group that already worked through earlier orders can therefore point past the new waypoints and ignore them. A jet sent home from its loiter kept orbiting because its index still pointed at the deleted loiter slot (`client/supports/fnc_arty.sqf`). Fix: after a re-order, point the group at its first new leg with `_grp setCurrentWaypoint _wp`, as the task-force orders do (`server/warcom/fnc_taskforce_tick.sqf`).
+`deleteWaypoint` removes waypoints but leaves the group's current-waypoint index where it was. A group that already worked through earlier orders can therefore point past the new waypoints and ignore them. A jet sent home from its loiter kept orbiting because its index still pointed at the deleted loiter slot (`client/supports/fnc_arty.sqf`). Fix: after a re-order, point the group at its first new leg with `_grp setCurrentWaypoint _wp`, as the task-force orders (`server/warcom/fnc_taskforce_tick.sqf`) and every OPCOM order (`DUWS_fnc_opcom_applyOrder`) do.
 
 ## A group in COMBAT behaviour ignores a commanded move order
 

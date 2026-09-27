@@ -102,8 +102,12 @@ private _streamStage = {
     params ["_t", "_ctx"];
     _ctx params ["", "_grp", "_live", "_engaged"];
     if (!_live) exitWith { [_t] call _deVirtIfNear };
-    if (([_t, leader _grp, _engaged] call _stowIfFar) && {(_t getOrDefault ["settleZone", ""]) isNotEqualTo ""}) then {
-        [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto;
+    if ([_t, leader _grp, _engaged] call _stowIfFar) exitWith {
+        if ((_t getOrDefault ["settleZone", ""]) isNotEqualTo "") then { [_t, _t get "settleZone"] call DUWS_fnc_opcom_garrisonInto };
+    };
+    // A live group with no active waypoint idles until stowed; guard and ferry hold without one by design.
+    if (!_engaged && {currentWaypoint _grp >= count waypoints _grp} && {!((_t get "order") in ["guard", "ferry"])}) then {
+        [_t] call DUWS_fnc_opcom_reOrderLive;
     };
 };
 

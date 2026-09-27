@@ -9,17 +9,24 @@ if (!isServer) exitWith {};
 DUWS_fnc_opcom_applyOrder = {
     params ["_grp", "_order", "_target", ["_via", []]];
     while {count waypoints _grp > 0} do { deleteWaypoint ((waypoints _grp) select 0) };
-    { (_grp addWaypoint [_x, 0]) setWaypointType "MOVE" } forEach _via;
+    private _first = [];
+    private _add = {
+        params ["_p", "_type"];
+        private _wp = _grp addWaypoint [_p, 0];
+        _wp setWaypointType _type;
+        if (_first isEqualTo []) then { _first = _wp };
+    };
+    { [_x, "MOVE"] call _add } forEach _via;
     switch (_order) do {
         case "capture";
         case "intercept": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "RED"; _grp setSpeedMode "FULL";
-            (_grp addWaypoint [_target, 0]) setWaypointType "SAD";
+            [_target, "SAD"] call _add;
         };
         // BLUE keeps the courier out of fights; arrival/delete is the tasking step's job.
         case "errand": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "BLUE"; _grp setSpeedMode "NORMAL";
-            (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
+            [_target, "MOVE"] call _add;
         };
         // The ferry stages ask for "move" by hand to march a hull or a rider to a shore, whatever order it holds.
         case "move";
@@ -27,12 +34,14 @@ DUWS_fnc_opcom_applyOrder = {
         case "probe";
         case "return": {
             _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
-            (_grp addWaypoint [_target, 0]) setWaypointType "MOVE";
+            [_target, "MOVE"] call _add;
         };
         default {
             _grp setBehaviour "AWARE"; _grp setCombatMode "YELLOW"; _grp setSpeedMode "NORMAL";
         };
     };
+    // deleteWaypoint leaves currentWaypoint where it was, which can point past every new leg (arma_engine_gotchas.md).
+    if (_first isNotEqualTo []) then { _grp setCurrentWaypoint _first };
 };
 
 // -> the rest of a bent route as MOVE points, one per grid cell it enters, [] when nothing bent it (lambda 0, nothing
