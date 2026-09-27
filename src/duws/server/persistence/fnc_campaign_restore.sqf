@@ -197,6 +197,7 @@ DUWS_fnc_restoreApply = {
     } forEach DUWS_support_permanent;
     DUWS_bluforRadioLevel = { _x in ["radio1", "radio2", "radio3"] } count DUWS_support_permanent;
     DUWS_intelLevel = { _x in ["intel1", "intel2", "intel3", "intel4"] } count DUWS_support_permanent;
+    DUWS_fortLevel = { _x in ["fort1", "fort2", "fort3", "fort4"] } count DUWS_support_permanent;
 
     // Classes a removed mod defined are dropped here rather than restored as names that spawn nothing.
     private _garage = (_d getOrDefault ["garage", []]) select { isClass (configFile >> "CfgVehicles" >> (_x param [0, ""])) };

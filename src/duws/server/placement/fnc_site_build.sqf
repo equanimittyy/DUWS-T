@@ -36,8 +36,16 @@ DUWS_fnc_siteBuildArm = {
 DUWS_fnc_baseBuildArm = {
     params ["_building", "_siteKey"];
     _building setVariable ["R3F_LOG_CF_disabled", false, true];
-    _building setVariable ["R3F_LOG_CF_credits", DUWS_baseBuildPoints, true];
+    _building setVariable ["R3F_LOG_CF_credits", DUWS_baseBuildPoints select (missionNamespace getVariable ["DUWS_fortLevel", 0]), true];
     [_building, _siteKey] call DUWS_fnc_siteBuildArm;
+};
+
+DUWS_fnc_baseBuildGrant = {
+    params ["_old", "_new"];
+    private _step = (DUWS_baseBuildPoints select _new) - (DUWS_baseBuildPoints select _old);
+    {
+        _x setVariable ["R3F_LOG_CF_credits", (_x getVariable ["R3F_LOG_CF_credits", 0]) + _step, true];
+    } forEach (([bluHQ_object] + Array_of_FOBS) select { !isNull _x });
 };
 
 // A piece in someone's hands or in a vehicle's cargo is left: deleting it would strand R3F's carry or cargo state.

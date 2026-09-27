@@ -504,6 +504,30 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_INTEL4";
     };
 
+    class unlock_fort1 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";
+        description = "$STR_DUWS_T_UNLOCK_FORT1";
+    };
+
+    class unlock_fort2 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";
+        description = "$STR_DUWS_T_UNLOCK_FORT2";
+    };
+
+    class unlock_fort3 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";
+        description = "$STR_DUWS_T_UNLOCK_FORT3";
+    };
+
+    class unlock_fort4 : SupportUnlock
+    {
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\Bunker_CA.paa";
+        description = "$STR_DUWS_T_UNLOCK_FORT4";
+    };
+
     class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

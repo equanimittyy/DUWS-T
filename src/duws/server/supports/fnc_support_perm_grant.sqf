@@ -22,6 +22,13 @@ DUWS_bluforRadioLevel = { _x in ["radio1", "radio2", "radio3"] } count DUWS_supp
 // the OPCOM tick's intel roll. Server-only, like that roll.
 DUWS_intelLevel = { _x in ["intel1", "intel2", "intel3", "intel4"] } count DUWS_support_permanent;
 
+private _fortWas = missionNamespace getVariable ["DUWS_fortLevel", 0];
+DUWS_fortLevel = { _x in ["fort1", "fort2", "fort3", "fort4"] } count DUWS_support_permanent;
+if (DUWS_fortLevel != _fortWas) then {
+    [_fortWas, DUWS_fortLevel] call DUWS_fnc_baseBuildGrant;
+    [_fortWas, DUWS_fortLevel] call DUWS_fnc_zoneFortGrant;
+};
+
 // Announced from here rather than from the buyer's own purchase: this is the one place that runs
 // exactly once per unlock, so the two players who reach a row in the same frame raise one card
 // between them. A permanent row is bought for the whole team, so the whole team is told.

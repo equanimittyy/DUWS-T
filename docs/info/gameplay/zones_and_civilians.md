@@ -340,16 +340,30 @@ sale. A destroyed build is lost: nothing refunds it. What adds credits depends o
 
 | Site | Credits added | Source |
 |---|---|---|
-| Zone | the difference between the two tiers' allowances, on each tier purchase; a capture sets the balance to 0 with the tier | `DUWS_zoneBuildPoints`, `DUWS_fnc_zoneBuildGrant` (`init_zones/fnc_zone_build.sqf`) |
-| HQ | 1250, once, when the HQ is built | `DUWS_baseBuildPoints`, `DUWS_fnc_baseBuildArm` |
-| FOB | 1250, once, when the FOB is built | `DUWS_baseBuildPoints`, `DUWS_fnc_baseBuildArm` |
+| Zone | the difference between the two allowances, on each tier purchase and each Fortification purchase; a capture sets the balance to 0 with the tier | `DUWS_zoneBuildPoints`, `DUWS_fnc_zoneBuildGrant`, `DUWS_fnc_zoneFortGrant` (`init_zones/fnc_zone_build.sqf`) |
+| HQ | the allowance of the current Fortification level, when the HQ is built; the difference between the two levels' allowances, on each Fortification purchase | `DUWS_baseBuildPoints`, `DUWS_fnc_baseBuildArm`, `DUWS_fnc_baseBuildGrant` |
+| FOB | the same as the HQ, from when the FOB is built | `DUWS_baseBuildPoints`, `DUWS_fnc_baseBuildArm`, `DUWS_fnc_baseBuildGrant` |
 
 | Zone tier | 0 | I | II | III | IV |
 |---|---|---|---|---|---|
 | Allowance (R3F credits) | 0 | 250 | 500 | 1000 | 2000 |
 
-The zone table gives the total allowance at each tier. Tier 0 has no allowance, so the player must buy a garrison
-tier before they can fortify a zone.
+The zone table gives the total allowance at each tier. A zone gets the allowance of the lower of its tier and the
+Fortification level, so a zone at tier III with Fortification I has 250. Tier 0 and no Fortification both give no
+allowance, so the player must buy a garrison tier and Fortification I before they can fortify a zone.
+
+| Fortification level | none | I | II | III | IV |
+|---|---|---|---|---|---|
+| Allowance per base (R3F credits) | 0 | 250 | 500 | 1000 | 2000 |
+| Price | none | 10 CP | 15 CP, 15 AP | 25 CP, 20 AP | 30 CP, 25 AP |
+| BLUFOR AP tier that shows the row | none | 2 | 3 | 4 | 5 |
+
+**Fortification is a permanent support that sets the bases' allowance and caps the zones'.** The team buys its
+levels in order (`fort1` to `fort4`, `client/supports/fnc_supports_init.sqf`). With no level, a base has no
+allowance. On each purchase, `fnc_support_perm_grant` recounts `DUWS_fortLevel` from `DUWS_support_permanent`. It
+then adds the step to the HQ, to every standing FOB, and to every held zone whose tier is above the old level. A FOB
+built later gets the whole allowance of the current level. A restore recounts the level from the restored record,
+as it does for the radio and intel levels.
 
 **A build belongs to the factory that made it.** R3F reports each build to `DUWS_fnc_buildRegister`, which files it
 under the factory's own key, `<siteKey>_builds`. That key is separate from the site's key, so a clear removes the

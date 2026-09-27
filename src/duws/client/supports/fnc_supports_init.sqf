@@ -50,6 +50,12 @@ fnc_support_catalogue = {
 		["intel3",    "PERM", 25, "support_intel3_available",      "STR_DUWS_T_intel_center_3",       "",           false, 20],
 		["intel4",    "PERM", 30, "support_intel4_available",      "STR_DUWS_T_intel_center_4",       "",           false, 25],
 
+		// Fortification (DUWS_fortLevel). No comm item: its build points are spent at a creation factory.
+		["fort1",     "PERM", 10, "support_fort1_available",       "STR_DUWS_T_fortification_1",      "",           false],
+		["fort2",     "PERM", 15, "support_fort2_available",       "STR_DUWS_T_fortification_2",      "",           false, 15],
+		["fort3",     "PERM", 25, "support_fort3_available",       "STR_DUWS_T_fortification_3",      "",           false, 20],
+		["fort4",     "PERM", 30, "support_fort4_available",       "STR_DUWS_T_fortification_4",      "",           false, 25],
+
 		// Slot only -- the team already paid for Mobile HQ at the permanent row, so this costs 0 CP.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
 		["rally",     "CONS",  0, "support_rally_available",       "STR_DUWS_T_RALLY_POINT",          "rally_point",false],
@@ -113,6 +119,9 @@ fnc_support_defs = {
 		if (_key == "intel2" && {!(["support_intel1_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "intel3" && {!(["support_intel2_available"] call fnc_support_owned)}) then { _keep = false };
 		if (_key == "intel4" && {!(["support_intel3_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "fort2" && {!(["support_fort1_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "fort3" && {!(["support_fort2_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "fort4" && {!(["support_fort3_available"] call fnc_support_owned)}) then { _keep = false };
 		_keep
 	}
 };
@@ -130,10 +139,10 @@ fnc_support_cost_bracket = {
 // AP tier per support key; unlisted = tier 1 (always available). Mirrors the vehicle tier rungs, so
 // radio towers and garage expansions are earned in lockstep with the strikes/vehicles their tier unlocks.
 DUWS_support_tiers = [
-	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["offensive_light", 2],
-	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3], ["offensive_heavy", 3],
-	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4], ["intel3", 4],
-	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5], ["intel4", 5]
+	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["mortar", 2], ["mortar_smoke", 2], ["intel1", 2], ["fort1", 2], ["offensive_light", 2],
+	["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3], ["garage2", 3], ["intel2", 3], ["fort2", 3], ["offensive_heavy", 3],
+	["arty", 4], ["hcAttChop", 4], ["radio3", 4], ["garage3", 4], ["intel3", 4], ["fort3", 4],
+	["hcCAS", 5], ["cluster", 5], ["napalm", 5], ["garage4", 5], ["intel4", 5], ["fort4", 5]
 ];
 fnc_support_tier = {
 	params ["_key"];

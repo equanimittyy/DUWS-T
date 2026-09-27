@@ -4483,6 +4483,22 @@
                 <Original>BLUFOR has upgraded to Intelligence Center IV</Original>
                 <English>BLUFOR has upgraded to Intelligence Center IV</English>
             </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_FORT1">
+                <Original>BLUFOR has upgraded to Fortification I</Original>
+                <English>BLUFOR has upgraded to Fortification I</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_FORT2">
+                <Original>BLUFOR has upgraded to Fortification II</Original>
+                <English>BLUFOR has upgraded to Fortification II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_FORT3">
+                <Original>BLUFOR has upgraded to Fortification III</Original>
+                <English>BLUFOR has upgraded to Fortification III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_FORT4">
+                <Original>BLUFOR has upgraded to Fortification IV</Original>
+                <English>BLUFOR has upgraded to Fortification IV</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
@@ -6997,6 +7013,22 @@
                 <Original>Intelligence Center IV</Original>
                 <English>Intelligence Center IV</English>
             </Key>
+            <Key ID="STR_DUWS_T_fortification_1">
+                <Original>Fortification I</Original>
+                <English>Fortification I</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fortification_2">
+                <Original>Fortification II</Original>
+                <English>Fortification II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fortification_3">
+                <Original>Fortification III</Original>
+                <English>Fortification III</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fortification_4">
+                <Original>Fortification IV</Original>
+                <English>Fortification IV</English>
+            </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>
                 <Spanish>Honda 1-1</Spanish>
@@ -8295,6 +8327,22 @@
             <Key ID="STR_DUWS_T_sdesc_intel4">
                 <Original>The best odds on the intel roll (level IV); requires level III.</Original>
                 <English>The best odds on the intel roll (level IV); requires level III.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_fort1">
+                <Original>Gives the HQ and each FOB 250 build points for fortifications, and lets a held zone fortify up to its tier I points (level I).</Original>
+                <English>Gives the HQ and each FOB 250 build points for fortifications, and lets a held zone fortify up to its tier I points (level I).</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_fort2">
+                <Original>250 more build points for the HQ and each FOB, 500 in all; zones up to tier II (level II); requires level I.</Original>
+                <English>250 more build points for the HQ and each FOB, 500 in all; zones up to tier II (level II); requires level I.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_fort3">
+                <Original>500 more build points for the HQ and each FOB, 1000 in all; zones up to tier III (level III); requires level II.</Original>
+                <English>500 more build points for the HQ and each FOB, 1000 in all; zones up to tier III (level III); requires level II.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_fort4">
+                <Original>1000 more build points for the HQ and each FOB, 2000 in all; zones up to tier IV (level IV); requires level III.</Original>
+                <English>1000 more build points for the HQ and each FOB, 2000 in all; zones up to tier IV (level IV); requires level III.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_mhq_slot">
                 <Original>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</Original>
