@@ -35,9 +35,9 @@ DUWS_fnc_opcom_applyOrder = {
     };
 };
 
-// -> the rest of a bent route as MOVE points a cell apart, [] when nothing bent it (lambda 0, nothing avoided). One
-// waypoint at the target lets the engine path a live group straight through what the route went around; a cell apart
-// keeps a road route's dense polyline to a handful of waypoints.
+// -> the rest of a bent route as MOVE points, one per grid cell it enters, [] when nothing bent it (lambda 0, nothing
+// avoided). One waypoint at the target lets the engine path a live group straight through what the route went around;
+// one per cell keeps a road route's dense polyline to a handful of waypoints.
 DUWS_fnc_opcom_routeVia = {
     params ["_t", "_from"];
     private _route = _t get "route";
@@ -49,7 +49,7 @@ DUWS_fnc_opcom_routeVia = {
     private _last = _from;
     for "_i" from (_near + 1) to (count _route - 2) do {
         private _p = _route select _i;
-        if ((_p distance2D _last) >= OPCOM_GRID_CELL) then { _via pushBack _p; _last = _p };
+        if (([_p, _last] call DUWS_fnc_opcom_cellDist) >= 1) then { _via pushBack _p; _last = _p };
     };
     _via
 };
