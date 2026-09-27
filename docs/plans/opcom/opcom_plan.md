@@ -969,7 +969,7 @@ Prices, first-pass defaults set against OPFOR's zone and town income of roughly 
 | Minefield | `OPCOM_AP_MINEFIELD` 1 per 50 m square, so 30 to 90 for a belt, plus its truck's source price |
 | Rapport | `OPCOM_AP_RAPPORT` 10, the goods the courier carries, plus its truck's source price |
 | Unit source | a hire's `OPCOM_AP_UNIT`, or 0 for a free unit; `OPCOM_AP_PER_KM` 0.5 × distance is scored on every source and charged on none ([§Sourcing](#sourcing-hire-on-demand-phase-4d)) |
-| Fire mission | `OPCOM_AP_PER_ROUND` per round: 2 for a mortar, 3 for a battery |
+| Fire mission | `OPCOM_AP_PER_ROUND` per round: 1 for a mortar, 2 for a battery |
 
 - **A garrison step is flat-priced.** Reinforce and Fortify cost the same wherever they land and whatever they buy
   back, and a zone and a town charge the same rate for the same order; a town adds only its truck, which is the
