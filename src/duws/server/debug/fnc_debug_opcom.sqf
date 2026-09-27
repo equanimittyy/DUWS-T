@@ -131,7 +131,7 @@ switch (_verb) do {
     };
     case "fire": {
         private _n = ["fire", _a, _b, _c] call fnc_opcom_debug_task;
-        (if (_n > 0) then { format ["%1 fires %2 rounds at %3.", _a, _n, _b apply { round _x }] } else { format ["%1 has no gun bearing on that. See the log.", _a] }) remoteExec ["hint", _caller];
+        (if (_n > 0) then { format ["%1 fires %2 rounds at %3.", _a, _n, _b apply { round _x }] } else { format ["Fire refused for %1 (still firing / no gun bears). See the log.", _a] }) remoteExec ["hint", _caller];
     };
     case "ferrybind": {
         private _ok = ["ferry", _a] call fnc_opcom_debug_task;
