@@ -224,6 +224,13 @@ DUWS_fnc_opcom_raise = {
     [_a, ([_zk] call fnc_site_at) get "pos", _zk, false] call fnc_opcom_recruit
 };
 
+DUWS_fnc_opcom_sourceName = {
+    params ["_ref"];
+    _ref params ["_kind", "_a", ["_zk", ""]];
+    if (_kind isEqualTo "free") exitWith { format ["%1 %2", ([_a] call DUWS_fnc_opcom_byId) get "menu", _a] };
+    format ["new %1 at %2", _a, [_zk] call DUWS_fnc_opcom_zoneLabel]
+};
+
 // Unhires a unit raised for an order that never went, so a refused execute leaves no unpaid unit standing.
 DUWS_fnc_opcom_dismiss = {
     params ["_ref", "_t"];
