@@ -951,7 +951,7 @@ appraisal already bought ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Spen
   (regardless of armament — the boat is armed). A row may carry several.
 
 Prices, first-pass defaults set against OPFOR's zone and town income of roughly 40–80 AP per 30 min
-(`fnc_zonesundercontrol.sqf`), before the drip (`OPCOM_AP_DRIP_TICKS`, up to 72 AP per 30 min):
+(`fnc_zonesundercontrol.sqf`), before the drip (`OPCOM_AP_DRIP_TICKS`, up to 90 AP per 30 min):
 
 | Purchase | Price |
 |---|---|
