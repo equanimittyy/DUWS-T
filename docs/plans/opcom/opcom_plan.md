@@ -44,7 +44,9 @@ it has nothing to tilt until every row it weighs is there.
 
 `src/duws/server/warcom/opcom/` holds it: `belief/` the perception and the influence grid, whose layers `_fri` (known
 OPFOR) and `_ene` (believed BLUFOR) the scoring reads, with the traffic layer and the observation tracker the guns
-are gated on; `taskings/` the orders, streaming, the carry, the fire mission and the attack record and its runner;
+are gated on; `taskings/` in three layers, `taskings/taskings/` the tasking record, its recruit, route, streaming and
+per-tick step, `taskings/orders/` each order's step and the table that dispatches them, and `taskings/actions/` what
+binds several taskings or none: the attack record and its runner, the carry, the errand's delivery and the fire mission;
 `appraisal/` the action list, every buy, the supply trucks, the roster,
 the sources and lifts, the commit orders, the siting pass, the score and the pick; and `appraisal/value/` the score's
 terms, one file each. The debug harness (`fnc_opcom_debug_task.sqf` and the Debug
@@ -603,7 +605,7 @@ commit + the order's re-issue span, the earliest tick the pick may draw the unit
 
 **WIP.**
 
-Each row of `DUWS_opcom_orders` (`taskings/fnc_opcom_orders.sqf`) carries its order's re-issue span in ticks, and
+Each row of `DUWS_opcom_orders` (`taskings/orders/fnc_opcom_orders.sqf`) carries its order's re-issue span in ticks, and
 `fnc_opcom_task` stamps `hold` as the tick + the span, floored at 0. The spans replace `OPCOM_COMMIT_HOLD`. An order
 with no row reads −1.
 
@@ -630,7 +632,7 @@ with no row reads −1.
 
 Attack is the one action that sends more than one unit, and it is three action rows, `attack_assault`, `attack_flank`
 and `attack_qrf` ([§QRF](#qrf-an-attack-on-a-moving-cluster)). Each commits an attack record (`DUWS_opcom_attacks`,
-`taskings/fnc_opcom_attack.sqf`) that runs two phases. **Buildup** places the units; **execution** runs the orders
+`taskings/actions/fnc_opcom_attack.sqf`) that runs two phases. **Buildup** places the units; **execution** runs the orders
 that already ship. Assault and flank differ only in data — which roles each binds, where each one's lane ends and
 what it waits on (`DUWS_opcom_attackRoles`) — so neither adds tasking code, and the QRF adds only what a moving target
 needs. A one-unit Attack is the smallest `attack_assault`
@@ -648,7 +650,7 @@ force-short attack sits in buildup until later picks fill its buckets.
 
 **This is what `move` is for.** A staging leg has to march to a point and hold it without fighting, without healing
 and without stamping the staleness layer, which is `move` and no other order: a buildup's staging leg and a side
-bucket's lane are its callers beside the debug page (`taskings/fnc_opcom_orders.sqf` is the table that knows every order).
+bucket's lane are its callers beside the debug page (`taskings/orders/fnc_opcom_orders.sqf` is the table that knows every order).
 
 **The runner**, each tick over every live attack (`DUWS_fnc_opcom_attackStep`): refresh each bound
 unit's status; in buildup, any bound unit `dead` or lost → **abort** (release the survivors, no AP refund), because a
@@ -667,7 +669,7 @@ The free pool is every unbound `garrison`ed or `guard` unit, except one garrison
 unbound marching unit past its re-issue hold ([§Re-issue](#re-issue-a-span-per-order)). A unit
 that reaches its rally settles to `guard`, which puts it straight back in that pool, and the next pick would send it
 somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its attack's id, is what
-the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/fnc_opcom_tasking_init.sqf`). The re-issue hold cannot do this job:
+the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/taskings/fnc_opcom_tasking_init.sqf`). The re-issue hold cannot do this job:
 a unit at rest carries none, and a staging `move` has a span of 0.
 
 One unit, one owner. Binding pulls a unit from the pool and a `garrison`ed draw strips that zone's reinforcement;
@@ -691,7 +693,7 @@ to know all of them.
 | `attack_flank` | band 0.5–2, a dry rally and a dry jump-off on some side | `fix` at the centre of a 3×1 line, `maneuver` in 1–2 buckets beside it | every bucket at launch; each `maneuver` hooks to its jump-off and closes once `fix` reads `engaged`, is lost or has ended its fight |
 | `attack_qrf` | a sighting cluster with no QRF on it | `attacker` in 1 bucket, with no rally | at once, on `intercept` |
 
-Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/fnc_opcom_attack.sqf`), keyed by the record's
+Each row's roles are an entry of `DUWS_opcom_attackRoles` (`taskings/actions/fnc_opcom_attack.sqf`), keyed by the record's
 kind, `assault` or `flank`. A QRF's one bucket is written by its sweep (`DUWS_fnc_opcom_qrfSweep`), since it has no
 rally to stage. A flank needs no count of mobile units at commit: its enveloping
 buckets are filled by later picks like any other, and a flank whose hooks stay empty leaves the fix to launch
@@ -832,7 +834,7 @@ chain that runs out of AP, or whose next gate has lapsed, stops where it is.
 
 **Avoiding threat is opt-in.** λ 0 is distance only, which is what an assault wants: a detour arrives late at the
 fight the order exists for. λ is therefore a field on the role binding (`DUWS_opcom_attackRoles`), falling back to the
-order's default, which is 1 for an `errand` and a `return` and 0 for every other order (`taskings/fnc_opcom_task.sqf`).
+order's default, which is 1 for an `errand` and a `return` and 0 for every other order (`taskings/taskings/fnc_opcom_task.sqf`).
 The order alone cannot carry it, because `flank`'s `fix` and `maneuver` both run `capture` and take opposite values.
 The tasking keeps its λ, so every re-plan of the march bends alike, and a lift takes its rider's. High is λ 1, and
 `OPCOM_ROUTE_LAMBDA` (200 m of detour per unit of believed force in a cell crossed) sets how high that is.
@@ -854,7 +856,7 @@ The tasking keeps its λ, so every re-plan of the march bends alike, and a lift 
   `OPCOM_ROUTE_AVOID_PENALTY` to enter each cell of it: far above any detour, so it is crossed only where no way
   round exists. A road route pays it on each road step in the block and ends its road leg on a road outside it.
 - **Negative λ is not available.** The cell chain's octile heuristic is admissible only at λ ≥ 0
-  (`taskings/fnc_opcom_route.sqf`): a negative edge weight stops A* returning the best path and leaves the pop cap as
+  (`taskings/taskings/fnc_opcom_route.sqf`): a negative edge weight stops A* returning the best path and leaves the pop cap as
   the only bound on a pathological re-open. A `probe` needs no such price: closing at λ 0 until the block reads fresh
   already walks it into whatever is there.
 - **A `return` at high λ is the cheap half of an open question.** Garrison asks whether a withdrawal needs a
@@ -872,12 +874,12 @@ into any threat that appears after.
 
 **A hull leaves the road only where the road ends.** At λ > 0 a hull's road leg stops at the road nearest its
 destination, and the leg past it takes the threat-priced cell chain a foot unit uses instead of a straight stub
-(`taskings/fnc_opcom_route.sqf`). A chain that crosses navigable water leaves the straight stub in place, because no
+(`taskings/taskings/fnc_opcom_route.sqf`). A chain that crosses navigable water leaves the straight stub in place, because no
 lift carries a hull. A hull never leaves the road mid-route to go around a threat: the road term already prices a
 threatened stretch.
 
 **A live group walks its route at λ > 0.** It takes a `MOVE` waypoint in each grid cell the rest of its route enters,
-before its order's own waypoint (`DUWS_fnc_opcom_routeVia`, `taskings/fnc_opcom_stream.sqf`), so a role that streams
+before its order's own waypoint (`DUWS_fnc_opcom_routeVia`, `taskings/taskings/fnc_opcom_stream.sqf`), so a role that streams
 live near the players still closes by the route its λ bent. At λ 0 a live group takes one waypoint at its target and
 the engine paths it. A group in combat ignores a move waypoint, so the route holds only on the approach.
 
@@ -885,8 +887,8 @@ the engine paths it. A group in combat ignores a move waypoint, so the route hol
 
 | Chunk | Builds |
 |---|---|
-| **5.1** Ownership | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
-| **5.2** Buildup | **Shipped** (`taskings/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (4) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
+| **5.1** Ownership | **Shipped** (`taskings/actions/fnc_opcom_attack.sqf`) — the attack record and `boundTo` honoured by `DUWS_fnc_opcom_drawable`. This chunk touches the pool every action draws from |
+| **5.2** Buildup | **Shipped** (`taskings/actions/fnc_opcom_attack.sqf`) — one rally cell at least `OPCOM_RALLY_K` (4) cells from the target's, outside the 3×3 block the muster bars read, on the bearing the first unit comes from, `move` staging with each unit's land-taxi sourced for its staging leg, a Join row while the bound force is short of the ideal bar, up to `OPCOM_ATTACK_UNITS`, the launch predicate, `OPCOM_MUSTER_EXPIRY` (240 ticks), and abort on a unit lost while staging |
 | **5.3** Assault and flank | **Shipped** (`DUWS_opcom_attackRoles`) — `attack_assault` across its 1–3 cells, the one-unit Attack among them, and `attack_flank`, its `maneuver` buckets waiting on `fix`, and the landmass rule that keeps every rally on the target's ground and sends only infantry, as an assault, across water |
 | **5.4** Route λ | **Shipped** — the role's λ threaded through `fnc_opcom_task` into `fnc_opcom_route`, the threat term on road segments, the threat-priced cell chain past the road's end, and a live group's waypoints along its route |
 | **5.5** Probe | **Shipped** (`DUWS_fnc_opcom_probeSweep`, `appraisal/fnc_opcom_commit.sqf`) — the action, sourced from Patrol's rows, its staleness Value, a `probe` order row and the fresh-block resolve. It lands after 5.2, because the muster bars are what a sharper reading is worth anything to |

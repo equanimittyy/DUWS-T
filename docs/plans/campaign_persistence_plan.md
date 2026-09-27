@@ -287,7 +287,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/arsenal/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
 | Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](../info/gameplay/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
 | `fnc_opcom_belief_init` assigns `DUWS_opcom_tick` 0 and `DUWS_opcom_hqKnown` false at boot | `server/warcom/opcom/belief/fnc_opcom_belief_init.sqf:12,14` | Every commit hold, staleness stamp and gun cooldown is a count against that tick, so a restored clock reset to 0 holds units for hours and hides an HQ the commander had found |
-| A tasking's `grp` is a live group's netId, and the ferry binds a carry by tasking id | `server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf` | Restoring a record unchanged points it at a group that no longer exists, and a carry bound at the write holds a rider that was never spawned |
+| A tasking's `grp` is a live group's netId, and the ferry binds a carry by tasking id | `server/warcom/opcom/taskings/taskings/fnc_opcom_tasking_init.sqf` | Restoring a record unchanged points it at a group that no longer exists, and a carry bound at the write holds a rider that was never spawned |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
 (`:5`) and hands it to `fnc_FOBactions.sqf:3`, which reads it and never uses it. Restore needs no
@@ -603,7 +603,7 @@ snapshot carries for it, and the contract they answer to is this section's; the 
 
 **A tasking is already serialisable, and that is deliberate.** A record holds numbers, strings and arrays
 only, and `grp` is a live group's netId rather than a handle
-(`server/warcom/opcom/taskings/fnc_opcom_tasking_init.sqf`). The save clears the live half: `grp` and the
+(`server/warcom/opcom/taskings/taskings/fnc_opcom_tasking_init.sqf`). The save clears the live half: `grp` and the
 helipad netId go to `""`, `status` to `virtual`, and a live group's strength and position are read into the
 record the way a stow reads them. Two riders are the exceptions. A rider that is boarding keeps the strength it
 froze at, because its men despawn as they board. A rider waiting for its lift keeps its route, because the lift

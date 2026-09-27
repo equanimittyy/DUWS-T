@@ -127,7 +127,7 @@ A coverage layer per side on the grid comes after those two steps, and only if t
 ask for it: stamp each emitter's disc with the bounded loop that `DUWS_fnc_opcom_deposit` uses
 (`belief/fnc_opcom_grid_sources.sqf:8-26`), and read one index per query. The layer is 500 m coarse where the point
 query is exact. The band test and `gunShare` sample cell centres, but a town centre or a sighting can read the wrong
-side of a band edge. `DUWS_fnc_opcom_buildCand` (`taskings/fnc_opcom_deliver.sqf:14`) runs once per build off the tick
+side of a band edge. `DUWS_fnc_opcom_buildCand` (`taskings/actions/fnc_opcom_deliver.sqf:14`) runs once per build off the tick
 and keeps the exact call.
 
 ### 4. A patrol's swept cells are gathered with `pushBackUnique`
@@ -145,7 +145,7 @@ native call. A hashMap is not a sure gain: its insert is still one interpreted c
 
 ### 5. The grid A* kept its frontier in a flat list
 
-In the play-test, the cell-chain branch of `fnc_opcom_route` (`taskings/fnc_opcom_route.sqf`) had the shape the road
+In the play-test, the cell-chain branch of `fnc_opcom_route` (`taskings/taskings/fnc_opcom_route.sqf`) had the shape the road
 search had before the road-graph fix: it filled two full-grid arrays of 3844 cells per call and took the next node by
 a linear scan of the open list in SQF. It runs for every
 infantry, air and boat order (`fnc_opcom_task.sqf:99`), every replan when a route empties
@@ -177,7 +177,7 @@ Each of these is small and none is the bottleneck; together they are a steady sh
   (`value/fnc_opcom_holding.sqf:24-41`). The label and the hold value still vary per zone.
 - `DUWS_fnc_opcom_rosterSweep` (`fnc_opcom_sources.sqf:27-29`) resolves a token class, faction pick included, for every
   menu row per pick. The open set changes only when the earned AP crosses a rung or a toggle flips.
-- `DUWS_fnc_opcom_batteryPieces` (`taskings/fnc_opcom_fires.sqf:20-25`) reads config per gun on every call, and
+- `DUWS_fnc_opcom_batteryPieces` (`taskings/actions/fnc_opcom_fires.sqf:20-25`) reads config per gun on every call, and
   `DUWS_fnc_opcom_fireTargets` asks two or three times per battery per pick. Mortars and batteries never stream, so the
   piece list holds while the composition stands.
 - `fnc_zone_key` formats a string per call and sits inside `findIf` loops: `fnc_zone_bluforHeld` formats every BLUFOR
