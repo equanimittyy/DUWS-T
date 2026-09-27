@@ -216,27 +216,35 @@ DUWS_fnc_tokenLocked = {
 // filters below. Gun = bullets/shells/grenades; missile = guided (shotMissile); air missile =
 // auto-locks air (airLock >= 2). A magazineWell-only turret reads unarmed -- fail-safe, so a
 // borderline hull is dropped rather than fielded as a gunless combatant.
+// Memoised: a filtered faction pick walks every class in the pool, and OPCOM's hire roster resolves its
+// vehicle rows through it on every pick. Class config is fixed for the session.
+DUWS_classArmsMemo = createHashMap;
 DUWS_fnc_classArms = {
     params ["_class"];
-    private _guns = ["shotBullet", "shotShell", "shotGrenade", "shotSpread", "shotSubmunitions"];
-    private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
-    private _gun = false; private _msl = false; private _air = false;
-    while { count _queue > 0 } do {
-        private _t = _queue deleteAt 0;
-        private _mags = +(getArray (_t >> "magazines"));
-        { _mags append (getArray (configFile >> "CfgWeapons" >> _x >> "magazines")) } forEach (getArray (_t >> "weapons"));
-        {
-            private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
-            private _sim = getText (configFile >> "CfgAmmo" >> _ammo >> "simulation");
-            if (_sim in _guns) then { _gun = true };
-            if (_sim == "shotMissile") then {
-                _msl = true;
-                if (getNumber (configFile >> "CfgAmmo" >> _ammo >> "airLock") >= 2) then { _air = true };
-            };
-        } forEach _mags;
-        _queue append ("true" configClasses (_t >> "Turrets"));
+    private _arms = DUWS_classArmsMemo get _class;
+    if (isNil "_arms") then {
+        private _guns = ["shotBullet", "shotShell", "shotGrenade", "shotSpread", "shotSubmunitions"];
+        private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
+        private _gun = false; private _msl = false; private _air = false;
+        while { count _queue > 0 } do {
+            private _t = _queue deleteAt 0;
+            private _mags = +(getArray (_t >> "magazines"));
+            { _mags append (getArray (configFile >> "CfgWeapons" >> _x >> "magazines")) } forEach (getArray (_t >> "weapons"));
+            {
+                private _ammo = getText (configFile >> "CfgMagazines" >> _x >> "ammo");
+                private _sim = getText (configFile >> "CfgAmmo" >> _ammo >> "simulation");
+                if (_sim in _guns) then { _gun = true };
+                if (_sim == "shotMissile") then {
+                    _msl = true;
+                    if (getNumber (configFile >> "CfgAmmo" >> _ammo >> "airLock") >= 2) then { _air = true };
+                };
+            } forEach _mags;
+            _queue append ("true" configClasses (_t >> "Turrets"));
+        };
+        _arms = [_gun, _msl, _air];
+        DUWS_classArmsMemo set [_class, _arms];
     };
-    [_gun, _msl, _air]
+    _arms
 };
 
 // Disjoint by construction: an air-lock round is itself a shotMissile, so AT excludes _air and AA

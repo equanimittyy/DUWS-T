@@ -152,6 +152,15 @@ for hundreds of objects whose class cannot change.
 Class config is fixed for the session, so the memo never goes stale. The sighting sensors and OPCOM's
 hardpoint pricing read the same memo.
 
+`DUWS_fnc_classArms` (`init_zones/fnc_zone_spawn_sizes.sqf`), the gun and missile test behind a filtered
+faction pick, memoises the same way. A spawn list resolves each vehicle token through a pick that tests
+every class in the faction's pool, and OPCOM's hire roster resolves its vehicle rows on every pick.
+
+OPCOM's fortify rows value a fortify by what the next tier fields over the current one. That difference
+depends only on the kind and the tier, since the spawn filter reads only the faction pools and the asset
+toggles, so `DUWS_fnc_opcom_tierOwed` (`warcom/opcom/appraisal/fnc_opcom_buy_holding.sqf`) builds it once
+a session per kind and tier. The lock check changes as AP is earned, so each row applies it per pick.
+
 ## An OPCOM stage costs what changed, not what exists
 
 Every OPCOM stage runs in one scheduled thread on one 5 s tick, so stage costs add up. That total

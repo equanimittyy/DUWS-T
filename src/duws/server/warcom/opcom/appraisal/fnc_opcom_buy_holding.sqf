@@ -25,17 +25,37 @@ DUWS_fnc_opcom_zoneReinforceTargets = {
     _out
 };
 
+// What the next tier fields over this one, locked tokens included. Kept per kind and tier for the session: the spawn
+// filter behind it reads only the faction pools and the asset toggles, fixed before the first pick. The lock check
+// moves as AP is earned, so callers apply it.
+DUWS_opcom_owedMemo = createHashMap;
+
+DUWS_fnc_opcom_tierOwed = {
+    params ["_kind", "_tier"];
+    private _key = format ["%1_%2", _kind, _tier];
+    private _owed = DUWS_opcom_owedMemo get _key;
+    if (isNil "_owed") then {
+        _owed = if (_kind isEqualTo "zone") then {
+            private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+            [
+                [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition,
+                [[_tier + 1] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
+            ] call DUWS_fnc_spawnDiff
+        } else {
+            [[_tier] call DUWS_fnc_townSpawnList, [_tier + 1] call DUWS_fnc_townSpawnList] call DUWS_fnc_spawnDiff
+        };
+        DUWS_opcom_owedMemo set [_key, _owed];
+    };
+    _owed
+};
+
 DUWS_fnc_opcom_zoneFortifyTargets = {
     private _top = count DUWS_zoneSpawnTiers;
-    private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
     private _out = [];
     {
         _x params ["_zk", "", "", "_worth", "_exp", "_tier"];
         if (_tier < _top) then {
-            private _owed = [
-                [[_tier] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition,
-                [[_tier + 1] call DUWS_fnc_zoneSpawnList, _mult] call DUWS_fnc_scaleComposition
-            ] call DUWS_fnc_spawnDiff;
+            private _owed = ["zone", _tier] call DUWS_fnc_opcom_tierOwed;
             private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
             _out pushBack [_zk, OPCOM_AP_FORTIFY,
                 format ["Fortify %1 to tier %2", [_zk] call DUWS_fnc_opcom_zoneLabel, _tier + 1],
@@ -70,7 +90,7 @@ DUWS_fnc_opcom_townReinforceOffer = {
 DUWS_fnc_opcom_townFortifyOffer = {
     params ["_i", "_tier", "_pos"];
     if (_tier < 1 || {_tier >= count DUWS_townSpawnTiers} || {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) exitWith { [] };
-    private _owed = [[_tier] call DUWS_fnc_townSpawnList, [_tier + 1] call DUWS_fnc_townSpawnList] call DUWS_fnc_spawnDiff;
+    private _owed = ["town", _tier] call DUWS_fnc_opcom_tierOwed;
     private _force = [_owed select { !([_x] call DUWS_fnc_tokenLocked) }] call DUWS_fnc_tokenListForce;
     [OPCOM_AP_FORTIFY, format ["Fortify %1 to tier %2", [_i] call DUWS_fnc_opcom_townLabel, _tier + 1],
         [[_i] call DUWS_fnc_opcom_townWorth, [_pos] call DUWS_fnc_opcom_exposure, _force, "town", _tier] call DUWS_fnc_opcom_holdValue]
