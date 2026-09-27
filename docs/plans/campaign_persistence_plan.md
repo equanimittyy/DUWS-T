@@ -418,6 +418,7 @@ must not have a snapshot put the old list back.
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
 | Builds | outcome | per object that the captured builder vehicle made: its class, position and orientation |
 | Zone builds | outcome | per zone, its flag factory's credit balance and each object that the factory made: its class, world position and orientation |
+| Base builds | outcome | for the HQ and each FOB, its factory's credit balance and each object that the factory made: its class, world position and orientation |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, names, radii and populations |
 | Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
@@ -469,6 +470,12 @@ vectors. An attached build is not saved, as for the builder vehicle. Restore wri
 records, and deploys them at once when the zone is awake. The flag's credit balance is saved beside the builds,
 because nothing can derive it: R3F spends and refunds it, and a destroyed build takes its cost with it. Restore
 writes the balance after it repaints the held zones, because the repaint's capture gate sets it to 0.
+
+**The HQ's and each FOB's builds are saved the same way, but every base is written.** A base's factory is granted
+its whole allowance when the base is built, so a base with no saved balance would come back with a full one; the
+write therefore includes a base that has spent everything and built nothing. A FOB is named by its position, not
+its site key, because the key carries a netId that a load renews. Restore runs in `DUWS_fnc_restoreBases` once it
+rebuilds the FOBs, finds each by position, and deploys its builds at once, since a base never streams.
 
 **A zone's composition is stored beside its name.** `fnc_createZone` rolls the prefab that it builds,
 so a replay without the kind would stand a field hospital where a comm station stood. The kind goes
