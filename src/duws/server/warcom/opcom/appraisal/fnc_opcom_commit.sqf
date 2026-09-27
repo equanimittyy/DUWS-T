@@ -32,9 +32,9 @@ DUWS_fnc_opcom_sendRun = {
 // defeat in detail. It commits as an assault or a flank, each its own action row, its units stage and launch together
 // (fnc_opcom_attack), and the bucket DUWS_fnc_opcom_joinBucket names is a target of its own, filled by a later pick.
 //
-// Zones and towns on the same terms. What differs is how the ground answers: a zone flips on presence, a town only
-// by having its garrison cleared, so a town with no garrison is no target -- there would be nothing to beat, and
-// reputation rather than a fight is what owns it.
+// Zones and towns on the same terms, and the HQ once found. What differs is how the ground answers: a zone flips on
+// presence, a town only by having its garrison cleared, so a town with no garrison is no target -- there would be
+// nothing to beat, and reputation rather than a fight is what owns it.
 //
 // A source across water from its target reaches it only by ferry, which carries men alone, and lands them a trip at a
 // time, which no flank's timing survives: such a source is offered only if it is transportable, and only to assault.
@@ -99,6 +99,10 @@ DUWS_fnc_opcom_attackSweep = {
             };
         };
     } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
+    if (DUWS_opcom_hqKnown && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+        private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
+        if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
+    };
     {
         private _attack = _x;
         private _kind = _attack get "kind";

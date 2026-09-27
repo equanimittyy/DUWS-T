@@ -123,7 +123,9 @@ DUWS_fnc_opcom_creepTargets = {
     {
         private _attack = _x;
         private _roles = _attack get "roles";
-        if ((_attack get "creep") isEqualTo [] && {_roles isNotEqualTo []} && {(_attack get "kind") isNotEqualTo "qrf"}) then {
+        // Its rows walk through the objective, so an objective inside the HQ circle is aimed at the HQ.
+        if ((_attack get "creep") isEqualTo [] && {_roles isNotEqualTo []} && {(_attack get "kind") isNotEqualTo "qrf"}
+            && {[_attack get "pos"] call DUWS_fnc_opcom_fireClear}) then {
             private _pos = _attack get "pos";
             // The wave closes from its first role's rally, or from where that unit stands when it staged in place.
             private _from = (_roles select 0) get "rally";

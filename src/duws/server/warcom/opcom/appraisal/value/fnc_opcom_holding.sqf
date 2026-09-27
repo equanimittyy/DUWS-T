@@ -16,6 +16,7 @@ DUWS_fnc_opcom_zoneWorthsSweep = {
 DUWS_fnc_opcom_siteWorth = {
     params ["_key"];
     if ((_key select [0, 5]) isEqualTo "town_") exitWith { [parseNumber (_key select [5])] call DUWS_fnc_opcom_townWorth };
+    if (_key isEqualTo "HQ") exitWith { OPCOM_HQ_WORTH };
     (["zoneWorths", DUWS_fnc_opcom_zoneWorthsSweep] call DUWS_fnc_opcom_tickCached) getOrDefault [_key, 0]
 };
 

@@ -4,9 +4,9 @@
 //   _order: one of the orders below. `guard` holds where it stands and ignores
 //     _target; `move` and `patrol` march to _target and settle to guard there, and `probe` settles sooner, once the
 //     block about _target reads fresh. A `capture` takes the BLUFOR-held
-//     holding at _target -- a zone, or a town they have garrisoned -- and aims at its centre; it ends when the ground
-//     is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR group's
-//     netId); it follows the row's believed position.
+//     holding at _target -- a zone, a town they have garrisoned, or their HQ -- and aims at its centre; it ends when
+//     the ground is no longer theirs (fnc_opcom_task_step). An `intercept`'s _target is a belief row key (a BLUFOR
+//     group's netId); it follows the row's believed position.
 //   _returnZone: `return` only, and required by it -- the site key, zone or town, whose garrison it joins on
 //     arrival. A boat goes to the site's port instead of _target (never a land point); a portless one refuses it.
 //   _errand: `errand` only, and required by it -- a supply run: ["reinforce" | "fortify" | "rapport", townIndex],
@@ -71,6 +71,11 @@ if (_order isEqualTo "capture") then {
                 };
             };
         };
+    };
+    if (_zk isEqualTo "" && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+        private _site = ["HQ"] call fnc_site_at;
+        private _sp = _site getOrDefault ["pos", []];
+        if (_sp isNotEqualTo [] && {(_sp distance2D _target) <= (_site get "radius")}) then { _zk = "HQ" };
     };
 };
 if (_order isEqualTo "capture" && {_zk isEqualTo ""}) exitWith {

@@ -818,6 +818,10 @@ OPCOM_DEFEND_FLOOR = 0.2;
 // A town's worth is its income level (1-5) times this, so the richest town still scores under the poorest zone.
 OPCOM_TOWN_WORTH = 5;
 
+// The found HQ's worth as an attack target: the top of a zone's range, so it competes with the frontline zones
+// rather than drawing every attack.
+OPCOM_HQ_WORTH = 50;
+
 // Banking's flat score, under the break-even 1 of an action that returns exactly what it costs, so OPCOM saves only
 // when nothing on the shortlist pays for itself.
 OPCOM_BANK_SCORE = 0.5;
