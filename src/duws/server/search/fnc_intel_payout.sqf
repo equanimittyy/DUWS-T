@@ -138,24 +138,11 @@ if (_knownOpfor) then {
     };
     // Every eligible unit, not a sample of them: a sample made the same payout worth anything from
     // nothing to the whole picture, which reads as an unreliable source rather than as a quiet sector.
-    private _firstPos = [];
-    private _n = 0;
-    {
-        if ([_x] call DUWS_fnc_intel_contactReveal) then {
-            _n = _n + 1;
-            if (_n == 1) then { _firstPos = _x get "pos" };
-        };
-    } forEach _contacts;
+    private _n = { [_x] call DUWS_fnc_intel_contactReveal } count _contacts;
     if (_n > 0) then {
         _awarded = true;
-        // One line for the batch: a line per contact would queue eight of them behind each other,
-        // and only the single-contact case has one place worth naming.
-        private _line = if (_n == 1) then {
-            format [localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE", [_firstPos] call fnc_place_name]
-        } else {
-            localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY"
-        };
-        [localize "STR_DUWS_T_ALLSEER", _line] remoteExec ["fnc_duws_dialogue", 0];
+        // One line for the batch: a line per contact would queue eight of them behind each other.
+        [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY"] remoteExec ["fnc_duws_dialogue", 0];
     };
 };
 

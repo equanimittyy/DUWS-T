@@ -64,7 +64,7 @@ batch of them at once, so their line is spoken by the payout rather than by the 
 | Zone | a *Zone Discovered* card, and an Overlord line naming the zone and the nearest settlement (`fnc_place_name`) |
 | Town | a *Town Discovered* card naming the town |
 | Hardpoint | an Allseer line on SUB-NET naming the type and the nearest zone or town ([`hardpoints.md`](hardpoints.md#reveal)) |
-| Contact | an Allseer line, one for the whole batch: the settlement it was fixed near (`fnc_place_name`) for a single contact, no count for several |
+| Contact | an Allseer line, one for the whole batch, that names no place and no count |
 
 `fnc_zone_reveal` and `fnc_hardpoint_reveal` also take a `_quiet` flag that hands the reporting to the
 caller: the recon mission marks its target under its own confirm line rather than beneath a second
@@ -300,8 +300,7 @@ still stands.
 **One payout plots every eligible unit.** It drew a random count between zero and all of them before, which
 made two identical payouts worth anything from nothing to the whole picture and read as an unreliable source
 rather than as a quiet sector. A payout hands over what the source knows. The batch is announced once rather
-than per contact: eight Allseer lines queued behind each other would still be arriving minutes later, and
-only a single-contact batch has one place worth naming.
+than per contact: eight Allseer lines queued behind each other would still be arriving minutes later.
 
 **The half is gated on the player knowing where at least one OPFOR-held zone is.** A march plotted across
 ground whose owner they have never found names nothing, and in hardcore that blank map is the opening the

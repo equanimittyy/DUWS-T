@@ -4159,10 +4159,6 @@
                 <Original>Be advised, we have intel on an enemy %1 near %2. Check your map.</Original>
                 <English>Be advised, we have intel on an enemy %1 near %2. Check your map.</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_REVEAL_CONTACT_LINE">
-                <Original>Be advised, we have a fix on an enemy element near %1. Last known position, check your map.</Original>
-                <English>Be advised, we have a fix on an enemy element near %1. Last known position, check your map.</English>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_REVEAL_CONTACT_MANY">
                 <Original>Be advised, we have fixes on enemy elements. Last known positions, check your map.</Original>
                 <English>Be advised, we have fixes on enemy elements. Last known positions, check your map.</English>
