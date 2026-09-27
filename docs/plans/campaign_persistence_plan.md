@@ -417,7 +417,7 @@ must not have a snapshot put the old list back.
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
 | Builds | outcome | per object that the captured builder vehicle made: its class, position and orientation |
-| Zone builds | outcome | per zone, each object that its flag's factory made: its class, world position and orientation |
+| Zone builds | outcome | per zone, its flag factory's credit balance and each object that the factory made: its class, world position and orientation |
 | Commanding officer | outcome | whether `hq_blu1` is alive |
 | Civilians | input | town positions, names, radii and populations |
 | Vendors | input | `DUWS_vendors`: per town slot, the shop's type, position, facing and remaining respawn seconds |
@@ -466,8 +466,9 @@ R3F factory flag again, so a player can still sell it back to a factory.
 `<zoneKey>_builds` (`server/init_zones/fnc_zone_build.sqf`), and that key streams with the zone. The write reads
 the standing builds and the stowed records of each key to a class, a world position and the direction and up
 vectors. An attached build is not saved, as for the builder vehicle. Restore writes the rows back as stowed
-records before it repaints the held zones, and deploys them at once when the zone is awake. The flag's credits
-are not saved: they are the tier's allowance minus the cost of the builds, so the restore derives them again.
+records, and deploys them at once when the zone is awake. The flag's credit balance is saved beside the builds,
+because nothing can derive it: R3F spends and refunds it, and a destroyed build takes its cost with it. Restore
+writes the balance after it repaints the held zones, because the repaint's capture gate sets it to 0.
 
 **A zone's composition is stored beside its name.** `fnc_createZone` rolls the prefab that it builds,
 so a replay without the kind would stand a field hospital where a comm station stood. The kind goes
