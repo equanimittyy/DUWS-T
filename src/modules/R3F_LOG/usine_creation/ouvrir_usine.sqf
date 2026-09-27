@@ -8,6 +8,9 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: a category with an empty label is listed under its class name.
+ * (GPLv3 section 5a modification notice.)
  */
 
 #include "dlg_constantes.h"
@@ -54,6 +57,8 @@ _sel_categorie = 0 max (_usine getVariable "R3F_LOG_CF_mem_idx_categorie");
 	_categorie = _x;
 	_config = configFile >> "CfgVehicleClasses" >> _categorie;
 	_nom = getText (_config >> "displayName");
+	// DUWS: a label naming a $STR_ key that no loaded stringtable holds reads as empty (Static's STR_DN_STATIC).
+	if (_nom == "") then {_nom = _categorie};
 	
 	_index = _ctrl_liste_categories lbAdd format ["%1", _nom];
 	_ctrl_liste_categories lbSetData [_index, _categorie];

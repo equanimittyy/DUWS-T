@@ -110,6 +110,10 @@ A bare `%` in a `format` string is dropped: the shop price line `"%1 money (%2% 
 
 A `$STR_` reference in config (`CfgDebriefing`, action names, `displayName`) is resolved and displayed as-is — no call site hands it arguments, so a shared key that gains a `%N` in a script use (the defeat notification in `server/misc/fnc_capture_zones_task.sqf`) renders literal `%1` on the config side (the outro card, `shared/includes/debriefing.hpp`). Fix: a `%N`-bearing key belongs to script call sites only; give config its own placeholder-free key.
 
+## A config `displayName` naming a missing `$STR_` key reads as empty
+
+When no loaded stringtable holds the key, `getText` on the `displayName` returns `""` and the RPT logs `String STR_<key> not found`. `CfgVehicleClasses >> Static` names `STR_DN_STATIC`, which a CUP session did not hold, so R3F's factory listed the `Static` category with a blank label. Fix: fall back to the class name when the label is empty (`modules/R3F_LOG/usine_creation/ouvrir_usine.sqf`).
+
 ## `localize` on a finished sentence looks it up as a key and speaks nothing
 
 `localize` only translates a stringtable ID; handed anything else it treats the string as a key, misses, logs `String <text> not found`, and returns nothing. `fnc_mission_finish` localises its line argument, so a caller handing it a finished sentence goes silent. Fix: a line needing a runtime `%N` is finished text — build and speak it at the call site (`fnc_duws_dialogue`) and hand finish `[]`.
