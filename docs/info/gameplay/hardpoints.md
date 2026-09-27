@@ -68,7 +68,7 @@ standing OPFOR hardpoint, seeded ones included, and every build still siting or 
 (`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at
 `OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG` and `OP` cap at their
 `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
-A `MINEFIELD` caps the same way per variant, `MINEFIELD_AT` and `MINEFIELD_AP` each at 1 a zone. The variant is
+A `MINEFIELD` caps the same way per variant, `MINEFIELD_AT` at 1 a zone and `MINEFIELD_AP` at 2. The variant is
 read from `DUWS_opcom_mineVariants`, which OPCOM's belts, the recon mission's field and a debug field write to. The
 recon mission lays no field while the AP cap is full. A Clear Minefield job's thinned field writes no variant, so it
 counts only toward the all-types cap.
