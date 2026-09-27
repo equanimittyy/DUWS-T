@@ -85,7 +85,7 @@ _fob setVariable ["DUWS_siteKey", _fobKey];
 // HQ raises, through fnc_enemy_contact. The FOB label is baked into the statement as a literal:
 // the trigger evaluates later with no local scope, so _fobname is out of reach by then.
 _trgWarning = createTrigger["EmptyDetector",_foundPickupPos];
-_trgWarning setTriggerArea[300,300,0,false];
+_trgWarning setTriggerArea[450,450,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
 _trgWarning setTriggerStatements[
     "this",

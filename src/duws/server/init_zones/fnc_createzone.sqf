@@ -142,7 +142,7 @@ _trg2 setTriggerStatements["this", format["['%1',%2,'%3','%4',thislist] spawn fn
 // Only the enemy-contact direction reports: walking into enemy ground is visible to the player already, but a
 // counter-attack on zone they hold isn't. Server-local per fnc_captured.sqf:15's unproven trigger-locality question.
 private _trgEnemy = createTrigger ["EmptyDetector", _zonePos, false];
-_trgEnemy setTriggerArea [_size, _size, 0, false];
+_trgEnemy setTriggerArea [_size * 1.5, _size * 1.5, 0, false];
 _trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
 // Carried on the trigger, not formatted into the statement string, so this position never becomes text and back.
 _trgEnemy setVariable ["DUWS_zonePos", _zonePos];

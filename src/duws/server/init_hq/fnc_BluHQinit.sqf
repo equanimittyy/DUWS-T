@@ -362,7 +362,7 @@ str(_markername) setMarkerText "Main Base";
 // Server-local, matching the zone's contact trigger: a global trigger runs its statement on every
 // machine, which would raise the alert and drop its markers once per player.
 _trgWarning = createTrigger["EmptyDetector",PosOfBLUHQ,false];
-_trgWarning setTriggerArea[200,200,0,false];
+_trgWarning setTriggerArea[300,300,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
 _trgWarning setTriggerStatements["this", "['Main Base', thisList] call fnc_enemy_contact;", ""];
 _trgWarning setTriggerTimeout [10, 10, 10, true];
