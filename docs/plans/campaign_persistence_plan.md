@@ -860,7 +860,7 @@ the others: escaping this one leaves boot blocked on a question with no answer.
 
 ### Telling the player what did not load
 
-Three failures reach the player, at three different moments, because that is when each one is
+Four failures reach the player, at four different moments, because that is when each one is
 discovered.
 
 **The store not reading back is not an empty list.** The scan publishes a status beside the summary —
@@ -880,6 +880,13 @@ rolls fresh ground, which is a different campaign wearing the same name. That ro
 the missing group named, like any other validation failure. An absent outcome group is a degraded
 load rather than a refusal — the campaign returns with those pools, flags or ledgers at their boot
 values — so the row stays selectable and the screen names the gap before the player commits to it.
+
+**A chosen campaign that does not load leaves the player on the screen.** A header can pass the scan
+while its payload fails: a torn write with no earlier save to fall back to, or a payload that fails the
+restore's own check. The server reads and checks the payload when Load is pressed, before it accepts
+the answer (`DUWS_fnc_saveChoose`). A refusal comes back to the screen as a hint that names the reason,
+and the player chooses again. Only the timeout's own pick falls through to a new campaign, because
+nobody is at the screen to choose again.
 
 **What only the restore can discover is reported once it has run.** A classname a removed mod
 defined, a token the current faction cannot field, a town position that no longer resolves to a
