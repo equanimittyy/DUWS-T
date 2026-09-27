@@ -112,11 +112,21 @@ DUWS_fnc_opcom_gridSourceOf = {
 // Belief and taskings change every tick, so they are never cached.
 DUWS_fnc_opcom_gridMobile = {
     params ["_fri", "_ene"];
+    // A sighted BLUFOR garrison group is skipped as a standing defender is below: its awake site's live force already
+    // holds it. By roster, since a prefab's static crews carry no garrison key.
+    private _held = createHashMap;
+    {
+        if ((_y select 2) isEqualTo "ene") then {
+            { if (alive _x) then { _held set [netId (group _x), true] } } forEach ([_x] call fnc_site_roster);
+        };
+    } forEach DUWS_opcom_gridAwake;
     // An expired stamp is already gone from the arrays.
     {
-        private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);
-        private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
-        [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
+        if !((DUWS_opcom_belief_key select _forEachIndex) in _held) then {
+            private _age = DUWS_opcom_tick - (DUWS_opcom_belief_time select _forEachIndex);
+            private _decay = ((OPCOM_BELIEF_EXPIRE - _age) / (OPCOM_BELIEF_EXPIRE - OPCOM_BELIEF_FRESH)) max 0 min 1;
+            [_ene, _x, (DUWS_opcom_belief_str select _forEachIndex) * _decay, OPCOM_GRID_SPREAD] call DUWS_fnc_opcom_deposit;
+        };
     } forEach DUWS_opcom_belief_pos;
     // A tasking's group is in no holdings scan, so this is where its force enters the grid at all -- except a standing
     // defender, which its zone's live garrison force already holds.

@@ -25,7 +25,9 @@ A garrison crews whatever the ground carries, so a zone the player holds mans it
 own men; only a raise reaches that pass, which is why it happens exactly when they have a garrison and not
 before. OPCOM reads a BLUFOR garrison at its **true force**, not a nominal — the commander is omniscient
 about what the player has built, and the territorial figure it used to read is now only the floor for
-BLUFOR ground carrying no garrison.
+BLUFOR ground carrying no garrison. A sighted group on a live BLUFOR garrison's roster keeps its belief row but
+adds nothing to the force grid, because the site's deposit already counts it
+(`src/duws/server/warcom/opcom/belief/fnc_opcom_grid_sources.sqf`).
 
 Both sides field the **same tier rows**. A token resolves through the asking side's vehicle table
 (`DUWS_spawnVehicles` / `DUWS_spawnVehiclesBlu`) and its own earned Army Power, so one row raises either
