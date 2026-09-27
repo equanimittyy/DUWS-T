@@ -62,7 +62,7 @@ DUWS_fnc_opcom_freeSource = {
 // port. At the unit cap only a truck is still hired.
 DUWS_fnc_opcom_hireSources = {
     params ["_fits", "_near", "_zones"];
-    private _capped = (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached) >= OPCOM_CAP_UNITS;
+    private _capped = (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached) >= OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array;
     private _out = [];
     {
         _x params ["_row", "_flags", "_mt", "_force", "_price", "_mix"];
@@ -124,7 +124,7 @@ DUWS_fnc_opcom_bestSources = {
 
 // -> [members, price, Value, P(win), Cost, names]: the units one pick sends into an attack, [] when they fall under
 // _floor. No-retreat punishes a muster that trickles in, so sources join best score first, a hire again for as long as
-// the wallet and OPCOM_CAP_UNITS allow, until the bound force meets the ideal bar or the attack holds
+// the wallet and the unit cap allow, until the bound force meets the ideal bar or the attack holds
 // OPCOM_ATTACK_UNITS. A member is [unit target, bucket, price], staged at the bucket DUWS_fnc_opcom_joinBucket would
 // name. A free unit serves once, as a member or as another's lift. The Value is the weakest member's, since the attack
 // goes only once its last unit is in. With nothing affordable the best source goes alone, so the pick can save for it.
@@ -138,7 +138,7 @@ DUWS_fnc_opcom_attackPackage = {
     _rank sort false;
     private _ene = ([_at] call DUWS_fnc_opcom_blockForce) select 1;
     private _gain = call DUWS_fnc_opcom_blockGain;
-    private _hires = OPCOM_CAP_UNITS - (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached);
+    private _hires = OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array - (["unitCount", DUWS_fnc_opcom_unitCount] call DUWS_fnc_opcom_tickCached);
     private _room = OPCOM_ATTACK_UNITS;
     { _room = _room - (_x select 3) } forEach _buckets;
     private _members = [];

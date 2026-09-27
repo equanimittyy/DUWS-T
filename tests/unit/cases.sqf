@@ -1943,7 +1943,8 @@ WARCOM_opfor_ap = 5;
 
 // --- DUWS_fnc_opcom_hireSources: where each row a job takes is hired ---
 DUWS_fnc_opcom_tickCached = { params ["", "_fn"]; call _fn };
-OPCOM_CAP_UNITS = 50;
+OPCOM_CAP_UNITS_PER_ZONE = 8;
+zone_meta_array = [[1, [0, 0, 0], 200], [2, [5000, 0, 0], 200]];
 DUWS_fnc_opcom_unitCount = { 0 };
 DUWS_fnc_opcom_hireRowsSweep = { [["rifles", [], "inf", 8, 10, 1], ["boat", ["transport"], "boat", 2, 3, 1], ["truck", ["supply"], "wheeled", 2, 3, 1]] };
 DUWS_fnc_opcom_portOf = { params ["_k"]; [-1, 7] select (_k isEqualTo "zb") };
@@ -1955,7 +1956,7 @@ private _hireZones = [["za", 0, [0, 0, 0]], ["zb", 0, [5000, 0, 0]]];
 ["hireSources: a boat is raised at the nearest zone with a port, and starts at the port",
     [{ params ["", "_mt"]; _mt isEqualTo "boat" }, [1000, 0, 0], _hireZones] call DUWS_fnc_opcom_hireSources,
     [[["hire", "boat", "zb"], [4700, 0, 0], 2, "boat", ["transport"], 3, 3, 1]]] call fnc_assertEq;
-DUWS_fnc_opcom_unitCount = { 50 };
+DUWS_fnc_opcom_unitCount = { 16 };
 ["hireSources: at the unit cap only a truck is hired",
     ([{ true }, [1000, 0, 0], _hireZones] call DUWS_fnc_opcom_hireSources) apply { _x select 0 },
     [["hire", "truck", "za"]]] call fnc_assertEq;

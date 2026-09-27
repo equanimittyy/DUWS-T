@@ -781,9 +781,9 @@ OPCOM_CAP_HP_PER_ZONE = 12;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
     ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD", 1]
 ];
-// Supply trucks sit outside OPCOM_CAP_UNITS: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
+// Supply trucks sit outside the unit cap: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
 // roster stall every supply buy.
-OPCOM_CAP_UNITS = 50;
+OPCOM_CAP_UNITS_PER_ZONE = 8;
 OPCOM_CAP_GARRISON = 10;
 OPCOM_CAP_SUPPLY = 10;
 // Fixed per type: a gun's true range is the faction gun's, known only at fire time.

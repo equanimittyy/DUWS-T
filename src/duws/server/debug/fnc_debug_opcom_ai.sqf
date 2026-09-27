@@ -67,7 +67,7 @@ private _slotsCap = 0;
 private _limits = [
     [format ["AP %1   income %2 per %3 min + 1 per %4 ticks   picks %5/tick", WARCOM_opfor_ap, round WARCOM_opfor_lastIncome,
         DUWS_econ_period / 60, OPCOM_AP_DRIP_TICKS, DUWS_opcom_picksPerTick]],
-    [["Units", call DUWS_fnc_opcom_unitCount, OPCOM_CAP_UNITS], ["Supply", call DUWS_fnc_opcom_supplyCount, OPCOM_CAP_SUPPLY],
+    [["Units", call DUWS_fnc_opcom_unitCount, OPCOM_CAP_UNITS_PER_ZONE * count zone_meta_array], ["Supply", call DUWS_fnc_opcom_supplyCount, OPCOM_CAP_SUPPLY],
         ["Garrisons full", _full, count _open]],
     [["Hardpoints", _hpAll, OPCOM_CAP_HP_PER_ZONE * count zone_meta_array], ["Zone slots", _slotsUsed, _slotsCap]],
     [["Radio", "RADIO"] call _hpItem, ["OP", "OP"] call _hpItem, ["Mortar", "MORTAR"] call _hpItem, ["Arty", "ARTY"] call _hpItem],
