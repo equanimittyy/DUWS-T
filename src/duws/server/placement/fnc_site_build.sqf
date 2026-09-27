@@ -13,15 +13,15 @@ DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\dete
 // The factory role is client-local, so it and the Clear action ride one JIP order. A string id, because an object-keyed
 // one would evict another order keyed to the same object (a FOB's actions).
 DUWS_fnc_siteBuildArm = {
-    params ["_factory", "_siteKey", ["_categories", ["Fortifications"]]];
+    params ["_factory", "_siteKey"];
     _factory setVariable ["DUWS_buildSite", _siteKey, true];
     _factory setVariable ["DUWS_buildKey", format ["%1_builds", _siteKey]];
-    [[_factory, _categories], {
-        params ["_factory", "_categories"];
+    [[_factory], {
+        params ["_factory"];
         if (!hasInterface || isNull _factory) exitWith {};
         waitUntil { !isNil "R3F_LOG_active" };
         if (!R3F_LOG_active) exitWith {};
-        [_factory, 0, west, _categories] call R3F_LOG_FNCT_usine_init;
+        [_factory, 0, west, ["Fortifications"]] call R3F_LOG_FNCT_usine_init;
         // Equal priorities list in the order they are added, so this sits right under R3F's Open action. Its condition
         // is that action's own: a distance to the model centre never shows on a building as big as the HQ.
         _factory addAction ["<t color=""#ff9600"">" + localize "STR_DUWS_T_zonebuild_clear" + "</t>",
