@@ -61,11 +61,12 @@ DUWS_fnc_opcom_patrolCells = {
     _cells
 };
 
-// The patrol lines of one pick cross the same cells many times over.
+// Need by staleness per cell, weighed when a line of the pick first crosses it and kept for the pick: its lines cross
+// the same cells many times over, and most of the grid is sea, off the box or crossed by no line at all.
 DUWS_fnc_opcom_sweepWeights = {
     ["sweepWeights", {
         private _out = [];
-        { _out pushBack (([_forEachIndex] call DUWS_fnc_opcom_needAt) * ([_forEachIndex] call DUWS_fnc_opcom_stalenessAt)) } forEach DUWS_opcom_grid_land;
+        _out resize count DUWS_opcom_grid_land;
         _out
     }] call DUWS_fnc_opcom_tickCached
 };
@@ -76,7 +77,14 @@ DUWS_fnc_opcom_patrolValue = {
     params ["_from", "_to", "_k"];
     private _weights = call DUWS_fnc_opcom_sweepWeights;
     private _sum = 0;
-    { _sum = _sum + (_weights select _x) } forEach ([_from, _to, _k] call DUWS_fnc_opcom_patrolCells);
+    {
+        private _w = _weights select _x;
+        if (isNil "_w") then {
+            _w = ([_x] call DUWS_fnc_opcom_needAt) * ([_x] call DUWS_fnc_opcom_stalenessAt);
+            _weights set [_x, _w];
+        };
+        _sum = _sum + _w;
+    } forEach ([_from, _to, _k] call DUWS_fnc_opcom_patrolCells);
     _sum * OPCOM_PATROL_SHARE
 };
 
