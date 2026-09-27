@@ -1192,12 +1192,9 @@ inheriting anything. The presence latch carries over; the `Mobilising` hold does
 arrives on ground it owns. A BLUFOR-held site also wakes for an OPCOM attacker, live or virtual, inside its ring, so
 its garrison renders and renders the attacker in turn.
 
-Not built:
-
-- **What the player pays for one.** `fnc_zone_garrison_fortify` / `_reinforce` and the town pair charge nothing —
-  the price is the caller's, as it is for OPCOM. Only the debug surface calls them for BLUFOR today, so the
-  currency, the price and where the player spends it are open. OPCOM's own candidate lists skip BLUFOR-held sites,
-  so nothing it buys can reach them.
+The player buys both from the View Map readout (`fnc_map_readout_buy`) at `OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY`
+in BLUFOR AP, landed at once with no truck, and refused while `DUWS_fnc_opcom_siteContested` holds for the site.
+OPCOM's own candidate lists skip BLUFOR-held sites, so nothing it buys can reach them.
 
 ## Random events: what a turned town does
 
