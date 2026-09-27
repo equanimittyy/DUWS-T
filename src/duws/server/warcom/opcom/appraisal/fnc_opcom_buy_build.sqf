@@ -54,7 +54,8 @@ DUWS_fnc_opcom_assetTargets = {
 // pick weighs is the price of the belt it would actually lay.
 DUWS_fnc_opcom_mineBuildTargets = {
     params ["_variant"];
-    if !(["MINEFIELD"] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
+    private _mixKey = format ["MINEFIELD_%1", _variant];
+    if !(["MINEFIELD", _mixKey] call DUWS_fnc_opcom_hpOpen) exitWith { [] };
     private _site = ["MINE"] call DUWS_fnc_opcom_siteFor;
     if (_site isEqualTo []) exitWith { [] };
     _site params ["_at", "_v"];
@@ -62,7 +63,7 @@ DUWS_fnc_opcom_mineBuildTargets = {
     private _hi = round (OPCOM_MINE_LEN_MAX / DUWS_mineSquare);
     private _size = [_lo + floor random (_hi - _lo + 1), round (OPCOM_MINE_DEPTH / DUWS_mineSquare)];
     private _label = format ["Lay %1 mines at %2", _variant, mapGridPosition _at];
-    ([_at, _v * ([format ["MINEFIELD_%1", _variant]] call DUWS_fnc_opcom_hpMix),
+    ([_at, _v * ([_mixKey] call DUWS_fnc_opcom_hpMix),
         OPCOM_AP_MINEFIELD * (_size select 0) * (_size select 1)] call DUWS_fnc_opcom_truckOffers)
         apply { _x params ["_src", "_price", "_tv", "_c"]; [[_variant, _size, _at, _src], _price, _label, _tv, 1, _c] }
 };

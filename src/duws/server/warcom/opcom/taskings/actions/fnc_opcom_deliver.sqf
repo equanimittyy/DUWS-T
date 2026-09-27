@@ -4,7 +4,8 @@ if (!isServer) exitWith {};
 // [key, type, zoneKey, pos, refund] per build still siting, so a Build cannot overfill a zone's slots or an asset's cap.
 DUWS_opcom_buildsPending = [];
 
-// Key -> "AT" / "AP" per field OPCOM lays: the registry row carries no variant, and the build mix weighs them apart.
+// Key -> "AT" / "AP" per OPFOR field bar a civilian job's thinned one: the registry row carries no variant, and the
+// build mix and the caps weigh them apart.
 DUWS_opcom_mineVariants = createHashMap;
 
 // Half a cell around the truck's drop, so a build stands where it was delivered; it faces where BLUFOR come from.

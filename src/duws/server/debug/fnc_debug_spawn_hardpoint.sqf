@@ -28,6 +28,7 @@ _this spawn {
         private _laid = [_squares, _dir, _variant, _key] call fnc_hardpoint_minefield_stream;
         [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
         _ring = _size call fnc_hardpoint_minefield_ring;
+        DUWS_opcom_mineVariants set [_key, _variant];
         _what = format ["%1 %2 mines planned over %3 squares", _laid, _variant, count _squares];
     } else {
         _objs = [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build;

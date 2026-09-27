@@ -41,7 +41,7 @@ DUWS_fnc_campaignTaskings = {
 
 // A streamed belt's squares are its whole state: the registry row names no geometry, and a field restored
 // without them would read as cleared on the first pass. Only squares still holding mines are kept. The variant is
-// read off a planned mine, since only OPCOM's belts are in DUWS_opcom_mineVariants.
+// read off a planned mine, so a belt missing from DUWS_opcom_mineVariants still restores as what it is.
 DUWS_fnc_campaignBelts = {
     (DUWS_hardpoints select { (_x select 2) isEqualTo "MINEFIELD" }) apply {
         private _key = _x select 0;

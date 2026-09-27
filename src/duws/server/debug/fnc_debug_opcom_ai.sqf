@@ -44,12 +44,12 @@ if (count _rows > AI_ROWS_MAX) then {
 };
 
 // Swept here rather than read from the pick's tick cache, which a build ordered since the last pick has outrun.
-private _hps = (call DUWS_fnc_opcom_hpSweep) select 0;
+(call DUWS_fnc_opcom_hpSweep) params ["_hps", "_byMix"];
 private _hpAll = 0;
 { _hpAll = _hpAll + count _y } forEach _hps;
 private _hpItem = {
-    params ["_label", "_type"];
-    [_label, count (_hps getOrDefault [_type, []]), [_type] call DUWS_fnc_opcom_hpCap]
+    params ["_label", "_mixKey"];
+    [_label, _byMix getOrDefault [_mixKey, 0], [_mixKey] call DUWS_fnc_opcom_hpCap]
 };
 private _open = call DUWS_fnc_opcom_zonesOpenSweep;
 private _homed = call DUWS_fnc_opcom_homedSweep;
@@ -71,7 +71,8 @@ private _limits = [
         ["Garrisons full", _full, count _open]],
     [["Hardpoints", _hpAll, OPCOM_CAP_HP_PER_ZONE * count zone_meta_array], ["Zone slots", _slotsUsed, _slotsCap]],
     [["Radio", "RADIO"] call _hpItem, ["OP", "OP"] call _hpItem, ["Mortar", "MORTAR"] call _hpItem, ["Arty", "ARTY"] call _hpItem],
-    [["AT", "AT"] call _hpItem, ["AA", "AA"] call _hpItem, ["GMG", "GMG"] call _hpItem, ["Mines", "MINEFIELD"] call _hpItem],
+    [["AT", "AT"] call _hpItem, ["AA", "AA"] call _hpItem, ["GMG", "GMG"] call _hpItem,
+        ["AT mines", "MINEFIELD_AT"] call _hpItem, ["AP mines", "MINEFIELD_AP"] call _hpItem],
     [format ["Tier %1", WARCOM_opfor_tier]]
 ];
 

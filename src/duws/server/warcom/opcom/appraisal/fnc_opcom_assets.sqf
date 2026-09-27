@@ -12,8 +12,8 @@ DUWS_opcom_assetCap = createHashMapFromArray [
 ];
 
 // Siting and on-truck builds count too, or two trucks fill a cap's last slot or carry two posts to one spot.
-// -> [type -> [position, ...], mix key -> count]. A minefield's mix key carries its variant, so the mix weighs AT
-// and AP apart; one OPCOM did not lay has no variant on record and stays out of the mix.
+// -> [type -> [position, ...], mix key -> count]. A minefield's mix key carries its variant, so the mix and the caps
+// weigh AT and AP apart; a civilian job's field has no variant on record and stays out of both.
 DUWS_fnc_opcom_hpSweep = {
     private _byType = createHashMap;
     private _byMix = createHashMap;
@@ -57,11 +57,12 @@ DUWS_fnc_opcom_hpCap = {
 };
 
 DUWS_fnc_opcom_hpOpen = {
-    params ["_type"];
-    private _hps = (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) select 0;
+    params ["_type", ["_mixKey", ""]];
+    if (_mixKey isEqualTo "") then { _mixKey = _type };
+    (["hardpoints", DUWS_fnc_opcom_hpSweep] call DUWS_fnc_opcom_tickCached) params ["_hps", "_byMix"];
     private _all = 0;
     { _all = _all + count _y } forEach _hps;
     (DUWS_hardpointTier getOrDefault [_type, 99]) <= WARCOM_opfor_tier
-        && {count (_hps getOrDefault [_type, []]) < ([_type] call DUWS_fnc_opcom_hpCap)}
+        && {(_byMix getOrDefault [_mixKey, 0]) < ([_mixKey] call DUWS_fnc_opcom_hpCap)}
         && {_all < OPCOM_CAP_HP_PER_ZONE * count zone_meta_array}
 };

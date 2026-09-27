@@ -48,6 +48,7 @@ private _build = {
                 call fnc_hardpoint_minefield_grid) select { !surfaceIsWater _x && {(_x nearRoads 100) isEqualTo []} };
             if (([_squares, _dir, "AP", _key] call fnc_hardpoint_minefield_stream) > 0) then {
                 [_squares, _dir, _key] call fnc_hardpoint_minefield_signs;
+                DUWS_opcom_mineVariants set [_key, "AP"];
                 [_key, "MINEFIELD", _fieldPos, "opfor", "", _dir,
                     [RECON_MINE_COLS, RECON_MINE_ROWS] call fnc_hardpoint_minefield_ring] call fnc_hardpoint_register;
             };

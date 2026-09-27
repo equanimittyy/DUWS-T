@@ -66,8 +66,11 @@ thinned field and reveals it at once ([`side_mission_catalogue.md`](side_mission
 OPCOM's builds roll only the types OPFOR's tier has unlocked (`DUWS_hardpointTier`), under caps that count every
 standing OPFOR hardpoint, seeded ones included, and every build still siting or on its truck
 (`DUWS_fnc_opcom_hpOpen`). Three types cap flat campaign-wide: `RADIO` at `AOI_OPFOR_TOWER_CAP` (5), `MORTAR` at
-`OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG`, `OP` and `MINEFIELD` cap at their
+`OPCOM_CAP_MORTAR` (2) and `ARTY` at `OPCOM_CAP_ARTY` (1). `AT`, `AA`, `GMG` and `OP` cap at their
 `OPCOM_CAP_HP_TYPE_PER_ZONE` factor times the campaign's zone count; `MG` and `ROADBLOCK` carry no cap of their own.
+A `MINEFIELD` caps the same way per variant, `MINEFIELD_AT` and `MINEFIELD_AP` each at 1 a zone. The variant is
+read from `DUWS_opcom_mineVariants`, which OPCOM's belts, the recon mission's field and a debug field write to. A
+Clear Minefield job's thinned field writes no variant, so it counts only toward the all-types cap.
 All types together, the flat-capped three included, cap at `OPCOM_CAP_HP_PER_ZONE` (12) times the zone count. The
 per-zone caps scale because the seed does, at about 7 hardpoints a zone. Within the caps, a build's Value leans toward
 the archetype's `hpMix` (`appraisal/fnc_opcom_archetypes.sqf`), where a type's share is its weight over the mix's sum:
@@ -95,9 +98,10 @@ unit-tested independently of the terrain read that feeds it:
   a roadblock needs a road within 8 m, every other type is kept 100 m clear of any road, and
   a minefield's footprint must be clear of trees and buildings). `_variant` is the minefield's, and an
   `AT` field is the second exception to the road standoff: buried mines are not spotted from the verge,
-  and `fnc_hardpoint_best_ground` snaps one onto a road when it draws within reach of one, since mines off
-  the road stop nothing that drives. Unlike a roadblock it is not bound to a road, and lays where it fell
-  when none is near. An `AP` field keeps the standoff.
+  and mines off the road stop nothing that drives. Like a roadblock, it is bound to a road:
+  `fnc_hardpoint_best_ground` puts its centre on a road within `HP_ROAD_SNAP` (120 m) of the draw, and
+  drops a draw with no road in reach. The belt runs at the bearing it was given, so it lies along the road,
+  across it, or at any angle between. An `AP` field keeps the standoff.
   Otherwise the multiplier rewards what that type wants — high ground and a road below for MG/AT,
   flat and open for AA, defilade for a mortar, a symmetric crest for a radio mast — plus a mutual-support
   bonus for sitting within interlock range of a hardpoint already down.

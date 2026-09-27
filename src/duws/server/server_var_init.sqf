@@ -784,7 +784,7 @@ OPCOM_CAP_ARTY = 1;
 // grows with the zone count, so a flat cap would sit under a large campaign's seed and far over a small one's.
 OPCOM_CAP_HP_PER_ZONE = 12;
 OPCOM_CAP_HP_TYPE_PER_ZONE = createHashMapFromArray [
-    ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD", 1]
+    ["AT", 2], ["AA", 2], ["GMG", 1], ["OP", 2], ["MINEFIELD_AT", 1], ["MINEFIELD_AP", 1]
 ];
 // Supply trucks sit outside the unit cap: OPCOM_CAP_SUPPLY bounds them, and counting them would let a full
 // roster stall every supply buy.
