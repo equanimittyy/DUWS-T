@@ -818,6 +818,9 @@ OPCOM_VALUE_HALFLIFE = 360;
 // flies over.
 OPCOM_ROAD_DETOUR = 1.3;
 
+// The taxi saving prices the drive alone, so a hop inside this 5x5 block would score a lift the board and drop eat.
+OPCOM_TAXI_MIN_K = 2;
+
 // Ticks OPCOM will bank toward an unaffordable top pick: one economy period, since income lands in lumps and a
 // shorter horizon would rarely hold a payout.
 OPCOM_SAVE_HORIZON = 360;

@@ -45,7 +45,7 @@ DUWS_fnc_opcom_taxiBind = {
     params ["_rider"];
     private _to = _rider get "target";
     private _v = _rider getOrDefault ["expValue", 0];
-    if (_v <= 0 || {_to isEqualTo []}) exitWith {};
+    if (_v <= 0 || {_to isEqualTo []} || {([_rider get "pos", _to] call DUWS_fnc_opcom_cellDist) <= OPCOM_TAXI_MIN_K}) exitWith {};
     private _best = 0;
     private _pick = [];
     {

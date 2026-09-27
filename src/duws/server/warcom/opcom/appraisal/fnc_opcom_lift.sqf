@@ -39,7 +39,7 @@ DUWS_fnc_opcom_freeTaxis = {
 DUWS_fnc_opcom_liftFor = {
     params ["_src", "_to", "_v", "_pw", "_budget"];
     _src params ["", "_from", "", "_rm", "_flags"];
-    if !("transportable" in _flags) exitWith { [] };
+    if (!("transportable" in _flags) || {([_from, _to] call DUWS_fnc_opcom_cellDist) <= OPCOM_TAXI_MIN_K}) exitWith { [] };
     private _dry = [_from, _to] call DUWS_fnc_opcom_lineDry;
     private _best = [];
     private _bn = 0;

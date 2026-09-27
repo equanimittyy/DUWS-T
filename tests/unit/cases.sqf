@@ -1986,6 +1986,8 @@ DUWS_fnc_opcom_isWaterPt = { params ["_p"]; (_p select 0) > 900 && {(_p select 0
 
 // --- DUWS_fnc_opcom_liftFor: the lift a transportable order rides, if any pays ---
 OPCOM_AP_PER_KM = 0.5;
+OPCOM_TAXI_MIN_K = 2;
+DUWS_fnc_opcom_cellDist = { params ["_a", "_b"]; floor ((_a distance2D _b) / 500) };
 DUWS_fnc_opcom_zonesOpen = { [] };
 DUWS_fnc_opcom_lineDry = { true };
 DUWS_fnc_opcom_freeTaxis = { [[["free", 5], [0, 0, 0], 2, "wheeled", ["transport"], 0, 2, 1]] };
@@ -2000,6 +2002,10 @@ private _rider = [["free", 1], [0, 0, 0], 8, "inf", ["transportable"], 0, 8, 1];
     [_rider, [5000, 0, 0], 20, 1, 5] call DUWS_fnc_opcom_liftFor, [["free", 5], 10, 0, 2]] call fnc_assertEq;
 ["liftFor: the odds scale the saving, so a long-shot order walks",
     [_rider, [5000, 0, 0], 20, 0.1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
+["liftFor: a target inside the 5x5 block round the rider walks",
+    [_rider, [1000, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
+["liftFor: a target just outside the block rides",
+    [_rider, [1500, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, [["hire", "trans_heli", "z"], 20, 10, 10]] call fnc_assertEq;
 DUWS_fnc_opcom_hireSources = { [] };
 DUWS_fnc_opcom_lineDry = { false };
 ["liftFor: a hull takes no ride over water", [_rider, [5000, 0, 0], 20, 1, 100] call DUWS_fnc_opcom_liftFor, []] call fnc_assertEq;
