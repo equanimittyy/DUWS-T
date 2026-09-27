@@ -8285,16 +8285,16 @@
                 <English>Unlocks the JDAM, laser-guided bomb, artillery, cluster bomb, napalm, attack helicopter and CAS.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio1">
-                <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</Original>
-                <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (level I).</English>
+                <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers, and extends BLUFOR influence 10% farther (level I).</Original>
+                <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers, and extends BLUFOR influence 10% farther (level I).</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio2">
-                <Original>A stronger reputation amplifier across covered towns (level II); requires level I.</Original>
-                <English>A stronger reputation amplifier across covered towns (level II); requires level I.</English>
+                <Original>A stronger reputation amplifier across covered towns, and BLUFOR influence 20% farther (level II); requires level I.</Original>
+                <English>A stronger reputation amplifier across covered towns, and BLUFOR influence 20% farther (level II); requires level I.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_radio3">
-                <Original>The strongest reputation amplifier across covered towns (level III); requires level II.</Original>
-                <English>The strongest reputation amplifier across covered towns (level III); requires level II.</English>
+                <Original>The strongest reputation amplifier across covered towns, and BLUFOR influence 30% farther (level III); requires level II.</Original>
+                <English>The strongest reputation amplifier across covered towns, and BLUFOR influence 30% farther (level III); requires level II.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_garage1">
                 <Original>Raises the vehicle depot's storage caps to 6 land, 3 air, 6 boat (level I); requires the depot.</Original>

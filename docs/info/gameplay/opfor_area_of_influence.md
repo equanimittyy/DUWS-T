@@ -11,8 +11,8 @@ passive town-reputation drift, and where OPFOR's standalone hardpoints get sited
 within reach of a side's ground or it isn't, with no falloff and no per-emitter strength, because
 the drift it drives is a flat step rather than a weighted one (see [Rep drift](#rep-drift)).
 `DUWS_fnc_aoi_covers` (`fnc_aoi_init.sqf:17`) is the shared primitive both sides' coverage tests
-wrap (`fnc_aoi_opfor_covers` / `fnc_aoi_blufor_covers`, `:62-63`); `fnc_aoi_field_at [_pos]`
-(`:68-73`) composes the two into an OPFOR-positive dominance value: `+1` OPFOR-only, `-1`
+wrap (`fnc_aoi_opfor_covers` / `fnc_aoi_blufor_covers`, `:67-68`); `fnc_aoi_field_at [_pos]`
+(`:73-78`) composes the two into an OPFOR-positive dominance value: `+1` OPFOR-only, `-1`
 BLUFOR-only, `0` contested or empty. Siting reads `fnc_aoi_field_at`; the drift reads the two
 coverage primitives directly so it can layer the radio-tower amplifiers on top.
 
@@ -25,10 +25,10 @@ coverage primitives directly so it can layer the radio-tower amplifiers on top.
 | Banded town | its band's side | `civ_radius + AOI_TOWN_REACH` (2000 m) |
 
 Reach is measured from each source's outer edge, not its centre, so a naturally large zone claims
-proportionally more ground than a small one — the constants live at `server_var_init.sqf:451-455`.
+proportionally more ground than a small one — the constants live at `server_var_init.sqf:562-566`.
 BLUFOR's radio supports are not in this table: they have no structure on the map, so they carry no
-reach and only amplify BLUFOR's drift wherever the emitters above already cover (see
-[Radio towers](#radio-towers)).
+coverage of their own. Each tier widens every BLUFOR reach above and amplifies BLUFOR's drift inside
+that coverage (see [Radio towers](#radio-towers)).
 
 A town emits only once its reputation has fully crossed `±10` — the same `OPFOR_BAND` threshold
 that already flips a town's side for garrison and income
@@ -43,7 +43,7 @@ built. That asymmetry is the starting pressure the rest of the mechanic answers.
 ### The exclusion
 
 The area of influence is the field's OPFOR-positive region minus the interior of every zone.
-`fnc_aoi_in_any_zone [_pos]` (`fnc_aoi_init.sqf:83-86`) tests a point against each zone's own
+`fnc_aoi_in_any_zone [_pos]` (`fnc_aoi_init.sqf:85-88`) tests a point against each zone's own
 `_size`, whoever holds it; inside a zone is the zone hardpoint ring's ground (see
 [`hardpoints.md`](hardpoints.md)), not the band's. The field still *covers* zone interiors — a
 town under a zone still drifts — but siting reads `fnc_aoi_field_at > 0 && !(fnc_aoi_in_any_zone)`,
@@ -75,7 +75,7 @@ it has paid to**: `DUWS_bluforRadioLevel` (the tier bought, `0`-`3`) with no bas
 BLUFOR-covered town drifts `0` until a radio-tower support is bought, then `+1` to `+3` by tier.
 Coverage with no tier pushes nothing; a tier with no coverage has nothing to push. A town's first
 rep lever is capturing zones (removes OPFOR's coverage and base push where it hurts most); the
-second is buying towers (turns BLUFOR coverage into an actual pull).
+second is buying towers (turns BLUFOR coverage into an actual pull, and widens it).
 
 The writer is the existing `fnc_town_rep_adjust` (`server/warcom/fnc_economy_init.sqf:136-157`),
 already clamped to `[-20, 20]`; the drift is a silent caller (`_silent` param, `:138`) beside its
@@ -84,13 +84,13 @@ rep already drove — the OPFOR/BLUFOR band, town income, the map marker colour 
 
 ## Radio towers
 
-A radio tower amplifies its side's drift push; the two sides differ in whether that amplifier also
-carries coverage.
+A radio tower amplifies its side's drift push. OPFOR's tower also carries coverage of its own;
+BLUFOR's tier carries none, but widens the coverage of every other BLUFOR emitter.
 
 ### OPFOR: a physical hardpoint
 
 `DUWS_opforRadioLevel` is the live count of uncleared `"RADIO"` rows in the `DUWS_hardpoints`
-registry, capped at `AOI_OPFOR_TOWER_CAP` (`server_var_init.sqf:463-465`). It is recomputed, never
+registry, capped at `AOI_OPFOR_TOWER_CAP` (`server_var_init.sqf:596`). It is recomputed, never
 incremented in place, by `DUWS_fnc_aoi_opforRecount`
 (`server/init_zones/fnc_hardpoint_stream.sqf:21-24`), called whenever a `"RADIO"` hardpoint is
 registered (`:328`) or cleared (`:182`) — so a destroyed tower drops the amplifier, and its
@@ -111,9 +111,17 @@ tier is hidden until the one below it is owned (`:85-86`). Nothing is placed and
 the purchase itself is the whole effect, so there is no BLUFOR structure for OPFOR to destroy in
 answer to a rising amplifier — only ground to retake.
 
+Each tier also widens BLUFOR's coverage. `DUWS_fnc_aoi_covers` multiplies the reach of every BLUFOR
+emitter by `1 + AOI_BLUFOR_RADIO_STEP × DUWS_bluforRadioLevel`, so tiers I to III reach 10%, 20% and
+30% farther: the HQ's 2000 m becomes 2200, 2400 and 2600 m. The step adds; it does not compound. Only
+the reach beyond the edge scales, so a zone's or a town's own radius stays the same. Every reader of
+the coverage follows, the band siting included, so a higher tier also leaves OPFOR less band to build
+in. The scale needs no save key: a restore recounts `DUWS_bluforRadioLevel` from the saved
+permanent-support record.
+
 ## Band siting
 
-`DUWS_fnc_aoi_bandPos` (`fnc_aoi_init.sqf:95-110`) is the shared candidate sampler: it draws an
+`DUWS_fnc_aoi_bandPos` (`fnc_aoi_init.sqf:97-112`) is the shared candidate sampler: it draws an
 annulus around a random OPFOR zone, out to `AOI_ZONE_REACH` past the zone's edge, and keeps the
 draw only where `fnc_aoi_field_at` is positive and `fnc_aoi_in_any_zone` is false. Every band
 placer except the two flank lines and the observation posts goes through it (directly, or via the per-emplacement
@@ -154,6 +162,7 @@ menu, not shown to the player.
 | `AOI_FOB_REACH` | 2000 m | each FOB's coverage radius |
 | `AOI_TOWN_REACH` | 2000 m | added to a banded town's `civ_radius` |
 | `AOI_OPFOR_TOWER_CAP` | 5 | ceiling on `DUWS_opforRadioLevel`; OPFOR's push bottoms out at `-6` |
+| `AOI_BLUFOR_RADIO_STEP` | 0.1 | share of each BLUFOR reach that each BLUFOR radio tier adds |
 
-All defined at `server/server_var_init.sqf:529-539`, server-only (not `publicVariable`d): every
+All defined at `server/server_var_init.sqf:562-599`, server-only (not `publicVariable`d): every
 reader — the drift on the economy tick, the hardpoint band siting — runs on the server.

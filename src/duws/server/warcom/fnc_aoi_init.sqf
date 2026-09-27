@@ -17,6 +17,8 @@ if (!isServer) exitWith {};
 DUWS_fnc_aoi_covers = {
     params ["_pos", "_side"];
     private _opfor = _side isEqualTo "opfor";
+    // Scales only the reach beyond an emitter's edge, so a zone's or town's own footprint stays put.
+    private _reachMult = [1 + AOI_BLUFOR_RADIO_STEP * DUWS_bluforRadioLevel, 1] select _opfor;
 
     // OPFOR radio towers: AOI_TOWER_REACH from the mast, the longest reach on the map. Read live from
     // the registry, so a stowed tower still projects its coverage and a cleared one stops projecting
@@ -31,14 +33,14 @@ DUWS_fnc_aoi_covers = {
     if ((zone_meta_array findIf {
         _x params ["", "_zp", "_zs"];
         private _zBlu = (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0;
-        (_zBlu != _opfor) && {(_pos distance2D _zp) <= _zs + AOI_ZONE_REACH}
+        (_zBlu != _opfor) && {(_pos distance2D _zp) <= _zs + AOI_ZONE_REACH * _reachMult}
     }) >= 0) exitWith { true };
 
     // Player HQ (BLUFOR): AOI_HQ_REACH from the flag. Empty until the HQ is placed.
-    if (!_opfor && {!(PosOfBLUHQ isEqualTo []) && {(_pos distance2D PosOfBLUHQ) <= AOI_HQ_REACH}}) exitWith { true };
+    if (!_opfor && {!(PosOfBLUHQ isEqualTo []) && {(_pos distance2D PosOfBLUHQ) <= AOI_HQ_REACH * _reachMult}}) exitWith { true };
 
     // FOBs (BLUFOR): AOI_FOB_REACH from each.
-    if (!_opfor && {(Array_of_FOBpos findIf {(_pos distance2D _x) <= AOI_FOB_REACH}) >= 0}) exitWith { true };
+    if (!_opfor && {(Array_of_FOBpos findIf {(_pos distance2D _x) <= AOI_FOB_REACH * _reachMult}) >= 0}) exitWith { true };
 
     // Banded towns: a town emits for its side only once its reputation has fully crossed +-10 -- the
     // same band that flips it for garrison and income. A neutral town is inert, so influence spreads
@@ -52,7 +54,7 @@ DUWS_fnc_aoi_covers = {
     private _hit = false;
     {
         private _banded = if (_opfor) then { _x <= -10 } else { _x >= 10 };
-        if (_banded && {(_pos distance2D (getPos (_locs select _forEachIndex))) <= (_radii select _forEachIndex) + AOI_TOWN_REACH}) exitWith { _hit = true };
+        if (_banded && {(_pos distance2D (getPos (_locs select _forEachIndex))) <= (_radii select _forEachIndex) + AOI_TOWN_REACH * _reachMult}) exitWith { _hit = true };
     } forEach _reps;
     _hit
 };

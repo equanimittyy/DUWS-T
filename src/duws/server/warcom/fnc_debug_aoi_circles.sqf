@@ -8,6 +8,7 @@ if (!isServer) exitWith {};
 params ["_requester"];
 
 private _circles = [];
+private _bluMult = 1 + AOI_BLUFOR_RADIO_STEP * DUWS_bluforRadioLevel;
 
 // OPFOR radio towers: AOI_TOWER_REACH from each mast still standing.
 { if ((_x select 2) isEqualTo "RADIO") then { _circles pushBack [_x select 1, AOI_TOWER_REACH, "opfor"] } } forEach DUWS_hardpoints;
@@ -17,12 +18,12 @@ private _circles = [];
 {
     _x params ["", "_zp", "_zs"];
     private _side = ["opfor", "blufor"] select ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0);
-    _circles pushBack [_zp, _zs + AOI_ZONE_REACH, _side];
+    _circles pushBack [_zp, _zs + AOI_ZONE_REACH * ([1, _bluMult] select (_side == "blufor")), _side];
 } forEach zone_meta_array;
 
 // Player HQ and every FOB, always BLUFOR.
-if !(PosOfBLUHQ isEqualTo []) then { _circles pushBack [PosOfBLUHQ, AOI_HQ_REACH, "blufor"] };
-{ _circles pushBack [_x, AOI_FOB_REACH, "blufor"] } forEach Array_of_FOBpos;
+if !(PosOfBLUHQ isEqualTo []) then { _circles pushBack [PosOfBLUHQ, AOI_HQ_REACH * _bluMult, "blufor"] };
+{ _circles pushBack [_x, AOI_FOB_REACH * _bluMult, "blufor"] } forEach Array_of_FOBpos;
 
 // Banded towns only -- a neutral town emits nothing, so it draws no ring. The rep's sign is the side:
 // >= +10 BLUFOR, <= -10 OPFOR, the same band that flips the town for garrison and income.
@@ -32,7 +33,7 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
 {
     if (abs _x >= 10) then {
         private _side = ["opfor", "blufor"] select (_x >= 10);
-        _circles pushBack [getPos (_locs select _forEachIndex), (_radii select _forEachIndex) + AOI_TOWN_REACH, _side];
+        _circles pushBack [getPos (_locs select _forEachIndex), (_radii select _forEachIndex) + AOI_TOWN_REACH * ([1, _bluMult] select (_side == "blufor")), _side];
     };
 } forEach _reps;
 
