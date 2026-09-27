@@ -32,8 +32,10 @@ since siting picks uniformly at random.
 
 **Siting** loops `zones_number` times. The `moreUrban` branch (`:92-126`): pick a random anchor, take
 the centroid of `House`/`Building` objects within 400 m (`:96-117`), `findSafePos` 0-10 m around it
-(`:113`), nudge 5 m off the nearest road (`:119-123`). Then distance-from-HQ (`:155`), spacing
-(`:159-169`) and 500 m origin keep-out (`:171-177`) gates, then `spawn fnc_createZone` (`:185`). The
+(`:113`), nudge 5 m off the nearest road (`:119-123`). Then distance-from-HQ (`:131`), spacing
+(`:133-145`) and 500 m origin keep-out (`:148-151`) gates, then `spawn fnc_createZone` (`:158`). The
+spacing gate measures edge to edge: `zones_spacing` is the gap between two zones' discs, half the
+maximum radius, so the contact trigger at 1.5 times a zone's radius stops short of its neighbour. The
 `else` branch (`:127-150`) is the older random-then-snap-to-building behaviour, with a 10-try
 validation loop.
 
@@ -849,7 +851,7 @@ Two numbers differ from the zone gate's, both because towns outnumber zones.
 |---|---|---|---|
 | Threads | one per zone | one for all | 3 towns per anchor plus a top-up wave ≈ `4 × zones + 3`, so a 40-zone campaign registers over 160 towns against 40 zones. One thread builds the player list once a tick and tests every town against it. |
 | Grace | 120 s | 60 s | Towns are disjoint, so a player is inside at most one, and a long grace leaves a trail of populated towns behind anyone crossing the map. Exactly half, which is what `fnc_civ_handler.sqf:25` records itself as. |
-| Reach | radius + 400 | radius + 200 | `zones_spacing` holds zones 1200 m apart, so 400 is a third of the guaranteed separation. Towns are only culled until their discs stop touching — `(r1 + r2) × 1.05` — so two 100 m towns can sit 210 m apart, and 400 would stream three in at once. |
+| Reach | radius + 400 | radius + 200 | `zones_spacing` keeps zone edges only half the maximum radius apart (250 m by default), so 400 can stream a neighbour zone in as well, and zones are few enough to afford that. Towns are only culled until their discs stop touching — `(r1 + r2) × 1.05` — so two 100 m towns can sit 210 m apart, and 400 would stream three in at once. |
 
 The reach buffer applies to arrival only; the fill still uses the town's own radius, or the crowd would
 be spread over the open ground the buffer reaches into. What it does double-trigger is self-limiting:

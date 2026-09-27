@@ -369,7 +369,7 @@ zones_manually_placed = false;publicVariable "zones_manually_placed";
 zones_max_dist_from_hq = 0;publicVariable "zones_max_dist_from_hq";
 // Number of capturables zones to create (when zones are created randomly)
 zones_number = 6; 
-zones_spacing = 1200; 
+zones_spacing = 500; 
 zones_max_radius = 1000;publicVariable "zones_max_radius"; 
 // Must not go under 200.
 zones_min_radius = 200;publicVariable "zones_min_radius";

@@ -31,7 +31,7 @@ if (zones_max_radius <= zones_min_radius) then {
 	zones_max_radius = _swap1;
 };
 
-zones_spacing = zones_max_radius * 1.8;  // zone distance from center to center
+zones_spacing = zones_max_radius * 0.5;  // edge-to-edge gap: keeps a zone's 1.5x-radius contact trigger off its neighbour
 publicVariable "zones_spacing";
 
 publicVariable "zones_max_radius";

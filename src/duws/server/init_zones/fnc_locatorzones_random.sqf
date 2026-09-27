@@ -4,7 +4,6 @@ while {!(["ZONES", "MASTER_allLocations_filtered from fnc_moreUrban_locations", 
 _infinite_failsafe_loop = true;
 failsafe_zones_not_found1 = false;
 failsafe_zones_not_found2 = false;
-_zones_array = [];
 
 _ZnObjects = MASTER_allLocations_filtered;
 
@@ -29,6 +28,7 @@ _mapcenter = [_half, _half, 0];
 _fortified = false;
 
 _zones_array = [[-9999,-9999,-9999]];
+_zone_radii = [0];
 
 for "_i" from 1 to zones_number do {
 	[{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -117,7 +117,6 @@ for "_i" from 1 to zones_number do {
 							_inArc = true;
 						};
 					};
-					if (_count == 11) exitWith {}; 
 					private _building = nearestBuilding _ZnLocation;
 					_zonePos = [_building, 10, 0, 5, 0.14, getPos _building] call fnc_safe_pos;
 					private _nearRoad = [_zonePos,10] call BIS_fnc_nearestRoad;
@@ -135,7 +134,7 @@ for "_i" from 1 to zones_number do {
 			private _distanceCheck = [];     
 			for [{_t=1}, {_t<=count _zones_array}, {_t=_t+1}] do {
 				private _idx = _t-1;
-				_distanceCheck pushBack ((_zones_array select _idx) distance _zonePos);
+				_distanceCheck pushBack (((_zones_array select _idx) distance _zonePos) - (_zone_radii select _idx) - _zone_radius);
 			};
 			for [{_t=1}, {_t<=count _distanceCheck}, {_t=_t+1}] do {
 				private _idx = _t-1;
@@ -159,6 +158,7 @@ if (_found_distance) then {
     ["", _points_zone, _zone_radius, _zonePos, _fortified, _prefabFlag, _i] spawn fnc_createZone;
     _found = true;
     _zones_array pushBack _zonePos;
+    _zone_radii pushBack _zone_radius;
     // Same map-layer constraint as the terrain survey: the globalChat lines below are
     // invisible while the map is open, so mirror the progress onto the map prompt.
     [format ["Generating zones...<br/>placing zone %1 of %2", _i, zones_number]]

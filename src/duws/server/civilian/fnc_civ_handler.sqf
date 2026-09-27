@@ -19,10 +19,9 @@ if (!isServer) exitWith {};
 // at once, and the grace is what decides that. A zone can afford the longer clock because there are
 // forty of it at the very most.
 //
-// Its buffer is 200, not the zone gate's 400: zones sit 1200 m apart by zones_spacing, towns only until
-// their discs stop touching, so two small ones can be 210 m apart. What 200 double-triggers is
-// self-limiting -- radius is buildings x 10 floored at 100, so the tight pairs are towns of ten
-// civilians or fewer.
+// Its buffer is 200, not the zone gate's 400: towns are culled only until their discs stop touching,
+// so two small ones can be 210 m apart. What 200 double-triggers is self-limiting -- radius is
+// buildings x 10 floored at 100, so the tight pairs are towns of ten civilians or fewer.
 
 // Share of the crowd placed on open ground beside a building rather than inside one. All-indoors
 // reads as a ghost town whose houses happen to be occupied; all-outdoors as a bus queue.
