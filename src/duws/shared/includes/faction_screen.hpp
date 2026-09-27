@@ -34,16 +34,16 @@ class startup_faction_next_dialog
 			x = 3 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.3 * GUI_GRID_H + GUI_GRID_Y;
 			w = 34 * GUI_GRID_W;
-			h = 4.9 * GUI_GRID_H;
+			h = 2.6 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
 		class faction_next_button: RscButton
 		{
 			idc = 1600;
 			text = "$STR_DUWS_T_faction_screen_resolve";
-			x = 13 * GUI_GRID_W + GUI_GRID_X;
+			x = 4 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
-			w = 14 * GUI_GRID_W;
+			w = 15.7 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 0.05;
 			colorBackground[] = {1, 0, 0, 0.5};
@@ -51,15 +51,14 @@ class startup_faction_next_dialog
 			action = "duws_faction_screen_next = true;";
 		};
 		// Dev-only shortcut past the whole setup flow. Hidden unless the DUWS_Debug param is on
-		// (ctrlShow from fnc_HQ_faction_dialog.sqf). Sits in the panel's left gap, clear of the
-		// BUILD FACTIONS button, and shares the same tear-down as that button -- the flow reads
-		// duws_debug_quickstart and diverts (client/dialog/fnc_startup_faction_flow.sqf).
+		// (ctrlShow from fnc_HQ_faction_dialog.sqf). Shares the BUILD FACTIONS button's tear-down --
+		// the flow reads duws_debug_quickstart and diverts (client/dialog/fnc_startup_faction_flow.sqf).
 		class faction_debug_button: RscButton
 		{
 			idc = 1601;
 			text = "$STR_DUWS_T_faction_debug_quickstart";
-			x = 3.75 * GUI_GRID_W + GUI_GRID_X;
-			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+			x = 0.5 * GUI_GRID_W + safezoneX;
+			y = 0.5 * GUI_GRID_H + safezoneY;
 			w = 6.5 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 0.04;
@@ -72,9 +71,9 @@ class startup_faction_next_dialog
 		{
 			idc = 1602;
 			text = "$STR_DUWS_T_faction_screen_back";
-			x = 13 * GUI_GRID_W + GUI_GRID_X;
-			y = 6.9 * GUI_GRID_H + GUI_GRID_Y;
-			w = 14 * GUI_GRID_W;
+			x = 20.3 * GUI_GRID_W + GUI_GRID_X;
+			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
+			w = 15.7 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			sizeEx = 0.03;
 			colorBackground[] = {0.35, 0.35, 0.35, 0.5};
