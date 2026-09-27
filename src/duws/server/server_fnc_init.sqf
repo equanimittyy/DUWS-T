@@ -705,10 +705,13 @@ fnc_rescue_hostage_mission = compile preprocessFileLineNumbers "duws\server\miss
 // Broadcast: the site-finder runs client-side in the offer picker (fnc_stratmap); undefined there, findSite
 // falls back to the accept-all generic and the cluster / zone-standoff / side-held-town gate is silently lost.
 fnc_rescue_hostage_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_hostage\fnc_rescue_hostage_site.sqf";publicVariable "fnc_rescue_hostage_site";
-// The query is broadcast because a client is what calls it, and the
+// The query and the buy are broadcast because a client is what calls them, and the
 // two display halves because the server is what calls them back.
+fnc_map_readout_offer = compile preprocessFileLineNumbers "duws\server\missions\fnc_map_readout_offer.sqf";
 fnc_map_readout_query = compile preprocessFileLineNumbers "duws\server\missions\fnc_map_readout_query.sqf";
 publicVariable "fnc_map_readout_query";
+fnc_map_readout_buy = compile preprocessFileLineNumbers "duws\server\missions\fnc_map_readout_buy.sqf";
+publicVariable "fnc_map_readout_buy";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";publicVariable "fnc_missionLocator";
 fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\missions\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
 

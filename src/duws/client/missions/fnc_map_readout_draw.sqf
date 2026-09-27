@@ -5,9 +5,11 @@
 // Empty arguments mean the click missed everything revealed.
 if (!hasInterface) exitWith {};
 
-params [["_kind", ""], ["_data", []]];
+params [["_kind", ""], ["_data", []], ["_note", ""]];
 
 private _text = localize "STR_DUWS_T_civ_mapview_miss";
+private _buy = [];
+private _buyTier = 0;
 
 // SQF has no string repeat, and the bar is two runs of it in different colours.
 private _fnc_pipes = {
@@ -42,7 +44,9 @@ switch (_kind) do {
 
 	case "ZONE": {
 		_data params [["_name", ""], ["_zoneKind", ""], ["_held", false], ["_seg", 0], ["_tier", 0],
-			["_hold", ""]];
+			["_hold", ""], ["_offer", []]];
+		_buy = _offer;
+		_buyTier = _tier;
 		// The kind qualifies the callsign rather than taking a line of its own, the way it reads on the
 		// marker. Guarded because a zone answers the readout from the moment it registers but files its
 		// kind at the end of build-out: a click inside that window would otherwise print "Foxtrot ()".
@@ -74,7 +78,9 @@ switch (_kind) do {
 
 	case "TOWN": {
 		_data params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0],
-			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""], ["_seg", 0]];
+			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""], ["_seg", 0], ["_offer", []]];
+		_buy = _offer;
+		_buyTier = _tier;
 		private _lines = [
 			format ["<t size='1.2'>%1</t>", _name],
 			format [localize "STR_DUWS_T_civ_mapview_pop", _pop]
@@ -115,7 +121,48 @@ switch (_kind) do {
 
 };
 
+_buy params [["_ref", []], ["_contested", false], ["_canReinforce", false], ["_canFortify", false],
+	["_reinforceAp", 0], ["_fortifyAp", 0]];
+if (_contested) then { _text = format ["%1<br/>%2", _text, localize "STR_DUWS_T_mapview_buy_contested"] };
+if (_note isNotEqualTo "") then { _text = format ["%1<br/>%2", _text, localize _note] };
+
 [_text] call fnc_map_prompt;
+
+// On the map display, not in a dialog: a dialog draws over the map.
+private _disp = findDisplay 12;
+{ ctrlDelete (_disp displayCtrl _x) } forEach [91335, 91336];
+private _rows = [];
+if (_canReinforce) then {
+	_rows pushBack ["REINFORCE", format [localize "STR_DUWS_T_mapview_buy_reinforce", _reinforceAp]];
+};
+if (_canFortify) then {
+	_rows pushBack ["FORTIFY", format [localize "STR_DUWS_T_mapview_buy_fortify",
+		["I", "II", "III", "IV"] select (((round _buyTier) max 0) min 3), _fortifyAp]];
+};
+if (_rows isNotEqualTo [] && {!isNull _disp}) then {
+	(ctrlPosition (_disp displayCtrl 91334)) params ["_bx", "_by", "_bw", "_bh"];
+	private _w = _bw * 0.3;
+	private _h = safezoneH * 0.035;
+	private _gap = safezoneH * 0.008;
+	private _left = _bx + (_bw - (count _rows) * _w - ((count _rows) - 1) * _gap) / 2;
+	{
+		_x params ["_action", "_label"];
+		private _btn = _disp ctrlCreate ["RscButton", 91335 + _forEachIndex];
+		_btn ctrlSetPosition [_left + _forEachIndex * (_w + _gap), _by + _bh + _gap, _w, _h];
+		_btn ctrlCommit 0;
+		_btn ctrlSetText _label;
+		// fnc_command_fill's COST_COLOUR: orange marks a button that spends.
+		_btn ctrlSetTextColor [1, 0.502, 0, 1];
+		_btn ctrlEnable !_contested;
+		_btn setVariable ["duws_buy", [_ref, _action]];
+		_btn ctrlAddEventHandler ["ButtonClick", {
+			params ["_btn"];
+			// One click, one purchase: the redraw that answers it brings fresh buttons.
+			{ ((ctrlParent _btn) displayCtrl _x) ctrlEnable false } forEach [91335, 91336];
+			((_btn getVariable "duws_buy") + [player]) remoteExec ["fnc_map_readout_buy", 2];
+		}];
+	} forEach _rows;
+};
 
 // A serial rather than a script handle, because the banner is one shared control: the timer
 // from an earlier click must not wipe a later click's readout when its ten seconds are up.
@@ -129,5 +176,6 @@ uiNamespace setVariable ["DUWS_mapReadout_seq", _seq];
 	sleep 10;
 	if ((uiNamespace getVariable ["DUWS_mapReadout_seq", 0]) isEqualTo _seq) then {
 		[""] call fnc_map_prompt;
+		{ ctrlDelete ((findDisplay 12) displayCtrl _x) } forEach [91335, 91336];
 	};
 };

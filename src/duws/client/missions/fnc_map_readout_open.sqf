@@ -22,6 +22,8 @@ openMap true;
 [] spawn {
 	waitUntil { !visibleMap };
 	["MAPREADOUT"] call fnc_mapclick_release;
+	// The map display outlives its closing, so buy buttons left on it would show on the next plain map.
+	{ ctrlDelete ((findDisplay 12) displayCtrl _x) } forEach [91335, 91336];
 	// Orphans any readout timer still counting: its banner died with the map display, and a
 	// stale one firing later would clear whatever is drawn then.
 	uiNamespace setVariable ["DUWS_mapReadout_seq",

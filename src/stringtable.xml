@@ -2391,6 +2391,30 @@
                 <Original>Income: %1 AP/30min to OPFOR</Original>
                 <English>Income: %1 AP/30min to OPFOR</English>
             </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_reinforce">
+                <Original>Reinforce (%1 AP)</Original>
+                <English>Reinforce (%1 AP)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_fortify">
+                <Original>Fortify to Tier %1 (%2 AP)</Original>
+                <English>Fortify to Tier %1 (%2 AP)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_contested">
+                <Original>Contested: enemies nearby</Original>
+                <English>Contested: enemies nearby</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_no_ap">
+                <Original>Not enough Army Power.</Original>
+                <English>Not enough Army Power.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_reinforced">
+                <Original>Garrison reinforced.</Original>
+                <English>Garrison reinforced.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_buy_fortified">
+                <Original>Garrison fortified. Reinforce to field the new tier.</Original>
+                <English>Garrison fortified. Reinforce to field the new tier.</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_title">
                 <Original>Escalation</Original>
                 <English>Escalation</English>

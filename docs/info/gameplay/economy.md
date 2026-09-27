@@ -3,11 +3,11 @@
 Command Points (CP, the global `commandpointsblu1`) are the player's throughput currency — spent on
 support unlocks, reinforcements, vehicles, FOBs, operatives and transport. Army Power (AP,
 `WARCOM_blufor_ap`) is the earned-capability currency: it gates the tier ladder, and it is now also
-spent from the menus — on advanced supports today, with combat vehicles priced CP-only for the
-moment. Town reputation is a third pool, per town rather than campaign-wide, and its band routes a
-town's passive income to a side: CP to a BLUFOR town, AP to an OPFOR one. Vehicle prices come from
-`DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over the shipped `blufor_RQST_*` tables —
-see [`faction_system.md`](faction_system.md).
+spent from the menus — on advanced supports and on garrison buys from the map readout, with combat
+vehicles priced CP-only for the moment. Town reputation is a third pool, per town rather than
+campaign-wide, and its band routes a town's passive income to a side: CP to a BLUFOR town, AP to an
+OPFOR one. Vehicle prices come from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over
+the shipped `blufor_RQST_*` tables — see [`faction_system.md`](faction_system.md).
 
 ## Authority: one server-side writer per pool
 
@@ -86,7 +86,8 @@ Three properties are load-bearing:
   queues a scheduled job for a later frame, which would split the test from the debit and reopen the
   gap. The same applies to the server-side purchase paths that never used the handshake —
   `server/init_hq/fnc_redeployHQUnits.sqf`, `server/supports/fnc_activateBaseRepairStation.sqf`,
-  `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`.
+  `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`, and the AP-only
+  `server/missions/fnc_map_readout_buy.sqf`.
 - **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
   purchase entry point is `spawn`ed today — the dialog `action =` fields, the comm-menu `expression =`
   fields, `addAction` bodies — so any new one must be too.
@@ -116,7 +117,7 @@ in `supports/taxi/` spend nothing.
 `fnc_escalation_cost` (`server/warcom/fnc_economy_init.sqf`) multiplies a base cost by
 `escalation_multiplier` and rounds up, so a scaled price is never cheaper than the base one.
 `fnc_pool_try_spend` applies it on entry, which covers every `fnc_pool_spend` site at once; the four
-paths listed above as handshake exceptions each apply it themselves, and are the only places that have
+CP paths listed above as handshake exceptions each apply it themselves, and are the only places that have
 to remember to. It is defined beside the pool writers rather than in `fnc_escalation.sqf` so the
 purchase path does not depend on whether escalation ever started — with no multiplier published it is
 the identity. It scales CP only: on a dual CP+AP price (the advanced supports) `fnc_pool_try_spend`
@@ -283,6 +284,7 @@ territory shows no readout.
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ and FOB redeploy | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/init_hq/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf` | 2 / 2 / 2 |
+| Garrison reinforce / fortify | `server/missions/fnc_map_readout_buy.sqf` | AP 15 / 25, OPCOM's own prices (`OPCOM_AP_REINFORCE` / `OPCOM_AP_FORTIFY`) |
 | Death | `client/client_init.sqf:156,171` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 | Raise Funds (money) | `server/civ_missions/fnc_civ_mission_give.sqf` | 9-15 `Money_roll`, pooled by the players at the giver; not refunded on a cancel or the giver's death |
 | Vendor purchase (money) | `server/vendors/fnc_vendor_buy.sqf` | 1-7 `Money_roll` for gear, 1.2 per CP of the request-menu price for a vehicle; more on the OPFOR and Everything lists, less in a town with good reputation ([`civilian_shops.md`](civilian_shops.md#prices)) |

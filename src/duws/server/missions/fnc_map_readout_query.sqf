@@ -4,7 +4,7 @@
 // server-only and none of them is broadcast -- so the click travels here and the readout travels back.
 if (!isServer) exitWith {};
 
-params [["_pos", [0, 0, 0]], ["_caller", objNull]];
+params [["_pos", [0, 0, 0]], ["_caller", objNull], ["_note", ""]];
 if (isNull _caller) exitWith {};
 
 private _locations = missionNamespace getVariable ["civ_locations", []];
@@ -48,6 +48,14 @@ private _best = 1e11;
 
 if (_pick isEqualTo []) exitWith { [] remoteExec ["fnc_map_readout_draw", _caller]; };
 
+// Prices ride along because OPCOM's constants are server-only.
+private _fnc_buy = {
+	params ["_ref"];
+	private _offer = [_ref] call fnc_map_readout_offer;
+	if (_offer isEqualTo []) exitWith { [] };
+	[_ref] + _offer + [OPCOM_AP_REINFORCE, OPCOM_AP_FORTIFY]
+};
+
 if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	_pick params ["", "_name", "_zPos"];
 	private _key = [_zPos] call fnc_zone_key;
@@ -69,7 +77,8 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// garrison at all when they take one, so there is nothing there to be on its way.
 	private _hold = if (!_held && {missionNamespace getVariable [format ["DUWS_zoneMobilising_%1", _key], false]})
 		then { "MOBILISING" } else { "" };
-	["ZONE", [_name, _kind, _held, _seg, _tier, _hold]] remoteExec ["fnc_map_readout_draw", _caller];
+	["ZONE", [_name, _kind, _held, _seg, _tier, _hold, [["ZONE", _zPos]] call _fnc_buy], _note]
+		remoteExec ["fnc_map_readout_draw", _caller];
 };
 
 private _hit = _pick select 1;
@@ -109,4 +118,5 @@ private _hold = ["", "MOBILISING"] select (([_hit] call fnc_town_garrison_holdAt
 // this is the ledger projection, standing garrison or not.
 private _seg = floor (([_hit] call fnc_town_garrison_strengthAt) * 20);
 _seg = (_seg max 0) min 20;
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold, _seg]] remoteExec ["fnc_map_readout_draw", _caller];
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold, _seg, [["TOWN", _hit]] call _fnc_buy], _note]
+	remoteExec ["fnc_map_readout_draw", _caller];

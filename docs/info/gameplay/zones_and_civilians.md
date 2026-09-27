@@ -275,8 +275,17 @@ tie has to break on something — and `fnc_map_readout_draw` draws the answer. A
 roman above its garrison bar, and the bar as twenty segments, green for what is left and grey for what
 is gone. The bar is the ledger's token strength. The ledger loses a token the moment its group is
 wiped, so a streamed-in zone and a stowed one read the same figure, and it cannot disagree with what
-arrives. A zone the player holds prints no bar: a full run of grey would read as a garrison wiped
-rather than one that was never there.
+arrives. A zone the player holds at tier 0 prints no bar: a full run of grey would read as a garrison
+wiped rather than one that was never there.
+
+**Where the player buys.** On a zone BLUFOR hold or a town in the BLUFOR band, the readout adds a
+Reinforce and a Fortify button under the banner. Each spends BLUFOR AP at OPCOM's price for the same buy
+(`OPCOM_AP_REINFORCE` 15, `OPCOM_AP_FORTIFY` 25), and a town's buy lands at once, with no truck. A button
+shows only when its buy changes something: Reinforce needs a lost token and a step of at least one token,
+and Fortify needs a tier below IV. While OPCOM counts the site as contested (an OPFOR sighting of BLUFOR
+within the site's radius plus one grid cell, `DUWS_fnc_opcom_siteContested`), the buttons are disabled
+and the readout says so. `fnc_map_readout_offer` decides what the buttons offer, and
+`fnc_map_readout_buy` asks it again on the server before it spends, so a stale button cannot buy.
 
 ### Why a pack-up cannot read as a capture
 
@@ -790,12 +799,6 @@ the server, not just the one in front of the player. And a town's tier IV carrie
 slots to match the six `garrison:garrison_element` on the zone's tier IV row; changing one without the other
 makes "tier IV reaches the zone benchmark" untrue.
 
-**What has no lever yet.** Nothing prices any of the purchases, because OPCOM does not
-exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their
-only caller. Zones have no hooks at all yet, though the same two sinks are meant to reach them
-([§Zone tiers](#zone-tiers)); when they do, whether a zone costs a town's price or more is the first
-thing to settle, since a zone garrison is the benchmark the town ladder climbs toward.
-
 ### BLUFOR inherits nothing
 
 **There is no destroyed state, and a captured zone or town hands the player no garrison.** When
@@ -815,9 +818,9 @@ same reason: nobody hands BLUFOR a tier, so nothing can leave them one. `Mobilis
 label because only OPFOR arrive on ground they already own — a BLUFOR garrison never arrives, it gets
 built.
 
-**What the player pays is still open.** Neither buy charges anything; the zone pair is reachable from
-the Debug menu's map-click rows and the town pair from the economy debug window, so the currency and the
-price belong to whatever player-facing surface spends them.
+**The player pays OPCOM's price in AP.** Neither buy charges on its own; the View Map readout charges
+`OPCOM_AP_REINFORCE` and `OPCOM_AP_FORTIFY` from BLUFOR's AP
+([§Attrition carries between visits](#attrition-carries-between-visits)).
 
 ### The guards belong to streaming, not to a side
 

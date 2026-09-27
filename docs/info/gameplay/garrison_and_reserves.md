@@ -51,9 +51,8 @@ other's attrition or their spending. Survivors of the beaten garrison fight on w
 
 Buying is `fnc_zone_garrison_fortify` / `_reinforce` and `fnc_town_garrison_fortify` / `_reinforce`.
 Neither charges: the price is the caller's, which is what keeps OPCOM spending only on its own ground
-(its candidate lists skip BLUFOR-held sites) and leaves the player's price to whatever surface spends
-their currency. The zone pair is reachable today only from the Debug menu's map-click rows; the town
-pair from the economy debug window.
+(its candidate lists skip BLUFOR-held sites). The player buys from the View Map readout at OPCOM's prices
+([`zones_and_civilians.md`](zones_and_civilians.md#attrition-carries-between-visits)).
 
 ## The ledger
 
