@@ -321,9 +321,9 @@ capture handlers previously guarded against with an `isServer` assert.
 ### Fortifying a held zone, the HQ and a FOB
 
 A zone's flag, the HQ building and each FOB building are R3F creation factories (`placement/fnc_site_build.sqf`).
-A zone's flag builds from the `Fortifications` and `Static` categories. The HQ and a FOB build from `Fortifications`
-only. The player opens a factory with R3F's own "Open the creation factory" action. Only a zone with a flag has one,
-so a zone's factory needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
+Every factory builds from the `Fortifications` and `Static` categories. The player opens a factory with R3F's own
+"Open the creation factory" action. Only a zone with a flag has one, so a zone's factory needs `VERSION_X == "MODERN"`
+or `simple_zones_enable`.
 
 **A built static weapon gets a gunner.** A zone's wake mans its builds with its own guns, for the side that holds
 the zone (`DUWS_fnc_zoneManStatics`). A gun placed while the zone's garrison stands is manned at once, and a base mans
