@@ -10,6 +10,9 @@
  * This program is free software under the terms of the GNU General Public License version 3.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified 2026-09-27 for DUWS_T: a creation costs at most 150 credits.
+ * (GPLv3 section 5a modification notice.)
  */
 
 private ["_classe", "_categorie_toLower", "_idx_facteur_cout", "_facteur_cout", "_cout_creation"];
@@ -25,6 +28,6 @@ _facteur_cout = 1;
 } forEach R3F_LOG_CFG_CF_creation_cost_factor;
 
 // Formule de calcul de coût
-_cout_creation = _facteur_cout * (1 max ceil (0.01 * getNumber (configFile >> "CfgVehicles" >> _classe >> "cost")));
+_cout_creation = 150 min (_facteur_cout * (1 max ceil (0.01 * getNumber (configFile >> "CfgVehicles" >> _classe >> "cost"))));
 
 _cout_creation

@@ -241,7 +241,7 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 		[_flg, _zoneKey, true] call fnc_duws_keep;
 		// Hold the flag out of Zeus so a game master cannot delete the zone marker (fnc_asset_guard).
 		[_flg] call fnc_guard_register;
-		[_flg, _zoneKey] call DUWS_fnc_siteBuildArm;
+		[_flg, _zoneKey, ["Fortifications", "Static"]] call DUWS_fnc_siteBuildArm;
 		// Carry logistics: OPFOR-held at spawn, so not yet movable. Arms the 50 m tether to the centre.
 		[_flg, false, _zonePos] call fnc_zone_flag_logistics;
 	};

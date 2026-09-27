@@ -321,13 +321,14 @@ capture handlers previously guarded against with an `isServer` assert.
 ### Fortifying a held zone, the HQ and a FOB
 
 A zone's flag, the HQ building and each FOB building are R3F creation factories (`placement/fnc_site_build.sqf`).
-Every factory builds from the `Fortifications` category only, so no factory sells a static weapon. The player opens
-a factory with R3F's own "Open the creation factory" action. Only a zone with a flag has one, so a zone's factory
-needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
+A zone's flag builds from the `Fortifications` and `Static` categories. The HQ and a FOB build from `Fortifications`
+only. The player opens a factory with R3F's own "Open the creation factory" action. Only a zone with a flag has one,
+so a zone's factory needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
 
-**A crewed build is not stowed.** A zone does not stow its builds while anyone crews one of them
-(`DUWS_fnc_zoneBuildSleep`), because a stow would delete the build with its crew. A campaign save can still hold a
-static weapon that a zone's factory built before the factories stopped selling them.
+**A built static weapon stands empty.** The zone's garrison mans only the zone's own guns, not its builds, so a
+player or a squadmate crews a built gun. A zone does not stow its builds while a squadmate mans one of them
+(`DUWS_fnc_zoneBuildSleep`), because a stow would delete the gun with its crew. The `Static` category holds only the
+statics whose config names it as their `vehicleClass`, so a mod's statics show only if the mod uses that category.
 
 **A zone's factory follows ownership.** `fnc_zone_flag_logistics` sets the factory gate (`R3F_LOG_CF_disabled`)
 with the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds
@@ -335,7 +336,8 @@ stay and OPFOR can fight from them. When BLUFOR take the zone back, the builds c
 base's factory is open for as long as the base stands.
 
 **The credits are R3F's own running balance.** R3F spends a factory's credits on a build and refunds them on a
-sale. A destroyed build is lost: nothing refunds it. What adds credits depends on the site:
+sale. A destroyed build is lost: nothing refunds it. A build costs at most 150 credits
+(`usine_creation/determiner_cout_creation.sqf`). What adds credits depends on the site:
 
 | Site | Credits added | Source |
 |---|---|---|
