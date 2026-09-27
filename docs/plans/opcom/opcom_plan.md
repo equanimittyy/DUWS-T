@@ -1033,7 +1033,7 @@ hardpoint and a build still on its truck:
 | 5 Jets (600) | nothing new |
 
 The tower, the mortar pit and the battery cap flat: the tower cap is also the reputation amplifier's, and the guns'
-is the resident AI's. AT, AA and OP cap at 2 a campaign zone, GMG, AT minefield and AP minefield at 1 each
+is the resident AI's. AT, AA, OP and AP minefield cap at 2 a campaign zone, GMG and AT minefield at 1
 (`OPCOM_CAP_HP_TYPE_PER_ZONE`).
 MG and roadblock carry no cap of their own. All types together, the flat-capped three included, cap at
 `OPCOM_CAP_HP_PER_ZONE` (12) a zone ([§Caps](#caps)).
