@@ -137,8 +137,8 @@ and keeps the exact call.
 cell inserted its k-block into the result with `pushBackUnique`. Each insert scans the whole result, so the cost was
 quadratic in the swept cell count: a 10 km line at k 3 inserts about a thousand cells into a set of a few hundred.
 `DUWS_fnc_opcom_patrolValue` then called `DUWS_fnc_opcom_needAt` and `DUWS_fnc_opcom_stalenessAt` for every swept
-cell. `DUWS_fnc_opcom_patrolSweep` (`fnc_opcom_commit.sqf`) runs it once per distinct start cell and reach for each of
-eight destinations, inside the unscheduled pass. A later stress test confirmed it as the largest row: `patrol` read
+cell. `DUWS_fnc_opcom_patrolSweep` (`fnc_opcom_commit.sqf`) runs it once per distinct start cell and reach for each
+sampled destination, inside the unscheduled pass: eight in the stress tests, now `OPCOM_PATROL_SAMPLES` (3). A later stress test confirmed it as the largest row: `patrol` read
 50 ms early in the session and 350 ms after an hour, of a 150-550 ms targets pass.
 
 **Fix.** A half-cell step moves the line at most one cell, so the line's rows run unbroken and its cells in each row
@@ -174,10 +174,14 @@ Each of these is small and none is the bottleneck; together they are a steady sh
 - `DUWS_fnc_opcom_zoneSlotsUsed` (`fnc_opcom_buy_build.sqf:10-13`) counts the hardpoint registry per zone, for every
   zone, in each of the five zone-build rows. `DUWS_fnc_opcom_hpSweep` (`fnc_opcom_assets.sqf:17-40`) walks the same
   registry once a pick and can return the per-zone counts.
-- `DUWS_fnc_opcom_zoneFortifyTargets` (`fnc_opcom_buy_holding.sqf:35-39`) diffs two spawn lists per open zone per pick,
-  each a token-class resolution per token. The owed force depends only on the tier, the multiplier and which tokens
-  the earned AP has unlocked (`DUWS_fnc_tokenLocked`); memoise it on those as `DUWS_fnc_opcom_tierForce` does
-  (`value/fnc_opcom_holding.sqf:24-41`). The label and the hold value still vary per zone.
+- `DUWS_fnc_opcom_zoneFortifyTargets` (`fnc_opcom_buy_holding.sqf`) diffs two spawn lists per open zone per pick,
+  each a token-class resolution per token, and `DUWS_fnc_opcom_townFortifyOffer` does the same per town. A vehicle
+  token resolves through a faction pick whose filter ran `DUWS_fnc_classArms`, a turret and ammo config walk, on every
+  class in the pool; a stress test measured the `town_fortify` row at 115-166 ms, the largest row after finding 4.
+  `DUWS_fnc_classArms` now memoises by class, and `DUWS_fnc_opcom_tierOwed` builds each tier's owed tokens once a
+  session per kind and tier, as `DUWS_fnc_opcom_tierForce` does (`value/fnc_opcom_holding.sqf`). The lock check
+  (`DUWS_fnc_tokenLocked`) changes as AP is earned, so each row applies it per pick; the label and the hold value still
+  vary per holding.
 - `DUWS_fnc_opcom_rosterSweep` (`fnc_opcom_sources.sqf:27-29`) resolves a token class, faction pick included, for every
   menu row per pick. The open set changes only when the earned AP crosses a rung or a toggle flips.
 - `DUWS_fnc_opcom_batteryPieces` (`taskings/actions/fnc_opcom_fires.sqf:20-25`) reads config per gun on every call, and
@@ -228,7 +232,7 @@ shorter sleep under load would add load.
   by a Killed handler would lose its handler on the next stream cycle: zone statics are streamed, not pinned
   (`fnc_static_place` files them without the pin, `shared/functions/fnc_static_roles.sqf:169`). The `grid` stage's
   frame count shows how much of its 35-360 ms is its own work.
-- **The class-power memo and the tier-force memo** already hold; nothing re-prices a class per tick.
+- **The class-power, class-arms and tier-force memos** hold; nothing re-prices a class per tick.
 - **The road search** is fixed by the road graph and the heap; the 15-128 s picks in the play-test predate it.
 
 ## Plan of action
