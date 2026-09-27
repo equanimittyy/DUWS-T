@@ -23,11 +23,11 @@ if (_subtitle isNotEqualTo "") then {
 
 // hint takes no duration; each re-issue restarts its fade. Stops on a newer readout, which it would paint over.
 [_markup, {
-	DUWS_debugLedgerHint = _this;
+	DUWS_ledgerHint = _this;
 	hint parseText _this;
 	for "_i" from 1 to 3 do {
 		sleep 10;
-		if (DUWS_debugLedgerHint isNotEqualTo _this) exitWith {};
+		if (DUWS_ledgerHint isNotEqualTo _this) exitWith {};
 		hintSilent parseText _this;
 	};
 }] remoteExec ["spawn", _target];

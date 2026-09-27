@@ -62,4 +62,4 @@ if (_what isEqualTo "zone") then { _rows append ([_key, _radius] call fnc_hardpo
 
 // The map is closed by the time this returns, so the hint is not drawn under it.
 diag_log format ["[DUWS garrison debug] %1", _what];
-["Garrison ledger", _key, _rows, _caller] call fnc_debug_ledger_hint;
+["Garrison ledger", _key, _rows, _caller] call fnc_ledger_hint;

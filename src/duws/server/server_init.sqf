@@ -371,7 +371,6 @@ if (isServer) then {
     // server/warcom/fnc_zonesundercontrol.sqf -- a second timer of the same nominal period would
     // accrue its own scheduler slop and walk out of phase.
     fnc_kill_income_sweep = {
-        private _paid = 0;
         {
             private _uid = getPlayerUID _x;
             private _kills = playerKillCount getOrDefault [_uid, 0];
@@ -380,7 +379,6 @@ if (isServer) then {
                 private _award = _batches * kill_cp_award;
                 // Server-side caller: call runs inline, where remoteExec [...,2] would land a frame later.
                 [_award, "kill_income"] call fnc_cp_adjust;
-                _paid = _paid + _award;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
                 // A card, not a hint -- deliberately the exception to the one-player-to-hint rule in
                 // docs/info/gameplay/player_text_style_guide.md: CP arriving speaks the card vocabulary
@@ -392,10 +390,8 @@ if (isServer) then {
 
         if (departedKillCP > 0) then {
             [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
-            _paid = _paid + departedKillCP;
             departedKillCP = 0;
         };
-        _paid
     };
 };
 { 

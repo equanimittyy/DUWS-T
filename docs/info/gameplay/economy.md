@@ -246,7 +246,7 @@ a suspended thread resumes when the scheduler reaches it, so separate loops accr
 walk apart. No faucet is gated on holdings — a side with no towns or zones simply computes 0 from
 them — because the enemy banking its towns while the player holds
 nothing is exactly the case the town economy exists to model. A tick that pays BLUFOR from territory
-hints every player a readout through the Debug menu's ledger box (`fnc_debug_ledger_hint`): the town
+hints every player a ledger readout (`server/warcom/fnc_ledger_hint.sqf`): the town
 CP and zone AP taken, with each pool's total; the throttle cut as the subtitle when campaign size is
 cutting the faucets; and each revealed town whose reputation rose, with BLUFOR's radio push and the
 town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Kill
@@ -265,8 +265,9 @@ caller today, capping what a town can pay out for treating its wounded. Server-l
 only server-side caps read it.
 
 The Debug menu's Economy dialog has a *Fire economy tick* button that runs one extra iteration off the clock
-(`server/debug/fnc_debug_econ_tick.sqf`), which keeps its own 30-minute schedule. It pays and bumps
-`econ_tick` like any other iteration, then hints the caller each pool's take and each town's drift.
+(`server/debug/fnc_debug_econ_tick.sqf`), which keeps its own 30-minute schedule. It pays, bumps
+`econ_tick` and hints every player like any other iteration, so a tick that pays BLUFOR nothing from
+territory shows no readout.
 
 ## Sinks
 

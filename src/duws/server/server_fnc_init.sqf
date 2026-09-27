@@ -425,7 +425,6 @@ fnc_debug_clear_hardpoints = compile preprocessFileLineNumbers "duws\server\debu
 fnc_debug_opcom_grid = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_opcom_grid.sqf";
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_search_flag.sqf";
 fnc_debug_spawn_intel = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_spawn_intel.sqf";
-fnc_debug_ledger_hint = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_ledger_hint.sqf";
 fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_garrison_query.sqf";
 fnc_debug_zone_flip = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_zone_flip.sqf";
 fnc_debug_zone_garrison = compile preprocessFileLineNumbers "duws\server\debug\fnc_debug_zone_garrison.sqf";
@@ -813,6 +812,7 @@ fnc_opcom_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\tas
 fnc_opcom_task_step = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_task_step.sqf";
 fnc_opcom_debug_task = compile preprocessFileLineNumbers "duws\server\warcom\opcom\taskings\taskings\fnc_opcom_debug_task.sqf";
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_zonesundercontrol.sqf";
+fnc_ledger_hint = compile preprocessFileLineNumbers "duws\server\warcom\fnc_ledger_hint.sqf";
 // Server-only: remoteExec'd to 2 by the OPCOM debug view, it gathers the AoI reach circles and hands
 // them back to the caller to draw. Read-only, so an accidental client call fails loud, not harmfully.
 fnc_debug_aoi_circles = compile preprocessFileLineNumbers "duws\server\warcom\fnc_debug_aoi_circles.sqf";

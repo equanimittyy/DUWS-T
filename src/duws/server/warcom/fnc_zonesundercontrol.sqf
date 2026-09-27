@@ -10,9 +10,6 @@ if (!isServer) exitWith {};
     so town income pays nobody, but the zone trickle still pays: it reads no town. BLUFOR's
     passive CP therefore goes to zero on civs-off, which the mission-CP lift restores
     (server/missions/fnc_mission_reward.sqf).
-
-    Returns [towns, bluTownCP, bluZoneAP, opfTownAP, opfZoneAP, killCP] for the Debug menu's readout,
-    towns holding one [oldRep, newRep, opforCovers, bluforCovers, push] per town.
 */
 // The tick's own sequence number, so anything that wants a "once per payout window" cap can
 // key off this clock rather than start a second one that drifts out of phase with it.
@@ -59,7 +56,7 @@ private _towns = [];
     ([_rep, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
     if (_side isEqualTo "BLU") then { _bluTownWorth = _bluTownWorth + _income };
     if (_side isEqualTo "OPF") then { _opfTownWorth = _opfTownWorth + _income };
-    _towns pushBack [_x, _rep, _opforCovers, _bluforCovers, _bluforPush - _opforPush];
+    _towns pushBack [_x, _rep];
 } forEach _reps;
 
 // Every passive faucet is scaled by the same shared campaign-size throttle (DUWS_econ_throttle)
@@ -88,7 +85,7 @@ if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfAP] call fnc_ap_a
 
 // Pays and notifies each player its own kill award; deliberately absent from the territory
 // hint below. Naming attrition there would advertise kill farming as an income route.
-private _killCP = call fnc_kill_income_sweep;
+call fnc_kill_income_sweep;
 
 // Only on a paid tick: a reduced-income subtitle with no income to reduce would read as an error.
 // An unrevealed town stays off it, or the hint would name what the town reveal keeps hidden.
@@ -119,7 +116,5 @@ if (_bluCP > 0 || {_bluZoneAP > 0}) then {
     if (DUWS_econ_throttle < 1) then {
         _subtitle = format [localize "STR_DUWS_T_econ_reduced_desc", round ((1 - DUWS_econ_throttle) * 100), "%"];
     };
-    [localize "STR_DUWS_T_econ_hint_title", _subtitle, _rows, [0, -2] select isDedicated] call fnc_debug_ledger_hint;
+    [localize "STR_DUWS_T_econ_hint_title", _subtitle, _rows, [0, -2] select isDedicated] call fnc_ledger_hint;
 };
-
-[_towns, _bluCP, _bluZoneAP, _opfTownAP, _opfZoneAP, _killCP]

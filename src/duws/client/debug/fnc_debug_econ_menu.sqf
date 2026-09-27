@@ -133,7 +133,7 @@ _tickBtn ctrlSetPosition [0.26, 0.90, 0.235, 0.05];
 _tickBtn ctrlSetText "Fire economy tick";
 _tickBtn ctrlCommit 0;
 _tickBtn ctrlAddEventHandler ["ButtonClick", {
-    [player] remoteExec ["fnc_debug_econ_tick", 2];
+    remoteExec ["fnc_debug_econ_tick", 2];
     ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
 }];
 
