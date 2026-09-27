@@ -280,7 +280,7 @@ wiped rather than one that was never there.
 
 **Where the player buys.** On a zone BLUFOR hold or a town in the BLUFOR band, the readout adds a
 Reinforce and a Fortify button under the banner. Each spends BLUFOR AP at OPCOM's price for the same buy
-(`OPCOM_AP_REINFORCE` 15, `OPCOM_AP_FORTIFY` 25), and a town's buy lands at once, with no truck. A button
+(`OPCOM_AP_REINFORCE` 10, `OPCOM_AP_FORTIFY` 15), and a town's buy lands at once, with no truck. A button
 shows only when its buy changes something: Reinforce needs a lost token and a step of at least one token,
 and Fortify needs a tier below IV. While OPCOM counts the site as contested (an OPFOR sighting of BLUFOR
 within the site's radius plus one grid cell, `DUWS_fnc_opcom_siteContested`), the buttons are disabled

@@ -738,35 +738,35 @@ OPCOM_GRID_ZONE_ENEMY_FORCE = 8;
 
 // What OPCOM pays, keyed by the thing it buys: a DUWS_opcom_recruitMenu row id here, a hardpoint type below. Never
 // off the composition or its force -- that tied two rows sharing a composition to one price, and made the same order
-// cost different amounts at different sites. Set against an OPFOR zone and town income near 40-80 AP per 30 min, before
-// OPCOM's drip (OPCOM_AP_DRIP_TICKS).
+// cost different amounts at different sites. Set against OPCOM's drip (OPCOM_AP_DRIP_TICKS), most of what it earns.
+// Whole AP only: fnc_ap_adjust rounds the pool, so a fractional price would charge other than what the pick weighed.
 OPCOM_AP_UNIT = createHashMapFromArray [
-    ["rifles", 10], ["weapons_team", 5], ["recon_foot", 5],
-    ["truck", 3], ["recon_car", 10], ["boat", 3],
-    ["car", 5], ["apc", 15], ["ifv", 25], ["mbt", 40],
-    ["recon_heli", 20], ["trans_heli", 10], ["attack_heli", 50], ["jet", 80]
+    ["rifles", 5], ["weapons_team", 3], ["recon_foot", 3],
+    ["truck", 2], ["recon_car", 5], ["boat", 2],
+    ["car", 3], ["apc", 8], ["ifv", 13], ["mbt", 20],
+    ["recon_heli", 10], ["trans_heli", 5], ["attack_heli", 20], ["jet", 30]
 ];
 
 OPCOM_AP_HARDPOINT = createHashMapFromArray [
-    ["ROADBLOCK", 8], ["MG", 12], ["GMG", 16], ["AT", 16], ["AA", 20]
+    ["ROADBLOCK", 4], ["MG", 6], ["GMG", 8], ["AT", 8], ["AA", 10]
 ];
 
 // Flat wherever the step lands and whatever it buys back: pricing it on the tokens owed made the cost a lottery on
 // what died there. A town adds only its truck, the delivery rather than the step. Fortify is dearer because a tier
 // raise is permanent where a refill is consumed.
-OPCOM_AP_REINFORCE = 15;
-OPCOM_AP_FORTIFY = 25;
+OPCOM_AP_REINFORCE = 10;
+OPCOM_AP_FORTIFY = 15;
 
 // Scored per km on every source and charged on none: it is what lets a near hire beat a far free unit.
 OPCOM_AP_PER_KM = 0.5;
-OPCOM_AP_RAPPORT = 10;
+OPCOM_AP_RAPPORT = 5;
 // The reputation a delivered Rapport takes off its town, of the 10 that flip it.
 OPCOM_RAPPORT_STEP = 3;
 // Asset hardpoints are flat-priced: what they are worth is reach, eyes or fire missions, not the force they field.
-OPCOM_AP_TOWER = 30;
-OPCOM_AP_OP = 15;
-OPCOM_AP_MORTAR = 25;
-OPCOM_AP_ARTY = 50;
+OPCOM_AP_TOWER = 15;
+OPCOM_AP_OP = 8;
+OPCOM_AP_MORTAR = 13;
+OPCOM_AP_ARTY = 25;
 // Per 50 m square, so a longer belt costs by its footprint. Low because a belt is tens of squares: at the
 // longest belt it is the dearest thing OPCOM buys, and any dearer a square puts even a short one over the
 // bank horizon, where the pick can never reach it.
@@ -844,7 +844,8 @@ OPCOM_SAVE_HORIZON = 360;
 // A cell BLUFOR cross once fades within the hour while a route they use every trip stays lit.
 OPCOM_TRAFFIC_HALFLIFE = 360;
 OPCOM_TRAFFIC_SHARE = 0.5;
-// Infantry's rate, the cheapest force OPCOM buys.
+// About twice infantry's hire rate, since it stays a whole AP: a free unit's stake reads dear beside a fresh hire, so
+// the pick leans toward hiring.
 OPCOM_AP_PER_FORCE = 1;
 // A band cell's base need is a zone's average pull per cell divided by this: a holding pulls harder than a gap, but
 // not so hard that hardpoints cluster around zones.
