@@ -7933,8 +7933,8 @@
                 <Chinesesimp>关于经济系统</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HELP_ECO_HINT">
-                <Original>Alongside CP, AP and reputation, DUWS-T runs a cash-and-intel economy. Spend cash to deal with locals; turn intel items into CP back at base. Both drop from enemy bodies, and some key personnel carry top-secret intel worth grabbing. You lose all cash and intel when you die, so stay alive.</Original>
-                <English>Alongside CP, AP and reputation, DUWS-T runs a cash-and-intel economy. Spend cash to deal with locals; turn intel items into CP back at base. Both drop from enemy bodies, and some key personnel carry top-secret intel worth grabbing. You lose all cash and intel when you die, so stay alive.</English>
+                <Original>Alongside CP, AP and reputation, DUWS-T runs a cash-and-intel economy. Enemy bodies carry cash, and the Search action can turn up intel documents. Spend cash at town vendors. Turn documents into CP with Analyse Intel at HQ: 1 CP for a wallet or phone, up to 5 CP for a secret file, and better documents can also reveal a hidden enemy position. You lose all cash and intel you carry when you die.</Original>
+                <English>Alongside CP, AP and reputation, DUWS-T runs a cash-and-intel economy. Enemy bodies carry cash, and the Search action can turn up intel documents. Spend cash at town vendors. Turn documents into CP with Analyse Intel at HQ: 1 CP for a wallet or phone, up to 5 CP for a secret file, and better documents can also reveal a hidden enemy position. You lose all cash and intel you carry when you die.</English>
                 <Chinesesimp>DUWS_T v1.3 包含了全新的经济系统。除了CP(指挥点)、AP(军力)以及声望以外，更引入了基于现金和情报物品的拟真经济模式。你可以使用货币与当地人进行交互，并在基地将情报物品转换为CP。货币和情报物品都可以在战场上单位的尸体里搜索获取——注意，一些关键人物可能携带有绝密情报！玩家死亡会掉落携带的所有情报和货币————试着别死。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HELP_ZONES">
@@ -7943,8 +7943,8 @@
                 <Chinesesimp>关于占领战区</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HELP_ZONES_HINT">
-                <Original>Move your squad into a red zone and hold it until the flag turns green. More BLUFOR inside the zone captures it faster.</Original>
-                <English>Move your squad into a red zone and hold it until the flag turns green. More BLUFOR inside the zone captures it faster.</English>
+                <Original>Move your squad into a red zone and fight down its garrison. The zone falls when its garrison, reserves included, drops to 15 percent and BLUFOR outnumber OPFOR in and within 400 m of the zone for 20 seconds without a break. The flag then turns green.</Original>
+                <English>Move your squad into a red zone and fight down its garrison. The zone falls when its garrison, reserves included, drops to 15 percent and BLUFOR outnumber OPFOR in and within 400 m of the zone for 20 seconds without a break. The flag then turns green.</English>
                 <Chinesesimp>带领你的小队进入红色敌区。停留在战区内直到旗帜变为绿色。战区内的蓝方单位越多，占领越快。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HELP_SUPPORTS">
@@ -7999,8 +7999,8 @@
                 <Chinesesimp>经济与资源</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_CIV_BODY">
-                <Original>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid or request a toolkit, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</Original>
-                <English>Civilians are optional, switched on from the mission setup screen: on the environment parameters page set Civilian / Reputation System to a population type (the first option, Off, disables them). Available types depend on the detected civilian mod; the vanilla Altis/Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones fill with non-combatants. Up close you can ask them for aid or request a toolkit, and Protect Civilian side missions may appear. Harming or killing civilians costs reputation, so watch your fire near towns.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</English>
+                <Original>Civilians are optional. On the Environment Parameters page of the setup screen, set Civilian / Reputation System to a population type; the first option, Off, disables civilians and town reputation. The available types depend on the detected civilian mod; the vanilla Altis and Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns fill with non-combatants. You can talk to them and take their jobs, and each town keeps its own reputation.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</Original>
+                <English>Civilians are optional. On the Environment Parameters page of the setup screen, set Civilian / Reputation System to a population type; the first option, Off, disables civilians and town reputation. The available types depend on the detected civilian mod; the vanilla Altis and Tanoa sets are always there.&lt;br/&gt;&lt;br/&gt;When enabled, towns fill with non-combatants. You can talk to them and take their jobs, and each town keeps its own reputation.&lt;br/&gt;&lt;br/&gt;Two alternative game modes replace this with a survivor-evacuation objective; see Other Game Modes.</English>
                 <Chinesesimp>平民为可选内容，在任务设置界面开启。在环境选项中，将“启用平民”设为某种人群类型；第一个选项（关闭）会完全禁用平民。可用的人群类型取决于检测到的平民模组，原版阿尔蒂斯/塔诺亚人群始终可用。&lt;br/&gt;&lt;br/&gt;启用后，城镇和区域会有非战斗人员。近距离时你可以向他们请求援助、索取工具包，或将其招募到己方，并可能出现“保护平民”支线任务。伤害或杀死平民会损失声望，因此在有人区域请注意火力。&lt;br/&gt;&lt;br/&gt;两种特殊模式会以幸存者撤离目标取代常规互动：丧尸末日（Ravage）与WBK事件。在这些模式中天气锁定为永久薄雾，你对平民的唯一任务是招募幸存者并带回基地撤离，每次营救都会奖励指挥点。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_L_OBJECTIVE">
@@ -8026,11 +8026,6 @@
                 <English>Capturing Zones</English>
                 <Chinesesimp>占领区域</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_MAN_L_SUPPDETAIL">
-                <Original>Support Options (Detailed)</Original>
-                <English>Support Options (Detailed)</English>
-                <Chinesesimp>支援选项（详解）</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_MAN_L_SIDEMISSIONS">
                 <Original>Side Missions</Original>
                 <English>Side Missions</English>
@@ -8055,16 +8050,176 @@
                 <English>OPCOM</English>
             </Key>
             <Key ID="STR_DUWS_T_MAN_OPCOM_BODY">
-                <Original>OPCOM is the opposing AI command layer that runs the enemy war effort. It tracks which zones each side holds, commits the enemy's reserves where it judges the threat highest, and orders reinforcement and counter-attacks against zones you threaten or capture.&lt;br/&gt;&lt;br/&gt;Full documentation of its behaviour is in progress.</Original>
-                <English>OPCOM is the opposing AI command layer that runs the enemy war effort. It tracks which zones each side holds, commits the enemy's reserves where it judges the threat highest, and orders reinforcement and counter-attacks against zones you threaten or capture.&lt;br/&gt;&lt;br/&gt;Full documentation of its behaviour is in progress.</English>
+                <Original>OPCOM is the enemy commander. It tracks every zone and town each side holds, and spends OPFOR's Army Power on reinforcements, hardpoints and attacks where it judges the threat or the opportunity is greatest.</Original>
+                <English>OPCOM is the enemy commander. It tracks every zone and town each side holds, and spends OPFOR's Army Power on reinforcements, hardpoints and attacks where it judges the threat or the opportunity is greatest.</English>
             </Key>
             <Key ID="STR_DUWS_T_MAN_MODES">
                 <Original>Other Game Modes</Original>
                 <English>Other Game Modes</English>
             </Key>
             <Key ID="STR_DUWS_T_MAN_MODES_BODY">
-                <Original>DUWS-T includes optional alternative game modes. They are in development; each mode's rules will be documented here once finalised.</Original>
-                <English>DUWS-T includes optional alternative game modes. They are in development; each mode's rules will be documented here once finalised.</English>
+                <Original>The faction screen offers three campaign modes: DUWS Classic, DUWS Guerilla and DUWS Apocalypse. Guerilla cuts BLUFOR's supports and makes OPFOR stronger from the start. Apocalypse is a zombie-survival campaign that needs the Ravage or WBK mod.&lt;br/&gt;&lt;br/&gt;Guerilla and Apocalypse are work in progress: if you pick either, the game returns you to DUWS Classic with a notice. Only DUWS Classic is playable now.</Original>
+                <English>The faction screen offers three campaign modes: DUWS Classic, DUWS Guerilla and DUWS Apocalypse. Guerilla cuts BLUFOR's supports and makes OPFOR stronger from the start. Apocalypse is a zombie-survival campaign that needs the Ravage or WBK mod.&lt;br/&gt;&lt;br/&gt;Guerilla and Apocalypse are work in progress: if you pick either, the game returns you to DUWS Classic with a notice. Only DUWS Classic is playable now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_DEFEAT">
+                <Original>Losing the Campaign</Original>
+                <English>Losing the Campaign</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_DEFEAT">
+                <Original>You lose if OPFOR break into HQ and kill the HQ officer, or if so many buildings are destroyed that escalation reaches its top level. The Campaign Lose Conditions lobby parameter can turn off either ending, or both. The default is Full.</Original>
+                <English>You lose if OPFOR break into HQ and kill the HQ officer, or if so many buildings are destroyed that escalation reaches its top level. The Campaign Lose Conditions lobby parameter can turn off either ending, or both. The default is Full.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_HOLDZONE">
+                <Original>Holding a Zone</Original>
+                <English>Holding a Zone</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_HOLDZONE">
+                <Original>A captured zone starts at tier 0 with no BLUFOR garrison, and OPFOR can take it back the same way.&lt;br/&gt;&lt;br/&gt;To defend it, open View Map in the Requests menu and click the zone. Reinforce (10 AP) replaces its losses and Fortify (15 AP) raises its tier. You cannot buy either while OPFOR are near the zone.</Original>
+                <English>A captured zone starts at tier 0 with no BLUFOR garrison, and OPFOR can take it back the same way.&lt;br/&gt;&lt;br/&gt;To defend it, open View Map in the Requests menu and click the zone. Reinforce (10 AP) replaces its losses and Fortify (15 AP) raises its tier. You cannot buy either while OPFOR are near the zone.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_HC_SQUADS">
+                <Original>HC Squads</Original>
+                <English>HC Squads</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_HC_SQUADS">
+                <Original>Buy a HC squad from the Requests menu at HQ or a FOB. It spawns near you under your High Command, so you give it orders like any AI squad. Squads with vehicles also cost AP, and heavier types unlock only at the AP tier they need. A FOB offers only the lighter types.&lt;br/&gt;&lt;br/&gt;A HC squad stays yours until you hand it to Overlord in Squad Manager.</Original>
+                <English>Buy a HC squad from the Requests menu at HQ or a FOB. It spawns near you under your High Command, so you give it orders like any AI squad. Squads with vehicles also cost AP, and heavier types unlock only at the AP tier they need. A FOB offers only the lighter types.&lt;br/&gt;&lt;br/&gt;A HC squad stays yours until you hand it to Overlord in Squad Manager.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_FACTORIES">
+                <Original>Fortifications and Statics</Original>
+                <English>Fortifications and Statics</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_FACTORIES">
+                <Original>The HQ, every FOB and every held zone's flag carry an Open the creation factory action. Use it to build fortifications and static weapons with build points, not CP. One build costs at most 150 points, and a static weapon you build is crewed automatically.&lt;br/&gt;&lt;br/&gt;The Fortification I to IV supports raise the build points of the HQ, each FOB and each held zone. Selling a build back refunds 75 percent; Clear Fortifications refunds all of it.</Original>
+                <English>The HQ, every FOB and every held zone's flag carry an Open the creation factory action. Use it to build fortifications and static weapons with build points, not CP. One build costs at most 150 points, and a static weapon you build is crewed automatically.&lt;br/&gt;&lt;br/&gt;The Fortification I to IV supports raise the build points of the HQ, each FOB and each held zone. Selling a build back refunds 75 percent; Clear Fortifications refunds all of it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_INTEL">
+                <Original>Intel</Original>
+                <English>Intel</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_INTEL">
+                <Original>Intel reveals what you have not found: hidden enemy zones, towns, hardpoints and OPFOR units on the move. It never marks an enemy you can already see. You earn it by searching enemy bodies, mission objectives and arrested civilians, and by walking into a zone or town. A Recon Enemy Position side mission reveals its target zone without a fight. The Intelligence Center supports keep turning up hidden positions on their own.</Original>
+                <English>Intel reveals what you have not found: hidden enemy zones, towns, hardpoints and OPFOR units on the move. It never marks an enemy you can already see. You earn it by searching enemy bodies, mission objectives and arrested civilians, and by walking into a zone or town. A Recon Enemy Position side mission reveals its target zone without a fight. The Intelligence Center supports keep turning up hidden positions on their own.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_SEARCH">
+                <Original>Searching</Original>
+                <English>Searching</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_SEARCH">
+                <Original>Hold Search on an enemy body, a marked mission object such as a laptop or case, or a civilian you arrested. It can give money, an intel document, CP, a map reveal, or nothing, and only you see the result.&lt;br/&gt;&lt;br/&gt;Not every body carries something, and the team can search only 3 ordinary bodies every 15 minutes. Objectives and arrested civilians do not count toward that limit.</Original>
+                <English>Hold Search on an enemy body, a marked mission object such as a laptop or case, or a civilian you arrested. It can give money, an intel document, CP, a map reveal, or nothing, and only you see the result.&lt;br/&gt;&lt;br/&gt;Not every body carries something, and the team can search only 3 ordinary bodies every 15 minutes. Objectives and arrested civilians do not count toward that limit.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_DISGUISE">
+                <Original>Disguise</Original>
+                <English>Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_DISGUISE">
+                <Original>Open Disguise from your scroll menu to pass as a civilian or, in a looted OPFOR uniform, as an enemy soldier. OPFOR do not engage you while it holds.&lt;br/&gt;&lt;br/&gt;A meter fills while enemies watch you and blows your cover at 100. It fills faster when you crouch or go prone, and much faster near a body. Firing where you can be seen, bad civilian kit, or a civilian disguise inside an enemy site blows it at once. A blown disguise is locked for 5 minutes (civilian) or 10 minutes (enemy).</Original>
+                <English>Open Disguise from your scroll menu to pass as a civilian or, in a looted OPFOR uniform, as an enemy soldier. OPFOR do not engage you while it holds.&lt;br/&gt;&lt;br/&gt;A meter fills while enemies watch you and blows your cover at 100. It fills faster when you crouch or go prone, and much faster near a body. Firing where you can be seen, bad civilian kit, or a civilian disguise inside an enemy site blows it at once. A blown disguise is locked for 5 minutes (civilian) or 10 minutes (enemy).</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_VENDORS">
+                <Original>Vendors</Original>
+                <English>Vendors</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_VENDORS">
+                <Original>Arms, Car and Boat Dealers in towns sell gear and vehicles for cash, never CP or AP. A town at reputation 10 or higher gives 10 percent off, and 20 percent off at 20. A town at -10 or lower refuses to sell. A killed vendor reopens after 5 minutes.</Original>
+                <English>Arms, Car and Boat Dealers in towns sell gear and vehicles for cash, never CP or AP. A town at reputation 10 or higher gives 10 percent off, and 20 percent off at 20. A town at -10 or lower refuses to sell. A killed vendor reopens after 5 minutes.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_TARGETING">
+                <Original>Threat Assessment</Original>
+                <English>Threat Assessment</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_TARGETING">
+                <Original>OPCOM reinforces and fortifies the ground nearest BLUFOR territory first, and values a big zone over a small one. It plans from what its forces have seen of you, not from your true strength, so it can misjudge a position it has not scouted recently.</Original>
+                <English>OPCOM reinforces and fortifies the ground nearest BLUFOR territory first, and values a big zone over a small one. It plans from what its forces have seen of you, not from your true strength, so it can misjudge a position it has not scouted recently.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_BUDGET">
+                <Original>Enemy Economy</Original>
+                <English>Enemy Economy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_BUDGET">
+                <Original>Every 30 minutes, OPFOR earns Army Power from each zone and town it holds. It also gets a steady drip: half of it is fixed, and the other half shrinks as OPFOR loses zones. Every zone and town you take cuts its income, but even with no zones left OPFOR keeps half its drip.</Original>
+                <English>Every 30 minutes, OPFOR earns Army Power from each zone and town it holds. It also gets a steady drip: half of it is fixed, and the other half shrinks as OPFOR loses zones. Every zone and town you take cuts its income, but even with no zones left OPFOR keeps half its drip.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_GARRISONS">
+                <Original>Garrisons and Reserves</Original>
+                <English>Garrisons and Reserves</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_GARRISONS">
+                <Original>A zone or town that OPFOR holds keeps reserves beyond the troops you can see. Every 5 minutes, and sooner once the garrison drops below half strength, the reserve replaces losses with a convoy that arrives from the far side of the site, away from your approach. The site falls only when the garrison, reserves included, is down to 15 percent.</Original>
+                <English>A zone or town that OPFOR holds keeps reserves beyond the troops you can see. Every 5 minutes, and sooner once the garrison drops below half strength, the reserve replaces losses with a convoy that arrives from the far side of the site, away from your approach. The site falls only when the garrison, reserves included, is down to 15 percent.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_COUNTERATTACK">
+                <Original>Counter-Attacks</Original>
+                <English>Counter-Attacks</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_COUNTERATTACK">
+                <Original>OPCOM gathers a strike force at a rally point out of sight, then advances in one wave instead of feeding units in one at a time. Its attackers do not retreat. After a failed attack, OPCOM waits 20 to 60 minutes before it attacks that zone again.</Original>
+                <English>OPCOM gathers a strike force at a rally point out of sight, then advances in one wave instead of feeding units in one at a time. Its attackers do not retreat. After a failed attack, OPCOM waits 20 to 60 minutes before it attacks that zone again.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_HARDPOINTS">
+                <Original>Hardpoints</Original>
+                <English>Hardpoints</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_HARDPOINTS">
+                <Original>OPFOR guards its zones and the ground between them with small positions: MG, AT, GMG and AA nests, roadblocks, mortar pits, artillery batteries, observation posts and radio towers. A hidden one shows on your map when you come within 100 m or reveal it with intel. Kill the crew, or destroy the gun, mortar or radio mast, to clear it. An observation post reports everyone it sees within about 1 km, so take it out early.</Original>
+                <English>OPFOR guards its zones and the ground between them with small positions: MG, AT, GMG and AA nests, roadblocks, mortar pits, artillery batteries, observation posts and radio towers. A hidden one shows on your map when you come within 100 m or reveal it with intel. Kill the crew, or destroy the gun, mortar or radio mast, to clear it. An observation post reports everyone it sees within about 1 km, so take it out early.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_MINEFIELDS">
+                <Original>Minefields</Original>
+                <English>Minefields</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_MINEFIELDS">
+                <Original>OPFOR lays mine belts across likely routes, with a few warning signs nearby. Every player can disarm a mine with the normal disarm action. When one mine in a field is found, set off or disarmed, the whole field shows on your map.</Original>
+                <English>OPFOR lays mine belts across likely routes, with a few warning signs nearby. Every player can disarm a mine with the normal disarm action. When one mine in a field is found, set off or disarmed, the whole field shows on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_INFLUENCE">
+                <Original>Area of Influence</Original>
+                <English>Area of Influence</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_INFLUENCE">
+                <Original>OPFOR zones and radio towers pull the reputation of nearby towns toward OPFOR, even next to a zone you hold. A radio tower reaches up to 5 km. Take the zone or clear the tower to stop the pull; the radio supports push BLUFOR influence farther the other way.</Original>
+                <English>OPFOR zones and radio towers pull the reputation of nearby towns toward OPFOR, even next to a zone you hold. A radio tower reaches up to 5 km. Take the zone or clear the tower to stop the pull; the radio supports push BLUFOR influence farther the other way.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_TIERS">
+                <Original>Enemy Tiers</Original>
+                <English>Enemy Tiers</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_TIERS">
+                <Original>OPFOR climbs its own five tiers, Infantry to Air, as its earned Army Power grows. Each tier unlocks heavier vehicles and hardpoints for OPCOM, and a tier never drops. OPFOR earns tier progress from the zones and towns it holds and from a share of its drip, so the less ground it holds, the slower it climbs.</Original>
+                <English>OPFOR climbs its own five tiers, Infantry to Air, as its earned Army Power grows. Each tier unlocks heavier vehicles and hardpoints for OPCOM, and a tier never drops. OPFOR earns tier progress from the zones and towns it holds and from a share of its drip, so the less ground it holds, the slower it climbs.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_CIVTALK">
+                <Original>Talking to Civilians</Original>
+                <English>Talking to Civilians</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_CIVTALK">
+                <Original>Use Halt on a nearby civilian, then Interact to open Civilian Interaction: Ask About the Enemy, Ask for Medical Aid, Ask for Tools, Ask for Work, or Arrest.&lt;br/&gt;&lt;br/&gt;Town reputation shapes the answer: a friendly town mostly helps, and a hostile one mostly refuses or asks for a bribe. Each civilian answers only one request. Aid and Tools leave one item at their feet. Each player can Ask About the Enemy once every 30 minutes.</Original>
+                <English>Use Halt on a nearby civilian, then Interact to open Civilian Interaction: Ask About the Enemy, Ask for Medical Aid, Ask for Tools, Ask for Work, or Arrest.&lt;br/&gt;&lt;br/&gt;Town reputation shapes the answer: a friendly town mostly helps, and a hostile one mostly refuses or asks for a bribe. Each civilian answers only one request. Aid and Tools leave one item at their feet. Each player can Ask About the Enemy once every 30 minutes.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_CIVJOBS">
+                <Original>Civilian Jobs</Original>
+                <English>Civilian Jobs</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_CIVJOBS">
+                <Original>Ask for Work to hear a town's job, if it has one: clear a bandit camp, recover a car that bandits stole, raise money for rebuilding, or clear an old minefield. Up to three jobs run across the map at once.&lt;br/&gt;&lt;br/&gt;Taking or declining a job both use up that civilian. Report back to the civilian who gave the job to collect CP, money and reputation, or find them again to cancel. If that civilian dies, the job fails.</Original>
+                <English>Ask for Work to hear a town's job, if it has one: clear a bandit camp, recover a car that bandits stole, raise money for rebuilding, or clear an old minefield. Up to three jobs run across the map at once.&lt;br/&gt;&lt;br/&gt;Taking or declining a job both use up that civilian. Report back to the civilian who gave the job to collect CP, money and reputation, or find them again to cancel. If that civilian dies, the job fails.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_HOSTILETOWN">
+                <Original>Hostile Towns</Original>
+                <English>Hostile Towns</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_HOSTILETOWN">
+                <Original>Near a town at reputation -10 or lower, hostile events can start every 5 to 10 minutes: a car bomb, a roadside IED, an enemy sniper, a recon patrol, an ambush car or an angry mob. They never start near HQ.&lt;br/&gt;&lt;br/&gt;Most IED piles are decoys, but treat each one as live and disarm it at the pile. A mob throws harmless junk, but some mobs hide armed instigators who break away and open fire.</Original>
+                <English>Near a town at reputation -10 or lower, hostile events can start every 5 to 10 minutes: a car bomb, a roadside IED, an enemy sniper, a recon patrol, an ambush car or an angry mob. They never start near HQ.&lt;br/&gt;&lt;br/&gt;Most IED piles are decoys, but treat each one as live and disarm it at the pile. A mob throws harmless junk, but some mobs hide armed instigators who break away and open fire.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_CAMPAIGNSETUP">
+                <Original>Campaign Setup</Original>
+                <English>Campaign Setup</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_CAMPAIGNSETUP">
+                <Original>Before HQ placement, the host sets up the campaign: starting CP (50 by default), CP Death Penalty (2), Reward Multiplier (1x), starting BLUFOR and OPFOR Army Power, AI skill, Garrison Density (50%) and OPFOR Unit Multiplier (1x).&lt;br/&gt;&lt;br/&gt;Campaign Lose Conditions, Autosave and Fatigue are lobby parameters, set before the mission loads. The DUWS Config page in the map notes lists the running campaign's settings.</Original>
+                <English>Before HQ placement, the host sets up the campaign: starting CP (50 by default), CP Death Penalty (2), Reward Multiplier (1x), starting BLUFOR and OPFOR Army Power, AI skill, Garrison Density (50%) and OPFOR Unit Multiplier (1x).&lt;br/&gt;&lt;br/&gt;Campaign Lose Conditions, Autosave and Fatigue are lobby parameters, set before the mission loads. The DUWS Config page in the map notes lists the running campaign's settings.</English>
             </Key>
             <Key ID="STR_DUWS_T_getwuiuy">
                 <German>Feedback/Bug Reports</German>
@@ -8105,8 +8260,8 @@
                 <German>DUWS_T (Erstellt von 5U5 und equanimity)&lt;br/&gt;Skript zur automatischen Fraktionserkennung (Erstellt von XOR)&lt;br/&gt;DUWS_X (Erstellt von Killa Tomata)&lt;br/&gt;Original DUWS (Erstellt von Kibot)&lt;br/&gt;DUWS-R (Erstellt von Frito und UltraNoobian)&lt;br/&gt;R3F-Logistikskript (Erstellt von Madbull)&lt;br/&gt;HALO-Sprungskript (Erstellt von Ghost)&lt;br/&gt;AIS-Medizinsystem (Erstellt von Phantom)&lt;br/&gt;TAW Einstellbare Sichtweite (Erstellt von Tonic)&lt;br/&gt;&lt;br/&gt;Besonderer Dank an alle Tester und Community-Spieler.</German>
                 <Spanish>DUWS_T (Creado por 5U5 y equanimity)&lt;br/&gt;Script de detección automática de facción (Creado por XOR)&lt;br/&gt;DUWS_X (Creado por Killa Tomata)&lt;br/&gt;DUWS original (Creado por Kibot)&lt;br/&gt;DUWS-R (Creado por Frito y UltraNoobian)&lt;br/&gt;Script de logística R3F (Creado por Madbull)&lt;br/&gt;Script de salto HALO (Creado por Ghost)&lt;br/&gt;Sistema médico AIS (Creado por Phantom)&lt;br/&gt;TAW Distancia de visión ajustable (Creado por Tonic)&lt;br/&gt;&lt;br/&gt;Agradecimiento especial a todos los testers y jugadores de la comunidad.</Spanish>
                 <Chinesesimp>DUWS_T(5U5、equanimity制作)&lt;br/&gt;自动检测阵营脚本(XOR制作)&lt;br/&gt;DUWS_X(Killa Tomata制作)&lt;br/&gt;原版DUWS(Kibot制作)&lt;br/&gt;DUWS-R(Frito and UltraNoobian制作)&lt;br/&gt;R3F后勤脚本(Madbull制作)&lt;br/&gt;高跳低开脚本(Ghost制作)&lt;br/&gt;AIS医疗系统(Phantom制作)&lt;br/&gt;TAW 可调视距(Tonic制作)&lt;br/&gt;&lt;br/&gt;特别感谢所有测试者与社区玩家。</Chinesesimp>
-                <Original>DUWS_T (Created by 5U5 and equanimity)&lt;br/&gt;Auto Detect Faction Script (Created by XOR)&lt;br/&gt;DUWS_X (Created by Killa Tomata)&lt;br/&gt;Original DUWS (Created by Kibot)&lt;br/&gt;DUWS-R (Created by Frito and UltraNoobian)&lt;br/&gt;R3F Logistics Script (Created by Madbull)&lt;br/&gt;HALO Jump Script (Created by Ghost)&lt;br/&gt;AIS Medical System (Created by Phantom)&lt;br/&gt;&lt;br/&gt;Special thanks to all testers and community players.</Original>
-                <English>DUWS_T (Created by 5U5 and equanimity)&lt;br/&gt;Auto Detect Faction Script (Created by XOR)&lt;br/&gt;DUWS_X (Created by Killa Tomata)&lt;br/&gt;Original DUWS (Created by Kibot)&lt;br/&gt;DUWS-R (Created by Frito and UltraNoobian)&lt;br/&gt;R3F Logistics Script (Created by Madbull)&lt;br/&gt;HALO Jump Script (Created by Ghost)&lt;br/&gt;AIS Medical System (Created by Phantom)&lt;br/&gt;&lt;br/&gt;Special thanks to all testers and community players.</English>
+                <Original>DUWS_T (Created by 5U5 and equanimity)&lt;br/&gt;Auto Detect Faction Script (Created by XOR)&lt;br/&gt;DUWS_X (Created by Killa Tomata)&lt;br/&gt;Original DUWS (Created by Kibot)&lt;br/&gt;DUWS-R (Created by Frito and UltraNoobian)&lt;br/&gt;R3F Logistics Script (Created by Madbull)&lt;br/&gt;HALO Jump Script (Created by Ghost)&lt;br/&gt;AIS Medical System (Created by Psychobastard)&lt;br/&gt;&lt;br/&gt;Special thanks to all testers and community players.</Original>
+                <English>DUWS_T (Created by 5U5 and equanimity)&lt;br/&gt;Auto Detect Faction Script (Created by XOR)&lt;br/&gt;DUWS_X (Created by Killa Tomata)&lt;br/&gt;Original DUWS (Created by Kibot)&lt;br/&gt;DUWS-R (Created by Frito and UltraNoobian)&lt;br/&gt;R3F Logistics Script (Created by Madbull)&lt;br/&gt;HALO Jump Script (Created by Ghost)&lt;br/&gt;AIS Medical System (Created by Psychobastard)&lt;br/&gt;&lt;br/&gt;Special thanks to all testers and community players.</English>
             </Key>
             <Key ID="STR_DUWS_T_uzx258em">
                 <German>Command Points (CP)</German>
@@ -8119,8 +8274,8 @@
                 <German>Command Points (CP) werden für den Kauf von Fahrzeugen, Einheiten und Unterstützungsanforderung (wie Artillerie oder das Arsenal) genutzt. Um Command Points zu erhalten musst du vom Feind kontrollierte Zonen erobern (rote Zonen auf der Karte) oder sekundäre Mission abschließen. Du erhälst außerdem alle 30 Minuten 6 Command Points für jede Zone die unter deiner Kontrolle steht.</German>
                 <Spanish>Los puntos de comando son usados para comprar vehículos, unidades y solicitar apoyos (como artillería o Arsenal). Para obtener puntos de comando debe capturar una zona controlada por el enemigo (zonas rojas en el mapa) o ejecutar misiones secundarias. Recibirá 6 puntos de comando adicionales por cada zona que tenga bajo su control cada 30 minutos.</Spanish>
                 <Chinesesimp>指挥点用于购买载具、部队和支援(如火炮或军火库)。要获得指挥点，你必须占领敌人控制的区域(地图上的红色区域)或执行支线任务。每30分钟，你控制的每个区域都会收到6个指挥点。</Chinesesimp>
-                <Original>Command Points buy units and vehicles and pay for support (Artillery, Arsenal, and so on). Earn them by capturing red zones and running side missions, plus 6 CP every 30 minutes for each zone you hold.</Original>
-                <English>Command Points buy units and vehicles and pay for support (Artillery, Arsenal, and so on). Earn them by capturing red zones and running side missions, plus 6 CP every 30 minutes for each zone you hold.</English>
+                <Original>Command Points buy units, vehicles and support. The starting amount is a campaign setup option (50 CP by default).&lt;br/&gt;&lt;br/&gt;The first capture of a zone pays 25 CP once; a recapture pays nothing. Side missions pay CP on success, Analyse Intel at HQ turns documents into CP, and each town at reputation 10 or higher pays CP every 30 minutes.</Original>
+                <English>Command Points buy units, vehicles and support. The starting amount is a campaign setup option (50 CP by default).&lt;br/&gt;&lt;br/&gt;The first capture of a zone pays 25 CP once; a recapture pays nothing. Side missions pay CP on success, Analyse Intel at HQ turns documents into CP, and each town at reputation 10 or higher pays CP every 30 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_x4vt0je3">
                 <German>Army Power (AP)</German>
@@ -8133,8 +8288,8 @@
                 <German>Army Power (AP) zeigt die Stärke der BLUFOR Kräfte, die vom AI Kommander kontrolliert werden, und die Stärke der OPFOR Einheiten in den Zonen an. Wenn feindliche Zonen erobert oder sekundäre Missionen abgeschlossen werden, wird deiner Armee Army Power hinzugefügt. Die Angriffswellen der BLUFOR Kräfte wird dadurch stärker.</German>
                 <Spanish>El poder militar representa la fuerza de las fuerzas de BLUFOR controladas por el comandante de IA y las Fuerzas de OPFOR en las zonas. Capturando zonas enemigas y completando misiones secundarias, agregará Poder militar a su ejército. Las oleadas de ataque del ejército BLUFOR se harán más fuertes.</Spanish>
                 <Chinesesimp>军力代表我方战区部队控制的部队的力量，以及战区内的敌方部队的力量。通过占领敌区并完成支线任务，你将为你的军队增加军队力量。军队的攻击波次将变得更强。</Chinesesimp>
-                <Original>Army Power is the strength of the AI commander's BLUFOR and of the OPFOR holding zones. Capturing zones and clearing side missions raises yours, and your attack waves grow stronger.</Original>
-                <English>Army Power is the strength of the AI commander's BLUFOR and of the OPFOR holding zones. Capturing zones and clearing side missions raises yours, and your attack waves grow stronger.</English>
+                <Original>Army Power sets your force's tier: Infantry, then Motorised at 60 earned AP, Mechanised at 150, Armour at 350 and Air at 600. Capturing and holding zones and finishing side missions earn it. A tier unlocks its units, vehicles and supports, and anything above your tier stays locked.&lt;br/&gt;&lt;br/&gt;A tier never drops once earned: spending AP, or losing a zone, lowers only your balance. OPFOR climbs its own ladder; see OPCOM.</Original>
+                <English>Army Power sets your force's tier: Infantry, then Motorised at 60 earned AP, Mechanised at 150, Armour at 350 and Air at 600. Capturing and holding zones and finishing side missions earn it. A tier unlocks its units, vehicles and supports, and anything above your tier stays locked.&lt;br/&gt;&lt;br/&gt;A tier never drops once earned: spending AP, or losing a zone, lowers only your balance. OPFOR climbs its own ladder; see OPCOM.</English>
             </Key>
             <Key ID="STR_DUWS_T_ty006zz4">
                 <German>Speichere das Spiel</German>
@@ -8147,8 +8302,8 @@
                 <German>Du kannst manuell über den SITREP (Funk-Menü 0-8) speichern. Das aktiviert die Speichern-Option im ESC-Menü.</German>
                 <Spanish>Puede guardar el juego usando el Reporte de situación (radio 0,8). Esto activará el guardado vanilla en el menú de ESC.</Spanish>
                 <Chinesesimp>你可以使用“报告”(支援菜单0,8)保存游戏。这将激活ESC菜单上的原版保存。</Chinesesimp>
-                <Original>Save with SITREP (radio 0-8); this enables Vanilla Save in the ESC menu.</Original>
-                <English>Save with SITREP (radio 0-8); this enables Vanilla Save in the ESC menu.</English>
+                <Original>DUWS-T saves the campaign, not the mission; the ESC-menu save is off. Before setup, the host picks NEW GAME or LOAD from the server's saved campaigns, with DELETE, IMPORT and EXPORT beside them.&lt;br/&gt;&lt;br/&gt;The server autosaves every 15 minutes by default (the Autosave lobby parameter), when the last player leaves, and when the campaign ends. Any player can save at once with SITREP (radio 0-8).</Original>
+                <English>DUWS-T saves the campaign, not the mission; the ESC-menu save is off. Before setup, the host picks NEW GAME or LOAD from the server's saved campaigns, with DELETE, IMPORT and EXPORT beside them.&lt;br/&gt;&lt;br/&gt;The server autosaves every 15 minutes by default (the Autosave lobby parameter), when the last player leaves, and when the campaign ends. Any player can save at once with SITREP (radio 0-8).</English>
             </Key>
             <Key ID="STR_DUWS_T_o31d875x">
                 <German>Unterstützungen</German>
@@ -8161,8 +8316,8 @@
                 <German>Du kannst Unterstützungsoptionen am Hauptquartier kaufen. Nutze die Unterstützung am Hauptquartier, an FOBs oder per Funk (0-8). DUWS_T bietet mehrere neue Unterstützungsarten an, und die Kosten für alle Unterstützungen wurden überarbeitet.</German>
                 <Spanish>Puedes comprar opciones de apoyo en el cuartel general. Accede al apoyo en el cuartel general, en las FOB o por radio (0-8). DUWS_T ofrece varios tipos de apoyo nuevos, y los costes de todo el apoyo han sido rehechos.</Spanish>
                 <Chinesesimp>你可以在总部购买支援选项。在总部，FOB或者无线电(0-8)来访问支援。DUWS_T提供了若干新的支援种类，并且所有支援的花费也都重做了。</Chinesesimp>
-                <Original>Buy and call supports at HQ, a FOB, or over the radio (0-8). Each unlocks once with CP, then costs CP per call.</Original>
-                <English>Buy and call supports at HQ, a FOB, or over the radio (0-8). Each unlocks once with CP, then costs CP per call.</English>
+                <Original>Buy supports in the Requests menu at HQ, then call them over the radio (0-8). Each unlocks once with CP, then costs CP per call.</Original>
+                <English>Buy supports in the Requests menu at HQ, then call them over the radio (0-8). Each unlocks once with CP, then costs CP per call.</English>
             </Key>
             <Key ID="STR_DUWS_T_4yxb8s2k">
                 <German>FOB errichten</German>
@@ -8175,15 +8330,15 @@
                 <German>Nachdem die BLUFOR-Streitkräfte die erste Operationszone erobert haben, kann der Spielerkommandant eine FOB für 10 CP errichten. Die FOB sichert die Logistik an abgelegenen Orten abseits des Hauptquartiers. Das Errichten einer FOB erzeugt zudem eine Garnison und warnt dich, wenn sich Feinde in der Nähe befinden. Um eine FOB zu errichten, muss die Umgebung um dich herum innerhalb eines 500-Meter-Radius feindfrei sein. Nutze das Unterstützungsmenü (0,8) und wähle „FOB errichten“ aus. Die FOB wird in der Richtung eingesetzt, in die du blickst.</German>
                 <Spanish>Una vez que las fuerzas BLUFOR hayan capturado la primera zona operativa, el jugador comandante puede establecer una FOB por 10 CP. La FOB asegura la logística en lugares remotos alejados del cuartel general. Establecer una FOB también genera una guarnición y te avisa si hay enemigos cercanos. Para establecer una FOB, la zona a tu alrededor debe estar libre de enemigos en un radio de 500 metros. Usa el menú de apoyo (0,8) y selecciona «Establecer una FOB». La FOB se desplegará en la dirección a la que estás mirando.</Spanish>
                 <Chinesesimp>蓝方部队占领了第一个战区后，玩家指挥官将可以用10 CP设立一个FOB。FOB在基地外的偏远地点保障后勤。建立FOB也会产生守备部队，并在附近有敌人时发出警告。要建立FOB，你周围的区域必须在500米半径范围内远离敌人。使用支援菜单(0,8)并选择“建立FOB”。FOB将部署在你正在寻找的方向。</Chinesesimp>
-                <Original>Once you hold the first zone, Establish FOB appears in the HQ requests menu. Unlock it for 10 CP; each FOB costs 10 CP more. A FOB pushes logistics forward, spawns a garrison, and warns you of nearby enemies.&lt;br/&gt;&lt;br/&gt;To place one, clear all enemies within 500 m, open the support menu (0-8), choose Establish FOB, and face the direction you want it deployed.</Original>
-                <English>Once you hold the first zone, Establish FOB appears in the HQ requests menu. Unlock it for 10 CP; each FOB costs 10 CP more. A FOB pushes logistics forward, spawns a garrison, and warns you of nearby enemies.&lt;br/&gt;&lt;br/&gt;To place one, clear all enemies within 500 m, open the support menu (0-8), choose Establish FOB, and face the direction you want it deployed.</English>
+                <Original>Once you hold your first zone, Establish FOB appears in the Requests menu at HQ. Unlock it once for 10 CP; each FOB you then place costs 10 CP. A FOB pushes logistics forward, spawns a garrison, warns you of nearby enemies, and is a respawn point. You can have one FOB for every two zones on the map.&lt;br/&gt;&lt;br/&gt;To place one, stand at least 2 km from any OPFOR zone or hostile town, clear all enemies within 125 m, open the radio menu (0-8), choose Establish FOB, and face the direction you want it deployed. The option returns 10 minutes later.</Original>
+                <English>Once you hold your first zone, Establish FOB appears in the Requests menu at HQ. Unlock it once for 10 CP; each FOB you then place costs 10 CP. A FOB pushes logistics forward, spawns a garrison, warns you of nearby enemies, and is a respawn point. You can have one FOB for every two zones on the map.&lt;br/&gt;&lt;br/&gt;To place one, stand at least 2 km from any OPFOR zone or hostile town, clear all enemies within 125 m, open the radio menu (0-8), choose Establish FOB, and face the direction you want it deployed. The option returns 10 minutes later.</English>
             </Key>
             <Key ID="STR_DUWS_T_617kjc41">
                 <German>Das Nebenmissionssystem von DUWS_X wurde in DUWS_T vollständig überarbeitet, darunter mehrere neue Missionen. Missionen, die spezielle Beute bieten oder einfacher sind, geben im Allgemeinen weniger CP/AP-Punkte. Einige Missionen haben strenge Zeitlimits und schlagen fehl, wenn sie nicht innerhalb der Frist erledigt werden. Du kannst Nebenmissionen im Hauptquartier oder an einer Forward Operating Base (FOB) anfordern. Nachdem du eine Nebenmission angefordert hast, kannst du sie über das Scrollmenü im Hauptquartier auch abbrechen. Zwischen zwei Nebenmissionen besteht eine 6-minütige Abkühlzeit; sobald die Abkühlzeit abgeschlossen ist, wird die Spielzeit um 3 Stunden vorspult.</German>
                 <Spanish>El sistema de misiones secundarias de DUWS_X ha sido completamente rehecho en DUWS_T, incluyendo varias misiones nuevas. Las misiones que ofrecen botín especial o son más fáciles generalmente dan menos puntos de CP/AP. Algunas misiones tienen límites de tiempo estrictos y fallarán si no se completan dentro del plazo. Puedes solicitar misiones secundarias en el cuartel general o en la Base Operativa Avanzada (FOB). Después de solicitar una misión secundaria, también puedes abortarla mediante el menú de rueda de desplazamiento en el cuartel general. Hay un tiempo de enfriamiento de 6 minutos entre dos misiones secundarias; una vez finalizado el enfriamiento, el tiempo del juego se adelantará 3 horas.</Spanish>
                 <Chinesesimp>DUWS_X的支线任务系统已经在DUWS_T里完全重做，包括几个新任务；同时，能为你带来特殊战利品和容易的任务一般奖励较少的CP/AP点数。其中有一些任务拥有苛刻的限制时间，限制时间内不完成任务的话任务会失败。你可以在总部或前线作战基地(FOB)请求支线任务，请求支线任务后也可以在总部滚轮选项里退出支线任务。两个支线任务期间拥有6分钟的冷却时间，冷却完成后，游戏时间会快进3小时。</Chinesesimp>
-                <Original>Request side missions at HQ or a FOB; abort an active one from the HQ scroll menu. Easier missions, or ones paying special loot, award less CP and AP. Some are timed and fail if you miss the limit. Missions share a 6-minute cooldown, and game time jumps 3 hours when one ends.</Original>
-                <English>Request side missions at HQ or a FOB; abort an active one from the HQ scroll menu. Easier missions, or ones paying special loot, award less CP and AP. Some are timed and fail if you miss the limit. Missions share a 6-minute cooldown, and game time jumps 3 hours when one ends.</English>
+                <Original>The host requests side missions from Side Missions in the Requests menu at HQ or a FOB. Easier missions, or ones that pay in loot, award less CP and AP. Some are timed and fail if you miss the limit. A new mission can start only 3 in-game hours after the last one began; Rest / Heal skips that wait.&lt;br/&gt;&lt;br/&gt;In Rescue Hostage, stay low, move slowly and hold your fire: the guards are then slower to notice you.</Original>
+                <English>The host requests side missions from Side Missions in the Requests menu at HQ or a FOB. Easier missions, or ones that pay in loot, award less CP and AP. Some are timed and fail if you miss the limit. A new mission can start only 3 in-game hours after the last one began; Rest / Heal skips that wait.&lt;br/&gt;&lt;br/&gt;In Rescue Hostage, stay low, move slowly and hold your fire: the guards are then slower to notice you.</English>
             </Key>
             <Key ID="STR_DUWS_T_g4orlwp1">
                 <German>ANFORDERUNGS-MENÜ</German>
@@ -8196,8 +8351,8 @@
                 <German>Du kannst Einheiten/Fahrzeuge/Missionen/Unterstützungen am HQ und FOBs über das Scoll-Menü anfordern</German>
                 <Spanish>Puede solicitar unidades/vehículos/misiones/apoyos en el CG y PdA usando el menú de la rueda del ratón.</Spanish>
                 <Chinesesimp>您可以使用滚动菜单请求总部和前进作战基地(FOB)的部队/载具/任务/支援</Chinesesimp>
-                <Original>Request units, vehicles, missions and supports from the scroll menu at HQ or any FOB.</Original>
-                <English>Request units, vehicles, missions and supports from the scroll menu at HQ or any FOB.</English>
+                <Original>Request units, vehicles, side missions and supports from the Requests menu at HQ or any FOB. A FOB offers a shorter list and no supports: buy supports at HQ.</Original>
+                <English>Request units, vehicles, side missions and supports from the Requests menu at HQ or any FOB. A FOB offers a shorter list and no supports: buy supports at HQ.</English>
             </Key>
             <Key ID="STR_DUWS_T_0f4f5uo2">
                 <German>Über DUWS_T</German>
@@ -8210,8 +8365,8 @@
                 <German>DUWS_T ist eine eigenständige Modifikation der berühmten DUWS_X-Mission von KillaTomata, erstellt von 5U5 und equanimity. Es enthält zahlreiche Verbesserungen der Lebensqualität und viele neue Funktionen. Gleichzeitig wurden einige unnötige Funktionen aus dem originalen DUWS_X entfernt. (Verbrechenssystem, Speicher- und Ladeoptionen im eingeschränkten Arsenal, die Einschränkung bei der manuellen Auswahl von Operationszonen nach Aktivieren des Hardcore-Modus, usw.)</German>
                 <Spanish>DUWS_T es una modificación única de la renombrada misión DUWS_X de KillaTomata, creada por 5U5 y equanimity. Incluye numerosas mejoras de calidad de vida y muchas características nuevas. Al mismo tiempo, se han eliminado algunas funciones innecesarias del DUWS_X original. (Sistema de crímenes de guerra, opciones de guardar/cargar en el arsenal restringido, la restricción para seleccionar zonas operativas manualmente tras activar el modo Hardcore, etc.)</Spanish>
                 <Chinesesimp>DUWS_T是5U5与equanimity对KillaTomata制作的久负盛名的DUWS_X任务的具有特色的修改版本，包含了巨量的QOL升级和众多的新特点。同时，原先的DUWS_X中的一些不必要的功能被移除。(战争罪系统、严格军火库中的加载/保存选项、选择硬核模式后对于手动选择战区的禁止，等等...)</Chinesesimp>
-                <Original>DUWS_T is a reworked take on KillaTomata's DUWS_X, built by 5U5 and equanimity. It adds heavy quality-of-life work and new features, and drops some original systems (the war-crime system, save/load in the restricted arsenal, and manual zone selection under Hardcore Mode).</Original>
-                <English>DUWS_T is a reworked take on KillaTomata's DUWS_X, built by 5U5 and equanimity. It adds heavy quality-of-life work and new features, and drops some original systems (the war-crime system, save/load in the restricted arsenal, and manual zone selection under Hardcore Mode).</English>
+                <Original>DUWS_T is a reworked take on Killa Tomata's DUWS_X, built by 5U5 and equanimity. It adds heavy quality-of-life work and new features, and drops some original systems (the war-crime system, save/load in the restricted arsenal, and manual zone selection under Hardcore Mode).</Original>
+                <English>DUWS_T is a reworked take on Killa Tomata's DUWS_X, built by 5U5 and equanimity. It adds heavy quality-of-life work and new features, and drops some original systems (the war-crime system, save/load in the restricted arsenal, and manual zone selection under Hardcore Mode).</English>
             </Key>
             <Key ID="STR_DUWS_T_auhmznp6">
                 <German>Spezialeinheit rekrutieren</German>
@@ -8238,8 +8393,8 @@
                 <German>Jeder Spieler (muss Gruppenführer sein) kann Einsatzkräfte über das Rekrutierungsmenü im Hauptquartier und an der Forward Operating Base (FOB) rekrutieren. Der erste Kauf kostet 8 CP (10 CP in DUWS_X). Falls eine Einsatzkraft im Kampf getötet wird, kann der Spieler die gefallene Einsatzkraft nach einer Minute kostenlos über das Rekrutierungsmenü neu einsetzen.</German>
                 <Spanish>Cada jugador (debe ser líder de escuadra) puede reclutar operativos desde el menú de reclutamiento en el cuartel general y en la Base Operativa Avanzada (FOB). La primera compra cuesta 8 CP (10 CP en DUWS_X). Si un operativo muere en combate, el jugador puede volver a desplegar al operativo caído desde el menú de reclutamiento después de un minuto de forma gratuita.</Spanish>
                 <Chinesesimp>每个玩家(必须为班长)都可以在总部和前线作战基地(FOB)的招募菜单中招募干员。第一次购买是8CP(在DUWS_X中是10CP)。如果干员在战斗中阵亡，一分钟后玩家可以在招募菜单中重新部署阵亡干员(免费)</Chinesesimp>
-                <Original>Squad leaders recruit operatives from the recruitment menu at HQ or a FOB. The first hire costs 8 CP. A killed operative redeploys free from the same menu after one minute.</Original>
-                <English>Squad leaders recruit operatives from the recruitment menu at HQ or a FOB. The first hire costs 8 CP. A killed operative redeploys free from the same menu after one minute.</English>
+                <Original>Any player can recruit operatives from the recruitment menu at HQ or a FOB. Each recruit costs 8 CP. A killed operative redeploys free from the same menu after one minute.</Original>
+                <English>Any player can recruit operatives from the recruitment menu at HQ or a FOB. Each recruit costs 8 CP. A killed operative redeploys free from the same menu after one minute.</English>
             </Key>
             <Key ID="STR_DUWS_T_supportguide">
                 <German>Detaillierte Erklärung der überarbeiteten Unterstützungsoptionen</German>
@@ -8357,8 +8512,8 @@
                 <English>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_veh_drop">
-                <Original>A helicopter drops a light vehicle of your choice; requires Logistical Supports.</Original>
-                <English>A helicopter drops a light vehicle of your choice; requires Logistical Supports.</English>
+                <Original>A helicopter drops a light vehicle of your choice; you also pay that vehicle's own CP price; requires Logistical Supports.</Original>
+                <English>A helicopter drops a light vehicle of your choice; you also pay that vehicle's own CP price; requires Logistical Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_uav">
                 <Original>A recon drone scans units in range and marks them on your map.</Original>
@@ -8405,27 +8560,27 @@
                 <English>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_hcAttChop">
-                <Original>Adds one attack helicopter to your High Command; no recall until it is destroyed; requires Heavy Supports.</Original>
-                <English>Adds one attack helicopter to your High Command; no recall until it is destroyed; requires Heavy Supports.</English>
+                <Original>Adds one attack helicopter to your High Command for 5 minutes, then it returns to base on its own; 10 min cooldown; requires Heavy Supports.</Original>
+                <English>Adds one attack helicopter to your High Command for 5 minutes, then it returns to base on its own; 10 min cooldown; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_hcCAS">
-                <Original>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed; requires Heavy Supports.</Original>
-                <English>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed; requires Heavy Supports.</English>
+                <Original>Adds one CAS fixed-wing to your High Command for 5 minutes, then it returns to base on its own; 10 min cooldown; requires Heavy Supports.</Original>
+                <English>Adds one CAS fixed-wing to your High Command for 5 minutes, then it returns to base on its own; 10 min cooldown; requires Heavy Supports.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_paradrop">
                 <Original>An infantry squad drops around you and joins your squad.</Original>
                 <English>An infantry squad drops around you and joins your squad.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_rally">
-                <Original>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</Original>
-                <English>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. A new one replaces it after 10 min. Squad leaders only.</English>
+                <Original>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. You can plant a new one, replacing the old, 10 min after the last. Squad leaders only.</Original>
+                <English>Plants a flag the team can fast travel to 10 times; lost if an enemy comes within 200 m. You can plant a new one, replacing the old, 10 min after the last. Squad leaders only.</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>
                 <Spanish>El molesto sistema de crímenes de guerra de DUWS_X ha sido eliminado y rehecho. La cantidad de civiles (incluidos los civiles armados) también ha aumentado considerablemente. En DUWS_T, una reputación baja no reducirá los puntos de CP/AP ni terminará la partida. BLUFOR comienza con 1 punto de reputación. La reputación disminuye cuando mueren civiles (por cualquier motivo) o se destruyen edificios. Si la reputación es negativa, los civiles se armarán y atacarán a BLUFOR. La reputación no se recupera automáticamente; los jugadores deben completar misiones secundarias para ayudar a los civiles y obtener reputación. (¡Cuida tu reputación! ¡Los civiles armados pueden ser extremadamente mortales!)</Spanish>
                 <Chinesesimp>DUWS_X中令人蛋疼的战争罪系统被移除和重做了，平民的数量也极大地被增多(武装平民也是)。在DUWS_T里，过低的声望不会导致CP/AP点数减少和游戏结束。开局时蓝方拥有1点声望。平民死亡(无论原因是什么)、摧毁建筑都会使声望降低。声望为负数会让平民武装起来攻击蓝方。声望不会自动恢复，玩家需要做帮助平民的支线任务才能获取声望。(珍惜你的声望！武装平民有时是很致命的！)</Chinesesimp>
-                <Original>BLUFOR starts at 1 reputation. It falls when civilians die (for any reason) or buildings are destroyed, and only civilian-help side missions restore it. Go negative and civilians arm themselves and attack you. Reputation costs no CP or AP and can't end the campaign, but armed civilians are deadly, so guard it.</Original>
-                <English>BLUFOR starts at 1 reputation. It falls when civilians die (for any reason) or buildings are destroyed, and only civilian-help side missions restore it. Go negative and civilians arm themselves and attack you. Reputation costs no CP or AP and can't end the campaign, but armed civilians are deadly, so guard it.</English>
+                <Original>Each town keeps its own reputation, from -20 to 20. It falls when BLUFOR kill or harm its civilians, destroy its buildings, steal its cars or arrest its people. It rises when you heal a civilian or finish a civilian job.&lt;br/&gt;&lt;br/&gt;At 10 or higher the town sides with BLUFOR and pays you CP every 30 minutes. At -10 or lower it sides with OPFOR, pays OPFOR, takes an OPFOR garrison and starts hostile events. In between it is neutral. Reputation also sets vendor prices.</Original>
+                <English>Each town keeps its own reputation, from -20 to 20. It falls when BLUFOR kill or harm its civilians, destroy its buildings, steal its cars or arrest its people. It rises when you heal a civilian or finish a civilian job.&lt;br/&gt;&lt;br/&gt;At 10 or higher the town sides with BLUFOR and pays you CP every 30 minutes. At -10 or lower it sides with OPFOR, pays OPFOR, takes an OPFOR garrison and starts hostile events. In between it is neutral. Reputation also sets vendor prices.</English>
             </Key>
             <Key ID="STR_DUWS_T_ojav7yf4">
                 <German>Hardcore Modus</German>
@@ -8438,8 +8593,8 @@
                 <German>Hardcore-Modus ist eine Kampagne mit versteckten Operationszonen und Geheimdienstinformationen. Feindliche Operationszonen sind verborgen, bis der Spieler eine betritt oder Informationen bei zufälligen zivilen Informanten, feindlichen Gruppenführern, Feuerteamleitern, hochwertigen Zielen, Laptops usw. findet. Zivile Informanten werden auf der Karte als lila Fragezeichen angezeigt.</German>
                 <Spanish>El Modo Hardcore es una campaña con zonas operativas ocultas e inteligencia. Las zonas operativas enemigas están ocultas hasta que el jugador entra en una o encuentra inteligencia en informantes civiles aleatorios, jefes de escuadra y jefes de equipo de fuego enemigos, objetivos de alto valor, ordenadores portátiles, etc. Los informantes civiles aparecerán como signos de interrogación morados en el mapa.</Spanish>
                 <Chinesesimp>硬核模式是带有隐藏战区和情报的战役。敌人的战区是隐藏的，直到玩家走进一个战区或在随机的平民线人、敌人班长和火力组组长、敌人高价值目标、笔记本电脑等上找到情报。平民线人将在地图上显示紫色问号。</Chinesesimp>
-                <Original>Enemy zones and civilian towns start hidden, except the few near your HQ. Reveal them with intel: search enemy bodies and objectives, complete side missions, or walk into one yourself.</Original>
-                <English>Enemy zones and civilian towns start hidden, except the few near your HQ. Reveal them with intel: search enemy bodies and objectives, complete side missions, or walk into one yourself.</English>
+                <Original>Hardcore Mode is off by default. When on, it hides every enemy zone and civilian town except the few near your HQ. Reveal them with intel: search enemy bodies, objectives and arrested civilians, walk into them, or buy the Intelligence Center supports. With Hardcore Mode off, zones and towns start visible. Hardpoints and other positions OPFOR builds during play stay hidden in both modes.</Original>
+                <English>Hardcore Mode is off by default. When on, it hides every enemy zone and civilian town except the few near your HQ. Reveal them with intel: search enemy bodies, objectives and arrested civilians, walk into them, or buy the Intelligence Center supports. With Hardcore Mode off, zones and towns start visible. Hardpoints and other positions OPFOR builds during play stay hidden in both modes.</English>
             </Key>
             <Key ID="STR_DUWS_T_ulm497s5">
                 <German>Task Forces</German>
@@ -8466,8 +8621,8 @@
                 <German>Der CP Pool ist übergreifend für alle. Die meisten Unterstützungs-Freischaltungen sind individuell, das Arsenal und HALO-Absprünge werden für alle freigeschaltet nd müssen nur einmalig von einem Spieler freigeschaltet werden. Nur der Host kann sekundäre Missionen anfordern. Nur der Host kann speichern und die Zeit vorspulen.</German>
                 <Spanish>Los puntos de comando son compartidos. La mayoría de los apoyos son individuales. El arsenal y HALO son compartidos y solo necesitan ser desbloqueados por un jugador. Solo el anfitrión puede solicitar misiones secundarias. Solo el anfitrión puede guardar y adelantar el tiempo.</Spanish>
                 <Chinesesimp>CP池对每个人来说都可见。大多数支援解锁是个人的，军火库和空降是共享的，只需要一名玩家解锁一次。只有主机才能请求执行任务。只有主机可以保存和跳过时间。</Chinesesimp>
-                <Original>CP is a shared pool; most support unlocks are per-player. Arsenal and HALO are shared and unlocked once by any player. Only the host can request side missions, save, and skip time.</Original>
-                <English>CP is a shared pool; most support unlocks are per-player. Arsenal and HALO are shared and unlocked once by any player. Only the host can request side missions, save, and skip time.</English>
+                <Original>CP is a shared pool; most support unlocks are per-player. Arsenal and HALO are shared and unlocked once by any player. Only the host can request side missions and use Rest / Heal. Any player can save with SITREP.</Original>
+                <English>CP is a shared pool; most support unlocks are per-player. Arsenal and HALO are shared and unlocked once by any player. Only the host can request side missions and use Rest / Heal. Any player can save with SITREP.</English>
             </Key>
             <Key ID="STR_DUWS_T_8yt3il47">
                 <German>Prüfe das Karten-Tagebuch für mehr Informationen (DUWS_T Anleitung)</German>
@@ -8487,8 +8642,8 @@
                 <German>Anders als DUWS_X haben Spieler in DUWS_T nur sehr wenige Möglichkeiten, die Zeit frei zu überspringen. Spieler können 3 Stunden im HQ und an Vorwärtsoperationsstützpunkten überspringen (mit einer 10-minütigen Abkühlzeit). Nachdem die Abkühlzeit einer Nebenmission abgeschlossen ist, werden automatisch 3 Stunden übersprungen. Du kannst wählen, tagsüber offen gegen Feinde zu kämpfen oder nachts heimlich feindliche Hochwertziele und Vermögenswerte zu zerstören.</German>
                 <Spanish>A diferencia de DUWS_X, en DUWS_T los jugadores tienen muy pocas oportunidades de saltarse el tiempo libremente. Los jugadores pueden saltarse 3 horas en el Cuartel General y en las Bases de Operaciones Avanzadas (con un tiempo de enfriamiento de 10 minutos). Cuando se complete el tiempo de enfriamiento de una misión secundaria, también se saltarán 3 horas automáticamente. Puedes elegir enfrentarte a los enemigos de frente durante el día o destruir sigilosamente objetivos de alto valor y activos enemigos por la noche.</Spanish>
                 <Chinesesimp>不像DUWS_X，在DUWS_T中，玩家能自由跳过时间的机会很少。玩家可以在总部和前线作战基地跳过3小时(有10分钟的冷却时间)，支线任务冷却完毕后也会自动跳过3小时时间。你可以选择在白天和敌人正面对决，在黑夜偷偷摧毁敌方重要人物和资产。</Chinesesimp>
-                <Original>Time skips are rare by design. Skip 3 hours at HQ or a FOB, and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</Original>
-                <English>Time skips are rare by design. Skip 3 hours at HQ or a FOB, and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</English>
+                <Original>Time skips are rare by design. The host uses Rest / Heal at HQ, a FOB or a medical tent to rest 3 to 24 hours. A rest heals everyone within 100 m, removes all dead bodies, and can set the weather for when you wake, unless the Rest Weather Config parameter turns that panel off. It asks for confirmation if a timed side mission is running.&lt;br/&gt;&lt;br/&gt;Fight in daylight, or hit high-value targets under cover of night.</Original>
+                <English>Time skips are rare by design. The host uses Rest / Heal at HQ, a FOB or a medical tent to rest 3 to 24 hours. A rest heals everyone within 100 m, removes all dead bodies, and can set the weather for when you wake, unless the Rest Weather Config parameter turns that panel off. It asks for confirmation if a timed side mission is running.&lt;br/&gt;&lt;br/&gt;Fight in daylight, or hit high-value targets under cover of night.</English>
             </Key>
         </Container>
         <Container name="System &amp; Multiplayer">
