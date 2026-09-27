@@ -7,7 +7,8 @@ DUWS_builds = [];
 // by netId and dropped on the vehicle's death, so a later builder cannot clobber it and it never leaks.
 DUWS_fnc_builderEnlist = {
     params ["_bld"];
-    _bld setVariable ["DUWS_campaignFactory", true];
+    // Broadcast for R3F's client-side factory condition, which keeps the builder vehicle out of every base ring.
+    _bld setVariable ["DUWS_campaignFactory", true, true];
     private _jipId = format ["DUWS_bldFactory_%1", netId _bld];
     [_bld, {
         params ["_bld"];
@@ -29,15 +30,18 @@ DUWS_fnc_builderEnlist = {
 // DUWS_buildKey, so a build is its factory's wherever it is carried.
 DUWS_fnc_buildRegister = {
     params ["_obj", "_factory"];
-    if (_factory getVariable ["DUWS_campaignFactory", false]) exitWith { DUWS_builds pushBack _obj };
+    if (_factory getVariable ["DUWS_campaignFactory", false]) exitWith {
+        DUWS_builds pushBack _obj;
+        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
+    };
     private _key = _factory getVariable ["DUWS_buildKey", ""];
     if (_key == "") exitWith {};
     // A build landing after its mission released the key would revive it, and nothing would release it again.
     if (_key in DUWS_retired) exitWith { [_obj] call fnc_duws_disposeAfter };
     [_obj, _key] call fnc_duws_keep;
-    private _zoneKey = _factory getVariable ["DUWS_zoneKey", ""];
-    if (_zoneKey != "") then {
-        _obj setVariable ["DUWS_buildZone", _zoneKey];
+    private _site = _factory getVariable ["DUWS_buildSite", ""];
+    if (_site != "") then {
+        _obj setVariable ["DUWS_buildSite", _site];
         _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
     };
 };

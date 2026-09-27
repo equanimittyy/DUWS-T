@@ -155,14 +155,26 @@ DUWS_fnc_campaignSnapshot = {
     _s set ["builds", (DUWS_builds select { alive _x && {isNull attachedTo _x} }) apply {
         [typeOf _x, getPosASL _x, vectorDir _x, vectorUp _x]
     }];
+    private _buildRows = {
+        params ["_key"];
+        ((DUWS_compositions getOrDefault [_key, []]) select { alive _x && {isNull attachedTo _x} })
+            apply { [typeOf _x, getPosWorld _x, [vectorDir _x, vectorUp _x]] }
+    };
     // A stowed zone's builds exist only as records, whose first three fields are the row a standing one reads to.
     _s set ["zoneBuilds", ((zone_meta_array apply { [_x select 1] call fnc_zone_key }) apply {
         private _key = format ["%1_builds", _x];
-        private _rows = ((DUWS_compositions getOrDefault [_key, []]) select { alive _x && {isNull attachedTo _x} })
-            apply { [typeOf _x, getPosWorld _x, [vectorDir _x, vectorUp _x]] };
+        private _rows = [_key] call _buildRows;
         _rows append ((DUWS_stowed getOrDefault [_key, []]) apply { _x select [0, 3] });
         [_x, ([_x] call DUWS_fnc_zoneFlag) getVariable ["R3F_LOG_CF_credits", 0], _rows]
     }) select { (_x select 1) > 0 || {(_x select 2) isNotEqualTo []} }];
+    // Every base, spent or not: a rebuilt base is granted its whole allowance, which only its saved balance overrides.
+    // A FOB is named by position, since its site key carries a netId that a load renews.
+    private _bases = [["HQ", bluHQ_object]];
+    { _bases pushBack [_x, Array_of_FOBS select _forEachIndex] } forEach Array_of_FOBpos;
+    _s set ["baseBuilds", _bases apply {
+        _x params ["_ref", "_factory"];
+        [_ref, _factory getVariable ["R3F_LOG_CF_credits", 0], [_factory getVariable ["DUWS_buildKey", ""]] call _buildRows]
+    }];
     _s set ["capturedPool", DUWS_capturedPool];
     // A spent-down class leaves the pool, so what was seeded is kept to tell it from a class a mod added since.
     if (DUWS_arsenalLimited) then { _s set ["seeded", missionNamespace getVariable ["DUWS_friendlyArsenal", []]] };

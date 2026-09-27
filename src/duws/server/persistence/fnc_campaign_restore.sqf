@@ -341,7 +341,7 @@ DUWS_fnc_restoreWorld = {
                 _x params ["_class", "_pos", "_dirUp"];
                 [_class, _pos, _dirUp, true, true, [], 0]
             }];
-            if !(_zoneKey in DUWS_stowed) then { [_zoneKey] call DUWS_fnc_zoneBuildWake };
+            if !(_zoneKey in DUWS_stowed) then { [_zoneKey] call DUWS_fnc_siteBuildDeploy };
         };
         ([_zoneKey] call DUWS_fnc_zoneFlag) setVariable ["R3F_LOG_CF_credits", _credits, true];
     } forEach (_r getOrDefault ["zoneBuilds", []]);
@@ -400,6 +400,23 @@ DUWS_fnc_restoreWorld = {
 // builds in flight could interleave them. Vehicles last, once every anchor stands.
 DUWS_fnc_restoreBases = {
     { _x params ["_pos", "_name"]; [_pos, 0, "", _name] call fnc_fob_server } forEach (DUWS_restore getOrDefault ["fobs", []]);
+    // After the FOBs stand, since each is found by the position its build was saved under.
+    {
+        _x params ["_ref", "_credits", "_rows"];
+        private _factory = if (_ref isEqualType "") then { bluHQ_object } else {
+            private _i = Array_of_FOBpos findIf { (_x distance2D _ref) < 5 };
+            if (_i < 0) then { objNull } else { Array_of_FOBS select _i }
+        };
+        if (!isNull _factory) then {
+            private _site = _factory getVariable "DUWS_buildSite";
+            DUWS_stowed set [format ["%1_builds", _site], _rows apply {
+                _x params ["_class", "_pos", "_dirUp"];
+                [_class, _pos, _dirUp, true, true, [], 0]
+            }];
+            [_site] call DUWS_fnc_siteBuildDeploy;
+            _factory setVariable ["R3F_LOG_CF_credits", _credits, true];
+        };
+    } forEach (DUWS_restore getOrDefault ["baseBuilds", []]);
 
     private _fnc_spawnSpec = {
         params ["_spec", "_pos", "_dir"];
@@ -443,6 +460,7 @@ DUWS_fnc_restoreBases = {
             _obj setPosASL _posASL;
             _obj setVectorDirAndUp [_vDir, _vUp];
             _obj setVariable ["R3F_LOG_CF_depuis_usine", true, true];
+            _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
             DUWS_builds pushBack _obj;
         };
     } forEach (DUWS_restore getOrDefault ["builds", []]);

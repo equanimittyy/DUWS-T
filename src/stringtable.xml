@@ -2032,8 +2032,12 @@
                 <English>Flagpole placement failed. It must be within 50 meters of the zone center.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonebuild_placement_failed">
-                <Original>Fortification placement failed. It must be within 100 meters of the zone center.</Original>
-                <English>Fortification placement failed. It must be within 100 meters of the zone center.</English>
+                <Original>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB.</Original>
+                <English>Fortification placement failed. It must be within 100 meters of the center of its zone, HQ or FOB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_bldv_base_refused">
+                <Original>Placement failed. The builder vehicle cannot fortify inside an HQ or FOB perimeter.</Original>
+                <English>Placement failed. The builder vehicle cannot fortify inside an HQ or FOB perimeter.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonebuild_clear">
                 <Original>Clear Fortifications</Original>

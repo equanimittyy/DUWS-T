@@ -68,6 +68,7 @@ if (count _fadePlayers > 0) then {
 private _fobKey = format ["FOB_%1", netId _fob];
 _fob setVariable ["DUWS_siteKey", _fobKey];
 [_fobKey, _foundPickupPos, base_garrison_sleep_range, "freeze"] call fnc_site_register;
+[_fob, _fobKey] call DUWS_fnc_baseBuildArm;
 // Woken by players or by hostiles. A garrison that cannot be woken by an attacker is a garrison
 // that loses its base while nobody is looking; the shared BLUFOR test cannot answer it, because
 // its AI arm exists to notice BLUFOR arriving on OPFOR ground and at a friendly base it would

@@ -1,0 +1,99 @@
+// Locality: server, except DUWS_fnc_inBaseRing. A held zone's flag, the HQ and each FOB are R3F factories for
+// fortifications (docs/info/gameplay/zones_and_civilians.md).
+//
+// A factory's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and the
+// callers add an allowance and a clear's refund. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
+// beside the site's own key, so a clear takes them without touching the site's composition.
+
+#define BUILD_REACH 100
+
+// R3F compiles its cost formula on clients only, and a dedicated server has none.
+DUWS_fnc_buildCost = compile preprocessFile "modules\R3F_LOG\usine_creation\determiner_cout_creation.sqf";
+
+// The factory role is client-local, so it and the Clear action ride one JIP order. A string id, because an object-keyed
+// one would evict another order keyed to the same object (a FOB's actions).
+DUWS_fnc_siteBuildArm = {
+    params ["_factory", "_siteKey"];
+    _factory setVariable ["DUWS_buildSite", _siteKey];
+    _factory setVariable ["DUWS_buildKey", format ["%1_builds", _siteKey]];
+    [_factory, {
+        params ["_factory"];
+        if (!hasInterface || isNull _factory) exitWith {};
+        [_factory, 0, west, ["Fortifications"]] execVM "modules\R3F_LOG\USER_FUNCT\init_creation_factory.sqf";
+        _factory addAction [localize "STR_DUWS_T_zonebuild_clear",
+            {
+                // hideOnUse off so a cancel keeps the action.
+                if ([localize "STR_DUWS_T_zonebuild_clear_confirm", localize "STR_DUWS_T_zonebuild_clear", true, true] call BIS_fnc_guiMessage) then {
+                    [_this select 0] remoteExec ["DUWS_fnc_siteBuildClear", 2];
+                };
+            },
+            [], 1.4, false, false, "",
+            "_this distance _target < 6 && {!(_target getVariable ['R3F_LOG_CF_disabled', true])}"];
+    }] remoteExec ["call", 0, format ["DUWS_siteBuild_%1", netId _factory]];
+};
+
+// A base is BLUFOR's for as long as it stands, so its factory opens at once with the whole allowance.
+DUWS_fnc_baseBuildArm = {
+    params ["_building", "_siteKey"];
+    _building setVariable ["R3F_LOG_CF_disabled", false, true];
+    _building setVariable ["R3F_LOG_CF_credits", DUWS_baseBuildPoints, true];
+    [_building, _siteKey] call DUWS_fnc_siteBuildArm;
+};
+
+// A piece in someone's hands or in a vehicle's cargo is left: deleting it would strand R3F's carry or cargo state.
+DUWS_fnc_siteBuildClear = {
+    params ["_factory"];
+    if (isNull _factory || {_factory getVariable ["R3F_LOG_CF_disabled", true]}) exitWith {};
+    private _key = _factory getVariable ["DUWS_buildKey", ""];
+    if (_key == "") exitWith {};
+    private _members = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
+    private _held = _members select { !isNull attachedTo _x };
+    private _gone = _members - _held;
+    private _refund = 0;
+    // A wreck refunds nothing, as R3F's own sale scales its refund by damage.
+    { if (alive _x) then { _refund = _refund + ([typeOf _x] call DUWS_fnc_buildCost) } } forEach _gone;
+    { _refund = _refund + ([_x select 0] call DUWS_fnc_buildCost) } forEach (DUWS_stowed getOrDefault [_key, []]);
+    { deleteVehicle _x } forEach _gone;
+    if (_held isEqualTo []) then { DUWS_compositions deleteAt _key } else { DUWS_compositions set [_key, _held] };
+    DUWS_stowed deleteAt _key;
+    _factory setVariable ["R3F_LOG_CF_credits", (_factory getVariable ["R3F_LOG_CF_credits", 0]) + _refund, true];
+    (localize "STR_DUWS_T_zonebuild_cleared") remoteExec ["hint", remoteExecutedOwner];
+};
+
+// Rebuilds a site's stowed builds, for a zone's wake and for a restore. A deploy makes each piece a new object, so what
+// was set on it at build time is set again here.
+DUWS_fnc_siteBuildDeploy = {
+    params ["_siteKey"];
+    private _key = format ["%1_builds", _siteKey];
+    if !(_key in DUWS_stowed) exitWith {};
+    [_key] call fnc_duws_deploy;
+    {
+        _x setVariable ["R3F_LOG_CF_depuis_usine", true, true];
+        _x setVariable ["DUWS_buildSite", _siteKey];
+        _x setVariable ["DUWS_buildLastGood", getPosATL _x];
+    } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
+};
+
+// Broadcast: R3F's factory condition runs it on every client (config.sqf).
+DUWS_fnc_inBaseRing = {
+    params ["_pos"];
+    ((Array_of_FOBpos + [PosOfBLUHQ]) findIf { (_x distance2D _pos) <= DUWS_base_keep_radius }) >= 0
+};
+
+// R3F reports every carried object once it has settled after a drop (deplacer.sqf). A site's build must stay within
+// reach of its site, and the builder vehicle's builds out of every base ring, so only a base's own budget fortifies it.
+DUWS_fnc_buildDropped = {
+    params ["_obj"];
+    if (isNull _obj || {!isNull attachedTo _obj}) exitWith {};
+    private _site = _obj getVariable ["DUWS_buildSite", ""];
+    private _bldv = _obj in DUWS_builds;
+    if (_site == "" && !_bldv) exitWith {};
+    private _bad = if (_bldv) then {
+        [getPosATL _obj] call DUWS_fnc_inBaseRing
+    } else {
+        (_obj distance2D (([_site] call fnc_site_at) get "pos")) > BUILD_REACH
+    };
+    if (!_bad) exitWith { _obj setVariable ["DUWS_buildLastGood", getPosATL _obj] };
+    _obj setPosATL (_obj getVariable "DUWS_buildLastGood");
+    (localize (["STR_DUWS_T_zonebuild_placement_failed", "STR_DUWS_T_bldv_base_refused"] select _bldv)) remoteExec ["hint", remoteExecutedOwner];
+};

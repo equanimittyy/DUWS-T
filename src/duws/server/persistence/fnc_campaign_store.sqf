@@ -35,7 +35,7 @@ DUWS_saveInputs = ["settings", "factions", "hq", "zones", "hardpoints"];
 // A snapshot missing one of these still loads, with that part at its boot value; the load screen names it.
 DUWS_saveOutcomes = ["fobs", "towns", "vendors", "belts", "unlocks", "officerAlive", "clock", "pools", "held",
     "firstCaptured", "escalation", "zoneTiers", "garrisons", "revealedZones", "revealedTowns", "opcom", "garage",
-    "mhq", "builder", "builds", "zoneBuilds", "capturedPool"];
+    "mhq", "builder", "builds", "zoneBuilds", "baseBuilds", "capturedPool"];
 publicVariable "DUWS_saveOutcomes";
 
 // Minutes since 2020-01-01 from a systemTimeUTC array. Minutes, not seconds: a float holds whole minutes

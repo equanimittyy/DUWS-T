@@ -471,7 +471,7 @@ else
 						R3F_LOG_PV_fin_deplacement_objet = _objet;
 						publicVariable "R3F_LOG_PV_fin_deplacement_objet";
 						["R3F_LOG_PV_fin_deplacement_objet", R3F_LOG_PV_fin_deplacement_objet] call R3F_LOG_FNCT_PVEH_fin_deplacement_objet;
-						// DUWS: a zone flag's fortification must settle within reach of its zone (fnc_zone_build.sqf).
+						// DUWS: a factory's fortification must settle within reach of its site, and a builder-vehicle build outside every base (fnc_site_build.sqf).
 						[_objet] remoteExec ["DUWS_fnc_buildDropped", 2];
 					};
 				};

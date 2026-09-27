@@ -120,6 +120,7 @@ private _invulnerableTypes = [
 
 bluHQ_object = _hqObj;
 publicVariable "bluHQ_object";
+[_hqObj, "HQ"] call DUWS_fnc_baseBuildArm;
 
 // Every anchor fnc_placeHQUnits reads lives in these keys. They are written before the placement
 // call rather than beside each spawn so the rebuild -- which has nothing but the namespace to work

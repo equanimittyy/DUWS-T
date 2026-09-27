@@ -192,7 +192,7 @@ DUWS_zoneStructureHooks = createHashMapFromArray [
         };
         // The zone flag is pinned, not stowed, so it was hidden rather than deleted -- show it again.
         { if (_x isKindOf "FlagPole_F") then { _x hideObjectGlobal false } } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
-        [_key] call DUWS_fnc_zoneBuildWake;
+        [_key] call DUWS_fnc_siteBuildDeploy;
     }],
     ["sleep", { params ["_key", "_o"];
         if ([_key] call fnc_duws_stow) then {
