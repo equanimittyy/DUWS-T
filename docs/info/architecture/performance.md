@@ -182,22 +182,24 @@ also reads every OPFOR hardpoint, so its memo resets on any build.
 
 ## Reading the cost from a playtest
 
-Five `.rpt` lines time the server's recurring work, all but the cleanup census at DEBUG. All five are
-wall time: a scheduled stage that reads long may be waiting on other scripts, not working.
+Six `.rpt` lines time the server's recurring work, all but the cleanup census at DEBUG. All but the hitch
+line are wall time: a scheduled stage that reads long may be waiting on other scripts, not working.
 
 | Line | Source | What it times |
 |---|---|---|
 | `[OPCOM] grid tick=… ms[…] pick[…] route[…]` | `warcom/opcom/belief/fnc_opcom_perception_run.sqf` | each stage of the 5 s OPCOM tick, the parts of its pick, and its A* searches |
 | `[OPCOM] need field rebuilt (…)`, `need deposits re-spread` | `warcom/opcom/appraisal/value/fnc_opcom_need.sqf` | each band rebuild and the signature parts that forced it; each deposit-only re-spread |
-| `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site |
+| `[STREAM] site pass: …` | `misc/fnc_site_stream_init.sqf` | the 10 s pass over every streamed site, and the frames it spans |
 | `[CLEANUP] litter census …` | `misc/fnc_repetitive_cleanup.sqf` | the sweep's `allMissionObjects` census, sampled every 10th pass |
-| `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, entity counts, and the five most numerous scheduled scripts by file |
+| `[PERF] fps …` | `server/server_init.sqf` | once a minute: frame rate, the longest frame and the count of hitches since the last line, entity counts, and the five most numerous scheduled scripts by file |
+| `[PERF] hitch: …` | `server/server_init.sqf` | each frame of 150 ms or more, logged in that frame, so the lines around it name the work that held it |
 
 A site pass that costs 1-2 ms on a quiet map and hundreds of ms in a firefight is doing the same work
 both times. The difference is contention, and the `PERF` line names the scripts behind it.
 
-The two OPCOM lines also give the frames each figure spans, as `ms/frames` on the tick line. A figure that spans
-many frames is scheduled work that waits for its share of the ~3 ms per frame
+The two OPCOM lines also give the frames each figure spans, as `ms/frames` on the tick line, and the site pass
+line gives the frames it spans. A figure that spans many frames is scheduled work that waits for its share of the
+~3 ms per frame
 ([`arma_engine_gotchas.md`](arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
 so its wall time can be far above its CPU time. A long figure that spans zero or one frame is a frame stall.
 
@@ -207,8 +209,8 @@ The `pick[…]` group splits the pick stage (`warcom/opcom/appraisal/fnc_opcom_p
 |---|---|
 | `site` | the siting pass, scheduled |
 | `siteValues` | the asset Values the siting pass computed, not read from its memo |
-| `targets` | the targets pass, unscheduled inside `isNil`, so it spans 0 frames and its ms is frame time |
-| `rows(…)` | each action row of the targets pass that took 1 ms or more |
+| `targets` | the targets pass: each row runs unscheduled inside `isNil`, in slices of about 10 ms with a frame between, so the pass spans a few frames |
+| `rows(…)` | each action row of the targets pass that took 1 ms or more; a row is never split, so its ms is frame time |
 | `rank` | the scoring and the weighted draw, scheduled |
 | `exec` | the execute of the drawn action, scheduled, which plans the routes of an order |
 

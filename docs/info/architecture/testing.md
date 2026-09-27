@@ -222,7 +222,7 @@ must never be used as a tag — `[DUWS][INFO][SRV][DUWS]` breaks tag filtering.
 | `INTRO` | the opening helicopter sequence |
 | `HALO` | AI HALO insertion |
 | `MARKERS` | the vendored unit-marker pack |
-| `PERF` | the server's once-a-minute DEBUG heartbeat: frame rate, entity counts and the most numerous scheduled scripts |
+| `PERF` | the server's once-a-minute DEBUG heartbeat: frame rate, the longest frame, entity counts and the most numerous scheduled scripts; plus a `hitch` line for each frame of 150 ms or more |
 
 Useful greps: `\[DUWS\]\[ERROR\]` for failures only, `\[DUWS\]\[[A-Z]*\]\[HOST\]` to separate the
 host's two halves, `\[DUWS\]\[.*\]\[ZONES\]` to follow campaign generation end to end,

@@ -20,28 +20,63 @@ DUWS_fnc_opcom_blockStaleness = {
 // for the reason the delay discount measures straight: no candidate may plan a route inside the pick's pass.
 DUWS_fnc_opcom_patrolCells = {
     params ["_from", "_to", "_k"];
+    private _w = DUWS_opcom_grid_w;
+    DUWS_opcom_box params ["_minCx", "_minCy", "_maxCx", "_maxCy"];
     private _steps = (ceil ((_from distance2D _to) / (OPCOM_GRID_CELL / 2))) max 1;
-    private _line = [];
+    // A half-cell step moves the line at most one cell, so its rows run unbroken and its cells in each row form one
+    // span. The band K about it is then one span a row, built without a per-cell dedupe.
+    private _rows = [];
+    private _lo = [];
+    private _hi = [];
     for "_i" from 0 to _steps do {
         private _f = _i / _steps;
-        _line pushBackUnique ([[(_from select 0) + ((_to select 0) - (_from select 0)) * _f,
-            (_from select 1) + ((_to select 1) - (_from select 1)) * _f, 0]] call DUWS_fnc_opcom_w2c);
+        private _c = [[(_from select 0) + ((_to select 0) - (_from select 0)) * _f,
+            (_from select 1) + ((_to select 1) - (_from select 1)) * _f, 0]] call DUWS_fnc_opcom_w2c;
+        private _cx = _c mod _w;
+        private _cy = floor (_c / _w);
+        private _j = count _rows - 1;
+        if (_j < 0 || {(_rows select _j) != _cy}) then {
+            _rows pushBack _cy;
+            _lo pushBack _cx;
+            _hi pushBack _cx;
+        } else {
+            _lo set [_j, (_lo select _j) min _cx];
+            _hi set [_j, (_hi select _j) max _cx];
+        };
     };
+    private _y0 = _rows select 0;
+    private _yN = _rows select (count _rows - 1);
+    private _dir = [1, -1] select (_yN < _y0);
     private _cells = [];
-    {
-        { _cells pushBackUnique _x } forEach ([_x, _k] call DUWS_fnc_opcom_blockCells);
-    } forEach _line;
+    for "_cy" from (((_y0 min _yN) - _k) max _minCy) to (((_y0 max _yN) + _k) min _maxCy) do {
+        private _a = 1e9;
+        private _b = -1e9;
+        for "_r" from ((_cy - _k) max (_y0 min _yN)) to ((_cy + _k) min (_y0 max _yN)) do {
+            private _j = (_r - _y0) * _dir;
+            _a = _a min (_lo select _j);
+            _b = _b max (_hi select _j);
+        };
+        for "_cx" from ((_a - _k) max _minCx) to ((_b + _k) min _maxCx) do { _cells pushBack (_cy * _w + _cx) };
+    };
     _cells
+};
+
+// The patrol lines of one pick cross the same cells many times over.
+DUWS_fnc_opcom_sweepWeights = {
+    ["sweepWeights", {
+        private _out = [];
+        { _out pushBack (([_forEachIndex] call DUWS_fnc_opcom_needAt) * ([_forEachIndex] call DUWS_fnc_opcom_stalenessAt)) } forEach DUWS_opcom_grid_land;
+        _out
+    }] call DUWS_fnc_opcom_tickCached
 };
 
 // The share keeps Patrol under the ground it sweeps: a patrol takes and protects nothing itself. The threat scale is
 // the caller's, being the unit's and not the line's.
 DUWS_fnc_opcom_patrolValue = {
     params ["_from", "_to", "_k"];
+    private _weights = call DUWS_fnc_opcom_sweepWeights;
     private _sum = 0;
-    {
-        _sum = _sum + ([_x] call DUWS_fnc_opcom_needAt) * ([_x] call DUWS_fnc_opcom_stalenessAt);
-    } forEach ([_from, _to, _k] call DUWS_fnc_opcom_patrolCells);
+    { _sum = _sum + (_weights select _x) } forEach ([_from, _to, _k] call DUWS_fnc_opcom_patrolCells);
     _sum * OPCOM_PATROL_SHARE
 };
 

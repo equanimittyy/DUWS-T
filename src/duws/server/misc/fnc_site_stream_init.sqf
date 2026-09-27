@@ -316,6 +316,7 @@ fnc_site_poller = {
         };
         private _now = time;
         private _t0 = diag_tickTime;
+        private _f0 = diag_frameNo;
 
         {
             private _key = _x;
@@ -448,8 +449,8 @@ fnc_site_poller = {
                 _passMs, SITE_TICK, count DUWS_sites]] call fnc_log;
         };
         if (duws_log_level >= 4) then {
-            ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms",
-                count DUWS_sites, _passMs]] call fnc_log;
+            ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms over %3 frames",
+                count DUWS_sites, _passMs, diag_frameNo - _f0]] call fnc_log;
         };
         } catch {
             ["ERROR", "STREAM", format ["site pass threw, thread held alive: %1", _exception]] call fnc_log;

@@ -1785,8 +1785,11 @@ DUWS_fnc_opcom_w2c = { params ["_p"]; (floor ((_p select 1) / 500)) * 10 + floor
     count ([[250, 250, 0], [2250, 250, 0], 1] call DUWS_fnc_opcom_patrolCells), 12] call fnc_assertEq;
 ["patrolCells: a wider reach sweeps a wider band, clipped at the box edge",
     count ([[250, 750, 0], [2250, 750, 0], 2] call DUWS_fnc_opcom_patrolCells), 28] call fnc_assertEq;
+["patrolCells: a diagonal run sweeps the band about every step once",
+    count ([[250, 250, 0], [2250, 2250, 0], 1] call DUWS_fnc_opcom_patrolCells), 24] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_patrolValue: what the ground a patrol sweeps is worth ---
+DUWS_fnc_opcom_tickCached = { params ["", "_fn"]; call _fn };
 DUWS_opcom_grid_seen = [];
 for "_i" from 1 to 100 do { DUWS_opcom_grid_seen pushBack (DUWS_opcom_tick - OPCOM_BELIEF_EXPIRE) };
 OPCOM_PATROL_SHARE = 0.2;
@@ -1942,7 +1945,6 @@ WARCOM_opfor_ap = 5;
 ["bestSources: no source is no offer", [[], [0, 0, 0], false] call DUWS_fnc_opcom_bestSources, []] call fnc_assertEq;
 
 // --- DUWS_fnc_opcom_hireSources: where each row a job takes is hired ---
-DUWS_fnc_opcom_tickCached = { params ["", "_fn"]; call _fn };
 OPCOM_CAP_UNITS_PER_ZONE = 8;
 zone_meta_array = [[1, [0, 0, 0], 200], [2, [5000, 0, 0], 200]];
 DUWS_fnc_opcom_unitCount = { 0 };

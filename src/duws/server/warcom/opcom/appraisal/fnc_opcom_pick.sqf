@@ -25,20 +25,29 @@ if (_dbg) then { DUWS_opcom_dbg_pick pushBack format ["siteValues=%1", _siteValu
 
 private _live = [];
 private _rowMs = [];
-// Unscheduled so every action reads one wallet and one store. The execute runs after, scheduled, because an order
-// plans a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
-isNil {
-    {
-        private _row = _x;
-        private _t0 = diag_tickTime;
-        private _targets = (_row param [3, []]) call (_row select 1);
-        if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
-        if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
-        if (_dbg) then {
-            private _rms = round ((diag_tickTime - _t0) * 1000);
-            if (_rms > 0) then { _rowMs pushBack format ["%1=%2", _row select 0, _rms] };
+// Each row reads unscheduled, so it sees one wallet and one store; the tick cache hands every row the same sweeps.
+// Rows run in ~10 ms slices with a frame between: all rows in one frame froze it past half a second late in a campaign,
+// and fully scheduled the pass would add seconds to the tick. The execute runs after, scheduled, because an order plans
+// a route and the router may yield. The weighted pick scores what it cannot yet afford, so it can save for it.
+private _n = count DUWS_opcom_actions;
+private _i = 0;
+while {_i < _n} do {
+    isNil {
+        private _end = diag_tickTime + 0.01;
+        while {_i < _n && {diag_tickTime < _end}} do {
+            private _row = DUWS_opcom_actions select _i;
+            private _t0 = diag_tickTime;
+            private _targets = (_row param [3, []]) call (_row select 1);
+            if (_mode isNotEqualTo "weighted") then { _targets = _targets select { (_x select 1) <= WARCOM_opfor_ap } };
+            if (_targets isNotEqualTo []) then { _live pushBack [_row, _targets] };
+            if (_dbg) then {
+                private _rms = round ((diag_tickTime - _t0) * 1000);
+                if (_rms > 0) then { _rowMs pushBack format ["%1=%2", _row select 0, _rms] };
+            };
+            _i = _i + 1;
         };
-    } forEach DUWS_opcom_actions;
+    };
+    sleep 0;
 };
 "targets" call _split;
 if (_rowMs isNotEqualTo []) then { DUWS_opcom_dbg_pick pushBack format ["rows(%1)", _rowMs joinString " "] };

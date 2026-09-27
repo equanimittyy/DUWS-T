@@ -260,6 +260,23 @@ if (ZeusStatus != 0) then {
     while {true} do {
         sleep 60;
         if (duws_log_level >= 4) then {
+            // diag_fpsMin spans only 16 frames, so it misses a lone long frame between samples.
+            if (isNil "DUWS_perf_frameEH") then {
+                DUWS_perf_last = diag_tickTime;
+                DUWS_perf_worst = 0;
+                DUWS_perf_hitches = 0;
+                DUWS_perf_frameEH = addMissionEventHandler ["EachFrame", {
+                    private _ms = (diag_tickTime - DUWS_perf_last) * 1000;
+                    DUWS_perf_last = diag_tickTime;
+                    DUWS_perf_worst = DUWS_perf_worst max _ms;
+                    // Logged as it happens, so the RPT lines beside it name what held the frame. 150 ms: above a
+                    // 10 fps frame, below the stalls worth chasing.
+                    if (_ms >= 150) then {
+                        DUWS_perf_hitches = DUWS_perf_hitches + 1;
+                        ["DEBUG", "PERF", format ["hitch: one frame took %1 ms", round _ms]] call fnc_log;
+                    };
+                }];
+            };
             private _scripts = diag_activeSQFScripts;
             private _byFile = createHashMap;
             {
@@ -270,9 +287,12 @@ if (ZeusStatus != 0) then {
             private _top = [];
             { _top pushBack [_y, _x] } forEach _byFile;
             _top sort false;
-            ["DEBUG", "PERF", format ["fps %1 (min %2), %3 scheduled scripts, %4 units, %5 groups, %6 vehicles, %7 dead, top %8",
-                round diag_fps, round diag_fpsMin, count _scripts, count allUnits, count allGroups, count vehicles, count allDead,
+            ["DEBUG", "PERF", format ["fps %1 (min %2), worst frame %3 ms, %4 hitches, %5 scheduled scripts, %6 units, %7 groups, %8 vehicles, %9 dead, top %10",
+                round diag_fps, round diag_fpsMin, round DUWS_perf_worst, DUWS_perf_hitches, count _scripts, count allUnits,
+                count allGroups, count vehicles, count allDead,
                 ((_top select [0, 5]) apply { format ["%1 x%2", _x select 1, _x select 0] }) joinString ", "]] call fnc_log;
+            DUWS_perf_worst = 0;
+            DUWS_perf_hitches = 0;
         };
     };
 };

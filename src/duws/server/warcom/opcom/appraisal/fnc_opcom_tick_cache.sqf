@@ -1,8 +1,8 @@
 // Locality: server, [] call'd at load. A per-pick cache for the sweeps every action row asks for.
 if (!isServer) exitWith {};
 
-// Every row asks for the same sweeps, and the store cannot move under them: the pick reads in one unscheduled pass and
-// executes afterwards.
+// Every row asks for the same sweeps. Taken once a pick, they also hold still across the pick's slices, where the store
+// can move between one row and the next.
 DUWS_opcom_tickCache = createHashMap;
 
 DUWS_fnc_opcom_tickCacheReset = { DUWS_opcom_tickCache = createHashMap };

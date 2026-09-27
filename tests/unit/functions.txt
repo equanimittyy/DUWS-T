@@ -104,6 +104,7 @@ duws/server/warcom/opcom/appraisal/value/fnc_opcom_cost.sqf::DUWS_fnc_opcom_aban
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_intercept.sqf::DUWS_fnc_opcom_interceptShare
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_stalenessAt
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolCells
+duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_sweepWeights
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_patrol.sqf::DUWS_fnc_opcom_patrolValue
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_garrison.sqf::DUWS_fnc_opcom_garrisonDefense
 duws/server/warcom/opcom/appraisal/value/fnc_opcom_garrison.sqf::DUWS_fnc_opcom_garrisonValue
