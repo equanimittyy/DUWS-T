@@ -208,7 +208,7 @@ a cheaper way to liquidate a slate, which inverts what the death penalty is for.
 | Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
 | Zone hold (AP trickle) | `server/warcom/fnc_zonesundercontrol.sqf:71-87` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
 | Town income | `server/warcom/fnc_zonesundercontrol.sqf:44-81` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
-| OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, so every 25 s; unthrottled, wallet only |
+| OPCOM drip | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | AP to OPFOR: 1 every `OPCOM_AP_DRIP_TICKS` (4) OPCOM ticks, so every 20 s; unthrottled, wallet only |
 | OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
 | Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
@@ -253,7 +253,7 @@ farming as an income route.
 
 **OPCOM's drip is the one faucet off this clock.** The payout lands as one lump, and the commander
 spends it within a minute, so for the rest of the period it could only bank or move free units.
-One AP is therefore paid every `OPCOM_AP_DRIP_TICKS` (5) OPCOM ticks, which is up to 72 AP per 30
+One AP is therefore paid every `OPCOM_AP_DRIP_TICKS` (4) OPCOM ticks, which is up to 90 AP per 30
 minutes, and it stops while no human is connected, as the tick does. It pays the wallet only: it
 never credits `WARCOM_opfor_ap_earned`, so it never moves OPFOR's tier.
 

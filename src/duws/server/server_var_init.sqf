@@ -969,7 +969,7 @@ DUWS_econ_throttle = 1;
 // that the commander spends within a minute, so without a drip it can only bank or move free units for
 // the rest of the period. Wallet only: it never credits the earned counter, so it never moves OPFOR's
 // tier. Ticks per AP rather than AP per tick, because fnc_ap_adjust keeps the pool whole. Server; tuning.
-OPCOM_AP_DRIP_TICKS = 5;
+OPCOM_AP_DRIP_TICKS = 4;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

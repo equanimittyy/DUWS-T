@@ -56,7 +56,7 @@ fnc_ap_adjust = {
 	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
 	// first-capture bonus; OPFOR's town and zone income. Spends, swings, consolation, refunds and
 	// OPCOM's drip leave it 0, so ground regained and money spent never move the ladder.
-	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every 25 s.
+	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every 20 s.
 	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0], ["_level", "INFO"]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
