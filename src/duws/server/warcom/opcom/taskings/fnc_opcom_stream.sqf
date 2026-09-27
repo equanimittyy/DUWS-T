@@ -91,7 +91,7 @@ DUWS_fnc_opcom_reOrderLive = {
 
 // OPCOM's own spawn: air must spawn flying at the tasking's point, not flown in from off-map like the zone spawner.
 DUWS_fnc_opcom_spawnComp = {
-    params ["_token", "_pos", ["_class", ""]];
+    params ["_token", "_pos", ["_class", ""], ["_dir", 0]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
         private _g = [_token, _pos, 100, "none", _pos] call fnc_spawn_team;
         // Posture "none" drops the team on one point; scatter <20 m so it still reads as one group in the stream radius.
@@ -107,16 +107,16 @@ DUWS_fnc_opcom_spawnComp = {
     if !(_class isKindOf "Air") exitWith {
         // pos is banked ASL (grid frame); spawnVehicle reads a 3D z as ATL, so pass 2D or the hull floats.
         private _g = [_pos select 0, _pos select 1];
-        private _grp = [_class, _g, 100, "none", _g] call fnc_spawn_vehicle;
-        // A supplied spawn point skips the clearance search, so a leg ending in a building or on water builds no hull.
-        // findEmptyPosition, not BIS_fnc_findSafePos: it answers [] on failure rather than a far random point.
-        if (isNull _grp) then {
-            private _clear = _g findEmptyPosition [0, OPCOM_DEVIRT_CLEAR_R, _class];
-            if (_clear isNotEqualTo []) then {
-                _grp = [_class, _g, 100, "none", [_clear select 0, _clear select 1]] call fnc_spawn_vehicle;
+        // Taskings banked on one point de-virt onto it together, and a hull spawned into another detonates both.
+        private _boat = _class isKindOf "Ship";
+        private _spot = [];
+        for "_i" from 0 to 15 do {
+            private _p = if (_i == 0) then { _g } else { _g getPos [random OPCOM_DEVIRT_CLEAR_R, random 360] };
+            if ((surfaceIsWater _p) isEqualTo _boat && {[_class, _p, _dir] call fnc_vehicle_spot_clear}) exitWith {
+                _spot = [_p select 0, _p select 1];
             };
         };
-        _grp
+        if (_spot isEqualTo []) then { grpNull } else { [_class, _g, 100, "none", _spot] call fnc_spawn_vehicle }
     };
     private _created = [[_pos select 0, _pos select 1, OPCOM_AIR_SPAWN_ALT], 0, _class, EAST] call BIS_fnc_spawnVehicle;
     _created params ["_veh", "_crew", "_grp"];
@@ -145,16 +145,16 @@ DUWS_fnc_opcom_deVirt = {
     params ["_t"];
     private _token = (_t get "comp") param [0, ""];
     private _pos = _t get "pos";
-    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""]] call DUWS_fnc_opcom_spawnComp;
+    private _tgt = _t get "target";
+    private _dir = if (_tgt isEqualTo []) then { 0 } else { _pos getDir _tgt };
+    private _grp = [_token, _pos, _t getOrDefault ["spawnClass", ""], _dir] call DUWS_fnc_opcom_spawnComp;
     if (isNull _grp) exitWith {
         ["ERROR", "OPCOM", format ["de-virt spawn failed for tasking %1 token %2", _t get "id", _token]] call fnc_log;
         false
     };
     private _full = _t get "fullForce";
     if (_full > 0) then { [_grp, (_t get "effForce") / _full] call DUWS_fnc_opcom_matchStrength };
-    private _tgt = _t get "target";
     if (_tgt isNotEqualTo []) then {
-        private _dir = _pos getDir _tgt;
         _grp setFormDir _dir;
         {
             private _v = vehicle _x;
