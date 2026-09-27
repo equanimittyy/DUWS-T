@@ -21,6 +21,7 @@ private _siteKey = (Array_of_FOBS select _i) getVariable ["DUWS_siteKey", ""];
 if (_siteKey != "") then {
 	[_siteKey, "infantry"] call fnc_site_collect;
 	[_siteKey] call fnc_site_retire;
+	{ [_x] call DUWS_fnc_buildCrewClear } forEach ((DUWS_compositions getOrDefault [format ["%1_builds", _siteKey], []]) select { !isNull _x });
 	[format ["%1_builds", _siteKey]] call fnc_duws_release;
 };
 remoteExec ["", format ["DUWS_siteBuild_%1", netId (Array_of_FOBS select _i)]];

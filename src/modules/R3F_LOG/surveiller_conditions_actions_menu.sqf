@@ -10,7 +10,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Modified 2026-09-27 for DUWS_T: the direct sale of a zone, HQ or FOB build accepts only the
- * factory that made it, from anywhere in its site, instead of any factory within 20 m.
+ * factory that made it, from anywhere in its site, instead of any factory within 20 m. A build
+ * whose only crew is friendly AI outside every player's group can be moved and sold directly.
  * (GPLv3 section 5a modification notice.)
  */
 
@@ -70,7 +71,7 @@ while {true} do
 		if (_fonctionnalites select __can_be_moved_by_player) then
 		{
 			// Condition action deplacer_objet
-			R3F_LOG_action_deplacer_objet_valide = (count crew _objet_pointe == 0 || _isUav) && (isNull R3F_LOG_joueur_deplace_objet) &&
+			R3F_LOG_action_deplacer_objet_valide = (count crew _objet_pointe == 0 || _isUav || {[_objet_pointe, _joueur] call DUWS_fnc_buildCrewFree}) && (isNull R3F_LOG_joueur_deplace_objet) &&
 				_objet_pas_en_cours_de_deplacement && isNull (_objet_pointe getVariable "R3F_LOG_est_transporte_par") &&
 				_objet_deverrouille && !(_objet_pointe getVariable "R3F_LOG_disabled");
 			
@@ -221,7 +222,7 @@ while {true} do
 		
 		// Condition action revendre_usine_direct
 		R3F_LOG_action_revendre_usine_direct_valide = _usine_autorisee_client && R3F_LOG_CFG_CF_sell_back_bargain_rate != -1 &&
-			_objet_pointe getVariable ["R3F_LOG_CF_depuis_usine", false] && (count crew _objet_pointe == 0 || _isUav) &&
+			_objet_pointe getVariable ["R3F_LOG_CF_depuis_usine", false] && (count crew _objet_pointe == 0 || _isUav || {[_objet_pointe, _joueur] call DUWS_fnc_buildCrewFree}) &&
 			isNull R3F_LOG_joueur_deplace_objet && isNull (_objet_pointe getVariable ["R3F_LOG_est_transporte_par", objNull]) &&
 			_objet_pas_en_cours_de_deplacement &&
 			{

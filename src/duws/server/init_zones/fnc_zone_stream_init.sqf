@@ -145,13 +145,16 @@ DUWS_fnc_zoneManStatics = {
     private _man = [opfor_SOLDIER_X, blufor_SOLDIER_X] select (_side isEqualTo "BLU");
     private _skill = [opfor_ai_skill, blufor_ai_skill] select (_side isEqualTo "BLU");
     private _roster = [_key] call fnc_zone_roster;
-    private _statics = (DUWS_compositions getOrDefault [_key, []]) select {
+    private _builds = (DUWS_compositions getOrDefault [format ["%1_builds", _key], []]) select { isNull attachedTo _x };
+    private _statics = ((DUWS_compositions getOrDefault [_key, []]) + _builds) select {
         !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"}
     };
 
     // A gun still carrying the prefab's crew is garrison as much as a spawned one, so its gunner joins
-    // the roster: that is what collects him when the zone streams out or falls.
-    { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
+    // the roster: that is what collects him when the zone streams out or falls. A player's squadmate kept a build
+    // from its stow, and the collect would delete him.
+    { _roster append ((crew _x) select { (units group _x) findIf { isPlayer _x } < 0 }) }
+        forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
     if (count _guns == 0) exitWith {};
@@ -179,6 +182,8 @@ DUWS_zoneEmplacementHooks = createHashMapFromArray [
         {
             if (_x isKindOf "StaticWeapon") then { deleteVehicleCrew _x };
         } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
+        // A squadmate keeps his seat in a build, and DUWS_fnc_zoneBuildSleep holds the builds' stow while he does.
+        { [_x] call DUWS_fnc_buildCrewClear } forEach ((DUWS_compositions getOrDefault [format ["%1_builds", _key], []]) select {!isNull _x});
     }]
 ];
 

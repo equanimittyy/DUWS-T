@@ -415,6 +415,7 @@ DUWS_fnc_restoreBases = {
                 [_class, _pos, _dirUp, true, true, [], 0]
             }];
             [_site] call DUWS_fnc_siteBuildDeploy;
+            [DUWS_compositions getOrDefault [format ["%1_builds", _site], []], _site] spawn DUWS_fnc_buildCrewSite;
             _factory setVariable ["R3F_LOG_CF_credits", _credits, true];
         };
     } forEach (DUWS_restore getOrDefault ["baseBuilds", []]);

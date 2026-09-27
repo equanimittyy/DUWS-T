@@ -13,7 +13,8 @@
  *
  * Modified 2026-09-27 for DUWS_T: each object that settles after a drop is reported to the server,
  * which holds a factory build within reach of its site and a builder-vehicle build out of every
- * base ring. (GPLv3 section 5a modification notice.)
+ * base ring. A build whose only crew is friendly AI outside every player's group can be moved,
+ * and the server deletes that crew first. (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -44,8 +45,10 @@ else
 	{
 		if (isNull (_objet getVariable ["R3F_LOG_remorque", objNull])) then
 		{
-			if (count crew _objet == 0 || getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1) then
+			if (count crew _objet == 0 || getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1 || {[_objet, _joueur] call DUWS_fnc_buildCrewFree}) then
 			{
+				// DUWS: the drop mans the build again (fnc_site_build.sqf).
+				if (count crew _objet > 0 && {[_objet, _joueur] call DUWS_fnc_buildCrewFree}) then {[_objet] remoteExec ["DUWS_fnc_buildCrewClear", 2]};
 				[_objet, _joueur] call R3F_LOG_FNCT_definir_proprietaire_verrou;
 				
 				_objet setVariable ["R3F_LOG_est_deplace_par", _joueur, true];

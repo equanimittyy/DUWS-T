@@ -1,5 +1,5 @@
-// Locality: server, except DUWS_fnc_inBaseRing and DUWS_fnc_canSellTo. A held zone's flag, the HQ and each FOB are
-// R3F factories for fortifications (docs/info/gameplay/zones_and_civilians.md).
+// Locality: server, except DUWS_fnc_inBaseRing, DUWS_fnc_canSellTo and DUWS_fnc_buildCrewFree. A held zone's flag, the
+// HQ and each FOB are R3F factories for fortifications (docs/info/gameplay/zones_and_civilians.md).
 //
 // A factory's credits are R3F's own running balance: R3F spends them on a build and refunds them on a sale, and the
 // callers add an allowance and the refund of a clear or of a rejected new build. A destroyed build is lost. Builds are filed under `<siteKey>_builds`,
@@ -65,7 +65,7 @@ DUWS_fnc_siteBuildClear = {
     // A wreck refunds nothing, as R3F's own sale scales its refund by damage.
     { if (alive _x) then { _refund = _refund + ([typeOf _x] call DUWS_fnc_buildCost) } } forEach _gone;
     { _refund = _refund + ([_x select 0] call DUWS_fnc_buildCost) } forEach (DUWS_stowed getOrDefault [_key, []]);
-    { deleteVehicle _x } forEach _gone;
+    { [_x] call DUWS_fnc_buildCrewClear; deleteVehicle _x } forEach _gone;
     if (_held isEqualTo []) then { DUWS_compositions deleteAt _key } else { DUWS_compositions set [_key, _held] };
     DUWS_stowed deleteAt _key;
     _factory setVariable ["R3F_LOG_CF_credits", (_factory getVariable ["R3F_LOG_CF_credits", 0]) + _refund, true];
@@ -84,6 +84,48 @@ DUWS_fnc_siteBuildDeploy = {
         _x setVariable ["DUWS_buildSite", _siteKey, true];
         _x setVariable ["DUWS_buildLastGood", getPosATL _x];
     } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
+};
+
+// Broadcast: R3F's move and direct-sale conditions run it on every client. The crew is deleted before the move or the
+// sale, so only friendly AI outside every player's group gives way; an enemy gunner or a squadmate holds the gun, and a
+// drone's AI crew is the drone itself.
+DUWS_fnc_buildCrewFree = {
+    params ["_obj", "_player"];
+    _obj getVariable ["DUWS_buildSite", ""] != "" && {getNumber (configFile >> "CfgVehicles" >> typeOf _obj >> "isUav") != 1} && {
+        (crew _obj) findIf {
+            alive _x && {side group _x != side group _player || {(units group _x) findIf { isPlayer _x } >= 0}}
+        } < 0
+    }
+};
+
+DUWS_fnc_buildCrewClear = {
+    params ["_gun"];
+    { if ((units group _x) findIf { isPlayer _x } < 0) then { _gun deleteVehicleCrew _x } } forEach crew _gun;
+};
+
+DUWS_fnc_buildCrew = {
+    params ["_guns", "_blu", ["_roster", []]];
+    private _empty = _guns select {
+        alive _x && {isNull attachedTo _x} && {_x isKindOf "StaticWeapon"} && {crew _x isEqualTo []}
+    };
+    if (_empty isEqualTo []) exitWith {};
+    private _man = [opfor_SOLDIER_X, blufor_SOLDIER_X] select _blu;
+    private _grp = [getPos (_empty select 0), [EAST, WEST] select _blu, _empty apply {_man}, [], [],
+        [opfor_ai_skill, blufor_ai_skill] select _blu] call BIS_fnc_spawnGroup;
+    _grp deleteGroupWhenEmpty true;
+    [_empty, _grp] call DUWS_fnc_manStatics;
+    _roster append (units _grp);
+};
+
+// The key, not the site record, tells a zone from a base: a load can restore the bases before the HQ site is registered.
+// A zone's gunner joins its garrison roster so the zone's collect takes him; its wake mans the builds in
+// DUWS_fnc_zoneManStatics, before the garrison stands.
+DUWS_fnc_buildCrewSite = {
+    params ["_guns", "_site"];
+    if (_site == "") exitWith {};
+    if ((_site select [0, 5]) isNotEqualTo "zone_") exitWith { [_guns, true] call DUWS_fnc_buildCrew };
+    if (([_site] call fnc_site_alive) == 0) exitWith {};
+    [_guns, ([_site] call DUWS_fnc_garrisonSideOf) isEqualTo "BLU", [_site] call fnc_zone_roster] call DUWS_fnc_buildCrew;
 };
 
 // Broadcast: R3F's factory condition runs it on every client (config.sqf).
@@ -114,7 +156,10 @@ DUWS_fnc_buildDropped = {
     } else {
         (_obj distance2D (([_site] call fnc_site_at) get "pos")) > BUILD_REACH
     };
-    if (!_bad) exitWith { _obj setVariable ["DUWS_buildLastGood", getPosATL _obj] };
+    if (!_bad) exitWith {
+        _obj setVariable ["DUWS_buildLastGood", getPosATL _obj];
+        [[_obj], _site] spawn DUWS_fnc_buildCrewSite;
+    };
     private _lastGood = _obj getVariable "DUWS_buildLastGood";
     private _msg = ["STR_DUWS_T_zonebuild_placement_failed", "STR_DUWS_T_bldv_base_refused"] select _bldv;
     // A new build has no good spot to go back to: R3F makes it far up in the sky before the carry.
@@ -129,6 +174,7 @@ DUWS_fnc_buildDropped = {
         deleteVehicle _obj;
     } else {
         _obj setPosATL _lastGood;
+        [[_obj], _site] spawn DUWS_fnc_buildCrewSite;
     };
     (localize _msg) remoteExec ["hint", remoteExecutedOwner];
 };

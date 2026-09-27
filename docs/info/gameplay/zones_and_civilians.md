@@ -325,10 +325,18 @@ A zone's flag builds from the `Fortifications` and `Static` categories. The HQ a
 only. The player opens a factory with R3F's own "Open the creation factory" action. Only a zone with a flag has one,
 so a zone's factory needs `VERSION_X == "MODERN"` or `simple_zones_enable`.
 
-**A built static weapon stands empty.** The zone's garrison mans only the zone's own guns, not its builds, so a
-player or a squadmate crews a built gun. A zone does not stow its builds while a squadmate mans one of them
-(`DUWS_fnc_zoneBuildSleep`), because a stow would delete the gun with its crew. The `Static` category holds only the
-statics whose config names it as their `vehicleClass`, so a mod's statics show only if the mod uses that category.
+**A built static weapon gets a gunner.** A zone's wake mans its builds with its own guns, for the side that holds
+the zone (`DUWS_fnc_zoneManStatics`). A gun placed while the zone's garrison stands is manned at once, and a base mans
+every built gun when it is placed and when a load restores it (`DUWS_fnc_buildCrewSite`). The gunners are not saved.
+A zone's sleep and a FOB's teardown delete the build gunners but not a squadmate. A zone does not stow its builds
+while a squadmate mans one of them (`DUWS_fnc_zoneBuildSleep`), because a stow would delete the gun with its crew. The
+`Static` category holds only the statics whose config names it as their `vehicleClass`, so a mod's statics show only
+if the mod uses that category.
+
+**R3F moves and sells a manned build.** R3F refuses to move or sell an object with a crew. A build whose only crew is
+friendly AI outside every player's group is the exception (`DUWS_fnc_buildCrewFree`): the Move action and the direct
+sale have the server delete that crew first, and the drop mans the gun again. An enemy gunner, a squadmate or a
+drone's own AI keeps the gun where it is.
 
 **A zone's factory follows ownership.** `fnc_zone_flag_logistics` sets the factory gate (`R3F_LOG_CF_disabled`)
 with the carry gate, so the factory works only while BLUFOR hold the zone. When OPFOR retake the zone, the builds

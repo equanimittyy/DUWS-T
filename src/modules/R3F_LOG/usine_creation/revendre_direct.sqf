@@ -11,7 +11,8 @@
  *
  * Modified 2026-09-27 for DUWS_T: the direct sale of a zone, HQ or FOB build accepts only the
  * factory that made it, from anywhere in its site, instead of the nearest factory within 22 m.
- * (GPLv3 section 5a modification notice.)
+ * A build whose only crew is friendly AI outside every player's group can be sold, and the server
+ * deletes that crew first. (GPLv3 section 5a modification notice.)
  */
 
 if (R3F_LOG_mutex_local_verrou) then
@@ -48,7 +49,7 @@ else
 		{
 			if (isNull (_objet getVariable ["R3F_LOG_remorque", objNull])) then
 			{
-				if (count crew _objet == 0 || getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1) then
+				if (count crew _objet == 0 || getNumber (configFile >> "CfgVehicles" >> (typeOf _objet) >> "isUav") == 1 || {[_objet, player] call DUWS_fnc_buildCrewFree}) then
 				{
 					if ([_objet, _usine, 30] call DUWS_fnc_canSellTo) then
 					{
@@ -57,6 +58,7 @@ else
 							_objet setVariable ["R3F_LOG_est_transporte_par", _usine, true];
 							
 							systemChat STR_R3F_LOG_action_revendre_en_cours;
+							if (count crew _objet > 0 && {[_objet, player] call DUWS_fnc_buildCrewFree}) then {[_objet] remoteExec ["DUWS_fnc_buildCrewClear", 2]};
 							
 							sleep 2;
 							
