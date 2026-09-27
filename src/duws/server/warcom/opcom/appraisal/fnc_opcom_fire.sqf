@@ -106,7 +106,10 @@ DUWS_fnc_opcom_fireRun = {
     _target params ["_key", "", "_pt", "_rounds", "_shape", "_spread"];
     if !([_pt] call DUWS_fnc_opcom_fireClear) exitWith { false };
     private _eta = [_key, _pt] call DUWS_fnc_opcom_fireETA;
-    if (([_key, _pt, _rounds, _shape] call DUWS_fnc_opcom_fireMission) <= 0) exitWith { false };
+    // Looked up by key: a creep hands no type.
+    private _hp = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+    private _price = if (_hp < 0) then { 0 } else { OPCOM_AP_PER_ROUND getOrDefault [(DUWS_hardpoints select _hp) select 2, 2] };
+    if (([_key, _pt, _rounds, _shape, _price] call DUWS_fnc_opcom_fireMission) <= 0) exitWith { false };
     // One mission per emplacement per tick, so the tick and the key name the marker uniquely.
     [_key, _pt, _spread, _eta, format ["opcom_arty_%1_%2", _key, DUWS_opcom_tick]] spawn DUWS_fnc_opcom_fireWarn;
     true

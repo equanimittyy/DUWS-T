@@ -637,8 +637,8 @@ OPCOM_DEVIRT_BUFFER = 2;
 // How far a de-virtualising hull may shift onto ground it fits on, clear of other hulls (fnc_opcom_stream); tight, so it stands near the leg it reached.
 OPCOM_DEVIRT_CLEAR_R = 100;
 
-// Seconds one round may take before it is written off (fnc_opcom_fires); generous, as the first carries the traverse.
-OPCOM_ARTY_ROUND_SECS = 30;
+// Seconds one round may take before it is written off and its AP refunded (fnc_opcom_fires).
+OPCOM_ARTY_ROUND_SECS = 10;
 
 // A fire mission's tightest spread: a saturate radius, a creep's width and its length never close below it.
 OPCOM_ARTY_MIN_SPREAD = 50;

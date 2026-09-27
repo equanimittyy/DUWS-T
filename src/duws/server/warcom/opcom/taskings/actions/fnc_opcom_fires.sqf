@@ -81,7 +81,7 @@ DUWS_fnc_opcom_fireAim = {
 // doArtilleryFire puts every round of one order on one point, so each aim point is its own one-round order.
 // A round not away inside OPCOM_ARTY_ROUND_SECS is written off, so a dead crew never leaves the gun loaded.
 DUWS_fnc_opcom_gunFire = {
-    params ["_gun", "_mag", "_pts", "_delay", "_jitter"];
+    params ["_gun", "_mag", "_pts", "_delay", "_jitter", "_price"];
     private _old = _gun getVariable ["DUWS_opcomFireEH", -1];
     if (_old >= 0) then { _gun removeEventHandler ["Fired", _old] };
     _gun setVariable ["DUWS_opcomFired", 0];
@@ -91,8 +91,8 @@ DUWS_fnc_opcom_gunFire = {
         _g setVariable ["DUWS_opcomShotAt", time];
         _g setVehicleAmmo 1;
     }]];
-    [_gun, _mag, _pts, _delay, _jitter] spawn {
-        params ["_gun", "_mag", "_pts", "_delay", "_jitter"];
+    [_gun, _mag, _pts, _delay, _jitter, _price] spawn {
+        params ["_gun", "_mag", "_pts", "_delay", "_jitter", "_price"];
         sleep _delay;
         {
             if (!alive _gun || {!alive (gunner _gun)}) exitWith {};
@@ -111,6 +111,8 @@ DUWS_fnc_opcom_gunFire = {
         _gun setVehicleAmmo 0;
         [["INFO", "WARN"] select (_fired < count _pts), "OPCOM", format ["arty: %1 put %2/%3 rounds down, empty again",
             typeOf _gun, _fired, count _pts]] call fnc_log;
+        private _refund = (count _pts - _fired) * _price;
+        if (_refund > 0) then { ["OPF", _refund, "opcom_arty_refund"] call fnc_ap_adjust };
     };
 };
 
@@ -132,10 +134,11 @@ DUWS_fnc_opcom_fireETA = {
 };
 
 // _shape is ["saturate", radius] about _target or ["creep", width, length, bearing] walking forward from it. _rounds is
-// a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). -> rounds ordered, 0 unless every ready
-// gun bears, since the pick priced the mission on them all.
+// a gun's for a saturate; a creep sizes its own (DUWS_fnc_opcom_creepGrid). _price is the AP each round cost, refunded
+// for a round its gun never fires; 0 for the unpaid debug verb. -> rounds ordered, 0 unless every ready gun bears,
+// since the pick priced the mission on them all.
 DUWS_fnc_opcom_fireMission = {
-    params ["_key", "_target", ["_rounds", 4], ["_shape", ["saturate", 0]]];
+    params ["_key", "_target", ["_rounds", 4], ["_shape", ["saturate", 0]], ["_price", 0]];
     private _pt = [_target select 0, _target select 1, 0];
     private _guns = [];
     private _short = objNull;
@@ -190,7 +193,7 @@ DUWS_fnc_opcom_fireMission = {
         for "_k" from 0 to _rounds - 1 do {
             _pts pushBack ([_pt, _shape, _g, count _guns, _k, _drift, [0, OPCOM_ARTY_ROCKET_SCATTER] select _rocket] call DUWS_fnc_opcom_fireAim);
         };
-        [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket] call DUWS_fnc_opcom_gunFire;
+        [_gun, _m, _pts, OPCOM_ARTY_STAGGER * _g, [OPCOM_ARTY_JITTER, OPCOM_ARTY_ROCKET_JITTER] select _rocket, _price] call DUWS_fnc_opcom_gunFire;
         _gun setVariable ["DUWS_opcomReadyTick", DUWS_opcom_tick + OPCOM_ARTY_COOLDOWN];
     } forEach _guns;
     ["INFO", "OPCOM", format ["arty: %1 fires %2 gun(s) x %3 rounds of %4 (%5), %6 at %7", _key, count _guns, _rounds,
