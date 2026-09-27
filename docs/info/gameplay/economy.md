@@ -245,11 +245,13 @@ paid from the same 30-minute iteration. Equal nominal periods are not one clock:
 a suspended thread resumes when the scheduler reaches it, so separate loops accrue their own slop and
 walk apart. No faucet is gated on holdings — a side with no towns or zones simply computes 0 from
 them — because the enemy banking its towns while the player holds
-nothing is exactly the case the town economy exists to model. The tick reports BLUFOR's take in one
-Overlord line (town CP and zone AP), and cards the throttle percentage beside it when campaign size
-is cutting the faucets. Kill income rides the same tick but is kept out of that line and announced
-only to the player who earned it: naming attrition in a campaign-wide report would advertise kill
-farming as an income route.
+nothing is exactly the case the town economy exists to model. A tick that pays BLUFOR from territory
+hints every player a readout through the Debug menu's ledger box (`fnc_debug_ledger_hint`): the town
+CP and zone AP taken, with each pool's total; the throttle cut as the subtitle when campaign size is
+cutting the faucets; and each revealed town whose reputation rose, with BLUFOR's radio push and the
+town's CP income if it is in the BLUFOR band. The readout leaves out OPFOR's side of the tick. Kill
+income rides the same tick but is kept out of the readout and announced only to the player who earned
+it: naming attrition in a campaign-wide report would advertise kill farming as an income route.
 
 **OPCOM's drip is the one faucet off this clock.** The payout lands as one lump, and the commander
 spends it within a minute, so for the rest of the period it could only bank or move free units.

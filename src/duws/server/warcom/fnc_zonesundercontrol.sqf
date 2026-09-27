@@ -39,8 +39,8 @@ private _towns = [];
 // Passive AoI rep drift first, then income on the result -- so a town that crosses a band this
 // tick pays on its new side the same tick. The pushes are asymmetric by design: OPFOR pushes by
 // holding ground (a flat 1 plus its standing radio towers), BLUFOR only once it has bought a tier
-// (no base). A contested town nets the difference; an uncovered one drifts nothing. Silent: the
-// town's marker colour is the feedback, not a card per town (see fnc_town_rep_adjust).
+// (no base). A contested town nets the difference; an uncovered one drifts nothing. Silent: no
+// card per town; the marker colour and the tick's hint below carry it (see fnc_town_rep_adjust).
 {
     private _townPos = getPos (_locs select _forEachIndex);
     private _opforCovers = [_townPos] call fnc_aoi_opfor_covers;
@@ -86,28 +86,40 @@ if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
 if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
 if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfAP] call fnc_ap_adjust };
 
-// Pays and notifies each player its own kill award; deliberately absent from Overlord's
-// report below, which speaks for territory only. Naming attrition there would advertise
-// kill farming as an income route.
+// Pays and notifies each player its own kill award; deliberately absent from the territory
+// hint below. Naming attrition there would advertise kill farming as an income route.
 private _killCP = call fnc_kill_income_sweep;
 
-// One line for what territory earned BLUFOR this tick, in place of a notification per faucet:
-// popups on the same frame read as spam, and the pair is what tells the player whether holding
-// ground is paying. CP is the town faucet, AP the zone trickle.
+// Only on a paid tick: a reduced-income subtitle with no income to reduce would read as an error.
+// An unrevealed town stays off it, or the hint would name what the town reveal keeps hidden.
 if (_bluCP > 0 || {_bluZoneAP > 0}) then {
-    [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _bluCP, _bluZoneAP]]
-        remoteExec ["fnc_duws_dialogue", 0];
-
-    // Carded, not spoken: the throttle is a standing campaign condition (fixed at generation as
-    // (REF_ZONES/zones)^k), not a line of this tick's report, and folding it into the dialogue
-    // would reword Overlord every tick with a number that never changes. Team news, so an A3
-    // card to all rather than a per-player hint. Only when it bites, and only alongside a paid
-    // tick -- "reduced" with no income line to reduce would read as an error.
-    if (DUWS_econ_throttle < 1) then {
-        private _cut = round ((1 - DUWS_econ_throttle) * 100);
-        ["sitrepinfo", [localize "STR_DUWS_T_econ_reduced_title", format [localize "STR_DUWS_T_econ_reduced_desc", _cut, "%"]]]
-            remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
+    private _visible = missionNamespace getVariable ["civ_visible", []];
+    private _rows = [
+        [localize "STR_DUWS_T_econ_hint_cp", format ["+%1", _bluCP], format [localize "STR_DUWS_T_econ_hint_total", commandpointsblu1]],
+        [localize "STR_DUWS_T_econ_hint_ap", format ["+%1", _bluZoneAP], format [localize "STR_DUWS_T_econ_hint_total", WARCOM_blufor_ap]]
+    ];
+    private _gained = [];
+    {
+        _x params ["_old", "_new"];
+        // Compared on the result, not the push: a town at the reputation cap takes a push and does not move.
+        if (_new > _old && {_visible param [_forEachIndex, true]}) then {
+            private _name = text (_locs select _forEachIndex);
+            if (_name isEqualTo "") then { _name = format ["Unnamed%1", _forEachIndex] };
+            ([_new, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
+            _gained pushBack [_name, format ["%1 -> %2", _old, _new],
+                ["", format [localize "STR_DUWS_T_civ_mapview_income_blu", _income]] select (_side isEqualTo "BLU")];
+        };
+    } forEach _towns;
+    if (_gained isNotEqualTo []) then {
+        _rows pushBack localize "STR_DUWS_T_econ_hint_drift";
+        _rows pushBack [localize "STR_DUWS_T_econ_hint_push", format ["+%1", DUWS_bluforRadioLevel]];
+        _rows append _gained;
     };
+    private _subtitle = "";
+    if (DUWS_econ_throttle < 1) then {
+        _subtitle = format [localize "STR_DUWS_T_econ_reduced_desc", round ((1 - DUWS_econ_throttle) * 100), "%"];
+    };
+    [localize "STR_DUWS_T_econ_hint_title", _subtitle, _rows, [0, -2] select isDedicated] call fnc_debug_ledger_hint;
 };
 
 [_towns, _bluCP, _bluZoneAP, _opfTownAP, _opfZoneAP, _killCP]

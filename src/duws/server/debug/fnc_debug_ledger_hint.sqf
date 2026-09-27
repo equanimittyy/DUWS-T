@@ -1,9 +1,12 @@
 // Locality: server. A row is a section-header string or [label, value, detail?]; each also goes to the .rpt.
 if (!isServer) exitWith {};
 
-params ["_title", "_subtitle", "_rows", "_caller"];
+params ["_title", "_subtitle", "_rows", "_target"];
 
-private _markup = format ["<t size='1.3' color='#00ffff'>%1</t><br/><t size='0.85' color='#b0b0b0'>%2</t><br/>", _title, _subtitle];
+private _markup = format ["<t size='1.3' color='#00ffff'>%1</t><br/>", _title];
+if (_subtitle isNotEqualTo "") then {
+	_markup = _markup + format ["<t size='0.85' color='#b0b0b0'>%1</t><br/>", _subtitle];
+};
 {
 	if (_x isEqualType "") then {
 		diag_log format ["[%1 %2]", toUpper _x, _subtitle];
@@ -27,4 +30,4 @@ private _markup = format ["<t size='1.3' color='#00ffff'>%1</t><br/><t size='0.8
 		if (DUWS_debugLedgerHint isNotEqualTo _this) exitWith {};
 		hintSilent parseText _this;
 	};
-}] remoteExec ["spawn", _caller];
+}] remoteExec ["spawn", _target];

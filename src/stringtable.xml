@@ -4483,13 +4483,29 @@
                 <Spanish>Action Squad a "Overlord 1-1", estamos en posición.</Spanish>
                 <Chinesesimp>"霸王1-1"，我们到了。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_econtickreport">
-                <Original>This is Overlord. Held territory has returned %1 CP and %2 AP.</Original>
-                <English>This is Overlord. Held territory has returned %1 CP and %2 AP.</English>
+            <Key ID="STR_DUWS_T_econ_hint_title">
+                <Original>Territory Income</Original>
+                <English>Territory Income</English>
             </Key>
-            <Key ID="STR_DUWS_T_econ_reduced_title">
-                <Original>Reduced Income</Original>
-                <English>Reduced Income</English>
+            <Key ID="STR_DUWS_T_econ_hint_cp">
+                <Original>CP from towns</Original>
+                <English>CP from towns</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_hint_ap">
+                <Original>AP from zones</Original>
+                <English>AP from zones</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_hint_total">
+                <Original>Total: %1</Original>
+                <English>Total: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_hint_drift">
+                <Original>Town Reputation</Original>
+                <English>Town Reputation</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_hint_push">
+                <Original>Rep Drift</Original>
+                <English>Rep Drift</English>
             </Key>
             <Key ID="STR_DUWS_T_econ_reduced_desc">
                 <Original>Income reduced by %1%2 due to campaign size</Original>
