@@ -9,7 +9,7 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 // (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and each
 // answer in its own labelled frame.
 //
-// One box, painted by three surfaces. The BUILD FACTIONS button is its own dialog
+// One box, painted by three surfaces. The START button is its own dialog
 // (shared/includes/faction_screen.hpp): a control this display creates can't be styled like a menu
 // button, and this display draws over that dialog -- so the panel is cut into the two pieces below,
 // above and beneath the strip the dialog paints, and the three greens meet edge to edge rather
@@ -163,7 +163,7 @@ _placeText ctrlCommit 0;
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
 // display is RscDisplayEmpty -- a configFile display, so every control above is the engine's base
 // class rather than shared/includes/defines.hpp's. Only what a setter exists for can be restated,
-// which is why the BUILD FACTIONS button is declared in a dialog instead: a button's hover, focus,
+// which is why the START button is declared in a dialog instead: a button's hover, focus,
 // shadow, border, press offsets and click sounds all come off the class and none of them have one.
 {
 	_x ctrlSetFont "PuristaMedium";
@@ -205,7 +205,7 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-// The BUILD FACTIONS button, and the cursor that makes this whole screen clickable.
+// The START button, and the cursor that makes this whole screen clickable.
 createDialog "startup_faction_next_dialog";
 waitUntil {dialog};
 

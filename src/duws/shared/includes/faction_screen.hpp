@@ -51,7 +51,7 @@ class startup_faction_next_dialog
 			action = "duws_faction_screen_next = true;";
 		};
 		// Dev-only shortcut past the whole setup flow. Hidden unless the DUWS_Debug param is on
-		// (ctrlShow from fnc_HQ_faction_dialog.sqf). Shares the BUILD FACTIONS button's tear-down --
+		// (ctrlShow from fnc_HQ_faction_dialog.sqf). Shares the START button's tear-down --
 		// the flow reads duws_debug_quickstart and diverts (client/dialog/fnc_startup_faction_flow.sqf).
 		class faction_debug_button: RscButton
 		{
@@ -66,7 +66,7 @@ class startup_faction_next_dialog
 			tooltip = "$STR_DUWS_T_faction_debug_quickstart_tt";
 			action = "duws_debug_quickstart = true; duws_faction_screen_next = true;";
 		};
-		// Ends the screen the way BUILD FACTIONS does; the flow reads duws_faction_screen_back and returns to the load screen.
+		// Ends the screen the way START does; the flow reads duws_faction_screen_back and returns to the load screen.
 		class faction_back_button: RscButton
 		{
 			idc = 1602;

@@ -1,5 +1,5 @@
 // Locality: client -- runs on the game-master client, the only machine that reaches the faction
-// screen (client_init gates the whole setup flow on game_master). The BUILD FACTIONS screen's
+// screen (client_init gates the whole setup flow on game_master). The faction screen's
 // debug button (shared/includes/faction_screen.hpp, shown only when the DUWS_Debug mission param
 // is on) routes here instead of the normal setup chain.
 //

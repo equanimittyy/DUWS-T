@@ -312,12 +312,12 @@
                 <English>Building factions...</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_next">
-                <Original>Select your GAME MODE and FACTIONS, then click the BUILD FACTIONS button above to build and confirm your DUWS units.</Original>
-                <English>Select your GAME MODE and FACTIONS, then click the BUILD FACTIONS button above to build and confirm your DUWS units.</English>
+                <Original>Select your GAME MODE and FACTIONS, then click the START button above to build and confirm your DUWS units.</Original>
+                <English>Select your GAME MODE and FACTIONS, then click the START button above to build and confirm your DUWS units.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_resolve">
-                <Original>BUILD FACTIONS</Original>
-                <English>BUILD FACTIONS</English>
+                <Original>START</Original>
+                <English>START</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_debug_quickstart">
                 <Original>DEBUG START</Original>
