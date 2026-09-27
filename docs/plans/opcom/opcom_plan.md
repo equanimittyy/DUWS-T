@@ -11,7 +11,7 @@ One thread runs on a 5 s tick (`OPCOM_TICK_PERIOD`): **perception** keeps the en
 **appraisal** weighs candidate actions and picks one, and **commitment** turns the pick into a sticky order.
 
 Phases 1–6 are shipped, and the code under `src/duws/server/warcom/opcom/` is the source of truth for them. This doc
-specifies what remains: the archetype.
+specifies what remains: the archetype, and a re-issue span per order.
 The sections marked **WIP** are first-pass decisions: they change as each chunk is built and played.
 
 ## Status
@@ -23,6 +23,7 @@ The sections marked **WIP** are first-pass decisions: they change as each chunk 
 | 5 — Attack: a buildup and execution spine, assault, flank and the QRF, threat-aware routes where a role asks for one, the probe, and the fires split | [§Attack](#attack-phase-5) — **shipped** |
 | 6 — Persistence: OPCOM's store saved and restored with the campaign snapshot | [§Persistence](#persistence-phase-6) — **shipped** |
 | 7 — Archetype: the campaign setting, the records the other archetypes need, and the commander's patience | [§Archetype](#archetype-phase-7) — WIP |
+| Re-issue — a marching unit drawable again once its order's span runs out | [§Re-issue](#re-issue-a-span-per-order) — WIP |
 
 The ordering is forced by what the next phase reads and by what is worth playing before more is built.
 **The Attack comes first**: an attack's role binds its unit through the 4D sourcing, and it is the
@@ -131,7 +132,7 @@ rather than designed:
   typed counter: AT under armour, AA under air.
 - **A surplus.** What the commander does with one, and whether it must spend rather than only can. The absorbers are
   reinforcing over upgrading, Garrison hires, and mustering, which hires the roles the roster lacks.
-- **Commit and carry.** `OPCOM_COMMIT_HOLD`, `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
+- **Commit and carry.** The re-issue spans ([§Re-issue](#re-issue-a-span-per-order)), `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
   `OPCOM_ROAD_DETOUR`. Whether a taxi should set its riders down short of the target rather than on it; whether a
   ground taxi needs its pickup drive timed out, which no carry phase does today.
 - **Patrol.** `OPCOM_PATROL_SHARE` and `OPCOM_PATROL_FORCE_REF` (8, a rifle squad's force), which sets whether a
@@ -406,7 +407,8 @@ hardpoint is built or cleared or ground changes hands, and need also moves with 
   safe backline costs almost nothing to draw from and a threatened one its full worth. The last term is the share of
   the local OPFOR force that leaves, capped for a deposit that spreads past the block. A draw takes only
   OPCOM-recruited units, never a zone's base garrison, so the term prices a thinned zone, never an empty one; a
-  `noncombat` unit covers nothing and abandons 0.
+  `noncombat` unit covers nothing and abandons 0. A unit drawn off a march abandons no defense; its stake adds the
+  Value of the order it drops instead ([§Re-issue](#re-issue-a-span-per-order)).
 
   The rebuy prices the whole stake at every ratio, never the expected losses. The square law has a win at ratio `r`
   keep √(1 − 1/r²) of the force, so a Cost of expected losses would score a 3:1 attack 12 times above an even one,
@@ -481,8 +483,8 @@ The Debug menu's OPCOM page and the OPCOM AI overlay are shipped (`fnc_debug_men
 
 OPCOM hires a unit only for the action that sends it (`appraisal/fnc_opcom_sources.sqf`). An action that needs a unit
 weighs, in the pick, each free unit it may draw against a hire of each row that can do the job, and offers each target
-with the source that scores best. A unit exists because an action sent it, and it stays drawable once that order
-ends. Nothing is hired ahead of need, so no hire is a candidate of its own, and a combatant's zone defense is a job of
+with the source that scores best. A unit exists because an action sent it, and it is drawable once that order
+ends, or mid-march once the order's re-issue span runs out ([§Re-issue](#re-issue-a-span-per-order)). Nothing is hired ahead of need, so no hire is a candidate of its own, and a combatant's zone defense is a job of
 its own, Garrison.
 
 | Source | Starts at | Price, charged | Cost, scored |
@@ -566,13 +568,14 @@ defense AP.
 ## Commitment: orders are sticky
 
 A chosen action lands as a buy, or as an order on the unit it sends. The order carries a `hold`, `DUWS_opcom_tick` at
-commit + `OPCOM_COMMIT_HOLD`, the earliest tick OPCOM may re-issue that unit's order. An Attack's units also carry a
-binding to their attack record ([§Attack](#attack-phase-5)).
+commit + the order's re-issue span, the earliest tick the pick may draw the unit off that order
+([§Re-issue](#re-issue-a-span-per-order)). An Attack's units also carry a binding to their attack record
+([§Attack](#attack-phase-5)).
 
-- **The hold is an absolute anti-flap lock** (KISS), not a success deadline: a committed unit is held the full span
-  no matter what; a target that dies mid-hold is re-evaluated once it expires. Resting `garrison`/`guard` are
-  unheld. Re-scoring fills free capacity and may re-task a unit only past its hold — a de-virtualised unit included
-  (a new order pushes onto the live group), a live water crossing included; only a *bound* ferry carry is off-limits.
+- **The hold is an absolute anti-flap lock**, not a success deadline: a marching unit is held the full span no
+  matter what. A unit at rest on `garrison` or `guard` carries no hold. Past its hold, a marching unit is drawable
+  as one at rest is — a de-virtualised unit included (a new order pushes onto the live group), a unit stopped at a
+  water leg included; a bound attack unit and a bound ferry carry are not.
 - **There is no retreat.** The engine owns a group in `COMBAT` and ignores a commanded withdrawal
   ([`arma_engine_gotchas.md`](../../info/architecture/arma_engine_gotchas.md#a-group-in-combat-behaviour-ignores-a-commanded-move-order)).
   A group that wins drops to `moving` and re-virtualises on clearing; one that loses dies. Recovery is winning.
@@ -590,6 +593,31 @@ binding to their attack record ([§Attack](#attack-phase-5)).
   units: an attack short of the ideal bar stays a target of its row, and a later pick sends it more from free units
   and hires ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). A QRF musters on the same bars, where its units stand
   and over `OPCOM_QRF_EXPIRY` instead ([§QRF](#qrf-an-attack-on-a-moving-cluster)).
+
+### Re-issue: a span per order
+
+**WIP.**
+
+Each row of `DUWS_opcom_orders` (`taskings/fnc_opcom_orders.sqf`) carries its order's re-issue span in ticks, and
+`fnc_opcom_task` stamps `hold` as the tick + the span, floored at 0. The spans replace `OPCOM_COMMIT_HOLD`. An order
+with no row reads −1.
+
+| Order | Span |
+|---|---|
+| `guard`, `garrison`, `move`, `return` | 0 |
+| `patrol`, `probe` | 12 (1 min) |
+| `capture`, `intercept`, `errand`, `ferry` | −1, never |
+
+- **The gate.** `DUWS_fnc_opcom_drawable` admits a marching unit once `DUWS_opcom_tick` reaches its `hold` and its
+  order's span is 0 or more. Its other exclusions stand: a bound unit, a carrying hull, an engaged unit, and a
+  garrison in a contested zone. `DUWS_fnc_opcom_freeSweep` drops its own hold test, so a unit is drawable the tick it
+  settles to rest. The ferry and taxi pools read the same gate.
+- **The incumbent pays.** `DUWS_fnc_opcom_commitCost` adds a marching unit's `expValue`, the Value of the order it
+  drops, to its stake ([§Cost](#cost)). `expValue` goes to 0 where an order's purpose ends without a send:
+  `DUWS_fnc_opcom_attackClose` for the units it unbinds, `DUWS_fnc_opcom_captureEnd` and `DUWS_fnc_opcom_ferryHome`.
+- **Hand-driving** runs with the commander `off`, since the pick draws a hand-ordered unit once its span runs out.
+- **Persistence.** Nothing new is saved: `hold` and `expValue` are tasking fields the snapshot already carries, and
+  the spans are constants.
 
 ## Attack (Phase 5)
 
@@ -626,11 +654,12 @@ no planner: a new way to attack is a new entry of roles rather than a new subsys
 
 ### Ownership: the roster has to skip a bound unit
 
-The free pool is every uncommitted `garrison`ed or `guard` unit, except one garrisoned in a contested zone. A unit
+The free pool is every unbound `garrison`ed or `guard` unit, except one garrisoned in a contested zone, and every
+unbound marching unit past its re-issue hold ([§Re-issue](#re-issue-a-span-per-order)). A unit
 that reaches its rally settles to `guard`, which puts it straight back in that pool, and the next pick would send it
 somewhere else mid-buildup. A `boundTo` key on the tasking record, holding its attack's id, is what
-the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/fnc_opcom_tasking_init.sqf`). `OPCOM_COMMIT_HOLD` cannot do this job: it
-is an anti-flap lock of a fixed span, and a buildup outlives it.
+the roster's drawable test filters on (`DUWS_fnc_opcom_drawable`, `taskings/fnc_opcom_tasking_init.sqf`). The re-issue hold cannot do this job:
+a unit at rest carries none, and a staging `move` has a span of 0.
 
 One unit, one owner. Binding pulls a unit from the pool and a `garrison`ed draw strips that zone's reinforcement;
 release returns it. An attack row is offered only when its band fits and the geometry holds; short a role, it
