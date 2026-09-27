@@ -32,7 +32,7 @@ reach-the-marker-and-kill with a bigger garrison (the design bar is in
 | 3 | Destroy Signal Tower | wreck an existing standalone OPFOR radio mast; win when its hardpoint row falls | `destroy_tower/` |
 | 16 | Destroy Hardpoint | wreck an existing revealed OPFOR emplacement (any type but radio/minefield); win when its hardpoint row falls | `destroy_hardpoint/` |
 | 8 | Sabotage Laptop | hunt which of 3-5 marked, garrisoned buildings hides the field laptop, then sabotage it | `sabotage_laptop/` |
-| 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a standalone AP minefield hardpoint (a streamed belt 500 m across and 100 m deep) sits at the ring edge opposite the patrol | `target_recon/` |
+| 17 | Eliminate Recon Patrol | hunt an OPFOR recon team hidden in a treeline; a third of the time a standalone AP minefield hardpoint (a streamed belt 500 m across and 100 m deep) sits at the ring edge opposite the patrol, unless the AP minefield cap is full | `target_recon/` |
 | 18 | Destroy Patrol Camp | find 1-3 recon camps hidden in treeline by their campfire smoke, wipe out every camp team | `destroy_patrol_camp/` |
 | 14 | Recover Humanitarian Supply Truck | seize an OPFOR-guarded aid truck and drive it to the IDAP crew waiting in a neutral/BLUFOR town | `transport_idap/` |
 | 13 | Protect Informant | reach the informant, fortify from an R3F crate through a prep window, then hold scaling OPFOR waves until he survives | `protect_civ/` (testing) |

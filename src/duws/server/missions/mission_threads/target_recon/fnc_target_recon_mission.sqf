@@ -31,10 +31,12 @@ private _build = {
     { _x setWaypointBehaviour "STEALTH" } forEach (waypoints _grp);
 
     // AP belt opposite the patrol (so no mine spawns on the team), a third of the time, at the far ring
-    // edge. Skipped near another minefield (<1 km); a square near a road (<100 m) or on water is dropped.
+    // edge. Skipped at the AP minefield cap, which the belt counts against, or near another minefield
+    // (<1 km); a square near a road (<100 m) or on water is dropped.
     // Streamed rather than laid: a standalone hardpoint, not a mission prop, so it outlives the mission
     // and at this size would otherwise stand as hundreds of permanent mines.
-    if (random 1 < RECON_MINE_CHANCE) then {
+    if (random 1 < RECON_MINE_CHANCE
+        && {(((call DUWS_fnc_opcom_hpSweep) select 1) getOrDefault ["MINEFIELD_AP", 0]) < (["MINEFIELD_AP"] call DUWS_fnc_opcom_hpCap)}) then {
         private _fieldPos = _targetpos getPos [_radius * 0.85, (_targetpos getDir _spawnPos) + 180];
         private _clash = DUWS_hardpoints findIf {
             (_x select 2) isEqualTo "MINEFIELD" && {(_x select 1) distance2D _fieldPos < 1000}
