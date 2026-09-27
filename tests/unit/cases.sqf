@@ -1619,6 +1619,14 @@ OPCOM_EXPOSE_FLOOR = 0.2;
 ["score: a free action scores its Value", [7, 1, 0] call DUWS_fnc_opcom_score, 7] call fnc_assertClose;
 ["score: a cost under 1 floors at 1", [7, 1, 0.25] call DUWS_fnc_opcom_score, 7] call fnc_assertClose;
 
+// --- DUWS_fnc_opcom_dripRate: OPCOM's drip per tick, half kept whatever ground OPFOR holds ---
+OPCOM_AP_DRIP_TICKS = 2;
+OPCOM_AP_DRIP_FLOOR = 0.5;
+["dripRate: every zone held pays the full rate", [6, 6] call DUWS_fnc_opcom_dripRate, 0.5] call fnc_assertClose;
+["dripRate: half the zones pay three quarters", [3, 6] call DUWS_fnc_opcom_dripRate, 0.375] call fnc_assertClose;
+["dripRate: the last zone still pays over half", [1, 6] call DUWS_fnc_opcom_dripRate, 0.5 * 7 / 12] call fnc_assertClose;
+["dripRate: no zone left keeps the floor", [0, 6] call DUWS_fnc_opcom_dripRate, 0.25] call fnc_assertClose;
+
 // --- DUWS_fnc_opcom_blockCells: the cells within k of a cell, clipped to the play box ---
 DUWS_opcom_grid_w = 10;
 DUWS_opcom_box = [0, 0, 9, 9];

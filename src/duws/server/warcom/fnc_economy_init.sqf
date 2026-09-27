@@ -43,6 +43,11 @@ DUWS_fnc_ap_tier = {
 	1 + ({ _earned >= _x } count DUWS_ap_tier_rungs)
 };
 
+DUWS_fnc_opcom_dripRate = {
+	params ["_held", "_total"];
+	(OPCOM_AP_DRIP_FLOOR + (1 - OPCOM_AP_DRIP_FLOOR) * _held / _total) / OPCOM_AP_DRIP_TICKS
+};
+
 // Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust: callers
 // remoteExec a signed delta, nothing else assigns the pools. An unrecognised side drops the delta
 // and logs rather than crediting the wrong pool; no HUD counter to refresh. Floored at 0 like CP:
@@ -56,7 +61,7 @@ fnc_ap_adjust = {
 	// the recurring faucets each side genuinely earns -- BLUFOR's zone trickle, missions and
 	// first-capture bonus; OPFOR's town and zone income. Spends, swings, consolation, refunds and
 	// OPCOM's drip leave it 0, so ground regained and money spent never move the ladder.
-	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every 20 s.
+	// _level lets the drip log at DEBUG: at INFO it would write a line to the RPT every few ticks.
 	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0], ["_level", "INFO"]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;

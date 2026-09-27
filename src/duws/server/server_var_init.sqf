@@ -981,11 +981,14 @@ DUWS_intel_contact_life = 600;
 // size rather than linearly. 1 until WARCOM init sets it, so the default six-zone campaign is unthrottled.
 DUWS_econ_throttle = 1;
 
-// OPCOM ticks per 1 AP of drip to OPFOR, on top of the 30-minute payout. The payout lands as one lump
-// that the commander spends within a minute, so without a drip it can only bank or move free units for
-// the rest of the period. Wallet only: it never credits the earned counter, so it never moves OPFOR's
-// tier. Ticks per AP rather than AP per tick, because fnc_ap_adjust keeps the pool whole. Server; tuning.
-OPCOM_AP_DRIP_TICKS = 4;
+// OPCOM ticks per 1 AP of drip to OPFOR while it holds every zone, on top of the 30-minute payout. The payout
+// lands as one lump that the commander spends within a minute, so without a drip it can only bank or move free
+// units for the rest of the period. Wallet only: it never credits the earned counter, so it never moves OPFOR's
+// tier. Server; tuning.
+OPCOM_AP_DRIP_TICKS = 2;
+// The share of the drip OPFOR keeps with no zone left; the rest scales with the share of zones it holds. A capture
+// has to cost the commander income, but one down to its last zone must still be able to buy a fight back.
+OPCOM_AP_DRIP_FLOOR = 0.5;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

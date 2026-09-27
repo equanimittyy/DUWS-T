@@ -79,7 +79,8 @@ if (_mode isEqualTo "weighted") then {
     if (_rank isNotEqualTo []) then {
         (_all select ((_rank select 0) select 1)) params ["_s", "", "_c"];
         private _short = (_c select 1) - WARCOM_opfor_ap;
-        private _rate = WARCOM_opfor_lastIncome * OPCOM_TICK_PERIOD / DUWS_econ_period + 1 / OPCOM_AP_DRIP_TICKS;
+        private _rate = WARCOM_opfor_lastIncome * OPCOM_TICK_PERIOD / DUWS_econ_period
+            + ([count WARCOM_zones_controled_by_OPFOR, count WARCOM_createdZones] call DUWS_fnc_opcom_dripRate);
         if (_s > 0 && {_short > 0} && {_rate > 0} && {_short / _rate <= OPCOM_SAVE_HORIZON}) then {
             _goal = [_s, _c, _short, _short / _rate];
         };
