@@ -777,7 +777,7 @@ OPCOM_MINE_DEPTH = 150;
 OPCOM_MINE_LEN_MIN = 500;
 OPCOM_MINE_LEN_MAX = 1500;
 // AP is the ammunition: the guns rest empty and are loaded per mission, so only the wallet and OPCOM_ARTY_COOLDOWN limit them.
-OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 2], ["ARTY", 3]];
+OPCOM_AP_PER_ROUND = createHashMapFromArray [["MORTAR", 1], ["ARTY", 2]];
 // Mortar pits and batteries are the only permanent-crew hardpoints, so their count bounds the resident AI.
 OPCOM_CAP_MORTAR = 2;
 OPCOM_CAP_ARTY = 1;
