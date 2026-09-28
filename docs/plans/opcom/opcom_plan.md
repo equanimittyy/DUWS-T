@@ -59,11 +59,11 @@ New work holds to:
 - **State** is numbers, strings and arrays only, and every time counts in ticks off `DUWS_opcom_tick`.
 - **A lift is the commander's call, not the rider's.** A unit stopped at a water leg takes a ferry, a boat or a
   helicopter, the tick one is free or affordable (`fnc_opcom_ferry.sqf`), and a land-taxi — a truck, a car, an APC, an
-  IFV or a transport helicopter — is sourced with the order it carries, when the target lies more than
+  IFV or a transport helicopter — is sourced with the order it carries, when its set-down point lies more than
   `OPCOM_TAXI_MIN_K` (2) cells away and the pickup drive plus the carry beats the walk (`fnc_opcom_taxi.sqf`). Either
   lift is a free unit or a hire ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). Both run the one carry. Only an
-  assault's or a flank's staging leg, a Garrison or a debug Move takes a land-taxi, so no lift carries a Patrol or a
-  QRF, though a patrol stopped at a water leg still takes a ferry. Drawing a combatant hull onto taxi duty empties its
+  assault's or a flank's staging leg, a QRF member's ride, a Garrison or a debug Move takes a land-taxi, so no lift
+  carries a Patrol, though a patrol stopped at a water leg still takes a ferry. Drawing a combatant hull onto taxi duty empties its
   post, like any other order that takes a garrisoned unit out.
 
 Two terms carry one meaning each throughout:
@@ -138,8 +138,9 @@ rather than designed:
 - **A surplus.** What the commander does with one, and whether it must spend rather than only can. The absorbers are
   reinforcing over upgrading, Garrison hires, and mustering, which hires the roles the roster lacks.
 - **Commit and carry.** The re-issue spans ([§Re-issue](#re-issue-a-span-per-order)), `OPCOM_GARRISON_HEAL_RATE`, `OPCOM_FERRY_BOARD_GROUND` and
-  `OPCOM_ROAD_DETOUR`. Whether a taxi should set its riders down short of the target rather than on it; whether a
-  ground taxi needs its pickup drive timed out, which no carry phase does today.
+  `OPCOM_ROAD_DETOUR`. Whether a staging or Garrison taxi should set its riders down short of the target, as a
+  QRF's does, rather than on it; whether a ground taxi needs its pickup drive timed out, which no carry phase does
+  today.
 - **Patrol.** `OPCOM_PATROL_SHARE` and `OPCOM_PATROL_FORCE_REF` (8, a rifle squad's force), which sets whether a
   hull patrols as readily as a squad. Whether a combatant's staleness stamp should count for less than a recon's,
   since it suppresses re-scouting for up to `OPCOM_BELIEF_EXPIRE` without having learned anything certain there;
@@ -526,7 +527,7 @@ The distance runs from where the source starts to where the action needs it: the
 | Garrison | combatants, air included |
 | Patrol, Probe | `recon` rows, the helicopter included, and land combatants |
 | Rapport, town Reinforce / Fortify, standalone and asset Build, Minefield | `supply` rows |
-| A land-taxi for an assault's or a flank's staging leg, or a Garrison | `transport` rows on wheels, tracks or a rotor |
+| A land-taxi for an assault's or a flank's staging leg, a QRF member's ride, or a Garrison | `transport` rows on wheels, tracks or a rotor |
 | A ferry | `transport` rows on water or a rotor |
 
 A fire mission fires the guns OPCOM owns, so it sources no unit.
@@ -537,14 +538,19 @@ A fire mission fires the guns OPCOM owns, so it sources no unit.
   execute routes the rider and the lift before it gives either an order, and commits neither when either fails, so
   a lift that cannot reach its rider charges nothing (`appraisal/fnc_opcom_lift.sqf`). Only a debug Move still binds
   the best free hull (`DUWS_fnc_opcom_taxiBind`), since the harness spends no AP.
+- **A QRF member rides to a set-down point short of its sighting.** In the QRF's package (`_ride`), a transportable
+  member offers a `move` on the sighting with a lift to `DUWS_fnc_opcom_qrfDrop`, `OPCOM_QRF_DROP_K` (2) cells short
+  on its side, priced on `OPCOM_QRF_HALFLIFE`. Where no lift pays, the set-down point is water, or another member
+  took the hull, it holds where it stands. `DUWS_fnc_opcom_liftRun` latches the lift's set-down point, which for a
+  staging leg or a Garrison is the rider's target.
 - **A lift never prices an affordable order out of reach.** A lift's price is capped by what the wallet holds past
   the rider's, so walking stays on offer whenever the rider alone is affordable.
 - **A hull is offered only over a dry straight line**, from the hull to the rider and on to the target. The route
   cannot be planned inside the pick, and without the test a ground taxi to an island target would score in every
   pick and fail in every execute, so the order never went. The line reads a bay as wet though a road runs round it,
   which costs a hull some coastal rides a rotor or the walk then takes.
-- **A land-taxi carries a rider only beyond the 5x5 block round it.** A target at most `OPCOM_TAXI_MIN_K` (2) cells
-  away walks, in the pick (`DUWS_fnc_opcom_liftFor`) and the debug Move (`DUWS_fnc_opcom_taxiBind`) alike. The saving
+- **A land-taxi carries a rider only beyond the 5x5 block round it.** A set-down point at most `OPCOM_TAXI_MIN_K` (2)
+  cells away walks, in the pick (`DUWS_fnc_opcom_liftFor`) and the debug Move (`DUWS_fnc_opcom_taxiBind`) alike. The saving
   prices the drive alone, so a short hop would score a lift that the pickup, board and drop eat.
 - **A ferry spends no pick.** The crossing belongs to an order the pick already bought, and a scored Ferry row spent
   a pick of its own and could leave a low-value rider stranded for many ticks. Each tick, after the task step, every
@@ -651,8 +657,8 @@ order and binds nothing: the order ends on its own predicate, which frees the un
 
 | State | Every bound unit is | Orders it uses | Ends on |
 |---|---|---|---|
-| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the minimum bar met; or `OPCOM_MUSTER_STAGED` after that last arrival, or `OPCOM_MUSTER_EXPIRY`, at `OPCOM_ATTACK_BREAK` or better. A QRF needs the ideal bar, or the minimum at `OPCOM_QRF_EXPIRY` ([§Commitment](#commitment-orders-are-sticky)) |
-| `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF | `resolve`: every bound unit back at rest, and no side bucket still on its lane; or the break: the bound force below `OPCOM_ATTACK_BREAK` (0.2:1) of the believed BLUFOR force at the target, read as the muster bars read it, and every survivor drops to `guard` where it stands |
+| `buildup` | staging or standing still. Nothing fights | `move`, settling to `guard` on arrival; none for a QRF, whose units hold where they stand, a rider riding to its set-down point on `move` | the launch predicate: every required bucket holding a unit, every bound unit at rest on its rally and the minimum bar met; or `OPCOM_MUSTER_STAGED` after that last arrival, or `OPCOM_MUSTER_EXPIRY`, at `OPCOM_ATTACK_BREAK` or better. A QRF needs the ideal bar, or the minimum at `OPCOM_QRF_EXPIRY`, and waits for no rider ([§Commitment](#commitment-orders-are-sticky)) |
+| `execution` | fighting for the target | `capture`, after `move` up its lane for a side bucket; `intercept` for a QRF, a rider once set down | `resolve`: every bound unit back at rest, and no side bucket still on its lane; or the break: the bound force below `OPCOM_ATTACK_BREAK` (0.2:1) of the believed BLUFOR force at the target, read as the muster bars read it, and every survivor drops to `guard` where it stands, a rider still on its lift excepted |
 | `done` | released back to the roster | — | — |
 
 Buildup is where a muster happens: the minimum ratio and the two timeouts are its launch predicate, and a
@@ -822,7 +828,11 @@ time, and no-retreat turns that into defeat in detail.
 - **A QRF prices arrival on its own half-life.** Its sources take the delay over `OPCOM_QRF_HALFLIFE` (60 ticks,
   5 min) in place of `OPCOM_VALUE_HALFLIFE`, since a sighting goes stale in `OPCOM_BELIEF_FRESH`. A fast unit
   outscores a slow one in proportion to the time it saves, so a QRF takes no vehicle boost.
-- **Every unit releases at launch on `intercept`** after the lead sighting. Units arrive in the order of their
+- **A far rider takes a land-taxi, and the QRF does not wait for it.** The rider rides from commit to its set-down
+  point while the QRF musters and launches. The launch check, the launch, a rekey and the break-off pass a rider still
+  on its lift, and `DUWS_fnc_opcom_qrfLand` puts it on `intercept` at the QRF's current target once set down. A rider
+  still riding when its QRF closes finishes the ride, walks to where the sighting stood at commit and guards there.
+- **Every unit releases at launch on `intercept`** after the lead sighting, a rider once set down. Units arrive in the order of their
   distance: the release does not stagger launches by ETA.
 - **The QRF hunts as one.** Each unit's look on arrival still reads the group nearest it, but the QRF moves only once
   a look disproves the lead. The group a unit found then becomes the whole QRF's target, and every unit re-keys onto
@@ -924,7 +934,7 @@ its target and the engine paths it. A group in combat ignores a move waypoint, s
 5.1 lands alone. Every chunk after it reads the pool it changes.
 
 Phase 5 settles in play the band thresholds and their overlap, each role's λ and how often a route is re-planned,
-the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, `OPCOM_QRF_HALFLIFE`, how far
+the longest off-road leg a hull drives without stalling, `OPCOM_MUSTER_EXPIRY`, `OPCOM_QRF_EXPIRY`, `OPCOM_QRF_HALFLIFE`, `OPCOM_QRF_DROP_K`, how far
 short of the target a rally has to sit to be safe enough to be worth the extra march (`OPCOM_RALLY_K`),
 `OPCOM_MUSTER_HOLD`, `OPCOM_ATTACK_BREAK`, `OPCOM_ATTACK_COOLDOWN`, how far out a `flank`'s hook waits (`OPCOM_HOOK_K`), `OPCOM_ATTACK_UNITS`, `OPCOM_ATTACK_VEHICLE_BOOST`, `OPCOM_PROBE_SHARE`, `OPCOM_PROBE_FRESH`, `OPCOM_ARTY_CREEP_SHARE` and the creep's box.
 
