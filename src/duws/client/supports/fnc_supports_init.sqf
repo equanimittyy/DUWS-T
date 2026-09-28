@@ -423,11 +423,11 @@ fnc_support_wipe = {
 	} forEach (([] call fnc_support_defs) select { (_x select 1) == "CONS" });
 
 	missionNamespace setVariable ["DUWS_support_paid", createHashMap];
-	// The body is gone and its comm menu with it, so there is nothing to remove -- only the record
-	// of what was in it. DUWS_support_running stays: a run in flight outlives its caller and releases
-	// its class when it ends.
-	missionNamespace setVariable ["DUWS_support_comm", createHashMap];
 	support_count = 0;
+	// The comm menu survives respawn, so the slate's entries are torn down here or they stay callable
+	// with no copy paying for them. DUWS_support_running stays: a run in flight outlives its caller
+	// and releases its class when it ends.
+	[] call fnc_support_comm_sync;
 
 	if (_backCP > 0) then { [_backCP, "support_death_refund"] remoteExec ["fnc_cp_adjust", 2] };
 	if (_backAP > 0) then { ["BLU", _backAP, "support_death_refund"] remoteExec ["fnc_ap_adjust", 2] };
