@@ -46,10 +46,14 @@ if (enable_fast_travel) then {
     // Matches the HQ's own map marker text (fnc_BluHQinit), which is what the player reads it as.
     private _base = "Main Base";
     _entries pushBack [_base, _travel, [PosOfBLUHQ, _base]];
+    private _fobs = [];
+    { _fobs pushBack [_x, _forEachIndex] } forEach Array_of_FOBname;
+    _fobs sort true;
     {
-        private _name = Array_of_FOBname select _forEachIndex;
-        _entries pushBack [_name, _travel, [getPos _x, _name]];
-    } forEach Array_of_FOBS;
+        _x params ["_name", "_i"];
+        private _label = format ["FOB %1", _name];
+        _entries pushBack [_label, _travel, [getPos (Array_of_FOBS select _i), _label]];
+    } forEach _fobs;
 };
 
 private _rally = missionNamespace getVariable ["DUWS_rally_tent", objNull];
