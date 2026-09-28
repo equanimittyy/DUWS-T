@@ -75,7 +75,7 @@ _hostageBldg setVariable ["DUWS_garrisonedBy", _garrison];
 sleep 1;
 
 // Foot-only patrol ring: no vehicles, so the fight stays a light-infantry stealth problem. Centred on the
-// hostage rather than _MissionPos, which the search marker keeps to hide the building.
+// hostage rather than _MissionPos, since the building can sit anywhere in the search circle.
 private _tokens = [];
 for "_i" from 1 to (floor random 2)     do { _tokens pushBack "closepatrol:team" };
 for "_i" from 1 to (2 + floor random 5) do { _tokens pushBack "widepatrol:patrol" };
@@ -99,8 +99,20 @@ private _blind = +(units _garrison);
     _x addPrimaryWeaponItem "acc_flashlight";
 } forEach _blind;
 
-// Search circle points at the cluster, not the building; the hostage track marker appears only once he is
-// freed (below), so his hiding place is never given away.
+private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
+createMarker [_trk, getPosATL _hostage];
+_trk setMarkerShape "ICON";
+_trk setMarkerType "mil_warning";
+_trk setMarkerColor "ColorBlue";
+_trk setMarkerText "Hostage";
+[_hostage, _trk] spawn {
+    params ["_hostage", "_mk"];
+    while { !isNull _hostage && { alive _hostage } && { markerType _mk != "" } } do {
+        _mk setMarkerPos (getPosATL _hostage);
+        sleep 5;
+    };
+};
+
 private _markername = [_MissionPos, _radius, _VARtaskgeneratedName, localize "STR_DUWS_T_RESCUE_HOSTAGE_DESC", _mission_name, "help",
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_rescuehostage_brief", 6], ["STR_DUWS_T_actionteam", "STR_DUWS_T_rescuehostage_copy", 0]]
 ] call fnc_mission_present;
@@ -133,9 +145,6 @@ private _leaveCond = "_target getVariable ['DUWS_hostage_freed', false] && {_thi
     [], 1.5, false, false, "", _leaveCond]
 ] remoteExec ["addAction", [0, -2] select isDedicated, _hostage];
 
-// Shared marker name so the watcher (creates on free) and the finish branches (delete) agree without
-// threading a handle; deleteMarker no-ops on an absent one, so an un-freed teardown stays correct.
-private _trk = format ["rescuehostage_trk_%1", missionNamespace getVariable ["DUWS_mission_token", 0]];
 private _clearIcons = {
     deleteMarker _trk;
     DUWS_float_hostage = objNull; publicVariable "DUWS_float_hostage";
@@ -150,8 +159,8 @@ private _clearIcons = {
 // (arma_engine_gotchas.md). knowsAbout still grades a live sighting, but only for a guard
 // with a current fix -- so breaking contact drains it. A sighting that holds arms the clock for good, and killing
 // the garrison is what frees the hostage.
-[_hostage, _garrison, _ring, _hostageBldg, _trk] spawn {
-    params ["_hostage", "_garrison", "_ring", "_bldg", "_trk"];
+[_hostage, _garrison, _ring, _hostageBldg, _VARtaskgeneratedName] spawn {
+    params ["_hostage", "_garrison", "_ring", "_bldg", "_taskId"];
     #define CONFIRM   1.5     // knowsAbout for a confirmed ID (engine scale: 0 unknown .. 4 identified)
     #define DET_RANGE 300     // nearTargets query radius: how far a cordon guard's live fix on the player counts
     #define DET_FRESH 5       // engine re-fixes a target's nearTargets age every few seconds, so a tighter gate drops a watched player between refreshes; matches OPCOM_TICK_PERIOD (arma_engine_gotchas.md)
@@ -200,18 +209,8 @@ private _clearIcons = {
             [localize "STR_DUWS_T_rescuehostage_captors"] remoteExec ["hint", _hintTgt];
             [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_rescuehostage_freed"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
             DUWS_float_hostage = _hostage; publicVariable "DUWS_float_hostage";
-            createMarker [_trk, getPosATL _hostage];
-            _trk setMarkerShape "ICON";
-            _trk setMarkerType "mil_warning";
-            _trk setMarkerColor "ColorBlue";
-            _trk setMarkerText "Hostage";
-            [_hostage, _trk] spawn {
-                params ["_hostage", "_mk"];
-                while { !isNull _hostage && { alive _hostage } && { markerType _mk != "" } } do {
-                    _mk setMarkerPos (getPosATL _hostage);
-                    sleep 5;
-                };
-            };
+            // 2D: a below-surface Z sinks the task diamond (arma_engine_gotchas.md).
+            [_taskId, PosOfBLUHQ select [0, 2]] call BIS_fnc_taskSetDestination;
         };
 
         // Clock expired: hand him to the cordon to be shot. Drop his damage clamp so rounds land full, then
@@ -292,13 +291,19 @@ if ([_deadline] call fnc_time_expired) exitWith {
     [_mission_name, _VARtaskgeneratedName, "FAILED", _MissionPos, _radius, [_markername], [], false, "", false, true] call fnc_mission_finish;
 };
 
-// Win: peel him off the player's group so a rescued NPC never rides the roster; the walk-to-tent despawn is
-// rescue_pilot's tail, where the 300s is only a blocked-path cap, not the despawn trigger.
+// Win: peel him off the player's group so a rescued NPC never rides the roster. Leave Group turns MOVE off, so
+// the walk turns it back on; the 300 s is only a blocked-path cap, not the despawn trigger.
 call _clearIcons;
 if (_townIdx >= 0) then { [_townIdx, DUWS_curReward select 2, "rescue_hostage_success"] call fnc_town_rep_adjust };
 [_hostage] spawn {
     params ["_h"];
     [_h] joinSilent (createGroup [WEST, true]);
+    if (vehicle _h != _h) then {
+        moveOut _h;
+        private _outBy = time + 1;
+        waitUntil { vehicle _h == _h || time > _outBy };
+    };
+    _h enableAI "MOVE";
     _h setUnitPos "AUTO";
     private _tent = objectFromNetId (missionNamespace getVariable ["HQ_medTent_netId", ""]);
     if (!isNull _tent) then {

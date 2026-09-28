@@ -11579,16 +11579,16 @@
                 <Spanish>Rescatar rehén</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_DESC">
-                <Original>OPFOR is holding a civilian reporter hostage in a building in this area. Rescue him and eliminate his captors.</Original>
-                <English>OPFOR is holding a civilian reporter hostage in a building in this area. Rescue him and eliminate his captors.</English>
-                <Chinesesimp>OPFOR 在本区域一栋建筑内扣押了一名平民记者作为人质。营救他，消灭他的绑架者。</Chinesesimp>
-                <German>OPFOR hält einen zivilen Reporter als Geisel in einem Gebäude in diesem Gebiet. Rettet ihn und schaltet seine Entführer aus.</German>
-                <Polish>OPFOR przetrzymuje cywilnego reportera jako zakładnika w budynku w tym rejonie. Uratuj go i wyeliminuj porywaczy.</Polish>
-                <Czech>OPFOR drží civilního reportéra jako rukojmí v budově v této oblasti. Zachraň ho a zlikviduj jeho věznitele.</Czech>
-                <Russian>OPFOR удерживает гражданского репортёра в заложниках в здании в этом районе. Спаси его и уничтожь похитителей.</Russian>
-                <French>OPFOR retient en otage un reporter civil dans un bâtiment de ce secteur. Sauvez-le et éliminez ses ravisseurs.</French>
-                <Chinese>OPFOR 在本區域一棟建築內扣押了一名平民記者作為人質。營救他，消滅他的綁架者。</Chinese>
-                <Spanish>OPFOR retiene a un periodista civil como rehén en un edificio de esta zona. Rescátalo y elimina a sus captores.</Spanish>
+                <Original>OPFOR is holding a civilian reporter hostage in a building in this area. Eliminate his captors, then bring him to HQ.</Original>
+                <English>OPFOR is holding a civilian reporter hostage in a building in this area. Eliminate his captors, then bring him to HQ.</English>
+                <Chinesesimp>OPFOR 在本区域一栋建筑内扣押了一名平民记者作为人质。消灭他的绑架者，然后把他带回总部。</Chinesesimp>
+                <German>OPFOR hält einen zivilen Reporter als Geisel in einem Gebäude in diesem Gebiet. Schaltet seine Entführer aus und bringt ihn dann zum HQ.</German>
+                <Polish>OPFOR przetrzymuje cywilnego reportera jako zakładnika w budynku w tym rejonie. Wyeliminuj porywaczy, a potem zabierz go do HQ.</Polish>
+                <Czech>OPFOR drží civilního reportéra jako rukojmí v budově v této oblasti. Zlikviduj jeho věznitele a pak ho doveď do HQ.</Czech>
+                <Russian>OPFOR удерживает гражданского репортёра в заложниках в здании в этом районе. Уничтожь похитителей, затем доставь его в штаб.</Russian>
+                <French>OPFOR retient en otage un reporter civil dans un bâtiment de ce secteur. Éliminez ses ravisseurs, puis ramenez-le au QG.</French>
+                <Chinese>OPFOR 在本區域一棟建築內扣押了一名平民記者作為人質。消滅他的綁架者，然後把他帶回總部。</Chinese>
+                <Spanish>OPFOR retiene a un periodista civil como rehén en un edificio de esta zona. Elimina a sus captores y luego llévalo al CG.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_RESCUE_HOSTAGE_NOTE">
                 <Original>The hostage will be executed within 3 minutes if BLUFOR is detected within the area. Discretion is advised.</Original>
