@@ -227,7 +227,7 @@ DUWS_playerRides = createHashMap;
 DUWS_civMissions = createHashMap;
 DUWS_civMissionSeq = 0;
 
-DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
+DUWSMP_CP_death_cost = 1;publicVariable "DUWSMP_CP_death_cost";
 
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	
 

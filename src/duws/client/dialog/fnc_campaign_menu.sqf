@@ -91,8 +91,8 @@
   [2106, _defReward] call _setDefault;
 
   [2107, "0", "0"] call _addOpt;
-  [2107, "1", "1"] call _addOpt;
-  private _defDeath = [2107, "2", "2"] call _addOpt;
+  private _defDeath = [2107, "1", "1"] call _addOpt;
+  [2107, "2", "2"] call _addOpt;
   [2107, "3", "3"] call _addOpt;
   [2107, "4", "4"] call _addOpt;
   [2107, "5", "5"] call _addOpt;
