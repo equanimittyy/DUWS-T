@@ -28,8 +28,8 @@ DUWS_fnc_opcom_sendRun = {
     !isNil "_t"
 };
 
-// One Attack per holding at a time: a second sent after the first dribbles men into a fight no-retreat turns into
-// defeat in detail. It commits as an assault or a flank, each its own action row, its units stage and launch together
+// One assault or flank at a time, and none for OPCOM_ATTACK_COOLDOWN after one ends, so the players get a lull between
+// offensives. It commits as an assault or a flank, each its own action row, its units stage and launch together
 // (fnc_opcom_attack), and the bucket DUWS_fnc_opcom_joinBucket names is a target of its own, filled by a later pick.
 //
 // Zones and towns on the same terms, and the HQ once found. What differs is how the ground answers: a zone flips on
@@ -52,7 +52,7 @@ DUWS_fnc_opcom_attackSweep = {
     private _zones = call DUWS_fnc_opcom_zonesOpen;
     // A muster commits below the odds it launches at, so only a hopeless one holds.
     private _floor = [OPCOM_MUSTER_HOLD, 0] call DUWS_fnc_opcom_pWinAt;
-    private _busy = (DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] }) + (DUWS_opcom_attacks apply { _x get "target" });
+    private _busy = DUWS_opcom_taskings apply { _x getOrDefault ["targetZone", ""] };
     private _out = createHashMapFromArray [["assault", []], ["flank", []]];
     private _fnc_sources = {
         params ["_at", "_near", "_flank"];
@@ -65,7 +65,7 @@ DUWS_fnc_opcom_attackSweep = {
     // position and the one its trigger filed differ in z.
     private _fnc_consider = {
         params ["_key", "_to", "_at", "_label"];
-        if (_key in _busy || {(DUWS_opcom_attackCooldown getOrDefault [_key, 0]) > DUWS_opcom_tick}) exitWith {};
+        if (_key in _busy) exitWith {};
         private _worth = [_key] call DUWS_fnc_opcom_siteWorth;
         private _lead = [([_at, _to, false] call _fnc_sources) apply { [_x, _worth] }, _to, true, 0, 0, 0] call DUWS_fnc_opcom_bestSources;
         if (_lead isEqualTo []) exitWith {};
@@ -86,22 +86,24 @@ DUWS_fnc_opcom_attackSweep = {
             };
         } forEach ["assault", "flank"];
     };
-    {
-        private _zk = [_x] call fnc_zone_key;
-        [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
-    } forEach WARCOM_zones_controled_by_BLUFOR;
-    {
-        private _i = _forEachIndex;
-        if (_x > 0 && {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) then {
-            private _tp = [_i] call DUWS_fnc_opcom_townPos;
-            if (_tp isNotEqualTo []) then {
-                [[_i] call fnc_town_site_key, _tp, _tp, [_i] call DUWS_fnc_opcom_townLabel] call _fnc_consider;
+    if (DUWS_opcom_attackReadyTick <= DUWS_opcom_tick && {(DUWS_opcom_attacks findIf { (_x get "kind") isNotEqualTo "qrf" }) < 0}) then {
+        {
+            private _zk = [_x] call fnc_zone_key;
+            [_zk, _x, ([_zk] call fnc_site_at) get "pos", [_zk] call DUWS_fnc_opcom_zoneLabel] call _fnc_consider;
+        } forEach WARCOM_zones_controled_by_BLUFOR;
+        {
+            private _i = _forEachIndex;
+            if (_x > 0 && {([_i] call fnc_town_garrison_ownerAt) isEqualTo "BLU"}) then {
+                private _tp = [_i] call DUWS_fnc_opcom_townPos;
+                if (_tp isNotEqualTo []) then {
+                    [[_i] call fnc_town_site_key, _tp, _tp, [_i] call DUWS_fnc_opcom_townLabel] call _fnc_consider;
+                };
             };
+        } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
+        if (DUWS_opcom_hqKnown && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
+            private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
+            if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
         };
-    } forEach (missionNamespace getVariable ["DUWS_townGarrisonTier", []]);
-    if (DUWS_opcom_hqKnown && {["HQ"] call DUWS_fnc_opcom_captureHolds}) then {
-        private _hp = (["HQ"] call fnc_site_at) getOrDefault ["pos", []];
-        if (_hp isNotEqualTo []) then { ["HQ", _hp, _hp, "HQ"] call _fnc_consider };
     };
     {
         private _attack = _x;

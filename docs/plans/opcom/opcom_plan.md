@@ -193,7 +193,7 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Standalone hardpoint Build | one action per unlocked standalone type, its target the band cell the siting pass picks by cover Value ([§Asset siting](#asset-siting)) |
 | Tower / OP / mortar / battery Build | one action each, under the type's cap, target the band cell the siting pass picks by the type's own rule ([§Asset siting](#asset-siting)) |
 | Minefield | one action per variant (AT, AP), target the band cell the siting pass picks by traffic, a belt 150 m deep and 500 m to 1.5 km long |
-| Attack assault, Attack flank | each BLUFOR-held zone, each town they have garrisoned and the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives, that is not on an attack cooldown, and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
+| Attack assault, Attack flank | while no assault or flank is open and the attack cooldown has ended, each BLUFOR-held zone, each town they have garrisoned and the HQ once found (`DUWS_opcom_hqKnown`) while its officer lives; and each attack of the row's kind still in buildup that needs more units; flank only below band 2 and from the target's own landmass, and a source across water only as infantry ([§Attack](#attack-phase-5)) |
 | Attack QRF | each cluster of BLUFOR sightings inside OPFOR's area of influence with no QRF on it, and each QRF still in buildup that needs more units ([§QRF](#qrf-an-attack-on-a-moving-cluster)) |
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
@@ -666,10 +666,11 @@ unit's status; in buildup, any bound unit `dead` or lost → **abort** (release 
 loss at the rally means BLUFOR found it; in execution a lost unit leaves the rest to finish, unless the bound force
 falls below `OPCOM_ATTACK_BREAK` → **fail** (every survivor to `guard` where it stands, so the target is free for a
 new attack); else test the current state's transition, and each side bucket's wait and close. A unit a hand order
-takes over from the debug page counts as lost. An assault or a flank that fails in execution, below
-`OPCOM_ATTACK_BREAK` or with every unit lost, puts its target on a cooldown rolled from `OPCOM_ATTACK_COOLDOWN`
-(240–720 ticks, 20–60 min), and the attack sweep offers no attack on it until the cooldown ends
-(`DUWS_opcom_attackCooldown`, `DUWS_fnc_opcom_attackFail`). A QRF sets none, because its target is a sighting. The
+takes over from the debug page counts as lost. **One assault or flank runs at a time.** The attack sweep offers
+no new one while one is in buildup or execution. When one ends, however it ends, a global cooldown rolled from
+`OPCOM_ATTACK_COOLDOWN` (240–720 ticks, 20–60 min) starts, and the sweep offers no new one until the cooldown ends
+(`DUWS_opcom_attackReadyTick`, `DUWS_fnc_opcom_attackClose`). Joins to the open one are still offered. A QRF is
+outside the cap and sets no cooldown, because its target is a sighting. The
 runner sequences the states; the route and streaming machinery moves the units. There is no planner: a new way to attack is a new entry of roles rather than a new subsystem.
 
 ### Ownership: the roster has to skip a bound unit
@@ -1231,7 +1232,7 @@ restore clears before it replays them, and why belief is not among them — is
 [`campaign_persistence_plan.md` §The commander](../campaign_persistence_plan.md#the-commander).
 
 - The snapshot carries the archetype, the taskings with `DUWS_opcom_taskSeq`, the attacks with
-  `DUWS_opcom_attackSeq`, the attack cooldowns (`DUWS_opcom_attackCooldown`), the tick, `DUWS_opcom_hqKnown`, the
+  `DUWS_opcom_attackSeq`, the attack cooldown (`DUWS_opcom_attackReadyTick`), the tick, `DUWS_opcom_hqKnown`, the
   mine variants and `DUWS_hpOpcomSeq`.
 - The save clears a tasking's live half: `grp` and `ferryPad` go to `""`, `status` to `virtual`, and a live group's
   strength and position are read into the record the way a stow reads them (`DUWS_fnc_campaignTaskings`). A
