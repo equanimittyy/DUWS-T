@@ -56,8 +56,9 @@ private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0
 _vehPos = [_targetpos, 60, 0, 8, 0.3] call fnc_safe_pos;
 
 // The objective itself: kept for the mission's duration so the abandoned-vehicle sweep cannot collect it.
+// Bare flag, not fnc_duws_keep: a release would put the truck on a disposal clock, not ordinary cleanup.
 _truck1 = "C_Truck_02_transport_F" createVehicle _vehPos;
-[_truck1, "mission_transport_idap"] call fnc_duws_keep;
+_truck1 setVariable ["persistent", true];
 
 _box1 = "";
 _box2 = "";
@@ -118,6 +119,7 @@ _deliveryMarkerName setMarkerSize [1, 1];
 _cleanupDelivery = {
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
     deleteMarker _deliveryMarkerName;
+    _truck1 setVariable ["persistent", false];
 };
 
 // Brief stays manual: fixed-speaker strings, not fnc_mission_present's callsign substitution.
@@ -173,8 +175,6 @@ sleep 2;
 deleteVehicle _box2;
 sleep 2;
 deleteVehicle _box1;
-sleep 8;
-deleteVehicle _truck1;
 call _cleanupDelivery;
 
 [_mission_name, _VARtaskgeneratedName, "SUCCEEDED", _targetpos, _radius, [_markername2], [], true, "mission_transport_idap", true, false] call fnc_mission_finish;

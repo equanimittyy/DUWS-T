@@ -28,7 +28,8 @@ private _hqPos = if (!isNil "bluHQ_object" && { !isNull bluHQ_object }) then { g
 private _spawnPos = [_hqPos, 300, 10, 15, 0.4] call fnc_safe_pos;
 
 private _truck = "C_Truck_02_transport_F" createVehicle _spawnPos;
-[_truck, "mission_deliver_supplies"] call fnc_duws_keep;
+// Bare flag, not fnc_duws_keep: a release would put the truck on a disposal clock, not ordinary cleanup.
+_truck setVariable ["persistent", true];
 
 private _box1 = "";
 private _box2 = "";
@@ -64,7 +65,7 @@ _hqMarker setMarkerText "Supply Truck";
 // Rides with the truck and clears once a BLUFOR crew boards -- it only exists to point the player there.
 [_hqMarker, _truck] spawn {
     params ["_m", "_t"];
-    while { !isNull _t && { (crew _t) findIf { side _x == west } < 0 } } do {
+    while { !isNull _t && { markerType _m != "" } && { (crew _t) findIf { side _x == west } < 0 } } do {
         _m setMarkerPos (getPosATL _t);
         sleep 1;
     };
@@ -83,7 +84,7 @@ private _cleanup = {
     deleteMarker _hqMarker;
     deleteMarker _delivMarker;
     { if (_x isEqualType objNull && { !isNull _x }) then { deleteVehicle _x } } forEach [_box1, _box2];
-    if (!isNull _truck) then { deleteVehicle _truck };
+    _truck setVariable ["persistent", false];
     { deleteVehicle _x } forEach units _crew;
     deleteGroup _crew;
 };
@@ -113,8 +114,8 @@ if ([_deadline] call fnc_time_expired) exitWith {
 };
 
 // Mission completes on Overlord's sign-off -- reward paid, task set, slot released -- so finish moves up
-// here and the sacks coming off and truck pulling away below are cosmetic aftermath. The close line is
-// spoken inline mid-theatre, so finish's _line is left empty.
+// here and the sacks coming off below are cosmetic aftermath. The close line is spoken inline
+// mid-theatre, so finish's _line is left empty.
 deleteMarker _delivMarker;
 if (!isNull _marshaller) then { _marshaller setVariable ["DUWS_holdAnim", false]; _marshaller switchMove "" };
 [localize "STR_DUWS_T_IDAP", format [localize "STR_DUWS_T_idapend", _townName], "VOICE"] remoteExec ["fnc_duws_dialogue", 0];
@@ -129,6 +130,4 @@ sleep 2;
 if (_box2 isEqualType objNull && { !isNull _box2 }) then { deleteVehicle _box2 };
 sleep 2;
 if (_box1 isEqualType objNull && { !isNull _box1 }) then { deleteVehicle _box1 };
-sleep 8;
-if (!isNull _truck) then { deleteVehicle _truck };
 call _cleanup;

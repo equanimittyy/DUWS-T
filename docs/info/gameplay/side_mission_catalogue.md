@@ -276,7 +276,9 @@ IDAP crew. The truck and its guard force are the stolen-supply shape (`fnc_steal
 idle team on the prize, close and wide foot patrols, and the tier-gated `DUWS_fnc_tokenClass` car/IFV
 patrols -- so the recovery leg reads like a theft the player is undoing. Win: the truck delivered within
 50 m of the crew. Fail: the truck destroyed (`> 0.95` damage), or the deadline. The win is a
-delivered-vehicle predicate the thread polls itself, like the stolen-supply thread.
+delivered-vehicle predicate the thread polls itself, like the stolen-supply thread. The truck is never
+deleted: every outcome drops its mission-only `persistent` flag, so it stays as an idle vehicle under
+ordinary cleanup.
 
 **Siting.** `surveyKind "map"`, so the truck spawns on contested ground rather than in a town, and
 `fnc_transport_IDAP_site` gates the offer on a neutral/BLUFOR town sitting within 3 km of the sited truck
@@ -385,9 +387,9 @@ delivered-vehicle predicate the thread polls itself.
 **Siting** mirrors Escort Informant: `surveyKind "town"`, no finder, the same non-enemy-town re-derivation
 and `no_delivery_town` abort. **Hand-over** mirrors `transport_IDAP`'s theatre: the marshaller drops its
 guide-in pose, IDAP thanks the player in the room (VOICE, naming the town), Overlord signs off over the
-net, then the sacks come off the bed and the emptied truck pulls away before teardown. +3 REP on delivery,
--3 on each fail branch. Spawns no opposition -- like Escort Informant, the difficulty is the war state on
-the HQ-to-town route.
+net, then the sacks come off the bed and the truck stays behind, as in `transport_IDAP`. +3 REP on
+delivery, -3 on each fail branch. Spawns no opposition -- like Escort Informant, the difficulty is the war
+state on the HQ-to-town route.
 
 ### Rescue Pilot
 
