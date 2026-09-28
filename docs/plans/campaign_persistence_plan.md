@@ -121,26 +121,17 @@ player still has to tick it in the launcher before the scenario will run with it
 
 ## When the save is written, and what happens with nobody on
 
-The writer is the server and there is only one. Four triggers:
+The writer is the server and there is only one. Three triggers:
 
 | Trigger | Why |
 |---|---|
 | Periodic timer | The only protection against a crash or an ALT-F4, neither of which fires any hook |
 | SITREP action | The existing manual save, kept |
-| Last player disconnecting | On a default dedicated server this is the last moment the mission exists. Under `persistent = 1` the loop's first empty pass would cover it; on the default that pass never comes |
 | `Ended` / `MPEnded` mission event handlers | Covers a clean mission end or admin `#missions` |
 
 Every write is gated on `mission_init_complete` (`server/server_var_init.sqf`). A snapshot taken
 during zone build-out describes half a campaign, and restoring it would produce a map with some
 zones and no others.
-
-**The last-disconnect write cannot be scheduled.** Under `persistent = 0` the mission ends in the
-frame the last player leaves, so a `spawn`ed save is a thread the mission may never get to run —
-the trigger that exists *because* it is the last moment the mission exists is also the one with no
-time to spare. The snapshot and the flush both `call`, inside the disconnect handler
-(`server/server_init.sqf:322`). That handler also has to identify the last player rather than count
-them: the leaver can still be in `allPlayers` when it fires, so the test excludes the UID the
-handler was handed.
 
 **A campaign that has ended is written, and must then never be loaded.**
 `server/misc/fnc_capture_zones_task.sqf:87` ends the mission on total victory, which fires the
@@ -164,9 +155,8 @@ exactly that: seconds as values with human labels as texts, on the model of `DUW
 (`shared/includes/params_modern.hpp`), read through `BIS_fnc_getParamValue`. A dedicated server
 sets it in `server.cfg` without touching the PBO, which is the whole point.
 
-**Off means manual saves only, not no saves.** The other three triggers are not part of this loop,
-so a campaign with the interval at zero still writes on the last disconnect and on a clean mission
-end, and the player can still save on demand: SITREP is a comm-menu item granted at boot rather
+**Off means manual saves only, not no saves.** The other two triggers are not part of this loop,
+so a campaign with the interval at zero still writes on a clean mission end, and the player can still save on demand: SITREP is a comm-menu item granted at boot rather
 than an unlock, and `client/client_init.sqf:383` grants it to the singleplayer player as well as
 the game master. What Off actually costs is the crash case — an ALT-F4 or a hang loses the whole
 session instead of one interval.
@@ -194,7 +184,7 @@ recovers it by someone taking that slot.
   path with no trace in the `.rpt` is one nobody can diagnose after the fact, and this one runs
   unattended on servers its author will never see.
 
-The other three triggers call the same function. There is one writer and one code path; the timer
+The other two triggers call the same function. There is one writer and one code path; the timer
 is not special.
 
 **Hosted session and singleplayer.** The host — or the single player — is the server, so the save
@@ -210,8 +200,8 @@ means the snapshot has to carry the whole job, and a player pressing Escape expe
 somewhere obvious to be sent instead.
 
 **Dedicated server, `persistent = 0` (the default).** The mission ends when the last player
-disconnects and everything in memory goes with it. Saving on the last disconnect is not an
-optimisation here; without it a dedicated server loses the campaign every time the server empties.
+disconnects and everything in memory goes with it. Nothing writes on the disconnect, so what
+survives is the last autosave, SITREP or mission-end write.
 
 **Dedicated server, `persistent = 1`.** The mission keeps running with nobody connected. That is
 the configuration this mission wants for a persistent campaign, and it raises a design question
@@ -1120,7 +1110,7 @@ refund attached to the one restore that consumes it.
 | `server/persistence/fnc_campaign_reconcile.sqf` | The refunds the save adds to the snapshot's pools |
 | `server/persistence/fnc_campaign_restore.sqf` | The gate, the apply, and every restore hook below |
 | `server/persistence/fnc_autoSave.sqf` | The SITREP save, and the carry to the caller's profile |
-| `server/server_init.sqf` | The gate after `serverinit_complete`; one faction resolution for both paths; the saved date; the last-disconnect and mission-end writes |
+| `server/server_init.sqf` | The gate after `serverinit_complete`; one faction resolution for both paths; the saved date; the mission-end writes |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Zone and hardpoint replay in place of the locator and generation; the world outcomes before the site poller; escalation after the census; the economy period counted only while a human is on |
 | `server/warcom/fnc_WARCOM_init.sqf` | Keeps held zones held; restores the ledger after its seed |
 | `server/warcom/opcom/belief/fnc_opcom_perception_run.sqf` | Restores OPCOM after its inits; idles with nobody on |
@@ -1147,7 +1137,7 @@ sessions.
 
 **Save on a timer, not on every change.** Writing the snapshot per CP change would put a
 serialisation on the hot path of the most frequently written global in the mission. A periodic
-write plus the disconnect and end hooks loses at most one interval of progress.
+write plus the end hooks loses at most one interval of progress.
 
 **The snapshot is versioned and map-locked.** Restoring a snapshot into a different world or an
 incompatible format silently produces a broken campaign. Refusing it and starting fresh is worse
