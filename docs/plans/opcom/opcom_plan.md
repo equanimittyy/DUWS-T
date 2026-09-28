@@ -199,8 +199,8 @@ magnitude; above that the best candidate takes most of the probability, and a hi
 | Patrol | each of `OPCOM_PATROL_SAMPLES` (3) sampled stale cells, one unit apiece, taken by the recon or land combatant, free or hired, that scores best |
 | Probe | each assault or flank target whose 3×3 block reads stale and has no probe already on it, and that an Attack can source or a buildup stages for, one unit apiece, sourced from Patrol's rows |
 | Garrison | each open zone under the garrison cap ([§Caps](#caps)), taken by the combatant, free or hired, healthy or worn, that scores best |
-| Arty saturate | each fresh belief sighting in range of an owned battery that is not firing or held by a creep and has a gun off cooldown |
-| Arty creeping | each attack, assault or flank, in buildup with no creep yet, whose target an owned battery reaches that is not firing or held by a creep and has a gun off cooldown |
+| Arty saturate | each fresh belief sighting in range of an owned battery that is not firing, held by a creep or on cooldown |
+| Arty creeping | each attack, assault or flank, in buildup with no creep yet, whose target an owned battery reaches that is not firing, held by a creep or on cooldown |
 
 An action that needs a unit offers each target with the best source for it, a free unit or a hire
 ([§Sourcing](#sourcing-hire-on-demand-phase-4d)). An attack offers a package of them instead
@@ -1111,17 +1111,19 @@ stays autonomous (`fnc_static_resolve`), uncapped here.
 | Spread | tighter (base 50 m) | wider (base 100 m) |
 
 - **A fire mission is an Arty action** — scored and committed like any other, `Cost` scaling with the rounds it
-  fires; it fires only when that action wins its phase, never on a schedule. An owned gun in range, not already
-  firing, off cooldown and with a live gunner is the availability gate. **AP is the ammunition** — the guns rest empty
-  and are loaded per mission, so there is no finite store.
+  fires; it fires only when that action wins its phase, never on a schedule. An owned battery off cooldown and not
+  already firing, with a gun in range that has a live gunner, is the availability gate. **AP is the ammunition** — the
+  guns rest empty and are loaded per mission, so there is no finite store.
 - **A mission fires every ready gun or none.** `Cost` counts every ready gun, so when one of them cannot reach the
   aim point the mission is refused rather than fired thinned at the full price.
 - **A round a gun has not fired within `OPCOM_ARTY_ROUND_SECS` (10 s) is written off and its AP refunded**, and the
-  gun is ordered its next round. A gun destroyed mid-mission refunds nothing, and the unpaid debug `fire` verb
-  refunds nothing.
-- **Each gun rests `OPCOM_ARTY_COOLDOWN` after it fires** — 360 ticks (30 min), saturate and creep alike, so a full
-  wallet cannot keep a battery shelling without pause. The debug `fire` verb zeroes the cooldown before it fires,
-  and refuses a battery that is still firing its last mission.
+  gun is ordered its next round. A gun destroyed mid-mission refunds no AP, and neither does the unpaid debug `fire`
+  verb.
+- **Each battery rests `OPCOM_ARTY_COOLDOWN` after a fire mission** — 360 ticks (30 min), saturate and creep alike,
+  so a full wallet cannot keep it shelling without pause. Each round the battery does not fire takes its share of the
+  rest back off, a destroyed gun's included, so a battery that fires none of its rounds is ready when the mission
+  ends. The rest is not saved: a load starts every battery ready. The debug `fire` verb zeroes the cooldown before it
+  fires, and refuses a battery that is still firing its last mission.
 - **Belief is the only trigger** — a gun fires on a fresh sighting in the belief store and on nothing else. Ground
   OPFOR merely owns eyes near is not a target: an OP post is a sensor like any other, and feeding the guns a channel
   outside belief would make them see what the commander does not. The guns are exactly as blind as the sensors are.
