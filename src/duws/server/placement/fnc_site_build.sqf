@@ -133,13 +133,19 @@ DUWS_fnc_buildCrew = {
     _roster append (units _grp);
 };
 
-// Dead gunners only: DUWS_fnc_buildCrewClear would also delete a drone's AI crew, which is the drone itself, and an enemy
-// sitting in the gun.
+// Not DUWS_fnc_buildCrewClear: that would also delete a drone's AI crew, which is the drone itself, and an enemy sitting
+// in the gun.
 DUWS_fnc_buildRecrew = {
     params ["_guns", "_blu", ["_roster", []]];
+    private _side = [EAST, WEST] select _blu;
     {
         private _gun = _x;
-        { _gun deleteVehicleCrew _x } forEach ((crew _gun) select { !alive _x });
+        {
+            if (!alive _x || {side group _x == _side && {(units group _x) findIf { isPlayer _x } < 0}
+                && {getNumber (configFile >> "CfgVehicles" >> typeOf _gun >> "isUav") != 1}}) then {
+                _gun deleteVehicleCrew _x
+            };
+        } forEach crew _gun;
     } forEach _guns;
     [_guns, _blu, _roster] call DUWS_fnc_buildCrew;
 };
