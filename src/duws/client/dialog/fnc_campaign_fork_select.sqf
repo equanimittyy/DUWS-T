@@ -28,7 +28,7 @@ if (_row isNotEqualTo []) then {
 		_text = _text + "<br/><br/>" + localize "STR_DUWS_T_fork_ended_won";
 	};
 	if (_why isNotEqualTo "") then {
-		_text = _text + "<br/><br/>" + format ["<t color='#ff9933'>%1</t>", localize _why];
+		_text = _text + "<br/><br/>" + format ["<t color='%1'>%2</t>", ["#ff9933", "#ff1111"] select (_why isEqualTo "STR_DUWS_T_LOAD_LOST"), localize _why];
 	} else {
 		private _missing = DUWS_saveOutcomes select { !(_x in (_h getOrDefault ["groups", []])) };
 		if (_missing isNotEqualTo []) then {
