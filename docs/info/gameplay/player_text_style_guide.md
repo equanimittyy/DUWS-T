@@ -31,13 +31,15 @@ whose text stays English (a callsign, a bare number) gets no language tag, so it
 **Per-language conventions.** An edit to a language tag repeats that language's row. For a term the
 table does not fix, reuse the rendering other keys already give the same English word, and quote a
 UI label in prose exactly as its own key reads. FOB, CP, AP, HC and CAS stay Latin acronyms in every
-language.
+language. `Alpha 1-1` and every "Name N-N" callsign never take a case ending, while an inflected
+language may add one after the intact `Overlord` or `Allseer` (`Overlordovi`).
 
 | Tag | Address | Quotes | Punctuation and numbers | Fixed terms |
 |---|---|---|---|---|
 | `<Chinesesimp>` | 你 | “…” | Full-width punctuation; 。 only where the English ends with a period; a half-width space between a Chinese character and an adjacent Latin word, number or placeholder, none next to full-width punctuation | vehicle 载具, HQ 总部 |
 | `<German>` | du; Overlord to the squad: ihr | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zerstört: %1`); an English em dash becomes ` – ` | vehicle Fahrzeug, HQ stays HQ, task force Task Force, mortar Mörser |
 | `<Polish>` | ty; Overlord to the squad: plural imperatives | „…” | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zniszczono: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle pojazd, HQ stays HQ, town miejscowość, hardpoint punkt oporu |
+| `<Czech>` (also serves Slovak) | ty; Overlord to the squad: plural imperatives | „…“ | Decimal comma; `%1 m`; a count or unknown-gender placeholder goes after a colon (`Zničeno: %1`); no gendered past tense aimed at the player, masculine where it cannot be avoided | vehicle vozidlo, HQ stays HQ, town obec, hardpoint opěrný bod |
 
 ## Military-like language
 
